@@ -213,20 +213,6 @@ fn played_this_turn(st: &State, player: Player, tag: u32, unit: Option<&Unit>) -
     st.turn_flags.played[player as usize].iter().filter(|(iid, c)| st.card(*c).tags & tag != 0 && unit.map(|u| u.iid != *iid).unwrap_or(true)).count() as i32
 }
 
-fn eat_random_ally(st: &mut State, unit: &Unit, cr: Cr) -> i32 {
-    let options = adjacent_friendly_units(st, unit, cr);
-    if options.is_empty() {
-        return 0;
-    }
-    let nb = options[st.rng.choice_index(options.len())];
-    let gained = st.top(nb).map(|t| effective_strength(st, t, None)).unwrap_or(0);
-    if remove_top(st, nb, unit.owner, true, Some(unit.card)) {
-        gained
-    } else {
-        0
-    }
-}
-
 fn add_strength(st: &mut State, iid: i64, n: i32) {
     if let Some(u) = st.unit_by_iid_mut(iid) {
         u.strength_counter += n as i16;
@@ -596,9 +582,20 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_choose(st, owner, o, "remove_and_draw", false, vmap!("n" => Value::Int(n as i64)));
         }
         ("tarantula", OnEndOfTurn) => {
-            let gained = eat_random_ally(st, unit, cr);
-            if gained != 0 {
-                add_strength(st, unit.iid, gained);
+            // "Dusk: remove the weakest animal next to this and gain its strength." (Martin, 2026-10-29: as the City Spider picks)
+            let options: Vec<(Cr, i32)> = adjacent_tops(st, cr, None)
+                .into_iter()
+                .filter(|(nb, top)| statics::can_be_removed(st, top, Some(*nb), false))
+                .map(|(nb, top)| (nb, effective_strength(st, &top, None)))
+                .collect();
+            if !options.is_empty() {
+                let low = options.iter().map(|(_, s)| *s).min().unwrap();
+                let lows: Vec<Cr> = options.iter().filter(|(_, s)| *s == low).map(|(nb, _)| *nb).collect();
+                let nb = lows[st.rng.choice_index(lows.len())];
+                remove_top(st, nb, owner, true, Some(unit.card));
+                if low > 0 {
+                    add_strength(st, unit.iid, low);
+                }
             }
         }
         ("sea_turtle", OnEndOfTurn) => {

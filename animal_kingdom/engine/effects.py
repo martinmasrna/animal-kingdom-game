@@ -1980,23 +1980,17 @@ def _mantis_place(state, unit, cr):
                  n=state.config.mantis_draw)
 
 
-def _eat_random_ally(state, unit, cr) -> int:
-    """Remove a random adjacent ally (Dawn asks no decision; the owner steers it by what it places beside). Returns the
-    strength of what was eaten, 0 if nothing was."""
-    options = _adjacent_friendly_units(state, unit, cr)
-    if not options:
-        return 0
-    nb = state.rng.choice(options)
-    gained = effective_strength(state, state.top_unit(nb))
-    return gained if remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id) else 0
-
-
 def _tarantula_eot(state, unit, cr):
-    """Dusk: remove a random adjacent ally and gain its strength."""
-    gained = _eat_random_ally(state, unit, cr)
-    if gained:
-        unit.strength_counter += gained
-        state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=gained)
+    """Dusk: remove the weakest animal next to this, yours or theirs, and gain its strength (Martin, 2026-10-29: as the
+    City Spider picks; ties at random, Dusk asks no decision). The strength it showed then is kept for good."""
+    options = [(nb, top) for nb, top in _adjacent_tops(state, cr) if statics.can_be_removed(state, top, nb)]
+    if options:
+        low = min(effective_strength(state, top) for _, top in options)
+        nb = state.rng.choice([nb for nb, top in options if effective_strength(state, top) == low])
+        remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
+        if low > 0:
+            unit.strength_counter += low
+            state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=low)
 
 
 def _city_spider_sot(state, unit, cr):

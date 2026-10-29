@@ -2873,10 +2873,10 @@
         "Arachnid"
       ],
       "base_strength": 5,
-      "text": "Dusk: remove a random adjacent ally and gain its strength.",
-      "keywords": [],
+      "text": "Dusk: remove the weakest animal next to this and gain its strength.",
       "species": "Tarantula",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "sea_turtle",

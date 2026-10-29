@@ -357,12 +357,14 @@ def test_praying_mantis_must_remove_an_ally_to_draw_two():
     assert s.top_unit("1,1").card_id == "cockroach"            # the Cockroach came back where it was
 
 
-def test_tarantula_eats_an_adjacent_ally_at_dusk_and_grows():
+def test_tarantula_eats_the_weakest_neighbour_at_dusk_and_grows():
+    # Martin, 2026-10-29: the weakest animal next to it, yours or theirs, as the City Spider picks.
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     t = put(s, "1,2", "tarantula", "A")
     put(s, "1,1", "lion", "A")
+    put(s, "2,2", "gazelle", "B")                              # the enemy 2 is the weakest neighbour
     end_turn(s)                                                # A's Dusk
-    assert s.top_unit("1,1") is None and effective_strength(s, t) == 5 + 7
+    assert s.top_unit("2,2") is None and s.top_unit("1,1").card_id == "lion" and effective_strength(s, t) == 5 + 2
 
 
 def test_the_city_spider_eats_the_cockroach_every_dawn_and_the_turn_sees_the_death():

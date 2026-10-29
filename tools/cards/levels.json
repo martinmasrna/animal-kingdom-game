@@ -4750,8 +4750,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792248229,
-      "note": "Martin 2026-10-16: Dusk, a night hunter, and further from the City Spider's Dawn"
+      "at": 1793298309,
+      "note": "Martin, 2026-10-29: the weakest neighbour, yours or theirs, as the City Spider; no longer random",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-16: Dusk, a night hunter, and further from the City Spider's Dawn",
+        "prev": "Dusk: remove a random adjacent ally and gain its strength."
+      }
     },
     "art": {
       "lv": "draft",
