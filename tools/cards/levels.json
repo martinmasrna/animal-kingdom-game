@@ -3390,6 +3390,16 @@
       },
       "by": "claude",
       "at": 1793269316
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-29",
+      "by": "claude",
+      "at": 1793295339
     }
   },
   "baby_fox": {
@@ -3663,9 +3673,9 @@
         "prev_note": "",
         "prev": 4
       },
-      "note": "Martin's sheet, 2026-10-24: 3 to try",
+      "note": "Martin, 2026-10-29",
       "by": "claude",
-      "at": 1792858794
+      "at": 1793295339
     }
   },
   "army_ant_legend": {

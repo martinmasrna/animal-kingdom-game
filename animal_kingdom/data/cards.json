@@ -41,7 +41,7 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: draw a Worker, a Soldier and a Nurse Colony animal.",
       "species": "Bee",
       "habitat": "Meadow",
@@ -1083,7 +1083,7 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: remove each enemy next to 2 or more of your Fish.",
       "species": "Piranha",
       "habitat": "Jungle",
