@@ -2169,9 +2169,10 @@
         "prev_note": "",
         "prev": "Rodent"
       },
-      "note": "not a rodent (Martin 2026-10-16: drop the tag)",
+      "note": "2026-10-29: the Rodent tag put on and taken off the same evening; a hedgehog isn't a rodent",
       "by": "claude",
-      "at": 1792187557
+      "at": 1793299614,
+      "lv": "draft"
     },
     "effect": {
       "note": "Martin, 2026-10-21: the Spikes common (a one-keyword card is a common); the food Roar is gone",
@@ -7001,6 +7002,59 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793295830
+    }
+  },
+  "vole": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793300215
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793300215
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: 2; the Roar is the card",
+      "by": "claude",
+      "at": 1793300215
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: 'I like the effect but it 100% feels like a rare card'; Big Gus for one neighbour",
+      "by": "claude",
+      "at": 1793300215
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793300216
     }
   }
 }

@@ -1776,6 +1776,17 @@ def _then_remove_and_draw(state, step, cr):
         draw_cards(state, step["chooser"], step["n"])
 
 
+def _then_repeat_roar(state, step, cr):
+    """Vole: the chosen neighbour's Roar happens again, as the Vole's own, at the Vole's crossroad."""
+    top = state.top_unit(cr)
+    vole_cr, vole = _find_unit(state, step["vole"])
+    if top is None or vole is None:
+        return
+    hook = _hook(state, top.card_id, "on_place", as_card=vole.card_id)
+    if hook:
+        hook(state, vole, vole_cr)
+
+
 def _then_pile_to_hand(state, step, card_id):
     """Raccoon (your own Remove Pile), the legendary Raven (your opponent's): the chosen card goes to your hand."""
     if state.pile_take(card_id, step["from_owner"]):
@@ -1813,6 +1824,7 @@ THEN = {
     "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "copy_and_add": _then_copy_and_add,
     "copy_from_hand": _then_copy_from_hand, "return_ally": _then_return_ally,
     "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
+    "repeat_roar": _then_repeat_roar,
     "make_in_hand": _then_make_in_hand,
     "duplicate": _then_duplicate, "discard": _then_discard, "roam_to": _then_roam_to,
 }
@@ -2777,6 +2789,18 @@ def _repeat_legend_place(state, unit, cr):
                 hook(state, unit, cr)
 
 
+REPEATERS = {"vole", "capybara_legend"}      # Roars that repeat Roars never repeat each other: two side by side would go for ever
+
+
+def _vole_place(state, unit, cr):
+    """Roar: repeat the Roar of an adjacent Rodent (Martin, 2026-10-29). The Vole picks one of its Rodent neighbours with
+    a Roar and repeats it as its own, here, as Big Gus does; it never picks a repeater."""
+    options = [nb for nb, top in _adjacent_tops(state, cr, unit.owner)
+               if "Rodent" in state.cards[top.card_id].tags and top.card_id not in REPEATERS
+               and _hook(state, top.card_id, "on_place")]
+    _push_choose(state, unit.owner, options, "repeat_roar", optional=False, vole=unit.iid)
+
+
 def _refill_legend_place(state, unit, cr):
     """Roar: draw cards until you have as many as your opponent."""
     state.effect_stack.append({"op": "draw_to_match", "player": unit.owner})
@@ -3358,6 +3382,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "sunfish": {"on_place": _spawns_beside("baby_fish")},
     # Food Aggro.
     "capybara_legend": {"on_place": _repeat_legend_place},
+    "vole": {"on_place": _vole_place},
     "macaque_legend": {"on_place": _refill_legend_place},
     "rat_legend": {"on_place": _rat_king_place},
     "chipmunk_legend": {"on_place": _chipmunk_legend_place},

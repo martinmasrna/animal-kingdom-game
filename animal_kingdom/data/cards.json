@@ -4056,6 +4056,20 @@
       "base_strength": 1,
       "keywords": [],
       "text": ""
+    },
+    {
+      "id": "vole",
+      "name": "Vole",
+      "status": "collectible",
+      "rarity": "rare",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 2,
+      "text": "Roar: repeat the Roar of an adjacent Rodent.",
+      "species": "Vole",
+      "habitat": "Meadow",
+      "keywords": []
     }
   ]
 }

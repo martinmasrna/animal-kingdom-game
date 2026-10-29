@@ -83,7 +83,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
-        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "boar" | "gazelle" | "deer" | "impala" | "baby_impala" | "rabbit"
+        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "boar" | "gazelle" | "deer" | "impala" | "baby_impala" | "rabbit" | "vole"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
         "zebra" => &[OnFlee],
@@ -1061,6 +1061,17 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("sunfish", OnPlace) => spawns_beside(st, unit, cr, "baby_fish"),
         ("deer", OnPlace) => spawns_beside(st, unit, cr, "fawn"),
         // Food Aggro
+        ("vole", OnPlace) => {
+            // "Roar: repeat the Roar of an adjacent Rodent." (Martin, 2026-10-29): one Rodent neighbour with a Roar, the
+            // owner's choice, repeated as the Vole's own; never a repeater (the legend, another Vole), or two would go for ever.
+            let gus = st.card_id("capybara_legend");
+            let o: Vec<Cr> = adjacent_tops(st, cr, Some(owner))
+                .into_iter()
+                .filter(|(_, top)| st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && Some(top.card) != gus && st.g.has_hook(top.card, OnPlace))
+                .map(|(nb, _)| nb)
+                .collect();
+            push_choose(st, owner, crs(st, o), "repeat_roar", false, vmap!("vole" => Value::Int(unit.iid)));
+        }
         ("capybara_legend", OnPlace) => {
             // each repeat is Big Gus's own, at its crossroad (as the Macaw's copy is the Macaw's)
             for (_nb, top) in adjacent_tops(st, cr, Some(owner)).into_iter().rev() {
@@ -1543,6 +1554,17 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             if let Some(cr) = cr_of(st) {
                 if remove_top(st, cr, chooser, true, by_card) {
                     draw_cards(st, chooser, m_get_i(step, "n").unwrap_or(0) as i32);
+                }
+            }
+        }
+        "repeat_roar" => {
+            // Vole: the chosen neighbour's Roar happens again, as the Vole's own, at the Vole's crossroad.
+            let (Some(cr), Some(iid)) = (cr_of(st), m_get_i(step, "vole")) else { return };
+            let Some((vole_cr, pos)) = st.find_unit(iid) else { return };
+            let vole = st.unit_at(vole_cr, pos).clone();
+            if let Some(top) = st.top(cr).cloned() {
+                if st.g.has_hook(top.card, Hook::OnPlace) {
+                    run(st, top.card, Some(vole.card), Hook::OnPlace, &vole, &Args::Place(vole_cr));
                 }
             }
         }
