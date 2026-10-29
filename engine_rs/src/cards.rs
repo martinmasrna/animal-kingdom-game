@@ -83,7 +83,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
-        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "boar" | "gazelle" | "deer" | "impala" | "baby_impala"
+        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "boar" | "gazelle" | "deer" | "impala" | "baby_impala" | "rabbit"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
         "zebra" => &[OnFlee],
@@ -1330,6 +1330,10 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             // The legendary Deer fleeing grows itself (`unit` is its hand instance here).
             let g = cfg(st, "deer_legend_grant");
             grant(st, vec![unit.iid], g);
+        }
+        ("rabbit", OnPlace) => {
+            // "Roar: play a Bunny next to this.": made and played on a neighbouring crossroad of the owner's choice.
+            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(owner), "card_id" => Value::s("bunny"), "make" => Value::Bool(true), "adjacent_to" => cr_v(st, cr)));
         }
         ("impala", OnPlace) => {
             // "Flee. Roar: play a Baby Impala.": made and played at once, a full placement with its Roar.

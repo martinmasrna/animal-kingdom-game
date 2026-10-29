@@ -232,6 +232,21 @@ def test_a_covered_calf_flees_to_hand_and_is_played_again():
     assert s.top_unit("1,1").card_id == "baby_impala"
 
 
+def test_the_rabbit_plays_a_bunny_next_to_it_and_that_is_the_hares_third_play():
+    # Martin, 2026-10-29: "Roar: play a Bunny next to this." The Bunny is played, not placed, so it counts.
+    s = make_state(current="A", hands={"A": ["rabbit", "hare"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    put(s, "1,1", "lion", "A")
+    rules.apply_action(s, PlaceAction("rabbit", ("cr", "1,2")))
+    assert s.pending is not None and s.pending["mode"] == "place" and not s.pending["optional"]
+    targets = {tuple(p["target"]) for p in s.pending["placements"]}
+    assert targets == {("cr", "1,1"), ("cr", "1,3"), ("cr", "2,2")}   # neighbours only (your own Lion can be covered)
+    rules.apply_action(s, PlaceAction("bunny", ("cr", "2,2")))
+    assert s.top_unit("2,2").card_id == "bunny" and s.player_to_act() == "A"
+    before = len(s.hands["A"])
+    rules.apply_action(s, PlaceAction("hare", ("cr", "1,3")))        # the third play this turn: the Hare draws 2
+    assert len(s.hands["A"]) == before - 1 + 2
+
+
 def test_the_legendary_deer_grows_every_fleer_including_itself_and_the_growth_travels():
     # Martin, 2026-10-29: "make sure it gives strength to itself as well". The fled card is grown in hand, keeps it when
     # played again, and keeps it through its next flight (the counter travels with the card on every bounce).

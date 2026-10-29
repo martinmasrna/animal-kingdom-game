@@ -1371,6 +1371,9 @@ def _op_play_named(state, step):
         return None
     allowed = {cid} if any(u.card_id == cid for u in state.hands[player]) else set()
     placements = legal_placements(state, player, allowed)
+    near = step.get("adjacent_to")                  # Rabbit: "play a Bunny next to this" (a crossroad, never a den)
+    if near is not None:
+        placements = [p for p in placements if p.target[0] == "cr" and state.game_map.adjacent(near, p.target[1])]
     if not placements:
         _return_if_fetched()
         return None
@@ -3103,6 +3106,12 @@ def _zebra_legend_place(state, unit, cr):
     _push_draw(state, unit.owner, len(kinds))
 
 
+def _rabbit_place(state, unit, cr):
+    """Roar: play a Bunny next to this (Martin, 2026-10-29): made, then played by its owner on a neighbouring crossroad,
+    a full placement that counts as a play (the Hare and the Rat see it)."""
+    state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "bunny", "make": True, "adjacent_to": cr})
+
+
 def _impala_place(state, unit, cr):
     """Roar: play a Baby Impala (made, then placed by its owner as a full placement, Roar and all)."""
     state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "baby_impala", "make": True})
@@ -3431,6 +3440,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Impala (Martin, 2026-10-29): "Flee. Roar: play a Baby Impala." The calf is made and played at once, a full placement
     # with its own Roar; one that has no legal place is gone. The calf: "Flee. Roar: if this is grazing, draw a card."
     "impala": {"on_place": _impala_place},
+    "rabbit": {"on_place": _rabbit_place},
     "baby_impala": {"on_place": _okapi_graze_draw},
     # The pool (Great White Shark's Reach is a static; Raksha, Verminus are anthems; Coyote, Cougar statics).
     "octopus": {"on_place": _octopus_ink_place},

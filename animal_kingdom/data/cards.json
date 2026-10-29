@@ -706,7 +706,9 @@
       "name": "Hare",
       "status": "collectible",
       "rarity": "common",
-      "tags": [],
+      "tags": [
+        "Rodent"
+      ],
       "base_strength": 4,
       "text": "Flee. Roar: if you played 3 or more animals this turn, draw 2 cards.",
       "keywords": [
@@ -4025,6 +4027,35 @@
       "keywords": [
         "Flee"
       ]
+    },
+    {
+      "id": "rabbit",
+      "name": "Rabbit",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 3,
+      "text": "Roar: play a Bunny next to this.",
+      "species": "Rabbit",
+      "habitat": "Meadow",
+      "related": [
+        "bunny"
+      ],
+      "keywords": []
+    },
+    {
+      "id": "bunny",
+      "name": "Bunny",
+      "status": "token",
+      "rarity": "common",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 1,
+      "keywords": [],
+      "text": ""
     }
   ]
 }

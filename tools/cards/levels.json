@@ -2108,9 +2108,10 @@
         "prev_note": "",
         "prev": "Rodent"
       },
-      "note": "not a rodent (Martin 2026-10-16: drop the tag)",
+      "note": "Martin, 2026-10-29: a Rabbit is a Rodent, so the Hare is too",
       "by": "claude",
-      "at": 1792187557
+      "at": 1793295830,
+      "lv": "draft"
     },
     "strength": {
       "review": {
@@ -6942,6 +6943,59 @@
       "note": "Martin, 2026-10-29: the forms build on each other, so the removal carries into the last",
       "by": "claude",
       "at": 1793295478
+    }
+  },
+  "rabbit": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793295829
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793295829
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: the Deer's shape, a Rodent",
+      "by": "claude",
+      "at": 1793295829
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: rabbits multiply; the Bunny is played, so it counts as a play for the Hare and the Rat",
+      "by": "claude",
+      "at": 1793295830
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793295830
     }
   }
 }
