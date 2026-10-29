@@ -54,15 +54,11 @@ The den is a connection problem: the defender cannot sit on it, so they hold a t
 - The 2-action trap: clearing a den-front blocker with one action leaves no action to capture, and the opponent covers the gap on their turn (Martin's Pestis and Skunk analysis, `cards/aggro-redesign.md`). A closer must clear and occupy in one action (Apex), or the gap must already exist.
 - "Must answer" here is an engine in the backline, not a big body: "in Hearthstone a big minion is must answer because it keeps hitting you in the face. In our game you're not doing the attacks. The must answer cards are more of engines that you play in the backline" (2026-10-23). A 7 that landed is a 7; a Whale Shark drawing every Dusk is the threat.
 
-## 6. Pricing a card
+## 6. What a card's price depends on
 
-The procedure, in Martin's order:
+There is no procedure; a card is understood whole. These are the things its worth actually depends on, and they pull against each other.
 
-1. Ledger: what the card gives or costs in actions (draw rider +1, extra play +1 −1 card, bounce −1, Titan −1, a condition that eats the other action −½).
-2. Placement: what the body does on landing (cover range from §3) and where it can legally land (§4). A 1–2 with an adjacency Roar has one target and needs an empty crossroad beside it.
-3. Condition: how often the deck that wants it has it for free. "Payoff is always the same, which means what we need to compare is how difficult this condition is to meet" (2026-10-22). Board state already there, or a body the deck wants gone, costs nothing; a condition that takes the turn's other action costs strength. Priced for the common failed state, never the screenshot.
-4. References: the Lion (7) for bodies, the Eagle (5, Flight) for fliers, and the cards that already carry the effect at the same rarity. A card an existing card strictly dominates, or that dominates one, is out. The unconditional version sits at a higher rarity than the conditional one (Honey Badger rare, Serval common).
-5. Counterplay: the opponent beats it by ordinary play, covering it or ignoring it, and does not lose the game by failing to answer it at once. Orca and the legendary Leopard at 7 were "answer this immediately or you lose" (2026-10-21), and the fix was the number, not the mechanic.
+What it does to the action ledger: a draw rider gives an action back, an extra play gives one and takes a card, a bounce or a Titan costs one, a condition that eats the turn's other action costs half of one. What the body does on landing and where it can legally land (§3, §4): a 1–2 with an adjacency Roar has one target and needs an empty crossroad beside it. How often the deck that wants the card has its condition for free: "payoff is always the same, which means what we need to compare is how difficult this condition is to meet" (2026-10-22); board state already there, or a body the deck wants gone, costs nothing, while a condition that takes the other action costs strength, and the price is set by the common failed state, never the screenshot. What already exists: the Lion (7) for bodies, the Eagle (5, Flight) for fliers, and the cards carrying the effect at the same rarity; a card that an existing card strictly dominates, or that dominates one, is a card the game already has or no longer needs, and the unconditional version sits above the conditional one in rarity (Honey Badger rare, Serval common). And what the opponent can do about it: beat it by ordinary play, cover it or ignore it, without losing the game for failing to answer it at once; Orca and the legendary Leopard at 7 were "answer this immediately or you lose" (2026-10-21), and the fix was the number, not the mechanic.
 
 When unsure between too weak and too strong, ship strong: "a broken card is obvious in play and easy to nerf, a weak one just goes unplayed" (2026-10-09).
 
@@ -78,7 +74,7 @@ Rarity asks what goes wrong if the opponent faces the card three times a game (2
 
 A legendary changes a rule or bends the game's own verb for you; it does not add a number. Theron turns a Cat's cover into a removal; Krill makes a Titan cost one action; the Locusts cover the board; Eon shuffles itself back smaller. It amplifies what the deck already does ("the deck gameplay doesn't change, it just gets amplified", 2026-10-08) and is readable as the animal's own myth. "Just another card draw", a common's effect doubled with a keyword, or a reprint of a rare in gold is "lazy" (2026-10-08, four times). A board wipe from nowhere "is a card from Hearthstone or Magic, not from our game" (2026-10-22); the same function as the Locust plague, which the opponent sees and plays around, is the game's own version.
 
-## 9. Elegant and clunky: the chess test
+## 9. Elegant and clunky
 
 The game is "closer to chess, but much more fast-paced, than to solitaire" (Martin, 2026-10-29): open decklists, five legal spots, one or two coverable enemies, two moves. A good card creates decisions on the board; a bad card creates decisions in the hand.
 
