@@ -1,110 +1,6 @@
 {
- "rev": 237,
+ "rev": 346,
  "cards": {
-  "mackerel": {
-   "x": 3880,
-   "y": 1932
-  },
-  "mosquito": {
-   "x": 4074,
-   "y": 1932
-  },
-  "bush_dog": {
-   "x": 1552,
-   "y": 2210
-  },
-  "mahi_mahi": {
-   "x": 2328,
-   "y": 2210
-  },
-  "guard_bee": {
-   "x": 3880,
-   "y": 2210
-  },
-  "viper": {
-   "x": 0,
-   "y": 2488
-  },
-  "african_wild_dog": {
-   "x": 194,
-   "y": 2488
-  },
-  "city_spider": {
-   "x": 970,
-   "y": 2488
-  },
-  "stag_beetle": {
-   "x": 2716,
-   "y": 2488
-  },
-  "stork": {
-   "x": 2910,
-   "y": 2488
-  },
-  "anaconda": {
-   "x": 3880,
-   "y": 2488
-  },
-  "baboon": {
-   "x": 4074,
-   "y": 2488
-  },
-  "black_bear": {
-   "x": 4268,
-   "y": 2488
-  },
-  "dingo": {
-   "x": 0,
-   "y": 2766
-  },
-  "zebra": {
-   "x": 776,
-   "y": 2766
-  },
-  "giraffe": {
-   "x": 1552,
-   "y": 2766
-  },
-  "gorilla": {
-   "x": 1746,
-   "y": 2766
-  },
-  "stick_insect": {
-   "x": 1940,
-   "y": 2766
-  },
-  "wildebeest": {
-   "x": 2328,
-   "y": 2766
-  },
-  "crocodile": {
-   "x": 3104,
-   "y": 2766
-  },
-  "grizzly_bear": {
-   "x": 3298,
-   "y": 2766
-  },
-  "moose": {
-   "x": 3492,
-   "y": 2766
-  },
-  "egg_eater": {
-   "x": 1493,
-   "y": 3505
-  },
-  "python": {
-   "x": 1691,
-   "y": 3505
-  },
-  "bird_egg": {
-   "x": 1888,
-   "y": 3507
-  },
-  "snake_egg": {
-   "x": 2087,
-   "y": 3512
-  },
   "mole": {
    "x": 6460,
    "y": 1416
@@ -601,26 +497,6 @@
    "x": 7563,
    "y": 2286
   },
-  "worker_bee": {
-   "x": 1911,
-   "y": 1461
-  },
-  "squirrel": {
-   "x": 1717,
-   "y": 1462
-  },
-  "chipmunk": {
-   "x": 1522,
-   "y": 1461
-  },
-  "sardine": {
-   "x": 44,
-   "y": 1664
-  },
-  "vulture": {
-   "x": 242,
-   "y": 1661
-  },
   "krill": {
    "x": 769,
    "y": 1377
@@ -629,57 +505,69 @@
    "x": 965,
    "y": 1375
   },
-  "sloth": {
-   "x": 2109,
-   "y": 1461
+  "toad": {
+   "x": 1120,
+   "y": -969
   },
-  "sunfish": {
-   "x": 3948,
-   "y": 3015
-  },
-  "deer": {
-   "x": 4145,
-   "y": 3018
-  },
-  "rabbit": {
-   "x": 4347,
-   "y": 3015
-  },
-  "cockroach": {
-   "x": 1811,
-   "y": 2238
-  },
-  "gazelle": {
-   "x": 2720,
-   "y": 2147
-  },
-  "worker_ant": {
-   "x": 1904,
-   "y": 1768
-  },
-  "worker_wasp": {
-   "x": 1712,
-   "y": 1768
-  },
-  "hamster": {
-   "x": 2102,
-   "y": 1772
-  },
-  "dung_beetle": {
-   "x": 1519,
-   "y": 1769
-  },
-  "hyena": {
-   "x": 2298,
-   "y": 1774
+  "tortoise": {
+   "x": 1337,
+   "y": -974
   },
   "cheetah": {
-   "x": 1936,
-   "y": 646
+   "x": 1911,
+   "y": 365
   },
   "falcon": {
-   "x": 2126,
-   "y": 645
+   "x": 2131,
+   "y": 364
+  },
+  "gazelle": {
+   "x": 1998,
+   "y": 1859
+  },
+  "african_wild_dog": {
+   "x": 2860,
+   "y": 1531
+  },
+  "stick_insect": {
+   "x": 1555,
+   "y": -973
+  },
+  "mahi_mahi": {
+   "x": 3367,
+   "y": 1560
+  },
+  "mackerel": {
+   "x": 3563,
+   "y": 1563
+  },
+  "zebra": {
+   "x": 1539,
+   "y": 1803
+  },
+  "cockroach": {
+   "x": 2457,
+   "y": 1529
+  },
+  "stag_beetle": {
+   "x": 2554,
+   "y": 1981
+  },
+  "stork": {
+   "x": 2345,
+   "y": 1989
+  },
+  "gorilla": {
+   "x": 2844,
+   "y": 1964
+  },
+  "baboon": {
+   "x": 3096,
+   "y": 1949
+  },
+  "city_spider": {
+   "x": 2656,
+   "y": 1533
   }
  },
  "piles": [
@@ -696,11 +584,10 @@
     "lion",
     "elephant",
     "blue_whale",
-    "tortoise",
     "tiger",
     "caracal",
     "pigeon",
-    "toad"
+    "guard_bee"
    ],
    "tint": "blue"
   },
@@ -758,7 +645,8 @@
     "fox",
     "mara",
     "praying_mantis",
-    "cod"
+    "cod",
+    "black_bear"
    ]
   },
   {
@@ -774,6 +662,94 @@
     "capybara",
     "marmot",
     "peacock"
+   ]
+  },
+  {
+   "id": "pmvuvbh501",
+   "name": "Flat Food",
+   "x": 2827,
+   "y": 154,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "chipmunk",
+    "worker_bee",
+    "sloth",
+    "squirrel"
+   ]
+  },
+  {
+   "id": "pmvuvbuyy0",
+   "name": "Food Engine",
+   "x": 2819,
+   "y": 551,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "worker_wasp",
+    "worker_ant",
+    "dung_beetle",
+    "hamster",
+    "hyena",
+    "wildebeest"
+   ]
+  },
+  {
+   "id": "pmvuvfv1o1",
+   "name": "Tokens",
+   "x": 1372,
+   "y": 1083,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "sunfish",
+    "rabbit",
+    "bush_dog",
+    "deer"
+   ]
+  },
+  {
+   "id": "pmvuvgsf22",
+   "name": "Tempo",
+   "x": 1900,
+   "y": -1060,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "mosquito",
+    "viper",
+    "anaconda",
+    "giraffe",
+    "crocodile",
+    "grizzly_bear",
+    "moose"
+   ]
+  },
+  {
+   "id": "pmvuvichj3",
+   "name": "Eggs",
+   "x": 2650,
+   "y": -297,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "egg_eater",
+    "python",
+    "bird_egg",
+    "snake_egg"
+   ],
+   "tint": "red"
+  },
+  {
+   "id": "pmvuvkcu74",
+   "name": "Deck Thinning",
+   "x": 3478,
+   "y": -295,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "vulture",
+    "sardine"
    ]
   }
  ],
@@ -816,7 +792,8 @@
   "andean_condor",
   "anteater",
   "forager_ant",
-  "muskrat"
+  "muskrat",
+  "dingo"
  ],
  "marks": {
   "mouse": {
@@ -837,7 +814,19 @@
   },
   "tortoise": {
    "flag": true,
-   "note": "tagless so maybe 7 is okay? or too strong?"
+   "note": "tagless so maybe 7 is okay? or too strong? would have to actually play with this one first"
+  },
+  "stick_insect": {
+   "flag": true,
+   "note": "same as tortoise"
+  },
+  "black_bear": {
+   "flag": true,
+   "note": "maybe too strong at 5?"
+  },
+  "sardine": {
+   "flag": true,
+   "note": "it's extra placement, idk"
   }
  }
 }
