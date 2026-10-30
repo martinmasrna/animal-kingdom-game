@@ -1,18 +1,6 @@
 {
- "rev": 808,
+ "rev": 818,
  "cards": {
-  "toad": {
-   "x": 2379,
-   "y": -2039
-  },
-  "tortoise": {
-   "x": 2596,
-   "y": -2044
-  },
-  "stick_insect": {
-   "x": 2814,
-   "y": -2043
-  },
   "stag_beetle": {
    "x": 1132,
    "y": 1391
@@ -24,18 +12,6 @@
   "falcon": {
    "x": 1986,
    "y": 742
-  },
-  "skunk": {
-   "x": 6822,
-   "y": 1794
-  },
-  "flying_squirrel": {
-   "x": 6588,
-   "y": 2094
-  },
-  "dart_frog": {
-   "x": 6589,
-   "y": 1783
   }
  },
  "piles": [
@@ -44,7 +20,7 @@
    "name": "Vanilla Anchors",
    "x": 166,
    "y": -2094,
-   "cols": 10,
+   "cols": 12,
    "stacked": false,
    "cards": [
     "wolf",
@@ -55,7 +31,10 @@
     "tiger",
     "caracal",
     "pigeon",
-    "guard_bee"
+    "guard_bee",
+    "toad",
+    "tortoise",
+    "stick_insect"
    ],
    "tint": "green"
   },
@@ -543,6 +522,20 @@
     "sloth_legend",
     "piranha_legend",
     "boar_legend"
+   ],
+   "tint": "grey"
+  },
+  {
+   "id": "pmvuy9e2i0",
+   "name": "Idk",
+   "x": 4747,
+   "y": 2699,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "flying_squirrel",
+    "dart_frog",
+    "skunk"
    ],
    "tint": "grey"
   }
