@@ -29,7 +29,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Squirrel** | 3 | Rodent | 3 | Roar: gain 10 food. |
+| **Squirrel** | 3 | Rodent | 4 | Roar: gain 10 food. |
 | **Chipmunk** | 3 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
 | **Gopher** | 3 | Rodent | 3 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
 | **Hamster** | 3 | Rodent | 3 | Whenever you draw a card, gain 5 food. |

@@ -217,7 +217,7 @@
         "Colony",
         "Worker"
       ],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Flight. Roar: gain 12 food.",
       "species": "Bee",
       "habitat": "Meadow",
@@ -1342,7 +1342,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 3,
+      "base_strength": 4,
       "text": "Roar: gain 10 food.",
       "keywords": [],
       "species": "Squirrel",

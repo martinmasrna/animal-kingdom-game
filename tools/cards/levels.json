@@ -4096,6 +4096,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-30 (card board review)",
+      "by": "claude",
+      "at": 1793372200
     }
   },
   "squirrel_legend": {
@@ -4608,9 +4618,9 @@
         "prev_note": "",
         "prev": 1
       },
-      "note": "Martin, 2026-10-26: the Workers swap, the Ant's food counts every animal like Queen Solenia's",
+      "note": "Martin, 2026-10-30 (card board review)",
       "by": "claude",
-      "at": 1793017114
+      "at": 1793372200
     }
   },
   "worker_wasp": {

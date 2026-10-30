@@ -1307,7 +1307,7 @@ def test_royal_jelly_makes_your_animals_five_wherever_they_are():
     rules.apply_action(s, PlaceAction("bee_legend_2", ("cr", "1,2")))
     five = CFG.jelly_strength
     assert effective_strength(s, s.top_unit("1,2")) == five                     # itself
-    assert effective_strength(s, on_board) == five and effective_strength(s, enemy) == 1   # yours on the board, not theirs
+    assert effective_strength(s, on_board) == five and effective_strength(s, enemy) == load_cards()["worker_bee"].base_strength   # yours on the board, not theirs
     assert {u.card_id: effective_strength(s, u) for u in s.hands["A"]} == {"raven": five, "lion": five}   # a 7 too
     drawn = s.draw("A", 3)
     assert [effective_strength(s, u) for u in drawn] == [five] * 3              # the deck's copies come out at it
@@ -1746,13 +1746,13 @@ def test_the_african_wild_dog_has_no_dusk_effect_any_more():
 
 def test_the_legendary_elephant_sweeps_small_enemies_where_it_is_placed_and_where_it_roams():
     s = make_state(hands={"A": ["elephant_legend"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    put(s, "1,1", "squirrel", "B"); put(s, "1,3", "chipmunk", "B")
+    put(s, "1,1", "chipmunk", "B"); put(s, "1,3", "chipmunk", "B")
     big = put(s, "2,2", "lion", "B")
     rules.apply_action(s, PlaceAction("elephant_legend", ("cr", "1,2")))
     assert s.top_unit("1,1") is None and s.top_unit("1,3") is None and s.top_unit("2,2") is big
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "elephant_legend", "A")
-    put(s, "2,1", "squirrel", "B"); put(s, "3,2", "lion", "B"); put(s, "2,3", "chipmunk", "B")
+    put(s, "2,1", "chipmunk", "B"); put(s, "3,2", "lion", "B"); put(s, "2,3", "chipmunk", "B")
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))    # arriving by a roam is landing too
     assert s.top_unit("2,1") is None and s.top_unit("2,3") is None and s.top_unit("3,2").card_id == "lion"
     assert CFG.elephant_legend_max == 3
@@ -1951,11 +1951,11 @@ def test_alike_copies_need_no_naming():
 def test_the_anaconda_swallows_what_it_eats_and_grows_by_its_strength():
     s = make_state(hands={"A": ["anaconda"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "lion", "A")
-    put(s, "2,2", "squirrel", "B")                             # 3: an Anaconda (5) can land on it
+    put(s, "2,2", "squirrel", "B")                             # 4: an Anaconda (5) can land on it
     rules.apply_action(s, PlaceAction("anaconda", ("cr", "2,2")))
     a = s.top_unit("2,2")
     assert a.card_id == "anaconda" and [u.card_id for u in s.board["2,2"]] == ["anaconda"]
-    assert effective_strength(s, a) == 5 + 3
+    assert effective_strength(s, a) == 5 + load_cards()["squirrel"].base_strength
 
 
 def test_the_legendary_leopard_grows_with_every_kill():
