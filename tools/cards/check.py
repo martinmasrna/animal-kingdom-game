@@ -8,7 +8,7 @@ nothing else: no verdict, no score. The agent reads the sheet; Martin sees the c
 
     .venv/bin/python tools/cards/check.py ID [--text "..."]        an existing card, or another wording of it
     .venv/bin/python tools/cards/check.py --new "Rat" --rarity C --str 3 --tag Rodent --text "Roar: ..." [--species S]
-    options: --no-fit (skip the browser measurement of the text), --play (place an existing card in a scratch game)
+    options: --play (place an existing card in a scratch game). Text length is no constraint on a design (Martin, 2026-10-30), so the sheet doesn't measure it.
 
 Sections: card, keywords (the registry's ruling for every keyword and term in the text), pool (the animal, the tag, the
 nearest effects), anchors (the cards at this rarity and strength, what can cover the body), record (every line of the design record that names the animal), grid (map_b's neighbours
@@ -293,7 +293,7 @@ def main(argv=None) -> None:
     ap.add_argument("--str", dest="strength", type=int)
     ap.add_argument("--tag", action="append", default=[], help="a tag (repeatable)")
     ap.add_argument("--text", default="")
-    ap.add_argument("--no-fit", action="store_true", help="skip the browser measurement of the text")
+    ap.add_argument("--no-fit", action="store_true", help=argparse.SUPPRESS)   # kept so old command lines still run
     ap.add_argument("--play", action="store_true", help="place an existing card in a scratch game and print what changed")
     a = ap.parse_args(argv)
 
@@ -322,7 +322,6 @@ def main(argv=None) -> None:
     out("anchors", anchors_section(cards, c))
     out("record", record_section(c))
     out("grid", grid_section(c))
-    out("text", text_section(c, fit=not a.no_fit))
     out("play", play_section(cards, c) if (a.play or not c.get("id")) else ["--play places it in a scratch game"])
 
 
