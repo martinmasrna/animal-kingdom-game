@@ -82,6 +82,7 @@ const pileSize = p => {
 const slot = (p, i) => p.stacked ? { x: p.x + PAD, y: p.y + HEAD + 12 }
   : { x: p.x + PAD + (i % p.cols) * (W + G), y: p.y + HEAD + Math.floor(i / p.cols) * (H + G) };
 const posOf = id => { const p = pileOf(id); return p ? slot(p, p.cards.indexOf(id)) : B.cards[id]; };
+const gone = id => B.gone.includes(id);   // taken off the board (it stays in the game)
 
 // Every card the game has gets a place: one in no pile and with no spot is laid out under everything, legendaries, rares and
 // commons each starting their own rows, weakest first; the cards not designed yet come last.
@@ -91,7 +92,8 @@ function placeNew() {
   const live = new Set(Object.keys(CARDS));
   for (const id of Object.keys(B.cards)) if (!live.has(id)) delete B.cards[id];
   for (const p of B.piles) p.cards = p.cards.filter(id => live.has(id));
-  const homeless = Object.values(CARDS).filter(c => !B.cards[c.id] && !pileOf(c.id));
+  B.gone = B.gone.filter(id => live.has(id));
+  const homeless = Object.values(CARDS).filter(c => !B.cards[c.id] && !pileOf(c.id) && !gone(c.id));
   if (!homeless.length) return false;
   let y = 0;
   for (const id of Object.keys(CARDS)) { const q = posOf(id); if (q) y = Math.max(y, q.y + H + G * 6); }
@@ -141,6 +143,7 @@ function draw() {
   }
   for (const id of Object.keys(CARDS)) {
     const el = els[id], q = posOf(id), p = pileOf(id);
+    if (el) el.style.display = gone(id) ? 'none' : '';
     if (!el || !q) continue;
     el.style.transform = `translate(${q.x}px,${q.y}px)`;
     el.classList.toggle('hidden', !!(p && p.stacked && p.cards[0] !== id));
@@ -163,8 +166,8 @@ async function save() {
   if (!r.ok) return msg('Not saved: ' + await r.text());
   B.rev = (await r.json()).rev; msg('');
 }
-const snap = () => JSON.stringify({ cards: B.cards, piles: B.piles });
-function restore(s) { const o = JSON.parse(s); B.cards = o.cards; B.piles = o.piles; sel.clear(); draw(); queueSave(); }
+const snap = () => JSON.stringify({ cards: B.cards, piles: B.piles, gone: B.gone });
+function restore(s) { const o = JSON.parse(s); B.cards = o.cards; B.piles = o.piles; B.gone = o.gone || []; sel.clear(); draw(); queueSave(); }
 function msg(t) { $('#msg').textContent = t; }
 
 // `cardsOnly`: card edits made elsewhere come in, the arrangement on the page stays as it is
@@ -173,7 +176,7 @@ async function load(cardsOnly = false) {
   if (!r) return msg('The board server is not running: ./board');
   const d = await r.json();
   CARDS = Object.fromEntries(d.cards.map(c => [c.id, c]));
-  if (!cardsOnly) { B = d.board; B.cards ||= {}; B.piles ||= []; }
+  if (!cardsOnly) { B = d.board; B.cards ||= {}; B.piles ||= []; B.gone ||= []; }
   buildCards();
   if (placeNew()) queueSave();
   draw();
@@ -393,6 +396,13 @@ addEventListener('keydown', e => {
   }
   if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); $('#q').focus(); }
   if (e.key === 'Escape') { sel.clear(); draw(); }
+  if ((e.key === 'Backspace' || e.key === 'Delete') && sel.size) {
+    e.preventDefault();
+    const before = snap();
+    for (const p of B.piles) p.cards = p.cards.filter(id => !sel.has(id));
+    for (const id of sel) { delete B.cards[id]; B.gone.push(id); }
+    sel.clear(); changed(before);
+  }
 });
 addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
 $('#fit').onclick = fit;
