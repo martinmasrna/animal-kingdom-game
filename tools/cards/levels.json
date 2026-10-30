@@ -1379,9 +1379,14 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-22: 5 per Hungry animal",
+      "note": "Martin, 2026-10-30 (card board review): 4 per Hungry animal",
       "by": "claude",
-      "at": 1792655320
+      "at": 1793372420,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-22: 5 per Hungry animal",
+        "prev": "Dusk: gain 5 food for each Hungry animal you control."
+      }
     },
     "tag": {
       "review": {

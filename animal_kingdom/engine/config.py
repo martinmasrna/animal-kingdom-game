@@ -139,7 +139,7 @@ class Config:
     tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food
     stag_beetle_per_armor: int = 5       # Stag Beetle: 5 food for each of your animals with Armor
     wildebeest_food: int = 6             # Wildebeest: at the end of your turn, if grazing, gain 6 (Martin, 2026-10-29)
-    dung_beetle_per: int = 5             # Dung Beetle: 5 food for each Hungry animal you control
+    dung_beetle_per: int = 4             # Dung Beetle: 4 food for each Hungry animal you control (Martin, 2026-10-30)
     otk_squirrel_multiplier: int = 3     # the legendary Squirrel: in 2 turns, gain three times the food it lost...
     otk_squirrel_delay: int = 2          # ...after this many of your turns (covering pauses it)
     migration_bonus: int = 5             # the legendary Wildebeest: your regions produce 5 more food
