@@ -1,5 +1,5 @@
 {
- "rev": 931,
+ "rev": 933,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -593,9 +593,6 @@
    "flag": true,
    "note": "the animal feels off, 6 strength stealth feels useless"
   },
-  "black_bear": {
-   "note": "maybe too strong at 5?"
-  },
   "sardine": {
    "flag": true,
    "note": "it's extra placement, idk"
@@ -605,9 +602,6 @@
    "note": "feels a bit random"
   },
   "black_panther": {
-   "flag": true
-  },
-  "jellyfish": {
    "flag": true
   },
   "skunk": {
