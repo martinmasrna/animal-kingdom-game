@@ -1,5 +1,5 @@
 {
- "rev": 949,
+ "rev": 955,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -98,11 +98,11 @@
    "cols": 5,
    "stacked": false,
    "cards": [
-    "guard_wasp",
-    "tuna",
+    "peacock",
     "capybara",
     "marmot",
-    "peacock"
+    "guard_wasp",
+    "tuna"
    ]
   },
   {
@@ -114,10 +114,10 @@
    "stacked": false,
    "cards": [
     "chipmunk",
-    "gazelle",
     "worker_bee",
-    "sloth",
-    "squirrel"
+    "gazelle",
+    "squirrel",
+    "sloth"
    ]
   },
   {
@@ -633,6 +633,9 @@
   },
   "nurse_bumblebee": {
    "note": "idk, lazy?"
+  },
+  "capybara": {
+   "note": "wording?"
   }
  }
 }
