@@ -64,9 +64,6 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
 import { cardHTML, fitNames } from '/static/card.js';
 
 const W = 180, H = Math.round(180 * 1.467), G = 14, PAD = 16, HEAD = 92, PER_ROW = 24;
-const HAB = ['Savanna', 'Jungle', 'Forest', 'Meadow', 'City', 'Open Ocean', 'Deep Ocean', 'Coral Reef', 'Coast', 'River and Lake',
-  'Australia', 'Islands', 'Mountains', 'Polar', 'Desert', 'Prehistoric', 'Ice Age'];
-const RAR = { legendary: 0, rare: 1, common: 2 };
 const $ = s => document.querySelector(s);
 const view = $('#view'), world = $('#world');
 
@@ -86,18 +83,25 @@ const slot = (p, i) => p.stacked ? { x: p.x + PAD, y: p.y + HEAD + 12 }
   : { x: p.x + PAD + (i % p.cols) * (W + G), y: p.y + HEAD + Math.floor(i / p.cols) * (H + G) };
 const posOf = id => { const p = pileOf(id); return p ? slot(p, p.cards.indexOf(id)) : B.cards[id]; };
 
-// Every card the game has gets a place: one in no pile and with no spot is laid out under everything, sorted by habitat and rarity.
+// Every card the game has gets a place: one in no pile and with no spot is laid out under everything, legendaries, rares and
+// commons each starting their own rows, weakest first; the cards not designed yet come last.
+const GROUPS = [c => !c.planned && c.rarity === 'legendary', c => !c.planned && c.rarity === 'rare', c => !c.planned && c.rarity === 'common', c => c.planned];
+const strOf = c => typeof c.str === 'number' ? c.str : 99;      // a strength the card sets itself (*) sorts last
 function placeNew() {
   const live = new Set(Object.keys(CARDS));
   for (const id of Object.keys(B.cards)) if (!live.has(id)) delete B.cards[id];
   for (const p of B.piles) p.cards = p.cards.filter(id => live.has(id));
-  const homeless = Object.values(CARDS).filter(c => !B.cards[c.id] && !pileOf(c.id))
-    .sort((a, b) => (HAB.indexOf(a.habitat) + 99) % 99 - (HAB.indexOf(b.habitat) + 99) % 99 || RAR[a.rarity] - RAR[b.rarity] || a.name.localeCompare(b.name));
+  const homeless = Object.values(CARDS).filter(c => !B.cards[c.id] && !pileOf(c.id));
   if (!homeless.length) return false;
-  let bottom = 0;
-  for (const id of Object.keys(CARDS)) { const q = posOf(id); if (q) bottom = Math.max(bottom, q.y + H + G * 4); }
-  for (const p of B.piles) bottom = Math.max(bottom, p.y + pileSize(p).h + G * 4);
-  homeless.forEach((c, i) => B.cards[c.id] = { x: (i % PER_ROW) * (W + G), y: bottom + Math.floor(i / PER_ROW) * (H + G) });
+  let y = 0;
+  for (const id of Object.keys(CARDS)) { const q = posOf(id); if (q) y = Math.max(y, q.y + H + G * 6); }
+  for (const p of B.piles) y = Math.max(y, p.y + pileSize(p).h + G * 6);
+  for (const g of GROUPS) {
+    const cs = homeless.filter(g).sort((a, b) => strOf(a) - strOf(b) || a.name.localeCompare(b.name));
+    if (!cs.length) continue;
+    cs.forEach((c, i) => B.cards[c.id] = { x: (i % PER_ROW) * (W + G), y: y + Math.floor(i / PER_ROW) * (H + G) });
+    y += Math.ceil(cs.length / PER_ROW) * (H + G) + H / 2;
+  }
   return true;
 }
 
@@ -193,8 +197,7 @@ function fit() {
 }
 view.addEventListener('wheel', e => {
   e.preventDefault(); hidePeek();
-  if (e.ctrlKey || e.metaKey) zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
-  else { cam.x -= e.deltaX; cam.y -= e.deltaY; setCam(); }
+  zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.002)));   // as on Miro: scrolling zooms (ctrl: a pinch)
 }, { passive: false });
 
 // ---------- dropping ----------
@@ -241,10 +244,8 @@ view.addEventListener('pointerdown', e => {
     // a stacked pile is lifted whole from its top card
     const p = pileOf(id); const lift = p && p.stacked ? p.cards.slice() : ids;
     act = { kind: 'cards', id, ids: lift, w0: w, start: Object.fromEntries(lift.map(i => [i, { ...posOf(i) }])), before: snap(), moved: false, fresh };
-  } else {
-    if (!e.shiftKey) { sel.clear(); draw(); }
-    act = { kind: 'marq', sx: e.clientX, sy: e.clientY, base: new Set(sel) };
-  }
+  } else if (e.shiftKey) act = { kind: 'marq', sx: e.clientX, sy: e.clientY, base: new Set(sel) };
+  else { act = { kind: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, clear: true }; view.classList.add('panning'); }
   view.setPointerCapture(e.pointerId);
 });
 view.addEventListener('pointermove', e => {
@@ -278,6 +279,7 @@ view.addEventListener('pointermove', e => {
 view.addEventListener('pointerup', e => {
   const a = act; act = null; view.classList.remove('panning'); $('#marq').style.display = 'none'; $('#ins').style.display = 'none';
   if (!a) return;
+  if (a.kind === 'pan' && a.clear && Math.hypot(e.clientX - a.sx, e.clientY - a.sy) < 3) { sel.clear(); draw(); }
   if (a.kind === 'pile' && a.moved) changed(a.before);
   else if (a.kind === 'cols' && a.p.cols !== a.c0) changed(a.before);
   else if (a.kind === 'cards') {
