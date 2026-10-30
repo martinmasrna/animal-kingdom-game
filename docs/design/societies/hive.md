@@ -160,7 +160,7 @@ Cards of the hive whose job the page can't yet name.
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **[BEE]** | legendary | 1 | Roar: if your starting deck has no animal of strength 4 or more, give your animals on the board, in your hand and in your deck +2 strength. | Meadow |
+| **[BEE]** | legendary | 1 | Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are). | Meadow |
 
 <!-- cards:end -->
 
