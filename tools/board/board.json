@@ -1,17 +1,9 @@
 {
- "rev": 921,
+ "rev": 931,
  "cards": {
   "stag_beetle": {
    "x": 1132,
    "y": 1391
-  },
-  "cheetah": {
-   "x": 1760,
-   "y": 742
-  },
-  "falcon": {
-   "x": 1986,
-   "y": 742
   }
  },
  "piles": [
@@ -84,7 +76,7 @@
    "name": "\"Draw 2\"",
    "x": 106,
    "y": 674,
-   "cols": 8,
+   "cols": 9,
    "stacked": false,
    "cards": [
     "nurse_bee",
@@ -93,7 +85,9 @@
     "mara",
     "praying_mantis",
     "cod",
-    "black_bear"
+    "black_bear",
+    "cheetah",
+    "falcon"
    ]
   },
   {
@@ -593,23 +587,13 @@
    "note": "idk, doesn't feel great"
   },
   "falcon": {
-   "flag": true,
    "note": "draw 2 would be too strong, but this feels too weak?"
-  },
-  "toad": {
-   "flag": true,
-   "note": "maybe 5 is completely fine?"
-  },
-  "tortoise": {
-   "flag": true,
-   "note": "tagless so maybe 7 is okay? or too strong? would have to actually play with this one first"
   },
   "stick_insect": {
    "flag": true,
-   "note": "same as tortoise, plus the animal feels off"
+   "note": "the animal feels off, 6 strength stealth feels useless"
   },
   "black_bear": {
-   "flag": true,
    "note": "maybe too strong at 5?"
   },
   "sardine": {
