@@ -3190,10 +3190,16 @@ def _warthog_place(state, unit, cr):
                         [nb for nb in _adjacent_enemy_targets(state, unit, cr) if flanked(nb)])
 
 
-def _boar_place(state, unit, cr):
-    """Roar: remove an adjacent enemy that isn't covering anything (alone on its crossroad)."""
-    _push_remove_choice(state, unit.owner, unit.card_id,
-                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if len(state.board[nb]) == 1])
+def _boar_enemy_placed(state, boar, placed, cr):
+    """Remove the first enemy placed next to this (Martin, 2026-10-30): one charge per Boar, spent on the first enemy
+    whatever happens to it (an Armor animal stays and the charge is gone all the same, as Spikes). `retaliation_used`
+    is the once-flag; the board's eye goes with it. Automatic, as the Hippopotamus: Stealth doesn't hide."""
+    if boar.retaliation_used:
+        return
+    boar.retaliation_used = True
+    if statics.can_be_removed(state, placed, cr):
+        state.effect_stack.append(remove_iid_step(placed.iid, by_player=boar.owner, by_effect=True,
+                                                  source_iid=None, by_card=boar.card_id))
 
 
 def _wildebeest_eot(state, unit, cr):
@@ -3470,7 +3476,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "zebra": {"on_flee": _zebra_flee},
     "warthog": {"on_place": _warthog_place},
     "albatross": {"on_place": _albatross_place},
-    "boar": {"on_place": _boar_place},
+    "boar": {"on_enemy_placed_adjacent": _boar_enemy_placed},
     "gazelle": {"on_place": _gazelle_place},
     "wildebeest": {"on_end_of_turn": _wildebeest_eot},
     "deer": {"on_place": _spawns_beside("fawn")},

@@ -605,9 +605,9 @@
         "prev_note": "",
         "prev": "C"
       },
-      "note": "Martin, 2026-10-22: an answer any deck can run, priced at 4 beside Black Mamba",
+      "note": "Martin, 2026-10-30: the boar charges whoever comes close, once",
       "by": "claude",
-      "at": 1792666803
+      "at": 1793383616
     },
     "strength": {
       "review": {
@@ -615,9 +615,19 @@
         "prev_note": "",
         "prev": 4
       },
-      "note": "Removal rares pass with Martin, 2026-10-26: above its common mirror, the Warthog (4)",
+      "note": "Martin, 2026-10-30: the boar charges whoever comes close, once",
       "by": "claude",
-      "at": 1793012642
+      "at": 1793383616
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: remove an adjacent enemy that isn't covering anything."
+      },
+      "note": "Martin, 2026-10-30: the boar charges whoever comes close, once",
+      "by": "claude",
+      "at": 1793383616
     }
   },
   "boar_legend": {

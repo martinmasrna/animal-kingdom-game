@@ -2444,15 +2444,15 @@
       "id": "boar",
       "name": "Boar",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 5,
-      "text": "Roar: remove an adjacent enemy that isn't covering anything.",
-      "keywords": [],
+      "base_strength": 4,
+      "text": "Remove the first enemy placed next to this.",
       "species": "Boar",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "warthog",

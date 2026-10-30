@@ -83,7 +83,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
-        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "boar" | "gazelle" | "deer" | "impala" | "baby_impala" | "rabbit" | "vole"
+        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "gazelle" | "deer" | "impala" | "baby_impala" | "rabbit" | "vole"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
         "zebra" => &[OnFlee],
@@ -105,7 +105,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "worker_wasp" | "african_wild_dog" => &[OnFriendlyPlace],
         "swan_legend" | "cuckoo_egg" | "golden_egg" => &[OnDraw],
         "manta_ray" => &[OnAllyCovered],
-        "golden_orb_weaver" | "hippopotamus" => &[OnEnemyPlacedAdjacent],
+        "golden_orb_weaver" | "hippopotamus" | "boar" => &[OnEnemyPlacedAdjacent],
         "butterfly_legend" => GROWS,
         "butterfly_legend_caterpillar" | "butterfly_legend_chrysalis" | "butterfly_legend_butterfly" => &[OnPlace, OnDawnInHand, OnStartOfTurn, OnGain],
         "caterpillar" => &[OnGainInHand],
@@ -1372,9 +1372,20 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 .collect();
             push_remove_choice(st, owner, unit.card, t, false);
         }
-        ("boar", OnPlace) => {
-            let t: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true).into_iter().filter(|nb| st.stack(*nb).len() == 1).collect();
-            push_remove_choice(st, owner, unit.card, t, false);
+        ("boar", OnEnemyPlacedAdjacent) => {
+            // "Remove the first enemy placed next to this.": one charge, spent on the first enemy whatever happens to it.
+            if let Args::PlacedAdjacent(placed, pcr) = args {
+                let spent = st.unit_by_iid(unit.iid).map(|u| u.retaliation_used).unwrap_or(true);
+                if !spent {
+                    if let Some(u) = st.unit_by_iid_mut(unit.iid) {
+                        u.retaliation_used = true;
+                    }
+                    if statics::can_be_removed(st, placed, Some(*pcr), false) {
+                        let step = remove_iid_step(st, placed.iid, owner, true, None, Some(unit.card));
+                        st.effect_stack.push(step);
+                    }
+                }
+            }
         }
         ("gazelle", OnPlace) => {
             let f = cfg(st, "gazelle_food");

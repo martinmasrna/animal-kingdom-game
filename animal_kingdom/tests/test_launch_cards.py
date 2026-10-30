@@ -1640,12 +1640,22 @@ def test_warthog_removes_only_an_enemy_another_hoofed_flanks():
     assert s2.top_unit("2,2") is None
 
 
-def test_boar_removes_an_adjacent_enemy_covering_nothing():
-    s = make_state(hands={"A": ["boar"]})
-    put(s, "1,1", "lion", "B")                                  # alone on its crossroad: the target
-    put(s, "2,2", "squirrel", "B"); put(s, "2,2", "lion", "B")  # on top of its own animal: safe
-    apply_click(s, PlaceAction("boar", ("cr", "1,2")))
-    assert "1,1" not in s.board and [u.card_id for u in s.board["2,2"]] == ["squirrel", "lion"]
+def test_the_boar_charges_the_first_enemy_placed_next_to_it_once():
+    s = make_state(current="B", hands={"B": ["lion", "lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    boar = put(s, "2,2", "boar", "A")
+    put(s, "3,2", "squirrel", "B")                              # there before the Boar: no charge
+    for cr in ("4,1", "4,3"):
+        put(s, cr, "mouse", "B")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,1")))      # not next to it: nothing
+    assert s.top_unit("3,1").card_id == "lion" and not boar.retaliation_used
+    rules.apply_action(s, PlaceAction("lion", ("cr", "2,1")))      # next to it: charged, a 7 included
+    assert s.top_unit("2,1") is None and boar.retaliation_used
+    assert s.top_unit("3,2").card_id == "squirrel"
+    s2 = make_state(current="B", hands={"B": ["lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    spent = put(s2, "2,2", "boar", "A"); spent.retaliation_used = True
+    put(s2, "4,1", "mouse", "B"); put(s2, "3,1", "mouse", "B")
+    rules.apply_action(s2, PlaceAction("lion", ("cr", "2,1")))     # the charge is spent: the Lion stays
+    assert s2.top_unit("2,1").card_id == "lion"
 
 
 def test_related_cards_are_real_cards_and_follow_the_engine():

@@ -89,8 +89,8 @@ The mob, the tusks in the hole, the charge at what stands alone: the herd's answ
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Boar** | rare | 5 | Roar: remove an adjacent enemy that isn't covering anything. | Forest |
 | **Cape Buffalo** | rare | 7 | Your other Hoofed animals have +1 strength during your opponent's turn. | Savanna |
+| **Boar** | common | 4 | Remove the first enemy placed next to this. | Forest |
 | **Warthog** | common | 4 | Roar: remove an adjacent enemy that has another of your Hoofed animals next to it. | Savanna |
 
 <!-- cards:end -->
