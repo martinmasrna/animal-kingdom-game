@@ -1,5 +1,5 @@
 {
- "rev": 1001,
+ "rev": 1002,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -620,9 +620,6 @@
   },
   "wolf_legend_2": {
    "note": "isn't it too strong compared to Adira?"
-  },
-  "zebra_legend": {
-   "note": "at least connected or somerhing"
   },
   "zebra": {
    "note": "seems weak still, idk"
