@@ -145,6 +145,9 @@ impl Bot {
                     if let Some(v) = get("den_sense") {
                         s.den_sense = as_bool(v);
                     }
+                    if let Some(v) = get("den_far") {
+                        s.den_far = as_usize(v);
+                    }
                     if let Some(v) = get("reply_turns") {
                         s.reply_turns = as_usize(v);
                     }

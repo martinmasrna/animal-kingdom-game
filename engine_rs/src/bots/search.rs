@@ -81,6 +81,8 @@ pub struct Searcher {
     pub reply_turns: usize,
     pub deepen_chase: bool,
     pub den_open: bool,
+    /// Far den sense (referee_bot.den_far): hands dealt to read a capture built from several placements; 0 off.
+    pub den_far: usize,
     pub reply_min: bool,
     pub outs: usize,
     // run state
@@ -133,6 +135,7 @@ impl Searcher {
             reply_turns: 0,
             deepen_chase: false,
             den_open: false,
+            den_far: 0,
             reply_min: false,
             outs: 0,
             reply_openings: Vec::new(),
@@ -228,6 +231,11 @@ impl Searcher {
                 self.stats.screened_candidates = 1;
                 return c.clone();
             }
+        }
+        // referee_bot: far den sense filters the legal actions first, so a planned continuation passes it too
+        let far_legal: Vec<Action> = if self.is_referee() && legal.len() > 1 { self.far_safe(st, legal.to_vec(), me) } else { legal.to_vec() };
+        let legal: &[Action] = &far_legal;
+        if self.is_referee() && self.staged {
             if !self.continuation_plan.is_empty() {
                 let key = observation_key(st, me);
                 let planned = self.continuation_plan.iter().find(|(k, _)| *k == key).map(|(_, a)| a.clone());
@@ -1065,6 +1073,52 @@ impl Searcher {
         1.0 - comb_f(total - enabling, hand as u64) / comb_f(total, hand as u64)
     }
 
+    /// referee_bot._far_hits: of `den_far` hands dealt from the unseen pool (seed 0, the same hands for every position
+    /// compared), how many capture my den in the opponent's coming turn.
+    fn far_hits(&self, st: &State, opp: Player, me: Player) -> usize {
+        let hand = st.hands[opp as usize].len();
+        let pool = crate::bots::features::opponent_unseen(st, opp);
+        if hand == 0 || pool.len() < hand {
+            return 0;
+        }
+        let dist = den_distance(st, me);
+        let mut rng = PyRandom::seeded(0);
+        let mut hits = 0usize;
+        for _ in 0..self.den_far {
+            let mut dealt = pool.clone();
+            rng.shuffle(&mut dealt);
+            let mut probe = st.clone();
+            let units: Vec<Unit> = dealt[..hand].iter().enumerate().map(|(i, &c)| Unit::new(c, opp, 900001 + i as i64)).collect();
+            probe.hands[opp as usize] = crate::state::Hand::from_slice(&units);
+            probe.decks[opp as usize] = crate::state::Deck::from_slice(&dealt[hand..]);
+            let mut budget = FAR_NODES;
+            if far_capture(&probe, opp, &dist, &mut budget) {
+                hits += 1;
+            }
+        }
+        hits
+    }
+
+    /// referee_bot._far_safe: root candidates that end my turn, dealt the same hands; one losing my den to clearly more
+    /// hands than the safest (by more than one in fifty) is dropped; one that doesn't end my turn is kept.
+    fn far_safe(&mut self, world: &State, candidates: Vec<Action>, me: Player) -> Vec<Action> {
+        if self.den_far == 0 {
+            return candidates;
+        }
+        let opp = other(me);
+        let mut hits: Vec<Option<usize>> = Vec::new();
+        for action in &candidates {
+            let mut nxt = world.clone();
+            let _ = rules::apply_action(&mut nxt, action, false);
+            let nxt = self.settled(&nxt, me);
+            let ends = nxt.result.is_none() && nxt.pending.is_none() && nxt.player_to_act() == opp && nxt.actions_taken_this_turn == 0;
+            hits.push(if ends { Some(self.far_hits(&nxt, opp, me)) } else { None });
+        }
+        let Some(best) = hits.iter().filter_map(|h| *h).min() else { return candidates };
+        let bar = best + (self.den_far / 50).max(1);
+        candidates.into_iter().zip(hits).filter(|(_, h)| h.map_or(true, |h| h <= bar)).map(|(a, _)| a).collect()
+    }
+
     fn reply_opening(&mut self, st: &State, opp: Player, legal: &[Action]) -> Option<Action> {
         if legal.len() < 2 {
             return None;
@@ -1261,4 +1315,75 @@ pub fn observation_key(st: &State, me: Player) -> String {
 pub fn effects_unused() {
     let _ = effects::pn;
     let _: Option<Map> = None;
+}
+
+const FAR_NODES: i64 = 400;
+
+/// referee_bot._den_distance: steps from each crossroad to my den's front (0 on the front).
+fn den_distance(st: &State, me: Player) -> Vec<i32> {
+    let gm = st.map();
+    let mut dist = vec![i32::MAX; gm.n()];
+    let mut frontier: Vec<Cr> = gm.front(me).to_vec();
+    for &c in &frontier {
+        dist[c as usize] = 0;
+    }
+    while !frontier.is_empty() {
+        let mut nxt = Vec::new();
+        for &c in &frontier {
+            for &nb in gm.neighbors(c) {
+                if dist[nb as usize] == i32::MAX {
+                    dist[nb as usize] = dist[c as usize] + 1;
+                    nxt.push(nb);
+                }
+            }
+        }
+        frontier = nxt;
+    }
+    dist
+}
+
+/// referee_bot._far_capture: whether `opp`, to act in their own turn, captures my den with what they hold, searching
+/// placements and roams that each land closer to my den than their chain stands, and the choices those open.
+fn far_capture(st: &State, opp: Player, dist: &[i32], budget: &mut i64) -> bool {
+    if let Some(r) = &st.result {
+        return r.winner == Some(opp);
+    }
+    if st.player_to_act() != opp || *budget <= 0 {
+        return false;
+    }
+    let legal = rules::legal_actions(st);
+    if legal.iter().any(|a| matches!(a, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. })) {
+        return true;
+    }
+    let occ = st.connected_occupied(opp);
+    let gm = st.map();
+    let mut stand = i32::MAX;
+    for c in 0..gm.n() {
+        if occ & (1 << c) != 0 {
+            stand = stand.min(dist[c]);
+        }
+    }
+    if stand == i32::MAX {
+        stand = gm.front(opp).iter().map(|&c| dist[c as usize]).min().unwrap_or(i32::MAX - 1) + 1;
+    }
+    for a in &legal {
+        match a {
+            Action::Place { target, .. } | Action::Roam { target, .. } => match target {
+                Target::Cr(c) if dist[*c as usize] < stand => {}
+                _ => continue,
+            },
+            _ if st.pending.is_none() => continue,
+            _ => {}
+        }
+        *budget -= 1;
+        if *budget < 0 {
+            return false;
+        }
+        let mut nxt = st.clone();
+        let _ = rules::apply_action(&mut nxt, a, false);
+        if far_capture(&nxt, opp, dist, budget) {
+            return true;
+        }
+    }
+    false
 }

@@ -49,7 +49,7 @@ from typing import Optional, Sequence
 from ..engine import rules
 from .base import keep_hand
 from ..engine.actions import Action, DrawAction, PlaceAction, RoamAction
-from ..engine.state import GameState, StateView
+from ..engine.state import GameState, StateView, other_player
 from ..engine.strength import card_strength
 from ..engine.state import UnitInstance
 from .features import opponent_unseen_card_ids
@@ -64,6 +64,53 @@ from .turn_search import _DECISIVE, TurnSearcher
 _LOSS_TIEBREAK = 1e6
 
 
+_FAR_NODES = 400     # positions one far-capture search may open (a hand that needs more is read as no capture)
+
+
+def _den_distance(gm, me: str) -> dict:
+    """Steps from each crossroad to my den's front (0 on the front)."""
+    dist = {cr: 0 for cr in gm.hq_front(me)}
+    frontier = sorted(dist)
+    while frontier:
+        nxt = []
+        for cr in frontier:
+            for nb in gm.neighbors(cr):
+                if nb not in dist:
+                    dist[nb] = dist[cr] + 1
+                    nxt.append(nb)
+        frontier = nxt
+    return dist
+
+
+def _far_capture(state: GameState, opp: str, dist: dict, budget: list) -> bool:
+    """Whether `opp`, to act in their own turn, captures my den with what they hold: a search over their placements
+    and roams that each land closer to my den than their chain stands (and over the choices those open), until a den
+    capture is legal. Draws and passes are not searched; `budget` caps the positions opened."""
+    if state.result is not None:
+        return state.result.winner == opp
+    if state.player_to_act() != opp or budget[0] <= 0:
+        return False
+    legal = rules.legal_actions(state)
+    if any(isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture for a in legal):
+        return True
+    occ = state.connected_occupied(opp)
+    stand = min((dist[cr] for cr in occ), default=min(dist[cr] for cr in state.game_map.hq_front(opp)) + 1)
+    for a in legal:
+        if isinstance(a, (PlaceAction, RoamAction)):
+            if a.target[0] != "cr" or dist[a.target[1]] >= stand:
+                continue
+        elif state.pending is None:
+            continue
+        budget[0] -= 1
+        if budget[0] < 0:
+            return False
+        nxt = state.clone()
+        rules.apply_action(nxt, a, validate=False)
+        if _far_capture(nxt, opp, dist, budget):
+            return True
+    return False
+
+
 class RefereeBot(TurnSearcher):
     def __init__(self, weights: Optional[GreedyWeights] = None,
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
@@ -75,7 +122,7 @@ class RefereeBot(TurnSearcher):
                  quiesce: bool = False, mulligan: bool = False,
                  depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
                  den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE, deepen_chase: bool = False,
-                 den_open: bool = False, reply_min: bool = False, outs: int = 0):
+                 den_open: bool = False, reply_min: bool = False, outs: int = 0, den_far: int = 0):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan, decisive=decisive)
@@ -103,6 +150,17 @@ class RefereeBot(TurnSearcher):
         # the strongest guard for each den approach (the one-move score ranked a Meerkat above the Groundhog on the
         # square that decided a game, so the only defence was never searched).
         self.den_sense = den_sense
+        # Far den sense (2026-10-30, Martin's 7K2LNQ game 15: his Mouse on 1,3, a Mole, a Rabbit and the Lion legendary in
+        # hand; the Expert put its Mara on 5,1 and he walked 1,3 to its den in one turn through 5,3). The den checks see
+        # one step onto a front crossroad beside their chain, so a capture built from several placements in one turn (a
+        # Mole's or a Rabbit's extra animal, a Roar that plays another) read as no threat, and five sampled hands rarely
+        # hold one (there, 5,1 loses to 11 hands in 200 and 5,3 to 1). With den_far, each root candidate that ends my
+        # turn is dealt the same `den_far` hands from the opponent's unseen pool, each searched for a capture this turn
+        # (every placement stepping closer to my den), and an action losing to clearly more hands than the safest is
+        # dropped before the search (`_far_safe`; it reads only their unseen pool and hand size, as determinize does).
+        # Scored inside the search instead, the risk drowned in the five worlds' noise, and the beam had cut the safe
+        # square before any later screen could keep it.
+        self.den_far = den_far
         # The reply as a turn (2026-10-17, Martin: "a turn is an atomic event consisting of 2 actions"): at the start of
         # the opponent's sampled reply, their first action is chosen by the position after their whole turn (the
         # `reply_turns` best openings by one-move score, each finished by the fast policy) instead of by the one-move
@@ -173,6 +231,8 @@ class RefereeBot(TurnSearcher):
                 self._continuation_plan = {}
                 self.last_search_stats["screened_candidates"] = 1
                 return captures[0]
+        if state is not None and len(legal) > 1:
+            legal = self._far_safe(state, legal, view.player)   # a planned continuation passes it too
         if self.staged and state is not None and self._continuation_plan:
             observation = self._observation_key(state, view.player)
             planned = self._continuation_plan.get(observation)
@@ -620,6 +680,47 @@ class RefereeBot(TurnSearcher):
         if not enabling:
             return 0.0
         return 1.0 - comb(total - enabling, hand) / comb(total, hand)
+
+    def _far_hits(self, state: GameState, opp: str, me: str) -> int:
+        """Of `den_far` hands dealt from the opponent's unseen pool (seed 0: the same hands for every position
+        compared), how many capture my den in their coming turn (`_far_capture`)."""
+        hand = len(state.hands[opp])
+        pool = opponent_unseen_card_ids(state, opp)
+        if not hand or len(pool) < hand:
+            return 0
+        dist = _den_distance(state.game_map, me)
+        rng = random.Random(0)
+        hits = 0
+        for _ in range(self.den_far):
+            dealt = list(pool)
+            rng.shuffle(dealt)
+            probe = state.clone()
+            probe.hands[opp] = [UnitInstance(cid, opp, 900001 + i) for i, cid in enumerate(dealt[:hand])]
+            probe.decks[opp] = dealt[hand:]
+            if _far_capture(probe, opp, dist, [_FAR_NODES]):
+                hits += 1
+        return hits
+
+    def _far_safe(self, world: GameState, candidates: list[Action], me: str) -> list[Action]:
+        """With den_far, my legal actions that end my turn are dealt the same hands and searched for a capture of
+        my den in the opponent's coming turn; one that loses to clearly more hands than the safest (by more than one in
+        fifty) is dropped. A candidate that doesn't end my turn is kept unmeasured."""
+        if not self.den_far:
+            return candidates
+        opp = other_player(me)
+        hits = []
+        for action in candidates:
+            nxt = world.clone()
+            rules.apply_action(nxt, action, validate=False)
+            nxt = self._settled(nxt, me)
+            ends = nxt.result is None and nxt.pending is None and nxt.player_to_act() == opp \
+                and nxt.actions_taken_this_turn == 0
+            hits.append(self._far_hits(nxt, opp, me) if ends else None)
+        measured = [h for h in hits if h is not None]
+        if not measured:
+            return candidates
+        bar = min(measured) + max(1, self.den_far // 50)
+        return [a for a, h in zip(candidates, hits) if h is None or h <= bar]
 
     def _reply_opening(self, state: GameState, opp: str, legal: Sequence[Action]) -> Optional[Action]:
         """The opponent's first action, judged by the position after their whole turn: each of their `reply_turns` best
