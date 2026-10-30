@@ -1,5 +1,5 @@
 {
- "rev": 1000,
+ "rev": 1001,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -185,8 +185,8 @@
   {
    "id": "pmvuvkcu74",
    "name": "Deck Thinning",
-   "x": 976,
-   "y": -1294,
+   "x": 983,
+   "y": -1305,
    "cols": 3,
    "stacked": false,
    "cards": [
