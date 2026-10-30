@@ -1,5 +1,5 @@
 {
- "rev": 936,
+ "rev": 939,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -242,9 +242,9 @@
    "stacked": false,
    "cards": [
     "rhinoceros",
-    "sperm_whale",
+    "hippopotamus",
     "whale_shark",
-    "hippopotamus"
+    "sperm_whale"
    ]
   },
   {
@@ -393,7 +393,8 @@
    "cols": 4,
    "stacked": false,
    "cards": [
-    "queen_ant"
+    "queen_ant",
+    "flying_squirrel"
    ],
    "tint": "orange"
   },
@@ -526,7 +527,6 @@
    "cols": 4,
    "stacked": false,
    "cards": [
-    "flying_squirrel",
     "dart_frog",
     "skunk"
    ],
