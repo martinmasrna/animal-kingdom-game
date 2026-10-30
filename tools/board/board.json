@@ -1,5 +1,5 @@
 {
- "rev": 48,
+ "rev": 51,
  "cards": {
   "butterfly_legend": {
    "x": 0,
@@ -845,7 +845,7 @@
  "piles": [
   {
    "id": "pmvutpeh30",
-   "name": "New pile",
+   "name": "Anchors",
    "x": 5134,
    "y": 5,
    "cols": 6,
