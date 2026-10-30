@@ -1,5 +1,5 @@
 {
- "rev": 818,
+ "rev": 819,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -407,8 +407,8 @@
   {
    "id": "pmvuwg41o18",
    "name": "Good",
-   "x": 9107,
-   "y": -780,
+   "x": 8321,
+   "y": -768,
    "cols": 19,
    "stacked": false,
    "cards": [
@@ -436,8 +436,8 @@
   {
    "id": "pmvuwh2be19",
    "name": "Right direction, might need some tweaking",
-   "x": 9106,
-   "y": -376,
+   "x": 8320,
+   "y": -364,
    "cols": 22,
    "stacked": false,
    "cards": [
@@ -469,8 +469,8 @@
   {
    "id": "pmvuwmd3520",
    "name": "Needs change",
-   "x": 9105,
-   "y": 423,
+   "x": 8319,
+   "y": 435,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -483,8 +483,8 @@
   {
    "id": "pmvuwt3hw0",
    "name": "Seems too weak",
-   "x": 9105,
-   "y": 29,
+   "x": 8319,
+   "y": 41,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -499,8 +499,8 @@
   {
    "id": "pmvuwu80n1",
    "name": "Literally Perfect",
-   "x": 9104,
-   "y": -1164,
+   "x": 8318,
+   "y": -1152,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -512,8 +512,8 @@
   {
    "id": "pmvuwx5td2",
    "name": "Not enough data",
-   "x": 9099,
-   "y": 814,
+   "x": 8313,
+   "y": 826,
    "cols": 5,
    "stacked": false,
    "cards": [
