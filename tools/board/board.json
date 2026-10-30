@@ -1,5 +1,5 @@
 {
- "rev": 235,
+ "rev": 237,
  "cards": {
   "mackerel": {
    "x": 3880,
@@ -834,6 +834,10 @@
   "toad": {
    "flag": true,
    "note": "maybe 5 is completely fine?"
+  },
+  "tortoise": {
+   "flag": true,
+   "note": "tagless so maybe 7 is okay? or too strong?"
   }
  }
 }
