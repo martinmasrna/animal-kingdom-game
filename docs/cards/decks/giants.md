@@ -13,7 +13,7 @@ The table below is generated from cards.json, where the cards live.
 | **[RHINOCEROS]** | 1 | — | 8 | Hungry 4. Roar: remove an adjacent enemy. |
 | **Azamandulai** | 1 | — | 3 | Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food. |
 | **[SPERM WHALE]** | 1 | — | 8 | Titan. Dusk: remove the strongest adjacent enemy. |
-| **[OXPECKER]** | 1 | Bird | 4 | Flight. Whenever your animal of strength 8 or more covers an enemy, draw a card. |
+| **[OXPECKER]** | 1 | Bird | 4 | Flight. Whenever your animal of strength 8 or more covers an enemy, play an Oxpecker. |
 
 ### Rare
 

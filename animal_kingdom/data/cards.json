@@ -2106,7 +2106,7 @@
         "Bird"
       ],
       "base_strength": 4,
-      "text": "Flight. Whenever your animal of strength 8 or more covers an enemy, draw a card.",
+      "text": "Flight. Whenever your animal of strength 8 or more covers an enemy, play an Oxpecker.",
       "species": "Oxpecker",
       "habitat": "Savanna",
       "keywords": [

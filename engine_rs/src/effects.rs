@@ -412,12 +412,12 @@ fn fire_cover_event(st: &mut State, coverer: &Unit, covered: &Unit) {
     if st.g.has_hook(coverer.card, Hook::OnCoverEnemy) {
         cards::run(st, coverer.card, None, Hook::OnCoverEnemy, coverer, &Args::Cover(covered.clone()));
     }
-    // The legendary Oxpecker: "Whenever your animal of strength 8 or more covers an enemy, draw a card." As in Python.
+    // The legendary Oxpecker: "Whenever your animal of strength 8 or more covers an enemy, play an Oxpecker." As in Python.
     if coverer.owner <= B && effective_strength(st, coverer, None) >= st.cfg().int("oxpecker_legend_min") {
         let bird = st.card_id("oxpecker_legend");
         for (_, iid) in statics::active_tops(st, coverer.owner, bird) {
-            st.effect_stack.push(vmap!("op" => Value::s("draw"), "player" => pn(coverer.owner), "n" => Value::Int(1),
-                "by_card" => Value::s("oxpecker_legend"), "by_iid" => Value::Int(iid)));
+            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(coverer.owner), "card_id" => Value::s("oxpecker"),
+                "make" => Value::Bool(true), "by_card" => Value::s("oxpecker_legend"), "by_iid" => Value::Int(iid)));
         }
     }
 }

@@ -316,11 +316,12 @@ def _fire_cover_event(state, coverer, covered) -> None:
     hook = _hook(state, coverer.card_id, "on_cover_enemy")   # "Whenever this covers an enemy" (Dhole)
     if hook:
         hook(state, coverer, covered)
-    # The legendary Oxpecker: "Whenever your animal of strength 8 or more covers an enemy, draw a card."
+    # The legendary Oxpecker: "Whenever your animal of strength 8 or more covers an enemy, play an Oxpecker." Made,
+    # then played by its owner like the Rabbit's Bunny: a full placement (Flight: anywhere), its Roar and all.
     if effective_strength(state, coverer) >= state.config.oxpecker_legend_min:
         for bird in statics.active_tops(state, coverer.owner, "oxpecker_legend"):
-            state.effect_stack.append({"op": "draw", "player": coverer.owner, "n": 1, "by_card": bird.card_id,
-                                       "by_iid": bird.iid})
+            state.effect_stack.append({"op": "play_named", "chooser": coverer.owner, "card_id": "oxpecker", "make": True,
+                                       "by_card": bird.card_id, "by_iid": bird.iid})
 
 
 def _push_theron(state, coverer, covered) -> None:

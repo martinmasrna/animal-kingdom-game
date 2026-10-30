@@ -135,15 +135,24 @@ def test_hungry_animals_count_what_they_eat_for_the_game():
     assert s.hungry_eaten["A"] == 3
 
 
-def test_the_legendary_oxpecker_draws_when_your_big_animal_covers_an_enemy():
-    s = make_state(hands={"A": ["elephant", "lion"]}, decks={"A": ["mouse"] * 4, "B": []})
-    put(s, "3,3", "oxpecker_legend", "A")                      # anywhere on the board
-    put(s, "1,1", "mouse", "A")
-    put(s, "2,1", "lion", "B"); put(s, "1,2", "mouse", "B")
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))      # a 7 covers: no draw
-    assert sorted(hand_ids(s, "A")) == ["elephant"]
-    rules.apply_action(s, PlaceAction("elephant", ("cr", "2,1")))  # a 9 covers: a card
-    assert hand_ids(s, "A") == ["mouse"]
+def test_the_legendary_oxpecker_plays_an_oxpecker_when_your_big_animal_covers_an_enemy():
+    def board():
+        s = make_state(hands={"A": ["elephant", "lion", "rhinoceros"]}, decks={"A": ["mouse"] * 4, "B": []})
+        put(s, "3,3", "oxpecker_legend", "A")                  # anywhere on the board
+        put(s, "1,1", "mouse", "A")
+        put(s, "2,1", "lion", "B"); put(s, "1,2", "mouse", "B")
+        return s
+    s = board()
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))      # a 7 covers: nothing
+    assert s.pending is None and sorted(hand_ids(s, "A")) == ["elephant", "rhinoceros"]
+    s = board()                                                    # first action: the turn doesn't end on us
+    rules.apply_action(s, PlaceAction("elephant", ("cr", "2,1")))  # a 9 covers: an Oxpecker is made and played
+    assert s.pending and s.pending["mode"] == "place"
+    spot = next(p for p in s.pending["placements"] if p["card_id"] == "oxpecker" and p["target"] == ["cr", "4,3"])
+    rules.apply_action(s, PlaceAction("oxpecker", tuple(spot["target"])))   # Flight: far from the chain
+    assert s.top_unit("4,3").card_id == "oxpecker"
+    assert sorted(hand_ids(s, "A")) == ["lion", "mouse", "rhinoceros"]     # its Roar: a card,
+    assert s.food["A"] == load_cards()["rhinoceros"].base_strength          # and food for the strongest in hand
 
 
 def test_a_sloths_food_arrives_before_the_hungry_eat():
