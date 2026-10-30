@@ -1,5 +1,5 @@
 {
- "rev": 955,
+ "rev": 956,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -128,9 +128,9 @@
    "cols": 6,
    "stacked": false,
    "cards": [
+    "dung_beetle",
     "worker_wasp",
     "worker_ant",
-    "dung_beetle",
     "hamster",
     "hyena",
     "wildebeest"
