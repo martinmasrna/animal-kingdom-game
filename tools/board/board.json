@@ -1,5 +1,5 @@
 {
- "rev": 966,
+ "rev": 967,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -497,8 +497,8 @@
    "cols": 4,
    "stacked": false,
    "cards": [
-    "lion_legend_2",
-    "lion_legend"
+    "lion_legend",
+    "lion_legend_2"
    ],
    "tint": "blue"
   },
