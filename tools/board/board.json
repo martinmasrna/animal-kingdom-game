@@ -1,5 +1,5 @@
 {
- "rev": 968,
+ "rev": 970,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -422,7 +422,8 @@
     "gorilla_legend",
     "baboon_legend",
     "chipmunk_legend",
-    "manta_ray_legend"
+    "manta_ray_legend",
+    "rodent_legend"
    ],
    "tint": "green"
   },
@@ -478,14 +479,13 @@
    "name": "Too weak",
    "x": 8319,
    "y": 41,
-   "cols": 5,
+   "cols": 4,
    "stacked": false,
    "cards": [
     "bat_legend",
     "oxpecker_legend",
     "rat_legend_2",
-    "deer_legend",
-    "rodent_legend"
+    "deer_legend"
    ],
    "tint": "orange"
   },
