@@ -1,5 +1,5 @@
 {
- "rev": 958,
+ "rev": 959,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -475,7 +475,7 @@
   },
   {
    "id": "pmvuwt3hw0",
-   "name": "Seems too weak",
+   "name": "Too weak",
    "x": 8319,
    "y": 41,
    "cols": 5,
