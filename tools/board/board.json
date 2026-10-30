@@ -1,5 +1,5 @@
 {
- "rev": 552,
+ "rev": 557,
  "cards": {
   "army_ant_legend": {
    "x": 12135,
@@ -44,10 +44,6 @@
   "wolf_legend_2": {
    "x": 11941,
    "y": 2541
-  },
-  "wolf_legend": {
-   "x": 14075,
-   "y": 2263
   },
   "skunk_legend": {
    "x": 11553,
@@ -137,14 +133,6 @@
    "x": 15627,
    "y": 1985
   },
-  "swan_legend": {
-   "x": 15433,
-   "y": 1985
-  },
-  "goose_legend": {
-   "x": 12717,
-   "y": 1985
-  },
   "baboon_legend": {
    "x": 14075,
    "y": 1985
@@ -200,10 +188,6 @@
   "sloth_legend": {
    "x": 13881,
    "y": 2263
-  },
-  "greywhisker": {
-   "x": 12911,
-   "y": 1985
   },
   "bat_legend": {
    "x": 11747,
@@ -678,8 +662,8 @@
   {
    "id": "pmvuwbfjh17",
    "name": "Tempo",
-   "x": 5822,
-   "y": 1404,
+   "x": 5747,
+   "y": 1274,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -728,7 +712,11 @@
   "anteater",
   "forager_ant",
   "muskrat",
-  "dingo"
+  "dingo",
+  "greywhisker",
+  "wolf_legend",
+  "swan_legend",
+  "goose_legend"
  ],
  "marks": {
   "mouse": {
