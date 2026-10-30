@@ -64,7 +64,7 @@ class Config:
     # --- Strength anthems ("has +X", live; decision E) ---
     guard_hornet_bonus: int = 3          # while >= threshold Colony units
     guard_hornet_colony_threshold: int = 4
-    mackerel_anthem: int = 1             # Mackerel: your other Fish have +1
+    mahi_mahi_anthem: int = 1            # Mahi-mahi: your other Fish have +1 (the Mackerel's aura, Martin 2026-10-30)
     tuna_per_fish: int = 1               # Tuna: +1 for each other Fish you control
     giraffe_bonus: int = 3               # Giraffe: +3 during your opponent's turn (5 on a 4 until 2026-10-26)
     crocodile_penalty: int = 3           # Crocodile: -3 during your opponent's turn
@@ -82,7 +82,6 @@ class Config:
     fox_draw: int = 2                    # Fox: Roar: if a Canine roamed this turn, draw 2 cards
     dhole_draw: int = 2                  # Dhole: whenever it covers an enemy with no other enemy next to it, draw 2 cards
     elephant_legend_max: int = 3         # the legendary Elephant: whenever it lands, remove all adjacent enemies of strength 3 or less
-    mahi_mahi_grant: int = 1             # Mahi-mahi: Roar: your other Fish +1
     gorilla_legend_grant: int = 1            # Silverback: Roar: every animal in your hand +1
     baboon_grant: int = 1                # Baboon: Roar: 2 animals in your hand +1...
     baboon_count: int = 2                # ...this many of them

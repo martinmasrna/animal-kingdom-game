@@ -1143,7 +1143,7 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: if this is next to an allied Fish, play another Fish.",
       "species": "Remora",
       "habitat": "Open Ocean",
@@ -1186,24 +1186,10 @@
         "Fish"
       ],
       "base_strength": 3,
-      "text": "Roar: give your other Fish +1 strength.",
-      "keywords": [],
-      "species": "Mahi-mahi",
-      "habitat": "Open Ocean"
-    },
-    {
-      "id": "mackerel",
-      "name": "Mackerel",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [
-        "Fish"
-      ],
-      "base_strength": 2,
       "text": "Your other Fish have +1 strength.",
-      "keywords": [],
-      "species": "Mackerel",
-      "habitat": "Open Ocean"
+      "species": "Mahi-mahi",
+      "habitat": "Open Ocean",
+      "keywords": []
     },
     {
       "id": "tuna",
@@ -3730,7 +3716,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: if you control another Cat, play another Cat.",
       "species": "Ocelot",
       "habitat": "Jungle",

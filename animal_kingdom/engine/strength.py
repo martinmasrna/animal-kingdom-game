@@ -62,7 +62,7 @@ def _inked(state: GameState, iid: Optional[int]) -> bool:
 # Auras on the board that give your other animals of a family strength: card id -> (family, config attr of the
 # bonus, whether only during your opponent's turn). Each source counts, and none counts for itself.
 FAMILY_AURAS = {
-    "mackerel": ("Fish", "mackerel_anthem", False),   # "Your other Fish have +1 strength."
+    "mahi_mahi": ("Fish", "mahi_mahi_anthem", False),   # "Your other Fish have +1 strength."
     "cape_buffalo": ("Hoofed", "buffalo_anthem", True),   # "Your other Hoofed animals have +1 strength during your opponent's turn."
 }
 AURA_FAMILIES = frozenset(fam for fam, _, _ in FAMILY_AURAS.values())

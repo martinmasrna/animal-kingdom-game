@@ -25,7 +25,7 @@ RENAMED_IDS = {"pilot_fish": "krill", "octopus_legend": "chameleon_legend", "you
                "queen_marabunta": "army_ant_legend", "gaboon_viper": "cottonmouth", "alpha": "fox_legend",
                "dire_wolf": "wolf", "goliath": "python", "guard_hornet": "guard_wasp", "omen": "swan_legend",
                "red_wolf": "dhole", "stoop": "hawk", "bulwark": "rhinoceros_legend", "rat_king": "rat_legend",
-               "jerboa": "mole", "chinchilla": "beaver", "greywhisker": "mole_legend", "house_cat": "alley_cat",
+               "jerboa": "mole", "chinchilla": "beaver", "greywhisker": "mole_legend", "mackerel": "mahi_mahi", "house_cat": "alley_cat",
                "taipan": "cottonmouth", "polar_bear": "crocodile", "gray_wolf": "chimpanzee",
                "snow_leopard": "leopard"}
 

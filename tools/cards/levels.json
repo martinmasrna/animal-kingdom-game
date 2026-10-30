@@ -2750,21 +2750,6 @@
       "note": "Martin 2026-10-17: the parrot repeats (no 'may'); 'your next Roar this turn happens twice' moves to another animal"
     }
   },
-  "mackerel": {
-    "crop": {
-      "lv": "fine",
-      "by": "martin"
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "into the collection",
-      "by": "claude",
-      "at": 1793098786
-    }
-  },
   "magpie": {
     "art": {
       "lv": "fine",
@@ -2779,6 +2764,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: give your other Fish +1 strength."
+      },
+      "note": "Martin, 2026-10-30 (card board review): the Mackerel's aura, the Mackerel removed",
+      "by": "claude",
+      "at": 1793370875
     }
   },
   "manta_ray": {
@@ -3812,9 +3807,9 @@
         "prev_note": "",
         "prev": 3
       },
-      "note": "A rare gets a better rate than the common it was (Martin, 2026-10-27)",
+      "note": "Martin, 2026-10-30 (card board review)",
       "by": "claude",
-      "at": 1793094031
+      "at": 1793370875
     }
   },
   "rhinoceros": {
@@ -6084,9 +6079,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "3 (2026-10-23): above the draw-2 anchor (a 1), since the rare gets the better rate and the card is dead outside a Cat deck",
+      "note": "Martin, 2026-10-30 (card board review)",
       "by": "claude",
-      "at": 1792783031
+      "at": 1793370875
     },
     "effect": {
       "review": {

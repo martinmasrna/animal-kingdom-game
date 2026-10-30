@@ -126,17 +126,17 @@ def test_a_retired_list_leaves_the_pool_and_stays_out_after_a_restart(monkeypatc
     _run(monkeypatch, tmp_path, body)
 
 
-def test_a_retired_lists_twin_comes_back_fresh_and_only_at_the_levels_asked(monkeypatch, tmp_path):
+def test_a_retired_lists_twin_comes_back_fresh_and_only_at_the_levels_asked(monkeypatch, tmp_path):   # a legal list: a design change can leave one illegal
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
-        twin = {"slug": "fish_again", "name": "Fish", "list": load_premade_deck("fish"), "levels": ["expert"]}
+        twin = {"slug": "cats_again", "name": "Cats", "list": load_premade_deck("cats"), "levels": ["expert"]}
         j = await (await c.post("/api/league/decks", json={"decks": [twin]}, headers=h)).json()
-        assert j["added"] == [] and "fish_again" in j["rejected"]               # the original still plays: no twin
-        await c.post("/api/league/retire", json={"slugs": ["fish"]}, headers=h)
+        assert j["added"] == [] and "cats_again" in j["rejected"]               # the original still plays: no twin
+        await c.post("/api/league/retire", json={"slugs": ["cats"]}, headers=h)
         j = await (await c.post("/api/league/decks", json={"decks": [twin]}, headers=h)).json()
-        assert j["added"] == ["fish_again"]
+        assert j["added"] == ["cats_again"]
         pool = await (await c.get("/api/league/pool", headers=h)).json()
-        assert [p["id"] for p in pool["players"] if p["id"].endswith(":fish_again")] == ["bot:expert:fish_again"]
+        assert [p["id"] for p in pool["players"] if p["id"].endswith(":cats_again")] == ["bot:expert:cats_again"]
     _run(monkeypatch, tmp_path, body)
 
 

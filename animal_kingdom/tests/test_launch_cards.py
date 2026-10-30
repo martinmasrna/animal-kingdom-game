@@ -1026,15 +1026,19 @@ def test_sardines_fill_adjacent_empty_crossroads_from_hand_and_deck_without_roar
     assert s.decks["A"] == ["lion"] and hand_ids(s, "A") == []
 
 
-def test_mahi_mahi_mackerel_and_tuna_grow_the_school():
+def test_mahi_mahi_and_tuna_grow_the_school():
     s = make_state(hands={"A": ["mahi_mahi"]})
     sar = put(s, "1,1", "sardine", "A")
     tuna = put(s, "1,3", "tuna", "A")
     assert effective_strength(s, tuna) == 3 + 1                # one other Fish
     rules.apply_action(s, PlaceAction("mahi_mahi", ("cr", "1,2")))
-    assert sar.strength_counter == CFG.mahi_mahi_grant
-    put(s, "2,2", "mackerel", "A")
-    assert effective_strength(s, sar) == load_cards()["sardine"].base_strength + CFG.mahi_mahi_grant + CFG.mackerel_anthem
+    base = load_cards()["sardine"].base_strength
+    assert sar.strength_counter == 0 and effective_strength(s, sar) == base + CFG.mahi_mahi_anthem   # an aura, not a grant
+    mahi = s.top_unit("1,2")
+    assert effective_strength(s, mahi) == load_cards()["mahi_mahi"].base_strength       # never itself
+    assert effective_strength(s, tuna) == 3 + 2 + CFG.mahi_mahi_anthem
+    put(s, "2,2", "mahi_mahi", "A")
+    assert effective_strength(s, sar) == base + 2 * CFG.mahi_mahi_anthem                 # each one counts
 
 
 def test_sunfish_places_a_baby_fish_on_a_random_adjacent_empty_crossroad():
@@ -1563,7 +1567,7 @@ def test_the_moose_is_a_hungry_eight_that_roams_and_eats_wherever_it_stands():
 
 def test_the_albatross_sweeps_the_small_enemies_where_it_lands():
     s = make_state(hands={"A": ["albatross"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    for cr, cid in (("2,1", "sardine"), ("3,2", "mackerel"), ("2,3", "mouse")):
+    for cr, cid in (("2,1", "sardine"), ("3,2", "chipmunk"), ("2,3", "mouse")):
         put(s, cr, cid, "B")
     rules.apply_action(s, PlaceAction("albatross", ("cr", "2,2")))   # Flight: no connection needed
     assert s.top_unit("2,1") is None and s.top_unit("3,2") is None and s.top_unit("2,3").card_id == "mouse"
@@ -1735,13 +1739,13 @@ def test_the_african_wild_dog_has_no_dusk_effect_any_more():
 
 def test_the_legendary_elephant_sweeps_small_enemies_where_it_is_placed_and_where_it_roams():
     s = make_state(hands={"A": ["elephant_legend"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    put(s, "1,1", "squirrel", "B"); put(s, "1,3", "mackerel", "B")
+    put(s, "1,1", "squirrel", "B"); put(s, "1,3", "chipmunk", "B")
     big = put(s, "2,2", "lion", "B")
     rules.apply_action(s, PlaceAction("elephant_legend", ("cr", "1,2")))
     assert s.top_unit("1,1") is None and s.top_unit("1,3") is None and s.top_unit("2,2") is big
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "elephant_legend", "A")
-    put(s, "2,1", "squirrel", "B"); put(s, "3,2", "lion", "B"); put(s, "2,3", "mackerel", "B")
+    put(s, "2,1", "squirrel", "B"); put(s, "3,2", "lion", "B"); put(s, "2,3", "chipmunk", "B")
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))    # arriving by a roam is landing too
     assert s.top_unit("2,1") is None and s.top_unit("2,3") is None and s.top_unit("3,2").card_id == "lion"
     assert CFG.elephant_legend_max == 3

@@ -168,7 +168,7 @@ pub struct Card {
     /// The cards whose own text is a live "+X" (strength.py ANTHEM_CARDS): 0 none, 1 guard_wasp, 2 tuna, 3 marmot,
     /// 4 peacock, 5 giraffe, 6 crocodile, 7 capybara.
     pub anthem_kind: u8,
-    /// Family auras (strength.py FAMILY_AURAS): 0 none, 1 mackerel (Fish, always), 2 cape_buffalo (Hoofed, their turn).
+    /// Family auras (strength.py FAMILY_AURAS): 0 none, 1 mahi_mahi (Fish, always), 2 cape_buffalo (Hoofed, their turn).
     pub family_aura: u8,
     /// Keyword auras (statics.py KEYWORD_AURAS): 0 none, 1 armadillo (Armor), 2 porcupine (Spikes), 3 jellyfish
     /// (Poison).
@@ -176,7 +176,7 @@ pub struct Card {
 }
 
 pub const ANTHEM_KINDS: [&str; 8] = ["", "guard_wasp", "tuna", "marmot", "peacock", "giraffe", "crocodile", "capybara"];
-pub const FAMILY_AURAS: [&str; 3] = ["", "mackerel", "cape_buffalo"];
+pub const FAMILY_AURAS: [&str; 3] = ["", "mahi_mahi", "cape_buffalo"];
 pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish"];
 
 /// The cards the engine's rules name (never a card's effect: those live with the card in effects): resolved once.

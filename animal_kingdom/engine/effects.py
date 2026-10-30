@@ -2763,13 +2763,6 @@ def _cod_place(state, unit, cr):
     _push_draw(state, unit.owner, _adjacent_ally_fish(state, unit, cr))
 
 
-def _mahi_mahi_place(state, unit, cr):
-    """Roar: give your other Fish +1 strength."""
-    _grant(state, [st[-1].iid for st in state.board.values()
-                   if st and st[-1].owner == unit.owner and st[-1] is not unit
-                   and "Fish" in state.cards[st[-1].card_id].tags], state.config.mahi_mahi_grant)
-
-
 def _spawns_beside(token):
     """Roar: place `token` on a random adjacent empty crossroad (Sunfish's Baby Fish, Deer's Fawn)."""
     def handler(state, unit, cr):
@@ -3388,7 +3381,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "remora": {"on_place": _remora_place},
     "cod": {"on_place": _cod_place},
     "sardine": {"on_place": _fill},
-    "mahi_mahi": {"on_place": _mahi_mahi_place},
     "sunfish": {"on_place": _spawns_beside("baby_fish")},
     # Food Aggro.
     "capybara_legend": {"on_place": _repeat_legend_place},

@@ -32,7 +32,7 @@ pub fn aura_sources(st: &State) -> Sources {
 
 fn aura_applies(st: &State, kind: u8, owner: Player, src_owner: Player, src_iid: i64, self_iid: Option<i64>, card: &Card, their_turn: bool) -> Option<i32> {
     let (fam, key, opp_only) = match kind {
-        1 => (T_FISH, "mackerel_anthem", false),
+        1 => (T_FISH, "mahi_mahi_anthem", false),
         2 => (T_HOOFED, "buffalo_anthem", true),
         _ => return None,
     };

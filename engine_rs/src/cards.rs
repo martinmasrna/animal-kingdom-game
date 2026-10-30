@@ -78,7 +78,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "mole_legend"
         | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
-        | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "piranha_legend" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
+        | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "piranha_legend" | "remora" | "cod" | "sardine" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
         | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
@@ -1054,11 +1054,6 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_draw(st, owner, n);
         }
         ("sardine", OnPlace) => fill(st, unit, cr),
-        ("mahi_mahi", OnPlace) => {
-            let iids: Vec<i64> = st.tops().filter(|(_, t)| t.owner == owner && t.iid != unit.iid && st.card(t.card).has_tag(T_FISH)).map(|(_, t)| t.iid).collect();
-            let g = cfg(st, "mahi_mahi_grant");
-            grant(st, iids, g);
-        }
         ("sunfish", OnPlace) => spawns_beside(st, unit, cr, "baby_fish"),
         ("deer", OnPlace) => spawns_beside(st, unit, cr, "fawn"),
         // Food Aggro
