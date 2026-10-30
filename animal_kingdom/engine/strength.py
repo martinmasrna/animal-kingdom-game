@@ -128,8 +128,8 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], so
             if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
                 bonus += cfg.guard_hornet_bonus
         elif cid == "tuna":                     # +1 for each other Fish you control
-            sardine = any(u.card_id == "sardine_legend" and not _inked(state, u.iid) for u in tops)
-            bonus += cfg.tuna_per_fish * count("Fish", include_self=False) * (2 if sardine else 1)
+            from .statics import fish_count     # statics imports this module
+            bonus += cfg.tuna_per_fish * fish_count(state, owner, exclude_iid=self_iid)
         elif cid == "marmot":                   # +1 for each 10 food you have (the Hamster's until 2026-10-29)
             bonus += cfg.marmot_per_step * (state.food[owner] // cfg.marmot_food_step)
         elif cid == "peacock":                  # +1 for each card in your hand: itself while there, one less once it lands

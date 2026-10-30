@@ -967,12 +967,14 @@ def test_barracuda_removes_up_to_the_number_of_your_fish():
     assert removed(s, "baby_turtle") and s.top_unit("1,3") is not None
 
 
-def test_the_legendary_sardine_counts_each_fish_twice():
+def test_the_legendary_sardine_and_its_adjacent_fish_count_twice():
     s = make_state(hands={"A": ["barracuda"]})
     put(s, "1,1", "sardine_legend", "A")
     tuna = put(s, "2,1", "tuna", "A")
-    assert effective_strength(s, tuna) == 3 + 2                # one other Fish, counted twice
-    put(s, "1,3", "squirrel", "B")                             # 3 <= 3 Fish counted as 6
+    assert effective_strength(s, tuna) == 3 + 2                # the legendary itself counts as 2
+    put(s, "4,3", "sardine", "A")
+    assert effective_strength(s, tuna) == 3 + 2 + 1            # a Fish away from it counts as 1
+    put(s, "1,3", "squirrel", "B")                             # squirrel 3: Sardine 2 + Tuna 2 + Barracuda 2 + far Sardine 1
     apply_click(s, PlaceAction("barracuda", ("cr", "1,2")))
     assert removed(s, "squirrel")
 

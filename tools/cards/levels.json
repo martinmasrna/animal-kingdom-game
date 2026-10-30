@@ -60,9 +60,9 @@
         "prev_note": "",
         "prev": 1
       },
-      "note": "Martin, 2026-10-29",
+      "note": "Martin 2026-10-31",
       "by": "claude",
-      "at": 1793303964
+      "at": 1793403518
     }
   },
   "anaconda": {
@@ -6910,7 +6910,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1793269316
+      "at": 1793403518,
+      "note": "Martin 2026-10-31: the doubling is local, the legendary and its neighbours"
     }
   },
   "deer_legend": {
@@ -6987,9 +6988,9 @@
         "prev_note": "",
         "prev": 1
       },
-      "note": "Martin, 2026-10-29",
+      "note": "Martin 2026-10-31",
       "by": "claude",
-      "at": 1793303964
+      "at": 1793403518
     }
   },
   "impala": {

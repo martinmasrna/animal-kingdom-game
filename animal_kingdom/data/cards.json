@@ -1030,7 +1030,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: add 2 Kittens to your hand.",
       "species": "Alley Cat",
       "habitat": "City",
@@ -3936,7 +3936,7 @@
         "Fish"
       ],
       "base_strength": 1,
-      "text": "Each of your Fish counts as 2 Fish.",
+      "text": "[SARDINE] and your adjacent Fish count as 2 Fish.",
       "species": "Sardine",
       "habitat": "Open Ocean",
       "keywords": []
@@ -3965,7 +3965,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 0,
+      "base_strength": 1,
       "text": "Roar: draw a common animal.",
       "keywords": []
     },

@@ -370,8 +370,8 @@ fn spawn_pups(st: &mut State, unit: &Unit, cr: Cr, n: i32, tokens: &[&str]) {
 }
 
 fn adjacent_ally_fish(st: &State, unit: &Unit, cr: Cr) -> i32 {
-    statics::fish_worth(st, unit.owner)
-        * adjacent_tops(st, cr, Some(unit.owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_FISH)).count() as i32
+    let near: Vec<Cr> = adjacent_tops(st, cr, Some(unit.owner)).iter().map(|(nb, _)| *nb).collect();
+    statics::fish_count(st, unit.owner, Some(&near), None)
 }
 
 fn drain_place(st: &mut State, unit: &Unit, cr: Cr, amount: i32) {
@@ -1040,7 +1040,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("barracuda", OnPlace) => {
-            let max = control_tag_count(st, owner, T_FISH) * statics::fish_worth(st, owner);
+            let max = statics::fish_count(st, owner, None, None);
             let t = adjacent_enemy_targets(st, unit, cr, Some(max), None, true);
             push_remove_choice(st, owner, unit.card, t, false);
         }

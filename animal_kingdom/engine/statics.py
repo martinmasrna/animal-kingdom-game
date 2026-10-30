@@ -43,9 +43,21 @@ def _controls(state: GameState, player: str, card_id: str) -> bool:
                for st in state.board.values())
 
 
-def fish_worth(state: GameState, player: str) -> int:
-    """The legendary Sardine: "Each of your Fish counts as 2 Fish." What one of `player`'s Fish counts as."""
-    return 2 if _controls(state, player, "sardine_legend") else 1
+def fish_worth(state: GameState, player: str, cr: str) -> int:
+    """The legendary Sardine: "[SARDINE] and your adjacent Fish count as 2 Fish." What `player`'s Fish on `cr` counts
+    as: 2 on a working legendary Sardine of theirs or next to one, else 1."""
+    for c, st in state.board.items():
+        if st and st[-1].owner == player and st[-1].card_id == "sardine_legend" and active(state, st[-1]) \
+                and (c == cr or c in state.game_map.neighbors(cr)):
+            return 2
+    return 1
+
+
+def fish_count(state: GameState, player: str, crs=None, exclude_iid=None) -> int:
+    """How many Fish `player` counts on their top animals (on `crs` only, when given), each as `fish_worth` says."""
+    return sum(fish_worth(state, player, c) for c, st in state.board.items()
+               if st and st[-1].owner == player and "Fish" in state.cards[st[-1].card_id].tags
+               and st[-1].iid != exclude_iid and (crs is None or c in crs))
 
 
 def crossroad_of(state: GameState, unit: UnitInstance) -> Optional[str]:
@@ -132,9 +144,7 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
         return True
     # The Piranha: "Your Fish can cover enemies of strength up to the number of your Fish."
     if "Fish" in placer_card.tags and _controls(state, owner, "piranha"):
-        fish = sum(1 for st in state.board.values()
-                   if st and st[-1].owner == owner and "Fish" in state.cards[st[-1].card_id].tags)
-        if target_str <= fish * fish_worth(state, owner):
+        if target_str <= fish_count(state, owner):
             return True
 
     return placer_str > target_str  # default: strictly greater

@@ -23,9 +23,19 @@ pub fn controls(st: &State, player: Player, card: Option<CardId>) -> bool {
     st.tops().any(|(_, u)| u.owner == player && u.card == card && active(st, u))
 }
 
-/// The legendary Sardine: "Each of your Fish counts as 2 Fish." What one of `player`'s Fish counts as.
-pub fn fish_worth(st: &State, player: Player) -> i32 {
-    if controls(st, player, st.g.known.sardine_legend) { 2 } else { 1 }
+/// The legendary Sardine: "[SARDINE] and your adjacent Fish count as 2 Fish." What `player`'s Fish on `cr` counts as.
+pub fn fish_worth(st: &State, player: Player, cr: Cr) -> i32 {
+    let Some(sardine) = st.g.known.sardine_legend else { return 1 };
+    let near = st.tops().any(|(c, u)| u.owner == player && u.card == sardine && active(st, u) && (c == cr || st.map().adjacent(c, cr)));
+    if near { 2 } else { 1 }
+}
+
+/// How many Fish `player` counts on their top animals (on `crs` only, when given), each as `fish_worth` says.
+pub fn fish_count(st: &State, player: Player, crs: Option<&[Cr]>, exclude: Option<i64>) -> i32 {
+    st.tops()
+        .filter(|(c, u)| u.owner == player && st.card(u.card).has_tag(T_FISH) && Some(u.iid) != exclude && crs.map_or(true, |l| l.contains(c)))
+        .map(|(c, _)| fish_worth(st, player, c))
+        .sum()
 }
 
 pub fn crossroad_of(st: &State, iid: i64) -> Option<Cr> {
@@ -98,8 +108,7 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
         return true;
     }
     if placer_card.has_tag(T_FISH) && controls(st, owner, k.piranha) {
-        let fish = st.tops().filter(|(_, u)| u.owner == owner && st.card(u.card).has_tag(T_FISH)).count() as i32 * fish_worth(st, owner);
-        if target_str <= fish {
+        if target_str <= fish_count(st, owner, None, None) {
             return true;
         }
     }

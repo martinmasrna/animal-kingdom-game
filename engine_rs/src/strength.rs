@@ -89,8 +89,7 @@ pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64
                 }
             }
             2 => {
-                let sardine = tops.iter().any(|u| Some(u.card) == st.g.known.sardine_legend && !st.is_inked(u.iid));
-                bonus += cfg.int("tuna_per_fish") * count(T_FISH, false) * if sardine { 2 } else { 1 };
+                bonus += cfg.int("tuna_per_fish") * crate::statics::fish_count(st, owner, None, self_iid);
             }
             3 => bonus += cfg.int("marmot_per_step") * (st.food[owner.min(1) as usize] / cfg.int("marmot_food_step")),
             4 => bonus += cfg.int("hand_per_card") * st.hands[owner.min(1) as usize].len() as i32,

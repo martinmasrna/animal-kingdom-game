@@ -2749,8 +2749,7 @@ def _manta_legend_eot(state, unit, cr):
 
 
 def _adjacent_ally_fish(state, unit, cr) -> int:
-    return statics.fish_worth(state, unit.owner) * sum(
-        1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Fish" in state.cards[top.card_id].tags)
+    return statics.fish_count(state, unit.owner, crs={nb for nb, _ in _adjacent_tops(state, cr, unit.owner)})
 
 
 def _swordfish_place(state, unit, cr):
@@ -2766,7 +2765,7 @@ def _swordfish_place(state, unit, cr):
 def _barracuda_place(state, unit, cr):
     """Roar: remove an adjacent enemy with strength up to the number of your Fish (this one included)."""
     _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(
-        state, unit, cr, max_strength=_control_tag_count(state, unit.owner, "Fish") * statics.fish_worth(state, unit.owner)))
+        state, unit, cr, max_strength=statics.fish_count(state, unit.owner)))
 
 
 def _piranha_legend_place(state, unit, cr):
