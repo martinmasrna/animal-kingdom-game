@@ -1,5 +1,5 @@
 {
- "rev": 416,
+ "rev": 447,
  "cards": {
   "mole": {
    "x": 6460,
@@ -285,69 +285,17 @@
    "x": 6205,
    "y": 2842
   },
-  "queen_bee": {
-   "x": 5623,
-   "y": 2842
-  },
   "earthworm": {
    "x": 5429,
    "y": 2286
-  },
-  "jackal": {
-   "x": 8921,
-   "y": 2286
-  },
-  "dhole": {
-   "x": 9115,
-   "y": 2564
-  },
-  "coyote": {
-   "x": 6011,
-   "y": 2286
-  },
-  "skunk": {
-   "x": 7951,
-   "y": 2564
-  },
-  "lynx": {
-   "x": 9503,
-   "y": 2564
-  },
-  "meerkat": {
-   "x": 9503,
-   "y": 2286
-  },
-  "dormouse": {
-   "x": 7951,
-   "y": 2286
-  },
-  "golden_orb_weaver": {
-   "x": 9309,
-   "y": 2564
   },
   "dart_frog": {
    "x": 5235,
    "y": 2286
   },
-  "magpie": {
-   "x": 9309,
-   "y": 2286
-  },
-  "hummingbird": {
-   "x": 5623,
-   "y": 2286
-  },
-  "orangutan": {
-   "x": 5041,
-   "y": 2842
-  },
   "tarsier": {
    "x": 7175,
    "y": 2286
-  },
-  "okapi": {
-   "x": 7369,
-   "y": 2564
   },
   "cuckoo": {
    "x": 7757,
@@ -355,14 +303,6 @@
   },
   "tarantula": {
    "x": 6011,
-   "y": 2842
-  },
-  "sea_turtle": {
-   "x": 5817,
-   "y": 2842
-  },
-  "queen_ant": {
-   "x": 5429,
    "y": 2842
   },
   "vole": {
@@ -421,13 +361,57 @@
    "x": 7041,
    "y": 2713
   },
-  "flying_squirrel": {
-   "x": 8164,
-   "y": 2292
-  },
   "groundhog": {
    "x": 7275,
    "y": 1914
+  },
+  "skunk": {
+   "x": 7898,
+   "y": 2823
+  },
+  "okapi": {
+   "x": 7468,
+   "y": 1913
+  },
+  "dormouse": {
+   "x": 7661,
+   "y": 1914
+  },
+  "queen_bee": {
+   "x": 6391,
+   "y": 2301
+  },
+  "sea_turtle": {
+   "x": 6583,
+   "y": 2302
+  },
+  "orangutan": {
+   "x": 6778,
+   "y": 2301
+  },
+  "coyote": {
+   "x": 6174,
+   "y": 1972
+  },
+  "queen_ant": {
+   "x": 5816,
+   "y": 2841
+  },
+  "golden_orb_weaver": {
+   "x": 8440,
+   "y": 2088
+  },
+  "flying_squirrel": {
+   "x": 8092,
+   "y": 2241
+  },
+  "jackal": {
+   "x": 8108,
+   "y": 1781
+  },
+  "magpie": {
+   "x": 8316,
+   "y": 1774
   }
  },
  "piles": [
@@ -615,8 +599,8 @@
   {
    "id": "pmvuvp1sm5",
    "name": "Deck-Specific",
-   "x": 84,
-   "y": 1291,
+   "x": 89,
+   "y": 1272,
    "cols": 6,
    "stacked": false,
    "cards": [
@@ -626,7 +610,8 @@
     "african_wild_dog",
     "baboon",
     "gorilla"
-   ]
+   ],
+   "tint": "yellow"
   },
   {
    "id": "pmvuvrsm76",
@@ -716,6 +701,20 @@
     "orca",
     "eagle"
    ]
+  },
+  {
+   "id": "pmvuw0k7c12",
+   "name": "Draw",
+   "x": 8918,
+   "y": 2566,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "hummingbird",
+    "meerkat",
+    "dhole",
+    "lynx"
+   ]
   }
  ],
  "gone": [
@@ -801,6 +800,9 @@
    "flag": true
   },
   "jellyfish": {
+   "flag": true
+  },
+  "skunk": {
    "flag": true
   }
  }
