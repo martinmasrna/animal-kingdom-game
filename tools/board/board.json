@@ -1,5 +1,5 @@
 {
- "rev": 798,
+ "rev": 804,
  "cards": {
   "toad": {
    "x": 2379,
@@ -26,16 +26,16 @@
    "y": 742
   },
   "skunk": {
-   "x": 8171,
-   "y": 2257
+   "x": 6822,
+   "y": 1794
   },
   "flying_squirrel": {
-   "x": 7937,
-   "y": 2557
+   "x": 6588,
+   "y": 2094
   },
   "dart_frog": {
-   "x": 7938,
-   "y": 2246
+   "x": 6589,
+   "y": 1783
   }
  },
  "piles": [
@@ -246,8 +246,8 @@
   {
    "id": "pmvuvrsm76",
    "name": "Utility",
-   "x": 5106,
-   "y": 2643,
+   "x": 4730,
+   "y": 1887,
    "cols": 8,
    "stacked": false,
    "cards": [
@@ -264,8 +264,8 @@
   {
    "id": "pmvuvs4vt7",
    "name": "Big Bodies",
-   "x": 5213,
-   "y": 120,
+   "x": 4734,
+   "y": 731,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -278,8 +278,8 @@
   {
    "id": "pmvuvsdpj8",
    "name": "Removal",
-   "x": 5295,
-   "y": -1834,
+   "x": 4714,
+   "y": -1133,
    "cols": 11,
    "stacked": false,
    "cards": [
@@ -299,8 +299,8 @@
   {
    "id": "pmvuvsvrj9",
    "name": "Auras",
-   "x": 5239,
-   "y": 1160,
+   "x": 6042,
+   "y": 336,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -312,8 +312,8 @@
   {
    "id": "pmvuvu3rf10",
    "name": "Walls",
-   "x": 5247,
-   "y": 1553,
+   "x": 6050,
+   "y": 729,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -325,8 +325,8 @@
   {
    "id": "pmvuvu9p511",
    "name": "Apex Predators",
-   "x": 5197,
-   "y": -274,
+   "x": 4718,
+   "y": 337,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -339,8 +339,8 @@
   {
    "id": "pmvuw0k7c12",
    "name": "Draw",
-   "x": 5312,
-   "y": -1424,
+   "x": 4731,
+   "y": -723,
    "cols": 9,
    "stacked": false,
    "cards": [
@@ -355,8 +355,8 @@
   {
    "id": "pmvuw2jze13",
    "name": "Tech",
-   "x": 5120,
-   "y": 3052,
+   "x": 4744,
+   "y": 2296,
    "cols": 6,
    "stacked": false,
    "cards": [
@@ -371,8 +371,8 @@
   {
    "id": "pmvuw3q0s14",
    "name": "Extra Placement",
-   "x": 5281,
-   "y": -2242,
+   "x": 4700,
+   "y": -1541,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -386,8 +386,8 @@
   {
    "id": "pmvuw59lk15",
    "name": "Engines",
-   "x": 5242,
-   "y": 762,
+   "x": 6045,
+   "y": -62,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -399,8 +399,8 @@
   {
    "id": "pmvuwaa0x16",
    "name": "Deck Specific",
-   "x": 5103,
-   "y": 2244,
+   "x": 4727,
+   "y": 1488,
    "cols": 8,
    "stacked": false,
    "cards": [
@@ -416,8 +416,8 @@
   {
    "id": "pmvuwbfjh17",
    "name": "Tempo",
-   "x": 5201,
-   "y": -673,
+   "x": 4722,
+   "y": -62,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -428,8 +428,8 @@
   {
    "id": "pmvuwg41o18",
    "name": "Good",
-   "x": 11497,
-   "y": -736,
+   "x": 9339,
+   "y": -364,
    "cols": 19,
    "stacked": false,
    "cards": [
@@ -457,8 +457,8 @@
   {
    "id": "pmvuwh2be19",
    "name": "Right direction, might need some tweaking",
-   "x": 11496,
-   "y": -332,
+   "x": 9338,
+   "y": 40,
    "cols": 22,
    "stacked": false,
    "cards": [
@@ -490,8 +490,8 @@
   {
    "id": "pmvuwmd3520",
    "name": "Needs change",
-   "x": 11495,
-   "y": 467,
+   "x": 9337,
+   "y": 839,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -504,8 +504,8 @@
   {
    "id": "pmvuwt3hw0",
    "name": "Seems too weak",
-   "x": 11495,
-   "y": 73,
+   "x": 9337,
+   "y": 445,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -520,8 +520,8 @@
   {
    "id": "pmvuwu80n1",
    "name": "Literally Perfect",
-   "x": 11494,
-   "y": -1120,
+   "x": 9336,
+   "y": -748,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -533,8 +533,8 @@
   {
    "id": "pmvuwx5td2",
    "name": "Not enough data",
-   "x": 11489,
-   "y": 858,
+   "x": 9331,
+   "y": 1230,
    "cols": 5,
    "stacked": false,
    "cards": [
