@@ -1,9 +1,9 @@
 {
- "rev": 959,
+ "rev": 966,
  "cards": {
   "stag_beetle": {
-   "x": 1132,
-   "y": 1391
+   "x": 1204,
+   "y": 1293
   }
  },
  "piles": [
@@ -52,8 +52,8 @@
   {
    "id": "pmvuubz3o1",
    "name": "Cantrips & Tutors",
-   "x": 100,
-   "y": 284,
+   "x": 163,
+   "y": 221,
    "cols": 12,
    "stacked": false,
    "cards": [
@@ -74,8 +74,8 @@
   {
    "id": "pmvuurszo0",
    "name": "\"Draw 2\"",
-   "x": 106,
-   "y": 674,
+   "x": 170,
+   "y": 616,
    "cols": 9,
    "stacked": false,
    "cards": [
@@ -108,8 +108,8 @@
   {
    "id": "pmvuvbh501",
    "name": "Flat Food",
-   "x": 112,
-   "y": 1311,
+   "x": 188,
+   "y": 1204,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -123,8 +123,8 @@
   {
    "id": "pmvuvbuyy0",
    "name": "Food Engine",
-   "x": 110,
-   "y": 1709,
+   "x": 193,
+   "y": 1604,
    "cols": 6,
    "stacked": false,
    "cards": [
@@ -170,8 +170,8 @@
   {
    "id": "pmvuvichj3",
    "name": "Eggs",
-   "x": 149,
-   "y": 2791,
+   "x": 198,
+   "y": 2663,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -197,8 +197,8 @@
   {
    "id": "pmvuvp1sm5",
    "name": "Deck-Specific",
-   "x": 140,
-   "y": 2381,
+   "x": 195,
+   "y": 2262,
    "cols": 11,
    "stacked": false,
    "cards": [
