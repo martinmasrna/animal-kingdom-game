@@ -1,5 +1,5 @@
 {
- "rev": 992,
+ "rev": 993,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -650,6 +650,9 @@
   "bat_legend": {
    "flag": true,
    "note": "maybe this can literally become a rare?"
+  },
+  "giraffe": {
+   "note": "useless with Hungry?"
   }
  }
 }
