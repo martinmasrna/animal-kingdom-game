@@ -1,5 +1,5 @@
 {
- "rev": 988,
+ "rev": 991,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -411,15 +411,15 @@
     "cockroach_legend",
     "honey_badger_legend",
     "raven_legend",
+    "mole_legend",
     "lion_legend_3",
     "lion_legend_4",
-    "mole_legend",
     "octopus_legend_2",
+    "eagle_legend",
+    "hornet_legend",
     "anaconda_legend",
     "pheasant_legend",
-    "eagle_legend",
     "chameleon_legend",
-    "hornet_legend",
     "gorilla_legend",
     "baboon_legend",
     "chipmunk_legend",
