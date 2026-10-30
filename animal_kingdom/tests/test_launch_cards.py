@@ -268,6 +268,12 @@ def test_the_vole_repeats_a_chosen_rodent_neighbours_roar_and_never_a_repeater()
     assert s.food["A"] - before == CFG.squirrel_food and s.pending is None
 
 
+def test_the_legendary_deer_draws_two_fleers():
+    s = make_state(hands={"A": ["deer_legend"]}, decks={"A": ["lion", "gazelle", "lion", "zebra", "lion"], "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("deer_legend", ("cr", "1,2")))
+    assert sorted(hand_ids(s, "A")) == ["gazelle", "zebra"] and s.decks["A"].count("lion") == 3
+
+
 def test_the_legendary_deer_grows_every_fleer_including_itself_and_the_growth_travels():
     # Martin, 2026-10-29: "make sure it gives strength to itself as well". The fled card is grown in hand, keeps it when
     # played again, and keeps it through its next flight (the counter travels with the card on every bounce).

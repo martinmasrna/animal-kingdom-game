@@ -3950,7 +3950,7 @@
         "Hoofed"
       ],
       "base_strength": 3,
-      "text": "Flee. Whenever one of your animals flees, it gains 2 strength.",
+      "text": "Flee. Roar: draw 2 animals with Flee. Whenever one of your animals flees, it gains 2 strength.",
       "species": "Deer",
       "habitat": "Forest",
       "keywords": [

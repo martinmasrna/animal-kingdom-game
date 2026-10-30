@@ -79,6 +79,7 @@ class Config:
     black_wolf_grant: int = 1            # the legendary Black Wolf: whenever a Canine roams, give it +1 strength
     black_wolf_draw: int = 1             # ... and draw a card
     deer_legend_grant: int = 2           # the legendary Deer: whenever one of your animals flees, it gains 2 strength (itself too)
+    deer_legend_draw: int = 2            # the legendary Deer: Roar: draw 2 animals with Flee (Martin, 2026-10-30)
     fox_draw: int = 2                    # Fox: Roar: if a Canine roamed this turn, draw 2 cards
     dhole_draw: int = 2                  # Dhole: whenever it covers an enemy with no other enemy next to it, draw 2 cards
     elephant_legend_max: int = 3         # the legendary Elephant: whenever it lands, remove all adjacent enemies of strength 3 or less

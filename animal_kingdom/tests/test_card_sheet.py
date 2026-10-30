@@ -10,11 +10,11 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 CHECK = ROOT / "tools" / "cards" / "check.py"
 pytestmark = pytest.mark.skipif(not CHECK.is_file(), reason="the deploy image ships no tools/cards")
-SECTIONS = ["card", "keywords", "pool", "anchors", "record", "grid", "text", "play"]
+SECTIONS = ["card", "keywords", "pool", "anchors", "record", "grid", "play"]   # no text fit: length is no constraint (Martin, 2026-10-30)
 
 
 def sheet(*args: str) -> str:
-    r = subprocess.run([sys.executable, str(CHECK), *args, "--no-fit"], capture_output=True, text=True, cwd=ROOT, timeout=120)
+    r = subprocess.run([sys.executable, str(CHECK), *args], capture_output=True, text=True, cwd=ROOT, timeout=120)
     assert r.returncode == 0, r.stderr
     return r.stdout
 

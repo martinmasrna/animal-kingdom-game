@@ -88,7 +88,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
         "zebra" => &[OnFlee],
         "hamster" => &[OnDrawEvent],
-        "deer_legend" => &[OnFriendlyFlee, OnFlee],
+        "deer_legend" => &[OnPlace, OnFriendlyFlee, OnFlee],
         "okapi" => &[OnStartOfTurn, OnEndOfTurn],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
@@ -1339,6 +1339,10 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             if let Args::Flee(coverer) = args {
                 st.effect_stack.push(vmap!("op" => Value::s("flee_return"), "iid" => Value::Int(*coverer)));
             }
+        }
+        ("deer_legend", OnPlace) => {
+            let n = cfg(st, "deer_legend_draw");
+            draws_filtered(st, unit, "keyword:Flee", n);
         }
         ("deer_legend", OnFriendlyFlee) => {
             // "Whenever one of your animals flees, it gains 2 strength": the fled card, now in hand.

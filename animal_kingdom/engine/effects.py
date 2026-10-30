@@ -3164,6 +3164,12 @@ def _zebra_flee(state, fled, coverer_iid):
     state.effect_stack.append({"op": "flee_return", "iid": coverer_iid})
 
 
+def _deer_legend_place(state, unit, cr):
+    """Roar: draw 2 animals with Flee (random among the deck's fleers, as every filtered draw)."""
+    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": state.config.deer_legend_draw,
+                               "spec": "keyword:Flee"})
+
+
 def _deer_legend_friendly_flee(state, watcher, fled):
     """Whenever one of your animals flees, it gains 2 strength: the fled card, now in hand (deer_legend_grant)."""
     _grant(state, [fled.iid], state.config.deer_legend_grant)
@@ -3458,7 +3464,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Hoofed (the legendary Wildebeest and Boar change region income; the legendary Giraffe reveals; Moose, Giraffe and
     # Boar are anthems).
     "zebra_legend": {"on_place": _zebra_legend_place},
-    "deer_legend": {"on_friendly_flee": _deer_legend_friendly_flee, "on_flee": _deer_legend_own_flee},
+    "deer_legend": {"on_place": _deer_legend_place, "on_friendly_flee": _deer_legend_friendly_flee, "on_flee": _deer_legend_own_flee},
     "honey_badger": {"on_place": _removes(min_attr="honey_badger_min")},
     "okapi": {"on_start_of_turn": _okapi_graze_draw, "on_end_of_turn": _okapi_graze_draw},
     "zebra": {"on_flee": _zebra_flee},
