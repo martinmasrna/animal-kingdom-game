@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Card Board</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='6' width='12' height='18' rx='2' fill='%23777'/><rect x='18' y='6' width='12' height='18' rx='2' fill='%23777'/><rect x='17' y='9' width='12' height='18' rx='2' fill='%23333'/></svg>">
+<link rel="stylesheet" href="/static/fonts/fonts.css">
+<link rel="stylesheet" href="/static/app.css">
+<style>
+/* Plain on purpose: a tool for one reader. The cards are the game's own (app.css, card.js); everything around them is a plain table. */
+:root { --table: #e6e4df; --pile: rgba(255,255,255,.55); --pile-line: #c4c1ba; --hot: #2f7de1; --ink: #222; --muted: #6d6a64; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; user-select: none; -webkit-user-select: none; }
+.top { position: fixed; left: 0; right: 0; top: 0; height: 44px; z-index: 10; display: flex; align-items: center; gap: 10px; padding: 0 12px;
+  background: #fafaf8; border-bottom: 1px solid #d6d3cc; }
+.top button { border: 1px solid #cfccc5; background: #fff; border-radius: 5px; padding: 5px 11px; font: 500 13px system-ui, sans-serif; color: var(--ink); }
+.top button:hover { background: #f1f0ec; }
+.top input { width: 220px; border: 1px solid #cfccc5; border-radius: 5px; padding: 5px 9px; font: 13px system-ui, sans-serif; }
+.top .sp { flex: 1; }
+.top .msg { color: #b3261e; }
+#view { position: fixed; left: 0; right: 0; top: 44px; bottom: 0; overflow: hidden; cursor: default; touch-action: none; }
+#view.panning { cursor: grabbing; }
+#world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.it { position: absolute; left: 0; top: 0; z-index: 2; }
+.it .card { --w: 180px; }
+.it.sel .card { outline: 6px solid var(--hot); outline-offset: 3px; }
+.it.dim { opacity: .18; }
+.it.drag { z-index: 50; }
+.it.hidden { display: none; }
+.it.planned .card { opacity: .75; }
+.pile { position: absolute; left: 0; top: 0; z-index: 1; background: var(--pile); border: 2px solid var(--pile-line); border-radius: 14px; }
+.pile.hot { border-color: var(--hot); background: rgba(47,125,225,.10); }
+/* the header's text keeps a readable screen size at any zoom, within the header's fixed height on the table */
+.pile .ph { --s: min(1, calc(1 / 3.6 / var(--z, 1))); position: absolute; left: 0; right: 0; top: 0; height: 92px; display: flex; align-items: center; gap: calc(40px * var(--s)); padding: 0 16px; cursor: grab; }
+.pile .nm { font: 700 calc(60px * var(--s))/1.1 system-ui, sans-serif; outline: none; white-space: nowrap; flex: none; min-width: 20px; }
+.pile .nm[contenteditable="true"] { cursor: text; background: #fff; padding: 2px 4px; border-radius: 4px; }
+.pile .ct { font: 400 calc(52px * var(--s))/1 system-ui, sans-serif; color: var(--muted); }
+.pile .ph .gap { flex: 1; }
+.pile .ph button { font: 500 calc(46px * var(--s))/1.2 system-ui, sans-serif; border: 1px solid var(--pile-line); background: #fff; border-radius: calc(12px * var(--s)); padding: calc(6px * var(--s)) calc(22px * var(--s)); color: var(--ink); cursor: pointer; }
+.pile .ph button:hover { background: #f1f0ec; }
+.pile .ph button { visibility: hidden; flex: none; } .pile .ph:hover button { visibility: visible; }
+.pile .rs { position: absolute; right: -8px; top: 92px; bottom: 0; width: 16px; cursor: ew-resize; }
+.pile.stacked .rs { display: none; }
+.pile .ghost { position: absolute; width: 180px; height: 264px; border-radius: 9px; background: #5a4630; box-shadow: 0 0 0 2px var(--table); }
+.ins { position: absolute; z-index: 40; width: 8px; height: 264px; background: var(--hot); border-radius: 4px; display: none; }
+.marq { position: fixed; z-index: 20; border: 1px solid var(--hot); background: rgba(47,125,225,.12); display: none; pointer-events: none; }
+#peek { position: fixed; z-index: 30; pointer-events: none; display: none; }
+#peek .card { --w: 300px; }
+</style>
+</head>
+<body>
+<div class="top">
+  <button id="newpile">New pile</button>
+  <input id="q" type="search" placeholder="Find a card" aria-label="Find a card">
+  <button id="fit">Fit</button>
+  <span class="sp"></span>
+  <span class="msg" id="msg"></span>
+</div>
+<div id="view"><div id="world"><div class="ins" id="ins"></div></div></div>
+<div class="marq" id="marq"></div>
+<div id="peek"></div>
+<script type="module">
+import { cardHTML, fitNames } from '/static/card.js';
+
+const W = 180, H = Math.round(180 * 1.467), G = 14, PAD = 16, HEAD = 92, PER_ROW = 24;
+const HAB = ['Savanna', 'Jungle', 'Forest', 'Meadow', 'City', 'Open Ocean', 'Deep Ocean', 'Coral Reef', 'Coast', 'River and Lake',
+  'Australia', 'Islands', 'Mountains', 'Polar', 'Desert', 'Prehistoric', 'Ice Age'];
+const RAR = { legendary: 0, rare: 1, common: 2 };
+const $ = s => document.querySelector(s);
+const view = $('#view'), world = $('#world');
+
+let CARDS = {}, B = { rev: 0, cards: {}, piles: [] };
+let cam = { x: 40, y: 30, z: 0.3 };
+let sel = new Set(), undo = [], redo = [];
+const els = {}, pileEls = {};
+
+// ---------- the arrangement ----------
+const pileOf = id => B.piles.find(p => p.cards.includes(id));
+const pileSize = p => {
+  if (p.stacked) return { w: PAD * 2 + 2 * W + G, h: HEAD + H + PAD + 12 };
+  const rows = Math.max(1, Math.ceil(p.cards.length / p.cols));
+  return { w: PAD * 2 + p.cols * W + (p.cols - 1) * G, h: HEAD + rows * H + (rows - 1) * G + PAD };
+};
+const slot = (p, i) => p.stacked ? { x: p.x + PAD, y: p.y + HEAD + 12 }
+  : { x: p.x + PAD + (i % p.cols) * (W + G), y: p.y + HEAD + Math.floor(i / p.cols) * (H + G) };
+const posOf = id => { const p = pileOf(id); return p ? slot(p, p.cards.indexOf(id)) : B.cards[id]; };
+
+// Every card the game has gets a place: one in no pile and with no spot is laid out under everything, sorted by habitat and rarity.
+function placeNew() {
+  const live = new Set(Object.keys(CARDS));
+  for (const id of Object.keys(B.cards)) if (!live.has(id)) delete B.cards[id];
+  for (const p of B.piles) p.cards = p.cards.filter(id => live.has(id));
+  const homeless = Object.values(CARDS).filter(c => !B.cards[c.id] && !pileOf(c.id))
+    .sort((a, b) => (HAB.indexOf(a.habitat) + 99) % 99 - (HAB.indexOf(b.habitat) + 99) % 99 || RAR[a.rarity] - RAR[b.rarity] || a.name.localeCompare(b.name));
+  if (!homeless.length) return false;
+  let bottom = 0;
+  for (const id of Object.keys(CARDS)) { const q = posOf(id); if (q) bottom = Math.max(bottom, q.y + H + G * 4); }
+  for (const p of B.piles) bottom = Math.max(bottom, p.y + pileSize(p).h + G * 4);
+  homeless.forEach((c, i) => B.cards[c.id] = { x: (i % PER_ROW) * (W + G), y: bottom + Math.floor(i / PER_ROW) * (H + G) });
+  return true;
+}
+
+// ---------- drawing ----------
+function setCam() { world.style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.z})`; world.style.setProperty('--z', cam.z); try { localStorage.setItem('board-cam', JSON.stringify(cam)); } catch (e) {} }
+
+function buildCards() {
+  for (const id of Object.keys(els)) if (!CARDS[id]) { els[id].remove(); delete els[id]; }
+  for (const c of Object.values(CARDS)) {
+    const html = cardHTML(c);
+    if (els[c.id] && els[c.id].dataset.h === html) continue;
+    const el = els[c.id] || world.appendChild(document.createElement('div'));
+    el.className = 'it' + (c.planned ? ' planned' : ''); el.dataset.id = c.id; el.dataset.h = html; el.innerHTML = html;
+    els[c.id] = el;
+  }
+  fitNames(world);
+}
+
+function draw() {
+  for (const id of Object.keys(pileEls)) if (!B.piles.find(p => p.id === id)) { pileEls[id].remove(); delete pileEls[id]; }
+  for (const p of B.piles) {
+    let el = pileEls[p.id];
+    if (!el) {
+      el = pileEls[p.id] = world.insertBefore(document.createElement('div'), world.firstChild);
+      el.className = 'pile'; el.dataset.pile = p.id;
+      el.innerHTML = `<div class="ph"><span class="nm"></span><span class="ct"></span><span class="gap"></span><button data-act="stack"></button><button data-act="del" title="Remove the pile; its cards stay on the table">×</button></div><div class="rs"></div>`;
+    }
+    const s = pileSize(p);
+    el.style.transform = `translate(${p.x}px,${p.y}px)`; el.style.width = s.w + 'px'; el.style.height = s.h + 'px';
+    el.classList.toggle('stacked', !!p.stacked);
+    const nm = el.querySelector('.nm'); if (nm.getAttribute('contenteditable') !== 'true') nm.textContent = p.name;
+    el.querySelector('.ct').textContent = p.cards.length;
+    el.querySelector('[data-act="stack"]').textContent = p.stacked ? 'Spread' : 'Stack';
+    el.querySelectorAll('.ghost').forEach(g => g.remove());
+    if (p.stacked && p.cards.length > 1) for (const o of [2, 1].slice(0, p.cards.length - 1))
+      el.insertAdjacentHTML('beforeend', `<div class="ghost" style="left:${PAD + o * 6 - 2}px;top:${HEAD + 12 - o * 6 + 2}px"></div>`);
+  }
+  for (const id of Object.keys(CARDS)) {
+    const el = els[id], q = posOf(id), p = pileOf(id);
+    if (!el || !q) continue;
+    el.style.transform = `translate(${q.x}px,${q.y}px)`;
+    el.classList.toggle('hidden', !!(p && p.stacked && p.cards[0] !== id));
+    el.classList.toggle('sel', sel.has(id));
+  }
+  search();
+}
+
+// ---------- saving ----------
+let saveT = null, saving = Promise.resolve();
+function changed(before) {
+  undo.push(before); if (undo.length > 200) undo.shift(); redo = [];
+  draw(); queueSave();
+}
+function queueSave() { clearTimeout(saveT); saveT = setTimeout(() => saving = saving.then(save), 300); }
+async function save() {
+  const r = await fetch('/api/state', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(B) }).catch(() => null);
+  if (!r) return msg('Not saved: the board server is not running (./board).');
+  if (r.status === 409) { msg('The board changed in another tab; reloaded.'); return load(); }
+  if (!r.ok) return msg('Not saved: ' + await r.text());
+  B.rev = (await r.json()).rev; msg('');
+}
+const snap = () => JSON.stringify({ cards: B.cards, piles: B.piles });
+function restore(s) { const o = JSON.parse(s); B.cards = o.cards; B.piles = o.piles; sel.clear(); draw(); queueSave(); }
+function msg(t) { $('#msg').textContent = t; }
+
+// `cardsOnly`: card edits made elsewhere come in, the arrangement on the page stays as it is
+async function load(cardsOnly = false) {
+  const r = await fetch('/api/state', { cache: 'no-store' }).catch(() => null);
+  if (!r) return msg('The board server is not running: ./board');
+  const d = await r.json();
+  CARDS = Object.fromEntries(d.cards.map(c => [c.id, c]));
+  if (!cardsOnly) { B = d.board; B.cards ||= {}; B.piles ||= []; }
+  buildCards();
+  if (placeNew()) queueSave();
+  draw();
+}
+
+// ---------- camera ----------
+const toWorld = (cx, cy) => { const r = view.getBoundingClientRect(); return { x: (cx - r.left - cam.x) / cam.z, y: (cy - r.top - cam.y) / cam.z }; };
+function zoomAt(cx, cy, f) {
+  const r = view.getBoundingClientRect(), z = Math.min(2, Math.max(0.05, cam.z * f));
+  const wx = (cx - r.left - cam.x) / cam.z, wy = (cy - r.top - cam.y) / cam.z;
+  cam = { x: cx - r.left - wx * z, y: cy - r.top - wy * z, z }; setCam();
+}
+function fit() {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const add = (x, y, w, h) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + w); y1 = Math.max(y1, y + h); };
+  for (const id of Object.keys(CARDS)) { const q = posOf(id); if (q) add(q.x, q.y, W, H); }
+  for (const p of B.piles) { const s = pileSize(p); add(p.x, p.y, s.w, s.h); }
+  if (x0 === Infinity) return;
+  const r = view.getBoundingClientRect(), m = 24, z = Math.min((r.width - m * 2) / (x1 - x0), (r.height - m * 2) / (y1 - y0), 1);
+  cam = { z, x: m - x0 * z + ((r.width - m * 2) - (x1 - x0) * z) / 2, y: m - y0 * z }; setCam();
+}
+view.addEventListener('wheel', e => {
+  e.preventDefault(); hidePeek();
+  if (e.ctrlKey || e.metaKey) zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
+  else { cam.x -= e.deltaX; cam.y -= e.deltaY; setCam(); }
+}, { passive: false });
+
+// ---------- dropping ----------
+function pileAt(w, skip) {
+  for (let i = B.piles.length - 1; i >= 0; i--) {
+    const p = B.piles[i]; if (p.id === skip) continue;
+    const s = pileSize(p); if (w.x >= p.x && w.x <= p.x + s.w && w.y >= p.y && w.y <= p.y + s.h) return p;
+  }
+  return null;
+}
+function insertIndex(p, w, moving) {
+  if (p.stacked) return 0;
+  const n = p.cards.filter(id => !moving.has(id)).length;
+  const col = Math.max(0, Math.min(p.cols, Math.round((w.x - p.x - PAD) / (W + G))));
+  const row = Math.max(0, Math.floor((w.y - p.y - HEAD + G / 2) / (H + G)));
+  return Math.min(n, row * p.cols + Math.min(col, p.cols));
+}
+function showIns(p, idx) {
+  const ins = $('#ins');
+  if (!p || p.stacked) { ins.style.display = 'none'; return; }
+  const c = idx % p.cols, r = Math.floor(idx / p.cols);
+  const x = p.x + PAD + c * (W + G) - G / 2 - 4, y = p.y + HEAD + r * (H + G);
+  ins.style.display = 'block'; ins.style.transform = `translate(${x}px,${y}px)`;
+}
+
+// ---------- pointer ----------
+let act = null, spaceDown = false;
+view.addEventListener('pointerdown', e => {
+  if (e.button === 2) return;
+  hidePeek();
+  const t = e.target, w = toWorld(e.clientX, e.clientY);
+  const nm = t.closest('.nm');
+  if (nm && nm.getAttribute('contenteditable') === 'true') return;
+  if (e.button === 1 || spaceDown) { act = { kind: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y }; view.classList.add('panning'); }
+  else if (t.closest('button')) return;
+  else if (t.closest('.rs')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'cols', p, before: snap(), x0: w.x, c0: p.cols }; }
+  else if (t.closest('.ph')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'pile', p, before: snap(), w0: w, x0: p.x, y0: p.y, moved: false }; }
+  else if (t.closest('.it')) {
+    const id = t.closest('.it').dataset.id;
+    if (e.shiftKey) { sel.has(id) ? sel.delete(id) : sel.add(id); draw(); act = null; return; }
+    const fresh = !sel.has(id);
+    if (fresh) { sel = new Set([id]); draw(); }
+    const ids = [...sel].filter(i => posOf(i) && !els[i].classList.contains('hidden') || i === id);
+    // a stacked pile is lifted whole from its top card
+    const p = pileOf(id); const lift = p && p.stacked ? p.cards.slice() : ids;
+    act = { kind: 'cards', id, ids: lift, w0: w, start: Object.fromEntries(lift.map(i => [i, { ...posOf(i) }])), before: snap(), moved: false, fresh };
+  } else {
+    if (!e.shiftKey) { sel.clear(); draw(); }
+    act = { kind: 'marq', sx: e.clientX, sy: e.clientY, base: new Set(sel) };
+  }
+  view.setPointerCapture(e.pointerId);
+});
+view.addEventListener('pointermove', e => {
+  if (!act) return peekMove(e);
+  const w = toWorld(e.clientX, e.clientY);
+  if (act.kind === 'pan') { cam.x = act.cx + e.clientX - act.sx; cam.y = act.cy + e.clientY - act.sy; setCam(); }
+  else if (act.kind === 'pile') {
+    const dx = w.x - act.w0.x, dy = w.y - act.w0.y; if (!act.moved && Math.hypot(dx, dy) * cam.z < 3) return;
+    act.moved = true; act.p.x = Math.round(act.x0 + dx); act.p.y = Math.round(act.y0 + dy); draw();
+  } else if (act.kind === 'cols') {
+    const c = Math.max(1, Math.min(30, act.c0 + Math.round((w.x - act.x0) / (W + G)))); if (c !== act.p.cols) { act.p.cols = c; draw(); }
+  } else if (act.kind === 'cards') {
+    const dx = w.x - act.w0.x, dy = w.y - act.w0.y; if (!act.moved && Math.hypot(dx, dy) * cam.z < 3) return;
+    if (!act.moved) { act.moved = true; act.ids.forEach(i => els[i].classList.add('drag')); }
+    for (const i of act.ids) els[i].style.transform = `translate(${act.start[i].x + dx}px,${act.start[i].y + dy}px)`;
+    const p = pileAt(w); const moving = new Set(act.ids);
+    for (const q of B.piles) pileEls[q.id].classList.toggle('hot', q === p);
+    showIns(p, p ? insertIndex(p, w, moving) : 0);
+  } else if (act.kind === 'marq') {
+    const x0 = Math.min(act.sx, e.clientX), y0 = Math.min(act.sy, e.clientY), x1 = Math.max(act.sx, e.clientX), y1 = Math.max(act.sy, e.clientY);
+    Object.assign($('#marq').style, { display: 'block', left: x0 + 'px', top: y0 + 'px', width: x1 - x0 + 'px', height: y1 - y0 + 'px' });
+    const a = toWorld(x0, y0), b = toWorld(x1, y1);
+    sel = new Set(act.base);
+    for (const id of Object.keys(CARDS)) {
+      const q = posOf(id); if (!q || els[id].classList.contains('hidden')) continue;
+      if (q.x < b.x && q.x + W > a.x && q.y < b.y && q.y + H > a.y) sel.add(id);
+    }
+    for (const id of Object.keys(els)) els[id].classList.toggle('sel', sel.has(id));
+  }
+});
+view.addEventListener('pointerup', e => {
+  const a = act; act = null; view.classList.remove('panning'); $('#marq').style.display = 'none'; $('#ins').style.display = 'none';
+  if (!a) return;
+  if (a.kind === 'pile' && a.moved) changed(a.before);
+  else if (a.kind === 'cols' && a.p.cols !== a.c0) changed(a.before);
+  else if (a.kind === 'cards') {
+    a.ids.forEach(i => els[i].classList.remove('drag'));
+    if (!a.moved) { if (!a.fresh && !e.shiftKey) { sel = new Set([a.id]); draw(); } return; }
+    const w = toWorld(e.clientX, e.clientY), dx = w.x - a.w0.x, dy = w.y - a.w0.y;
+    const from = pileOf(a.id), moving = new Set(a.ids);
+    const target = pileAt(w);
+    if (from && from.stacked && target === from) { draw(); return; }
+    if (from && from.stacked && !target) {          // a whole stack dragged by its top card moves the pile
+      from.x = Math.round(from.x + dx); from.y = Math.round(from.y + dy); changed(a.before); return;
+    }
+    const order = a.ids.slice().sort((p, q) => { const A = a.start[p], Bq = a.start[q]; return A.y - Bq.y || A.x - Bq.x; });
+    const idx = target ? insertIndex(target, w, moving) : 0;
+    for (const p of B.piles) p.cards = p.cards.filter(id => !moving.has(id));
+    for (const i of a.ids) delete B.cards[i];
+    if (target) target.cards.splice(idx, 0, ...order);
+    else for (const i of a.ids) B.cards[i] = { x: Math.round(a.start[i].x + dx), y: Math.round(a.start[i].y + dy) };
+    for (const q of B.piles) pileEls[q.id].classList.remove('hot');
+    changed(a.before);
+  }
+});
+
+// ---------- piles ----------
+let pileN = 0;
+const newId = () => 'p' + Date.now().toString(36) + (pileN++);
+$('#newpile').onclick = () => {
+  const before = snap(), cards = [...sel].sort((p, q) => { const A = posOf(p), Bq = posOf(q); return A.y - Bq.y || A.x - Bq.x; });
+  // on free table: right of the loose cards, under the piles already there
+  let right = 0, top = Infinity;
+  for (const [id, q] of Object.entries(B.cards)) if (!sel.has(id)) { right = Math.max(right, q.x + W); top = Math.min(top, q.y); }
+  if (top === Infinity) top = 0;
+  const x = Math.round(right + 160), col = B.piles.filter(q => q.x + pileSize(q).w > x - 20);
+  const y = col.length ? Math.max(...col.map(q => q.y + pileSize(q).h)) + 60 : top;
+  const p = { id: newId(), name: 'New pile', x, y, cols: 4, stacked: false, cards };
+  for (const q of B.piles) q.cards = q.cards.filter(id => !sel.has(id));
+  for (const id of cards) delete B.cards[id];
+  B.piles.push(p); sel.clear(); changed(before);
+  const r = view.getBoundingClientRect(), s = pileSize(p), a = toWorld(r.left, r.top), b = toWorld(r.right, r.bottom);
+  if (p.x < a.x || p.y < a.y || p.x + s.w > b.x || p.y + s.h > b.y) fit();
+  rename(p);
+};
+function rename(p) {
+  const nm = pileEls[p.id].querySelector('.nm');
+  nm.setAttribute('contenteditable', 'true'); nm.focus();
+  const range = document.createRange(); range.selectNodeContents(nm); getSelection().removeAllRanges(); getSelection().addRange(range);
+  const done = keep => {
+    nm.removeEventListener('blur', onBlur); nm.removeEventListener('keydown', onKey); nm.setAttribute('contenteditable', 'false');
+    const v = nm.textContent.trim();
+    if (keep && v && v !== p.name) { const before = snap(); p.name = v; changed(before); } else draw();
+  };
+  const onBlur = () => done(true);
+  const onKey = e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); done(true); } if (e.key === 'Escape') done(false); };
+  nm.addEventListener('blur', onBlur); nm.addEventListener('keydown', onKey);
+}
+world.addEventListener('dblclick', e => {
+  const pe = e.target.closest('.pile'); if (!pe) return;
+  const p = B.piles.find(p => p.id === pe.dataset.pile);
+  if (e.target.closest('.ph')) rename(p);
+});
+world.addEventListener('click', e => {
+  const b = e.target.closest('.ph button'); if (!b) return;
+  const p = B.piles.find(p => p.id === b.closest('.pile').dataset.pile), before = snap();
+  if (b.dataset.act === 'stack') { p.stacked = !p.stacked; changed(before); }
+  if (b.dataset.act === 'del') {                       // its cards stay where they lay
+    p.cards.forEach((id, i) => B.cards[id] = { ...slot(p, i) });
+    B.piles = B.piles.filter(q => q !== p); changed(before);
+  }
+});
+
+// ---------- find ----------
+function search() {
+  const q = $('#q').value.trim().toLowerCase();
+  for (const c of Object.values(CARDS)) {
+    const hit = !q || [c.name, c.species, c.habitat, c.text, ...c.tags].some(s => (s || '').toLowerCase().includes(q));
+    els[c.id]?.classList.toggle('dim', !hit);
+  }
+}
+$('#q').addEventListener('input', search);
+$('#q').addEventListener('keydown', e => {                // Enter picks up every card found
+  e.stopPropagation();
+  if (e.key === 'Enter' && $('#q').value.trim()) { sel = new Set(Object.keys(CARDS).filter(id => !els[id].classList.contains('dim'))); draw(); $('#q').blur(); }
+  if (e.key === 'Escape') { $('#q').value = ''; search(); $('#q').blur(); }
+});
+
+// ---------- reading a card ----------
+let peekT = null, peekId = null;
+function peekMove(e) {
+  const it = e.target.closest?.('.it');
+  const id = it && cam.z * W < 250 ? it.dataset.id : null;
+  if (id !== peekId) { hidePeek(); peekId = id; if (id) peekT = setTimeout(() => showPeek(id, e), 350); }
+  else if (id && $('#peek').style.display === 'block') placePeek(e);
+}
+function showPeek(id, e) { const pk = $('#peek'); pk.innerHTML = cardHTML(CARDS[id]); pk.style.display = 'block'; fitNames(pk); placePeek(e); }
+function placePeek(e) {
+  const pk = $('#peek'), w = 300, h = 300 * 1.467, gap = 24;
+  const x = e.clientX + gap + w < innerWidth ? e.clientX + gap : e.clientX - gap - w;
+  pk.style.left = x + 'px'; pk.style.top = Math.max(52, Math.min(innerHeight - h - 8, e.clientY - h / 2)) + 'px';
+}
+function hidePeek() { clearTimeout(peekT); $('#peek').style.display = 'none'; }
+view.addEventListener('pointerleave', () => { hidePeek(); peekId = null; });
+
+// ---------- keys ----------
+addEventListener('keydown', e => {
+  if (e.target.closest?.('input, [contenteditable="true"]')) return;
+  if (e.code === 'Space') { spaceDown = true; e.preventDefault(); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+    e.preventDefault();
+    const [from, to] = e.shiftKey ? [redo, undo] : [undo, redo];
+    if (from.length) { to.push(snap()); restore(from.pop()); }
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); $('#q').focus(); }
+  if (e.key === 'Escape') { sel.clear(); draw(); }
+});
+addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
+$('#fit').onclick = fit;
+addEventListener('focus', () => { if (!act) load(true); });   // card edits made elsewhere show when he comes back
+
+try { const c = JSON.parse(localStorage.getItem('board-cam')); if (c && c.z) cam = c; } catch (e) {}
+setCam();
+await load();
+if (!localStorage.getItem('board-cam')) fit();
+</script>
+</body>
+</html>

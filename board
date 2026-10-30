@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# The card board: every card on one table, to spread out and sort into piles (tools/board/).
+#
+#   ./board                   # http://localhost:8004
+#   ./board --port 8005 --no-open
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$here"
+exec "$here/.venv/bin/python" tools/board/serve.py "$@"
