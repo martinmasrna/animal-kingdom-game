@@ -1,5 +1,5 @@
 {
- "rev": 947,
+ "rev": 949,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -40,12 +40,12 @@
    "cards": [
     "soldier_ant",
     "macaque",
-    "rat",
     "serval",
+    "rat",
+    "gopher",
     "barracuda",
     "wolverine",
     "warthog",
-    "gopher",
     "hammerhead"
    ]
   },
