@@ -1,5 +1,5 @@
 {
- "rev": 360,
+ "rev": 377,
  "cards": {
   "mole": {
    "x": 6460,
@@ -513,61 +513,37 @@
    "x": 2131,
    "y": 364
   },
-  "african_wild_dog": {
-   "x": 2860,
-   "y": 1531
-  },
   "stick_insect": {
    "x": 1555,
    "y": -973
   },
-  "mahi_mahi": {
-   "x": 3367,
-   "y": 1560
-  },
-  "mackerel": {
-   "x": 3563,
-   "y": 1563
-  },
-  "cockroach": {
-   "x": 2457,
-   "y": 1529
-  },
-  "gorilla": {
-   "x": 2844,
-   "y": 1964
-  },
-  "baboon": {
-   "x": 3096,
-   "y": 1949
-  },
-  "city_spider": {
-   "x": 2656,
-   "y": 1533
-  },
-  "zebra": {
-   "x": 1667,
-   "y": 1630
-  },
-  "gazelle": {
-   "x": 1874,
-   "y": 1629
-  },
   "street_dog": {
-   "x": 1319,
-   "y": 1707
+   "x": 2575,
+   "y": 1092
   },
   "krill": {
-   "x": 1123,
-   "y": 1709
+   "x": 2379,
+   "y": 1094
   },
-  "stork": {
-   "x": 2263,
-   "y": 1912
+  "mahi_mahi": {
+   "x": 2891,
+   "y": 1099
+  },
+  "mackerel": {
+   "x": 3087,
+   "y": 1102
+  },
+  "zebra": {
+   "x": 1894,
+   "y": 1104
+  },
+  "gazelle": {
+   "x": 2101,
+   "y": 1103
   },
   "stag_beetle": {
-   "x": 2458,
-   "y": 1914
+   "x": 2350,
+   "y": 1508
   }
  },
  "piles": [
@@ -683,7 +659,7 @@
    "name": "Food Engine",
    "x": 3527,
    "y": 294,
-   "cols": 5,
+   "cols": 6,
    "stacked": false,
    "cards": [
     "worker_wasp",
@@ -750,6 +726,22 @@
    "cards": [
     "vulture",
     "sardine"
+   ]
+  },
+  {
+   "id": "pmvuvp1sm5",
+   "name": "Deck-Specific",
+   "x": 84,
+   "y": 1291,
+   "cols": 6,
+   "stacked": false,
+   "cards": [
+    "stork",
+    "cockroach",
+    "city_spider",
+    "african_wild_dog",
+    "baboon",
+    "gorilla"
    ]
   }
  ],
