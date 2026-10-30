@@ -1,5 +1,5 @@
 {
- "rev": 934,
+ "rev": 935,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -632,9 +632,6 @@
   },
   "mackerel": {
    "flag": true
-  },
-  "mole_legend": {
-   "note": "remove the 1 food part?"
   }
  }
 }
