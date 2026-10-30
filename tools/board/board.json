@@ -1,5 +1,5 @@
 {
- "rev": 939,
+ "rev": 942,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -439,7 +439,6 @@
     "bee_legend_2",
     "locust_legend",
     "squirrel_legend",
-    "krill_legend",
     "leopard_legend",
     "sperm_whale_legend",
     "tiger_legend",
@@ -578,7 +577,8 @@
   "swan_legend",
   "goose_legend",
   "jellyfish_legend",
-  "scout_bee"
+  "scout_bee",
+  "krill_legend"
  ],
  "marks": {
   "mouse": {
@@ -624,10 +624,6 @@
   },
   "zebra": {
    "note": "seems weak still, idk"
-  },
-  "mahi_mahi": {
-   "flag": true,
-   "note": "board buff is weird"
   },
   "mackerel": {
    "flag": true
