@@ -1,26 +1,6 @@
 {
- "rev": 4,
+ "rev": 5,
  "cards": {
-  "baboon_legend": {
-   "x": 0,
-   "y": 0
-  },
-  "dung_beetle_legend": {
-   "x": 194,
-   "y": 0
-  },
-  "elephant_legend": {
-   "x": 388,
-   "y": 0
-  },
-  "giraffe_legend": {
-   "x": 582,
-   "y": 0
-  },
-  "leopard_legend": {
-   "x": 776,
-   "y": 0
-  },
   "oxpecker_legend": {
    "x": 970,
    "y": 0
@@ -96,26 +76,6 @@
   "naked_mole_rat": {
    "x": 4462,
    "y": 0
-  },
-  "rhinoceros": {
-   "x": 0,
-   "y": 278
-  },
-  "termite_king": {
-   "x": 194,
-   "y": 278
-  },
-  "termite_queen": {
-   "x": 388,
-   "y": 278
-  },
-  "african_wild_dog": {
-   "x": 582,
-   "y": 278
-  },
-  "baboon": {
-   "x": 776,
-   "y": 278
   },
   "caracal": {
    "x": 970,
@@ -669,10 +629,6 @@
    "x": 4268,
    "y": 1668
   },
-  "nurse_bee": {
-   "x": 4462,
-   "y": 1668
-  },
   "nurse_bumblebee": {
    "x": 0,
    "y": 1946
@@ -1008,13 +964,25 @@
  },
  "piles": [
   {
-   "id": "pmvub0moy0",
+   "id": "pmvub1lwi0",
    "name": "Cats",
-   "x": 1933,
-   "y": 980,
+   "x": 4802,
+   "y": 0,
    "cols": 4,
    "stacked": false,
-   "cards": []
+   "cards": [
+    "baboon_legend",
+    "dung_beetle_legend",
+    "elephant_legend",
+    "giraffe_legend",
+    "leopard_legend",
+    "rhinoceros",
+    "nurse_bee",
+    "termite_king",
+    "termite_queen",
+    "african_wild_dog",
+    "baboon"
+   ]
   }
  ]
 }
