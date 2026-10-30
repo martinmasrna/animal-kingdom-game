@@ -41,6 +41,7 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
 #peek .pn { margin-top: 10px; width: 300px; padding: 10px 12px; background: #fdf3c4; border: 1px solid #e3cf6e; border-radius: 6px; font: 15px/1.35 system-ui, sans-serif; color: var(--ink); white-space: pre-wrap; }
 .pile { position: absolute; left: 0; top: 0; z-index: 1; background: var(--pile); border: 2px solid var(--pile-line); border-radius: 14px; }
 .pile.hot { border-color: var(--hot); background: rgba(47,125,225,.10); }
+.pile.sel { outline: 6px solid var(--hot); outline-offset: 4px; }
 /* the header's text keeps a readable screen size at any zoom, within the header's fixed height on the table */
 .pile .ph { --s: min(1, calc(1 / 3.6 / var(--z, 1))); position: absolute; left: 0; right: 0; top: 0; height: 92px; display: flex; align-items: center; gap: calc(40px * var(--s)); padding: 0 16px; cursor: grab; }
 .pile .nm { font: 700 calc(60px * var(--s))/1.1 system-ui, sans-serif; outline: none; white-space: nowrap; flex: none; min-width: 20px; }
@@ -92,7 +93,7 @@ const view = $('#view'), world = $('#world');
 
 let CARDS = {}, B = { rev: 0, cards: {}, piles: [] };
 let cam = { x: 40, y: 30, z: 0.3 };
-let sel = new Set(), undo = [], redo = [];
+let sel = new Set(), psel = new Set(), undo = [], redo = [];   // the picked cards, the picked piles
 const els = {}, pileEls = {};
 
 // ---------- the arrangement ----------
@@ -156,7 +157,7 @@ function draw() {
     }
     const s = pileSize(p);
     el.style.transform = `translate(${p.x}px,${p.y}px)`; el.style.width = s.w + 'px'; el.style.height = s.h + 'px';
-    el.classList.toggle('stacked', !!p.stacked);
+    el.classList.toggle('stacked', !!p.stacked); el.classList.toggle('sel', psel.has(p.id));
     const nm = el.querySelector('.nm'); if (nm.getAttribute('contenteditable') !== 'true') nm.textContent = p.name;
     const sb = el.querySelector('[data-act="stack"]'); sb.innerHTML = p.stacked ? ICON.spread : ICON.stack; sb.title = p.stacked ? 'Spread out' : 'Stack up';
     el.style.background = TINT[p.tint] || '';
@@ -192,7 +193,7 @@ async function save() {
   B.rev = (await r.json()).rev; msg('');
 }
 const snap = () => JSON.stringify({ cards: B.cards, piles: B.piles, gone: B.gone, marks: B.marks });
-function restore(s) { const o = JSON.parse(s); B.cards = o.cards; B.piles = o.piles; B.gone = o.gone || []; B.marks = o.marks || {}; sel.clear(); draw(); queueSave(); }
+function restore(s) { const o = JSON.parse(s); B.cards = o.cards; B.piles = o.piles; B.gone = o.gone || []; B.marks = o.marks || {}; sel.clear(); psel.clear(); draw(); queueSave(); }
 function msg(t) { $('#msg').textContent = t; }
 
 // `cardsOnly`: card edits made elsewhere come in, the arrangement on the page stays as it is
@@ -263,19 +264,28 @@ view.addEventListener('pointerdown', e => {
   if (e.button === 1 || e.button === 2 || spaceDown) { act = { kind: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, menu: e.button === 2 && t.closest('.it')?.dataset.id }; view.classList.add('panning'); }
   else if (t.closest('button')) return;
   else if (t.closest('.rs')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'cols', p, before: snap(), x0: w.x, c0: p.cols }; }
-  else if (t.closest('.ph')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'pile', p, before: snap(), w0: w, x0: p.x, y0: p.y, moved: false, name: !!nm }; }
+  else if (t.closest('.ph')) {
+    const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile);
+    if (e.shiftKey) { psel.has(p.id) ? psel.delete(p.id) : psel.add(p.id); draw(); act = null; return; }
+    const fresh = !psel.has(p.id);
+    if (fresh) { psel = new Set([p.id]); sel.clear(); draw(); }
+    // every picked pile moves together, with the picked cards lying loose on the table
+    const piles = B.piles.filter(q => psel.has(q.id)), loose = [...sel].filter(id => B.cards[id]);
+    act = { kind: 'pile', p, piles, loose, before: snap(), w0: w, moved: false, name: !!nm, fresh,
+      start: piles.map(q => [q.x, q.y]), cstart: loose.map(id => ({ ...B.cards[id] })) };
+  }
   else if (t.closest('.it')) {
     const id = t.closest('.it').dataset.id;
     if (e.shiftKey) { sel.has(id) ? sel.delete(id) : sel.add(id); draw(); act = null; return; }
     const fresh = !sel.has(id);
-    if (fresh) { sel = new Set([id]); draw(); }
+    if (fresh) { sel = new Set([id]); psel.clear(); draw(); }
     const ids = [...sel].filter(i => posOf(i) && !els[i].classList.contains('hidden') || i === id);
     // a stacked pile is lifted whole from its top card
     const p = pileOf(id); const lift = p && p.stacked ? p.cards.slice() : ids;
     act = { kind: 'cards', id, ids: lift, w0: w, start: Object.fromEntries(lift.map(i => [i, { ...posOf(i) }])), before: snap(), moved: false, fresh };
   } else {
-    if (!e.shiftKey) { sel.clear(); draw(); }
-    act = { kind: 'marq', sx: e.clientX, sy: e.clientY, base: new Set(sel) };
+    if (!e.shiftKey) { sel.clear(); psel.clear(); draw(); }
+    act = { kind: 'marq', sx: e.clientX, sy: e.clientY, base: new Set(sel), pbase: new Set(psel) };
   }
   view.setPointerCapture(e.pointerId);
 });
@@ -285,7 +295,10 @@ view.addEventListener('pointermove', e => {
   if (act.kind === 'pan') { cam.x = act.cx + e.clientX - act.sx; cam.y = act.cy + e.clientY - act.sy; setCam(); }
   else if (act.kind === 'pile') {
     const dx = w.x - act.w0.x, dy = w.y - act.w0.y; if (!act.moved && Math.hypot(dx, dy) * cam.z < 3) return;
-    act.moved = true; act.p.x = Math.round(act.x0 + dx); act.p.y = Math.round(act.y0 + dy); draw();
+    act.moved = true;
+    act.piles.forEach((q, i) => { q.x = Math.round(act.start[i][0] + dx); q.y = Math.round(act.start[i][1] + dy); });
+    act.loose.forEach((id, i) => B.cards[id] = { x: Math.round(act.cstart[i].x + dx), y: Math.round(act.cstart[i].y + dy) });
+    draw();
   } else if (act.kind === 'cols') {
     const c = Math.max(1, Math.min(30, act.c0 + Math.round((w.x - act.x0) / (W + G)))); if (c !== act.p.cols) { act.p.cols = c; draw(); }
   } else if (act.kind === 'cards') {
@@ -299,9 +312,14 @@ view.addEventListener('pointermove', e => {
     const x0 = Math.min(act.sx, e.clientX), y0 = Math.min(act.sy, e.clientY), x1 = Math.max(act.sx, e.clientX), y1 = Math.max(act.sy, e.clientY);
     Object.assign($('#marq').style, { display: 'block', left: x0 + 'px', top: y0 + 'px', width: x1 - x0 + 'px', height: y1 - y0 + 'px' });
     const a = toWorld(x0, y0), b = toWorld(x1, y1);
+    // a pile the box holds whole is picked as a pile; otherwise the cards it touches
+    psel = new Set(act.pbase);
+    for (const p of B.piles) { const z = pileSize(p); if (p.x >= a.x && p.y >= a.y && p.x + z.w <= b.x && p.y + z.h <= b.y) psel.add(p.id); }
+    for (const p of B.piles) pileEls[p.id].classList.toggle('sel', psel.has(p.id));
     sel = new Set(act.base);
     for (const id of Object.keys(CARDS)) {
       const q = posOf(id); if (!q || els[id].classList.contains('hidden')) continue;
+      const own = pileOf(id); if (own && psel.has(own.id)) continue;
       if (q.x < b.x && q.x + W > a.x && q.y < b.y && q.y + H > a.y) sel.add(id);
     }
     for (const id of Object.keys(els)) els[id].classList.toggle('sel', sel.has(id));
@@ -313,6 +331,7 @@ view.addEventListener('pointerup', e => {
   if (a.kind === 'pan' && a.menu && Math.hypot(e.clientX - a.sx, e.clientY - a.sy) < 4) return openMenu(a.menu, e);   // a right click on a card, not a drag
   if (a.kind === 'pile' && a.moved) changed(a.before);
   else if (a.kind === 'pile' && a.name) rename(a.p);   // a click on the name renames; a drag moves the pile
+  else if (a.kind === 'pile' && !a.fresh) { psel = new Set([a.p.id]); sel.clear(); draw(); }
   else if (a.kind === 'cols' && a.p.cols !== a.c0) changed(a.before);
   else if (a.kind === 'cards') {
     a.ids.forEach(i => els[i].classList.remove('drag'));
@@ -356,7 +375,7 @@ $('#newpile').onclick = () => {
   spots.sort((u, v) => Math.hypot(u[0] - ax, u[1] - ay) - Math.hypot(v[0] - ax, v[1] - ay));
   const [x, y] = spots.find(([x, y]) => free(x, y)) || [ax, ay];
   p.x = Math.round(x); p.y = Math.round(y);
-  B.piles.push(p); sel.clear(); changed(before);
+  B.piles.push(p); sel.clear(); psel.clear(); changed(before);
   // into view if it isn't, at the same zoom
   const a = toWorld(r.left, r.top), b = toWorld(r.right, r.bottom);
   if (s.w * cam.z > r.width || s.h * cam.z > r.height) fit();
@@ -461,7 +480,7 @@ addEventListener('keydown', e => {
     if (from.length) { to.push(snap()); restore(from.pop()); }
   }
   if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); $('#q').focus(); }
-  if (e.key === 'Escape') { sel.clear(); draw(); }
+  if (e.key === 'Escape') { sel.clear(); psel.clear(); draw(); }
   if ((e.key === 'Backspace' || e.key === 'Delete') && sel.size) {
     e.preventDefault();
     const before = snap();
