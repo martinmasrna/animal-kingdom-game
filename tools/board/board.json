@@ -1,5 +1,5 @@
 {
- "rev": 1002,
+ "rev": 1003,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -632,9 +632,6 @@
   },
   "nurse_bumblebee": {
    "note": "idk, lazy?"
-  },
-  "capybara": {
-   "note": "wording?"
   },
   "egg_eater": {
    "note": "wording"
