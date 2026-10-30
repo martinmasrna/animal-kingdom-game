@@ -1,5 +1,5 @@
 {
- "rev": 935,
+ "rev": 936,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -211,8 +211,7 @@
     "gorilla",
     "krill",
     "zebra",
-    "mahi_mahi",
-    "mackerel"
+    "mahi_mahi"
    ],
    "tint": "yellow"
   },
@@ -632,6 +631,9 @@
   },
   "mackerel": {
    "flag": true
+  },
+  "bee_legend_2": {
+   "note": "maybe just flat +1 strength?"
   }
  }
 }
