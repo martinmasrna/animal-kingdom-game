@@ -1,10 +1,6 @@
 {
- "rev": 179,
+ "rev": 181,
  "cards": {
-  "alley_cat": {
-   "x": 970,
-   "y": 1932
-  },
   "caterpillar": {
    "x": 1164,
    "y": 1932
@@ -786,7 +782,7 @@
    "name": "Cantrips & Tutors",
    "x": 946,
    "y": 170,
-   "cols": 5,
+   "cols": 6,
    "stacked": false,
    "cards": [
     "badger",
@@ -794,6 +790,7 @@
     "dolphin",
     "bat",
     "butterfly",
+    "alley_cat",
     "oxpecker",
     "nurse_bumblebee",
     "bobcat",
