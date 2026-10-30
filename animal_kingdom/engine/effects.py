@@ -2833,8 +2833,16 @@ def _beaver_place(state, unit, cr):
 
 
 def _krill_place(state, unit, cr):
-    """Roar: the next Titan you play this turn costs one action (a flag, not a stack: two Krill still lower one)."""
+    """Roar: draw a card. The next Titan you play this turn costs one action (a flag, not a stack: two Krill still
+    lower one)."""
     state.turn_flags[f"titan_discount_{unit.owner}"] = True
+    _push_draw(state, unit.owner, 1)
+
+
+def _flying_squirrel_place(state, unit, cr):
+    """Flight. Roar: gain 10 food and draw a card (the stack runs last-in first: the food, then the card)."""
+    _push_draw(state, unit.owner, 1)
+    _push_gain(state, unit.owner, state.config.flying_squirrel_food)
 
 
 def _electric_eel_place(state, unit, cr):
@@ -3389,7 +3397,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "macaque_legend": {"on_place": _refill_legend_place},
     "rat_legend": {"on_place": _rat_king_place},
     "chipmunk_legend": {"on_place": _chipmunk_legend_place},
-    "flying_squirrel": {"on_place": _gains("flying_squirrel_food")},
+    "flying_squirrel": {"on_place": _flying_squirrel_place},
     "meerkat": {"on_place": _draw1, "on_enemy_placed_adjacent": _meerkat_enemy_placed},
     "beaver": {"on_place": _beaver_place},
     "electric_eel": {"on_place": _electric_eel_place},

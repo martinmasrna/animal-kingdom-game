@@ -19,7 +19,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food. |
+| **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food and draw a card. |
 | **Beaver** | 2 | Rodent | 5 | Roar: next turn, take 1 additional action. |
 | **Dormouse** | 2 | Rodent | 3 | Dusk: draw a card for each 10 food you gained this turn. |
 | **Groundhog** | 2 | Rodent | 3 | Dawn: gain 10 food. |

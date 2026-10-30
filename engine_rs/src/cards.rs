@@ -1100,14 +1100,20 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let n = per * (st.food[owner as usize] / step);
             push_gain(st, owner, n);
         }
-        ("flying_squirrel", OnPlace) => gains(st, unit, "flying_squirrel_food"),
+        ("flying_squirrel", OnPlace) => {
+            push_draw(st, owner, 1);
+            gains(st, unit, "flying_squirrel_food");
+        }
         ("meerkat", OnPlace) => draws(st, unit, 1),
         ("meerkat", OnEnemyPlacedAdjacent) => push_draw(st, owner, 1),
         ("beaver", OnPlace) => {
             let n = cfg(st, "beaver_bonus_actions");
             schedule(st, unit, 1, vmap!("op" => Value::s("grant_action"), "player" => pn(owner), "n" => Value::Int(n as i64)), false, None);
         }
-        ("krill", OnPlace) => st.turn_flags.titan_discount[owner.min(1) as usize] = true,
+        ("krill", OnPlace) => {
+            st.turn_flags.titan_discount[owner.min(1) as usize] = true;
+            push_draw(st, owner, 1);
+        }
         ("electric_eel", OnPlace) => {
             let opp = other(owner);
             let n = cfg(st, "eel_actions");

@@ -15,7 +15,7 @@ The habitats are listed in [`../design/habitats.md`](../design/habitats.md). The
 - **Mountains:** Cougar, Ibex, Bighorn Sheep, Andean Condor, California Condor.
 - **Polar**, both poles and the snowy north: Polar Bear, Snow Leopard, Lemming, Reindeer, Musk Ox, Arctic Fox, Snowy Owl, Narwhal, Walrus, Penguin, Steller's Sea Cow.
 - **Desert:** Rattlesnake, Black Widow (planned in the card table), Coyote, Camel, Roadrunner, Scorpion, Antlion.
-- **Prehistoric:** dinosaurs, pterosaurs and the ancient seas: Tyrannosaurus, Velociraptor, Oviraptor, Archaeopteryx.
+- **Prehistoric:** dinosaurs, pterosaurs and the ancient seas: Tyrannosaurus, Velociraptor, Oviraptor, Archaeopteryx. The legendary Krill ("Your Titans cost 10 food to play, but only 1 action.") waits in the reserve for it (Martin, 2026-10-30).
 - **Ice Age:** Woolly Mammoth (Yuka, in the reserve since 2026-09-29).
 
 **The prairie**, no habitat yet: Bison, Prairie Dog, Pronghorn.

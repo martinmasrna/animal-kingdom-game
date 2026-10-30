@@ -1684,6 +1684,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: gain 10 food."
+      },
+      "note": "Martin, 2026-10-30 (card board review)",
+      "by": "claude",
+      "at": 1793371330
     }
   },
   "fox": {
@@ -6241,9 +6251,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-27: a common cheat for the Titans, the fish that swims ahead of sharks and whales",
+      "note": "Martin, 2026-10-30 (card board review)",
       "by": "claude",
-      "at": 1793102577
+      "at": 1793371330
     },
     "animal": {
       "review": {
@@ -6401,9 +6411,9 @@
           "species": "Krill"
         }
       },
-      "note": "into the collection",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793117866
+      "at": 1793371330
     },
     "strength": {
       "review": {
@@ -6426,6 +6436,16 @@
       "note": "Martin, 2026-10-27: the Krill's Titan discount at legendary size, paid in food (his text)",
       "by": "claude",
       "at": 1793117864
+    },
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Open Ocean"
+      },
+      "note": "Martin, 2026-10-30 (card board review): kept for the dinosaur expansion",
+      "by": "claude",
+      "at": 1793371330
     }
   },
   "dung_beetle_legend_form2": {

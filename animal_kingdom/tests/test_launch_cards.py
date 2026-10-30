@@ -1224,9 +1224,16 @@ def test_the_legendary_krill_makes_titans_cost_ten_food_and_one_action():
     assert s.top_unit("1,1").card_id == "blue_whale" and s.food["A"] == 0 and s.current == "B"
 
 
+def test_the_flying_squirrel_gains_ten_food_and_draws_a_card():
+    s = make_state(hands={"A": ["flying_squirrel"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("flying_squirrel", ("cr", "3,3")))         # Flight: anywhere
+    assert s.food["A"] == CFG.flying_squirrel_food == 10 and hand_ids(s, "A") == ["lion"]
+
+
 def test_the_krill_makes_the_next_titan_cost_one_action():
     s = make_state(hands={"A": ["krill", "blue_whale", "blue_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     rules.apply_action(s, PlaceAction("krill", ("cr", "1,2")))
+    assert sorted(hand_ids(s, "A")) == ["blue_whale", "blue_whale", "lion"]        # Roar: draw a card
     assert PlaceAction("blue_whale", ("cr", "1,1")) in rules.legal_actions(s)      # one action left pays for it
     rules.apply_action(s, PlaceAction("blue_whale", ("cr", "1,1")))
     assert s.top_unit("1,1").card_id == "blue_whale" and s.current == "B"

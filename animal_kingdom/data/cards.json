@@ -1287,12 +1287,12 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Flight. Roar: gain 10 food.",
+      "text": "Flight. Roar: gain 10 food and draw a card.",
+      "species": "Flying Squirrel",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Flying Squirrel",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "meerkat",
@@ -3781,7 +3781,7 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "Roar: the next Titan you play this turn costs one action.",
+      "text": "Roar: draw a card. The next Titan you play this turn costs one action.",
       "species": "Krill",
       "habitat": "Open Ocean",
       "keywords": []
@@ -3822,13 +3822,13 @@
     {
       "id": "krill_legend",
       "name": "[KRILL]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
       "text": "Your Titans cost 10 food to play, but only 1 action.",
       "species": "Krill",
-      "habitat": "Open Ocean",
+      "habitat": "Prehistoric",
       "unnamed": true,
       "keywords": []
     },
