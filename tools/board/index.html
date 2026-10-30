@@ -34,8 +34,8 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
 /* the header's text keeps a readable screen size at any zoom, within the header's fixed height on the table */
 .pile .ph { --s: min(1, calc(1 / 3.6 / var(--z, 1))); position: absolute; left: 0; right: 0; top: 0; height: 92px; display: flex; align-items: center; gap: calc(40px * var(--s)); padding: 0 16px; cursor: grab; }
 .pile .nm { font: 700 calc(60px * var(--s))/1.1 system-ui, sans-serif; outline: none; white-space: nowrap; flex: none; min-width: 20px; }
-.pile .nm[contenteditable="true"] { cursor: text; background: #fff; padding: 2px 4px; border-radius: 4px; }
-.pile .ct { font: 400 calc(52px * var(--s))/1 system-ui, sans-serif; color: var(--muted); }
+.pile .nm { cursor: text; }
+.pile .nm[contenteditable="true"] { background: #fff; padding: 2px 4px; border-radius: 4px; }
 .pile .ph .gap { flex: 1; }
 .pile .ph button { font: 500 calc(46px * var(--s))/1.2 system-ui, sans-serif; border: 1px solid var(--pile-line); background: #fff; border-radius: calc(12px * var(--s)); padding: calc(6px * var(--s)) calc(22px * var(--s)); color: var(--ink); cursor: pointer; }
 .pile .ph button:hover { background: #f1f0ec; }
@@ -129,13 +129,12 @@ function draw() {
     if (!el) {
       el = pileEls[p.id] = world.insertBefore(document.createElement('div'), world.firstChild);
       el.className = 'pile'; el.dataset.pile = p.id;
-      el.innerHTML = `<div class="ph"><span class="nm"></span><span class="ct"></span><span class="gap"></span><button data-act="stack"></button><button data-act="del" title="Remove the pile; its cards stay on the table">×</button></div><div class="rs"></div>`;
+      el.innerHTML = `<div class="ph"><span class="nm"></span><span class="gap"></span><button data-act="stack"></button><button data-act="del" title="Remove the pile; its cards stay on the table">×</button></div><div class="rs"></div>`;
     }
     const s = pileSize(p);
     el.style.transform = `translate(${p.x}px,${p.y}px)`; el.style.width = s.w + 'px'; el.style.height = s.h + 'px';
     el.classList.toggle('stacked', !!p.stacked);
     const nm = el.querySelector('.nm'); if (nm.getAttribute('contenteditable') !== 'true') nm.textContent = p.name;
-    el.querySelector('.ct').textContent = p.cards.length;
     el.querySelector('[data-act="stack"]').textContent = p.stacked ? 'Spread' : 'Stack';
     el.querySelectorAll('.ghost').forEach(g => g.remove());
     if (p.stacked && p.cards.length > 1) for (const o of [2, 1].slice(0, p.cards.length - 1))
@@ -237,7 +236,7 @@ view.addEventListener('pointerdown', e => {
   if (e.button === 1 || e.button === 2 || spaceDown) { act = { kind: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y }; view.classList.add('panning'); }
   else if (t.closest('button')) return;
   else if (t.closest('.rs')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'cols', p, before: snap(), x0: w.x, c0: p.cols }; }
-  else if (t.closest('.ph')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'pile', p, before: snap(), w0: w, x0: p.x, y0: p.y, moved: false }; }
+  else if (t.closest('.ph')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'pile', p, before: snap(), w0: w, x0: p.x, y0: p.y, moved: false, name: !!nm }; }
   else if (t.closest('.it')) {
     const id = t.closest('.it').dataset.id;
     if (e.shiftKey) { sel.has(id) ? sel.delete(id) : sel.add(id); draw(); act = null; return; }
@@ -285,6 +284,7 @@ view.addEventListener('pointerup', e => {
   const a = act; act = null; view.classList.remove('panning'); $('#marq').style.display = 'none'; $('#ins').style.display = 'none';
   if (!a) return;
   if (a.kind === 'pile' && a.moved) changed(a.before);
+  else if (a.kind === 'pile' && a.name) rename(a.p);   // a click on the name renames; a drag moves the pile
   else if (a.kind === 'cols' && a.p.cols !== a.c0) changed(a.before);
   else if (a.kind === 'cards') {
     a.ids.forEach(i => els[i].classList.remove('drag'));
@@ -339,11 +339,6 @@ function rename(p) {
   const onKey = e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); done(true); } if (e.key === 'Escape') done(false); };
   nm.addEventListener('blur', onBlur); nm.addEventListener('keydown', onKey);
 }
-world.addEventListener('dblclick', e => {
-  const pe = e.target.closest('.pile'); if (!pe) return;
-  const p = B.piles.find(p => p.id === pe.dataset.pile);
-  if (e.target.closest('.ph')) rename(p);
-});
 world.addEventListener('click', e => {
   const b = e.target.closest('.ph button'); if (!b) return;
   const p = B.piles.find(p => p.id === b.closest('.pile').dataset.pile), before = snap();
