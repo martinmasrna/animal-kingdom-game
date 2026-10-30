@@ -1,5 +1,5 @@
 {
- "rev": 378,
+ "rev": 416,
  "cards": {
   "mole": {
    "x": 6460,
@@ -289,25 +289,9 @@
    "x": 5623,
    "y": 2842
   },
-  "raccoon": {
-   "x": 10457,
-   "y": 2373
-  },
-  "piranha": {
-   "x": 6924,
-   "y": 3056
-  },
   "earthworm": {
    "x": 5429,
    "y": 2286
-  },
-  "sperm_whale": {
-   "x": 9903,
-   "y": 3086
-  },
-  "orca": {
-   "x": 7012,
-   "y": 3483
   },
   "jackal": {
    "x": 8921,
@@ -321,41 +305,13 @@
    "x": 6011,
    "y": 2286
   },
-  "hornet": {
-   "x": 8469,
-   "y": 3304
-  },
   "skunk": {
    "x": 7951,
    "y": 2564
   },
-  "jaguar": {
-   "x": 8270,
-   "y": 3302
-  },
-  "leopard": {
-   "x": 7117,
-   "y": 3054
-  },
-  "black_panther": {
-   "x": 7211,
-   "y": 3482
-  },
   "lynx": {
    "x": 9503,
    "y": 2564
-  },
-  "swordfish": {
-   "x": 5623,
-   "y": 2564
-  },
-  "manta_ray": {
-   "x": 7316,
-   "y": 3056
-  },
-  "flying_squirrel": {
-   "x": 8339,
-   "y": 2286
   },
   "meerkat": {
    "x": 9503,
@@ -365,45 +321,17 @@
    "x": 7951,
    "y": 2286
   },
-  "groundhog": {
-   "x": 8533,
-   "y": 2286
-  },
-  "porcupine": {
-   "x": 5789,
-   "y": 3273
-  },
   "golden_orb_weaver": {
    "x": 9309,
    "y": 2564
-  },
-  "armadillo": {
-   "x": 5994,
-   "y": 3275
   },
   "dart_frog": {
    "x": 5235,
    "y": 2286
   },
-  "jellyfish": {
-   "x": 6206,
-   "y": 3274
-  },
-  "hawk": {
-   "x": 8668,
-   "y": 3310
-  },
-  "cottonmouth": {
-   "x": 9068,
-   "y": 3310
-  },
   "magpie": {
    "x": 9309,
    "y": 2286
-  },
-  "black_mamba": {
-   "x": 8455,
-   "y": 3589
   },
   "hummingbird": {
    "x": 5623,
@@ -417,69 +345,13 @@
    "x": 7175,
    "y": 2286
   },
-  "chimpanzee": {
-   "x": 8649,
-   "y": 3589
-  },
-  "rhinoceros": {
-   "x": 9709,
-   "y": 3086
-  },
-  "hippopotamus": {
-   "x": 9509,
-   "y": 3088
-  },
-  "whale_shark": {
-   "x": 10097,
-   "y": 3086
-  },
-  "honey_badger": {
-   "x": 8866,
-   "y": 3310
-  },
   "okapi": {
    "x": 7369,
    "y": 2564
   },
-  "cape_buffalo": {
-   "x": 7511,
-   "y": 3062
-  },
-  "boar": {
-   "x": 8856,
-   "y": 3596
-  },
-  "octopus": {
-   "x": 7175,
-   "y": 2564
-  },
-  "great_white_shark": {
-   "x": 7409,
-   "y": 3481
-  },
-  "macaw": {
-   "x": 10063,
-   "y": 2369
-  },
-  "eagle": {
-   "x": 6811,
-   "y": 3484
-  },
   "cuckoo": {
    "x": 7757,
    "y": 2286
-  },
-  "opossum": {
-   "x": 10263,
-   "y": 2373
-  },
-  "woodpecker": {
-   "x": 10657,
-   "y": 2381
-  },
-  "albatross": {
-   "x": 8261,
-   "y": 3589
   },
   "tarantula": {
    "x": 6011,
@@ -544,6 +416,18 @@
   "stag_beetle": {
    "x": 2350,
    "y": 1508
+  },
+  "manta_ray": {
+   "x": 7041,
+   "y": 2713
+  },
+  "flying_squirrel": {
+   "x": 8164,
+   "y": 2292
+  },
+  "groundhog": {
+   "x": 7275,
+   "y": 1914
   }
  },
  "piles": [
@@ -743,6 +627,95 @@
     "baboon",
     "gorilla"
    ]
+  },
+  {
+   "id": "pmvuvrsm76",
+   "name": "Utility",
+   "x": 9567,
+   "y": 1663,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "macaw",
+    "woodpecker",
+    "opossum",
+    "raccoon",
+    "octopus"
+   ]
+  },
+  {
+   "id": "pmvuvs4vt7",
+   "name": "Big Bodies",
+   "x": 9905,
+   "y": 2334,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "rhinoceros",
+    "sperm_whale",
+    "whale_shark",
+    "hippopotamus"
+   ]
+  },
+  {
+   "id": "pmvuvsdpj8",
+   "name": "Removal",
+   "x": 8797,
+   "y": 3143,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "jaguar",
+    "hornet",
+    "hawk",
+    "honey_badger",
+    "cottonmouth",
+    "albatross",
+    "black_mamba",
+    "chimpanzee",
+    "boar",
+    "swordfish"
+   ]
+  },
+  {
+   "id": "pmvuvsvrj9",
+   "name": "Auras",
+   "x": 6809,
+   "y": 3461,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "leopard",
+    "cape_buffalo",
+    "piranha"
+   ]
+  },
+  {
+   "id": "pmvuvu3rf10",
+   "name": "Walls",
+   "x": 6816,
+   "y": 3069,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "porcupine",
+    "armadillo",
+    "jellyfish"
+   ]
+  },
+  {
+   "id": "pmvuvu9p511",
+   "name": "Apex Predators",
+   "x": 6803,
+   "y": 3846,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "great_white_shark",
+    "black_panther",
+    "orca",
+    "eagle"
+   ]
   }
  ],
  "gone": [
@@ -810,7 +783,7 @@
   },
   "stick_insect": {
    "flag": true,
-   "note": "same as tortoise"
+   "note": "same as tortoise, plus the animal feels off"
   },
   "black_bear": {
    "flag": true,
@@ -823,6 +796,12 @@
   "stag_beetle": {
    "flag": true,
    "note": "feels a bit random"
+  },
+  "black_panther": {
+   "flag": true
+  },
+  "jellyfish": {
+   "flag": true
   }
  }
 }
