@@ -1,5 +1,5 @@
 {
- "rev": 1003,
+ "rev": 1004,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -626,9 +626,6 @@
   },
   "mackerel": {
    "flag": true
-  },
-  "bee_legend_2": {
-   "note": "maybe just flat +1 strength?"
   },
   "nurse_bumblebee": {
    "note": "idk, lazy?"
