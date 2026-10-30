@@ -565,7 +565,7 @@ pub fn remove_specific(st: &mut State, cr: Cr, iid: i64, by_player: Player, by_e
     st.turn_flags.removed_any = true;
     if let Some(py) = st.g.known.python {
         for p in [A, B] {
-            if owns_copy(st, p, py) {
+            if p != unit.owner && owns_copy(st, p, py) {
                 let g = st.cfg().int("python_growth");
                 *st.card_strength_counters[p as usize].entry(py).or_insert(0) += g;
             }

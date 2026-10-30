@@ -532,8 +532,8 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     # "if an animal was removed this turn" (Great White Shark): board removals, counted per owner.
     state.turn_flags[f"lost_{unit.owner}"] = state.turn_flags.get(f"lost_{unit.owner}", 0) + 1
     state.turn_flags["removed_any"] = True
-    for p in ("A", "B"):        # Python: "Whenever an animal is removed, gain 1 strength (wherever this is)"
-        if _owns_copy(state, p, "python"):
+    for p in ("A", "B"):        # Python: "Whenever an enemy is removed, gain 1 strength (wherever this is)"
+        if p != unit.owner and _owns_copy(state, p, "python"):
             grown = state.card_strength_counters.setdefault(p, {})
             grown["python"] = grown.get("python", 0) + state.config.python_growth
     # A unit uncovered by this very removal was buried when it happened, so it doesn't react to it.

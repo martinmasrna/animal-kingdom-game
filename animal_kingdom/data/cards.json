@@ -403,10 +403,10 @@
         "Snake"
       ],
       "base_strength": 0,
-      "text": "Whenever an animal is removed, gain 1 strength (wherever this is).",
-      "keywords": [],
+      "text": "Whenever an enemy is removed, gain 1 strength (wherever this is).",
       "species": "Python",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "rat_legend_2",
