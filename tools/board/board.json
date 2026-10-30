@@ -1,10 +1,6 @@
 {
- "rev": 514,
+ "rev": 552,
  "cards": {
-  "chameleon": {
-   "x": 8078,
-   "y": 1382
-  },
   "army_ant_legend": {
    "x": 12135,
    "y": 2263
@@ -297,45 +293,17 @@
    "x": 2350,
    "y": 1508
   },
-  "queen_bee": {
-   "x": 6391,
-   "y": 2301
-  },
-  "sea_turtle": {
-   "x": 6583,
-   "y": 2302
-  },
-  "flying_squirrel": {
-   "x": 8092,
-   "y": 2241
-  },
-  "tarantula": {
-   "x": 7344,
-   "y": 1699
-  },
-  "earthworm": {
-   "x": 7775,
-   "y": 1354
-  },
   "dart_frog": {
-   "x": 7581,
-   "y": 1354
+   "x": 7185,
+   "y": 1450
   },
   "skunk": {
-   "x": 7638,
-   "y": 2106
+   "x": 7418,
+   "y": 1461
   },
-  "queen_ant": {
-   "x": 6718,
-   "y": 1316
-  },
-  "orangutan": {
-   "x": 6948,
-   "y": 1794
-  },
-  "tarsier": {
-   "x": 7283,
-   "y": 2086
+  "flying_squirrel": {
+   "x": 7184,
+   "y": 1761
   }
  },
  "piles": [
@@ -572,8 +540,8 @@
   {
    "id": "pmvuvsdpj8",
    "name": "Removal",
-   "x": 5450,
-   "y": -439,
+   "x": 5642,
+   "y": -319,
    "cols": 6,
    "stacked": false,
    "cards": [
@@ -633,8 +601,8 @@
   {
    "id": "pmvuw0k7c12",
    "name": "Draw",
-   "x": 6825,
-   "y": -448,
+   "x": 6858,
+   "y": -331,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -665,8 +633,8 @@
   {
    "id": "pmvuw3q0s14",
    "name": "Extra Placement",
-   "x": 7835,
-   "y": -448,
+   "x": 8382,
+   "y": -279,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -689,6 +657,35 @@
     "groundhog",
     "dormouse"
    ]
+  },
+  {
+   "id": "pmvuwaa0x16",
+   "name": "Deck Specific",
+   "x": 7774,
+   "y": 1340,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "earthworm",
+    "sea_turtle",
+    "orangutan",
+    "tarantula",
+    "tarsier",
+    "chameleon",
+    "queen_bee"
+   ]
+  },
+  {
+   "id": "pmvuwbfjh17",
+   "name": "Tempo",
+   "x": 5822,
+   "y": 1404,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "queen_ant"
+   ],
+   "tint": "orange"
   }
  ],
  "gone": [
@@ -780,6 +777,13 @@
    "flag": true
   },
   "vole": {
+   "flag": true
+  },
+  "tarantula": {
+   "flag": true,
+   "note": "not too happy with what we did, idk"
+  },
+  "dart_frog": {
    "flag": true
   }
  }
