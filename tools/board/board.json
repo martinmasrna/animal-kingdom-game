@@ -1,5 +1,5 @@
 {
- "rev": 706,
+ "rev": 726,
  "cards": {
   "toad": {
    "x": 1120,
@@ -20,30 +20,6 @@
   "stick_insect": {
    "x": 1555,
    "y": -973
-  },
-  "street_dog": {
-   "x": 2575,
-   "y": 1092
-  },
-  "krill": {
-   "x": 2379,
-   "y": 1094
-  },
-  "mahi_mahi": {
-   "x": 2891,
-   "y": 1099
-  },
-  "mackerel": {
-   "x": 3087,
-   "y": 1102
-  },
-  "zebra": {
-   "x": 1894,
-   "y": 1104
-  },
-  "gazelle": {
-   "x": 2101,
-   "y": 1103
   },
   "stag_beetle": {
    "x": 2350,
@@ -159,12 +135,13 @@
   {
    "id": "pmvuvbh501",
    "name": "Flat Food",
-   "x": 2706,
-   "y": 297,
-   "cols": 4,
+   "x": 112,
+   "y": 1311,
+   "cols": 5,
    "stacked": false,
    "cards": [
     "chipmunk",
+    "gazelle",
     "worker_bee",
     "sloth",
     "squirrel"
@@ -173,8 +150,8 @@
   {
    "id": "pmvuvbuyy0",
    "name": "Food Engine",
-   "x": 3527,
-   "y": 294,
+   "x": 110,
+   "y": 1709,
    "cols": 6,
    "stacked": false,
    "cards": [
@@ -247,17 +224,22 @@
   {
    "id": "pmvuvp1sm5",
    "name": "Deck-Specific",
-   "x": 89,
-   "y": 1272,
-   "cols": 6,
+   "x": 101,
+   "y": 2116,
+   "cols": 11,
    "stacked": false,
    "cards": [
+    "street_dog",
     "stork",
     "cockroach",
     "city_spider",
     "african_wild_dog",
     "baboon",
-    "gorilla"
+    "gorilla",
+    "krill",
+    "zebra",
+    "mahi_mahi",
+    "mackerel"
    ],
    "tint": "yellow"
   },
@@ -677,6 +659,16 @@
   },
   "zebra_legend": {
    "note": "at least connected or somerhing"
+  },
+  "zebra": {
+   "note": "seems weak still, idk"
+  },
+  "mahi_mahi": {
+   "flag": true,
+   "note": "board buff is weird"
+  },
+  "mackerel": {
+   "flag": true
   }
  }
 }
