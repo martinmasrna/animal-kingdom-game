@@ -1,5 +1,5 @@
 {
- "rev": 557,
+ "rev": 572,
  "cards": {
   "army_ant_legend": {
    "x": 12135,
@@ -61,14 +61,6 @@
    "x": 12329,
    "y": 1985
   },
-  "lion_legend": {
-   "x": 11747,
-   "y": 2263
-  },
-  "lion_legend_2": {
-   "x": 11941,
-   "y": 2263
-  },
   "lion_legend_3": {
    "x": 13493,
    "y": 2541
@@ -76,10 +68,6 @@
   "lion_legend_4": {
    "x": 16015,
    "y": 2263
-  },
-  "jellyfish_legend": {
-   "x": 14657,
-   "y": 1985
   },
   "tuna_legend": {
    "x": 15239,
@@ -141,10 +129,6 @@
    "x": 12911,
    "y": 2263
   },
-  "butterfly_legend": {
-   "x": 11553,
-   "y": 1985
-  },
   "eagle_legend": {
    "x": 14463,
    "y": 1985
@@ -152,10 +136,6 @@
   "rhinoceros_legend": {
    "x": 13105,
    "y": 2541
-  },
-  "tortoise_legend": {
-   "x": 15239,
-   "y": 1985
   },
   "sperm_whale_legend": {
    "x": 13299,
@@ -191,14 +171,6 @@
   },
   "bat_legend": {
    "x": 11747,
-   "y": 1985
-  },
-  "scout_bee": {
-   "x": 15045,
-   "y": 1985
-  },
-  "bee_legend_2": {
-   "x": 11941,
    "y": 1985
   },
   "tiger_legend": {
@@ -670,6 +642,32 @@
     "queen_ant"
    ],
    "tint": "orange"
+  },
+  {
+   "id": "pmvuwg41o18",
+   "name": "Banger",
+   "x": 10851,
+   "y": 1172,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "tortoise_legend",
+    "lion_legend_2",
+    "lion_legend"
+   ],
+   "tint": "green"
+  },
+  {
+   "id": "pmvuwh2be19",
+   "name": "New pile",
+   "x": 10903,
+   "y": 1619,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "butterfly_legend",
+    "bee_legend_2"
+   ]
   }
  ],
  "gone": [
@@ -716,7 +714,9 @@
   "greywhisker",
   "wolf_legend",
   "swan_legend",
-  "goose_legend"
+  "goose_legend",
+  "jellyfish_legend",
+  "scout_bee"
  ],
  "marks": {
   "mouse": {
