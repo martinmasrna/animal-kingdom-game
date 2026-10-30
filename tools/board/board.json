@@ -1,5 +1,5 @@
 {
- "rev": 956,
+ "rev": 958,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -636,6 +636,12 @@
   },
   "capybara": {
    "note": "wording?"
+  },
+  "egg_eater": {
+   "note": "wording"
+  },
+  "python": {
+   "note": "wording"
   }
  }
 }
