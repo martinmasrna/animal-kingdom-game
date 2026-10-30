@@ -114,6 +114,10 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     placer_card = state.cards[placer.card_id]
     owner = placer.owner
 
+    # The Bison: "Can't be covered while this is grazing." Nothing overrides it, the Hercules Beetle included.
+    if target.card_id == "bison" and active(state, target) and grazing(state, target):
+        return False
+
     # The Hercules Beetle covers units of any strength (its own side needs no strength anyway).
     if placer_card.id == "hercules_beetle" and (not roaming or active(state, placer)):
         return True

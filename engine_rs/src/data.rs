@@ -182,6 +182,7 @@ pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish"]
 /// The cards the engine's rules name (never a card's effect: those live with the card in effects): resolved once.
 pub struct Known {
     pub hercules_beetle: Option<CardId>,
+    pub bison: Option<CardId>,
     pub leopard: Option<CardId>,
     pub piranha: Option<CardId>,
     pub sardine_legend: Option<CardId>,
@@ -213,6 +214,7 @@ impl Known {
         let k = |n: &str| cards.id_of(n);
         Known {
             hercules_beetle: k("hercules_beetle"),
+            bison: k("bison"),
             leopard: k("leopard"),
             piranha: k("piranha"),
             sardine_legend: k("sardine_legend"),

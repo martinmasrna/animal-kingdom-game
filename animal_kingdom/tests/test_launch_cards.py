@@ -1556,6 +1556,17 @@ def test_grazing_okapi_draws_and_wildebeest_feeds():
     assert len(s.hands["A"]) == 2                               # Martin, 2026-10-29: Dawn and Dusk
 
 
+def test_the_bison_cant_be_covered_while_it_grazes():
+    s = make_state(hands={"B": ["elephant", "hercules_beetle"]})
+    put(s, "1,1", "mouse", "A"); put(s, "1,2", "mouse", "A"); put(s, "2,2", "mouse", "A")
+    bison = put(s, "2,1", "bison", "A")                         # closes R1: it grazes
+    elephant, beetle = s.hands["B"]
+    assert statics.grazing(s, bison)
+    assert not statics.can_cover(s, elephant, bison) and not statics.can_cover(s, beetle, bison)
+    put(s, "1,1", "lion", "B")                                  # the region breaks somewhere else
+    assert not statics.grazing(s, bison) and statics.can_cover(s, elephant, bison)
+
+
 def test_giraffe_and_cape_buffalo_are_bigger_on_the_opponents_turn():
     s = make_state()
     g = put(s, "1,2", "giraffe", "A"); put(s, "1,1", "cape_buffalo", "A")

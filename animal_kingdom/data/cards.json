@@ -4058,6 +4058,20 @@
       "species": "Marmot",
       "habitat": "Meadow",
       "keywords": []
+    },
+    {
+      "id": "bison",
+      "name": "Bison",
+      "status": "collectible",
+      "rarity": "rare",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 7,
+      "text": "Can't be covered while this is grazing.",
+      "species": "Bison",
+      "habitat": "Forest",
+      "keywords": []
     }
   ]
 }

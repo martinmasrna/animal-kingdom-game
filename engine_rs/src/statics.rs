@@ -84,6 +84,10 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
     let k = &st.g.known;
     let placer_card = st.card(placer.card);
     let owner = placer.owner;
+    // The Bison: "Can't be covered while this is grazing." Nothing overrides it, the Hercules Beetle included.
+    if Some(target.card) == k.bison && active(st, target) && grazing(st, target, None) {
+        return false;
+    }
     if Some(placer.card) == k.hercules_beetle && (!roaming || active(st, placer)) {
         return true;
     }
