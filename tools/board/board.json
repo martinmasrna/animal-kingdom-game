@@ -1,5 +1,5 @@
 {
- "rev": 703,
+ "rev": 706,
  "cards": {
   "toad": {
    "x": 1120,
@@ -446,8 +446,8 @@
   {
    "id": "pmvuwg41o18",
    "name": "Good",
-   "x": 10851,
-   "y": 1172,
+   "x": 11497,
+   "y": -736,
    "cols": 19,
    "stacked": false,
    "cards": [
@@ -475,8 +475,8 @@
   {
    "id": "pmvuwh2be19",
    "name": "Right direction, might need some tweaking",
-   "x": 10850,
-   "y": 1576,
+   "x": 11496,
+   "y": -332,
    "cols": 22,
    "stacked": false,
    "cards": [
@@ -508,8 +508,8 @@
   {
    "id": "pmvuwmd3520",
    "name": "Needs change",
-   "x": 10849,
-   "y": 2375,
+   "x": 11495,
+   "y": 467,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -522,8 +522,8 @@
   {
    "id": "pmvuwt3hw0",
    "name": "Seems too weak",
-   "x": 10849,
-   "y": 1981,
+   "x": 11495,
+   "y": 73,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -538,8 +538,8 @@
   {
    "id": "pmvuwu80n1",
    "name": "Literally Perfect",
-   "x": 10848,
-   "y": 788,
+   "x": 11494,
+   "y": -1120,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -551,8 +551,8 @@
   {
    "id": "pmvuwx5td2",
    "name": "Not enough data",
-   "x": 10843,
-   "y": 2766,
+   "x": 11489,
+   "y": 858,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -561,7 +561,8 @@
     "sloth_legend",
     "piranha_legend",
     "boar_legend"
-   ]
+   ],
+   "tint": "grey"
   }
  ],
  "gone": [
