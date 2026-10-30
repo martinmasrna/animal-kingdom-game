@@ -2448,7 +2448,7 @@
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 4,
+      "base_strength": 5,
       "text": "Remove the first enemy placed next to this.",
       "species": "Boar",
       "habitat": "Forest",
