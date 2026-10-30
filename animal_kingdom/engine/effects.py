@@ -446,9 +446,21 @@ def _op_queen_guard(state, step):
     """The guard leaves its owner's hand (first) or deck and is placed on top of the enemy that covered the Colony animal: no
     action, no connection or strength check, no Roar. Nothing happens if that enemy has left the crossroad meanwhile, or
     the guard has left the hand and deck (played, discarded, stolen)."""
-    cid, owner, cr = step["card"], step["player"], step["cr"]
-    if not any(u.iid == step["coverer"] for u in state.board.get(cr, [])):
+    cid, owner = step["card"], step["player"]
+    # One event can cover several of the owner's Colony animals at once (the Locust swarm): the guard goes to the one
+    # played earliest, as Dawn and Dusk are ordered (Martin, 2026-10-31); the other calls for it fizzle with it gone.
+    calls = [step] + [s for s in state.effect_stack if s.get("op") == "queen_guard" and s["card"] == cid and s["player"] == owner]
+    state.effect_stack[:] = [s for s in state.effect_stack if not any(s is c for c in calls[1:])]
+    live = []
+    for call in calls:
+        stack = state.board.get(call["cr"], [])
+        pos = next((i for i, u in enumerate(stack) if u.iid == call["coverer"]), None)
+        if pos is not None:                       # the coverer is still there (an Apex may have eaten what it covered)
+            under = stack[pos - 1] if pos else None
+            live.append((under.play_seq if under else 1 << 30, call["cr"]))
+    if not live:
         return None
+    cr = min(live)[1]
     inst = next((u for u in state.hands[owner] if u.card_id == cid), None)
     from_hand = inst is not None
     if from_hand:

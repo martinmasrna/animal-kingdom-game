@@ -93,3 +93,14 @@ def test_a_wild_animal_connects_no_one_and_holds_no_region():
     rules.apply_action(s, PlaceAction("locust_legend", ("cr", spot)))
     assert not rules.regions_controlled(s, "A") and not rules.regions_controlled(s, "B")
     assert not s.connected_occupied("A") and not s.connected_occupied("B")
+
+
+def test_vesper_guards_the_colony_animal_played_first_when_the_swarm_covers_several():
+    """Martin, 2026-10-31: one swarm covers several of the owner's Colony animals at once, and Vesper goes to the one that
+    was played first, as Dawn and Dusk are ordered."""
+    s = make_state(current="A", hands={"A": ["locust_legend"], "B": ["hornet_legend"]},
+                   decks={"A": ["lion"] * 9, "B": ["lion"] * 9})
+    for seq, cr in enumerate(("2,2", "3,3", "1,1"), start=1):
+        put(s, cr, "worker_ant", "B").play_seq = seq
+    rules.apply_action(s, next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction)))
+    assert [cr for cr, st in s.board.items() if st[-1].card_id == "hornet_legend"] == ["2,2"]
