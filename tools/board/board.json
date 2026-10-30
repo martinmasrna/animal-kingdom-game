@@ -1,18 +1,6 @@
 {
- "rev": 186,
+ "rev": 207,
  "cards": {
-  "cockroach": {
-   "x": 1552,
-   "y": 1932
-  },
-  "dung_beetle": {
-   "x": 1746,
-   "y": 1932
-  },
-  "gazelle": {
-   "x": 3492,
-   "y": 1932
-  },
   "mackerel": {
    "x": 3880,
    "y": 1932
@@ -23,10 +11,6 @@
   },
   "bush_dog": {
    "x": 1552,
-   "y": 2210
-  },
-  "hamster": {
-   "x": 2134,
    "y": 2210
   },
   "mahi_mahi": {
@@ -47,30 +31,6 @@
   },
   "city_spider": {
    "x": 970,
-   "y": 2488
-  },
-  "cod": {
-   "x": 1164,
-   "y": 2488
-  },
-  "gopher": {
-   "x": 1552,
-   "y": 2488
-  },
-  "hammerhead": {
-   "x": 1746,
-   "y": 2488
-  },
-  "hare": {
-   "x": 1940,
-   "y": 2488
-  },
-  "hyena": {
-   "x": 2134,
-   "y": 2488
-  },
-  "mara": {
-   "x": 2328,
    "y": 2488
   },
   "stag_beetle": {
@@ -685,14 +645,6 @@
    "x": 242,
    "y": 1661
   },
-  "nurse_bee": {
-   "x": 3459,
-   "y": 984
-  },
-  "praying_mantis": {
-   "x": 3658,
-   "y": 987
-  },
   "krill": {
    "x": 769,
    "y": 1377
@@ -721,10 +673,6 @@
    "x": 4347,
    "y": 3015
   },
-  "fox": {
-   "x": 3260,
-   "y": 985
-  },
   "worker_wasp": {
    "x": 782,
    "y": 1922
@@ -732,6 +680,26 @@
   "worker_ant": {
    "x": 974,
    "y": 1922
+  },
+  "hamster": {
+   "x": 1172,
+   "y": 1926
+  },
+  "dung_beetle": {
+   "x": 589,
+   "y": 1923
+  },
+  "cockroach": {
+   "x": 1811,
+   "y": 2238
+  },
+  "hyena": {
+   "x": 1377,
+   "y": 1923
+  },
+  "gazelle": {
+   "x": 2720,
+   "y": 2147
   }
  },
  "piles": [
@@ -740,7 +708,7 @@
    "name": "Vanilla Anchors",
    "x": 139,
    "y": -495,
-   "cols": 6,
+   "cols": 5,
    "stacked": false,
    "cards": [
     "wolf",
@@ -770,7 +738,9 @@
     "soldier_ant",
     "barracuda",
     "wolverine",
-    "warthog"
+    "warthog",
+    "gopher",
+    "hammerhead"
    ]
   },
   {
@@ -778,7 +748,7 @@
    "name": "Cantrips & Tutors",
    "x": 946,
    "y": 170,
-   "cols": 6,
+   "cols": 5,
    "stacked": false,
    "cards": [
     "badger",
@@ -793,6 +763,22 @@
     "owl",
     "mouse",
     "caterpillar"
+   ]
+  },
+  {
+   "id": "pmvuurszo0",
+   "name": "\"Draw 2\"",
+   "x": 1948,
+   "y": 170,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "nurse_bee",
+    "hare",
+    "fox",
+    "mara",
+    "praying_mantis",
+    "cod"
    ]
   }
  ],
