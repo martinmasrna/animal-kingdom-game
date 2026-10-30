@@ -337,18 +337,27 @@ let pileN = 0;
 const newId = () => 'p' + Date.now().toString(36) + (pileN++);
 $('#newpile').onclick = () => {
   const before = snap(), cards = [...sel].sort((p, q) => { const A = posOf(p), Bq = posOf(q); return A.y - Bq.y || A.x - Bq.x; });
-  // on free table: right of the loose cards, under the piles already there
-  let right = 0, top = Infinity;
-  for (const [id, q] of Object.entries(B.cards)) if (!sel.has(id)) { right = Math.max(right, q.x + W); top = Math.min(top, q.y); }
-  if (top === Infinity) top = 0;
-  const x = Math.round(right + 160), col = B.piles.filter(q => q.x + pileSize(q).w > x - 20);
-  const y = col.length ? Math.max(...col.map(q => q.y + pileSize(q).h)) + 60 : top;
-  const p = { id: newId(), name: 'New pile', x, y, cols: 4, stacked: false, cards };
+  // where the picked cards lay (or the middle of the screen), at the nearest spot of free table
+  const r = view.getBoundingClientRect(), mid = toWorld(r.left + r.width / 2, r.top + r.height / 2);
+  const ax = cards.length ? Math.min(...cards.map(id => posOf(id).x)) : mid.x - 2 * (W + G);
+  const ay = cards.length ? Math.min(...cards.map(id => posOf(id).y)) : mid.y - H / 2;
   for (const q of B.piles) q.cards = q.cards.filter(id => !sel.has(id));
   for (const id of cards) delete B.cards[id];
+  const p = { id: newId(), name: 'New pile', x: 0, y: 0, cols: 4, stacked: false, cards };
+  const s = pileSize(p), M = G * 2;
+  const boxes = [...Object.entries(B.cards).filter(([id]) => !gone(id)).map(([, q]) => [q.x, q.y, W, H]),
+    ...B.piles.map(q => { const z = pileSize(q); return [q.x, q.y, z.w, z.h]; })];
+  const free = (x, y) => boxes.every(([bx, by, bw, bh]) => x + s.w + M <= bx || bx + bw + M <= x || y + s.h + M <= by || by + bh + M <= y);
+  const step = (W + G) / 2, spots = [];
+  for (let i = -60; i <= 60; i++) for (let j = -60; j <= 60; j++) spots.push([ax + i * step, ay + j * step]);
+  spots.sort((u, v) => Math.hypot(u[0] - ax, u[1] - ay) - Math.hypot(v[0] - ax, v[1] - ay));
+  const [x, y] = spots.find(([x, y]) => free(x, y)) || [ax, ay];
+  p.x = Math.round(x); p.y = Math.round(y);
   B.piles.push(p); sel.clear(); changed(before);
-  const r = view.getBoundingClientRect(), s = pileSize(p), a = toWorld(r.left, r.top), b = toWorld(r.right, r.bottom);
-  if (p.x < a.x || p.y < a.y || p.x + s.w > b.x || p.y + s.h > b.y) fit();
+  // into view if it isn't, at the same zoom
+  const a = toWorld(r.left, r.top), b = toWorld(r.right, r.bottom);
+  if (s.w * cam.z > r.width || s.h * cam.z > r.height) fit();
+  else if (p.x < a.x || p.y < a.y || p.x + s.w > b.x || p.y + s.h > b.y) { cam.x = r.width / 2 - (p.x + s.w / 2) * cam.z; cam.y = r.height / 2 - (p.y + s.h / 2) * cam.z; setCam(); }
   rename(p);
 };
 function rename(p) {
