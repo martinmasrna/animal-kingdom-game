@@ -1,5 +1,5 @@
 {
- "rev": 346,
+ "rev": 360,
  "cards": {
   "mole": {
    "x": 6460,
@@ -497,14 +497,6 @@
    "x": 7563,
    "y": 2286
   },
-  "krill": {
-   "x": 769,
-   "y": 1377
-  },
-  "street_dog": {
-   "x": 965,
-   "y": 1375
-  },
   "toad": {
    "x": 1120,
    "y": -969
@@ -520,10 +512,6 @@
   "falcon": {
    "x": 2131,
    "y": 364
-  },
-  "gazelle": {
-   "x": 1998,
-   "y": 1859
   },
   "african_wild_dog": {
    "x": 2860,
@@ -541,21 +529,9 @@
    "x": 3563,
    "y": 1563
   },
-  "zebra": {
-   "x": 1539,
-   "y": 1803
-  },
   "cockroach": {
    "x": 2457,
    "y": 1529
-  },
-  "stag_beetle": {
-   "x": 2554,
-   "y": 1981
-  },
-  "stork": {
-   "x": 2345,
-   "y": 1989
   },
   "gorilla": {
    "x": 2844,
@@ -568,6 +544,30 @@
   "city_spider": {
    "x": 2656,
    "y": 1533
+  },
+  "zebra": {
+   "x": 1667,
+   "y": 1630
+  },
+  "gazelle": {
+   "x": 1874,
+   "y": 1629
+  },
+  "street_dog": {
+   "x": 1319,
+   "y": 1707
+  },
+  "krill": {
+   "x": 1123,
+   "y": 1709
+  },
+  "stork": {
+   "x": 2263,
+   "y": 1912
+  },
+  "stag_beetle": {
+   "x": 2458,
+   "y": 1914
   }
  },
  "piles": [
@@ -667,8 +667,8 @@
   {
    "id": "pmvuvbh501",
    "name": "Flat Food",
-   "x": 2827,
-   "y": 154,
+   "x": 2706,
+   "y": 297,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -681,8 +681,8 @@
   {
    "id": "pmvuvbuyy0",
    "name": "Food Engine",
-   "x": 2819,
-   "y": 551,
+   "x": 3527,
+   "y": 294,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -697,8 +697,8 @@
   {
    "id": "pmvuvfv1o1",
    "name": "Tokens",
-   "x": 1372,
-   "y": 1083,
+   "x": 3136,
+   "y": -682,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -728,8 +728,8 @@
   {
    "id": "pmvuvichj3",
    "name": "Eggs",
-   "x": 2650,
-   "y": -297,
+   "x": 3141,
+   "y": -1064,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -743,8 +743,8 @@
   {
    "id": "pmvuvkcu74",
    "name": "Deck Thinning",
-   "x": 3478,
-   "y": -295,
+   "x": 3943,
+   "y": -1070,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -827,6 +827,10 @@
   "sardine": {
    "flag": true,
    "note": "it's extra placement, idk"
+  },
+  "stag_beetle": {
+   "flag": true,
+   "note": "feels a bit random"
   }
  }
 }
