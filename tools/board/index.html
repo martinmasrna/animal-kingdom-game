@@ -39,7 +39,11 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
 .pile .ph .gap { flex: 1; }
 .pile .ph button { font: 500 calc(46px * var(--s))/1.2 system-ui, sans-serif; border: 1px solid var(--pile-line); background: #fff; border-radius: calc(12px * var(--s)); padding: calc(6px * var(--s)) calc(22px * var(--s)); color: var(--ink); cursor: pointer; }
 .pile .ph button:hover { background: #f1f0ec; }
-.pile .ph button { visibility: hidden; flex: none; } .pile .ph:hover button { visibility: visible; }
+.pile .ph button { visibility: hidden; flex: none; display: inline-flex; align-items: center; } .pile .ph:hover button, .pile .ph.open button { visibility: visible; }
+.pile .ph button svg { width: 1.15em; height: 1.15em; }
+.pile .pal { display: none; gap: calc(12px * var(--s)); align-items: center; }
+.pile .ph.open .pal { display: flex; }
+.pile .pal button { width: 1.6em; height: 1.6em; padding: 0; border-radius: 50%; }
 .pile .rs { position: absolute; right: -8px; top: 92px; bottom: 0; width: 16px; cursor: ew-resize; }
 .pile.stacked .rs { display: none; }
 .pile .ghost { position: absolute; width: 180px; height: 264px; border-radius: 9px; background: #5a4630; box-shadow: 0 0 0 2px var(--table); }
@@ -65,6 +69,14 @@ import { cardHTML, fitNames } from '/static/card.js';
 
 const W = 180, H = Math.round(180 * 1.467), G = 14, PAD = 16, HEAD = 92, PER_ROW = 24;
 const $ = s => document.querySelector(s);
+// a pile's soft colour, as a sheet's fill colours: none, then the usual pale ones
+const TINT = { none: '', red: '#f6d6d1', orange: '#f9e1c6', yellow: '#f5ecb7', green: '#d7ebcf', blue: '#d4e3f5', purple: '#e4d9f2', grey: '#d9d7d2' };
+const svg = b => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">${b}</svg>`;
+const ICON = {
+  stack: svg('<rect x="7" y="3" width="12" height="15" rx="2"/><path d="M5 6v13a2 2 0 0 0 2 2h9"/>'),   // squared into one stack
+  spread: svg('<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="9" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),
+  tint: svg('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/>'),
+};
 const view = $('#view'), world = $('#world');
 
 let CARDS = {}, B = { rev: 0, cards: {}, piles: [] };
@@ -129,13 +141,14 @@ function draw() {
     if (!el) {
       el = pileEls[p.id] = world.insertBefore(document.createElement('div'), world.firstChild);
       el.className = 'pile'; el.dataset.pile = p.id;
-      el.innerHTML = `<div class="ph"><span class="nm"></span><span class="gap"></span><button data-act="stack"></button><button data-act="del" title="Remove the pile; its cards stay on the table">×</button></div><div class="rs"></div>`;
+      el.innerHTML = `<div class="ph"><span class="nm"></span><span class="gap"></span><span class="pal">${Object.entries(TINT).map(([k, c]) => `<button data-tint="${k}" title="${k}" style="background:${c || '#fff'}"></button>`).join('')}</span><button data-act="tint" title="Colour">${ICON.tint}</button><button data-act="stack"></button><button data-act="del" title="Remove the pile; its cards stay on the table">×</button></div><div class="rs"></div>`;
     }
     const s = pileSize(p);
     el.style.transform = `translate(${p.x}px,${p.y}px)`; el.style.width = s.w + 'px'; el.style.height = s.h + 'px';
     el.classList.toggle('stacked', !!p.stacked);
     const nm = el.querySelector('.nm'); if (nm.getAttribute('contenteditable') !== 'true') nm.textContent = p.name;
-    el.querySelector('[data-act="stack"]').textContent = p.stacked ? 'Spread' : 'Stack';
+    const sb = el.querySelector('[data-act="stack"]'); sb.innerHTML = p.stacked ? ICON.spread : ICON.stack; sb.title = p.stacked ? 'Spread out' : 'Stack up';
+    el.style.background = TINT[p.tint] || '';
     el.querySelectorAll('.ghost').forEach(g => g.remove());
     if (p.stacked && p.cards.length > 1) for (const o of [2, 1].slice(0, p.cards.length - 1))
       el.insertAdjacentHTML('beforeend', `<div class="ghost" style="left:${PAD + o * 6 - 2}px;top:${HEAD + 12 - o * 6 + 2}px"></div>`);
@@ -228,6 +241,7 @@ function showIns(p, idx) {
 // ---------- pointer ----------
 let act = null, spaceDown = false;
 view.addEventListener('pointerdown', e => {
+  if (!e.target.closest('.ph.open')) document.querySelectorAll('.ph.open').forEach(h => h.classList.remove('open'));
   hidePeek();
   const t = e.target, w = toWorld(e.clientX, e.clientY);
   const nm = t.closest('.nm');
@@ -342,6 +356,8 @@ function rename(p) {
 world.addEventListener('click', e => {
   const b = e.target.closest('.ph button'); if (!b) return;
   const p = B.piles.find(p => p.id === b.closest('.pile').dataset.pile), before = snap();
+  if (b.dataset.act === 'tint') { b.closest('.ph').classList.toggle('open'); return; }
+  if (b.dataset.tint) { b.closest('.ph').classList.remove('open'); if ((p.tint || 'none') !== b.dataset.tint) { p.tint = b.dataset.tint; changed(before); } return; }
   if (b.dataset.act === 'stack') { p.stacked = !p.stacked; changed(before); }
   if (b.dataset.act === 'del') {                       // its cards stay where they lay
     p.cards.forEach((id, i) => B.cards[id] = { ...slot(p, i) });
