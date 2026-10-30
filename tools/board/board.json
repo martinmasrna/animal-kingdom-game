@@ -1,5 +1,5 @@
 {
- "rev": 933,
+ "rev": 934,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -616,9 +616,6 @@
   },
   "dart_frog": {
    "flag": true
-  },
-  "sperm_whale_legend": {
-   "note": "random?"
   },
   "wolf_legend_2": {
    "note": "isn't it too strong compared to Adira?"
