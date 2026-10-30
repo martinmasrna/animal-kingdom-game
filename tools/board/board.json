@@ -1,5 +1,5 @@
 {
- "rev": 991,
+ "rev": 992,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -74,8 +74,8 @@
   {
    "id": "pmvuurszo0",
    "name": "\"Draw 2\"",
-   "x": 170,
-   "y": 616,
+   "x": 155,
+   "y": 614,
    "cols": 9,
    "stacked": false,
    "cards": [
