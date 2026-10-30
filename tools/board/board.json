@@ -1,5 +1,5 @@
 {
- "rev": 5,
+ "rev": 9,
  "cards": {
   "butterfly_legend": {
    "x": 0,
@@ -239,14 +239,6 @@
   },
   "elephant_legend": {
    "x": 2134,
-   "y": 556
-  },
-  "cairn": {
-   "x": 2328,
-   "y": 556
-  },
-  "borealis": {
-   "x": 2522,
    "y": 556
   },
   "anaconda_legend": {
@@ -497,10 +489,6 @@
    "x": 2328,
    "y": 1522
   },
-  "snow_leopard": {
-   "x": 2522,
-   "y": 1522
-  },
   "black_panther": {
    "x": 2716,
    "y": 1522
@@ -515,10 +503,6 @@
   },
   "hippopotamus": {
    "x": 3298,
-   "y": 1522
-  },
-  "polar_bear": {
-   "x": 3492,
    "y": 1522
   },
   "rhinoceros": {
@@ -1006,5 +990,11 @@
    "y": 3176
   }
  },
- "piles": []
+ "piles": [],
+ "gone": [
+  "borealis",
+  "cairn",
+  "snow_leopard",
+  "polar_bear"
+ ]
 }
