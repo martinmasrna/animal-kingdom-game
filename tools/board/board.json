@@ -1,5 +1,5 @@
 {
- "rev": 219,
+ "rev": 233,
  "cards": {
   "mackerel": {
    "x": 3880,
@@ -104,14 +104,6 @@
   "snake_egg": {
    "x": 2087,
    "y": 3512
-  },
-  "cheetah": {
-   "x": 2885,
-   "y": 3323
-  },
-  "falcon": {
-   "x": 3086,
-   "y": 3327
   },
   "mole": {
    "x": 6460,
@@ -653,33 +645,41 @@
    "x": 4347,
    "y": 3015
   },
-  "worker_wasp": {
-   "x": 782,
-   "y": 1922
-  },
-  "worker_ant": {
-   "x": 974,
-   "y": 1922
-  },
-  "hamster": {
-   "x": 1172,
-   "y": 1926
-  },
-  "dung_beetle": {
-   "x": 589,
-   "y": 1923
-  },
   "cockroach": {
    "x": 1811,
    "y": 2238
   },
-  "hyena": {
-   "x": 1377,
-   "y": 1923
-  },
   "gazelle": {
    "x": 2720,
    "y": 2147
+  },
+  "worker_ant": {
+   "x": 1904,
+   "y": 1768
+  },
+  "worker_wasp": {
+   "x": 1712,
+   "y": 1768
+  },
+  "hamster": {
+   "x": 2102,
+   "y": 1772
+  },
+  "dung_beetle": {
+   "x": 1519,
+   "y": 1769
+  },
+  "hyena": {
+   "x": 2298,
+   "y": 1774
+  },
+  "cheetah": {
+   "x": 1936,
+   "y": 646
+  },
+  "falcon": {
+   "x": 2126,
+   "y": 645
   }
  },
  "piles": [
@@ -822,6 +822,18 @@
   "mouse": {
    "flag": true,
    "note": "idk, doesn't feel great"
+  },
+  "cheetah": {
+   "flag": true,
+   "note": "draw 2 cards?"
+  },
+  "falcon": {
+   "flag": true,
+   "note": "draw 2 would be too strong, but this feels too weak?"
+  },
+  "toad": {
+   "flag": true,
+   "note": "maybe 5 is completely fine?"
   }
  }
 }
