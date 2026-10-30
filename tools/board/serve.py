@@ -5,6 +5,7 @@ committed and pushed by itself once he stops moving things for QUIET seconds.
 
     ./board                 # http://localhost:8004
     ./board --port 8005 --no-open
+    ./board --port 8014 --no-open --board /tmp/x.json   # a test server that never touches his arrangement
 """
 from __future__ import annotations
 
@@ -102,7 +103,11 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--port", type=int, default=8004)
     ap.add_argument("--no-open", action="store_true")
+    ap.add_argument("--board", type=Path, help="the arrangement file (a test server keeps its own), never committed")
     a = ap.parse_args()
+    global BOARD, _commit
+    if a.board:
+        BOARD, _commit = a.board, lambda: None
     if not a.no_open:
         webbrowser.open(f"http://localhost:{a.port}/")
     web.run_app(make_app(), host="127.0.0.1", port=a.port, print=lambda *_: print(f"Board: http://localhost:{a.port}/"))

@@ -229,12 +229,12 @@ function showIns(p, idx) {
 // ---------- pointer ----------
 let act = null, spaceDown = false;
 view.addEventListener('pointerdown', e => {
-  if (e.button === 2) return;
   hidePeek();
   const t = e.target, w = toWorld(e.clientX, e.clientY);
   const nm = t.closest('.nm');
   if (nm && nm.getAttribute('contenteditable') === 'true') return;
-  if (e.button === 1 || spaceDown) { act = { kind: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y }; view.classList.add('panning'); }
+  // as on Miro: a drag on empty table selects; the right or middle button, or Space held, drags the table
+  if (e.button === 1 || e.button === 2 || spaceDown) { act = { kind: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y }; view.classList.add('panning'); }
   else if (t.closest('button')) return;
   else if (t.closest('.rs')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'cols', p, before: snap(), x0: w.x, c0: p.cols }; }
   else if (t.closest('.ph')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'pile', p, before: snap(), w0: w, x0: p.x, y0: p.y, moved: false }; }
@@ -247,8 +247,10 @@ view.addEventListener('pointerdown', e => {
     // a stacked pile is lifted whole from its top card
     const p = pileOf(id); const lift = p && p.stacked ? p.cards.slice() : ids;
     act = { kind: 'cards', id, ids: lift, w0: w, start: Object.fromEntries(lift.map(i => [i, { ...posOf(i) }])), before: snap(), moved: false, fresh };
-  } else if (e.shiftKey) act = { kind: 'marq', sx: e.clientX, sy: e.clientY, base: new Set(sel) };
-  else { act = { kind: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, clear: true }; view.classList.add('panning'); }
+  } else {
+    if (!e.shiftKey) { sel.clear(); draw(); }
+    act = { kind: 'marq', sx: e.clientX, sy: e.clientY, base: new Set(sel) };
+  }
   view.setPointerCapture(e.pointerId);
 });
 view.addEventListener('pointermove', e => {
@@ -282,7 +284,6 @@ view.addEventListener('pointermove', e => {
 view.addEventListener('pointerup', e => {
   const a = act; act = null; view.classList.remove('panning'); $('#marq').style.display = 'none'; $('#ins').style.display = 'none';
   if (!a) return;
-  if (a.kind === 'pan' && a.clear && Math.hypot(e.clientX - a.sx, e.clientY - a.sy) < 3) { sel.clear(); draw(); }
   if (a.kind === 'pile' && a.moved) changed(a.before);
   else if (a.kind === 'cols' && a.p.cols !== a.c0) changed(a.before);
   else if (a.kind === 'cards') {
@@ -383,6 +384,7 @@ function placePeek(e) {
   pk.style.left = x + 'px'; pk.style.top = Math.max(52, Math.min(innerHeight - h - 8, e.clientY - h / 2)) + 'px';
 }
 function hidePeek() { clearTimeout(peekT); $('#peek').style.display = 'none'; }
+view.addEventListener('contextmenu', e => e.preventDefault());
 view.addEventListener('pointerleave', () => { hidePeek(); peekId = null; });
 
 // ---------- keys ----------
