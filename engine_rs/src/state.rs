@@ -625,9 +625,8 @@ impl State {
         Some(counter)
     }
 
-    pub fn jelly_counter(&self, player: Player, card: CardId) -> i32 {
-        let base = self.card(card).base.unwrap_or(0);
-        self.cfg().jelly_strength - base - self.growth(player, card)
+    pub fn jelly_counter(&self, _player: Player, _card: CardId) -> i32 {
+        self.cfg().jelly_grant
     }
 
     pub fn growth(&self, player: Player, card: CardId) -> i32 {

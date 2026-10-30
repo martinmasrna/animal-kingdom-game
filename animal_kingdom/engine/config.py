@@ -113,9 +113,9 @@ class Config:
     gorilla_min: int = 8                 # Gorilla: draw if this has this much strength
     manta_legend_regions: int = 2        # the legendary Manta Ray: draw at Dusk with this many regions...
     manta_legend_draw: int = 2           # ...this many cards
-    capybara_bonus: int = 7              # Capybara: this has +7 strength if your starting deck has no other animal...
+    capybara_strength: int = 8           # Capybara: this has 8 strength if your starting deck has no other animal...
     capybara_small_max: int = 3          # ...of strength 4 or more (the small-deck archetype's line)
-    jelly_strength: int = 4              # the legendary Bee: "the animals in your hand and deck become strength 4"
+    jelly_grant: int = 2                 # the legendary Bee: "give your animals on the board, in your hand and in your deck +2 strength"
     vulture_removals: int = 3            # Vulture: lands at your Dusk if this many animals were removed this turn
 
     # --- Removal-strength caps on Roar removals ---

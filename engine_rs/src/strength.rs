@@ -106,7 +106,7 @@ pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64
             }
             7 => {
                 if owner <= B && !st.starting_decks[owner as usize].is_empty() && small_starting_deck(st, owner, card.idx) {
-                    bonus += cfg.int("capybara_bonus");
+                    bonus += cfg.int("capybara_strength") - card.base.unwrap_or(0);
                 }
             }
             _ => {}

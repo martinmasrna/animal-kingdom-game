@@ -170,21 +170,22 @@ def test_strength_limit_text_matches_config():
 
 
 def test_no_strength_limit_card_escapes_the_check():
-    # The Capybara's "strength 4 or more" reads the starting deck and the legendary Oxpecker's "strength 8 or more" is the
-    # coverer's size, neither a removal limit (test_capybara_numbers_match_config, and the check below).
+    # The Capybara's and the legendary Bee's "strength 4 or more" read the starting deck and the legendary Oxpecker's
+    # "strength 8 or more" is the coverer's size, none a removal limit (test_capybara_numbers_match_config, and below).
     printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
-    assert printed - {"capybara", "oxpecker_legend"} == set(STRENGTH_LIMITS)
+    assert printed - {"capybara", "bee_legend_2", "oxpecker_legend"} == set(STRENGTH_LIMITS)
     (n,) = re.findall(r"strength (\d+) or more", _cards()["oxpecker_legend"].text)
     assert int(n) == Config.default().oxpecker_legend_min
 
 
 def test_royal_jelly_number_matches_config():
-    assert int(re.search(r"become strength (\d+)", _cards()["bee_legend_2"].text).group(1)) == Config.default().jelly_strength
+    assert int(re.search(r"\+(\d+) strength", _cards()["bee_legend_2"].text).group(1)) == Config.default().jelly_grant
 
 
 def test_capybara_numbers_match_config():
     cfg, text = Config.default(), _cards()["capybara"].text
     assert int(STRENGTH_LIMIT_RE.search(text).group(1)) == cfg.capybara_small_max + 1
+    assert int(re.search(r"this has (\d+) strength", text).group(1)) == cfg.capybara_strength
 
 
 STRENGTH_LOSS_RE = re.compile(r"(?:gets?|enemy) -(\d+) strength", re.IGNORECASE)
@@ -309,7 +310,7 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 # card_id -> config attrs, one per printed "+N strength" (a "give" counter or a "has/have" anthem), in order. Every card
 # printing one must be listed (checked below): the launch decks brought a dozen of them at once.
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
-    "capybara": ["capybara_bonus"],
+    "bee_legend_2": ["jelly_grant"],
     "guard_wasp": ["guard_hornet_bonus"],
     "python": ["python_growth"],
     "leopard_legend": ["leopard_legend_growth"],

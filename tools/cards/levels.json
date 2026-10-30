@@ -894,9 +894,9 @@
     },
     "effect": {
       "lv": "draft",
-      "note": "Martin, 2026-10-22: 'other' cut, the Capybara's own printed 2 never counts",
+      "note": "Martin, 2026-10-30: a set strength, so the legendary Bee's +2 adds on top",
       "by": "claude",
-      "at": 1792684067,
+      "at": 1793389564,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-22: 'other' cut, the Capybara's own printed 2 never counts",
@@ -5889,9 +5889,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin 2026-10-25: 5 carried the Capybara Rodents list hard in his gauntlet (4-1 in games it landed, 1-4 without); 4 to try",
+      "note": "Martin, 2026-10-30: the Capybara's condition restored; +2 instead of becoming 4, so nothing resets",
       "by": "claude",
-      "at": 1792884610
+      "at": 1793389279
     },
     "strength": {
       "review": {

@@ -138,9 +138,9 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], so
             bonus += cfg.giraffe_bonus if their_turn else 0
         elif cid == "crocodile":                # -3 during your opponent's turn
             bonus -= cfg.crocodile_penalty if their_turn else 0
-        elif cid == "capybara":                 # +7 if your starting deck holds no other animal of 4 or more
+        elif cid == "capybara":                 # 8 if your starting deck holds no other animal of 4 or more
             if state.starting_decks.get(owner) and small_starting_deck(state, owner, cid):
-                bonus += cfg.capybara_bonus
+                bonus += cfg.capybara_strength - state.cards[cid].base_strength
 
     for u in tops:
         aura = FAMILY_AURAS.get(u.card_id)

@@ -1482,7 +1482,7 @@
         "Rodent"
       ],
       "base_strength": 2,
-      "text": "If your starting deck has no animal of strength 4 or more, this has +7 strength.",
+      "text": "If your starting deck has no animal of strength 4 or more, this has 8 strength.",
       "species": "Capybara",
       "habitat": "Jungle",
       "keywords": []
@@ -3661,7 +3661,7 @@
         "Colony"
       ],
       "base_strength": 1,
-      "text": "Roar: your animals on the board, in your hand and in your deck become strength 4.",
+      "text": "Roar: if your starting deck has no animal of strength 4 or more, give your animals on the board, in your hand and in your deck +2 strength.",
       "species": "Bee",
       "habitat": "Meadow",
       "unnamed": true,

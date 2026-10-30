@@ -25,7 +25,7 @@ from typing import Callable, Optional
 from .actions import SKIP, ChoiceAction, PlaceAction, RoamAction
 from .state import WILD, EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
-from .strength import effective_strength, placement_strength, raw_strength
+from .strength import effective_strength, placement_strength, raw_strength, small_starting_deck
 
 
 # ============================================================== pending / requests
@@ -3024,14 +3024,16 @@ def _baboon_legend_sot(state, unit, cr):
 
 
 def _bee_legend_2_place(state, unit, cr):
-    """Royal jelly: "Roar: your animals on the board, in your hand and in your deck become strength 5." Each on the board (itself included, the
-    top animals and those buried) and in hand gains or loses the difference as a buff would (one in hand that grows
-    there reacts, the Butterfly evolving); the deck's copies come out at it (GameState.deck_instance)."""
+    """Royal jelly: "Roar: if your starting deck has no animal of strength 4 or more, give your animals on the board, in
+    your hand and in your deck +2 strength." (The Capybara's condition.) Each on the board (itself included, the top
+    animals and those buried) and in hand is given +2 as a buff (one in hand that grows there reacts, the Butterfly
+    evolving); the deck's copies come out with it (GameState.deck_instance)."""
     p = unit.owner
+    if not small_starting_deck(state, p, unit.card_id):
+        return
     state.jelly[p] = {cid: [state.decks[p].count(cid), state.jelly_counter(p, cid)] for cid in set(state.decks[p])}
     mine = [u for stack in state.board.values() for u in stack if u.owner == p] + list(state.hands[p])
-    for inst in mine:
-        _grant(state, [inst.iid], state.jelly_counter(p, inst.card_id) - inst.strength_counter)
+    _grant(state, [inst.iid for inst in mine], state.config.jelly_grant)
 
 
 def _gorilla_legend_place(state, unit, cr):

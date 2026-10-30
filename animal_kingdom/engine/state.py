@@ -435,11 +435,9 @@ class GameState:
         return counter
 
     def jelly_counter(self, player: str, card_id: str) -> int:
-        """The stored counter that makes a copy of `card_id` strength `jelly_strength` now (its printed strength, a dynamic
-        one as 0, plus any growth its card id carries). Fixed at the Roar: growth after it adds on top, in the deck too."""
-        card = self.cards[card_id]
-        base = card.base_strength if isinstance(card.base_strength, int) else 0
-        return self.config.jelly_strength - base - self.card_strength_counters.get(player, {}).get(card_id, 0)
+        """The stored counter the royal jelly gives a copy of `card_id` left in the deck: +2, on top of any growth its card id
+        carries."""
+        return self.config.jelly_grant
 
     def eaten_form(self, player: str, card_id: str) -> str:
         """The legendary Dung Beetle's form reached ("Evolves when your Hungry animals have eaten N food"), by the food

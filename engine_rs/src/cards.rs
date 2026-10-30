@@ -1254,6 +1254,11 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             grant(st, iids, g);
         }
         ("bee_legend_2", OnPlace) => {
+            // "Roar: if your starting deck has no animal of strength 4 or more, give your animals on the board, in your
+            // hand and in your deck +2 strength." As in Python.
+            if !crate::strength::small_starting_deck(st, owner, unit.card) {
+                return;
+            }
             let p = owner as usize;
             let mut distinct: Vec<CardId> = Vec::new();
             for c in &st.decks[p] {
@@ -1270,10 +1275,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
             let mut mine: Vec<Unit> = st.order.iter().flat_map(|&c| st.stacks[c as usize].iter().filter(|u| u.owner == owner).cloned()).collect();
             mine.extend(st.hands[p].iter().cloned());
-            for inst in mine {
-                let d = st.jelly_counter(owner, inst.card) - inst.strength_counter as i32;
-                grant(st, vec![inst.iid], d);
-            }
+            let g = st.cfg().jelly_grant;
+            grant(st, mine.iter().map(|u| u.iid).collect(), g);
         }
         ("butterfly_legend", OnDawnInHand) | ("butterfly_legend", OnStartOfTurn) | ("butterfly_legend", OnGain)
         | ("butterfly_legend_caterpillar", OnDawnInHand) | ("butterfly_legend_caterpillar", OnStartOfTurn) | ("butterfly_legend_caterpillar", OnGain)

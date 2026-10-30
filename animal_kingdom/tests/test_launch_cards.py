@@ -1314,44 +1314,52 @@ def test_stag_beetle_counts_armor_including_an_armadillos_gift():
     assert s.food["A"] == 2 * CFG.stag_beetle_per_armor
 
 
-def test_royal_jelly_makes_your_animals_five_wherever_they_are():
+def test_royal_jelly_gives_your_animals_two_wherever_they_are_when_the_starting_deck_is_small():
     from animal_kingdom.engine.strength import effective_strength
-    s = make_state(hands={"A": ["bee_legend_2", "raven", "lion"]}, decks={"A": ["snake_egg", "lion", "raven"], "B": []})
+    s = make_state(hands={"A": ["bee_legend_2", "raven", "worker_ant"]}, decks={"A": ["snake_egg", "raven", "raven"], "B": []})
+    s.starting_decks = {"A": ("bee_legend_2", "raven", "worker_ant", "snake_egg", "raven", "raven"), "B": ()}
     on_board = put(s, "1,1", "worker_bee", "A")
     enemy = put(s, "4,2", "worker_bee", "B")
     rules.apply_action(s, PlaceAction("bee_legend_2", ("cr", "1,2")))
-    five = CFG.jelly_strength
-    assert effective_strength(s, s.top_unit("1,2")) == five                     # itself
-    assert effective_strength(s, on_board) == five and effective_strength(s, enemy) == load_cards()["worker_bee"].base_strength   # yours on the board, not theirs
-    assert {u.card_id: effective_strength(s, u) for u in s.hands["A"]} == {"raven": five, "lion": five}   # a 7 too
+    g, base = CFG.jelly_grant, lambda cid: load_cards()[cid].base_strength
+    assert effective_strength(s, s.top_unit("1,2")) == base("bee_legend_2") + g                 # itself
+    assert effective_strength(s, on_board) == base("worker_bee") + g and effective_strength(s, enemy) == base("worker_bee")
+    assert {u.card_id: effective_strength(s, u) for u in s.hands["A"]} == {"raven": base("raven") + g, "worker_ant": base("worker_ant") + g}
     drawn = s.draw("A", 3)
-    assert [effective_strength(s, u) for u in drawn] == [five] * 3              # the deck's copies come out at it
-    s.decks["A"].append("lion")                                                 # shuffled in later: untouched
-    assert effective_strength(s, s.draw("A", 1)[0]) == 7
+    assert [effective_strength(s, u) for u in drawn] == [base(u.card_id) + g for u in drawn]    # the deck's copies come out with it
+    s.decks["A"].append("raven")                                                # shuffled in later: untouched
+    assert effective_strength(s, s.draw("A", 1)[0]) == base("raven")
 
 
-def test_royal_jelly_sets_five_at_the_roar_and_a_pythons_growth_in_the_deck_stays():
-    """Martin's game HFMRHG (2026-10-22): two Pythons drawn after the Roar showed 7 and 5, each set to 5 when drawn, which
-    erased the growth it had in the deck. Both are 5 at the Roar, and every removal since grows both."""
+def test_royal_jelly_does_nothing_when_the_starting_deck_has_a_four():
+    from animal_kingdom.engine.strength import effective_strength
+    s = make_state(hands={"A": ["bee_legend_2", "raven"]}, decks={"A": ["raven"], "B": []})
+    s.starting_decks = {"A": ("bee_legend_2", "raven", "raven", "lion"), "B": ()}
+    rules.apply_action(s, PlaceAction("bee_legend_2", ("cr", "1,2")))
+    assert effective_strength(s, s.hands["A"][0]) == load_cards()["raven"].base_strength
+
+
+def test_royal_jelly_adds_to_a_pythons_growth_and_never_resets_it():
+    """Martin, 2026-10-30: "become strength 4" reset a grown Python; +2 adds on top of whatever it has."""
     from animal_kingdom.engine.effects import remove_top
     from animal_kingdom.engine.strength import effective_strength
     s = make_state(hands={"A": ["bee_legend_2"]}, decks={"A": ["python", "python"], "B": []})
-    rules.apply_action(s, PlaceAction("bee_legend_2", ("cr", "1,2")))
+    s.starting_decks = {"A": ("bee_legend_2", "python", "python"), "B": ()}
     for cr in ("4,1", "4,3"):
-        put(s, cr, "worker_ant", "B"); remove_top(s, cr, by_player="A")
-    first = s.draw("A", 1)[0]
-    put(s, "4,2", "worker_ant", "B"); remove_top(s, "4,2", by_player="A")
-    second = s.draw("A", 1)[0]
-    assert effective_strength(s, first) == effective_strength(s, second) == CFG.jelly_strength + 3
+        put(s, cr, "worker_ant", "B"); remove_top(s, cr, by_player="A")             # 2 grown in the deck before the Roar
+    rules.apply_action(s, PlaceAction("bee_legend_2", ("cr", "1,2")))
+    put(s, "4,2", "worker_ant", "B"); remove_top(s, "4,2", by_player="A")           # and 1 after
+    first, second = s.draw("A", 2)
+    assert effective_strength(s, first) == effective_strength(s, second) == 3 + CFG.jelly_grant
 
 
-def test_the_capybara_is_a_nine_when_the_rest_of_the_starting_deck_is_small():
+def test_the_capybara_is_an_eight_when_the_rest_of_the_starting_deck_is_small():
     from animal_kingdom.engine.strength import effective_strength
     small = make_state(hands={"A": ["capybara"]})
     small.starting_decks = {"A": ("capybara", "capybara", "raven", "snake_egg", "magpie"), "B": ()}
     big = make_state(hands={"A": ["capybara"]})
     big.starting_decks = {"A": ("capybara", "raven", "lynx"), "B": ()}       # the Lynx is a 5
-    assert effective_strength(small, small.hands["A"][0]) == 2 + CFG.capybara_bonus == 9
+    assert effective_strength(small, small.hands["A"][0]) == CFG.capybara_strength == 8
     assert effective_strength(big, big.hands["A"][0]) == 2
 
 

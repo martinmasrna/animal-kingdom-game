@@ -456,7 +456,7 @@ pub struct Config {
     pub mulligan_max: Option<i32>,
     pub first_player_opening_draw: i32,
     pub second_player_opening_draw: i32,
-    pub jelly_strength: i32,
+    pub jelly_grant: i32,
     pub egg_eater_growth: i32,
     pub capybara_small_max: i32,
 }
@@ -476,7 +476,7 @@ impl Config {
             mulligan_max: raw.get("mulligan_max").and_then(|x| x.as_i64()).map(|x| x as i32),
             first_player_opening_draw: gi("first_player_opening_draw", 4),
             second_player_opening_draw: gi("second_player_opening_draw", 4),
-            jelly_strength: gi("jelly_strength", 4),
+            jelly_grant: gi("jelly_grant", 2),
             egg_eater_growth: gi("egg_eater_growth", 2),
             capybara_small_max: gi("capybara_small_max", 3),
             raw,
