@@ -1,5 +1,5 @@
 {
- "rev": 919,
+ "rev": 921,
  "cards": {
   "stag_beetle": {
    "x": 1132,
@@ -581,7 +581,6 @@
   "forager_ant",
   "muskrat",
   "dingo",
-  "greywhisker",
   "wolf_legend",
   "swan_legend",
   "goose_legend",
@@ -592,10 +591,6 @@
   "mouse": {
    "flag": true,
    "note": "idk, doesn't feel great"
-  },
-  "cheetah": {
-   "flag": true,
-   "note": "draw 2 cards?"
   },
   "falcon": {
    "flag": true,
