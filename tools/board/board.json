@@ -1,41 +1,9 @@
 {
- "rev": 447,
+ "rev": 514,
  "cards": {
-  "mole": {
-   "x": 6460,
-   "y": 1416
-  },
-  "termite_queen": {
-   "x": 6659,
-   "y": 1415
-  },
-  "remora": {
-   "x": 6856,
-   "y": 1414
-  },
-  "ocelot": {
-   "x": 7059,
-   "y": 1419
-  },
   "chameleon": {
    "x": 8078,
    "y": 1382
-  },
-  "beaver": {
-   "x": 8281,
-   "y": 1384
-  },
-  "hercules_beetle": {
-   "x": 8482,
-   "y": 1385
-  },
-  "impala": {
-   "x": 6454,
-   "y": 1704
-  },
-  "electric_eel": {
-   "x": 7879,
-   "y": 1387
   },
   "army_ant_legend": {
    "x": 12135,
@@ -281,34 +249,6 @@
    "x": 14269,
    "y": 1985
   },
-  "termite_king": {
-   "x": 6205,
-   "y": 2842
-  },
-  "earthworm": {
-   "x": 5429,
-   "y": 2286
-  },
-  "dart_frog": {
-   "x": 5235,
-   "y": 2286
-  },
-  "tarsier": {
-   "x": 7175,
-   "y": 2286
-  },
-  "cuckoo": {
-   "x": 7757,
-   "y": 2286
-  },
-  "tarantula": {
-   "x": 6011,
-   "y": 2842
-  },
-  "vole": {
-   "x": 7563,
-   "y": 2286
-  },
   "toad": {
    "x": 1120,
    "y": -969
@@ -357,26 +297,6 @@
    "x": 2350,
    "y": 1508
   },
-  "manta_ray": {
-   "x": 7041,
-   "y": 2713
-  },
-  "groundhog": {
-   "x": 7275,
-   "y": 1914
-  },
-  "skunk": {
-   "x": 7898,
-   "y": 2823
-  },
-  "okapi": {
-   "x": 7468,
-   "y": 1913
-  },
-  "dormouse": {
-   "x": 7661,
-   "y": 1914
-  },
   "queen_bee": {
    "x": 6391,
    "y": 2301
@@ -385,33 +305,37 @@
    "x": 6583,
    "y": 2302
   },
-  "orangutan": {
-   "x": 6778,
-   "y": 2301
-  },
-  "coyote": {
-   "x": 6174,
-   "y": 1972
-  },
-  "queen_ant": {
-   "x": 5816,
-   "y": 2841
-  },
-  "golden_orb_weaver": {
-   "x": 8440,
-   "y": 2088
-  },
   "flying_squirrel": {
    "x": 8092,
    "y": 2241
   },
-  "jackal": {
-   "x": 8108,
-   "y": 1781
+  "tarantula": {
+   "x": 7344,
+   "y": 1699
   },
-  "magpie": {
-   "x": 8316,
-   "y": 1774
+  "earthworm": {
+   "x": 7775,
+   "y": 1354
+  },
+  "dart_frog": {
+   "x": 7581,
+   "y": 1354
+  },
+  "skunk": {
+   "x": 7638,
+   "y": 2106
+  },
+  "queen_ant": {
+   "x": 6718,
+   "y": 1316
+  },
+  "orangutan": {
+   "x": 6948,
+   "y": 1794
+  },
+  "tarsier": {
+   "x": 7283,
+   "y": 2086
   }
  },
  "piles": [
@@ -616,23 +540,26 @@
   {
    "id": "pmvuvrsm76",
    "name": "Utility",
-   "x": 9567,
-   "y": 1663,
+   "x": 9040,
+   "y": 1562,
    "cols": 5,
    "stacked": false,
    "cards": [
     "macaw",
     "woodpecker",
+    "beaver",
     "opossum",
     "raccoon",
-    "octopus"
+    "hercules_beetle",
+    "vole",
+    "coyote"
    ]
   },
   {
    "id": "pmvuvs4vt7",
    "name": "Big Bodies",
-   "x": 9905,
-   "y": 2334,
+   "x": 6950,
+   "y": 832,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -645,9 +572,9 @@
   {
    "id": "pmvuvsdpj8",
    "name": "Removal",
-   "x": 8797,
-   "y": 3143,
-   "cols": 5,
+   "x": 5450,
+   "y": -439,
+   "cols": 6,
    "stacked": false,
    "cards": [
     "jaguar",
@@ -655,6 +582,7 @@
     "hawk",
     "honey_badger",
     "cottonmouth",
+    "jackal",
     "albatross",
     "black_mamba",
     "chimpanzee",
@@ -665,8 +593,8 @@
   {
    "id": "pmvuvsvrj9",
    "name": "Auras",
-   "x": 6809,
-   "y": 3461,
+   "x": 5726,
+   "y": 837,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -678,8 +606,8 @@
   {
    "id": "pmvuvu3rf10",
    "name": "Walls",
-   "x": 6816,
-   "y": 3069,
+   "x": 5730,
+   "y": 446,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -691,8 +619,8 @@
   {
    "id": "pmvuvu9p511",
    "name": "Apex Predators",
-   "x": 6803,
-   "y": 3846,
+   "x": 6951,
+   "y": 446,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -705,15 +633,61 @@
   {
    "id": "pmvuw0k7c12",
    "name": "Draw",
-   "x": 8918,
-   "y": 2566,
-   "cols": 4,
+   "x": 6825,
+   "y": -448,
+   "cols": 5,
    "stacked": false,
    "cards": [
     "hummingbird",
     "meerkat",
+    "termite_king",
     "dhole",
+    "manta_ray",
     "lynx"
+   ]
+  },
+  {
+   "id": "pmvuw2jze13",
+   "name": "Tech",
+   "x": 9038,
+   "y": 1171,
+   "cols": 6,
+   "stacked": false,
+   "cards": [
+    "golden_orb_weaver",
+    "cuckoo",
+    "octopus",
+    "magpie",
+    "electric_eel"
+   ],
+   "tint": "red"
+  },
+  {
+   "id": "pmvuw3q0s14",
+   "name": "Extra Placement",
+   "x": 7835,
+   "y": -448,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "remora",
+    "termite_queen",
+    "mole",
+    "ocelot",
+    "impala"
+   ]
+  },
+  {
+   "id": "pmvuw59lk15",
+   "name": "Engines",
+   "x": 8209,
+   "y": 446,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "okapi",
+    "groundhog",
+    "dormouse"
    ]
   }
  ],
@@ -803,6 +777,9 @@
    "flag": true
   },
   "skunk": {
+   "flag": true
+  },
+  "vole": {
    "flag": true
   }
  }
