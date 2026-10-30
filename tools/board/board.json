@@ -1,10 +1,6 @@
 {
- "rev": 145,
+ "rev": 173,
  "cards": {
-  "sardine": {
-   "x": 582,
-   "y": 1932
-  },
   "alley_cat": {
    "x": 970,
    "y": 1932
@@ -13,24 +9,12 @@
    "x": 1164,
    "y": 1932
   },
-  "chipmunk": {
-   "x": 1358,
-   "y": 1932
-  },
   "cockroach": {
    "x": 1552,
    "y": 1932
   },
   "dung_beetle": {
    "x": 1746,
-   "y": 1932
-  },
-  "krill": {
-   "x": 2134,
-   "y": 1932
-  },
-  "capybara": {
-   "x": 3298,
    "y": 1932
   },
   "gazelle": {
@@ -45,22 +29,6 @@
    "x": 4074,
    "y": 1932
   },
-  "praying_mantis": {
-   "x": 194,
-   "y": 2210
-  },
-  "soldier_ant": {
-   "x": 388,
-   "y": 2210
-  },
-  "street_dog": {
-   "x": 582,
-   "y": 2210
-  },
-  "vulture": {
-   "x": 776,
-   "y": 2210
-  },
   "worker_ant": {
    "x": 970,
    "y": 2210
@@ -71,10 +39,6 @@
   },
   "bush_dog": {
    "x": 1552,
-   "y": 2210
-  },
-  "deer": {
-   "x": 1746,
    "y": 2210
   },
   "fox": {
@@ -89,14 +53,6 @@
    "x": 2328,
    "y": 2210
   },
-  "rabbit": {
-   "x": 3104,
-   "y": 2210
-  },
-  "sloth": {
-   "x": 3686,
-   "y": 2210
-  },
   "guard_bee": {
    "x": 3880,
    "y": 2210
@@ -107,10 +63,6 @@
   },
   "african_wild_dog": {
    "x": 194,
-   "y": 2488
-  },
-  "barracuda": {
-   "x": 776,
    "y": 2488
   },
   "city_spider": {
@@ -151,18 +103,6 @@
   },
   "stork": {
    "x": 2910,
-   "y": 2488
-  },
-  "sunfish": {
-   "x": 3104,
-   "y": 2488
-  },
-  "warthog": {
-   "x": 3492,
-   "y": 2488
-  },
-  "wolverine": {
-   "x": 3686,
    "y": 2488
   },
   "anaconda": {
@@ -733,10 +673,6 @@
    "x": 7563,
    "y": 2286
   },
-  "nurse_bumblebee": {
-   "x": 2235,
-   "y": 824
-  },
   "peacock": {
    "x": 2423,
    "y": 1655
@@ -744,10 +680,6 @@
   "marmot": {
    "x": 2620,
    "y": 1653
-  },
-  "nurse_bee": {
-   "x": 4363,
-   "y": 1438
   },
   "guard_wasp": {
    "x": 2816,
@@ -765,57 +697,61 @@
    "x": 3011,
    "y": 1649
   },
-  "rat": {
-   "x": 3485,
-   "y": 1389
+  "chipmunk": {
+   "x": 1522,
+   "y": 1461
   },
-  "serval": {
-   "x": 3878,
-   "y": 1390
+  "sardine": {
+   "x": 44,
+   "y": 1664
   },
-  "macaque": {
-   "x": 3681,
-   "y": 1390
+  "vulture": {
+   "x": 242,
+   "y": 1661
   },
-  "bat": {
-   "x": 2236,
-   "y": 547
+  "nurse_bee": {
+   "x": 3459,
+   "y": 984
   },
-  "badger": {
-   "x": 2041,
-   "y": 546
+  "praying_mantis": {
+   "x": 3658,
+   "y": 987
   },
-  "oxpecker": {
-   "x": 2043,
-   "y": 824
+  "krill": {
+   "x": 769,
+   "y": 1377
   },
-  "owl": {
-   "x": 1849,
-   "y": 826
+  "street_dog": {
+   "x": 965,
+   "y": 1375
   },
-  "dolphin": {
-   "x": 1845,
-   "y": 547
+  "sloth": {
+   "x": 2109,
+   "y": 1461
   },
-  "bobcat": {
-   "x": 2427,
-   "y": 825
+  "capybara": {
+   "x": 3209,
+   "y": 1650
   },
-  "butterfly": {
-   "x": 2427,
-   "y": 547
+  "sunfish": {
+   "x": 3948,
+   "y": 3015
   },
-  "raven": {
-   "x": 2621,
-   "y": 546
+  "deer": {
+   "x": 4145,
+   "y": 3018
+  },
+  "rabbit": {
+   "x": 4347,
+   "y": 3015
   }
  },
  "piles": [
   {
    "id": "pmvutpeh30",
    "name": "Vanilla Anchors",
-   "x": 187,
-   "y": 295,
+   "x": 139,
+   "y": -495,
    "cols": 6,
    "stacked": false,
    "cards": [
@@ -831,6 +767,42 @@
     "toad"
    ],
    "tint": "blue"
+  },
+  {
+   "id": "pmvuubgcv0",
+   "name": "Removal",
+   "x": 132,
+   "y": 174,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "rat",
+    "macaque",
+    "serval",
+    "soldier_ant",
+    "barracuda",
+    "wolverine",
+    "warthog"
+   ]
+  },
+  {
+   "id": "pmvuubz3o1",
+   "name": "Cantrips & Tutors",
+   "x": 946,
+   "y": 170,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "badger",
+    "raven",
+    "dolphin",
+    "bat",
+    "butterfly",
+    "oxpecker",
+    "nurse_bumblebee",
+    "bobcat",
+    "owl"
+   ]
   }
  ],
  "gone": [
