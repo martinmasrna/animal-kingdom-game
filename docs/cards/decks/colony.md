@@ -27,10 +27,10 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Nurse Bee** | 2 | Colony, Nurse | 2 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. |
+| **Nurse Bee** | 2 | Colony, Nurse | 2 | Flight. Roar: if you control 5 or more Colony animals, draw 2 cards. |
 | **Nurse Bumblebee** | 3 | Colony, Nurse | 3 | Flight. Roar: draw a Colony animal. |
-| **Soldier Wasp** | 3 | Colony, Soldier | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. |
-| **Soldier Ant** | 3 | Colony, Soldier | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
+| **Soldier Wasp** | 3 | Colony, Soldier | 3 | Flight. Has +4 strength while you control 5 or more Colony animals. |
+| **Soldier Ant** | 3 | Colony, Soldier | 2 | Roar: if you control 5 or more Colony animals, remove an adjacent enemy. |
 | **Worker Ant** | 3 | Colony, Worker | 2 | Roar: gain 3 food for each animal you control. |
 | **Worker Wasp** | 3 | Colony, Worker | 2 | Flight. Whenever you place a Colony animal, gain 3 food. |
 | **Worker Bee** | 3 | Colony, Worker | 2 | Flight. Roar: gain 12 food. |

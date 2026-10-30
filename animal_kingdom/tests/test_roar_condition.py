@@ -30,19 +30,20 @@ def test_another_cat_means_a_cat_other_than_the_one_being_played():
 
 def test_colony_threshold_counts_the_card_itself():
     s = make_state()
-    for cr in ("1,1", "1,2"):
+    for cr in ("1,1", "1,2", "2,2"):
         put(s, cr, "worker_ant", "A")
-    assert roar_condition(s, "A", "soldier_ant") is False  # 2 + itself = 3
+    assert roar_condition(s, "A", "soldier_ant") is False  # 3 + itself = 4
     put(s, "1,3", "worker_ant", "A")
-    assert roar_condition(s, "A", "soldier_ant") is True   # 3 + itself = 4
+    assert roar_condition(s, "A", "soldier_ant") is True   # 4 + itself = 5
     ant = put(s, "2,1", "soldier_ant", "A")
     assert roar_condition(s, "A", "soldier_ant", ant) is True
 
 
-def test_nurse_bee_from_hand_counts_itself_toward_four_colony():
+def test_nurse_bee_from_hand_counts_itself_toward_five_colony():
     s = make_state()
     put(s, "1,1", "worker_ant", "A")
     put(s, "1,2", "worker_ant", "A")
+    put(s, "2,2", "worker_ant", "A")
     assert not roar_condition(s, "A", "nurse_bee")
     put(s, "1,3", "worker_ant", "A")
     assert roar_condition(s, "A", "nurse_bee") is True

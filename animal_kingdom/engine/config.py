@@ -62,8 +62,8 @@ class Config:
                                           # top of its crossroad - see rules overview.md 9.1)
 
     # --- Strength anthems ("has +X", live; decision E) ---
-    guard_hornet_bonus: int = 3          # while >= threshold Colony units
-    guard_hornet_colony_threshold: int = 4
+    guard_hornet_bonus: int = 4          # while >= threshold Colony units
+    guard_hornet_colony_threshold: int = 5
     mahi_mahi_anthem: int = 1            # Mahi-mahi: your other Fish have +1 (the Mackerel's aura, Martin 2026-10-30)
     tuna_per_fish: int = 1               # Tuna: +1 for each other Fish you control
     giraffe_bonus: int = 3               # Giraffe: +3 during your opponent's turn (5 on a 4 until 2026-10-26)
@@ -106,7 +106,7 @@ class Config:
     leopard_legend_growth: int = 1       # the legendary Leopard: +1 strength whenever it removes an animal (every kill makes him bigger)
 
     # --- Thresholds / strength gates ---
-    colony_synergy_threshold: int = 4    # Guard Wasp / Soldier Ant / Nurse Bumblebee "4+ Colony"
+    colony_synergy_threshold: int = 5    # Nurse Bee / Soldier Ant "5 or more Colony"
     hare_played_min: int = 3             # Hare and Rat: their Roar if you played this many animals this turn
     hare_draw: int = 2                   # ...this many cards
     macaque_hand_min: int = 5            # Macaque: remove if you have this many cards in hand
@@ -164,7 +164,7 @@ class Config:
     black_bear_draw: int = 2            # baseline-ruler tuning 2026-07-13: 1→2 (draw-1 too weak vs draw-2 default)
     raven_draw: int = 3                 # Raven's Roar: cards drawn...
     raven_shuffle: int = 2              # ...then shuffled back from the hand
-    nurse_bee_draw: int = 2             # Nurse Bee: drawn with 4 or more Colony animals (Martin's sheet, 2026-10-24)
+    nurse_bee_draw: int = 2             # Nurse Bee: drawn with 5 or more Colony animals (Martin's sheet, 2026-10-24)
     viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
     black_mamba_max: int = 6                 # Black Mamba removes an adjacent enemy of at most this strength
     anaconda_legend_decay: int = 1                  # Eon's strength lost each time it shuffles itself back

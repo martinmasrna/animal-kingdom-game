@@ -37,14 +37,14 @@ def advance_to(state, target_tc):
 
 
 
-def test_guard_hornet_anthem_gated_on_four_colony():
+def test_guard_hornet_anthem_gated_on_five_colony():
     s = make_state()
     gh = put(s, "1,1", "guard_wasp", "A")
     assert effective_strength(s, gh) == GW
-    for cr in ("1,2", "1,3"):
+    for cr in ("1,2", "1,3", "2,2"):
         put(s, cr, "worker_ant", "A")
-    assert effective_strength(s, gh) == GW               # only 3 Colony incl. self
-    put(s, "2,1", "worker_ant", "A")                     # three more Colony -> 4 incl. self
+    assert effective_strength(s, gh) == GW               # only 4 Colony incl. self
+    put(s, "2,1", "worker_ant", "A")                     # four more Colony -> 5 incl. self
     assert effective_strength(s, gh) == GW + CFG.guard_hornet_bonus   # the anthem
 
 
@@ -685,17 +685,17 @@ def test_jaguar_and_honey_badger_respect_strength_bounds():
     assert srv.owner_of("3,2") is None and srv.owner_of("2,3") == "B"
 
 
-def test_soldier_ant_removal_gated_on_four_colony():
+def test_soldier_ant_removal_gated_on_five_colony():
     few = make_state(hands={"A": ["soldier_ant"]})
-    put(few, "1,2", "worker_ant", "A")
-    put(few, "1,3", "worker_ant", "A")
+    for cr in ("1,1", "1,2", "1,3"):
+        put(few, cr, "worker_ant", "A")
     put(few, "3,2", "tuna", "B")
-    apply_click(few, PlaceAction("soldier_ant", ("cr", "2,2")))   # only 3 Colony incl. Soldier
+    apply_click(few, PlaceAction("soldier_ant", ("cr", "2,2")))   # only 4 Colony incl. Soldier
     assert few.owner_of("3,2") == "B"
 
     many = make_state(hands={"A": ["soldier_ant"]})
-    for cr in ("1,1", "1,2", "1,3"):
-        put(many, cr, "worker_ant", "A")               # 3 + Soldier = 4 Colony
+    for cr in ("1,1", "1,2", "1,3", "2,1"):
+        put(many, cr, "worker_ant", "A")               # 4 + Soldier = 5 Colony
     put(many, "3,2", "tuna", "B")
     apply_click(many, PlaceAction("soldier_ant", ("cr", "2,2")))
     assert many.owner_of("3,2") is None
@@ -1006,10 +1006,10 @@ def test_black_mamba_removes_an_adjacent_enemy_of_strength_6_or_less():
     assert s2.top_unit("2,1").card_id == "lion"
 
 
-def test_guard_wasp_in_hand_does_not_count_itself_toward_four_colony():
+def test_guard_wasp_in_hand_does_not_count_itself_toward_five_colony():
     s = make_state(hands={"A": ["guard_wasp"]})
-    for cr in ("1,1", "1,2", "1,3"):
-        put(s, cr, "worker_ant", "A")                    # 3 Colony on the board
+    for cr in ("1,1", "1,2", "1,3", "2,2"):
+        put(s, cr, "worker_ant", "A")                    # 4 Colony on the board
     assert card_strength(s, "guard_wasp", "A") == GW   # not yet controlled: no bonus to cover with
     put(s, "2,1", "worker_ant", "A")
     assert card_strength(s, "guard_wasp", "A") == GW + CFG.guard_hornet_bonus

@@ -74,7 +74,7 @@ The ones inside who feed the brood and decide, with royal jelly, which larva bec
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Nurse Bee** | common | 2 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. | Meadow |
+| **Nurse Bee** | common | 2 | Flight. Roar: if you control 5 or more Colony animals, draw 2 cards. | Meadow |
 | **Nurse Bumblebee** | common | 3 | Flight. Roar: draw a Colony animal. | Meadow |
 
 <!-- cards:end -->
@@ -89,9 +89,9 @@ The ones at the door and the ones built to fight. Nothing alone; everything in n
 |---|---|---:|---|---|
 | **Vesper** | legendary | 3 | Flight. When an enemy covers a Colony ally, place Vesper on top of it from your hand or deck. | Forest |
 | **Hornet** | rare | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. | Forest |
-| **Soldier Ant** | common | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. | Jungle |
+| **Soldier Ant** | common | 2 | Roar: if you control 5 or more Colony animals, remove an adjacent enemy. | Jungle |
 | **Soldier Bee** | common | 3 | Flight. Spikes. | Meadow |
-| **Soldier Wasp** | common | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. | Forest |
+| **Soldier Wasp** | common | 3 | Flight. Has +4 strength while you control 5 or more Colony animals. | Forest |
 
 <!-- cards:end -->
 

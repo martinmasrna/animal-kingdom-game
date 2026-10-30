@@ -2060,9 +2060,14 @@
       "at": 1792076082
     },
     "effect": {
-      "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers. (3 base, +3: a 6 with Flight, so never a worse Eagle)",
+      "note": "Martin 2026-10-30: +4 at 5 Colony",
       "by": "claude",
-      "at": 1792076082
+      "at": 1793399965,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers. (3 base, +3: a 6 with Flight, so never a worse Eagle)",
+        "prev": "Flight. Has +3 strength while you control 4 or more Colony animals."
+      }
     },
     "animal": {
       "review": {
@@ -3071,9 +3076,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: if you control two of the same Colony animal, draw 3 cards."
       },
-      "note": "Martin's sheet, 2026-10-24",
+      "note": "Martin 2026-10-30: Colony conditions at 5",
       "by": "claude",
-      "at": 1792861464
+      "at": 1793399965
     },
     "rarity": {
       "review": {
@@ -4117,6 +4122,16 @@
       "note": "Martin's sheet, 2026-10-24: castes are tags, so Melissia can draw by them",
       "by": "claude",
       "at": 1792858795
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if you control 4 or more Colony animals, remove an adjacent enemy."
+      },
+      "note": "Martin 2026-10-30: Colony conditions at 5",
+      "by": "claude",
+      "at": 1793399965
     }
   },
   "squirrel": {
