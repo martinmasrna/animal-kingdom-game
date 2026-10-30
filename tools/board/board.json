@@ -1,5 +1,5 @@
 {
- "rev": 993,
+ "rev": 1000,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -433,7 +433,7 @@
    "name": "Right direction, might need some testing and tweaking",
    "x": 7010,
    "y": -1328,
-   "cols": 24,
+   "cols": 27,
    "stacked": false,
    "cards": [
     "butterfly_legend",
@@ -459,7 +459,9 @@
     "tuna_legend",
     "wolf_legend_2",
     "oxpecker_legend",
-    "deer_legend"
+    "deer_legend",
+    "deer_legend_2",
+    "zebra_legend"
    ],
    "tint": "yellow"
   },
@@ -472,8 +474,7 @@
    "stacked": false,
    "cards": [
     "falcon_legend",
-    "skunk_legend",
-    "zebra_legend"
+    "skunk_legend"
    ],
    "tint": "red"
   },
