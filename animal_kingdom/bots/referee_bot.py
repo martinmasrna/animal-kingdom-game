@@ -75,7 +75,7 @@ class RefereeBot(TurnSearcher):
                  quiesce: bool = False, mulligan: bool = False,
                  depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
                  den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE, deepen_chase: bool = False,
-                 den_open: bool = False, reply_min: bool = False):
+                 den_open: bool = False, reply_min: bool = False, outs: int = 0):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan, decisive=decisive)
@@ -128,6 +128,13 @@ class RefereeBot(TurnSearcher):
         # 30 points for the Capybara). With reply_min a deepened line is scored against each of the `reply_turns`
         # openings and the worst for me counts: a win is a win only when every reply they considered allows it.
         self.reply_min = reply_min
+        # Outs (2026-10-30, Martin's YFRCBG: thirty Lions, his Den Rush one step from the den, and the Expert put its
+        # Lions on 5,1 and 4,1 instead of the two open den fronts): a root's score is the mean over the sampled worlds,
+        # and a line that loses in every world is a flat loss softened by the board it hands over, so among lost lines
+        # the one that keeps more of my animals alive wins, however many of his hands it loses to. With outs, when
+        # every deepened root reads as lost, each is replayed against `outs` fresh sampled hands and the roots rank by
+        # how many of those hands fail to win, the score behind: a lost bot plays the line that needs the most from you.
+        self.outs = outs
         self._reply_openings: list[Action] = []   # the openings the last reply considered, the one it played first
         self._deepening = False             # on only while _rescore_roots scores a root's final lines
         # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
@@ -473,6 +480,29 @@ class RefereeBot(TurnSearcher):
             self._end_root_candidate(action)
             deep.append((action, score))
         self.last_search_stats["deepened_roots"] = len(deep)
+        if self.outs and deep and max(s for _, s in deep) <= -self.decisive / 2:
+            # Every deepened root reads as lost: rank them by the sampled hands they survive (a world's line scoring
+            # above the half-decisive mark, which a loss inside the sight never does), the mean score behind.
+            from .determinize import determinize
+            extra = [determinize(state, me, self.det_rng) for _ in range(self.outs)]
+            ranked = []
+            for action, score in deep:
+                if self._over_budget():
+                    return deep
+                self._begin_root_candidate(action)
+                # The staged node budget is spent by now; a greedy completion here would play a different turn than
+                # the one ranked above (drawing twice instead of placing), so each root's outs get a fresh budget.
+                self._search_nodes = 0
+                branches = self._branches_after_action(extra, action, me, complete_turn=(state.current == me))
+                self._deepening, top, self.deepen_top = True, self.deepen_top, len(branches)
+                try:
+                    alive = sum(1 for s in self._reply_scores(branches, me) if s > -self.decisive / 2)
+                finally:
+                    self._deepening, self.deepen_top = False, top
+                self._end_root_candidate(action)
+                ranked.append((action, score + alive * self.decisive))
+            self.last_search_stats["outs_roots"] = len(ranked)
+            return ranked
         return deep
 
     def _leaf_score(self, state: GameState, me: str, depth: int) -> float:

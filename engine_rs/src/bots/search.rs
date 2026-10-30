@@ -82,6 +82,7 @@ pub struct Searcher {
     pub deepen_chase: bool,
     pub den_open: bool,
     pub reply_min: bool,
+    pub outs: usize,
     // run state
     reply_openings: Vec<Action>,
     search_nodes: usize,
@@ -133,6 +134,7 @@ impl Searcher {
             deepen_chase: false,
             den_open: false,
             reply_min: false,
+            outs: 0,
             reply_openings: Vec::new(),
             search_nodes: 0,
             deepening: false,
@@ -896,6 +898,29 @@ impl Searcher {
             deep.push((action.clone(), score));
         }
         self.stats.deepened_roots = deep.len();
+        // Outs (bots/referee_bot.py): every deepened root reads as lost, so rank them by the sampled hands they survive
+        let best_deep = deep.iter().map(|(_, s)| *s).fold(f64::NEG_INFINITY, f64::max);
+        if self.outs > 0 && !deep.is_empty() && best_deep <= -self.decisive / 2.0 {
+            let extra: Vec<State> = (0..self.outs).map(|_| determinize(st, me, &mut self.det_rng)).collect();
+            let mut ranked: Vec<(Action, f64)> = Vec::with_capacity(deep.len());
+            for (action, score) in &deep {
+                if self.over_budget() {
+                    return deep;
+                }
+                self.begin_root_candidate();
+                self.search_nodes = 0; // a fresh staged budget: a greedy completion would play a different turn than the one ranked
+                let mut branches = self.branches_after_action(&extra, action, me, st.current == me);
+                let top = self.deepen_top;
+                self.deepening = true;
+                self.deepen_top = branches.len();
+                let alive = self.reply_scores(&mut branches, me).iter().filter(|s| **s > -self.decisive / 2.0).count();
+                self.deepening = false;
+                self.deepen_top = top;
+                self.end_root_candidate(action);
+                ranked.push((action.clone(), score + alive as f64 * self.decisive));
+            }
+            return ranked;
+        }
         deep
     }
 
