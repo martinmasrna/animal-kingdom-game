@@ -1,5 +1,5 @@
 {
- "rev": 572,
+ "rev": 586,
  "cards": {
   "army_ant_legend": {
    "x": 12135,
@@ -21,20 +21,8 @@
    "x": 12911,
    "y": 2541
   },
-  "locust_legend": {
-   "x": 13881,
-   "y": 1985
-  },
-  "cockroach_legend": {
-   "x": 13105,
-   "y": 1985
-  },
   "rat_legend_2": {
    "x": 11553,
-   "y": 2263
-  },
-  "leopard_legend": {
-   "x": 15045,
    "y": 2263
   },
   "wolf_legend_3": {
@@ -105,10 +93,6 @@
    "x": 12523,
    "y": 2263
   },
-  "honey_badger_legend": {
-   "x": 15821,
-   "y": 2263
-  },
   "chameleon_legend": {
    "x": 15821,
    "y": 1985
@@ -116,10 +100,6 @@
   "anaconda_legend": {
    "x": 14269,
    "y": 2541
-  },
-  "raven_legend": {
-   "x": 15627,
-   "y": 1985
   },
   "baboon_legend": {
    "x": 14075,
@@ -132,14 +112,6 @@
   "eagle_legend": {
    "x": 14463,
    "y": 1985
-  },
-  "rhinoceros_legend": {
-   "x": 13105,
-   "y": 2541
-  },
-  "sperm_whale_legend": {
-   "x": 13299,
-   "y": 2541
   },
   "oxpecker_legend": {
    "x": 13493,
@@ -172,10 +144,6 @@
   "bat_legend": {
    "x": 11747,
    "y": 1985
-  },
-  "tiger_legend": {
-   "x": 12717,
-   "y": 2541
   },
   "dung_beetle_legend": {
    "x": 12717,
@@ -260,6 +228,22 @@
   "flying_squirrel": {
    "x": 7184,
    "y": 1761
+  },
+  "leopard_legend": {
+   "x": 12991,
+   "y": 1537
+  },
+  "rhinoceros_legend": {
+   "x": 13190,
+   "y": 1543
+  },
+  "sperm_whale_legend": {
+   "x": 13393,
+   "y": 1549
+  },
+  "tiger_legend": {
+   "x": 13605,
+   "y": 1545
   }
  },
  "piles": [
@@ -648,25 +632,29 @@
    "name": "Banger",
    "x": 10851,
    "y": 1172,
-   "cols": 4,
+   "cols": 6,
    "stacked": false,
    "cards": [
     "tortoise_legend",
     "lion_legend_2",
-    "lion_legend"
+    "lion_legend",
+    "cockroach_legend",
+    "honey_badger_legend",
+    "raven_legend"
    ],
    "tint": "green"
   },
   {
    "id": "pmvuwh2be19",
-   "name": "New pile",
-   "x": 10903,
-   "y": 1619,
+   "name": "Right direction, might need some tweaking",
+   "x": 10824,
+   "y": 1607,
    "cols": 4,
    "stacked": false,
    "cards": [
     "butterfly_legend",
-    "bee_legend_2"
+    "bee_legend_2",
+    "locust_legend"
    ]
   }
  ],
