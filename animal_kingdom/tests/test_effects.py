@@ -1031,3 +1031,15 @@ def test_queen_bee_makes_the_chosen_bee_in_hand():
     assert sorted(s.pending["options"]) == ["guard_bee", "nurse_bee", "worker_bee"]
     rules.apply_action(s, ChoiceAction("nurse_bee"))
     assert hand_ids(s, "A") == ["nurse_bee"] and s.decks["A"] == []
+
+
+def test_rabbit_bunny_may_take_the_enemy_den():
+    """"Play a Bunny next to this": the den the Rabbit fronts is next to it too (Martin, 2026-10-30: in his Den Rush
+    gauntlet the Bunny was offered every neighbouring crossroad but the den)."""
+    s = make_state(hands={"A": ["rabbit"]})
+    for cr in ("1,2", "2,2", "3,2"):
+        put(s, cr, "lion", "A")
+    rules.apply_action(s, PlaceAction(card_id="rabbit", target=("cr", "4,2"), iid=hand_inst(s, "A", "rabbit").iid))
+    targets = {tuple(p["target"]) for p in s.pending["placements"]}
+    assert ("hq", "B") in targets
+    assert ("cr", "3,2") in targets and ("cr", "2,2") not in targets

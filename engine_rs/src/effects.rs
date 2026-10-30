@@ -1557,8 +1557,12 @@ fn op_play_named(st: &mut State, step: &mut Map) -> Option<Pending> {
     let allowed: Vec<CardId> = if st.hands[p].iter().any(|u| u.card == cid) { vec![cid] } else { vec![] };
     let mut placements = legal_placements(st, player, Some(&allowed), false);
     if let Some(near) = m_get_s(step, "adjacent_to").and_then(|n| st.map().cr(n)) {
-        // Rabbit: "play a Bunny next to this" (a crossroad, never a den)
-        placements.retain(|p| matches!(p, Action::Place { target: Target::Cr(c), .. } if st.map().adjacent(near, *c)));
+        // Rabbit: "play a Bunny next to this": a neighbouring crossroad, or the den it fronts (Martin, 2026-10-30)
+        placements.retain(|p| match p {
+            Action::Place { target: Target::Cr(c), .. } => st.map().adjacent(near, *c),
+            Action::Place { target: Target::Hq(h), .. } => st.map().in_front(*h, near),
+            _ => false,
+        });
     }
     if placements.is_empty() {
         return_if_fetched(st, step);

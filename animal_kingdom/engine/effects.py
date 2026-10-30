@@ -1371,9 +1371,11 @@ def _op_play_named(state, step):
         return None
     allowed = {cid} if any(u.card_id == cid for u in state.hands[player]) else set()
     placements = legal_placements(state, player, allowed)
-    near = step.get("adjacent_to")                  # Rabbit: "play a Bunny next to this" (a crossroad, never a den)
+    near = step.get("adjacent_to")                  # Rabbit: "play a Bunny next to this": a neighbouring crossroad, or the den it fronts (Martin, 2026-10-30)
     if near is not None:
-        placements = [p for p in placements if p.target[0] == "cr" and state.game_map.adjacent(near, p.target[1])]
+        placements = [p for p in placements
+                      if (p.target[0] == "cr" and state.game_map.adjacent(near, p.target[1]))
+                      or (p.target[0] == "hq" and near in state.game_map.hq_connects[p.target[1]])]
     if not placements:
         _return_if_fetched()
         return None
