@@ -1,5 +1,5 @@
 {
- "rev": 978,
+ "rev": 983,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -457,7 +457,8 @@
     "wildebeest_legend",
     "tuna_legend",
     "wolf_legend_2",
-    "oxpecker_legend"
+    "oxpecker_legend",
+    "deer_legend"
    ],
    "tint": "yellow"
   },
@@ -466,7 +467,7 @@
    "name": "Needs change",
    "x": 7009,
    "y": -529,
-   "cols": 4,
+   "cols": 5,
    "stacked": false,
    "cards": [
     "falcon_legend",
@@ -480,12 +481,11 @@
    "name": "Too weak",
    "x": 7009,
    "y": -923,
-   "cols": 4,
+   "cols": 5,
    "stacked": false,
    "cards": [
     "bat_legend",
-    "rat_legend_2",
-    "deer_legend"
+    "rat_legend_2"
    ],
    "tint": "orange"
   },
