@@ -445,9 +445,9 @@ fn sweep(st: &mut State, unit: &Unit, cr: Cr, max_attr: &str) {
     }
 }
 
-fn hq_adjacent_draw(st: &mut State, unit: &Unit, cr: Cr) {
+fn hq_adjacent_draw(st: &mut State, unit: &Unit, cr: Cr, n: i32) {
     if st.map().in_front(other(unit.owner), cr) {
-        push_draw(st, unit.owner, 1);
+        push_draw(st, unit.owner, n);
     }
 }
 
@@ -458,13 +458,17 @@ fn chipmunk(st: &mut State, unit: &Unit) {
     schedule(st, unit, 1, vmap!("op" => Value::s("gain_food"), "player" => pn(unit.owner), "amount" => Value::Int(later as i64)), false, None);
 }
 
-fn greywhisker(st: &mut State, unit: &Unit) {
+fn mole_legend(st: &mut State, unit: &Unit) {
     let o = unit.owner;
     st.effect_stack.push(vmap!("op" => Value::s("discard_choice"), "player" => pn(o)));
     push_play_extra(st, o, None, false);
     push_draw(st, o, 1);
+}
+
+fn greywhisker(st: &mut State, unit: &Unit) {
+    mole_legend(st, unit);
     let n = cfg(st, "greywhisker_food");
-    push_gain(st, o, n);
+    push_gain(st, unit.owner, n);
 }
 
 fn mole(st: &mut State, unit: &Unit, cr: Cr) {
@@ -871,7 +875,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("worker_bee", OnPlace) => gains(st, unit, "worker_bee_food"),
         // Den Rush
-        ("greywhisker", OnPlace) | ("mole_legend", OnPlace) => greywhisker(st, unit),
+        ("greywhisker", OnPlace) => greywhisker(st, unit),
+        ("mole_legend", OnPlace) => mole_legend(st, unit),
         ("rat_legend_2", OnPlace) => {
             let mut options = adjacent_enemy_unit_crossroads(st, unit, cr, true);
             options.extend(adjacent_friendly_units(st, unit, cr));
@@ -923,7 +928,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let n = cfg(st, "kitten_draw");
             draws_filtered(st, unit, "rarity:common", n);
         }
-        ("cheetah", OnPlace) | ("falcon", OnPlace) => hq_adjacent_draw(st, unit, cr),
+        ("falcon", OnPlace) => hq_adjacent_draw(st, unit, cr, 1),
+        ("cheetah", OnPlace) => { let n = cfg(st, "cheetah_draw"); hq_adjacent_draw(st, unit, cr, n) }
         ("rat", OnPlace) => {
             if conditional(st, card, unit) {
                 let t = adjacent_enemy_targets(st, unit, cr, None, None, true);

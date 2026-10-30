@@ -1029,7 +1029,14 @@
     },
     "strength": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "note": "Martin, 2026-10-30 (card board review)",
+      "at": 1793369440
     },
     "effect": {
       "lv": "draft",
@@ -1039,8 +1046,8 @@
         "prev_note": "",
         "prev": "Roar: if placed next to the opponent's den, draw a card."
       },
-      "note": "Martin, 2026-10-26: \"your opponent's den\"",
-      "at": 1793031758
+      "note": "Martin, 2026-10-30 (card board review)",
+      "at": 1793369441
     },
     "art": {
       "lv": "fine",
@@ -2481,9 +2488,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "Martin, 2026-10-28: try at 4",
+      "note": "Martin, 2026-10-30 (card board review)",
       "by": "claude",
-      "at": 1793191880
+      "at": 1793369440
     }
   },
   "jellyfish_legend": {
@@ -4944,8 +4951,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1793191880,
-      "note": "Martin, 2026-10-28: try at 4"
+      "at": 1793369440,
+      "note": "Martin, 2026-10-30 (card board review)"
     }
   },
   "locust_legend": {
@@ -5214,9 +5221,14 @@
   "mole_legend": {
     "effect": {
       "lv": "draft",
-      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "note": "Martin, 2026-10-30 (card board review): the 1 food was a leftover",
       "by": "claude",
-      "at": 1792191573
+      "at": 1793369441,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+        "prev": "Roar: gain 1 food, draw a card, play another animal, then discard a card."
+      }
     },
     "animal": {
       "note": "moved from pool to den-rush",

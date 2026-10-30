@@ -359,7 +359,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 4,
+      "base_strength": 5,
       "text": "Poison.",
       "species": "Toad",
       "habitat": "Meadow",
@@ -727,8 +727,8 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 6,
-      "text": "Roar: if this is next to your opponent's den, draw a card.",
+      "base_strength": 5,
+      "text": "Roar: if this is next to your opponent's den, draw 2 cards.",
       "species": "Cheetah",
       "habitat": "Savanna",
       "keywords": []
@@ -828,10 +828,10 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
-      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
-      "keywords": [],
+      "text": "Roar: draw a card, play another animal, then discard a card.",
       "species": "Mole",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "lion_legend",
@@ -1580,7 +1580,7 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 4,
+      "base_strength": 5,
       "text": "Poison. Your adjacent animals have Poison.",
       "species": "Jellyfish",
       "habitat": "Open Ocean",

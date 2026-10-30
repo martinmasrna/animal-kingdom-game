@@ -2359,13 +2359,18 @@ def _scout_bee_eot(state, unit, cr):
 
 # --- Den Rush ---------------------------------------------------------------------------------------------------
 
-def _greywhisker_place(state, unit, cr):
-    """Roar: gain 1 food, draw a card, play another animal, then discard a card."""
+def _mole_legend_place(state, unit, cr):
+    """Roar: draw a card, play another animal, then discard a card."""
     o = unit.owner
     state.effect_stack.append({"op": "discard_choice", "player": o})
     _push_play_extra(state, o)
     _push_draw(state, o, 1)
-    _push_gain(state, o, state.config.greywhisker_food)
+
+
+def _greywhisker_place(state, unit, cr):
+    """Roar: gain 1 food, draw a card, play another animal, then discard a card (the Mole's Roar, plus the food)."""
+    _mole_legend_place(state, unit, cr)
+    _push_gain(state, unit.owner, state.config.greywhisker_food)
 
 
 def _op_discard_choice(state, step):
@@ -2390,9 +2395,14 @@ def _falcon_legend_place(state, unit, cr):
     _push_draw(state, unit.owner, sum(1 for c in front if (top := state.top_unit(c)) and top.owner == unit.owner))
 
 
-def _hq_adjacent_draw(state, unit, cr):
+def _hq_adjacent_draw(state, unit, cr, n=1):
     if cr in state.game_map.hq_front(other_player(unit.owner)):  # adjacent to the opponent's den (F6)
-        _push_draw(state, unit.owner, 1)
+        _push_draw(state, unit.owner, n)
+
+
+def _cheetah_place(state, unit, cr):
+    """Roar: if this is next to your opponent's den, draw 2 cards."""
+    _hq_adjacent_draw(state, unit, cr, state.config.cheetah_draw)
 
 
 def _adjacent_enemy_unit_crossroads(state, unit, cr, *, chosen=True):
@@ -3345,7 +3355,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "worker_bee": {"on_place": _gains("worker_bee_food")},
     # Den Rush.
     "greywhisker": {"on_place": _greywhisker_place},
-    "mole_legend": {"on_place": _greywhisker_place},
+    "mole_legend": {"on_place": _mole_legend_place},
     "rat_legend_2": {"on_place": _rat_legend_2_place},
     "skunk_legend": {"on_place": _skunk_legend_place},
     "falcon_legend": {"on_place": _falcon_legend_place},
@@ -3355,7 +3365,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "skunk": {"on_place": _skunk_place},
     "hare": {"on_place": _conditional("hare", _draws("hare_draw"))},
     "ocelot": {"on_place": _ocelot_place},
-    "cheetah": {"on_place": _hq_adjacent_draw},
+    "cheetah": {"on_place": _cheetah_place},
     "rat": {"on_place": _conditional("rat", _rat_place)},
     "falcon": {"on_place": _hq_adjacent_draw},
     "bat": {"on_place": _draw1},

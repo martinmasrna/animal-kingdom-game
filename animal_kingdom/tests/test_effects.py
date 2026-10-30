@@ -632,11 +632,11 @@ def test_prince_leo_plays_the_twin_from_deck():
 # ============================== Stage 2.3: HQ-adjacency draw (F6) + start-of-turn (goose_legend)
 
 def test_cheetah_draws_when_placed_next_to_enemy_base():
-    s = make_state(current="A", hands={"A": ["cheetah"]}, decks={"A": ["lion"], "B": []})
+    s = make_state(current="A", hands={"A": ["cheetah"]}, decks={"A": ["lion", "fox", "rat"], "B": []})
     for cr in ("1,2", "2,2", "3,2"):                    # chain up to B's front column
         put(s, cr, "caracal", "A")
     rules.apply_action(s, PlaceAction("cheetah", ("cr", "4,2")))   # 4,2 is HQ_B's front
-    assert len(s.hands["A"]) == 1
+    assert len(s.hands["A"]) == CFG.cheetah_draw == 2
 
 
 def test_legendary_bat_draws_at_the_start_of_its_owners_turn():
