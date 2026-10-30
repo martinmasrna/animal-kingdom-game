@@ -1,10 +1,6 @@
 {
- "rev": 181,
+ "rev": 186,
  "cards": {
-  "caterpillar": {
-   "x": 1164,
-   "y": 1932
-  },
   "cockroach": {
    "x": 1552,
    "y": 1932
@@ -24,14 +20,6 @@
   "mosquito": {
    "x": 4074,
    "y": 1932
-  },
-  "worker_ant": {
-   "x": 970,
-   "y": 2210
-  },
-  "worker_wasp": {
-   "x": 1164,
-   "y": 2210
   },
   "bush_dog": {
    "x": 1552,
@@ -736,6 +724,14 @@
   "fox": {
    "x": 3260,
    "y": 985
+  },
+  "worker_wasp": {
+   "x": 782,
+   "y": 1922
+  },
+  "worker_ant": {
+   "x": 974,
+   "y": 1922
   }
  },
  "piles": [
@@ -795,7 +791,8 @@
     "nurse_bumblebee",
     "bobcat",
     "owl",
-    "mouse"
+    "mouse",
+    "caterpillar"
    ]
   }
  ],
