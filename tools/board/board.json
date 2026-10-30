@@ -1,5 +1,5 @@
 {
- "rev": 967,
+ "rev": 968,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -419,7 +419,6 @@
     "eagle_legend",
     "chameleon_legend",
     "hornet_legend",
-    "wolf_legend_2",
     "gorilla_legend",
     "baboon_legend",
     "chipmunk_legend",
@@ -455,7 +454,8 @@
     "elephant_legend",
     "wolf_legend_3",
     "wildebeest_legend",
-    "tuna_legend"
+    "tuna_legend",
+    "wolf_legend_2"
    ],
    "tint": "yellow"
   },
