@@ -1,5 +1,5 @@
 {
- "rev": 804,
+ "rev": 808,
  "cards": {
   "toad": {
    "x": 2379,
@@ -428,8 +428,8 @@
   {
    "id": "pmvuwg41o18",
    "name": "Good",
-   "x": 9339,
-   "y": -364,
+   "x": 9107,
+   "y": -780,
    "cols": 19,
    "stacked": false,
    "cards": [
@@ -457,8 +457,8 @@
   {
    "id": "pmvuwh2be19",
    "name": "Right direction, might need some tweaking",
-   "x": 9338,
-   "y": 40,
+   "x": 9106,
+   "y": -376,
    "cols": 22,
    "stacked": false,
    "cards": [
@@ -490,8 +490,8 @@
   {
    "id": "pmvuwmd3520",
    "name": "Needs change",
-   "x": 9337,
-   "y": 839,
+   "x": 9105,
+   "y": 423,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -504,8 +504,8 @@
   {
    "id": "pmvuwt3hw0",
    "name": "Seems too weak",
-   "x": 9337,
-   "y": 445,
+   "x": 9105,
+   "y": 29,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -520,8 +520,8 @@
   {
    "id": "pmvuwu80n1",
    "name": "Literally Perfect",
-   "x": 9336,
-   "y": -748,
+   "x": 9104,
+   "y": -1164,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -533,8 +533,8 @@
   {
    "id": "pmvuwx5td2",
    "name": "Not enough data",
-   "x": 9331,
-   "y": 1230,
+   "x": 9099,
+   "y": 814,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -669,6 +669,9 @@
   },
   "mackerel": {
    "flag": true
+  },
+  "mole_legend": {
+   "note": "remove the 1 food part?"
   }
  }
 }
