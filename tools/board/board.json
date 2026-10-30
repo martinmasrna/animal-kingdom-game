@@ -1,5 +1,5 @@
 {
- "rev": 377,
+ "rev": 378,
  "cards": {
   "mole": {
    "x": 6460,
@@ -565,7 +565,7 @@
     "pigeon",
     "guard_bee"
    ],
-   "tint": "blue"
+   "tint": "green"
   },
   {
    "id": "pmvuubgcv0",
