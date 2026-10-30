@@ -53,6 +53,12 @@ def fish_worth(state: GameState, player: str, cr: str) -> int:
     return 1
 
 
+def animal_worth(state: GameState, player: str, cr: str) -> int:
+    """How many animals `player`'s top animal on `cr` counts as wherever animals are counted: a Fish as `fish_worth`
+    says (2 beside their legendary Sardine: 2 Fish are 2 animals), anything else 1."""
+    return fish_worth(state, player, cr) if "Fish" in state.cards[state.board[cr][-1].card_id].tags else 1
+
+
 def fish_count(state: GameState, player: str, crs=None, exclude_iid=None) -> int:
     """How many Fish `player` counts on their top animals (on `crs` only, when given), each as `fish_worth` says."""
     return sum(fish_worth(state, player, c) for c, st in state.board.items()

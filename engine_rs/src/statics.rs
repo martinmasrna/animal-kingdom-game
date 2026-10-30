@@ -30,6 +30,14 @@ pub fn fish_worth(st: &State, player: Player, cr: Cr) -> i32 {
     if near { 2 } else { 1 }
 }
 
+/// statics.animal_worth: how many animals `player`'s top animal on `cr` counts as wherever animals are counted.
+pub fn animal_worth(st: &State, player: Player, cr: Cr) -> i32 {
+    match st.top(cr) {
+        Some(u) if st.card(u.card).has_tag(T_FISH) => fish_worth(st, player, cr),
+        _ => 1,
+    }
+}
+
 /// How many Fish `player` counts on their top animals (on `crs` only, when given), each as `fish_worth` says.
 pub fn fish_count(st: &State, player: Player, crs: Option<&[Cr]>, exclude: Option<i64>) -> i32 {
     st.tops()

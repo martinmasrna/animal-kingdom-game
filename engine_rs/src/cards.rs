@@ -1191,7 +1191,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("grizzly_bear", OnPlace) => push_draw(st, other(owner), 1),
         ("stag_beetle", OnPlace) => {
-            let n = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_ARMOR, Some(*c))).count() as i32;
+            let n: i32 = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_ARMOR, Some(*c))).map(|(c, _)| statics::animal_worth(st, owner, c)).sum();
             let per = cfg(st, "stag_beetle_per_armor");
             push_gain(st, owner, n * per);
         }
@@ -1231,7 +1231,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("oxpecker", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("oxpecker"), "player" => pn(owner))),
         ("anteater", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("anteater"), "player" => pn(owner))),
         ("dung_beetle", OnEndOfTurn) => {
-            let n = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_HUNGRY, Some(*c))).count() as i32;
+            let n: i32 = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_HUNGRY, Some(*c))).map(|(c, _)| statics::animal_worth(st, owner, c)).sum();
             let per = cfg(st, "dung_beetle_per");
             push_gain(st, owner, n * per);
         }

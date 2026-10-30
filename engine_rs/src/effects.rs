@@ -1699,7 +1699,7 @@ pub fn adjacent_tops(st: &State, cr: Cr, owner: Option<Player>) -> Vec<(Cr, Unit
 }
 
 pub fn control_tag_count(st: &State, player: Player, tags: u32) -> i32 {
-    st.tops().filter(|(_, u)| u.owner == player && st.card(u.card).tags & tags == tags).count() as i32
+    st.tops().filter(|(_, u)| u.owner == player && st.card(u.card).tags & tags == tags).map(|(c, _)| statics::animal_worth(st, player, c)).sum()
 }
 
 pub fn grant(st: &mut State, iids: Vec<i64>, amount: i32) {

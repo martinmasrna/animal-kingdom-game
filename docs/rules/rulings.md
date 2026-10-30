@@ -16,6 +16,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 - **"Can't" beats "can".** When one card forbids what another allows, the prohibition wins.
 - **Next to the opponent's den** means one of the enemy den's front crossroads.
 - **Sardine** places the copies from hand and deck on random empty crossroads adjacent to the triggering one; leftovers stay where they are. The copies are placed (traps beside them see them), but their Roars don't fire.
+- **The legendary Sardine** ("[SARDINE] and your adjacent Fish count as 2 Fish."): a Fish it doubles is 2 animals wherever animals are counted, not only Fish: the Worker Ant, Queen Solenia, the Dung Beetle and the Stag Beetle count it twice too (Martin, 2026-10-31). It doubles only while it is on top and its effects work.
 - **Recurring timed triggers** ("at the start of your turn") fire every time their window comes while the unit is in play, including the turn it was played if the window is still ahead. "Your turn" means the owner's turn only.
 
 ## Drawing and hidden information

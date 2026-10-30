@@ -1553,9 +1553,9 @@ def _adjacent_tops(state, cr, owner=None):
 
 
 def _control_tag_count(state, player, *tags) -> int:
-    """How many crossroads `player` tops with a unit carrying all of `tags`."""
+    """How many animals carrying all of `tags` `player` controls (tops), each as `statics.animal_worth` says."""
     return sum(
-        1 for st in state.board.values()
+        statics.animal_worth(state, player, c) for c, st in state.board.items()
         if st and st[-1].owner == player and all(t in state.cards[st[-1].card_id].tags for t in tags)
     )
 
@@ -2939,7 +2939,7 @@ def _orb_weaver_enemy_placed(state, spider, placed, cr):
 
 def _stag_beetle_place(state, unit, cr):
     """Roar: gain 5 food for each of your animals with Armor (this one included)."""
-    n = sum(1 for c, st in state.board.items()
+    n = sum(statics.animal_worth(state, unit.owner, c) for c, st in state.board.items()
             if st and st[-1].owner == unit.owner and statics.has_keyword(state, st[-1], "Armor", c))
     _push_gain(state, unit.owner, n * state.config.stag_beetle_per_armor)
 
@@ -3014,7 +3014,7 @@ def _anteater_place(state, unit, cr):
 
 def _dung_beetle_eot(state, unit, cr):
     """At the end of your turn, gain 5 food for each Hungry animal you control."""
-    n = sum(1 for c, st in state.board.items()
+    n = sum(statics.animal_worth(state, unit.owner, c) for c, st in state.board.items()
             if st and st[-1].owner == unit.owner and statics.has_keyword(state, st[-1], "Hungry", c))
     _push_gain(state, unit.owner, n * state.config.dung_beetle_per)
 

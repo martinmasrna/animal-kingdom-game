@@ -979,6 +979,25 @@ def test_the_legendary_sardine_and_its_adjacent_fish_count_twice():
     assert removed(s, "squirrel")
 
 
+def test_the_legendary_sardines_doubled_fish_count_as_two_animals_for_the_worker_ant_and_queen_solenia():
+    """Martin, 2026-10-31: 2 Fish are 2 animals, so "for each animal you control" counts a doubled Fish twice."""
+    cfg = Config.default()
+    s = make_state(hands={"A": ["worker_ant"]})
+    put(s, "1,1", "sardine_legend", "A")                       # 2
+    put(s, "2,1", "sardine", "A")                              # beside it: 2
+    put(s, "3,3", "sardine", "A")                              # away from it: 1
+    apply_click(s, PlaceAction("worker_ant", ("cr", "1,3")))   # the Worker Ant itself: 1
+    assert s.food["A"] == 6 * cfg.worker_ant_per
+
+    s = make_state(current="A", decks={"A": ["lion"], "B": ["lynx"]})
+    put(s, "1,1", "sardine_legend", "A")
+    put(s, "2,1", "sardine", "A")
+    put(s, "1,3", "army_ant_legend", "A")
+    s.actions_taken_this_turn = s.config.actions_per_turn - 1
+    rules.apply_action(s, DrawAction())                        # her Dusk: 2 + 2 + herself
+    assert s.food["A"] == 5 * cfg.army_ant_legend_per
+
+
 def test_a_covered_legendary_sardine_stops_counting_double():
     s = make_state()
     put(s, "1,1", "sardine_legend", "A")
