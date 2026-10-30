@@ -1,5 +1,5 @@
 {
- "rev": 9,
+ "rev": 48,
  "cards": {
   "butterfly_legend": {
    "x": 0,
@@ -517,24 +517,8 @@
    "x": 4074,
    "y": 1522
   },
-  "bird_egg": {
-   "x": 0,
-   "y": 1932
-  },
-  "python": {
-   "x": 194,
-   "y": 1932
-  },
-  "rattlesnake": {
-   "x": 388,
-   "y": 1932
-  },
   "sardine": {
    "x": 582,
-   "y": 1932
-  },
-  "snake_egg": {
-   "x": 776,
    "y": 1932
   },
   "alley_cat": {
@@ -563,10 +547,6 @@
   },
   "krill": {
    "x": 2134,
-   "y": 1932
-  },
-  "lemming": {
-   "x": 2328,
    "y": 1932
   },
   "peacock": {
@@ -737,10 +717,6 @@
    "x": 1164,
    "y": 2488
   },
-  "falcon": {
-   "x": 1358,
-   "y": 2488
-  },
   "gopher": {
    "x": 1552,
    "y": 2488
@@ -809,32 +785,8 @@
    "x": 0,
    "y": 2766
   },
-  "dolphin": {
-   "x": 194,
-   "y": 2766
-  },
-  "hedgehog": {
-   "x": 388,
-   "y": 2766
-  },
-  "pigeon": {
-   "x": 582,
-   "y": 2766
-  },
   "zebra": {
    "x": 776,
-   "y": 2766
-  },
-  "caracal": {
-   "x": 970,
-   "y": 2766
-  },
-  "cheetah": {
-   "x": 1164,
-   "y": 2766
-  },
-  "cougar": {
-   "x": 1358,
    "y": 2766
   },
   "giraffe": {
@@ -849,24 +801,8 @@
    "x": 1940,
    "y": 2766
   },
-  "tortoise": {
-   "x": 2134,
-   "y": 2766
-  },
   "wildebeest": {
    "x": 2328,
-   "y": 2766
-  },
-  "wolf": {
-   "x": 2522,
-   "y": 2766
-  },
-  "lion": {
-   "x": 2716,
-   "y": 2766
-  },
-  "tiger": {
-   "x": 2910,
    "y": 2766
   },
   "crocodile": {
@@ -881,120 +817,84 @@
    "x": 3492,
    "y": 2766
   },
-  "elephant": {
-   "x": 3686,
-   "y": 2766
-  },
-  "blue_whale": {
-   "x": 3880,
-   "y": 2766
-  },
   "egg_eater": {
-   "x": 4074,
-   "y": 2766
+   "x": 1493,
+   "y": 3505
   },
-  "basilisk": {
-   "x": 0,
-   "y": 3176
+  "python": {
+   "x": 1691,
+   "y": 3505
   },
-  "black_widow": {
-   "x": 194,
-   "y": 3176
+  "bird_egg": {
+   "x": 1888,
+   "y": 3507
   },
-  "centipede": {
-   "x": 388,
-   "y": 3176
+  "snake_egg": {
+   "x": 2087,
+   "y": 3512
   },
-  "coral_snake": {
-   "x": 582,
-   "y": 3176
+  "cheetah": {
+   "x": 2885,
+   "y": 3323
   },
-  "dragonfly": {
-   "x": 776,
-   "y": 3176
-  },
-  "duck": {
-   "x": 970,
-   "y": 3176
-  },
-  "firefly": {
-   "x": 1164,
-   "y": 3176
-  },
-  "frog": {
-   "x": 1358,
-   "y": 3176
-  },
-  "gecko": {
-   "x": 1552,
-   "y": 3176
-  },
-  "grasshopper": {
-   "x": 1746,
-   "y": 3176
-  },
-  "iguana": {
-   "x": 1940,
-   "y": 3176
-  },
-  "ladybird": {
-   "x": 2134,
-   "y": 3176
-  },
-  "leech": {
-   "x": 2328,
-   "y": 3176
-  },
-  "ostrich": {
-   "x": 2522,
-   "y": 3176
-  },
-  "pond_skater": {
-   "x": 2716,
-   "y": 3176
-  },
-  "salamander": {
-   "x": 2910,
-   "y": 3176
-  },
-  "snail": {
-   "x": 3104,
-   "y": 3176
-  },
-  "sparrow": {
-   "x": 3298,
-   "y": 3176
-  },
-  "squid": {
-   "x": 3492,
-   "y": 3176
-  },
-  "strawberry_leopard": {
-   "x": 3686,
-   "y": 3176
-  },
-  "swallow": {
-   "x": 3880,
-   "y": 3176
-  },
-  "tapir": {
-   "x": 4074,
-   "y": 3176
-  },
-  "tick": {
-   "x": 4268,
-   "y": 3176
-  },
-  "weasel": {
-   "x": 4462,
-   "y": 3176
+  "falcon": {
+   "x": 3086,
+   "y": 3327
   }
  },
- "piles": [],
+ "piles": [
+  {
+   "id": "pmvutpeh30",
+   "name": "New pile",
+   "x": 5134,
+   "y": 5,
+   "cols": 6,
+   "stacked": false,
+   "cards": [
+    "wolf",
+    "hedgehog",
+    "lion",
+    "dolphin",
+    "elephant",
+    "blue_whale",
+    "tortoise",
+    "tiger",
+    "caracal",
+    "pigeon"
+   ]
+  }
+ ],
  "gone": [
   "borealis",
   "cairn",
   "snow_leopard",
-  "polar_bear"
+  "polar_bear",
+  "ostrich",
+  "firefly",
+  "salamander",
+  "weasel",
+  "dragonfly",
+  "ladybird",
+  "grasshopper",
+  "pond_skater",
+  "frog",
+  "snail",
+  "tick",
+  "centipede",
+  "duck",
+  "swallow",
+  "gecko",
+  "sparrow",
+  "coral_snake",
+  "tapir",
+  "basilisk",
+  "iguana",
+  "leech",
+  "squid",
+  "strawberry_leopard",
+  "black_widow",
+  "lemming",
+  "rattlesnake",
+  "cougar"
  ]
 }
