@@ -1535,14 +1535,13 @@ def test_the_legendary_giraffe_reveals_the_opponents_hand():
     assert s.view_for("A").opponent_hand == ("lion",) and s.view_for("B").opponent_hand is None
 
 
-def test_the_legendary_zebra_draws_per_different_other_hoofed_animal_you_control_anywhere():
+def test_the_legendary_zebra_draws_per_grazing_hoofed_animal():
     s = make_state(hands={"A": ["zebra_legend"]}, decks={"A": ["lion"] * 5, "B": []})
-    put(s, "1,2", "gazelle", "A"); put(s, "4,3", "gazelle", "A")   # two copies count once; far away counts
-    put(s, "3,1", "deer", "A")
-    put(s, "3,2", "boar", "B")                                  # an enemy's Hoofed animal doesn't count
-    put(s, "1,1", "lion", "A")                                  # nor an ally that isn't Hoofed
-    rules.apply_action(s, PlaceAction("zebra_legend", ("cr", "2,2")))
-    assert len(s.hands["A"]) == 2                               # Gazelle and Deer, not the Zebra itself
+    put(s, "1,1", "gazelle", "A"); put(s, "2,1", "deer", "A")      # R1's corners: Hoofed, grazing once it closes
+    put(s, "1,2", "lion", "A")                                  # a grazing corner, but not Hoofed
+    put(s, "4,3", "gazelle", "A")                               # Hoofed, but grazing nowhere
+    rules.apply_action(s, PlaceAction("zebra_legend", ("cr", "2,2")))   # closes R1 and grazes itself
+    assert len(s.hands["A"]) == 3                               # Gazelle, Deer and the Zebra
 
 
 def test_grazing_okapi_draws_and_wildebeest_feeds():

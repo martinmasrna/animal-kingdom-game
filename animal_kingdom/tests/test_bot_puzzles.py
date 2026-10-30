@@ -163,27 +163,6 @@ def test_aggro_draws_on_its_opening(bot_cls):
         assert isinstance(chosen, DrawAction), chosen
 
 
-def test_hoofed_holds_the_zebra_for_a_bigger_draw():
-    # Martin, 2026-10-17: the Expert played the legendary Zebra ("draw a card for each different Hoofed animal you
-    # control") on turn one, for one card, with a hand of Hoofed animals. The one-turn search can't see that two Hoofed
-    # now and the Zebra next turn draw three; a second turn of sight (depth 1) can. Depth 0 plays the Zebra in 5 of 5
-    # seeds, depth 1 in 0 of 5 (measured 2026-10-17).
-    # No Deer in the hand: its Fawn makes a second Hoofed kind, so Deer then the Zebra draws three this turn (2026-10-22).
-    from animal_kingdom.engine.maps import load_map
-    from animal_kingdom.sim.runner import make_bot
-    for seed in range(3):
-        s = make_state(current="A", hands={"A": ["zebra_legend", "okapi", "warthog", "gazelle", "giraffe", "wildebeest"],
-                                           "B": ["lion", "serval", "lynx", "bobcat"]},
-                       decks={"A": ["moose", "boar", "zebra", "cape_buffalo", "okapi", "deer"] * 3, "B": ["tiger", "lion", "cougar"] * 5})
-        s.game_map = load_map("map_b")
-        put(s, next(iter(s.game_map.hq_front("B"))), "serval", "B")
-        bot, turn = make_bot("referee", seed, extra={"depth": 1}), []
-        while s.result is None and s.current == "A":
-            turn.append(bot.choose(s.view_for(s.player_to_act()), rules.legal_actions(s), s))
-            rules.apply_action(s, turn[-1])
-        assert "zebra_legend" not in [getattr(a, "card_id", None) for a in turn], (seed, turn)
-
-
 def test_taipan_marks_the_python():
     # Goodstuff vs Martin's Egg Control, his game of 2026-09-30, the bot's turn with 0 food: hand
     # Elephant, Tiger, Brutus, Wolf, Taipan; his Python (8) in the middle, his Raven beside it.

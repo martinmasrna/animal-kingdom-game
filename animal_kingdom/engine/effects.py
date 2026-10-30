@@ -3129,11 +3129,11 @@ def _gorilla_place(state, unit, cr):
 # --- Hoofed -----------------------------------------------------------------------------------------------------
 
 def _zebra_legend_place(state, unit, cr):
-    """Roar: draw a card for each different other Hoofed animal you control (the whole board, not this one; different
-    cards, so two copies of one count once)."""
-    kinds = {st[-1].card_id for st in state.board.values()
-             if st and st[-1].owner == unit.owner and st[-1].iid != unit.iid and "Hoofed" in state.cards[st[-1].card_id].tags}
-    _push_draw(state, unit.owner, len(kinds))
+    """Roar: draw a card for each of your grazing Hoofed animals (itself too, when it lands grazing)."""
+    n = sum(1 for c, st in state.board.items()
+            if st and st[-1].owner == unit.owner and "Hoofed" in state.cards[st[-1].card_id].tags
+            and statics.grazing(state, st[-1], c))
+    _push_draw(state, unit.owner, n)
 
 
 def _rabbit_place(state, unit, cr):

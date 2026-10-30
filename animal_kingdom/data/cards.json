@@ -2299,7 +2299,7 @@
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Roar: draw a card for each different other Hoofed animal you control.",
+      "text": "Roar: draw a card for each of your grazing Hoofed animals.",
       "species": "Zebra",
       "habitat": "Savanna",
       "keywords": []

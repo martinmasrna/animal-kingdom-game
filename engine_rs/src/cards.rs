@@ -1319,13 +1319,9 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         // Hoofed
         ("zebra_legend", OnPlace) => {
-            let mut kinds: Vec<CardId> = Vec::new();
-            for (_, t) in st.tops() {
-                if t.owner == owner && t.iid != unit.iid && st.card(t.card).has_tag(T_HOOFED) && !kinds.contains(&t.card) {
-                    kinds.push(t.card);
-                }
-            }
-            push_draw(st, owner, kinds.len() as i32);
+            // "Roar: draw a card for each of your grazing Hoofed animals." (itself too, when it lands grazing)
+            let n = st.tops().filter(|(c, t)| t.owner == owner && st.card(t.card).has_tag(T_HOOFED) && statics::grazing(st, t, Some(*c))).count();
+            push_draw(st, owner, n as i32);
         }
         ("honey_badger", OnPlace) => removes(st, unit, cr, None, Some("honey_badger_min")),
         ("okapi", OnStartOfTurn) | ("okapi", OnEndOfTurn) | ("baby_impala", OnPlace) => {
