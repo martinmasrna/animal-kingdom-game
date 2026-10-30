@@ -329,8 +329,8 @@ def test_reach_covering_still_needs_greater_strength():
 
 
 def test_reach_works_for_an_extra_placement_too():
-    s = state(hands={"A": ["greywhisker", "t_reach"]})
-    rules.apply_action(s, PlaceAction("greywhisker", ("cr", "1,2")))
+    s = state(hands={"A": ["mole_legend", "t_reach"]})
+    rules.apply_action(s, PlaceAction("mole_legend", ("cr", "1,2")))
     assert s.pending and s.pending["mode"] == "place"
     assert {"card_id": "t_reach", "target": ["cr", "3,2"]} in s.pending["placements"]
 

@@ -2924,20 +2924,6 @@
       "habitat": "Savanna"
     },
     {
-      "id": "greywhisker",
-      "name": "Greywhisker",
-      "status": "reserve",
-      "rarity": "legendary",
-      "tags": [
-        "Rodent"
-      ],
-      "base_strength": 1,
-      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
-      "keywords": [],
-      "species": "Rat",
-      "habitat": "City"
-    },
-    {
       "id": "bat_legend",
       "name": "[BAT]",
       "status": "collectible",

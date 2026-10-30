@@ -1945,32 +1945,6 @@
       "by": "martin"
     }
   },
-  "greywhisker": {
-    "crop": {
-      "lv": "draft",
-      "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
-      "at": 1792139108
-    },
-    "animal": {
-      "lv": "fine",
-      "by": "claude",
-      "note": "out of the collection (status open, in the reserve)",
-      "at": 1792191573
-    },
-    "art": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792139108
-    }
-  },
   "grizzly_bear": {
     "art": {
       "lv": "fine",

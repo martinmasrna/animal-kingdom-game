@@ -167,8 +167,8 @@ def test_titan_costs_two_actions_and_no_free_placement_pays_for_it():
     s2 = make_state(hands={"A": ["lion", "blue_whale"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     rules.apply_action(s2, PlaceAction("lion", ("cr", "1,1")))  # one action left
     assert not [a for a in rules.legal_actions(s2) if getattr(a, "card_id", None) == "blue_whale"]
-    s3 = make_state(hands={"A": ["greywhisker", "blue_whale"]})
-    rules.apply_action(s3, PlaceAction("greywhisker", ("cr", "1,1")))   # Roar "play another animal": a free placement
+    s3 = make_state(hands={"A": ["mole_legend", "blue_whale"]})
+    rules.apply_action(s3, PlaceAction("mole_legend", ("cr", "1,1")))   # Roar "play another animal": a free placement
     assert s3.pending is None or all(p["card_id"] != "blue_whale" for p in s3.pending.get("placements", []))
 
 

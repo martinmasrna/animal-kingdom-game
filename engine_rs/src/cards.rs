@@ -75,7 +75,7 @@ pub fn hook_mask(card: &str) -> u32 {
     let hooks: &[Hook] = match card {
         "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "badger" | "coyote" | "street_dog" | "fox" | "wolverine" | "lion_legend"
         | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "kitten" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
-        | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "greywhisker" | "mole_legend"
+        | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "mole_legend"
         | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
         | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "piranha_legend" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
@@ -463,12 +463,6 @@ fn mole_legend(st: &mut State, unit: &Unit) {
     st.effect_stack.push(vmap!("op" => Value::s("discard_choice"), "player" => pn(o)));
     push_play_extra(st, o, None, false);
     push_draw(st, o, 1);
-}
-
-fn greywhisker(st: &mut State, unit: &Unit) {
-    mole_legend(st, unit);
-    let n = cfg(st, "greywhisker_food");
-    push_gain(st, unit.owner, n);
 }
 
 fn mole(st: &mut State, unit: &Unit, cr: Cr) {
@@ -875,7 +869,6 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("worker_bee", OnPlace) => gains(st, unit, "worker_bee_food"),
         // Den Rush
-        ("greywhisker", OnPlace) => greywhisker(st, unit),
         ("mole_legend", OnPlace) => mole_legend(st, unit),
         ("rat_legend_2", OnPlace) => {
             let mut options = adjacent_enemy_unit_crossroads(st, unit, cr, true);

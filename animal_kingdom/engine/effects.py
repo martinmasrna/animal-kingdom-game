@@ -2367,12 +2367,6 @@ def _mole_legend_place(state, unit, cr):
     _push_draw(state, o, 1)
 
 
-def _greywhisker_place(state, unit, cr):
-    """Roar: gain 1 food, draw a card, play another animal, then discard a card (the Mole's Roar, plus the food)."""
-    _mole_legend_place(state, unit, cr)
-    _push_gain(state, unit.owner, state.config.greywhisker_food)
-
-
 def _op_discard_choice(state, step):
     """Discard a card of your choice from your hand (none to discard: nothing)."""
     hand = _hand_iids(state, step["player"])
@@ -3354,7 +3348,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "worker_wasp": {"on_friendly_place": _worker_wasp_friendly_place},
     "worker_bee": {"on_place": _gains("worker_bee_food")},
     # Den Rush.
-    "greywhisker": {"on_place": _greywhisker_place},
     "mole_legend": {"on_place": _mole_legend_place},
     "rat_legend_2": {"on_place": _rat_legend_2_place},
     "skunk_legend": {"on_place": _skunk_legend_place},

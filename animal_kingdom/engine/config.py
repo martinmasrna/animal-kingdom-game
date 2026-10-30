@@ -31,7 +31,6 @@ class Config:
     tortoise_legend_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)
     tortoise_legend_food_cap: int = 20        # Methuselah: each player gains at most this much food per turn
-    greywhisker_food: int = 1            # Roar: gain 1 food (+ draw 1, + play 1 more, then discard 1)
     cheetah_draw: int = 2                # Roar: if this is next to your opponent's den, draw 2 cards (Martin, 2026-10-30)
     army_ant_legend_per: int = 2         # Queen Solenia: Dusk: gain 2 food for each animal you control (Martin's sheet, 2026-10-24)
     # Colony outside the precon, bench drafts (Martin, 2026-10-21; effects-pass.md)
