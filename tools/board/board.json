@@ -1,98 +1,6 @@
 {
- "rev": 636,
+ "rev": 703,
  "cards": {
-  "army_ant_legend": {
-   "x": 12135,
-   "y": 2263
-  },
-  "bee_legend": {
-   "x": 13687,
-   "y": 1985
-  },
-  "wolf_legend_3": {
-   "x": 15433,
-   "y": 2263
-  },
-  "fox_legend": {
-   "x": 11747,
-   "y": 2541
-  },
-  "tuna_legend": {
-   "x": 15239,
-   "y": 2263
-  },
-  "manta_ray_legend": {
-   "x": 13105,
-   "y": 2263
-  },
-  "piranha_legend": {
-   "x": 13493,
-   "y": 1985
-  },
-  "capybara_legend": {
-   "x": 12329,
-   "y": 2541
-  },
-  "macaque_legend": {
-   "x": 13299,
-   "y": 1985
-  },
-  "rat_legend": {
-   "x": 13687,
-   "y": 2263
-  },
-  "chipmunk_legend": {
-   "x": 14463,
-   "y": 2263
-  },
-  "baboon_legend": {
-   "x": 14075,
-   "y": 1985
-  },
-  "gorilla_legend": {
-   "x": 12911,
-   "y": 2263
-  },
-  "wildebeest_legend": {
-   "x": 15627,
-   "y": 2263
-  },
-  "boar_legend": {
-   "x": 14657,
-   "y": 2263
-  },
-  "zebra_legend": {
-   "x": 14269,
-   "y": 2263
-  },
-  "giraffe_legend": {
-   "x": 12523,
-   "y": 2541
-  },
-  "cuckoo_legend": {
-   "x": 12135,
-   "y": 2541
-  },
-  "sloth_legend": {
-   "x": 13881,
-   "y": 2263
-  },
-  "dung_beetle_legend": {
-   "x": 12717,
-   "y": 2263
-  },
-  "rodent_legend": {
-   "x": 14851,
-   "y": 1985
-  },
-  "sardine_legend": {
-   "x": 12523,
-   "y": 1985
-  },
-  "deer_legend": {
-   "x": 14269,
-   "y": 1985
-  },
   "toad": {
    "x": 1120,
    "y": -969
@@ -152,26 +60,6 @@
   "flying_squirrel": {
    "x": 7184,
    "y": 1761
-  },
-  "elephant_legend": {
-   "x": 13498,
-   "y": 2538
-  },
-  "bat_legend": {
-   "x": 10901,
-   "y": 2182
-  },
-  "rat_legend_2": {
-   "x": 11394,
-   "y": 2178
-  },
-  "bumblebee_legend": {
-   "x": 14885,
-   "y": 1589
-  },
-  "oxpecker_legend": {
-   "x": 12831,
-   "y": 2739
   }
  },
  "piles": [
@@ -557,15 +445,13 @@
   },
   {
    "id": "pmvuwg41o18",
-   "name": "Banger",
+   "name": "Good",
    "x": 10851,
    "y": 1172,
-   "cols": 17,
+   "cols": 19,
    "stacked": false,
    "cards": [
     "tortoise_legend",
-    "lion_legend_2",
-    "lion_legend",
     "cockroach_legend",
     "honey_badger_legend",
     "raven_legend",
@@ -578,7 +464,11 @@
     "eagle_legend",
     "chameleon_legend",
     "hornet_legend",
-    "wolf_legend_2"
+    "wolf_legend_2",
+    "gorilla_legend",
+    "baboon_legend",
+    "chipmunk_legend",
+    "manta_ray_legend"
    ],
    "tint": "green"
   },
@@ -587,7 +477,7 @@
    "name": "Right direction, might need some tweaking",
    "x": 10850,
    "y": 1576,
-   "cols": 13,
+   "cols": 22,
    "stacked": false,
    "cards": [
     "butterfly_legend",
@@ -598,22 +488,80 @@
     "leopard_legend",
     "sperm_whale_legend",
     "tiger_legend",
-    "rhinoceros_legend"
+    "rhinoceros_legend",
+    "fox_legend",
+    "capybara_legend",
+    "giraffe_legend",
+    "army_ant_legend",
+    "cuckoo_legend",
+    "bee_legend",
+    "dung_beetle_legend",
+    "rat_legend",
+    "bumblebee_legend",
+    "elephant_legend",
+    "wolf_legend_3",
+    "wildebeest_legend",
+    "tuna_legend"
    ],
    "tint": "yellow"
   },
   {
    "id": "pmvuwmd3520",
    "name": "Needs change",
-   "x": 10853,
-   "y": 2673,
+   "x": 10849,
+   "y": 2375,
    "cols": 4,
    "stacked": false,
    "cards": [
     "falcon_legend",
-    "skunk_legend"
+    "skunk_legend",
+    "zebra_legend"
    ],
    "tint": "red"
+  },
+  {
+   "id": "pmvuwt3hw0",
+   "name": "Seems too weak",
+   "x": 10849,
+   "y": 1981,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "bat_legend",
+    "oxpecker_legend",
+    "rat_legend_2",
+    "deer_legend",
+    "rodent_legend"
+   ],
+   "tint": "orange"
+  },
+  {
+   "id": "pmvuwu80n1",
+   "name": "Literally Perfect",
+   "x": 10848,
+   "y": 788,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "lion_legend_2",
+    "lion_legend"
+   ],
+   "tint": "blue"
+  },
+  {
+   "id": "pmvuwx5td2",
+   "name": "Not enough data",
+   "x": 10843,
+   "y": 2766,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "sardine_legend",
+    "macaque_legend",
+    "sloth_legend",
+    "piranha_legend",
+    "boar_legend"
+   ]
   }
  ],
  "gone": [
@@ -721,11 +669,13 @@
    "flag": true
   },
   "sperm_whale_legend": {
-   "flag": true,
    "note": "random?"
   },
   "wolf_legend_2": {
    "note": "isn't it too strong compared to Adira?"
+  },
+  "zebra_legend": {
+   "note": "at least connected or somerhing"
   }
  }
 }
