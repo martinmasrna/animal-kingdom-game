@@ -1,5 +1,5 @@
 {
- "rev": 177,
+ "rev": 179,
  "cards": {
   "alley_cat": {
    "x": 970,
@@ -842,5 +842,11 @@
   "anteater",
   "forager_ant",
   "muskrat"
- ]
+ ],
+ "marks": {
+  "mouse": {
+   "flag": true,
+   "note": "idk, doesn't feel great"
+  }
+ }
 }
