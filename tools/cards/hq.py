@@ -307,7 +307,7 @@ def _apply_value(r: dict, col: str, value) -> None:
     _save_cards(cards)
 
 
-TOKEN_COLS = ("strength", "effect")      # what a token's card says; where it sits stays its maker's business
+TOKEN_COLS = ("strength", "effect", "rarity")   # what a token's card says, and its frame (a legendary's stages wear its gold); where it sits stays its maker's business
 
 
 def set_value(card_id: str, col: str, value, by: str = "martin", note: str | None = None) -> str:

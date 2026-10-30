@@ -76,7 +76,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "badger" | "coyote" | "street_dog" | "fox" | "wolverine" | "lion_legend"
         | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "kitten" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
         | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "mole_legend"
-        | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
+        | "rat_legend_2" | "skunk_legend" | "deer_legend_2" | "young_stag" | "great_stag" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
         | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "piranha_legend" | "remora" | "cod" | "sardine" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
@@ -877,6 +877,24 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             if !options.is_empty() {
                 let o = crs(st, options);
                 st.effect_stack.push(vmap!("op" => Value::s("rat_legend_2_wipe"), "chooser" => pn(owner), "options" => Value::List(o)));
+            }
+        }
+        ("deer_legend_2", OnPlace) => {
+            let c = cid(st, "young_stag");
+            gain_to_hand(st, owner, c, 0);
+        }
+        ("young_stag", OnPlace) => {
+            let c = cid(st, "great_stag");
+            gain_to_hand(st, owner, c, 0);
+        }
+        ("great_stag", OnPlace) => {
+            // "Roar: return every adjacent enemy weaker than this to its owner's hand." As in Python.
+            let mine = effective_strength(st, unit, None);
+            for nb in adjacent_enemy_unit_crossroads(st, unit, cr, false) {
+                let t = st.top(nb).unwrap().clone();
+                if effective_strength(st, &t, None) < mine {
+                    st.effect_stack.push(vmap!("op" => Value::s("bounce_iid"), "iid" => Value::Int(t.iid)));
+                }
             }
         }
         ("skunk_legend", OnPlace) => {

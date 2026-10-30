@@ -1566,6 +1566,20 @@ def test_the_bison_cant_be_covered_while_it_grazes():
     assert not statics.grazing(s, bison) and statics.can_cover(s, elephant, bison)
 
 
+def test_the_fawn_grows_up_one_stage_per_play_and_the_great_stag_bellows():
+    s = make_state(hands={"A": ["deer_legend_2"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("deer_legend_2", ("cr", "1,2")))
+    assert hand_ids(s, "A") == ["young_stag"]
+    rules.apply_action(s, PlaceAction("young_stag", ("cr", "1,1")))
+    assert hand_ids(s, "A") == ["great_stag"]
+    s2 = make_state(hands={"A": ["great_stag"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s2, "1,1", "lion", "B"); put(s2, "2,2", "elephant", "B")    # a 7 next to it, and a 9
+    put(s2, "1,3", "mouse", "B")
+    rules.apply_action(s2, PlaceAction("great_stag", ("cr", "1,2")))
+    assert s2.top_unit("1,1") is None and s2.top_unit("1,3") is None and s2.top_unit("2,2").card_id == "elephant"
+    assert sorted(hand_ids(s2, "B")) == ["lion", "mouse"]
+
+
 def test_giraffe_and_cape_buffalo_are_bigger_on_the_opponents_turn():
     s = make_state()
     g = put(s, "1,2", "giraffe", "A"); put(s, "1,1", "cape_buffalo", "A")

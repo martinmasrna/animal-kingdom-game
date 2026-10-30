@@ -7236,5 +7236,108 @@
       "by": "claude",
       "at": 1793382545
     }
+  },
+  "deer_legend_2": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "[DEER 2]",
+          "species": "Deer"
+        }
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793388087
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-30: the fawn's arc, each stage handing you the next",
+      "by": "claude",
+      "at": 1793388087
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-30: the fawn's arc, each stage handing you the next",
+      "by": "claude",
+      "at": 1793388087
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-30: the fawn's arc, each stage handing you the next",
+      "by": "claude",
+      "at": 1793388087
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-30: the fawn's arc, each stage handing you the next",
+      "by": "claude",
+      "at": 1793388087
+    }
+  },
+  "young_stag": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-10-30: the fawn's arc, each stage handing you the next",
+      "by": "claude",
+      "at": 1793388087
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-30: the Fawn's stages wear its legendary frame, as the Butterfly's do",
+      "by": "claude",
+      "at": 1793388269
+    }
+  },
+  "great_stag": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-10-30: the rutting bellow; 8 strength",
+      "by": "claude",
+      "at": 1793388088
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-30: the Fawn's stages wear its legendary frame, as the Butterfly's do",
+      "by": "claude",
+      "at": 1793388269
+    }
   }
 }

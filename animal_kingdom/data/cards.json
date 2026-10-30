@@ -4072,6 +4072,52 @@
       "species": "Bison",
       "habitat": "Forest",
       "keywords": []
+    },
+    {
+      "id": "deer_legend_2",
+      "name": "[FAWN]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 2,
+      "text": "Flee. Roar: add a Young Stag to your hand.",
+      "species": "Deer",
+      "habitat": "Forest",
+      "keywords": [
+        "Flee"
+      ],
+      "related": [
+        "young_stag",
+        "great_stag"
+      ]
+    },
+    {
+      "id": "young_stag",
+      "name": "Young Stag",
+      "status": "token",
+      "rarity": "legendary",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 4,
+      "text": "Flee. Roar: add a Great Stag to your hand.",
+      "keywords": [
+        "Flee"
+      ]
+    },
+    {
+      "id": "great_stag",
+      "name": "Great Stag",
+      "status": "token",
+      "rarity": "legendary",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 8,
+      "text": "Roar: return every adjacent enemy weaker than this to its owner's hand.",
+      "keywords": []
     }
   ]
 }

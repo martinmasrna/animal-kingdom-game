@@ -2475,6 +2475,25 @@ def _op_pestis_wipe(state, step):
     return None
 
 
+def _fawn_place(state, unit, cr):
+    """The legendary Fawn: Roar: add a Young Stag to your hand (Martin, 2026-10-30)."""
+    gain_to_hand(state, unit.owner, "young_stag")
+
+
+def _young_stag_place(state, unit, cr):
+    """Roar: add a Great Stag to your hand: the fawn's arc, each stage handing you the next."""
+    gain_to_hand(state, unit.owner, "great_stag")
+
+
+def _great_stag_place(state, unit, cr):
+    """Roar: return every adjacent enemy weaker than this to its owner's hand (the rutting bellow). Automatic: Stealth
+    doesn't hide, Armor stays, as for every mass bounce."""
+    mine = effective_strength(state, unit)
+    for nb in _adjacent_enemy_unit_crossroads(state, unit, cr, chosen=False):
+        if effective_strength(state, state.top_unit(nb)) < mine:
+            state.effect_stack.append({"op": "bounce_iid", "iid": state.top_unit(nb).iid})
+
+
 def _skunk_legend_place(state, unit, cr):
     for nb in _adjacent_enemy_unit_crossroads(state, unit, cr, chosen=False):  # mass bounce
         state.effect_stack.append({"op": "bounce_iid", "iid": state.top_unit(nb).iid})
@@ -3365,6 +3384,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "mole_legend": {"on_place": _mole_legend_place},
     "rat_legend_2": {"on_place": _rat_legend_2_place},
     "skunk_legend": {"on_place": _skunk_legend_place},
+    "deer_legend_2": {"on_place": _fawn_place},
+    "young_stag": {"on_place": _young_stag_place},
+    "great_stag": {"on_place": _great_stag_place},
     "falcon_legend": {"on_place": _falcon_legend_place},
     "mole": {"on_place": _mole_place},
     "naked_mole_rat": {"on_place": _mole_place},
