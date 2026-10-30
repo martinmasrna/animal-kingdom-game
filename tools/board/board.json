@@ -1,5 +1,5 @@
 {
- "rev": 971,
+ "rev": 973,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -645,6 +645,10 @@
   },
   "sloth_legend": {
    "note": "change to \"and dawn\"?"
+  },
+  "bat_legend": {
+   "flag": true,
+   "note": "maybe this can literally become a rare?"
   }
  }
 }
