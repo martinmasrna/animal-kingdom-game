@@ -1,5 +1,5 @@
 {
- "rev": 983,
+ "rev": 988,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -291,7 +291,8 @@
    "cards": [
     "porcupine",
     "armadillo",
-    "jellyfish"
+    "jellyfish",
+    "bison"
    ]
   },
   {
