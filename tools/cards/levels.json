@@ -963,6 +963,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When this gains strength in your hand, draw a card and turn this into a Butterfly."
+      },
+      "note": "Martin 2026-10-30: the animal acts in its own voice",
+      "by": "claude",
+      "at": 1793395835
     }
   },
   "chameleon": {
@@ -4512,10 +4522,15 @@
       "at": 1792085440
     },
     "effect": {
-      "by": "martin",
-      "at": 1792656901,
+      "by": "claude",
+      "at": 1793395835,
       "lv": "problem",
-      "note": "weird wording"
+      "note": "Martin 2026-10-30: the animal acts in its own voice",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "weird wording",
+        "prev": "Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck."
+      }
     }
   },
   "whale_shark": {
@@ -5057,10 +5072,15 @@
   },
   "wolf_legend": {
     "effect": {
-      "note": "why not just \"gain +1\"...",
-      "by": "martin",
-      "at": 1792657031,
-      "lv": "problem"
+      "note": "Martin 2026-10-30: the animal acts in its own voice",
+      "by": "claude",
+      "at": 1793395834,
+      "lv": "problem",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "why not just \"gain +1\"...",
+        "prev": "Roam. Dusk: this gains +1 strength for each of your adjacent Canines."
+      }
     },
     "art": {
       "lv": "draft",
@@ -5151,10 +5171,15 @@
       "at": 1792143620
     },
     "effect": {
-      "note": "Reach has no number: the Shark's Reach 3 becomes Reach, 2 (Martin, 2026-10-21)\n\nwhy \"this has reach\" and not just \"reach\"? let's discuss in chat",
-      "by": "martin",
-      "at": 1792657349,
-      "lv": "problem"
+      "note": "Martin 2026-10-30: the animal acts in its own voice",
+      "by": "claude",
+      "at": 1793395835,
+      "lv": "problem",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "Reach has no number: the Shark's Reach 3 becomes Reach, 2 (Martin, 2026-10-21)\n\nwhy \"this has reach\" and not just \"reach\"? let's discuss in chat",
+        "prev": "Apex Predator. If an animal was removed this turn, this has Reach."
+      }
     },
     "animal": {
       "note": "moved from pool to fish",
@@ -7229,9 +7254,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-30: the herd's anchor; its region must be broken elsewhere first",
+      "note": "Martin 2026-10-30: the animal acts in its own voice",
       "by": "claude",
-      "at": 1793382545
+      "at": 1793395835
     },
     "animal": {
       "review": {

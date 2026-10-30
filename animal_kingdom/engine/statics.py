@@ -114,7 +114,7 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     placer_card = state.cards[placer.card_id]
     owner = placer.owner
 
-    # The Bison: "Can't be covered while this is grazing." Nothing overrides it, the Hercules Beetle included.
+    # The Bison: "Can't be covered while grazing." Nothing overrides it, the Hercules Beetle included.
     if target.card_id == "bison" and active(state, target) and grazing(state, target):
         return False
 
@@ -166,8 +166,8 @@ def free_roams(state: GameState, player: str, unit: Optional[UnitInstance] = Non
 # ------------------------------------------------------------------------ Reach
 
 def reach_of(state: GameState, card_id: str) -> int:
-    """How far a card lands, 0 without Reach: printed, or the Great White Shark's "If an animal was removed this turn,
-    this has Reach."."""
+    """How far a card lands, 0 without Reach: printed, or the Great White Shark's "Has Reach if an animal was removed
+    this turn."."""
     if "Reach" in state.cards[card_id].keywords or (
             card_id == "great_white_shark" and state.turn_flags.get("removed_any")):
         return state.config.reach

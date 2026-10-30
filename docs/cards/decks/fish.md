@@ -20,7 +20,7 @@ The table below is generated from cards.json, where the cards live.
 | **Swordfish** | 2 | Fish | 3 | Roar: remove a random adjacent enemy for each adjacent allied Fish. |
 | **Manta Ray** | 2 | Fish | 6 | Whenever your opponent covers an adjacent allied Fish, draw a card. |
 | **Remora** | 2 | Fish | 2 | Roar: if this is next to an allied Fish, play another Fish. |
-| **Shark** | 2 | Fish | 7 | Apex Predator. If an animal was removed this turn, this has Reach. |
+| **Shark** | 2 | Fish | 7 | Apex Predator. Has Reach if an animal was removed this turn. |
 
 ### Common
 

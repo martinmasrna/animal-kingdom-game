@@ -2053,7 +2053,7 @@ def _hyena_eot(state, unit, cr):
 def _vultures_dusk(state, player):
     """Vulture: at your Dusk, if 3 or more animals were removed this turn, every Vulture in your hand and deck lands on a
     random empty crossroad, all at once (Dusk asks no decision). Not a placement from the hand: nothing Roars."""
-    if state.turn_flags.get("lost_A", 0) + state.turn_flags.get("lost_B", 0) < state.config.vulture_removals:
+    if _lost_this_turn(state, "A") + _lost_this_turn(state, "B") + _lost_this_turn(state, WILD) < state.config.vulture_removals:
         return
     for inst in [u for u in state.hands[player] if u.card_id == "vulture"]:
         empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c))
@@ -2180,7 +2180,7 @@ def _black_wolf_own_roam(state, unit, cr, event):
 
 
 def _wolf_legend_eot(state, unit, cr):
-    """Dusk: this gains +1 strength for each of your adjacent Canines."""
+    """Dusk: gain 1 strength for each of your adjacent Canines."""
     n = sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags)
     if n:
         _grant(state, [unit.iid], n * state.config.wolf_legend_grant)
@@ -3138,7 +3138,7 @@ def _stork_place(state, unit, cr):
 
 
 def _caterpillar_grows(state, inst, amount):
-    """When this gains strength in your hand, draw a card and turn this into a Butterfly."""
+    """When this gains strength in your hand, draw a card and turn into a Butterfly."""
     _transform(state, inst, "butterfly")
     draw_cards(state, inst.owner, 1)
 

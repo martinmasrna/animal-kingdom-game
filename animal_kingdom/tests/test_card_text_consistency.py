@@ -402,7 +402,7 @@ def test_the_launch_decks_other_numbers_match_config():
     assert int(re.search(r"give (\d+) animals", c["baboon"].text).group(1)) == cfg.baboon_count
     assert int(re.search(r"produce (\d+) more food", c["wildebeest_legend"].text).group(1)) == cfg.migration_bonus
     assert int(re.search(r"produce (\d+) less food", c["boar_legend"].text).group(1)) == cfg.boar_penalty
-    assert c["great_white_shark"].text.endswith("this has Reach.")
+    assert c["great_white_shark"].text.endswith("Has Reach if an animal was removed this turn.")
     assert "Poppy and Rusty" in c["fox_legend"].text and cfg.alpha_pups == 2
 
 

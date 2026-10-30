@@ -520,7 +520,7 @@ pub fn rattlesnake_shuffle_event(st: &mut State, player: Player) {
 
 pub fn vultures_dusk(st: &mut State, player: Player) {
     let Some(vulture) = st.g.known.vulture else { return };
-    let lost = st.turn_flags.lost[0] + st.turn_flags.lost[1];
+    let lost = st.turn_flags.lost.iter().sum::<i32>();
     if lost < cfg(st, "vulture_removals") {
         return;
     }

@@ -288,12 +288,12 @@
         "Bird"
       ],
       "base_strength": 2,
-      "text": "Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck.",
+      "text": "Flight. Dusk: if 3 or more animals were removed this turn, fly in from your hand or deck.",
+      "species": "Vulture",
+      "habitat": "Savanna",
       "keywords": [
         "Flight"
-      ],
-      "species": "Vulture",
-      "habitat": "Savanna"
+      ]
     },
     {
       "id": "city_spider",
@@ -479,12 +479,12 @@
         "Canine"
       ],
       "base_strength": 4,
-      "text": "Roam. Dusk: this gains +1 strength for each of your adjacent Canines.",
+      "text": "Roam. Dusk: gain 1 strength for each of your adjacent Canines.",
+      "species": "Wolf",
+      "habitat": "Forest",
       "keywords": [
         "Roam"
-      ],
-      "species": "Wolf",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "orca",
@@ -2017,14 +2017,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "When this gains strength in your hand, draw a card and turn this into a Butterfly.",
-      "keywords": [],
+      "text": "When this gains strength in your hand, draw a card and turn into a Butterfly.",
       "related": [
         "butterfly"
       ],
       "evolves": true,
       "species": "Butterfly",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "gorilla",
@@ -2489,12 +2489,12 @@
         "Fish"
       ],
       "base_strength": 7,
-      "text": "Apex Predator. If an animal was removed this turn, this has Reach.",
+      "text": "Apex Predator. Has Reach if an animal was removed this turn.",
+      "species": "Great White Shark",
+      "habitat": "Open Ocean",
       "keywords": [
         "Apex Predator"
-      ],
-      "species": "Great White Shark",
-      "habitat": "Open Ocean"
+      ]
     },
     {
       "id": "butterfly",
@@ -4068,7 +4068,7 @@
         "Hoofed"
       ],
       "base_strength": 7,
-      "text": "Can't be covered while this is grazing.",
+      "text": "Can't be covered while grazing.",
       "species": "Bison",
       "habitat": "Forest",
       "keywords": []

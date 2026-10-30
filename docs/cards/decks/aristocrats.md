@@ -29,7 +29,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Praying Mantis** | 3 | — | 2 | Roar: remove an adjacent ally to draw 2 cards. |
-| **Vulture** | 3 | Bird | 2 | Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck. |
+| **Vulture** | 3 | Bird | 2 | Flight. Dusk: if 3 or more animals were removed this turn, fly in from your hand or deck. |
 | **City Spider** | 3 | Arachnid | 4 | Dawn: remove the weakest animal next to this. |
 | **Cockroach** | 3 | — | 1 | Fall: replace this with a Cockroach and place a Roach on an adjacent empty crossroad. |
 | **Python** | 3 | Snake | 0 | Whenever an enemy is removed, gain 1 strength (wherever this is). |
