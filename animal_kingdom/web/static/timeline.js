@@ -124,13 +124,16 @@ export function plan(prev, next, cards = {}) {
         if (e.cr) {
           take(e.cr, e.iid);
           if (e.e === 'bounce' && fresh[i + 1] && fresh[i + 1].e === 'to_hand') toHand(fresh[++i]);   // it flies back into the hand
-          // what a swarm removes goes together, in one beat, as its landing did: the Locusts eating the whole board. A run
-          // of removals by one card is a swarm when several of its animals did them; one animal's removals keep a beat each.
+          // what a swarm takes goes together, in one beat, as its landing did: the Locusts eating the whole board and flying
+          // off. A run of removals and Wild fly-aways by one card is a swarm when several of its animals did them; one
+          // animal's removals keep a beat each.
+          const gone = x => x && x.cr && (x.e === 'remove' || (x.e === 'bounce' && x.owner === 'wild'));
           let j = i;
-          while (e.e === 'remove' && e.cause && fresh[j + 1] && fresh[j + 1].e === 'remove' && fresh[j + 1].cr && fresh[j + 1].cause === e.cause) j++;
+          while (gone(e) && e.cause && gone(fresh[j + 1]) && fresh[j + 1].cause === e.cause) j++;
           const many = new Set(fresh.slice(i, j + 1).map(r => r.cause_iid)).size > 1;
+          const kind = many ? 'remove' : e.e;
           if (many) for (; i < j; i++) take(fresh[i + 1].cr, fresh[i + 1].iid);
-          push({ kind: e.e, dur: DUR[e.e], cr: e.cr, card: e.card, owner: e.owner, by: many ? null : culprit(s.board, e.cause, e.cr, e.cause_iid) });
+          push({ kind, dur: DUR[kind], cr: e.cr, card: e.card, owner: e.owner, by: many ? null : culprit(s.board, e.cause, e.cr, e.cause_iid) });
         }
         else if (e.zone === 'hand') {   // discarded from a hand
           s.handCount[e.owner] = Math.max(0, s.handCount[e.owner] - 1);

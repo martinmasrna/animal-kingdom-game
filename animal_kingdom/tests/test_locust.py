@@ -1,5 +1,5 @@
 """The First of Many (Martin, 2026-10-22): "Roar: cover the board with Locusts." Each Locust is Wild, no one's, with
-"In 2 turns, remove this and the animal under it": the opponent's turn, then the caster's, since a Wild animal's timer
+"In 2 turns, remove the animal underneath, then fly away": the opponent's turn, then the caster's, since a Wild animal's timer
 ticks every turn (keywords.md, Wild)."""
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PassAction, PlaceAction
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import WILD
+from animal_kingdom.engine.strength import card_strength
 
 from ._helpers import make_state, put
 
@@ -46,6 +47,17 @@ def test_the_swarm_eats_at_the_start_of_the_casters_next_turn_and_what_was_burie
     assert s.board["2,2"] == [buried]                        # the Locust and the Lion went, the Fox resurfaced
     assert "1,2" not in s.board                              # the legendary went with its swarm
     assert not any(u.card_id == "locust_swarm" for st in s.board.values() for u in st)
+
+
+def test_a_locust_flying_away_is_no_removal_so_only_what_it_eats_counts():
+    s = make_state(hands={"A": ["locust_legend", "python"], "B": ["lion"]}, decks={"A": ["lion"] * 9, "B": ["lion"] * 9})
+    put(s, "2,2", "lion", "B")
+    put(s, "3,1", "hyena", "A")
+    rules.apply_action(s, PlaceAction("locust_legend", ("cr", "1,2")))
+    end_turn(s)
+    end_turn(s)                                              # A's Dawn: 12 Locusts fly off, the Lion, Hyena and legendary are eaten
+    assert card_strength(s, "python", "A") == 1              # one enemy removed: the Lion
+    assert s.turn_flags.get(f"lost_{WILD}", 0) == 0
 
 
 def test_covering_a_locust_spares_that_crossroad():

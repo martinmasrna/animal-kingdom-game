@@ -632,7 +632,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("hyena", OnEndOfTurn) => {
-            let removed = lost_this_turn(st, A) + lost_this_turn(st, B);
+            let removed = lost_this_turn(st, A) + lost_this_turn(st, B) + lost_this_turn(st, WILD);
             let per = cfg(st, "hyena_food_per");
             push_gain(st, owner, per * removed);
         }

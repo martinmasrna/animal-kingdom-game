@@ -53,7 +53,7 @@ At the start of your turn this eats up to N of your food, and gets −1 strength
 When an enemy covers this, it returns to your hand: the cover takes the crossroad, but nothing dies. A fleer keeps its value in its Roar, which comes again when it's played back. Carried by the herd's fleers (Gazelle, Deer, Zebra) and the Hare.
 
 ### Wild
-Belongs to no one. A Wild animal connects no one and holds no region, so a region with one in it pays no one; any animal of strength 1 or more covers it (it is no one's, so covering it needs more strength, as an enemy does); "enemy" effects see it, since it isn't yours. Its timers tick every turn, both players', so "In 2 turns" on a Wild animal is the opponent's turn and then yours (Martin, 2026-10-22). Carried by the Locusts that The First of Many covers the board with ("Wild. In 2 turns, remove this and the animal under it."): a covered Locust's timer waits, so covering one spares that crossroad.
+Belongs to no one. A Wild animal connects no one and holds no region, so a region with one in it pays no one; any animal of strength 1 or more covers it (it is no one's, so covering it needs more strength, as an enemy does); "enemy" effects see it, since it isn't yours. Its timers tick every turn, both players', so "In 2 turns" on a Wild animal is the opponent's turn and then yours (Martin, 2026-10-22). Carried by the Locusts that The First of Many covers the board with ("Wild. In 2 turns, remove the animal underneath, then fly away."; flying away is not a removal, so only the animals the swarm eats count as removed, Martin 2026-10-30): a covered Locust's timer waits, so covering one spares that crossroad.
 
 ### Apex Predator
 A predator that must land on prey and eats it.

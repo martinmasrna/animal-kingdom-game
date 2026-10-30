@@ -2045,8 +2045,8 @@ def _raccoon_place(state, unit, cr):
 
 
 def _hyena_eot(state, unit, cr):
-    """Dusk: gain 3 food for each animal removed this turn (either player's)."""
-    removed = _lost_this_turn(state, "A") + _lost_this_turn(state, "B")
+    """Dusk: gain 3 food for each animal removed this turn (either player's or a Wild one)."""
+    removed = _lost_this_turn(state, "A") + _lost_this_turn(state, "B") + _lost_this_turn(state, WILD)
     _push_gain(state, unit.owner, state.config.hyena_food_per * removed)
 
 
@@ -2132,13 +2132,14 @@ def _locust_legend_place(state, unit, cr):
 
 
 def _op_locust_eat(state, step):
-    """A Locust's time is up: it goes, and so does the animal under it (Armor still holds; a crossroad the swarm found
-    empty just clears)."""
+    """A Locust's time is up: "remove the animal underneath, then fly away". Armor still holds; flying away is a Wild
+    bounce, not a removal, so the swarm feeds removal counters (Python, Hyena) only with what it eats."""
     cr, locust = _find_unit(state, step["iid"])
     if locust is None or state.board[cr][-1] is not locust:
         return None
-    if remove_top(state, cr, by_player=step["by_player"], by_card="locust_swarm"):
-        remove_top(state, cr, by_player=step["by_player"], by_card="locust_swarm")
+    if len(state.board[cr]) > 1:
+        _remove_specific(state, cr, state.board[cr][-2], by_player=step["by_player"], by_card="locust_swarm")
+    _bounce(state, cr, locust)
     return None
 
 
