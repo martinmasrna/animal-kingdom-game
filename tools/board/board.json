@@ -1,5 +1,5 @@
 {
- "rev": 1006,
+ "rev": 1007,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -218,8 +218,8 @@
   {
    "id": "pmvuvrsm76",
    "name": "Utility",
-   "x": 3877,
-   "y": 1321,
+   "x": 3672,
+   "y": 1370,
    "cols": 8,
    "stacked": false,
    "cards": [
@@ -236,8 +236,8 @@
   {
    "id": "pmvuvs4vt7",
    "name": "Big Bodies",
-   "x": 3881,
-   "y": 165,
+   "x": 3676,
+   "y": 214,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -250,8 +250,8 @@
   {
    "id": "pmvuvsdpj8",
    "name": "Removal",
-   "x": 3861,
-   "y": -1699,
+   "x": 3656,
+   "y": -1650,
    "cols": 11,
    "stacked": false,
    "cards": [
@@ -271,8 +271,8 @@
   {
    "id": "pmvuvsvrj9",
    "name": "Auras",
-   "x": 5189,
-   "y": -230,
+   "x": 4984,
+   "y": -181,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -284,8 +284,8 @@
   {
    "id": "pmvuvu3rf10",
    "name": "Walls",
-   "x": 5197,
-   "y": 163,
+   "x": 4992,
+   "y": 212,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -298,8 +298,8 @@
   {
    "id": "pmvuvu9p511",
    "name": "Apex Predators",
-   "x": 3865,
-   "y": -229,
+   "x": 3660,
+   "y": -180,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -312,8 +312,8 @@
   {
    "id": "pmvuw0k7c12",
    "name": "Draw",
-   "x": 3878,
-   "y": -1289,
+   "x": 3673,
+   "y": -1240,
    "cols": 9,
    "stacked": false,
    "cards": [
@@ -328,8 +328,8 @@
   {
    "id": "pmvuw2jze13",
    "name": "Tech",
-   "x": 3891,
-   "y": 1730,
+   "x": 3686,
+   "y": 1779,
    "cols": 6,
    "stacked": false,
    "cards": [
@@ -344,8 +344,8 @@
   {
    "id": "pmvuw3q0s14",
    "name": "Extra Placement",
-   "x": 3847,
-   "y": -2107,
+   "x": 3642,
+   "y": -2058,
    "cols": 5,
    "stacked": false,
    "cards": [
@@ -359,8 +359,8 @@
   {
    "id": "pmvuw59lk15",
    "name": "Engines",
-   "x": 5192,
-   "y": -628,
+   "x": 4987,
+   "y": -579,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -372,8 +372,8 @@
   {
    "id": "pmvuwaa0x16",
    "name": "Deck Specific",
-   "x": 3874,
-   "y": 922,
+   "x": 3669,
+   "y": 971,
    "cols": 8,
    "stacked": false,
    "cards": [
@@ -389,8 +389,8 @@
   {
    "id": "pmvuwbfjh17",
    "name": "Tempo",
-   "x": 3869,
-   "y": -628,
+   "x": 3664,
+   "y": -579,
    "cols": 4,
    "stacked": false,
    "cards": [
@@ -523,8 +523,8 @@
   {
    "id": "pmvuy9e2i0",
    "name": "Idk",
-   "x": 3894,
-   "y": 2133,
+   "x": 3689,
+   "y": 2182,
    "cols": 4,
    "stacked": false,
    "cards": [
