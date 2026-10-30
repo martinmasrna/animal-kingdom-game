@@ -1,5 +1,5 @@
 {
- "rev": 635,
+ "rev": 636,
  "cards": {
   "army_ant_legend": {
    "x": 12135,
@@ -723,6 +723,9 @@
   "sperm_whale_legend": {
    "flag": true,
    "note": "random?"
+  },
+  "wolf_legend_2": {
+   "note": "isn't it too strong compared to Adira?"
   }
  }
 }
