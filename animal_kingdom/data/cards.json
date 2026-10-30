@@ -911,7 +911,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: if you played another Cat this turn, remove an adjacent enemy.",
       "keywords": [],
       "species": "Serval",
@@ -1370,7 +1370,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 4,
+      "base_strength": 3,
       "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy.",
       "species": "Gopher",
       "habitat": "Meadow",
