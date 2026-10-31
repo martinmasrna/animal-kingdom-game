@@ -1,5 +1,5 @@
 {
- "rev": 1012,
+ "rev": 1013,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -473,7 +473,6 @@
    "cols": 5,
    "stacked": false,
    "cards": [
-    "falcon_legend",
     "skunk_legend"
    ],
    "tint": "red"
@@ -487,7 +486,8 @@
    "stacked": false,
    "cards": [
     "bat_legend",
-    "rat_legend_2"
+    "rat_legend_2",
+    "falcon_legend"
    ],
    "tint": "orange"
   },
