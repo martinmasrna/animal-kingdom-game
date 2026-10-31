@@ -8,7 +8,7 @@ from animal_kingdom.bots.atomic_bot import AtomicBot
 
 
 def _position():
-    s = new_game(["lion"] * 15 + ["mouse"] * 15, ["tiger"] * 15 + ["mouse"] * 15, 7, map_id="map_b", first_player="A")
+    s = new_game(["lion"] * 15 + ["mouse"] * 15, ["elephant"] * 30, 7, map_id="map_b", first_player="A")
     while s.pending is not None:
         rules.apply_action(s, ChoiceAction(SKIP))
     rules.apply_action(s, next(a for a in rules.legal_actions(s) if a.kind == "place"))
@@ -37,3 +37,16 @@ def test_it_plays_a_legal_turn():
     bot = AtomicBot(make_bot("turn", 1, extra={"determinizations": 2}, python_only=True), widths=(3,), workers=1)
     legal = rules.legal_actions(s)
     assert bot.choose(s.view_for(me), legal, s) in legal
+
+
+def test_drawing_first_never_scores_below_playing_and_then_drawing():
+    """Martin, 2026-10-31: 'if you're going to draw anyway, you might as well do it first'. In one imagined hand "draw,
+    then X" reaches the position "X, then draw" does, so the draw-first turn, finished by its best continuation, scores
+    at least as well."""
+    s = _position()
+    me = s.player_to_act()
+    bot = AtomicBot(make_bot("turn", 1, extra={"determinizations": 2}, python_only=True), widths=(400,), workers=1)
+    rows = bot.rank(s, me)
+    draw_first = next(r for r in rows if r["turn"][0].kind == "draw")
+    then_draw = [r for r in rows if len(r["turn"]) > 1 and r["turn"][-1].kind == "draw" and r["levels"][0] is not None]
+    assert then_draw and all(draw_first["levels"][0] >= r["levels"][0] - 1e-9 for r in then_draw)

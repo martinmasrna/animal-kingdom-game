@@ -51,13 +51,12 @@ def _key(s: GameState) -> tuple:
 
 
 class AtomicBot(Bot):
-    def __init__(self, base, rounds: int = 1, widths: tuple = (60, 20), inner: int = 4, draw_width: int = 3,
+    def __init__(self, base, rounds: int = 1, widths: tuple = (60, 20), inner: int = 4,
                  cap: int = 3000, workers: int = 5):
         self.base = base                 # a TurnSearcher: evaluation, imagined hands, decided-game value, mulligan
         self.rounds = rounds
         self.widths = widths             # my turns taken to level 1, then to level 2
         self.inner = inner               # turns followed further at each step inside a deeper line
-        self.draw_width = draw_width     # continuations after a draw that get searched, per imagined hand
         self.cap = cap                   # whole turns listed at most for one side in one position
         self.workers = workers
         self._plan: list[Action] = []
@@ -137,16 +136,28 @@ class AtomicBot(Bot):
         """(my evaluation after it, the actions of) the opponent's whole reply turn from `s` that is worst for me."""
         return self.best_line(s, me, 1)
 
-    def _after_my_turn(self, s: GameState, me: str, open_: bool, plies: int) -> float:
+    def _after_my_turn(self, s: GameState, me: str, open_: bool, plies: int, hand: int = -1) -> float:
         """The value of my turn ending in `s`, looking `plies` turns past it; a turn a draw left open is finished in
-        this imagined hand by the best continuation for the cards drawn there."""
+        this imagined hand (`hand`) by the best of every continuation for the cards drawn there. Every one, never a
+        board-scored shortlist: "draw, then the Orangutan" reaches the same position as "the Orangutan, then draw" in
+        the same hand, so drawing first can never score below it (Martin, 2026-10-31: "if you're going to draw anyway,
+        you might as well do it first"). Positions already scored in this hand are remembered, which keeps it cheap."""
         if not open_ or rules.is_terminal(s) is not None or s.player_to_act() != me:
-            return self.line_value(s, me, plies)
+            return self._remembered(s, me, plies, hand)
         rest = self.turns(s, me, through_draws=True)
         if not rest:
-            return self.line_value(s, me, plies)
-        rest.sort(key=lambda t: -self._value(t[1], me))
-        return max(self.line_value(end, me, plies) for _, end in rest[:self.draw_width])
+            return self._remembered(s, me, plies, hand)
+        return max(self._remembered(end, me, plies, hand) for _, end in rest)
+
+    def _remembered(self, s: GameState, me: str, plies: int, hand: int) -> float:
+        key = (hand, plies, _key(s))
+        memo = self.__dict__.setdefault("_memo", {})
+        if hand < 0 or key not in memo:
+            v = self.line_value(s, me, plies)
+            if hand < 0:
+                return v
+            memo[key] = v
+        return memo[key]
 
     # ------------------------------------------------------------------ the search
 
@@ -154,6 +165,7 @@ class AtomicBot(Bot):
         """Every whole turn for `me`, best first: {turn, board, levels: [round 1 score, round 2 score...]}, a level's
         score None for a turn that did not reach it. `progress(rows, level, done, total)` hears the ranking fill."""
         worlds = worlds or [determinize(state, me, self.base.det_rng) for _ in range(self.base.determinizations)]
+        self._memo = {}
         rows = []
         for path, _ in self.turns(state, me, through_draws=False):
             ends = []
@@ -169,7 +181,11 @@ class AtomicBot(Bot):
             if len(ends) < len(worlds):
                 continue
             open_ = rules.is_terminal(ends[0]) is None and ends[0].player_to_act() == me     # a draw left it open
-            board = sum(self._value(e.clone(), me) for e in ends) / len(ends)
+            # never the board in mid-turn: a turn a draw left open scores, in each hand, the best board its
+            # continuations reach with the cards drawn there
+            board = sum((max((self._value(end, me) for _, end in self.turns(e, me, through_draws=True)),
+                             default=self._value(e.clone(), me)) if open_ else self._value(e.clone(), me))
+                        for e in ends) / len(ends)
             rows.append({"turn": path, "ends": ends, "open": open_, "board": board,
                          "levels": [None] * self.rounds, "per_hand": [None] * self.rounds})
 
@@ -205,7 +221,7 @@ class AtomicBot(Bot):
         return rows
 
     def _job(self, row: dict, k: int, me: str, plies: int) -> float:
-        return self._after_my_turn(row["ends"][k].clone(), me, row["open"], plies)
+        return self._after_my_turn(row["ends"][k].clone(), me, row["open"], plies, hand=k)
 
     def choose(self, view: StateView, legal: Sequence[Action], state: Optional[GameState] = None) -> Action:
         legal = list(legal)
