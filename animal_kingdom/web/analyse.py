@@ -59,14 +59,12 @@ def _name(cid: str) -> str:
 
 
 def describe(a: dict) -> str:
-    """One action as a line of the move list."""
+    """One action without its position (a fallback for anything `named` can't place)."""
     k = a.get("kind")
     if k == "place":
-        t = a["target"]
-        return f"{_name(a['card_id'])} → {'den' if t[0] == 'hq' else t[1]}"
+        return f"{_name(a['card_id'])} → {'den' if a['target'][0] == 'hq' else a['target'][1]}"
     if k == "roam":
-        t = a["target"]
-        return f"roam {a['from']} → {'den' if t[0] == 'hq' else t[1]}"
+        return f"roam {a['from']} → {'den' if a['target'][0] == 'hq' else a['target'][1]}"
     if k == "draw":
         return "draw"
     if k == "pass":
@@ -77,28 +75,72 @@ def describe(a: dict) -> str:
     return json.dumps(a)
 
 
-def texts(state: GameState, seq: list[dict]) -> list[str]:
-    """`seq` played from `state`, each action described with what it touches: a choice names the animal on the
-    crossroad it picks (or the card it picks), as the seat acting sees it ("own" or "enemy")."""
-    s, out = state.clone(), []
+def _where(s: GameState, cr: str, me: str) -> str:
+    """An empty crossroad by where it lies for the side acting: how far from its own den, and which row."""
+    gm = s.game_map
+    cols = max(int(c.split(",")[0]) for c in gm.crossroads)
+    rows = max(int(c.split(",")[1]) for c in gm.crossroads)
+    c, r = map(int, cr.split(","))
+    own = min(int(x.split(",")[0]) for x in gm.hq_front(me))
+    far = abs(c - own)
+    col = {0: "at own den", cols - 1: "at enemy den"}.get(far, "centre" if far == (cols - 1) / 2 else
+                                                         "own half" if far < (cols - 1) / 2 else "enemy half")
+    row = "top" if r == 1 else "bottom" if r == rows else "middle"
+    return f"empty crossroad, {col}, {row} row"
+
+
+def _unit(s: GameState, cr: str, me: str) -> str:
+    u = s.top_unit(cr)
+    if u is None:
+        return _where(s, cr, me)
+    return f"{'own' if u.owner == me else 'enemy'} {_name(u.card_id)} ({effective_strength(s, u)})"
+
+
+def named(state: GameState, seq: list[dict]) -> tuple[list[str], list[list[str]]]:
+    """`seq` played from `state`, each action named by what it touches rather than where ("[TIGER] onto enemy Peacock
+    (6)", "Serval onto empty crossroad, centre, top row"), as the side acting sees it; and, for each action, the
+    crossroads it touches (for the page to ring on the board)."""
+    s, out, crs = state.clone(), [], []
     for d in seq:
-        t = describe(d)
-        if d.get("kind") == "choice":
-            c, me = d.get("choice"), s.player_to_act()
-            if isinstance(c, str) and s.top_unit(c) is not None:
-                u = s.top_unit(c)
-                t = f"  on {c}: {'own' if u.owner == me else 'enemy'} {_name(u.card_id)} ({effective_strength(s, u)})"
+        me, k, t, touched = s.player_to_act(), d.get("kind"), describe(d), []
+        if k == "place":
+            tg = d["target"]
+            if tg[0] == "hq":
+                t = f"{_name(d['card_id'])} into the enemy den"
+            else:
+                t = f"{_name(d['card_id'])} onto {_unit(s, tg[1], me)}"
+                touched = [tg[1]]
+        elif k == "roam":
+            src = s.top_unit(d["from"])
+            tg = d["target"]
+            name = _name(src.card_id) if src else "an animal"
+            t = f"{name} roams into the enemy den" if tg[0] == "hq" else f"{name} roams onto {_unit(s, tg[1], me)}"
+            touched = [d["from"]] + ([tg[1]] if tg[0] != "hq" else [])
+        elif k == "choice":
+            c = d.get("choice")
+            if isinstance(c, str) and c in s.game_map.crossroads:
+                t, touched = f"  → {_unit(s, c, me)}", [c]
             elif isinstance(c, str) and c in CARDS:
-                t = f"  pick {_name(c)}"
+                t = f"  → {_name(c)}"
             elif isinstance(c, int):
                 u = next((u for p in "AB" for u in s.hands[p] if u.iid == c), None)
-                t = f"  pick {_name(u.card_id)}" if u else t
+                t = f"  → {_name(u.card_id)}" if u else t
+            elif c in ("den", "skip"):
+                t = "  → the den" if c == "den" else "  → nothing"
         out.append(t)
+        crs.append(touched)
         try:
-            rules.apply_action(s, action_from_dict({k: v for k, v in d.items() if k != "by"}), validate=False)
+            rules.apply_action(s, action_from_dict({k_: v for k_, v in d.items() if k_ != "by"}), validate=False)
         except Exception:
             break
-    return out
+    while len(out) < len(seq):
+        out.append(describe(seq[len(out)]))
+        crs.append([])
+    return out, crs
+
+
+def texts(state: GameState, seq: list[dict]) -> list[str]:
+    return named(state, seq)[0]
 
 
 # ------------------------------------------------------------------------------------------------ games
@@ -229,7 +271,8 @@ class Session:
     def moves(self) -> list[dict]:
         st, out = self.start(), []
         for i, a in enumerate(self.line):
-            out.append({"k": i, "turn": st.turn_counter, "actor": _actor(st, a), "text": texts(st, [a])[0],
+            txt, crs = named(st, [a])
+            out.append({"k": i, "turn": st.turn_counter, "actor": _actor(st, a), "text": txt[0], "crs": crs[0],
                         "top": a.get("kind") != "choice", "game": i < len(self.game) and self.game[i] == a})
             rules.apply_logged(st, a)
         return out
@@ -238,6 +281,7 @@ class Session:
         st = self.m.state
         seat = self.seat()
         out = {"k": self.k, "n": len(self.line), "seat": seat, "view": seat_view(self.m, seat), "turn": st.turn_counter,
+               "cols": max(int(c.split(",")[0]) for c in st.game_map.crossroads),
                "food": st.food, "over": rules.is_terminal(st) is not None,
                "off_game": self.line[:len(self.game)] != self.game[:len(self.line)] or len(self.line) > len(self.game)}
         if mover and mover != seat:     # the move animates from the mover's seat first, then the board turns
@@ -326,8 +370,11 @@ def engine(state: GameState, seed: int, emit) -> None:
         for d in t:
             rules.apply_action(s, action_from_dict(d), validate=False)
         return rules.is_terminal(s) is None and s.player_to_act() == me
-    rows = [{"turn": t, "text": texts(state, t) + (["then its quick policy plays on"] if open_after(t) else []),
-             "d1": None, "d2": None, "d3": None} for t in all_turns]
+    rows = []
+    for t in all_turns:
+        txt, crs = named(state, t)
+        rows.append({"turn": t, "text": txt + (["then its quick policy plays on"] if open_after(t) else []),
+                     "crs": crs, "d1": None, "d2": None, "d3": None})
     t0 = time.monotonic()
     def send(stage, done, total, extra=None):
         ranked = sorted(rows, key=lambda r: tuple(-(r[k] if r[k] is not None else -1e9) for k in ("d3", "d2", "d1")))
@@ -371,7 +418,8 @@ def engine(state: GameState, seed: int, emit) -> None:
     for r in rows:
         r["expert"] = r["turn"] == planned
     if not any(r.get("expert") for r in rows):
-        rows.append({"turn": planned, "text": texts(state, planned), "d1": None, "d2": None, "d3": None, "expert": True})
+        txt, crs = named(state, planned)
+        rows.append({"turn": planned, "text": txt, "crs": crs, "d1": None, "d2": None, "d3": None, "expert": True})
     send(5, 1, 1, {"expert": expert})
 
 
@@ -409,7 +457,8 @@ def search(state: GameState, seed: int) -> dict:
     roots = []
     for a, shallow in keep.get("shallow", []):
         t = _turn_of(bot, worlds[0], a, me)
-        roots.append({"turn": t, "text": texts(state, t), "reply": round(shallow, 1),
+        txt, crs = named(state, t)
+        roots.append({"turn": t, "text": txt, "crs": crs, "reply": round(shallow, 1),
                       "deep": round(deep[a], 1) if a in deep else None,
                       "decisions": _decisions(state, a, t, seen.get(a, {}))})
     planned = next((r["turn"] for r in roots if r["turn"][0] == chosen.to_dict()), [chosen.to_dict()])

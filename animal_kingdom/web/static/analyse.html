@@ -94,6 +94,10 @@ async function feed(view, animate) {
   const w = frameWin();
   w.__ak.onAct = action => onAct(action);
   if (!w.__akKeys) { w.__akKeys = true; w.document.addEventListener('keydown', keys); }   // the arrows work with the board focused too
+  if (!w.__akRing) { w.__akRing = true; const st = w.document.createElement('style');
+    st.textContent = `#board .cr.ahl::after { content: ''; position: absolute; inset: -10px; border-radius: 50%; border: 5px solid #f9ab00; pointer-events: none; z-index: 5; }
+      #board .cr.ahl::before { content: attr(data-ahl); position: absolute; left: -14px; top: -14px; width: 26px; height: 26px; border-radius: 50%; background: #f9ab00; color: #202124; font: 700 15px/26px sans-serif; text-align: center; z-index: 6; pointer-events: none; }`;
+    w.document.head.appendChild(st); }
   const v = JSON.parse(JSON.stringify(view)); v.version = S.ver++; v.analysed = v.version;
   if (!animate) { v.game.events = []; v.game.history = []; }
   w.__ak.feed(v);
@@ -102,6 +106,21 @@ async function feed(view, animate) {
     if (S.ver - 1 !== v.version) return;
     if ((w.__ak().V || {}).analysed !== v.version) w.__ak.feed(v);
   }
+}
+function ring(crs) {
+  const w = frameWin(); if (!w || !w.document) return;
+  unring();
+  const seat = (S.frames ? S.frames[S.fi].you : S.b.view.you) || S.b.seat, cols = S.b.cols || 5;
+  const flat = []; (crs || []).forEach(list => (list || []).forEach(cr => { if (!flat.includes(cr)) flat.push(cr); }));
+  flat.forEach((cr, i) => {
+    const [c, r] = cr.split(','), v = seat === 'A' ? cr : `${cols + 1 - Number(c)},${r}`;
+    const el = w.document.querySelector(`#board [data-cr="${v}"]`);
+    if (el) { el.classList.add('ahl'); el.dataset.ahl = flat.length > 1 ? i + 1 : ''; }
+  });
+}
+function unring() { const w = frameWin(); if (w && w.document) w.document.querySelectorAll('#board .ahl').forEach(el => el.classList.remove('ahl')); }
+function ringOnHover(root, sel, crsOf) {
+  root.querySelectorAll(sel).forEach(el => { el.addEventListener('mouseenter', () => ring(crsOf(el))); el.addEventListener('mouseleave', unring); });
 }
 const animating = () => { const w = frameWin(); return w && w.__ak && w.__ak().PB && w.__ak().PB.busy; };
 
@@ -154,6 +173,7 @@ function renderMoves() {
   $('moves').innerHTML = `<div data-k="0" class="${k === 0 ? 'at' : ''}">start</div>` + S.moves.map(m =>
     `<div data-k="${m.k + 1}" class="${m.top ? '' : 'sub'}${m.game ? '' : ' off'}${m.k + 1 === k ? ' at' : ''}">T${m.turn} ${m.actor} (${who(m.actor)}): ${esc(m.text)}</div>`).join('');
   $('moves').querySelectorAll('div').forEach(el => el.onclick = () => goto(+el.dataset.k));
+  ringOnHover($('moves'), 'div[data-k]', el => { const m = S.moves[+el.dataset.k - 1]; return m ? [m.crs] : []; });
   const at = $('moves').querySelector('.at'); if (at) at.scrollIntoView({ block: 'nearest' });
 }
 
@@ -193,6 +213,8 @@ function renderEngine(L, done) {
   $('eng').querySelectorAll('a[data-play]').forEach(a => a.onclick = e => { e.stopPropagation(); playTurn(rows[+a.dataset.play].turn); });
   $('eng').querySelectorAll('a[data-hands]').forEach(a => a.onclick = e => { e.stopPropagation(); hands(rows[+a.dataset.hands].turn); });
   $('eng').querySelectorAll('tr.click').forEach(tr => tr.onclick = () => hands(rows[+tr.dataset.i].turn));
+  ringOnHover($('eng'), 'tr.click[data-i]', el => rows[+el.dataset.i].crs);
+  if (L.expert) ringOnHover($('eng'), 'tr[data-root]', el => L.expert.roots[+el.dataset.root].crs);
   $('eng').querySelectorAll('a[data-opt]').forEach(a => a.onclick = e => { e.stopPropagation(); const [r, d, o] = a.dataset.opt.split('.').map(Number); hands(L.expert.roots[r].decisions[d].options[o].turn); });
 }
 function expertHtml(x) {
@@ -200,7 +222,7 @@ function expertHtml(x) {
     <div class="muted">The first actions it scored (it looks one round deeper only at its best three by the reply score), the rest of the turn it planned with each, and every option it weighed at each decision.</div>
     <table><tr><th>Turn it planned</th><th class="num">Deep</th><th class="num">Reply</th></tr>`;
   x.roots.forEach((r, ri) => {
-    h += `<tr><td>${r.text.map(t => esc(t.trim())).join(' · ')}${r.decisions.map((d, di) => `<div class="dec"><b>Decision ${di + 1}</b> <span class="muted">${d.options[0].reply ? 'scored after the reply' : 'scored on the board when the turn ends, no reply'}</span>
+    h += `<tr data-root="${ri}"><td>${r.text.map(t => esc(t.trim())).join(' · ')}${r.decisions.map((d, di) => `<div class="dec"><b>Decision ${di + 1}</b> <span class="muted">${d.options[0].reply ? 'scored after the reply' : 'scored on the board when the turn ends, no reply'}</span>
       <table>${d.options.map((o, oi) => `<tr class="${o.took ? 'took' : ''}"><td>${esc(o.text.trim())}${o.took ? ' <span class="muted">(taken)</span>' : ''}</td><td class="num">${fmt(o.score)}</td><td><a class="x" data-opt="${ri}.${di}.${oi}">hands</a></td></tr>`).join('')}</table></div>`).join('')}</td>
       <td class="num">${fmt(r.deep)}</td><td class="num">${fmt(r.reply)}</td></tr>`;
   });
