@@ -1,5 +1,5 @@
 {
- "rev": 1011,
+ "rev": 1012,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -606,7 +606,8 @@
    "flag": true
   },
   "skunk": {
-   "flag": true
+   "flag": true,
+   "note": "maybe change it to global, just like octopus? think that's good, the art would need to change probably but that's fine"
   },
   "vole": {
    "flag": true
