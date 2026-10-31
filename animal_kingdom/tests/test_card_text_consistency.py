@@ -311,6 +311,7 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 # printing one must be listed (checked below): the launch decks brought a dozen of them at once.
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "bee_legend_2": ["jelly_grant"],
+    "deer_legend": ["deer_legend_grant"],      # "give it +2 strength" (the active-text pass, 2026-10-31)
     "guard_wasp": ["guard_hornet_bonus"],
     "python": ["python_growth"],
     "leopard_legend": ["leopard_legend_growth"],
