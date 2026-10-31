@@ -2465,8 +2465,13 @@
   },
   "jellyfish": {
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1793448250
     },
     "rarity": {
       "review": {
@@ -2505,6 +2510,15 @@
       "note": "Martin, 2026-10-30 (card board review)",
       "by": "claude",
       "at": 1793369440
+    },
+    "art": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448162
     }
   },
   "jellyfish_legend": {
@@ -4856,12 +4870,20 @@
     "art": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792139104
+      "at": 1793448164,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      }
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792140511
+      "at": 1793448250,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      }
     },
     "effect": {
       "review": {
@@ -5846,6 +5868,24 @@
       "note": "Martin, 2026-10-24: an ant queen flies once, sheds her wings and lays where she stands, so no Flight; 5, the Sea Turtle's strength, and the Turtle gets a new effect",
       "by": "claude",
       "at": 1792867920
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448163
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448250
     }
   },
   "scout_bee": {
@@ -6334,6 +6374,24 @@
       "note": "moved from pool to giants",
       "by": "claude",
       "at": 1793104279
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448163
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448250
     }
   },
   "dung_beetle_legend": {
@@ -7174,6 +7232,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793300216
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448164
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448250
     }
   },
   "marmot": {
@@ -7282,6 +7358,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793382545
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448162
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448250
     }
   },
   "deer_legend_2": {
@@ -7385,6 +7479,26 @@
       "note": "Martin, 2026-10-30: the Fawn's stages wear its legendary frame, as the Butterfly's do",
       "by": "claude",
       "at": 1793388269
+    }
+  },
+  "young_ant": {
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448164
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793448250
     }
   }
 }

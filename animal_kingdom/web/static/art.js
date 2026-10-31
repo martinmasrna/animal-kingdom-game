@@ -1,6 +1,11 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  young_ant: [.6, .47, .55],
+  vole: [.5, .45, .55],
+  queen_ant: [.68, .5, .55],
+  krill: [.55, .38, .55],
+  bison: [.62, .62, .5],
   locust_swarm: [.6, .47, .66],
   fawn: [.62, .32, .7],
   albatross: [.58, .46, .72],
@@ -20,7 +25,7 @@ export const CROP = {
   tarantula: [.55, .5, .75],
   sperm_whale_legend: [.6, .5, .72],
   opossum: [.68, .4, .7],
-  sea_turtle: [.6, .47, .72],
+  sea_turtle: [.62, .38, .5],
   roach: [.6, .48, .62],
   toad: [.62, .45, .8],
   locust_legend: [.62, .38, .8],
@@ -61,7 +66,7 @@ export const CROP = {
   leopard_legend: [.639, .42, .62],
   leopard: [.612, .348, .6],
   lion_legend_3: [.578, .317, .62],
-  jellyfish: [.618, .263, .72],
+  jellyfish: [.5, .27, .6],
   jackal: [.665, .486, .6],
   honey_badger_legend: [.349, .396, .653],
   honey_badger: [.466, .492, .8],
@@ -165,6 +170,11 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  young_ant: [.62, .47, 1.2],
+  vole: [.55, .45, 1.2],
+  queen_ant: [.7, .5, 1.2],
+  krill: [.6, .36, 1.2],
+  bison: [.66, .6, 1.2],
   locust_swarm: [.66, .45, 1.2],
   fawn: [.67, .28, 1.3],
   albatross: [.6, .45, 1.2],
@@ -184,7 +194,7 @@ export const STRIP = {
   tarantula: [.55, .48, 1.2],
   sperm_whale_legend: [.62, .5, 1.2],
   opossum: [.72, .42, 1.2],
-  sea_turtle: [.65, .45, 1.2],
+  sea_turtle: [.65, .36, 1.2],
   roach: [.62, .45, 1.2],
   toad: [.72, .35, 1.2],
   locust_legend: [.7, .28, 1.2],
@@ -222,7 +232,7 @@ export const STRIP = {
   leopard_legend: [.656, .451, 1],
   leopard: [.678, .319, 1],
   lion_legend_3: [.589, .295, 1],
-  jellyfish: [.549, .249, 1.032],
+  jellyfish: [.55, .25, 1.2],
   honey_badger_legend: [.322, .436, 1],
   golden_orb_weaver: [.5, .373, 1],
   giraffe_legend: [.592, .287, 1],
@@ -322,6 +332,11 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  young_ant: .45,
+  vole: .45,
+  queen_ant: .45,
+  krill: .4,
+  bison: .55,
   locust_swarm: .48,
   fawn: .45,
   albatross: .45,
@@ -341,7 +356,7 @@ export const FULL = {
   tarantula: .48,
   sperm_whale_legend: .5,
   opossum: .42,
-  sea_turtle: .45,
+  sea_turtle: .4,
   roach: .45,
   toad: .45,
   locust_legend: .45,
@@ -437,7 +452,7 @@ export const FULL = {
   blue_whale: .45,
   whale_shark: .45,
   orca: .45,
-  jellyfish: .37,
+  jellyfish: .3,
   tuna_legend: .45,
   manta_ray_legend: .38,
   manta_ray: .4,
