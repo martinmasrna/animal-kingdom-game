@@ -71,9 +71,14 @@ html.kb .mscr { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phon
 .mscr .dtile b { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font: 700 19px/1.1 'Fira Sans Condensed', sans-serif; color: #f0ece4; text-shadow: 0 1px 3px #000; }
 .mscr .dtile:not(.on):hover { filter: brightness(1.18); box-shadow: inset 0 0 0 1.5px rgba(240,232,218,.55), inset 0 1px 0 rgba(255,245,230,.3), 0 3px 6px rgba(0,0,0,.55); }
 .mscr .dtile.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
-/* a deck still under 30 cards: listed dim with its count, a click opens it in the collection */
-.mscr .dtile.short { filter: saturate(.5) brightness(.75); }
-.mscr .dtile.short .left { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font: 600 15px/1 'Fira Sans Condensed', sans-serif; color: #e8c37a; text-shadow: 0 1px 3px #000; }
+/* a deck still under 30 cards, as Hearthstone marks one: the tile greyed, a warning triangle and the count in warning yellow;
+   it can't be chosen to play, a click opens it in the collection (Martin, 2026-10-31: "it clearly needs to be visible") */
+.mscr .dtile.short { background-color: #1c1917; background-blend-mode: luminosity; }
+.mscr .dtile.short::before { background: linear-gradient(90deg, rgba(22,19,16,.97) 35%, rgba(22,19,16,.75)); }
+.mscr .dtile.short b { color: #a89f91; }
+.mscr .dtile.short .left { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; padding: 4px 9px 4px 7px; border-radius: 6px;
+  background: rgba(0,0,0,.75); box-shadow: inset 0 0 0 1.5px #f2c64a; font: 700 16px/1 'Fira Sans Condensed', sans-serif; color: #ffd75e; text-shadow: 0 1px 2px #000; }
+.mscr .dtile.short .left::before { content: '!'; display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: #f2c64a; color: #1a1408; font: 800 13px/1 'Fira Sans Condensed', sans-serif; }
 
 /* ---------- The deck column (the collection's decks, the play screen's): the list of tiles, one deck open as a framed panel of
    strips, the open tile's bare icon actions. Layered as it was settled in the collection (builder/notes.md, round B2). ---------- */
