@@ -1,5 +1,5 @@
 {
- "rev": 1007,
+ "rev": 1009,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -645,10 +645,6 @@
   },
   "giraffe": {
    "note": "useless with Hungry?"
-  },
-  "hyena": {
-   "flag": true,
-   "note": "needs to change give how locust work I think ... which is a damn shame..."
   }
  }
 }
