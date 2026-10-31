@@ -200,10 +200,10 @@ const STAGES = { 1: 'depth 1 · the board when each turn ends', 2: 'depth 2 · a
 function renderEngine(L, done) {
   $('status').textContent = done ? `done · ${L.seconds} s` : `${STAGES[L.stage]} · ${L.done}/${L.total} · ${L.seconds} s`;
   const rows = L.rows;
-  let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="Mean over the five imagined hands after the opponent's reply and one more round: the score the Expert picks by">Deep</th><th class="num" title="Mean over the five hands after the opponent's reply">Reply</th><th class="num" title="Mean over the five hands of the board when the turn ends">Board</th><th></th></tr>`;
+  let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="Mean over the five hands of the board when the turn ends (depth 1, every turn)">Board</th><th class="num" title="Mean over the five hands after the opponent's reply (depth 2, the best 40 by Board)">Reply</th><th class="num" title="Mean over the five imagined hands after the reply and one more round (depth 3, the best 12 by Reply): the score the Expert picks by">Deep</th><th></th></tr>`;
   rows.forEach((r, i) => {
     h += `<tr class="click${r.expert ? ' exp' : ''}" data-i="${i}"><td class="r">${i + 1}</td><td>${r.text.map(t => esc(t.trim())).join(' · ')}${r.expert ? '<span class="badge" title="The turn the Expert\'s own search plays here">Expert</span>' : ''}</td>
-      <td class="num">${fmt(r.d3)}</td><td class="num${r.d3 != null ? ' dim' : ''}">${fmt(r.d2)}</td><td class="num${r.d2 != null ? ' dim' : ''}">${fmt(r.d1)}</td>
+      <td class="num${r.d2 != null ? ' dim' : ''}">${fmt(r.d1)}</td><td class="num${r.d3 != null ? ' dim' : ''}">${fmt(r.d2)}</td><td class="num">${fmt(r.d3)}</td>
       <td style="white-space:nowrap"><a class="x" data-play="${i}" title="Play this turn on the board">play</a><a class="x" data-hands="${i}" title="The five imagined hands, each one's scores and its line">hands</a></td></tr>`;
   });
   h += '</table>';
@@ -220,11 +220,11 @@ function renderEngine(L, done) {
 function expertHtml(x) {
   let h = `<details><summary>The Expert's own search: ${esc(x.planned_text.map(t => t.trim()).join(' · '))}</summary>
     <div class="muted">The first actions it scored (it looks one round deeper only at its best three by the reply score), the rest of the turn it planned with each, and every option it weighed at each decision.</div>
-    <table><tr><th>Turn it planned</th><th class="num">Deep</th><th class="num">Reply</th></tr>`;
+    <table><tr><th>Turn it planned</th><th class="num">Reply</th><th class="num">Deep</th></tr>`;
   x.roots.forEach((r, ri) => {
     h += `<tr data-root="${ri}"><td>${r.text.map(t => esc(t.trim())).join(' · ')}${r.decisions.map((d, di) => `<div class="dec"><b>Decision ${di + 1}</b> <span class="muted">${d.options[0].reply ? 'scored after the reply' : 'scored on the board when the turn ends, no reply'}</span>
       <table>${d.options.map((o, oi) => `<tr class="${o.took ? 'took' : ''}"><td>${esc(o.text.trim())}${o.took ? ' <span class="muted">(taken)</span>' : ''}</td><td class="num">${fmt(o.score)}</td><td><a class="x" data-opt="${ri}.${di}.${oi}">hands</a></td></tr>`).join('')}</table></div>`).join('')}</td>
-      <td class="num">${fmt(r.deep)}</td><td class="num">${fmt(r.reply)}</td></tr>`;
+      <td class="num">${fmt(r.reply)}</td><td class="num">${fmt(r.deep)}</td></tr>`;
   });
   return h + '</table></details>';
 }
