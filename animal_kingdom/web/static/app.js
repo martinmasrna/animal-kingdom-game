@@ -112,9 +112,11 @@ const myDecks = () => ME.decks.map(d => ({ ...d, cards: Object.fromEntries(Objec
 const saveDecks = ds => { ME.decks = ds; api('/api/me/decks', { method: 'PUT', body: JSON.stringify(ds) }).then(r => r.ok || toast('Could not save your decks')); };
 const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 // The decks you can play: your complete decks (a profile starts with the starters as its own); with none, the starters.
-const playable = () => { const mine = myDecks().filter(d => deckSize(d.cards) === 30).map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
-  return mine.length ? mine : DECKS; };
-const chosenDeck = () => { const all = playable(), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
+// A deck under 30 cards is listed too, so it doesn't vanish from home while you build it: shown with its count, opened in
+// the collection to finish, never chosen to play (Martin, 2026-10-31: "affordance for decklist with less than 30 cards").
+const playable = () => { const mine = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: Math.max(0, 30 - deckSize(d.cards)), list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
+  return mine.some(d => !d.short) ? mine : [...DECKS, ...mine]; };
+const chosenDeck = () => { const all = playable().filter(d => !d.short), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 
 // ------------------------------------------------------------------ routing
@@ -276,7 +278,7 @@ function homeScreen(mode = {}) {
     : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : isTest ? label(TEST_BOTS, play.botDeck) : 'Random'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
-  const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
+  const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.short ? `<span class="left">${30 - d.short}/30</span>` : ''}</div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
   const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
   const chooser = play.open === 'decks'
@@ -313,7 +315,10 @@ function homeScreen(mode = {}) {
   root.onclick = e => { if (play.open && !e.target.closest('.chooser, .pick, #gearbtn')) { play.open = null; redraw(); } };   // a click elsewhere closes the chooser
   root.querySelectorAll('.chooser [data-deck]').forEach(el => {
     // A click picks the deck and shows its list; the chooser stays open to read it (hover changed the list on the way to it).
-    el.onclick = () => { store('ak:deck', el.dataset.deck); play.peek = el.dataset.deck; redraw(); };
+    el.onclick = () => {
+      const d = all.find(x => x.id === el.dataset.deck);
+      if (d && d.short) { play.open = null; location.hash = '#/collection/' + d.id.slice(3); return; }   // unfinished: finish it where it is built
+      store('ak:deck', el.dataset.deck); play.peek = el.dataset.deck; redraw(); };
   });
   const wireList = () => { const e = $('dedit'); if (e) e.onclick = () => { play.open = null; location.hash = "#/collection/" + play.peek.slice(3); };
     const dl = root.querySelector('.dl'); if (dl) wirePops(dl); };
@@ -638,7 +643,7 @@ async function startTutorial(lesson = 1) {
 // After the tutorial, straight into a real match: Cats against an Easy bot playing Den Rush (the deck chosen for later games too).
 async function firstMatch() {
   const name = ([...DECKS, ...BOT_ONLY].find(d => d.id === 'cats') || {}).name;
-  const cats = playable().find(d => d.name === name);   // the player's own Cats deck (a copy of the starter), else the starter
+  const cats = playable().find(d => d.name === name && !d.short);   // the player's own Cats deck (a copy of the starter), else the starter
   if (cats) store('ak:deck', cats.id);
   const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats', name: 'You', bot: { level: 'Beginner', deck: EASY_POOL[Math.floor(Math.random() * EASY_POOL.length)] } }) });
   if (!r.ok) return toast(await r.text());
