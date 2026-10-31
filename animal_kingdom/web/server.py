@@ -15,6 +15,7 @@ import logging
 import os
 import random
 import secrets
+import subprocess
 import time
 import webbrowser
 from collections import Counter
@@ -68,6 +69,20 @@ if os.environ.get("AK_BOT_PAUSE") is not None:   # the test harness sets 0: test
 log = logging.getLogger("animal_kingdom.web")
 
 
+def _commit() -> str:
+    """The commit the server runs, for the game logs: a log replays only under the rules it was played with, and a day of
+    card and rule changes left 32 of 140 games of 2026-10-30 unreplayable at the next day's HEAD. Empty where there is no git
+    (the deployed image)."""
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=Path(__file__).resolve().parent, capture_output=True,
+                              text=True, timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+COMMIT = _commit()
+
+
 def save_game(match: Match, record: dict) -> None:
     if os.environ.get("AK_NO_GAME_LOGS") or all(seat.is_bot for seat in match.seats.values()):
         return
@@ -75,7 +90,7 @@ def save_game(match: Match, record: dict) -> None:
         LOG_DIR.mkdir(parents=True, exist_ok=True)
         stamp = match.created.strftime("%Y%m%dT%H%M%S")
         with open(LOG_DIR / f"web_{stamp}_{match.id}.jsonl", "a", encoding="utf-8") as fh:
-            fh.write(json.dumps(record) + "\n")
+            fh.write(json.dumps({**record, **({"commit": COMMIT} if COMMIT else {})}) + "\n")
     except OSError:
         log.exception("could not save the game log for match %s", match.id)
 
