@@ -36,7 +36,7 @@ struct Leaf {
     mode: LeafMode,
     plies: usize,
     hand: i64,
-    ends: Vec<(Vec<i64>, Vec<(Vec<i64>, f64)>, FxHashSet<Vec<i64>>)>,
+    ends: Vec<(Vec<i64>, Vec<(Vec<i64>, f64)>, FxHashSet<Vec<i64>>, f64)>,
     index: FxHashMap<Vec<i64>, usize>,
     followed: FxHashMap<Vec<i64>, FxHashSet<Vec<i64>>>,
 }
@@ -256,7 +256,7 @@ impl AtomicBot {
         out
     }
 
-    fn leaf(&mut self, ctx: &mut Leaf, e: &State, hist: &[i64], me: Player) -> Option<f64> {
+    fn leaf(&mut self, ctx: &mut Leaf, e: &State, hist: &[i64], prob: f64, me: Player) -> Option<f64> {
         match ctx.mode {
             LeafMode::Board => {
                 let v = self.value(e, me);
@@ -264,7 +264,7 @@ impl AtomicBot {
                 let i = match ctx.index.get(hist) {
                     Some(&i) => i,
                     None => {
-                        ctx.ends.push((hist.to_vec(), Vec::new(), FxHashSet::default()));
+                        ctx.ends.push((hist.to_vec(), Vec::new(), FxHashSet::default(), prob));
                         ctx.index.insert(hist.to_vec(), ctx.ends.len() - 1);
                         ctx.ends.len() - 1
                     }
@@ -292,10 +292,10 @@ impl AtomicBot {
     /// decision is the best of its actions for the actor, a draw the average over what it may bring, a finished turn
     /// the leaf (None: not followed, so never chosen). `hist` is the cards drawn so far.
     fn tree(&mut self, mut s: State, actor: Player, me: Player, ctx: &mut Leaf, hist: &mut Vec<i64>,
-            memo: &mut FxHashMap<(Vec<i64>, Vec<i64>), Option<(f64, Vec<Action>)>>) -> Option<(f64, Vec<Action>)> {
+            memo: &mut FxHashMap<(Vec<i64>, Vec<i64>), Option<(f64, Vec<Action>)>>, prob: f64) -> Option<(f64, Vec<Action>)> {
         self.resolve_others(&mut s, actor);
         if rules::is_terminal(&s).is_some() || s.player_to_act() != actor {
-            return self.leaf(ctx, &s, hist, me).map(|v| (v, Vec::new()));
+            return self.leaf(ctx, &s, hist, prob, me).map(|v| (v, Vec::new()));
         }
         let mk = (key(&s), hist.clone());
         if let Some(r) = memo.get(&mk) {
@@ -317,7 +317,7 @@ impl AtomicBot {
                     let n = hist.len();
                     hist.push(-1);
                     hist.extend(taken.iter().copied());
-                    let r = self.tree(x.clone(), actor, me, ctx, hist, memo);
+                    let r = self.tree(x.clone(), actor, me, ctx, hist, memo, prob * w);
                     hist.truncate(n);
                     match r {
                         Some((v, _)) => {
@@ -332,7 +332,7 @@ impl AtomicBot {
                 }
                 (self.mix(&vals, &ws), vec![a.clone()])
             } else {
-                match self.tree(nxt, actor, me, ctx, hist, memo) {
+                match self.tree(nxt, actor, me, ctx, hist, memo, prob) {
                     Some((v, p)) => {
                         let mut path = vec![a.clone()];
                         path.extend(p);
@@ -347,6 +347,9 @@ impl AtomicBot {
             };
             if better {
                 best = Some((v, path));
+                if if mine { v >= self.base.decisive } else { v <= -self.base.decisive } {
+                    break;     // a decided win for the actor: nothing can beat it
+                }
             }
         }
         memo.insert(mk, best.clone());
@@ -355,7 +358,7 @@ impl AtomicBot {
 
     fn run_tree(&mut self, s: &State, actor: Player, me: Player, ctx: &mut Leaf) -> Option<(f64, Vec<Action>)> {
         let mut memo = FxHashMap::default();
-        self.tree(s.clone(), actor, me, ctx, &mut Vec::new(), &mut memo)
+        self.tree(s.clone(), actor, me, ctx, &mut Vec::new(), &mut memo, 1.0)
     }
 
     pub fn line_value(&mut self, s: &State, me: Player, plies: usize) -> f64 {
@@ -380,7 +383,7 @@ impl AtomicBot {
             return first;
         }
         let mut followed: FxHashMap<Vec<i64>, FxHashSet<Vec<i64>>> = FxHashMap::default();
-        for (h, es, _) in &ctx.ends {
+        for (h, es, _, _) in &ctx.ends {
             let mut es = es.clone();
             if mine {
                 es.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));

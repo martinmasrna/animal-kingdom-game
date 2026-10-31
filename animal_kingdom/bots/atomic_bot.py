@@ -231,13 +231,15 @@ class AtomicBot(Bot):
             out.append((w / total, x, tuple(taken)))
         return out
 
-    def _tree(self, s: GameState, actor: str, me: str, leaf, hist: tuple, memo: dict) -> Optional[tuple[float, list]]:
+    def _tree(self, s: GameState, actor: str, me: str, leaf, hist: tuple, memo: dict,
+              prob: float = 1.0) -> Optional[tuple[float, list]]:
         """The value of `actor`'s best whole turn from `s` and its actions up to the first draw: a decision is the best
         of its actions for the actor, a draw (anything taken from the actor's deck) the average over what it may bring,
-        a finished turn `leaf(end, hist)` (None: not followed, so never chosen). `hist` is the cards drawn so far."""
+        a finished turn `leaf(end, hist, prob)` (None: not followed, so never chosen). `hist` is the cards drawn so far,
+        `prob` their odds. A decision stops looking once it has a decided win for the actor: nothing can beat it."""
         self._resolve_others(s, actor)
         if rules.is_terminal(s) is not None or s.player_to_act() != actor:
-            v = leaf(s, hist)
+            v = leaf(s, hist, prob)
             return None if v is None else (v, [])
         key = (_key(s), hist)
         if key in memo:
@@ -252,7 +254,7 @@ class AtomicBot(Bot):
                 outs = self._outcomes(s, actor, a, k)
                 vals = []
                 for w, x, taken in outs:
-                    r = self._tree(x, actor, me, leaf, hist + (taken,), memo)
+                    r = self._tree(x, actor, me, leaf, hist + (taken,), memo, prob * w)
                     if r is None:
                         break
                     vals.append(r[0])
@@ -260,12 +262,14 @@ class AtomicBot(Bot):
                     continue
                 v, path = self._mix(vals, [w for w, _, _ in outs]), [a]
             else:
-                r = self._tree(nxt, actor, me, leaf, hist, memo)
+                r = self._tree(nxt, actor, me, leaf, hist, memo, prob)
                 if r is None:
                     continue
                 v, path = r[0], [a] + r[1]
             if best is None or (v > best[0] if mine else v < best[0]):
                 best = (v, path)
+                if (v >= self.base.decisive) if mine else (v <= -self.base.decisive):
+                    break
         memo[key] = best
         return best
 
@@ -282,10 +286,12 @@ class AtomicBot(Bot):
         actor = s.player_to_act()
         mine = actor == me
         ends: dict = {}
+        odds: dict = {}
 
-        def board(e, hist):
+        def board(e, hist, prob):
             v = self._value(e, me)
             ends.setdefault(hist, {}).setdefault(_key(e), v)
+            odds.setdefault(hist, prob)
             return v
 
         first = self._tree(s.clone(), actor, me, board, (), {})
@@ -296,7 +302,7 @@ class AtomicBot(Bot):
         followed = {h: set(k for k, _ in sorted(es.items(), key=lambda t: -t[1] if mine else t[1])[:self.inner])
                     for h, es in ends.items()}
 
-        def deeper(e, hist):
+        def deeper(e, hist, prob):
             return self.line_value(e, me, plies - 1) if _key(e) in followed.get(hist, ()) else None
 
         r = self._tree(s.clone(), actor, me, deeper, (), {})
@@ -314,7 +320,7 @@ class AtomicBot(Bot):
         you might as well do it first"). Positions already scored in this hand are remembered, which keeps it cheap."""
         if not open_ or rules.is_terminal(s) is not None or s.player_to_act() != me:
             return self._remembered(s, me, plies, hand)
-        r = self._tree(s.clone(), me, me, lambda e, hist: self._remembered(e, me, plies, hand), (), {})
+        r = self._tree(s.clone(), me, me, lambda e, hist, prob: self._remembered(e, me, plies, hand), (), {})
         return self._remembered(s, me, plies, hand) if r is None else r[0]
 
     def _remembered(self, s: GameState, me: str, plies: int, hand: int) -> float:
@@ -392,7 +398,7 @@ class AtomicBot(Bot):
 
     def _best_board(self, e: GameState, me: str) -> float:
         """The board a turn a draw left open reaches, in this imagined hand, by its best continuation."""
-        r = self._tree(e.clone(), me, me, lambda end, hist: self._value(end, me), (), {})
+        r = self._tree(e.clone(), me, me, lambda end, hist, prob: self._value(end, me), (), {})
         return self._value(e.clone(), me) if r is None else r[0]
 
     def _job(self, row: dict, k: int, me: str, plies: int) -> float:
