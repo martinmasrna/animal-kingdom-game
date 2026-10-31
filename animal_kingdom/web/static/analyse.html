@@ -75,16 +75,23 @@ async function api(path, body) {
 }
 
 // ---- the board: the game's own client in a frame, fed views through its test hook
+// Ready once the frame's own lab view has loaded (it fetches one at start, and would draw over anything fed before it).
 function boardReady() {
   const w = $('board').contentWindow;
-  return w && w.__ak && w.__ak.feed && w.__ak.cards && Object.keys(w.__ak.cards() || {}).length;
+  return w && w.__ak && w.__ak.feed && w.__ak.cards && Object.keys(w.__ak.cards() || {}).length && w.__ak().V;
 }
 async function show(view, caption) {
-  for (let i = 0; i < 100 && !boardReady(); i++) await new Promise(r => setTimeout(r, 100));
+  for (let i = 0; i < 150 && !boardReady(); i++) await new Promise(r => setTimeout(r, 100));
   if (!boardReady()) return;
-  const v = JSON.parse(JSON.stringify(view)); v.version = S.ver++; v.game.history = [];
-  $('board').contentWindow.__ak.feed(v);
+  const v = JSON.parse(JSON.stringify(view)); v.version = S.ver++; v.game.history = []; v.analysed = v.version;
+  const w = $('board').contentWindow;
+  w.__ak.feed(v);
   $('cap').textContent = caption || view.label || '';
+  for (let i = 0; i < 10; i++) {   // and make sure it stayed: nothing else may have replaced it
+    await new Promise(r => setTimeout(r, 200));
+    if (S.ver - 1 !== v.version) return;   // a newer frame has been shown since
+    if ((w.__ak().V || {}).analysed !== v.version) w.__ak.feed(v);
+  }
 }
 function framebar() {
   const fb = $('framebar');
