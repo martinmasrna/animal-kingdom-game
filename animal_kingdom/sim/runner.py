@@ -85,7 +85,7 @@ LEARNED_BASE_KIND = {"greedy_learned": "greedy", "turn_learned": "turn",
 
 # The whole-turn search (bots/atomic_bot.py) takes these keys of its own; the rest of its spec builds the referee it
 # stands on (evaluation, imagined hands, decided-game value), in both engines.
-ATOMIC_KEYS = ("rounds", "width1", "width2", "inner", "cap", "threads", "workers")
+ATOMIC_KEYS = ("rounds", "width1", "width2", "inner", "cap", "threads", "workers", "hands", "temperature", "draws")
 
 # Bare name resolved via bots.learned_eval.load_eval when a '<kind>_learned' bot's `extra`
 # doesn't set `eval=` explicitly (e.g. `--candidate-kind turn_learned:eval=rung0`).
@@ -165,7 +165,8 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
         return AtomicBot(base, rounds=int(own.get("rounds", 1)),
                          widths=(int(own.get("width1", 60)), int(own.get("width2", 20))),
                          inner=int(own.get("inner", 4)), cap=int(own.get("cap", 3000)),
-                         workers=int(own.get("workers", 5)))
+                         workers=int(own.get("workers", 5)), hands=int(own.get("hands", 30)),
+                         temperature=float(own.get("temperature", 2.3)), draws=int(own.get("draws", 8)))
     overrides = {k[2:]: extra.pop(k) for k in list(extra) if k.startswith("w.")}
     if overrides:
         weights = replace(weights or GreedyWeights(), **overrides)

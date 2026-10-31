@@ -3,8 +3,9 @@
 The opponent cannot act during my turn, so a turn's actions are one move played in sequence; scoring the board between
 them is like scoring a chess position with the knight in mid-air. So this search never does. It lists every whole turn
 I can play (each sequence of actions and choices until the turn passes), and scores each only once it is complete: in
-each of the hands it imagines for the opponent (determinization, the Expert's own five), against the opponent's best
-whole reply turn, by the evaluation of the board after it. There is no model of the opponent but "the reply that is
+each hand the opponent may hold (every distinct hand their unseen cards make, at its odds: `spread`), against the
+opponent's best whole reply turn, by the evaluation of the board after it. The hands are averaged as chances to win
+(`_mix`), so a turn that survives in one hand in seven beats one that never does, and a 1% chance counts as 1%. There is no model of the opponent but "the reply that is
 worst for me": no GreedyBot playing them, no first action locked to one planned continuation.
 
 It looks `rounds` rounds ahead: round 1 is my turn and their best reply; round 2 adds my best next turn and their best
@@ -12,8 +13,8 @@ reply to that. Each level is iterative deepening, as a chess engine's: who goes 
 score already in hand, never the shallowest one.
 
     whole turns:   every sequence until the turn passes; two orders that reach the same position count once
-    level 0        all of them scored on the board when the turn ends (mean over the imagined hands)
-    level 1        the best `widths[0]` of level 0: mean over the hands of my evaluation after their best reply
+    level 0        all of them scored on the board when the turn ends (over the imagined hands, at their odds)
+    level 1        the best `widths[0]` of level 0: my evaluation after their best reply, over the hands
     level 2        the best `widths[1]` of level 1: their reply, my next turn, their reply to that
 
 Inside a deeper line every whole turn of the side to act is listed and scored on the board; the best `inner` of them
@@ -28,12 +29,14 @@ RefereeBot), so the two bots differ only in the search.
 """
 from __future__ import annotations
 
+import math
 import multiprocessing as mp
+from math import comb
 from typing import Optional, Sequence
 
 from ..engine import rules
 from ..engine.actions import Action, DrawAction
-from ..engine.state import GameState, StateView, other_player
+from ..engine.state import GameState, Rng, StateView, UnitInstance, other_player
 from ..engine.strength import effective_strength
 from .base import Bot
 from .determinize import determinize
@@ -52,13 +55,19 @@ def _key(s: GameState) -> tuple:
 
 class AtomicBot(Bot):
     def __init__(self, base, rounds: int = 1, widths: tuple = (60, 20), inner: int = 4,
-                 cap: int = 3000, workers: int = 5):
+                 cap: int = 3000, workers: int = 5, hands: int = 30, temperature: float = 2.3, draws: int = 8):
         self.base = base                 # a TurnSearcher: evaluation, imagined hands, decided-game value, mulligan
         self.rounds = rounds
         self.widths = widths             # my turns taken to level 1, then to level 2
         self.inner = inner               # turns followed further at each step inside a deeper line
         self.cap = cap                   # whole turns listed at most for one side in one position
         self.workers = workers
+        self.hands = hands               # opponent hands scored at most: every distinct one when there are no more
+        # The network's chances are too sure of themselves: at the start of 4,268 turns of 240 of Martin's games, its 5%
+        # was won about 20% of the time and its 85% about 70%. Its logit divided by 2.3 fits the record best
+        # (2026-10-31); the hands are averaged on that corrected scale.
+        self.temperature = temperature
+        self.draws = draws               # ways a draw can come out followed at most: the likeliest
         self._plan: list[Action] = []
         self._plan_key = None
         self.last_ranking: list[dict] = []
@@ -78,6 +87,75 @@ class AtomicBot(Bot):
                 return
             who = s.player_to_act()
             rules.apply_action(s, self.base._policy.choose(s.view_for(who), rules.legal_actions(s), s), validate=False)
+
+    def _mix(self, vs: Sequence[float], ws: Sequence[float]) -> float:
+        """The value over the imagined hands, each by its odds: the evaluation is a win logit (times the network's
+        scale, and over the `temperature` that makes it a true chance), so the hands are averaged as chances to win and
+        the mean turned back into the same units. A decided
+        game (+/- decisive) counts as a sure win or loss; a 1% chance at a win is worth 1% of one."""
+        scale = getattr(self.base.evaluator, "scale", None)
+        if not scale:
+            return sum(v * w for v, w in zip(vs, ws))
+        scale *= self.temperature
+        p = 0.0
+        for v, w in zip(vs, ws):
+            p += w / (1.0 + math.exp(-v / scale))
+        cap = self.base.decisive
+        if p <= 0.0:
+            return -cap
+        if p >= 1.0:
+            return cap
+        return max(-cap, min(cap, scale * math.log(p / (1.0 - p))))
+
+    def spread(self, state: GameState, me: str) -> tuple[list[GameState], list[float]]:
+        """The hands the opponent may hold, as imagined worlds with their odds: every distinct hand their unseen cards
+        can make, weighted by how many ways it can be dealt (the deck orders, mine and theirs, drawn at random per
+        hand); when there are more than `hands` of them, that many hands dealt at random, equally weighted."""
+        opp = other_player(me)
+        rng = self.base.det_rng
+        hand = state.hands[opp]
+        kept = [u for u in hand if u.locked_until_turn > state.turn_counter]
+        hidden = len(hand) - len(kept)
+        pool = sorted([u.card_id for u in hand if u not in kept] + list(state.decks[opp]))
+        kinds = sorted(set(pool))
+        counts = [pool.count(c) for c in kinds]
+        found: list[list[int]] = []
+
+        def walk(i: int, left: int, ks: list[int]) -> bool:
+            if len(found) > self.hands:
+                return False
+            if i == len(kinds):
+                if left == 0:
+                    found.append(list(ks))
+                return True
+            for k in range(min(counts[i], left) + 1):
+                if not walk(i + 1, left - k, ks + [k]):
+                    return False
+            return True
+
+        if not walk(0, hidden, []) or len(found) > self.hands:
+            worlds = [determinize(state, me, rng) for _ in range(self.hands)]
+            return worlds, [1.0 / len(worlds)] * len(worlds)
+        worlds, weights = [], []
+        for ks in found:
+            x = state.clone()
+            x.decks[me].sort()
+            rng.shuffle(x.decks[me])
+            cards = [c for c, k in zip(kinds, ks) for _ in range(k)]
+            rest = list(pool)
+            for c in cards:
+                rest.remove(c)
+            rng.shuffle(rest)
+            x.hands[opp] = list(kept) + [UnitInstance(c, opp, x.new_iid()) for c in cards]
+            x.decks[opp] = rest
+            x.rng = Rng(rng.getrandbits(64))
+            weight = 1
+            for c, k in zip(counts, ks):
+                weight *= comb(c, k)
+            worlds.append(x)
+            weights.append(float(weight))
+        total = sum(weights)
+        return worlds, [w / total for w in weights]
 
     def turns(self, s: GameState, actor: str, through_draws: bool) -> list[tuple[list[Action], GameState]]:
         """Every whole turn `actor` can play from `s`, one per position it ends on: (the actions, the end position).
@@ -109,28 +187,120 @@ class AtomicBot(Bot):
         walk(s.clone(), [])
         return out
 
+    def _outcomes(self, st: GameState, actor: str, a: Action, k: int) -> list[tuple[float, GameState, tuple]]:
+        """The ways action `a`, which takes `k` cards from the actor's deck, can come out: every distinct set of cards it
+        can take, with its odds, as (odds, the position after, the cards). Neither side knows the order of a deck, so a
+        draw is a chance event, not a choice: the drawer gets the average over what it may bring, never the card it
+        would like. More than `draws` of them: the likeliest that many."""
+        deck = st.decks[actor]
+        kinds = sorted(set(deck))
+        counts = [deck.count(c) for c in kinds]
+        found: list[list[int]] = []
+
+        def walk(i: int, left: int, ks: list[int]) -> None:
+            if i == len(kinds):
+                if left == 0:
+                    found.append(list(ks))
+                return
+            for n in range(min(counts[i], left) + 1):
+                walk(i + 1, left - n, ks + [n])
+
+        walk(0, k, [])
+        scored = []
+        for ks in found:
+            weight = 1
+            for c, n in zip(counts, ks):
+                weight *= comb(c, n)
+            scored.append((float(weight), ks))
+        scored.sort(key=lambda t: -t[0])           # stable: equal odds keep the listing order
+        scored = scored[:self.draws]
+        total = sum(w for w, _ in scored)
+        out = []
+        for w, ks in scored:
+            taken = [c for c, n in zip(kinds, ks) for _ in range(n)]
+            want = list(taken)
+            rest = []
+            for c in reversed(deck):              # the deck is drawn from its end: the taken cards go there
+                if c in want:
+                    want.remove(c)
+                else:
+                    rest.append(c)
+            x = st.clone()
+            x.decks[actor] = rest[::-1] + taken
+            rules.apply_action(x, a, validate=False)
+            out.append((w / total, x, tuple(taken)))
+        return out
+
+    def _tree(self, s: GameState, actor: str, me: str, leaf, hist: tuple, memo: dict) -> Optional[tuple[float, list]]:
+        """The value of `actor`'s best whole turn from `s` and its actions up to the first draw: a decision is the best
+        of its actions for the actor, a draw (anything taken from the actor's deck) the average over what it may bring,
+        a finished turn `leaf(end, hist)` (None: not followed, so never chosen). `hist` is the cards drawn so far."""
+        self._resolve_others(s, actor)
+        if rules.is_terminal(s) is not None or s.player_to_act() != actor:
+            v = leaf(s, hist)
+            return None if v is None else (v, [])
+        key = (_key(s), hist)
+        if key in memo:
+            return memo[key]
+        mine = actor == me
+        best = None
+        for a in rules.legal_actions(s):
+            nxt = s.clone()
+            rules.apply_action(nxt, a, validate=False)
+            k = len(s.decks[actor]) - len(nxt.decks[actor])
+            if k > 0:
+                outs = self._outcomes(s, actor, a, k)
+                vals = []
+                for w, x, taken in outs:
+                    r = self._tree(x, actor, me, leaf, hist + (taken,), memo)
+                    if r is None:
+                        break
+                    vals.append(r[0])
+                if len(vals) < len(outs):
+                    continue
+                v, path = self._mix(vals, [w for w, _, _ in outs]), [a]
+            else:
+                r = self._tree(nxt, actor, me, leaf, hist, memo)
+                if r is None:
+                    continue
+                v, path = r[0], [a] + r[1]
+            if best is None or (v > best[0] if mine else v < best[0]):
+                best = (v, path)
+        memo[key] = best
+        return best
+
     def line_value(self, s: GameState, me: str, plies: int) -> float:
         """My evaluation of `s` (the start of a turn, or decided) looking `plies` whole turns ahead, each side playing
-        its best turn: the last one the best of all its turns on the board, the earlier ones the best `inner` of them
-        followed further."""
+        its best turn: the last one judged on the board, the earlier ones by following, for every set of cards drawn,
+        the best `inner` of their finished turns for that side further."""
         return self.best_line(s, me, plies)[0]
 
     def best_line(self, s: GameState, me: str, plies: int) -> tuple[float, list[Action]]:
-        """(the value, the actions of the first turn of) the line `line_value` follows."""
+        """(the value, the actions of the first turn up to its first draw of) the line `line_value` follows."""
         if plies <= 0 or rules.is_terminal(s) is not None:
             return self._value(s, me), []
         actor = s.player_to_act()
-        ends = self.turns(s, actor, through_draws=True)
-        if not ends:
-            return self._value(s, me), []
         mine = actor == me
-        scored = sorted(((self._value(end, me), path, end) for path, end in ends), key=lambda t: t[0], reverse=mine)
+        ends: dict = {}
+
+        def board(e, hist):
+            v = self._value(e, me)
+            ends.setdefault(hist, {}).setdefault(_key(e), v)
+            return v
+
+        first = self._tree(s.clone(), actor, me, board, (), {})
+        if first is None:
+            return self._value(s, me), []
         if plies == 1:
-            return scored[0][0], scored[0][1]
-        pick = max if mine else min
-        followed = [(self.line_value(end, me, plies - 1), path) for _, path, end in scored[:self.inner]]
-        best = pick(followed, key=lambda t: t[0])
-        return best[0], best[1]
+            return first
+        followed = {h: set(k for k, _ in sorted(es.items(), key=lambda t: -t[1] if mine else t[1])[:self.inner])
+                    for h, es in ends.items()}
+
+        def deeper(e, hist):
+            return self.line_value(e, me, plies - 1) if _key(e) in followed.get(hist, ()) else None
+
+        r = self._tree(s.clone(), actor, me, deeper, (), {})
+        return r if r is not None else first
 
     def best_reply(self, s: GameState, me: str) -> tuple[float, list[Action]]:
         """(my evaluation after it, the actions of) the opponent's whole reply turn from `s` that is worst for me."""
@@ -144,10 +314,8 @@ class AtomicBot(Bot):
         you might as well do it first"). Positions already scored in this hand are remembered, which keeps it cheap."""
         if not open_ or rules.is_terminal(s) is not None or s.player_to_act() != me:
             return self._remembered(s, me, plies, hand)
-        rest = self.turns(s, me, through_draws=True)
-        if not rest:
-            return self._remembered(s, me, plies, hand)
-        return max(self._remembered(end, me, plies, hand) for _, end in rest)
+        r = self._tree(s.clone(), me, me, lambda e, hist: self._remembered(e, me, plies, hand), (), {})
+        return self._remembered(s, me, plies, hand) if r is None else r[0]
 
     def _remembered(self, s: GameState, me: str, plies: int, hand: int) -> float:
         key = (hand, plies, _key(s))
@@ -161,10 +329,14 @@ class AtomicBot(Bot):
 
     # ------------------------------------------------------------------ the search
 
-    def rank(self, state: GameState, me: str, worlds: Optional[list[GameState]] = None, progress=None) -> list[dict]:
+    def rank(self, state: GameState, me: str, worlds: Optional[list[GameState]] = None, progress=None,
+             weights: Optional[list[float]] = None) -> list[dict]:
         """Every whole turn for `me`, best first: {turn, board, levels: [round 1 score, round 2 score...]}, a level's
-        score None for a turn that did not reach it. `progress(rows, level, done, total)` hears the ranking fill."""
-        worlds = worlds or [determinize(state, me, self.base.det_rng) for _ in range(self.base.determinizations)]
+        score None for a turn that did not reach it. `progress(rows, level, done, total)` hears the ranking fill.
+        `worlds` (with `weights`, equal by default) replaces the spread of the opponent's possible hands."""
+        if worlds is None:
+            worlds, weights = self.spread(state, me)
+        weights = weights or [1.0 / len(worlds)] * len(worlds)
         self._memo = {}
         rows = []
         for path, _ in self.turns(state, me, through_draws=False):
@@ -183,9 +355,7 @@ class AtomicBot(Bot):
             open_ = rules.is_terminal(ends[0]) is None and ends[0].player_to_act() == me     # a draw left it open
             # never the board in mid-turn: a turn a draw left open scores, in each hand, the best board its
             # continuations reach with the cards drawn there
-            board = sum((max((self._value(end, me) for _, end in self.turns(e, me, through_draws=True)),
-                             default=self._value(e.clone(), me)) if open_ else self._value(e.clone(), me))
-                        for e in ends) / len(ends)
+            board = self._mix([self._best_board(e, me) if open_ else self._value(e.clone(), me) for e in ends], weights)
             rows.append({"turn": path, "ends": ends, "open": open_, "board": board,
                          "levels": [None] * self.rounds, "per_hand": [None] * self.rounds})
 
@@ -210,7 +380,7 @@ class AtomicBot(Bot):
                 i = job[0]
                 if all((i, k) in values for k in range(len(worlds))):
                     vs = [values[(i, k)] for k in range(len(worlds))]
-                    go[i]["levels"][lv], go[i]["per_hand"][lv] = sum(vs) / len(vs), vs
+                    go[i]["levels"][lv], go[i]["per_hand"][lv] = self._mix(vs, weights), vs
                     if progress:
                         progress(order(), lv + 1, sum(r["levels"][lv] is not None for r in go), len(go))
             pool = sorted(go, key=lambda r: -r["levels"][lv])
@@ -219,6 +389,11 @@ class AtomicBot(Bot):
             r.pop("ends", None)
             r["score"] = next((v for v in reversed(r["levels"]) if v is not None), None)
         return rows
+
+    def _best_board(self, e: GameState, me: str) -> float:
+        """The board a turn a draw left open reaches, in this imagined hand, by its best continuation."""
+        r = self._tree(e.clone(), me, me, lambda end, hist: self._value(end, me), (), {})
+        return self._value(e.clone(), me) if r is None else r[0]
 
     def _job(self, row: dict, k: int, me: str, plies: int) -> float:
         return self._after_my_turn(row["ends"][k].clone(), me, row["open"], plies, hand=k)

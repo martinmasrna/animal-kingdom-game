@@ -309,8 +309,8 @@ impl PyBot {
         let me = state.st.player_to_act();
         let st = &state.st;
         let rows = py.detach(|| {
-            let worlds = if real { vec![st.clone()] } else { a.worlds(st, me) };
-            a.rank(st, me, &worlds)
+            let (worlds, weights) = if real { (vec![st.clone()], vec![1.0]) } else { a.spread(st, me) };
+            a.rank(st, me, &worlds, &weights)
         });
         let out: Vec<sj::Value> = rows
             .iter()

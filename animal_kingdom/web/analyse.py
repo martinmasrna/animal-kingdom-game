@@ -7,14 +7,17 @@ game" restores the game's). "Analyse" starts the engine on the position on the b
 can play, ranked by the whole-turn search (bots/atomic_bot.py, Martin, 2026-10-31: a turn is atomic, so nothing is
 scored in the middle of one):
 
-    Board        the board when the turn ends, mean over the five imagined hands      (every turn)
-    Best reply   after the opponent's best whole reply turn in each hand: the ranking (the best 60 by Board)
-    Old reply    the old search's score, after its GreedyBot reply, for contrast      (the best 20 by Best reply)
+    Board        the board when the turn ends, over the hands the opponent may hold          (every turn)
+    Old reply    the old search's score, after its GreedyBot reply, for contrast           (the best 20)
+    Depth 1      after the opponent's best whole reply turn in each hand                   (the best 60 by Board)
+    Depth 2      then my best next turn and their best reply to it                         (the best 20 by Depth 1)
 
-The evaluation and the five imagined hands are the Expert's own. Last, the Expert's own search runs on the position,
-and its pick is marked in the list, with every option it weighed at each decision of its turn.
+The hands are every distinct hand the opponent's unseen cards make, each at its odds, averaged as chances to win; the
+evaluation is the Expert's own. Last, the Expert's own search runs on the position, and its pick is marked in the list,
+with every option it weighed at each decision of its turn.
 
-Any turn can be opened hand by hand ("hands"): the five hands, each one's scores, and its line, played on the board.
+Any turn can be opened hand by hand ("hands"): the Expert's five imagined hands, each one's scores, and its line, played
+on the board.
 
 Heavy work runs in child processes (`python -m animal_kingdom.web.analyse`), so the server's event loop and its bots never
 wait on it; the engine streams its ranking as JSON lines and the page polls the latest.

@@ -95,7 +95,10 @@ impl Bot {
             let inner = get("inner").map(as_usize).unwrap_or(4);
             let cap = get("cap").map(as_usize).unwrap_or(3000);
             let threads = get("threads").map(as_usize).unwrap_or(8);
-            return Ok(Bot::Atomic(Box::new(atomic::AtomicBot::new(base, rounds, widths, inner, cap, threads))));
+            let hands = get("hands").map(as_usize).unwrap_or(30);
+            let temperature = get("temperature").and_then(|v| v.as_f64().or_else(|| v.as_str().and_then(|s| s.parse().ok()))).unwrap_or(2.3);
+            let draws = get("draws").map(as_usize).unwrap_or(8);
+            return Ok(Bot::Atomic(Box::new(atomic::AtomicBot::new(base, rounds, widths, inner, cap, threads, hands, temperature, draws))));
         }
         match kind.as_str() {
             "random" => Ok(Bot::Random(PyRandom::seeded(seed))),

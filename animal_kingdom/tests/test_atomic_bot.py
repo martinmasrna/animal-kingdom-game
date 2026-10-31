@@ -7,8 +7,8 @@ from animal_kingdom.sim.runner import make_bot
 from animal_kingdom.bots.atomic_bot import AtomicBot
 
 
-def _position():
-    s = new_game(["lion"] * 15 + ["mouse"] * 15, ["elephant"] * 30, 7, map_id="map_b", first_player="A")
+def _position(theirs=("elephant",) * 30):
+    s = new_game(["lion"] * 15 + ["mouse"] * 15, list(theirs), 7, map_id="map_b", first_player="A")
     while s.pending is not None:
         rules.apply_action(s, ChoiceAction(SKIP))
     rules.apply_action(s, next(a for a in rules.legal_actions(s) if a.kind == "place"))
@@ -60,12 +60,32 @@ def test_the_rust_search_gives_the_python_numbers(monkeypatch):
     monkeypatch.delenv("AK_PY_BOTS", raising=False)
     if not rust_bot.available():
         pytest.skip("the Rust engine is not built")
-    s = _position()
+    s = _position(["elephant"] * 15 + ["lion"] * 15)     # several hands the opponent may hold, at different odds
     me = s.player_to_act()
-    spec = "atomic:determinizations=2,rounds=2,width1=6,width2=3,threads=2"
+    spec = "atomic_learned:eval=wave2_slot_r4_10_live,decisive=500,rounds=2,width1=4,width2=2,inner=2,draws=2,threads=2"
     rust = make_bot(spec, 4).ranking(s)
     py = make_bot(spec + ",workers=1", 4, python_only=True).rank(s, me)
     assert [r["turn"] for r in rust] == [[a.to_dict() for a in r["turn"]] for r in py]
     for a, b in zip(py, rust):
         assert abs(a["board"] - b["board"]) < 1e-9
         assert all((x is None) == (y is None) and (x is None or abs(x - y) < 1e-9) for x, y in zip(a["levels"], b["levels"]))
+
+
+def test_the_hands_are_every_hand_the_opponent_may_hold_at_its_odds():
+    """With few enough of them, the imagined hands are every distinct hand the opponent's unseen cards make, each
+    weighted by the number of ways it can be dealt (Martin's game PXPR6W, turn 28: five random hands missed the double
+    Alley Cat that was the only way to survive, and every turn tied at a sure loss)."""
+    from math import comb
+    s = _position(["elephant"] * 15 + ["lion"] * 15)
+    me = s.player_to_act()
+    opp = "B" if me == "A" else "A"
+    assert len({u.card_id for u in s.hands[opp]} | set(s.decks[opp])) == 2
+    bot = AtomicBot(make_bot("turn", 1, python_only=True), workers=1)
+    worlds, weights = bot.spread(s, me)
+    pool = [u.card_id for u in s.hands[opp]] + list(s.decks[opp])
+    kind = pool[0]
+    n, e = len(s.hands[opp]), pool.count(kind)
+    held = [sum(u.card_id == kind for u in w.hands[opp]) for w in worlds]
+    assert sorted(held) == [k for k in range(n + 1) if k <= e and n - k <= len(pool) - e]
+    for k, w in zip(held, weights):
+        assert abs(w - comb(e, k) * comb(len(pool) - e, n - k) / comb(len(pool), n)) < 1e-12
