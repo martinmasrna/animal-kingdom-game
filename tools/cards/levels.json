@@ -2060,9 +2060,9 @@
       "at": 1792076082
     },
     "effect": {
-      "note": "Martin 2026-10-30: +4 at 5 Colony",
+      "note": "Martin 2026-10-31: Colony conditions back at 4",
       "by": "claude",
-      "at": 1793399965,
+      "at": 1793454475,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers. (3 base, +3: a 6 with Flight, so never a worse Eagle)",
@@ -3090,9 +3090,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: if you control two of the same Colony animal, draw 3 cards."
       },
-      "note": "Martin 2026-10-30: Colony conditions at 5",
+      "note": "Martin 2026-10-31: Colony conditions back at 4",
       "by": "claude",
-      "at": 1793399965
+      "at": 1793454475
     },
     "rarity": {
       "review": {
@@ -4153,9 +4153,9 @@
         "prev_note": "",
         "prev": "Roar: if you control 4 or more Colony animals, remove an adjacent enemy."
       },
-      "note": "Martin 2026-10-30: Colony conditions at 5",
+      "note": "Martin 2026-10-31: Colony conditions back at 4",
       "by": "claude",
-      "at": 1793399965
+      "at": 1793454475
     }
   },
   "squirrel": {

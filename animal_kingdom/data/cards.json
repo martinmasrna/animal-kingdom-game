@@ -73,7 +73,7 @@
         "Nurse"
       ],
       "base_strength": 2,
-      "text": "Flight. Roar: if you control 5 or more Colony animals, draw 2 cards.",
+      "text": "Flight. Roar: if you control 4 or more Colony animals, draw 2 cards.",
       "species": "Bee",
       "habitat": "Meadow",
       "keywords": [
@@ -156,7 +156,7 @@
         "Soldier"
       ],
       "base_strength": 3,
-      "text": "Flight. Has +4 strength while you control 5 or more Colony animals.",
+      "text": "Flight. Has +4 strength while you control 4 or more Colony animals.",
       "species": "Wasp",
       "habitat": "Forest",
       "keywords": [
@@ -173,7 +173,7 @@
         "Soldier"
       ],
       "base_strength": 2,
-      "text": "Roar: if you control 5 or more Colony animals, remove an adjacent enemy.",
+      "text": "Roar: if you control 4 or more Colony animals, remove an adjacent enemy.",
       "species": "Army Ant",
       "habitat": "Jungle",
       "keywords": []
