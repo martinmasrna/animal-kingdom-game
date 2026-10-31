@@ -1,5 +1,5 @@
 {
- "rev": 1046,
+ "rev": 1047,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -639,6 +639,9 @@
   },
   "giraffe": {
    "note": "useless with Hungry?"
+  },
+  "cockroach": {
+   "note": "place Cockroach instead of Roach?"
   }
  }
 }
