@@ -1,5 +1,5 @@
 {
- "rev": 1009,
+ "rev": 1011,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -610,10 +610,6 @@
   },
   "vole": {
    "flag": true
-  },
-  "tarantula": {
-   "flag": true,
-   "note": "not too happy with what we did, idk"
   },
   "dart_frog": {
    "flag": true
