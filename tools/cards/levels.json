@@ -7037,6 +7037,24 @@
       "note": "Active text pass (Martin, 2026-10-31): \"give it\" instead of \"it gains\"",
       "by": "claude",
       "at": 1793412477
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793452984
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793452984
     }
   },
   "kitten": {
