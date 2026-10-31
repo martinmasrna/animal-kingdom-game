@@ -1492,7 +1492,7 @@ function drawBoard(d) {
   [A, g] = holdFood(d, A, g);   // a lesson may hold the fruit until its Next (coach.js)
   // a den taken: the animal that took it, as it was played (the engine's capture event), standing in the den's mouth
   const cap = V.game.result && V.game.result.reason === 'hq_capture' && (V.game.events || []).filter(e => e.e === 'capture').pop();
-  const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str } : null;
+  const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str, iid: cap.iid } : null;
   const region = shownRegion(d);
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
   const fire = st && st.src ? st.src.map(dcr) : null;   // the animals whose own effect this is: their trigger marks brighten

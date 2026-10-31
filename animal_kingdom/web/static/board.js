@@ -123,7 +123,8 @@ export function renderBoard(el, M, g, cards, ui) {
   }
 
   for (let c = 1; c <= M.cols; c++) for (let r = 1; r <= M.rows; r++) {
-    const cr = key(c, r), st = g.board[cr] || [], [x, y] = at(c, r);
+    // an animal that roamed into the den stands only in its mouth, not also where it came from
+    const cr = key(c, r), st = (g.board[cr] || []).filter(u => !ui.capture || u.iid !== ui.capture.iid), [x, y] = at(c, r);
     const cls = (rings.has(cr) ? ' tgt' : '') + (roamable.has(cr) ? (ui.roamFrom === cr ? ' roamsel' : ' roamable') : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');
     const pv = ui.preview && ui.preview.cr === cr ? ui.preview : null;
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
