@@ -1587,8 +1587,8 @@
         "prev_note": "",
         "prev": "Flight. When this is removed, shuffle it into your deck."
       },
-      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board",
-      "at": 1793023431
+      "note": "Active text pass (Martin, 2026-10-31): the card's name instead of \"this\"",
+      "at": 1793412476
     },
     "art": {
       "lv": "fine",
@@ -1618,9 +1618,9 @@
         "prev_note": "",
         "prev": "Apex Predator. Dusk: shuffle this into your deck with -1 strength."
       },
-      "note": "Martin, 2026-10-27: the Ouroboros was a pure one-for-one at very low tempo; the draw makes each cycle cost no card",
+      "note": "Active text pass (Martin, 2026-10-31): the card's name instead of \"this\"",
       "by": "claude",
-      "at": 1793110105
+      "at": 1793412477
     }
   },
   "falcon": {
@@ -5051,13 +5051,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1793023436,
+      "at": 1793412476,
       "review": {
         "prev_lv": "draft",
         "prev_note": "",
         "prev": "When this is removed, put it back where it was with +1 strength and draw a card."
       },
-      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board"
+      "note": "Active text pass (Martin, 2026-10-31): the card's name instead of \"this\""
     },
     "animal": {
       "note": "moved from pool to aristocrats",
@@ -6966,9 +6966,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-30: the Roar brings the herd the +2 needs; a covered Deer comes home to draw again",
+      "note": "Active text pass (Martin, 2026-10-31): \"give it\" instead of \"it gains\"",
       "by": "claude",
-      "at": 1793379839
+      "at": 1793412477
     }
   },
   "kitten": {
