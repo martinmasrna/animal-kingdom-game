@@ -429,7 +429,7 @@ def test_the_tiger_legend_eats_its_prey_then_removes_an_adjacent_enemy_of_7_but_
 
 def test_the_alley_cat_adds_two_kittens_and_a_kitten_draws_a_common_animal():
     s = make_state(hands={"A": ["alley_cat"]},
-                   decks={"A": ["jaguar", "mouse", "lion", "mouse"], "B": ["lion"] * 5})
+                   decks={"A": ["jaguar", "mouse", "jaguar", "jaguar"], "B": ["lion"] * 5})
     rules.apply_action(s, PlaceAction("alley_cat", ("cr", "1,2")))
     assert hand_ids(s, "A") == ["kitten", "kitten"]
     rules.apply_action(s, PlaceAction("kitten", ("cr", "1,3")))
