@@ -532,17 +532,14 @@ fn op_queen_guard(st: &mut State, step: &mut Map) -> Option<Pending> {
     let cid = step_card(st, step, "card").unwrap();
     let owner = step_player(st, step, "player");
     // One event can cover several of the owner's Colony animals at once (the Locust swarm): the guard goes to the one
-    // played earliest, as Dawn and Dusk are ordered; the other calls for it fizzle with it gone.
+    // played earliest, as Dawn and Dusk are ordered.
+    // the other calls stay queued (an op never shrinks the stack) and fizzle, the guard being gone from hand and deck
     let mut calls: Vec<Map> = vec![step.clone()];
-    let mut rest = Vec::with_capacity(st.effect_stack.len());
-    for s in std::mem::take(&mut st.effect_stack) {
-        if m_get_s(&s, "op") == Some("queen_guard") && step_card(st, &s, "card") == Some(cid) && step_player(st, &s, "player") == owner {
-            calls.push(s);
-        } else {
-            rest.push(s);
+    for s in &st.effect_stack {
+        if m_get_s(s, "op") == Some("queen_guard") && step_card(st, s, "card") == Some(cid) && step_player(st, s, "player") == owner {
+            calls.push(s.clone());
         }
     }
-    st.effect_stack = rest;
     let mut best: Option<(i64, &'static str, Cr)> = None;
     for call in &calls {
         let c = step_cr(st, call, "cr").unwrap();

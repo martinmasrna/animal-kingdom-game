@@ -448,9 +448,9 @@ def _op_queen_guard(state, step):
     the guard has left the hand and deck (played, discarded, stolen)."""
     cid, owner = step["card"], step["player"]
     # One event can cover several of the owner's Colony animals at once (the Locust swarm): the guard goes to the one
-    # played earliest, as Dawn and Dusk are ordered (Martin, 2026-10-31); the other calls for it fizzle with it gone.
+    # played earliest, as Dawn and Dusk are ordered (Martin, 2026-10-31); the other calls stay queued and fizzle, it being
+    # gone from hand and deck.
     calls = [step] + [s for s in state.effect_stack if s.get("op") == "queen_guard" and s["card"] == cid and s["player"] == owner]
-    state.effect_stack[:] = [s for s in state.effect_stack if not any(s is c for c in calls[1:])]
     live = []
     for call in calls:
         stack = state.board.get(call["cr"], [])
