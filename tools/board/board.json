@@ -1,5 +1,5 @@
 {
- "rev": 1013,
+ "rev": 1014,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -586,9 +586,6 @@
   "mouse": {
    "flag": true,
    "note": "idk, doesn't feel great"
-  },
-  "falcon": {
-   "note": "draw 2 would be too strong, but this feels too weak?"
   },
   "stick_insect": {
    "flag": true,
