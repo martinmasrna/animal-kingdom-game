@@ -269,6 +269,7 @@ class Session:
     def play(self, action: dict) -> None:
         st = self.m.state
         seat = st.player_to_act()
+        self.m.events = []      # the view animates this move's events only, never the moves before it
         self.m.act(seat, action)
         self.line = self.line[:self.k] + [action]
         self.k += 1

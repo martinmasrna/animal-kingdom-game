@@ -102,7 +102,12 @@ async function feed(view, animate) {
       #board .cr.ahl::before { content: attr(data-ahl); position: absolute; left: -14px; top: -14px; width: 26px; height: 26px; border-radius: 50%; background: #f9ab00; color: #202124; font: 700 15px/26px sans-serif; text-align: center; z-index: 6; pointer-events: none; }`;
     w.document.head.appendChild(st); }
   const v = JSON.parse(JSON.stringify(view)); v.version = S.ver++; v.analysed = v.version;
+  // The board animates the history entries it hasn't seen: a still view carries none, a move's view only the moves
+  // since the last view, or a draw would replay every move of the game first.
+  const full = v.game.history || [];
   if (!animate) { v.game.events = []; v.game.history = []; }
+  else v.game.history = (S.sent || []).concat(full.slice(S.histLen ?? full.length));
+  S.histLen = full.length; S.sent = v.game.history;
   w.__ak.feed(v);
   for (let i = 0; i < 10; i++) {   // the frame's own start-up view must not draw over this one
     await new Promise(r => setTimeout(r, 200));
