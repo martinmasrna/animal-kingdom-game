@@ -29,6 +29,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
     .venv/bin/python tools/cards/hq.py token MAKER ID NAME STR [--tags T,U]   a token MAKER's effect places
     .venv/bin/python tools/cards/hq.py untoken MAKER ID              a token MAKER no longer makes (out of the game when nothing else makes it)
+    .venv/bin/python tools/cards/hq.py link MAKER ID                 an existing card MAKER's effect brings in, shown beside it when read
     .venv/bin/python tools/cards/hq.py stage MAKER ID TEXT            the next form MAKER evolves into (its rarity, name, strength, tags)
 
 A planned card becomes a card (in the reserve) once it has a rarity and a strength. Every edit is checked against the
@@ -477,6 +478,20 @@ def untoken(maker: str, cid: str, by: str = "martin") -> str:
     return f"{cid}: no longer a token of {maker}; nothing else makes it, so it is out of the game"
 
 
+def link(maker: str, cid: str) -> str:
+    """An existing card MAKER's effect brings in (the Queen Bee's Worker, Soldier and Nurse Bees), shown beside it when read
+    large, as a token is (Martin, 2026-10-31)."""
+    cards = _read(CARDS)
+    m = _rec(cards, _row(maker)["id"])
+    if not any(c["id"] == cid for c in cards["cards"]):
+        raise Refused(f"no card {cid}")
+    if cid in m.get("related", []):
+        return f"{cid} is already shown beside {maker}"
+    m["related"] = [*m.get("related", []), cid]
+    _save_cards(cards)
+    return f"{cid}: shown beside {maker}"
+
+
 def add_stage(maker: str, cid: str, text: str) -> str:
     """The next form an evolving card becomes, shown after its earlier forms (the legendary Butterfly's stages): the
     maker's rarity, name, strength and tags, its own text."""
@@ -631,6 +646,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("stage"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("text")
     s = sub.add_parser("token"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("name"); s.add_argument("strength", type=int); s.add_argument("--tags", default="")
     s = sub.add_parser("untoken"); s.add_argument("maker"); s.add_argument("id")
+    s = sub.add_parser("link"); s.add_argument("maker"); s.add_argument("id")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
     try:
@@ -667,6 +683,8 @@ def main(argv=None) -> None:
             print(add_token(a.maker, a.id, a.name, a.strength, [t for t in a.tags.split(",") if t]))
         elif a.cmd == "untoken":
             print(untoken(a.maker, a.id, "claude"))
+        elif a.cmd == "link":
+            print(link(a.maker, a.id))
         elif a.cmd == "crop":
             nums = lambda v: "reset" if v == "reset" else [float(x) for x in v.split(",")] if v else None
             full = None if a.full is None else "reset" if a.full == "reset" else float(a.full)

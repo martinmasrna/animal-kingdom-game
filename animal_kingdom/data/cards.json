@@ -139,7 +139,11 @@
       "text": "Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand.",
       "species": "Bee",
       "habitat": "Meadow",
-      "related": [],
+      "related": [
+        "worker_bee",
+        "guard_bee",
+        "nurse_bee"
+      ],
       "keywords": []
     },
     {
@@ -232,7 +236,7 @@
         "Bird"
       ],
       "base_strength": 7,
-      "text": "Flight. Fall: shuffle this into your deck.",
+      "text": "Flight. Fall: shuffle Ember into your deck.",
       "species": "Pheasant",
       "habitat": "Forest",
       "keywords": [
@@ -387,7 +391,7 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
-      "text": "Fall: put this back where it was with +1 strength and draw a card.",
+      "text": "Fall: put Roach King back where it was with +1 strength and draw a card.",
       "species": "Cockroach",
       "habitat": "City",
       "keywords": []
@@ -1625,7 +1629,7 @@
         "Snake"
       ],
       "base_strength": 10,
-      "text": "Apex Predator. Dusk: shuffle this into your deck with -1 strength and draw a card.",
+      "text": "Apex Predator. Dusk: shuffle Eon into your deck with -1 strength and draw a card.",
       "species": "Anaconda",
       "habitat": "Jungle",
       "keywords": [
@@ -3936,7 +3940,7 @@
         "Hoofed"
       ],
       "base_strength": 3,
-      "text": "Flee. Roar: draw 2 animals with Flee. Whenever one of your animals flees, it gains 2 strength.",
+      "text": "Flee. Roar: draw 2 animals with Flee. Whenever one of your animals flees, give it +2 strength.",
       "species": "Deer",
       "habitat": "Forest",
       "keywords": [
