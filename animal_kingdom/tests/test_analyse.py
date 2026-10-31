@@ -27,8 +27,10 @@ def test_watching_the_search_does_not_change_its_choice():
     assert seen and all(isinstance(path, tuple) and path for path, _, _ in seen)
 
 
-def test_texts_name_what_a_choice_touches():
+def test_moves_are_named_by_what_they_touch_and_carry_their_crossroads():
     s = _position()
     place = next(a for a in rules.legal_actions(s) if a.kind == "place")
-    assert analyse.texts(s, [place.to_dict()]) == [analyse.describe(place.to_dict())]
-    assert analyse.describe({"kind": "draw"}) == "draw"
+    text, crs = analyse.named(s, [place.to_dict(), {"kind": "draw"}])
+    card = analyse.CARDS[place.card_id].name
+    assert text[0].startswith(f"{card} onto ") and place.target[1] not in text[0]   # no coordinates
+    assert crs[0] == [place.target[1]] and text[1] == "draw" and crs[1] == []
