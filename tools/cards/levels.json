@@ -2921,7 +2921,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792141740
+      "at": 1793452249
     },
     "crop": {
       "review": {
@@ -2930,7 +2930,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792141751
+      "at": 1793452272
     },
     "animal": {
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -3593,12 +3593,22 @@
   },
   "pup": {
     "art": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1793452249
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1793452272
     }
   },
   "python": {
@@ -7049,6 +7059,24 @@
       "note": "Martin 2026-10-31",
       "by": "claude",
       "at": 1793403518
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793452248
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793452272
     }
   },
   "impala": {

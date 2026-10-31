@@ -1,6 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  kitten: [.6, .38, .5],
   young_ant: [.6, .47, .55],
   vole: [.5, .45, .55],
   queen_ant: [.68, .5, .55],
@@ -23,7 +24,7 @@ export const CROP = {
   great_white_shark: [.6, .45, .75],
   cuckoo_legend: [.47, .45, .7],
   tarantula: [.55, .5, .75],
-  sperm_whale_legend: [.6, .5, .72],
+  sperm_whale_legend: [.5, .42, .7],
   opossum: [.68, .4, .7],
   sea_turtle: [.62, .38, .5],
   roach: [.6, .48, .62],
@@ -164,12 +165,13 @@ export const CROP = {
   bee_legend: [.6, .38, .7], army_ant_legend: [.64, .43, .7], hornet_legend: [.55, .42, .8], bumblebee_legend: [.52, .37, .95],
   anaconda_legend: [.6, .33, .7], pheasant_legend: [.55, .3, .75], goose_legend: [.52, .5, .85], anaconda: [.49, .6, .62], egg_eater: [.68, .27, .6], bird_egg: [.52, .42, .82],
   dingo: [.7, .27, .6],
-  pup: [.55, .36, .72], outrider: [.62, .36, .75], dhole: [.66, .36, .66], hyena: [.62, .45, .6], bush_dog: [.64, .34, .6],
+  pup: [.52, .38, .5], outrider: [.62, .36, .75], dhole: [.66, .36, .66], hyena: [.62, .45, .6], bush_dog: [.64, .34, .6],
   wolf_legend_2: [.55, .42, .75], wolf_legend_3: [.6, .22, .7], fox_legend: [.56, .36, .8], baby_fox: [.55, .36, .72], baby_fox_2: [.45, .36, .72],
 };
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  kitten: [.62, .36, 1.2],
   young_ant: [.62, .47, 1.2],
   vole: [.55, .45, 1.2],
   queen_ant: [.7, .5, 1.2],
@@ -192,7 +194,7 @@ export const STRIP = {
   great_white_shark: [.6, .45, 1.2],
   cuckoo_legend: [.47, .4, 1.2],
   tarantula: [.55, .48, 1.2],
-  sperm_whale_legend: [.62, .5, 1.2],
+  sperm_whale_legend: [.55, .4, 1.2],
   opossum: [.72, .42, 1.2],
   sea_turtle: [.65, .36, 1.2],
   roach: [.62, .45, 1.2],
@@ -325,13 +327,14 @@ export const STRIP = {
   skunk: [.21, .55, 3.4], lemming: [.82, .38, 1.4], cheetah: [.87, .4, 1.3], falcon: [.8, .6, 1.7], bat: [.6, .42, 1.4],
   wolf_legend_2: [.55, .38, 1.2], wolf_legend_3: [.63, .16, 1.1], dhole: [.68, .22, 1.6],
   jackal: [.8, .5, 1], fox: [.7, .4, 1.3], dingo: [.73, .25, 1.1], fox_legend: [.6, .19, 1.2],
-  hyena: [.72, .45, 1.2], outrider: [.77, .31, 1.3], pup: [.57, .27, 1.2], baby_fox: [.5, .32, 1], baby_fox_2: [.5, .32, 1],
+  hyena: [.72, .45, 1.2], outrider: [.77, .31, 1.3], pup: [.55, .36, 1.2], baby_fox: [.5, .32, 1], baby_fox_2: [.5, .32, 1],
 };
 // FULL places the painting in the full card's window, which shows 61% of its height between the name bar and the rules panel:
 // the height, as a fraction of the art, the window centres on (its top edge is that minus .305). Set by hand: the whole animal
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  kitten: .4,
   young_ant: .45,
   vole: .45,
   queen_ant: .45,
@@ -354,7 +357,7 @@ export const FULL = {
   great_white_shark: .45,
   cuckoo_legend: .38,
   tarantula: .48,
-  sperm_whale_legend: .5,
+  sperm_whale_legend: .45,
   opossum: .42,
   sea_turtle: .4,
   roach: .45,
@@ -487,7 +490,7 @@ export const FULL = {
   grizzly_bear: .425, groundhog: .385, guard_wasp: .465, hamster: .455,
   hornet: .425, alley_cat: .435, hyena: .45, jaguar: .455, lemming: .445, wolf_legend_2: .45,
   lynx: .395, magpie: .375, nurse_bumblebee: .445, outrider: .365,
-  owl: .385, rat_legend_2: .405, porcupine: .424, lion_legend: .365, lion_legend_2: .395, pup: .365,
+  owl: .385, rat_legend_2: .405, porcupine: .424, lion_legend: .365, lion_legend_2: .395, pup: .4,
   queen_bee: .425, army_ant_legend: .45, rat_legend: .32, rattlesnake: .555, raven: .405,
   dhole: .445, rhinoceros: .395, chipmunk_legend: .41, serval: .5, skunk_legend: .44, skunk: .45,
   snake_egg: .42, snow_leopard: .385, soldier_ant: .465, squirrel: .455, taipan: .405, termite_king: .485, crocodile: .45, honey_badger: .5,
