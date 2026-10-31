@@ -655,7 +655,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let worms = cfg(st, "earthworm_worms");
             let worm = cid(st, "worm");
             for _ in 0..worms {
-                let blocked = st.top(*rcr).map(|t| t.owner != owner).unwrap_or(false);
+                let blocked = st.top(*rcr).map(|t| t.owner == other(owner)).unwrap_or(false);   // an enemy on top: no room; a Wild Locust is no enemy (Martin, 2026-10-31)
                 if blocked || st.result.is_some() {
                     return;
                 }

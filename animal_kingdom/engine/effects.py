@@ -2084,11 +2084,13 @@ def _vultures_dusk(state, player):
 
 def _earthworm_remove(state, unit, cr, pos):
     """Fall: place two Worms on its crossroad: they land on top, as placements do, while the crossroad is
-    empty or yours. Under an enemy there is no room for them (rulings.md: Worms never cover an enemy). And draw a card."""
+    empty, yours or Wild. Under an enemy there is no room for them (rulings.md: Worms never cover an enemy). A Wild
+    Locust on top is no enemy: the Worms land over it, and a Locust that ate the Earthworm flies off from under them
+    (Martin, 2026-10-31: no Worms when a Locust or his Mantis took the Earthworm under a Locust). And draw a card."""
     draw_cards(state, unit.owner, 1)
     for _ in range(state.config.earthworm_worms):
         top = state.top_unit(cr)
-        if top is not None and top.owner != unit.owner or state.result is not None:
+        if top is not None and top.owner == other_player(unit.owner) or state.result is not None:
             return
         _spawn(state, unit.owner, "worm", cr)
 

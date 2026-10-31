@@ -1858,11 +1858,11 @@ fn op_locust_eat(st: &mut State, step: &mut Map) -> Option<Pending> {
     }
     let by = step_player(st, step, "by_player");
     let locust = st.g.known.locust_swarm;
+    let me = st.unit_at(cr, pos).clone();   // the swarm itself: what it ate may have left Worms over it (the Earthworm's Fall)
     if pos > 0 {
         let under = st.unit_at(cr, pos - 1).iid;
         remove_specific(st, cr, under, by, true, locust, false);
     }
-    let me = st.top(cr).cloned().unwrap();
     bounce(st, cr, &me, 0);
     None
 }
