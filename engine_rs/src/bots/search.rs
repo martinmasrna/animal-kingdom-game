@@ -83,6 +83,9 @@ pub struct Searcher {
     pub den_open: bool,
     /// Far den sense (referee_bot.den_far): hands dealt to read a capture built from several placements; 0 off.
     pub den_far: usize,
+    /// referee_bot.den_far_margin / den_far_ratio: how much riskier an action may be and stay.
+    pub den_far_margin: usize,
+    pub den_far_ratio: f64,
     pub reply_min: bool,
     pub outs: usize,
     // run state
@@ -136,6 +139,8 @@ impl Searcher {
             deepen_chase: false,
             den_open: false,
             den_far: 0,
+            den_far_margin: 0,
+            den_far_ratio: 0.0,
             reply_min: false,
             outs: 0,
             reply_openings: Vec::new(),
@@ -1115,8 +1120,14 @@ impl Searcher {
             hits.push(if ends { Some(self.far_hits(&nxt, opp, me)) } else { None });
         }
         let Some(best) = hits.iter().filter_map(|h| *h).min() else { return candidates };
-        let bar = best + (self.den_far / 50).max(1);
-        candidates.into_iter().zip(hits).filter(|(_, h)| h.map_or(true, |h| h <= bar)).map(|(a, _)| a).collect()
+        let bar = best + if self.den_far_margin > 0 { self.den_far_margin } else { (self.den_far / 50).max(1) };
+        let ratio = self.den_far_ratio;
+        candidates
+            .into_iter()
+            .zip(hits)
+            .filter(|(_, h)| h.map_or(true, |h| h <= bar || (ratio > 0.0 && h as f64 <= ratio * best as f64)))
+            .map(|(a, _)| a)
+            .collect()
     }
 
     fn reply_opening(&mut self, st: &State, opp: Player, legal: &[Action]) -> Option<Action> {

@@ -122,7 +122,8 @@ class RefereeBot(TurnSearcher):
                  quiesce: bool = False, mulligan: bool = False,
                  depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
                  den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE, deepen_chase: bool = False,
-                 den_open: bool = False, reply_min: bool = False, outs: int = 0, den_far: int = 0):
+                 den_open: bool = False, reply_min: bool = False, outs: int = 0, den_far: int = 0,
+                 den_far_margin: int = 0, den_far_ratio: float = 0.0):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan, decisive=decisive)
@@ -161,6 +162,11 @@ class RefereeBot(TurnSearcher):
         # Scored inside the search instead, the risk drowned in the five worlds' noise, and the beam had cut the safe
         # square before any later screen could keep it.
         self.den_far = den_far
+        # How much riskier an action may be and stay: more than `den_far_margin` hands over the safest (0: one in fifty
+        # of the hands dealt) and, with `den_far_ratio`, more than that many times the safest's count too, so a turn
+        # where every action is about equally exposed keeps them all.
+        self.den_far_margin = den_far_margin
+        self.den_far_ratio = den_far_ratio
         # The reply as a turn (2026-10-17, Martin: "a turn is an atomic event consisting of 2 actions"): at the start of
         # the opponent's sampled reply, their first action is chosen by the position after their whole turn (the
         # `reply_turns` best openings by one-move score, each finished by the fast policy) instead of by the one-move
@@ -719,8 +725,10 @@ class RefereeBot(TurnSearcher):
         measured = [h for h in hits if h is not None]
         if not measured:
             return candidates
-        bar = min(measured) + max(1, self.den_far // 50)
-        return [a for a, h in zip(candidates, hits) if h is None or h <= bar]
+        best = min(measured)
+        bar = best + (self.den_far_margin or max(1, self.den_far // 50))
+        return [a for a, h in zip(candidates, hits)
+                if h is None or h <= bar or (self.den_far_ratio and h <= self.den_far_ratio * best)]
 
     def _reply_opening(self, state: GameState, opp: str, legal: Sequence[Action]) -> Optional[Action]:
         """The opponent's first action, judged by the position after their whole turn: each of their `reply_turns` best

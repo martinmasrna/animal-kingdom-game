@@ -148,6 +148,12 @@ impl Bot {
                     if let Some(v) = get("den_far") {
                         s.den_far = as_usize(v);
                     }
+                    if let Some(v) = get("den_far_margin") {
+                        s.den_far_margin = as_usize(v);
+                    }
+                    if let Some(v) = get("den_far_ratio") {
+                        s.den_far_ratio = as_f64(v);
+                    }
                     if let Some(v) = get("reply_turns") {
                         s.reply_turns = as_usize(v);
                     }
