@@ -1,5 +1,5 @@
 {
- "rev": 1014,
+ "rev": 1030,
  "cards": {
   "stag_beetle": {
    "x": 1204,
@@ -17,10 +17,8 @@
    "cards": [
     "wolf",
     "hedgehog",
-    "lion",
     "elephant",
     "blue_whale",
-    "tiger",
     "caracal",
     "pigeon",
     "guard_bee",
@@ -35,7 +33,7 @@
    "name": "Removal",
    "x": 163,
    "y": -332,
-   "cols": 9,
+   "cols": 12,
    "stacked": false,
    "cards": [
     "soldier_ant",
@@ -46,6 +44,7 @@
     "barracuda",
     "wolverine",
     "warthog",
+    "boar",
     "hammerhead"
    ]
   },
@@ -256,7 +255,6 @@
    "stacked": false,
    "cards": [
     "jaguar",
-    "hornet",
     "hawk",
     "honey_badger",
     "cottonmouth",
@@ -264,7 +262,6 @@
     "albatross",
     "black_mamba",
     "chimpanzee",
-    "boar",
     "swordfish"
    ]
   },
@@ -532,6 +529,31 @@
     "skunk"
    ],
    "tint": "grey"
+  },
+  {
+   "id": "pmvwl024t0",
+   "name": "Literally Perfect",
+   "x": 172,
+   "y": -2522,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "lion",
+    "tiger"
+   ],
+   "tint": "blue"
+  },
+  {
+   "id": "pmvwl0yz91",
+   "name": "Literally Perfect",
+   "x": 3636,
+   "y": -2550,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "hornet"
+   ],
+   "tint": "blue"
   }
  ],
  "gone": [
