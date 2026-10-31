@@ -739,10 +739,9 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("bush_dog", OnRoam) => {
             if let Args::Roam(_, ev) = args {
-                if !st.occupied(ev.from) {
-                    let pup = cid(st, "pup");
-                    spawn(st, owner, pup, ev.from);
-                }
+                // on top of any animal that resurfaced there (Martin, 2026-10-31)
+                let pup = cid(st, "pup");
+                spawn(st, owner, pup, ev.from);
             }
         }
         ("african_wild_dog", OnFriendlyPlace) => {

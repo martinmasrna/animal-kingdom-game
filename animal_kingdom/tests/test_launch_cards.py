@@ -592,17 +592,17 @@ def test_the_legendary_wolf_grows_at_dusk_by_its_adjacent_canines():
     assert w.strength_counter == 2 * CFG.wolf_legend_grant
 
 
-def test_the_bush_dog_leaves_a_pup_on_the_crossroad_it_left_unless_an_animal_resurfaced():
+def test_the_bush_dog_leaves_a_pup_on_the_crossroad_it_left_even_on_a_resurfaced_animal():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "bush_dog", "A")
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
     pup = s.top_unit("1,2")
     assert pup is not None and pup.card_id == "pup" and pup.owner == "A" and s.top_unit("2,2").card_id == "bush_dog"
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    put(s, "1,2", "lion", "A")
-    put(s, "1,2", "bush_dog", "A")                             # it stands on a Lion
+    put(s, "1,2", "lion", "B")
+    put(s, "1,2", "bush_dog", "A")                             # it stands on an enemy Lion
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
-    assert [u.card_id for u in s.board["1,2"]] == ["lion"]
+    assert [(u.card_id, u.owner) for u in s.board["1,2"]] == [("lion", "B"), ("pup", "A")]
 
 
 def test_the_fox_draws_two_only_if_an_ally_roamed_this_turn():

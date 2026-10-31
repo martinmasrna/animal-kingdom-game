@@ -2232,10 +2232,9 @@ def _jackal_roam(state, unit, cr, event):
 
 
 def _bush_dog_roam(state, unit, cr, event):
-    """Whenever this roams, place a Pup on the crossroad it left (nothing if an animal resurfaced there)."""
-    left = event["from"]
-    if state.top_unit(left) is None:
-        _spawn(state, unit.owner, "pup", left)
+    """Whenever this roams, place a Pup on the crossroad it left, on top of any animal that resurfaced there (Martin,
+    2026-10-31)."""
+    _spawn(state, unit.owner, "pup", event["from"])
 
 
 def _wild_dog_friendly_place(state, watcher, placed) -> None:
