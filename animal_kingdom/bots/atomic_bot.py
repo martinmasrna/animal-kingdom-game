@@ -379,16 +379,27 @@ class AtomicBot(Bot):
         for lv in range(self.rounds):
             go = pool[:self.widths[min(lv, len(self.widths) - 1)]]
             plies = 2 * lv + 1
-            jobs = [(i, k) for i in range(len(go)) for k in range(len(worlds))]
+            # a turn already won or lost outright in a hand one level up stays so deeper: nothing to search there
             values: dict = {}
-            for job, v in _run_jobs(self, go, jobs, me, plies):
-                values[job] = v
-                i = job[0]
-                if all((i, k) in values for k in range(len(worlds))):
+            if lv > 0:
+                for i, r in enumerate(go):
+                    for k, v in enumerate(r["per_hand"][lv - 1]):
+                        if abs(v) >= self.base.decisive:
+                            values[(i, k)] = v
+            jobs = [(i, k) for i in range(len(go)) for k in range(len(worlds)) if (i, k) not in values]
+
+            def finish(i):
+                if go[i]["levels"][lv] is None and all((i, k) in values for k in range(len(worlds))):
                     vs = [values[(i, k)] for k in range(len(worlds))]
                     go[i]["levels"][lv], go[i]["per_hand"][lv] = self._mix(vs, weights), vs
                     if progress:
                         progress(order(), lv + 1, sum(r["levels"][lv] is not None for r in go), len(go))
+
+            for i in range(len(go)):
+                finish(i)
+            for job, v in _run_jobs(self, go, jobs, me, plies):
+                values[job] = v
+                finish(job[0])
             pool = sorted(go, key=lambda r: -r["levels"][lv])
         rows = order()
         for r in rows:

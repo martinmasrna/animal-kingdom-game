@@ -591,8 +591,22 @@ impl AtomicBot {
             let width = self.widths[lv.min(self.widths.len() - 1)];
             let go: Vec<usize> = pool.iter().take(width).copied().collect();
             let plies = 2 * lv + 1;
-            let jobs: Vec<(usize, usize)> = go.iter().flat_map(|&i| (0..worlds.len()).map(move |k| (i, k))).collect();
-            let values = self.run_jobs(&rows, &jobs, me, plies);
+            // a turn already won or lost outright in a hand one level up stays so deeper: nothing to search there
+            let mut decided: FxHashMap<(usize, usize), f64> = FxHashMap::default();
+            if lv > 0 {
+                for &i in &go {
+                    if let Some(prev) = &rows[i].per_hand[lv - 1] {
+                        for (k, &v) in prev.iter().enumerate() {
+                            if v.abs() >= self.base.decisive {
+                                decided.insert((i, k), v);
+                            }
+                        }
+                    }
+                }
+            }
+            let jobs: Vec<(usize, usize)> = go.iter().flat_map(|&i| (0..worlds.len()).map(move |k| (i, k))).filter(|j| !decided.contains_key(j)).collect();
+            let mut values = self.run_jobs(&rows, &jobs, me, plies);
+            values.extend(decided);
             for &i in &go {
                 let vs: Vec<f64> = (0..worlds.len()).map(|k| values[&(i, k)]).collect();
                 rows[i].levels[lv] = Some(self.mix(&vs, weights));
