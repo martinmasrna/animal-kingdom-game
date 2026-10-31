@@ -28,6 +28,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d|reset] [--strip x,y,z|reset] [--full y|reset]   (all three reset: no painting)
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
     .venv/bin/python tools/cards/hq.py token MAKER ID NAME STR [--tags T,U]   a token MAKER's effect places
+    .venv/bin/python tools/cards/hq.py untoken MAKER ID              a token MAKER no longer makes (out of the game when nothing else makes it)
     .venv/bin/python tools/cards/hq.py stage MAKER ID TEXT            the next form MAKER evolves into (its rarity, name, strength, tags)
 
 A planned card becomes a card (in the reserve) once it has a rarity and a strength. Every edit is checked against the
@@ -457,6 +458,25 @@ def add_token(maker: str, cid: str, name: str, strength: int, tags: list[str]) -
     return f"{cid}: a token of {maker}"
 
 
+def untoken(maker: str, cid: str, by: str = "martin") -> str:
+    """A token its maker no longer makes (the Queen Bee's Young Bee after her text changed, Martin 2026-10-31): out of
+    the maker's related cards, and out of the game when no other card makes it."""
+    cards = _read(CARDS)
+    m = _rec(cards, _row(maker)["id"])
+    if cid not in m.get("related", []):
+        raise Refused(f"{cid} is not a token of {maker}")
+    m["related"] = [k for k in m["related"] if k != cid]
+    _save_cards(cards)
+    if any(cid in c.get("related", []) for c in cards["cards"]):
+        return f"{cid}: no longer a token of {maker}"
+    cards["cards"] = [c for c in cards["cards"] if c["id"] != cid]
+    _save_cards(cards)
+    levels = _levels()
+    levels.pop(cid, None)
+    _write(LEVELS, levels)
+    return f"{cid}: no longer a token of {maker}; nothing else makes it, so it is out of the game"
+
+
 def add_stage(maker: str, cid: str, text: str) -> str:
     """The next form an evolving card becomes, shown after its earlier forms (the legendary Butterfly's stages): the
     maker's rarity, name, strength and tags, its own text."""
@@ -610,6 +630,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
     s = sub.add_parser("stage"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("text")
     s = sub.add_parser("token"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("name"); s.add_argument("strength", type=int); s.add_argument("--tags", default="")
+    s = sub.add_parser("untoken"); s.add_argument("maker"); s.add_argument("id")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
     try:
@@ -644,6 +665,8 @@ def main(argv=None) -> None:
             print(add_stage(a.maker, a.id, a.text))
         elif a.cmd == "token":
             print(add_token(a.maker, a.id, a.name, a.strength, [t for t in a.tags.split(",") if t]))
+        elif a.cmd == "untoken":
+            print(untoken(a.maker, a.id, "claude"))
         elif a.cmd == "crop":
             nums = lambda v: "reset" if v == "reset" else [float(x) for x in v.split(",")] if v else None
             full = None if a.full is None else "reset" if a.full == "reset" else float(a.full)
