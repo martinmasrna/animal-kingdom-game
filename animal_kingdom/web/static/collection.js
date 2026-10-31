@@ -37,7 +37,7 @@ const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${
 
 // The launch habitats, in the order the sets are presented.
 const HABITATS = ['Savanna', 'Forest', 'Meadow', 'Jungle', 'City', 'Open Ocean'];
-let X, C, cards, tokens = [], st = { open: null, families: new Set(), rar: null, hab: '', str: '', q: '', sheet: false }, flash = null, wired = false;
+let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', q: '', sheet: false }, flash = null, wired = false;
 const limit = c => LIMIT[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
 // A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
 export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
@@ -69,7 +69,6 @@ export function collectionScreen(app, ctx) {
   X = ctx; C = ctx.cards;
   if (!saved) saved = Object.fromEntries(decks().map(d => [d.id, [...d.list]]));
   cards = Object.values(C).filter(c => c.status === 'collectible');   // the starters' cards and the bench (cleared cards in no starter)
-  tokens = Object.values(C).filter(c => c.status === 'token');        // the cards other cards make (Bunny, Kitten): found by search, read, never added (Martin, 2026-10-31)
   if (!wired) { wired = true; wireGlobal(); }
   const all = decks();
   // Opens your first deck; with none yet, nothing is open and the grid is for browsing.
@@ -98,8 +97,10 @@ function render(app, all) {
   if (st.was !== !!st.open) keep[1] = 0; st.was = !!st.open;   // switching list and deck starts the column at its top
   const open = all.find(d => d.id === st.open), counts = open ? countsOf(open.list) : {};
   const q = st.q.toLowerCase();
-  const shown = (q ? cards.concat(tokens) : cards).filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str))
-    && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(q)))
+  // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
+  const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
+  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str))
+    && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ') + ' ' + made(c)).toLowerCase().includes(q)))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
@@ -231,7 +232,6 @@ function wire(app, all, open) {
     e.onclick = () => { const c = C[e.dataset.card];
       if (!open && matchMedia('(hover: none)').matches) { hidePop(); return zoom(app, c); }   // touch, browsing: a tap reads it
       if (!open) return X.toast(`Open a deck ${portrait() ? 'below' : 'on the right'} to build it`);
-      if (c.status === 'token') { const by = Object.values(C).filter(m => (m.related || []).includes(c.id)).map(m => m.name); return X.toast(`${c.name} can't go in a deck: ${by.length ? by.join(' and ') + ' make' + (by.length > 1 ? '' : 's') + ' it' : 'an effect makes it'}`); }
       const n = open.list.filter(x => x === c.id).length, inR = open.list.filter(x => C[x].rarity === c.rarity).length;
       const why = open.list.length >= 30 ? 'tot' : n >= limit(c) ? 'pips' : CAP[c.rarity] && inR >= CAP[c.rarity] ? c.rarity : null;
       if (why) return refuse(app, e, why);
