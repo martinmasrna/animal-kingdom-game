@@ -34,6 +34,6 @@ def test_whole_turns_end_where_the_turn_passes_and_merge_orders():
 def test_it_plays_a_legal_turn():
     s = _position()
     me = s.player_to_act()
-    bot = AtomicBot(make_bot("turn", 1, extra={"determinizations": 2}, python_only=True), turn_width=3, workers=1)
+    bot = AtomicBot(make_bot("turn", 1, extra={"determinizations": 2}, python_only=True), widths=(3,), workers=1)
     legal = rules.legal_actions(s)
     assert bot.choose(s.view_for(me), legal, s) in legal

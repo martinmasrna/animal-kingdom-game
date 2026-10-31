@@ -8,8 +8,8 @@ can play, ranked by the whole-turn search (bots/atomic_bot.py, Martin, 2026-10-3
 scored in the middle of one):
 
     Board        the board when the turn ends, mean over the five imagined hands      (every turn)
-    Old reply    the old search's score, after its GreedyBot reply, for contrast      (the best 20 by Board)
-    Best reply   after the opponent's best whole reply turn in each hand: the ranking (the best 20 by Board)
+    Best reply   after the opponent's best whole reply turn in each hand: the ranking (the best 60 by Board)
+    Old reply    the old search's score, after its GreedyBot reply, for contrast      (the best 20 by Best reply)
 
 The evaluation and the five imagined hands are the Expert's own. Last, the Expert's own search runs on the position,
 and its pick is marked in the list, with every option it weighed at each decision of its turn.
@@ -370,7 +370,7 @@ def turns(state: GameState, me: str, cap: int = TURN_CAP) -> list[list[dict]]:
 
 def engine(state: GameState, seed: int, emit) -> None:
     """Every whole turn for the side to act, ranked by the whole-turn search (bots/atomic_bot.py): the board when it
-    ends, for all of them; for the best `turn_width`, the old search's score after its GreedyBot reply (for contrast)
+    ends, for all of them; for the best 20, the old search's score after its GreedyBot reply (for contrast)
     and the new one, after the opponent's best whole reply turn, which ranks. `emit` gets the ranking as it fills,
     and once more with the Expert's own pick marked."""
     from ..bots.atomic_bot import AtomicBot
@@ -386,15 +386,15 @@ def engine(state: GameState, seed: int, emit) -> None:
         txt, crs = named(state, turn)
         k = json.dumps(turn)
         return {"turn": turn, "text": txt + (["then the best for the cards it draws"] if r["open"] else []), "crs": crs,
-                "board": round(r["board"], 1), "score": None if r["score"] is None else round(r["score"], 1),
-                "per_hand": [round(v, 1) for v in r.get("per_hand", [])], "old": old.get(k)}
+                "board": round(r["board"], 1), "score": None if r["levels"][0] is None else round(r["levels"][0], 1),
+                "per_hand": [round(v, 1) for v in (r["per_hand"][0] or [])], "old": old.get(k)}
 
     def send(rows, stage, done, total, extra=None):
         emit({"stage": stage, "done": done, "total": total, "turns": len(rows), "seconds": round(time.monotonic() - t0, 1),
               "me": me, "rows": [rowdict(r) for r in rows[:60]], **(extra or {})})
 
-    rows = bot.rank(state, me, worlds, progress=lambda rs, d, t: send(rs, 1 if d == 0 else 2, d, t))
-    for r in rows[:bot.turn_width]:          # the old search's score of the same turns, after its GreedyBot reply
+    rows = bot.rank(state, me, worlds, progress=lambda rs, lv, d, t: send(rs, 1 if lv == 0 else 2, d, t))
+    for r in rows[:20]:                      # the old search's score of the best 20, after its GreedyBot reply
         if r["score"] is None:
             continue
         turn = [a.to_dict() for a in r["turn"]]

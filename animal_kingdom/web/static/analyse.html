@@ -198,11 +198,11 @@ async function poll() {
   if (!j.done && S.on) S.pollT = setTimeout(poll, 600);
   else if (j.done) $('status').textContent = S.last ? `done · ${S.last.seconds} s` : '';
 }
-const STAGES = { 1: 'every whole turn scored on the board', 2: 'the best 20 against the opponent\'s best reply', 3: 'the old search\'s reply, for contrast', 4: 'the Expert\'s own search', 5: 'done' };
+const STAGES = { 1: 'every whole turn scored on the board', 2: 'the best 60 against the opponent\'s best reply', 3: 'the old search\'s reply, for contrast', 4: 'the Expert\'s own search', 5: 'done' };
 function renderEngine(L, done) {
   $('status').textContent = done ? `done · ${L.seconds} s` : `${STAGES[L.stage]} · ${L.done}/${L.total} · ${L.seconds} s`;
   const rows = L.rows;
-  let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="Mean over the five imagined hands of the board when the turn ends (every turn)">Board</th><th class="num" title="The old search's score: after its GreedyBot reply, mean of the five hands (the best 20 by Board)">Old reply</th><th class="num" title="The new search's score, which ranks: after the opponent's best whole reply turn in each imagined hand, mean of the five (the best 20 by Board)">Best reply</th><th></th></tr>`;
+  let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="Mean over the five imagined hands of the board when the turn ends (every turn)">Board</th><th class="num" title="The old search's score: after its GreedyBot reply, mean of the five hands (the best 20 by Best reply)">Old reply</th><th class="num" title="The new search's score, which ranks: after the opponent's best whole reply turn in each imagined hand, mean of the five (the best 60 by Board)">Best reply</th><th></th></tr>`;
   rows.forEach((r, i) => {
     h += `<tr class="click${r.expert ? ' exp' : ''}" data-i="${i}"><td class="r">${i + 1}</td><td>${r.text.map(t => esc(t.trim())).join(' · ')}${i === 0 && r.score != null ? '<span class="badge new" title="The new whole-turn search plays this">New pick</span>' : ''}${r.expert ? '<span class="badge" title="What the live bot (the old search) plays here">Live bot</span>' : ''}</td>
       <td class="num${r.score != null ? ' dim' : ''}">${fmt(r.board)}</td><td class="num dim">${fmt(r.old)}</td><td class="num">${fmt(r.score)}</td>
