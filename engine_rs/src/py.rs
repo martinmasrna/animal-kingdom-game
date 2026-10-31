@@ -300,6 +300,28 @@ impl PyBot {
         Ok(PyList::new(py, items)?.into_any().unbind())
     }
 
+    /// The whole-turn search's ranking of `state` for the seat to act (an atomic bot; empty for any other): every whole
+    /// turn as {turn: [action dicts], open, board, levels: [score or None per depth], per_hand: [[score per hand] or None]},
+    /// best first. `real` scores against the true hidden cards instead of the imagined hands (one "hand": the position).
+    #[pyo3(signature = (state, real=false))]
+    fn ranking(&mut self, py: Python<'_>, state: &PyState, real: bool) -> PyResult<Py<PyAny>> {
+        let bots::Bot::Atomic(a) = &mut self.bot else { return json_to_py(py, &sj::json!([])) };
+        let me = state.st.player_to_act();
+        let st = &state.st;
+        let rows = py.detach(|| {
+            let worlds = if real { vec![st.clone()] } else { a.worlds(st, me) };
+            a.rank(st, me, &worlds)
+        });
+        let out: Vec<sj::Value> = rows
+            .iter()
+            .map(|r| {
+                sj::json!({"turn": r.turn.iter().map(|x| x.to_json(st)).collect::<Vec<_>>(), "open": r.open, "board": r.board,
+                    "levels": r.levels, "per_hand": r.per_hand})
+            })
+            .collect();
+        json_to_py(py, &sj::Value::Array(out))
+    }
+
     fn stats(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         match self.bot.stats() {
             None => Ok(py.None()),

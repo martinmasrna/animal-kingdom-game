@@ -10,7 +10,7 @@
   body { margin: 0; font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #202124; background: #fff; overflow: hidden; }
   header { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--line); background: var(--head); height: 37px; }
   header select { max-width: 560px; }
-  header input { width: 52px; }
+  header input#seed { width: 52px; }
   #engbtn { font-weight: 600; min-width: 92px; }
   #engbtn.on { background: #1a73e8; color: #fff; border-color: #1a73e8; }
   main { display: flex; height: calc(100vh - 37px); }
@@ -56,6 +56,8 @@
 <header>
   <select id="game" title="The game"></select>
   <label title="Sets the five hands the engine imagines for the opponent (as the Expert would at this seed)">seed <input id="seed" type="number" value="0" min="0"></label>
+  <label title="Depth 1: this turn and the opponent's best reply. Depth 2: then this side's best next turn and the opponent's best reply to that">depth <select id="depth"><option value="1">1</option><option value="2" selected>2</option></select></label>
+  <label title="Score against the real hidden cards and deck order (a look back at the game), instead of the hands the bot would imagine"><input id="real" type="checkbox"> real hands</label>
   <button id="engbtn" title="Start or stop the engine on the position on the board (it restarts by itself when the position changes)">Analyse</button>
   <span id="status" class="status"></span>
 </header>
@@ -185,7 +187,7 @@ async function startEngine() {
   clearTimeout(S.pollT); S.last = null; S.explainOf = null;
   if (S.b.over) { $('eng').innerHTML = '<p class="muted">The game is over.</p>'; return; }
   $('eng').innerHTML = '<p class="muted">Starting…</p>';
-  await api('/api/analyse/engine', { sid: S.sid, seed: seed() });
+  await api('/api/analyse/engine', { sid: S.sid, seed: seed(), depth: +$('depth').value, real: $('real').checked });
   poll();
 }
 async function stopEngine() { clearTimeout(S.pollT); await api('/api/analyse/engine/stop', { sid: S.sid }).catch(() => {}); $('status').textContent = 'stopped'; }
@@ -198,14 +200,15 @@ async function poll() {
   if (!j.done && S.on) S.pollT = setTimeout(poll, 600);
   else if (j.done) $('status').textContent = S.last ? `done · ${S.last.seconds} s` : '';
 }
-const STAGES = { 1: 'every whole turn scored on the board', 2: 'the best 60 against the opponent\'s best reply', 3: 'the old search\'s reply, for contrast', 4: 'the Expert\'s own search', 5: 'done' };
+const STAGES = { 2: 'depth 1 done', 3: 'depth 2 done', 4: 'the live bot\'s own search', 5: 'done' };
 function renderEngine(L, done) {
-  $('status').textContent = done ? `done · ${L.seconds} s` : `${STAGES[L.stage]} · ${L.done}/${L.total} · ${L.seconds} s`;
+  const next = L.stage === 2 && L.depth >= 2 ? ' · depth 2 running' : L.stage < 4 ? ' · the live bot\'s search running' : '';
+  $('status').textContent = done ? `done · ${L.seconds} s${L.real ? ' · real hands' : ''}` : `${STAGES[L.stage] || ''}${next} · ${L.seconds} s`;
   const rows = L.rows;
-  let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="Mean over the five imagined hands of the board when the turn ends (every turn)">Board</th><th class="num" title="The old search's score: after its GreedyBot reply, mean of the five hands (the best 20 by Best reply)">Old reply</th><th class="num" title="The new search's score, which ranks: after the opponent's best whole reply turn in each imagined hand, mean of the five (the best 60 by Board)">Best reply</th><th></th></tr>`;
+  let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="The board when the turn ends, mean over the imagined hands (every turn)">Board</th><th class="num" title="The live bot's score: after its GreedyBot reply, mean of the five hands (the best 20)">Old reply</th><th class="num" title="Depth 1: after the opponent's best whole reply turn, mean over the hands (the best 60 by Board)">Depth 1</th>${L.depth >= 2 ? '<th class="num" title="Depth 2: then this side\'s best next turn and the opponent\'s best reply to it (the best 20 by depth 1); ranks when shown">Depth 2</th>' : ''}<th></th></tr>`;
   rows.forEach((r, i) => {
-    h += `<tr class="click${r.expert ? ' exp' : ''}" data-i="${i}"><td class="r">${i + 1}</td><td>${r.text.map(t => esc(t.trim())).join(' · ')}${i === 0 && r.score != null ? '<span class="badge new" title="The new whole-turn search plays this">New pick</span>' : ''}${r.expert ? '<span class="badge" title="What the live bot (the old search) plays here">Live bot</span>' : ''}</td>
-      <td class="num${r.score != null ? ' dim' : ''}">${fmt(r.board)}</td><td class="num dim">${fmt(r.old)}</td><td class="num">${fmt(r.score)}</td>
+    h += `<tr class="click${r.expert ? ' exp' : ''}" data-i="${i}"><td class="r">${i + 1}</td><td>${r.text.map(t => esc(t.trim())).join(' · ')}${i === 0 && (r.score2 ?? r.score) != null ? '<span class="badge new" title="The new whole-turn search plays this">New pick</span>' : ''}${r.expert ? '<span class="badge" title="What the live bot (the old search) plays here">Live bot</span>' : ''}</td>
+      <td class="num${r.score != null ? ' dim' : ''}">${fmt(r.board)}</td><td class="num dim">${fmt(r.old)}</td><td class="num${r.score2 != null ? ' dim' : ''}">${fmt(r.score)}</td>${L.depth >= 2 ? `<td class="num">${fmt(r.score2)}</td>` : ''}
       <td style="white-space:nowrap"><a class="x" data-play="${i}" title="Play this turn on the board">play</a><a class="x" data-hands="${i}" title="The five imagined hands, each one's scores and its line">hands</a></td></tr>`;
   });
   h += '</table>';
@@ -283,7 +286,7 @@ $('engbtn').onclick = () => {
   S.on = !S.on; $('engbtn').classList.toggle('on', S.on); $('engbtn').textContent = S.on ? 'Analysing' : 'Analyse';
   if (S.on) startEngine(); else stopEngine();
 };
-$('seed').onchange = () => { if (S.on) startEngine(); };
+$('seed').onchange = $('depth').onchange = $('real').onchange = () => { if (S.on) startEngine(); };
 $('game').onchange = () => openGame(+$('game').value);
 function keys(e) {
   if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;

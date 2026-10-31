@@ -50,3 +50,22 @@ def test_drawing_first_never_scores_below_playing_and_then_drawing():
     draw_first = next(r for r in rows if r["turn"][0].kind == "draw")
     then_draw = [r for r in rows if len(r["turn"]) > 1 and r["turn"][-1].kind == "draw" and r["levels"][0] is not None]
     assert then_draw and all(draw_first["levels"][0] >= r["levels"][0] - 1e-9 for r in then_draw)
+
+
+def test_the_rust_search_gives_the_python_numbers(monkeypatch):
+    """The Rust port (engine_rs/src/bots/atomic.rs) ranks the same whole turns in the same order with the same scores."""
+    import pytest
+    from animal_kingdom.bots import rust_bot
+    monkeypatch.setenv("AK_RUST_BOTS", "1")
+    monkeypatch.delenv("AK_PY_BOTS", raising=False)
+    if not rust_bot.available():
+        pytest.skip("the Rust engine is not built")
+    s = _position()
+    me = s.player_to_act()
+    spec = "atomic:determinizations=2,rounds=2,width1=6,width2=3,threads=2"
+    rust = make_bot(spec, 4).ranking(s)
+    py = make_bot(spec + ",workers=1", 4, python_only=True).rank(s, me)
+    assert [r["turn"] for r in rust] == [[a.to_dict() for a in r["turn"]] for r in py]
+    for a, b in zip(py, rust):
+        assert abs(a["board"] - b["board"]) < 1e-9
+        assert all((x is None) == (y is None) and (x is None or abs(x - y) < 1e-9) for x, y in zip(a["levels"], b["levels"]))

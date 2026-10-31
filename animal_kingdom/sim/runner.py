@@ -74,14 +74,18 @@ def crossed_progress_decile(done: int, total: int) -> bool:
 # player still learning the cards (the 2026-10-02 playtest read: a new player broke even with plain GreedyBot).
 EASY_SLIP = 0.3
 BOT_KINDS = ("easy", "greedy", "lookahead", "random", "referee", "turn", "greedy_belief",
-             "greedy_learned", "turn_learned", "referee_learned")
+             "greedy_learned", "turn_learned", "referee_learned", "atomic", "atomic_learned")
 
 # '<kind>_learned' -> the base kind it otherwise builds exactly like (see make_bot). The
 # learned kinds exist so a paired benchmark can A/B a LinearEval-piloted bot against its
 # hand-eval counterpart through the same `--candidate-kind` seam every other bot A/B uses -
 # no bespoke harness plumbing.
 LEARNED_BASE_KIND = {"greedy_learned": "greedy", "turn_learned": "turn",
-                     "referee_learned": "referee"}
+                     "referee_learned": "referee", "atomic_learned": "atomic"}
+
+# The whole-turn search (bots/atomic_bot.py) takes these keys of its own; the rest of its spec builds the referee it
+# stands on (evaluation, imagined hands, decided-game value), in both engines.
+ATOMIC_KEYS = ("rounds", "width1", "width2", "inner", "cap", "threads", "workers")
 
 # Bare name resolved via bots.learned_eval.load_eval when a '<kind>_learned' bot's `extra`
 # doesn't set `eval=` explicitly (e.g. `--candidate-kind turn_learned:eval=rung0`).
@@ -154,6 +158,14 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
         rust = _rust_bot(kind, seed, weights, extra)   # the same bot on the Rust engine when it is built (bots/rust_bot.py)
         if rust is not None:
             return rust
+    if kind in ("atomic", "atomic_learned"):
+        from ..bots.atomic_bot import AtomicBot
+        own = {k: extra.pop(k) for k in list(extra) if k in ATOMIC_KEYS}
+        base = make_bot(kind.replace("atomic", "referee"), seed, weights, extra, python_only=True)
+        return AtomicBot(base, rounds=int(own.get("rounds", 1)),
+                         widths=(int(own.get("width1", 60)), int(own.get("width2", 20))),
+                         inner=int(own.get("inner", 4)), cap=int(own.get("cap", 3000)),
+                         workers=int(own.get("workers", 5)))
     overrides = {k[2:]: extra.pop(k) for k in list(extra) if k.startswith("w.")}
     if overrides:
         weights = replace(weights or GreedyWeights(), **overrides)
@@ -196,7 +208,7 @@ def _rust_bot(kind: str, seed: int, weights, extra: dict):
     if not rust_bot.available() or weights is not None:
         return None
     base = LEARNED_BASE_KIND.get(kind, kind)
-    if base not in ("greedy", "easy", "turn", "referee", "lookahead", "greedy_belief", "random"):
+    if base not in ("greedy", "easy", "turn", "referee", "lookahead", "greedy_belief", "random", "atomic"):
         return None
     evaluator_json = None
     kwargs = dict(extra)

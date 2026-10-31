@@ -1,6 +1,7 @@
 //! The bots: a bot is built from a spec string the way sim.runner.make_bot builds one (`kind:k=v,...`, `w.<name>`
 //! for an evaluation weight), and plays through `choose`.
 
+pub mod atomic;
 pub mod features;
 pub mod greedy;
 pub mod search;
@@ -23,6 +24,7 @@ pub enum Bot {
     Random(PyRandom),
     Greedy(GreedyBot),
     Search(Searcher),
+    Atomic(Box<atomic::AtomicBot>),
 }
 
 fn coerce(v: &str) -> sj::Value {
@@ -81,6 +83,20 @@ impl Bot {
             extra.retain(|(k, _)| k != "eval");
         }
         let get = |name: &str| extra.iter().find(|(k, _)| k == name).map(|(_, v)| v);
+        if kind == "atomic" {
+            // the whole-turn search (atomic.rs) on a referee base: its evaluation, imagined hands and decided-game value
+            let base_spec = spec.replacen("atomic", "referee", 1);
+            let base = match Bot::from_spec(&base_spec, seed, evaluator_json)? {
+                Bot::Search(s) => s,
+                _ => return Err("the atomic bot needs a referee base".into()),
+            };
+            let rounds = get("rounds").map(as_usize).unwrap_or(1).max(1);
+            let widths = vec![get("width1").map(as_usize).unwrap_or(60), get("width2").map(as_usize).unwrap_or(20)];
+            let inner = get("inner").map(as_usize).unwrap_or(4);
+            let cap = get("cap").map(as_usize).unwrap_or(3000);
+            let threads = get("threads").map(as_usize).unwrap_or(8);
+            return Ok(Bot::Atomic(Box::new(atomic::AtomicBot::new(base, rounds, widths, inner, cap, threads))));
+        }
         match kind.as_str() {
             "random" => Ok(Bot::Random(PyRandom::seeded(seed))),
             "greedy" | "easy" | "lookahead" | "greedy_belief" => {
@@ -186,12 +202,14 @@ impl Bot {
             }
             Bot::Greedy(g) => g.choose(st, me, legal),
             Bot::Search(s) => s.choose(st, me, legal),
+            Bot::Atomic(a) => a.choose(st, me, legal),
         }
     }
 
     pub fn root_scores(&self) -> Vec<(Action, f64)> {
         match self {
             Bot::Search(s) => s.last_root_scores.clone(),
+            Bot::Atomic(a) => a.last_ranking.iter().filter_map(|r| r.levels.iter().rev().flatten().next().map(|v| (r.turn[0].clone(), *v))).collect(),
             _ => Vec::new(),
         }
     }
