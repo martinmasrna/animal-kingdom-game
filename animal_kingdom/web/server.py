@@ -1459,6 +1459,9 @@ def make_app() -> web.Application:
         web.get("/ws/{id}", socket),
         web.static("/static", STATIC),
     ])
+    if os.environ.get("AK_ANALYSE"):   # the position analyser, localhost only (./play sets it; live never does)
+        from . import analyse
+        analyse.register(app)
     app.on_response_prepare.append(_revalidate)
 
     async def resume(_app):

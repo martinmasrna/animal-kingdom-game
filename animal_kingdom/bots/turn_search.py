@@ -29,7 +29,7 @@ from __future__ import annotations
 import math
 import random
 from collections import defaultdict
-from typing import Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 from ..engine import rules
 from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction, RoamAction
@@ -132,6 +132,11 @@ class TurnSearcher(Bot):
         # Without it, a card like "Roar: play another unit" is ranked by its half-played state
         # (one card spent, nothing gained yet) and cut before the search ever sees its payoff.
         self.quiesce = quiesce
+        # The position analyser's window into the search (web/analyse.py): when set, called with every continuation of
+        # my turn the planner scores, as (the actions from the turn's root, its score, whether the score includes the
+        # sampled reply). None in play; the search is the same either way.
+        self._observer: Optional[Callable[[tuple, float, bool], None]] = None
+        self._trace: list[Action] = []
 
     def choose(
         self,
@@ -270,9 +275,13 @@ class TurnSearcher(Bot):
                         extra = (self.weights.wasted_roar
                                  if _roar_fizzled(state, nxt, me, action) else 0.0)
                         next_group.append((nxt, penalty + extra))
+                    self._trace.append(action)
                     candidate_group = self._complete_own_turn(
                         next_group, me, guard=guard + 1)
                     score = self._score_candidate_group(candidate_group, me, compare)
+                    if self._observer is not None:
+                        self._observer(tuple(self._trace), score, compare)
+                    self._trace.pop()
                     if score > best_score:
                         best_score = score
                         best_action = action
