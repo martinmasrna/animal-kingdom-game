@@ -41,6 +41,7 @@
   td.dim { color: #b0b4ba; }
   .neg { color: var(--bad); } .pos { color: var(--good); }
   .muted { color: var(--muted); }
+  .badge.new { background: #1e8e3e; color: #fff; }
   .badge { display: inline-block; padding: 0 5px; border-radius: 3px; background: #f9ab00; color: #202124; font-size: 11px; font-weight: 600; margin-left: 4px; }
   a.x { cursor: pointer; color: #1a73e8; text-decoration: underline; white-space: nowrap; margin-left: 6px; }
   h3 { margin: 10px 0 2px; font-size: 13px; }
@@ -203,7 +204,7 @@ function renderEngine(L, done) {
   const rows = L.rows;
   let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="Mean over the five imagined hands of the board when the turn ends (every turn)">Board</th><th class="num" title="The old search's score: after its GreedyBot reply, mean of the five hands (the best 20 by Board)">Old reply</th><th class="num" title="The new search's score, which ranks: after the opponent's best whole reply turn in each imagined hand, mean of the five (the best 20 by Board)">Best reply</th><th></th></tr>`;
   rows.forEach((r, i) => {
-    h += `<tr class="click${r.expert ? ' exp' : ''}" data-i="${i}"><td class="r">${i + 1}</td><td>${r.text.map(t => esc(t.trim())).join(' · ')}${r.expert ? '<span class="badge" title="The turn the Expert\'s own search plays here">Expert</span>' : ''}</td>
+    h += `<tr class="click${r.expert ? ' exp' : ''}" data-i="${i}"><td class="r">${i + 1}</td><td>${r.text.map(t => esc(t.trim())).join(' · ')}${i === 0 && r.score != null ? '<span class="badge new" title="The new whole-turn search plays this">New pick</span>' : ''}${r.expert ? '<span class="badge" title="What the live bot (the old search) plays here">Live bot</span>' : ''}</td>
       <td class="num${r.score != null ? ' dim' : ''}">${fmt(r.board)}</td><td class="num dim">${fmt(r.old)}</td><td class="num">${fmt(r.score)}</td>
       <td style="white-space:nowrap"><a class="x" data-play="${i}" title="Play this turn on the board">play</a><a class="x" data-hands="${i}" title="The five imagined hands, each one's scores and its line">hands</a></td></tr>`;
   });
@@ -219,7 +220,7 @@ function renderEngine(L, done) {
   $('eng').querySelectorAll('a[data-opt]').forEach(a => a.onclick = e => { e.stopPropagation(); const [r, d, o] = a.dataset.opt.split('.').map(Number); hands(L.expert.roots[r].decisions[d].options[o].turn); });
 }
 function expertHtml(x) {
-  let h = `<details><summary>The Expert's own search: ${esc(x.planned_text.map(t => t.trim()).join(' · '))}</summary>
+  let h = `<details><summary>The live bot (the old search) plays: ${esc(x.planned_text.map(t => t.trim()).join(' · '))}</summary>
     <div class="muted">The first actions it scored (it looks one round deeper only at its best three by the reply score), the rest of the turn it planned with each, and every option it weighed at each decision.</div>
     <table><tr><th>Turn it planned</th><th class="num">Reply</th><th class="num">Deep</th></tr>`;
   x.roots.forEach((r, ri) => {
