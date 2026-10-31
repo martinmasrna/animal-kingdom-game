@@ -763,7 +763,12 @@ class Match:
                     if u.iid == o:
                         return {"v": o, "kind": "cr", "cr": cr, "id": u.card_id}
         if isinstance(o, str) and o in CARDS:
-            return {"v": o, "kind": "card", "id": o, **({"str": card_strength(st, o, owner)} if owner else {})}
+            if not owner:
+                return {"v": o, "kind": "card", "id": o}
+            # a card offered out of a deck (the Owl's Scout) is shown as it would be drawn: in the form it has evolved to there
+            # (the legendary Dung Beetle) and at the strength it would come out with, the royal jelly's included
+            form = st.eaten_form(owner, o)
+            return {"v": o, "kind": "card", "id": form, "str": card_strength(st, form, owner) + st.jelly_peek(owner, o)}
         return {"v": o, "kind": "other", "label": str(o)}
 
 

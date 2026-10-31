@@ -434,6 +434,13 @@ class GameState:
             self.jelly[player][card_id] = [left - 1, counter]
         return counter
 
+    def jelly_peek(self, player: str, card_id: str) -> int:
+        """The counter a copy of `card_id` would leave `player`'s deck with right now (jelly_take without spending it): what a
+        card scouted out of the deck is shown at (Martin, 2026-10-31: "Scouting with owl should display real-time strength")."""
+        val = self.jelly.get(player, {}).get(card_id, (0, 0))
+        left, counter = (val, self.jelly_counter(player, card_id)) if isinstance(val, int) else val
+        return counter if left else 0
+
     def jelly_counter(self, player: str, card_id: str) -> int:
         """The stored counter the royal jelly gives a copy of `card_id` left in the deck: +2, on top of any growth its card id
         carries."""
