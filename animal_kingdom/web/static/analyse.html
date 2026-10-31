@@ -3,70 +3,78 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Position analyser</title>
+<title>Analysis board</title>
 <style>
-  :root { --line: #d0d4da; --head: #f2f4f7; --took: #e6f4ea; --bad: #b3261e; --good: #137333; --muted: #5f6368; --sel: #e8f0fe; }
+  :root { --line: #d0d4da; --head: #f2f4f7; --took: #e6f4ea; --bad: #b3261e; --good: #137333; --muted: #5f6368; --sel: #e8f0fe; --exp: #fef7e0; }
   * { box-sizing: border-box; }
-  body { margin: 0; font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #202124; background: #fff; }
-  header { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--line); background: var(--head); }
-  header select { max-width: 520px; }
-  header input { width: 56px; }
+  body { margin: 0; font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #202124; background: #fff; overflow: hidden; }
+  header { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--line); background: var(--head); height: 37px; }
+  header select { max-width: 560px; }
+  header input { width: 52px; }
+  #engbtn { font-weight: 600; min-width: 92px; }
+  #engbtn.on { background: #1a73e8; color: #fff; border-color: #1a73e8; }
   main { display: flex; height: calc(100vh - 37px); }
-  #left { flex: 0 0 58%; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+  #left { flex: 0 0 60%; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
   #board { flex: 1; border: 0; width: 100%; background: #c9a46a; }
-  #framebar { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-top: 1px solid var(--line); min-height: 36px; background: var(--head); }
-  #framebar .cap { flex: 1; }
+  #nav { display: flex; gap: 6px; align-items: center; padding: 6px 10px; border-top: 1px solid var(--line); background: var(--head); min-height: 38px; }
+  #nav .cap { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #nav button { min-width: 34px; }
   #right { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-  #moves { height: 170px; overflow: auto; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  #eng { flex: 1; overflow: auto; padding: 4px 10px 10px; }
+  #moves { height: 190px; overflow: auto; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; padding: 2px 0; }
   #moves div { padding: 1px 10px; cursor: pointer; white-space: nowrap; }
   #moves div.sub { color: var(--muted); }
+  #moves div.off { font-style: italic; color: #1a73e8; }
   #moves div.at { background: var(--sel); font-weight: 600; }
   #moves div:hover { background: #f1f3f4; }
-  #panel { flex: 1; overflow: auto; padding: 8px 10px 40px; }
   button { font: inherit; padding: 2px 8px; cursor: pointer; }
-  table { border-collapse: collapse; width: 100%; margin: 6px 0 10px; }
+  table { border-collapse: collapse; width: 100%; margin: 4px 0 10px; }
   th, td { border: 1px solid var(--line); padding: 3px 6px; text-align: left; vertical-align: top; }
-  th { background: var(--head); font-weight: 600; }
-  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  th { background: var(--head); font-weight: 600; position: sticky; top: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; width: 58px; }
+  td.r { width: 26px; color: var(--muted); text-align: right; }
+  tr.exp td { background: var(--exp); }
   tr.took td { background: var(--took); }
   tr.click { cursor: pointer; }
   tr.click:hover td { background: #f1f3f4; }
   tr.open td { background: var(--sel); }
+  td.dim { color: #b0b4ba; }
   .neg { color: var(--bad); } .pos { color: var(--good); }
   .muted { color: var(--muted); }
+  .badge { display: inline-block; padding: 0 5px; border-radius: 3px; background: #f9ab00; color: #202124; font-size: 11px; font-weight: 600; margin-left: 4px; }
+  a.x { cursor: pointer; color: #1a73e8; text-decoration: underline; white-space: nowrap; margin-left: 6px; }
+  h3 { margin: 10px 0 2px; font-size: 13px; }
+  .status { color: var(--muted); }
+  .err { color: var(--bad); white-space: pre-wrap; }
   .dec { margin: 4px 0 4px 18px; }
   .dec table { width: auto; min-width: 60%; }
-  h3 { margin: 12px 0 2px; font-size: 13px; }
-  a.x { cursor: pointer; color: #1a73e8; text-decoration: underline; white-space: nowrap; }
-  .build select { margin: 2px 0; max-width: 100%; }
-  .wait { color: var(--muted); font-style: italic; }
-  .err { color: var(--bad); white-space: pre-wrap; }
+  details > summary { cursor: pointer; margin: 8px 0 2px; font-weight: 600; }
 </style>
 </head>
 <body>
 <header>
-  <select id="game"></select>
-  <label>seed <input id="seed" type="number" value="0" min="0"></label>
-  <button id="go">Analyse this position</button>
-  <span id="status" class="muted"></span>
+  <select id="game" title="The game"></select>
+  <label title="Sets the five hands the engine imagines for the opponent (as the Expert would at this seed)">seed <input id="seed" type="number" value="0" min="0"></label>
+  <button id="engbtn" title="Start or stop the engine on the position on the board (it restarts by itself when the position changes)">Analyse</button>
+  <span id="status" class="status"></span>
 </header>
 <main>
   <section id="left">
     <iframe id="board" src="/#/lab/mid"></iframe>
-    <div id="framebar"><span class="cap" id="cap">The position</span></div>
+    <div id="nav"></div>
   </section>
   <section id="right">
+    <div id="eng"><p class="muted">Play on the board as in a game: either side, both hands face up. Step through the game with ◀ ▶ (or the arrow keys) and click any move in the list below. "Analyse" ranks every turn the side to act can play, the way the Expert scores them, and keeps looking deeper.</p></div>
     <div id="moves"></div>
-    <div id="panel"></div>
   </section>
 </main>
 <script>
 const $ = id => document.getElementById(id);
-const S = { games: [], g: null, moves: [], ply: 0, pos: null, search: null, frames: null, fi: 0, ver: 1000, _txt: {} };
-const fmt = x => x == null ? '—' : `<span class="${x < 0 ? 'neg' : x > 0 ? 'pos' : ''}">${x.toFixed(1)}</span>`;
+const S = { games: [], g: null, sid: null, b: null, moves: [], on: false, ver: 1000, frames: null, fi: 0, last: null, pollT: null, explainOf: null };
+const fmt = x => x == null ? '' : `<span class="${x < 0 ? 'neg' : x > 0 ? 'pos' : ''}">${x.toFixed(1)}</span>`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const seatName = (g, p) => g.seats[p] === 'human' || !g.seats[p] ? 'you' : g.seats[p];
-const key = () => ({ src: S.g.src, id: S.g.id, n: S.g.n, ply: S.ply });
+const who = p => { const s = S.g && S.g.seats[p]; return !s || s === 'human' || /^Player/.test(s) ? 'you' : s; };
+const seed = () => +$('seed').value || 0;
 
 async function api(path, body) {
   const r = await fetch(path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {});
@@ -74,147 +82,196 @@ async function api(path, body) {
   return r.json();
 }
 
-// ---- the board: the game's own client in a frame, fed views through its test hook
-// Ready once the frame's own lab view has loaded (it fetches one at start, and would draw over anything fed before it).
+// ---- the board: the game's own client in a frame. Moves made on it come back through its hook and are played here.
+const frameWin = () => $('board').contentWindow;
 function boardReady() {
-  const w = $('board').contentWindow;
+  const w = frameWin();
   return w && w.__ak && w.__ak.feed && w.__ak.cards && Object.keys(w.__ak.cards() || {}).length && w.__ak().V;
 }
-async function show(view, caption) {
-  for (let i = 0; i < 150 && !boardReady(); i++) await new Promise(r => setTimeout(r, 100));
-  if (!boardReady()) return;
-  const v = JSON.parse(JSON.stringify(view)); v.version = S.ver++; v.game.history = []; v.analysed = v.version;
-  const w = $('board').contentWindow;
+async function untilReady() { for (let i = 0; i < 150 && !boardReady(); i++) await new Promise(r => setTimeout(r, 100)); return boardReady(); }
+async function feed(view, animate) {
+  if (!await untilReady()) return;
+  const w = frameWin();
+  w.__ak.onAct = action => onAct(action);
+  if (!w.__akKeys) { w.__akKeys = true; w.document.addEventListener('keydown', keys); }   // the arrows work with the board focused too
+  const v = JSON.parse(JSON.stringify(view)); v.version = S.ver++; v.analysed = v.version;
+  if (!animate) { v.game.events = []; v.game.history = []; }
   w.__ak.feed(v);
-  $('cap').textContent = caption || view.label || '';
-  for (let i = 0; i < 10; i++) {   // and make sure it stayed: nothing else may have replaced it
+  for (let i = 0; i < 10; i++) {   // the frame's own start-up view must not draw over this one
     await new Promise(r => setTimeout(r, 200));
-    if (S.ver - 1 !== v.version) return;   // a newer frame has been shown since
+    if (S.ver - 1 !== v.version) return;
     if ((w.__ak().V || {}).analysed !== v.version) w.__ak.feed(v);
   }
 }
-function framebar() {
-  const fb = $('framebar');
-  if (!S.frames) { fb.innerHTML = `<span class="cap" id="cap">${S.pos ? posCaption() : ''}</span>`; return; }
-  fb.innerHTML = `<button id="fp">◀</button><span class="muted">${S.fi + 1} / ${S.frames.length}</span><button id="fn">▶</button>
-    <span class="cap" id="cap"></span><button id="fx">Back to the position</button>`;
-  $('fp').onclick = () => step(-1); $('fn').onclick = () => step(1);
-  $('fx').onclick = () => { S.frames = null; framebar(); show(S.pos.view, posCaption()); };
-  show(S.frames[S.fi]);
-}
-function step(d) { if (!S.frames) return; S.fi = Math.max(0, Math.min(S.frames.length - 1, S.fi + d)); framebar(); }
-function posCaption() { return `Turn ${S.pos.turn} · ${seatName(S.g, S.pos.me)} to act (seat ${S.pos.me}, at the bottom) · food ${S.pos.food.A}–${S.pos.food.B}${S.pos.over ? ' · game over' : ''}`; }
+const animating = () => { const w = frameWin(); return w && w.__ak && w.__ak().PB && w.__ak().PB.busy; };
 
-// ---- games and moves
+async function onAct(action) {
+  if (S.frames) return;            // a still of an imagined line: nothing to play
+  try {
+    const r = await api('/api/analyse/play', { sid: S.sid, action });
+    S.b = r; S.moves = r.moves;
+    if (r.mover_view) {            // the move plays out from the mover's side, then the board turns to the side to act
+      await feed(r.mover_view, true);
+      for (let i = 0; i < 40 && animating(); i++) await new Promise(res => setTimeout(res, 100));
+      await new Promise(res => setTimeout(res, 300));
+      await feed(r.view, false);
+    } else await feed(r.view, true);
+    afterMove();
+  } catch (e) { $('status').textContent = e.message; }
+}
+async function goto(k, game) {
+  const r = await api('/api/analyse/goto', { sid: S.sid, k, game: !!game });
+  S.b = r; S.moves = r.moves; S.frames = null;
+  await feed(r.view, false);
+  afterMove();
+}
+function afterMove() {
+  location.hash = `${S.g.src}/${S.g.id}/${S.g.n}/${S.b.k}`;
+  renderNav(); renderMoves();
+  if (S.on) startEngine(); else renderIdle();
+}
+
+function renderNav() {
+  const nav = $('nav');
+  if (S.frames) {
+    nav.innerHTML = `<button id="fp">◀</button><span class="muted">${S.fi + 1} / ${S.frames.length}</span><button id="fn">▶</button>
+      <span class="cap">${esc(S.frames[S.fi].label || '')}</span><button id="fx">Back to the board</button>`;
+    $('fp').onclick = () => frameStep(-1); $('fn').onclick = () => frameStep(1);
+    $('fx').onclick = () => { S.frames = null; feed(S.b.view, false); renderNav(); };
+    return;
+  }
+  const b = S.b;
+  nav.innerHTML = `<button id="n0" title="Start">⏮</button><button id="np" title="Back (←)">◀</button><button id="nn" title="Forward (→)">▶</button><button id="ne" title="End of the line">⏭</button>
+    <span class="cap">Turn ${b.turn} · ${b.over ? 'game over' : `${who(b.seat)} to act (seat ${b.seat}, at the bottom)`} · food A ${b.food.A} · B ${b.food.B}</span>
+    ${b.off_game ? '<button id="ng" title="Drop this line and go back to the moves of the game">Back to the game</button>' : ''}`;
+  $('n0').onclick = () => goto(0); $('np').onclick = () => goto(b.k - 1); $('nn').onclick = () => goto(b.k + 1); $('ne').onclick = () => goto(b.n);
+  if ($('ng')) $('ng').onclick = () => goto(Math.min(b.k, S.moves.filter(m => m.game).length), true);
+}
+function frameStep(d) { if (!S.frames) return; S.fi = Math.max(0, Math.min(S.frames.length - 1, S.fi + d)); feed(S.frames[S.fi], false); renderNav(); }
+
+function renderMoves() {
+  const k = S.b.k;
+  $('moves').innerHTML = `<div data-k="0" class="${k === 0 ? 'at' : ''}">start</div>` + S.moves.map(m =>
+    `<div data-k="${m.k + 1}" class="${m.top ? '' : 'sub'}${m.game ? '' : ' off'}${m.k + 1 === k ? ' at' : ''}">T${m.turn} ${m.actor} (${who(m.actor)}): ${esc(m.text)}</div>`).join('');
+  $('moves').querySelectorAll('div').forEach(el => el.onclick = () => goto(+el.dataset.k));
+  const at = $('moves').querySelector('.at'); if (at) at.scrollIntoView({ block: 'nearest' });
+}
+
+// ---- the engine
+function renderIdle() { if (!S.explainOf) $('eng').innerHTML = `<p class="muted">Press "Analyse" to rank every turn ${S.b.over ? '' : `${who(S.b.seat)} can play here`}.</p>`; $('status').textContent = ''; }
+async function startEngine() {
+  clearTimeout(S.pollT); S.last = null; S.explainOf = null;
+  if (S.b.over) { $('eng').innerHTML = '<p class="muted">The game is over.</p>'; return; }
+  $('eng').innerHTML = '<p class="muted">Starting…</p>';
+  await api('/api/analyse/engine', { sid: S.sid, seed: seed() });
+  poll();
+}
+async function stopEngine() { clearTimeout(S.pollT); await api('/api/analyse/engine/stop', { sid: S.sid }).catch(() => {}); $('status').textContent = 'stopped'; }
+async function poll() {
+  const j = await api(`/api/analyse/engine?sid=${S.sid}`).catch(() => null);
+  if (!j || j.none) return;
+  if (j.k !== S.b.k) return;      // a result for another position
+  if (j.error) { $('eng').innerHTML = `<p class="err">${esc(j.error)}</p>`; return; }
+  if (j.latest && !S.explainOf) { S.last = j.latest; renderEngine(j.latest, j.done); }
+  if (!j.done && S.on) S.pollT = setTimeout(poll, 600);
+  else if (j.done) $('status').textContent = S.last ? `done · ${S.last.seconds} s` : '';
+}
+const STAGES = { 1: 'depth 1 · the board when each turn ends', 2: 'depth 2 · after the opponent\'s reply', 3: 'depth 3 · one round deeper', 4: 'the Expert\'s own search', 5: 'done' };
+function renderEngine(L, done) {
+  $('status').textContent = done ? `done · ${L.seconds} s` : `${STAGES[L.stage]} · ${L.done}/${L.total} · ${L.seconds} s`;
+  const rows = L.rows;
+  let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="Mean over the five imagined hands after the opponent's reply and one more round: the score the Expert picks by">Deep</th><th class="num" title="Mean over the five hands after the opponent's reply">Reply</th><th class="num" title="Mean over the five hands of the board when the turn ends">Board</th><th></th></tr>`;
+  rows.forEach((r, i) => {
+    h += `<tr class="click${r.expert ? ' exp' : ''}" data-i="${i}"><td class="r">${i + 1}</td><td>${r.text.map(t => esc(t.trim())).join(' · ')}${r.expert ? '<span class="badge" title="The turn the Expert\'s own search plays here">Expert</span>' : ''}</td>
+      <td class="num">${fmt(r.d3)}</td><td class="num${r.d3 != null ? ' dim' : ''}">${fmt(r.d2)}</td><td class="num${r.d2 != null ? ' dim' : ''}">${fmt(r.d1)}</td>
+      <td style="white-space:nowrap"><a class="x" data-play="${i}" title="Play this turn on the board">play</a><a class="x" data-hands="${i}" title="The five imagined hands, each one's scores and its line">hands</a></td></tr>`;
+  });
+  h += '</table>';
+  if (L.expert) h += expertHtml(L.expert);
+  const scroll = $('eng').scrollTop;
+  $('eng').innerHTML = h; $('eng').scrollTop = scroll;
+  $('eng').querySelectorAll('a[data-play]').forEach(a => a.onclick = e => { e.stopPropagation(); playTurn(rows[+a.dataset.play].turn); });
+  $('eng').querySelectorAll('a[data-hands]').forEach(a => a.onclick = e => { e.stopPropagation(); hands(rows[+a.dataset.hands].turn); });
+  $('eng').querySelectorAll('tr.click').forEach(tr => tr.onclick = () => hands(rows[+tr.dataset.i].turn));
+  $('eng').querySelectorAll('a[data-opt]').forEach(a => a.onclick = e => { e.stopPropagation(); const [r, d, o] = a.dataset.opt.split('.').map(Number); hands(L.expert.roots[r].decisions[d].options[o].turn); });
+}
+function expertHtml(x) {
+  let h = `<details><summary>The Expert's own search: ${esc(x.planned_text.map(t => t.trim()).join(' · '))}</summary>
+    <div class="muted">The first actions it scored (it looks one round deeper only at its best three by the reply score), the rest of the turn it planned with each, and every option it weighed at each decision.</div>
+    <table><tr><th>Turn it planned</th><th class="num">Deep</th><th class="num">Reply</th></tr>`;
+  x.roots.forEach((r, ri) => {
+    h += `<tr><td>${r.text.map(t => esc(t.trim())).join(' · ')}${r.decisions.map((d, di) => `<div class="dec"><b>Decision ${di + 1}</b> <span class="muted">${d.options[0].reply ? 'scored after the reply' : 'scored on the board when the turn ends, no reply'}</span>
+      <table>${d.options.map((o, oi) => `<tr class="${o.took ? 'took' : ''}"><td>${esc(o.text.trim())}${o.took ? ' <span class="muted">(taken)</span>' : ''}</td><td class="num">${fmt(o.score)}</td><td><a class="x" data-opt="${ri}.${di}.${oi}">hands</a></td></tr>`).join('')}</table></div>`).join('')}</td>
+      <td class="num">${fmt(r.deep)}</td><td class="num">${fmt(r.reply)}</td></tr>`;
+  });
+  return h + '</table></details>';
+}
+async function playTurn(turn) {   // a ranked turn played on the board, action by action, as if clicked
+  for (const a of turn) { await onAct(a); await new Promise(r => setTimeout(r, 150)); }
+}
+
+// ---- one turn, hand by hand
+async function hands(turn) {
+  S.explainOf = turn; clearTimeout(S.pollT);
+  $('eng').innerHTML = `<p><a class="x" id="hback" style="margin:0">← back to the ranking</a></p><p class="muted">Scoring this turn hand by hand…</p>`;
+  $('hback').onclick = backToRanking;
+  try {
+    const e = await api('/api/analyse/explain', { sid: S.sid, seed: seed(), turn });
+    if (S.explainOf !== turn) return;
+    const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+    let h = `<p><a class="x" id="hback" style="margin:0">← back to the ranking</a></p><h3>${e.turn.map(t => esc(t.trim())).join(' · ')}</h3>
+      <div class="muted">The five hands the engine imagines for the opponent at seed ${seed()} (the Expert's own five). Click a hand to play its line on the board.</div>
+      <table><tr><th class="r">#</th><th>Hand imagined for the opponent</th><th class="num">Board</th><th class="num">Reply</th><th class="num">Deep</th><th>Ends</th></tr>`;
+    e.hands.forEach((x, i) => { h += `<tr class="click" data-h="${i}"><td class="r">${i + 1}</td><td>${x.hand.map(esc).join(', ')}</td><td class="num">${fmt(x.board)}</td><td class="num">${fmt(x.reply)}</td><td class="num">${fmt(x.deep)}</td><td>${esc(x.ends)}</td></tr>`; });
+    h += `<tr><th></th><th>Mean</th><th class="num">${fmt(mean(e.board))}</th><th class="num">${fmt(mean(e.reply))}</th><th class="num">${fmt(mean(e.deep))}</th><th></th></tr></table>`;
+    $('eng').innerHTML = h; $('hback').onclick = backToRanking;
+    $('eng').querySelectorAll('tr[data-h]').forEach(tr => tr.onclick = () => {
+      $('eng').querySelectorAll('tr[data-h]').forEach(t => t.classList.remove('open')); tr.classList.add('open');
+      S.frames = e.hands[+tr.dataset.h].frames; S.fi = 0; feed(S.frames[0], false); renderNav();
+    });
+  } catch (err) { $('eng').innerHTML = `<p><a class="x" id="hback" style="margin:0">← back</a></p><p class="err">${esc(err.message)}</p>`; $('hback').onclick = backToRanking; }
+}
+function backToRanking() {
+  S.explainOf = null;
+  if (S.frames) { S.frames = null; feed(S.b.view, false); renderNav(); }
+  if (S.last) renderEngine(S.last, !S.on || S.last.stage === 5); else renderIdle();
+  if (S.on && (!S.last || S.last.stage !== 5)) poll();
+}
+
+// ---- games
 async function loadGames() {
   S.games = await api('/api/analyse/games');
   $('game').innerHTML = S.games.map((g, i) => {
     const when = new Date(g.when * 1000).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    const tag = g.running ? 'running' : `${g.winner ? 'won by ' + g.winner : ''} ${g.reason || ''}`;
-    return `<option value="${i}">${when} · ${g.id.replace(/^web_\d+T\d+_/, '')} game ${g.game} · A ${g.seats.A} vs B ${g.seats.B} · ${g.moves} moves · ${tag}</option>`;
+    const tag = g.running ? 'running' : `${g.winner ? g.winner + ' won' : ''} ${g.reason || ''}`;
+    return `<option value="${i}">${when} · ${g.id.replace(/^web_\d+T\d+_/, '')} game ${g.game} · A ${g.seats.A} vs B ${g.seats.B} · ${tag}</option>`;
   }).join('');
 }
-async function pickGame(i, ply) {
-  S.g = S.games[i]; $('game').value = i;
-  S.moves = await api(`/api/analyse/moves?src=${S.g.src}&id=${encodeURIComponent(S.g.id)}&n=${S.g.n}`);
-  await setPly(ply == null ? S.moves.length : ply);
-}
-function renderMoves() {
-  $('moves').innerHTML = S.moves.map(m => `<div data-ply="${m.ply}" class="${m.top ? '' : 'sub'}${m.ply === S.ply ? ' at' : ''}">T${m.turn} ${m.actor} (${seatName(S.g, m.actor)}): ${esc(m.text)}</div>`).join('')
-    + `<div data-ply="${S.moves.length}" class="${S.ply === S.moves.length ? 'at' : ''}">— now —</div>`;
-  $('moves').querySelectorAll('div').forEach(el => el.onclick = () => setPly(+el.dataset.ply));
-  const at = $('moves').querySelector('.at'); if (at) at.scrollIntoView({ block: 'nearest' });
-}
-async function setPly(ply) {
-  S.ply = ply; S.search = null; S.frames = null;
-  location.hash = `${S.g.src}/${S.g.id}/${S.g.n}/${ply}`;
-  renderMoves();
-  $('panel').innerHTML = `<p class="muted">The board shows the position right before the highlighted move, from the seat to act; the other hand is face up. "Analyse this position" runs the Expert's full search on it (about half a minute).</p>`;
-  S.pos = await api(`/api/analyse/position?src=${S.g.src}&id=${encodeURIComponent(S.g.id)}&n=${S.g.n}&ply=${ply}`);
-  framebar(); show(S.pos.view, posCaption());
-  if (!S.pos.over) renderBuild();
+async function openGame(i, k) {
+  S.g = S.games[i]; $('game').value = i; S.frames = null; S.explainOf = null;
+  const r = await api('/api/analyse/open', { src: S.g.src, id: S.g.id, n: S.g.n, k: k == null ? null : k });
+  S.sid = r.sid; S.b = r; S.moves = r.moves;
+  await feed(r.view, false);
+  afterMove();
 }
 
-// ---- the search
-async function analyse() {
-  const seed = +$('seed').value || 0;
-  $('status').textContent = 'searching…'; $('go').disabled = true;
-  try { S.search = await api('/api/analyse/search', { ...key(), seed }); renderSearch(); $('status').textContent = ''; }
-  catch (e) { $('panel').innerHTML = `<p class="err">${esc(e.message)}</p>`; $('status').textContent = ''; }
-  finally { $('go').disabled = false; }
+$('engbtn').onclick = () => {
+  S.on = !S.on; $('engbtn').classList.toggle('on', S.on); $('engbtn').textContent = S.on ? 'Analysing' : 'Analyse';
+  if (S.on) startEngine(); else stopEngine();
+};
+$('seed').onchange = () => { if (S.on) startEngine(); };
+$('game').onchange = () => openGame(+$('game').value);
+function keys(e) {
+  if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); S.frames ? frameStep(1) : goto(S.b.k + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); S.frames ? frameStep(-1) : goto(S.b.k - 1); }
 }
-function renderSearch() {
-  const s = S.search, played = S.moves[S.ply];
-  let h = `<h3>The Expert picks: ${esc(s.chosen_text)}</h3>
-    <div class="muted">Seed ${$('seed').value}: the seed sets the five hands it imagines for the opponent. ${s.legal} legal actions, ${s.stats.root_candidates} first actions kept for the search, ${s.stats.deepened_roots || 0} looked at one round deeper. ${s.seconds} s.${s.outs ? ' Every deep line read as lost, so the scores were re-ranked by how many of 20 fresh hands each survives (+500 a hand).' : ''}${played && played.actor === s.me ? ` In the game it played: ${esc(played.text)}.` : ''}</div>
-    <table><tr><th>Turn it planned (first action, then the rest)</th><th class="num" title="Mean over the five imagined hands, after the opponent's reply and one more round: what the pick is made on">Deep</th><th class="num" title="Mean over the five hands after the opponent's reply only: what decided which first actions went deeper">Reply</th><th></th></tr>`;
-  s.roots.forEach((r, i) => {
-    const took = JSON.stringify(r.first) === JSON.stringify(s.chosen);
-    h += `<tr class="click${took ? ' took' : ''}" data-r="${i}"><td>${r.text.map(esc).join(' · ')}</td><td class="num">${fmt(r.deep)}</td><td class="num">${fmt(r.shallow)}</td><td><a class="x" data-ex="${i}">explain</a></td></tr>
-      <tr class="dect" data-d="${i}" style="display:none"><td colspan="4">${renderDecisions(r, i)}</td></tr>`;
-  });
-  h += `</table><div id="explain"></div>`;
-  $('panel').innerHTML = h + buildHtml();
-  $('panel').querySelectorAll('tr.click').forEach(tr => tr.onclick = e => {
-    if (e.target.dataset.ex != null) return;
-    const d = $('panel').querySelector(`tr[data-d="${tr.dataset.r}"]`); const open = d.style.display === 'none';
-    d.style.display = open ? '' : 'none'; tr.classList.toggle('open', open);
-  });
-  $('panel').querySelectorAll('a[data-ex]').forEach(a => a.onclick = e => { e.stopPropagation(); explain(s.roots[+a.dataset.ex].turn); });
-  $('panel').querySelectorAll('a[data-opt]').forEach(a => a.onclick = e => { e.stopPropagation(); const [r, d, o] = a.dataset.opt.split('.').map(Number); explain(s.roots[r].decisions[d].options[o].turn); });
-  wireBuild();
-}
-function renderDecisions(r, ri) {
-  if (!r.decisions.length) return '<span class="muted">No further decisions in this turn.</span>';
-  return r.decisions.map((d, di) => `<div class="dec"><b>Decision ${di + 1}</b> <span class="muted">${d.options[0].reply ? 'scored after the opponent\'s imagined reply, mean of five hands' : 'scored on the board at the end of this turn, no reply'}</span>
-    <table><tr><th>Option</th><th class="num">Score</th><th></th></tr>${d.options.map((o, oi) => `<tr class="${o.took ? 'took' : ''}"><td>${esc(o.text.trim())}${o.took ? ' <span class="muted">(taken)</span>' : ''}</td><td class="num">${fmt(o.score)}</td><td><a class="x" data-opt="${ri}.${di}.${oi}">explain</a></td></tr>`).join('')}</table></div>`).join('');
-}
-
-// ---- one turn, hand by hand
-async function explain(turn) {
-  const box = $('explain') || $('panel'); box.innerHTML = '<p class="wait">Scoring this turn hand by hand…</p>'; box.scrollIntoView({ block: 'nearest' });
-  try {
-    const e = await api('/api/analyse/explain', { ...key(), seed: +$('seed').value || 0, turn });
-    const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
-    let h = `<h3>${e.turn.map(esc).join(' · ')}</h3><div class="muted">The same five hands the search imagined at this seed. Board after the turn (in hand 1's deal): ${fmt(e.board)}. Click a hand to play its line on the board.</div>
-      <table><tr><th>#</th><th>Hand it imagined for the opponent</th><th class="num">After reply</th><th class="num">Deep</th><th>Ends</th></tr>`;
-    e.hands.forEach((x, i) => { h += `<tr class="click" data-h="${i}"><td>${i + 1}</td><td>${x.hand.map(esc).join(', ')}</td><td class="num">${fmt(x.shallow)}${x.penalty ? ` <span class="muted" title="wasted Roar">−${x.penalty}</span>` : ''}</td><td class="num">${fmt(x.deep)}</td><td>${esc(x.after_reply)}</td></tr>`; });
-    h += `<tr><th></th><th>Mean (what the search compares)</th><th class="num">${fmt(mean(e.shallow))}</th><th class="num">${fmt(mean(e.deep))}</th><th></th></tr></table>`;
-    box.innerHTML = h;
-    box.querySelectorAll('tr[data-h]').forEach(tr => tr.onclick = () => {
-      box.querySelectorAll('tr[data-h]').forEach(t => t.classList.remove('open')); tr.classList.add('open');
-      S.frames = e.hands[+tr.dataset.h].frames; S.fi = 0; framebar();
-    });
-  } catch (err) { box.innerHTML = `<p class="err">${esc(err.message)}</p>`; }
-}
-
-// ---- a turn of your own
-let built = [];
-function buildHtml() { return `<h3>Score a turn of your own</h3><div class="build" id="build"></div><div id="explain2"></div>`; }
-function renderBuild() { if (!$('build')) $('panel').insertAdjacentHTML('beforeend', buildHtml()); built = []; wireBuild(); }
-async function wireBuild() {
-  const box = $('build'); if (!box) return;
-  const opts = await api('/api/analyse/legal', { ...key(), after: built });
-  const mine = opts.filter(o => o.actor === S.pos.me);
-  box.innerHTML = built.map(a => `<div>· ${esc(S._txt[JSON.stringify(a)] || JSON.stringify(a))}</div>`).join('')
-    + (mine.length && opts.length ? `<select id="bnext"><option value="">${built.length ? 'next action…' : 'first action…'}</option>${mine.map((o, i) => `<option value="${i}">${esc(o.text.trim())}</option>`).join('')}</select> ` : '<div class="muted">The turn is complete.</div>')
-    + (built.length ? ` <button id="bundo">Undo</button> <button id="bgo">Explain this turn</button>` : '');
-  if ($('bnext')) $('bnext').onchange = () => { const o = mine[+$('bnext').value]; if (!o) return; S._txt[JSON.stringify(o.action)] = o.text.trim(); built.push(o.action); wireBuild(); };
-  if ($('bundo')) $('bundo').onclick = () => { built.pop(); wireBuild(); };
-  if ($('bgo')) $('bgo').onclick = () => { const t = built.slice(); const ex = $('explain'); if (!ex) $('explain2').id = 'explain'; explain(t); };
-}
-
-// ---- start
-$('go').onclick = analyse;
-$('game').onchange = () => pickGame(+$('game').value);
-document.addEventListener('keydown', e => { if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowRight') S.frames ? step(1) : setPly(Math.min(S.moves.length, S.ply + 1));
-  if (e.key === 'ArrowLeft') S.frames ? step(-1) : setPly(Math.max(0, S.ply - 1)); });
+document.addEventListener('keydown', keys);
 (async () => {
   await loadGames();
-  const [src, id, n, ply] = decodeURIComponent(location.hash.slice(1)).split('/');
+  const [src, id, n, k] = decodeURIComponent(location.hash.slice(1)).split('/');
   const i = S.games.findIndex(g => g.src === src && g.id === id && String(g.n) === n);
-  await pickGame(i >= 0 ? i : 0, i >= 0 && ply !== undefined ? +ply : null);
+  await openGame(i >= 0 ? i : 0, i >= 0 && k !== undefined ? +k : null);
 })();
 </script>
 </body>
