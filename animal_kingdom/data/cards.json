@@ -579,6 +579,9 @@
       "habitat": "Jungle",
       "keywords": [
         "Roam"
+      ],
+      "related": [
+        "pup"
       ]
     },
     {
@@ -847,7 +850,10 @@
       "text": "Roar: play Princess Lea from your hand or deck.",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "related": [
+        "lion_legend_2"
+      ]
     },
     {
       "id": "lion_legend_2",
@@ -861,7 +867,10 @@
       "text": "Roar: play Prince Leo from your hand or deck.",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "related": [
+        "lion_legend"
+      ]
     },
     {
       "id": "lion_legend_3",
@@ -2113,6 +2122,9 @@
       "habitat": "Savanna",
       "keywords": [
         "Flight"
+      ],
+      "related": [
+        "oxpecker"
       ]
     },
     {
@@ -3001,7 +3013,6 @@
       "species": "Ant",
       "habitat": "Forest",
       "related": [
-        "young_ant",
         "young_ant"
       ],
       "keywords": []
@@ -4095,6 +4106,9 @@
       "text": "Flee. Roar: add a Great Stag to your hand.",
       "keywords": [
         "Flee"
+      ],
+      "related": [
+        "great_stag"
       ]
     },
     {
