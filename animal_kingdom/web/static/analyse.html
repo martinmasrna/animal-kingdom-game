@@ -64,7 +64,7 @@
     <div id="nav"></div>
   </section>
   <section id="right">
-    <div id="eng"><p class="muted">Play on the board as in a game: either side, both hands face up. Step through the game with ◀ ▶ (or the arrow keys) and click any move in the list below. "Analyse" ranks every turn the side to act can play, the way the Expert scores them, and keeps looking deeper.</p></div>
+    <div id="eng"><p class="muted">Play on the board as in a game: either side, both hands face up. Step through the game with ◀ ▶ (or the arrow keys) and click any move in the list below. "Analyse" ranks every whole turn the side to act can play, each scored against the opponent's best whole reply.</p></div>
     <div id="moves"></div>
   </section>
 </main>
@@ -162,6 +162,7 @@ function renderNav() {
   const b = S.b;
   nav.innerHTML = `<button id="n0" title="Start">⏮</button><button id="np" title="Back (←)">◀</button><button id="nn" title="Forward (→)">▶</button><button id="ne" title="End of the line">⏭</button>
     <span class="cap">Turn ${b.turn} · ${b.over ? 'game over' : `${who(b.seat)} to act (seat ${b.seat}, at the bottom)`} · food A ${b.food.A} · B ${b.food.B}</span>
+    ${b.stops != null ? `<span class="muted" title="A card changed since this game was played, so its move ${b.stops + 1} is no longer legal">replays to move ${b.stops}</span>` : ''}
     ${b.off_game ? '<button id="ng" title="Drop this line and go back to the moves of the game">Back to the game</button>' : ''}`;
   $('n0').onclick = () => goto(0); $('np').onclick = () => goto(b.k - 1); $('nn').onclick = () => goto(b.k + 1); $('ne').onclick = () => goto(b.n);
   if ($('ng')) $('ng').onclick = () => goto(Math.min(b.k, S.moves.filter(m => m.game).length), true);
@@ -196,14 +197,14 @@ async function poll() {
   if (!j.done && S.on) S.pollT = setTimeout(poll, 600);
   else if (j.done) $('status').textContent = S.last ? `done · ${S.last.seconds} s` : '';
 }
-const STAGES = { 1: 'depth 1 · the board when each turn ends', 2: 'depth 2 · after the opponent\'s reply', 3: 'depth 3 · one round deeper', 4: 'the Expert\'s own search', 5: 'done' };
+const STAGES = { 1: 'every whole turn scored on the board', 2: 'the best 20 against the opponent\'s best reply', 3: 'the old search\'s reply, for contrast', 4: 'the Expert\'s own search', 5: 'done' };
 function renderEngine(L, done) {
   $('status').textContent = done ? `done · ${L.seconds} s` : `${STAGES[L.stage]} · ${L.done}/${L.total} · ${L.seconds} s`;
   const rows = L.rows;
-  let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="Mean over the five hands of the board when the turn ends (depth 1, every turn)">Board</th><th class="num" title="Mean over the five hands after the opponent's reply (depth 2, the best 40 by Board)">Reply</th><th class="num" title="Mean over the five imagined hands after the reply and one more round (depth 3, the best 12 by Reply): the score the Expert picks by">Deep</th><th></th></tr>`;
+  let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="Mean over the five imagined hands of the board when the turn ends (every turn)">Board</th><th class="num" title="The old search's score: after its GreedyBot reply, mean of the five hands (the best 20 by Board)">Old reply</th><th class="num" title="The new search's score, which ranks: after the opponent's best whole reply turn in each imagined hand, mean of the five (the best 20 by Board)">Best reply</th><th></th></tr>`;
   rows.forEach((r, i) => {
     h += `<tr class="click${r.expert ? ' exp' : ''}" data-i="${i}"><td class="r">${i + 1}</td><td>${r.text.map(t => esc(t.trim())).join(' · ')}${r.expert ? '<span class="badge" title="The turn the Expert\'s own search plays here">Expert</span>' : ''}</td>
-      <td class="num${r.d2 != null ? ' dim' : ''}">${fmt(r.d1)}</td><td class="num${r.d3 != null ? ' dim' : ''}">${fmt(r.d2)}</td><td class="num">${fmt(r.d3)}</td>
+      <td class="num${r.score != null ? ' dim' : ''}">${fmt(r.board)}</td><td class="num dim">${fmt(r.old)}</td><td class="num">${fmt(r.score)}</td>
       <td style="white-space:nowrap"><a class="x" data-play="${i}" title="Play this turn on the board">play</a><a class="x" data-hands="${i}" title="The five imagined hands, each one's scores and its line">hands</a></td></tr>`;
   });
   h += '</table>';
@@ -242,10 +243,10 @@ async function hands(turn) {
     if (S.explainOf !== turn) return;
     const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
     let h = `<p><a class="x" id="hback" style="margin:0">← back to the ranking</a></p><h3>${e.turn.map(t => esc(t.trim())).join(' · ')}</h3>
-      <div class="muted">The five hands the engine imagines for the opponent at seed ${seed()} (the Expert's own five). Click a hand to play its line on the board.</div>
-      <table><tr><th class="r">#</th><th>Hand imagined for the opponent</th><th class="num">Board</th><th class="num">Reply</th><th class="num">Deep</th><th>Ends</th></tr>`;
-    e.hands.forEach((x, i) => { h += `<tr class="click" data-h="${i}"><td class="r">${i + 1}</td><td>${x.hand.map(esc).join(', ')}</td><td class="num">${fmt(x.board)}</td><td class="num">${fmt(x.reply)}</td><td class="num">${fmt(x.deep)}</td><td>${esc(x.ends)}</td></tr>`; });
-    h += `<tr><th></th><th>Mean</th><th class="num">${fmt(mean(e.board))}</th><th class="num">${fmt(mean(e.reply))}</th><th class="num">${fmt(mean(e.deep))}</th><th></th></tr></table>`;
+      <div class="muted">The five hands imagined for the opponent at seed ${seed()} (the Expert's own five), and in each, their whole reply turn that is worst for this turn. Click a hand to play it on the board.</div>
+      <table><tr><th class="r">#</th><th>Hand imagined for the opponent</th><th class="num">Board</th><th class="num" title="The old search: after its GreedyBot reply">Old reply</th><th class="num" title="After their best whole reply turn">Best reply</th><th>Their best reply</th></tr>`;
+    e.hands.forEach((x, i) => { h += `<tr class="click" data-h="${i}"><td class="r">${i + 1}</td><td>${x.hand.map(esc).join(', ')}</td><td class="num">${fmt(x.board)}</td><td class="num dim">${fmt(x.reply)}</td><td class="num">${fmt(x.best)}</td><td>${x.reply_text.map(t => esc(t.trim())).join(' · ')}${x.ends ? ` <b>${esc(x.ends)}</b>` : ''}</td></tr>`; });
+    h += `<tr><th></th><th>Mean</th><th class="num">${fmt(mean(e.board))}</th><th class="num">${fmt(mean(e.reply))}</th><th class="num">${fmt(mean(e.best))}</th><th></th></tr></table>`;
     $('eng').innerHTML = h; $('hback').onclick = backToRanking;
     $('eng').querySelectorAll('tr[data-h]').forEach(tr => tr.onclick = () => {
       $('eng').querySelectorAll('tr[data-h]').forEach(t => t.classList.remove('open')); tr.classList.add('open');

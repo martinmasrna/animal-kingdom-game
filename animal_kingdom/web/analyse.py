@@ -4,16 +4,15 @@ Localhost only (`./play` sets AK_ANALYSE=1; live and staging never register it).
 The board is the game's own client: he plays on from any move as in a game, for either side, both hands face up, and
 steps back and forth through the line (a move played after stepping back starts a new line from there; "back to the
 game" restores the game's). "Analyse" starts the engine on the position on the board: every whole turn the side to act
-can play, ranked, re-ranked as it looks deeper, like a chess engine's lines:
+can play, ranked by the whole-turn search (bots/atomic_bot.py, Martin, 2026-10-31: a turn is atomic, so nothing is
+scored in the middle of one):
 
-    depth 1  the board when the turn ends            (every turn)
-    depth 2  after the opponent's reply              (the best `REPLY_K` of depth 1)
-    depth 3  one round deeper: my next turn, theirs  (the best `DEEP_K` of depth 2)
+    Board        the board when the turn ends, mean over the five imagined hands      (every turn)
+    Old reply    the old search's score, after its GreedyBot reply, for contrast      (the best 20 by Board)
+    Best reply   after the opponent's best whole reply turn in each hand: the ranking (the best 20 by Board)
 
-Every number is the Expert's own judgement, the way its search scores a line: its evaluation, the five hands it imagines
-for the opponent at this seed, its model of their reply, its deeper look. What the engine drops is the Expert's pruning,
-so a turn the Expert never weighed still gets its score here. Last, the Expert's own search runs on the position, and its
-pick is marked in the list, with every option it weighed at each decision of its turn.
+The evaluation and the five imagined hands are the Expert's own. Last, the Expert's own search runs on the position,
+and its pick is marked in the list, with every option it weighed at each decision of its turn.
 
 Any turn can be opened hand by hand ("hands"): the five hands, each one's scores, and its line, played on the board.
 
@@ -231,8 +230,18 @@ class Session:
 
     def __init__(self, src: str, gid: str, n: int):
         self.start, self.seed, game = _source(src, gid, n)
-        self.game = [dict(a) for a in game]
-        self.line = [dict(a) for a in game]
+        # A game from before a card changed stops replaying where a logged move became illegal: the board holds the
+        # moves up to there, and says so (`stops`).
+        st, ok = self.start(), 0
+        for a in game:
+            try:
+                rules.apply_logged(st, a)
+            except Exception:
+                break
+            ok += 1
+        self.stops = ok if ok < len(game) else None
+        self.game = [dict(a) for a in game[:ok]]
+        self.line = [dict(a) for a in self.game]
         self.k = len(self.line)
         self.m = None
         self._build(self.k)
@@ -283,7 +292,8 @@ class Session:
         out = {"k": self.k, "n": len(self.line), "seat": seat, "view": seat_view(self.m, seat), "turn": st.turn_counter,
                "cols": max(int(c.split(",")[0]) for c in st.game_map.crossroads),
                "food": st.food, "over": rules.is_terminal(st) is not None,
-               "off_game": self.line[:len(self.game)] != self.game[:len(self.line)] or len(self.line) > len(self.game)}
+               "off_game": self.line[:len(self.game)] != self.game[:len(self.line)] or len(self.line) > len(self.game),
+               "stops": self.stops}
         if mover and mover != seat:     # the move animates from the mover's seat first, then the board turns
             out["mover_view"] = seat_view(self.m, mover)
         return out
@@ -359,68 +369,55 @@ def turns(state: GameState, me: str, cap: int = TURN_CAP) -> list[list[dict]]:
 
 
 def engine(state: GameState, seed: int, emit) -> None:
-    """Every whole turn for the side to act, scored the Expert's way at three depths, best first; `emit` gets the whole
-    ranking after every few turns scored, and once more with the Expert's own pick."""
+    """Every whole turn for the side to act, ranked by the whole-turn search (bots/atomic_bot.py): the board when it
+    ends, for all of them; for the best `turn_width`, the old search's score after its GreedyBot reply (for contrast)
+    and the new one, after the opponent's best whole reply turn, which ranks. `emit` gets the ranking as it fills,
+    and once more with the Expert's own pick marked."""
+    from ..bots.atomic_bot import AtomicBot
     me = state.player_to_act()
-    bot = _expert(seed)
-    worlds = _worlds(bot, state, me)
-    all_turns = turns(state, me)
-    def open_after(t):         # a turn the enumeration stopped inside (a draw, the cap): the search's policy plays the rest
-        s = state.clone()
-        for d in t:
-            rules.apply_action(s, action_from_dict(d), validate=False)
-        return rules.is_terminal(s) is None and s.player_to_act() == me
-    rows = []
-    for t in all_turns:
-        txt, crs = named(state, t)
-        rows.append({"turn": t, "text": txt + (["then its quick policy plays on"] if open_after(t) else []),
-                     "crs": crs, "d1": None, "d2": None, "d3": None})
+    base = _expert(seed)
+    worlds = _worlds(base, state, me)
+    bot = AtomicBot(base)
     t0 = time.monotonic()
-    def send(stage, done, total, extra=None):
-        ranked = sorted(rows, key=lambda r: tuple(-(r[k] if r[k] is not None else -1e9) for k in ("d3", "d2", "d1")))
+    old: dict = {}
+
+    def rowdict(r):
+        turn = [a.to_dict() for a in r["turn"]]
+        txt, crs = named(state, turn)
+        k = json.dumps(turn)
+        return {"turn": turn, "text": txt + (["then the best for the cards it draws"] if r["open"] else []), "crs": crs,
+                "board": round(r["board"], 1), "score": None if r["score"] is None else round(r["score"], 1),
+                "per_hand": [round(v, 1) for v in r.get("per_hand", [])], "old": old.get(k)}
+
+    def send(rows, stage, done, total, extra=None):
         emit({"stage": stage, "done": done, "total": total, "turns": len(rows), "seconds": round(time.monotonic() - t0, 1),
-              "me": me, "rows": ranked[:60], **(extra or {})})
+              "me": me, "rows": [rowdict(r) for r in rows[:60]], **(extra or {})})
 
-    branches = {}
-    for i, r in enumerate(rows):
-        try:
-            bs = []
-            for w in worlds:
-                s = w.clone()
-                bs.append((s, _finish(bot, s, r["turn"], me)))
-        except Exception:
-            r["d1"] = None
+    rows = bot.rank(state, me, worlds, progress=lambda rs, d, t: send(rs, 1 if d == 0 else 2, d, t))
+    for r in rows[:bot.turn_width]:          # the old search's score of the same turns, after its GreedyBot reply
+        if r["score"] is None:
             continue
-        branches[i] = bs
-        r["d1"] = round(sum(bot._clamped_eval(s, me) - p for s, p in bs) / len(bs), 1)
-        if i % 100 == 99:
-            send(1, i + 1, len(rows))
-    send(1, len(rows), len(rows))
-
-    order = sorted((i for i in branches if rows[i]["d1"] is not None), key=lambda i: -rows[i]["d1"])
-    for j, i in enumerate(order[:REPLY_K]):
-        bot._move_started, bot._deepening, bot._search_nodes = time.monotonic(), False, 0
-        sc = bot._reply_scores([(s.clone(), p) for s, p in branches[i]], me)
-        rows[i]["d2"] = round(sum(sc) / len(sc), 1)
-        send(2, j + 1, min(REPLY_K, len(order)))
-
-    order = sorted((i for i in branches if rows[i]["d2"] is not None), key=lambda i: -rows[i]["d2"])
-    for j, i in enumerate(order[:DEEP_K]):
-        bot._move_started, bot._deepening, bot._search_nodes = time.monotonic(), True, 0
-        sc = bot._reply_scores([(s.clone(), p) for s, p in branches[i]], me)
-        bot._deepening = False
-        rows[i]["d3"] = round(sum(sc) / len(sc), 1)
-        send(3, j + 1, min(DEEP_K, len(order)))
-
-    send(4, 0, 1)
+        turn = [a.to_dict() for a in r["turn"]]
+        branches = []
+        for w in worlds:
+            x = w.clone()
+            branches.append((x, _finish(base, x, turn, me)))
+        base._move_started, base._deepening, base._search_nodes = time.monotonic(), False, 0
+        sc = base._reply_scores(branches, me)
+        old[json.dumps(turn)] = round(sum(sc) / len(sc), 1)
+    send(rows, 3, 0, 1)
     expert = search(state, seed)
-    planned = expert["planned"]
-    for r in rows:
-        r["expert"] = r["turn"] == planned
-    if not any(r.get("expert") for r in rows):
-        txt, crs = named(state, planned)
-        rows.append({"turn": planned, "text": txt, "crs": crs, "d1": None, "d2": None, "d3": None, "expert": True})
-    send(5, 1, 1, {"expert": expert})
+    out = {"expert": expert}
+    send(rows, 4, 1, 1, out)
+    last = [rowdict(r) for r in rows[:60]]
+    for r in last:
+        r["expert"] = r["turn"] == expert["planned"]
+    if not any(r["expert"] for r in last):
+        txt, crs = named(state, expert["planned"])
+        last.append({"turn": expert["planned"], "text": txt, "crs": crs, "board": None, "score": None, "per_hand": [],
+                     "old": None, "expert": True})
+    emit({"stage": 5, "done": 1, "total": 1, "turns": len(rows), "seconds": round(time.monotonic() - t0, 1), "me": me,
+          "rows": last, **out})
 
 
 def search(state: GameState, seed: int) -> dict:
@@ -544,38 +541,25 @@ def explain(state: GameState, seed: int, turn: list[dict]) -> dict:
         branches.append(s)
     out = {"me": me, "turn": texts(state, turn), "hands": []}
     out["board"] = [round(bot._clamped_eval(b, me) - p, 1) for b, p in zip(branches, pens)]
-    for deep in (False, True):
-        bot._move_started, bot._deepening, bot._search_nodes = time.monotonic(), deep, 0
-        scores = bot._reply_scores([(b.clone(), p) for b, p in zip(branches, pens)], me)
-        out["deep" if deep else "reply"] = [round(x, 1) for x in scores]
-    bot._deepening = False
+    bot._move_started, bot._deepening, bot._search_nodes = time.monotonic(), False, 0
+    out["reply"] = [round(x, 1) for x in bot._reply_scores([(b.clone(), p) for b, p in zip(branches, pens)], me)]
+    from ..bots.atomic_bot import AtomicBot
+    atomic = AtomicBot(bot)
     for k, (w, b) in enumerate(zip(worlds, branches)):
         frames = [view(w, me, "The position, with the hand imagined for the opponent"), view(b, me, "After this turn")]
+        value, reply = atomic.best_reply(b.clone(), me)
         r = b.clone()
-        frames += _recorded(r, lambda s: bot._advance(s, me), me, "Their imagined reply")
-        result = r.result
-        if r.result is None and r.player_to_act() == me and r.pending is None:
-            best, best_frames = None, []
-            for a in bot._greedy_topn(r, rules.legal_actions(r), me, bot.next_width):
-                x = r.clone()
-                def run(s, a=a):
-                    rules.apply_action(s, a, validate=False)
-                    bot._play_turn(s, me)
-                    bot._deepening = True
-                    try:
-                        bot._advance(s, me)
-                    finally:
-                        bot._deepening = False
-                fr = _recorded(x, run, me, "One round deeper")
-                value = bot._clamped_eval(x, me)
-                if best is None or value > best:
-                    best, best_frames = value, fr
-            frames += best_frames
+        def run(s):
+            for a in reply:
+                rules.apply_action(s, a, validate=False)
+        frames += _recorded(r, run, me, "Their best reply")
+        result = rules.is_terminal(r)
         out["hands"].append({"hand": [_name(u.card_id) for u in w.hands[other_player(me)]],
-                             "board": out["board"][k], "reply": out["reply"][k], "deep": out["deep"][k],
-                             "penalty": pens[k],
+                             "board": out["board"][k], "reply": out["reply"][k], "best": round(value, 1),
+                             "reply_text": named(b, [a.to_dict() for a in reply])[0],
                              "ends": (("they win" if result.winner != me else "it wins") + f" ({result.reason})")
                              if result else "", "frames": frames})
+    out["best"] = [h["best"] for h in out["hands"]]
     return out
 
 
