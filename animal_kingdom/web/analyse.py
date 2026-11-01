@@ -377,7 +377,9 @@ def _atomic(seed: int, rounds: int):
     from ..sim.runner import make_bot
     from .match import EXPERT
     spec = EXPERT.replace("referee_learned", "atomic_learned").replace("time_budget=8", "time_budget=0")
-    return make_bot(f"{spec},rounds={rounds}", seed)
+    # depth 2 on the overnight fast setting (2 mid-line draws spread over the odds, 2 replies, 8 turns deep)
+    fast = ",draws=2,inner=2,width2=8" if rounds >= 2 else ""
+    return make_bot(f"{spec},rounds={rounds}{fast}", seed)
 
 
 def _ranked(bot, state: GameState) -> list[dict]:
@@ -728,6 +730,84 @@ async def api_explain(req):
     return web.json_response(out)
 
 
+# ------------------------------------------------------------------------------------------------ Martin's candidates
+
+CAND_DIR = ROOT / "results" / "candidates"
+CAND_PAGE = Path(__file__).resolve().parent / "static" / "candidates.html"
+
+
+def _cand_set() -> list[dict]:
+    f = CAND_DIR / "set.json"
+    return json.loads(f.read_text()) if f.exists() else []
+
+
+def _cand_answers() -> dict:
+    f = CAND_DIR / "answers.json"
+    return json.loads(f.read_text()) if f.exists() else {}
+
+
+def _cand_view(s: Session) -> dict:
+    """The board from the seat to act with the other hand hidden: what Martin saw at the table."""
+    st = s.m.state
+    seat = s.seat()
+    v = s.m.view(seat)
+    v["game"]["events"] = []
+    v["game"]["history"] = []
+    return {"k": s.k, "seat": seat, "view": v, "turn": st.turn_counter, "food": st.food,
+            "over": rules.is_terminal(st) is not None, "to_act": st.player_to_act(),
+            "taken": st.actions_taken_this_turn, "pending": st.pending is not None}
+
+
+async def cand_page(_req):
+    return web.FileResponse(CAND_PAGE)
+
+
+async def api_cand_set(_req):
+    return web.json_response({"set": _cand_set(), "answers": _cand_answers()})
+
+
+async def api_cand_open(req):
+    body = await req.json()
+    c = _cand_set()[int(body["i"])]
+    s = Session(c["src"], c["id"], c["n"])
+    s.goto(int(c["k"]))
+    sid = secrets.token_urlsafe(8)
+    SESSIONS[sid] = s
+    while len(SESSIONS) > 20:
+        SESSIONS.pop(next(iter(SESSIONS)))
+    return web.json_response({"sid": sid, "pos": c, **_cand_view(s)})
+
+
+async def api_cand_play(req):
+    body = await req.json()
+    s = _session(body["sid"])
+    s.play(body["action"])
+    seq = s.line[int(body["k0"]):s.k]
+    base = s.start()
+    for a in s.line[:int(body["k0"])]:
+        rules.apply_logged(base, a)
+    texts, crs = named(base, seq)
+    return web.json_response({**_cand_view(s), "seq": seq, "texts": texts, "crs": crs})
+
+
+async def api_cand_reset(req):
+    body = await req.json()
+    s = _session(body["sid"])
+    s.goto(int(body["k0"]))
+    s.line = s.line[:s.k]
+    return web.json_response(_cand_view(s))
+
+
+async def api_cand_save(req):
+    body = await req.json()
+    CAND_DIR.mkdir(exist_ok=True)
+    answers = _cand_answers()
+    answers[str(body["i"])] = {"candidates": body["candidates"], "play": body.get("play"), "note": body.get("note", ""),
+                               "when": time.strftime("%Y-%m-%dT%H:%M")}
+    (CAND_DIR / "answers.json").write_text(json.dumps(answers, indent=1))
+    return web.json_response({"ok": True, "done": len(answers)})
+
+
 def register(app: web.Application) -> None:
     app.add_routes([
         web.get("/analyse", page),
@@ -739,6 +819,12 @@ def register(app: web.Application) -> None:
         web.get("/api/analyse/engine", api_engine_poll),
         web.post("/api/analyse/engine/stop", api_engine_stop),
         web.post("/api/analyse/explain", api_explain),
+        web.get("/candidates", cand_page),
+        web.get("/api/candidates/set", api_cand_set),
+        web.post("/api/candidates/open", api_cand_open),
+        web.post("/api/candidates/play", api_cand_play),
+        web.post("/api/candidates/reset", api_cand_reset),
+        web.post("/api/candidates/save", api_cand_save),
     ])
 
 
