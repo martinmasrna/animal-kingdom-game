@@ -380,20 +380,19 @@ def _atomic(seed: int, rounds: int):
     return make_bot(f"{spec},rounds={rounds}", seed)
 
 
-def _ranked(bot, state: GameState, real: bool) -> list[dict]:
+def _ranked(bot, state: GameState) -> list[dict]:
     """The bot's ranking of `state` as plain rows {turn: [action dicts], open, board, levels, per_hand}."""
     if hasattr(bot, "ranking"):
-        return bot.ranking(state, real)
+        return bot.ranking(state, False)
     me = state.player_to_act()
-    rows = bot.rank(state, me, [state.clone()] if real else None)
+    rows = bot.rank(state, me, None)
     return [{**r, "turn": [a.to_dict() for a in r["turn"]]} for r in rows]
 
 
-def engine(state: GameState, seed: int, emit, depth: int = 1, real: bool = False) -> None:
+def engine(state: GameState, seed: int, emit, depth: int = 1) -> None:
     """Every whole turn for the side to act, ranked by the whole-turn search (bots/atomic_bot.py, in Rust when built):
     the board when it ends, for all of them; depth 1 (after the opponent's best reply) for the best 60; with `depth`
-    2, depth 2 (my best next turn and their best reply to it) for the best 20 of those. `real`: scored against the
-    true hidden cards and deck order instead of the imagined hands (a look back at the game, not the bot's view).
+    2, depth 2 (my best next turn and their best reply to it) for the best 20 of those.
     `emit` gets the ranking after each depth, then with the old search's reply score and the Expert's own pick."""
     me = state.player_to_act()
     t0 = time.monotonic()
@@ -411,26 +410,25 @@ def engine(state: GameState, seed: int, emit, depth: int = 1, real: bool = False
 
     def send(rows, stage, extra=None):
         emit({"stage": stage, "done": 1, "total": 1, "turns": len(rows), "seconds": round(time.monotonic() - t0, 1),
-              "me": me, "depth": depth, "real": real, "rows": [rowdict(r) for r in rows[:60]], **(extra or {})})
+              "me": me, "depth": depth, "rows": [rowdict(r) for r in rows[:60]], **(extra or {})})
 
-    rows = _ranked(_atomic(seed, 1), state, real)
+    rows = _ranked(_atomic(seed, 1), state)
     send(rows, 2)
     if depth >= 2:
-        rows = _ranked(_atomic(seed, 2), state, real)
+        rows = _ranked(_atomic(seed, 2), state)
         send(rows, 3)
-    if not real:                               # the old search's score of the best 20, after its GreedyBot reply
-        base = _expert(seed)
-        worlds = _worlds(base, state, me)
-        for r in rows[:20]:
-            if r["levels"][0] is None:
-                continue
-            branches = []
-            for w in worlds:
-                x = w.clone()
-                branches.append((x, _finish(base, x, r["turn"], me)))
-            base._move_started, base._deepening, base._search_nodes = time.monotonic(), False, 0
-            sc = base._reply_scores(branches, me)
-            old[json.dumps(r["turn"])] = round(sum(sc) / len(sc), 1)
+    base = _expert(seed)                       # the old search's score of the best 20, after its GreedyBot reply
+    worlds = _worlds(base, state, me)
+    for r in rows[:20]:
+        if r["levels"][0] is None:
+            continue
+        branches = []
+        for w in worlds:
+            x = w.clone()
+            branches.append((x, _finish(base, x, r["turn"], me)))
+        base._move_started, base._deepening, base._search_nodes = time.monotonic(), False, 0
+        sc = base._reply_scores(branches, me)
+        old[json.dumps(r["turn"])] = round(sum(sc) / len(sc), 1)
     send(rows, 4)
     expert = search(state, seed)
     last = [rowdict(r) for r in rows[:60]]
@@ -441,7 +439,7 @@ def engine(state: GameState, seed: int, emit, depth: int = 1, real: bool = False
         last.append({"turn": expert["planned"], "text": txt, "crs": crs, "board": None, "score": None, "score2": None,
                      "per_hand": [], "per_hand2": [], "old": None, "expert": True})
     emit({"stage": 5, "done": 1, "total": 1, "turns": len(rows), "seconds": round(time.monotonic() - t0, 1), "me": me,
-          "depth": depth, "real": real, "rows": last, "expert": expert})
+          "depth": depth, "rows": last, "expert": expert})
 
 
 def search(state: GameState, seed: int) -> dict:
@@ -688,7 +686,7 @@ async def api_engine(req):
     state = s.m.state.clone()
     if rules.is_terminal(state) is not None:
         raise web.HTTPBadRequest(text="The game is over")
-    job = {"k": s.k, "seed": int(body.get("seed", 0)), "depth": int(body.get("depth", 1)), "real": bool(body.get("real")),
+    job = {"k": s.k, "seed": int(body.get("seed", 0)), "depth": int(body.get("depth", 1)),
            "latest": None, "proc": None, "done": False}
     JOBS[body["sid"]] = job
 
@@ -699,7 +697,7 @@ async def api_engine(req):
 
     async def run():
         try:
-            await _child("engine", state, {"seed": job["seed"], "depth": job["depth"], "real": job["real"]}, on_line)
+            await _child("engine", state, {"seed": job["seed"], "depth": job["depth"]}, on_line)
         except Exception as e:
             job["error"] = str(e)[-500:]
         job["done"] = True
@@ -750,7 +748,7 @@ def main(argv: Optional[list] = None) -> None:
     state = GameState.from_dict(json.loads(Path(path).read_text()))
     emit = lambda d: (sys.stdout.write(json.dumps(d) + "\n"), sys.stdout.flush())
     if kind == "engine":
-        engine(state, int(args["seed"]), emit, int(args.get("depth", 1)), bool(args.get("real")))
+        engine(state, int(args["seed"]), emit, int(args.get("depth", 1)))
     elif kind == "search":
         emit(search(state, int(args["seed"])))
     else:

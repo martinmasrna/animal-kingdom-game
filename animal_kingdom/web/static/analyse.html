@@ -57,7 +57,6 @@
   <select id="game" title="The game"></select>
   <label title="Sets the five hands the engine imagines for the opponent (as the Expert would at this seed)">seed <input id="seed" type="number" value="0" min="0"></label>
   <label title="Depth 1: this turn and the opponent's best reply. Depth 2: then this side's best next turn and the opponent's best reply to that">depth <select id="depth"><option value="1">1</option><option value="2" selected>2</option></select></label>
-  <label title="Score against the real hidden cards and deck order (a look back at the game), instead of the hands the bot would imagine"><input id="real" type="checkbox"> real hands</label>
   <button id="engbtn" title="Start or stop the engine on the position on the board (it restarts by itself when the position changes)">Analyse</button>
   <span id="status" class="status"></span>
 </header>
@@ -192,7 +191,7 @@ async function startEngine() {
   clearTimeout(S.pollT); S.last = null; S.explainOf = null;
   if (S.b.over) { $('eng').innerHTML = '<p class="muted">The game is over.</p>'; return; }
   $('eng').innerHTML = '<p class="muted">Starting…</p>';
-  await api('/api/analyse/engine', { sid: S.sid, seed: seed(), depth: +$('depth').value, real: $('real').checked });
+  await api('/api/analyse/engine', { sid: S.sid, seed: seed(), depth: +$('depth').value });
   poll();
 }
 async function stopEngine() { clearTimeout(S.pollT); await api('/api/analyse/engine/stop', { sid: S.sid }).catch(() => {}); $('status').textContent = 'stopped'; }
@@ -208,7 +207,7 @@ async function poll() {
 const STAGES = { 2: 'depth 1 done', 3: 'depth 2 done', 4: 'the live bot\'s own search', 5: 'done' };
 function renderEngine(L, done) {
   const next = L.stage === 2 && L.depth >= 2 ? ' · depth 2 running' : L.stage < 4 ? ' · the live bot\'s search running' : '';
-  $('status').textContent = done ? `done · ${L.seconds} s${L.real ? ' · real hands' : ''}` : `${STAGES[L.stage] || ''}${next} · ${L.seconds} s`;
+  $('status').textContent = done ? `done · ${L.seconds} s` : `${STAGES[L.stage] || ''}${next} · ${L.seconds} s`;
   const rows = L.rows;
   let h = `<table><tr><th class="r">#</th><th>Turn (${who(L.me)}, ${L.turns} possible)</th><th class="num" title="The board when the turn ends, mean over the imagined hands (every turn)">Board</th><th class="num" title="The live bot's score: after its GreedyBot reply, mean of the five hands (the best 20)">Old reply</th><th class="num" title="Depth 1: after the opponent's best whole reply turn, mean over the hands (the best 60 by Board)">Depth 1</th>${L.depth >= 2 ? '<th class="num" title="Depth 2: then this side\'s best next turn and the opponent\'s best reply to it (the best 20 by depth 1); ranks when shown">Depth 2</th>' : ''}<th></th></tr>`;
   rows.forEach((r, i) => {
@@ -291,7 +290,7 @@ $('engbtn').onclick = () => {
   S.on = !S.on; $('engbtn').classList.toggle('on', S.on); $('engbtn').textContent = S.on ? 'Analysing' : 'Analyse';
   if (S.on) startEngine(); else stopEngine();
 };
-$('seed').onchange = $('depth').onchange = $('real').onchange = () => { if (S.on) startEngine(); };
+$('seed').onchange = $('depth').onchange = () => { if (S.on) startEngine(); };
 $('game').onchange = () => openGame(+$('game').value);
 function keys(e) {
   if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
