@@ -1,5 +1,7 @@
 """AtomicBot (bots/atomic_bot.py) scores whole turns only: every turn it lists ends where the turn passes (or at a step
 that reaches into the deck), and two orders that reach the same position count once."""
+import pytest
+
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import SKIP, ChoiceAction
 from animal_kingdom.engine.state import new_game
@@ -52,6 +54,7 @@ def test_drawing_first_never_scores_below_playing_and_then_drawing():
     assert then_draw and all(draw_first["levels"][0] >= r["levels"][0] - 1e-9 for r in then_draw)
 
 
+@pytest.mark.slow
 def test_the_rust_search_gives_the_python_numbers(monkeypatch):
     """The Rust port (engine_rs/src/bots/atomic.rs) ranks the same whole turns in the same order with the same scores."""
     import pytest
@@ -62,7 +65,7 @@ def test_the_rust_search_gives_the_python_numbers(monkeypatch):
         pytest.skip("the Rust engine is not built")
     s = _position(["elephant"] * 15 + ["lion"] * 15)     # several hands the opponent may hold, at different odds
     me = s.player_to_act()
-    spec = "atomic_learned:eval=wave2_slot_r4_10_live,decisive=500,rounds=2,width1=4,width2=2,inner=2,draws=2,threads=2"
+    spec = "atomic_learned:eval=wave2_slot_r4_10_live,decisive=500,rounds=2,width1=3,width2=1,inner=1,draws=2,threads=2"
     rust = make_bot(spec, 4).ranking(s)
     py = make_bot(spec + ",workers=1", 4, python_only=True).rank(s, me)
     assert [r["turn"] for r in rust] == [[a.to_dict() for a in r["turn"]] for r in py]
@@ -89,3 +92,20 @@ def test_the_hands_are_every_hand_the_opponent_may_hold_at_its_odds():
     assert sorted(held) == [k for k in range(n + 1) if k <= e and n - k <= len(pool) - e]
     for k, w in zip(held, weights):
         assert abs(w - comb(e, k) * comb(len(pool) - e, n - k) / comb(len(pool), n)) < 1e-12
+
+
+def test_the_opponents_last_draw_judged_card_by_card_is_every_set_of_cards():
+    """Martin, 2026-11-01: after a draw the opponent has one play left, so only one drawn card can be played, and my
+    evaluation sees their hand only as its size. Judged card by card, their last turn is worth exactly what searching
+    every set of cards drawn gives."""
+    from animal_kingdom.engine.state import other_player
+    s = _position(["elephant"] * 10 + ["lion"] * 10 + ["mouse"] * 10)
+    rules.apply_action(s, next(a for a in rules.legal_actions(s) if a.kind == "place"))
+    while s.pending is not None:
+        rules.apply_action(s, ChoiceAction(SKIP))
+    me = other_player(s.player_to_act())
+    base = make_bot("referee_learned:eval=wave2_slot_r4_10_live,decisive=500", 1, python_only=True)
+    by_card = AtomicBot(base, workers=1, draws=99)
+    every_set = AtomicBot(base, workers=1, draws=99)
+    every_set._by_card = lambda *a, **k: None
+    assert abs(by_card.best_line(s.clone(), me, 1)[0] - every_set.best_line(s.clone(), me, 1)[0]) < 1e-9

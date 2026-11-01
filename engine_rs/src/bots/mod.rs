@@ -98,7 +98,9 @@ impl Bot {
             let hands = get("hands").map(as_usize).unwrap_or(30);
             let temperature = get("temperature").and_then(|v| v.as_f64().or_else(|| v.as_str().and_then(|s| s.parse().ok()))).unwrap_or(2.3);
             let draws = get("draws").map(as_usize).unwrap_or(8);
-            return Ok(Bot::Atomic(Box::new(atomic::AtomicBot::new(base, rounds, widths, inner, cap, threads, hands, temperature, draws))));
+            let mut bot = atomic::AtomicBot::new(base, rounds, widths, inner, cap, threads, hands, temperature, draws);
+            bot.by_card = get("bycard").map(as_usize).unwrap_or(1) != 0;     // 0: every set of cards drawn, for checking it
+            return Ok(Bot::Atomic(Box::new(bot)));
         }
         match kind.as_str() {
             "random" => Ok(Bot::Random(PyRandom::seeded(seed))),

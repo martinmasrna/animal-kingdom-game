@@ -218,25 +218,95 @@ class AtomicBot(Bot):
         out = []
         for w, ks in scored:
             taken = [c for c, n in zip(kinds, ks) for _ in range(n)]
-            want = list(taken)
-            rest = []
-            for c in reversed(deck):              # the deck is drawn from its end: the taken cards go there
-                if c in want:
-                    want.remove(c)
-                else:
-                    rest.append(c)
-            x = st.clone()
-            x.decks[actor] = rest[::-1] + taken
-            rules.apply_action(x, a, validate=False)
-            out.append((w / total, x, tuple(taken)))
+            out.append((w / total, self._dealt(st, actor, a, taken), tuple(taken)))
         return out
 
-    def _tree(self, s: GameState, actor: str, me: str, leaf, hist: tuple, memo: dict,
-              prob: float = 1.0) -> Optional[tuple[float, list]]:
+    @staticmethod
+    def _dealt(st: GameState, actor: str, a: Action, taken: list) -> GameState:
+        """The position after action `a` when the cards it takes from the actor's deck are `taken`."""
+        want = list(taken)
+        rest = []
+        for c in reversed(st.decks[actor]):       # the deck is drawn from its end: the taken cards go there
+            if c in want:
+                want.remove(c)
+            else:
+                rest.append(c)
+        x = st.clone()
+        x.decks[actor] = rest[::-1] + list(taken)
+        rules.apply_action(x, a, validate=False)
+        return x
+
+    def _by_card(self, s: GameState, actor: str, me: str, a: Action, k: int) -> Optional[float]:
+        """The opponent's draw in their last turn of a line, judged card by card (Martin, 2026-11-01: after a draw they
+        have one play left, so of the cards drawn only one can be played, and pairs do not matter). My evaluation sees
+        their hand only as its size, so a card left in it changes nothing: their best play with each card type is
+        searched once, and the draw is worth, over every set of cards it can bring at its odds, the best of what they
+        could do without the new cards and with each of them. None when a line could place two of the drawn cards (an
+        extra placement): then the sets of cards are searched one by one."""
+        deck = s.decks[actor]
+        kinds = sorted(set(deck))
+        before = {u.iid for u in s.hands[actor]}
+        chain = [False]
+        # a draw that ends their turn changes nothing I can see but their hand's size: one position, whatever it brings
+        x = self._dealt(s, actor, a, deck[len(deck) - min(k, len(deck)):][:k])
+        self._resolve_others(x, actor)
+        if rules.is_terminal(x) is not None or x.player_to_act() != actor:
+            return self._value(x, me)
+
+        def judged(card):
+            def leaf(e, hist, prob):
+                gone = [u for u in drawn if u.iid not in {h.iid for h in e.hands[actor]}]
+                if len(gone) > 1:
+                    chain[0] = True
+                if card is None:
+                    return self._value(e, me) if not gone else None
+                return self._value(e, me) if [u.card_id for u in gone] == [card] else None
+            return leaf
+
+        values = {}
+        base = None
+        for c in kinds:
+            others = list(deck)
+            others.remove(c)
+            x = self._dealt(s, actor, a, others[len(others) - (k - 1):] + [c] if k > 1 else [c])
+            drawn = [u for u in x.hands[actor] if u.iid not in before]
+            if base is None:
+                r = self._tree(x.clone(), actor, me, judged(None), (), {})
+                base = r[0] if r is not None else math.inf
+            r = self._tree(x, actor, me, judged(c), (), {})
+            values[c] = r[0] if r is not None else math.inf
+            if chain[0]:
+                return None
+        counts = [deck.count(c) for c in kinds]
+        found: list = []
+
+        def walk(i, left, ks):
+            if i == len(kinds):
+                if left == 0:
+                    found.append(list(ks))
+                return
+            for n in range(min(counts[i], left) + 1):
+                walk(i + 1, left - n, ks + [n])
+
+        walk(0, k, [])
+        vals, ws = [], []
+        for ks in found:
+            weight = 1
+            for c, n in zip(counts, ks):
+                weight *= comb(c, n)
+            vals.append(min([base] + [values[c] for c, n in zip(kinds, ks) if n]))
+            ws.append(float(weight))
+        total = sum(ws)
+        return self._mix(vals, [w / total for w in ws])
+
+    def _tree(self, s: GameState, actor: str, me: str, leaf, hist: tuple, memo: dict, prob: float = 1.0,
+              alpha: float = -math.inf, beta: float = math.inf, last: bool = False) -> Optional[tuple[float, list]]:
         """The value of `actor`'s best whole turn from `s` and its actions up to the first draw: a decision is the best
         of its actions for the actor, a draw (anything taken from the actor's deck) the average over what it may bring,
         a finished turn `leaf(end, hist, prob)` (None: not followed, so never chosen). `hist` is the cards drawn so far,
-        `prob` their odds. A decision stops looking once it has a decided win for the actor: nothing can beat it."""
+        `prob` their odds. A decision stops looking once it has a decided win for the actor: nothing can beat it; and,
+        before any draw, once it has a turn the side choosing above would never allow (mine at `beta` or more, theirs at
+        `alpha` or less: the cut-off of a chess engine). After a draw nothing is cut: the average needs every value."""
         self._resolve_others(s, actor)
         if rules.is_terminal(s) is not None or s.player_to_act() != actor:
             v = leaf(s, hist, prob)
@@ -250,7 +320,10 @@ class AtomicBot(Bot):
             nxt = s.clone()
             rules.apply_action(nxt, a, validate=False)
             k = len(s.decks[actor]) - len(nxt.decks[actor])
-            if k > 0:
+            judged = self._by_card(s, actor, me, a, k) if k > 0 and last and actor != me else None
+            if judged is not None:
+                v, path = judged, [a]
+            elif k > 0:
                 outs = self._outcomes(s, actor, a, k)
                 vals = []
                 for w, x, taken in outs:
@@ -262,7 +335,7 @@ class AtomicBot(Bot):
                     continue
                 v, path = self._mix(vals, [w for w, _, _ in outs]), [a]
             else:
-                r = self._tree(nxt, actor, me, leaf, hist, memo, prob)
+                r = self._tree(nxt, actor, me, leaf, hist, memo, prob, alpha, beta, last)
                 if r is None:
                     continue
                 v, path = r[0], [a] + r[1]
@@ -270,42 +343,53 @@ class AtomicBot(Bot):
                 best = (v, path)
                 if (v >= self.base.decisive) if mine else (v <= -self.base.decisive):
                     break
+                if not hist and ((v >= beta) if mine else (v <= alpha)):
+                    break
         memo[key] = best
         return best
 
-    def line_value(self, s: GameState, me: str, plies: int) -> float:
+    def line_value(self, s: GameState, me: str, plies: int, alpha: float = -math.inf, beta: float = math.inf) -> float:
         """My evaluation of `s` (the start of a turn, or decided) looking `plies` whole turns ahead, each side playing
         its best turn: the last one judged on the board, the earlier ones by following, for every set of cards drawn,
-        the best `inner` of their finished turns for that side further."""
-        return self.best_line(s, me, plies)[0]
+        the best `inner` of their finished turns for that side further. Outside (`alpha`, `beta`) the value is only a
+        bound: the side choosing above already has better."""
+        return self.best_line(s, me, plies, alpha, beta)[0]
 
-    def best_line(self, s: GameState, me: str, plies: int) -> tuple[float, list[Action]]:
+    def best_line(self, s: GameState, me: str, plies: int, alpha: float = -math.inf,
+                  beta: float = math.inf) -> tuple[float, list[Action]]:
         """(the value, the actions of the first turn up to its first draw of) the line `line_value` follows."""
         if plies <= 0 or rules.is_terminal(s) is not None:
             return self._value(s, me), []
         actor = s.player_to_act()
         mine = actor == me
+        if plies == 1:
+            r = self._tree(s.clone(), actor, me, lambda e, hist, prob: self._value(e, me), (), {}, 1.0, alpha, beta,
+                           last=True)
+            return r if r is not None else (self._value(s, me), [])
         ends: dict = {}
-        odds: dict = {}
 
         def board(e, hist, prob):
             v = self._value(e, me)
             ends.setdefault(hist, {}).setdefault(_key(e), v)
-            odds.setdefault(hist, prob)
             return v
 
         first = self._tree(s.clone(), actor, me, board, (), {})
         if first is None:
             return self._value(s, me), []
-        if plies == 1:
-            return first
         followed = {h: set(k for k, _ in sorted(es.items(), key=lambda t: -t[1] if mine else t[1])[:self.inner])
                     for h, es in ends.items()}
+        achieved = [alpha if mine else beta]      # the best this side is sure of so far, as a bound for the next line
 
         def deeper(e, hist, prob):
-            return self.line_value(e, me, plies - 1) if _key(e) in followed.get(hist, ()) else None
+            if _key(e) not in followed.get(hist, ()):
+                return None
+            if hist:                              # after a draw: one of an average, so exact
+                return self.line_value(e, me, plies - 1)
+            v = self.line_value(e, me, plies - 1, *((achieved[0], beta) if mine else (alpha, achieved[0])))
+            achieved[0] = max(achieved[0], v) if mine else min(achieved[0], v)
+            return v
 
-        r = self._tree(s.clone(), actor, me, deeper, (), {})
+        r = self._tree(s.clone(), actor, me, deeper, (), {}, 1.0, alpha, beta)
         return r if r is not None else first
 
     def best_reply(self, s: GameState, me: str) -> tuple[float, list[Action]]:
