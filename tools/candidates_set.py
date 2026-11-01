@@ -24,7 +24,8 @@ for f in sorted(glob.glob("results/human_games/web/*.jsonl")):
         spots, ok = [], True
         for k, a in enumerate(g["actions"]):
             if (st.player_to_act() == me and st.pending is None and st.actions_taken_this_turn == 0
-                    and 6 <= st.turn_counter <= 18 and rules.is_terminal(st) is None):
+                    and 6 <= st.turn_counter <= 18 and rules.is_terminal(st) is None
+                    and len(st.hands[me]) >= 3 and len(rules.legal_actions(st)) >= 8):   # a real decision
                 spots.append((k, st.turn_counter))
             try:
                 rules.apply_logged(st, a)
