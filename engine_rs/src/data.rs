@@ -180,6 +180,7 @@ pub const FAMILY_AURAS: [&str; 3] = ["", "mahi_mahi", "cape_buffalo"];
 pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish"];
 
 /// The cards the engine's rules name (never a card's effect: those live with the card in effects): resolved once.
+#[derive(Clone)]
 pub struct Known {
     pub hercules_beetle: Option<CardId>,
     pub bison: Option<CardId>,
@@ -255,6 +256,7 @@ impl Card {
     }
 }
 
+#[derive(Clone)]
 pub struct Cards {
     pub list: Vec<Card>,
     pub by_id: FxHashMap<String, CardId>,
@@ -356,6 +358,7 @@ pub struct Region {
     pub food: i32,
 }
 
+#[derive(Clone)]
 pub struct GameMap {
     pub id: String,
     pub crossroads: Vec<String>, // index -> name
@@ -444,6 +447,7 @@ impl GameMap {
 }
 
 /// The Python Config dataclass as a name -> value table, with the hot fields cached.
+#[derive(Clone)]
 pub struct Config {
     pub raw: sj::Map<String, sj::Value>,
     pub actions_per_turn: i32,

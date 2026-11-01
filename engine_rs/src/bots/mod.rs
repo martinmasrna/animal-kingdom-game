@@ -2,6 +2,7 @@
 //! for an evaluation weight), and plays through `choose`.
 
 pub mod atomic;
+pub mod cand;
 pub mod features;
 pub mod greedy;
 pub mod search;
@@ -100,6 +101,10 @@ impl Bot {
             let draws = get("draws").map(as_usize).unwrap_or(8);
             let mut bot = atomic::AtomicBot::new(base, rounds, widths, inner, cap, threads, hands, temperature, draws);
             bot.by_card = get("bycard").map(as_usize).unwrap_or(1) != 0;     // 0: every set of cards drawn, for checking it
+            bot.beam = get("beam").map(as_usize).unwrap_or(0);     // >0: only that many actions in mid-turn searched on (AtomicBot::beam)
+            if let Some(path) = get("cand").and_then(|v| v.as_str()) {   // the candidate network (cand.rs) chooses the beam
+                bot.cand = Some(std::sync::Arc::new(cand::CandNet::load(path)?));
+            }
             return Ok(Bot::Atomic(Box::new(bot)));
         }
         match kind.as_str() {

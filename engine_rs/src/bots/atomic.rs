@@ -10,7 +10,7 @@
 
 use rustc_hash::{FxHashMap, FxHashSet};
 
-use crate::actions::Action;
+use crate::actions::{Action, Target};
 use crate::bots::search::{observation_key, Searcher};
 use crate::bots::features::Evaluator;
 use crate::bots::world::determinize;
@@ -18,7 +18,8 @@ use crate::rng::PyRandom;
 use crate::state::Unit;
 use crate::data::*;
 use crate::rules;
-use crate::state::State;
+use crate::state::{Game, State};
+use std::sync::Arc;
 use crate::strength::effective_strength;
 use crate::value::m_get_s;
 use serde_json as sj;
@@ -30,6 +31,7 @@ enum LeafMode {
     Deep,
     Remembered,
     Card,
+    Kinds,
 }
 
 /// What a finished turn is worth inside `tree`: its board (recording it, by the cards drawn on the way), its board
@@ -52,13 +54,28 @@ struct Leaf {
     drawn: Vec<(i64, i64)>,
     actor: Player,
     chain: bool,
+    kinds: Option<Box<KindsAcc>>,
 }
+
+/// What `by_card` gathers from one search after the opponent's draw, in a hand holding one of every card they could
+/// have: their best play with each card (or with none of them), whatever their hand.
+struct KindsAcc {
+    ids: Vec<(i64, CardId)>, // the instances of that hand they might not hold
+    pool: Vec<CardId>,       // every card they may hold or draw (sorted)
+    kept: Vec<i64>,          // the cards in their hand I know (locked)
+    n: usize,                // how many cards their hand really holds after the draw, without the known ones
+    g: Arc<Game>,
+    // the cards each line plays from that hand (sorted) -> the best value for them
+    best: FxHashMap<Vec<CardId>, f64>,
+}
+
+pub static FALLBACKS: [std::sync::atomic::AtomicUsize; 2] = [std::sync::atomic::AtomicUsize::new(0), std::sync::atomic::AtomicUsize::new(0)];
 
 impl Leaf {
     fn new(mode: LeafMode, plies: usize, hand: i64) -> Leaf {
         Leaf { mode, plies, hand, ends: Vec::new(), index: FxHashMap::default(), followed: FxHashMap::default(),
                mine: true, alpha: f64::NEG_INFINITY, beta: f64::INFINITY, achieved: 0.0, card: -1, drawn: Vec::new(),
-               actor: 0, chain: false }
+               actor: 0, chain: false, kinds: None }
     }
 }
 
@@ -85,6 +102,16 @@ pub struct AtomicBot {
     pub temperature: f64,
     pub draws: usize,
     pub by_card: bool,
+    // >0: at a decision in mid-turn, only the `beam` most promising actions for the side choosing are searched on
+    // (each scored on the board it leaves, a card drawn on the way as it came in this hand); actions that end the turn
+    // and the Draw action are always searched
+    pub beam: usize,
+    // the candidate network: when set, the beam is chosen by its scores (one pass per decision) instead of by the
+    // board each action leaves (an engine run and an evaluation per action)
+    pub cand: Option<std::sync::Arc<super::cand::CandNet>>,
+    roomy: Option<Arc<Game>>,
+    // by_card's searches by what I see after the draw: (no card, the best with each card), None when a line plays two
+    kinds_seen: FxHashMap<String, Option<Vec<(Vec<CardId>, f64)>>>,
     memo: FxHashMap<(i64, usize, Vec<i64>), f64>,
     // my turn's board pass by what I can see (`seen`): the turns scored and which are followed, the same whatever the
     // opponent holds, since my evaluation reads their hand only as its size
@@ -132,7 +159,7 @@ fn key(s: &State) -> Vec<i64> {
 
 impl AtomicBot {
     pub fn new(base: Searcher, rounds: usize, widths: Vec<usize>, inner: usize, cap: usize, threads: usize, hands: usize, temperature: f64, draws: usize) -> AtomicBot {
-        AtomicBot { base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new() }
+        AtomicBot { base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, beam: 0, cand: None, roomy: None, kinds_seen: FxHashMap::default(), memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new() }
     }
 
     // ------------------------------------------------------------------ evaluation
@@ -185,7 +212,14 @@ impl AtomicBot {
             return;
         }
         let a_idx = actor as usize;
-        for a in rules::legal_actions(&st) {
+        let mut legal = rules::legal_actions(&st);
+        if self.beam > 0 && legal.len() > self.beam {
+            if let Some(net) = &self.cand {
+                let net = net.clone();
+                legal = self.cand_beam(&net, &st, actor, legal);
+            }
+        }
+        for a in legal {
             let mut nxt = st.clone();
             let _ = rules::apply_action(&mut nxt, &a, false);
             if !through_draws && (matches!(a, Action::Draw) || nxt.decks[a_idx].len() != st.decks[a_idx].len()) {
@@ -242,8 +276,29 @@ impl AtomicBot {
                 (w, ks)
             })
             .collect();
-        scored.sort_by(|x, y| y.0.partial_cmp(&x.0).unwrap_or(std::cmp::Ordering::Equal));
-        scored.truncate(self.draws);
+        if scored.len() > self.draws {
+            // that many picked evenly across their odds (atomic_bot._outcomes: systematic sampling)
+            let mut total = 0.0;
+            for (w, _) in &scored {
+                total += w;
+            }
+            let mut picked: Vec<(usize, usize)> = Vec::new();
+            let mut run = scored[0].0 / total;
+            let mut i = 0usize;
+            for j in 0..self.draws {
+                let point = (j as f64 + 0.5) / self.draws as f64;
+                while run < point && i < scored.len() - 1 {
+                    i += 1;
+                    run += scored[i].0 / total;
+                }
+                match picked.iter_mut().find(|(x, _)| *x == i) {
+                    Some(p) => p.1 += 1,
+                    None => picked.push((i, 1)),
+                }
+            }
+            picked.sort();
+            scored = picked.into_iter().map(|(i, n)| (n as f64, scored[i].1.clone())).collect();
+        }
         let mut total = 0.0;
         for (w, _) in &scored {
             total += w;
@@ -282,73 +337,69 @@ impl AtomicBot {
                 return Some(self.value(&x, me));
             }
         }
-        let mut values: Vec<f64> = Vec::with_capacity(kinds.len());
-        let mut base: Option<f64> = None;
-        for &c in &kinds {
-            let mut others = deck.clone();
-            let i = others.iter().position(|&x| x == c).unwrap();
-            others.remove(i);
-            let mut taken: Vec<CardId> = if k > 1 { others[others.len() - (k - 1)..].to_vec() } else { Vec::new() };
-            taken.push(c);
-            let x = dealt(s, actor, a, &taken);
-            let drawn: Vec<(i64, i64)> = x.hands[ai].iter().filter(|u| !before.contains(&u.iid)).map(|u| (u.iid, u.card as i64)).collect();
-            if base.is_none() {
-                let mut ctx = Leaf::new(LeafMode::Card, 0, -1);
-                ctx.card = -1;
-                ctx.drawn = drawn.clone();
-                ctx.actor = actor;
-                let r = self.run_tree(&x, actor, me, &mut ctx);
-                if ctx.chain {
-                    return None;
-                }
-                base = Some(r.map_or(f64::INFINITY, |r| r.0));
-            }
-            let mut ctx = Leaf::new(LeafMode::Card, 0, -1);
-            ctx.card = c as i64;
-            ctx.drawn = drawn;
+        // what each card would do after the draw is the same in every hand they may hold: one search, in a hand
+        // holding one of every card they could have, remembered by what I see; this hand then takes the best of its own
+        // cards and of the cards each draw may bring
+        let o = ai;
+        let kept: Vec<i64> = s.hands[o].iter().filter(|u| u.locked_until_turn as i32 > s.turn_counter).map(|u| u.iid).collect();
+        let mut hand: Vec<CardId> = s.hands[o].iter().filter(|u| !kept.contains(&u.iid)).map(|u| u.card).collect();
+        hand.sort_unstable();
+        let mut sdeck = deck.clone();
+        sdeck.sort_unstable();
+        let mut pool = hand.clone();
+        pool.extend(sdeck.iter().copied());
+        pool.sort_unstable();
+        let mut every = pool.clone();
+        every.dedup();
+        let g = s.g.clone();
+        if self.roomy.is_none() {
+            let mut cfg = g.cfg.clone();
+            cfg.hand_limit = 99;
+            self.roomy = Some(Arc::new(Game { cards: g.cards.clone(), map: g.map.clone(), cfg, known: g.known.clone(), hook_masks: g.hook_masks.clone() }));
+        }
+        let mut u = s.clone();
+        u.g = self.roomy.clone().unwrap();
+        let mut uh: crate::state::Hand = s.hands[o].iter().filter(|x| kept.contains(&x.iid)).cloned().collect();
+        for &c in &every {
+            let iid = u.new_iid();
+            uh.push(Unit::new(c, actor, iid));
+        }
+        u.hands[o] = uh;
+        u.decks[o] = crate::state::Deck::from_slice(&pool);
+        let _ = rules::apply_action(&mut u, a, false);
+        let n = hand.len() + k.min(deck.len());
+        let sk = format!("{}|{}", seen(&u, me), n);
+        FALLBACKS[1].fetch_add(0, std::sync::atomic::Ordering::Relaxed);
+        if std::env::var("AK_KEYS").is_ok() {
+            eprintln!("BYCARD taken={} a={:?} k={} hand={} cur={} me={}", s.actions_taken_this_turn, a, k, s.hands[ai].len(), s.current, me);
+        }
+        if !self.kinds_seen.contains_key(&sk) {
+            let ids: Vec<(i64, CardId)> = u.hands[o].iter().filter(|x| !kept.contains(&x.iid)).map(|x| (x.iid, x.card)).collect();
+            let mut ctx = Leaf::new(LeafMode::Kinds, 0, -1);
             ctx.actor = actor;
-            let r = self.run_tree(&x, actor, me, &mut ctx);
-            if ctx.chain {
-                return None;
-            }
-            values.push(r.map_or(f64::INFINITY, |r| r.0));
+            ctx.kinds = Some(Box::new(KindsAcc { ids, pool: pool.clone(), kept: kept.clone(), n, g: g.clone(), best: FxHashMap::default() }));
+            let _ = self.run_tree(&u, actor, me, &mut ctx);
+            let acc = ctx.kinds.unwrap();
+            let got = if ctx.chain {
+                None
+            } else {
+                let mut v: Vec<(Vec<CardId>, f64)> = acc.best.into_iter().collect();
+                v.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal).then(a.0.cmp(&b.0)));
+                Some(v)
+            };
+            FALLBACKS[if ctx.chain { 1 } else { 0 }].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            self.kinds_seen.insert(sk.clone(), got);
         }
-        let counts: Vec<usize> = kinds.iter().map(|c| deck.iter().filter(|x| *x == c).count()).collect();
-        fn walk(i: usize, left: usize, ks: &mut Vec<usize>, counts: &[usize], found: &mut Vec<Vec<usize>>) {
-            if i == counts.len() {
-                if left == 0 {
-                    found.push(ks.clone());
-                }
-                return;
-            }
-            for n in 0..=counts[i].min(left) {
-                ks.push(n);
-                walk(i + 1, left - n, ks, counts, found);
-                ks.pop();
-            }
+        let best = self.kinds_seen[&sk].clone()?;
+        let (vals, ws) = draw_sets(&sdeck, k.min(sdeck.len()), |got| {
+            let mut have = hand.clone();
+            have.extend(got.iter().copied());
+            have.sort_unstable();
+            best.iter().find(|(need, _)| msubset(need, &have)).map(|(_, v)| *v)
+        });
+        if vals.is_empty() {
+            return None;
         }
-        let mut found: Vec<Vec<usize>> = Vec::new();
-        walk(0, k, &mut Vec::new(), &counts, &mut found);
-        let base = base.unwrap_or(f64::INFINITY);
-        let mut vals: Vec<f64> = Vec::with_capacity(found.len());
-        let mut ws: Vec<f64> = Vec::with_capacity(found.len());
-        for ks in &found {
-            let mut w = 1.0f64;
-            let mut v = base;
-            for (j, (&c, &n)) in counts.iter().zip(ks.iter()).enumerate() {
-                w *= comb(c, n) as f64;
-                if n > 0 && values[j] < v {
-                    v = values[j];
-                }
-            }
-            vals.push(v);
-            ws.push(w);
-        }
-        let mut total = 0.0;
-        for w in &ws {
-            total += w;
-        }
-        let ws: Vec<f64> = ws.iter().map(|w| w / total).collect();
         Some(self.mix(&vals, &ws))
     }
 
@@ -395,12 +446,53 @@ impl AtomicBot {
                 let ok = if ctx.card < 0 { gone.is_empty() } else { gone.len() == 1 && gone[0].1 == ctx.card };
                 if ok { Some(self.value(e, me)) } else { None }
             }
+            LeafMode::Kinds => {
+                let acc = ctx.kinds.as_mut().unwrap();
+                let o = ctx.actor as usize;
+                let mut gone: Vec<CardId> = acc.ids.iter().filter(|(i, _)| !e.hands[o].iter().any(|x| x.iid == *i)).map(|&(_, c)| c).collect();
+                gone.sort_unstable();
+                // the board as I see it: their hand as many cards as they really hold, hand and deck what is left
+                let mut r = e.clone();
+                r.g = acc.g.clone();
+                let left = msub(&acc.pool, &gone);
+                let m = (acc.n - gone.len()).min(left.len());
+                let mut hand: crate::state::Hand = e.hands[o].iter().filter(|x| acc.kept.contains(&x.iid)).cloned().collect();
+                for &c in &left[..m] {
+                    let iid = r.new_iid();
+                    hand.push(Unit::new(c, ctx.actor, iid));
+                }
+                r.hands[o] = hand;
+                r.decks[o] = crate::state::Deck::from_slice(&left[m..]);
+                let v = self.value(&r, me);
+                let b = acc.best.entry(gone).or_insert(f64::INFINITY);
+                *b = b.min(v);
+                Some(v)
+            }
         }
     }
 
     /// The value of `actor`'s best whole turn from `s` and its actions up to the first draw (atomic_bot._tree): a
     /// decision is the best of its actions for the actor, a draw the average over what it may bring, a finished turn
     /// the leaf (None: not followed, so never chosen). `hist` is the cards drawn so far.
+    /// The candidate network's beam at a decision of `actor` in `s`: its `beam` likeliest of `legal`, in its order,
+    /// plus a den capture, whatever it scored (the net ranks wins first anyway; checking every action for a win
+    /// would cost an engine run each, which the net is there to save).
+    fn cand_beam(&self, net: &super::cand::CandNet, s: &State, actor: Player, legal: Vec<Action>) -> Vec<Action> {
+        let scores = net.scores(s, actor, &legal);
+        let mut order: Vec<usize> = (0..legal.len()).collect();
+        order.sort_by(|&i, &j| scores[j].partial_cmp(&scores[i]).unwrap_or(std::cmp::Ordering::Equal).then(i.cmp(&j)));
+        let mut keep = vec![false; legal.len()];
+        for &i in order.iter().take(self.beam) {
+            keep[i] = true;
+        }
+        for (i, a) in legal.iter().enumerate() {
+            if !keep[i] && matches!(a, Action::Roam { target: Target::Hq(_), .. }) {   // a den capture is never cut
+                keep[i] = true;
+            }
+        }
+        order.iter().filter(|&&i| keep[i]).map(|&i| legal[i].clone()).collect()
+    }
+
     fn tree(&mut self, mut s: State, actor: Player, me: Player, ctx: &mut Leaf, hist: &mut Vec<i64>,
             memo: &mut FxHashMap<(Vec<i64>, Vec<i64>), Option<(f64, Vec<Action>)>>, prob: f64, alpha: f64, beta: f64) -> Option<(f64, Vec<Action>)> {
         self.resolve_others(&mut s, actor);
@@ -414,7 +506,44 @@ impl AtomicBot {
         let mine = actor == me;
         let ai = actor as usize;
         let mut best: Option<(f64, Vec<Action>)> = None;
-        for a in rules::legal_actions(&s) {
+        let mut legal = rules::legal_actions(&s);
+        let selective = self.beam > 0 && (self.cand.is_some() || !matches!(ctx.mode, LeafMode::Card | LeafMode::Kinds));   // the net's beam holds inside the draw searches too
+        if selective && legal.len() > self.beam {
+            if let Some(net) = &self.cand {
+                // the candidate network's beam: its `beam` likeliest actions for the side choosing, plus any that
+                // decide the game at once
+                let net = net.clone();
+                legal = self.cand_beam(&net, &s, actor, legal);
+            } else {
+            // the actions that leave the turn open, best first for the side choosing by the board they leave; the rest
+            // of those are not searched on
+            let mut open: Vec<(f64, Action)> = Vec::new();
+            let mut kept: Vec<Action> = Vec::new();
+            for a in legal.drain(..) {
+                let mut nxt = s.clone();
+                let _ = rules::apply_action(&mut nxt, &a, false);
+                if matches!(a, Action::Draw) {
+                    kept.push(a);
+                    continue;
+                }
+                self.resolve_others(&mut nxt, actor);
+                if rules::is_terminal(&nxt).is_some() || nxt.player_to_act() != actor {
+                    kept.push(a);
+                    continue;
+                }
+                open.push((self.value(&nxt, me), a));
+            }
+            if mine {
+                open.sort_by(|x, y| y.0.partial_cmp(&x.0).unwrap_or(std::cmp::Ordering::Equal));
+            } else {
+                open.sort_by(|x, y| x.0.partial_cmp(&y.0).unwrap_or(std::cmp::Ordering::Equal));
+            }
+            let mut first: Vec<Action> = open.into_iter().take(self.beam).map(|(_, a)| a).collect();
+            first.extend(kept);
+            legal = first;
+            }
+        }
+        for a in legal {
             let mut nxt = s.clone();
             let _ = rules::apply_action(&mut nxt, &a, false);
             let before = s.decks[ai].len();
@@ -424,6 +553,24 @@ impl AtomicBot {
             } else {
                 None
             };
+            if ctx.mode == LeafMode::Kinds && after < before {
+                // a second draw that ends their turn: one position, whatever it brings
+                let mut x = nxt.clone();
+                self.resolve_others(&mut x, actor);
+                if rules::is_terminal(&x).is_some() || x.player_to_act() != actor {
+                    ctx.kinds.as_mut().unwrap().n += before - after;
+                    let r = self.leaf(ctx, &x, hist, prob, me);
+                    ctx.kinds.as_mut().unwrap().n -= before - after;
+                    if let Some(v) = r {
+                        if best.as_ref().map_or(true, |(b, _)| v < *b) {
+                            best = Some((v, vec![a.clone()]));
+                        }
+                    }
+                    continue;
+                }
+                ctx.chain = true;     // a second draw: judged the old way
+                continue;
+            }
             let (v, path) = if let Some(v) = judged {
                 (v, vec![a.clone()])
             } else if after < before {
@@ -464,6 +611,9 @@ impl AtomicBot {
             };
             if better {
                 best = Some((v, path));
+                if ctx.mode == LeafMode::Kinds {
+                    continue;     // every play is wanted, each for the card it uses
+                }
                 if if mine { v >= self.base.decisive } else { v <= -self.base.decisive } {
                     break;     // a decided win for the actor: nothing can beat it
                 }
@@ -760,6 +910,9 @@ impl AtomicBot {
             next.sort_by(|&a, &b| rows[b].levels[lv].unwrap().partial_cmp(&rows[a].levels[lv].unwrap()).unwrap_or(std::cmp::Ordering::Equal));
             pool = next;
         }
+        if std::env::var("AK_COUNT").is_ok() {
+            eprintln!("KINDS searched={} fell_back={}", FALLBACKS[0].load(std::sync::atomic::Ordering::Relaxed), FALLBACKS[1].load(std::sync::atomic::Ordering::Relaxed));
+        }
         let rounds = self.rounds;
         let order_key = |r: &Row| -> (i64, f64) {
             for lv in (0..rounds).rev() {
@@ -929,4 +1082,85 @@ fn seen(s: &State, me: Player) -> String {
     }
     strip(&mut j);
     j.to_string()
+}
+
+/// `a` without the cards of `b` (sorted multisets).
+fn msub(a: &[CardId], b: &[CardId]) -> Vec<CardId> {
+    let mut b: Vec<CardId> = b.to_vec();
+    b.sort_unstable();
+    let mut out = Vec::with_capacity(a.len());
+    let mut j = 0;
+    for &x in a {
+        while j < b.len() && b[j] < x {
+            j += 1;
+        }
+        if j < b.len() && b[j] == x {
+            j += 1;
+        } else {
+            out.push(x);
+        }
+    }
+    out
+}
+
+/// Every distinct set of `k` cards from `deck` (sorted) at its odds, each scored by `f` (None: left out).
+fn draw_sets(deck: &[CardId], k: usize, mut f: impl FnMut(&[CardId]) -> Option<f64>) -> (Vec<f64>, Vec<f64>) {
+    let mut kinds: Vec<CardId> = Vec::new();
+    let mut counts: Vec<usize> = Vec::new();
+    for &c in deck {
+        if kinds.last() == Some(&c) {
+            *counts.last_mut().unwrap() += 1;
+        } else {
+            kinds.push(c);
+            counts.push(1);
+        }
+    }
+    fn walk(i: usize, left: usize, ks: &mut Vec<usize>, counts: &[usize], found: &mut Vec<Vec<usize>>) {
+        if i == counts.len() {
+            if left == 0 {
+                found.push(ks.clone());
+            }
+            return;
+        }
+        for n in 0..=counts[i].min(left) {
+            ks.push(n);
+            walk(i + 1, left - n, ks, counts, found);
+            ks.pop();
+        }
+    }
+    let mut found: Vec<Vec<usize>> = Vec::new();
+    walk(0, k, &mut Vec::new(), &counts, &mut found);
+    let (mut vals, mut ws) = (Vec::new(), Vec::new());
+    for ks in &found {
+        let mut got: Vec<CardId> = Vec::new();
+        let mut w = 1.0f64;
+        for ((&c, &n), &cnt) in kinds.iter().zip(ks.iter()).zip(counts.iter()) {
+            w *= comb(cnt, n) as f64;
+            for _ in 0..n {
+                got.push(c);
+            }
+        }
+        if let Some(v) = f(&got) {
+            vals.push(v);
+            ws.push(w);
+        }
+    }
+    let total: f64 = ws.iter().sum();
+    (vals, ws.iter().map(|w| w / total).collect())
+}
+
+/// Whether every card of `a` is in `b` (sorted multisets).
+fn msubset(a: &[CardId], b: &[CardId]) -> bool {
+    let mut j = 0;
+    for &x in a {
+        while j < b.len() && b[j] < x {
+            j += 1;
+        }
+        if j < b.len() && b[j] == x {
+            j += 1;
+        } else {
+            return false;
+        }
+    }
+    true
 }

@@ -191,7 +191,7 @@ class AtomicBot(Bot):
         """The ways action `a`, which takes `k` cards from the actor's deck, can come out: every distinct set of cards it
         can take, with its odds, as (odds, the position after, the cards). Neither side knows the order of a deck, so a
         draw is a chance event, not a choice: the drawer gets the average over what it may bring, never the card it
-        would like. More than `draws` of them: the likeliest that many."""
+        would like. More than `draws` of them: that many picked evenly across their odds."""
         deck = st.decks[actor]
         kinds = sorted(set(deck))
         counts = [deck.count(c) for c in kinds]
@@ -212,8 +212,20 @@ class AtomicBot(Bot):
             for c, n in zip(counts, ks):
                 weight *= comb(c, n)
             scored.append((float(weight), ks))
-        scored.sort(key=lambda t: -t[0])           # stable: equal odds keep the listing order
-        scored = scored[:self.draws]
+        if len(scored) > self.draws:
+            # more ways than `draws`: that many picked evenly across their odds (systematic sampling: points at
+            # (j + 1/2) / draws on the running total), each pick worth 1 / draws; the likeliest alone would over-weight
+            # pairs of the same card and could drop the one card that saves the drawer
+            total = sum(w for w, _ in scored)
+            picked: dict = {}
+            run, i = scored[0][0] / total, 0
+            for j in range(self.draws):
+                point = (j + 0.5) / self.draws
+                while run < point and i < len(scored) - 1:
+                    i += 1
+                    run += scored[i][0] / total
+                picked[i] = picked.get(i, 0) + 1
+            scored = [(float(n), scored[i][1]) for i, n in sorted(picked.items())]
         total = sum(w for w, _ in scored)
         out = []
         for w, ks in scored:

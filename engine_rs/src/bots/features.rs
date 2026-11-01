@@ -719,7 +719,7 @@ pub fn board_names() -> &'static Vec<&'static str> {
     })
 }
 
-fn push_properties(v: &mut Vec<f64>, card: &Card, sign: f64, on_board_live: bool) {
+pub(crate) fn push_properties(v: &mut Vec<f64>, card: &Card, sign: f64, on_board_live: bool) {
     let (kw, tags) = property_order();
     if on_board_live {
         v.push(0.0);   // board_live: a Roar on the board has fired
