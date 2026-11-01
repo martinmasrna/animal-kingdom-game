@@ -32,7 +32,7 @@ fn main() {
         st.record_events = false;
         let mut bots: [Bot; 2] = [Bot::from_spec(&args[7], s * 2, None).unwrap(), Bot::from_spec(&args[8], s * 2 + 1, None).unwrap()];
         let mut eps = PyRandom::seeded(s);
-        let log = bots::play_out(&mut st, &mut bots, 0.0, &mut eps, |_, _, _| {});
+        let log = bots::play_out(&mut st, &mut bots, 0.0, &mut eps, |_, _, _, _| {});
         actions += log.len();
         let r = rules::is_terminal(&st).unwrap();
         println!("game {k}: {:?} by {} in {} turns, {} actions", r.winner, r.reason, st.turn_counter, log.len());

@@ -233,8 +233,10 @@ impl Bot {
 }
 
 /// Play `st` to the end with two bots; returns the action log as dicts. `on_decision` sees every top-level and
-/// sub-choice decision (the actor, the state before, the action after it is applied is not available here).
-pub fn play_out(st: &mut State, bots: &mut [Bot; 2], epsilon: f64, eps_rng: &mut PyRandom, mut record: impl FnMut(&State, Player, bool)) -> Vec<sj::Value> {
+/// sub-choice decision (the actor, the state before, the action after it is applied is not available here). Before a
+/// decision the search's value of the position (its best root's score, the mover's side) comes with it: what the
+/// search found by looking ahead from there, `None` for a random or a one-option move.
+pub fn play_out(st: &mut State, bots: &mut [Bot; 2], epsilon: f64, eps_rng: &mut PyRandom, mut record: impl FnMut(&State, Player, bool, Option<f64>)) -> Vec<sj::Value> {
     let mut log = Vec::new();
     let mut guard = 0;
     while rules::is_terminal(st).is_none() && guard < 5000 {
@@ -244,16 +246,21 @@ pub fn play_out(st: &mut State, bots: &mut [Bot; 2], epsilon: f64, eps_rng: &mut
         if legal.is_empty() {
             break;
         }
-        record(st, actor, true);
-        let action = if legal.len() > 1 && epsilon > 0.0 && eps_rng.random() < epsilon {
-            legal[eps_rng.choice_index(legal.len())].clone()
+        let (action, value) = if legal.len() > 1 && epsilon > 0.0 && eps_rng.random() < epsilon {
+            (legal[eps_rng.choice_index(legal.len())].clone(), None)
+        } else if legal.len() == 1 {
+            (legal[0].clone(), None)
         } else {
-            bots[actor.min(1) as usize].choose(st, actor, &legal)
+            let bot = &mut bots[actor.min(1) as usize];
+            let a = bot.choose(st, actor, &legal);
+            let v = bot.root_scores().iter().map(|x| x.1).fold(None, |m: Option<f64>, v| Some(m.map_or(v, |m| m.max(v))));
+            (a, v)
         };
+        record(st, actor, true, value);
         log.push(action.to_json(st));
         let _ = rules::apply_action(st, &action, false);
         if rules::is_terminal(st).is_none() {
-            record(st, actor, false);
+            record(st, actor, false, None);
         }
     }
     log

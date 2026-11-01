@@ -371,21 +371,24 @@ fn play_game(
     let mut xs: Vec<Vec<f64>> = Vec::new();
     let mut seats: Vec<Player> = Vec::new();
     let mut turns: Vec<i32> = Vec::new();
+    let mut values: Vec<Option<f64>> = Vec::new();   // the search's score of a turn-start position, in points
     let fs = features.clone();
     let log = py.detach(|| {
-        bots::play_out(&mut st, &mut bots, epsilon, &mut eps_rng, |s, actor, before| {
+        bots::play_out(&mut st, &mut bots, epsilon, &mut eps_rng, |s, actor, before, value| {
             let Some(fs) = &fs else { return };
             if before {
                 if s.pending.is_none() && s.actions_taken_this_turn == 0 && s.turn_counter > 0 {
                     xs.push(bots::features::extract(s, actor, fs));
                     seats.push(actor);
                     turns.push(s.turn_counter);
+                    values.push(value);
                 }
             } else {
                 let mut c = s.clone();
                 xs.push(bots::features::extract_as_scored(&mut c, actor, fs));
                 seats.push(actor);
                 turns.push(s.turn_counter);
+                values.push(None);
             }
         })
     });
@@ -403,7 +406,7 @@ fn play_game(
         "turns": st.turn_counter,
         "first_player": player_name(st.first_player),
         "actions": log,
-        "x": xs, "y": ys, "turn": turns, "seat": seats.iter().map(|s| player_name(*s)).collect::<Vec<_>>(),
+        "x": xs, "y": ys, "turn": turns, "seat": seats.iter().map(|s| player_name(*s)).collect::<Vec<_>>(), "value": values,
         "food": {"A": st.food[0], "B": st.food[1]},
         "events": if record_events { sj::Value::Array(st.events.iter().map(|m| value::Value::Map(m.clone()).to_json()).collect()) } else { sj::Value::Null },
     });

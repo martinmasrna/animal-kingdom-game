@@ -376,10 +376,15 @@ def _atomic(seed: int, rounds: int):
     """The whole-turn search on the Expert's evaluation and imagined hands: the Rust engine's when it is built."""
     from ..sim.runner import make_bot
     from .match import EXPERT
+    # the candidate network (engine_rs/src/bots/cand.rs) chooses what the search looks at: its 8 likeliest actions at
+    # depth 1, 6 at depth 2; depth 2 also follows one draw outcome and one reply per line over 5 imagined hands and
+    # answers within 20 s from the deepest level it finished
+    cand = "cand=animal_kingdom/data/learned/cand_v4.json"
+    if rounds >= 2:
+        spec = EXPERT.replace("referee_learned", "atomic_learned").replace("time_budget=8", "time_budget=20")
+        return make_bot(f"{spec},rounds=2,draws=1,inner=1,width2=6,beam=6,hands=5,{cand}", seed)
     spec = EXPERT.replace("referee_learned", "atomic_learned").replace("time_budget=8", "time_budget=0")
-    # depth 2 on the overnight fast setting (2 mid-line draws spread over the odds, 2 replies, 8 turns deep)
-    fast = ",draws=2,inner=2,width2=8" if rounds >= 2 else ""
-    return make_bot(f"{spec},rounds={rounds}{fast}", seed)
+    return make_bot(f"{spec},rounds=1,draws=2,beam=8,hands=10,{cand}", seed)
 
 
 def _ranked(bot, state: GameState) -> list[dict]:
