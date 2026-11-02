@@ -9,6 +9,7 @@ module only *produces* the per-game `GameRecord`s.
 from __future__ import annotations
 
 import json
+import sys
 
 import random
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -161,6 +162,8 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
             return rust
     if kind in ("atomic", "atomic_learned"):
         from ..bots.atomic_bot import AtomicBot
+        if not python_only:
+            print("make_bot: the Python whole-turn search, hours a game; AK_RUST_BOTS=1 runs it on the Rust engine", file=sys.stderr)
         own = {k: extra.pop(k) for k in list(extra) if k in ATOMIC_KEYS}
         base = make_bot(kind.replace("atomic", "referee"), seed, weights, extra, python_only=True)
         return AtomicBot(base, rounds=int(own.get("rounds", 1)),
