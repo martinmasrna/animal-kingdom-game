@@ -5777,6 +5777,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1792861464
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632087
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632731
     }
   },
   "forager_ant": {
@@ -6233,6 +6251,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1792755470
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632103
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632735
     }
   },
   "stick_insect": {
@@ -6274,6 +6310,24 @@
       "note": "moved from pool to food_otk",
       "by": "claude",
       "at": 1793190634
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632092
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632547
     }
   },
   "hercules_beetle": {
@@ -6527,6 +6581,24 @@
       "note": "moved from pool to aristocrats",
       "by": "claude",
       "at": 1793114063
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632089
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632732
     }
   },
   "krill_legend": {
@@ -6723,6 +6795,24 @@
       "note": "moved from pool to food_aggro",
       "by": "claude",
       "at": 1793188544
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632094
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632733
     }
   },
   "elephant_legend": {
@@ -6815,6 +6905,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793210604
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632098
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632733
     }
   },
   "pigeon": {
@@ -6870,6 +6978,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793210606
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632090
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632732
     }
   },
   "rodent_legend": {
@@ -7225,6 +7351,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793295830
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632100
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632734
     }
   },
   "vole": {
@@ -7349,6 +7493,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793300648
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632096
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632548
     }
   },
   "bison": {
@@ -7545,6 +7707,26 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793448250
+    }
+  },
+  "bunny": {
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632101
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793632735
     }
   }
 }

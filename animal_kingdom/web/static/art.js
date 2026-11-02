@@ -1,6 +1,16 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  ocelot: [.7, .47, .6],
+  bunny: [.57, .47, .75],
+  rabbit: [.53, .44, .9],
+  wolverine: [.65, .49, .66],
+  marmot: [.57, .4, .78],
+  mara: [.67, .36, .66],
+  stick_insect: [.64, .37, .7],
+  pigeon: [.65, .52, .7],
+  hammerhead: [.6, .53, .8],
+  guard_bee: [.64, .46, .66],
   deer_legend: [.6, .27, .5],
   kitten: [.6, .38, .5],
   young_ant: [.6, .47, .55],
@@ -172,6 +182,16 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  ocelot: [.79, .475, 1.2],
+  bunny: [.65, .495, 1.2],
+  rabbit: [.67, .45, 1.2],
+  wolverine: [.73, .485, 1.3],
+  marmot: [.61, .31, 1.2],
+  mara: [.77, .35, 1.25],
+  stick_insect: [.78, .35, 1.35],
+  pigeon: [.78, .54, 1.3],
+  hammerhead: [.72, .535, 1.2],
+  guard_bee: [.67, .47, 1.25],
   deer_legend: [.62, .25, 1.2],
   kitten: [.62, .36, 1.2],
   young_ant: [.62, .47, 1.2],
@@ -336,6 +356,16 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  ocelot: .455,
+  bunny: .46,
+  rabbit: .42,
+  wolverine: .47,
+  marmot: .415,
+  mara: .405,
+  stick_insect: .4,
+  pigeon: .45,
+  hammerhead: .46,
+  guard_bee: .45,
   deer_legend: .3,
   kitten: .4,
   young_ant: .45,
