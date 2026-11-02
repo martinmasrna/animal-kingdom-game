@@ -96,9 +96,11 @@ def main():
 
     def save(suffix):
         for stem, c in ((out + "_out", cols), (out + "_search", scols)):
-            np.savez_compressed(stem + suffix, x=np.array(c["x"], dtype=np.float32), y=np.array(c["y"]), turn=np.array(c["turn"]),
+            tmp = stem + suffix + ".tmp.npz"       # written whole, then renamed: a run killed mid-save keeps its last checkpoint
+            np.savez_compressed(tmp, x=np.array(c["x"], dtype=np.float32), y=np.array(c["y"]), turn=np.array(c["turn"]),
                                 deck=np.array(c["deck"]), opp=np.array(c["opp"]), game=np.array(c["game"]), reason=np.array(c["reason"]),
                                 features=feat, feature_set=np.array(FEATURE_SET), eval_path=np.array(""), pilot=np.array(a.spec), pilot_b=np.array(""))
+            os.replace(tmp, stem + suffix)
 
     w = JsonlGameWriter(Path(out + ".jsonl"))
     t0 = time.time(); n = 0
