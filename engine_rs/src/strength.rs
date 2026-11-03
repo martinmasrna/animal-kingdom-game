@@ -52,8 +52,13 @@ pub fn small_starting_deck(st: &State, owner: Player, but: CardId) -> bool {
 
 /// The live "has +X" bonus for a unit of `card` controlled by `owner` (`self_iid` None: a prospective placement).
 pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64>, sources: Option<&Sources>) -> i32 {
+    anthem_bonus_turn(st, card, owner, self_iid, sources, st.current != owner)
+}
+
+/// The anthem as it stands on a chosen turn (`their_turn`: the owner's opponent to move), for an evaluation that asks
+/// both (Giraffe, Crocodile and the Cape Buffalo's aura change with whose turn it is).
+pub fn anthem_bonus_turn(st: &State, card: &Card, owner: Player, self_iid: Option<i64>, sources: Option<&Sources>, their_turn: bool) -> i32 {
     let cfg = st.cfg();
-    let their_turn = st.current != owner;
     const AURA_FAMILIES: u32 = T_FISH | T_HOOFED;
     if card.anthem_kind == 0 {
         if card.tags & AURA_FAMILIES == 0 {
@@ -131,6 +136,13 @@ pub fn raw_strength(st: &State, unit: &Unit, sources: Option<&Sources>) -> i32 {
         return base + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources);
     }
     base_or_dynamic(st, card) + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources)
+}
+
+/// `raw_strength` on a chosen turn (see `anthem_bonus_turn`).
+pub fn raw_strength_turn(st: &State, unit: &Unit, sources: Option<&Sources>, their_turn: bool) -> i32 {
+    let card = st.card(unit.card);
+    let base = if st.is_inked(unit.iid) { card.base.unwrap_or(0) } else { base_or_dynamic(st, card) };
+    base + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus_turn(st, card, unit.owner, Some(unit.iid), sources, their_turn)
 }
 
 /// Strength of a unit in play, >= 0.

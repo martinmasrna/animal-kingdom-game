@@ -1251,6 +1251,7 @@ pub enum Evaluator {
     Linear(LinearEval),
     Net(NetEval),
     Slot(SlotEval),
+    Raw(super::raw::RawEval),
 }
 
 impl Evaluator {
@@ -1259,6 +1260,9 @@ impl Evaluator {
         let vec = |k: &str| -> Vec<f64> { d[k].as_array().map(|a| a.iter().map(|x| x.as_f64().unwrap_or(0.0)).collect()).unwrap_or_default() };
         if d.get("kind").and_then(|k| k.as_str()) == Some("slotnet") {
             return Ok(Evaluator::Slot(SlotEval::from_json(d, fs)?));
+        }
+        if d.get("kind").and_then(|k| k.as_str()) == Some("rawnet") {
+            return Ok(Evaluator::Raw(super::raw::RawEval::from_json(d)?));
         }
         if d.get("kind").and_then(|k| k.as_str()) == Some("mlp") || d.get("w1").is_some() {
             let mut net = NetEval {
@@ -1300,6 +1304,12 @@ impl Evaluator {
                 }
                 let phi = extract(st, me, &n.feature_set);
                 n.scale * n.logit_of(&phi)
+            }
+            Evaluator::Raw(n) => {
+                if let Some(r) = &st.result {
+                    return if r.winner == Some(me) { f64::INFINITY } else if r.winner == Some(other(me)) { f64::NEG_INFINITY } else { 0.0 };
+                }
+                n.scale * n.logit_of(&super::raw::extract(st, me), &st.g.cards)
             }
             Evaluator::Net(n) => {
                 if let Some(r) = &st.result {

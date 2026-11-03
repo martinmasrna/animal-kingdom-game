@@ -131,6 +131,34 @@ impl PyState {
         self.st.to_json().to_string()
     }
 
+    /// The raw position from `player`'s side (bots.raw_position.extract), card ids as names, for the parity test.
+    fn raw_position(&self, py: Python<'_>, player: &str) -> PyResult<Py<PyAny>> {
+        let me = player_from(player);
+        let p = bots::raw::extract(&self.st, me);
+        let name = |c: Option<crate::data::CardId>| -> sj::Value { match c { Some(c) => sj::Value::from(self.st.g.cards.name_of(c)), None => sj::Value::Null } };
+        let mut bags = sj::Map::new();
+        for (i, b) in bots::raw::BAGS.iter().enumerate() {
+            bags.insert(b.to_string(), sj::Value::Array(p.bags[i].iter().map(|(c, w)| sj::json!([self.st.g.cards.name_of(*c), w])).collect()));
+        }
+        let d = sj::json!({
+            "cr_card": p.cr_card.iter().map(|l| sj::Value::Array(l.iter().map(|c| name(*c)).collect())).collect::<Vec<_>>(),
+            "cr_owner": p.cr_owner.iter().map(|l| sj::json!(l)).collect::<Vec<_>>(),
+            "top_num": p.top_num.iter().map(|l| sj::json!(l.to_vec())).collect::<Vec<_>>(),
+            "under_num": p.under_num.iter().map(|l| sj::json!(l.to_vec())).collect::<Vec<_>>(),
+            "bags": bags,
+            "globals": p.globals.to_vec(),
+        });
+        json_to_py(py, &d)
+    }
+
+    /// Both outputs of a raw-position network artifact (JSON) on this position from `player`'s side.
+    fn raw_heads(&self, player: &str, artifact_json: &str) -> PyResult<Vec<f64>> {
+        let d: sj::Value = sj::from_str(artifact_json).map_err(|e| err(e.to_string()))?;
+        let net = bots::raw::RawEval::from_json(&d).map_err(err)?;
+        let me = player_from(player);
+        Ok(net.heads(&bots::raw::extract(&self.st, me), &self.st.g.cards))
+    }
+
     fn legal_actions(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         let acts = rules::legal_actions(&self.st);
         let items: Vec<Py<PyAny>> = acts.iter().map(|a| json_to_py(py, &a.to_json(&self.st))).collect::<PyResult<_>>()?;

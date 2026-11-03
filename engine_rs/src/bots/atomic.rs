@@ -743,6 +743,7 @@ impl AtomicBot {
     pub fn mix(&self, vs: &[f64], ws: &[f64]) -> f64 {
         let scale = match &self.base.evaluator {
             Evaluator::Slot(n) => n.scale,
+            Evaluator::Raw(n) => n.scale,
             Evaluator::Net(n) => n.scale,
             _ => 0.0,
         } * self.temperature;
