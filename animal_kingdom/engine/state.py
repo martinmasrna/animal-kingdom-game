@@ -76,7 +76,7 @@ class UnitInstance:
         self.placed_on_turn = placed_on_turn  # turn_counter at placement (Egg timing); 0 in hand
         self.strength_counter = strength_counter  # stored "give +X" buffs (signed); travels hand->board
         self.locked_until_turn = locked_until_turn  # Skunk: unplayable from hand while turn < this
-        self.retaliation_used = retaliation_used  # Gale: "first time covered" fires once per instance
+        self.retaliation_used = retaliation_used  # the once-per-piece charge: Spikes (first enemy that covers this) and the Wild Boar (first enemy placed next to this)
         self.play_seq = play_seq  # when it entered the board, game-wide (Dawn/Dusk resolve in play order); 0 in hand
         self.granted_roam = granted_roam  # Coyote: "gains Roam" for as long as this instance stays on the board
 

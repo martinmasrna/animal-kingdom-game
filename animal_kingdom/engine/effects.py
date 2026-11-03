@@ -281,8 +281,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
         state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
 
     # Apex Predator: it covers the occupant like any placement, and eats it afterwards
-    # (Martin, 2026-09-29): the roar, then every reaction to the cover (Porcupine's Spikes,
-    # Gale), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
+    # (Martin, 2026-09-29): the roar, then every reaction to the cover (Spikes, Poison,
+    # King Theron), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
     _push_theron(state, unit, covered)
     if is_apex and covered is not None:
         state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id,
@@ -878,7 +878,7 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
 #
 # Roam (keywords.md): as an action, move an animal you own that is connected to your den to an adjacent crossroad under
 # the placement rules, at most once per animal per turn. Moving isn't placing: no Roar, no "when you play" reactions, no
-# new place in the play order. Arriving is: adjacency traps, covering reactions (Spikes, Poison, Gale, King Theron) and
+# new place in the play order. Arriving is: adjacency traps, covering reactions (Spikes, Poison, King Theron) and
 # an Apex Predator's eat all happen as on a placement.
 #
 # Hooks for the cards that build on it (none exist yet):
