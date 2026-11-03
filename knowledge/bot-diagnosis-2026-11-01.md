@@ -49,3 +49,38 @@ What runs instead: rounds continue unattended with the outcome refit as the sear
 ## Evidence counted
 
 Misplays Martin reported 2026-10-20 to 2026-10-31: 15 positions. Treatments: 10 network rounds (one shipped on his call with a clear deck down), about 15 dials (7 shipped, the rest benchmark washes), one search rebuild, eight speed passes. Static score right and search wrong: Tiger, Eagle, Rhinoceros. Static score wrong and search rescued: Oxpecker. Net blind spots named in the record: own-den-front body, spent Roar, grazing, timers, the price of a buried 7. Depth 2 on the best network: +4.7 against depth 1's +4.9 (2026-10-23). Twenty worlds against five: a wash. Whole-turn depth 1 on a mid-game position: over 60 s; Martin's bound: 30 s.
+
+## What 2026-11-03 measured
+
+Martin's questions drove the day: "how is it different from search depth", "isn't this overindexing into one situation", "what does 'values problem' mean in practice", "is there a cheap way to test", "maybe the mistake is forcing the bot to be general instead of letting it identify cards by id". Every claim below was measured; the claims that failed their test are listed last so the record stops repeating them.
+
+The exploit under study: the combo deck (Martin's p5; Laras's first-week deck, 275 wins to 20 against the Expert, 68% of her wins by turn 5). Its test: the old Expert pilots p5 and attacks; a defender plays the other nine decks; 144 paired games; the numbers are the defender's wins and the share of games where the den falls by turn 5 (`results/bot_quality/exploit-p5*`).
+
+| defender | wins | den captured by turn 5 |
+|---|---|---|
+| the live Expert (greedy reply model, 8 s) | 40% | 31% |
+| the whole-turn search, 5 hands, 3 s (Saturday's benchmark setting) | 41% (+0.7, −8 to +10) | 27% |
+| the whole-turn search, 20 hands, 30 s (Martin's budget, 2026-11-03) | 51% (+11.1, +1.4 to +20.1) | 26% |
+
+So: the search's gain is real and comes from time and hands, not from the whole-turn reply alone (Saturday's flat tournament measured the cheap setting and was right about it); and no search budget moves the early kills. On Martin's own replayable captures, the whole-turn search two bot-turns before the capture already scores five of six positions as losing (−20 to −125 two rounds out, with 5 hands as with 20); one turn before, no defence exists. The decision that loses is on turns 1 and 2, where every bot reads the position as fine (+55, −19) and draws. The bot attacker is half a Laras (60% wins against the Expert to her 93%), so a pass on this test is necessary, not sufficient.
+
+The judge, measured on 36,025 turn-start positions (turns 1 to 8) from the chaining bot's own 4,914 self-play games, held out by game, label "the side to move loses its den within 3 turns" (base rate 8.8%), scored as AUC (0.5 is useless):
+
+| ranks the positions by | AUC |
+|---|---|
+| the live judge's own score (`wave2_slot_r4_10_live`) | 0.65 |
+| the round-1 refit, old games plus new | 0.65 |
+| the round-1 refit with the search's scores as labels | 0.65 |
+| a refit on the chaining games only, no old games (`results/netlearn/slot_new_only.json`) | 0.65 |
+| the same refit with the outcome discounted by distance, 0.9 a turn (`slot_disc9.json`) | 0.68 |
+| the same, 0.75 a turn (`slot_disc.json`) | 0.72 |
+| a linear predictor fitted to this label on the same 908 inputs | 0.77 |
+| the same linear predictor on card identities instead (hand, board by side, opponent's unseen pool, 264 ids) | 0.80 |
+
+The discount is a dial: the steep one predicts the final winner on Martin's 974 positions at 61% against the live judge's 67%, the gentle one at 65%. A judge with two outputs (final winner; danger in the next turns) would not have to trade. On the final-winner label the identity picture also beats the description picture: AUC 0.753 against 0.726, accuracy 69% against 66%.
+
+What this says: the judge is taught one question, who won the whole game, in which a den lost in three turns and a grind lost in twenty are the same 0; and it is shown descriptions (strength, cost, tags, keywords, one bit "has a Roar") under which Mole and Mouse are the same card. The generalist rule (CLAUDE.md, 2026-07-02, "no deck slugs, archetype names or card ids in bot policies") was written against hand-coded card logic and is enforced by a source scan; a learned meaning per card id is the chess bot's "this is a rook" and is not what the rule forbade. Martin, 2026-11-03: "maybe the fundamental mistake we're making is trying to force the bot to be general, instead of letting it identify cards by id?" The decision on the rule is his.
+
+Pending as of writing: the discounted judge and the new-only judge in the cheap search, paired against the old judge, on the exploit test (`exploit-p5-newjudge`, `exploit-p5-disc`).
+
+Claims made on 2026-11-03 that failed their test, so no session repeats them: that bot games contain no chains to the den (a third of self-play den captures are three placements or more); that the imagined hands are the likeliest hands (they are random deals); that five hands is the hole (five and twenty see the same losses two turns out); that the judge's inputs lack the warning signs (adding opponent-deck and chain-distance numbers to the 908 changed nothing: 0.765 to 0.766); that the lesson was drowned by old games (the new-only refit is 0.645). The one earlier reading that held: the live Expert plays the opponent's reply turn greedily (`advance`/`play_turn` in `engine_rs/src/bots/search.rs`), and the whole-turn search does not.

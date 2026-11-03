@@ -28,4 +28,4 @@ if __name__ == "__main__":
     print(f"{os.path.basename(sys.argv[1])} [{extra}] {secs:.1f} s, {len(rows)} turns")
     for r in rows[:5]:
         lv = r.get("levels") or []
-        print("  ", " ".join(f"{v:7.1f}" for v in ([r.get('board', 0.0)] + lv)), "·", " · ".join(texts(st, r["turn"]))[:110])
+        print("  ", " ".join(f"{v:7.1f}" if v is not None else "      -" for v in ([r.get("board", 0.0)] + lv)), "·", " · ".join(texts(st, r["turn"]))[:110])
