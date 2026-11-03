@@ -34,8 +34,11 @@ DROPOUT = 0.0
 def load(paths):
     ds = [np.load(p, allow_pickle=False) for p in paths]
     out = {"source": np.concatenate([np.full(len(d["y_win"]), i, dtype=np.int16) for i, d in enumerate(ds)]), "paths": list(paths)}
-    for k in ds[0].files:
-        if k.endswith("_names") or k in ("bags", "desc_names"):
+    keys = [k for k in ds[0].files if all(k in d.files for d in ds)]
+    # a relabelled file carries the outcome beside the (soft) training label; a plain file's outcome is its label
+    out["y_outcome"] = np.concatenate([d["y_outcome"] if "y_outcome" in d.files else d["y_win"] for d in ds])
+    for k in keys:
+        if k.endswith("_names") or k in ("bags", "desc_names", "cards"):
             out[k] = ds[0][k]
         elif k == "game":
             base, parts = 0, []
@@ -178,7 +181,7 @@ def train(model, batch, tr, va, epochs, lr, wd, bs, log, name):
 
 
 def report(log, name, logits, d, rows, head):
-    y = (d["y_win"] if head == 0 else d["y_den3"])[rows]
+    y = (d.get("y_outcome", d["y_win"]) if head == 0 else d["y_den3"])[rows]
     ll, a, acc = score(logits[:, head] if logits.ndim == 2 else logits, y)
     log(f"{name:52s} log-loss {ll:.4f}  AUC {a:.3f}  accuracy {acc:.3f}  (base rate {y.mean():.3f}, {len(y)} rows)")
 
