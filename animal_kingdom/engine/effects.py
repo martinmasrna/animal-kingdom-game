@@ -306,10 +306,27 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
                 and (_hook(state, unit.card_id, "on_place") or (onto_enemy and _hook(state, unit.card_id, "on_place_onto_enemy")))):
             del state.roar_twice[unit.owner]            # the Woodpecker: this Roar happens twice, then the double is spent
             times = 2
-        for _ in range(times):
-            _push_hook(state, unit, cr, "on_place")
-            if onto_enemy:
-                _push_hook(state, unit, cr, "on_place_onto_enemy")
+        if times == 2:
+            # The second time is pushed first (the stack is LIFO), as a step that runs the Roar when it comes off the
+            # stack: it happens after the first has resolved and picks its targets then, so it never offers an animal
+            # the first one already removed.
+            state.effect_stack.append({"op": "roar_again", "iid": unit.iid, "cr": cr, "onto_enemy": onto_enemy,
+                                       "by_card": unit.card_id, "by_iid": unit.iid})
+        _push_hook(state, unit, cr, "on_place")
+        if onto_enemy:
+            _push_hook(state, unit, cr, "on_place_onto_enemy")
+
+
+def _op_roar_again(state, step):
+    """The Woodpecker's second Roar: run it now, against the board as it stands after the first. It needs the animal
+    still on the board, where it roars from."""
+    cr, unit = _find_unit(state, step["iid"])
+    if unit is None:
+        return None
+    _push_hook(state, unit, cr, "on_place")
+    if step["onto_enemy"]:
+        _push_hook(state, unit, cr, "on_place_onto_enemy")
+    return None
 
 
 def _fire_cover_event(state, coverer, covered) -> None:
@@ -1454,6 +1471,7 @@ def _op_grant_action(state, step):
 
 OPS: dict[str, Callable] = {
     "mulligan": _op_mulligan,
+    "roar_again": _op_roar_again,
     "gain_food": _op_gain_food,
     "draw": _op_draw,
     "draw_filtered": _op_draw_filtered,

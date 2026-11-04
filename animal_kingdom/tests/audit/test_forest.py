@@ -1157,3 +1157,14 @@ def test_deer_legend_2_flees():
     play(s, "v5", "3,2")
     assert "deer_legend_2" in hand_ids(s, "A")
 
+
+def test_woodpecker_second_roar_picks_a_new_target():
+    s = st(hands={"A": ["woodpecker", "hawk"]})
+    put(s, "2,1", "v3", "B")
+    put(s, "1,2", "v3", "B")
+    play(s, "woodpecker", "3,3")
+    play(s, "hawk", "1,1")
+    choose(s, "1,2")
+    assert s.pending["options"] == ["2,1"]                                # the first Roar's target is gone
+    choose(s, "2,1")
+    assert s.top_unit("2,1") is None and s.top_unit("1,2") is None       # the Roar happened twice
