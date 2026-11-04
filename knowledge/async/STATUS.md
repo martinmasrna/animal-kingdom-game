@@ -13,9 +13,16 @@ Branch `play/async` from `main`, built overnight 2026-11-04 by a cloud session. 
 - **Phase 4, daily ranked** (asked by the supervising session): `POST /api/daily/ranked`, paired with the longest waiting person, a bot at your rating after a day (`DAILY_RANKED_WAIT_DAYS`), at most 3 (`DAILY_RANKED_MAX`), rated by the existing `rate_match`; Ranked then Daily on home; "Looking for a daily opponent" with Leave on home's list. Tests: three more in `test_daily.py` (14 in all), one more in `daily.test.mjs` (4 in all).
 - supervisor message received (2026-11-04, relayed through a session named "Evaluation function training methods" for animal-kingdom-74: phases 4 and 5).
 
+- **Phase 5, the full web suite** (`npm run test:full`, once, in this container on the preinstalled Chromium, 2026-11-04, 19 minutes): **133 tests, 121 pass, 12 fail, 0 cancelled, 0 skipped.** All 12 also fail on `main` in this container (the four files run on a `main` worktree with only the harness's `--no-sandbox` line added: 37 tests, the same 12 fail). None is in a file this work touches:
+  - `collection.test.mjs`: filters: a family, clearing it, and an empty result
+  - `news.test.mjs`: no dot for a newcomer; ... (`spawnSync sqlite3 ENOENT`: the container has no `sqlite3` command)
+  - `replay.test.mjs`, six: a deck in a match's row shows its list beside the row, on hover; a match that can no longer be replayed says so; a match opens its replay; stepping skips what brought nothing; the opponent's hand shows face up; the replay ends on the result
+  - `ui.test.mjs`, four: the series opens the history, the card backs the opponent's decklist; hovering your deck shows your decklist; a hover label in the game does not stay on screen after leaving; a hover label by the window's right edge opens to the left
+  - The fast tiers on this branch: Python 3697 pass, 3 fail (`test_deck_docs.py`, aristocrats, egg_control, hoofed; also failing on `main`); web: the 2 hover-label tests above fail, everything else passes, `daily.test.mjs` included.
+
 ## Next
 
-- Phase 5: one run of `npm run test:full`, its counts here.
+- Waiting for Martin (and the supervising session). The obvious next steps, not started: decision 5 (a mail when a turn comes to you), and the "not rated before your first turn" rule (decision 3).
 
 ## Blocked
 
