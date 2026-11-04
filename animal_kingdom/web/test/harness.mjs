@@ -1,8 +1,8 @@
 // Shared set-up for the browser tests: a private server on a free port (games not logged), recorded view sequences,
 // and a page that plays views through the client (window.__ak.feed) the way the socket delivers them.
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdtempSync, readdirSync, readFileSync, existsSync } from 'node:fs';
+import { tmpdir, homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
@@ -10,8 +10,25 @@ import puppeteer from 'puppeteer-core';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const PY = process.env.AK_PYTHON || join(REPO, '.venv', ...(process.platform === 'win32' ? ['Scripts', 'python.exe'] : ['bin', 'python']));
-const CHROME = process.env.CHROME || (process.platform === 'win32' ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-                                                                     : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome');
+// Chrome for Testing when it is installed (`npx @puppeteer/browsers install chrome@stable`, into ~/.cache/puppeteer): Google's
+// automation build, a separate app, so a focus blocker that polices Google Chrome (Cold Turkey quit every test browser on
+// Martin's Mac, 2026-11-04) leaves it alone. Otherwise the installed Google Chrome.
+function chromeForTesting() {
+  const root = join(homedir(), '.cache', 'puppeteer', 'chrome');
+  if (!existsSync(root)) return null;
+  for (const v of readdirSync(root).sort().reverse()) {
+    const dir = join(root, v);
+    const app = readdirSync(dir).find(d => d.startsWith('chrome-'));
+    if (!app) continue;
+    const exe = process.platform === 'win32' ? join(dir, app, 'chrome.exe')
+      : process.platform === 'darwin' ? join(dir, app, 'Google Chrome for Testing.app', 'Contents', 'MacOS', 'Google Chrome for Testing')
+      : join(dir, app, 'chrome');
+    if (existsSync(exe)) return exe;
+  }
+  return null;
+}
+const CHROME = process.env.CHROME || chromeForTesting() || (process.platform === 'win32' ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+                                                                                           : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome');
 
 const freePort = () => new Promise(res => { const s = net.createServer(); s.listen(0, () => { const { port } = s.address(); s.close(() => res(port)); }); });
 
