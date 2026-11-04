@@ -16,6 +16,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
+from .. import puzzles
+from ..bots.base import Bot
 from ..decks import LADDER_DECK_NAMES, PREMADE_DECKS, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
@@ -96,6 +98,21 @@ def bot_for(level: str, seed: int):
     if level in tutorial.BOTS.values():
         return tutorial.TutorialBot(seed=seed, lesson=next(n for n, b in tutorial.BOTS.items() if b == level))
     return make_bot(BOT_LEVELS[level], seed)
+
+
+PUZZLE_BOT = "puzzle"   # the defender of a puzzle: the solver's own search (puzzles.Solver.defence)
+
+
+class PuzzleBot(Bot):
+    """A puzzle's defender: of every whole-turn reply, one that escapes if any does, else the one that leaves the solver the
+    fewest winning moves. A puzzle can never be solved by the defender's mistake."""
+
+    def __init__(self, solver: "puzzles.Solver"):
+        self.solver = solver
+
+    def choose(self, view, legal, state=None):
+        line = self.solver.defence(state)
+        return line[0] if line else (legal[0] if legal else PassAction())
 
 
 def deck_list(slug: str) -> list[str]:
@@ -219,6 +236,8 @@ class Match:
         self.on_match_end = None         # callback(match); the server adds it to the players' histories
         self.rematches = 0               # a rematch starts a new series in the same match
         self.takeover = False            # a game played on from a logged position (start_from): neither logged nor rated
+        self.puzzle: Optional[str] = None   # a puzzle's id (start_puzzle): never ranked, rated, or in the match history
+        self.solver: Optional[puzzles.Solver] = None   # its search, shared by the defender and the verdict (not saved)
         self.last_log: Optional[dict] = None   # the last finished game (game_log), for its replay
         self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
         self.rng = random.Random(secrets.randbits(32))
@@ -338,6 +357,38 @@ class Match:
         self._clock_update()
         self.version += 1
 
+    def start_puzzle(self, puzzle_id: str) -> None:
+        """A puzzle from its position: both hands face up, both decks empty, no mulligan, the solver (seat A, the player)
+        to move, the defender (seat B) played by the search. It fails the moment the search says the den can no longer
+        be forced, and is solved when the den falls."""
+        pz = puzzles.load(puzzle_id)
+        self.puzzle = puzzle_id
+        self.seed = 0
+        self.actions, self.action_times = [], []
+        self.started_at = time.time()
+        self.state = puzzles.build(pz)
+        self.solver = puzzles.Solver(pz["turns"])
+        self.bots = {"B": PuzzleBot(self.solver)}
+        self.history, self.events, self.seq = [], [], 0
+        self.results = []
+        self.phase = "playing"
+        self.clock = None
+        self.version += 1
+
+    def _puzzle_verdict(self) -> None:
+        """A puzzle in play: fail it as soon as the search proves the den can no longer be forced."""
+        if not self.puzzle or self.state.result is not None:
+            return
+        if self.solver is None:
+            self.solver = puzzles.Solver(puzzles.load(self.puzzle)["turns"])
+            self.bots = {"B": PuzzleBot(self.solver)}
+        try:
+            alive = self.solver.wins(self.state)
+        except puzzles.Unproven:      # never fail a player on a guess
+            return
+        if not alive:
+            self._check_end(Result("B", "puzzle"))
+
     def next_game(self) -> None:
         if self.phase != "game_over":
             raise EngineError("no game to continue from")
@@ -345,6 +396,9 @@ class Match:
         self.version += 1
 
     def rematch(self) -> None:
+        if self.puzzle:                  # a puzzle's retry: its position again, from the start, at any time
+            self.start_puzzle(self.puzzle)
+            return
         if self.phase != "match_over":
             raise EngineError("the match is still on")
         self.last_game = self.results[-1]
@@ -415,6 +469,7 @@ class Match:
             self.history[-1].events += new
             self.history[-1].fx = _effects(self.history[-1].events, self.history[-1])
         self._check_end()
+        self._puzzle_verdict()
         self._clock_update()
         self.version += 1
 
@@ -536,10 +591,13 @@ class Match:
         return self.bots[s].choose(state.view_for(s), rules.legal_actions(state), state)
 
     def fallback_move(self):
-        """A legal move when the bot's own choice failed: the Easy bot's, else the first legal action."""
+        """A legal move when the bot's own choice failed: the Easy bot's, else the first legal action (a puzzle's
+        defender: its own search again, which never fails a legal position)."""
         s = self.to_act()
         state = self.state.clone()
         legal = rules.legal_actions(state)
+        if self.puzzle:
+            return self.bot_move()
         try:
             return make_bot("greedy", self.seed).choose(state.view_for(s), legal, state)
         except Exception:
@@ -554,7 +612,7 @@ class Match:
                 "actions": self.actions, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
                 "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
-                "takeover": self.takeover,
+                "takeover": self.takeover, "puzzle": self.puzzle,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history],
                 "events": self.events, "seq": self.seq}
@@ -571,6 +629,7 @@ class Match:
         m.last_game = d.get("last_game")
         m.last_log = d.get("last_log")
         m.takeover = d.get("takeover", False)
+        m.puzzle = d.get("puzzle")
         m.clock = d.get("clock")
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's
@@ -578,7 +637,10 @@ class Match:
         m.state = GameState.from_dict(d["state"]) if d["state"] else None
         m.history = [Move(**h) for h in d["history"]]
         m.events, m.seq = d.get("events", []), d.get("seq", 0)
-        if m.state is not None and m.seed is not None:
+        if m.puzzle:
+            m.solver = puzzles.Solver(puzzles.load(m.puzzle)["turns"])
+            m.bots = {"B": PuzzleBot(m.solver)}
+        elif m.state is not None and m.seed is not None:
             m.bots = {s: bot_for(seat.bot, m.seed + i) for i, (s, seat) in enumerate(m.seats.items())
                       if seat.is_bot}
         return m
@@ -614,9 +676,25 @@ class Match:
                                               "first": nxt["first"], "yours": nxt.get("seat", "B") == s},
                              "record": [{"deckName": DECK_NAMES.get(d, d), "w": w, "l": l}
                                         for d, (w, l) in record.items()]}
+        if self.puzzle:
+            v["puzzle"] = self.puzzle_view()
         if self.state is not None:
             v["game"] = self._game_view(s, opp)
         return v
+
+    def puzzle_view(self) -> dict:
+        """What the puzzle screen shows: its title and brief, the hint (shown on request), how many of the solver's
+        turns are left, and whether it is solved or failed."""
+        pz = puzzles.load(self.puzzle)
+        st, n = self.state, pz["turns"]
+        r = st.result if st is not None else None
+        last = puzzles.FIRST_TURN + 2 * (n - 1)            # the solver's last turn
+        left = n if st is None else max(0, (last - st.turn_counter) // 2 + 1 if st.current == "A"
+                                        else (last - st.turn_counter - 1) // 2 + 1)
+        return {"id": pz["id"], "title": pz["title"], "theme": pz.get("theme", ""), "turns": n,
+                "brief": f"Take the den {'this turn' if n == 1 else f'in {n} turns'}.", "hint": pz.get("hint", ""),
+                "turnsLeft": left,
+                "status": "playing" if r is None else "solved" if r.winner == "A" and r.reason == "hq_capture" else "failed"}
 
     def _game_view(self, s: str, opp: str) -> dict:
         st = self.state
@@ -658,9 +736,9 @@ class Match:
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
             "eaten": {p: st.hungry_eaten.get(p, 0) for p in "AB"},   # what each side's Hungry animals ate (EVOLVES_AT)
-            # the opponent's hand, face up, while they play with it revealed (your legendary Giraffe)
+            # the opponent's hand, face up, while they play with it revealed (your legendary Giraffe), and always in a puzzle
             **({"revealedHand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u)} for u in st.hands[opp]]}
-               if statics.hand_revealed(st, opp) else {}),
+               if statics.hand_revealed(st, opp) or self.puzzle else {}),
             "handLimit": st.config.hand_limit,
             "deckCount": {p: len(st.decks[p]) for p in "AB"},
             "deckLeft": dict(Counter(st.decks[s])),

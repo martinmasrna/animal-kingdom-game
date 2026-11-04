@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS history (
     profile TEXT NOT NULL, match TEXT NOT NULL, ended REAL NOT NULL, kind TEXT NOT NULL,
     my_deck TEXT NOT NULL, opp TEXT NOT NULL, opp_deck TEXT NOT NULL, won INTEGER NOT NULL, lost INTEGER NOT NULL,
     PRIMARY KEY (profile, match));
+CREATE TABLE IF NOT EXISTS puzzles (
+    profile TEXT NOT NULL, puzzle TEXT NOT NULL, solved REAL NOT NULL, PRIMARY KEY (profile, puzzle));
 """
 
 
@@ -178,7 +180,8 @@ class Profiles:
             self.db.execute("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover, starter, edited) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                             (pid, f"{d['id']}-{guest[:4]}", d["name"], d["cards"], pos, d["cover"], d["starter"], d["edited"]))
         self.db.execute("UPDATE OR IGNORE history SET profile = ? WHERE profile = ?", (pid, guest))
-        for table in ("decks", "history", "sessions"):
+        self.db.execute("UPDATE OR IGNORE puzzles SET profile = ? WHERE profile = ?", (pid, guest))
+        for table in ("decks", "history", "sessions", "puzzles"):
             self.db.execute(f"DELETE FROM {table} WHERE profile = ?", (guest,))
         self.db.execute("DELETE FROM profiles WHERE id = ?", (guest,))
 
@@ -298,6 +301,16 @@ class Profiles:
                                 (r["id"], 0 if same else 1, r["profile"], r["id"]))
                 linked, left = linked + same, left + (not same)
         return linked, left
+
+    # ------------------------------------------------------------- puzzles
+    def solve_puzzle(self, pid: str, puzzle: str) -> None:
+        """Remember that `pid` solved `puzzle` (the first time counts; a puzzle is never ranked or in the history)."""
+        with self.db:
+            self.db.execute("INSERT OR IGNORE INTO puzzles (profile, puzzle, solved) VALUES (?, ?, ?)",
+                            (pid, puzzle, time.time()))
+
+    def solved_puzzles(self, pid: str) -> set[str]:
+        return {r[0] for r in self.db.execute("SELECT puzzle FROM puzzles WHERE profile = ?", (pid,))}
 
     # ------------------------------------------------------------- history
     def record(self, pid: str, match: str, *, kind: str, my_deck: str, opp: str, opp_deck: str,

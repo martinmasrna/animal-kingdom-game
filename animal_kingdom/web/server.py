@@ -39,7 +39,8 @@ from . import oauth
 from .profiles import ProfileError, Profiles
 from . import replay
 from . import tutorial
-from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, STARTER_COVERS, Match, Seat, card_pool, map_info
+from .. import puzzles
+from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, PUZZLE_BOT, STARTER_COVERS, Match, Seat, card_pool, map_info
 from . import discord
 
 CARDS = load_cards()
@@ -138,7 +139,9 @@ class Hub:
             except Exception:
                 log.exception("could not reload %s", path.name)
                 continue
-            if not match.takeover:
+            if match.puzzle:
+                match.on_match_end = on_loop(record_puzzle)
+            elif not match.takeover:
                 match.on_game_end = save_game
                 match.on_match_end = record_match
             self.matches[match.id] = match
@@ -176,7 +179,7 @@ class Hub:
                 events.record(profiles.db, s.profile, "game_end", {
                     "match": match.id, "game": len(match.results), "lesson": lesson, "won": r["winner"] == p,
                     "reason": r["reason"], "rounds": r["turns"]})
-                if r["winner"] == p:   # a line for the Discord channel, when it is one worth a line (web/discord.py)
+                if r["winner"] == p and not match.puzzle:   # a line for the Discord channel, when it is one worth a line (web/discord.py)
                     opp = match.seats.get("B" if p == "A" else "A")
                     deck = lambda q: DECK_NAMES.get(q.deck, "their own deck") if q else ""
                     text = discord.result_text(s.name, opp.name if opp else "", deck(s), deck(opp), opp.bot if opp and opp.is_bot else None, lesson)
@@ -243,7 +246,10 @@ class Hub:
             if match.version != version:     # the position moved under the bot (rematch etc.)
                 continue
             try:
-                match.act(s, action)
+                if match.puzzle:     # the verdict searches: off the event loop
+                    await asyncio.to_thread(match.act, s, action)
+                else:
+                    match.act(s, action)
             except Exception:   # the move was refused (feedback 2026-10-01: a bot that never moved, only conceding got out): the
                 log.exception("bot move refused in match %s; playing a fallback move", match.id)   # plain move, then the first legal one
                 failures += 1
@@ -448,6 +454,33 @@ def deck_cover(seat: Seat) -> str:
             if d.get("cover") and Counter(d["cards"]) == cards:
                 return d["cover"]
     return next((c for c in cards if CARDS[c].rarity == "legendary"), next(iter(cards), ""))
+
+
+def on_loop(fn):
+    """`fn`, run on the server's event loop whichever thread calls it (a puzzle's moves are applied off the loop, and the
+    profile database belongs to the loop's thread)."""
+    loop = asyncio.get_running_loop()
+    return lambda *a: loop.call_soon_threadsafe(fn, *a)
+
+
+def record_puzzle(match: Match) -> None:
+    """A puzzle solved is remembered on the player's profile; nothing else of it is kept (never ranked, rated, logged or
+    in the match history)."""
+    r = match.results[-1] if match.results else None
+    seat = match.seats.get("A")
+    if r and r["winner"] == "A" and r["reason"] == "hq_capture" and seat and seat.profile:
+        try:
+            profiles.solve_puzzle(seat.profile, match.puzzle)
+        except Exception:
+            log.exception("could not remember puzzle %s for %s", match.puzzle, seat.profile)
+
+
+async def list_puzzles(req):
+    """Every puzzle, in the order a player meets them: id, title, theme, turns, and whether you have solved it."""
+    p = profile_of(req)
+    solved = profiles.solved_puzzles(p["id"]) if p else set()
+    return web.json_response([{"id": pz["id"], "title": pz["title"], "theme": pz.get("theme", ""), "turns": pz["turns"],
+                               "solved": pz["id"] in solved} for pz in puzzles.all_puzzles()])
 
 
 def record_match(match: Match) -> None:
@@ -993,7 +1026,7 @@ async def current_match(req):
     started = lambda m, seat: not any(o.is_bot for o in m.seats.values()) or any(h.seat == seat for h in m.history)
     mine = [(m, s) for m in hub.matches.values() if m.phase == "playing" and not m.schedule and live(m)
             for seat, s in m.seats.items() if s.profile == p["id"] and started(m, seat)
-            and not any(o.bot in lessons for o in m.seats.values())]
+            and not any(o.bot in lessons for o in m.seats.values()) and not m.puzzle]
     if not mine:
         return web.json_response({})
     m, s = max(mine, key=lambda ms: ms[0].started_at)
@@ -1258,10 +1291,28 @@ async def takeover_match(req, src: dict):
     return web.json_response({"id": mid, "token": token, "seat": seat})
 
 
+async def puzzle_match(req, puzzle_id: str):
+    """A puzzle: its position, you in seat A to move, its defender in seat B. Solving it is remembered on your profile;
+    it is never ranked, rated, logged or in the match history."""
+    if puzzle_id not in puzzles.all_ids():
+        raise web.HTTPNotFound(text="no such puzzle")
+    p = profile_of(req)
+    mid, token = hub.new_id(), secrets.token_urlsafe(12)
+    match = Match(mid, Seat(token, display(p) if p else "You", profile=p and p["id"]))
+    match.seats["B"] = Seat(secrets.token_urlsafe(12), "Defender", bot=PUZZLE_BOT)
+    match.start_puzzle(puzzle_id)
+    match.on_match_end = on_loop(record_puzzle)
+    hub.matches[mid] = match
+    hub.save(match)
+    return web.json_response({"id": mid, "token": token, "seat": "A"})
+
+
 async def create_match(req):
     body = await req.json()
     if body.get("from"):
         return await takeover_match(req, body["from"])
+    if body.get("puzzle") is not None:
+        return await puzzle_match(req, str(body["puzzle"]))
     try:
         lesson = int(body.get("tutorial") or 0)    # the tutorial's lesson: 1 or 2
         if lesson not in (0, *tutorial.BOTS):
@@ -1373,7 +1424,10 @@ async def socket(req):
             try:
                 kind = data.get("t")
                 if kind == "act":
-                    match.act(seat, data["action"])
+                    if match.puzzle:      # the verdict searches: off the event loop
+                        await asyncio.to_thread(match.act, seat, data["action"])
+                    else:
+                        match.act(seat, data["action"])
                 elif kind == "deck":
                     match.set_deck(seat, custom_decks.resolve(data["deck"]))
                 elif kind == "ready":
@@ -1462,6 +1516,7 @@ def make_app() -> web.Application:
         web.post("/api/challenge/{id}/answer", challenge_answer),
         web.get("/ws/presence", presence_socket),
         web.post("/api/match", create_match),
+        web.get("/api/puzzles", list_puzzles),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),
         web.static("/static", STATIC),

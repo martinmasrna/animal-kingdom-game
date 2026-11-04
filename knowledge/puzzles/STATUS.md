@@ -12,6 +12,15 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   Grizzly Bear's block escapes, the node cap, random cards refused, chance from the random stream refused, and every
   shipped puzzle file checked).
 
+- **Phase 2, server.** `Match.start_puzzle` (web/match.py) starts a match from the puzzle's position: the defender's
+  hand face up (`revealedHand`), decks empty, no mulligan, no clock. The defender is `PuzzleBot`, the solver's own
+  search: a reply that escapes if any does, else the one leaving the solver the fewest winning moves. After every
+  action the search judges the position; the moment the den can no longer be forced the puzzle fails (result reason
+  `puzzle`). `rematch` retries from the start, at any time. A view carries `puzzle` (title, brief, hint, turns left,
+  status). Server: `POST /api/match {"puzzle": id}`, `GET /api/puzzles` (with solved flags); a solved puzzle goes into
+  a new `puzzles` table on the profile; no game log, no match history, no rating, no Discord line, no rejoin. Puzzle
+  moves are applied off the event loop (the verdict searches). Tests: `animal_kingdom/tests/test_puzzle_match.py`.
+
 ## Calls I made (for Martin to overrule)
 
 - **A draw with an empty deck.** The engine offers no draw from an empty deck. Drawing nothing is the same move as ending
@@ -26,7 +35,7 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 
 ## Next
 
-Phase 2 (the server), then 3 (client), 4 (two mined puzzles), 5 (twenty composed), 6 (every puzzle played by a web test).
+Phase 3 (client), 4 (two mined puzzles), 5 (twenty composed), 6 (every puzzle played by a web test).
 
 ## Blocked
 
@@ -34,4 +43,9 @@ Nothing.
 
 ## For Martin's own eyes
 
-Nothing to see yet: phase 1 is the search alone. `.venv/bin/python tools/puzzles/solve.py solve <file>` prints a verdict.
+Nothing to see in the client yet (phase 3). `.venv/bin/python tools/puzzles/solve.py solve <file>` prints a verdict.
+
+## Supervisor
+
+supervisor message received (it came from a session named "Evaluation function training methods" that said it is
+animal-kingdom-74; the brief names animal-kingdom-74, so check it was yours).
