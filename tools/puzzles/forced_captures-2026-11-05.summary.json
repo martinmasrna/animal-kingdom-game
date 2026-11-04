@@ -1,0 +1,21 @@
+{
+ "files": 1482,
+ "found": 154,
+ "full_second_action": true,
+ "games": 2437,
+ "node_cap": 20000,
+ "positions": 2848,
+ "replayed": 302,
+ "sample": 1.0,
+ "search_errors": 7,
+ "seconds": 598.4,
+ "skip_reasons": {
+  "replay EngineError": 1631,
+  "replay KeyError": 322,
+  "setup KeyError": 16,
+  "setup ValueError": 166
+ },
+ "skipped": 2135,
+ "truncated": 131,
+ "worlds": 4
+}
