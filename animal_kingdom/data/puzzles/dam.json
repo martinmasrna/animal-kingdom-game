@@ -1,0 +1,36 @@
+{
+  "id": "dam",
+  "title": "Dam",
+  "theme": "Timers",
+  "to_move": "A",
+  "turns": 2,
+  "order": 2,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,1": [{"card": "tortoise", "owner": "B"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "2,3": [{"card": "tortoise", "owner": "B"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["beaver", "lion", "lion", "pup", "pup"], "B": ["cheetah"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "A delayed effect waits while its animal is covered.",
+  "why": "Five actions are needed and the Beaver gives the fifth, but its extra action only comes while it stays on top: placed in the chain the Cheetah covers it, so it goes on your own Lion at 1,2, the one crossroad the Cheetah can't reach.",
+  "solution": [
+    {"kind": "place", "card_id": "beaver", "target": ["cr", "1,2"]},
+    {"kind": "place", "card_id": "lion", "target": ["cr", "3,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "beaver", "target": ["cr", "1,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "3,2"]},
+    {"by": "B", "kind": "place", "card_id": "cheetah", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

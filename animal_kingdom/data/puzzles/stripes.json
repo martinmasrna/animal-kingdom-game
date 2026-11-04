@@ -1,0 +1,37 @@
+{
+  "id": "stripes",
+  "title": "Stripes",
+  "theme": "Flee",
+  "to_move": "A",
+  "turns": 2,
+  "order": 7,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,2": [{"card": "zebra", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["lion", "black_mamba", "pup", "pup"], "B": ["cheetah"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "Covering a Zebra sends your own animal back to your hand.",
+  "why": "Covering the Zebra only bounces your animal and leaves the gate open to the Zebra again; the Black Mamba removes it from beside instead, a Pup takes the gate, and the Lion stays in hand for the Cheetah that will cover the Mamba.",
+  "solution": [
+    {"kind": "place", "card_id": "black_mamba", "target": ["cr", "4,2"]},
+    {"kind": "choice", "choice": "5,2"},
+    {"kind": "place", "card_id": "pup", "target": ["cr", "5,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "black_mamba", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "choice", "choice": "5,2"},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["cr", "5,2"]},
+    {"by": "B", "kind": "place", "card_id": "cheetah", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

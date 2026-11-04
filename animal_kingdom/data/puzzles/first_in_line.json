@@ -1,0 +1,34 @@
+{
+  "id": "first_in_line",
+  "title": "First in line",
+  "theme": "Traps",
+  "to_move": "A",
+  "turns": 2,
+  "order": 4,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "boar", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["lion", "lion", "pup", "pup"], "B": ["cheetah"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "The Boar removes only the first enemy placed next to it.",
+  "why": "The Lion walked straight to 4,2 is removed by the Boar beside it; a Pup sent there first spends the Boar's one charge, and the Lion that covers the Pup is safe.",
+  "solution": [
+    {"kind": "place", "card_id": "pup", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "lion", "target": ["cr", "4,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"by": "B", "kind": "place", "card_id": "cheetah", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "id": "hunger",
+  "title": "Hunger",
+  "theme": "Dawn",
+  "to_move": "A",
+  "turns": 2,
+  "order": 3,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,2": [{"card": "elephant", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["lion", "lion", "pup"], "B": ["cheetah", "bobcat"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "Look at what the Elephant must eat at the start of its owner's turn.",
+  "why": "The Elephant (9) can't be covered now, but its owner has no food, so at its Dawn it eats nothing and drops to 4: one Lion to the gate and end the turn; the second Lion is needed next turn to cover whatever stands there.",
+  "solution": [
+    {"kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"kind": "pass"}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "pass"},
+    {"by": "B", "kind": "place", "card_id": "bobcat", "target": ["cr", "2,1"]},
+    {"by": "B", "kind": "place", "card_id": "cheetah", "target": ["cr", "1,1"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

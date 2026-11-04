@@ -1,0 +1,34 @@
+{
+  "id": "ink",
+  "title": "Ink",
+  "theme": "Traps",
+  "to_move": "A",
+  "turns": 2,
+  "order": 5,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "hippopotamus", "owner": "B"}],
+    "4,3": [{"card": "hippopotamus", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["octopus", "mouse", "pup", "pup"], "B": ["pup"]},
+  "food": {"A": 0, "B": 9},
+  "hint": "The Octopus's Roar comes first, but the Hippos still answer the animal that woke them.",
+  "why": "Any weak animal placed at 4,2 is removed by the Hippos; the Octopus is removed too, but its Roar has already switched both Hippos off for good, so the Pup that follows stays and the den is two steps away.",
+  "solution": [
+    {"kind": "place", "card_id": "octopus", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "pup", "target": ["cr", "4,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "octopus", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["cr", "4,2"]},
+    {"by": "B", "kind": "place", "card_id": "pup", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "mouse", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

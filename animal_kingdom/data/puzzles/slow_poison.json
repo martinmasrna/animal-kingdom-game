@@ -1,0 +1,35 @@
+{
+  "id": "slow_poison",
+  "title": "Slow poison",
+  "theme": "Poison",
+  "to_move": "A",
+  "turns": 2,
+  "order": 6,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,2": [{"card": "toad", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["lion", "lion", "pup"], "B": ["cheetah"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "Poison takes its time: the animal that covers a Toad is removed at the start of its owner's next turn.",
+  "why": "Covering the Toad now gets the Lion removed at the defender's next turn and the Toad back; Poison never stops a walk-in, so one Lion to 4,2 now, and next turn cover the Toad and take the den before the poison can act.",
+  "solution": [
+    {"kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"kind": "pass"}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "pass"},
+    {"by": "B", "kind": "place", "card_id": "cheetah", "target": ["cr", "2,1"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

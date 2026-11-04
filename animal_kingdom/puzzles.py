@@ -179,11 +179,23 @@ def step(state: GameState, action: Action) -> GameState:
     return nxt
 
 
-def _key(state: GameState) -> str:
-    """The exact position (iids and play order included): a transposition table key."""
-    d = state.to_dict()
-    d.pop("rng", None)
-    return json.dumps(d, sort_keys=True, separators=(",", ":"))
+def _unit(u: UnitInstance) -> tuple:
+    return (u.card_id, u.owner, u.iid, u.placed_on_turn, u.strength_counter, u.locked_until_turn, u.retaliation_used,
+            u.play_seq, u.granted_roam)
+
+
+def _key(state: GameState) -> tuple:
+    """The exact position (iids and play order included): a transposition table key. Everything to_dict saves but the
+    random stream (a puzzle has no chance in it), built as tuples: the search asks for it at every node."""
+    return (state.turn_counter, state.current, state.actions_taken_this_turn, state.units_placed_this_turn,
+            state.idle_turns, state._next_iid, state.play_seq, tuple(sorted(state.food.items())),
+            tuple((cr, tuple(map(_unit, st))) for cr, st in sorted(state.board.items()) if st),
+            tuple((p, tuple(map(_unit, h))) for p, h in sorted(state.hands.items())),
+            tuple((p, tuple(d)) for p, d in sorted(state.decks.items())),
+            tuple(state.remove_pile), tuple(state.pile_owners), repr(state.effect_stack), repr(state.pending),
+            repr(state.scheduled), repr(sorted(state.turn_flags.items())), repr(state.card_strength_counters),
+            tuple(sorted(state.inked)), repr(sorted(state.roar_twice.items())), repr(sorted(state.hungry_eaten.items())),
+            repr(sorted(state.last_roar.items())), repr(state.jelly), state.result)
 
 
 def turn_key(state: GameState) -> str:
