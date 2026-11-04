@@ -167,3 +167,67 @@ def view(s: Standing, rating_shown: str | None = None) -> dict:
     else:
         v["stars"], v["of"] = s.stars, stars_needed(s.league)
     return v
+
+
+def sort_key(s: Standing, rating: float) -> float:
+    """Where a person sits on the one leaderboard beside the bots, on the rating's scale: below the top their league's par
+    plus their stars' share of the 100 points to the next league (league 8, 2 of 5 stars: 1740); in the top league their
+    rating."""
+    return rating if s.league == TOP else par(s.league) + 100 * s.stars / stars_needed(s.league)
+
+
+# --------------------------------------------------------------- the table (in the profiles database, beside `ladder`)
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS tiers (
+    id TEXT PRIMARY KEY, league INTEGER NOT NULL, stars INTEGER NOT NULL, floor INTEGER NOT NULL,
+    streak INTEGER NOT NULL, best INTEGER NOT NULL, games INTEGER NOT NULL);
+"""
+
+
+class Tiers:
+    """Each person's standing by ladder id (their profile id). Bots have none. A person with no row stands in league 1."""
+
+    def __init__(self, db):
+        self.db = db
+        db.executescript(SCHEMA)
+
+    def get(self, pid: str) -> Standing:
+        row = self.db.execute("SELECT league, stars, floor, streak, best FROM tiers WHERE id = ?", (pid,)).fetchone()
+        return Standing(*row) if row else Standing()
+
+    def games(self, pid: str) -> int:
+        row = self.db.execute("SELECT games FROM tiers WHERE id = ?", (pid,)).fetchone()
+        return row[0] if row else 0
+
+    def put(self, pid: str, s: Standing, games: int) -> None:
+        with self.db:
+            self.db.execute("INSERT OR REPLACE INTO tiers VALUES (?, ?, ?, ?, ?, ?, ?)",
+                            (pid, s.league, s.stars, s.floor, s.streak, s.best, games))
+
+    def result(self, pid: str, won: bool, rating: float) -> Change:
+        """One rated game for a person: their standing moved by the result, `rating` their rating going in."""
+        ch = after_game(self.get(pid), won, rating)
+        self.put(pid, ch.after, self.games(pid) + 1)
+        return ch
+
+    def all(self) -> dict[str, Standing]:
+        return {lid: Standing(*rest) for lid, *rest in self.db.execute("SELECT id, league, stars, floor, streak, best FROM tiers")}
+
+    def migrate(self, ratings: dict) -> int:
+        """Once, when leagues arrive: every person already rated gets a standing from their rating (from_rating); a
+        `tiers_migrated` mark in ladder_meta keeps it from running again, so a later newcomer starts in league 1.
+        `ratings`: ladder id -> ladder.Rating for the people (not the bots). Returns how many were placed."""
+        self.db.execute("CREATE TABLE IF NOT EXISTS ladder_meta (k TEXT PRIMARY KEY, v TEXT NOT NULL)")
+        if self.db.execute("SELECT 1 FROM ladder_meta WHERE k = 'tiers_migrated'").fetchone():
+            return 0
+        n = 0
+        with self.db:
+            for lid, r in ratings.items():
+                if lid.startswith("bot:") or r.games <= 0:
+                    continue
+                if not self.db.execute("SELECT 1 FROM tiers WHERE id = ?", (lid,)).fetchone():
+                    s = from_rating(r.rating, r.games)
+                    self.db.execute("INSERT INTO tiers VALUES (?, ?, ?, ?, ?, ?, ?)", (lid, s.league, s.stars, s.floor, 0, s.best, 0))
+                    n += 1
+            self.db.execute("INSERT OR REPLACE INTO ladder_meta VALUES ('tiers_migrated', '1')")
+        return n

@@ -139,7 +139,7 @@ Bronze to Diamond reads instantly and says nothing; it is the fallback if none o
 
 ## Migration
 
-Existing profiles get a league from their current rating once, when the server first starts with leagues (`tiers.from_rating`, run by `server.migrate_tiers`): two leagues under the league their rating stands for (the highest league whose par is at or under the rating), capped at league 9, at that league's checkpoint, with 0 stars. A profile still placing (under 10 rated games) starts at league 1. Examples: 1820 stands for league 9, starts in league 7 (checkpoint 7); 1500 stands for league 6, starts in league 4; 1250 stands for league 3, starts in league 1.
+Existing profiles get a league from their current rating once, when the server first starts with leagues (`tiers.from_rating`, run by `server.migrate_tiers`): two leagues under the league their rating stands for (the highest league whose par is at or under the rating), so at most league 8 (the top is always earned), at that league's checkpoint, with 0 stars. A profile still placing (under 10 rated games) starts at league 1. Examples: 1820 stands for league 9, starts in league 7 (checkpoint 7); 1500 stands for league 6, starts in league 4; 1250 stands for league 3, starts in league 1.
 
 Why two under: putting everyone straight where their rating says would make the first ranked game after the release say nothing. Two leagues under, with the rating bonus, a player whose rating is ahead gains two stars a win and is back where they belong in about eight wins (an 1820 player from league 7 to the top: 15 stars at 2 a win), so the release is felt as a climb, not taken away. Bots get nothing: they have no league.
 

@@ -7,10 +7,11 @@ Branch `ranked/leagues`, built overnight 2026-11-04 by a cloud session. The desi
 - Phase 1, design: `docs/ranked-leagues.md` (the four games, what each mechanic is for, the rules table, Martin's calls, three name sets).
 - Phase 2, simulation: `tools/ranked/simulate.py`. The numbers are in the doc. The plain Hearthstone rules let weak players grind to the top (rating-matched opponents keep everyone near 50%); two rating ties fixed it (a win pays double while the rating is ahead of the league, a loss costs double while it is over 100 behind).
 
+- Phase 3, the mechanics: a `tiers` table beside `ladder` in the profiles database (`web/tiers.py` `Tiers`), moved in `server.rate_match` for every person in a rated game, read off their rating going in. Matchmaking and bot ratings untouched. `/api/me` and the profile carry `league`; the leaderboard lists a person from their first rated game, with their league and no number below the top league (before, a person still placing was left off); a ranked match's seats carry a person's league and their rating only in the top league; the match view at the end carries the one line. The migration runs once at startup (marked in `ladder_meta`). Tests: `animal_kingdom/tests/test_tiers.py` (one per rule) and `test_ladder.py` updated to the new screens. Fast tier: 3707 passed; 3 fail in `test_deck_docs.py`, which fail on `main` too (the deck docs are stale against cards.json; regenerate with `.venv/bin/python -m animal_kingdom.render.deck_docs`, left alone here as not this branch's).
+
 ## Next
 
-- Phase 3, the mechanics: league state per profile, updated on every rated game with a person in it; tests.
-- Phase 4, the client text; phase 5, the migration (designed in the doc).
+- Phase 4, the client text; phase 5, the migration (built in phase 3, designed in the doc).
 
 ## Blocked / caveats
 
@@ -18,6 +19,8 @@ Branch `ranked/leagues`, built overnight 2026-11-04 by a cloud session. The desi
 - Web research came through search summaries only (the session's network policy blocked the wikis and blizzard.com).
 
 ## For Martin to look at
+
+- After phase 3: nothing on screen yet. The behaviour change to judge: people still placing now show on the leaderboard (in league 1 and up) instead of being hidden until ten games.
 
 - The rules table and "Martin's calls" in `docs/ranked-leagues.md`: names, pictures, whether bots show a league, seasons.
 - The Kalista row of the simulation: the one learning player, a week at league 7 while her rating caught up. Is that the right feel?
