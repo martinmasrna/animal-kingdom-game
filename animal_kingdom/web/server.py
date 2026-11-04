@@ -1290,8 +1290,15 @@ async def create_match(req):
         # The player's deck is no opponent, even sent as a custom list identical to a premade (the mirror isn't a test).
         mine = sorted(load_premade_deck(deck))
         wanted = gauntlet.get("decks")       # an explicit field (any shipped deck, the bots' own, a test deck such as lions30, or a saved player deck), else the starters
-        if wanted is not None and (not isinstance(wanted, list) or not all(d in PREMADE_DECKS or d in TEST_BOT_DECKS or d in custom_decks._saved for d in wanted)):
-            raise web.HTTPBadRequest(text="bad gauntlet field")
+        if wanted is not None:
+            if not isinstance(wanted, list):
+                raise web.HTTPBadRequest(text="bad gauntlet field")
+            try:
+                wanted = [custom_decks.resolve(d) if isinstance(d, dict) else d for d in wanted]   # a player's own deck as {name, list}, as the home piece sends its field
+            except EngineError as e:
+                raise web.HTTPBadRequest(text=str(e))
+            if not all(d in PREMADE_DECKS or d in TEST_BOT_DECKS or d in custom_decks._saved for d in wanted):
+                raise web.HTTPBadRequest(text="bad gauntlet field")
         mirror = bool(gauntlet.get("mirror"))   # both seats on each named deck in turn: the pilot is the only variable
         field = [d for d in (wanted if wanted is not None else sorted(DECK_SLUGS))
                  if mirror or (d != deck and d not in skip and sorted(load_premade_deck(d)) != mine)]

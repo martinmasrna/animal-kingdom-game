@@ -247,6 +247,7 @@ try { const k = JSON.parse(store('ak:play') || '{}');
 const keepPlay = () => { if (['bot', 'ranked'].includes(play.opp)) store('ak:play', JSON.stringify({ opp: play.opp, level: play.level, botDeck: play.botDeck, side: play.side })); };
 const TEST_BOTS = [['lions30', '30 Lions']];   // test opponents (decks.TEST_BOT_DECKS), offered only after #/?botdeck=<id>
 const LEVELS = BANDS.map(b => [b, b]), SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
+const GFIELDS = [['mine', 'Against your other decks'], ['shipped', 'Against the shipped decks']], GGAMES = [['1', '1 game a deck'], ['2', '2 games a deck'], ['5', '5 games a deck'], ['10', '10 games a deck']];   // the gauntlet's field and length, chosen on home (Martin, 2026-11-04: a gauntlet he can reach without a link)
 const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
 // Home's corner piece (design sandbox screen/nav/, 2026-10-02): the Ladder (where you stand on it), Collection by name, and a menu (three bars) listing the rest, the gear kept for Settings in it; seven equal icons were too many. Feedback is a tab on the
 // screen's edge while the game is in testing (moves into the menu's list at launch; see boot). Icons painted in the board numbers' chalk.
@@ -261,7 +262,7 @@ let homeMode = {};   // the mode home was last drawn in: a late redraw keeps to 
 function homeScreen(mode = {}) {
   screen = 'home'; homeMode = mode;
   if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(homeMode); }); }   // the dot and "Since you last played" once it's known
-  if (mode.gauntlet) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet' || mode.join) play.opp = mode.join ? 'friend' : 'bot';
+  if (mode.gauntlet) play.opp = 'gauntlet'; else if (mode.join) play.opp = 'friend';
   const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
   const testBot = new URLSearchParams(location.hash.split('?')[1] || '').get('botdeck');   // a test opponent, by link only
   if (TEST_BOTS.some(([id]) => id === testBot)) play.botDeck = testBot;
@@ -282,11 +283,11 @@ function homeScreen(mode = {}) {
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
   const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
   const chooser = play.open === 'decks'
-    ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${deckList(peek)}</div></div>`
-    : play.open === 'opp' ? `<div class="chooser opps">${play.opp === 'gauntlet' ? levels + dd('side', play.side, SIDES)
-      : `<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
+    ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, chosen && d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${peek ? deckList(peek) : ''}</div></div>`
+    : play.open === 'opp' ? `<div class="chooser opps">${`<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend'], ['gauntlet', 'Gauntlet']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
         + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f, '', play.friends)}</button>`).join('')}</div>
           <button class="slab" id="addfriend">Add a friend</button><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
+          : play.opp === 'gauntlet' ? levels + dd('side', play.side || 'mine', SIDES) + dd('gfield', play.gfield || 'mine', GFIELDS) + dd('ggames', play.ggames || '2', GGAMES)
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
     : play.open === 'menu' ? `<div class="chooser gear">${!learned() ? '' : `<button class="slab" id="learn2">${TOPICON.learn}How to play</button>`}<a class="slab" href="#/news">${TOPICON.news}News${newsUnread() ? '<i class="ndot"></i>' : ''}</a><a class="slab" href="#/settings">${TOPICON.settings}Settings</a><button class="slab fbm" id="fbmenu">${TOPICON.feedback}Feedback</button></div>`
     : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
@@ -294,7 +295,7 @@ function homeScreen(mode = {}) {
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
     <div class="top">${mePiece()}<a class="backbtn lab" href="#/collection" aria-label="Collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.menu}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
-    ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
+    ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar">${chosen ? `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>` : `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn"><b>Choose a deck</b><i class="chev"></i></button>`}
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}<i class="chev"></i></button>
       <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
@@ -322,7 +323,7 @@ function homeScreen(mode = {}) {
   });
   const wireList = () => { const e = $('dedit'); if (e) e.onclick = () => { play.open = null; location.hash = "#/collection/" + play.peek.slice(3); };
     const dl = root.querySelector('.dl'); if (dl) wirePops(dl); };
-  if (play.open === 'decks') { play.peek = peek.id; wireList(); }
+  if (play.open === 'decks') { play.peek = peek && peek.id; wireList(); }
   if (play.open === 'opp' && play.opp === 'friend' && !play.friends) api('/api/friends').then(r => r.ok && r.json()).then(j => {
     play.friends = j ? j.friends : []; play.code = play.code || ''; play.friendCode = j && j.code; if (screen === 'home') redraw(); });
   root.querySelectorAll('[data-friend]').forEach(el => el.onclick = () => { play.friend = play.friend === el.dataset.friend ? null : el.dataset.friend; redraw(); });
@@ -337,6 +338,7 @@ function homeScreen(mode = {}) {
     $('joinbtn').onclick = joinCode;
   }
   $('go').onclick = async () => {
+    if (!chosen) return toast('Choose a deck first');
     if (mode.join) {
       const r = await api(`/api/match/${mode.join}/join`, { method: 'POST', body: JSON.stringify({ deck: deckSpec(chosen), name: 'Friend' }) });
       if (!r.ok) return toast(r.status === 404 ? `No match ${mode.join}` : await r.text());
@@ -352,7 +354,8 @@ function homeScreen(mode = {}) {
     }
     if (play.opp === 'gauntlet') {
       const q = new URLSearchParams(location.hash.split('?')[1] || '');
-      body.gauntlet = { level: play.level, reverse: play.side === 'theirs' };
+      body.gauntlet = { level: play.level, reverse: play.side === 'theirs', games: +(play.ggames || 2) };
+      if ((play.gfield || 'mine') === 'mine' && !q.get('decks')) body.gauntlet.decks = all.filter(d => d.mine && !d.short && d.id !== chosen.id).map(deckSpec);   // your other finished decks, by their lists
       if (q.get('skip')) body.gauntlet.skip = q.get('skip').split(',');
       if (q.get('decks')) body.gauntlet.decks = q.get('decks').split(',');       // #/gauntlet?decks=a,b: exactly this field (Martin, 2026-10-21: the three piles)
       if (q.get('level')) body.gauntlet.level = q.get('level');
