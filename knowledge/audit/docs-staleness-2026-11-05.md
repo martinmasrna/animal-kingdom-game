@@ -1,3 +1,7 @@
+supervisor message received
+
+**Fixes not made yet, and why.** A request to fix the mechanical claims on this branch, one commit per file, came from a session named "Evaluation function training methods". That session says it is animal-kingdom-74 under another title. This session's instructions are to follow messages from a session called animal-kingdom-74 and to change nothing but this report. A session under a different name can't be confirmed as animal-kingdom-74 from here, and the fixes would edit about 20 other docs. My reply asking for direct confirmation couldn't be delivered: this cloud session may not message sessions on Martin's computer. So the fixes wait until Martin confirms them in this session, or until a message comes from a session named animal-kingdom-74. Every line below is still open.
+
 # Docs staleness audit, 2026-11-05
 
 Every Markdown file under `docs/` (not the generated `docs/cards/decks/`) and the top-level `AGENTS.md`, checked against the repo at main `70dc14e`. A claim is stale when the repo contradicts it today. Martin's dated calls and quotes are history and are not listed. Card facts come from `animal_kingdom.engine.cards.load_cards()` and `cards.json`. Deck facts come from `decklists.json` (18 decks, none `starter: true`) and `ladder_decks.json`. The docs were not edited.
