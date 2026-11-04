@@ -12,7 +12,7 @@ This is a design proposal only. Names, strength values, and exact wording are pr
 
 The current game is two actions per turn, with a Draw action drawing two cards. A unit captures the den immediately when placed there; normal placement needs a connected chain, while Flight only ignores that connection for the flying unit. Strength is relevant to covering and holding a crossroad, not to dealing damage. These are the constraints for this proposal, not the historical draw-1 assumptions in the earlier Aggro redesign document. See the [mental model](../rules/mental-model.md#the-whole-system-in-one-breath) and its [connection and strength rules](../rules/mental-model.md#the-board-is-a-graph-placement-is-gated-by-connection).
 
-The current 4-4-6 list is a source of roles and candidates, not a claim that every current card belongs in the redesign ([current deck](decks/aggro-hq-rush.md)). The recommendation below still uses a 30-card, 4-4-6 test deck so it is comparable to the existing decks. A larger candidate pool is useful for deckbuilding, but should not be mistaken for an instruction to add all of its cards.
+The current 4-4-6 list is a source of roles and candidates, not a claim that every current card belongs in the redesign ([current deck](decks/den-rush.md)). The recommendation below still uses a 30-card, 4-4-6 test deck so it is comparable to the existing decks. A larger candidate pool is useful for deckbuilding, but should not be mistaken for an instruction to add all of its cards.
 
 ## Ranked diagnosis
 
@@ -27,7 +27,7 @@ This order follows the earlier diagnosis that clearing without occupying fails t
 
 ### Evidence versus bot blind spot
 
-The first three failures are rule-structure claims; they can be demonstrated from a board position without any bot. The claim that Aggro cannot reach row-1/3 den lanes is not yet a card diagnosis: both production bot families are documented as over-valuing the row-2 spine and under-contesting those lanes ([project status, Bots — known blind spots](../STATUS.md)). Therefore:
+The first three failures are rule-structure claims; they can be demonstrated from a board position without any bot. The claim that Aggro cannot reach row-1/3 den lanes is not yet a card diagnosis: both production bot families are documented as over-valuing the row-2 spine and under-contesting those lanes ([bots, known blind spots](../bots.md)). Therefore:
 
 - Treat a low use rate of a row-1/3 route as a pilot hypothesis until RefereeBot replays and deliberately constructed lane positions agree with it.
 - Treat a card as a card problem when the same legal front/capture sequence is unattractive or fails under RefereeBot and inspected replays, not merely when TurnBot misses it.
