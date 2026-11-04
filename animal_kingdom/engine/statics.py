@@ -77,7 +77,7 @@ def crossroad_of(state: GameState, unit: UnitInstance) -> Optional[str]:
 # --------------------------------------------------------------------- keywords
 
 # Auras that give an adjacent ally a keyword: card id -> (keyword, the family it's limited to, or None).
-KEYWORD_AURAS = {
+KEYWORD_AURAS: dict[str, tuple[str, Optional[str]]] = {   # keyword, and the family it is limited to
     "armadillo": ("Armor", None),                 # "Armor. Your adjacent animals have Armor."
     "porcupine": ("Spikes", None),                # "Spikes. Your adjacent animals have Spikes."
     "jellyfish": ("Poison", None),                # "Poison. Your adjacent animals have Poison."
