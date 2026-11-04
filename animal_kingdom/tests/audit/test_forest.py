@@ -1168,3 +1168,175 @@ def test_woodpecker_second_roar_picks_a_new_target():
     assert s.pending["options"] == ["2,1"]                                # the first Roar's target is gone
     choose(s, "2,1")
     assert s.top_unit("2,1") is None and s.top_unit("1,2") is None       # the Roar happened twice
+
+
+# ============================================================ edges the text implies
+
+def test_hornet_legend_answers_a_cover_by_roaming():
+    s = st(current="B", hands={"A": ["hornet_legend"]})
+    put(s, "3,2", "worker_ant", "A")
+    put(s, "4,2", "wolf", "B")
+    rules.apply_action(s, RoamAction("4,2", ("cr", "3,2")))
+    assert [u.card_id for u in s.board["3,2"]] == ["worker_ant", "wolf", "hornet_legend"]
+
+
+def test_worker_wasp_sees_a_colony_animal_an_effect_places():
+    s = st()
+    put(s, "3,3", "worker_wasp", "A")
+    put(s, "1,1", "queen_ant", "A")
+    end_turn(s)                                                            # Dusk: a Young Ant is placed
+    assert on_board(s, "young_ant", "A") and s.food["A"] == 3
+
+
+def test_pheasant_legend_eaten_by_an_apex_falls_into_the_deck():
+    s = st(current="B", hands={"B": ["eagle"]}, decks={"A": ["v1"] * 2, "B": ["v1"] * 2})
+    e = put(s, "2,2", "pheasant_legend", "A")
+    e.strength_counter = -2                                                # a 5: the Eagle (6) covers it
+    play(s, "eagle", "2,2")
+    assert "pheasant_legend" in s.decks["A"] and "pheasant_legend" not in s.remove_pile
+
+
+def test_wolf_legend_2_and_fox_see_a_roam_an_effect_makes():
+    s = st(hands={"A": ["coyote", "fox"]})
+    put(s, "3,3", "wolf_legend_2", "A")
+    w = put(s, "1,1", "wolf", "A")
+    play(s, "coyote", "1,2")
+    choose(s, "1,1")
+    choose(s, "2,1")                                                       # "It roams": a roam
+    assert w.strength_counter == 1 and len(s.hands["A"]) == 2              # the Fox and the Black Wolf's card
+    play(s, "fox", "1,3")
+    assert len(s.hands["A"]) == 3                                          # an ally roamed this turn: 2 more
+
+
+def test_skunk_legend_returns_a_stealth_enemy_mass_effects_hit_it():
+    s = st(hands={"A": ["skunk_legend"]})
+    put(s, "2,2", "stick_insect", "B")
+    play(s, "skunk_legend", "1,2")
+    assert s.top_unit("2,2") is None and hand_ids(s, "B") == ["stick_insect"]
+
+
+def test_hornet_with_only_an_armored_or_stealth_enemy_keeps_its_spare():
+    for enemy in ("tortoise", "stick_insect"):
+        s = st(hands={"A": ["hornet", "hornet"]})
+        put(s, "2,1", enemy, "B")
+        play(s, "hornet", "1,1")
+        click_through(s)
+        assert s.top_unit("2,1").card_id == enemy and hand_ids(s, "A") == ["hornet"]
+
+
+def test_wolverine_cant_choose_a_stealth_enemy():
+    s = st(hands={"A": ["wolverine"]})
+    put(s, "2,1", "stick_insect", "B")
+    play(s, "wolverine", "1,1")
+    click_through(s)
+    assert s.top_unit("2,1").card_id == "stick_insect"
+
+
+def test_viper_below_0_kills():
+    s = st(hands={"A": ["viper"]})
+    put(s, "2,1", "v2", "B")
+    play(s, "viper", "1,1")
+    click_through(s)
+    assert s.top_unit("2,1") is None and "v2" in s.remove_pile
+
+
+def test_eagle_legend_brings_its_mate_when_returned_to_hand():
+    s = st(current="B", hands={"B": ["skunk_legend"]})
+    put(s, "3,2", "eagle_legend", "A")
+    put(s, "4,1", "v1", "B")
+    play(s, "skunk_legend", "4,2")
+    assert sorted(hand_ids(s, "A")) == ["eagle_legend", "eagle_legend_2"]
+
+
+def test_eagle_covers_an_armored_animal_it_cant_eat():
+    s = st(hands={"A": ["eagle"]})
+    put(s, "3,3", "tortoise", "A")
+    play(s, "eagle", "3,3")
+    assert [u.card_id for u in s.board["3,3"]] == ["tortoise", "eagle"]
+
+
+def test_bison_grazing_stops_an_apex_and_a_roam_too():
+    s = st(current="B", hands={"B": ["eagle"]})
+    for cr in ("1,1", "1,2", "2,2"):
+        put(s, cr, "v1", "A")
+    put(s, "2,1", "bison", "A")
+    put(s, "4,1", "v1", "B")
+    w = put(s, "3,1", "wolf", "B")
+    w.strength_counter = 5                                                 # an 11
+    assert "2,1" not in place_targets(s)
+    assert not legal(s, RoamAction("3,1", ("cr", "2,1")))
+
+
+def test_porcupine_gives_no_spikes_to_enemies_beside_it():
+    s = st(hands={"A": ["v8"]})
+    put(s, "1,1", "porcupine", "A")
+    put(s, "1,2", "v2", "B")
+    play(s, "v8", "1,2")
+    assert s.top_unit("1,2").card_id == "v8"
+
+
+def test_boar_legend_two_copies_and_never_below_nothing():
+    s = st(current="B")
+    for cr in ("3,1", "4,1", "3,2", "4,2"):
+        put(s, cr, "v1", "B")
+    put(s, "1,2", "boar_legend", "A")
+    put(s, "1,3", "boar_legend", "A")
+    end_turn(s)
+    assert s.food["B"] == 0
+
+
+def test_boar_hits_a_stealth_enemy_and_an_enemy_that_roams_next_to_it():
+    s = st(current="B", hands={"B": ["stick_insect"]})
+    put(s, "3,1", "boar", "A")
+    put(s, "4,2", "v1", "B")
+    play(s, "stick_insect", "4,1")
+    assert s.top_unit("4,1") is None                                       # automatic: Stealth doesn't hide
+    s = st(current="B")
+    put(s, "2,1", "boar", "A")
+    put(s, "4,1", "wolf", "B")
+    rules.apply_action(s, RoamAction("4,1", ("cr", "3,1")))
+    assert s.top_unit("3,1") is None                                       # arriving next to a trap sets it off
+
+
+def test_boar_is_spent_on_an_armored_enemy():
+    s = st(current="B", hands={"B": ["tortoise", "v5"]})
+    put(s, "3,1", "boar", "A")
+    put(s, "4,2", "v1", "B")
+    play(s, "tortoise", "4,1")
+    assert s.top_unit("4,1").card_id == "tortoise"                         # the first enemy: Armor keeps it
+    play(s, "v5", "3,2")
+    assert s.top_unit("3,2").card_id == "v5"                               # and the Boar is spent
+
+
+def test_boar_still_removes_an_enemy_whose_roar_removed_the_boar():
+    s = st(current="B", hands={"B": ["wolverine"]})
+    put(s, "3,1", "boar", "A")
+    put(s, "4,2", "v1", "B")
+    play(s, "wolverine", "4,1")
+    click_through(s)
+    assert s.top_unit("3,1") is None and s.top_unit("4,1") is None         # the trap still goes off
+
+
+def test_magpie_with_an_empty_opponent_hand_still_discards():
+    s = st(hands={"A": ["magpie", "v3"]})
+    play(s, "magpie", "1,1")
+    click_through(s)
+    assert s.hands["A"] == []
+
+
+def test_owl_scouts_three_different_cards():
+    s = st(hands={"A": ["owl"]}, decks={"A": ["v1", "v4", "v2", "v2", "v3"], "B": []})
+    play(s, "owl", "1,2")
+    assert sorted(s.pending["options"]) == ["v2", "v3", "v4"]            # top down: v3, v2, (v2 passed over), v4
+    click_through(s)
+    assert len(s.hands["A"]) == 1 and len(s.decks["A"]) == 4
+
+
+@pytest.mark.xfail(strict=True, reason="two readings: A) placing the Worker Wasp is placing a Colony animal, so it "
+                                       "pays for itself (as the Worker Ant and the Falcon legend count themselves); "
+                                       "B) a 'whenever' reaction sees only the animals placed after it. The engine "
+                                       "follows B.")
+def test_worker_wasp_pays_for_itself():
+    s = st(hands={"A": ["worker_wasp"]})
+    play(s, "worker_wasp", "1,1")
+    assert s.food["A"] == 3
