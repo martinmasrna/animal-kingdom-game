@@ -17,6 +17,8 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 
 def test_inventory_is_complete():
     """Every state field, piece field and turn-flag key is encoded or excluded with a reason."""
+    if not rules.__file__.endswith(".py"):
+        pytest.skip("the inventory reads the engine's source and slots; this engine is compiled (the deploy image)")
     assert R.inventory_check() == []
 
 
