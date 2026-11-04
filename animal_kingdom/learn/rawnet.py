@@ -74,6 +74,7 @@ class Batch:
             "globals": torch.as_tensor(d["globals"][rows].astype(np.float32), device=dev),
             "desc": torch.as_tensor(d["desc"][rows].astype(np.float32), device=dev),
             "y": torch.as_tensor(np.stack([d["y_win"][rows], d["y_den3"][rows]], 1).astype(np.float32), device=dev),
+            "w": torch.as_tensor(d["row_w"][rows].astype(np.float32), device=dev) if "row_w" in d else None,
         }
         bags = {}
         for b in self.bags:
@@ -165,7 +166,10 @@ def train(model, batch, tr, va, epochs, lr, wd, bs, log, name):
         t0 = time.time(); perm = rng.permutation(tr); tot = 0.0
         for i in range(0, len(perm), bs):
             x = batch.take(perm[i:i + bs])
-            loss = Fn.binary_cross_entropy_with_logits(model(x), x["y"])
+            if x["w"] is None:
+                loss = Fn.binary_cross_entropy_with_logits(model(x), x["y"])
+            else:   # a row's weight: who played it (--weight, one per training file)
+                loss = (Fn.binary_cross_entropy_with_logits(model(x), x["y"], reduction="none") * x["w"][:, None]).sum() / (2 * x["w"].sum())
             opt.zero_grad(); loss.backward(); opt.step(); tot += float(loss.detach()) * len(x["y"])
         pv = predict(model, batch, va)
         vl = np.mean([score(pv[:, k], np.stack([batch.d["y_win"][va], batch.d["y_den3"][va]], 1)[:, k])[0] for k in range(2)])
@@ -217,6 +221,9 @@ def main(argv=None):
     ap.add_argument("--trunk", default="192,64"); ap.add_argument("--only", choices=["raw", "desc"], default=None)
     ap.add_argument("--export", default=None, help="write the trained raw network as a rawnet JSON artifact")
     ap.add_argument("--scale", type=float, default=47.0, help="points per logit in the artifact (net.POINTS_PER_LOGIT)")
+    ap.add_argument("--weight", default=None, help="row weights, one per training file (e.g. 1,1,2,20): who played the position")
+    ap.add_argument("--init", default=None, help="start the raw network from this checkpoint (fine-tuning)")
+    ap.add_argument("--game-offset", type=int, default=0, help="shift game ids before the held-out split, to keep a fine-tune's held-out games the same as the checkpoint's")
     a = ap.parse_args(argv)
     global DROPOUT, TRUNK
     DROPOUT = a.dropout; TRUNK = tuple(int(v) for v in a.trunk.split(","))
@@ -225,8 +232,11 @@ def main(argv=None):
     d = load(a.train)
     n_cards = int(max(d[f"bag_{b}_idx"].max() if len(d[f"bag_{b}_idx"]) else 0 for b in [str(x) for x in d["bags"]]) + 1)
     n_cards = max(n_cards, int(d["cr_card"].max()) + 1)
+    if a.weight:
+        ws = [float(v) for v in a.weight.split(",")]; assert len(ws) == len(a.train), (ws, a.train)
+        d["row_w"] = np.array(ws, dtype=np.float32)[d["source"]]
     batch = Batch(d, dev)
-    games = d["game"]; held = (games % 5) == 0; val = (games % 5) == 1
+    games = d["game"] + a.game_offset; held = (games % 5) == 0; val = (games % 5) == 1
     tr = np.where(~held & ~val)[0]; va = np.where(val)[0]; te = np.where(held)[0]
     log(f"rows {batch.n} train {len(tr)} val {len(va)} held-out {len(te)}; cards {n_cards}; device {dev}")
     tests = [("held-out games", d, batch, te)] if len(a.train) == 1 else \
@@ -252,6 +262,10 @@ def main(argv=None):
         models.append(("descriptions network (908 inputs)", train(desc, batch, tr, va, a.epochs, a.lr, a.wd, a.batch, log, "descriptions")))
     if a.only != "desc":
         raw = RawNet(n_cards, a.dim, batch.bags, d["top_num"].shape[2], d["under_num"].shape[2], d["globals"].shape[1]).to(dev)
+        if a.init:
+            ck = torch.load(a.init, map_location=dev)
+            assert ck["dim"] == a.dim and ck["n_cards"] == n_cards and list(ck["bags"]) == list(batch.bags), "checkpoint does not match the data"
+            raw.load_state_dict(ck["state"]); log(f"raw network initialised from {a.init}")
         models.append((f"raw position network (dim {a.dim})", train(raw, batch, tr, va, a.epochs, a.lr, a.wd, a.batch, log, "raw")))
         torch.save({"state": raw.state_dict(), "dim": a.dim, "n_cards": n_cards, "bags": batch.bags, "trunk": TRUNK}, a.out)
         if a.export:
