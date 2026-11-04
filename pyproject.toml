@@ -34,7 +34,7 @@ packages = [
 ]
 
 [tool.setuptools.package-data]
-animal_kingdom = ["data/*.json", "data/learned/*.json", "web/static/*", "web/static/art/*"]
+animal_kingdom = ["data/*.json", "data/learned/*.json", "data/puzzles/*.json", "web/static/*", "web/static/art/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["animal_kingdom/tests"]
