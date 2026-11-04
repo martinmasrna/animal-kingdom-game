@@ -714,6 +714,9 @@ def new_game(
     cards = cards or load_cards()
     config = config or Config.default()
     game_map = load_map(map_id)
+    unknown = sorted({c for c in (*deck_a, *deck_b) if c not in cards})
+    if unknown:                            # refused here, not by a KeyError once the card is first looked up
+        raise EngineError(f"unknown card {', '.join(unknown)}")
 
     decks = {"A": list(deck_a), "B": list(deck_b)}
     starting_decks = {"A": tuple(deck_a), "B": tuple(deck_b)}  # the fixed lists, for Oxpecker (F12)

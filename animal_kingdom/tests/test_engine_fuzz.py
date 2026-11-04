@@ -74,3 +74,38 @@ def test_a_reproduction_rebuilds_its_position():
     assert k == n // 2 and rules.is_terminal(mid) is None
     for a in rules.legal_actions(mid)[:1]:
         rules.apply_action(mid, a)
+
+
+# --- group: crash | engine/state.py ensure_mates | KeyError (the human-game probe, 2026-11-05) ---------------------------
+# results/human_games/web/web_20261010T161459_LBFBOA.jsonl line 7: deck A still lists four old design ids
+# (fish_legend_jellyfish, ...) that web/renamed.py does not map. new_game took them, and the logged game happened never
+# to look one up; skipping the mulligan at action index 1 instead ends it, and ensure_mates raised KeyError on the
+# unknown id in hand. A deck with a card the registry doesn't hold is now refused at setup, as the Rust engine does.
+
+def _mixed_deck():
+    return ["sardine"] * 3 + ["fish_legend_jellyfish"] + ["cod"] * 3 + ["mouse"] * 3
+
+
+def test_unknown_card_id_is_refused_at_setup():
+    from animal_kingdom.engine.state import new_game
+    with pytest.raises(EngineError, match="fish_legend_jellyfish"):
+        new_game(_mixed_deck(), ["sardine"] * 10, 22811793, first_player="B")
+
+
+def test_the_logged_position_no_longer_crashes():
+    """The probe's reproduction: the log either refuses at setup or every action at every position applies."""
+    import json
+    path = pathlib.Path(__file__).resolve().parents[2] / "results/human_games/web/web_20261010T161459_LBFBOA.jsonl"
+    if not path.exists():
+        pytest.skip("human game log not present")
+    from animal_kingdom.web.renamed import renamed
+    log = renamed(json.loads(path.read_text().splitlines()[7]))
+    try:
+        state, _, _ = fuzz._log_state(log)
+    except EngineError as e:
+        assert "unknown card" in str(e)
+        return
+    for index, adict in enumerate(log["actions"]):
+        fuzz._skip_unlogged_mulligans(state, adict)
+        assert fuzz.probe_position(state, {"log": "x", "index": index}) == []
+        rules.apply_logged(state, adict)
