@@ -319,6 +319,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   .ladder .sfoot { position: sticky; bottom: 0; z-index: 2; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; }
   /* a choice hangs clear of the top bar, scrolling inside when the window is short */
   .home .chooser { max-height: calc(100vh - 290px); overflow-y: auto; }
+  .home .chooser.opps { overflow: visible; }   /* the bot-deck list opens upward out of the piece; a scrolling piece would clip it (Martin's phone, 2026-11-04) */
   .home .opp span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 /* A match row, narrow: the result, both pieces with their decks, who and when on a second line. */
