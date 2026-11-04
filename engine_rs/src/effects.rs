@@ -399,11 +399,15 @@ pub fn land_unit(st: &mut State, player: Player, mut unit: Unit, cr: Cr, from_ha
             st.roar_twice[unit.owner as usize] = None;
             times = 2;
         }
-        for _ in 0..times {
-            cards::run(st, unit.card, None, Hook::OnPlace, &unit, &Args::Place(cr));
-            if onto_enemy {
-                cards::run(st, unit.card, None, Hook::OnPlaceOntoEnemy, &unit, &Args::Place(cr));
-            }
+        if times == 2 {
+            // The Woodpecker's second Roar is pushed first (the stack is LIFO) as a step that runs the Roar when it
+            // comes off the stack: after the first has resolved, picking its targets then. As in Python (_op_roar_again).
+            st.effect_stack.push(vmap!("op" => Value::s("roar_again"), "iid" => Value::Int(unit.iid), "cr" => cr_v(st, cr),
+                "onto_enemy" => Value::Bool(onto_enemy), "by_card" => card_v(st, unit.card), "by_iid" => Value::Int(unit.iid)));
+        }
+        cards::run(st, unit.card, None, Hook::OnPlace, &unit, &Args::Place(cr));
+        if onto_enemy {
+            cards::run(st, unit.card, None, Hook::OnPlaceOntoEnemy, &unit, &Args::Place(cr));
         }
     }
 }
@@ -1314,6 +1318,19 @@ fn op_draw_filtered(st: &mut State, step: &mut Map) -> Option<Pending> {
     None
 }
 
+fn op_roar_again(st: &mut State, step: &mut Map) -> Option<Pending> {
+    // The Woodpecker's second Roar: run it now, against the board as it stands after the first. It needs the animal
+    // still on the board, where it roars from. As in Python.
+    let iid = m_get_i(step, "iid").unwrap();
+    let Some((cr, unit)) = find_unit_pair(st, iid) else { return None };
+    let onto_enemy = step.get("onto_enemy").map(|v| v.as_bool()).unwrap_or(false);
+    cards::run(st, unit.card, None, Hook::OnPlace, &unit, &Args::Place(cr));
+    if onto_enemy {
+        cards::run(st, unit.card, None, Hook::OnPlaceOntoEnemy, &unit, &Args::Place(cr));
+    }
+    None
+}
+
 fn op_egg_hatch(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iid = m_get_i(step, "iid").unwrap();
     let Some((cr, pos)) = st.find_unit(iid) else { return None };
@@ -2011,6 +2028,7 @@ fn op_hand_grant_all(st: &mut State, step: &mut Map) -> Option<Pending> {
 fn run_op(st: &mut State, op: &str, step: &mut Map) -> Option<Pending> {
     match op {
         "mulligan" => op_mulligan(st, step),
+        "roar_again" => op_roar_again(st, step),
         "gain_food" => op_gain_food(st, step),
         "draw" => op_draw(st, step),
         "draw_filtered" => op_draw_filtered(st, step),
