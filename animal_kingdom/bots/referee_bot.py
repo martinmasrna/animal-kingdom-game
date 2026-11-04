@@ -122,7 +122,7 @@ class RefereeBot(TurnSearcher):
                  quiesce: bool = False, mulligan: bool = False,
                  depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
                  den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE, deepen_chase: bool = False,
-                 den_open: bool = False, reply_min: bool = False, outs: int = 0, den_far: int = 0,
+                 den_open: bool = False, den_reach: bool = False, reply_min: bool = False, outs: int = 0, den_far: int = 0,
                  den_far_margin: int = 0, den_far_ratio: float = 0.0):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
@@ -184,6 +184,15 @@ class RefereeBot(TurnSearcher):
         # two-action win, but its one-move score is ordinary, so both shortlists (the beam and the root screen) dropped
         # it and the win was never searched. With den_open both keep every such placement.
         self.den_open = den_open
+        # Den reach (2026-11-04, the Expert's misses among the 154 mined den captures, tools/puzzles/expert_finds.py):
+        # with den_open, an opener is judged after the fast policy settles its sub-choices and only a placement or roam
+        # onto the den counts as the follow-up, so a removal that uncovers my own buried animal, a choice inside a Roar,
+        # and a second action that takes the den through its Roar's free placement were never kept. With den_reach my
+        # sub-choices are all tried (bounded), and the best two den takers of that kind, or else the best three such
+        # openers, are kept through the beam, the root screen and the reply shortlist (`TurnSearcher._den_reach_keep`);
+        # a line the node budget hands to the fast policy still takes the den (`_den_reach_move`). Python only: the Rust
+        # port does not have it, so `sim.runner` builds the Python bot for a spec that sets it.
+        self.den_reach = den_reach and den_open
         # Reply minimax (2026-10-30, Martin's G2EFVA: Serval's Roar spared his 9-strength Capybara beside my den and
         # took an Owl): the deepened line plays the reply opening the opponent's own one-turn score likes, and my next
         # turn then sees that one reply in full, so a win that exists only because the sampled reply left a hole counts
@@ -346,7 +355,11 @@ class RefereeBot(TurnSearcher):
                 if guards:
                     selected.add(max(guards, key=lambda a: card_strength(state, a.card_id, me)))
         if self.den_open:
-            selected.update(self._den_openers(worlds[0], candidates, me))
+            openers = self._den_openers(worlds[0], candidates, me)
+            selected.update(openers)
+            if self.den_reach:
+                score_of = {action: score for score, _, action in scored}
+                selected.update(self._den_reach_keep(worlds[0], candidates, me, score_of.__getitem__, set(openers)))
         # Draw is strategically distinct and deliberately protected by the generic beam;
         # retain it through the cheap screen even when its immediate score is low.
         selected.update(
@@ -443,6 +456,10 @@ class RefereeBot(TurnSearcher):
             and not row[2].is_hq_capture
             and row[2].crossroad in state.game_map.hq_front(me)
         ]
+        if self.den_reach:
+            score_of = {action: score for score, _, action in scored}
+            selected.update(sorted(self._den_takers(state, candidates, me), key=score_of.__getitem__,
+                                   reverse=True)[:2])
         if home:
             selected.add(home[0][2])
         if live:

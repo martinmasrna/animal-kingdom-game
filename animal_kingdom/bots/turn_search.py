@@ -57,6 +57,9 @@ _DET_SEED_SALT = 0x9E3779B9
 # Recursion guard: no legal own turn expands anywhere near this many decision points, so
 # hitting it means a pathological state - bail out with the branches searched so far.
 _MAX_DEPTH = 40
+_DEN_REACH_NODES = 200   # den_reach: sub-choice nodes tried per question (`_reaches_capture`, `_opens_den`)
+_DEN_REACH_TAKERS = 2     # den_reach: den takers a shortlist keeps (`_den_reach_keep`)
+_DEN_REACH_OPENERS = 3    # den_reach: openers beyond den_open's a shortlist keeps
 
 
 def _reframed_at_my_turn(state: GameState, me: str, fn):
@@ -111,6 +114,8 @@ class TurnSearcher(Bot):
         self.max_search_nodes = max_search_nodes
         self._search_nodes = 0
         self.den_open = False   # RefereeBot's dial: keep every den opener (`_den_openers`) through the shortlists
+        self.den_reach = False  # RefereeBot's dial, on top of den_open: openers and den takers seen through sub-choices
+        self._den_memo: dict = {}   # den_reach: id(position) -> (position, {action: takes the den}), for one move
         # One greedy policy plays every non-branching completion seat: my remaining own actions
         # in a budget-exhausted line, and (for RefereeBot) the sampled opponent reply. Being the
         # real GreedyBot, it carries the lethal-avoidance and fizzle logic with it - and the same
@@ -145,6 +150,7 @@ class TurnSearcher(Bot):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
+        self._den_memo = {}
         if (keep := self._keep_hand(view, legal, state)) is not None:
             return keep
         if state is None or len(legal) == 1:
@@ -318,8 +324,8 @@ class TurnSearcher(Bot):
             if actor == me:
                 legal = self._safe_actions(
                     representative, rules.legal_actions(representative), me)
-                action = self._policy.choose(
-                    representative.view_for(me), legal, representative)
+                action = (self._den_reach_move(representative, legal, me) if self.den_reach else None) \
+                    or self._policy.choose(representative.view_for(me), legal, representative)
                 advanced = []
                 for state, penalty in group:
                     nxt = state.clone()
@@ -589,7 +595,10 @@ class TurnSearcher(Bot):
                 if group:
                     reserved.add(max(group, key=lambda a: score_of[a]))
         if self.den_open:
-            reserved.update(self._den_openers(world, legal, me))
+            openers = self._den_openers(world, legal, me)
+            reserved.update(openers)
+            if self.den_reach:
+                reserved.update(self._den_reach_keep(world, legal, me, score_of.__getitem__, set(openers)))
 
         kept = set(reserved)
         for _, _, action in scored:
@@ -613,6 +622,128 @@ class TurnSearcher(Bot):
             if self._capture_next(nxt, me):
                 openers.append(action)
         return openers
+
+    def _den_reach_keep(self, world: GameState, legal: Sequence[Action], me: str, score: Callable[[Action], float],
+                        known: set) -> list[Action]:
+        """What den_reach adds to a shortlist besides `known` (den_open's openers): the best `_DEN_REACH_TAKERS` den
+        takers by `score` when there is one (a win this action makes every other opener moot: kept all, they flooded
+        the root screen to 58 candidates where a Mole could walk in from any of a dozen crossroads), else the best
+        `_DEN_REACH_OPENERS` actions after which, my sub-choices tried, my next action can take the den."""
+        takers = self._den_takers(world, legal, me)
+        if takers:
+            return sorted(takers, key=score, reverse=True)[:_DEN_REACH_TAKERS]
+        opens = []
+        for action in legal:
+            if action in known or not isinstance(action, (PlaceAction, RoamAction, ChoiceAction)) \
+                    or (isinstance(action, (PlaceAction, RoamAction)) and action.is_hq_capture):
+                continue
+            nxt = world.clone()
+            rules.apply_action(nxt, action, validate=False)
+            if self._opens_den(nxt, me, 2, [0]):
+                opens.append(action)
+        return sorted(opens, key=score, reverse=True)[:_DEN_REACH_OPENERS]
+
+    # den_reach (2026-11-04, the Expert's misses in tools/puzzles/forced_captures-2026-11-05.jsonl, audit in
+    # knowledge/audit/forced-captures-2026-11-05.md): `_capture_next` settles the opener's own sub-choices with the fast
+    # policy and then asks only for a placement or roam onto the den. So a removal whose target the policy would not
+    # pick (the Hornet that lifts the Hyena off his own Snake Egg), a choice inside a Roar, and a second action that
+    # takes the den through its Roar's free placement (a Mole onto the Locust, its Roar playing the Egg Eater in) were
+    # all invisible, and the beam and the reply shortlist could cut both halves of the win. With den_reach every one of
+    # my sub-choices on the way is tried (two levels deep, bounded by `_DEN_REACH_NODES`), and an action whose own resolution ends in my
+    # capture (a den taker) is kept like a capture. It reads the searched world only: my hand, the board, my deck as
+    # determinize re-sampled it; never the true hidden state.
+
+    def _reaches_capture(self, state: GameState, me: str, depth: int, ctr: list) -> bool:
+        """Whether some sequence of my own pending sub-choices from `state` ends in my den capture: an option onto the
+        den is seen at once, and `depth` more levels of options are tried (bounded by `_DEN_REACH_NODES` in all)."""
+        r = rules.is_terminal(state)
+        if r is not None:
+            return r.winner == me and r.reason == "hq_capture"
+        if state.pending is None or state.current != me or state.player_to_act() != me:
+            return False
+        legal = rules.legal_actions(state)
+        if any(isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture for a in legal):
+            return True
+        if depth <= 0:
+            return False
+        for a in legal:
+            ctr[0] += 1
+            if ctr[0] > _DEN_REACH_NODES:
+                return False
+            nxt = state.clone()
+            rules.apply_action(nxt, a, validate=False)
+            if self._reaches_capture(nxt, me, depth - 1, ctr):
+                return True
+        return False
+
+    def _takes_den(self, state: GameState, action: Action, me: str, depth: int, ctr: list) -> bool:
+        """Whether `action` captures the den, at once or through my sub-choices it opens (a Roar's free placement onto
+        the den; `depth` as in `_reaches_capture`)."""
+        if isinstance(action, (PlaceAction, RoamAction)) and action.is_hq_capture:
+            return True
+        if isinstance(action, DrawAction) or (isinstance(action, PlaceAction) and state.pending is None
+                                              and not state.cards[action.card_id].has_roar):
+            return False
+        nxt = state.clone()
+        rules.apply_action(nxt, action, validate=False)
+        if nxt.result is not None:
+            return nxt.result.winner == me and nxt.result.reason == "hq_capture"
+        return nxt.pending is not None and self._reaches_capture(nxt, me, depth, ctr)
+
+    def _opens_den(self, state: GameState, me: str, depth: int, ctr: list) -> bool:
+        """Whether, after my own pending sub-choices (`depth` levels of them tried), my next turn action can take the den:
+        a placement or roam onto it, or a Roar whose free placement lands on it."""
+        if rules.is_terminal(state) is not None or state.current != me or state.player_to_act() != me:
+            return False
+        legal = rules.legal_actions(state)
+        if state.pending is not None:
+            if depth <= 0:
+                return False
+            for a in legal:
+                ctr[0] += 1
+                if ctr[0] > _DEN_REACH_NODES:
+                    return False
+                nxt = state.clone()
+                rules.apply_action(nxt, a, validate=False)
+                if self._opens_den(nxt, me, depth - 1, ctr):
+                    return True
+            return False
+        if any(isinstance(b, (PlaceAction, RoamAction)) and b.is_hq_capture for b in legal):
+            return True
+        return any(self._takes_den(state, b, me, 0, ctr) for b in legal)
+
+    def _den_reach_move(self, state: GameState, legal: Sequence[Action], me: str) -> Optional[Action]:
+        """For a line the node budget hands to the fast policy: a den taker if there is one, else, at one of my
+        sub-choices, an option after which my den can be taken (the Hornet's target that uncovers my Egg); None
+        otherwise. The fast policy picks one action at a time and walks past both."""
+        for a in legal:
+            if self._takes_den(state, a, me, 0, [0]):
+                return a
+        if state.pending is None:
+            return None
+        for a in legal:
+            nxt = state.clone()
+            rules.apply_action(nxt, a, validate=False)
+            if self._opens_den(nxt, me, 1, [0]):
+                return a
+        return None
+
+    def _den_takers(self, world: GameState, legal: Sequence[Action], me: str) -> list[Action]:
+        """The actions (not themselves a placement or roam onto the den) whose own resolution ends in my capture.
+        Remembered per position for the rest of the move: the beam and the reply shortlist ask about the same one."""
+        held = self._den_memo.get(id(world))
+        if held is None or held[0] is not world:
+            held = self._den_memo[id(world)] = (world, {})
+        memo = held[1]
+        out = []
+        for a in legal:
+            if isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture:
+                continue
+            if a not in memo:
+                memo[a] = self._takes_den(world, a, me, 1, [0])
+            if memo[a]:
+                out.append(a)
+        return out
 
     def _capture_next(self, state: GameState, me: str) -> bool:
         """Whether my den capture is legal once this position's pending choices are settled by the fast policy."""
@@ -652,7 +783,8 @@ class TurnSearcher(Bot):
             nxt = world.clone()
             rules.apply_action(nxt, action, validate=False)
             if nxt.result is not None or not _opponent_lethal_next_turn(nxt, opponent) \
-                    or (self.den_open and self._capture_next(nxt, me)):
+                    or (self.den_open and self._capture_next(nxt, me)) \
+                    or (self.den_reach and (self._opens_den(nxt, me, 2, [0]) or self._reaches_capture(nxt, me, 1, [0]))):
                 safe.append(action)
         return safe or list(legal)
 

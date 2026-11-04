@@ -212,6 +212,9 @@ def _rust_bot(kind: str, seed: int, weights, extra: dict):
     from ..bots import rust_bot
     if not rust_bot.available() or weights is not None:
         return None
+    if extra.get("den_reach"):   # Python only (2026-11-04): the Rust port would ignore the key and measure a no-op
+        print("make_bot: den_reach is not in the Rust port; this bot is the Python one", file=sys.stderr)
+        return None
     base = LEARNED_BASE_KIND.get(kind, kind)
     if base not in ("greedy", "easy", "turn", "referee", "lookahead", "greedy_belief", "random", "atomic"):
         return None
