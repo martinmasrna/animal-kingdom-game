@@ -134,13 +134,13 @@ def test_rule_8_the_bonuses_read_the_rating_going_in():
 
 
 def test_rule_9_the_end_of_match_line():
-    assert after_game(at(5, 0, streak=2), True, par(5)).line() == "+2 stars (win streak): League 5, 2 stars of 5"
-    assert after_game(at(5, 0), True, par(5)).line() == "+1 star: League 5, 1 star of 5"
-    assert after_game(at(4, 0), False, par(4)).line() == "No star lost (League 4 is a checkpoint): League 4, 0 stars of 5"
-    assert after_game(at(2, 1), False, par(2)).line() == "No star lost (no stars lost in leagues 1 to 3): League 2, 1 star of 3"
+    assert after_game(at(5, 0, streak=2), True, par(5)).line() == "+2 stars (win streak): League 5, 2 of 5 stars"
+    assert after_game(at(5, 0), True, par(5)).line() == "+1 star: League 5, 1 of 5 stars"
+    assert after_game(at(4, 0), False, par(4)).line() == "No star lost (League 4 is a checkpoint): League 4, 0 of 5 stars"
+    assert after_game(at(2, 1), False, par(2)).line() == "No star lost (no stars lost in leagues 1 to 3): League 2, 1 of 3 stars"
     assert after_game(at(6, 4, floor=4), True, par(6)).line() == "Up to League 7, 0 stars"
     assert after_game(at(5, 0, floor=4), False, par(5)).line() == "Down to League 4, 4 stars"
-    assert after_game(at(6, 3), False, 1300).line() == "-2 stars: League 6, 1 star of 5"
+    assert after_game(at(6, 3), False, 1300).line() == "-2 stars: League 6, 1 of 5 stars"
     assert after_game(at(9, 4), True, 2000).line("2004") == "Up to League 10"
     assert after_game(at(T.TOP), True, 2000).line("2011") == "League 10: rating 2011"
 

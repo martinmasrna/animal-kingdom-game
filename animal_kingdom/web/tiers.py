@@ -98,12 +98,12 @@ class Change:
             return f"Down to {name(a.league)}, {_stars(a.stars)}"
         if self.won:
             why = " (win streak)" if self.streak_bonus else " (rating bonus)" if self.rating_bonus else ""
-            return f"+{self.gained} star{'s' if self.gained > 1 else ''}{why}: {name(a.league)}, {_stars(a.stars)} of {stars_needed(a.league)}"
+            return f"+{self.gained} star{'s' if self.gained > 1 else ''}{why}: {name(a.league)}, {a.stars} of {stars_needed(a.league)} stars"
         if self.gained:
-            return f"-{self.gained} star{'s' if self.gained > 1 else ''}: {name(a.league)}, {_stars(a.stars)} of {stars_needed(a.league)}"
+            return f"-{self.gained} star{'s' if self.gained > 1 else ''}: {name(a.league)}, {a.stars} of {stars_needed(a.league)} stars"
         why = {"low league": f"no stars lost in leagues 1 to {NO_LOSS_UNTIL}", "floor": f"{name(a.league)} is a checkpoint"}.get(self.saved, "")
-        return f"No star lost ({why}): {name(a.league)}, {_stars(a.stars)} of {stars_needed(a.league)}" if why else \
-            f"{name(a.league)}, {_stars(a.stars)} of {stars_needed(a.league)}"
+        return f"No star lost ({why}): {name(a.league)}, {a.stars} of {stars_needed(a.league)} stars" if why else \
+            f"{name(a.league)}, {a.stars} of {stars_needed(a.league)} stars"
 
 
 def _stars(n: int) -> str:
