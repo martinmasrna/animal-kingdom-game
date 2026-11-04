@@ -89,6 +89,42 @@ How the people were read without that file: the game logs carry the seats, decks
 
 None of the three played "a few games a day": Laras played 177 games on her first day, Martin 123, Kalista 87. Measured in games, Martin and Laras reach the top in 33 and 42, and Kalista, who started weak and improved (she lost three of four on day one and beat the Expert more often than not by day twelve), climbs over ten days and 245 games, sitting at league 7 for a week while her rating caught up. That is the shape wanted: the strong players' climb is quick, the learning player's climb follows her learning.
 
+**By day**, under the recommended rules: the league at the end of each day each person played ("top, 1850" is the top league with the rating replayed that day; the count in brackets is their games so far; a blank is a day they didn't play). Martin and Laras reach the top on their first day because they played over a hundred games that day; Kalista's row is the climb of a learning player.
+
+| Day | Martin | Laras | Kalista |
+|---|---|---|---|
+| 10-01 | top, 1850 (123) | top, 1858 (177) | 7, 4 of 5 stars (87) |
+| 10-02 | top, 1907 (170) | top, 2073 (269) | 7, 4 of 5 stars (116) |
+| 10-04 | top, 1918 (202) | top, 2000 (604) | 7, 2 of 5 stars (126) |
+| 10-05 | top, 1996 (217) | top, 2185 (652) | 7, 4 of 5 stars (148) |
+| 10-06 | top, 2011 (219) | top, 2213 (663) | 7, 3 of 5 stars (149) |
+| 10-07 | top, 2024 (221) |  | 8, 0 of 5 stars (163) |
+| 10-08 | top, 2016 (229) |  | 8, 2 of 5 stars (215) |
+| 10-09 | top, 1926 (246) |  | 8, 2 of 5 stars (233) |
+| 10-10 | top, 2019 (379) |  | top, 1986 (258) |
+| 10-11 | top, 1978 (385) |  |  |
+| 10-12 | top, 2071 (399) |  | top, 2023 (273) |
+| 10-13 | top, 2123 (418) |  | top, 2042 (276) |
+| 10-14 | top, 2003 (440) |  |  |
+| 10-15 | top, 1975 (528) |  | top, 2060 (279) |
+| 10-16 | top, 2053 (559) |  | top, 2026 (284) |
+| 10-17 | top, 2133 (617) |  |  |
+| 10-18 | top, 2089 (619) |  |  |
+| 10-19 | top, 2112 (632) |  |  |
+| 10-20 | top, 2108 (635) |  |  |
+| 10-21 | top, 1901 (669) |  |  |
+| 10-22 | top, 2015 (690) |  |  |
+| 10-23 | top, 2174 (717) |  |  |
+| 10-24 | top, 2148 (782) |  |  |
+| 10-25 | top, 2090 (828) |  |  |
+| 10-26 | top, 2100 (846) |  |  |
+| 10-27 | top, 1918 (896) |  |  |
+| 10-28 | top, 1908 (907) |  |  |
+| 10-29 | top, 1803 (1018) |  |  |
+| 10-30 | top, 1948 (1132) |  |  |
+| 10-31 | top, 1908 (1210) |  |  |
+| 11-04 | top, 1820 (1228) |  |  |
+
 **Synthetic players**, 300 runs each, 400 games. A fixed win rate, as asked (the rating moved by those results against opponents at the player's own rating):
 
 | Win rate | Games to reach league 4 | 6 | 8 | 9 | top |
@@ -117,6 +153,18 @@ For a person playing five ranked games a day: the first three promotions in the 
 - Adding the streak-only-at-par rule alone: the 1200 player at league 6 after 300 games, the 1500 player at 8. Weaker on its own, but it stops a streak from pushing an over-ranked player further.
 - Leagues 4 to 6 at 5 stars instead of 4: about 5 more games to the top for strong players and a slower middle, chosen so the table reads "3 stars at the bottom, 5 above".
 - Over-ranked at 50 instead of 100 points: no difference worth the stricter rule.
+
+## What a player sees, screen by screen
+
+Text only, as built on the branch; where a picture belongs is marked. For Martin to design from.
+
+- **Home, the Ladder piece** (top-right corner): "Ladder", under it the league and place: "League 5 · 2 of 5 stars · #7"; in the top league "League 10 · 2011 · #2". A newcomer who hasn't played ranked sees "Ladder" alone. *Picture: the league's badge beside the word.*
+- **Home, the Ranked choice**: under "Ranked", the league instead of "your rating 1500?": "League 5 · 2 of 5 stars".
+- **The ladder screen, Leaderboard tab**: one line above the list, your standing: "League 5 · 2 of 5 stars · never below League 4 · 3 wins in a row" (the streak shows from two wins; the checkpoint always). In the top league: "League 10 · 2011". *Picture: the badge at the start of the line; perhaps the stars as pips instead of the count.*
+- **The leaderboard rows**: a person below the top league has their league where the number was ("League 5") and their stars beside their name ("2 of 5 stars"); a person in the top league has their rating where the number was and "League 10" beside their name; bots as before, "Fish (Expert Bot)" and its rating. The list is one, people and bots, people placed by league and stars. *Picture: a small badge in the row.*
+- **The versus moment** (two cards facing each other as a match opens): a person below the top league shows nothing under their card; in the top league their rating in the gem as before; a bot its rating in the gem. *A design spot: the gem could hold the league's badge.*
+- **The end of a ranked match**: under Victory or Defeat and how it ended, one line about the stars: "+1 star: League 5, 1 of 5 stars", "+2 stars (win streak): …", "+2 stars (rating bonus): …", "-1 star: …", "-2 stars: …", "No star lost (no stars lost in leagues 1 to 3): League 2, 1 of 3 stars", "No star lost (League 4 is a checkpoint): …", "Up to League 7, 0 stars", "Down to League 4, 4 stars". Below the top league no rating counter; in the top league the rating counts from before to after as it does today, and the line shows only on the game that brought you there ("Up to League 10"). *A design spot: moving up deserves its own moment (the badge arriving), and the stars could fill one by one.*
+- **The match history**: unchanged; a ranked game says "Ranked" as before.
 
 ## Martin's calls
 
