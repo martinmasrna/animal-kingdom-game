@@ -13,6 +13,7 @@ import { track } from './log.js';
 import { loadNews, unread as newsUnread, newsScreen, showSince, hideSince } from './news.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
 import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends } from './chat.js';
+import { initDaily, loadDaily, dailyPiece, wireDaily, sendDaily, timeLeft } from './daily.js';
 import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, handLights, holdFood, shownRegion, lessonEnd, drawCoach } from './coach.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -143,6 +144,9 @@ async function boot() {
   bindCoach({ V: () => V, ui, CARDS: () => CARDS, send: m => send(m), drawGame: () => drawGame(), tapWords, PL: () => PL(), store, startTutorial, firstMatch });
   openPresence({ api, toast, build: checkBuild, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
+  initDaily({ api, toast, deck: () => { const d = chosenDeck(); return d && deckSpec(d); },   // daily matches on home (daily.js)
+    open: (id, token) => { setToken(id, token); location.hash = '#/m/' + id; },
+    changed: () => { if (screen === 'home' && !play.open) homeScreen(homeMode); } });
   initChat({ api, toast, inMatch: () => screen === 'game' && !!V && V.phase === 'playing' && !RP.views.length,
     changed: () => { if (screen === 'game' && V) drawGame(); },   // the game's Friends button shows once you have a friend
     challenge: (f, all) => {   // a conversation's Challenge: home's Play with that friend picked
@@ -263,6 +267,7 @@ function homeScreen(mode = {}) {
   screen = 'home'; homeMode = mode;
   if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(homeMode); }); }   // the dot and "Since you last played" once it's known
   if (mode.gauntlet) play.opp = 'gauntlet'; else if (mode.join) play.opp = 'friend';
+  if (!mode.daily) loadDaily().then(d => { if (d && screen === 'home' && homeMode === mode) homeScreen({ ...mode, daily: true }); });   // the list as it stands now, then drawn
   const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
   const testBot = new URLSearchParams(location.hash.split('?')[1] || '').get('botdeck');   // a test opponent, by link only
   if (TEST_BOTS.some(([id]) => id === testBot)) play.botDeck = testBot;
@@ -275,10 +280,11 @@ function homeScreen(mode = {}) {
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
-  const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? friendLabel(fr, play.friends) : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
+  const daily = play.opp === 'friend' && play.pace === 'daily';   // a friend match that waits for days (docs/async-play.md)
+  const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? friendLabel(fr, play.friends) + (daily ? ' · daily' : '') : daily ? 'Daily' : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
     : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : isTest ? label(TEST_BOTS, play.botDeck) : 'Random'}`];
-  const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
+  const go = mode.join ? 'Join match' : daily ? (fr ? `Daily challenge to ${esc(friendLabel(fr, play.friends))}` : 'Choose a friend') : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.short ? `<span class="left">${30 - d.short}/30</span>` : ''}</div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
   const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
@@ -286,6 +292,7 @@ function homeScreen(mode = {}) {
     ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, chosen && d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${peek ? deckList(peek) : ''}</div></div>`
     : play.open === 'opp' ? `<div class="chooser opps">${`<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend'], ['gauntlet', 'Gauntlet']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
         + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f, '', play.friends)}</button>`).join('')}</div>
+          <div class="seg">${[['live', 'Live'], ['daily', 'Daily']].map(([v, l]) => `<button class="slab${(play.pace || 'live') === v ? ' on' : ''}" data-pace="${v}">${l}</button>`).join('')}</div>
           <button class="slab" id="addfriend">Add a friend</button><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : play.opp === 'gauntlet' ? levels + dd('side', play.side || 'mine', SIDES) + dd('gfield', play.gfield || 'mine', GFIELDS) + dd('ggames', play.ggames || '2', GGAMES)
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
@@ -293,7 +300,7 @@ function homeScreen(mode = {}) {
     : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
-  app.innerHTML = `<div class="mscr home">${chooser}
+  app.innerHTML = `<div class="mscr home">${chooser}${first ? '' : dailyPiece()}
     <div class="top">${mePiece()}<a class="backbtn lab" href="#/collection" aria-label="Collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.menu}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar">${chosen ? `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>` : `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn"><b>Choose a deck</b><i class="chev"></i></button>`}
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}<i class="chev"></i></button>
@@ -302,6 +309,7 @@ function homeScreen(mode = {}) {
   fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
   if (!first && !mode.join && !mode.gauntlet) showSince(api, { onRead: () => { location.hash = '#/news'; } });   // a returning player, once
   wireChatButton($('hchat'));
+  wireDaily(root);
   $('gearbtn').onclick = () => { play.open = play.open === 'menu' || play.open === 'learn' ? null : 'menu'; play.peek = null; redraw(); };   // the gear opens its list, or closes the lessons it led to
   if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
     $('learn').onclick = () => { track('learn_to_play'); startTutorial(store('ak:lesson') === '1' ? 2 : 1); };
@@ -329,6 +337,7 @@ function homeScreen(mode = {}) {
   root.querySelectorAll('[data-friend]').forEach(el => el.onclick = () => { play.friend = play.friend === el.dataset.friend ? null : el.dataset.friend; redraw(); });
   if ($('addfriend')) $('addfriend').onclick = () => play.friendCode && shareLink(`${location.origin}/#/friend/${play.friendCode}`, 'Be my friend in Animal Kingdom');
   root.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; redraw(); });
+  root.querySelectorAll('[data-pace]').forEach(el => el.onclick = () => { play.pace = el.dataset.pace; redraw(); });
   root.querySelectorAll('[data-level]').forEach(el => el.onclick = () => { play.level = el.dataset.level; redraw(); });
   wireDd(root, (k, v) => { play[k] = v; redraw(); });
   const code = $('code');
@@ -346,6 +355,7 @@ function homeScreen(mode = {}) {
     }
     if (search) return cancelSearch();
     if (play.opp === 'ranked') return findRanked('go', deckSpec(chosen));
+    if (daily) { if (!fr) return toast('Choose a friend first'); play.open = null; return sendDaily(fr.id, deckSpec(chosen), friendLabel(fr, play.friends)); }
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
@@ -700,7 +710,7 @@ function ladderScreen() {
   const shown = ME.history.filter(h => !ui.histDeck || h.my_deck === ui.histDeck);
   const bot = h => h.kind !== 'friend';   // a bot's deck has a name you know; a person's deck name is theirs, so the row names the person
   const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';
-  const mode = h => ({ ranked: 'Ranked · ', practice: 'Practice · ', friendly: 'Friendly · ' })[h.mode] || '';   // older matches: unknown   // a match is one game (older best-of-3s by their result)
+  const mode = h => ({ ranked: 'Ranked · ', practice: 'Practice · ', friendly: 'Friendly · ', daily: 'Daily · ' })[h.mode] || '';   // older matches: unknown   // a match is one game (older best-of-3s by their result)
   // the game's name in the logs, to point at it ("look at GMIDKA", Martin, 2026-10-21): here, not on the result screen
   const gid = h => { const [, id, n] = h.match.match(/^(.*)-(\d+)$/) || [, h.match, null]; return ` · ${esc(id)}${n === null ? '' : ` game ${+n + 1}`}`; };
   const side = (s, name) => `data-side="${s}" data-name="${esc(name)}"`;   // a deck in the row: hovered (tapped), its list shows
@@ -923,9 +933,20 @@ function strengthFlash(step) {
 }
 // Tell the server the screen has played the events out: a bot opponent waits for it before its next move (server._watched).
 function played() {
+  dailyDone();
   if (!wsId || RP.views.length || !V || !V.game) return;
   const ev = V.game.events || [];
   if (ev.length && ev[ev.length - 1].seq !== played.seq) { played.seq = ev[ev.length - 1].seq; send({ t: 'played', seq: played.seq }); }
+}
+// A daily match (docs/async-play.md): once your turn has played out and it is your friend's, home, unless they are in the
+// match too (both in at once, it plays as a live match). Home says whose turn it is now.
+function dailyDone() {
+  if (!V || !V.daily || !V.id || RP.views.length || V.phase !== 'playing') { dailyDone.was = null; return; }
+  const was = dailyDone.was; dailyDone.was = { id: V.id, yours: V.daily.yours };
+  if (!was || was.id !== V.id || !was.yours || V.daily.yours || V.daily.oppHere || PB.busy) return;
+  const id = V.id, who = (V.seats[opp()] || {}).name || 'Your friend', left = V.daily.deadline && timeLeft(V.daily.deadline, V.daily.now);
+  setTimeout(() => { if (wsId !== id || !V || !V.daily || V.daily.yours || V.daily.oppHere || V.phase !== 'playing') return;
+    location.hash = '#/'; toast(`Your turn is done. ${who.split('#')[0]} has ${left} for theirs.`, true); }, 900);
 }
 function stopPlayback() { clearTimeout(PB.t); PB.busy = false; PB.queue = []; ui.step = null; }
 // Your move never waits on an animation (player report 2026-10-04: clicks on cards did nothing while the opponent's moves
@@ -1023,6 +1044,13 @@ const mmss = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2
 function drawClock() {
   const el = document.getElementById('clock'), c = V && V.game && V.game.clock;
   if (!el) return;
+  if (V.daily && V.daily.deadline && V.phase === 'playing') {   // a daily match: days for this turn, then the match is lost
+    const left = V.daily.deadline - (V.daily.now + Date.now() / 1000 - V.rx);
+    el.className = `clock daily${left < 3600 ? ' low' : ''}`;
+    el.innerHTML = `<b>${timeLeft(V.daily.deadline, V.daily.now + Date.now() / 1000 - V.rx).replace(/ days?/, 'd').replace(' h', 'h').replace(' min', 'm')}</b>`;
+    el.dataset.tip = `${V.daily.yours ? 'Your' : "Your opponent's"} time for this turn: ${timeLeft(V.daily.deadline, V.daily.now + Date.now() / 1000 - V.rx)}. When it runs out, the match is lost.`;
+    return;
+  }
   if (!c || !c.on) { el.innerHTML = ''; el.className = 'clock'; return; }   // every view states the clock: {on: false} when there is none
   const spent = c.now + (Date.now() / 1000 - V.rx) - c.since, free = Math.max(0, c.free - spent);
   const bank = Math.max(0, c.bank[c.holder] - Math.max(0, spent - c.free)), left = free + bank;
@@ -1623,7 +1651,7 @@ function drawEnd() {
   if (live) sfx(w === you ? 'victory' : 'defeat');
   drawEnd.sounded = key;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
-  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
+  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: V.daily ? (w === null ? 'Time ran out for you both' : w === you ? 'Your opponent ran out of time' : 'You ran out of time') : w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
   const howLine = ['hq_capture', 'food'].includes(G.result.reason) && w !== null ? '' : `<div class="how">${how}.</div>`;   // a den taken, a full den: the board showed it
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;

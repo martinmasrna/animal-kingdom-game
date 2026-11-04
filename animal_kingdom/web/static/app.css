@@ -494,3 +494,17 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mf b { position: absolute; right: -6px; bottom: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: #1b1916; color: #f0e8da; font-size: 12px; line-height: 18px; text-align: center; box-shadow: 0 0 0 1px rgba(255,245,230,.25); }
 .ladder .metar .mbody { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; } .ladder .metar .mside { flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 .ladder .metar .mside .mxw { align-self: flex-start; } .ladder .metar .mside .mxw + .msub { margin-top: 14px; } @media (max-width: 700px) { .ladder .metar { padding: 0 12px 20px; } .ladder .metar .mstrip { width: 180px; } }
+
+/* Daily matches on home (daily.js; docs/async-play.md): plain text rows on a granite piece at the top left, a stand-in until
+   the list has a design of its own. */
+.home .daily { position: absolute; left: 16px; top: 16px; z-index: 4; box-sizing: border-box; width: 340px; max-height: calc(100vh - 260px);
+  overflow-y: auto; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; padding: 10px; display: flex; flex-direction: column; gap: 6px; border-radius: 16px;
+  background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12); }
+.home .daily h4 { margin: 2px 6px 2px; font: 700 15px 'Fira Sans Condensed', sans-serif; color: #b3a996; letter-spacing: .04em; text-transform: uppercase; }
+.home .daily .drow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 8px 10px; border: 0; border-radius: 10px; background: rgba(0,0,0,.22);
+  text-align: left; color: #f0ece4; font: 500 15px/1.25 'Fira Sans Condensed', sans-serif; }
+.home .daily button.drow { cursor: pointer; } .home .daily button.drow:hover { background: rgba(255,245,230,.08); }
+.home .daily .drow b { font-weight: 700; font-size: 17px; } .home .daily .drow > span { color: #c9bfae; }
+.home .daily .drow.turn b { color: #f3d98a; }
+.home .daily .drow .btns { display: flex; gap: 6px; margin-left: auto; } .home .daily .drow .btns .slab { height: 32px; padding: 0 12px; font-size: 15px; }
+@media (max-width: 700px) { .home .daily { top: 98px; right: 16px; width: auto; max-height: calc(100vh - 330px); } }
