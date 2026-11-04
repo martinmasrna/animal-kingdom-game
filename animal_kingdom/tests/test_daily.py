@@ -255,3 +255,88 @@ def test_a_daily_match_on_disk_is_reloaded_however_old(monkeypatch, tmp_path):
     assert fresh.matches[m.id].daily_deadline() == m.daily_deadline()
     fresh.drop(fresh.matches[m.id])
     assert not old.exists()
+
+
+def test_the_daily_ranked_queue_pairs_the_next_person_and_rates_the_result(monkeypatch):
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a, b = [await (await c.post("/api/profile", json={})).json() for _ in range(2)]   # strangers: no friendship needed
+            ha, hb = {"X-AK-Key": a["code"]}, {"X-AK-Key": b["code"]}
+            one = await (await c.post("/api/daily/ranked", json={"deck": "cats"}, headers=ha)).json()
+            assert not one["paired"]
+            assert (await c.post("/api/daily/ranked", json={"deck": "cats"}, headers=ha)).status == 409, "one place in the queue"
+            q = (await (await c.get("/api/daily", headers=ha)).json())["queue"]
+            assert [x["id"] for x in q] == [one["id"]] and q[0]["until"] - time_now() > 0.9 * DAY
+            two = await (await c.post("/api/daily/ranked", json={"deck": "giants"}, headers=hb)).json()
+            assert two["paired"] and two["id"] == one["id"] and two["seat"] == "B"
+            match = server.hub.matches[one["id"]]
+            assert match.phase == "playing" and match.daily["ranked"] and match.clock is None
+            assert match.seats["A"].ladder == a["profile"]["id"] and match.seats["B"].ladder == b["profile"]["id"]
+            assert match.view("A")["ranked"] and match.seats["A"].rating
+            rows = (await (await c.get("/api/daily", headers=hb)).json())["turn"]
+            assert [r["id"] for r in rows] == [one["id"]] and rows[0]["ranked"]
+            before = {p: server.ladder.get(match.seats[p].ladder).rating for p in "AB"}
+            _keep_hands(match)
+            late = match.to_act()
+            await server.hub.sweep_daily(match.daily_deadline() + 1)
+            after = {p: server.ladder.get(match.seats[p].ladder).rating for p in "AB"}
+            assert after[late] < before[late] and after["B" if late == "A" else "A"] > before["B" if late == "A" else "A"], "rated"
+            hist = server.profiles.history(a["profile"]["id"])
+            assert hist[0]["mode"] == "ranked"
+    asyncio.run(run())
+
+
+def time_now():
+    import time
+    return time.time()
+
+
+def test_nobody_in_the_daily_queue_for_a_day_gives_a_bot_at_your_rating_that_answers_at_once(monkeypatch):
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setenv("AK_BOT_PAUSE", "0")
+    monkeypatch.setattr(server, "BOT_PAUSE", {"open": 0, "move": 0, "choice": 0})
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a = await (await c.post("/api/profile", json={})).json()
+            ha = {"X-AK-Key": a["code"]}
+            one = await (await c.post("/api/daily/ranked", json={"deck": "cats"}, headers=ha)).json()
+            match = server.hub.matches[one["id"]]
+            await server.hub.sweep_daily(match.daily["until"] - 1)
+            assert match.phase == "lobby"
+            await server.hub.sweep_daily(match.daily["until"] + 1)
+            assert match.phase == "playing" and match.seats["B"].is_bot and match.seats["B"].ladder.startswith("bot:")
+            assert match.daily["ranked"] and match.daily["bot"]
+            assert match.yours("A")
+            from animal_kingdom.web.match import bot_for
+            match.bots["B"] = bot_for("easy", 1)        # a quick pilot: the test is about who waits, not how well it plays
+            match.act("A", ChoiceAction(SKIP))         # you keep your hand; the bot then mulligans and plays at once
+            server.hub.kick_bot(match)
+            for _ in range(600):
+                if not match.mulliganing() and match.yours("A"):
+                    break
+                await asyncio.sleep(0.05)
+            assert not match.mulliganing() and match.yours("A") and not match.yours("B"), "the bot never keeps you waiting"
+    asyncio.run(run())
+
+
+def test_at_most_a_few_daily_ranked_matches(monkeypatch):
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setattr(server, "DAILY_RANKED_MAX", 1)
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a, b = [await (await c.post("/api/profile", json={})).json() for _ in range(2)]
+            ha, hb = {"X-AK-Key": a["code"]}, {"X-AK-Key": b["code"]}
+            await c.post("/api/daily/ranked", json={"deck": "cats"}, headers=ha)
+            await c.post("/api/daily/ranked", json={"deck": "cats"}, headers=hb)
+            r = await c.post("/api/daily/ranked", json={"deck": "cats"}, headers=ha)
+            assert r.status == 409 and "1 daily ranked" in await r.text()
+            # the queue can be left
+            d = await (await c.post("/api/profile", json={})).json()
+            hd = {"X-AK-Key": d["code"]}
+            w = await (await c.post("/api/daily/ranked", json={"deck": "cats"}, headers=hd)).json()
+            assert (await c.delete(f"/api/daily/{w['id']}", headers=hd)).status == 200 and w["id"] not in server.hub.matches
+    asyncio.run(run())

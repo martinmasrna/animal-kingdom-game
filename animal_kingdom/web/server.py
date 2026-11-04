@@ -214,7 +214,11 @@ class Hub:
         for match in [m for m in self.matches.values() if m.daily is not None]:
             try:
                 if match.phase == "lobby" and now >= match.daily.get("until", now + 1):
-                    self.drop(match)
+                    if match.daily.get("ranked"):        # nobody came in a day: a bot at your rating, which answers at once
+                        _daily_bot(match)
+                        await self.push(match)
+                    else:
+                        self.drop(match)
                     await self.tell_daily(match, force=True)
                 elif match.daily_time_out(now):
                     await self.broadcast(match)
@@ -1164,6 +1168,8 @@ async def challenge_answer(req):
 DAILY_INVITE_DAYS = 7        # days a daily challenge waits for its friend's answer before it lapses
 DAILY_MAX = 10               # daily matches a player may have open at once, challenges sent and received counted
 DAILY_SWEEP = 30             # seconds between looks for a daily clock run out
+DAILY_RANKED_WAIT_DAYS = 1   # days the daily ranked queue waits for a person before giving you a bot at your rating
+DAILY_RANKED_MAX = 3         # daily ranked matches a person may have open at once (the queue's wait counted)
 if os.environ.get("AK_DAILY_SWEEP"):   # the browser tests' forfeit looks every half second
     DAILY_SWEEP = float(os.environ["AK_DAILY_SWEEP"])
 
@@ -1188,8 +1194,11 @@ async def daily_list(req):
     """Home's list: your daily matches where it's your turn, where it's theirs, challenges to you and from you, and
     results you haven't opened yet. Each match you're in carries your seat's token, so any tab can open it."""
     p = me(req)
-    out = {"turn": [], "waiting": [], "challenges": [], "sent": [], "results": [], "now": time.time(), "max": DAILY_MAX}
+    out = {"turn": [], "waiting": [], "challenges": [], "sent": [], "queue": [], "results": [], "now": time.time(), "max": DAILY_MAX}
     for m, seat in _daily_of(p["id"]):
+        if m.phase == "lobby" and m.daily.get("ranked"):
+            out["queue"].append({"id": m.id, "until": m.daily["until"]})
+            continue
         if m.phase == "lobby":
             if seat is None:
                 out["challenges"].append({"id": m.id, "from": friend_label(p["id"], m.seats["A"].profile), "until": m.daily["until"]})
@@ -1199,8 +1208,8 @@ async def daily_list(req):
                                     "to": friend_label(p["id"], m.daily["invite"]) if inv else "?"})
             continue
         other = m.seats["B" if seat == "A" else "A"]
-        opp = friend_label(p["id"], other.profile) if other.profile and profiles.get(other.profile) else other.name
-        row = {"id": m.id, "token": m.seats[seat].token, "seat": seat, "opp": opp}
+        opp = friend_label(p["id"], other.profile) if other.profile and friends.are(p["id"], other.profile) else other.name
+        row = {"id": m.id, "token": m.seats[seat].token, "seat": seat, "opp": opp, "ranked": bool(m.daily.get("ranked"))}
         if m.phase == "playing":
             row |= {"deadline": m.daily_deadline(), "round": m.state.turn_counter // 2 + 1 if m.state else 1}
             out["turn" if m.yours(seat) else "waiting"].append(row)
@@ -1238,6 +1247,61 @@ async def daily_challenge(req):
     return web.json_response({"id": mid, "token": token, "seat": "A"})
 
 
+def _daily_bot(match: Match) -> None:
+    """The daily ranked queue waited a day with nobody: the nearest bot at the player's rating takes the other seat, as the
+    live queue gives one after its seconds; it answers each turn at once, the player keeps the daily clock."""
+    a = match.seats["A"]
+    recent = [h["opp_deck"] for h in profiles.history(a.profile) if h.get("mode") == "ranked" and h["opp"].startswith("Bot (")][:ranking.RECENT_DECKS]
+    slug = {name: s for s, name in DECK_NAMES.items()}
+    bid = ladder.nearest_bot(ladder.get(a.ladder).rating, random, avoid={slug.get(d, d) for d in recent})
+    level, bdeck = ranking.parse_bot(bid)
+    match.daily.pop("until", None)
+    match.daily["bot"] = True
+    match.join(Seat(secrets.token_urlsafe(12), ladder_name(bid), bot=level, deck=bdeck, ladder=bid))
+    for seat in match.seats.values():
+        seat.rating = ladder.get(seat.ladder).shown()
+
+
+async def daily_ranked(req):
+    """Join the daily ranked queue with a deck: paired with the next person who joins it, however far apart your ratings
+    (there are few enough of us that a window would pair nobody); with nobody in a day, a bot at your rating. Rated on the
+    one ladder like any ranked match."""
+    p, body = me(req), await req.json()
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    mine = [m for m, _ in _daily_of(p["id"]) if m.daily.get("ranked") and m.phase in ("lobby", "playing")]
+    if any(m.phase == "lobby" for m in mine):
+        raise web.HTTPConflict(text="You are in the daily queue already")
+    if len(mine) >= DAILY_RANKED_MAX:
+        raise web.HTTPConflict(text=f"You have {DAILY_RANKED_MAX} daily ranked matches already")
+    if _daily_open(p["id"]) >= DAILY_MAX:
+        raise web.HTTPConflict(text=f"You have {DAILY_MAX} daily matches already")
+    token = secrets.token_urlsafe(12)
+    seat = Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"])
+    wait = min((m for m in hub.matches.values() if m.daily is not None and m.daily.get("ranked") and m.phase == "lobby"
+                and m.seats["A"].profile != p["id"]), key=lambda m: m.daily["until"], default=None)   # the longest waiting
+    if wait is not None:
+        wait.daily.pop("until", None)
+        wait.join(seat)
+        for st in wait.seats.values():
+            st.rating = ladder.get(st.ladder).shown()
+        await hub.push(wait)
+        await hub.tell_daily(wait, force=True)
+        return web.json_response({"id": wait.id, "token": token, "seat": "B", "paired": True})
+    mid = hub.new_id()
+    match = Match(mid, seat)
+    match.daily = {"days": DAILY_DAYS, "ranked": True, "until": time.time() + DAILY_RANKED_WAIT_DAYS * DAY}
+    match.version += 1
+    match.on_game_end = save_game
+    match.on_match_end = record_match
+    hub.matches[mid] = match
+    hub.save(match)
+    await hub.tell_daily(match, force=True)
+    return web.json_response({"id": mid, "token": token, "seat": "A", "paired": False})
+
+
 async def daily_answer(req):
     """Accept a daily challenge to you (with your deck: the match starts, its first deadline running) or decline it."""
     p, body = me(req), await req.json()
@@ -1269,7 +1333,7 @@ async def daily_withdraw(req):
     match = hub.matches.get(req.match_info["id"])
     if not match or match.daily is None or match.phase != "lobby" or match.seats["A"].profile != p["id"]:
         raise web.HTTPGone(text="that challenge has gone")
-    hub.drop(match)
+    hub.drop(match)   # a challenge you sent, or your place in the daily ranked queue
     await hub.tell_daily(match, force=True)
     return web.json_response({})
 
@@ -1630,6 +1694,7 @@ def make_app() -> web.Application:
         web.post("/api/challenge/{id}/answer", challenge_answer),
         web.get("/api/daily", daily_list),
         web.post("/api/daily", daily_challenge),
+        web.post("/api/daily/ranked", daily_ranked),
         web.post("/api/daily/{id}/answer", daily_answer),
         web.delete("/api/daily/{id}", daily_withdraw),
         web.get("/ws/presence", presence_socket),

@@ -49,20 +49,21 @@ The Friend choice on home gets a second way to play beside the live challenge: *
 
 **Where a design belongs (for Martin and the design sandbox):** the home list is plain text on granite. It wants to be designed as part of home's piece: how it sits against the key art, how many rows before it scrolls, whether a "your turn" count belongs on the corner piece (as the Friends button counts who is online), and whether the game screen shows the daily clock differently from the live one (today it reuses the clock's place with "1 d 4 h" in text).
 
-## Ranked daily (designed, not built)
+## Ranked daily (built in phase 4)
 
-The ask was a ranked queue of its own as a second step. What it would mean:
+Asked for by Martin's supervising session after the first three phases: a player who chooses daily ranked is paired with the next person who does, or, with nobody waiting for a day, with a bot at their rating; rated like any ranked game on the one ladder; a few open daily ranked matches a person.
 
-- **Pairing without anyone online.** You join the daily pool with a deck; you are paired with the next person in the pool whose rating is near yours, however long that takes (the window widens by the day, not by the second as the live queue's does). No bot fallback: a bot is not a daily opponent.
-- **Rating.** Rating computation is not touched by this work. The choice is where a daily result goes, and it is Martin's (decision 3).
-- **Not rated if it ends before it started**, as Chess.com does before the fourth move: a timeout or concession before your own first turn moves nothing. Without it, a pool of people who accept and forget gives free points.
-- With today's player numbers (no person-versus-person games among the last 400 logged), a daily pool would rarely pair anyone. That is the main reason it is not built yet.
+- **Pairing without anyone online.** Ranked, then Daily, then "Find a daily opponent" on home. You are paired with whoever has waited longest in the daily queue, whatever the ratings: with today's player numbers (no person-versus-person games among the last 400 logged) a rating window would pair nobody. One place in the queue at a time; Leave takes it back.
+- **The bot after a day** (`DAILY_RANKED_WAIT_DAYS` = 1): the nearest bot at your rating (`Ladder.nearest_bot`, avoiding the decks of your last bot games, as the live queue does). It answers each turn at once; you keep the daily clock. This replaces the doc's first recommendation of no bot at all.
+- **Rating.** Untouched: a daily ranked match is two ladder seats, so `rate_match` rates it as it rates any ranked match, and the history calls it ranked. Daily and live results share the one ladder.
+- **At most `DAILY_RANKED_MAX` (3)** daily ranked matches a person, the wait in the queue counted, inside the 10 daily matches.
+- **Not built:** Chess.com's "not rated before the fourth move". A player who joins the queue and forgets loses on time, rated. Decision 3 below.
 
 ## Decisions that are Martin's
 
 1. **The clock.** Recommended: one fixed setting, 2 days a turn, for everyone (a choice of 1, 2 or 3 days on the challenge later, if players ask). Chess.com's default is 3, but its games run 40 moves; ours run 4 or 5 turns each, and 3 days a turn makes one slow game last a month.
 2. **Timeout.** Recommended: a loss, always, as built. The alternative is a loss only after the first turn and a lapsed match before it (nobody's history), which is kinder to a challenge accepted and forgotten.
-3. **Ranked daily and the rating.** Recommended, when there are players enough: the one ladder (Martin, 2026-10-24: "every game counts"), with the not-before-your-first-turn rule. Chess.com keeps a separate Daily rating because a day per move is a different game from blitz; a turn of this game with a day to think may be too.
+3. **Ranked daily and the rating.** Built on the one ladder (Martin, 2026-10-24: "every game counts"). Open: whether a timeout or concession before your own first turn should move no rating, as Chess.com does before the fourth move (recommended). Chess.com keeps a separate Daily rating because a day per move is a different game from blitz; a turn of this game with a day to think may be too.
 4. **Vacation.** Chess.com's answer to "I'm away for a week". Recommended: none for now; the 2-day clock and 10-match cap are small enough to recover from. It is the first thing players will ask for.
 5. **Telling a player it's their turn.** Nothing tells them today except home. Recommended next: a mail when a turn comes to you and you have not been on for a day (the feedback mail's Gmail sending exists, `web/feedback.py`), with an opt-out in Settings. Words With Friends lives on its notifications; without one, daily play leans on people remembering.
 6. **Live clock when both are in.** Built: the daily clock always applies, even while both are in the match; only the pace is live. The alternative, switching to the live clock (30 s and the bank) while both are present, punishes whoever happens to have the tab open.

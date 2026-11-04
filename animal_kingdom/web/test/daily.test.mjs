@@ -134,3 +134,21 @@ test('a turn not taken in time loses the match, and home says so until the match
   assert.ok((hist.history || hist.profile?.history || []).some(h => h.mode === 'daily'), 'in the match history, as daily');
   assert.deepEqual([...ann.errors, ...bob.errors], []);
 });
+
+test('daily ranked: the next person who chooses it is your opponent, and home says so', async () => {
+  const ann = await person(server.url), bob = await person(server.url);   // strangers: the queue needs no friendship
+  const queue = async p => {
+    await p.click('#oppbtn'); await p.waitForSelector('[data-opp="ranked"]'); await p.click('[data-opp="ranked"]');
+    await p.click('[data-pace="daily"]');
+    assert.equal(await p.$eval('#go', e => e.textContent), 'Find a daily opponent');
+    await p.click('#go');
+  };
+  await queue(ann);
+  await until(ann, () => /Looking for a daily opponent/.test((document.getElementById('daily') || {}).textContent || ''), 'Ann waits in the queue');
+  await away(ann);
+  await queue(bob);
+  await until(bob, () => /Your turn.*Ranked/.test((document.getElementById('daily') || {}).textContent || ''), 'Bob is paired at once');
+  await back(ann);
+  await until(ann, () => /Your turn.*Ranked/.test((document.getElementById('daily') || {}).textContent || ''), 'and Ann finds the match on home');
+  assert.deepEqual([...ann.errors, ...bob.errors], []);
+});

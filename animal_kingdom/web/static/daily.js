@@ -35,10 +35,11 @@ export function dailyPiece() {
   const d = S.data;
   if (!d) return '';
   const rows = [
-    ...d.turn.map(r => `<button class="drow turn" data-open="${r.id}"><b>Your turn</b><span>${esc(r.opp)} · ${timeLeft(r.deadline, now())} left</span></button>`),
+    ...d.turn.map(r => `<button class="drow turn" data-open="${r.id}"><b>Your turn</b><span>${r.ranked ? 'Ranked · ' : ''}${esc(r.opp)} · ${timeLeft(r.deadline, now())} left</span></button>`),
     ...d.challenges.map(c => `<div class="drow ask"><b>${esc(c.from)} sends a daily challenge</b><span class="btns"><button class="slab" data-decline="${c.id}">Decline</button><button class="slab" data-accept="${c.id}">Play</button></span></div>`),
     ...d.results.map(r => `<button class="drow done" data-open="${r.id}"><b>${r.draw ? 'Draw' : r.won ? 'Won' : 'Lost'}</b><span>${r.won ? 'against' : r.draw ? 'with' : 'to'} ${esc(r.opp)}${why(r)}</span></button>`),
-    ...d.waiting.map(r => `<button class="drow wait" data-open="${r.id}"><b>${esc(r.opp)}'s turn</b><span>${timeLeft(r.deadline, now())} left</span></button>`),
+    ...d.waiting.map(r => `<button class="drow wait" data-open="${r.id}"><b>${esc(r.opp)}'s turn</b><span>${r.ranked ? 'Ranked · ' : ''}${timeLeft(r.deadline, now())} left</span></button>`),
+    ...(d.queue || []).map(c => `<div class="drow sent"><b>Looking for a daily opponent</b><span>ranked · a bot in ${timeLeft(c.until, now())} if nobody comes</span><span class="btns"><button class="slab" data-withdraw="${c.id}">Leave</button></span></div>`),
     ...d.sent.map(c => `<div class="drow sent"><b>Challenge sent</b><span>to ${esc(c.to)}</span><span class="btns"><button class="slab" data-withdraw="${c.id}">Withdraw</button></span></div>`),
   ];
   return rows.length ? `<div class="daily" id="daily"><h4>Daily</h4>${rows.join('')}</div>` : '';
@@ -68,5 +69,14 @@ export async function sendDaily(friend, deck, who) {
   const r = await ctx.api('/api/daily', { method: 'POST', body: JSON.stringify({ friend, deck }) });
   if (!r.ok) return ctx.toast(await r.text());
   ctx.toast(`Daily challenge sent to ${who}`, true);
+  await loadDaily(); ctx.changed();
+}
+
+// The daily ranked queue: paired with the next person who joins it, else with a bot at your rating after a day.
+export async function dailyRanked(deck) {
+  const r = await ctx.api('/api/daily/ranked', { method: 'POST', body: JSON.stringify({ deck }) });
+  if (!r.ok) return ctx.toast(await r.text());
+  const m = await r.json();
+  ctx.toast(m.paired ? 'Daily opponent found: your match is on home' : 'In the daily queue: your match will be on home', true);
   await loadDaily(); ctx.changed();
 }

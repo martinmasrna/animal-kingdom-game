@@ -13,7 +13,7 @@ import { track } from './log.js';
 import { loadNews, unread as newsUnread, newsScreen, showSince, hideSince } from './news.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
 import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends } from './chat.js';
-import { initDaily, loadDaily, dailyPiece, wireDaily, sendDaily, timeLeft } from './daily.js';
+import { initDaily, loadDaily, dailyPiece, wireDaily, sendDaily, dailyRanked, timeLeft } from './daily.js';
 import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, handLights, holdFood, shownRegion, lessonEnd, drawCoach } from './coach.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -280,19 +280,20 @@ function homeScreen(mode = {}) {
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
-  const daily = play.opp === 'friend' && play.pace === 'daily';   // a friend match that waits for days (docs/async-play.md)
+  const daily = play.opp === 'friend' && play.pace === 'daily', dranked = play.opp === 'ranked' && play.pace === 'daily';   // a friend match that waits for days (docs/async-play.md)
   const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? friendLabel(fr, play.friends) + (daily ? ' · daily' : '') : daily ? 'Daily' : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
-    : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
+    : play.opp === 'ranked' ? ['Ranked', `${dranked ? 'daily · ' : ''}your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : isTest ? label(TEST_BOTS, play.botDeck) : 'Random'}`];
-  const go = mode.join ? 'Join match' : daily ? (fr ? `Daily challenge to ${esc(friendLabel(fr, play.friends))}` : 'Choose a friend') : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
+  const go = mode.join ? 'Join match' : dranked ? 'Find a daily opponent' : daily ? (fr ? `Daily challenge to ${esc(friendLabel(fr, play.friends))}` : 'Choose a friend') : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
+  const paceSeg = () => `<div class="seg">${[['live', 'Live'], ['daily', 'Daily']].map(([v, l]) => `<button class="slab${(play.pace || 'live') === v ? ' on' : ''}" data-pace="${v}">${l}</button>`).join('')}</div>`;   // live, or a turn when you visit (docs/async-play.md)
   const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.short ? `<span class="left">${30 - d.short}/30</span>` : ''}</div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
   const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
   const chooser = play.open === 'decks'
     ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, chosen && d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${peek ? deckList(peek) : ''}</div></div>`
     : play.open === 'opp' ? `<div class="chooser opps">${`<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend'], ['gauntlet', 'Gauntlet']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
-        + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f, '', play.friends)}</button>`).join('')}</div>
-          <div class="seg">${[['live', 'Live'], ['daily', 'Daily']].map(([v, l]) => `<button class="slab${(play.pace || 'live') === v ? ' on' : ''}" data-pace="${v}">${l}</button>`).join('')}</div>
+        + (play.opp === 'ranked' ? paceSeg() : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f, '', play.friends)}</button>`).join('')}</div>
+          ${paceSeg()}
           <button class="slab" id="addfriend">Add a friend</button><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : play.opp === 'gauntlet' ? levels + dd('side', play.side || 'mine', SIDES) + dd('gfield', play.gfield || 'mine', GFIELDS) + dd('ggames', play.ggames || '2', GGAMES)
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
@@ -354,6 +355,7 @@ function homeScreen(mode = {}) {
       const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id; return;
     }
     if (search) return cancelSearch();
+    if (dranked) { play.open = null; return dailyRanked(deckSpec(chosen)); }
     if (play.opp === 'ranked') return findRanked('go', deckSpec(chosen));
     if (daily) { if (!fr) return toast('Choose a friend first'); play.open = null; return sendDaily(fr.id, deckSpec(chosen), friendLabel(fr, play.friends)); }
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
@@ -1688,8 +1690,8 @@ function drawEnd() {
     const rt = V.rating, d = rt && rt.delta;
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
       ${rt ? `<div class="rating"><small>Rating</small><div><b id="rnum">${live ? rt.before : rt.after}</b><span class="rd ${d >= 0 ? 'up' : 'down'}${live ? '' : ' on'}">${d >= 0 ? '+' : '−'}${Math.abs(d)}</span></div></div>` : ''}
-      <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
-    document.getElementById('again').onclick = () => findRanked('again', deckSpec(chosenDeck()));
+      <div class="btns"><a class="slab" href="#/">Menu</a>${peek}${V.daily ? '' : '<button class="play" id="again">Play again</button>'}</div></div>`;
+    if (!V.daily) document.getElementById('again').onclick = () => findRanked('again', deckSpec(chosenDeck()));
     if (live && rt) countRating(rt);
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
