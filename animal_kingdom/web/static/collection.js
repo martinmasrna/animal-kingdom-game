@@ -97,8 +97,10 @@ function render(app, all) {
   if (st.was !== !!st.open) keep[1] = 0; st.was = !!st.open;   // switching list and deck starts the column at its top
   const open = all.find(d => d.id === st.open), counts = open ? countsOf(open.list) : {};
   const q = st.q.toLowerCase();
-  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '9+' ? c.str >= 9 : String(c.str) === st.str))
-    && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(q)))
+  // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
+  const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
+  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str))
+    && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ') + ' ' + made(c)).toLowerCase().includes(q)))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
@@ -107,7 +109,7 @@ function render(app, all) {
       return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact', lazy: true })}${n && c.rarity !== 'legendary' ? `<span class="pips">${pips(n, limit(c))}</span>` : ''}</div>`; }).join('') + '</div>';
 
   const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
-  const strengths = [...Array(9).keys()].map(String).concat('9+');   // 0 to 8, then 9 and up together (Hearthstone's 7+)
+  const strengths = [...Array(8).keys()].map(String).concat('8+');   // 0 to 7, then 8 and up together: few animals are 8 or more (Martin, 2026-10-30)
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
@@ -118,7 +120,8 @@ function render(app, all) {
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`
-    : `<div class="dtile" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b></div>`;
+    // a deck still under 30 cards is marked with its count, as on home's chooser (Martin, 2026-10-31)
+    : `<div class="dtile${d.list.length < 30 ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < 30 ? `<span class="left">${d.list.length}/30</span>` : ''}</div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
   const column = open

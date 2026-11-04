@@ -35,3 +35,16 @@ test('a den taken by roaming leaves the hand alone', () => {
 test('the new keywords are explained', () => {
   for (const k of ['Roam', 'Reach', 'Poison', 'Dawn', 'Dusk']) assert.ok(KEYWORDS[k], k);
 });
+
+test('an animal that roamed into the den stands only in its mouth, not also where it came from', async () => {
+  const { renderBoard } = await import('../static/board.js');
+  const M = { cols: 5, rows: 3, regions: [] };
+  const el = { innerHTML: '', getAnimations: () => [], querySelectorAll: () => [] };
+  const draw = capture => { renderBoard(el, M, { board: { '4,2': [mouse, wolf] }, food: { A: 0, B: 0 }, income: {}, winFood: 30 },
+    { jackal: { name: 'Jackal', kw: [] }, mouse: { name: 'Mouse', kw: [] } },
+    { rings: [], capture }); return el.innerHTML; };
+  assert.match(draw(null), /data-cr="4,2" data-card="jackal"/);
+  const won = draw({ side: 'B', id: 'jackal', owner: 'A', str: 4, iid: 5 });
+  assert.doesNotMatch(won, /data-cr="4,2" data-card="jackal"/);
+  assert.match(won, /data-cr="4,2" data-card="mouse"/, 'what it stood on shows again');
+});

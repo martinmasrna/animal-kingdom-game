@@ -2,7 +2,7 @@
 
 Rules questions created by the larger-card-pool brainstorm. Nothing here changes the canonical keyword registry until explicitly adopted.
 
-All card candidates that use these mechanics are inventoried in [`../cards/card-candidates.md`](../cards/card-candidates.md). This document defines only the open rules questions.
+Card ideas that use these mechanics are in [`../cards/ideas.md`](../cards/ideas.md). This document defines only the open rules questions.
 
 ## Design standard
 

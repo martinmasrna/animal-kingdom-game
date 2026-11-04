@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import os
 import random
+import warnings
 from typing import Optional, Sequence
 
 from .engine.cards import COPY_LIMITS, Card, DECKLISTS, DECK_SLUGS, load_cards
@@ -140,12 +141,18 @@ def make_vanilla_deck(
     return pool[:n]
 
 
-def _check_shipped() -> None:
-    """Every shipped deck is a legal list over the collectible cards (the loader is the trust boundary)."""
+def shipped_problems() -> dict[str, list[str]]:
+    """Each shipped or ladder deck a card change has made illegal, with what's wrong with it."""
     cards = load_cards()
-    for slug, decklist in PREMADE_DECKS.items():
-        if problems := decklist_problems(decklist, cards=cards):
-            raise ValueError(f"decklists.json: {slug}: " + "; ".join(problems))
+    return {slug: p for slug, decklist in PREMADE_DECKS.items() if (p := decklist_problems(decklist, cards=cards))}
+
+
+def _check_shipped() -> None:
+    """A deck a card change made illegal (a rarity moved, a card benched) loads with a warning and never fails a test,
+    commit or deploy: the decks get their pass before the game ships (Martin, 2026-10-27). It is not meant to be played;
+    marking it in the collection is on the to-do list (Martin, 2026-10-29)."""
+    for slug, problems in shipped_problems().items():
+        warnings.warn(f"deck {slug}: " + "; ".join(problems), stacklevel=2)
 
 
 _check_shipped()

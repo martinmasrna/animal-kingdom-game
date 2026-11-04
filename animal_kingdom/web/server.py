@@ -15,6 +15,7 @@ import logging
 import os
 import random
 import secrets
+import subprocess
 import time
 import webbrowser
 from collections import Counter
@@ -68,6 +69,20 @@ if os.environ.get("AK_BOT_PAUSE") is not None:   # the test harness sets 0: test
 log = logging.getLogger("animal_kingdom.web")
 
 
+def _commit() -> str:
+    """The commit the server runs, for the game logs: a log replays only under the rules it was played with, and a day of
+    card and rule changes left 32 of 140 games of 2026-10-30 unreplayable at the next day's HEAD. Empty where there is no git
+    (the deployed image)."""
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=Path(__file__).resolve().parent, capture_output=True,
+                              text=True, timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+COMMIT = _commit()
+
+
 def save_game(match: Match, record: dict) -> None:
     if os.environ.get("AK_NO_GAME_LOGS") or all(seat.is_bot for seat in match.seats.values()):
         return
@@ -75,7 +90,7 @@ def save_game(match: Match, record: dict) -> None:
         LOG_DIR.mkdir(parents=True, exist_ok=True)
         stamp = match.created.strftime("%Y%m%dT%H%M%S")
         with open(LOG_DIR / f"web_{stamp}_{match.id}.jsonl", "a", encoding="utf-8") as fh:
-            fh.write(json.dumps(record) + "\n")
+            fh.write(json.dumps({**record, **({"commit": COMMIT} if COMMIT else {})}) + "\n")
     except OSError:
         log.exception("could not save the game log for match %s", match.id)
 
@@ -1120,7 +1135,7 @@ async def pool(_req):
         # The bot decks that are not starters: shown by name and list wherever a bot's deck is (Practice's chooser,
         # the versus moment, the match history), never in a player's collection.
         "bot_only": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug), "cover": STARTER_COVERS.get(slug, "")}
-                     for slug in (ladder.decks if ladder else BOT_DECKS) if slug not in DECK_SLUGS],
+                     for slug in (ladder.decks if ladder else BOT_DECKS) if slug not in {d["slug"] for d in STARTER_DECKS}],
         "build": BUILD,
     })
 
@@ -1274,12 +1289,12 @@ async def create_match(req):
             raise web.HTTPBadRequest(text="bad gauntlet")
         # The player's deck is no opponent, even sent as a custom list identical to a premade (the mirror isn't a test).
         mine = sorted(load_premade_deck(deck))
-        wanted = gauntlet.get("decks")       # an explicit field (any shipped deck, the bots' own included), else the starters
-        if wanted is not None and (not isinstance(wanted, list) or not all(d in PREMADE_DECKS for d in wanted)):
+        wanted = gauntlet.get("decks")       # an explicit field (any shipped deck, the bots' own, a test deck such as lions30, or a saved player deck), else the starters
+        if wanted is not None and (not isinstance(wanted, list) or not all(d in PREMADE_DECKS or d in TEST_BOT_DECKS or d in custom_decks._saved for d in wanted)):
             raise web.HTTPBadRequest(text="bad gauntlet field")
         mirror = bool(gauntlet.get("mirror"))   # both seats on each named deck in turn: the pilot is the only variable
         field = [d for d in (wanted if wanted is not None else sorted(DECK_SLUGS))
-                 if mirror or (d != deck and d not in skip and sorted(PREMADE_DECKS[d]) != mine)]
+                 if mirror or (d != deck and d not in skip and sorted(load_premade_deck(d)) != mine)]
         if not field:
             raise web.HTTPBadRequest(text="empty gauntlet")
         match.join(Seat(secrets.token_urlsafe(12), f"{ranking.PILOT_BAND[level]} Bot", bot=level, deck=field[0]))
@@ -1444,6 +1459,9 @@ def make_app() -> web.Application:
         web.get("/ws/{id}", socket),
         web.static("/static", STATIC),
     ])
+    if os.environ.get("AK_ANALYSE"):   # the position analyser, localhost only (./play sets it; live never does)
+        from . import analyse
+        analyse.register(app)
     app.on_response_prepare.append(_revalidate)
 
     async def resume(_app):

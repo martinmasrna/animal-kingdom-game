@@ -55,7 +55,7 @@ LABELS = {
     "normal": "Normal", "easy": "Easy",
 }
 ANCHOR_SPEC = EXPERT_HISTORY[2][1]
-EVAL_ALIASES = {"wave2_slot_r456": "slot_r456"}
+EVAL_ALIASES = {"wave2_slot_r456": "slot_r456", "wave2_slot_r4_10_live": "slot_r4_10_live"}
 
 
 def canonical(spec: str) -> str:

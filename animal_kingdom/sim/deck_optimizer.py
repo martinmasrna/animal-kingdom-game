@@ -135,7 +135,7 @@ def random_recipe(rng: random.Random, pools: Optional[dict[str, list[str]]] = No
 SEED_RECIPE = make_recipe(
     legendary=("falcon_legend", "skunk_legend", "rat_legend_2", "fox_legend"),
     rare=("jaguar", "hawk", "orca", "rhinoceros"),
-    common=("lion", "tiger", "mouse", "wolf", "eagle", "bat"),
+    common=("lion", "tiger", "mouse", "wolf", "pigeon", "bat"),
 )
 
 

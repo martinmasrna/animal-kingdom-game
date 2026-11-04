@@ -158,6 +158,8 @@ class GreedyBot(Bot):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
+        if not legal:       # a turn left open with nothing to do (an extra action and no card to spend it on): end it
+            return PassAction()
         if (keep := keep_hand(view, legal, state if self.mulligan else None)) is not None:
             return keep
         if self.slip and self.slip_rng.random() < self.slip:

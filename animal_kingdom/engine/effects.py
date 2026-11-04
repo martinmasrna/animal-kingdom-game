@@ -25,7 +25,7 @@ from typing import Callable, Optional
 from .actions import SKIP, ChoiceAction, PlaceAction, RoamAction
 from .state import WILD, EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
-from .strength import effective_strength, placement_strength, raw_strength
+from .strength import effective_strength, placement_strength, raw_strength, small_starting_deck
 
 
 # ============================================================== pending / requests
@@ -281,8 +281,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
         state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
 
     # Apex Predator: it covers the occupant like any placement, and eats it afterwards
-    # (Martin, 2026-09-29): the roar, then every reaction to the cover (Porcupine's Spikes,
-    # Gale), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
+    # (Martin, 2026-09-29): the roar, then every reaction to the cover (Spikes, Poison,
+    # King Theron), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
     _push_theron(state, unit, covered)
     if is_apex and covered is not None:
         state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id,
@@ -313,9 +313,15 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
 
 
 def _fire_cover_event(state, coverer, covered) -> None:
-    hook = _hook(state, coverer.card_id, "on_cover_enemy")   # "Whenever this covers an enemy" (Fox)
+    hook = _hook(state, coverer.card_id, "on_cover_enemy")   # "Whenever this covers an enemy" (Dhole)
     if hook:
         hook(state, coverer, covered)
+    # The legendary Oxpecker: "Whenever your animal of strength 8 or more covers an enemy, play an Oxpecker." Made,
+    # then played by its owner like the Rabbit's Bunny: a full placement (Flight: anywhere), its Roar and all.
+    if effective_strength(state, coverer) >= state.config.oxpecker_legend_min:
+        for bird in statics.active_tops(state, coverer.owner, "oxpecker_legend"):
+            state.effect_stack.append({"op": "play_named", "chooser": coverer.owner, "card_id": "oxpecker", "make": True,
+                                       "by_card": bird.card_id, "by_iid": bird.iid})
 
 
 def _push_theron(state, coverer, covered) -> None:
@@ -342,13 +348,33 @@ def _push_flee(state, covered, coverer, cr) -> None:
 
 
 def _op_flee(state, step):
+    """The fleer is back in hand (with its stored strength), then the reactions: the player's other top animals'
+    "whenever one of your animals flees" (the legendary Deer), and the fleer's own "when this flees" (the Zebra's kick,
+    the legendary Deer growing itself). Hooks get the hand instance, the one that goes on existing."""
     cr, unit = _find_unit(state, step["iid"])
     if unit is None:
         return None
-    _bounce(state, cr, unit)
-    hook = _hook(state, unit.card_id, "on_flee")     # "When this flees, ..." (no card has one now)
+    fled = _bounce(state, cr, unit)
+    if fled is None:                                  # a Wild fleer has no hand: nothing to react to
+        return None
+    for st in list(state.board.values()):
+        top = st[-1] if st else None
+        if top is None or top.owner != fled.owner:
+            continue
+        hook = _hook(state, top.card_id, "on_friendly_flee")
+        if hook:
+            hook(state, top, fled)
+    hook = _hook(state, fled.card_id, "on_flee")
     if hook:
-        hook(state, unit, step["coverer"])
+        hook(state, fled, step["coverer"])
+    return None
+
+
+def _op_flee_return(state, step):
+    """Zebra: "When this flees, return the enemy that covered it to its owner's hand." (A return: Armor resists it.)"""
+    cr, unit = _find_unit(state, step["iid"])
+    if unit is not None and statics.can_be_removed(state, unit, cr):
+        _bounce(state, cr, unit)
     return None
 
 
@@ -420,9 +446,21 @@ def _op_queen_guard(state, step):
     """The guard leaves its owner's hand (first) or deck and is placed on top of the enemy that covered the Colony animal: no
     action, no connection or strength check, no Roar. Nothing happens if that enemy has left the crossroad meanwhile, or
     the guard has left the hand and deck (played, discarded, stolen)."""
-    cid, owner, cr = step["card"], step["player"], step["cr"]
-    if not any(u.iid == step["coverer"] for u in state.board.get(cr, [])):
+    cid, owner = step["card"], step["player"]
+    # One event can cover several of the owner's Colony animals at once (the Locust swarm): the guard goes to the one
+    # played earliest, as Dawn and Dusk are ordered (Martin, 2026-10-31); the other calls stay queued and fizzle, it being
+    # gone from hand and deck.
+    calls = [step] + [s for s in state.effect_stack if s.get("op") == "queen_guard" and s["card"] == cid and s["player"] == owner]
+    live = []
+    for call in calls:
+        stack = state.board.get(call["cr"], [])
+        pos = next((i for i, u in enumerate(stack) if u.iid == call["coverer"]), None)
+        if pos is not None:                       # the coverer is still there (an Apex may have eaten what it covered)
+            under = stack[pos - 1] if pos else None
+            live.append((under.play_seq if under else 1 << 30, call["cr"]))
+    if not live:
         return None
+    cr = min(live)[1]
     inst = next((u for u in state.hands[owner] if u.card_id == cid), None)
     from_hand = inst is not None
     if from_hand:
@@ -506,8 +544,8 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     # "if an animal was removed this turn" (Great White Shark): board removals, counted per owner.
     state.turn_flags[f"lost_{unit.owner}"] = state.turn_flags.get(f"lost_{unit.owner}", 0) + 1
     state.turn_flags["removed_any"] = True
-    for p in ("A", "B"):        # Python: "Whenever an animal is removed, gain 1 strength (wherever this is)"
-        if _owns_copy(state, p, "python"):
+    for p in ("A", "B"):        # Python: "Whenever an enemy is removed, gain 1 strength (wherever this is)"
+        if p != unit.owner and _owns_copy(state, p, "python"):
             grown = state.card_strength_counters.setdefault(p, {})
             grown["python"] = grown.get("python", 0) + state.config.python_growth
     # A unit uncovered by this very removal was buried when it happened, so it doesn't react to it.
@@ -840,14 +878,14 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
 #
 # Roam (keywords.md): as an action, move an animal you own that is connected to your den to an adjacent crossroad under
 # the placement rules, at most once per animal per turn. Moving isn't placing: no Roar, no "when you play" reactions, no
-# new place in the play order. Arriving is: adjacency traps, covering reactions (Spikes, Poison, Gale, King Theron) and
+# new place in the play order. Arriving is: adjacency traps, covering reactions (Spikes, Poison, King Theron) and
 # an Apex Predator's eat all happen as on a placement.
 #
 # Hooks for the cards that build on it (none exist yet):
 #   - EFFECTS[card]["on_roam"](state, unit, cr, event): "whenever this roams…", resolves first, where a Roar would;
 #   - EFFECTS[card]["on_friendly_roam"](state, watcher, roamer, event): "whenever one of your animals roams…" (any of
 #     the player's other top units; event["onto_enemy"] tells a cover);
-#   - statics.can_roam / statics.roam_covers_equal: who roams, and which animals with Roam may cover an equal enemy;
+#   - statics.can_roam: who roams (printed Roam, or the Coyote's gift, UnitInstance.granted_roam);
 #   - free roams: statics.free_roams(state, player) per turn, plus turn_flags["free_roams_<player>"] granted by the
 #     `grant_free_roam` op; a free roam is spent before an action.
 # The event dict: {"player", "iid", "from", "to" (None for a den), "covered" (iid or None), "onto_enemy"}.
@@ -856,14 +894,18 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
 def legal_roams(state: GameState, player: str, *, free_only: bool = False) -> list:
     """Every legal Roam for `player`, in a deterministic order. `free_only`: only roams a free roam pays for (the turn's
     actions are spent)."""
-    if not any(st and st[-1].owner == player and statics.can_roam(state, st[-1]) for st in state.board.values()):
+    given = {int(k[14:]) for k in state.turn_flags if k.startswith("free_roam_iid_")}   # animals an effect gave a roam
+    if not any(st and st[-1].owner == player and (statics.can_roam(state, st[-1])
+                                                   or (st[-1].iid in given and statics.active(state, st[-1])))
+               for st in state.board.values()):
         return []                                     # the usual case, and the search's hot path: skip the BFS
     occ = state.connected_occupied(player)
     enemy_front = state.game_map.hq_front(other_player(player))
     out: list = []
     for cr in sorted(cr for cr, st in state.board.items() if st and st[-1].owner == player):
         unit = state.board[cr][-1]
-        if not statics.can_roam(state, unit) or state.turn_flags.get(f"roamed_{unit.iid}"):
+        if not (statics.can_roam(state, unit) or (unit.iid in given and statics.active(state, unit))) \
+                or state.turn_flags.get(f"roamed_{unit.iid}"):
             continue
         if free_only and not free_roams_left(state, player, unit):
             continue
@@ -875,7 +917,7 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None)
     """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy). A roam moves the animal
     through your own animals connected to it (its pack), then up to its Reach beyond them, one step without Reach,
     jumping over whatever stands between (Martin, 2026-10-15): distance counts from the animal, never from the den. It
-    lands by the placement rules: empty, your own animal, or an enemy it beats (Dhole's equal included); an Apex
+    lands by the placement rules: empty, your own animal, or an enemy it beats; an Apex
     Predator lands only on an animal. It takes the den only when its pack stands on the den front and is connected to
     your own den, as a card from the hand would. `enemy_front` and `occ` are accepted for old callers."""
     player = unit.owner
@@ -920,7 +962,7 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None)
 
 
 def _own_free_roams(state: GameState, player: str, unit=None) -> int:
-    """Free roams given to one animal ("It roams", the Street Dog): `unit`'s own, or with no unit, any of `player`'s
+    """Free roams given to one animal ("It roams", the African Wild Dog): `unit`'s own, or with no unit, any of `player`'s
     animals still on top that hasn't roamed this turn."""
     if unit is not None:
         return state.turn_flags.get(f"free_roam_iid_{unit.iid}", 0)
@@ -945,14 +987,17 @@ def pay_for_roam(state: GameState, player: str, unit=None) -> None:
         state.actions_taken_this_turn += 1
 
 
-def do_roam(state: GameState, player: str, origin: str, target) -> None:
-    """Move the top animal of `origin` to `target`. Leaving uncovers whatever was beneath it."""
+def do_roam(state: GameState, player: str, origin: str, target, *, by_effect: bool = False) -> None:
+    """Move the top animal of `origin` to `target`. Leaving uncovers whatever was beneath it. `by_effect`: a card's "It
+    roams", which isn't the animal's one roam of the turn (Martin, 2026-10-28)."""
     stack = state.board.get(origin)
     if not stack or stack[-1].owner != player:
         raise EngineError(f"{player} has no animal on {origin!r} to roam")
     unit = stack[-1]
-    state.turn_flags[f"roamed_{unit.iid}"] = True
+    if not by_effect:
+        state.turn_flags[f"roamed_{unit.iid}"] = True
     state.turn_flags[f"roams_{player}"] = state.turn_flags.get(f"roams_{player}", 0) + 1
+    state.turn_flags["any_roamed"] = True             # the Fox's Roar asks
     kind, where = target
     if kind == "hq":                                  # the game ends as it steps onto the den
         state.emit("roam", player=player, iid=unit.iid, card=unit.card_id, cr=origin, to=None, den=where)
@@ -1104,6 +1149,12 @@ def _eat(state, unit, cr) -> None:
     try:
         eaten = min(n, state.food[unit.owner])
         lose_food(state, unit.owner, eaten, card=unit.card_id)
+        if eaten:
+            state.hungry_eaten[unit.owner] = state.hungry_eaten.get(unit.owner, 0) + eaten
+            for inst in state.hands[unit.owner]:     # the legendary Dung Beetle evolves in hand (in the deck, as it's drawn)
+                form = state.eaten_form(unit.owner, inst.card_id)
+                if form != inst.card_id:
+                    _transform(state, inst, form)
         if eaten < n:
             unit.strength_counter -= n - eaten
             state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=eaten - n)
@@ -1242,10 +1293,9 @@ def remove_choice_step(chooser, options, *, by_card, optional) -> dict:
 
 
 def _op_remove_iid(state, step):
-    # A reactive removal may name the unit that triggered it (`source_iid`). If that source
-    # has since left the board - e.g. a fed Muskrat's roar removed the Hippo before the
-    # Hippo's queued reaction resolves (decision: reactions fizzle when their source is gone) -
-    # the removal fizzles rather than firing from a dead trigger.
+    # A reactive removal may name a unit whose leaving the board makes it fizzle (`source_iid`).
+    # The placement traps (Hippopotamus, Golden Orb-Weaver) name none: once set off, they
+    # resolve even if the placed animal's Roar removed the trap first.
     src = step["source_iid"]
     if src is not None and _find_unit(state, src)[1] is None:
         return None
@@ -1334,6 +1384,11 @@ def _op_play_named(state, step):
         return None
     allowed = {cid} if any(u.card_id == cid for u in state.hands[player]) else set()
     placements = legal_placements(state, player, allowed)
+    near = step.get("adjacent_to")                  # Rabbit: "play a Bunny next to this": a neighbouring crossroad, or the den it fronts (Martin, 2026-10-30)
+    if near is not None:
+        placements = [p for p in placements
+                      if (p.target[0] == "cr" and state.game_map.adjacent(near, p.target[1]))
+                      or (p.target[0] == "hq" and near in state.game_map.hq_connects[p.target[1]])]
     if not placements:
         _return_if_fetched()
         return None
@@ -1417,6 +1472,7 @@ OPS: dict[str, Callable] = {
     "grant_free_roam": _op_grant_free_roam,
     "timed_hook": _op_timed_hook,
     "flee": _op_flee,
+    "flee_return": _op_flee_return,
     "queen_guard": _op_queen_guard,
 }
 
@@ -1497,9 +1553,9 @@ def _adjacent_tops(state, cr, owner=None):
 
 
 def _control_tag_count(state, player, *tags) -> int:
-    """How many crossroads `player` tops with a unit carrying all of `tags`."""
+    """How many animals carrying all of `tags` `player` controls (tops), each as `statics.animal_worth` says."""
     return sum(
-        1 for st in state.board.values()
+        statics.animal_worth(state, player, c) for c, st in state.board.items()
         if st and st[-1].owner == player and all(t in state.cards[st[-1].card_id].tags for t in tags)
     )
 
@@ -1553,14 +1609,18 @@ def _push_play_extra(state, owner, *, filter=None, optional=False):
 
 
 def _bounce(state, cr, top, *, lock_until=0):
-    """Return a board unit to its owner's hand (not a removal: no Remove Pile, no triggers)."""
+    """Return a board unit to its owner's hand (not a removal: no Remove Pile, no triggers). The card keeps its stored
+    strength, as it does through every other change of place (a fled animal the legendary Deer grew stays grown).
+    Returns the hand instance, or None for a Wild animal."""
     state.emit("bounce", cr=cr, iid=top.iid, card=top.card_id, owner=top.owner)
     state.board[cr].remove(top)
     if not state.board[cr]:
         del state.board[cr]
     if top.owner == WILD:       # a Wild animal has no hand to go back to: it just leaves
-        return
-    gain_to_hand(state, top.owner, top.card_id).locked_until_turn = lock_until
+        return None
+    inst = gain_to_hand(state, top.owner, top.card_id, strength_counter=top.strength_counter)
+    inst.locked_until_turn = lock_until
+    return inst
 
 
 def _spawn(state, owner, card_id, cr):
@@ -1624,13 +1684,43 @@ def _then_hand_grant(state, step, iid):
     _grant(state, [iid], step["amount"])
 
 
-def _then_stray_dog(state, step, cr):
-    """Street Dog: the ally gets +2, then a free Roam this turn (only if it still can roam this turn)."""
+def _then_coyote(state, step, cr):
+    """Coyote: the ally gets Roam, for as long as it stays on the board, and roams now."""
     top = state.top_unit(cr)
     if top is None:
         return
-    state.effect_stack.append({"op": "forced_roam", "iid": top.iid, "player": step["chooser"]})
+    top.granted_roam = True
+    _push_it_roams(state, top.iid)
+
+
+def _then_street_dog(state, step, cr):
+    """Street Dog: the ally gets +3 strength, then roams."""
+    top = state.top_unit(cr)
+    if top is None:
+        return
+    _push_it_roams(state, top.iid)                    # pushed first, so the +3 lands before it moves
     _grant(state, [top.iid], step["amount"])
+
+
+def _push_it_roams(state, iid):
+    state.effect_stack.append({"op": "it_roams", "iid": iid})
+
+
+def _op_it_roams(state, step):
+    """"It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
+    Roam rules, the den included (Martin, 2026-10-28: "if a card says 'draw 2 cards' does that mean I get to choose when
+    it happens?"); its owner picks where. It isn't the animal's one roam of the turn ("it should NOT count towards the
+    'one roam per turn' limit")."""
+    cr = _crossroad_of(state, step["iid"])
+    top = state.top_unit(cr) if cr is not None else None
+    if top is None or top.iid != step["iid"] or not statics.active(state, top):
+        return None
+    options = ["den" if kind == "hq" else where for kind, where in roam_targets(state, top, cr)]
+    _push_choose(state, top.owner, options, "roam_to", iid=top.iid)
+    return None
+
+
+OPS["it_roams"] = _op_it_roams
 
 
 def _become(state, step, card_id, counter) -> None:
@@ -1650,7 +1740,26 @@ def _then_copy_and_add(state, step, cr):
     if target is None:
         return
     _become(state, step, target.card_id, target.strength_counter)
+    me = _find_instance(state, step["self"])
+    if me is not None and _crossroad_of(state, me.iid) is not None:
+        _copy_timers(state, target, me)
     gain_to_hand(state, step["chooser"], target.card_id)
+
+
+def _copy_timers(state, source, copy) -> None:
+    """A copy carries the animal's ticking timers, as far along as they are (Martin, 2026-10-27): its own (a Sloth's food,
+    an Electric Eel's cap) seen from the copy's side, so an enemy Sloth's food comes to the copy's owner; and the ones on
+    it (venom, poison) as they are, so a poisoned animal's copy is poisoned too."""
+    swap = {}
+    if source.owner != copy.owner and source.owner != WILD:
+        swap = {source.owner: copy.owner, other_player(source.owner): other_player(copy.owner)}
+    for s in [s for s in state.scheduled if s["iid"] == source.iid]:
+        own = s["step"].get("by_iid") == source.iid
+        step = {k: copy.iid if k in ("iid", "by_iid") and v == source.iid
+                else swap.get(v, v) if own and k in ("player", "by_player") else v
+                for k, v in s["step"].items()}
+        state.scheduled.append({**s, "iid": copy.iid, "step": step,
+                                "owner": swap.get(s["owner"], s["owner"]) if own else s["owner"]})
 
 
 def _then_copy_from_hand(state, step, iid):
@@ -1682,11 +1791,27 @@ def _then_remove_and_draw(state, step, cr):
         draw_cards(state, step["chooser"], step["n"])
 
 
+def _then_repeat_roar(state, step, cr):
+    """Vole: the chosen neighbour's Roar happens again, as the Vole's own, at the Vole's crossroad."""
+    top = state.top_unit(cr)
+    vole_cr, vole = _find_unit(state, step["vole"])
+    if top is None or vole is None:
+        return
+    hook = _hook(state, top.card_id, "on_place", as_card=vole.card_id)
+    if hook:
+        hook(state, vole, vole_cr)
+
+
 def _then_pile_to_hand(state, step, card_id):
     """Raccoon (your own Remove Pile), the legendary Raven (your opponent's): the chosen card goes to your hand."""
     if state.pile_take(card_id, step["from_owner"]):
         state.emit("unremove", card=card_id, owner=step["from_owner"], to=step["chooser"])
         gain_to_hand(state, step["chooser"], card_id)
+
+
+def _then_make_in_hand(state, step, card_id):
+    """Queen Bee: the chosen card is made out of thin air in your hand."""
+    gain_to_hand(state, step["chooser"], card_id)
 
 
 def _then_duplicate(state, step, iid):
@@ -1706,27 +1831,18 @@ def _then_roam_to(state, step, cr):
     _, unit = _find_unit(state, step["iid"])
     origin = _crossroad_of(state, step["iid"])
     if unit is not None and origin is not None and state.top_unit(origin) is unit:
-        do_roam(state, unit.owner, origin, ("cr", cr))
+        do_roam(state, unit.owner, origin, ("hq", other_player(unit.owner)) if cr == "den" else ("cr", cr), by_effect=True)
 
 
 THEN = {
     "remove": _then_remove, "set_strength": _then_set_strength, "drain": _then_drain, "grant": _then_grant,
-    "hand_grant": _then_hand_grant, "stray_dog": _then_stray_dog, "copy_and_add": _then_copy_and_add,
+    "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "copy_and_add": _then_copy_and_add,
     "copy_from_hand": _then_copy_from_hand, "return_ally": _then_return_ally,
     "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
+    "repeat_roar": _then_repeat_roar,
+    "make_in_hand": _then_make_in_hand,
     "duplicate": _then_duplicate, "discard": _then_discard, "roam_to": _then_roam_to,
 }
-
-
-def _op_forced_roam(state, step):
-    """"It roams" (Street Dog): the animal gets a free Roam this turn, an ordinary roam the player takes when they like
-    (Martin, 2026-10-15: "it should just be normal roam"), the den included, while it hasn't roamed this turn."""
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is None or state.top_unit(cr) is not unit or state.turn_flags.get(f"roamed_{unit.iid}"):
-        return None
-    if statics.can_roam(state, unit):
-        state.turn_flags[f"free_roam_iid_{unit.iid}"] = 1
-    return None
 
 
 def _op_draw_to_match(state, step):
@@ -1745,11 +1861,21 @@ def _op_anteater(state, step):
     return None
 
 
+def _op_oxpecker(state, step):
+    """Oxpecker: draw a card, then gain food equal to the strongest animal in your hand (each as it would be played now)."""
+    draw_cards(state, step["player"], 1)
+    hand = state.hands[step["player"]]
+    if hand:
+        gain_food(state, step["player"], max(placement_strength(state, u) for u in hand))
+    return None
+
+
 OPS.update({
     "choose": _op_choose,
-    "forced_roam": _op_forced_roam,
     "draw_to_match": _op_draw_to_match,
     "anteater": _op_anteater,
+    "oxpecker": _op_oxpecker,
+    "steal_from_pile": lambda state, step: _op_steal_from_pile(state, step),
 })
 
 
@@ -1779,19 +1905,19 @@ def roar_condition(state, player, card_id, unit=None):
         return placement_strength(state, inst) if inst else 0
     check = {
         "gopher": lambda: _fed_this_turn(state, player),
-        "muskrat": lambda: _fed_this_turn(state, player),
-        "groundhog": lambda: _fed_this_turn(state, player),
+        "mara": lambda: _fed_this_turn(state, player),
         "bobcat": lambda: others("Cat") >= 1,
         "serval": lambda: _played_this_turn(state, player, "Cat", unit) >= 1,
         "tutorial_lynx": lambda: others("Cat") >= 1,
-        "alley_cat": lambda: others("Cat") >= 1,
+        "ocelot": lambda: others("Cat") >= 1,
         "soldier_ant": lambda: others("Colony") + 1 >= colony_min,
         "nurse_bee": lambda: others("Colony") + 1 >= colony_min,
-        "piranha": lambda: _lost_this_turn(state, player) >= 1,
+        "hammerhead": lambda: _lost_this_turn(state, player) >= 1,
         "hare": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "rat": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "macaque": lambda: hand_after() >= cfg.macaque_hand_min,
         "gorilla": lambda: strength() >= cfg.gorilla_min,
+        "fox": lambda: bool(state.turn_flags.get("any_roamed")),
     }.get(card_id)
     return check() if check else None
 
@@ -1802,10 +1928,11 @@ def _played_this_turn(state, player, tag, unit) -> int:
                if tag in state.cards[cid].tags and (unit is None or iid != unit.iid))
 
 
-def _conditional(effect):
-    """A Roar that happens only while its roar_condition holds."""
+def _conditional(card_id, effect):
+    """`card_id`'s Roar, which happens only while its roar_condition holds (read for that card even when a repeat, Big Gus's
+    or the Macaw's, runs it on its own unit)."""
     def handler(state, unit, cr):
-        if roar_condition(state, unit.owner, unit.card_id, unit):
+        if roar_condition(state, unit.owner, card_id, unit):
             effect(state, unit, cr)
     return handler
 
@@ -1823,6 +1950,10 @@ def _gains(attr):
     return handler
 
 
+def _rodent_legend_place(state, unit, cr):
+    _push_gain(state, unit.owner, _food_gained_this_turn(state, unit.owner))
+
+
 def _removes(max_attr=None, min_attr=None):
     """Roar: remove an adjacent enemy (of strength N or less / more): the player picks it."""
     def handler(state, unit, cr):
@@ -1833,11 +1964,17 @@ def _removes(max_attr=None, min_attr=None):
     return handler
 
 
-def _oxpecker_legend_eot(state, unit, cr):
-    """The legendary Oxpecker: Dusk: draw a card for each adjacent Hungry ally."""
-    _push_draw(state, unit.owner, sum(
-        1 for nb in state.game_map.neighbors(cr)
-        if (top := state.top_unit(nb)) and top.owner == unit.owner and statics.has_keyword(state, top, "Hungry", nb)))
+def _dung_beetle_form_place(form):
+    """The legendary Dung Beetle's later forms (Martin, 2026-10-27): form 2 "Roar: draw a card", form 3 also removes an
+    adjacent enemy (Martin, 2026-10-29, in place of 10 food), form 4 also plays another animal. In that order: the drawn
+    card can be played."""
+    def handler(state, unit, cr):
+        if form >= 4:
+            _push_play_extra(state, unit.owner)
+        if form >= 3:
+            _removes()(state, unit, cr)
+        _push_draw(state, unit.owner, 1)
+    return handler
 
 
 def _draws_filtered(spec, n=1):
@@ -1870,23 +2007,17 @@ def _mantis_place(state, unit, cr):
                  n=state.config.mantis_draw)
 
 
-def _eat_random_ally(state, unit, cr) -> int:
-    """Remove a random adjacent ally (Dawn asks no decision; the owner steers it by what it places beside). Returns the
-    strength of what was eaten, 0 if nothing was."""
-    options = _adjacent_friendly_units(state, unit, cr)
-    if not options:
-        return 0
-    nb = state.rng.choice(options)
-    gained = effective_strength(state, state.top_unit(nb))
-    return gained if remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id) else 0
-
-
 def _tarantula_eot(state, unit, cr):
-    """Dusk: remove a random adjacent ally and gain its strength."""
-    gained = _eat_random_ally(state, unit, cr)
-    if gained:
-        unit.strength_counter += gained
-        state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=gained)
+    """Dusk: remove the weakest animal next to this, yours or theirs, and gain its strength (Martin, 2026-10-29: as the
+    City Spider picks; ties at random, Dusk asks no decision). The strength it showed then is kept for good."""
+    options = [(nb, top) for nb, top in _adjacent_tops(state, cr) if statics.can_be_removed(state, top, nb)]
+    if options:
+        low = min(effective_strength(state, top) for _, top in options)
+        nb = state.rng.choice([nb for nb, top in options if effective_strength(state, top) == low])
+        remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
+        if low > 0:
+            unit.strength_counter += low
+            state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=low)
 
 
 def _city_spider_sot(state, unit, cr):
@@ -1908,6 +2039,12 @@ def _sperm_whale_legend_eot(state, unit, cr):
         remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
 
 
+def _alley_cat_place(state, unit, cr):
+    """Roar: add 2 Kittens to your hand (Martin, 2026-10-29)."""
+    for _ in range(state.config.alley_cat_kittens):
+        gain_to_hand(state, unit.owner, "kitten")
+
+
 def _sea_turtle_eot(state, unit, cr):
     """Dusk: add a Baby Turtle to your hand (Martin, 2026-10-26); the hand limit burns it like any gained card."""
     gain_to_hand(state, unit.owner, "baby_turtle")
@@ -1920,15 +2057,15 @@ def _raccoon_place(state, unit, cr):
 
 
 def _hyena_eot(state, unit, cr):
-    """Dusk: gain 3 food for each animal removed this turn (either player's)."""
-    removed = _lost_this_turn(state, "A") + _lost_this_turn(state, "B")
+    """Dusk: gain 3 food for each animal removed this turn (either player's or a Wild one)."""
+    removed = _lost_this_turn(state, "A") + _lost_this_turn(state, "B") + _lost_this_turn(state, WILD)
     _push_gain(state, unit.owner, state.config.hyena_food_per * removed)
 
 
 def _vultures_dusk(state, player):
     """Vulture: at your Dusk, if 3 or more animals were removed this turn, every Vulture in your hand and deck lands on a
     random empty crossroad, all at once (Dusk asks no decision). Not a placement from the hand: nothing Roars."""
-    if state.turn_flags.get("lost_A", 0) + state.turn_flags.get("lost_B", 0) < state.config.vulture_removals:
+    if _lost_this_turn(state, "A") + _lost_this_turn(state, "B") + _lost_this_turn(state, WILD) < state.config.vulture_removals:
         return
     for inst in [u for u in state.hands[player] if u.card_id == "vulture"]:
         empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c))
@@ -1947,11 +2084,13 @@ def _vultures_dusk(state, player):
 
 def _earthworm_remove(state, unit, cr, pos):
     """Fall: place two Worms on its crossroad: they land on top, as placements do, while the crossroad is
-    empty or yours. Under an enemy there is no room for them (rulings.md: Worms never cover an enemy). And draw a card."""
+    empty, yours or Wild. Under an enemy there is no room for them (rulings.md: Worms never cover an enemy). A Wild
+    Locust on top is no enemy: the Worms land over it, and a Locust that ate the Earthworm flies off from under them
+    (Martin, 2026-10-31: no Worms when a Locust or his Mantis took the Earthworm under a Locust). And draw a card."""
     draw_cards(state, unit.owner, 1)
     for _ in range(state.config.earthworm_worms):
         top = state.top_unit(cr)
-        if top is not None and top.owner != unit.owner or state.result is not None:
+        if top is not None and top.owner == other_player(unit.owner) or state.result is not None:
             return
         _spawn(state, unit.owner, "worm", cr)
 
@@ -2007,13 +2146,14 @@ def _locust_legend_place(state, unit, cr):
 
 
 def _op_locust_eat(state, step):
-    """A Locust's time is up: it goes, and so does the animal under it (Armor still holds; a crossroad the swarm found
-    empty just clears)."""
+    """A Locust's time is up: "remove the animal underneath, then fly away". Armor still holds; flying away is a Wild
+    bounce, not a removal, so the swarm feeds removal counters (Python, Hyena) only with what it eats."""
     cr, locust = _find_unit(state, step["iid"])
     if locust is None or state.board[cr][-1] is not locust:
         return None
-    if remove_top(state, cr, by_player=step["by_player"], by_card="locust_swarm"):
-        remove_top(state, cr, by_player=step["by_player"], by_card="locust_swarm")
+    if len(state.board[cr]) > 1:
+        _remove_specific(state, cr, state.board[cr][-2], by_player=step["by_player"], by_card="locust_swarm")
+    _bounce(state, cr, locust)
     return None
 
 
@@ -2029,7 +2169,7 @@ def _remove_tops(state, unit, crs):
                                                       source_iid=None, by_card=unit.card_id))
 
 
-def _piranha_place(state, unit, cr):
+def _hammerhead_place(state, unit, cr):
     """Roar (if an ally was removed this turn): remove an adjacent animal, yours or theirs: the player picks it."""
     _push_remove_choice(state, unit.owner, unit.card_id,
                         [nb for nb, top in _adjacent_tops(state, cr)
@@ -2038,56 +2178,96 @@ def _piranha_place(state, unit, cr):
 
 # --- Canines ----------------------------------------------------------------------------------------------------
 
-def _wolf_legend_2_friendly_roam(state, watcher, roamer, event):
-    """Whenever an ally roams onto an enemy, draw a card."""
-    if event["onto_enemy"]:
-        _push_draw(state, watcher.owner, 1)
+def _black_wolf_grows(state, watcher, roamer):
+    """Whenever a Canine of yours roams: give it +1 strength and draw a card."""
+    if "Canine" in state.cards[roamer.card_id].tags:
+        _grant(state, [roamer.iid], state.config.black_wolf_grant)
+        _push_draw(state, watcher.owner, state.config.black_wolf_draw)
+
+
+def _black_wolf_friendly_roam(state, watcher, roamer, event):
+    _black_wolf_grows(state, watcher, roamer)
+
+
+def _black_wolf_own_roam(state, unit, cr, event):
+    _black_wolf_grows(state, unit, unit)
 
 
 def _wolf_legend_eot(state, unit, cr):
-    """Dusk: this gains +1 strength for each of your adjacent Canines."""
+    """Dusk: gain 1 strength for each of your adjacent Canines."""
     n = sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags)
     if n:
         _grant(state, [unit.iid], n * state.config.wolf_legend_grant)
 
 
-def _fox_cover(state, unit, covered):
-    """Whenever this covers an enemy (placed or roaming), draw a card."""
-    _push_draw(state, unit.owner, 1)
+def _fox_place(state, unit, cr):
+    """Roar: if an ally roamed this turn, draw 2 cards."""
+    if roar_condition(state, unit.owner, unit.card_id, unit):
+        _push_draw(state, unit.owner, state.config.fox_draw)
 
 
-def _jackal_place(state, unit, cr):
-    """Roar: remove an adjacent enemy that has another of your Canines adjacent to it."""
-    def flanked(nb):
-        return any(top.iid != unit.iid and "Canine" in state.cards[top.card_id].tags
-                   for _, top in _adjacent_tops(state, nb, unit.owner))
+def _lonely(state, enemy_of, cr) -> bool:
+    """Whether no enemy of `enemy_of` tops a crossroad next to `cr`: the animal on `cr` has no other enemy beside it."""
+    return not any(top.owner != enemy_of for _, top in _adjacent_tops(state, cr))
+
+
+def _wolverine_place(state, unit, cr):
+    """Roar: remove an adjacent enemy with no other enemy next to it."""
     _push_remove_choice(state, unit.owner, unit.card_id,
-                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if flanked(nb)])
+                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if _lonely(state, unit.owner, nb)])
 
 
-def _bush_dog_eot(state, unit, cr):
-    """Dusk: give a random adjacent Canine of yours +2 strength."""
-    options = [top.iid for _, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags]
-    if options:
-        _grant(state, [state.rng.choice(options)], state.config.bush_dog_grant)
+def _dhole_cover(state, unit, covered):
+    """Whenever this covers an enemy with no other enemy next to it, draw 2 cards (judged as it is covered)."""
+    at = _crossroad_of(state, unit.iid)
+    if at is not None and _lonely(state, unit.owner, at):
+        _push_draw(state, unit.owner, state.config.dhole_draw)
 
 
-def _raccoon_dog_friendly_roam(state, watcher, roamer, event):
-    """Whenever an allied Canine roams, give it +1 strength."""
-    if "Canine" in state.cards[roamer.card_id].tags:
-        _grant(state, [roamer.iid], state.config.raccoon_dog_grant)
+def _jackal_roam(state, unit, cr, event):
+    """Roam. Whenever this roams, remove an adjacent enemy weaker than this (judged where it lands, by strength as it
+    stands then: the pack's buffs lengthen its reach; Martin, 2026-10-29)."""
+    _push_remove_choice(state, unit.owner, unit.card_id,
+                        _adjacent_enemy_targets(state, unit, cr, max_strength=effective_strength(state, unit) - 1))
 
 
-def _wild_dog_eot(state, unit, cr):
-    """Dusk: give your adjacent animals +1 strength."""
-    _grant(state, [top.iid for _, top in _adjacent_tops(state, cr, unit.owner)], state.config.wild_dog_grant)
+def _bush_dog_roam(state, unit, cr, event):
+    """Whenever this roams, place a Pup on the crossroad it left, on top of any animal that resurfaced there (Martin,
+    2026-10-31)."""
+    _spawn(state, unit.owner, "pup", event["from"])
 
 
-def _stray_dog_place(state, unit, cr):
-    """Roar: give an ally with Roam +2 strength. It roams."""
-    options = sorted(c for c, st in state.board.items()
-                     if st and st[-1].owner == unit.owner and st[-1] is not unit and statics.can_roam(state, st[-1]))
-    _push_choose(state, unit.owner, options, "stray_dog", amount=state.config.stray_dog_grant)
+def _wild_dog_friendly_place(state, watcher, placed) -> None:
+    """African Wild Dog: whenever you play a Canine next to this, it roams. Played, from the hand: a token or an
+    animal an effect places isn't played (rulings.md, "Place versus play"), and a roam is never a placement, so it
+    can't loop (Martin, 2026-10-28)."""
+    played = any(iid == placed.iid for iid, _ in state.turn_flags.get(f"played_{placed.owner}", []))
+    at, here = _crossroad_of(state, placed.iid), _crossroad_of(state, watcher.iid)
+    if (played and "Canine" in state.cards[placed.card_id].tags and at is not None and here is not None
+            and at in state.game_map.neighbors(here)):
+        _push_it_roams(state, placed.iid)
+
+
+def _connected_allies(state, unit, cr) -> list:
+    """The crossroads of your other top animals connected to `unit` (on `cr`) through a chain of your own top animals."""
+    seen, queue = {cr}, deque([cr])
+    while queue:
+        for nb in state.game_map.neighbors(queue.popleft()):
+            if nb not in seen and state.owner_of(nb) == unit.owner:
+                seen.add(nb)
+                queue.append(nb)
+    return sorted(seen - {cr})
+
+
+def _coyote_place(state, unit, cr):
+    """Roar: give a connected ally Roam. It roams."""
+    _push_choose(state, unit.owner, _connected_allies(state, unit, cr), "coyote")
+
+
+def _street_dog_place(state, unit, cr):
+    """Roar: give a connected ally with Roam +3 strength. It roams."""
+    options = [c for c in _connected_allies(state, unit, cr) if "Roam" in statics.unit_keywords(state, state.top_unit(c), c)]
+    _push_choose(state, unit.owner, options, "street_dog", amount=state.config.street_dog_grant)
 
 
 def _dingo_eot(state, unit, cr):
@@ -2114,7 +2294,7 @@ def _serval_place(state, unit, cr):
         _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(state, unit, cr))
 
 
-def _house_cat_place(state, unit, cr):
+def _ocelot_place(state, unit, cr):
     if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"]})
 
@@ -2159,9 +2339,9 @@ def _termite_king_place(state, unit, cr):
 
 
 def _queen_bee_place(state, unit, cr):
-    """Queen Bee: Roar: play a Young Bee. A free play like Prince Leo's, anywhere a placement is legal, of a token made
-    out of thin air (Martin, 2026-10-24)."""
-    state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "young_bee", "make": True})
+    """Queen Bee: Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand, made out of thin air; the owner picks
+    which (Martin, 2026-10-27)."""
+    _push_choose(state, unit.owner, ["worker_bee", "guard_bee", "nurse_bee"], "make_in_hand")
 
 
 def _queen_ant_eot(state, unit, cr):
@@ -2194,13 +2374,12 @@ def _scout_bee_eot(state, unit, cr):
 
 # --- Den Rush ---------------------------------------------------------------------------------------------------
 
-def _greywhisker_place(state, unit, cr):
-    """Roar: gain 1 food, draw a card, play another animal, then discard a card."""
+def _mole_legend_place(state, unit, cr):
+    """Roar: draw a card, play another animal, then discard a card."""
     o = unit.owner
     state.effect_stack.append({"op": "discard_choice", "player": o})
     _push_play_extra(state, o)
     _push_draw(state, o, 1)
-    _push_gain(state, o, state.config.greywhisker_food)
 
 
 def _op_discard_choice(state, step):
@@ -2225,9 +2404,14 @@ def _falcon_legend_place(state, unit, cr):
     _push_draw(state, unit.owner, sum(1 for c in front if (top := state.top_unit(c)) and top.owner == unit.owner))
 
 
-def _hq_adjacent_draw(state, unit, cr):
+def _hq_adjacent_draw(state, unit, cr, n=1):
     if cr in state.game_map.hq_front(other_player(unit.owner)):  # adjacent to the opponent's den (F6)
-        _push_draw(state, unit.owner, 1)
+        _push_draw(state, unit.owner, n)
+
+
+def _cheetah_place(state, unit, cr):
+    """Roar: if this is next to your opponent's den, draw 2 cards."""
+    _hq_adjacent_draw(state, unit, cr, state.config.cheetah_draw)
 
 
 def _adjacent_enemy_unit_crossroads(state, unit, cr, *, chosen=True):
@@ -2303,6 +2487,25 @@ def _op_pestis_wipe(state, step):
     for unit in doomed:
         _remove_specific(state, target, unit, by_player=step["chooser"], by_card="rat_legend_2", armor_checked=True)
     return None
+
+
+def _fawn_place(state, unit, cr):
+    """The legendary Fawn: Roar: add a Young Stag to your hand (Martin, 2026-10-30)."""
+    gain_to_hand(state, unit.owner, "young_stag")
+
+
+def _young_stag_place(state, unit, cr):
+    """Roar: add a Great Stag to your hand: the fawn's arc, each stage handing you the next."""
+    gain_to_hand(state, unit.owner, "great_stag")
+
+
+def _great_stag_place(state, unit, cr):
+    """Roar: return every adjacent enemy weaker than this to its owner's hand (the rutting bellow). Automatic: Stealth
+    doesn't hide, Armor stays, as for every mass bounce."""
+    mine = effective_strength(state, unit)
+    for nb in _adjacent_enemy_unit_crossroads(state, unit, cr, chosen=False):
+        if effective_strength(state, state.top_unit(nb)) < mine:
+            state.effect_stack.append({"op": "bounce_iid", "iid": state.top_unit(nb).iid})
 
 
 def _skunk_legend_place(state, unit, cr):
@@ -2387,9 +2590,21 @@ def _omen_drawn(state, inst):
 
 
 def _raven_legend_place(state, unit, cr):
-    """Roar: put an animal from your opponent's Remove Pile into your hand."""
-    opp = other_player(unit.owner)
-    _push_choose(state, unit.owner, sorted(set(state.pile_cards_of(opp))), "pile_to_hand", from_owner=opp)
+    """Roar: put 2 animals from your opponent's Remove Pile into your hand."""
+    state.effect_stack.append({"op": "steal_from_pile", "player": unit.owner, "n": state.config.raven_legend_steals})
+
+
+def _op_steal_from_pile(state, step):
+    """Grimm: one pick from the opponent's Remove Pile, then the next with the options asked afresh (a card taken by the
+    first pick isn't offered again)."""
+    opp = other_player(step["player"])
+    names = sorted(set(state.pile_cards_of(opp)))
+    if not names or step["n"] <= 0:
+        return None
+    if step["n"] > 1:
+        state.effect_stack.append({**step, "n": step["n"] - 1})
+    _push_choose(state, step["player"], names, "pile_to_hand", from_owner=opp)
+    return None
 
 
 def _owl_place(state, unit, cr):
@@ -2452,6 +2667,7 @@ def _anaconda_legend_end_of_turn(state, unit, cr):
     counters["anaconda_legend"] = counters.get("anaconda_legend", 0) - state.config.anaconda_legend_decay
     state.emit("strength", card="anaconda_legend", owner=unit.owner, n=-state.config.anaconda_legend_decay)   # every copy (this one is in the deck now)
     shuffle_back(state, unit.owner, ["anaconda_legend"])
+    _push_draw(state, unit.owner, 1)              # "and draw a card": after the shuffle, so it may be Eon again
 
 
 def _magpie_place(state, unit, cr):
@@ -2534,7 +2750,7 @@ def _manta_legend_eot(state, unit, cr):
 
 
 def _adjacent_ally_fish(state, unit, cr) -> int:
-    return sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Fish" in state.cards[top.card_id].tags)
+    return statics.fish_count(state, unit.owner, crs={nb for nb, _ in _adjacent_tops(state, cr, unit.owner)})
 
 
 def _swordfish_place(state, unit, cr):
@@ -2550,7 +2766,15 @@ def _swordfish_place(state, unit, cr):
 def _barracuda_place(state, unit, cr):
     """Roar: remove an adjacent enemy with strength up to the number of your Fish (this one included)."""
     _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(
-        state, unit, cr, max_strength=_control_tag_count(state, unit.owner, "Fish")))
+        state, unit, cr, max_strength=statics.fish_count(state, unit.owner)))
+
+
+def _piranha_legend_place(state, unit, cr):
+    """Roar: remove each enemy next to 2 or more of your Fish (the Sardine's double count included)."""
+    for where, st in list(state.board.items()):
+        if st and st[-1].owner != unit.owner and _adjacent_ally_fish(state, unit, where) >= state.config.piranha_legend_fish:
+            state.effect_stack.append(remove_iid_step(st[-1].iid, by_player=unit.owner, by_effect=True,
+                                                      source_iid=None, by_card=unit.card_id))
 
 
 def _manta_ally_covered(state, watcher, covered, coverer, cr):
@@ -2572,13 +2796,6 @@ def _cod_place(state, unit, cr):
     _push_draw(state, unit.owner, _adjacent_ally_fish(state, unit, cr))
 
 
-def _mahi_mahi_place(state, unit, cr):
-    """Roar: give your other Fish +1 strength."""
-    _grant(state, [st[-1].iid for st in state.board.values()
-                   if st and st[-1].owner == unit.owner and st[-1] is not unit
-                   and "Fish" in state.cards[st[-1].card_id].tags], state.config.mahi_mahi_grant)
-
-
 def _spawns_beside(token):
     """Roar: place `token` on a random adjacent empty crossroad (Sunfish's Baby Fish, Deer's Fawn)."""
     def handler(state, unit, cr):
@@ -2591,11 +2808,33 @@ def _spawns_beside(token):
 # --- Food Aggro -------------------------------------------------------------------------------------------------
 
 def _repeat_legend_place(state, unit, cr):
-    """Roar: repeat the Roar of each of your adjacent Rodents (as if each roared again where it stands). Another of these
-    (a mimic Octopus's copy) isn't repeated: two side by side would repeat each other for ever."""
-    for nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
-        if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id:
-            _push_hook(state, top, nb, "on_place")
+    """Roar: repeat the Roar of each of your adjacent Rodents. Big Gus absorbs them: each repeat is Big Gus's own, here,
+    as the Macaw's copy is the Macaw's (Martin, 2026-10-29: the instinctive reading), so its food, removals and timers
+    come from Big Gus. Another of these (a mimic Octopus's copy) isn't repeated: two side by side would repeat each
+    other for ever."""
+    for _nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
+        if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id and top.card_id not in REPEATERS:
+            hook = _hook(state, top.card_id, "on_place", as_card=unit.card_id)
+            if hook:
+                hook(state, unit, cr)
+
+
+REPEATERS = {"vole", "capybara_legend"}      # Roars that repeat Roars never repeat each other: two side by side would go for ever
+
+
+def _hamster_draw_event(state, unit, cr, event):
+    """Whenever you draw a card, gain 5 food (Martin, 2026-10-29): the owner's draws only, one gain per card."""
+    if event["player"] == unit.owner:
+        _push_gain(state, unit.owner, state.config.hamster_draw_food)
+
+
+def _vole_place(state, unit, cr):
+    """Roar: repeat the Roar of an adjacent Rodent (Martin, 2026-10-29). The Vole picks one of its Rodent neighbours with
+    a Roar and repeats it as its own, here, as Big Gus does; it never picks a repeater."""
+    options = [nb for nb, top in _adjacent_tops(state, cr, unit.owner)
+               if "Rodent" in state.cards[top.card_id].tags and top.card_id not in REPEATERS
+               and _hook(state, top.card_id, "on_place")]
+    _push_choose(state, unit.owner, options, "repeat_roar", optional=False, vole=unit.iid)
 
 
 def _refill_legend_place(state, unit, cr):
@@ -2626,6 +2865,19 @@ def _beaver_place(state, unit, cr):
              while_buried=False)
 
 
+def _krill_place(state, unit, cr):
+    """Roar: draw a card. The next Titan you play this turn costs one action (a flag, not a stack: two Krill still
+    lower one)."""
+    state.turn_flags[f"titan_discount_{unit.owner}"] = True
+    _push_draw(state, unit.owner, 1)
+
+
+def _flying_squirrel_place(state, unit, cr):
+    """Flight. Roar: gain 10 food and draw a card (the stack runs last-in first: the food, then the card)."""
+    _push_draw(state, unit.owner, 1)
+    _push_gain(state, unit.owner, state.config.flying_squirrel_food)
+
+
 def _electric_eel_place(state, unit, cr):
     """Roar: your opponent takes only 1 action next turn. The Beaver's mirror: it lands on the opponent's very next turn,
     as a timer that ticks on their turn (and dies with the Eel, as the Beaver's does)."""
@@ -2635,10 +2887,11 @@ def _electric_eel_place(state, unit, cr):
 
 
 def _dormouse_eot(state, unit, cr):
-    """Dusk: if you gained 10 or more food this turn, draw a card. Dusk comes before region income, so only the turn's
+    """Dusk: draw a card for each 10 food you gained this turn. Dusk comes before region income, so only the turn's
     own food counts."""
-    if _fed_this_turn(state, unit.owner):
-        _push_draw(state, unit.owner, 1)
+    n = _food_gained_this_turn(state, unit.owner) // state.config.fed_threshold
+    if n:
+        _push_draw(state, unit.owner, n)
 
 
 def _chipmunk_place(state, unit, cr):
@@ -2682,14 +2935,14 @@ def _orb_weaver_enemy_placed(state, spider, placed, cr):
     if (statics.has_keyword(state, placed, "Flight", cr) or statics.has_keyword(state, placed, "Roam", cr)) \
             and statics.can_be_removed(state, placed, cr):
         state.effect_stack.append(remove_iid_step(placed.iid, by_player=spider.owner, by_effect=True,
-                                                  source_iid=spider.iid, by_card=spider.card_id))
+                                                  source_iid=None, by_card=spider.card_id))
 
 
-def _tortoise_place(state, unit, cr):
+def _stag_beetle_place(state, unit, cr):
     """Roar: gain 5 food for each of your animals with Armor (this one included)."""
-    n = sum(1 for c, st in state.board.items()
+    n = sum(statics.animal_worth(state, unit.owner, c) for c, st in state.board.items()
             if st and st[-1].owner == unit.owner and statics.has_keyword(state, st[-1], "Armor", c))
-    _push_gain(state, unit.owner, n * state.config.tortoise_per_armor)
+    _push_gain(state, unit.owner, n * state.config.stag_beetle_per_armor)
 
 
 def _grizzly_place(state, unit, cr):
@@ -2711,6 +2964,18 @@ def _rhinoceros_place(state, unit, cr):
                                                   source_iid=None, by_card=unit.card_id))
 
 
+def _elephant_legend_lands(state, unit, cr):
+    """Whenever this lands (placed, or arriving by a roam): remove all adjacent enemies of strength 3 or less."""
+    for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.elephant_legend_max,
+                                      chosen=False):        # mass AoE hits Stealth
+        state.effect_stack.append(remove_iid_step(state.top_unit(nb).iid, by_player=unit.owner, by_effect=True,
+                                                  source_iid=None, by_card=unit.card_id))
+
+
+def _elephant_legend_roam(state, unit, cr, event):
+    _elephant_legend_lands(state, unit, cr)
+
+
 def _albatross_place(state, unit, cr):
     """Roar: remove all adjacent enemies of strength 2 or less (the Rhinoceros's sweep, landing anywhere)."""
     for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.albatross_max,
@@ -2728,11 +2993,12 @@ def _remove_all_adjacent(state, unit, cr):
 
 
 def _hippo_enemy_placed(state, hippo, placed, cr):
-    # Automatic trigger, nobody "chose" the target: Stealth doesn't hide (decision B).
+    # Automatic trigger, nobody "chose" the target: Stealth doesn't hide (decision B). Set off by the placement, it
+    # resolves even when the placed animal's Roar removed the Hippo first: the two go together (Martin, 2026-10-27).
     if (effective_strength(state, placed) <= state.config.hippopotamus_max
             and statics.can_be_removed(state, placed, cr)):
         state.effect_stack.append(remove_iid_step(placed.iid, by_player=hippo.owner, by_effect=True,
-                                                  source_iid=hippo.iid, by_card=hippo.card_id))
+                                                  source_iid=None, by_card=hippo.card_id))
 
 
 def _tortoise_legend_eot(state, unit, cr):
@@ -2740,11 +3006,7 @@ def _tortoise_legend_eot(state, unit, cr):
 
 
 def _oxpecker_place(state, unit, cr):
-    """Roar: gain 1 food for each animal of strength 8 or more in your starting deck."""
-    n = sum(1 for cid in state.starting_decks.get(unit.owner, ())
-            if isinstance(state.cards[cid].base_strength, int)
-            and state.cards[cid].base_strength >= state.config.oxpecker_min)
-    _push_gain(state, unit.owner, n)
+    state.effect_stack.append({"op": "oxpecker", "player": unit.owner})
 
 
 def _anteater_place(state, unit, cr):
@@ -2753,7 +3015,7 @@ def _anteater_place(state, unit, cr):
 
 def _dung_beetle_eot(state, unit, cr):
     """At the end of your turn, gain 5 food for each Hungry animal you control."""
-    n = sum(1 for c, st in state.board.items()
+    n = sum(statics.animal_worth(state, unit.owner, c) for c, st in state.board.items()
             if st and st[-1].owner == unit.owner and statics.has_keyword(state, st[-1], "Hungry", c))
     _push_gain(state, unit.owner, n * state.config.dung_beetle_per)
 
@@ -2775,14 +3037,16 @@ def _baboon_legend_sot(state, unit, cr):
 
 
 def _bee_legend_2_place(state, unit, cr):
-    """Royal jelly: "Roar: your animals on the board, in your hand and in your deck become strength 5." Each on the board (itself included, the
-    top animals and those buried) and in hand gains or loses the difference as a buff would (one in hand that grows
-    there reacts, the Butterfly evolving); the deck's copies come out at it (GameState.deck_instance)."""
+    """Royal jelly: "Roar: if your starting deck has no animal of strength 4 or more, give your animals on the board, in
+    your hand and in your deck +2 strength." (The Capybara's condition.) Each on the board (itself included, the top
+    animals and those buried) and in hand is given +2 as a buff (one in hand that grows there reacts, the Butterfly
+    evolving); the deck's copies come out with it (GameState.deck_instance)."""
     p = unit.owner
+    if not small_starting_deck(state, p, unit.card_id):
+        return
     state.jelly[p] = {cid: [state.decks[p].count(cid), state.jelly_counter(p, cid)] for cid in set(state.decks[p])}
     mine = [u for stack in state.board.values() for u in stack if u.owner == p] + list(state.hands[p])
-    for inst in mine:
-        _grant(state, [inst.iid], state.jelly_counter(p, inst.card_id) - inst.strength_counter)
+    _grant(state, [inst.iid for inst in mine], state.config.jelly_grant)
 
 
 def _gorilla_legend_place(state, unit, cr):
@@ -2886,7 +3150,7 @@ def _stork_place(state, unit, cr):
 
 
 def _caterpillar_grows(state, inst, amount):
-    """When this gains strength in your hand, draw a card and turn this into a Butterfly."""
+    """When this gains strength in your hand, draw a card and turn into a Butterfly."""
     _transform(state, inst, "butterfly")
     draw_cards(state, inst.owner, 1)
 
@@ -2899,15 +3163,26 @@ def _gorilla_place(state, unit, cr):
 # --- Hoofed -----------------------------------------------------------------------------------------------------
 
 def _zebra_legend_place(state, unit, cr):
-    """Roar: draw a card for each different Hoofed animal you control (the whole board, this one included; different
-    cards, so two copies of one count once)."""
-    kinds = {st[-1].card_id for st in state.board.values()
-             if st and st[-1].owner == unit.owner and "Hoofed" in state.cards[st[-1].card_id].tags}
-    _push_draw(state, unit.owner, len(kinds))
+    """Roar: draw a card for each of your grazing Hoofed animals (itself too, when it lands grazing)."""
+    n = sum(1 for c, st in state.board.items()
+            if st and st[-1].owner == unit.owner and "Hoofed" in state.cards[st[-1].card_id].tags
+            and statics.grazing(state, st[-1], c))
+    _push_draw(state, unit.owner, n)
 
 
-def _okapi_eot(state, unit, cr):
-    """Dusk: if this is grazing, draw a card."""
+def _rabbit_place(state, unit, cr):
+    """Roar: play a Bunny next to this (Martin, 2026-10-29): made, then played by its owner on a neighbouring crossroad,
+    a full placement that counts as a play (the Hare and the Rat see it)."""
+    state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "bunny", "make": True, "adjacent_to": cr})
+
+
+def _impala_place(state, unit, cr):
+    """Roar: play a Baby Impala (made, then placed by its owner as a full placement, Roar and all)."""
+    state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "baby_impala", "make": True})
+
+
+def _okapi_graze_draw(state, unit, cr):
+    """Dawn and Dusk: if this is grazing, draw a card (Martin, 2026-10-29: both ends of the turn)."""
     if statics.grazing(state, unit, cr):
         _push_draw(state, unit.owner, 1)
 
@@ -2918,26 +3193,47 @@ def _gazelle_place(state, unit, cr):
     _push_draw(state, unit.owner, 1)
 
 
-def _zebra_place(state, unit, cr):
-    """Roar: gain 5 food for each other Hoofed animal next to this (zebra_food)."""
-    n = sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Hoofed" in state.cards[top.card_id].tags)
-    if n:
-        _push_gain(state, unit.owner, n * state.config.zebra_food)
+def _zebra_flee(state, fled, coverer_iid):
+    """When this flees, return the enemy that covered it to its owner's hand (Martin, 2026-10-29: the kick, back)."""
+    state.effect_stack.append({"op": "flee_return", "iid": coverer_iid})
+
+
+def _deer_legend_place(state, unit, cr):
+    """Roar: draw 2 animals with Flee (random among the deck's fleers, as every filtered draw)."""
+    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": state.config.deer_legend_draw,
+                               "spec": "keyword:Flee"})
+
+
+def _deer_legend_friendly_flee(state, watcher, fled):
+    """Whenever one of your animals flees, it gains 2 strength: the fled card, now in hand (deer_legend_grant)."""
+    _grant(state, [fled.iid], state.config.deer_legend_grant)
+
+
+def _deer_legend_own_flee(state, fled, coverer_iid):
+    """The legendary Deer fleeing grows itself (Martin, 2026-10-29: "make sure it gives strength to itself as well")."""
+    _grant(state, [fled.iid], state.config.deer_legend_grant)
 
 
 def _warthog_place(state, unit, cr):
-    """Roar: remove an adjacent enemy covering an allied Hoofed animal (the animal right beneath it)."""
-    def covering(nb):
-        st = state.board[nb]
-        return len(st) >= 2 and st[-2].owner == unit.owner and "Hoofed" in state.cards[st[-2].card_id].tags
+    """Roar: remove an adjacent enemy that has another of your Hoofed animals next to it (the herd mobs the intruder;
+    Martin, 2026-10-29: the old "covering an allied Hoofed" condition went dead once six Hoofed carry Flee)."""
+    def flanked(nb):
+        return any(top.iid != unit.iid and "Hoofed" in state.cards[top.card_id].tags
+                   for _, top in _adjacent_tops(state, nb, unit.owner))
     _push_remove_choice(state, unit.owner, unit.card_id,
-                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if covering(nb)])
+                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if flanked(nb)])
 
 
-def _boar_place(state, unit, cr):
-    """Roar: remove an adjacent enemy that isn't covering anything (alone on its crossroad)."""
-    _push_remove_choice(state, unit.owner, unit.card_id,
-                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if len(state.board[nb]) == 1])
+def _boar_enemy_placed(state, boar, placed, cr):
+    """Remove the first enemy placed next to this (Martin, 2026-10-30): one charge per Boar, spent on the first enemy
+    whatever happens to it (an Armor animal stays and the charge is gone all the same, as Spikes). `retaliation_used`
+    is the once-flag; the board's eye goes with it. Automatic, as the Hippopotamus: Stealth doesn't hide."""
+    if boar.retaliation_used:
+        return
+    boar.retaliation_used = True
+    if statics.can_be_removed(state, placed, cr):
+        state.effect_stack.append(remove_iid_step(placed.iid, by_player=boar.owner, by_effect=True,
+                                                  source_iid=None, by_card=boar.card_id))
 
 
 def _wildebeest_eot(state, unit, cr):
@@ -3052,7 +3348,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
     "tiger_legend": {"on_place": _removes("tiger_legend_max")},
     "raccoon": {"on_place": _raccoon_place},
-    "piranha": {"on_place": _conditional(_piranha_place)},
+    "hammerhead": {"on_place": _conditional("hammerhead", _hammerhead_place)},
     "hyena": {"on_end_of_turn": _hyena_eot},
     "city_spider": {"on_start_of_turn": _city_spider_sot},
     "earthworm": {"on_remove": _earthworm_remove},
@@ -3061,16 +3357,18 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cockroach_legend": {"on_remove": _cockroach_legend_remove},
     "dart_frog": {"on_remove": _blast_remove},
     "locust_legend": {"on_place": _locust_legend_place},
-    # Canines (Clarion's free roam and Dhole's equal roams are statics).
-    "wolf_legend_2": {"on_friendly_roam": _wolf_legend_2_friendly_roam},
+    # Canines (Clarion's free roam is a static).
+    "wolf_legend_2": {"on_friendly_roam": _black_wolf_friendly_roam, "on_roam": _black_wolf_own_roam},
     "wolf_legend": {"on_end_of_turn": _wolf_legend_eot},
-    "fox": {"on_cover_enemy": _fox_cover},
-    "jackal": {"on_place": _jackal_place},
-    "bush_dog": {"on_end_of_turn": _bush_dog_eot},
-    "coyote": {"on_friendly_roam": _raccoon_dog_friendly_roam},
-    "african_wild_dog": {"on_end_of_turn": _wild_dog_eot},
+    "fox": {"on_place": _fox_place},
+    "dhole": {"on_cover_enemy": _dhole_cover},
+    "wolverine": {"on_place": _wolverine_place},
+    "jackal": {"on_roam": _jackal_roam},
+    "bush_dog": {"on_roam": _bush_dog_roam},
+    "african_wild_dog": {"on_friendly_place": _wild_dog_friendly_place},
     "badger": {"on_place": _draws_filtered("keyword:Roam")},
-    "street_dog": {"on_place": _stray_dog_place},
+    "coyote": {"on_place": _coyote_place},
+    "street_dog": {"on_place": _street_dog_place},
     # Cats (King Theron fires from _fire_cover_event; Leopard is a static).
     "lion_legend": {"on_place": _twin_place("lion_legend_2")},
     "lion_legend_2": {"on_place": _twin_place("lion_legend")},
@@ -3078,39 +3376,41 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "jaguar": {"on_place": _removes("jaguar_max")},
     "serval": {"on_place": _serval_place},
     "lynx": {"on_place_onto_enemy": _draws("lynx_draw")},
-    "bobcat": {"on_place": _conditional(_draw1)},
-    "alley_cat": {"on_place": _house_cat_place},
+    "bobcat": {"on_place": _conditional("bobcat", _draw1)},
+    "alley_cat": {"on_place": _alley_cat_place},
+    "kitten": {"on_place": lambda state, unit, cr: _draws_filtered("rarity:common", state.config.kitten_draw)(state, unit, cr)},
     # Colony.
     "army_ant_legend": {"on_end_of_turn": _army_ant_legend_eot},
     "bee_legend": {"on_place": _bee_legend_place},
     "forager_ant": {"on_place": _forager_ant_place},
     "queen_ant": {"on_end_of_turn": _queen_ant_eot},
     "scout_bee": {"on_end_of_turn": _scout_bee_eot},
-    "nurse_bee": {"on_place": _conditional(_draws("nurse_bee_draw"))},
+    "nurse_bee": {"on_place": _conditional("nurse_bee", _draws("nurse_bee_draw"))},
     "nurse_bumblebee": {"on_place": _draws_filtered("tag:Colony")},
     "termite_king": {"on_place": _termite_king_place},
     "termite_queen": {"on_place": lambda state, unit, cr: _push_play_extra(
         state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"]})},
     "queen_bee": {"on_place": _queen_bee_place},
-    "soldier_ant": {"on_place": _conditional(_removes())},
+    "soldier_ant": {"on_place": _conditional("soldier_ant", _removes())},
     "worker_ant": {"on_place": _worker_ant_place},
     "worker_wasp": {"on_friendly_place": _worker_wasp_friendly_place},
     "worker_bee": {"on_place": _gains("worker_bee_food")},
     # Den Rush.
-    "greywhisker": {"on_place": _greywhisker_place},
-    "mole_legend": {"on_place": _greywhisker_place},
+    "mole_legend": {"on_place": _mole_legend_place},
     "rat_legend_2": {"on_place": _rat_legend_2_place},
     "skunk_legend": {"on_place": _skunk_legend_place},
+    "deer_legend_2": {"on_place": _fawn_place},
+    "young_stag": {"on_place": _young_stag_place},
+    "great_stag": {"on_place": _great_stag_place},
     "falcon_legend": {"on_place": _falcon_legend_place},
     "mole": {"on_place": _mole_place},
     "naked_mole_rat": {"on_place": _mole_place},
     "hornet": {"on_place": _hornet_place},
     "skunk": {"on_place": _skunk_place},
-    "hare": {"on_place": _conditional(_draws("hare_draw"))},
-    "ocelot": {"on_place": lambda state, unit, cr: _draws_filtered("tag:Cat&rarity:common",
-                                                                    state.config.ocelot_draw)(state, unit, cr)},
-    "cheetah": {"on_place": _hq_adjacent_draw},
-    "rat": {"on_place": _conditional(_rat_place)},
+    "hare": {"on_place": _conditional("hare", _draws("hare_draw"))},
+    "ocelot": {"on_place": _ocelot_place},
+    "cheetah": {"on_place": _cheetah_place},
+    "rat": {"on_place": _conditional("rat", _rat_place)},
     "falcon": {"on_place": _hq_adjacent_draw},
     "bat": {"on_place": _draw1},
     "dolphin": {"on_place": _draw1},
@@ -3134,27 +3434,31 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "manta_ray_legend": {"on_end_of_turn": _manta_legend_eot},
     "swordfish": {"on_place": _swordfish_place},
     "barracuda": {"on_place": _barracuda_place},
+    "piranha_legend": {"on_place": _piranha_legend_place},
     "manta_ray": {"on_ally_covered": _manta_ally_covered},
     "remora": {"on_place": _remora_place},
     "cod": {"on_place": _cod_place},
     "sardine": {"on_place": _fill},
-    "mahi_mahi": {"on_place": _mahi_mahi_place},
     "sunfish": {"on_place": _spawns_beside("baby_fish")},
     # Food Aggro.
     "capybara_legend": {"on_place": _repeat_legend_place},
+    "vole": {"on_place": _vole_place},
+    "hamster": {"on_draw_event": _hamster_draw_event},
     "macaque_legend": {"on_place": _refill_legend_place},
     "rat_legend": {"on_place": _rat_king_place},
     "chipmunk_legend": {"on_place": _chipmunk_legend_place},
-    "flying_squirrel": {"on_place": _gains("flying_squirrel_food")},
+    "flying_squirrel": {"on_place": _flying_squirrel_place},
     "meerkat": {"on_place": _draw1, "on_enemy_placed_adjacent": _meerkat_enemy_placed},
     "beaver": {"on_place": _beaver_place},
     "electric_eel": {"on_place": _electric_eel_place},
+    "krill": {"on_place": _krill_place},
     "dormouse": {"on_end_of_turn": _dormouse_eot},
     "squirrel": {"on_place": _gains("squirrel_food")},
     "chipmunk": {"on_place": _chipmunk_place},
-    "gopher": {"on_place": _conditional(_draws("gopher_draw"))},
-    "muskrat": {"on_place": _conditional(_removes())},
-    "groundhog": {"on_place": _conditional(_gains("groundhog_food"))},
+    "gopher": {"on_place": _conditional("gopher", _removes())},
+    "mara": {"on_place": _conditional("mara", _draws("mara_draw"))},
+    "groundhog": {"on_start_of_turn": _gains("groundhog_food")},
+    "rodent_legend": {"on_place": _rodent_legend_place},
     # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
     "octopus_legend_2": {"on_place": _chameleon_legend_2_place},
     "squirrel_legend": {"on_place": _otk_squirrel_place},
@@ -3163,16 +3467,19 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "golden_orb_weaver": {"on_enemy_placed_adjacent": _orb_weaver_enemy_placed},
     "black_bear": {"on_place": _black_bear_place},
     "grizzly_bear": {"on_place": _grizzly_place},
-    "tortoise": {"on_place": _tortoise_place},
+    "stag_beetle": {"on_place": _stag_beetle_place},
     "owl": {"on_place": _owl_place},
     # Giants (Hungry and Titan are keywords).
     "rhinoceros_legend": {"on_place": _removes()},            # the horn: one adjacent enemy, no cap (Martin, 2026-10-26)
     "tortoise_legend": {"on_end_of_turn": _tortoise_legend_eot},
     "sperm_whale_legend": {"on_end_of_turn": _sperm_whale_legend_eot},
     "rhinoceros": {"on_place": _rhinoceros_place},
+    "elephant_legend": {"on_place": _elephant_legend_lands, "on_roam": _elephant_legend_roam},
     "hippopotamus": {"on_enemy_placed_adjacent": _hippo_enemy_placed},
     "whale_shark": {"on_end_of_turn": _draw1},
-    "oxpecker_legend": {"on_end_of_turn": _oxpecker_legend_eot},
+    "dung_beetle_legend_form2": {"on_place": _dung_beetle_form_place(2)},
+    "dung_beetle_legend_form3": {"on_place": _dung_beetle_form_place(3)},
+    "dung_beetle_legend_form4": {"on_place": _dung_beetle_form_place(4)},
     "oxpecker": {"on_place": _oxpecker_place},
     "anteater": {"on_place": _anteater_place},
     "dung_beetle": {"on_end_of_turn": _dung_beetle_eot},
@@ -3200,15 +3507,21 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Hoofed (the legendary Wildebeest and Boar change region income; the legendary Giraffe reveals; Moose, Giraffe and
     # Boar are anthems).
     "zebra_legend": {"on_place": _zebra_legend_place},
+    "deer_legend": {"on_place": _deer_legend_place, "on_friendly_flee": _deer_legend_friendly_flee, "on_flee": _deer_legend_own_flee},
     "honey_badger": {"on_place": _removes(min_attr="honey_badger_min")},
-    "okapi": {"on_end_of_turn": _okapi_eot},
-    "zebra": {"on_place": _zebra_place},
+    "okapi": {"on_start_of_turn": _okapi_graze_draw, "on_end_of_turn": _okapi_graze_draw},
+    "zebra": {"on_flee": _zebra_flee},
     "warthog": {"on_place": _warthog_place},
     "albatross": {"on_place": _albatross_place},
-    "boar": {"on_place": _boar_place},
+    "boar": {"on_enemy_placed_adjacent": _boar_enemy_placed},
     "gazelle": {"on_place": _gazelle_place},
     "wildebeest": {"on_end_of_turn": _wildebeest_eot},
     "deer": {"on_place": _spawns_beside("fawn")},
+    # Impala (Martin, 2026-10-29): "Flee. Roar: play a Baby Impala." The calf is made and played at once, a full placement
+    # with its own Roar; one that has no legal place is gone. The calf: "Flee. Roar: if this is grazing, draw a card."
+    "impala": {"on_place": _impala_place},
+    "rabbit": {"on_place": _rabbit_place},
+    "baby_impala": {"on_place": _okapi_graze_draw},
     # The pool (Great White Shark's Reach is a static; Raksha, Verminus are anthems; Coyote, Cougar statics).
     "octopus": {"on_place": _octopus_ink_place},
     "macaw": {"on_place": _macaw_place},
@@ -3224,6 +3537,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "andean_condor": {"on_place": _andean_condor_place},
     "dingo": {"on_end_of_turn": _dingo_eot},
     # The tutorial's own cards, as they were when it was written.
-    "tutorial_lynx": {"on_place": _conditional(_draw1)},
+    "tutorial_lynx": {"on_place": _conditional("tutorial_lynx", _draw1)},
     "tutorial_chipmunk": {"on_place": _chipmunk_place},
 }

@@ -343,15 +343,15 @@ def test_features_source_allows_flight_keyword_literal():
 
 
 def test_a_roar_wasted_on_the_turns_last_action_still_fizzles():
-    # The turn's last action also ends the turn (region food, Dusk): that isn't the Roar doing something. Street Dog
-    # with no Roam ally does nothing, whether or not the turn ends with it (a gauntlet game, 2026-10-15).
+    # The turn's last action also ends the turn (region food, Dusk): that isn't the Roar doing something. A Wolverine
+    # with no enemy to remove does nothing, whether or not the turn ends with it (a gauntlet game, 2026-10-15).
     from animal_kingdom.engine import rules
     from animal_kingdom.engine.actions import PlaceAction
-    s = make_state(hands={"A": ["street_dog"], "B": ["mouse"]}, decks={"A": ["mouse"] * 5, "B": ["mouse"] * 5})
-    for cr in ("1,1", "1,2", "2,1", "2,2"):
+    s = make_state(hands={"A": ["wolverine"], "B": ["mouse"]}, decks={"A": ["mouse"] * 5, "B": ["mouse"] * 5})
+    for cr in ("1,1", "2,1", "2,2"):
         put(s, cr, "lion", "A")
     s.actions_taken_this_turn = rules.turn_actions(s) - 1
-    action = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "street_dog")
+    action = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "wolverine" and a.target == ("cr", "1,2"))
     post = s.clone()
     rules.apply_action(post, action)
     assert post.current == "B" and post.food["A"] > s.food["A"]      # the turn ended, and paid
@@ -399,3 +399,42 @@ def test_pending_payoff_credits_only_a_timer_that_can_still_fire():
     state.scheduled = [timer]
     state.board["5,2"] = [state.board["5,2"][-1]]       # the egg is eaten (Eon), the entry lingers
     assert pending_payoff(state, "A", "B", alive_only=True) == 0
+
+
+def test_board_live_reads_a_fired_roar_as_spent():
+    """On the board a Roar has fired: `board_live` zeroes the slot's roar and keeps only an ability that outlasts it
+    (Martin's XITW8A game 6, 2026-10-27: the Tiger ate its own Lion because a spent Ocelot read as worth +10)."""
+    cards = load_cards()
+    assert not features.lasting_ability(cards["ocelot"]) and features.has_ability(cards["ocelot"])
+    assert not features.lasting_ability(cards["skunk"])       # "It can't be played next turn." is the Roar's own
+    assert features.lasting_ability(cards["meerkat"])         # "When an enemy is placed next to this, ..."
+    state = make_state(current="A")
+    put(state, "4,2", "ocelot", "A")
+    names = features.feature_names("board_live")
+    slot = sorted(state.game_map.crossroads).index("4,2")
+    old = dict(zip(names, features.extract(state, "A", "board")))
+    new = dict(zip(names, features.extract(state, "A", "board_live")))
+    assert (old[f"cr{slot}_roar"], old[f"cr{slot}_ability"]) == (1.0, 1.0)
+    assert (new[f"cr{slot}_roar"], new[f"cr{slot}_ability"]) == (0.0, 0.0)
+    assert {k for k in names if old[k] != new[k]} == {f"cr{slot}_roar", f"cr{slot}_ability"}
+
+
+def test_board_ability_reads_what_an_ability_does():
+    """`board_ability` reads an ability from its text as what it does, so a grazing Wildebeest is not a Cape Buffalo
+    (both a 6-strength Hoofed animal with an ability to `board_live`), and a timer says what it pays (2026-10-29: the
+    Expert lost Hoofed Graze's food race, results/bot_quality/net-r4-10)."""
+    cards = load_cards()
+    assert features.ability_profile(cards["wildebeest"], lasting=True) != features.ability_profile(cards["cape_buffalo"], lasting=True)
+    state = make_state(current="A")
+    region = next(iter(state.game_map.regions.values()))
+    for cr in region.corners:
+        put(state, cr, "wildebeest", "A")
+    names = features.feature_names("board_ability")
+    v = dict(zip(names, features.extract(state, "A", "board_ability")))
+    slot = sorted(state.game_map.crossroads).index(sorted(region.corners)[0])
+    assert v[f"cr{slot}_grazing"] == 1.0 and v[f"cr{slot}_ab_dusk"] == 1.0 and v[f"cr{slot}_ab_food"] == 1.0
+    assert v[f"cr{slot}_ab_conditional"] == 1.0 and v[f"cr{slot}_ab_strength"] == 0.0
+    state.scheduled = [{"iid": -1, "owner": "B", "remaining": 2, "while_buried": False, "step": {"op": "draw", "player": "B", "n": 2}},
+                       {"iid": -2, "owner": "A", "remaining": 2, "while_buried": False, "step": {"op": "gain_food", "player": "A", "amount": 30}}]
+    v = dict(zip(names, features.extract(state, "A", "board_ability")))
+    assert (v["timer_cards_diff"], v["timer_food_diff"]) == (-2.0, 3.0)

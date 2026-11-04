@@ -32,11 +32,20 @@ export function cardHTML(c, { str = c.str, cls = '', attrs = '', lazy = false } 
 }
 
 // Names are set at their largest size and shrink only as much as their bar actually needs (measured, not guessed from length).
+// The effect text does the same in its panel: a long effect sets smaller, never past the family line under it (length is
+// no constraint on a card, Martin 2026-10-30; the panel fits the text, not the other way round).
 export function fitNames(root) {
   for (const s of root.querySelectorAll('.card .nbar:not(.two) span')) {
     s.style.fontSize = '';
     const over = s.scrollWidth / s.clientWidth;
     if (over > 1.001) s.style.fontSize = (parseFloat(getComputedStyle(s).fontSize) / over * .98) + 'px';
+  }
+  for (const p of root.querySelectorAll('.card:not(.compact) .ctext p')) {
+    p.style.fontSize = '';
+    const box = p.parentElement, cs = getComputedStyle(box);
+    const room = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    for (let i = 0; i < 8 && room > 0 && p.offsetHeight > room + 0.5; i++)   // rewrapping isn't linear: step down until it fits
+      p.style.fontSize = (parseFloat(getComputedStyle(p).fontSize) * Math.max(.9, Math.sqrt(room / p.offsetHeight))) + 'px';
   }
 }
 

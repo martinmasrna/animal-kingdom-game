@@ -20,9 +20,10 @@ from ..decks import LADDER_DECK_NAMES, PREMADE_DECKS, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine.cards import DECKLISTS, load_cards
+from ..engine.config import Config
 from ..engine.effects import roar_condition
 from ..engine.maps import load_map
-from ..engine.state import EngineError, GameState, Result, new_game, other_player
+from ..engine.state import EATEN_FORMS, EngineError, GameState, Result, new_game, other_player
 from ..engine.strength import card_strength, effective_strength, placement_strength
 from ..sim.runner import make_bot
 from . import tutorial
@@ -66,9 +67,18 @@ log = logging.getLogger(__name__)
 # the Rust engine (AK_RUST_BOTS=1 in the image), where the network's slower evaluation costs no depth inside the 8 s.
 # A won or lost game scores 500, not 1e9 (2026-10-28, docs/bots.md: at 1e9 a few sampled losses outweighed every
 # positional difference and the bot stacked on its own animals; +1.3 points a deck, results/bot_quality/decisive-mine).
-EXPERT = ("referee_learned:eval=wave2_slot_r456,depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,"
+# Since 2026-10-29 the network is `wave2_slot_r4_10_live` (board_live features, retrained on self-play rounds 4 to 10 on
+# current cards and Martin's decks; +5.0 points a deck on his 11, results/bot_quality/net-r4-10; Hoofed Graze -6 clear,
+# shipped on Martin's call: the network cannot see grazing). Since that evening it keeps every den opener (den_open, Martin's
+# 2TZBCA: Tiger onto the Wildebeest guarding his den, then Kitten in, was cut by the safety filter before any search).
+# Since 2026-10-30 a deepened line is scored against each of the opponent's reply openings, the worst for the bot counting
+# (reply_min, Martin's G2EFVA: Serval's Roar spared his 9-strength Capybara beside the den because one sampled reply left a
+# Sardine win open, and that one reply scored as a win). Since that day a bot whose every line reads as lost plays to its
+# outs: the lost roots are replayed against 20 fresh sampled hands and ranked by how many fail to win (outs, Martin's YFRCBG:
+# thirty Lions put on 5,1 and 4,1 with both den fronts open, because among lost lines the one losing no Lion scored best).
+EXPERT = ("referee_learned:eval=wave2_slot_r4_10_live,depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,"
           "w.buried_presence=0.25,w.food_progress=0,w.food_curve=3,w.food_proximity=60,w.food_race=true,quiesce=true,mulligan=true,"
-          "decisive=500")
+          "decisive=500,den_open=true,reply_min=true,outs=20")
 # The Normal pilot is the one-turn searcher with the den-front reach term (2026-10-21, Martin's game GMIDKA: it left two
 # cut-off Falcons in its den front for two turns). The Expert sees those threats through its reply search and the term
 # cost it a point on average (results/bot_quality/wave2-reach), so it stays off there.
@@ -621,6 +631,7 @@ class Match:
                           **({"timer": timers[u.iid]} if u.iid in timers else {}),
                           **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner), cr) else {}),
                           **({"spikes": True} if statics.has_keyword(st, u, "Spikes", cr) and not u.retaliation_used else {}),   # until used
+                          **({"spent": True} if u.card_id == "boar" and u.retaliation_used else {}),   # the Boar's one charge: its eye goes
                           **({"poison": True} if statics.has_keyword(st, u, "Poison", cr) else {}),   # printed, or a neighbour's legendary Jellyfish
                           # "armor": it can't be removed (printed, or a neighbour's Capybara); "inked": the Octopus's ink is on it
                           **({"armor": True} if not statics.can_be_removed(st, u, cr) else {}),
@@ -646,6 +657,7 @@ class Match:
                       **({"ready": True} if roar_condition(st, s, u.card_id) or conditional_reach(st, u.card_id) else {})}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
+            "eaten": {p: st.hungry_eaten.get(p, 0) for p in "AB"},   # what each side's Hungry animals ate (EVOLVES_AT)
             # the opponent's hand, face up, while they play with it revealed (your legendary Giraffe)
             **({"revealedHand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u)} for u in st.hands[opp]]}
                if statics.hand_revealed(st, opp) else {}),
@@ -739,6 +751,8 @@ class Match:
         st = self.state
         if isinstance(o, str) and o in st.game_map.crossroads:
             return {"v": o, "kind": "cr"}
+        if o == "den":                                    # "It roams" onto the enemy den
+            return {"v": o, "kind": "hq"}
         if isinstance(o, int):
             for p in "AB":
                 for u in st.hands[p]:
@@ -749,7 +763,12 @@ class Match:
                     if u.iid == o:
                         return {"v": o, "kind": "cr", "cr": cr, "id": u.card_id}
         if isinstance(o, str) and o in CARDS:
-            return {"v": o, "kind": "card", "id": o, **({"str": card_strength(st, o, owner)} if owner else {})}
+            if not owner:
+                return {"v": o, "kind": "card", "id": o}
+            # a card offered out of a deck (the Owl's Scout) is shown as it would be drawn: in the form it has evolved to there
+            # (the legendary Dung Beetle) and at the strength it would come out with, the royal jelly's included
+            form = st.eaten_form(owner, o)
+            return {"v": o, "kind": "card", "id": form, "str": card_strength(st, form, owner) + st.jelly_peek(owner, o)}
         return {"v": o, "kind": "other", "label": str(o)}
 
 
@@ -773,6 +792,13 @@ def card_pool() -> list[dict]:
              # A variable-strength card (Python) prints 0: its text says what it gains ("+1 for each removed animal").
              "str": 0 if c.is_dynamic else c.base_strength, "text": c.text,
              "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat,
-             "related": list(c.related or ahead.get(c.id, ())), "evolves": c.evolves or bool(ahead.get(c.id))}
+             "related": list(c.related or ahead.get(c.id, ())), "evolves": c.evolves or bool(ahead.get(c.id)),
+             **({"evolvesAt": EVOLVES_AT[c.id]} if c.id in EVOLVES_AT else {})}
             for c in CARDS.values()]
+
+
+# The legendary Dung Beetle's forms but the last: the food its owner's Hungry animals must have eaten for the next one. The
+# game screen prints the count towards it after the text, "(14/25)" (Martin, 2026-10-27).
+_CFG = Config.default()
+EVOLVES_AT = dict(zip(EATEN_FORMS, (_CFG.dung_beetle_legend_draw_at, _CFG.dung_beetle_legend_food_at, _CFG.dung_beetle_legend_play_at)))
 

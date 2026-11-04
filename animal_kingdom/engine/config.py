@@ -31,7 +31,7 @@ class Config:
     tortoise_legend_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)
     tortoise_legend_food_cap: int = 20        # Methuselah: each player gains at most this much food per turn
-    greywhisker_food: int = 1            # Roar: gain 1 food (+ draw 1, + play 1 more, then discard 1)
+    cheetah_draw: int = 2                # Roar: if this is next to your opponent's den, draw 2 cards (Martin, 2026-10-30)
     army_ant_legend_per: int = 2         # Queen Solenia: Dusk: gain 2 food for each animal you control (Martin's sheet, 2026-10-24)
     # Colony outside the precon, bench drafts (Martin, 2026-10-21; effects-pass.md)
     forager_ant_food: int = 5            # Forager Ant: Roar: gain 5 food
@@ -43,10 +43,11 @@ class Config:
     # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---
     # A shared threshold read by Gopher/Muskrat/Groundhog.
     fed_threshold: int = 10              # food gained this turn to arm Gopher/Muskrat/Groundhog
-    gopher_draw: int = 2                # Gopher: draw N if fed this turn
-    groundhog_food: int = 10            # Groundhog: gain N food if fed this turn (was +5 str)
-    chipmunk_legend_food_per: int = 3           # Scrooge: Roar: gain 3 food for each 10 food you have
-    chipmunk_legend_food_step: int = 10
+    mara_draw: int = 2                  # Mara: draw N if fed this turn
+    piranha_legend_fish: int = 2        # the legendary Piranha: removes each enemy next to N or more of your Fish
+    groundhog_food: int = 10            # Groundhog: Dawn: gain N food
+    chipmunk_legend_food_per: int = 1           # Tally: Roar: gain 1 food for each 3 food you have
+    chipmunk_legend_food_step: int = 3
     beaver_bonus_actions: int = 1       # Beaver: extra top-level actions on your NEXT turn
     eel_actions: int = 1                # Electric Eel: the actions your opponent takes on their next turn
 
@@ -55,16 +56,15 @@ class Config:
 
     # --- Payoff food ---
     gazelle_food: int = 5                # Gazelle: Roar: draw a card and gain 5 food (its Flee brings the Roar back)
-    zebra_food: int = 5                  # Zebra: Roar: gain 5 food for each other Hoofed animal next to this
     sloth_food: int = 30                 # Sloth: gain food when its timer comes due
     locust_delay: int = 2                # Locust (The First of Many's): turns until it eats, every turn counting (Wild)
     sloth_delay: int = 2                 # owner-turns until Sloth pays out (ticks only while it is
                                           # top of its crossroad - see rules overview.md 9.1)
 
     # --- Strength anthems ("has +X", live; decision E) ---
-    guard_hornet_bonus: int = 3          # while >= threshold Colony units
+    guard_hornet_bonus: int = 4          # while >= threshold Colony units
     guard_hornet_colony_threshold: int = 4
-    mackerel_anthem: int = 1             # Mackerel: your other Fish have +1
+    mahi_mahi_anthem: int = 1            # Mahi-mahi: your other Fish have +1 (the Mackerel's aura, Martin 2026-10-30)
     tuna_per_fish: int = 1               # Tuna: +1 for each other Fish you control
     giraffe_bonus: int = 3               # Giraffe: +3 during your opponent's turn (5 on a 4 until 2026-10-26)
     crocodile_penalty: int = 3           # Crocodile: -3 during your opponent's turn
@@ -74,12 +74,15 @@ class Config:
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
-    bush_dog_grant: int = 2              # Bush Dog: Dusk: give an adjacent Canine +2
-    raccoon_dog_grant: int = 1           # Coyote: an allied Canine that roams gets +1
     wolf_legend_grant: int = 1           # the legendary Wolf: Dusk: +1 for each adjacent Canine
-    stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
-    wild_dog_grant: int = 1              # African Wild Dog: Dusk: your adjacent animals +1
-    mahi_mahi_grant: int = 1             # Mahi-mahi: Roar: your other Fish +1
+    street_dog_grant: int = 3            # Street Dog: Roar: give a connected ally with Roam +3 strength. It roams.
+    black_wolf_grant: int = 1            # the legendary Black Wolf: whenever a Canine roams, give it +1 strength
+    black_wolf_draw: int = 1             # ... and draw a card
+    deer_legend_grant: int = 2           # the legendary Deer: whenever one of your animals flees, it gains 2 strength (itself too)
+    deer_legend_draw: int = 2            # the legendary Deer: Roar: draw 2 animals with Flee (Martin, 2026-10-30)
+    fox_draw: int = 2                    # Fox: Roar: if a Canine roamed this turn, draw 2 cards
+    dhole_draw: int = 2                  # Dhole: whenever it covers an enemy with no other enemy next to it, draw 2 cards
+    elephant_legend_max: int = 3         # the legendary Elephant: whenever it lands, remove all adjacent enemies of strength 3 or less
     gorilla_legend_grant: int = 1            # Silverback: Roar: every animal in your hand +1
     baboon_grant: int = 1                # Baboon: Roar: 2 animals in your hand +1...
     baboon_count: int = 2                # ...this many of them
@@ -99,21 +102,20 @@ class Config:
     golden_egg_draw: int = 2             # Golden Egg (Aurum's): cards drawn when you draw it
     earthworm_worms: int = 2             # Earthworm: Worms placed on its crossroad when it's removed
     cockroach_legend_growth: int = 1           # Roach King: comes back with +1 strength
-    python_growth: int = 1               # Python: +1 strength whenever an animal is removed
+    python_growth: int = 1               # Python: +1 strength whenever an enemy is removed
     leopard_legend_growth: int = 1       # the legendary Leopard: +1 strength whenever it removes an animal (every kill makes him bigger)
 
     # --- Thresholds / strength gates ---
-    colony_synergy_threshold: int = 4    # Guard Wasp / Soldier Ant / Nurse Bumblebee "4+ Colony"
+    colony_synergy_threshold: int = 4    # Nurse Bee / Soldier Ant "4 or more Colony"
     hare_played_min: int = 3             # Hare and Rat: their Roar if you played this many animals this turn
     hare_draw: int = 2                   # ...this many cards
     macaque_hand_min: int = 5            # Macaque: remove if you have this many cards in hand
     gorilla_min: int = 8                 # Gorilla: draw if this has this much strength
     manta_legend_regions: int = 2        # the legendary Manta Ray: draw at Dusk with this many regions...
     manta_legend_draw: int = 2           # ...this many cards
-    oxpecker_min: int = 8                # Oxpecker: count starting-deck animals of strength >= this
-    capybara_bonus: int = 7              # Capybara: this has +7 strength if your starting deck has no other animal...
+    capybara_strength: int = 8           # Capybara: this has 8 strength if your starting deck has no other animal...
     capybara_small_max: int = 3          # ...of strength 4 or more (the small-deck archetype's line)
-    jelly_strength: int = 4              # the legendary Bee: "the animals in your hand and deck become strength 4"
+    jelly_grant: int = 2                 # the legendary Bee: "give your animals on the board, in your hand and in your deck +2 strength"
     vulture_removals: int = 3            # Vulture: lands at your Dusk if this many animals were removed this turn
 
     # --- Removal-strength caps on Roar removals ---
@@ -129,14 +131,16 @@ class Config:
     hyena_food_per: int = 3              # Hyena: Dusk: 3 food for each animal removed this turn
     hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
     lynx_draw: int = 2                   # Lynx (rare): Roar: draw 2 if placed on top of an enemy
-    ocelot_draw: int = 2                 # Ocelot (rare): Roar: draw 2 common Cats
+    alley_cat_kittens: int = 2           # Alley Cat: Roar: add 2 Kittens to your hand
+    kitten_draw: int = 1                 # Kitten: Roar: draw a common animal (no printed number)
     tiger_legend_max: int = 7            # [TIGER] (legendary): Roar: remove an adjacent enemy of strength 7 or less
-    hamster_per_step: int = 1            # Hamster: +1 strength for each 10 food you have
-    hamster_food_step: int = 10
+    marmot_per_step: int = 1             # Marmot: +1 strength for each 10 food you have
+    marmot_food_step: int = 10
+    hamster_draw_food: int = 5           # Hamster: whenever you draw a card, gain 5 food
     tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food
-    tortoise_per_armor: int = 5          # Tortoise: 5 food for each of your animals with Armor
-    wildebeest_food: int = 5             # Wildebeest: at the end of your turn, if grazing, gain 5
-    dung_beetle_per: int = 5             # Dung Beetle: 5 food for each Hungry animal you control
+    stag_beetle_per_armor: int = 5       # Stag Beetle: 5 food for each of your animals with Armor
+    wildebeest_food: int = 6             # Wildebeest: at the end of your turn, if grazing, gain 6 (Martin, 2026-10-29)
+    dung_beetle_per: int = 4             # Dung Beetle: 4 food for each Hungry animal you control (Martin, 2026-10-30)
     otk_squirrel_multiplier: int = 3     # the legendary Squirrel: in 2 turns, gain three times the food it lost...
     otk_squirrel_delay: int = 2          # ...after this many of your turns (covering pauses it)
     migration_bonus: int = 5             # the legendary Wildebeest: your regions produce 5 more food
@@ -164,6 +168,12 @@ class Config:
     viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
     black_mamba_max: int = 6                 # Black Mamba removes an adjacent enemy of at most this strength
     anaconda_legend_decay: int = 1                  # Eon's strength lost each time it shuffles itself back
+    raven_legend_steals: int = 2                    # Grimm: animals taken from the opponent's Remove Pile
+    dung_beetle_legend_draw_at: int = 10            # the legendary Dung Beetle: food your Hungry animals ate this game
+    dung_beetle_legend_food_at: int = 25            #   for each tier: a card, then a removal, then another animal
+    dung_beetle_legend_play_at: int = 40
+    oxpecker_legend_min: int = 8                    # the legendary Oxpecker: your covering animals this strong call an Oxpecker
+    krill_legend_food: int = 10                     # the legendary Krill: a Titan's food, for one action instead of two
 
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---

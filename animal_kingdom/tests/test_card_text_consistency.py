@@ -36,8 +36,6 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "worker_bee": ["worker_bee_food"],
     "tortoise_legend": ["tortoise_legend_food"],
     "sloth": ["sloth_food"],
-    "greywhisker": ["greywhisker_food"],
-    "mole_legend": ["greywhisker_food"],
     "rat_legend": ["rat_king_per_rodent"],
     "flying_squirrel": ["flying_squirrel_food"],
     "squirrel": ["squirrel_food"],
@@ -45,11 +43,11 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "tutorial_chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
     "groundhog": ["groundhog_food"],
     "gazelle": ["gazelle_food"],
-    "zebra": ["zebra_food"],
+    "hamster": ["hamster_draw_food"],
     "chipmunk_legend": ["chipmunk_legend_food_per"],
     "wildebeest": ["wildebeest_food"],
     "hyena": ["hyena_food_per"],
-    "tortoise": ["tortoise_per_armor"],
+    "stag_beetle": ["stag_beetle_per_armor"],
     "dung_beetle": ["dung_beetle_per"],
     "tuna_legend": ["tuna_legend_food"],
 }
@@ -57,14 +55,10 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
 # Cards whose food-gain number is structural, not a tunable constant, so there is
 # nothing in config to compare against. Keep this list tight — it is the escape
 # hatch, and every entry needs a reason.
-NO_CONSTANT = {
-    # "gain 1 food for each unit ..." — the per-unit rate of 1 is hardcoded in
-    # _oxpecker_place; there is no oxpecker_food dial.
-    "oxpecker",
-}
+NO_CONSTANT: set = set()
 
 # Cards read the shared fed_threshold via "gained N or more food this turn".
-FED_THRESHOLD_CARDS = {"gopher", "muskrat", "groundhog", "forager_ant"}
+FED_THRESHOLD_CARDS = {"gopher", "mara", "forager_ant"}
 
 
 def _cards():
@@ -163,6 +157,7 @@ STRENGTH_LIMITS = {
     "albatross": "albatross_max",
     "black_mamba": "black_mamba_max",
     "hippopotamus": "hippopotamus_max",
+    "elephant_legend": "elephant_legend_max",
 }
 
 
@@ -175,19 +170,22 @@ def test_strength_limit_text_matches_config():
 
 
 def test_no_strength_limit_card_escapes_the_check():
-    # Oxpecker's "strength 8 or more" and the Capybara's "strength 4 or more" read the starting deck, not a removal limit
-    # (checked below and in test_capybara_numbers_match_config).
+    # The Capybara's and the legendary Bee's "strength 4 or more" read the starting deck and the legendary Oxpecker's
+    # "strength 8 or more" is the coverer's size, none a removal limit (test_capybara_numbers_match_config, and below).
     printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
-    assert printed - {"oxpecker", "capybara"} == set(STRENGTH_LIMITS)
+    assert printed - {"capybara", "bee_legend_2", "oxpecker_legend"} == set(STRENGTH_LIMITS)
+    (n,) = re.findall(r"strength (\d+) or more", _cards()["oxpecker_legend"].text)
+    assert int(n) == Config.default().oxpecker_legend_min
 
 
 def test_royal_jelly_number_matches_config():
-    assert int(re.search(r"become strength (\d+)", _cards()["bee_legend_2"].text).group(1)) == Config.default().jelly_strength
+    assert int(re.search(r"\+(\d+) strength", _cards()["bee_legend_2"].text).group(1)) == Config.default().jelly_grant
 
 
 def test_capybara_numbers_match_config():
     cfg, text = Config.default(), _cards()["capybara"].text
     assert int(STRENGTH_LIMIT_RE.search(text).group(1)) == cfg.capybara_small_max + 1
+    assert int(re.search(r"this has (\d+) strength", text).group(1)) == cfg.capybara_strength
 
 
 STRENGTH_LOSS_RE = re.compile(r"(?:gets?|enemy) -(\d+) strength", re.IGNORECASE)
@@ -245,9 +243,11 @@ def test_roar_label_matches_placement_effect():
     """
     from animal_kingdom.engine.effects import EFFECTS
 
+    # "Whenever this lands" (the legendary Elephant) runs on placement and on a roam's arrival: it has the hook, no label.
     mismatched = sorted(
         cid for cid, card in load_cards().items()
-        if card.has_roar != any(hook.startswith("on_place") for hook in EFFECTS.get(cid, {})))
+        if "Whenever this lands" not in card.text
+        and card.has_roar != any(hook.startswith("on_place") for hook in EFFECTS.get(cid, {})))
     assert mismatched == []
 
 
@@ -260,13 +260,16 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "raven": ["raven_draw"],
     "golden_egg": ["golden_egg_draw"],
     "hare": ["hare_draw"],
+    "cheetah": ["cheetah_draw"],
     "nurse_bee": ["nurse_bee_draw"],
     "black_bear": ["black_bear_draw"],
-    "gopher": ["gopher_draw"],
+    "mara": ["mara_draw"],
     "praying_mantis": ["mantis_draw"],
     "hummingbird": ["hummingbird_draw"],
     "lynx": ["lynx_draw"],
-    "ocelot": ["ocelot_draw"],
+    "fox": ["fox_draw"],
+    "dhole": ["dhole_draw"],
+    "alley_cat": ["alley_cat_kittens"],
     "manta_ray_legend": ["manta_legend_draw"],
     "butterfly_legend_monarch": ["butterfly_legend_stage5_draw"],
     "snake_egg": ["egg_hatch_draw"],   # "draw a Snake" now (snake_egg_draw, no printed number), "draw 2 Snakes" at the hatch
@@ -295,30 +298,35 @@ def test_draw_and_shuffle_text_matches_config():
     assert not problems, "card text / config desync:\n  " + "\n  ".join(problems)
 
 
+def test_the_black_wolfs_card_is_one_and_the_wolverine_prints_no_number():
+    """"Give it +1 strength and draw a card" (the +1 is in STRENGTH_BONUS_CONSTANTS below); the Wolverine's text has no
+    number to map."""
+    assert Config.default().black_wolf_draw == 1
+    assert not re.search(r"\d", _cards()["wolverine"].text)
+
+
 STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 
 # card_id -> config attrs, one per printed "+N strength" (a "give" counter or a "has/have" anthem), in order. Every card
 # printing one must be listed (checked below): the launch decks brought a dozen of them at once.
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
-    "capybara": ["capybara_bonus"],
+    "bee_legend_2": ["jelly_grant"],
+    "deer_legend": ["deer_legend_grant"],      # "give it +2 strength" (the active-text pass, 2026-10-31)
     "guard_wasp": ["guard_hornet_bonus"],
     "python": ["python_growth"],
     "leopard_legend": ["leopard_legend_growth"],
     "dingo": ["dingo_grant"],
     "egg_eater": ["egg_eater_growth"],
     "wolf_legend": ["wolf_legend_grant"],
-    "bush_dog": ["bush_dog_grant"],
-    "coyote": ["raccoon_dog_grant"],
-    "african_wild_dog": ["wild_dog_grant"],
-    "street_dog": ["stray_dog_grant"],
-    "mahi_mahi": ["mahi_mahi_grant"],
-    "mackerel": ["mackerel_anthem"],
+    "wolf_legend_2": ["black_wolf_grant"],
+    "street_dog": ["street_dog_grant"],
+    "mahi_mahi": ["mahi_mahi_anthem"],
     "tuna": ["tuna_per_fish"],
     "baboon_legend": ["baboon_legend_grant"],
     "gorilla_legend": ["gorilla_legend_grant"],
     "tarsier": ["tarsier_grant"],
     "baboon": ["baboon_grant"],
-    "hamster": ["hamster_per_step"],
+    "marmot": ["marmot_per_step"],
     "butterfly": ["butterfly_grant"],
     "butterfly_legend_chrysalis": ["butterfly_grant"],
     "butterfly_legend_butterfly": ["butterfly_legend_stage4_grant"],
@@ -353,7 +361,7 @@ def test_strength_bonus_text_matches_config():
     assert not problems, "card text / config desync:\n  " + "\n  ".join(problems)
 
 
-COUNT_THRESHOLD_RE = re.compile(r"(\d+) or more (animals|cards|strength|regions|Colony animals|removals)")
+COUNT_THRESHOLD_RE = re.compile(r"(\d+) or more (animals|cards|strength|regions|Colony animals|removals|of your Fish)")
 
 # card_id -> the config attr of its printed "N or more <things>" threshold.
 THRESHOLDS = {
@@ -366,6 +374,7 @@ THRESHOLDS = {
     "guard_wasp": "guard_hornet_colony_threshold",
     "soldier_ant": "colony_synergy_threshold",
     "vulture": "vulture_removals",
+    "piranha_legend": "piranha_legend_fish",
 }
 
 
@@ -375,16 +384,17 @@ def test_thresholds_text_matches_config():
     assert printed == {cid: getattr(cfg, attr) for cid, attr in THRESHOLDS.items()}
 
 
-def test_oxpecker_threshold_matches_config():
-    (n,) = re.findall(r"strength (\d+) or more", _cards()["oxpecker"].text)
-    assert int(n) == Config.default().oxpecker_min
-
-
 def test_the_launch_decks_other_numbers_match_config():
     """The numbers printed as words, or in a shape the patterns above don't read."""
     cfg, c = Config.default(), _cards()
     words = {"two": 2, "three": 3}
     assert words[re.search(r"add (\w+) random younglings", c["stork"].text).group(1)] == cfg.stork_younglings
+    assert int(re.search(r"put (\d+) animals from your opponent's Remove Pile", c["raven_legend"].text).group(1)) == cfg.raven_legend_steals
+    assert int(re.search(r"cost (\d+) food to play", c["krill_legend"].text).group(1)) == cfg.krill_legend_food
+    assert int(re.search(r"for each (\d+) food you have", c["chipmunk_legend"].text).group(1)) == cfg.chipmunk_legend_food_step
+    tiers = [int(re.search(r"Evolves at (\d+) food", c[f].text).group(1))
+             for f in ("dung_beetle_legend", "dung_beetle_legend_form2", "dung_beetle_legend_form3")]
+    assert tiers == [cfg.dung_beetle_legend_draw_at, cfg.dung_beetle_legend_food_at, cfg.dung_beetle_legend_play_at]
     assert words[re.search(r"shuffle (\w+) Cuckoo Eggs", c["cuckoo"].text).group(1)] == cfg.cuckoo_eggs
     assert words[re.search(r"shuffle (\w+) Golden Eggs", c["goose_legend"].text).group(1)] == cfg.aurum_eggs
     assert words[re.search(r"place (\w+) Worms", c["earthworm"].text).group(1)] == cfg.earthworm_worms
@@ -393,7 +403,7 @@ def test_the_launch_decks_other_numbers_match_config():
     assert int(re.search(r"give (\d+) animals", c["baboon"].text).group(1)) == cfg.baboon_count
     assert int(re.search(r"produce (\d+) more food", c["wildebeest_legend"].text).group(1)) == cfg.migration_bonus
     assert int(re.search(r"produce (\d+) less food", c["boar_legend"].text).group(1)) == cfg.boar_penalty
-    assert c["great_white_shark"].text.endswith("this has Reach.")
+    assert c["great_white_shark"].text.endswith("Has Reach if an animal was removed this turn.")
     assert "Poppy and Rusty" in c["fox_legend"].text and cfg.alpha_pups == 2
 
 

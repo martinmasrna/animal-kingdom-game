@@ -41,7 +41,7 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: draw a Worker, a Soldier and a Nurse Colony animal.",
       "species": "Bee",
       "habitat": "Meadow",
@@ -72,7 +72,7 @@
         "Colony",
         "Nurse"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Flight. Roar: if you control 4 or more Colony animals, draw 2 cards.",
       "species": "Bee",
       "habitat": "Meadow",
@@ -130,17 +130,19 @@
       "id": "queen_bee",
       "name": "Queen Bee",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Colony",
         "Queen"
       ],
-      "base_strength": 3,
-      "text": "Roar: play a Young Bee.",
+      "base_strength": 5,
+      "text": "Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand.",
       "species": "Bee",
       "habitat": "Meadow",
       "related": [
-        "young_bee"
+        "worker_bee",
+        "guard_bee",
+        "nurse_bee"
       ],
       "keywords": []
     },
@@ -154,12 +156,12 @@
         "Soldier"
       ],
       "base_strength": 3,
-      "text": "Flight. Has +3 strength while you control 4 or more Colony animals.",
+      "text": "Flight. Has +4 strength while you control 4 or more Colony animals.",
+      "species": "Wasp",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Wasp",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "soldier_ant",
@@ -172,9 +174,9 @@
       ],
       "base_strength": 2,
       "text": "Roar: if you control 4 or more Colony animals, remove an adjacent enemy.",
-      "keywords": [],
       "species": "Army Ant",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "worker_ant",
@@ -217,7 +219,7 @@
         "Colony",
         "Worker"
       ],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Flight. Roar: gain 12 food.",
       "species": "Bee",
       "habitat": "Meadow",
@@ -234,7 +236,7 @@
         "Bird"
       ],
       "base_strength": 7,
-      "text": "Flight. Fall: shuffle this into your deck.",
+      "text": "Flight. Fall: shuffle Ember into your deck.",
       "species": "Pheasant",
       "habitat": "Forest",
       "keywords": [
@@ -269,15 +271,15 @@
       "id": "piranha",
       "name": "Piranha",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Fish"
       ],
       "base_strength": 3,
-      "text": "Roar: if an ally was removed this turn, remove an adjacent animal.",
-      "keywords": [],
+      "text": "Your Fish can cover enemies of strength up to the number of your Fish.",
       "species": "Piranha",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "vulture",
@@ -288,12 +290,12 @@
         "Bird"
       ],
       "base_strength": 2,
-      "text": "Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck.",
+      "text": "Flight. Dusk: if 3 or more animals were removed this turn, fly in from your hand or deck.",
+      "species": "Vulture",
+      "habitat": "Savanna",
       "keywords": [
         "Flight"
-      ],
-      "species": "Vulture",
-      "habitat": "Savanna"
+      ]
     },
     {
       "id": "city_spider",
@@ -359,12 +361,11 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 2,
-      "text": "Reach. Poison.",
+      "base_strength": 5,
+      "text": "Poison.",
       "species": "Toad",
       "habitat": "Meadow",
       "keywords": [
-        "Reach",
         "Poison"
       ]
     },
@@ -390,7 +391,7 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
-      "text": "Fall: put this back where it was with +1 strength and draw a card.",
+      "text": "Fall: put Roach King back where it was with +1 strength and draw a card.",
       "species": "Cockroach",
       "habitat": "City",
       "keywords": []
@@ -404,10 +405,10 @@
         "Snake"
       ],
       "base_strength": 0,
-      "text": "Whenever an animal is removed, gain 1 strength (wherever this is).",
-      "keywords": [],
+      "text": "Whenever an enemy is removed, gain 1 strength (wherever this is).",
       "species": "Python",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "rat_legend_2",
@@ -464,26 +465,28 @@
         "Canine"
       ],
       "base_strength": 6,
-      "text": "Whenever an ally roams onto an enemy, draw a card.",
-      "keywords": [],
+      "text": "Roam. Whenever a Canine roams, give it +1 strength and draw a card.",
       "species": "Wolf",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": [
+        "Roam"
+      ]
     },
     {
       "id": "wolf_legend",
       "name": "[WOLF]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Canine"
       ],
       "base_strength": 4,
-      "text": "Roam. Dusk: this gains +1 strength for each of your adjacent Canines.",
+      "text": "Roam. Dusk: gain 1 strength for each of your adjacent Canines.",
+      "species": "Wolf",
+      "habitat": "Forest",
       "keywords": [
         "Roam"
-      ],
-      "species": "Wolf",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "orca",
@@ -504,31 +507,31 @@
       "id": "fox",
       "name": "Fox",
       "status": "collectible",
-      "rarity": "rare",
-      "tags": [
-        "Canine"
-      ],
-      "base_strength": 5,
-      "text": "Roam. Whenever this covers an enemy, draw a card.",
-      "keywords": [
-        "Roam"
-      ],
-      "species": "Fox",
-      "habitat": "Forest"
-    },
-    {
-      "id": "jackal",
-      "name": "Jackal",
-      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Canine"
       ],
       "base_strength": 3,
-      "text": "Roar: remove an adjacent enemy that has another of your Canines next to it.",
-      "keywords": [],
+      "text": "Roar: if an ally roamed this turn, draw 2 cards.",
+      "species": "Fox",
+      "habitat": "Forest",
+      "keywords": []
+    },
+    {
+      "id": "jackal",
+      "name": "Jackal",
+      "status": "collectible",
+      "rarity": "rare",
+      "tags": [
+        "Canine"
+      ],
+      "base_strength": 3,
+      "text": "Roam. Whenever this roams, remove an adjacent enemy weaker than this.",
       "species": "Jackal",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": [
+        "Roam"
+      ]
     },
     {
       "id": "dhole",
@@ -538,8 +541,8 @@
       "tags": [
         "Canine"
       ],
-      "base_strength": 6,
-      "text": "Roam. Your animals with Roam can cover enemies of equal strength.",
+      "base_strength": 5,
+      "text": "Roam. Whenever this covers an enemy with no other enemy next to it, draw 2 cards.",
       "species": "Dhole",
       "habitat": "Jungle",
       "keywords": [
@@ -571,24 +574,29 @@
         "Canine"
       ],
       "base_strength": 3,
-      "text": "Dusk: give a random adjacent Canine of yours +2 strength.",
-      "keywords": [],
+      "text": "Roam. Whenever this roams, place a Pup on the crossroad it left.",
       "species": "Bush Dog",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": [
+        "Roam"
+      ],
+      "related": [
+        "pup"
+      ]
     },
     {
       "id": "coyote",
       "name": "Coyote",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Canine"
       ],
-      "base_strength": 3,
-      "text": "Whenever an allied Canine roams, give it +1 strength.",
-      "keywords": [],
+      "base_strength": 2,
+      "text": "Roar: give a connected ally Roam. It roams.",
       "species": "Coyote",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "african_wild_dog",
@@ -598,11 +606,13 @@
       "tags": [
         "Canine"
       ],
-      "base_strength": 3,
-      "text": "Dusk: give your adjacent animals +1 strength.",
-      "keywords": [],
+      "base_strength": 4,
+      "text": "Roam. Whenever you play a Canine next to this, it roams.",
       "species": "African Wild Dog",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": [
+        "Roam"
+      ]
     },
     {
       "id": "badger",
@@ -624,11 +634,11 @@
       "tags": [
         "Canine"
       ],
-      "base_strength": 1,
-      "text": "Roar: give an ally with Roam +2 strength. It roams.",
-      "keywords": [],
+      "base_strength": 2,
+      "text": "Roar: give a connected ally with Roam +3 strength. It roams.",
       "species": "Street Dog",
-      "habitat": "City"
+      "habitat": "City",
+      "keywords": []
     },
     {
       "id": "skunk_legend",
@@ -703,7 +713,9 @@
       "name": "Hare",
       "status": "collectible",
       "rarity": "common",
-      "tags": [],
+      "tags": [
+        "Rodent"
+      ],
       "base_strength": 4,
       "text": "Flee. Roar: if you played 3 or more animals this turn, draw 2 cards.",
       "keywords": [
@@ -721,7 +733,7 @@
         "Cat"
       ],
       "base_strength": 6,
-      "text": "Roar: if this is next to your opponent's den, draw a card.",
+      "text": "Roar: if this is next to your opponent's den, draw 2 cards.",
       "species": "Cheetah",
       "habitat": "Savanna",
       "keywords": []
@@ -821,10 +833,10 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
-      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
-      "keywords": [],
+      "text": "Roar: draw a card, play another animal, then discard a card.",
       "species": "Mole",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "lion_legend",
@@ -838,7 +850,10 @@
       "text": "Roar: play Princess Lea from your hand or deck.",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "related": [
+        "lion_legend_2"
+      ]
     },
     {
       "id": "lion_legend_2",
@@ -852,7 +867,10 @@
       "text": "Roar: play Prince Leo from your hand or deck.",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "related": [
+        "lion_legend"
+      ]
     },
     {
       "id": "lion_legend_3",
@@ -904,7 +922,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: if you played another Cat this turn, remove an adjacent enemy.",
       "keywords": [],
       "species": "Serval",
@@ -1023,16 +1041,19 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 1,
-      "text": "Roar: if you control another Cat, play another Cat.",
-      "keywords": [],
+      "base_strength": 2,
+      "text": "Roar: add 2 Kittens to your hand.",
       "species": "Alley Cat",
-      "habitat": "City"
+      "habitat": "City",
+      "keywords": [],
+      "related": [
+        "kitten"
+      ]
     },
     {
       "id": "jellyfish_legend",
       "name": "[JELLYFISH]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
@@ -1077,11 +1098,11 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 3,
-      "text": "Your Fish can cover enemies of strength up to the number of your Fish.",
-      "keywords": [],
+      "base_strength": 2,
+      "text": "Roar: remove each enemy next to 2 or more of your Fish.",
       "species": "Piranha",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "swordfish",
@@ -1129,11 +1150,11 @@
       "id": "remora",
       "name": "Remora",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Fish"
       ],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: if this is next to an allied Fish, play another Fish.",
       "species": "Remora",
       "habitat": "Open Ocean",
@@ -1176,24 +1197,10 @@
         "Fish"
       ],
       "base_strength": 3,
-      "text": "Roar: give your other Fish +1 strength.",
-      "keywords": [],
-      "species": "Mahi-mahi",
-      "habitat": "Open Ocean"
-    },
-    {
-      "id": "mackerel",
-      "name": "Mackerel",
-      "status": "reserve",
-      "rarity": "common",
-      "tags": [
-        "Fish"
-      ],
-      "base_strength": 2,
       "text": "Your other Fish have +1 strength.",
-      "keywords": [],
-      "species": "Mackerel",
-      "habitat": "Open Ocean"
+      "species": "Mahi-mahi",
+      "habitat": "Open Ocean",
+      "keywords": []
     },
     {
       "id": "tuna",
@@ -1277,10 +1284,10 @@
         "Rodent"
       ],
       "base_strength": 4,
-      "text": "Roar: gain 3 food for each 10 food you have.",
-      "keywords": [],
+      "text": "Roar: gain 1 food for each 3 food you have.",
       "species": "Chipmunk",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "flying_squirrel",
@@ -1291,12 +1298,12 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Flight. Roar: gain 10 food.",
+      "text": "Flight. Roar: gain 10 food and draw a card.",
+      "species": "Flying Squirrel",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Flying Squirrel",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "meerkat",
@@ -1333,7 +1340,7 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Dusk: if you gained 10 or more food this turn, draw a card.",
+      "text": "Dusk: draw a card for each 10 food you gained this turn.",
       "species": "Dormouse",
       "habitat": "Forest",
       "keywords": []
@@ -1346,7 +1353,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 3,
+      "base_strength": 4,
       "text": "Roar: gain 10 food.",
       "keywords": [],
       "species": "Squirrel",
@@ -1374,39 +1381,39 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 4,
-      "text": "Roar: if you gained 10 or more food this turn, draw 2 cards.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy.",
       "species": "Gopher",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "muskrat",
       "name": "Muskrat",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy.",
-      "keywords": [],
+      "text": "",
       "species": "Muskrat",
-      "habitat": "Meadow"
+      "habitat": "River and Lake",
+      "keywords": []
     },
     {
       "id": "groundhog",
       "name": "Groundhog",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Rodent"
       ],
-      "base_strength": 4,
-      "text": "Roar: if you gained 10 or more food this turn, gain 10 food.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Dawn: gain 10 food.",
       "species": "Groundhog",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "hamster",
@@ -1417,10 +1424,10 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Has +1 strength for each 10 food you have.",
-      "keywords": [],
+      "text": "Whenever you draw a card, gain 5 food.",
       "species": "Hamster",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "octopus_legend_2",
@@ -1474,7 +1481,7 @@
       "base_strength": 3,
       "text": "Roar: choose an adjacent animal. Become a copy of it, and add another copy to your hand.",
       "species": "Chameleon",
-      "habitat": "Open Ocean",
+      "habitat": "Jungle",
       "keywords": []
     },
     {
@@ -1486,7 +1493,7 @@
         "Rodent"
       ],
       "base_strength": 2,
-      "text": "If your starting deck has no animal of strength 4 or more, this has +7 strength.",
+      "text": "If your starting deck has no animal of strength 4 or more, this has 8 strength.",
       "species": "Capybara",
       "habitat": "Jungle",
       "keywords": []
@@ -1568,15 +1575,15 @@
       "id": "jellyfish",
       "name": "Jellyfish",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [],
-      "base_strength": 4,
-      "text": "Poison.",
+      "base_strength": 5,
+      "text": "Poison. Your adjacent animals have Poison.",
+      "species": "Jellyfish",
+      "habitat": "Open Ocean",
       "keywords": [
         "Poison"
-      ],
-      "species": "Jellyfish",
-      "habitat": "Open Ocean"
+      ]
     },
     {
       "id": "black_bear",
@@ -1598,13 +1605,13 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 4,
-      "text": "Armor. Roar: gain 5 food for each of your animals with Armor.",
+      "base_strength": 6,
+      "text": "Armor.",
+      "species": "Tortoise",
+      "habitat": "Savanna",
       "keywords": [
         "Armor"
-      ],
-      "species": "Tortoise",
-      "habitat": "Savanna"
+      ]
     },
     {
       "id": "owl",
@@ -1631,12 +1638,12 @@
         "Snake"
       ],
       "base_strength": 10,
-      "text": "Apex Predator. Dusk: shuffle this into your deck with -1 strength.",
+      "text": "Apex Predator. Dusk: shuffle Eon into your deck with -1 strength and draw a card.",
+      "species": "Anaconda",
+      "habitat": "Jungle",
       "keywords": [
         "Apex Predator"
-      ],
-      "species": "Anaconda",
-      "habitat": "Jungle"
+      ]
     },
     {
       "id": "raven_legend",
@@ -1647,17 +1654,17 @@
         "Bird"
       ],
       "base_strength": 3,
-      "text": "Flight. Roar: put an animal from your opponent's Remove Pile into your hand.",
+      "text": "Flight. Roar: put 2 animals from your opponent's Remove Pile into your hand.",
+      "species": "Raven",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Raven",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "swan_legend",
       "name": "Black Swan",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -1668,7 +1675,7 @@
         "Flight"
       ],
       "species": "Swan",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "hawk",
@@ -1689,7 +1696,7 @@
     {
       "id": "cottonmouth",
       "name": "Cottonmouth",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Snake"
@@ -1698,7 +1705,7 @@
       "text": "Roar: choose an adjacent enemy. At the start of your next turn, remove it.",
       "keywords": [],
       "species": "Cottonmouth",
-      "habitat": "Forest"
+      "habitat": "River and Lake"
     },
     {
       "id": "magpie",
@@ -1820,7 +1827,7 @@
     {
       "id": "goose_legend",
       "name": "Aurum",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -1831,7 +1838,7 @@
         "golden_egg"
       ],
       "species": "Goose",
-      "habitat": "Meadow",
+      "habitat": "River and Lake",
       "keywords": []
     },
     {
@@ -2021,14 +2028,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "When this gains strength in your hand, draw a card and turn this into a Butterfly.",
-      "keywords": [],
+      "text": "When this gains strength in your hand, draw a card and turn into a Butterfly.",
       "related": [
         "butterfly"
       ],
       "evolves": true,
       "species": "Butterfly",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "gorilla",
@@ -2110,11 +2117,14 @@
         "Bird"
       ],
       "base_strength": 4,
-      "text": "Flight. Dusk: draw a card for each adjacent Hungry ally.",
+      "text": "Flight. Whenever your animal of strength 8 or more covers an enemy, play an Oxpecker.",
       "species": "Oxpecker",
       "habitat": "Savanna",
       "keywords": [
         "Flight"
+      ],
+      "related": [
+        "oxpecker"
       ]
     },
     {
@@ -2173,18 +2183,18 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 1,
-      "text": "Flight. Roar: gain 1 food for each animal of strength 8 or more in your starting deck.",
+      "base_strength": 2,
+      "text": "Flight. Roar: draw a card, then gain food equal to the strongest animal in your hand.",
+      "species": "Oxpecker",
+      "habitat": "Savanna",
       "keywords": [
         "Flight"
-      ],
-      "species": "Oxpecker",
-      "habitat": "Savanna"
+      ]
     },
     {
       "id": "anteater",
       "name": "Anteater",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -2202,7 +2212,7 @@
         "Beetle"
       ],
       "base_strength": 1,
-      "text": "Dusk: gain 5 food for each Hungry animal you control.",
+      "text": "Dusk: gain 4 food for each Hungry animal you control.",
       "species": "Dung Beetle",
       "habitat": "Savanna",
       "keywords": []
@@ -2252,19 +2262,19 @@
       "id": "moose",
       "name": "Moose",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Hoofed"
       ],
       "base_strength": 8,
       "text": "Hungry 3. Roam.",
+      "species": "Moose",
+      "habitat": "Forest",
       "keywords": [
         "Hungry",
         "Roam"
       ],
-      "hungry": 3,
-      "species": "Moose",
-      "habitat": "Forest"
+      "hungry": 3
     },
     {
       "id": "wildebeest_legend",
@@ -2303,10 +2313,10 @@
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Roar: draw a card for each different Hoofed animal you control.",
-      "keywords": [],
+      "text": "Roar: draw a card for each of your grazing Hoofed animals.",
       "species": "Zebra",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "giraffe_legend",
@@ -2343,10 +2353,10 @@
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Dusk: if this is grazing, draw a card.",
-      "keywords": [],
+      "text": "Dawn and Dusk: if this is grazing, draw a card.",
       "species": "Okapi",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "zebra",
@@ -2356,8 +2366,8 @@
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 4,
-      "text": "Flee. Roar: gain 5 food for each other Hoofed animal next to this.",
+      "base_strength": 5,
+      "text": "Flee. When this flees, return the enemy that covered it to its owner's hand.",
       "species": "Zebra",
       "habitat": "Savanna",
       "keywords": [
@@ -2389,7 +2399,7 @@
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 6,
+      "base_strength": 7,
       "text": "Your other Hoofed animals have +1 strength during your opponent's turn.",
       "keywords": [],
       "species": "Cape Buffalo",
@@ -2420,10 +2430,10 @@
         "Hoofed"
       ],
       "base_strength": 6,
-      "text": "Dusk: if this is grazing, gain 5 food.",
-      "keywords": [],
+      "text": "Dusk: if this is grazing, gain 6 food.",
       "species": "Wildebeest",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "deer",
@@ -2448,15 +2458,15 @@
       "id": "boar",
       "name": "Boar",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Hoofed"
       ],
       "base_strength": 5,
-      "text": "Roar: remove an adjacent enemy that isn't covering anything.",
-      "keywords": [],
+      "text": "Remove the first enemy placed next to this.",
       "species": "Boar",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "warthog",
@@ -2467,10 +2477,10 @@
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Roar: remove an adjacent enemy covering an allied Hoofed animal.",
-      "keywords": [],
+      "text": "Roar: remove an adjacent enemy that has another of your Hoofed animals next to it.",
       "species": "Warthog",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "octopus",
@@ -2493,12 +2503,12 @@
         "Fish"
       ],
       "base_strength": 7,
-      "text": "Apex Predator. If an animal was removed this turn, this has Reach.",
+      "text": "Apex Predator. Has Reach if an animal was removed this turn.",
+      "species": "Great White Shark",
+      "habitat": "Open Ocean",
       "keywords": [
         "Apex Predator"
-      ],
-      "species": "Great White Shark",
-      "habitat": "Open Ocean"
+      ]
     },
     {
       "id": "butterfly",
@@ -2534,17 +2544,18 @@
       "id": "eagle",
       "name": "Eagle",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Bird"
       ],
-      "base_strength": 5,
-      "text": "Flight.",
-      "keywords": [
-        "Flight"
-      ],
+      "base_strength": 6,
+      "text": "Flight. Apex Predator.",
       "species": "Eagle",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": [
+        "Flight",
+        "Apex Predator"
+      ]
     },
     {
       "id": "cuckoo",
@@ -2793,13 +2804,13 @@
       "tags": [
         "Beetle"
       ],
-      "base_strength": 6,
-      "text": "Armor.",
+      "base_strength": 4,
+      "text": "Armor. Roar: gain 5 food for each of your animals with Armor.",
+      "species": "Stag Beetle",
+      "habitat": "Forest",
       "keywords": [
         "Armor"
-      ],
-      "species": "Stag Beetle",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "dolphin",
@@ -2864,10 +2875,10 @@
         "Arachnid"
       ],
       "base_strength": 5,
-      "text": "Dusk: remove a random adjacent ally and gain its strength.",
-      "keywords": [],
+      "text": "Dusk: remove the weakest animal next to this and gain its strength.",
       "species": "Tarantula",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "sea_turtle",
@@ -2911,20 +2922,6 @@
       "keywords": [],
       "species": "Naked Mole-Rat",
       "habitat": "Savanna"
-    },
-    {
-      "id": "greywhisker",
-      "name": "Greywhisker",
-      "status": "reserve",
-      "rarity": "legendary",
-      "tags": [
-        "Rodent"
-      ],
-      "base_strength": 1,
-      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
-      "keywords": [],
-      "species": "Rat",
-      "habitat": "City"
     },
     {
       "id": "bat_legend",
@@ -3016,7 +3013,6 @@
       "species": "Ant",
       "habitat": "Forest",
       "related": [
-        "young_ant",
         "young_ant"
       ],
       "keywords": []
@@ -3409,7 +3405,7 @@
       "text": "",
       "keywords": [],
       "species": "Dragonfly",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "ladybird",
@@ -3445,7 +3441,7 @@
       "text": "",
       "keywords": [],
       "species": "Pond Skater",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "frog",
@@ -3457,7 +3453,7 @@
       "text": "",
       "keywords": [],
       "species": "Frog",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "snail",
@@ -3505,7 +3501,7 @@
       "text": "",
       "keywords": [],
       "species": "Duck",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "swallow",
@@ -3534,14 +3530,18 @@
     {
       "id": "pigeon",
       "name": "Pigeon",
-      "status": "planned",
-      "rarity": "",
-      "tags": [],
-      "base_strength": null,
-      "text": "",
-      "keywords": [],
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Bird"
+      ],
+      "base_strength": 5,
+      "text": "Flight.",
       "species": "Pigeon",
-      "habitat": "City"
+      "habitat": "City",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "sparrow",
@@ -3625,19 +3625,21 @@
       "text": "",
       "keywords": [],
       "species": "Leech",
-      "habitat": "Jungle"
+      "habitat": "River and Lake"
     },
     {
       "id": "hammerhead",
       "name": "Hammerhead",
-      "status": "planned",
-      "rarity": "",
-      "tags": [],
-      "base_strength": null,
-      "text": "",
-      "keywords": [],
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Fish"
+      ],
+      "base_strength": 4,
+      "text": "Roar: if an ally was removed this turn, remove an adjacent animal.",
       "species": "Hammerhead",
-      "habitat": "Open Ocean"
+      "habitat": "Open Ocean",
+      "keywords": []
     },
     {
       "id": "squid",
@@ -3672,7 +3674,7 @@
         "Colony"
       ],
       "base_strength": 1,
-      "text": "Roar: your animals on the board, in your hand and in your deck become strength 4.",
+      "text": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
       "species": "Bee",
       "habitat": "Meadow",
       "unnamed": true,
@@ -3697,7 +3699,7 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 0,
-      "text": "Wild. In 2 turns, remove this and the animal under it.",
+      "text": "Wild. In 2 turns, remove the animal underneath, then fly away.",
       "keywords": [
         "Wild"
       ]
@@ -3727,8 +3729,8 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 3,
-      "text": "Roar: draw 2 common Cats.",
+      "base_strength": 2,
+      "text": "Roar: if you control another Cat, play another Cat.",
       "species": "Ocelot",
       "habitat": "Jungle",
       "keywords": []
@@ -3746,18 +3748,6 @@
       "keywords": [
         "Stealth"
       ]
-    },
-    {
-      "id": "young_bee",
-      "name": "Young Bee",
-      "status": "token",
-      "rarity": "common",
-      "tags": [
-        "Colony"
-      ],
-      "base_strength": 1,
-      "keywords": [],
-      "text": ""
     },
     {
       "id": "young_ant",
@@ -3783,6 +3773,354 @@
       "text": "Can cover animals of any strength.",
       "species": "Hercules Beetle",
       "habitat": "Jungle",
+      "keywords": []
+    },
+    {
+      "id": "krill",
+      "name": "Krill",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Roar: draw a card. The next Titan you play this turn costs one action.",
+      "species": "Krill",
+      "habitat": "Open Ocean",
+      "keywords": []
+    },
+    {
+      "id": "dung_beetle_legend",
+      "name": "[DUNG BEETLE]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Beetle"
+      ],
+      "base_strength": 4,
+      "text": "Evolves at 10 food eaten by your Hungry animals.",
+      "species": "Dung Beetle",
+      "habitat": "Savanna",
+      "unnamed": true,
+      "related": [
+        "dung_beetle_legend_form2",
+        "dung_beetle_legend_form3",
+        "dung_beetle_legend_form4"
+      ],
+      "evolves": true,
+      "keywords": []
+    },
+    {
+      "id": "black_widow",
+      "name": "Black Widow",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Black Widow",
+      "habitat": "Desert"
+    },
+    {
+      "id": "krill_legend",
+      "name": "[KRILL]",
+      "status": "reserve",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Your Titans cost 10 food to play, but only 1 action.",
+      "species": "Krill",
+      "habitat": "Prehistoric",
+      "unnamed": true,
+      "keywords": []
+    },
+    {
+      "id": "dung_beetle_legend_form2",
+      "name": "[DUNG BEETLE]",
+      "status": "token",
+      "rarity": "legendary",
+      "tags": [
+        "Beetle"
+      ],
+      "base_strength": 4,
+      "text": "Roar: draw a card. Evolves at 25 food eaten by your Hungry animals.",
+      "stage": 2,
+      "keywords": []
+    },
+    {
+      "id": "dung_beetle_legend_form3",
+      "name": "[DUNG BEETLE]",
+      "status": "token",
+      "rarity": "legendary",
+      "tags": [
+        "Beetle"
+      ],
+      "base_strength": 4,
+      "text": "Roar: draw a card and remove an adjacent enemy. Evolves at 40 food your Hungry animals ate.",
+      "stage": 3,
+      "keywords": []
+    },
+    {
+      "id": "dung_beetle_legend_form4",
+      "name": "[DUNG BEETLE]",
+      "status": "token",
+      "rarity": "legendary",
+      "tags": [
+        "Beetle"
+      ],
+      "base_strength": 4,
+      "text": "Roar: draw a card, remove an adjacent enemy and play another animal.",
+      "stage": 4,
+      "keywords": []
+    },
+    {
+      "id": "mara",
+      "name": "Mara",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 4,
+      "text": "Roar: if you gained 10 or more food this turn, draw 2 cards.",
+      "species": "Mara",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "wolverine",
+      "name": "Wolverine",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Roar: remove an adjacent enemy with no other enemy next to it.",
+      "species": "Wolverine",
+      "habitat": "Forest",
+      "keywords": []
+    },
+    {
+      "id": "elephant_legend",
+      "name": "[ELEPHANT]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 9,
+      "text": "Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less.",
+      "species": "Elephant",
+      "habitat": "Savanna",
+      "keywords": [
+        "Hungry",
+        "Roam"
+      ],
+      "hungry": 6
+    },
+    {
+      "id": "rodent_legend",
+      "name": "[RODENT]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 3,
+      "text": "Roar: gain as much food as you gained this turn.",
+      "species": "Rodent",
+      "habitat": "Forest",
+      "keywords": []
+    },
+    {
+      "id": "sardine_legend",
+      "name": "[SARDINE]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Fish"
+      ],
+      "base_strength": 1,
+      "text": "[SARDINE] and your adjacent Fish count as 2 Fish.",
+      "species": "Sardine",
+      "habitat": "Open Ocean",
+      "keywords": []
+    },
+    {
+      "id": "deer_legend",
+      "name": "[DEER]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 3,
+      "text": "Flee. Roar: draw 2 animals with Flee. Whenever one of your animals flees, give it +2 strength.",
+      "species": "Deer",
+      "habitat": "Forest",
+      "keywords": [
+        "Flee"
+      ]
+    },
+    {
+      "id": "kitten",
+      "name": "Kitten",
+      "status": "token",
+      "rarity": "common",
+      "tags": [
+        "Cat"
+      ],
+      "base_strength": 1,
+      "text": "Roar: draw a common animal.",
+      "keywords": []
+    },
+    {
+      "id": "impala",
+      "name": "Impala",
+      "status": "collectible",
+      "rarity": "rare",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 2,
+      "text": "Flee. Roar: play a Baby Impala.",
+      "species": "Impala",
+      "habitat": "Savanna",
+      "related": [
+        "baby_impala"
+      ],
+      "keywords": [
+        "Flee"
+      ]
+    },
+    {
+      "id": "baby_impala",
+      "name": "Baby Impala",
+      "status": "token",
+      "rarity": "common",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 1,
+      "text": "Flee. Roar: if this is grazing, draw a card.",
+      "keywords": [
+        "Flee"
+      ]
+    },
+    {
+      "id": "rabbit",
+      "name": "Rabbit",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 3,
+      "text": "Roar: play a Bunny next to this.",
+      "species": "Rabbit",
+      "habitat": "Meadow",
+      "related": [
+        "bunny"
+      ],
+      "keywords": []
+    },
+    {
+      "id": "bunny",
+      "name": "Bunny",
+      "status": "token",
+      "rarity": "common",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 1,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "vole",
+      "name": "Vole",
+      "status": "collectible",
+      "rarity": "rare",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 2,
+      "text": "Roar: repeat the Roar of an adjacent Rodent.",
+      "species": "Vole",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "marmot",
+      "name": "Marmot",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 3,
+      "text": "Has +1 strength for each 10 food you have.",
+      "species": "Marmot",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "bison",
+      "name": "Bison",
+      "status": "collectible",
+      "rarity": "rare",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 7,
+      "text": "Can't be covered while grazing.",
+      "species": "Bison",
+      "habitat": "Forest",
+      "keywords": []
+    },
+    {
+      "id": "deer_legend_2",
+      "name": "[FAWN]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 2,
+      "text": "Flee. Roar: add a Young Stag to your hand.",
+      "species": "Deer",
+      "habitat": "Forest",
+      "keywords": [
+        "Flee"
+      ],
+      "related": [
+        "young_stag",
+        "great_stag"
+      ]
+    },
+    {
+      "id": "young_stag",
+      "name": "Young Stag",
+      "status": "token",
+      "rarity": "legendary",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 4,
+      "text": "Flee. Roar: add a Great Stag to your hand.",
+      "keywords": [
+        "Flee"
+      ],
+      "related": [
+        "great_stag"
+      ]
+    },
+    {
+      "id": "great_stag",
+      "name": "Great Stag",
+      "status": "token",
+      "rarity": "legendary",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 8,
+      "text": "Roar: return every adjacent enemy weaker than this to its owner's hand.",
       "keywords": []
     }
   ]

@@ -82,6 +82,11 @@ class RustBot(Bot):
             raise RuntimeError(f"the Rust bot chose {d}, not a legal action here")
         return action
 
+    def ranking(self, state: GameState, real: bool = False) -> list:
+        """An atomic bot's whole-turn ranking of `state` for the seat to act (bots/atomic_bot.py, in Rust): every whole
+        turn as {turn, open, board, levels, per_hand}, best first; `real` scores against the true hidden cards."""
+        return self.bot.ranking(engine_for(state).from_dict(state.to_dict()), real)
+
     def root_scores(self) -> list:
         """The last search's root candidates with their scores, as (action dict, score) pairs."""
         rs, _ = getattr(self, "_last_roots", (None, None))

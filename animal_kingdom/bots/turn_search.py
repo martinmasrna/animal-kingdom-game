@@ -29,7 +29,7 @@ from __future__ import annotations
 import math
 import random
 from collections import defaultdict
-from typing import Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 from ..engine import rules
 from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction, RoamAction
@@ -110,6 +110,7 @@ class TurnSearcher(Bot):
         # finishes the line without branching, bounding the shallow-but-bushy breadth blow-up.
         self.max_search_nodes = max_search_nodes
         self._search_nodes = 0
+        self.den_open = False   # RefereeBot's dial: keep every den opener (`_den_openers`) through the shortlists
         # One greedy policy plays every non-branching completion seat: my remaining own actions
         # in a budget-exhausted line, and (for RefereeBot) the sampled opponent reply. Being the
         # real GreedyBot, it carries the lethal-avoidance and fizzle logic with it - and the same
@@ -131,6 +132,11 @@ class TurnSearcher(Bot):
         # Without it, a card like "Roar: play another unit" is ranked by its half-played state
         # (one card spent, nothing gained yet) and cut before the search ever sees its payoff.
         self.quiesce = quiesce
+        # The position analyser's window into the search (web/analyse.py): when set, called with every continuation of
+        # my turn the planner scores, as (the actions from the turn's root, its score, whether the score includes the
+        # sampled reply). None in play; the search is the same either way.
+        self._observer: Optional[Callable[[tuple, float, bool], None]] = None
+        self._trace: list[Action] = []
 
     def choose(
         self,
@@ -269,9 +275,13 @@ class TurnSearcher(Bot):
                         extra = (self.weights.wasted_roar
                                  if _roar_fizzled(state, nxt, me, action) else 0.0)
                         next_group.append((nxt, penalty + extra))
+                    self._trace.append(action)
                     candidate_group = self._complete_own_turn(
                         next_group, me, guard=guard + 1)
                     score = self._score_candidate_group(candidate_group, me, compare)
+                    if self._observer is not None:
+                        self._observer(tuple(self._trace), score, compare)
+                    self._trace.pop()
                     if score > best_score:
                         best_score = score
                         best_action = action
@@ -578,6 +588,8 @@ class TurnSearcher(Bot):
             for group in (connected, home_front, covers, live):
                 if group:
                     reserved.add(max(group, key=lambda a: score_of[a]))
+        if self.den_open:
+            reserved.update(self._den_openers(world, legal, me))
 
         kept = set(reserved)
         for _, _, action in scored:
@@ -587,6 +599,26 @@ class TurnSearcher(Bot):
             if len(kept) >= max(self.beam_width, len(reserved)):
                 break
         return [a for a in legal if a in kept]
+
+    def _den_openers(self, world: GameState, legal: Sequence[Action], me: str) -> list[Action]:
+        """The placements after which my den capture is legal (its Roar settled by the fast policy): the first half of
+        a two-action win, whose one-move score looks ordinary (Martin's 2TZBCA, 2026-10-29: a Tiger onto the
+        Wildebeest guarding his den, then a Kitten in, never reached the search)."""
+        openers = []
+        for action in legal:
+            if not isinstance(action, (PlaceAction, RoamAction)) or action.is_hq_capture:
+                continue
+            nxt = world.clone()
+            rules.apply_action(nxt, action, validate=False)
+            if self._capture_next(nxt, me):
+                openers.append(action)
+        return openers
+
+    def _capture_next(self, state: GameState, me: str) -> bool:
+        """Whether my den capture is legal once this position's pending choices are settled by the fast policy."""
+        s = self._settled(state, me)
+        return s.result is None and s.pending is None and s.player_to_act() == me and any(
+            isinstance(b, (PlaceAction, RoamAction)) and b.is_hq_capture for b in rules.legal_actions(s))
 
     def _is_collapsible_deck_reveal(self, world: GameState) -> bool:
         """A deck-reveal choice (Owl/Raven) whose options are re-sampled noise in lookahead.
@@ -612,13 +644,15 @@ class TurnSearcher(Bot):
         return [action for _, _, action in scored[:n]]
 
     def _safe_actions(self, world: GameState, legal: Sequence[Action], me: str) -> list[Action]:
-        """Hard-filter actions that leave an avoidable next-turn HQ capture."""
+        """Hard-filter actions that leave an avoidable next-turn HQ capture (with `den_open`, never one after which my
+        own capture is legal: I take their den first)."""
         safe = []
         opponent = other_player(me)
         for action in legal:
             nxt = world.clone()
             rules.apply_action(nxt, action, validate=False)
-            if nxt.result is not None or not _opponent_lethal_next_turn(nxt, opponent):
+            if nxt.result is not None or not _opponent_lethal_next_turn(nxt, opponent) \
+                    or (self.den_open and self._capture_next(nxt, me)):
                 safe.append(action)
         return safe or list(legal)
 

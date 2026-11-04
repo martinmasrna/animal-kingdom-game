@@ -28,6 +28,10 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d|reset] [--strip x,y,z|reset] [--full y|reset]   (all three reset: no painting)
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
     .venv/bin/python tools/cards/hq.py token MAKER ID NAME STR [--tags T,U]   a token MAKER's effect places
+    .venv/bin/python tools/cards/hq.py untoken MAKER ID              a token MAKER no longer makes (out of the game when nothing else makes it)
+    .venv/bin/python tools/cards/hq.py link MAKER ID                 an existing card MAKER's effect brings in, shown beside it when read
+    .venv/bin/python tools/cards/hq.py related MAKER ID,ID           the cards shown beside MAKER, set exactly (no repeats)
+    .venv/bin/python tools/cards/hq.py stage MAKER ID TEXT            the next form MAKER evolves into (its rarity, name, strength, tags)
 
 A planned card becomes a card (in the reserve) once it has a rarity and a strength. Every edit is checked against the
 engine's card rules before it is written. This is the only way cards change: the workspace's hook
@@ -57,7 +61,9 @@ PY = Path(sys.executable)   # the venv this runs in (bin/ on Unix, Scripts/ on W
 COLUMNS = ["habitat", "rarity", "animal", "tag", "strength", "effect", "art", "crop"]
 VALUE_COLS = ["habitat", "rarity", "animal", "tag", "strength", "effect"]
 LEVELS_ORDER = ["empty", "draft", "problem", "fine", "locked"]
-HABITATS = ["Savanna", "Jungle", "Forest", "Meadow", "City", "Open Ocean", "Polar", "Desert", "Mountains", "Australia", "Ice Age"]
+HABITATS = ["Savanna", "Jungle", "Forest", "Meadow", "City", "Open Ocean",          # the launch six; the rest: docs/design/habitats.md
+            "Deep Ocean", "Coral Reef", "Coast", "River and Lake", "Australia", "Islands", "Mountains", "Polar", "Desert",
+            "Prehistoric", "Ice Age"]
 RARITY = {"L": "legendary", "R": "rare", "C": "common"}
 LETTER = {v: k for k, v in RARITY.items()}
 COPIES = {"legendary": 1, "rare": 2, "common": 3}     # the 4-4-6 copy limits: a starter holds each card at its limit
@@ -304,7 +310,7 @@ def _apply_value(r: dict, col: str, value) -> None:
     _save_cards(cards)
 
 
-TOKEN_COLS = ("strength", "effect")      # what a token's card says; where it sits stays its maker's business
+TOKEN_COLS = ("strength", "effect", "rarity")   # what a token's card says, and its frame (a legendary's stages wear its gold); where it sits stays its maker's business
 
 
 def set_value(card_id: str, col: str, value, by: str = "martin", note: str | None = None) -> str:
@@ -454,6 +460,73 @@ def add_token(maker: str, cid: str, name: str, strength: int, tags: list[str]) -
     return f"{cid}: a token of {maker}"
 
 
+def untoken(maker: str, cid: str, by: str = "martin") -> str:
+    """A token its maker no longer makes (the Queen Bee's Young Bee after her text changed, Martin 2026-10-31): out of
+    the maker's related cards, and out of the game when no other card makes it."""
+    cards = _read(CARDS)
+    m = _rec(cards, _row(maker)["id"])
+    if cid not in m.get("related", []):
+        raise Refused(f"{cid} is not a token of {maker}")
+    m["related"] = [k for k in m["related"] if k != cid]
+    _save_cards(cards)
+    if any(cid in c.get("related", []) for c in cards["cards"]):
+        return f"{cid}: no longer a token of {maker}"
+    cards["cards"] = [c for c in cards["cards"] if c["id"] != cid]
+    _save_cards(cards)
+    levels = _levels()
+    levels.pop(cid, None)
+    _write(LEVELS, levels)
+    return f"{cid}: no longer a token of {maker}; nothing else makes it, so it is out of the game"
+
+
+def link(maker: str, cid: str) -> str:
+    """An existing card MAKER's effect brings in (the Queen Bee's Worker, Soldier and Nurse Bees), shown beside it when read
+    large, as a token is (Martin, 2026-10-31)."""
+    cards = _read(CARDS)
+    m = _rec(cards, _row(maker)["id"])
+    if not any(c["id"] == cid for c in cards["cards"]):
+        raise Refused(f"no card {cid}")
+    if cid in m.get("related", []):
+        return f"{cid} is already shown beside {maker}"
+    m["related"] = [*m.get("related", []), cid]
+    _save_cards(cards)
+    return f"{cid}: shown beside {maker}"
+
+
+def set_related(maker: str, ids: list[str]) -> str:
+    """The cards shown beside MAKER when read large, set exactly (no repeats, every id a card): what its effect makes,
+    brings or becomes (Martin, 2026-10-31: the Queen Ant showed her Young Ant twice)."""
+    cards = _read(CARDS)
+    m = _rec(cards, _row(maker)["id"])
+    seen = []
+    for cid in ids:
+        if not any(c["id"] == cid for c in cards["cards"]):
+            raise Refused(f"no card {cid}")
+        if cid not in seen:
+            seen.append(cid)
+    m["related"] = seen
+    if not seen:
+        m.pop("related", None)
+    _save_cards(cards)
+    return f"{maker}: shown with {', '.join(seen) or 'nothing'}"
+
+
+def add_stage(maker: str, cid: str, text: str) -> str:
+    """The next form an evolving card becomes, shown after its earlier forms (the legendary Butterfly's stages): the
+    maker's rarity, name, strength and tags, its own text."""
+    cards = _read(CARDS)
+    if any(c["id"] == cid for c in cards["cards"]):
+        raise Refused(f"{cid} already exists")
+    m = _rec(cards, _row(maker)["id"])
+    rec = {"id": cid, "name": m["name"], "status": "token", "rarity": m["rarity"], "tags": list(m.get("tags", [])),
+           "base_strength": m["base_strength"], "keywords": [], "text": text, "stage": len(m.get("related", [])) + 2}
+    validate_card_record(rec)
+    cards["cards"].append(rec)
+    m["related"], m["evolves"] = [*m.get("related", []), cid], True
+    _save_cards(cards)
+    return f"{cid}: form {rec['stage']} of {maker}"
+
+
 def deck_name(deck: str, name: str) -> str:
     """Rename a starter deck (the name players see). A player's saved copy keeps the name it was saved with."""
     decklists = _read(DECKLISTS)
@@ -482,9 +555,8 @@ def _set_status(card_id: str, frm: str, to: str, note: str, by: str) -> str:
 
 
 def shelve(card_id: str, by: str = "martin") -> str:
-    """Take a card in no starter deck out of the collection, into the reserve (kept, not collectible)."""
-    if _row(card_id)["deck"] != POOL:
-        raise Refused(f"{card_id} is in a starter deck; move it to {POOL} first")
+    """Take a card out of the collection, into the reserve (kept, not collectible); it leaves its starter deck too."""
+    move(card_id, POOL, by)
     return _set_status(card_id, "collectible", "reserve", "out of the collection (in the reserve)", by)
 
 
@@ -519,8 +591,13 @@ def rename(old: str, new: str) -> str:
         raise Refused(f"{new} is taken or not an id")
     # the id as a word, or leading a code name built on it (_goose_legend_roar, goose_legend_eggs), but never another card's id (eon_food_engine)
     word = re.compile(rf"(?<![A-Za-z0-9_])(_?){re.escape(old)}(?=(_[a-z0-9_]+)?(?![A-Za-z0-9_]))")
+    # only where it's plainly an id: quoted ("rodent", `rodent`) or in a code name; a bare word is prose (a rodent), left alone
+    def is_id(m: re.Match) -> bool:
+        s, i, j = m.string, m.start(), m.end(2) if m.group(2) else m.end()
+        return bool(m.group(1) or m.group(2)) or (i > 0 and j < len(s) and s[i - 1] in "\"'`" and s[j] in "\"'`")
     def sub(text: str) -> str:
-        return word.sub(lambda m: m.group(0) if m.group(2) and old + m.group(2) in ids else m.group(1) + new, text)
+        return word.sub(lambda m: m.group(0) if not is_id(m) or (m.group(2) and old + m.group(2) in ids)
+                        else m.group(1) + new, text)
     changed = 0
     for f in _git_files(ROOT):
         p = ROOT / f
@@ -585,7 +662,11 @@ def main(argv=None) -> None:
     s = sub.add_parser("delete"); s.add_argument("id")
     s = sub.add_parser("rename"); s.add_argument("old"); s.add_argument("new")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
+    s = sub.add_parser("stage"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("text")
     s = sub.add_parser("token"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("name"); s.add_argument("strength", type=int); s.add_argument("--tags", default="")
+    s = sub.add_parser("untoken"); s.add_argument("maker"); s.add_argument("id")
+    s = sub.add_parser("link"); s.add_argument("maker"); s.add_argument("id")
+    s = sub.add_parser("related"); s.add_argument("maker"); s.add_argument("ids", help="comma-separated card ids, in the order they come; empty for none")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
     try:
@@ -616,8 +697,16 @@ def main(argv=None) -> None:
             print(rename(a.old, a.new))
         elif a.cmd == "add":
             print(add(a.name, a.habitat, a.species))
+        elif a.cmd == "stage":
+            print(add_stage(a.maker, a.id, a.text))
         elif a.cmd == "token":
             print(add_token(a.maker, a.id, a.name, a.strength, [t for t in a.tags.split(",") if t]))
+        elif a.cmd == "untoken":
+            print(untoken(a.maker, a.id, "claude"))
+        elif a.cmd == "link":
+            print(link(a.maker, a.id))
+        elif a.cmd == "related":
+            print(set_related(a.maker, [x for x in a.ids.split(",") if x]))
         elif a.cmd == "crop":
             nums = lambda v: "reset" if v == "reset" else [float(x) for x in v.split(",")] if v else None
             full = None if a.full is None else "reset" if a.full == "reset" else float(a.full)

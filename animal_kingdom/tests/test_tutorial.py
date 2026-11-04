@@ -60,7 +60,7 @@ def _adj(cr):
 
 
 def eagle_at(m):
-    return next(cr for cr, st in m.state.board.items() if st and st[-1].owner == "A" and st[-1].card_id == "eagle")
+    return next(cr for cr, st in m.state.board.items() if st and st[-1].owner == "A" and st[-1].card_id == "pigeon")
 
 
 def _lesson2() -> Match:
@@ -96,8 +96,8 @@ def test_lesson_1_guided_to_regions_always_ends_on_100_food():
 
 
 def test_lesson_2_can_always_be_finished_wherever_the_player_puts_its_animals():
-    """From the set-up board: the Lynx anywhere legal; the Eagle, Squirrel and Black Mamba where the lesson rings them (the same
-    rules as static/tutorial.js); the opponent's Eagle covers the Squirrel, the Mamba frees it, the Polar Bear breaks the
+    """From the set-up board: the Lynx anywhere legal; the Pigeon, Squirrel and Black Mamba where the lesson rings them (the same
+    rules as static/tutorial.js); the opponent's Pigeon covers the Squirrel, the Mamba frees it, the Polar Bear breaks the
     wall, the den falls."""
     adj = lambda cr: {f"{c},{r}" for c, r in ((int(cr[0]) - 1, int(cr[2])), (int(cr[0]) + 1, int(cr[2])),
                                               (int(cr[0]), int(cr[2]) - 1), (int(cr[0]), int(cr[2]) + 1)) if 1 <= c <= 5 and 1 <= r <= 3}
@@ -122,21 +122,21 @@ def test_lesson_2_can_always_be_finished_wherever_the_player_puts_its_animals():
 
         place = lambda card, crs: a(PlaceAction(card, ("cr", rng.choice(crs))))
         assert [u.card_id for u in m.state.hands["A"]] == ["tutorial_lynx"] and own("1,2") == "A" and own("5,2") == "B", "the set-up board"
-        place("tutorial_lynx", empty("tutorial_lynx"))   # its Roar draws the Eagle
-        reach = set(x.crossroad for x in legal() if isinstance(x, PlaceAction) and not x.is_hq_capture and x.card_id != "eagle") | {
+        place("tutorial_lynx", empty("tutorial_lynx"))   # its Roar draws the Pigeon
+        reach = set(x.crossroad for x in legal() if isinstance(x, PlaceAction) and not x.is_hq_capture and x.card_id != "pigeon") | {
             n for cr in m.state.board if own(cr) == "A" for n in adj(cr) if not m.state.board.get(n)} | {"1,1", "1,3"} - set(m.state.board)
-        unreached = [cr for cr in empty("eagle") if cr not in reach]
+        unreached = [cr for cr in empty("pigeon") if cr not in reach]
         alone = [cr for cr in unreached if not any(n in reach or own(n) == "A" for n in adj(cr))]
-        place("eagle", alone or unreached or empty("eagle"))
-        eagle = next(cr for cr in m.state.board if own(cr) == "A" and m.state.board[cr][-1].card_id == "eagle")
+        place("pigeon", alone or unreached or empty("pigeon"))
+        eagle = next(cr for cr in m.state.board if own(cr) == "A" and m.state.board[cr][-1].card_id == "pigeon")
         their_turn()
         a(DrawAction())
         safe = [cr for cr in empty("squirrel") if any(not own(n) and (n[0] == "1" or any(q != cr and q != eagle and own(q) == "A" for q in adj(n)))
                                                      for n in adj(cr))]
         place("squirrel", safe or empty("squirrel")); moves = their_turn()
-        assert [type(x).__name__ for x in moves][:2] == ["DrawAction", "PlaceAction"] and moves[1].card_id == "eagle", (seed, "it draws, then the Eagle's cover ends its turn", moves)
+        assert [type(x).__name__ for x in moves][:2] == ["DrawAction", "PlaceAction"] and moves[1].card_id == "pigeon", (seed, "it draws, then the Pigeon's cover ends its turn", moves)
         sq = next(cr for cr, st in m.state.board.items() if any(u.card_id == "squirrel" and u.owner == "A" for u in st))
-        assert own(sq) == "B", (seed, "the Eagle covers the Squirrel")
+        assert own(sq) == "B", (seed, "the Pigeon covers the Squirrel")
         beside = [x.crossroad for x in legal() if isinstance(x, PlaceAction) and x.card_id == "black_mamba" and x.crossroad in adj(sq)]
         rescue = [cr for cr in beside if not own(cr)] or [cr for cr in beside if own(cr) == "A"]   # else on top of your own
         assert rescue, (seed, "a crossroad for the Black Mamba beside the Squirrel")

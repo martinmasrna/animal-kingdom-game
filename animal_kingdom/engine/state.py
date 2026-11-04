@@ -38,6 +38,9 @@ from .cards import Card, load_cards
 from .config import Config
 from .maps import GameMap, load_map
 
+# The legendary Dung Beetle's forms, in order: each evolves at the next food count its owner's Hungry animals ate.
+EATEN_FORMS = ("dung_beetle_legend", "dung_beetle_legend_form2", "dung_beetle_legend_form3", "dung_beetle_legend_form4")
+
 
 class EngineError(Exception):
     """Raised on an illegal engine operation (bad action, unsupported state)."""
@@ -62,31 +65,32 @@ class UnitInstance:
     """
 
     __slots__ = ("card_id", "owner", "iid", "placed_on_turn", "strength_counter", "locked_until_turn",
-                 "retaliation_used", "play_seq")
+                 "retaliation_used", "play_seq", "granted_roam")
 
     def __init__(self, card_id: str, owner: str, iid: int, placed_on_turn: int = 0,
                  strength_counter: int = 0, locked_until_turn: int = 0, retaliation_used: bool = False,
-                 play_seq: int = 0):
+                 play_seq: int = 0, granted_roam: bool = False):
         self.card_id = card_id
         self.owner = owner
         self.iid = iid
         self.placed_on_turn = placed_on_turn  # turn_counter at placement (Egg timing); 0 in hand
         self.strength_counter = strength_counter  # stored "give +X" buffs (signed); travels hand->board
         self.locked_until_turn = locked_until_turn  # Skunk: unplayable from hand while turn < this
-        self.retaliation_used = retaliation_used  # Gale: "first time covered" fires once per instance
+        self.retaliation_used = retaliation_used  # the once-per-piece charge: Spikes (first enemy that covers this) and the Wild Boar (first enemy placed next to this)
         self.play_seq = play_seq  # when it entered the board, game-wide (Dawn/Dusk resolve in play order); 0 in hand
+        self.granted_roam = granted_roam  # Coyote: "gains Roam" for as long as this instance stays on the board
 
     def to_dict(self) -> dict:
         return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid,
                 "placed_on_turn": self.placed_on_turn, "strength_counter": self.strength_counter,
                 "locked_until_turn": self.locked_until_turn, "retaliation_used": self.retaliation_used,
-                "play_seq": self.play_seq}
+                "play_seq": self.play_seq, "granted_roam": self.granted_roam}
 
     @staticmethod
     def from_dict(d: dict) -> "UnitInstance":
         return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("placed_on_turn", 0),
                             d.get("strength_counter", 0), d.get("locked_until_turn", 0),
-                            d.get("retaliation_used", False), d.get("play_seq", 0))
+                            d.get("retaliation_used", False), d.get("play_seq", 0), d.get("granted_roam", False))
 
     def __repr__(self) -> str:
         c = f", +{self.strength_counter}" if self.strength_counter else ""
@@ -96,7 +100,7 @@ class UnitInstance:
 def _copy_unit(u: UnitInstance) -> UnitInstance:
     """An independent copy of a unit instance (used by clone, now that instances mutate)."""
     return UnitInstance(u.card_id, u.owner, u.iid, u.placed_on_turn, u.strength_counter,
-                        u.locked_until_turn, u.retaliation_used, u.play_seq)
+                        u.locked_until_turn, u.retaliation_used, u.play_seq, u.granted_roam)
 
 
 def _plain_copy(v):
@@ -305,6 +309,7 @@ class GameState:
         pile_owners: Optional[list] = None,
         inked: Optional[set[int]] = None,
         roar_twice: Optional[dict[str, int]] = None,
+        hungry_eaten: Optional[dict[str, int]] = None,
         last_roar: Optional[dict[str, str]] = None,
         jelly: Optional[dict[str, dict[str, Any]]] = None,
     ):
@@ -325,6 +330,8 @@ class GameState:
         self.inked = inked if inked is not None else set()
         # Woodpecker: player -> the turn_counter in which that player's next Roar happens twice (spent by that Roar).
         self.roar_twice = roar_twice if roar_twice is not None else {}
+        # The legendary Dung Beetle: player -> food that player's Hungry animals have eaten this game.
+        self.hungry_eaten = hungry_eaten if hungry_eaten is not None else {}
         # The Macaw: player -> the card whose Roar that player played last (public; a Macaw's copy counts as the copied card).
         self.last_roar = last_roar if last_roar is not None else {}
         # The legendary Bee's royal jelly: player -> card id -> [how many deck copies it reached, the counter that made them
@@ -427,16 +434,31 @@ class GameState:
             self.jelly[player][card_id] = [left - 1, counter]
         return counter
 
+    def jelly_peek(self, player: str, card_id: str) -> int:
+        """The counter a copy of `card_id` would leave `player`'s deck with right now (jelly_take without spending it): what a
+        card scouted out of the deck is shown at (Martin, 2026-10-31: "Scouting with owl should display real-time strength")."""
+        val = self.jelly.get(player, {}).get(card_id, (0, 0))
+        left, counter = (val, self.jelly_counter(player, card_id)) if isinstance(val, int) else val
+        return counter if left else 0
+
     def jelly_counter(self, player: str, card_id: str) -> int:
-        """The stored counter that makes a copy of `card_id` strength `jelly_strength` now (its printed strength, a dynamic
-        one as 0, plus any growth its card id carries). Fixed at the Roar: growth after it adds on top, in the deck too."""
-        card = self.cards[card_id]
-        base = card.base_strength if isinstance(card.base_strength, int) else 0
-        return self.config.jelly_strength - base - self.card_strength_counters.get(player, {}).get(card_id, 0)
+        """The stored counter the royal jelly gives a copy of `card_id` left in the deck: +2, on top of any growth its card id
+        carries."""
+        return self.config.jelly_grant
+
+    def eaten_form(self, player: str, card_id: str) -> str:
+        """The legendary Dung Beetle's form reached ("Evolves when your Hungry animals have eaten N food"), by the food
+        `player`'s Hungry animals ate this game; any other card is itself."""
+        if card_id not in EATEN_FORMS:
+            return card_id
+        cfg, n = self.config, self.hungry_eaten.get(player, 0)
+        return EATEN_FORMS[sum(n >= at for at in (cfg.dung_beetle_legend_draw_at, cfg.dung_beetle_legend_food_at,
+                                                  cfg.dung_beetle_legend_play_at))]
 
     def deck_instance(self, player: str, card_id: str) -> "UnitInstance":
-        """An instance of a card just taken out of `player`'s deck, at the royal jelly's strength if it reached it."""
-        inst = UnitInstance(card_id, player, self.new_iid())
+        """An instance of a card just taken out of `player`'s deck, at the royal jelly's strength if it reached it, and in
+        the form it has evolved to there (the legendary Dung Beetle)."""
+        inst = UnitInstance(self.eaten_form(player, card_id), player, self.new_iid())
         counter = self.jelly_take(player, card_id)
         if counter is not None:
             inst.strength_counter = counter
@@ -545,6 +567,7 @@ class GameState:
         new.pile_owners = list(self.pile_owners)
         new.inked = set(self.inked)
         new.roar_twice = dict(self.roar_twice)
+        new.hungry_eaten = dict(self.hungry_eaten)
         new.last_roar = dict(self.last_roar)
         new.jelly = {p: dict(j) for p, j in self.jelly.items()}
         new.result = self.result  # Result is frozen/immutable - safe to share
@@ -611,6 +634,7 @@ class GameState:
             "pile_owners": list(self.pile_owners),
             "inked": sorted(self.inked),
             "roar_twice": dict(sorted(self.roar_twice.items())),
+            "hungry_eaten": dict(sorted(self.hungry_eaten.items())),
             "last_roar": dict(sorted(self.last_roar.items())),
             "jelly": {p: dict(sorted(j.items())) for p, j in sorted(self.jelly.items())},
         }
@@ -660,6 +684,7 @@ class GameState:
             pile_owners=list(d["pile_owners"]) if "pile_owners" in d else None,
             inked={int(i[0] if isinstance(i, list) else i) for i in (d.get("inked") or [])},   # [iid, until]: saved while ink wore off
             roar_twice=dict(d.get("roar_twice") or {}),
+            hungry_eaten=dict(d.get("hungry_eaten") or {}),
             last_roar=dict(d.get("last_roar") or {}),
             jelly={p: dict(j) for p, j in (d.get("jelly") or {}).items()},
         )

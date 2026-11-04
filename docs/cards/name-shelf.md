@@ -1,6 +1,6 @@
 # Name shelf
 
-Names that would suit a legendary one day and have no card yet. The second shelf beside the cards ([`card-candidates.md`](card-candidates.md), [`shelved-cards.md`](shelved-cards.md)): reach for it when a card needs a name, or let a name and a card find each other. Martin writes on it (the sheet at https://claude.ai/artifact/4BC1u4Nh2qj7UAy3UNF5wd is his input; this file is the record, pulled from it), Claude adds only the clash and pronunciation notes and names Martin reserved during a naming round. A shape with a blank ([XYZ]) is a pattern waiting for its animal. Slovak entries stay Slovak until a card wants them. One line per name, no ranking.
+Names that would suit a legendary one day and have no card yet. The second shelf beside the cards ([`ideas.md`](ideas.md), [`shelved-cards.md`](shelved-cards.md)): reach for it when a card needs a name, or let a name and a card find each other. Martin writes on it (the sheet at https://claude.ai/artifact/4BC1u4Nh2qj7UAy3UNF5wd is his input; this file is the record, pulled from it), Claude adds only the clash and pronunciation notes and names Martin reserved during a naming round. A shape with a blank ([XYZ]) is a pattern waiting for its animal. Slovak entries stay Slovak until a card wants them. One line per name, no ranking.
 
 ## Martin's braindump, 2026-10-16
 

@@ -1,12 +1,11 @@
 {
- "_comment": "The decks the game ships, as lists over cards.json: a starter deck (starter: true) is what a new profile gets; a bot deck (bot: true) is what the bots play, ranked and in Practice's Random (a starter may be both). Starter decks share no card, so a new player meets as many cards as possible; bot decks may overlap with anything (Martin, 2026-10-19). Each deck: slug, name, cover (the card whose art faces it), order (the menus), cards (id: copies; a legal 4-4-6 list of collectible cards). Edited here by hand, or a starter's through tools/cards/hq.py (move, deck-name).",
+ "_comment": "The decks the game ships, as lists over cards.json: a starter deck (starter: true) is what a new profile gets, none while the cards change (Martin, 2026-10-29: back once they settle); a bot deck (bot: true) is what the bots play, ranked and in Practice's Random (a starter may be both). Starter decks share no card, so a new player meets as many cards as possible; bot decks may overlap with anything (Martin, 2026-10-19). Each deck: slug, name, cover (the card whose art faces it), order (the menus), cards (id: copies; a legal 4-4-6 list of collectible cards). Edited here by hand, or a starter's through tools/cards/hq.py (move, deck-name).",
  "decks": [
   {
    "slug": "colony",
    "name": "Colony",
    "order": 0,
    "cover": "bee_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "army_ant_legend": 1,
@@ -14,10 +13,10 @@
     "bee_legend": 1,
     "bumblebee_legend": 1,
     "nurse_bee": 2,
-    "nurse_bumblebee": 2,
+    "nurse_bumblebee": 3,
     "termite_king": 2,
     "termite_queen": 2,
-    "queen_bee": 3,
+    "queen_bee": 2,
     "guard_wasp": 3,
     "soldier_ant": 3,
     "worker_ant": 3,
@@ -30,13 +29,11 @@
    "name": "Circle of Life",
    "order": 1,
    "cover": "pheasant_legend",
-   "starter": true,
    "bot": false,
    "cards": {
     "pheasant_legend": 1,
     "praying_mantis": 3,
     "raccoon": 2,
-    "piranha": 3,
     "vulture": 3,
     "city_spider": 3,
     "earthworm": 2,
@@ -46,7 +43,8 @@
     "cockroach_legend": 1,
     "python": 3,
     "rat_legend_2": 1,
-    "dart_frog": 2
+    "dart_frog": 2,
+    "hammerhead": 3
    }
   },
   {
@@ -54,23 +52,22 @@
    "name": "Roaming Pack",
    "order": 2,
    "cover": "wolf_legend_2",
-   "starter": true,
    "bot": true,
    "cards": {
     "leopard_legend": 1,
     "wolf_legend_3": 1,
     "wolf_legend_2": 1,
-    "wolf_legend": 1,
+    "elephant_legend": 1,
     "orca": 2,
-    "fox": 2,
-    "jackal": 2,
+    "african_wild_dog": 3,
+    "coyote": 2,
     "dhole": 2,
     "wolf": 3,
-    "bush_dog": 3,
-    "coyote": 3,
-    "african_wild_dog": 3,
+    "jackal": 2,
+    "street_dog": 3,
     "badger": 3,
-    "street_dog": 3
+    "fox": 3,
+    "wolverine": 3
    }
   },
   {
@@ -78,7 +75,6 @@
    "name": "Den Rush",
    "order": 3,
    "cover": "fox_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "skunk_legend": 1,
@@ -102,7 +98,6 @@
    "name": "Cats",
    "order": 4,
    "cover": "lion_legend_3",
-   "starter": true,
    "bot": true,
    "cards": {
     "lion_legend": 1,
@@ -126,23 +121,20 @@
    "name": "Fish",
    "order": 5,
    "cover": "tuna_legend",
-   "starter": true,
    "bot": true,
    "cards": {
-    "jellyfish_legend": 1,
     "tuna_legend": 1,
     "manta_ray_legend": 1,
-    "piranha_legend": 1,
     "swordfish": 2,
     "barracuda": 3,
     "manta_ray": 2,
-    "remora": 3,
+    "remora": 2,
     "cod": 3,
     "sardine": 3,
     "mahi_mahi": 3,
     "tuna": 3,
     "sunfish": 3,
-    "great_white_shark": 1
+    "great_white_shark": 2
    }
   },
   {
@@ -150,7 +142,6 @@
    "name": "Rodents",
    "order": 6,
    "cover": "rat_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "capybara_legend": 1,
@@ -163,10 +154,10 @@
     "squirrel": 3,
     "chipmunk": 3,
     "gopher": 3,
-    "muskrat": 3,
-    "groundhog": 3,
+    "groundhog": 2,
     "hamster": 3,
-    "woodpecker": 2
+    "woodpecker": 2,
+    "mara": 3
    }
   },
   {
@@ -174,7 +165,6 @@
    "name": "Untouchables",
    "order": 7,
    "cover": "octopus_legend_2",
-   "starter": true,
    "bot": false,
    "cards": {
     "octopus_legend_2": 1,
@@ -185,12 +175,12 @@
     "golden_orb_weaver": 2,
     "armadillo": 2,
     "hedgehog": 3,
-    "jellyfish": 3,
     "black_bear": 3,
     "tortoise": 3,
     "toad": 3,
     "stag_beetle": 3,
-    "meerkat": 2
+    "meerkat": 2,
+    "stick_insect": 3
    }
   },
   {
@@ -198,14 +188,11 @@
    "name": "Birds & Snakes",
    "order": 8,
    "cover": "anaconda_legend",
-   "starter": true,
    "bot": false,
    "cards": {
     "anaconda_legend": 1,
     "raven_legend": 1,
-    "swan_legend": 1,
     "hawk": 2,
-    "cottonmouth": 2,
     "magpie": 2,
     "black_mamba": 2,
     "egg_eater": 3,
@@ -214,7 +201,9 @@
     "bird_egg": 3,
     "snake_egg": 3,
     "viper": 3,
-    "goose_legend": 1
+    "cuckoo_legend": 1,
+    "cuckoo": 2,
+    "bat_legend": 1
    }
   },
   {
@@ -222,7 +211,6 @@
    "name": "Primates",
    "order": 9,
    "cover": "gorilla_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "baboon_legend": 1,
@@ -246,7 +234,6 @@
    "name": "Giants",
    "order": 10,
    "cover": "rhinoceros_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "rhinoceros_legend": 1,
@@ -257,12 +244,12 @@
     "hippopotamus": 2,
     "whale_shark": 2,
     "oxpecker": 3,
-    "anteater": 3,
     "dung_beetle": 3,
     "blue_whale": 3,
     "sloth": 3,
     "elephant": 3,
-    "moose": 2
+    "moose": 2,
+    "krill": 3
    }
   },
   {
@@ -270,14 +257,13 @@
    "name": "Hoofed",
    "order": 11,
    "cover": "giraffe_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "wildebeest_legend": 1,
-    "boar_legend": 1,
+    "deer_legend": 1,
     "zebra_legend": 1,
     "giraffe_legend": 1,
-    "honey_badger": 2,
+    "impala": 2,
     "okapi": 2,
     "zebra": 3,
     "giraffe": 3,
@@ -425,7 +411,7 @@
     "porcupine": 2,
     "rhinoceros": 2,
     "queen_ant": 2,
-    "anteater": 3,
+    "oxpecker": 3,
     "badger": 3,
     "deer": 3,
     "dolphin": 3,

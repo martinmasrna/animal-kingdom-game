@@ -34,7 +34,7 @@ from dataclasses import asdict, dataclass
 from typing import Optional, Sequence
 
 from ..bots.greedy_bot import GreedyWeights
-from ..decks import BOT_DECKS, PANEL_OPPONENTS, PREMADE_DECKS
+from ..decks import BOT_DECKS, EXTRA_DECKS, PANEL_OPPONENTS, PREMADE_DECKS
 from ..engine.config import Config, load_config_overrides
 from . import metrics
 
@@ -550,8 +550,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         decks = sorted(SHIPPED_DECKS) if args.decks.strip().lower() == "all" else [d.strip().lower() for d in args.decks.split(",") if d.strip()]
     if args.deck is not None:
         decks = [args.deck.strip().lower()]
-    if bad := [d for d in decks if d not in SHIPPED_DECKS]:
-        raise SystemExit(f"decks {bad} not in {sorted(SHIPPED_DECKS)}")
+    if bad := [d for d in decks if d not in SHIPPED_DECKS and d not in EXTRA_DECKS]:   # a registered deck (AK_EXTRA_DECKS) plays too
+        raise SystemExit(f"decks {bad} not in {sorted(SHIPPED_DECKS)} or the registered decks {sorted(EXTRA_DECKS)}")
     full = args.opponents is not None and args.opponents.strip().lower() == "all"
 
     total = len(decks)

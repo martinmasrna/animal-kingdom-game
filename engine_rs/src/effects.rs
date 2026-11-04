@@ -412,6 +412,14 @@ fn fire_cover_event(st: &mut State, coverer: &Unit, covered: &Unit) {
     if st.g.has_hook(coverer.card, Hook::OnCoverEnemy) {
         cards::run(st, coverer.card, None, Hook::OnCoverEnemy, coverer, &Args::Cover(covered.clone()));
     }
+    // The legendary Oxpecker: "Whenever your animal of strength 8 or more covers an enemy, play an Oxpecker." As in Python.
+    if coverer.owner <= B && effective_strength(st, coverer, None) >= st.cfg().int("oxpecker_legend_min") {
+        let bird = st.card_id("oxpecker_legend");
+        for (_, iid) in statics::active_tops(st, coverer.owner, bird) {
+            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(coverer.owner), "card_id" => Value::s("oxpecker"),
+                "make" => Value::Bool(true), "by_card" => Value::s("oxpecker_legend"), "by_iid" => Value::Int(iid)));
+        }
+    }
 }
 
 // King Theron, pushed before everything else the cover sets off so it resolves last (effects.py `_push_theron`).
@@ -437,13 +445,33 @@ fn push_flee(st: &mut State, covered: &Unit, coverer: &Unit, cr: Cr) {
     }
 }
 
+/// The fleer is back in hand (with its stored strength), then the reactions: the player's other top animals'
+/// "whenever one of your animals flees" (the legendary Deer), and the fleer's own "when this flees" (the Zebra's kick,
+/// the legendary Deer growing itself). Hooks get the hand instance, the one that goes on existing (effects.py _op_flee).
 fn op_flee(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iid = m_get_i(step, "iid").unwrap();
     let Some((cr, pos)) = st.find_unit(iid) else { return None };
     let unit = st.unit_at(cr, pos).clone();
-    bounce(st, cr, &unit, 0);
-    if st.g.has_hook(unit.card, Hook::OnFlee) {
-        cards::run(st, unit.card, None, Hook::OnFlee, &unit, &Args::Flee(m_get_i(step, "coverer").unwrap_or(-1)));
+    let Some(fled) = bounce(st, cr, &unit, 0) else { return None };
+    let tops: SmallVec<[Unit; 16]> = st.tops().filter(|(_, t)| t.owner == fled.owner).map(|(_, t)| *t).collect();
+    for top in tops {
+        if st.g.has_hook(top.card, Hook::OnFriendlyFlee) {
+            cards::run(st, top.card, None, Hook::OnFriendlyFlee, &top, &Args::FriendlyFlee(fled));
+        }
+    }
+    if st.g.has_hook(fled.card, Hook::OnFlee) {
+        cards::run(st, fled.card, None, Hook::OnFlee, &fled, &Args::Flee(m_get_i(step, "coverer").unwrap_or(-1)));
+    }
+    None
+}
+
+/// Zebra: "When this flees, return the enemy that covered it to its owner's hand." A return: Armor resists it.
+fn op_flee_return(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let iid = m_get_i(step, "iid").unwrap();
+    let Some((cr, pos)) = st.find_unit(iid) else { return None };
+    let unit = st.unit_at(cr, pos).clone();
+    if statics::can_be_removed(st, &unit, Some(cr), true) {
+        bounce(st, cr, &unit, 0);
     }
     None
 }
@@ -503,11 +531,28 @@ fn push_queen_guards(st: &mut State, owner: Player, coverer: &Unit, cr: Cr) {
 fn op_queen_guard(st: &mut State, step: &mut Map) -> Option<Pending> {
     let cid = step_card(st, step, "card").unwrap();
     let owner = step_player(st, step, "player");
-    let cr = step_cr(st, step, "cr").unwrap();
-    let coverer = m_get_i(step, "coverer").unwrap();
-    if !st.stack(cr).iter().any(|u| u.iid == coverer) {
-        return None;
+    // One event can cover several of the owner's Colony animals at once (the Locust swarm): the guard goes to the one
+    // played earliest, as Dawn and Dusk are ordered.
+    // the other calls stay queued (an op never shrinks the stack) and fizzle, the guard being gone from hand and deck
+    let mut calls: Vec<Map> = vec![step.clone()];
+    for s in &st.effect_stack {
+        if m_get_s(s, "op") == Some("queen_guard") && step_card(st, s, "card") == Some(cid) && step_player(st, s, "player") == owner {
+            calls.push(s.clone());
+        }
     }
+    let mut best: Option<(i64, &'static str, Cr)> = None;
+    for call in &calls {
+        let c = step_cr(st, call, "cr").unwrap();
+        let coverer = m_get_i(call, "coverer").unwrap();
+        if let Some(pos) = st.stack(c).iter().position(|u| u.iid == coverer) {
+            let seq = if pos > 0 { st.unit_at(c, pos - 1).play_seq as i64 } else { 1 << 30 };
+            let key = (seq, st.map().name(c), c);
+            if best.map_or(true, |b| (key.0, key.1) < (b.0, b.1)) {
+                best = Some(key);
+            }
+        }
+    }
+    let Some((_, _, cr)) = best else { return None };
     let p = owner as usize;
     let (inst, from_hand) = if let Some(pos) = st.hands[p].iter().position(|u| u.card == cid) {
         (st.hands[p].remove(pos), true)
@@ -537,7 +582,7 @@ pub fn remove_specific(st: &mut State, cr: Cr, iid: i64, by_player: Player, by_e
     st.turn_flags.removed_any = true;
     if let Some(py) = st.g.known.python {
         for p in [A, B] {
-            if owns_copy(st, p, py) {
+            if p != unit.owner && owns_copy(st, p, py) {
                 let g = st.cfg().int("python_growth");
                 *st.card_strength_counters[p as usize].entry(py).or_insert(0) += g;
             }
@@ -920,14 +965,16 @@ fn apex_can_land(st: &State, placer: &Unit, top: &Unit) -> bool {
 // ======================================================================== Roam
 
 pub fn legal_roams(st: &State, player: Player, free_only: bool) -> Vec<Action> {
-    if !st.tops().any(|(_, u)| u.owner == player && statics::can_roam(st, u)) {
+    // an animal that has Roam, or one an effect gave a roam this turn (the African Wild Dog's "It roams")
+    let may = |u: &Unit| statics::can_roam(st, u) || (statics::active(st, u) && st.turn_flags.free_roam_iid.iter().any(|(i, n)| *i == u.iid && *n != 0));
+    if !st.tops().any(|(_, u)| u.owner == player && may(u)) {
         return Vec::new();
     }
     let occ = st.connected_occupied(player);
     let mut out = Vec::new();
     for cr in st.sorted_occupied() {
         let unit = st.top(cr).unwrap();
-        if unit.owner != player || !statics::can_roam(st, unit) || st.turn_flags.roamed.contains(&unit.iid) {
+        if unit.owner != player || !may(unit) || st.turn_flags.roamed.contains(&unit.iid) {
             continue;
         }
         if free_only && free_roams_left(st, player, Some(unit)) == 0 {
@@ -1027,15 +1074,17 @@ pub fn pay_for_roam(st: &mut State, player: Player, unit: Option<&Unit>) {
     }
 }
 
-pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target) -> Result<(), String> {
+/// `by_effect`: a card's "It roams", which isn't the animal's one roam of the turn (Martin, 2026-10-28).
+pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target, by_effect: bool) -> Result<(), String> {
     let unit = match st.top(origin) {
         Some(u) if u.owner == player => u.clone(),
         _ => return Err(format!("{} has no animal on {:?} to roam", player_name(player), st.crname(origin))),
     };
-    if !st.turn_flags.roamed.contains(&unit.iid) {
+    if !by_effect && !st.turn_flags.roamed.contains(&unit.iid) {
         st.turn_flags.roamed.push(unit.iid);
     }
     st.turn_flags.roams[player.min(1) as usize] += 1;
+    st.turn_flags.any_roamed = true;       // the Fox's Roar asks
     match target {
         Target::Hq(den) => {
             crate::emit!(st, "roam", vmap!("player" => pn(player), "iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, origin), "to" => Value::Null, "den" => pn(*den)));
@@ -1091,6 +1140,27 @@ pub struct RoamEvent {
     pub to: Option<Cr>,
     pub covered: Option<i64>,
     pub onto_enemy: bool,
+}
+
+/// "It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
+/// Roam rules, the den included; its owner picks where. It isn't the animal's one roam of the turn.
+fn op_it_roams(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let iid = m_get_i(step, "iid").unwrap_or(-1);
+    let cr = statics::crossroad_of(st, iid)?;
+    let unit = st.top(cr).filter(|u| u.iid == iid).cloned()?;
+    if !statics::active(st, &unit) {
+        return None;
+    }
+    let occ = st.connected_occupied(unit.owner);
+    let options: Vec<Value> = roam_targets(st, &unit, cr, occ)
+        .into_iter()
+        .map(|t| match t {
+            Target::Cr(c) => cr_v(st, c),
+            Target::Hq(_) => Value::s("den"),
+        })
+        .collect();
+    push_choose(st, unit.owner, options, "roam_to", false, vmap!("iid" => Value::Int(iid)));
+    None
 }
 
 fn op_grant_free_roam(st: &mut State, step: &mut Map) -> Option<Pending> {
@@ -1208,6 +1278,13 @@ fn eat(st: &mut State, unit: &Unit, cr: Cr) {
     let eaten = if unit.owner <= B { n.min(st.food[unit.owner as usize]) } else { 0 };
     if eaten > 0 {
         lose_food(st, unit.owner, eaten, Some(unit.card));
+        st.hungry_eaten[unit.owner as usize] += eaten;
+        // the legendary Dung Beetle evolves in hand (in the deck, as it's drawn)
+        let evolving: Vec<(i64, CardId)> = st.hands[unit.owner as usize].iter()
+            .filter_map(|u| { let f = st.eaten_form(unit.owner, u.card); (f != u.card).then_some((u.iid, f)) }).collect();
+        for (iid, f) in evolving {
+            transform(st, iid, f);
+        }
     }
     if eaten < n {
         if let Some(u) = st.unit_by_iid_mut(unit.iid) {
@@ -1495,7 +1572,15 @@ fn op_play_named(st: &mut State, step: &mut Map) -> Option<Pending> {
         return None;
     }
     let allowed: Vec<CardId> = if st.hands[p].iter().any(|u| u.card == cid) { vec![cid] } else { vec![] };
-    let placements = legal_placements(st, player, Some(&allowed), false);
+    let mut placements = legal_placements(st, player, Some(&allowed), false);
+    if let Some(near) = m_get_s(step, "adjacent_to").and_then(|n| st.map().cr(n)) {
+        // Rabbit: "play a Bunny next to this": a neighbouring crossroad, or the den it fronts (Martin, 2026-10-30)
+        placements.retain(|p| match p {
+            Action::Place { target: Target::Cr(c), .. } => st.map().adjacent(near, *c),
+            Action::Place { target: Target::Hq(h), .. } => st.map().in_front(*h, near),
+            _ => false,
+        });
+    }
     if placements.is_empty() {
         return_if_fetched(st, step);
         return None;
@@ -1611,7 +1696,7 @@ pub fn adjacent_tops(st: &State, cr: Cr, owner: Option<Player>) -> Vec<(Cr, Unit
 }
 
 pub fn control_tag_count(st: &State, player: Player, tags: u32) -> i32 {
-    st.tops().filter(|(_, u)| u.owner == player && st.card(u.card).tags & tags == tags).count() as i32
+    st.tops().filter(|(_, u)| u.owner == player && st.card(u.card).tags & tags == tags).map(|(c, _)| statics::animal_worth(st, player, c)).sum()
 }
 
 pub fn grant(st: &mut State, iids: Vec<i64>, amount: i32) {
@@ -1672,17 +1757,21 @@ pub fn push_play_extra(st: &mut State, owner: Player, filter: Option<Map>, optio
 }
 
 /// Return a board unit to its owner's hand (no Remove Pile, no triggers).
-pub fn bounce(st: &mut State, cr: Cr, top: &Unit, lock_until: i32) {
+/// Return a board unit to its owner's hand (not a removal). The card keeps its stored strength, as through every other
+/// change of place (a fled animal the legendary Deer grew stays grown). Returns the hand instance; None for a Wild animal.
+pub fn bounce(st: &mut State, cr: Cr, top: &Unit, lock_until: i32) -> Option<Unit> {
     crate::emit!(st, "bounce", vmap!("cr" => cr_v(st, cr), "iid" => Value::Int(top.iid), "card" => card_v(st, top.card), "owner" => pn(top.owner)));
     st.take_unit(cr, top.iid);
     if top.owner == WILD {
-        return;
+        return None;
     }
-    let inst = gain_to_hand(st, top.owner, top.card, 0);
+    let inst = gain_to_hand(st, top.owner, top.card, top.strength_counter as i32);
     let p = top.owner as usize;
     if let Some(u) = st.hands[p].iter_mut().find(|u| u.iid == inst.iid) {
         u.locked_until_turn = lock_until as i16;
+        return Some(*u);
     }
+    Some(inst)
 }
 
 /// A token made on `cr` by an effect: it lands as a placement would, with nothing to Roar.
@@ -1709,22 +1798,6 @@ pub fn transform(st: &mut State, iid: i64, card: CardId) {
     crate::emit!(st, "transform", vmap!("iid" => Value::Int(iid), "owner" => pn(owner), "card" => card_v(st, card), "was" => card_v(st, was)));
 }
 
-fn op_forced_roam(st: &mut State, step: &mut Map) -> Option<Pending> {
-    let iid = m_get_i(step, "iid").unwrap();
-    let Some((cr, pos)) = st.find_unit(iid) else { return None };
-    if pos + 1 != st.stack(cr).len() || st.turn_flags.roamed.contains(&iid) {
-        return None;
-    }
-    let unit = st.unit_at(cr, pos).clone();
-    if statics::can_roam(st, &unit) {
-        match st.turn_flags.free_roam_iid.iter_mut().find(|(i, _)| *i == iid) {
-            Some(e) => e.1 = 1,
-            None => st.turn_flags.free_roam_iid.push((iid, 1)),
-        }
-    }
-    None
-}
-
 fn op_draw_to_match(st: &mut State, step: &mut Map) -> Option<Pending> {
     let player = step_player(st, step, "player");
     let n = st.hands[other(player) as usize].len() as i32 - st.hands[player as usize].len() as i32;
@@ -1747,6 +1820,36 @@ fn op_anteater(st: &mut State, step: &mut Map) -> Option<Pending> {
     None
 }
 
+/// Grimm: one pick from the opponent's Remove Pile, then the next with the options asked afresh. As in Python.
+fn op_steal_from_pile(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let player = step_player(st, step, "player");
+    let opp = crate::data::other(player);
+    let n = m_get_i(step, "n").unwrap_or(0);
+    let mut names: Vec<&'static str> = st.pile_cards_of(opp).iter().map(|c| st.cname(*c)).collect();
+    names.sort();
+    names.dedup();
+    if names.is_empty() || n <= 0 {
+        return None;
+    }
+    if n > 1 {
+        let mut next = step.clone();
+        next.insert("n", Value::Int(n - 1));
+        st.effect_stack.push(next);
+    }
+    push_choose(st, player, names.into_iter().map(Value::Str).collect(), "pile_to_hand", false, vmap!("from_owner" => pn(opp)));
+    None
+}
+
+fn op_oxpecker(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let player = step_player(st, step, "player");
+    draw_cards(st, player, 1);
+    let hand = st.hands[player as usize].clone();
+    if let Some(s) = hand.iter().map(|u| placement_strength(st, u)).max() {
+        gain_food(st, player, s, true, false);
+    }
+    None
+}
+
 fn op_locust_eat(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iid = m_get_i(step, "iid").unwrap();
     let Some((cr, pos)) = st.find_unit(iid) else { return None };
@@ -1755,9 +1858,12 @@ fn op_locust_eat(st: &mut State, step: &mut Map) -> Option<Pending> {
     }
     let by = step_player(st, step, "by_player");
     let locust = st.g.known.locust_swarm;
-    if remove_top(st, cr, by, true, locust) {
-        remove_top(st, cr, by, true, locust);
+    let me = st.unit_at(cr, pos).clone();   // the swarm itself: what it ate may have left Worms over it (the Earthworm's Fall)
+    if pos > 0 {
+        let under = st.unit_at(cr, pos - 1).iid;
+        remove_specific(st, cr, under, by, true, locust, false);
     }
+    bounce(st, cr, &me, 0);
     None
 }
 
@@ -1918,16 +2024,19 @@ fn run_op(st: &mut State, op: &str, step: &mut Map) -> Option<Pending> {
         "play_extra" => op_play_extra(st, step),
         "play_named" => op_play_named(st, step),
         "grant_strength" => op_grant_strength(st, step),
+        "it_roams" => op_it_roams(st, step),
         "grant_action" => op_grant_action(st, step),
         "cap_actions" => op_cap_actions(st, step),
         "grant_free_roam" => op_grant_free_roam(st, step),
         "timed_hook" => op_timed_hook(st, step),
         "flee" => op_flee(st, step),
+        "flee_return" => op_flee_return(st, step),
         "queen_guard" => op_queen_guard(st, step),
         "choose" => op_choose(st, step),
-        "forced_roam" => op_forced_roam(st, step),
         "draw_to_match" => op_draw_to_match(st, step),
         "anteater" => op_anteater(st, step),
+        "oxpecker" => op_oxpecker(st, step),
+        "steal_from_pile" => op_steal_from_pile(st, step),
         "locust_eat" => op_locust_eat(st, step),
         "discard_choice" => op_discard_choice(st, step),
         "hornet_kill" => op_hornet_kill(st, step),

@@ -131,6 +131,34 @@ impl PyState {
         self.st.to_json().to_string()
     }
 
+    /// The raw position from `player`'s side (bots.raw_position.extract), card ids as names, for the parity test.
+    fn raw_position(&self, py: Python<'_>, player: &str) -> PyResult<Py<PyAny>> {
+        let me = player_from(player);
+        let p = bots::raw::extract(&self.st, me);
+        let name = |c: Option<crate::data::CardId>| -> sj::Value { match c { Some(c) => sj::Value::from(self.st.g.cards.name_of(c)), None => sj::Value::Null } };
+        let mut bags = sj::Map::new();
+        for (i, b) in bots::raw::BAGS.iter().enumerate() {
+            bags.insert(b.to_string(), sj::Value::Array(p.bags[i].iter().map(|(c, w)| sj::json!([self.st.g.cards.name_of(*c), w])).collect()));
+        }
+        let d = sj::json!({
+            "cr_card": p.cr_card.iter().map(|l| sj::Value::Array(l.iter().map(|c| name(*c)).collect())).collect::<Vec<_>>(),
+            "cr_owner": p.cr_owner.iter().map(|l| sj::json!(l)).collect::<Vec<_>>(),
+            "top_num": p.top_num.iter().map(|l| sj::json!(l.to_vec())).collect::<Vec<_>>(),
+            "under_num": p.under_num.iter().map(|l| sj::json!(l.to_vec())).collect::<Vec<_>>(),
+            "bags": bags,
+            "globals": p.globals.to_vec(),
+        });
+        json_to_py(py, &d)
+    }
+
+    /// Both outputs of a raw-position network artifact (JSON) on this position from `player`'s side.
+    fn raw_heads(&self, player: &str, artifact_json: &str) -> PyResult<Vec<f64>> {
+        let d: sj::Value = sj::from_str(artifact_json).map_err(|e| err(e.to_string()))?;
+        let net = bots::raw::RawEval::from_json(&d).map_err(err)?;
+        let me = player_from(player);
+        Ok(net.heads(&bots::raw::extract(&self.st, me), &self.st.g.cards))
+    }
+
     fn legal_actions(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         let acts = rules::legal_actions(&self.st);
         let items: Vec<Py<PyAny>> = acts.iter().map(|a| json_to_py(py, &a.to_json(&self.st))).collect::<PyResult<_>>()?;
@@ -300,6 +328,28 @@ impl PyBot {
         Ok(PyList::new(py, items)?.into_any().unbind())
     }
 
+    /// The whole-turn search's ranking of `state` for the seat to act (an atomic bot; empty for any other): every whole
+    /// turn as {turn: [action dicts], open, board, levels: [score or None per depth], per_hand: [[score per hand] or None]},
+    /// best first. `real` scores against the true hidden cards instead of the imagined hands (one "hand": the position).
+    #[pyo3(signature = (state, real=false))]
+    fn ranking(&mut self, py: Python<'_>, state: &PyState, real: bool) -> PyResult<Py<PyAny>> {
+        let bots::Bot::Atomic(a) = &mut self.bot else { return json_to_py(py, &sj::json!([])) };
+        let me = state.st.player_to_act();
+        let st = &state.st;
+        let rows = py.detach(|| {
+            let (worlds, weights) = if real { (vec![st.clone()], vec![1.0]) } else { a.spread(st, me) };
+            a.rank(st, me, &worlds, &weights)
+        });
+        let out: Vec<sj::Value> = rows
+            .iter()
+            .map(|r| {
+                sj::json!({"turn": r.turn.iter().map(|x| x.to_json(st)).collect::<Vec<_>>(), "open": r.open, "board": r.board,
+                    "levels": r.levels, "per_hand": r.per_hand})
+            })
+            .collect();
+        json_to_py(py, &sj::Value::Array(out))
+    }
+
     fn stats(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         match self.bot.stats() {
             None => Ok(py.None()),
@@ -349,21 +399,24 @@ fn play_game(
     let mut xs: Vec<Vec<f64>> = Vec::new();
     let mut seats: Vec<Player> = Vec::new();
     let mut turns: Vec<i32> = Vec::new();
+    let mut values: Vec<Option<f64>> = Vec::new();   // the search's score of a turn-start position, in points
     let fs = features.clone();
     let log = py.detach(|| {
-        bots::play_out(&mut st, &mut bots, epsilon, &mut eps_rng, |s, actor, before| {
+        bots::play_out(&mut st, &mut bots, epsilon, &mut eps_rng, |s, actor, before, value| {
             let Some(fs) = &fs else { return };
             if before {
                 if s.pending.is_none() && s.actions_taken_this_turn == 0 && s.turn_counter > 0 {
                     xs.push(bots::features::extract(s, actor, fs));
                     seats.push(actor);
                     turns.push(s.turn_counter);
+                    values.push(value);
                 }
             } else {
                 let mut c = s.clone();
                 xs.push(bots::features::extract_as_scored(&mut c, actor, fs));
                 seats.push(actor);
                 turns.push(s.turn_counter);
+                values.push(None);
             }
         })
     });
@@ -381,7 +434,7 @@ fn play_game(
         "turns": st.turn_counter,
         "first_player": player_name(st.first_player),
         "actions": log,
-        "x": xs, "y": ys, "turn": turns, "seat": seats.iter().map(|s| player_name(*s)).collect::<Vec<_>>(),
+        "x": xs, "y": ys, "turn": turns, "seat": seats.iter().map(|s| player_name(*s)).collect::<Vec<_>>(), "value": values,
         "food": {"A": st.food[0], "B": st.food[1]},
         "events": if record_events { sj::Value::Array(st.events.iter().map(|m| value::Value::Map(m.clone()).to_json()).collect()) } else { sj::Value::Null },
     });

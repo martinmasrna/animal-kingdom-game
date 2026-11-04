@@ -248,6 +248,8 @@
 /* drawn cards slide in: yours from the deck, theirs down from the top edge */
 .game .hc.drawn { animation: drawcard .45s cubic-bezier(.3,.7,.4,1) backwards; }
 @keyframes drawcard { 0% { transform: translate(var(--fx), 30px) rotate(8deg) scale(.8); opacity: 0; } 30% { opacity: 1; } 100% { transform: none; } }
+.game .hc.made { animation: madecard .45s cubic-bezier(.3,.7,.4,1) backwards; }   /* a card an effect made: it rises into its place, no deck to come from */
+@keyframes madecard { 0% { transform: translateY(40px) scale(.8); opacity: 0; } 100% { transform: none; opacity: 1; } }
 .game .back.drawn { animation: drawback .45s cubic-bezier(.3,.7,.4,1) backwards; }
 @keyframes drawback { 0% { transform: translateY(-70px); opacity: 0; } 100% { transform: none; opacity: 1; } }
 /* a strength that changed pops once */

@@ -62,14 +62,14 @@ def _inked(state: GameState, iid: Optional[int]) -> bool:
 # Auras on the board that give your other animals of a family strength: card id -> (family, config attr of the
 # bonus, whether only during your opponent's turn). Each source counts, and none counts for itself.
 FAMILY_AURAS = {
-    "mackerel": ("Fish", "mackerel_anthem", False),   # "Your other Fish have +1 strength."
+    "mahi_mahi": ("Fish", "mahi_mahi_anthem", False),   # "Your other Fish have +1 strength."
     "cape_buffalo": ("Hoofed", "buffalo_anthem", True),   # "Your other Hoofed animals have +1 strength during your opponent's turn."
 }
 AURA_FAMILIES = frozenset(fam for fam, _, _ in FAMILY_AURAS.values())
 # The cards whose own text is a live "+X" (the branches of anthem_bonus). Any other card, of a family no aura reaches,
 # has no anthem at all: anthem_bonus answers 0 for it before walking the board. The search asks for every unit's strength
 # in every position it imagines, so that walk, once per unit, was the hottest line of the engine (2026-10-20).
-ANTHEM_CARDS = frozenset({"guard_wasp", "tuna", "hamster", "peacock", "giraffe", "crocodile", "capybara"})
+ANTHEM_CARDS = frozenset({"guard_wasp", "tuna", "marmot", "peacock", "giraffe", "crocodile", "capybara"})
 
 
 _SMALL_DECKS: dict = {}
@@ -128,18 +128,19 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], so
             if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
                 bonus += cfg.guard_hornet_bonus
         elif cid == "tuna":                     # +1 for each other Fish you control
-            bonus += cfg.tuna_per_fish * count("Fish", include_self=False)
-        elif cid == "hamster":                  # +1 for each 10 food you have
-            bonus += cfg.hamster_per_step * (state.food[owner] // cfg.hamster_food_step)
+            from .statics import fish_count     # statics imports this module
+            bonus += cfg.tuna_per_fish * fish_count(state, owner, exclude_iid=self_iid)
+        elif cid == "marmot":                   # +1 for each 10 food you have (the Hamster's until 2026-10-29)
+            bonus += cfg.marmot_per_step * (state.food[owner] // cfg.marmot_food_step)
         elif cid == "peacock":                  # +1 for each card in your hand: itself while there, one less once it lands
             bonus += cfg.hand_per_card * len(state.hands[owner])
         elif cid == "giraffe":                  # +5 during your opponent's turn
             bonus += cfg.giraffe_bonus if their_turn else 0
         elif cid == "crocodile":                # -3 during your opponent's turn
             bonus -= cfg.crocodile_penalty if their_turn else 0
-        elif cid == "capybara":                 # +7 if your starting deck holds no other animal of 4 or more
+        elif cid == "capybara":                 # 8 if your starting deck holds no other animal of 4 or more
             if state.starting_decks.get(owner) and small_starting_deck(state, owner, cid):
-                bonus += cfg.capybara_bonus
+                bonus += cfg.capybara_strength - state.cards[cid].base_strength
 
     for u in tops:
         aura = FAMILY_AURAS.get(u.card_id)

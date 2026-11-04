@@ -49,7 +49,7 @@ from typing import Optional, Sequence
 from ..engine import rules
 from .base import keep_hand
 from ..engine.actions import Action, DrawAction, PlaceAction, RoamAction
-from ..engine.state import GameState, StateView
+from ..engine.state import GameState, StateView, other_player
 from ..engine.strength import card_strength
 from ..engine.state import UnitInstance
 from .features import opponent_unseen_card_ids
@@ -64,6 +64,53 @@ from .turn_search import _DECISIVE, TurnSearcher
 _LOSS_TIEBREAK = 1e6
 
 
+_FAR_NODES = 400     # positions one far-capture search may open (a hand that needs more is read as no capture)
+
+
+def _den_distance(gm, me: str) -> dict:
+    """Steps from each crossroad to my den's front (0 on the front)."""
+    dist = {cr: 0 for cr in gm.hq_front(me)}
+    frontier = sorted(dist)
+    while frontier:
+        nxt = []
+        for cr in frontier:
+            for nb in gm.neighbors(cr):
+                if nb not in dist:
+                    dist[nb] = dist[cr] + 1
+                    nxt.append(nb)
+        frontier = nxt
+    return dist
+
+
+def _far_capture(state: GameState, opp: str, dist: dict, budget: list) -> bool:
+    """Whether `opp`, to act in their own turn, captures my den with what they hold: a search over their placements
+    and roams that each land closer to my den than their chain stands (and over the choices those open), until a den
+    capture is legal. Draws and passes are not searched; `budget` caps the positions opened."""
+    if state.result is not None:
+        return state.result.winner == opp
+    if state.player_to_act() != opp or budget[0] <= 0:
+        return False
+    legal = rules.legal_actions(state)
+    if any(isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture for a in legal):
+        return True
+    occ = state.connected_occupied(opp)
+    stand = min((dist[cr] for cr in occ), default=min(dist[cr] for cr in state.game_map.hq_front(opp)) + 1)
+    for a in legal:
+        if isinstance(a, (PlaceAction, RoamAction)):
+            if a.target[0] != "cr" or dist[a.target[1]] >= stand:
+                continue
+        elif state.pending is None:
+            continue
+        budget[0] -= 1
+        if budget[0] < 0:
+            return False
+        nxt = state.clone()
+        rules.apply_action(nxt, a, validate=False)
+        if _far_capture(nxt, opp, dist, budget):
+            return True
+    return False
+
+
 class RefereeBot(TurnSearcher):
     def __init__(self, weights: Optional[GreedyWeights] = None,
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
@@ -74,7 +121,9 @@ class RefereeBot(TurnSearcher):
                  evaluator: Optional[LinearEval] = None,
                  quiesce: bool = False, mulligan: bool = False,
                  depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
-                 den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE, deepen_chase: bool = False):
+                 den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE, deepen_chase: bool = False,
+                 den_open: bool = False, reply_min: bool = False, outs: int = 0, den_far: int = 0,
+                 den_far_margin: int = 0, den_far_ratio: float = 0.0):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan, decisive=decisive)
@@ -102,6 +151,22 @@ class RefereeBot(TurnSearcher):
         # the strongest guard for each den approach (the one-move score ranked a Meerkat above the Groundhog on the
         # square that decided a game, so the only defence was never searched).
         self.den_sense = den_sense
+        # Far den sense (2026-10-30, Martin's 7K2LNQ game 15: his Mouse on 1,3, a Mole, a Rabbit and the Lion legendary in
+        # hand; the Expert put its Mara on 5,1 and he walked 1,3 to its den in one turn through 5,3). The den checks see
+        # one step onto a front crossroad beside their chain, so a capture built from several placements in one turn (a
+        # Mole's or a Rabbit's extra animal, a Roar that plays another) read as no threat, and five sampled hands rarely
+        # hold one (there, 5,1 loses to 11 hands in 200 and 5,3 to 1). With den_far, each root candidate that ends my
+        # turn is dealt the same `den_far` hands from the opponent's unseen pool, each searched for a capture this turn
+        # (every placement stepping closer to my den), and an action losing to clearly more hands than the safest is
+        # dropped before the search (`_far_safe`; it reads only their unseen pool and hand size, as determinize does).
+        # Scored inside the search instead, the risk drowned in the five worlds' noise, and the beam had cut the safe
+        # square before any later screen could keep it.
+        self.den_far = den_far
+        # How much riskier an action may be and stay: more than `den_far_margin` hands over the safest (0: one in fifty
+        # of the hands dealt) and, with `den_far_ratio`, more than that many times the safest's count too, so a turn
+        # where every action is about equally exposed keeps them all.
+        self.den_far_margin = den_far_margin
+        self.den_far_ratio = den_far_ratio
         # The reply as a turn (2026-10-17, Martin: "a turn is an atomic event consisting of 2 actions"): at the start of
         # the opponent's sampled reply, their first action is chosen by the position after their whole turn (the
         # `reply_turns` best openings by one-move score, each finished by the fast policy) instead of by the one-move
@@ -115,6 +180,26 @@ class RefereeBot(TurnSearcher):
         # behind (drawing) was never deepened. With chase, deepening continues down the one-turn order while the best
         # deepened score trails the next root's one-turn score, within the move's time budget.
         self.deepen_chase = deepen_chase
+        # Den openers (2026-10-29, Martin's 2TZBCA): a placement that makes my den capture legal is the first half of a
+        # two-action win, but its one-move score is ordinary, so both shortlists (the beam and the root screen) dropped
+        # it and the win was never searched. With den_open both keep every such placement.
+        self.den_open = den_open
+        # Reply minimax (2026-10-30, Martin's G2EFVA: Serval's Roar spared his 9-strength Capybara beside my den and
+        # took an Owl): the deepened line plays the reply opening the opponent's own one-turn score likes, and my next
+        # turn then sees that one reply in full, so a win that exists only because the sampled reply left a hole counts
+        # as a win (there, emptying the Owl's crossroad drew the stand-in into a chain to my front that left 2,2 open
+        # for Sardine into his den; two worlds of five scored the Owl as a win and outweighed the one-turn score's
+        # 30 points for the Capybara). With reply_min a deepened line is scored against each of the `reply_turns`
+        # openings and the worst for me counts: a win is a win only when every reply they considered allows it.
+        self.reply_min = reply_min
+        # Outs (2026-10-30, Martin's YFRCBG: thirty Lions, his Den Rush one step from the den, and the Expert put its
+        # Lions on 5,1 and 4,1 instead of the two open den fronts): a root's score is the mean over the sampled worlds,
+        # and a line that loses in every world is a flat loss softened by the board it hands over, so among lost lines
+        # the one that keeps more of my animals alive wins, however many of his hands it loses to. With outs, when
+        # every deepened root reads as lost, each is replayed against `outs` fresh sampled hands and the roots rank by
+        # how many of those hands fail to win, the score behind: a lost bot plays the line that needs the most from you.
+        self.outs = outs
+        self._reply_openings: list[Action] = []   # the openings the last reply considered, the one it played first
         self._deepening = False             # on only while _rescore_roots scores a root's final lines
         # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
         # are set identically by TurnSearcher.__init__; RefereeBot uses them for reply rollouts
@@ -152,6 +237,8 @@ class RefereeBot(TurnSearcher):
                 self._continuation_plan = {}
                 self.last_search_stats["screened_candidates"] = 1
                 return captures[0]
+        if state is not None and len(legal) > 1:
+            legal = self._far_safe(state, legal, view.player)   # a planned continuation passes it too
         if self.staged and state is not None and self._continuation_plan:
             observation = self._observation_key(state, view.player)
             planned = self._continuation_plan.get(observation)
@@ -258,6 +345,8 @@ class RefereeBot(TurnSearcher):
                           if isinstance(a, PlaceAction) and not a.is_hq_capture and a.crossroad == cr]
                 if guards:
                     selected.add(max(guards, key=lambda a: card_strength(state, a.card_id, me)))
+        if self.den_open:
+            selected.update(self._den_openers(worlds[0], candidates, me))
         # Draw is strategically distinct and deliberately protected by the generic beam;
         # retain it through the cheap screen even when its immediate score is low.
         selected.update(
@@ -370,12 +459,14 @@ class RefereeBot(TurnSearcher):
         me: str,
     ) -> list[float]:
         scores, leaves = [], []
+        deep = bool(self.depth and self._deepening)
         for state, penalty in branches:
             # A lost world is a flat -_DECISIVE, so when every world is lost all moves tie
             # and the bot plays a random one. Keep the position it handed the opponent as a
             # tiebreak: still a decisive loss, but the most resistant one ranks first.
             tiebreak = _LOSS_TIEBREAK if self.decisive >= _DECISIVE else self.decisive / 10
             before = max(-tiebreak, min(tiebreak, self._planning_eval(state, me)))
+            pre = state.clone() if deep and self.reply_min else None
             threat = self._advance(state, me)
             score = self._clamped_eval(state, me)
             if score == -self.decisive:
@@ -383,24 +474,41 @@ class RefereeBot(TurnSearcher):
             if threat:
                 score = threat * (-self.decisive + before) + (1.0 - threat) * score
             scores.append(score - penalty)
-            leaves.append((state, penalty, before))
+            leaves.append((state, penalty, before, pre, self._reply_openings))
             self.last_search_stats["reply_world_rollouts"] += 1
-        if self.depth and self._deepening and leaves:
+        if deep and leaves:
             # The extra sight goes to the lines the one-turn score likes best (ties and near-ties are where it decides),
             # while the move's time budget lasts.
             order = sorted(range(len(scores)), key=lambda i: -scores[i])[:self.deepen_top]
             for i in order:
-                if self.time_budget and time.monotonic() - self._move_started > self.time_budget:
-                    self.last_search_stats["lookahead_cut"] = self.last_search_stats.get("lookahead_cut", 0) + 1
+                if self._over_budget():
                     break
-                state, penalty, before = leaves[i]
+                state, penalty, before, pre, openings = leaves[i]
                 if state.result is not None:
                     continue
-                score = self._leaf_score(state, me, self.depth)
-                if score == -self.decisive:
-                    score += before
+                score = self._deep_line(state, me, before)
+                # Reply minimax: the same line against each of their other openings; the worst for me counts.
+                for opening in openings[1:] if pre is not None else ():
+                    if self._over_budget():
+                        break
+                    alt = pre.clone()
+                    self._advance(alt, me, opening=opening)
+                    score = min(score, self._deep_line(alt, me, before))
                 scores[i] = score - penalty
         return scores
+
+    def _over_budget(self) -> bool:
+        if self.time_budget and time.monotonic() - self._move_started > self.time_budget:
+            self.last_search_stats["lookahead_cut"] = self.last_search_stats.get("lookahead_cut", 0) + 1
+            return True
+        return False
+
+    def _deep_line(self, state: GameState, me: str, before: float) -> float:
+        """The deepened score of a reply leaf: my next turns from `state`, a loss softened by the position before."""
+        score = self._leaf_score(state, me, self.depth)
+        if score == -self.decisive:
+            score += before
+        return score
 
     def _mean_reply_score(
         self,
@@ -438,6 +546,29 @@ class RefereeBot(TurnSearcher):
             self._end_root_candidate(action)
             deep.append((action, score))
         self.last_search_stats["deepened_roots"] = len(deep)
+        if self.outs and deep and max(s for _, s in deep) <= -self.decisive / 2:
+            # Every deepened root reads as lost: rank them by the sampled hands they survive (a world's line scoring
+            # above the half-decisive mark, which a loss inside the sight never does), the mean score behind.
+            from .determinize import determinize
+            extra = [determinize(state, me, self.det_rng) for _ in range(self.outs)]
+            ranked = []
+            for action, score in deep:
+                if self._over_budget():
+                    return deep
+                self._begin_root_candidate(action)
+                # The staged node budget is spent by now; a greedy completion here would play a different turn than
+                # the one ranked above (drawing twice instead of placing), so each root's outs get a fresh budget.
+                self._search_nodes = 0
+                branches = self._branches_after_action(extra, action, me, complete_turn=(state.current == me))
+                self._deepening, top, self.deepen_top = True, self.deepen_top, len(branches)
+                try:
+                    alive = sum(1 for s in self._reply_scores(branches, me) if s > -self.decisive / 2)
+                finally:
+                    self._deepening, self.deepen_top = False, top
+                self._end_root_candidate(action)
+                ranked.append((action, score + alive * self.decisive))
+            self.last_search_stats["outs_roots"] = len(ranked)
+            return ranked
         return deep
 
     def _leaf_score(self, state: GameState, me: str, depth: int) -> float:
@@ -481,14 +612,16 @@ class RefereeBot(TurnSearcher):
             action = self._policy.choose(state.view_for(me), legal, state)
             rules.apply_action(state, action, validate=False)
 
-    def _advance(self, state: GameState, me: str) -> float:
+    def _advance(self, state: GameState, me: str, opening: Optional[Action] = None) -> float:
         """Play the rollout clone forward with the greedy policy - through my pending
         sub-choices, the opponent's whole reply turn (their sampled hand), and any
         pendings that opens - until my next top-level decision or a terminal state.
         Mutates `state`; sets `state.result` at terminals so `evaluate` sees them. Returns the chance (den sense) that
-        the opponent's reply captured my den instead; 0.0 without den sense or threat."""
+        the opponent's reply captured my den instead; 0.0 without den sense or threat. `opening` forces the first
+        action of their reply (reply minimax) in place of the one `_reply_opening` would pick."""
         guard = 0
         threat = 0.0
+        self._reply_openings = []
         while guard < 40:
             guard += 1
             result = rules.is_terminal(state)   # also catches max_turns,
@@ -504,9 +637,14 @@ class RefereeBot(TurnSearcher):
                 threat = self._den_threat(state, actor, me)
             if self.reply_turns and (self._deepening or not self.depth) and actor != me and state.pending is None \
                     and state.actions_taken_this_turn == 0:
-                opening = self._reply_opening(state, actor, legal)
-                if opening is not None:
-                    rules.apply_action(state, opening, validate=False)   # the rest of their turn is the policy's
+                if opening is not None and opening in legal:
+                    rules.apply_action(state, opening, validate=False)
+                    opening = None
+                    continue
+                opening = None
+                picked = self._reply_opening(state, actor, legal)
+                if picked is not None:
+                    rules.apply_action(state, picked, validate=False)   # the rest of their turn is the policy's
                     continue
             action = self._policy.choose(state.view_for(actor), legal, state)
             rules.apply_action(state, action, validate=False)
@@ -549,17 +687,62 @@ class RefereeBot(TurnSearcher):
             return 0.0
         return 1.0 - comb(total - enabling, hand) / comb(total, hand)
 
+    def _far_hits(self, state: GameState, opp: str, me: str) -> int:
+        """Of `den_far` hands dealt from the opponent's unseen pool (seed 0: the same hands for every position
+        compared), how many capture my den in their coming turn (`_far_capture`)."""
+        hand = len(state.hands[opp])
+        pool = opponent_unseen_card_ids(state, opp)
+        if not hand or len(pool) < hand:
+            return 0
+        dist = _den_distance(state.game_map, me)
+        rng = random.Random(0)
+        hits = 0
+        for _ in range(self.den_far):
+            dealt = list(pool)
+            rng.shuffle(dealt)
+            probe = state.clone()
+            probe.hands[opp] = [UnitInstance(cid, opp, 900001 + i) for i, cid in enumerate(dealt[:hand])]
+            probe.decks[opp] = dealt[hand:]
+            if _far_capture(probe, opp, dist, [_FAR_NODES]):
+                hits += 1
+        return hits
+
+    def _far_safe(self, world: GameState, candidates: list[Action], me: str) -> list[Action]:
+        """With den_far, my legal actions that end my turn are dealt the same hands and searched for a capture of
+        my den in the opponent's coming turn; one that loses to clearly more hands than the safest (by more than one in
+        fifty) is dropped. A candidate that doesn't end my turn is kept unmeasured."""
+        if not self.den_far:
+            return candidates
+        opp = other_player(me)
+        hits = []
+        for action in candidates:
+            nxt = world.clone()
+            rules.apply_action(nxt, action, validate=False)
+            nxt = self._settled(nxt, me)
+            ends = nxt.result is None and nxt.pending is None and nxt.player_to_act() == opp \
+                and nxt.actions_taken_this_turn == 0
+            hits.append(self._far_hits(nxt, opp, me) if ends else None)
+        measured = [h for h in hits if h is not None]
+        if not measured:
+            return candidates
+        best = min(measured)
+        bar = best + (self.den_far_margin or max(1, self.den_far // 50))
+        return [a for a, h in zip(candidates, hits)
+                if h is None or h <= bar or (self.den_far_ratio and h <= self.den_far_ratio * best)]
+
     def _reply_opening(self, state: GameState, opp: str, legal: Sequence[Action]) -> Optional[Action]:
         """The opponent's first action, judged by the position after their whole turn: each of their `reply_turns` best
         openings by one-move score is finished by the fast policy and the finished turn scored for them."""
         if len(legal) < 2:
             return None
         best, best_score = None, None
-        for opening in self._greedy_topn(state, list(legal), opp, self.reply_turns):
+        openings = self._greedy_topn(state, list(legal), opp, self.reply_turns)
+        for opening in openings:
             nxt = state.clone()
             rules.apply_action(nxt, opening, validate=False)
             self._play_turn(nxt, opp)
             score = self._clamped_eval(nxt, opp)
             if best_score is None or score > best_score:
                 best, best_score = opening, score
+        self._reply_openings = [best] + [o for o in openings if o != best]
         return best

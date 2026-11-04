@@ -49,8 +49,8 @@ The one whose bark brings the others in; worth more the more of the herd stands 
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **[ZEBRA]** | legendary | 4 | Roar: draw a card for each different Hoofed animal you control. | Savanna |
-| **Zebra** | common | 4 | Flee. Roar: gain 5 food for each other Hoofed animal next to this. | Savanna |
+| **[ZEBRA]** | legendary | 4 | Roar: draw a card for each of your grazing Hoofed animals. | Savanna |
+| **Zebra** | common | 5 | Flee. When this flees, return the enemy that covered it to its owner's hand. | Savanna |
 
 <!-- cards:end -->
 
@@ -63,8 +63,8 @@ The one who knows where the grass is; the herd's food.
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **[WILDEBEEST]** | legendary | 5 | Your regions produce 5 more food. | Savanna |
-| **Okapi** | rare | 4 | Dusk: if this is grazing, draw a card. | Jungle |
-| **Wildebeest** | common | 6 | Dusk: if this is grazing, gain 5 food. | Savanna |
+| **Okapi** | rare | 4 | Dawn and Dusk: if this is grazing, draw a card. | Jungle |
+| **Wildebeest** | common | 6 | Dusk: if this is grazing, gain 6 food. | Savanna |
 
 <!-- cards:end -->
 
@@ -89,9 +89,9 @@ The mob, the tusks in the hole, the charge at what stands alone: the herd's answ
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Boar** | rare | 5 | Roar: remove an adjacent enemy that isn't covering anything. | Forest |
-| **Cape Buffalo** | rare | 6 | Your other Hoofed animals have +1 strength during your opponent's turn. | Savanna |
-| **Warthog** | common | 4 | Roar: remove an adjacent enemy covering an allied Hoofed animal. | Savanna |
+| **Cape Buffalo** | rare | 7 | Your other Hoofed animals have +1 strength during your opponent's turn. | Savanna |
+| **Boar** | common | 5 | Remove the first enemy placed next to this. | Forest |
+| **Warthog** | common | 4 | Roar: remove an adjacent enemy that has another of your Hoofed animals next to it. | Savanna |
 
 <!-- cards:end -->
 

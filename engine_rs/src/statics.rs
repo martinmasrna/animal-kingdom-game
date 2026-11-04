@@ -23,6 +23,29 @@ pub fn controls(st: &State, player: Player, card: Option<CardId>) -> bool {
     st.tops().any(|(_, u)| u.owner == player && u.card == card && active(st, u))
 }
 
+/// The legendary Sardine: "[SARDINE] and your adjacent Fish count as 2 Fish." What `player`'s Fish on `cr` counts as.
+pub fn fish_worth(st: &State, player: Player, cr: Cr) -> i32 {
+    let Some(sardine) = st.g.known.sardine_legend else { return 1 };
+    let near = st.tops().any(|(c, u)| u.owner == player && u.card == sardine && active(st, u) && (c == cr || st.map().adjacent(c, cr)));
+    if near { 2 } else { 1 }
+}
+
+/// statics.animal_worth: how many animals `player`'s top animal on `cr` counts as wherever animals are counted.
+pub fn animal_worth(st: &State, player: Player, cr: Cr) -> i32 {
+    match st.top(cr) {
+        Some(u) if st.card(u.card).has_tag(T_FISH) => fish_worth(st, player, cr),
+        _ => 1,
+    }
+}
+
+/// How many Fish `player` counts on their top animals (on `crs` only, when given), each as `fish_worth` says.
+pub fn fish_count(st: &State, player: Player, crs: Option<&[Cr]>, exclude: Option<i64>) -> i32 {
+    st.tops()
+        .filter(|(c, u)| u.owner == player && st.card(u.card).has_tag(T_FISH) && Some(u.iid) != exclude && crs.map_or(true, |l| l.contains(c)))
+        .map(|(c, _)| fish_worth(st, player, c))
+        .sum()
+}
+
 pub fn crossroad_of(st: &State, iid: i64) -> Option<Cr> {
     st.find_unit(iid).map(|(cr, _)| cr)
 }
@@ -31,7 +54,7 @@ fn keyword_aura(kind: u8) -> (u32, Option<u32>) {
     match kind {
         1 => (K_ARMOR, None),
         2 => (K_SPIKES, None),
-        3 => (K_POISON, Some(T_FISH)),
+        3 => (K_POISON, None),
         _ => (0, None),
     }
 }
@@ -42,7 +65,7 @@ pub fn unit_keywords(st: &State, unit: &Unit, cr: Option<Cr>, as_top: bool) -> u
         return 0;
     }
     let card = st.card(unit.card);
-    let kws = card.keywords;
+    let kws = if unit.granted_roam { card.keywords | K_ROAM } else { card.keywords };   // the Coyote's gift
     if unit.owner > B || !st.cache.kw_aura[unit.owner as usize] {
         return kws;
     }
@@ -79,21 +102,21 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
     let k = &st.g.known;
     let placer_card = st.card(placer.card);
     let owner = placer.owner;
+    // The Bison: "Can't be covered while this is grazing." Nothing overrides it, the Hercules Beetle included.
+    if Some(target.card) == k.bison && active(st, target) && grazing(st, target, None) {
+        return false;
+    }
     if Some(placer.card) == k.hercules_beetle && (!roaming || active(st, placer)) {
         return true;
     }
     let placer_str = if roaming { effective_strength(st, placer, None) } else { placement_strength(st, placer) };
     let target_str = effective_strength(st, target, None);
     // Placing and roaming follow one rule: every override below holds for both.
-    if placer_card.has_kw(K_ROAM) && roam_covers_equal(st, owner) && placer_str >= target_str {
-        return true;
-    }
     if placer_card.has_tag(T_CAT) && placer_str >= target_str && active_tops(st, owner, k.leopard).iter().any(|(_, iid)| *iid != placer.iid) {
         return true;
     }
-    if placer_card.has_tag(T_FISH) && controls(st, owner, k.piranha_legend) {
-        let fish = st.tops().filter(|(_, u)| u.owner == owner && st.card(u.card).has_tag(T_FISH)).count() as i32;
-        if target_str <= fish {
+    if placer_card.has_tag(T_FISH) && controls(st, owner, k.piranha) {
+        if target_str <= fish_count(st, owner, None, None) {
             return true;
         }
     }
@@ -101,16 +124,12 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
 }
 
 pub fn can_roam(st: &State, unit: &Unit) -> bool {
-    st.card(unit.card).has_kw(K_ROAM) && active(st, unit)
+    (st.card(unit.card).has_kw(K_ROAM) || unit.granted_roam) && active(st, unit)
 }
 
 pub fn free_roams(st: &State, player: Player) -> i32 {
     let Some(card) = st.g.known.wolf_legend_3 else { return 0 };
     st.tops().filter(|(_, u)| u.owner == player && u.card == card && active(st, u)).count() as i32
-}
-
-pub fn roam_covers_equal(st: &State, owner: Player) -> bool {
-    controls(st, owner, st.g.known.dhole)
 }
 
 pub fn reach_of(st: &State, card: CardId) -> i32 {

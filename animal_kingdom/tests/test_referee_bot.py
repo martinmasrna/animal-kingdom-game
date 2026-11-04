@@ -301,3 +301,18 @@ def test_decisive_bounds_what_a_decided_game_is_worth_in_the_search():
     assert plain > 1.0 and default._clamped_eval(s, "B") < -1.0
     assert tiny._clamped_eval(s, "A") == 1.0 and tiny._clamped_eval(s, "B") == -1.0
     assert finite._clamped_eval(s, "A") == plain      # within a finite bound the score is untouched
+
+
+def test_far_den_sense_keeps_the_square_that_stops_a_one_turn_walk_to_the_den():
+    """Martin's 7K2LNQ game 15: his Mouse on 1,3 and a deck of Moles, Rabbits and the Lion legendary; the Expert's last
+    action of the turn put its Mara on 5,1, and a Mole, a Rabbit, its Bunny and the Lion with Princess Lea walked 1,3 to
+    its den through 5,3. Here on the test map, a row shorter: dealt the same hands, 4,1 loses the den to clearly more of
+    them than 4,3, the square in front of the Mouse's column, so it is dropped."""
+    pool = ["mole", "rabbit", "lion_legend", "mouse"] * 4 + ["lion_legend_2"] * 2
+    s = make_state(current="B", hands={"A": pool[:4], "B": ["mara"]}, decks={"A": pool[4:], "B": ["lion"] * 9})
+    put(s, "1,3", "mouse", "A")
+    put(s, "4,2", "chipmunk", "B")
+    s.actions_taken_this_turn = 1                            # the Mara is the turn's last action
+    legal = [a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.target[1] in ("4,1", "4,3")]
+    kept = RefereeBot(seed=0, den_far=40, quiesce=True)._far_safe(s, legal, "B")
+    assert [a.target[1] for a in kept] == ["4,3"]

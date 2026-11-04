@@ -252,6 +252,8 @@ pub struct Unit {
     pub card: CardId,
     pub owner: Player,
     pub retaliation_used: bool,
+    /// The Coyote's gift: Roam for as long as this instance stays on the board.
+    pub granted_roam: bool,
     pub iid: i64,
     // 16-bit counters: a game's turns, plays and strength changes stay far below 32k, and the unit is what the board,
     // the hands and every clone of them are made of (24 bytes instead of 32)
@@ -263,7 +265,7 @@ pub struct Unit {
 
 impl Unit {
     pub fn new(card: CardId, owner: Player, iid: i64) -> Unit {
-        Unit { card, owner, iid, placed_on_turn: 0, strength_counter: 0, locked_until_turn: 0, retaliation_used: false, play_seq: 0 }
+        Unit { card, owner, iid, placed_on_turn: 0, strength_counter: 0, locked_until_turn: 0, retaliation_used: false, granted_roam: false, play_seq: 0 }
     }
 }
 
@@ -276,6 +278,8 @@ pub struct TurnFlags {
     pub removed_any: bool,
     pub food_gained: [i32; 2],
     pub roamed: FastVec<[i64; 4]>,
+    /// An animal roamed this turn (the Fox's Roar asks).
+    pub any_roamed: bool,
     pub roams: [i32; 2],
     pub free_roams: [i32; 2],
     pub free_roams_used: [i32; 2],
@@ -284,6 +288,7 @@ pub struct TurnFlags {
     pub action_cap: [Option<i32>; 2],
     pub gain_str: FastVec<[i64; 4]>,
     pub falstaff: [bool; 2],
+    pub titan_discount: [bool; 2],
     pub caps: FastVec<[(&'static str, i64); 4]>,
 }
 
@@ -316,6 +321,9 @@ impl TurnFlags {
             if self.falstaff[p] {
                 m.insert(format!("falstaff_{pn}"), sj::Value::Bool(true));
             }
+            if self.titan_discount[p] {
+                m.insert(format!("titan_discount_{pn}"), sj::Value::Bool(true));
+            }
         }
         for p in 0..3 {
             if self.lost[p] != 0 {
@@ -327,6 +335,9 @@ impl TurnFlags {
         }
         for iid in &self.roamed {
             m.insert(format!("roamed_{iid}"), sj::Value::Bool(true));
+        }
+        if self.any_roamed {
+            m.insert("any_roamed".into(), sj::Value::Bool(true));
         }
         for (iid, n) in &self.free_roam_iid {
             m.insert(format!("free_roam_iid_{iid}"), sj::Value::from(*n));
@@ -356,6 +367,8 @@ impl TurnFlags {
                 t.lost[p_of(rest)] = val.as_i64().unwrap_or(0) as i32;
             } else if k == "removed_any" {
                 t.removed_any = val.as_bool().unwrap_or(false);
+            } else if k == "any_roamed" {
+                t.any_roamed = val.as_bool().unwrap_or(false);
             } else if let Some(rest) = k.strip_prefix("roamed_") {
                 if let Ok(i) = rest.parse::<i64>() {
                     t.roamed.push(i);
@@ -380,6 +393,8 @@ impl TurnFlags {
                 }
             } else if let Some(rest) = k.strip_prefix("falstaff_") {
                 t.falstaff[p_of(rest).min(1)] = val.as_bool().unwrap_or(false);
+            } else if let Some(rest) = k.strip_prefix("titan_discount_") {
+                t.titan_discount[p_of(rest).min(1)] = val.as_bool().unwrap_or(false);
             } else if k.starts_with("cap_") {
                 if let Some((flag, iid)) = k.rsplit_once('_') {
                     if let Ok(i) = iid.parse::<i64>() {
@@ -451,6 +466,8 @@ pub struct State {
     pub result: Option<GameResult>,
     pub inked: BTreeSet<i64>,
     pub roar_twice: [Option<i32>; 2],
+    /// The legendary Dung Beetle: food each player's Hungry animals have eaten this game.
+    pub hungry_eaten: [i32; 2],
     pub last_roar: [Option<CardId>; 2],
     pub jelly: [FxHashMap<CardId, (i32, i32)>; 2],
     /// Whether `jelly[p]` exists at all (Python keeps the player's dict once the legendary Bee roared, empty or not).
@@ -497,6 +514,7 @@ impl Clone for State {
             result: self.result.clone(),
             inked: self.inked.clone(),
             roar_twice: self.roar_twice,
+            hungry_eaten: self.hungry_eaten,
             last_roar: self.last_roar,
             jelly: self.jelly.clone(),
             jelly_set: self.jelly_set,
@@ -607,9 +625,8 @@ impl State {
         Some(counter)
     }
 
-    pub fn jelly_counter(&self, player: Player, card: CardId) -> i32 {
-        let base = self.card(card).base.unwrap_or(0);
-        self.cfg().jelly_strength - base - self.growth(player, card)
+    pub fn jelly_counter(&self, _player: Player, _card: CardId) -> i32 {
+        self.cfg().jelly_grant
     }
 
     pub fn growth(&self, player: Player, card: CardId) -> i32 {
@@ -619,9 +636,21 @@ impl State {
         *self.card_strength_counters[player as usize].get(&card).unwrap_or(&0)
     }
 
+    /// The legendary Dung Beetle's form reached, by the food `player`'s Hungry animals ate this game; any other card is itself.
+    pub fn eaten_form(&self, player: Player, card: CardId) -> CardId {
+        const FORMS: [&str; 4] = ["dung_beetle_legend", "dung_beetle_legend_form2", "dung_beetle_legend_form3", "dung_beetle_legend_form4"];
+        if !self.cname(card).starts_with("dung_beetle_legend") || player > 1 {
+            return card;
+        }
+        let n = self.hungry_eaten[player as usize];
+        let c = self.cfg();
+        let i = ["dung_beetle_legend_draw_at", "dung_beetle_legend_food_at", "dung_beetle_legend_play_at"].iter().filter(|k| n >= c.int(k)).count();
+        self.card_id(FORMS[i]).unwrap_or(card)
+    }
+
     pub fn deck_instance(&mut self, player: Player, card: CardId) -> Unit {
         let iid = self.new_iid();
-        let mut inst = Unit::new(card, player, iid);
+        let mut inst = Unit::new(self.eaten_form(player, card), player, iid);
         if let Some(c) = self.jelly_take(player, card) {
             inst.strength_counter = c as i16;
         }
@@ -842,6 +871,7 @@ impl State {
             "card_id": self.cname(u.card), "owner": player_name(u.owner), "iid": u.iid,
             "placed_on_turn": u.placed_on_turn, "strength_counter": u.strength_counter,
             "locked_until_turn": u.locked_until_turn, "retaliation_used": u.retaliation_used, "play_seq": u.play_seq,
+            "granted_roam": u.granted_roam,
         })
     }
 
@@ -855,6 +885,7 @@ impl State {
             strength_counter: d.get("strength_counter").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
             locked_until_turn: d.get("locked_until_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
             retaliation_used: d.get("retaliation_used").and_then(|x| x.as_bool()).unwrap_or(false),
+            granted_roam: d.get("granted_roam").and_then(|x| x.as_bool()).unwrap_or(false),
             play_seq: d.get("play_seq").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
         }
     }
@@ -880,6 +911,12 @@ impl State {
         for p in 0..2 {
             if let Some(t) = self.roar_twice[p] {
                 roar_twice.insert(player_name(p as Player).to_string(), sj::Value::from(t));
+            }
+        }
+        let mut hungry_eaten = sj::Map::default();
+        for p in 0..2 {
+            if self.hungry_eaten[p] != 0 {
+                hungry_eaten.insert(player_name(p as Player).to_string(), sj::Value::from(self.hungry_eaten[p]));
             }
         }
         let mut last_roar = sj::Map::default();
@@ -920,6 +957,7 @@ impl State {
             "pile_owners": self.pile_owners.iter().map(|o| o.map(|p| sj::Value::String(player_name(p).to_string())).unwrap_or(sj::Value::Null)).collect::<Vec<_>>(),
             "inked": self.inked.iter().copied().collect::<Vec<i64>>(),
             "roar_twice": roar_twice,
+            "hungry_eaten": hungry_eaten,
             "last_roar": last_roar,
             "jelly": jelly_m,
         })
@@ -965,6 +1003,9 @@ impl State {
             }
             if let Some(t) = d.get("roar_twice").and_then(|c| c.get(pn)).and_then(|c| c.as_i64()) {
                 st.roar_twice[p] = Some(t as i32);
+            }
+            if let Some(n) = d.get("hungry_eaten").and_then(|c| c.get(pn)).and_then(|c| c.as_i64()) {
+                st.hungry_eaten[p] = n as i32;
             }
             if let Some(c) = d.get("last_roar").and_then(|c| c.get(pn)).and_then(|c| c.as_str()) {
                 st.last_roar[p] = Some(cid(c));
@@ -1050,6 +1091,7 @@ impl State {
             result: None,
             inked: BTreeSet::new(),
             roar_twice: [None, None],
+            hungry_eaten: [0, 0],
             last_roar: [None, None],
             jelly: [FxHashMap::default(), FxHashMap::default()],
             jelly_set: [false, false],

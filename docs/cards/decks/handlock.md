@@ -31,7 +31,7 @@ The table below is generated from cards.json, where the cards live.
 | **Macaque** | 3 | Primate | 2 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
 | **Baboon** | 3 | Primate | 5 | Roar: give 2 animals in your hand +1 strength. |
 | **Stork** | 3 | Bird | 4 | Flight. Roar: add two random younglings to your hand. |
-| **Caterpillar** | 3 | — | 1 | When this gains strength in your hand, draw a card and turn this into a Butterfly. |
+| **Caterpillar** | 3 | — | 1 | When this gains strength in your hand, draw a card and turn into a Butterfly. |
 | **Gorilla** | 3 | Primate | 6 | Roar: if this has 8 or more strength, draw a card. |
 | **Peacock** | 3 | Bird | 1 | Has +1 strength for each card in your hand. |
 

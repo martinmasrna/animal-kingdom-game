@@ -43,12 +43,12 @@ The rarity question is what goes wrong if the opponent faces this card three tim
   1. The build-around (a deck's whole plan, like Black Swan; few of these).
   2. The amplifier, which takes the plan the commons and rares already have and pushes it over the edge, without changing it (King Theron, Queen Adira: Cats play the same with or without them).
   3. The generally excellent card, far stronger than a common and good in many decks (Prince Leo and Princess Lea, Aurum, Scarlett).
+- **No extra placements on commons.** Playing another card is a rare's or a legendary's effect. A common may still place a token on a random empty crossroad (Martin, 2026-10-27).
 - **A card that is one keyword and nothing else is a common** (Martin, 2026-10-21). A rare or legendary with a keyword earns its rarity with something more: a second keyword or an effect.
 - **A higher rarity gets a better rate.** A rare must be stronger than a common, and a legendary stronger than a rare, if they were to have the same effect. Ideally they shouldn't, so this is only an anchor (Martin, 2026-10-26).
 
 ## Guardrails
 
-- No burst extra placements, and an instant-capture audit for every chaining effect near an enemy den.
 - No effect that grants a connection-ignoring placement able to reach the den.
 - No infinite combos.
 - A new keyword needs at least three cards.
@@ -69,8 +69,9 @@ Games imagined while designing are reasoning, not evidence: only real play settl
 - Every card is an animal.
 - The pool celebrates what evolution made. An animal earns its card by being recognisable, one of a kind (nothing else looks like it to a normal person) and astonishing (the axolotl regrowing its legs, the chameleon changing colour). A group of lookalikes (rodents, small brown birds, most antelopes, most fish) doesn't get fifteen members; but two similar animals can both have cards when their art makes them clearly distinct (Martin, 2026-10-07).
 - **Animal–effect fit** runs both ways: the effect is the best one for the animal (its most famous trait, as a normal person knows it, turned into a rule), and the animal is the best one for the effect (the first animal the effect brings to mind). Rattlesnake (the rattle is the shuffle), Owl (sees what's hidden: Scout), Raven, Cheetah and Falcon have it. Ideally, the most unique effects go on the most unique animals.
+- **A normal person knows an animal by one association, and that is the whole fit.** "Oxpecker = synergy with big animals. That's it" (Martin, 2026-10-27). Not how it grooms its host, not its nickname, not its alarm call: the one thing a player who never watched a documentary connects with the animal. If the fit needs explaining, it isn't the fit.
 - One species per pool among commons and rares; subspecies, sex and age variants count as the same species. Two exceptions: Colony castes, and metamorphosis, life stages that look nothing alike and turn into each other (Caterpillar and Butterfly; later a tadpole and a frog). (Martin, 2026-10-08).
 - Legendaries are a specific named individual of a real species that has a common or rare in the pool (Martin, 2026-10-08).
 - No "[adjective] animal" names that most people would see as the same animal (a Martial Eagle next to an Eagle). Species people tell apart are fine (Polar Bear, Grizzly, Black Bear).
 - Strength follows the animal's real size, at least for commons and rares (a common Lion is never a 1). The strongest utility effects (extra placements, extra actions, draw) therefore sit on small, low-strength animals (Martin, 2026-10-05).
-- No pets and no farm animals. Farm animals appear as their wild forms (Martin, 2026-10-08).
+- No pets and no farm animals unless they appear as their wild forms (Martin, 2026-10-08).

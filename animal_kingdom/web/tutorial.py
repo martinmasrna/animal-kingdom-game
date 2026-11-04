@@ -28,33 +28,33 @@ PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first ga
 OPPONENT_DECK = ["baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup",
                  "baby_fox", "baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup"]
 # Lesson 2. The player opens with Lion, Lynx (it glows once the Lion stands) and a Buffalo; the Lynx's Roar draws the
-# Eagle (Flight, on your own animal first); the next draw brings the Squirrel (food from a Roar) and the Black Mamba
-# (removes up to 5: the opponent's Eagle), the one after the Polar Bear (8, Apex Predator: it eats a 7 of the wall, and
+# Pigeon (Flight, on your own animal first); the next draw brings the Squirrel (food from a Roar) and the Black Mamba
+# (removes up to 5: the opponent's Pigeon), the one after the Polar Bear (8, Apex Predator: it eats a 7 of the wall, and
 # the den falls); then animals.
-PLAYER_DECK_2 = ["tutorial_lynx", "eagle", "squirrel", "black_mamba", "polar_bear", "tutorial_dire_wolf", "lion",
+PLAYER_DECK_2 = ["tutorial_lynx", "pigeon", "squirrel", "black_mamba", "polar_bear", "tutorial_dire_wolf", "lion",
                  "squirrel", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion", "tutorial_chipmunk", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion",
                  "squirrel", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion", "tutorial_chipmunk", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion",
                  "squirrel", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion", "squirrel",
                  "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion"]
-# Its opponent walls all three crossroads before its den with 7s (a 7 can't cover a 7: only the Polar Bear gets in), flies its Eagle
+# Its opponent walls all three crossroads before its den with 7s (a 7 can't cover a 7: only the Polar Bear gets in), flies its Pigeon
 # onto the Squirrel (stacks), then plays wild dogs.
-OPPONENT_DECK_2 = ["eagle"] + OPPONENT_DECK[1:]
+OPPONENT_DECK_2 = ["pigeon"] + OPPONENT_DECK[1:]
 
 DECKS = {"tutorial_you": PLAYER_DECK, "tutorial_them": OPPONENT_DECK, "tutorial2_you": PLAYER_DECK_2, "tutorial2_them": OPPONENT_DECK_2}
 NAMES = {"tutorial_you": "Tutorial", "tutorial_them": "Wild dogs", "tutorial2_you": "Tutorial", "tutorial2_them": "Wild dogs"}
 BOTS = {1: "tutorial", 2: "tutorial2"}
 # Placements a turn, by the opponent's turn (its first two, then every later one): lesson 1's uses both moves while the
 # two-moves rule is new, then one dog on the player's way and a draw: the march covers it (covering drilled, not slowed); lesson 2's keeps to one, so no extra dog takes the
-# crossroad the Black Mamba needs beside the Eagle.
+# crossroad the Black Mamba needs beside the Pigeon.
 PER_TURN = {1: (2, 2, 1), 2: (1, 1, 1)}   # the opponent's bot name per lesson
 
 # The opponent's scripted moves, by its turn (turn_counter): lesson 1 walls the middle of its den and puts a dog beside
-# it; lesson 2 walls all three crossroads, then flies the Eagle onto the player's Squirrel (SQUIRREL: wherever it is).
+# it; lesson 2 walls all three crossroads, then flies the Pigeon onto the player's Squirrel (SQUIRREL: wherever it is).
 SQUIRREL = "squirrel"
 OPENINGS = {1: {1: [("baby_fox_2", "5,2"), ("pup", "4,2")]},
             2: {}}   # lesson 2's board is set up (set_up): the guard of 7s stands from the start
-# Lesson 2's Eagle flies onto the Squirrel the first turn it can (the Squirrel on top of its stack), whenever that is.
-AMBUSH = {2: ("eagle", SQUIRREL)}
+# Lesson 2's Pigeon flies onto the Squirrel the first turn it can (the Squirrel on top of its stack), whenever that is.
+AMBUSH = {2: ("pigeon", SQUIRREL)}
 
 
 # Lesson 2 starts from a set-up board (Martin, from the cold reviews: placing the Lion and Buffalo again taught nothing):
@@ -98,7 +98,7 @@ class TutorialBot(Bot):
             done = cr in board and board[cr] and board[cr][-1].owner == "B" and board[cr][-1].card_id == card
             pick = None if done else next((a for a in places if a.card_id == card and a.crossroad == cr), None)
             if pick:
-                # the ambush turn draws first: the Eagle's cover is its last move, so the player's turn follows it at once
+                # the ambush turn draws first: the Pigeon's cover is its last move, so the player's turn follows it at once
                 draw = next((a for a in legal if isinstance(a, DrawAction)), None)
                 if (card, SQUIRREL) == self.ambush and draw and not state.actions_taken_this_turn:
                     return draw

@@ -1,0 +1,647 @@
+{
+ "rev": 1047,
+ "cards": {
+  "stag_beetle": {
+   "x": 1204,
+   "y": 1293
+  }
+ },
+ "piles": [
+  {
+   "id": "pmvutpeh30",
+   "name": "Vanilla Anchors",
+   "x": 166,
+   "y": -2094,
+   "cols": 12,
+   "stacked": false,
+   "cards": [
+    "wolf",
+    "hedgehog",
+    "lion",
+    "elephant",
+    "blue_whale",
+    "tiger",
+    "caracal",
+    "pigeon",
+    "guard_bee",
+    "toad",
+    "tortoise",
+    "stick_insect"
+   ],
+   "tint": "none"
+  },
+  {
+   "id": "pmvuubgcv0",
+   "name": "Removal",
+   "x": 163,
+   "y": -332,
+   "cols": 12,
+   "stacked": false,
+   "cards": [
+    "soldier_ant",
+    "macaque",
+    "serval",
+    "rat",
+    "gopher",
+    "barracuda",
+    "wolverine",
+    "warthog",
+    "hammerhead",
+    "boar"
+   ]
+  },
+  {
+   "id": "pmvuubz3o1",
+   "name": "Cantrips & Tutors",
+   "x": 163,
+   "y": 221,
+   "cols": 12,
+   "stacked": false,
+   "cards": [
+    "badger",
+    "raven",
+    "dolphin",
+    "bat",
+    "butterfly",
+    "alley_cat",
+    "oxpecker",
+    "nurse_bumblebee",
+    "bobcat",
+    "owl",
+    "mouse",
+    "caterpillar"
+   ]
+  },
+  {
+   "id": "pmvuurszo0",
+   "name": "\"Draw 2\"",
+   "x": 155,
+   "y": 614,
+   "cols": 9,
+   "stacked": false,
+   "cards": [
+    "nurse_bee",
+    "hare",
+    "fox",
+    "mara",
+    "praying_mantis",
+    "cod",
+    "black_bear",
+    "cheetah",
+    "falcon"
+   ]
+  },
+  {
+   "id": "pmvuv25va0",
+   "name": "Big Bodies",
+   "x": 172,
+   "y": -724,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "peacock",
+    "capybara",
+    "marmot",
+    "guard_wasp",
+    "tuna"
+   ]
+  },
+  {
+   "id": "pmvuvbh501",
+   "name": "Flat Food",
+   "x": 188,
+   "y": 1204,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "chipmunk",
+    "worker_bee",
+    "gazelle",
+    "squirrel",
+    "sloth"
+   ]
+  },
+  {
+   "id": "pmvuvbuyy0",
+   "name": "Food Engine",
+   "x": 193,
+   "y": 1604,
+   "cols": 6,
+   "stacked": false,
+   "cards": [
+    "dung_beetle",
+    "worker_wasp",
+    "worker_ant",
+    "hamster",
+    "hyena",
+    "wildebeest"
+   ]
+  },
+  {
+   "id": "pmvuvfv1o1",
+   "name": "Tokens",
+   "x": 165,
+   "y": -1302,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "sunfish",
+    "rabbit",
+    "bush_dog",
+    "deer"
+   ]
+  },
+  {
+   "id": "pmvuvgsf22",
+   "name": "Tempo",
+   "x": 164,
+   "y": -1693,
+   "cols": 7,
+   "stacked": false,
+   "cards": [
+    "mosquito",
+    "viper",
+    "anaconda",
+    "giraffe",
+    "crocodile",
+    "grizzly_bear",
+    "moose"
+   ]
+  },
+  {
+   "id": "pmvuvichj3",
+   "name": "Eggs",
+   "x": 198,
+   "y": 2663,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "egg_eater",
+    "python",
+    "bird_egg",
+    "snake_egg"
+   ],
+   "tint": "red"
+  },
+  {
+   "id": "pmvuvkcu74",
+   "name": "Deck Thinning",
+   "x": 983,
+   "y": -1305,
+   "cols": 3,
+   "stacked": false,
+   "cards": [
+    "vulture",
+    "sardine"
+   ]
+  },
+  {
+   "id": "pmvuvp1sm5",
+   "name": "Deck-Specific",
+   "x": 195,
+   "y": 2262,
+   "cols": 11,
+   "stacked": false,
+   "cards": [
+    "street_dog",
+    "stork",
+    "cockroach",
+    "city_spider",
+    "african_wild_dog",
+    "baboon",
+    "gorilla",
+    "krill",
+    "zebra",
+    "mahi_mahi"
+   ],
+   "tint": "yellow"
+  },
+  {
+   "id": "pmvuvrsm76",
+   "name": "Utility",
+   "x": 3672,
+   "y": 1370,
+   "cols": 8,
+   "stacked": false,
+   "cards": [
+    "macaw",
+    "woodpecker",
+    "beaver",
+    "opossum",
+    "raccoon",
+    "hercules_beetle",
+    "vole",
+    "coyote"
+   ]
+  },
+  {
+   "id": "pmvuvs4vt7",
+   "name": "Big Bodies",
+   "x": 3676,
+   "y": 214,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "rhinoceros",
+    "hippopotamus",
+    "whale_shark",
+    "sperm_whale"
+   ]
+  },
+  {
+   "id": "pmvuvsdpj8",
+   "name": "Removal",
+   "x": 3656,
+   "y": -1650,
+   "cols": 11,
+   "stacked": false,
+   "cards": [
+    "jaguar",
+    "hornet",
+    "hawk",
+    "honey_badger",
+    "cottonmouth",
+    "jackal",
+    "albatross",
+    "black_mamba",
+    "chimpanzee",
+    "swordfish"
+   ]
+  },
+  {
+   "id": "pmvuvsvrj9",
+   "name": "Auras",
+   "x": 4984,
+   "y": -181,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "leopard",
+    "cape_buffalo",
+    "piranha"
+   ]
+  },
+  {
+   "id": "pmvuvu3rf10",
+   "name": "Walls",
+   "x": 4992,
+   "y": 212,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "porcupine",
+    "armadillo",
+    "jellyfish",
+    "bison"
+   ]
+  },
+  {
+   "id": "pmvuvu9p511",
+   "name": "Apex Predators",
+   "x": 3660,
+   "y": -180,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "great_white_shark",
+    "black_panther",
+    "orca",
+    "eagle"
+   ]
+  },
+  {
+   "id": "pmvuw0k7c12",
+   "name": "Draw",
+   "x": 3673,
+   "y": -1240,
+   "cols": 9,
+   "stacked": false,
+   "cards": [
+    "hummingbird",
+    "meerkat",
+    "termite_king",
+    "dhole",
+    "manta_ray",
+    "lynx"
+   ]
+  },
+  {
+   "id": "pmvuw2jze13",
+   "name": "Tech",
+   "x": 3686,
+   "y": 1779,
+   "cols": 6,
+   "stacked": false,
+   "cards": [
+    "golden_orb_weaver",
+    "cuckoo",
+    "octopus",
+    "magpie",
+    "electric_eel"
+   ],
+   "tint": "red"
+  },
+  {
+   "id": "pmvuw3q0s14",
+   "name": "Extra Placement",
+   "x": 3642,
+   "y": -2058,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "remora",
+    "termite_queen",
+    "mole",
+    "ocelot",
+    "impala"
+   ]
+  },
+  {
+   "id": "pmvuw59lk15",
+   "name": "Engines",
+   "x": 4987,
+   "y": -579,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "okapi",
+    "groundhog",
+    "dormouse"
+   ]
+  },
+  {
+   "id": "pmvuwaa0x16",
+   "name": "Deck Specific",
+   "x": 3669,
+   "y": 971,
+   "cols": 8,
+   "stacked": false,
+   "cards": [
+    "earthworm",
+    "sea_turtle",
+    "orangutan",
+    "tarantula",
+    "tarsier",
+    "chameleon",
+    "queen_bee"
+   ]
+  },
+  {
+   "id": "pmvuwbfjh17",
+   "name": "Tempo",
+   "x": 3664,
+   "y": -579,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "queen_ant",
+    "flying_squirrel"
+   ],
+   "tint": "orange"
+  },
+  {
+   "id": "pmvuwg41o18",
+   "name": "Good",
+   "x": 7011,
+   "y": -1732,
+   "cols": 19,
+   "stacked": false,
+   "cards": [
+    "tortoise_legend",
+    "cockroach_legend",
+    "honey_badger_legend",
+    "raven_legend",
+    "mole_legend",
+    "lion_legend_3",
+    "lion_legend_4",
+    "octopus_legend_2",
+    "eagle_legend",
+    "hornet_legend",
+    "anaconda_legend",
+    "pheasant_legend",
+    "chameleon_legend",
+    "gorilla_legend",
+    "baboon_legend",
+    "chipmunk_legend",
+    "manta_ray_legend",
+    "rodent_legend"
+   ],
+   "tint": "green"
+  },
+  {
+   "id": "pmvuwh2be19",
+   "name": "Right direction, might need some testing and tweaking",
+   "x": 7010,
+   "y": -1328,
+   "cols": 27,
+   "stacked": false,
+   "cards": [
+    "butterfly_legend",
+    "bee_legend_2",
+    "locust_legend",
+    "squirrel_legend",
+    "leopard_legend",
+    "sperm_whale_legend",
+    "tiger_legend",
+    "rhinoceros_legend",
+    "fox_legend",
+    "capybara_legend",
+    "giraffe_legend",
+    "army_ant_legend",
+    "cuckoo_legend",
+    "bee_legend",
+    "dung_beetle_legend",
+    "rat_legend",
+    "bumblebee_legend",
+    "elephant_legend",
+    "wolf_legend_3",
+    "wildebeest_legend",
+    "tuna_legend",
+    "wolf_legend_2",
+    "oxpecker_legend",
+    "deer_legend",
+    "deer_legend_2",
+    "zebra_legend"
+   ],
+   "tint": "yellow"
+  },
+  {
+   "id": "pmvuwmd3520",
+   "name": "Needs change",
+   "x": 7009,
+   "y": -529,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "skunk_legend"
+   ],
+   "tint": "red"
+  },
+  {
+   "id": "pmvuwt3hw0",
+   "name": "Too weak",
+   "x": 7009,
+   "y": -923,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "bat_legend",
+    "rat_legend_2",
+    "falcon_legend"
+   ],
+   "tint": "orange"
+  },
+  {
+   "id": "pmvuwu80n1",
+   "name": "Literally Perfect",
+   "x": 7008,
+   "y": -2116,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "lion_legend",
+    "lion_legend_2"
+   ],
+   "tint": "blue"
+  },
+  {
+   "id": "pmvuwx5td2",
+   "name": "Not enough data",
+   "x": 7003,
+   "y": -138,
+   "cols": 5,
+   "stacked": false,
+   "cards": [
+    "sardine_legend",
+    "macaque_legend",
+    "sloth_legend",
+    "piranha_legend",
+    "boar_legend"
+   ],
+   "tint": "grey"
+  },
+  {
+   "id": "pmvuy9e2i0",
+   "name": "Idk",
+   "x": 3689,
+   "y": 2182,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "dart_frog",
+    "skunk"
+   ],
+   "tint": "grey"
+  }
+ ],
+ "gone": [
+  "borealis",
+  "cairn",
+  "snow_leopard",
+  "polar_bear",
+  "ostrich",
+  "firefly",
+  "salamander",
+  "weasel",
+  "dragonfly",
+  "ladybird",
+  "grasshopper",
+  "pond_skater",
+  "frog",
+  "snail",
+  "tick",
+  "centipede",
+  "duck",
+  "swallow",
+  "gecko",
+  "sparrow",
+  "coral_snake",
+  "tapir",
+  "basilisk",
+  "iguana",
+  "leech",
+  "squid",
+  "strawberry_leopard",
+  "black_widow",
+  "lemming",
+  "rattlesnake",
+  "cougar",
+  "chinchilla",
+  "jerboa",
+  "naked_mole_rat",
+  "outrider",
+  "andean_condor",
+  "anteater",
+  "forager_ant",
+  "muskrat",
+  "dingo",
+  "wolf_legend",
+  "swan_legend",
+  "goose_legend",
+  "jellyfish_legend",
+  "scout_bee",
+  "krill_legend"
+ ],
+ "marks": {
+  "mouse": {
+   "flag": true,
+   "note": "idk, doesn't feel great"
+  },
+  "stick_insect": {
+   "flag": true,
+   "note": "the animal feels off, 6 strength stealth feels useless"
+  },
+  "sardine": {
+   "flag": true,
+   "note": "it's extra placement, idk"
+  },
+  "stag_beetle": {
+   "flag": true,
+   "note": "feels a bit random"
+  },
+  "black_panther": {
+   "flag": true
+  },
+  "skunk": {
+   "flag": true,
+   "note": "maybe change it to global, just like octopus? think that's good, the art would need to change probably but that's fine"
+  },
+  "vole": {
+   "flag": true
+  },
+  "dart_frog": {
+   "flag": true
+  },
+  "wolf_legend_2": {
+   "note": "isn't it too strong compared to Adira?"
+  },
+  "zebra": {
+   "note": "seems weak still, idk"
+  },
+  "mackerel": {
+   "flag": true
+  },
+  "nurse_bumblebee": {
+   "note": "idk, lazy?"
+  },
+  "egg_eater": {
+   "note": "wording"
+  },
+  "python": {
+   "note": "wording"
+  },
+  "sloth_legend": {
+   "note": "change to \"and dawn\"?"
+  },
+  "bat_legend": {
+   "flag": true,
+   "note": "maybe this can literally become a rare?"
+  },
+  "giraffe": {
+   "note": "useless with Hungry?"
+  },
+  "cockroach": {
+   "note": "place Cockroach instead of Roach?"
+  }
+ }
+}

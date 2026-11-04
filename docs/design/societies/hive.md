@@ -43,11 +43,11 @@ The one the colony is for. She lays, and everyone else exists to feed her brood.
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Queen Melissia** | legendary | 3 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. | Meadow |
+| **Queen Melissia** | legendary | 2 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. | Meadow |
 | **Queen Solenia** | legendary | 3 | Dusk: gain 2 food for each animal you control. | Jungle |
 | **Queen Ant** | rare | 5 | Dusk: place a Young Ant on an adjacent empty crossroad. | Forest |
+| **Queen Bee** | rare | 5 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. | Meadow |
 | **Termite Queen** | rare | 2 | Roar: play a non-Queen Colony animal. | Savanna |
-| **Queen Bee** | common | 3 | Roar: play a Young Bee. | Meadow |
 
 <!-- cards:end -->
 
@@ -60,7 +60,7 @@ The daughters who carry: nectar, seeds, wood, whatever the nest eats. More of th
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **Worker Ant** | common | 2 | Roar: gain 3 food for each animal you control. | Forest |
-| **Worker Bee** | common | 1 | Flight. Roar: gain 12 food. | Meadow |
+| **Worker Bee** | common | 2 | Flight. Roar: gain 12 food. | Meadow |
 | **Worker Wasp** | common | 2 | Flight. Whenever you place a Colony animal, gain 3 food. | Forest |
 | **Forager Ant (reserve)** | common | 1 | Roar: gain 5 food. If you gained 10 or more food this turn, draw a card. | Forest |
 
@@ -74,7 +74,7 @@ The ones inside who feed the brood and decide, with royal jelly, which larva bec
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Nurse Bee** | common | 3 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. | Meadow |
+| **Nurse Bee** | common | 2 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. | Meadow |
 | **Nurse Bumblebee** | common | 3 | Flight. Roar: draw a Colony animal. | Meadow |
 
 <!-- cards:end -->
@@ -91,7 +91,7 @@ The ones at the door and the ones built to fight. Nothing alone; everything in n
 | **Hornet** | rare | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. | Forest |
 | **Soldier Ant** | common | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. | Jungle |
 | **Soldier Bee** | common | 3 | Flight. Spikes. | Meadow |
-| **Soldier Wasp** | common | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. | Forest |
+| **Soldier Wasp** | common | 3 | Flight. Has +4 strength while you control 4 or more Colony animals. | Forest |
 
 <!-- cards:end -->
 
@@ -160,7 +160,7 @@ Cards of the hive whose job the page can't yet name.
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **[BEE]** | legendary | 1 | Roar: your animals on the board, in your hand and in your deck become strength 4. | Meadow |
+| **[BEE]** | legendary | 1 | Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are). | Meadow |
 
 <!-- cards:end -->
 

@@ -32,7 +32,7 @@ pub fn aura_sources(st: &State) -> Sources {
 
 fn aura_applies(st: &State, kind: u8, owner: Player, src_owner: Player, src_iid: i64, self_iid: Option<i64>, card: &Card, their_turn: bool) -> Option<i32> {
     let (fam, key, opp_only) = match kind {
-        1 => (T_FISH, "mackerel_anthem", false),
+        1 => (T_FISH, "mahi_mahi_anthem", false),
         2 => (T_HOOFED, "buffalo_anthem", true),
         _ => return None,
     };
@@ -52,8 +52,13 @@ pub fn small_starting_deck(st: &State, owner: Player, but: CardId) -> bool {
 
 /// The live "has +X" bonus for a unit of `card` controlled by `owner` (`self_iid` None: a prospective placement).
 pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64>, sources: Option<&Sources>) -> i32 {
+    anthem_bonus_turn(st, card, owner, self_iid, sources, st.current != owner)
+}
+
+/// The anthem as it stands on a chosen turn (`their_turn`: the owner's opponent to move), for an evaluation that asks
+/// both (Giraffe, Crocodile and the Cape Buffalo's aura change with whose turn it is).
+pub fn anthem_bonus_turn(st: &State, card: &Card, owner: Player, self_iid: Option<i64>, sources: Option<&Sources>, their_turn: bool) -> i32 {
     let cfg = st.cfg();
-    let their_turn = st.current != owner;
     const AURA_FAMILIES: u32 = T_FISH | T_HOOFED;
     if card.anthem_kind == 0 {
         if card.tags & AURA_FAMILIES == 0 {
@@ -88,8 +93,10 @@ pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64
                     bonus += cfg.int("guard_hornet_bonus");
                 }
             }
-            2 => bonus += cfg.int("tuna_per_fish") * count(T_FISH, false),
-            3 => bonus += cfg.int("hamster_per_step") * (st.food[owner.min(1) as usize] / cfg.int("hamster_food_step")),
+            2 => {
+                bonus += cfg.int("tuna_per_fish") * crate::statics::fish_count(st, owner, None, self_iid);
+            }
+            3 => bonus += cfg.int("marmot_per_step") * (st.food[owner.min(1) as usize] / cfg.int("marmot_food_step")),
             4 => bonus += cfg.int("hand_per_card") * st.hands[owner.min(1) as usize].len() as i32,
             5 => {
                 if their_turn {
@@ -103,7 +110,7 @@ pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64
             }
             7 => {
                 if owner <= B && !st.starting_decks[owner as usize].is_empty() && small_starting_deck(st, owner, card.idx) {
-                    bonus += cfg.int("capybara_bonus");
+                    bonus += cfg.int("capybara_strength") - card.base.unwrap_or(0);
                 }
             }
             _ => {}
@@ -129,6 +136,13 @@ pub fn raw_strength(st: &State, unit: &Unit, sources: Option<&Sources>) -> i32 {
         return base + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources);
     }
     base_or_dynamic(st, card) + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources)
+}
+
+/// `raw_strength` on a chosen turn (see `anthem_bonus_turn`).
+pub fn raw_strength_turn(st: &State, unit: &Unit, sources: Option<&Sources>, their_turn: bool) -> i32 {
+    let card = st.card(unit.card);
+    let base = if st.is_inked(unit.iid) { card.base.unwrap_or(0) } else { base_or_dynamic(st, card) };
+    base + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus_turn(st, card, unit.owner, Some(unit.iid), sources, their_turn)
 }
 
 /// Strength of a unit in play, >= 0.

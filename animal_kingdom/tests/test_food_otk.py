@@ -32,72 +32,59 @@ def test_food_gained_counter_tracks_and_resets_between_turns():
     assert effects._food_gained_this_turn(s, "A") == 0                # reset each turn
 
 
-def test_gopher_draws_only_when_fed():
-    fed = make_state(hands={"A": ["gopher"]}, decks={"A": ["mouse", "mouse"], "B": []})
+def test_mara_draws_only_when_fed():
+    fed = make_state(hands={"A": ["mara"]}, decks={"A": ["mouse", "mouse"], "B": []})
     fed.turn_flags["food_gained_A"] = CFG.fed_threshold
-    rules.apply_action(fed, PlaceAction("gopher", ("cr", "1,2")))
-    assert len(fed.hands["A"]) == CFG.gopher_draw
+    rules.apply_action(fed, PlaceAction("mara", ("cr", "1,2")))
+    assert len(fed.hands["A"]) == CFG.mara_draw
 
-    unfed = make_state(hands={"A": ["gopher"]}, decks={"A": ["mouse", "mouse"], "B": []})
-    rules.apply_action(unfed, PlaceAction("gopher", ("cr", "1,2")))
+    unfed = make_state(hands={"A": ["mara"]}, decks={"A": ["mouse", "mouse"], "B": []})
+    rules.apply_action(unfed, PlaceAction("mara", ("cr", "1,2")))
     assert len(unfed.hands["A"]) == 0
 
 
-def test_muskrat_removes_adjacent_enemy_only_when_fed():
-    fed = make_state(current="A", hands={"A": ["muskrat"]})
+def test_gopher_removes_adjacent_enemy_only_when_fed():
+    fed = make_state(current="A", hands={"A": ["gopher"]})
     fed.turn_flags["food_gained_A"] = CFG.fed_threshold
     put(fed, "1,2", "lion", "A")                                      # connects 2,2
     put(fed, "2,1", "mouse", "B")                                     # enemy adjacent to 2,2
-    rules.apply_action(fed, PlaceAction("muskrat", ("cr", "2,2")))
+    rules.apply_action(fed, PlaceAction("gopher", ("cr", "2,2")))
     if fed.pending is not None:
         rules.apply_action(fed, ChoiceAction("2,1"))
     assert fed.owner_of("2,1") is None and "mouse" in fed.remove_pile
 
-    unfed = make_state(current="A", hands={"A": ["muskrat"]})
+    unfed = make_state(current="A", hands={"A": ["gopher"]})
     put(unfed, "1,2", "lion", "A")
     put(unfed, "2,1", "mouse", "B")
-    rules.apply_action(unfed, PlaceAction("muskrat", ("cr", "2,2")))
+    rules.apply_action(unfed, PlaceAction("gopher", ("cr", "2,2")))
     assert unfed.owner_of("2,1") == "B"                               # no removal offered
 
 
-def test_fed_muskrat_survives_the_hippo_it_removes():
-    """A fed Muskrat placed next to an enemy Hippo removes it FIRST (roar before
-    reactions, decision 8); the Hippo's queued reactive removal then fizzles because its
-    source is gone - Muskrat lives. An UNfed Muskrat (str 2 <= Hippo's max) is still
-    removed by the Hippo, which survives."""
-    fed = make_state(current="A", hands={"A": ["muskrat"]})
+def test_fed_gopher_and_the_hippo_it_removes_go_together():
+    """A fed Gopher placed next to an enemy Hippo removes it first (roar before reactions), and the Hippo's
+    removal, already set off by the placement, still takes the Gopher (Martin, 2026-10-27). An UNfed
+    Gopher (str 4 <= Hippo's max) is removed by the Hippo, which survives."""
+    fed = make_state(current="A", hands={"A": ["gopher"]})
     fed.turn_flags["food_gained_A"] = CFG.fed_threshold
     put(fed, "1,2", "lion", "A")                                      # connects 2,2
     put(fed, "2,1", "hippopotamus", "B")                             # enemy Hippo adjacent
-    rules.apply_action(fed, PlaceAction("muskrat", ("cr", "2,2")))
+    rules.apply_action(fed, PlaceAction("gopher", ("cr", "2,2")))
     if fed.pending is not None:
-        rules.apply_action(fed, ChoiceAction("2,1"))                  # Muskrat removes the Hippo
-    assert fed.owner_of("2,2") == "A"                                 # Muskrat survives...
-    assert fed.owner_of("2,1") is None                               # ...and the Hippo is gone
-    assert "hippopotamus" in fed.remove_pile and "muskrat" not in fed.remove_pile
+        rules.apply_action(fed, ChoiceAction("2,1"))                  # Gopher removes the Hippo
+    assert fed.owner_of("2,2") is None and fed.owner_of("2,1") is None
+    assert "hippopotamus" in fed.remove_pile and "gopher" in fed.remove_pile
 
-    unfed = make_state(current="A", hands={"A": ["muskrat"]})
+    unfed = make_state(current="A", hands={"A": ["gopher"]})
     put(unfed, "1,2", "lion", "A")
     put(unfed, "2,1", "hippopotamus", "B")
-    rules.apply_action(unfed, PlaceAction("muskrat", ("cr", "2,2")))
-    assert unfed.owner_of("2,2") is None                             # Hippo removes the Muskrat
+    rules.apply_action(unfed, PlaceAction("gopher", ("cr", "2,2")))
+    assert unfed.owner_of("2,2") is None                             # Hippo removes the Gopher
     assert unfed.owner_of("2,1") == "B"                              # Hippo survives
-    assert "muskrat" in unfed.remove_pile
-
-
-def test_groundhog_gains_food_only_when_fed():
-    fed = make_state(hands={"A": ["groundhog"]})
-    fed.turn_flags["food_gained_A"] = CFG.fed_threshold
-    rules.apply_action(fed, PlaceAction("groundhog", ("cr", "1,2")))
-    assert fed.food["A"] == CFG.groundhog_food
-
-    unfed = make_state(hands={"A": ["groundhog"]})
-    rules.apply_action(unfed, PlaceAction("groundhog", ("cr", "1,2")))
-    assert unfed.food["A"] == 0
+    assert "gopher" in unfed.remove_pile
 
 
 
-# ------------------------------------------------------------------ go-wide rodent payoff
+# ------------------------------------------------------------------ go-wide rodent_legend payoff
 
 def test_rat_king_gains_food_per_other_rodent_and_draws():
     s = make_state(hands={"A": ["rat_legend"]}, decks={"A": ["lion"], "B": []})
@@ -192,3 +179,14 @@ def test_porcupine_gives_its_neighbours_spikes_each_kills_its_first_coverer():
     assert s.top_unit("3,2") is squirrel and "lion" in s.remove_pile  # ...and the borrowed spines remove it
     rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))         # spent: the second cover holds
     assert s.top_unit("3,2").card_id == "lion"
+
+
+def test_rodent_legend_gains_as_much_food_as_gained_this_turn():
+    s = make_state(hands={"A": ["rodent_legend"]})
+    s.turn_flags["food_gained_A"] = 15
+    rules.apply_action(s, PlaceAction("rodent_legend", ("cr", "1,2")))
+    assert s.food["A"] == 15
+
+    none = make_state(hands={"A": ["rodent_legend"]})
+    rules.apply_action(none, PlaceAction("rodent_legend", ("cr", "1,2")))
+    assert none.food["A"] == 0

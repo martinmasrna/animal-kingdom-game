@@ -1,5 +1,5 @@
 """The First of Many (Martin, 2026-10-22): "Roar: cover the board with Locusts." Each Locust is Wild, no one's, with
-"In 2 turns, remove this and the animal under it": the opponent's turn, then the caster's, since a Wild animal's timer
+"In 2 turns, remove the animal underneath, then fly away": the opponent's turn, then the caster's, since a Wild animal's timer
 ticks every turn (keywords.md, Wild)."""
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PassAction, PlaceAction
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import WILD
+from animal_kingdom.engine.strength import card_strength
 
 from ._helpers import make_state, put
 
@@ -48,6 +49,17 @@ def test_the_swarm_eats_at_the_start_of_the_casters_next_turn_and_what_was_burie
     assert not any(u.card_id == "locust_swarm" for st in s.board.values() for u in st)
 
 
+def test_a_locust_flying_away_is_no_removal_so_only_what_it_eats_counts():
+    s = make_state(hands={"A": ["locust_legend", "python"], "B": ["lion"]}, decks={"A": ["lion"] * 9, "B": ["lion"] * 9})
+    put(s, "2,2", "lion", "B")
+    put(s, "3,1", "hyena", "A")
+    rules.apply_action(s, PlaceAction("locust_legend", ("cr", "1,2")))
+    end_turn(s)
+    end_turn(s)                                              # A's Dawn: 12 Locusts fly off, the Lion, Hyena and legendary are eaten
+    assert card_strength(s, "python", "A") == 1              # one enemy removed: the Lion
+    assert s.turn_flags.get(f"lost_{WILD}", 0) == 0
+
+
 def test_covering_a_locust_spares_that_crossroad():
     s = swarm()
     lion = put(s, "2,2", "lion", "B")
@@ -81,3 +93,14 @@ def test_a_wild_animal_connects_no_one_and_holds_no_region():
     rules.apply_action(s, PlaceAction("locust_legend", ("cr", spot)))
     assert not rules.regions_controlled(s, "A") and not rules.regions_controlled(s, "B")
     assert not s.connected_occupied("A") and not s.connected_occupied("B")
+
+
+def test_vesper_guards_the_colony_animal_played_first_when_the_swarm_covers_several():
+    """Martin, 2026-10-31: one swarm covers several of the owner's Colony animals at once, and Vesper goes to the one that
+    was played first, as Dawn and Dusk are ordered."""
+    s = make_state(current="A", hands={"A": ["locust_legend"], "B": ["hornet_legend"]},
+                   decks={"A": ["lion"] * 9, "B": ["lion"] * 9})
+    for seq, cr in enumerate(("2,2", "3,3", "1,1"), start=1):
+        put(s, cr, "worker_ant", "B").play_seq = seq
+    rules.apply_action(s, next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction)))
+    assert [cr for cr, st in s.board.items() if st[-1].card_id == "hornet_legend"] == ["2,2"]

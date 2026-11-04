@@ -80,7 +80,16 @@ pub struct Searcher {
     pub den_sense: bool,
     pub reply_turns: usize,
     pub deepen_chase: bool,
+    pub den_open: bool,
+    /// Far den sense (referee_bot.den_far): hands dealt to read a capture built from several placements; 0 off.
+    pub den_far: usize,
+    /// referee_bot.den_far_margin / den_far_ratio: how much riskier an action may be and stay.
+    pub den_far_margin: usize,
+    pub den_far_ratio: f64,
+    pub reply_min: bool,
+    pub outs: usize,
     // run state
+    reply_openings: Vec<Action>,
     search_nodes: usize,
     deepening: bool,
     screening: bool,
@@ -128,6 +137,13 @@ impl Searcher {
             den_sense: false,
             reply_turns: 0,
             deepen_chase: false,
+            den_open: false,
+            den_far: 0,
+            den_far_margin: 0,
+            den_far_ratio: 0.0,
+            reply_min: false,
+            outs: 0,
+            reply_openings: Vec::new(),
             search_nodes: 0,
             deepening: false,
             screening: false,
@@ -220,6 +236,11 @@ impl Searcher {
                 self.stats.screened_candidates = 1;
                 return c.clone();
             }
+        }
+        // referee_bot: far den sense filters the legal actions first, so a planned continuation passes it too
+        let far_legal: Vec<Action> = if self.is_referee() && legal.len() > 1 { self.far_safe(st, legal.to_vec(), me) } else { legal.to_vec() };
+        let legal: &[Action] = &far_legal;
+        if self.is_referee() && self.staged {
             if !self.continuation_plan.is_empty() {
                 let key = observation_key(st, me);
                 let planned = self.continuation_plan.iter().find(|(k, _)| *k == key).map(|(_, a)| a.clone());
@@ -469,6 +490,14 @@ impl Searcher {
                 selected.push(i);
             }
         }
+        if self.den_open {
+            for a in self.den_openers(&worlds[0], &candidates, me) {
+                let i = candidates.iter().position(|x| *x == a).unwrap();
+                if !selected.contains(&i) {
+                    selected.push(i);
+                }
+            }
+        }
         let narrowed: Vec<Action> = candidates.iter().enumerate().filter(|(i, _)| selected.contains(i)).map(|(_, a)| a.clone()).collect();
         self.stats.screened_candidates = narrowed.len();
         narrowed
@@ -634,6 +663,14 @@ impl Searcher {
                 }
             }
         }
+        if self.den_open {
+            for a in self.den_openers(world, legal, me) {
+                let i = legal.iter().position(|x| *x == a).unwrap();
+                if !reserved.contains(&i) {
+                    reserved.push(i);
+                }
+            }
+        }
         let mut kept: Vec<usize> = reserved.clone();
         let cap = self.beam_width.max(reserved.len());
         for &(_, i) in &scored {
@@ -648,6 +685,32 @@ impl Searcher {
             }
         }
         legal.iter().enumerate().filter(|(i, _)| kept.contains(i)).map(|(_, a)| a.clone()).collect()
+    }
+
+    /// The placements after which my den capture is legal (the Roar settled by the fast policy): the first half of a
+    /// two-action win, whose one-move score looks ordinary (Martin's 2TZBCA, 2026-10-29).
+    fn den_openers(&mut self, world: &State, legal: &[Action], me: Player) -> Vec<Action> {
+        let mut openers = Vec::new();
+        for action in legal {
+            if !matches!(action, Action::Place { target: Target::Cr(_), .. } | Action::Roam { target: Target::Cr(_), .. }) {
+                continue;
+            }
+            let mut nxt = world.clone();
+            let _ = rules::apply_action(&mut nxt, action, false);
+            if self.capture_next(&nxt, me) {
+                openers.push(action.clone());
+            }
+        }
+        openers
+    }
+
+    /// Whether my den capture is legal once this position's pending choices are settled by the fast policy.
+    fn capture_next(&mut self, st: &State, me: Player) -> bool {
+        let s = self.settled(st, me);
+        s.result.is_none()
+            && s.pending.is_none()
+            && s.player_to_act() == me
+            && rules::legal_actions(&s).iter().any(|b| matches!(b, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. }))
     }
 
     fn is_collapsible_deck_reveal(&self, world: &State) -> bool {
@@ -668,13 +731,13 @@ impl Searcher {
         scored.iter().take(n).map(|(_, i)| legal[*i].clone()).collect()
     }
 
-    fn safe_actions(&self, world: &State, legal: &[Action], me: Player) -> Vec<Action> {
+    fn safe_actions(&mut self, world: &State, legal: &[Action], me: Player) -> Vec<Action> {
         let opponent = other(me);
         let mut safe = Vec::new();
         for action in legal {
             let mut nxt = world.clone();
             let _ = rules::apply_action(&mut nxt, action, false);
-            if nxt.result.is_some() || !opponent_lethal_next_turn(&nxt, opponent) {
+            if nxt.result.is_some() || !opponent_lethal_next_turn(&nxt, opponent) || (self.den_open && self.capture_next(&nxt, me)) {
                 safe.push(action.clone());
             }
         }
@@ -750,10 +813,15 @@ impl Searcher {
     fn reply_scores(&mut self, branches: &mut Vec<Branch>, me: Player) -> Vec<f64> {
         let mut scores = Vec::with_capacity(branches.len());
         let mut befores = Vec::with_capacity(branches.len());
+        let deep = self.depth > 0 && self.deepening;
+        // Reply minimax: the position before the reply and the openings it weighed, per branch
+        let mut pres: Vec<Option<(State, Vec<Action>)>> = Vec::with_capacity(branches.len());
         for (s, penalty) in branches.iter_mut() {
             let tiebreak = if self.decisive >= DECISIVE { LOSS_TIEBREAK } else { self.decisive / 10.0 };
             let before = self.planning_eval(s, me).max(-tiebreak).min(tiebreak);
-            let threat = self.advance(s, me);
+            let pre = if deep && self.reply_min { Some(s.clone()) } else { None };
+            let threat = self.advance(s, me, None);
+            pres.push(pre.map(|p| (p, self.reply_openings.clone())));
             let mut score = self.clamped_eval(s, me);
             if score == -self.decisive {
                 score += before;
@@ -765,7 +833,7 @@ impl Searcher {
             befores.push(before);
             self.stats.reply_world_rollouts += 1;
         }
-        if self.depth > 0 && self.deepening && !branches.is_empty() {
+        if deep && !branches.is_empty() {
             let mut order: Vec<usize> = (0..scores.len()).collect();
             order.sort_by(|&a, &b| scores[b].partial_cmp(&scores[a]).unwrap_or(std::cmp::Ordering::Equal).then(a.cmp(&b)));
             for &i in order.iter().take(self.deepen_top) {
@@ -777,14 +845,31 @@ impl Searcher {
                     continue;
                 }
                 let state = branches[i].0.clone();
-                let mut score = self.leaf_score(&state, me, self.depth);
-                if score == -self.decisive {
-                    score += befores[i];
+                let mut score = self.deep_line(&state, me, befores[i]);
+                // Reply minimax: the same line against each of their other openings; the worst for me counts
+                if let Some((pre, openings)) = &pres[i] {
+                    for opening in openings.iter().skip(1) {
+                        if self.over_budget() {
+                            self.stats.lookahead_cut += 1;
+                            break;
+                        }
+                        let mut alt = pre.clone();
+                        self.advance(&mut alt, me, Some(opening));
+                        score = score.min(self.deep_line(&alt, me, befores[i]));
+                    }
                 }
                 scores[i] = score - branches[i].1;
             }
         }
         scores
+    }
+
+    fn deep_line(&mut self, st: &State, me: Player, before: f64) -> f64 {
+        let mut score = self.leaf_score(st, me, self.depth);
+        if score == -self.decisive {
+            score += before;
+        }
+        score
     }
 
     fn mean_reply_score(&mut self, branches: &mut Vec<Branch>, me: Player) -> f64 {
@@ -826,6 +911,29 @@ impl Searcher {
             deep.push((action.clone(), score));
         }
         self.stats.deepened_roots = deep.len();
+        // Outs (bots/referee_bot.py): every deepened root reads as lost, so rank them by the sampled hands they survive
+        let best_deep = deep.iter().map(|(_, s)| *s).fold(f64::NEG_INFINITY, f64::max);
+        if self.outs > 0 && !deep.is_empty() && best_deep <= -self.decisive / 2.0 {
+            let extra: Vec<State> = (0..self.outs).map(|_| determinize(st, me, &mut self.det_rng)).collect();
+            let mut ranked: Vec<(Action, f64)> = Vec::with_capacity(deep.len());
+            for (action, score) in &deep {
+                if self.over_budget() {
+                    return deep;
+                }
+                self.begin_root_candidate();
+                self.search_nodes = 0; // a fresh staged budget: a greedy completion would play a different turn than the one ranked
+                let mut branches = self.branches_after_action(&extra, action, me, st.current == me);
+                let top = self.deepen_top;
+                self.deepening = true;
+                self.deepen_top = branches.len();
+                let alive = self.reply_scores(&mut branches, me).iter().filter(|s| **s > -self.decisive / 2.0).count();
+                self.deepening = false;
+                self.deepen_top = top;
+                self.end_root_candidate(action);
+                ranked.push((action.clone(), score + alive as f64 * self.decisive));
+            }
+            return ranked;
+        }
         deep
     }
 
@@ -842,7 +950,7 @@ impl Searcher {
             let mut nxt = st.clone();
             let _ = rules::apply_action(&mut nxt, &action, false);
             self.play_turn(&mut nxt, me);
-            let threat = self.advance(&mut nxt, me);
+            let threat = self.advance(&mut nxt, me, None);
             self.stats.lookahead_lines += 1;
             let mut value = self.leaf_score(&nxt, me, depth - 1);
             if threat != 0.0 {
@@ -878,8 +986,10 @@ impl Searcher {
         }
     }
 
-    fn advance(&mut self, st: &mut State, me: Player) -> f64 {
+    fn advance(&mut self, st: &mut State, me: Player, opening: Option<&Action>) -> f64 {
         let mut threat = 0.0;
+        let mut forced = opening;
+        self.reply_openings.clear();
         for _ in 0..40 {
             if let Some(r) = rules::is_terminal(st) {
                 st.result = Some(r);
@@ -894,6 +1004,12 @@ impl Searcher {
                 threat = self.den_threat(st, actor, me);
             }
             if self.reply_turns > 0 && (self.deepening || self.depth == 0) && actor != me && st.pending.is_none() && st.actions_taken_this_turn == 0 {
+                if let Some(o) = forced.take() {
+                    if legal.contains(o) {
+                        let _ = rules::apply_action(st, o, false);
+                        continue;
+                    }
+                }
                 if let Some(opening) = self.reply_opening(st, actor, &legal) {
                     let _ = rules::apply_action(st, &opening, false);
                     continue;
@@ -962,22 +1078,77 @@ impl Searcher {
         1.0 - comb_f(total - enabling, hand as u64) / comb_f(total, hand as u64)
     }
 
+    /// referee_bot._far_hits: of `den_far` hands dealt from the unseen pool (seed 0, the same hands for every position
+    /// compared), how many capture my den in the opponent's coming turn.
+    fn far_hits(&self, st: &State, opp: Player, me: Player) -> usize {
+        let hand = st.hands[opp as usize].len();
+        let pool = crate::bots::features::opponent_unseen(st, opp);
+        if hand == 0 || pool.len() < hand {
+            return 0;
+        }
+        let dist = den_distance(st, me);
+        let mut rng = PyRandom::seeded(0);
+        let mut hits = 0usize;
+        for _ in 0..self.den_far {
+            let mut dealt = pool.clone();
+            rng.shuffle(&mut dealt);
+            let mut probe = st.clone();
+            let units: Vec<Unit> = dealt[..hand].iter().enumerate().map(|(i, &c)| Unit::new(c, opp, 900001 + i as i64)).collect();
+            probe.hands[opp as usize] = crate::state::Hand::from_slice(&units);
+            probe.decks[opp as usize] = crate::state::Deck::from_slice(&dealt[hand..]);
+            let mut budget = FAR_NODES;
+            if far_capture(&probe, opp, &dist, &mut budget) {
+                hits += 1;
+            }
+        }
+        hits
+    }
+
+    /// referee_bot._far_safe: root candidates that end my turn, dealt the same hands; one losing my den to clearly more
+    /// hands than the safest (by more than one in fifty) is dropped; one that doesn't end my turn is kept.
+    fn far_safe(&mut self, world: &State, candidates: Vec<Action>, me: Player) -> Vec<Action> {
+        if self.den_far == 0 {
+            return candidates;
+        }
+        let opp = other(me);
+        let mut hits: Vec<Option<usize>> = Vec::new();
+        for action in &candidates {
+            let mut nxt = world.clone();
+            let _ = rules::apply_action(&mut nxt, action, false);
+            let nxt = self.settled(&nxt, me);
+            let ends = nxt.result.is_none() && nxt.pending.is_none() && nxt.player_to_act() == opp && nxt.actions_taken_this_turn == 0;
+            hits.push(if ends { Some(self.far_hits(&nxt, opp, me)) } else { None });
+        }
+        let Some(best) = hits.iter().filter_map(|h| *h).min() else { return candidates };
+        let bar = best + if self.den_far_margin > 0 { self.den_far_margin } else { (self.den_far / 50).max(1) };
+        let ratio = self.den_far_ratio;
+        candidates
+            .into_iter()
+            .zip(hits)
+            .filter(|(_, h)| h.map_or(true, |h| h <= bar || (ratio > 0.0 && h as f64 <= ratio * best as f64)))
+            .map(|(a, _)| a)
+            .collect()
+    }
+
     fn reply_opening(&mut self, st: &State, opp: Player, legal: &[Action]) -> Option<Action> {
         if legal.len() < 2 {
             return None;
         }
         let mut best: Option<Action> = None;
         let mut best_score: Option<f64> = None;
-        for opening in self.greedy_topn(st, legal, opp, self.reply_turns) {
+        let openings = self.greedy_topn(st, legal, opp, self.reply_turns);
+        for opening in &openings {
             let mut nxt = st.clone();
-            let _ = rules::apply_action(&mut nxt, &opening, false);
+            let _ = rules::apply_action(&mut nxt, opening, false);
             self.play_turn(&mut nxt, opp);
             let score = self.clamped_eval(&nxt, opp);
             if best_score.map(|b| score > b).unwrap_or(true) {
-                best = Some(opening);
+                best = Some(opening.clone());
                 best_score = Some(score);
             }
         }
+        // the openings weighed, the one played first (reply minimax tries the others)
+        self.reply_openings = best.iter().cloned().chain(openings.iter().filter(|o| Some(*o) != best.as_ref()).cloned()).collect();
         best
     }
 
@@ -1155,4 +1326,75 @@ pub fn observation_key(st: &State, me: Player) -> String {
 pub fn effects_unused() {
     let _ = effects::pn;
     let _: Option<Map> = None;
+}
+
+const FAR_NODES: i64 = 400;
+
+/// referee_bot._den_distance: steps from each crossroad to my den's front (0 on the front).
+fn den_distance(st: &State, me: Player) -> Vec<i32> {
+    let gm = st.map();
+    let mut dist = vec![i32::MAX; gm.n()];
+    let mut frontier: Vec<Cr> = gm.front(me).to_vec();
+    for &c in &frontier {
+        dist[c as usize] = 0;
+    }
+    while !frontier.is_empty() {
+        let mut nxt = Vec::new();
+        for &c in &frontier {
+            for &nb in gm.neighbors(c) {
+                if dist[nb as usize] == i32::MAX {
+                    dist[nb as usize] = dist[c as usize] + 1;
+                    nxt.push(nb);
+                }
+            }
+        }
+        frontier = nxt;
+    }
+    dist
+}
+
+/// referee_bot._far_capture: whether `opp`, to act in their own turn, captures my den with what they hold, searching
+/// placements and roams that each land closer to my den than their chain stands, and the choices those open.
+fn far_capture(st: &State, opp: Player, dist: &[i32], budget: &mut i64) -> bool {
+    if let Some(r) = &st.result {
+        return r.winner == Some(opp);
+    }
+    if st.player_to_act() != opp || *budget <= 0 {
+        return false;
+    }
+    let legal = rules::legal_actions(st);
+    if legal.iter().any(|a| matches!(a, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. })) {
+        return true;
+    }
+    let occ = st.connected_occupied(opp);
+    let gm = st.map();
+    let mut stand = i32::MAX;
+    for c in 0..gm.n() {
+        if occ & (1 << c) != 0 {
+            stand = stand.min(dist[c]);
+        }
+    }
+    if stand == i32::MAX {
+        stand = gm.front(opp).iter().map(|&c| dist[c as usize]).min().unwrap_or(i32::MAX - 1) + 1;
+    }
+    for a in &legal {
+        match a {
+            Action::Place { target, .. } | Action::Roam { target, .. } => match target {
+                Target::Cr(c) if dist[*c as usize] < stand => {}
+                _ => continue,
+            },
+            _ if st.pending.is_none() => continue,
+            _ => {}
+        }
+        *budget -= 1;
+        if *budget < 0 {
+            return false;
+        }
+        let mut nxt = st.clone();
+        let _ = rules::apply_action(&mut nxt, a, false);
+        if far_capture(&nxt, opp, dist, budget) {
+            return true;
+        }
+    }
+    false
 }

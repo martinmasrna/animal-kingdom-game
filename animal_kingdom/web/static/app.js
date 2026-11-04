@@ -76,8 +76,15 @@ function readOverlay(html) {
   ov.addEventListener('click', e => { e.stopPropagation(); if (pressed) ov.remove(); });
   ov.addEventListener('contextmenu', e => { e.preventDefault(); ov.remove(); });
 }
-function readCard(id, str) {
-  const c = CARDS[id]; if (!c) return;
+// A card that evolves at a food count its owner's Hungry animals reach (the legendary Dung Beetle; Martin, 2026-10-27):
+// in a game its text ends with the count towards the next form, "(14/25)".
+function formOf(id, seat) {
+  const c = CARDS[id], at = c && c.evolvesAt;
+  if (!at || !V || !V.game || !V.game.eaten) return c;
+  return { ...c, text: `${c.text} (${Math.min(V.game.eaten[seat] || 0, at)}/${at})` };
+}
+function readCard(id, str, seat = V && V.you) {
+  const c = formOf(id, seat); if (!c) return;
   const side = readSide(c, CARDS);   // the cards it makes and its keywords, right of the card (under it on a narrow screen)
   readOverlay(`<div class="rcard${(c.related || []).length ? ' wide' : ''}">${cardHTML(c, str == null ? {} : { str })}${side}</div>`);
 }
@@ -105,9 +112,11 @@ const myDecks = () => ME.decks.map(d => ({ ...d, cards: Object.fromEntries(Objec
 const saveDecks = ds => { ME.decks = ds; api('/api/me/decks', { method: 'PUT', body: JSON.stringify(ds) }).then(r => r.ok || toast('Could not save your decks')); };
 const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 // The decks you can play: your complete decks (a profile starts with the starters as its own); with none, the starters.
-const playable = () => { const mine = myDecks().filter(d => deckSize(d.cards) === 30).map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
-  return mine.length ? mine : DECKS; };
-const chosenDeck = () => { const all = playable(), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
+// A deck under 30 cards is listed too, so it doesn't vanish from home while you build it: shown with its count, opened in
+// the collection to finish, never chosen to play (Martin, 2026-10-31: "affordance for decklist with less than 30 cards").
+const playable = () => { const mine = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: Math.max(0, 30 - deckSize(d.cards)), list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
+  return mine.some(d => !d.short) ? mine : [...DECKS, ...mine]; };
+const chosenDeck = () => { const all = playable().filter(d => !d.short), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 
 // ------------------------------------------------------------------ routing
@@ -269,7 +278,7 @@ function homeScreen(mode = {}) {
     : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : isTest ? label(TEST_BOTS, play.botDeck) : 'Random'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
-  const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
+  const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.short ? `<span class="left">${30 - d.short}/30</span>` : ''}</div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
   const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
   const chooser = play.open === 'decks'
@@ -306,7 +315,10 @@ function homeScreen(mode = {}) {
   root.onclick = e => { if (play.open && !e.target.closest('.chooser, .pick, #gearbtn')) { play.open = null; redraw(); } };   // a click elsewhere closes the chooser
   root.querySelectorAll('.chooser [data-deck]').forEach(el => {
     // A click picks the deck and shows its list; the chooser stays open to read it (hover changed the list on the way to it).
-    el.onclick = () => { store('ak:deck', el.dataset.deck); play.peek = el.dataset.deck; redraw(); };
+    el.onclick = () => {
+      const d = all.find(x => x.id === el.dataset.deck);
+      if (d && d.short) { play.open = null; location.hash = '#/collection/' + d.id.slice(3); return; }   // unfinished: finish it where it is built
+      store('ak:deck', el.dataset.deck); play.peek = el.dataset.deck; redraw(); };
   });
   const wireList = () => { const e = $('dedit'); if (e) e.onclick = () => { play.open = null; location.hash = "#/collection/" + play.peek.slice(3); };
     const dl = root.querySelector('.dl'); if (dl) wirePops(dl); };
@@ -335,7 +347,7 @@ function homeScreen(mode = {}) {
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const pool = play.level === 'Beginner' ? DECKS.filter(d => EASY_POOL.includes(d.id)) : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
+      const pool = play.level === 'Beginner' ? botAll.filter(d => EASY_POOL.includes(d.id)) : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck };
     }
     if (play.opp === 'gauntlet') {
@@ -630,8 +642,8 @@ async function startTutorial(lesson = 1) {
 }
 // After the tutorial, straight into a real match: Cats against an Easy bot playing Den Rush (the deck chosen for later games too).
 async function firstMatch() {
-  const name = (DECKS.find(d => d.id === 'cats') || {}).name;
-  const cats = playable().find(d => d.name === name);   // the player's own Cats deck (a copy of the starter), else the starter
+  const name = ([...DECKS, ...BOT_ONLY].find(d => d.id === 'cats') || {}).name;
+  const cats = playable().find(d => d.name === name && !d.short);   // the player's own Cats deck (a copy of the starter), else the starter
   if (cats) store('ak:deck', cats.id);
   const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats', name: 'You', bot: { level: 'Beginner', deck: EASY_POOL[Math.floor(Math.random() * EASY_POOL.length)] } }) });
   if (!r.ok) return toast(await r.text());
@@ -824,7 +836,8 @@ async function matchScreen(id) {
   matchScreen.wake = () => { if (document.hidden || wsId !== id) return;
     if (!ws || ws.readyState > 1) { if (ws) ws.onclose = null; connect(); } };
 }
-const send = msg => { clog('send ' + (msg.t === 'act' ? JSON.stringify(msg.action).slice(0, 50) : msg.t) + (ws && ws.readyState === 1 ? '' : ' DROPPED (socket ' + (ws ? ws.readyState : 'none') + ')')); if (!(ws && ws.readyState === 1)) { if (msg.t === 'act') toast('Reconnecting… try again in a moment'); return false; } return ws.send(JSON.stringify(msg)); };   // a dropped move says so (feedback 2026-10-04: clicks that did nothing)
+const send = msg => { if (msg.t === 'act' && window.__ak.onAct) return window.__ak.onAct(msg.action), true;   // the position analyser plays the move itself
+  clog('send ' + (msg.t === 'act' ? JSON.stringify(msg.action).slice(0, 50) : msg.t) + (ws && ws.readyState === 1 ? '' : ' DROPPED (socket ' + (ws ? ws.readyState : 'none') + ')')); if (!(ws && ws.readyState === 1)) { if (msg.t === 'act') toast('Reconnecting… try again in a moment'); return false; } return ws.send(JSON.stringify(msg)); };   // a dropped move says so (feedback 2026-10-04: clicks that did nothing)
 // ?clicklog: a live record of presses, clicks and what the game did with them, in a corner (chasing clicks that do
 // nothing, 2026-10-04). Off unless asked for; it costs nothing then.
 const CLOG = new URLSearchParams(location.search).has('clicklog');
@@ -1034,6 +1047,7 @@ function decision() {
   if (d.pend && d.pend.mode === 'choice') {
     for (const o of d.pend.options) {
       if (o.kind === 'cr') d.crChoice[dcr(o.cr || o.v)] = o.v;
+      else if (o.kind === 'hq') d.hqRing = true;   // "It roams" may take the enemy den
       else if (o.kind === 'hand' && d.pend.kind === 'mulligan') d.handPick.add(o.v);   // the mulligan picks in the hand itself
       else if (o.kind === 'hand') d.cardOpts.push({ ...o, str: (G.hand.find(h => h.iid === o.v) || {}).str });   // any other pick from your hand is laid out in the middle: a lit hand reads as "play one" (feedback 2026-10-01)
       else if (o.kind === 'card') d.cardOpts.push(o);
@@ -1239,14 +1253,17 @@ function drawGame() {
   let drawnK = 0;
   const lit = handLights(d, G.hand);   // a lesson's hints (coach.js)
   hand.innerHTML = G.hand.map((h, i) => {
-    const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
+    const c = formOf(h.id, V.you), can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = lit.hint(can), shown = lit.shown(h.id);
     const talking = lit.talking || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
     const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || selCopy()).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
-    // a card just drawn slides in from the deck (bottom right), the second a beat after the first
-    const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
+    // a card just drawn slides in from the deck (bottom right), the second a beat after the first; a card an effect made or
+    // fetched (a Kitten, a Young Stag) came from no deck, so it rises into its place instead (Martin, 2026-10-31: flying in
+    // from the deck "just looks weird")
+    const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = drawn && ui.step && ui.step.kind === 'to_hand';
+    const from = drawn ? `${made ? '' : `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
     const r = rise(h), html = cardHTML(c, { str: r ? r.now : h.str, cls: 'compact' });
-    return `<div class="hc ${r ? cls.replace(' dim', '') + ' rise' : cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}${r ? `--ago:${-r.ago}ms` : ''}">${r
+    return `<div class="hc ${r ? cls.replace(' dim', '') + ' rise' : cls}${drawn ? (made ? ' made' : ' drawn') : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}${r ? `--ago:${-r.ago}ms` : ''}">${r
       ? html.replace('<div class="stab">', `<div class="stab">${cardHTML(c, { str: r.was, cls: 'compact' }).match(/<span class="n[^"]*">.*?<\/span>/)[0].replace('class="n', 'class="n was')}`) : html}</div>`;
   }).join('');
   fitNames(hand);
@@ -1332,7 +1349,7 @@ function drawGame() {
     : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
   if (st && st.kind === 'reveal') {   // the opponent's card, shown large and flown down onto its crossroad; the next step lands it
     const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
-    rv.innerHTML = cardHTML(CARDS[st.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
+    rv.innerHTML = cardHTML(formOf(st.card, st.player)); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
   }
   drawCoach($('coach'), d.lesson, d.rings);   // a lesson's coach (coach.js); none while steps play
@@ -1476,7 +1493,7 @@ function drawBoard(d) {
   [A, g] = holdFood(d, A, g);   // a lesson may hold the fruit until its Next (coach.js)
   // a den taken: the animal that took it, as it was played (the engine's capture event), standing in the den's mouth
   const cap = V.game.result && V.game.result.reason === 'hq_capture' && (V.game.events || []).filter(e => e.e === 'capture').pop();
-  const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str } : null;
+  const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str, iid: cap.iid } : null;
   const region = shownRegion(d);
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
   const fire = st && st.src ? st.src.map(dcr) : null;   // the animals whose own effect this is: their trigger marks brighten
@@ -1519,6 +1536,7 @@ function wireBoard() {
     const d = lastDecision;
     if (!d || !d.mine) { const g = touch() && e.target.closest('[data-cr]'); if (g) readStack(g.dataset.cr); return; }   // off your turn a tap only reads
     const hq = e.target.closest('[data-hq]');
+    if (hq && d.pend && d.pend.mode === 'choice' && d.hqRing) return act({ kind: 'choice', choice: 'den' });
     if (hq && ui.sel) { const t = selPlaces(d).find(t => t[0] === 'hq'); if (t) return act(placeAction(t)); }
     if (hq && ui.roam) { const t = d.roams[ui.roam].find(t => t[0] === 'hq'); if (t) return act({ kind: 'roam', from: dcr(ui.roam), target: t }); }
     const g = e.target.closest('[data-cr]'); if (!g) return;
@@ -1559,7 +1577,7 @@ function showStack(g, cr) {
 }
 function readStack(cr) {
   const st = V && V.game && viewerGame().board[cr]; if (!st || !st.length) return;
-  const card = u => `<div class="sc ${u.owner}">${cardHTML(CARDS[u.id], { str: u.str })}` +
+  const card = u => `<div class="sc ${u.owner}">${cardHTML(formOf(u.id, u.owner === 'A' ? V.you : opp()), { str: u.str })}` +
     (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`;
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
   readOverlay(card(top) + (buried.length ? `<div class="under">${buried.map(card).join('')}</div>` : ''));
@@ -1567,7 +1585,7 @@ function readStack(cr) {
 function stackAt(cr) {
   const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];
   if (!g || !st) return;
-  const card = (u, w, top) => { const c = CARDS[u.id];
+  const card = (u, w, top) => { const c = formOf(u.id, u.owner === 'A' ? V.you : opp());
     return `<div class="sc ${u.owner}">${cardHTML(c, { str: u.str, attrs: `style="--w:${w}px"` })}` +
       (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`; };
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();

@@ -33,6 +33,7 @@ pub enum Hook {
     OnDawnInHand,
     OnRoam,
     OnFriendlyRoam,
+    OnFriendlyFlee,
 }
 
 impl Hook {
@@ -63,6 +64,7 @@ pub enum Args {
     Timed(Cr),
     Roam(Cr, RoamEvent),
     FriendlyRoam(Unit, RoamEvent),
+    FriendlyFlee(Unit),
 }
 
 const GROWS: &[Hook] = &[Hook::OnDawnInHand, Hook::OnStartOfTurn, Hook::OnGain];
@@ -71,33 +73,39 @@ const GROWS: &[Hook] = &[Hook::OnDawnInHand, Hook::OnStartOfTurn, Hook::OnGain];
 pub fn hook_mask(card: &str) -> u32 {
     use Hook::*;
     let hooks: &[Hook] = match card {
-        "cuckoo_legend" | "praying_mantis" | "raccoon" | "piranha" | "locust_legend" | "jackal" | "badger" | "street_dog" | "lion_legend"
-        | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
-        | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "greywhisker" | "mole_legend"
-        | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
+        "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "badger" | "coyote" | "street_dog" | "fox" | "wolverine" | "lion_legend"
+        | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "kitten" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
+        | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "mole_legend"
+        | "rat_legend_2" | "skunk_legend" | "deer_legend_2" | "young_stag" | "great_stag" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
-        | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
+        | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "piranha_legend" | "remora" | "cod" | "sardine" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
-        | "chipmunk" | "gopher" | "muskrat" | "groundhog" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
-        | "grizzly_bear" | "tortoise" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
+        | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
+        | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
-        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
+        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "gazelle" | "deer" | "impala" | "baby_impala" | "rabbit" | "vole"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
-        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" => &[OnPlace],
+        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
+        "zebra" => &[OnFlee],
+        "hamster" => &[OnDrawEvent],
+        "deer_legend" => &[OnPlace, OnFriendlyFlee, OnFlee],
+        "okapi" => &[OnStartOfTurn, OnEndOfTurn],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
-        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_ant" | "scout_bee" | "army_ant_legend"
-        | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
-        | "dingo" | "sperm_whale_legend" | "oxpecker_legend" => &[OnEndOfTurn],
-        "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
-        "wolf_legend_2" | "coyote" => &[OnFriendlyRoam],
-        "fox" => &[OnCoverEnemy],
+        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "queen_ant" | "scout_bee" | "army_ant_legend"
+        | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "wildebeest"
+        | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
+        "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" | "groundhog" => &[OnStartOfTurn],
+        "wolf_legend_2" => &[OnFriendlyRoam, OnRoam],
+        "bush_dog" | "jackal" => &[OnRoam],
+        "elephant_legend" => &[OnPlace, OnRoam],
+        "dhole" => &[OnCoverEnemy],
         "lion_legend_4" => &[OnRemoveEvent],
         "lynx" => &[OnPlaceOntoEnemy],
-        "worker_wasp" => &[OnFriendlyPlace],
+        "worker_wasp" | "african_wild_dog" => &[OnFriendlyPlace],
         "swan_legend" | "cuckoo_egg" | "golden_egg" => &[OnDraw],
         "manta_ray" => &[OnAllyCovered],
-        "golden_orb_weaver" | "hippopotamus" => &[OnEnemyPlacedAdjacent],
+        "golden_orb_weaver" | "hippopotamus" | "boar" => &[OnEnemyPlacedAdjacent],
         "butterfly_legend" => GROWS,
         "butterfly_legend_caterpillar" | "butterfly_legend_chrysalis" | "butterfly_legend_butterfly" => &[OnPlace, OnDawnInHand, OnStartOfTurn, OnGain],
         "caterpillar" => &[OnGainInHand],
@@ -158,9 +166,9 @@ fn removes(st: &mut State, unit: &Unit, cr: Cr, max_attr: Option<&str>, min_attr
 fn draws_filtered(st: &mut State, unit: &Unit, spec: &'static str, n: i32) {
     st.effect_stack.push(vmap!("op" => Value::s("draw_filtered"), "player" => pn(unit.owner), "n" => Value::Int(n as i64), "spec" => Value::s(spec)));
 }
-fn conditional(st: &State, unit: &Unit) -> bool {
-    let name = st.cname(unit.card).to_string();
-    roar_condition(st, unit.owner, &name, Some(unit)).unwrap_or(false)
+/// `card`: the card whose Roar this is, which a repeat (Big Gus, the Macaw) runs on its own unit.
+fn conditional(st: &State, card: &str, unit: &Unit) -> bool {
+    roar_condition(st, unit.owner, card, Some(unit)).unwrap_or(false)
 }
 
 /// Whether the "if ..." of `card`'s Roar holds; None for a card with no such condition.
@@ -186,14 +194,15 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
     };
     let placed_plus = st.units_placed_this_turn + if unit.is_some() { 0 } else { 1 };
     Some(match card {
-        "gopher" | "muskrat" | "groundhog" => fed_this_turn(st, player),
-        "bobcat" | "tutorial_lynx" | "alley_cat" => others(T_CAT) >= 1,
+        "gopher" | "mara" => fed_this_turn(st, player),
+        "bobcat" | "tutorial_lynx" | "ocelot" => others(T_CAT) >= 1,
         "serval" => played_this_turn(st, player, T_CAT, unit) >= 1,
         "soldier_ant" | "nurse_bee" => others(T_COLONY) + 1 >= colony_min,
-        "piranha" => lost_this_turn(st, player) >= 1,
+        "hammerhead" => lost_this_turn(st, player) >= 1,
         "hare" | "rat" => placed_plus >= cfg(st, "hare_played_min"),
         "macaque" => hand_after() >= cfg(st, "macaque_hand_min"),
         "gorilla" => strength() >= cfg(st, "gorilla_min"),
+        "fox" => st.turn_flags.any_roamed,
         _ => return None,
     })
 }
@@ -203,20 +212,6 @@ fn played_this_turn(st: &State, player: Player, tag: u32, unit: Option<&Unit>) -
         return 0;
     }
     st.turn_flags.played[player as usize].iter().filter(|(iid, c)| st.card(*c).tags & tag != 0 && unit.map(|u| u.iid != *iid).unwrap_or(true)).count() as i32
-}
-
-fn eat_random_ally(st: &mut State, unit: &Unit, cr: Cr) -> i32 {
-    let options = adjacent_friendly_units(st, unit, cr);
-    if options.is_empty() {
-        return 0;
-    }
-    let nb = options[st.rng.choice_index(options.len())];
-    let gained = st.top(nb).map(|t| effective_strength(st, t, None)).unwrap_or(0);
-    if remove_top(st, nb, unit.owner, true, Some(unit.card)) {
-        gained
-    } else {
-        0
-    }
 }
 
 fn add_strength(st: &mut State, iid: i64, n: i32) {
@@ -236,6 +231,45 @@ fn become_copy(st: &mut State, me_iid: i64, card: CardId, counter: i16) {
         me.strength_counter = counter;
     }
     transform(st, me_iid, card);
+}
+
+/// A copy carries the animal's ticking timers, as far along as they are: its own seen from the copy's side, the ones on
+/// it (venom, poison) as they are. As in Python.
+fn copy_timers(st: &mut State, src: &Unit, me_iid: i64, me_owner: Player) {
+    let swap = |p: Player| -> Player {
+        if src.owner == me_owner || src.owner == WILD {
+            p
+        } else if p == src.owner {
+            me_owner
+        } else if p == other(src.owner) {
+            other(me_owner)
+        } else {
+            p
+        }
+    };
+    let found: Vec<Map> = st.scheduled.iter().filter(|s| m_get_i(s, "iid") == Some(src.iid)).cloned().collect();
+    for mut s in found {
+        let Some(Value::Map(mut step)) = s.get("step").cloned() else { continue };
+        let own = m_get_i(&step, "by_iid") == Some(src.iid);
+        for (k, v) in step.0.iter_mut() {
+            if (*k == "iid" || *k == "by_iid") && v.as_i64() == Some(src.iid) {
+                *v = Value::Int(me_iid);
+            } else if own && (*k == "player" || *k == "by_player") {
+                if let Some(p) = v.as_str() {
+                    *v = pn(swap(player_from(p)));
+                }
+            }
+        }
+        if own {
+            if let Some(o) = m_get_s(&s, "owner") {
+                let o = swap(player_from(o));
+                s.insert("owner", pn(o));
+            }
+        }
+        s.insert("iid", Value::Int(me_iid));
+        s.insert("step", Value::Map(step));
+        st.scheduled.push(s);
+    }
 }
 
 fn put_back(st: &mut State, unit: &Unit, cr: Cr, pos: usize, counter: i32) {
@@ -336,7 +370,8 @@ fn spawn_pups(st: &mut State, unit: &Unit, cr: Cr, n: i32, tokens: &[&str]) {
 }
 
 fn adjacent_ally_fish(st: &State, unit: &Unit, cr: Cr) -> i32 {
-    adjacent_tops(st, cr, Some(unit.owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_FISH)).count() as i32
+    let near: Vec<Cr> = adjacent_tops(st, cr, Some(unit.owner)).iter().map(|(nb, _)| *nb).collect();
+    statics::fish_count(st, unit.owner, Some(&near), None)
 }
 
 fn drain_place(st: &mut State, unit: &Unit, cr: Cr, amount: i32) {
@@ -346,6 +381,10 @@ fn drain_place(st: &mut State, unit: &Unit, cr: Cr, amount: i32) {
         .map(|(nb, _)| cr_v(st, nb))
         .collect();
     push_choose(st, unit.owner, options, "drain", false, vmap!("amount" => Value::Int(amount as i64)));
+}
+
+fn it_roams(st: &mut State, iid: i64) {
+    st.effect_stack.push(vmap!("op" => Value::s("it_roams"), "iid" => Value::Int(iid)));
 }
 
 fn crs(st: &State, v: Vec<Cr>) -> Vec<Value> {
@@ -361,6 +400,42 @@ fn remove_all_adjacent(st: &mut State, unit: &Unit, cr: Cr) {
     }
 }
 
+/// Whenever a Canine of `owner`'s roams (the Black Wolf's own roam included): give it +1 strength and draw a card.
+fn black_wolf_grows(st: &mut State, owner: Player, roamer: &Unit) {
+    if st.card(roamer.card).has_tag(T_CANINE) {
+        let g = cfg(st, "black_wolf_grant");
+        grant(st, vec![roamer.iid], g);
+        let d = cfg(st, "black_wolf_draw");
+        push_draw(st, owner, d);
+    }
+}
+
+/// Whether no enemy of `enemy_of` tops a crossroad next to `cr`: the animal on `cr` has no other enemy beside it.
+fn lonely(st: &State, enemy_of: Player, cr: Cr) -> bool {
+    !adjacent_tops(st, cr, None).iter().any(|(_, t)| t.owner != enemy_of)
+}
+
+/// The crossroads of `owner`'s other top animals connected to the one on `cr` through a chain of `owner`'s top animals,
+/// in crossroad-name order.
+fn connected_allies(st: &State, owner: Player, cr: Cr) -> Vec<Cr> {
+    let gm = st.map();
+    let mut seen: Vec<bool> = vec![false; gm.n()];
+    seen[cr as usize] = true;
+    let mut queue = vec![cr];
+    let mut qi = 0;
+    while qi < queue.len() {
+        let c = queue[qi];
+        qi += 1;
+        for &nb in gm.neighbors(c) {
+            if !seen[nb as usize] && st.owner_of(nb) == Some(owner) {
+                seen[nb as usize] = true;
+                queue.push(nb);
+            }
+        }
+    }
+    gm.sorted.iter().copied().filter(|&c| seen[c as usize] && c != cr).collect()
+}
+
 fn sweep(st: &mut State, unit: &Unit, cr: Cr, max_attr: &str) {
     let max = cfg(st, max_attr);
     for nb in adjacent_enemy_targets(st, unit, cr, Some(max), None, false) {
@@ -370,9 +445,9 @@ fn sweep(st: &mut State, unit: &Unit, cr: Cr, max_attr: &str) {
     }
 }
 
-fn hq_adjacent_draw(st: &mut State, unit: &Unit, cr: Cr) {
+fn hq_adjacent_draw(st: &mut State, unit: &Unit, cr: Cr, n: i32) {
     if st.map().in_front(other(unit.owner), cr) {
-        push_draw(st, unit.owner, 1);
+        push_draw(st, unit.owner, n);
     }
 }
 
@@ -383,13 +458,11 @@ fn chipmunk(st: &mut State, unit: &Unit) {
     schedule(st, unit, 1, vmap!("op" => Value::s("gain_food"), "player" => pn(unit.owner), "amount" => Value::Int(later as i64)), false, None);
 }
 
-fn greywhisker(st: &mut State, unit: &Unit) {
+fn mole_legend(st: &mut State, unit: &Unit) {
     let o = unit.owner;
     st.effect_stack.push(vmap!("op" => Value::s("discard_choice"), "player" => pn(o)));
     push_play_extra(st, o, None, false);
     push_draw(st, o, 1);
-    let n = cfg(st, "greywhisker_food");
-    push_gain(st, o, n);
 }
 
 fn mole(st: &mut State, unit: &Unit, cr: Cr) {
@@ -447,7 +520,7 @@ pub fn rattlesnake_shuffle_event(st: &mut State, player: Player) {
 
 pub fn vultures_dusk(st: &mut State, player: Player) {
     let Some(vulture) = st.g.known.vulture else { return };
-    let lost = st.turn_flags.lost[0] + st.turn_flags.lost[1];
+    let lost = st.turn_flags.lost.iter().sum::<i32>();
     if lost < cfg(st, "vulture_removals") {
         return;
     }
@@ -508,9 +581,20 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_choose(st, owner, o, "remove_and_draw", false, vmap!("n" => Value::Int(n as i64)));
         }
         ("tarantula", OnEndOfTurn) => {
-            let gained = eat_random_ally(st, unit, cr);
-            if gained != 0 {
-                add_strength(st, unit.iid, gained);
+            // "Dusk: remove the weakest animal next to this and gain its strength." (Martin, 2026-10-29: as the City Spider picks)
+            let options: Vec<(Cr, i32)> = adjacent_tops(st, cr, None)
+                .into_iter()
+                .filter(|(nb, top)| statics::can_be_removed(st, top, Some(*nb), false))
+                .map(|(nb, top)| (nb, effective_strength(st, &top, None)))
+                .collect();
+            if !options.is_empty() {
+                let low = options.iter().map(|(_, s)| *s).min().unwrap();
+                let lows: Vec<Cr> = options.iter().filter(|(_, s)| *s == low).map(|(nb, _)| *nb).collect();
+                let nb = lows[st.rng.choice_index(lows.len())];
+                remove_top(st, nb, owner, true, Some(unit.card));
+                if low > 0 {
+                    add_strength(st, unit.iid, low);
+                }
             }
         }
         ("sea_turtle", OnEndOfTurn) => {
@@ -537,8 +621,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             names.dedup();
             push_choose(st, owner, names.into_iter().map(Value::Str).collect(), "pile_to_hand", false, vmap!("from_owner" => pn(owner)));
         }
-        ("piranha", OnPlace) => {
-            if conditional(st, unit) {
+        ("hammerhead", OnPlace) => {
+            if conditional(st, card, unit) {
                 let targets: Vec<Cr> = adjacent_tops(st, cr, None)
                     .into_iter()
                     .filter(|(nb, top)| statics::can_be_removed(st, top, Some(*nb), false) && statics::can_be_chosen(st, top, owner, Some(*nb)))
@@ -548,7 +632,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("hyena", OnEndOfTurn) => {
-            let removed = lost_this_turn(st, A) + lost_this_turn(st, B);
+            let removed = lost_this_turn(st, A) + lost_this_turn(st, B) + lost_this_turn(st, WILD);
             let per = cfg(st, "hyena_food_per");
             push_gain(st, owner, per * removed);
         }
@@ -571,7 +655,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let worms = cfg(st, "earthworm_worms");
             let worm = cid(st, "worm");
             for _ in 0..worms {
-                let blocked = st.top(*rcr).map(|t| t.owner != owner).unwrap_or(false);
+                let blocked = st.top(*rcr).map(|t| t.owner == other(owner)).unwrap_or(false);   // an enemy on top: no room; a Wild Locust is no enemy (Martin, 2026-10-31)
                 if blocked || st.result.is_some() {
                     return;
                 }
@@ -615,12 +699,11 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         // Canines
         ("wolf_legend_2", OnFriendlyRoam) => {
-            if let Args::FriendlyRoam(_, ev) = args {
-                if ev.onto_enemy {
-                    push_draw(st, owner, 1);
-                }
+            if let Args::FriendlyRoam(roamer, _) = args {
+                black_wolf_grows(st, owner, roamer);
             }
         }
+        ("wolf_legend_2", OnRoam) => black_wolf_grows(st, owner, unit),
         ("wolf_legend", OnEndOfTurn) => {
             let n = adjacent_tops(st, cr, Some(owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_CANINE)).count() as i32;
             if n != 0 {
@@ -628,41 +711,65 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 grant(st, vec![unit.iid], n * g);
             }
         }
-        ("fox", OnCoverEnemy) => push_draw(st, owner, 1),
-        ("jackal", OnPlace) => {
-            let targets: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true)
-                .into_iter()
-                .filter(|nb| adjacent_tops(st, *nb, Some(owner)).iter().any(|(_, t)| t.iid != unit.iid && st.card(t.card).has_tag(T_CANINE)))
-                .collect();
-            push_remove_choice(st, owner, unit.card, targets, false);
-        }
-        ("bush_dog", OnEndOfTurn) => {
-            let options: Vec<i64> = adjacent_tops(st, cr, Some(owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_CANINE)).map(|(_, t)| t.iid).collect();
-            if !options.is_empty() {
-                let pick = options[st.rng.choice_index(options.len())];
-                let g = cfg(st, "bush_dog_grant");
-                grant(st, vec![pick], g);
+        ("fox", OnPlace) => {
+            if conditional(st, card, unit) {
+                let n = cfg(st, "fox_draw");
+                push_draw(st, owner, n);
             }
         }
-        ("coyote", OnFriendlyRoam) => {
-            if let Args::FriendlyRoam(roamer, _) = args {
-                if st.card(roamer.card).has_tag(T_CANINE) {
-                    let g = cfg(st, "raccoon_dog_grant");
-                    grant(st, vec![roamer.iid], g);
+        ("dhole", OnCoverEnemy) => {
+            if let Some(at) = statics::crossroad_of(st, unit.iid) {
+                if lonely(st, owner, at) {
+                    let n = cfg(st, "dhole_draw");
+                    push_draw(st, owner, n);
                 }
             }
         }
-        ("african_wild_dog", OnEndOfTurn) => {
-            let iids: Vec<i64> = adjacent_tops(st, cr, Some(owner)).iter().map(|(_, t)| t.iid).collect();
-            let g = cfg(st, "wild_dog_grant");
-            grant(st, iids, g);
+        ("wolverine", OnPlace) => {
+            let targets: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true).into_iter().filter(|nb| lonely(st, owner, *nb)).collect();
+            push_remove_choice(st, owner, unit.card, targets, false);
+        }
+        ("jackal", OnRoam) => {
+            // "Roam. Whenever this roams, remove an adjacent enemy weaker than this.": judged where it lands, by its strength then
+            if let Args::Roam(to, _) = args {
+                let cap = effective_strength(st, unit, None) - 1;
+                let targets = adjacent_enemy_targets(st, unit, *to, Some(cap), None, true);
+                push_remove_choice(st, owner, unit.card, targets, false);
+            }
+        }
+        ("bush_dog", OnRoam) => {
+            if let Args::Roam(_, ev) = args {
+                // on top of any animal that resurfaced there (Martin, 2026-10-31)
+                let pup = cid(st, "pup");
+                spawn(st, owner, pup, ev.from);
+            }
+        }
+        ("african_wild_dog", OnFriendlyPlace) => {
+            // a Canine played next to this roams: played from the hand only, never a token or a placed animal
+            if let Args::FriendlyPlace(placed) = args {
+                let played = placed.owner <= B && st.turn_flags.played[placed.owner as usize].iter().any(|(i, _)| *i == placed.iid);
+                let near = match (statics::crossroad_of(st, placed.iid), statics::crossroad_of(st, unit.iid)) {
+                    (Some(a), Some(b)) => st.map().adjacent(a, b),
+                    _ => false,
+                };
+                if played && near && st.card(placed.card).has_tag(T_CANINE) {
+                    it_roams(st, placed.iid);
+                }
+            }
         }
         ("badger", OnPlace) => draws_filtered(st, unit, "keyword:Roam", 1),
+        ("coyote", OnPlace) => {
+            let o = crs(st, connected_allies(st, owner, cr));
+            push_choose(st, owner, o, "coyote", false, Map::default());
+        }
         ("street_dog", OnPlace) => {
-            let options: Vec<Cr> = st.sorted_occupied().into_iter().filter(|&c| st.top(c).map(|t| t.owner == owner && t.iid != unit.iid && statics::can_roam(st, t)).unwrap_or(false)).collect();
+            let options: Vec<Cr> = connected_allies(st, owner, cr)
+                .into_iter()
+                .filter(|&c| st.top(c).map(|t| statics::has_keyword(st, t, K_ROAM, Some(c))).unwrap_or(false))
+                .collect();
             let o = crs(st, options);
-            let g = cfg(st, "stray_dog_grant");
-            push_choose(st, owner, o, "stray_dog", false, vmap!("amount" => Value::Int(g as i64)));
+            let g = cfg(st, "street_dog_grant");
+            push_choose(st, owner, o, "street_dog", false, vmap!("amount" => Value::Int(g as i64)));
         }
         // Cats
         ("lion_legend", OnPlace) => twin_place(st, unit, "lion_legend_2"),
@@ -676,7 +783,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("jaguar", OnPlace) => removes(st, unit, cr, Some("jaguar_max"), None),
         ("serval", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let t = adjacent_enemy_targets(st, unit, cr, None, None, true);
                 push_remove_choice(st, owner, unit.card, t, false);
             }
@@ -686,12 +793,12 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             draws(st, unit, n);
         }
         ("bobcat", OnPlace) | ("tutorial_lynx", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 draws(st, unit, 1);
             }
         }
-        ("alley_cat", OnPlace) => {
-            if conditional(st, unit) {
+        ("ocelot", OnPlace) => {
+            if conditional(st, card, unit) {
                 push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Cat")]))), false);
             }
         }
@@ -723,7 +830,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("nurse_bee", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let n = cfg(st, "nurse_bee_draw");
                 draws(st, unit, n);
             }
@@ -737,11 +844,12 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("termite_queen", OnPlace) => push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Colony")]), "tags_none" => Value::List(vec![Value::s("Queen")]))), false),
         ("queen_bee", OnPlace) => {
-            // Roar: play a Young Bee: a free play like Prince Leo's, of a token made out of thin air
-            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(owner), "card_id" => Value::s("young_bee"), "make" => Value::Bool(true)));
+            // Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand, made out of thin air; the owner picks
+            let options = ["worker_bee", "guard_bee", "nurse_bee"].into_iter().map(Value::s).collect();
+            push_choose(st, owner, options, "make_in_hand", false, Map::new());
         }
-        ("soldier_ant", OnPlace) | ("muskrat", OnPlace) => {
-            if conditional(st, unit) {
+        ("soldier_ant", OnPlace) | ("gopher", OnPlace) => {
+            if conditional(st, card, unit) {
                 removes(st, unit, cr, None, None);
             }
         }
@@ -760,7 +868,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("worker_bee", OnPlace) => gains(st, unit, "worker_bee_food"),
         // Den Rush
-        ("greywhisker", OnPlace) | ("mole_legend", OnPlace) => greywhisker(st, unit),
+        ("mole_legend", OnPlace) => mole_legend(st, unit),
         ("rat_legend_2", OnPlace) => {
             let mut options = adjacent_enemy_unit_crossroads(st, unit, cr, true);
             options.extend(adjacent_friendly_units(st, unit, cr));
@@ -768,6 +876,24 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             if !options.is_empty() {
                 let o = crs(st, options);
                 st.effect_stack.push(vmap!("op" => Value::s("rat_legend_2_wipe"), "chooser" => pn(owner), "options" => Value::List(o)));
+            }
+        }
+        ("deer_legend_2", OnPlace) => {
+            let c = cid(st, "young_stag");
+            gain_to_hand(st, owner, c, 0);
+        }
+        ("young_stag", OnPlace) => {
+            let c = cid(st, "great_stag");
+            gain_to_hand(st, owner, c, 0);
+        }
+        ("great_stag", OnPlace) => {
+            // "Roar: return every adjacent enemy weaker than this to its owner's hand." As in Python.
+            let mine = effective_strength(st, unit, None);
+            for nb in adjacent_enemy_unit_crossroads(st, unit, cr, false) {
+                let t = st.top(nb).unwrap().clone();
+                if effective_strength(st, &t, None) < mine {
+                    st.effect_stack.push(vmap!("op" => Value::s("bounce_iid"), "iid" => Value::Int(t.iid)));
+                }
             }
         }
         ("skunk_legend", OnPlace) => {
@@ -797,18 +923,25 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("hare", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let n = cfg(st, "hare_draw");
                 draws(st, unit, n);
             }
         }
-        ("ocelot", OnPlace) => {
-            let n = cfg(st, "ocelot_draw");
-            draws_filtered(st, unit, "tag:Cat&rarity:common", n);
+        ("alley_cat", OnPlace) => {
+            let c = cid(st, "kitten");
+            for _ in 0..cfg(st, "alley_cat_kittens") {
+                gain_to_hand(st, owner, c, 0);
+            }
         }
-        ("cheetah", OnPlace) | ("falcon", OnPlace) => hq_adjacent_draw(st, unit, cr),
+        ("kitten", OnPlace) => {
+            let n = cfg(st, "kitten_draw");
+            draws_filtered(st, unit, "rarity:common", n);
+        }
+        ("falcon", OnPlace) => hq_adjacent_draw(st, unit, cr, 1),
+        ("cheetah", OnPlace) => { let n = cfg(st, "cheetah_draw"); hq_adjacent_draw(st, unit, cr, n) }
         ("rat", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let t = adjacent_enemy_targets(st, unit, cr, None, None, true);
                 let rat = cid(st, "rat");
                 push_remove_choice(st, owner, rat, t, false);
@@ -830,13 +963,11 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             *st.card_strength_counters[owner as usize].entry(me).or_insert(0) -= decay;
             crate::emit!(st, "strength", vmap!("card" => Value::s("anaconda_legend"), "owner" => pn(owner), "n" => Value::Int(-(decay as i64))));
             shuffle_back(st, owner, &[me], None);
+            push_draw(st, owner, 1);
         }
         ("raven_legend", OnPlace) => {
-            let opp = other(owner);
-            let mut names: Vec<&'static str> = st.pile_cards_of(opp).iter().map(|c| st.cname(*c)).collect();
-            names.sort();
-            names.dedup();
-            push_choose(st, owner, names.into_iter().map(Value::Str).collect(), "pile_to_hand", false, vmap!("from_owner" => pn(opp)));
+            let n = cfg(st, "raven_legend_steals");
+            st.effect_stack.push(vmap!("op" => Value::s("steal_from_pile"), "player" => pn(owner), "n" => Value::Int(n as i64)));
         }
         ("goose_legend", OnStartOfTurn) => {
             let egg = cid(st, "golden_egg");
@@ -908,9 +1039,19 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("barracuda", OnPlace) => {
-            let max = control_tag_count(st, owner, T_FISH);
+            let max = statics::fish_count(st, owner, None, None);
             let t = adjacent_enemy_targets(st, unit, cr, Some(max), None, true);
             push_remove_choice(st, owner, unit.card, t, false);
+        }
+        ("piranha_legend", OnPlace) => {
+            let need = cfg(st, "piranha_legend_fish");
+            let prey: Vec<(Cr, i64)> = st.tops().filter(|(_, u)| u.owner != owner).map(|(c, u)| (c, u.iid)).collect();
+            for (at, iid) in prey {
+                if adjacent_ally_fish(st, unit, at) >= need {
+                    let step = remove_iid_step(st, iid, owner, true, None, Some(unit.card));
+                    st.effect_stack.push(step);
+                }
+            }
         }
         ("manta_ray", OnAllyCovered) => {
             if let Args::AllyCovered(covered, coverer, ccr) = args {
@@ -930,18 +1071,36 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_draw(st, owner, n);
         }
         ("sardine", OnPlace) => fill(st, unit, cr),
-        ("mahi_mahi", OnPlace) => {
-            let iids: Vec<i64> = st.tops().filter(|(_, t)| t.owner == owner && t.iid != unit.iid && st.card(t.card).has_tag(T_FISH)).map(|(_, t)| t.iid).collect();
-            let g = cfg(st, "mahi_mahi_grant");
-            grant(st, iids, g);
-        }
         ("sunfish", OnPlace) => spawns_beside(st, unit, cr, "baby_fish"),
         ("deer", OnPlace) => spawns_beside(st, unit, cr, "fawn"),
         // Food Aggro
+        ("hamster", OnDrawEvent) => {
+            // "Whenever you draw a card, gain 5 food." (Martin, 2026-10-29): your draws only, each card once.
+            if let Args::CardEvent(_, _, player) = args {
+                if *player == owner {
+                    let f = cfg(st, "hamster_draw_food");
+                    push_gain(st, owner, f);
+                }
+            }
+        }
+        ("vole", OnPlace) => {
+            // "Roar: repeat the Roar of an adjacent Rodent." (Martin, 2026-10-29): one Rodent neighbour with a Roar, the
+            // owner's choice, repeated as the Vole's own; never a repeater (the legend, another Vole), or two would go for ever.
+            let (gus, vole) = (st.card_id("capybara_legend"), st.card_id("vole"));
+            let o: Vec<Cr> = adjacent_tops(st, cr, Some(owner))
+                .into_iter()
+                .filter(|(_, top)| st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && Some(top.card) != gus && Some(top.card) != vole && st.g.has_hook(top.card, OnPlace))
+                .map(|(nb, _)| nb)
+                .collect();
+            push_choose(st, owner, crs(st, o), "repeat_roar", false, vmap!("vole" => Value::Int(unit.iid)));
+        }
         ("capybara_legend", OnPlace) => {
-            for (nb, top) in adjacent_tops(st, cr, Some(owner)).into_iter().rev() {
-                if st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && st.g.has_hook(top.card, OnPlace) {
-                    run(st, top.card, None, OnPlace, &top, &Args::Place(nb));
+            // each repeat is Big Gus's own, at its crossroad (as the Macaw's copy is the Macaw's); repeaters (the Vole, another
+            // of these) are never repeated, or two side by side would go for ever
+            let vole = st.card_id("vole");
+            for (_nb, top) in adjacent_tops(st, cr, Some(owner)).into_iter().rev() {
+                if st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && Some(top.card) != vole && st.g.has_hook(top.card, OnPlace) {
+                    run(st, top.card, Some(unit.card), OnPlace, unit, &Args::Place(cr));
                 }
             }
         }
@@ -958,12 +1117,19 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let n = per * (st.food[owner as usize] / step);
             push_gain(st, owner, n);
         }
-        ("flying_squirrel", OnPlace) => gains(st, unit, "flying_squirrel_food"),
+        ("flying_squirrel", OnPlace) => {
+            push_draw(st, owner, 1);
+            gains(st, unit, "flying_squirrel_food");
+        }
         ("meerkat", OnPlace) => draws(st, unit, 1),
         ("meerkat", OnEnemyPlacedAdjacent) => push_draw(st, owner, 1),
         ("beaver", OnPlace) => {
             let n = cfg(st, "beaver_bonus_actions");
             schedule(st, unit, 1, vmap!("op" => Value::s("grant_action"), "player" => pn(owner), "n" => Value::Int(n as i64)), false, None);
+        }
+        ("krill", OnPlace) => {
+            st.turn_flags.titan_discount[owner.min(1) as usize] = true;
+            push_draw(st, owner, 1);
         }
         ("electric_eel", OnPlace) => {
             let opp = other(owner);
@@ -971,22 +1137,23 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             schedule(st, unit, 1, vmap!("op" => Value::s("cap_actions"), "player" => pn(opp), "n" => Value::Int(n as i64)), true, Some(opp));
         }
         ("dormouse", OnEndOfTurn) => {
-            if fed_this_turn(st, owner) {
-                push_draw(st, owner, 1);
+            let n = food_gained_this_turn(st, owner) / cfg(st, "fed_threshold");
+            if n > 0 {
+                push_draw(st, owner, n);
             }
         }
         ("squirrel", OnPlace) => gains(st, unit, "squirrel_food"),
         ("chipmunk", OnPlace) | ("tutorial_chipmunk", OnPlace) => chipmunk(st, unit),
-        ("gopher", OnPlace) => {
-            if conditional(st, unit) {
-                let n = cfg(st, "gopher_draw");
+        ("mara", OnPlace) => {
+            if conditional(st, card, unit) {
+                let n = cfg(st, "mara_draw");
                 draws(st, unit, n);
             }
         }
-        ("groundhog", OnPlace) => {
-            if conditional(st, unit) {
-                gains(st, unit, "groundhog_food");
-            }
+        ("groundhog", OnStartOfTurn) => gains(st, unit, "groundhog_food"),
+        ("rodent_legend", OnPlace) => {
+            let n = food_gained_this_turn(st, owner);
+            push_gain(st, owner, n);
         }
         // Food OTK
         ("octopus_legend_2", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("scout"), "player" => pn(owner), "spec" => Value::s("rarity:legendary"))),
@@ -1011,7 +1178,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("golden_orb_weaver", OnEnemyPlacedAdjacent) => {
             if let Args::PlacedAdjacent(placed, pcr) = args {
                 if (statics::has_keyword(st, placed, K_FLIGHT, Some(*pcr)) || statics::has_keyword(st, placed, K_ROAM, Some(*pcr))) && statics::can_be_removed(st, placed, Some(*pcr), false) {
-                    let step = remove_iid_step(st, placed.iid, owner, true, Some(unit.iid), Some(unit.card));
+                    let step = remove_iid_step(st, placed.iid, owner, true, None, Some(unit.card));
                     st.effect_stack.push(step);
                 }
             }
@@ -1022,9 +1189,9 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             schedule(st, unit, d, vmap!("op" => Value::s("draw"), "player" => pn(owner), "n" => Value::Int(n as i64)), false, None);
         }
         ("grizzly_bear", OnPlace) => push_draw(st, other(owner), 1),
-        ("tortoise", OnPlace) => {
-            let n = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_ARMOR, Some(*c))).count() as i32;
-            let per = cfg(st, "tortoise_per_armor");
+        ("stag_beetle", OnPlace) => {
+            let n: i32 = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_ARMOR, Some(*c))).map(|(c, _)| statics::animal_worth(st, owner, c)).sum();
+            let per = cfg(st, "stag_beetle_per_armor");
             push_gain(st, owner, n * per);
         }
         // Giants
@@ -1033,27 +1200,37 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("tortoise_legend", OnEndOfTurn) => gains(st, unit, "tortoise_legend_food"),
         ("rhinoceros", OnPlace) => sweep(st, unit, cr, "rhinoceros_max"),
         ("albatross", OnPlace) => sweep(st, unit, cr, "albatross_max"),
+        ("elephant_legend", OnPlace) => sweep(st, unit, cr, "elephant_legend_max"),
+        ("elephant_legend", OnRoam) => {
+            if let Args::Roam(to, _) = args {
+                sweep(st, unit, *to, "elephant_legend_max");
+            }
+        }
         ("hippopotamus", OnEnemyPlacedAdjacent) => {
             if let Args::PlacedAdjacent(placed, pcr) = args {
                 if effective_strength(st, placed, None) <= cfg(st, "hippopotamus_max") && statics::can_be_removed(st, placed, Some(*pcr), false) {
-                    let step = remove_iid_step(st, placed.iid, owner, true, Some(unit.iid), Some(unit.card));
+                    let step = remove_iid_step(st, placed.iid, owner, true, None, Some(unit.card));
                     st.effect_stack.push(step);
                 }
             }
         }
         ("whale_shark", OnEndOfTurn) => draws(st, unit, 1),
-        ("oxpecker_legend", OnEndOfTurn) => {
-            let n = st.map().neighbors(cr).iter().filter(|&&nb| st.top(nb).map(|t| t.owner == owner && statics::has_keyword(st, t, K_HUNGRY, Some(nb))).unwrap_or(false)).count() as i32;
-            draws(st, unit, n);
+        ("dung_beetle_legend_form2", OnPlace) | ("dung_beetle_legend_form3", OnPlace) | ("dung_beetle_legend_form4", OnPlace) => {
+            // the legendary Dung Beetle's later forms; pushed last-first so the draw resolves first, as in Python
+            let name = st.cname(unit.card);
+            let form = if name.ends_with("form4") { 4 } else if name.ends_with("form3") { 3 } else { 2 };
+            if form >= 4 {
+                push_play_extra(st, owner, None, false);
+            }
+            if form >= 3 {
+                removes(st, unit, cr, None, None);
+            }
+            push_draw(st, owner, 1);
         }
-        ("oxpecker", OnPlace) => {
-            let min = cfg(st, "oxpecker_min");
-            let n = if owner <= B { st.starting_decks[owner as usize].iter().filter(|c| st.card(**c).base.map(|b| b >= min).unwrap_or(false)).count() as i32 } else { 0 };
-            push_gain(st, owner, n);
-        }
+        ("oxpecker", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("oxpecker"), "player" => pn(owner))),
         ("anteater", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("anteater"), "player" => pn(owner))),
         ("dung_beetle", OnEndOfTurn) => {
-            let n = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_HUNGRY, Some(*c))).count() as i32;
+            let n: i32 = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_HUNGRY, Some(*c))).map(|(c, _)| statics::animal_worth(st, owner, c)).sum();
             let per = cfg(st, "dung_beetle_per");
             push_gain(st, owner, n * per);
         }
@@ -1076,6 +1253,11 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             grant(st, iids, g);
         }
         ("bee_legend_2", OnPlace) => {
+            // "Roar: if your starting deck has no animal of strength 4 or more, give your animals on the board, in your
+            // hand and in your deck +2 strength." As in Python.
+            if !crate::strength::small_starting_deck(st, owner, unit.card) {
+                return;
+            }
             let p = owner as usize;
             let mut distinct: Vec<CardId> = Vec::new();
             for c in &st.decks[p] {
@@ -1092,10 +1274,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
             let mut mine: Vec<Unit> = st.order.iter().flat_map(|&c| st.stacks[c as usize].iter().filter(|u| u.owner == owner).cloned()).collect();
             mine.extend(st.hands[p].iter().cloned());
-            for inst in mine {
-                let d = st.jelly_counter(owner, inst.card) - inst.strength_counter as i32;
-                grant(st, vec![inst.iid], d);
-            }
+            let g = st.cfg().jelly_grant;
+            grant(st, mine.iter().map(|u| u.iid).collect(), g);
         }
         ("butterfly_legend", OnDawnInHand) | ("butterfly_legend", OnStartOfTurn) | ("butterfly_legend", OnGain)
         | ("butterfly_legend_caterpillar", OnDawnInHand) | ("butterfly_legend_caterpillar", OnStartOfTurn) | ("butterfly_legend_caterpillar", OnGain)
@@ -1110,7 +1290,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             draws(st, unit, n);
         }
         ("macaque", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let t = adjacent_enemy_targets(st, unit, cr, None, None, true);
                 push_remove_choice(st, owner, unit.card, t, false);
             }
@@ -1153,46 +1333,75 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             draw_cards(st, owner, 1);
         }
         ("gorilla", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 push_draw(st, owner, 1);
             }
         }
         // Hoofed
         ("zebra_legend", OnPlace) => {
-            let mut kinds: Vec<CardId> = Vec::new();
-            for (_, t) in st.tops() {
-                if t.owner == owner && st.card(t.card).has_tag(T_HOOFED) && !kinds.contains(&t.card) {
-                    kinds.push(t.card);
-                }
-            }
-            push_draw(st, owner, kinds.len() as i32);
+            // "Roar: draw a card for each of your grazing Hoofed animals." (itself too, when it lands grazing)
+            let n = st.tops().filter(|(c, t)| t.owner == owner && st.card(t.card).has_tag(T_HOOFED) && statics::grazing(st, t, Some(*c))).count();
+            push_draw(st, owner, n as i32);
         }
         ("honey_badger", OnPlace) => removes(st, unit, cr, None, Some("honey_badger_min")),
-        ("okapi", OnEndOfTurn) => {
+        ("okapi", OnStartOfTurn) | ("okapi", OnEndOfTurn) | ("baby_impala", OnPlace) => {
+            // Okapi: "Dawn and Dusk: if this is grazing, draw a card." Baby Impala: "Flee. Roar: if this is grazing, draw a card."
             if statics::grazing(st, unit, Some(cr)) {
                 push_draw(st, owner, 1);
             }
         }
-        ("zebra", OnPlace) => {
-            let n = adjacent_tops(st, cr, Some(owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_HOOFED)).count() as i32;
-            if n != 0 {
-                let f = cfg(st, "zebra_food");
-                push_gain(st, owner, n * f);
+        ("zebra", OnFlee) => {
+            // "Flee. When this flees, return the enemy that covered it to its owner's hand." (Martin, 2026-10-29: the kick, back)
+            if let Args::Flee(coverer) = args {
+                st.effect_stack.push(vmap!("op" => Value::s("flee_return"), "iid" => Value::Int(*coverer)));
             }
         }
+        ("deer_legend", OnPlace) => {
+            let n = cfg(st, "deer_legend_draw");
+            draws_filtered(st, unit, "keyword:Flee", n);
+        }
+        ("deer_legend", OnFriendlyFlee) => {
+            // "Whenever one of your animals flees, it gains 2 strength": the fled card, now in hand.
+            if let Args::FriendlyFlee(fled) = args {
+                let g = cfg(st, "deer_legend_grant");
+                grant(st, vec![fled.iid], g);
+            }
+        }
+        ("deer_legend", OnFlee) => {
+            // The legendary Deer fleeing grows itself (`unit` is its hand instance here).
+            let g = cfg(st, "deer_legend_grant");
+            grant(st, vec![unit.iid], g);
+        }
+        ("rabbit", OnPlace) => {
+            // "Roar: play a Bunny next to this.": made and played on a neighbouring crossroad of the owner's choice.
+            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(owner), "card_id" => Value::s("bunny"), "make" => Value::Bool(true), "adjacent_to" => cr_v(st, cr)));
+        }
+        ("impala", OnPlace) => {
+            // "Flee. Roar: play a Baby Impala.": made and played at once, a full placement with its Roar.
+            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(owner), "card_id" => Value::s("baby_impala"), "make" => Value::Bool(true)));
+        }
         ("warthog", OnPlace) => {
+            // "Roar: remove an adjacent enemy that has another of your Hoofed animals next to it.": the herd mobs the intruder
             let t: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true)
                 .into_iter()
-                .filter(|nb| {
-                    let s = st.stack(*nb);
-                    s.len() >= 2 && s[s.len() - 2].owner == owner && st.card(s[s.len() - 2].card).has_tag(T_HOOFED)
-                })
+                .filter(|nb| adjacent_tops(st, *nb, Some(owner)).iter().any(|(_, t)| t.iid != unit.iid && st.card(t.card).has_tag(T_HOOFED)))
                 .collect();
             push_remove_choice(st, owner, unit.card, t, false);
         }
-        ("boar", OnPlace) => {
-            let t: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true).into_iter().filter(|nb| st.stack(*nb).len() == 1).collect();
-            push_remove_choice(st, owner, unit.card, t, false);
+        ("boar", OnEnemyPlacedAdjacent) => {
+            // "Remove the first enemy placed next to this.": one charge, spent on the first enemy whatever happens to it.
+            if let Args::PlacedAdjacent(placed, pcr) = args {
+                let spent = st.unit_by_iid(unit.iid).map(|u| u.retaliation_used).unwrap_or(true);
+                if !spent {
+                    if let Some(u) = st.unit_by_iid_mut(unit.iid) {
+                        u.retaliation_used = true;
+                    }
+                    if statics::can_be_removed(st, placed, Some(*pcr), false) {
+                        let step = remove_iid_step(st, placed.iid, owner, true, None, Some(unit.card));
+                        st.effect_stack.push(step);
+                    }
+                }
+            }
         }
         ("gazelle", OnPlace) => {
             let f = cfg(st, "gazelle_food");
@@ -1329,12 +1538,23 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             }
             grant(st, vec![iid], amount as i32);
         }
-        "stray_dog" => {
+        "coyote" => {
             if let Some(cr) = cr_of(st) {
-                if let Some(top) = st.top(cr).cloned() {
-                    st.effect_stack.push(vmap!("op" => Value::s("forced_roam"), "iid" => Value::Int(top.iid), "player" => pn(chooser)));
-                    grant(st, vec![top.iid], m_get_i(step, "amount").unwrap_or(0) as i32);
-                }
+                let iid = match st.top_mut(cr) {
+                    Some(top) => {
+                        top.granted_roam = true;
+                        top.iid
+                    }
+                    None => return,
+                };
+                it_roams(st, iid);
+            }
+        }
+        "street_dog" => {
+            if let Some(cr) = cr_of(st) {
+                let Some(top) = st.top(cr).cloned() else { return };
+                it_roams(st, top.iid);   // pushed first, so the +3 lands before it moves
+                grant(st, vec![top.iid], m_get_i(step, "amount").unwrap_or(0) as i32);
             }
         }
         "copy_and_add" => {
@@ -1342,6 +1562,9 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             let Some(cr) = cr_of(st) else { return };
             let Some(target) = st.top(cr).cloned() else { return };
             become_copy(st, me_iid, target.card, target.strength_counter);
+            if st.find_unit(me_iid).is_some() {
+                copy_timers(st, &target, me_iid, chooser);
+            }
             gain_to_hand(st, chooser, target.card, 0);
         }
         "copy_from_hand" => {
@@ -1376,6 +1599,17 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                 }
             }
         }
+        "repeat_roar" => {
+            // Vole: the chosen neighbour's Roar happens again, as the Vole's own, at the Vole's crossroad.
+            let (Some(cr), Some(iid)) = (cr_of(st), m_get_i(step, "vole")) else { return };
+            let Some((vole_cr, pos)) = st.find_unit(iid) else { return };
+            let vole = st.unit_at(vole_cr, pos).clone();
+            if let Some(top) = st.top(cr).cloned() {
+                if st.g.has_hook(top.card, Hook::OnPlace) {
+                    run(st, top.card, Some(vole.card), Hook::OnPlace, &vole, &Args::Place(vole_cr));
+                }
+            }
+        }
         "pile_to_hand" => {
             let Some(card) = choice.as_str().and_then(|s| st.card_id(s)) else { return };
             let from_owner = m_get_s(step, "from_owner").map(player_from);
@@ -1383,6 +1617,10 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                 crate::emit!(st, "unremove", vmap!("card" => card_v(st, card), "owner" => from_owner.map(pn).unwrap_or(Value::Null), "to" => pn(chooser)));
                 gain_to_hand(st, chooser, card, 0);
             }
+        }
+        "make_in_hand" => {
+            let Some(card) = choice.as_str().and_then(|s| st.card_id(s)) else { return };
+            gain_to_hand(st, chooser, card, 0);
         }
         "duplicate" => {
             let iid = choice.as_i64().unwrap_or(-1);
@@ -1398,10 +1636,17 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
         }
         "roam_to" => {
             let iid = m_get_i(step, "iid").unwrap_or(-1);
-            if let (Some(cr), Some((origin, pos))) = (cr_of(st), st.find_unit(iid)) {
+            if let Some((origin, pos)) = st.find_unit(iid) {
                 if pos + 1 == st.stack(origin).len() {
                     let owner = st.unit_at(origin, pos).owner;
-                    let _ = do_roam(st, owner, origin, &crate::actions::Target::Cr(cr));
+                    let target = if choice.as_str() == Some("den") {
+                        Some(crate::actions::Target::Hq(other(owner)))
+                    } else {
+                        cr_of(st).map(crate::actions::Target::Cr)
+                    };
+                    if let Some(t) = target {
+                        let _ = do_roam(st, owner, origin, &t, true);
+                    }
                 }
             }
         }

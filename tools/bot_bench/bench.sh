@@ -6,10 +6,13 @@
 #   tools/bot_bench/bench.sh clean <name>                         remove the run's checkout; the results stay
 # A spec is a bot kind string ("referee:depth=1,..."). A candidate starting with "+" appends to the baseline ("+quiesce=true").
 # The baseline defaults to the shipped Expert without its time budget, and is the opponent too. GAMES (20) and JOBS (7)
-# size the run; AFTER=<name> makes it wait for that run to finish first. Everything of a run lives in results/bot_quality/<name>:
+# size the run; AFTER=<name> makes it wait for that run to finish first. DECKS=a,b and OPPONENTS=a,b name the candidate
+# decks and the opponent decks (default: the bot pool against the standing panel); EXTRA_DECKS=<json file of slug: cards>
+# registers decks the tree does not ship, such as Martin's decks exported from his profile (2026-10-30: the 43-deck pool
+# carried 25 ladder decks with cards that no longer exist and none of his ten). Everything of a run lives in results/bot_quality/<name>:
 # tree/ (the checkout), run.json (what ran on what), run.sh, run.log, logs/ (every game).
-# The bots play on the Rust engine: the tree gets its own copy of the built module, so a rebuild during the run cannot
-# change what it plays with (AK_PY_BOTS=1 for the Python bots, fifty times slower). Every long job gets its own freeze;
+# The bots play on the Rust engine, built from the tree's own source into the tree, so neither a rebuild nor another
+# session's uncommitted engine edits can change what it plays with (AK_PY_BOTS=1 for the Python bots, fifty times slower). Every long job gets its own freeze;
 # a tree is never moved, fetched into or edited while anything runs from it, since workers re-read it as batches start.
 set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -30,6 +33,9 @@ freeze() {
   if [[ "$rust" == 1 ]]; then
     ls "$module"/*.so >/dev/null 2>&1 || { echo "no built engine module at $module (cd engine_rs && ../.venv/bin/maturin develop --release)"; exit 1; }
     cp -R "$module" "$tree/ak_engine"
+    # The engine built from the tree's own source: the shared module carries whatever another session left uncommitted.
+    (cd "$tree/engine_rs" && CARGO_TARGET_DIR="$out/target" cargo build --release -q) || { echo "engine build failed in $tree"; exit 1; }
+    cp "$out/target/release/libak_engine.dylib" "$tree/ak_engine/$(basename "$tree"/ak_engine/*.so)"
   fi
 }
 
@@ -47,15 +53,18 @@ run)
   cards="$(git -C "$repo" rev-parse "$at:animal_kingdom/data/cards.json")"
   lists="$(git -C "$repo" rev-parse "$at:animal_kingdom/data/decklists.json")"
   games="${GAMES:-20}"; jobs="${JOBS:-7}"
+  extra=""; [[ -z "${EXTRA_DECKS:-}" ]] || { extra="$out/extra_decks.json"; cp "$EXTRA_DECKS" "$extra"; }
   python3 -c 'import json,sys; print(json.dumps(dict(zip(sys.argv[1::2], sys.argv[2::2])), indent=2))' \
-    commit "$at" cards "$cards" decklists "$lists" candidate "$cand" baseline "$base" games "$games" jobs "$jobs" after "${AFTER:-}" rust "$rust" started "$(date '+%Y-%m-%d %H:%M')" > "$out/run.json"
+    commit "$at" cards "$cards" decklists "$lists" candidate "$cand" baseline "$base" games "$games" jobs "$jobs" after "${AFTER:-}" rust "$rust" \
+    decks "${DECKS:-}" opponents "${OPPONENTS:-}" extra_decks "$extra" started "$(date '+%Y-%m-%d %H:%M')" > "$out/run.json"
   {
     echo '#!/bin/zsh'
     echo "cd '$tree'"
     [[ "$rust" != 1 ]] || echo "export AK_RUST_BOTS=1"
+    [[ -z "$extra" ]] || echo "export AK_EXTRA_DECKS=\"\$(cat '$extra')\""
     [[ -z "${AFTER:-}" ]] || echo "until grep -q '=== done' '$repo/results/bot_quality/$AFTER/run.log' || ! pgrep -f 'bot_quality/$AFTER/run.sh' >/dev/null; do sleep 60; done"
     echo 'echo "=== start $(date)"'
-    echo "PYTHONPATH=\$PWD .venv/bin/python -m animal_kingdom.sim.bot_comparison --games $games --jobs $jobs --candidate-kind '$cand' --baseline-kind '$base' --opponent-kind '$base' --out '$out'"
+    echo "PYTHONPATH=\$PWD .venv/bin/python -m animal_kingdom.sim.bot_comparison --games $games --jobs $jobs --candidate-kind '$cand' --baseline-kind '$base' --opponent-kind '$base' --out '$out'${DECKS:+ --decks '$DECKS'}${OPPONENTS:+ --opponents '$OPPONENTS'}"
     echo 'echo "=== done $(date)"'
   } > "$out/run.sh"
   nohup zsh "$out/run.sh" > "$out/run.log" 2>&1 &

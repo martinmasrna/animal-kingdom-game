@@ -43,6 +43,29 @@ def _controls(state: GameState, player: str, card_id: str) -> bool:
                for st in state.board.values())
 
 
+def fish_worth(state: GameState, player: str, cr: str) -> int:
+    """The legendary Sardine: "[SARDINE] and your adjacent Fish count as 2 Fish." What `player`'s Fish on `cr` counts
+    as: 2 on a working legendary Sardine of theirs or next to one, else 1."""
+    for c, st in state.board.items():
+        if st and st[-1].owner == player and st[-1].card_id == "sardine_legend" and active(state, st[-1]) \
+                and (c == cr or c in state.game_map.neighbors(cr)):
+            return 2
+    return 1
+
+
+def animal_worth(state: GameState, player: str, cr: str) -> int:
+    """How many animals `player`'s top animal on `cr` counts as wherever animals are counted: a Fish as `fish_worth`
+    says (2 beside their legendary Sardine: 2 Fish are 2 animals), anything else 1."""
+    return fish_worth(state, player, cr) if "Fish" in state.cards[state.board[cr][-1].card_id].tags else 1
+
+
+def fish_count(state: GameState, player: str, crs=None, exclude_iid=None) -> int:
+    """How many Fish `player` counts on their top animals (on `crs` only, when given), each as `fish_worth` says."""
+    return sum(fish_worth(state, player, c) for c, st in state.board.items()
+               if st and st[-1].owner == player and "Fish" in state.cards[st[-1].card_id].tags
+               and st[-1].iid != exclude_iid and (crs is None or c in crs))
+
+
 def crossroad_of(state: GameState, unit: UnitInstance) -> Optional[str]:
     for cr, st in state.board.items():
         for u in st:
@@ -57,8 +80,11 @@ def crossroad_of(state: GameState, unit: UnitInstance) -> Optional[str]:
 KEYWORD_AURAS = {
     "armadillo": ("Armor", None),                 # "Armor. Your adjacent animals have Armor."
     "porcupine": ("Spikes", None),                # "Spikes. Your adjacent animals have Spikes."
-    "jellyfish_legend": ("Poison", "Fish"),  # "Your adjacent Fish have Poison."
+    "jellyfish": ("Poison", None),                # "Poison. Your adjacent animals have Poison."
 }
+
+
+_ROAM = frozenset({"Roam"})
 
 
 def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None, *, as_top: bool = False) -> frozenset:
@@ -68,6 +94,8 @@ def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None
         return frozenset()
     card = state.cards[unit.card_id]
     kws = card.keywords
+    if unit.granted_roam and "Roam" not in kws:   # the Coyote's gift
+        kws = kws | _ROAM
     if not any(st and st[-1].owner == unit.owner and st[-1].card_id in KEYWORD_AURAS for st in state.board.values()):
         return kws
     at = crossroad_of(state, unit)
@@ -104,6 +132,10 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     placer_card = state.cards[placer.card_id]
     owner = placer.owner
 
+    # The Bison: "Can't be covered while grazing." Nothing overrides it, the Hercules Beetle included.
+    if target.card_id == "bison" and active(state, target) and grazing(state, target):
+        return False
+
     # The Hercules Beetle covers units of any strength (its own side needs no strength anyway).
     if placer_card.id == "hercules_beetle" and (not roaming or active(state, placer)):
         return True
@@ -112,17 +144,13 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     target_str = effective_strength(state, target)
 
     # Placing and roaming follow one rule: every override below holds for both.
-    if roam_covers_equal(state, placer) and placer_str >= target_str:
-        return True
     # Leopard: "Your Cats can cover enemies of equal strength."
     if "Cat" in placer_card.tags and placer_str >= target_str and any(
             u is not placer for u in active_tops(state, owner, "leopard")):
         return True
-    # The legendary Piranha: "Your Fish can cover enemies of strength up to the number of your Fish."
-    if "Fish" in placer_card.tags and _controls(state, owner, "piranha_legend"):
-        fish = sum(1 for st in state.board.values()
-                   if st and st[-1].owner == owner and "Fish" in state.cards[st[-1].card_id].tags)
-        if target_str <= fish:
+    # The Piranha: "Your Fish can cover enemies of strength up to the number of your Fish."
+    if "Fish" in placer_card.tags and _controls(state, owner, "piranha"):
+        if target_str <= fish_count(state, owner):
             return True
 
     return placer_str > target_str  # default: strictly greater
@@ -131,8 +159,8 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
 # ------------------------------------------------------------------------- Roam
 
 def can_roam(state: GameState, unit: UnitInstance) -> bool:
-    """Whether `unit` has Roam right now (printed, and not inked)."""
-    return "Roam" in state.cards[unit.card_id].keywords and active(state, unit)
+    """Whether `unit` has Roam right now (printed or given by the Coyote, and not inked)."""
+    return ("Roam" in state.cards[unit.card_id].keywords or unit.granted_roam) and active(state, unit)
 
 
 # Card ids that, while on top of their crossroad, give their controller one free roam each turn ("Once each turn, an
@@ -151,17 +179,11 @@ def free_roams(state: GameState, player: str, unit: Optional[UnitInstance] = Non
     return n
 
 
-def roam_covers_equal(state: GameState, unit: UnitInstance) -> bool:
-    """Whether `unit`, placed or roaming, may cover an enemy of equal strength (Dhole: "Your animals with Roam can cover
-    enemies of equal strength", id `dhole`)."""
-    return "Roam" in state.cards[unit.card_id].keywords and _controls(state, unit.owner, "dhole")
-
-
 # ------------------------------------------------------------------------ Reach
 
 def reach_of(state: GameState, card_id: str) -> int:
-    """How far a card lands, 0 without Reach: printed, or the Great White Shark's "If an animal was removed this turn,
-    this has Reach."."""
+    """How far a card lands, 0 without Reach: printed, or the Great White Shark's "Has Reach if an animal was removed
+    this turn."."""
     if "Reach" in state.cards[card_id].keywords or (
             card_id == "great_white_shark" and state.turn_flags.get("removed_any")):
         return state.config.reach

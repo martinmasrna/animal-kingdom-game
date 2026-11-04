@@ -13,26 +13,26 @@ The table below is generated from cards.json, where the cards live.
 | **Big Gus** | 1 | Rodent | 6 | Roar: repeat the Roar of each of your adjacent Rodents. |
 | **[MACAQUE]** | 1 | Primate | 2 | Roar: draw cards until you have as many as your opponent. |
 | **[RAT]** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
-| **Tally** | 1 | Rodent | 4 | Roar: gain 3 food for each 10 food you have. |
+| **Tally** | 1 | Rodent | 4 | Roar: gain 1 food for each 3 food you have. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food. |
+| **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food and draw a card. |
 | **Beaver** | 2 | Rodent | 5 | Roar: next turn, take 1 additional action. |
-| **Dormouse** | 2 | Rodent | 3 | Dusk: if you gained 10 or more food this turn, draw a card. |
+| **Dormouse** | 2 | Rodent | 3 | Dusk: draw a card for each 10 food you gained this turn. |
+| **Groundhog** | 2 | Rodent | 3 | Dawn: gain 10 food. |
 | **Woodpecker** | 2 | Bird | 3 | Flight. Roar: your next Roar this turn happens twice. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Squirrel** | 3 | Rodent | 3 | Roar: gain 10 food. |
+| **Squirrel** | 3 | Rodent | 4 | Roar: gain 10 food. |
 | **Chipmunk** | 3 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
-| **Gopher** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
-| **Muskrat** | 3 | Rodent | 3 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
-| **Groundhog** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, gain 10 food. |
-| **Hamster** | 3 | Rodent | 3 | Has +1 strength for each 10 food you have. |
+| **Gopher** | 3 | Rodent | 3 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
+| **Hamster** | 3 | Rodent | 3 | Whenever you draw a card, gain 5 food. |
+| **Mara** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
 
 <!-- cards:end -->

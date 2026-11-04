@@ -1,8 +1,11 @@
 //! The bots: a bot is built from a spec string the way sim.runner.make_bot builds one (`kind:k=v,...`, `w.<name>`
 //! for an evaluation weight), and plays through `choose`.
 
+pub mod atomic;
+pub mod cand;
 pub mod features;
 pub mod greedy;
+pub mod raw;
 pub mod search;
 pub mod world;
 
@@ -23,6 +26,7 @@ pub enum Bot {
     Random(PyRandom),
     Greedy(GreedyBot),
     Search(Searcher),
+    Atomic(Box<atomic::AtomicBot>),
 }
 
 fn coerce(v: &str) -> sj::Value {
@@ -81,6 +85,29 @@ impl Bot {
             extra.retain(|(k, _)| k != "eval");
         }
         let get = |name: &str| extra.iter().find(|(k, _)| k == name).map(|(_, v)| v);
+        if kind == "atomic" {
+            // the whole-turn search (atomic.rs) on a referee base: its evaluation, imagined hands and decided-game value
+            let base_spec = spec.replacen("atomic", "referee", 1);
+            let base = match Bot::from_spec(&base_spec, seed, evaluator_json)? {
+                Bot::Search(s) => s,
+                _ => return Err("the atomic bot needs a referee base".into()),
+            };
+            let rounds = get("rounds").map(as_usize).unwrap_or(1).max(1);
+            let widths = vec![get("width1").map(as_usize).unwrap_or(60), get("width2").map(as_usize).unwrap_or(20)];
+            let inner = get("inner").map(as_usize).unwrap_or(4);
+            let cap = get("cap").map(as_usize).unwrap_or(3000);
+            let threads = get("threads").map(as_usize).unwrap_or(8);
+            let hands = get("hands").map(as_usize).unwrap_or(30);
+            let temperature = get("temperature").and_then(|v| v.as_f64().or_else(|| v.as_str().and_then(|s| s.parse().ok()))).unwrap_or(2.3);
+            let draws = get("draws").map(as_usize).unwrap_or(8);
+            let mut bot = atomic::AtomicBot::new(base, rounds, widths, inner, cap, threads, hands, temperature, draws);
+            bot.by_card = get("bycard").map(as_usize).unwrap_or(1) != 0;     // 0: every set of cards drawn, for checking it
+            bot.beam = get("beam").map(as_usize).unwrap_or(0);     // >0: only that many actions in mid-turn searched on (AtomicBot::beam)
+            if let Some(path) = get("cand").and_then(|v| v.as_str()) {   // the candidate network (cand.rs) chooses the beam
+                bot.cand = Some(std::sync::Arc::new(cand::CandNet::load(path)?));
+            }
+            return Ok(Bot::Atomic(Box::new(bot)));
+        }
         match kind.as_str() {
             "random" => Ok(Bot::Random(PyRandom::seeded(seed))),
             "greedy" | "easy" | "lookahead" | "greedy_belief" => {
@@ -145,11 +172,29 @@ impl Bot {
                     if let Some(v) = get("den_sense") {
                         s.den_sense = as_bool(v);
                     }
+                    if let Some(v) = get("den_far") {
+                        s.den_far = as_usize(v);
+                    }
+                    if let Some(v) = get("den_far_margin") {
+                        s.den_far_margin = as_usize(v);
+                    }
+                    if let Some(v) = get("den_far_ratio") {
+                        s.den_far_ratio = as_f64(v);
+                    }
                     if let Some(v) = get("reply_turns") {
                         s.reply_turns = as_usize(v);
                     }
                     if let Some(v) = get("deepen_chase") {
                         s.deepen_chase = as_bool(v);
+                    }
+                    if let Some(v) = get("den_open") {
+                        s.den_open = as_bool(v);
+                    }
+                    if let Some(v) = get("reply_min") {
+                        s.reply_min = as_bool(v);
+                    }
+                    if let Some(v) = get("outs") {
+                        s.outs = as_usize(v);
                     }
                 }
                 Ok(Bot::Search(s))
@@ -168,12 +213,14 @@ impl Bot {
             }
             Bot::Greedy(g) => g.choose(st, me, legal),
             Bot::Search(s) => s.choose(st, me, legal),
+            Bot::Atomic(a) => a.choose(st, me, legal),
         }
     }
 
     pub fn root_scores(&self) -> Vec<(Action, f64)> {
         match self {
             Bot::Search(s) => s.last_root_scores.clone(),
+            Bot::Atomic(a) => a.last_ranking.iter().filter_map(|r| r.levels.iter().rev().flatten().next().map(|v| (r.turn[0].clone(), *v))).collect(),
             _ => Vec::new(),
         }
     }
@@ -187,8 +234,10 @@ impl Bot {
 }
 
 /// Play `st` to the end with two bots; returns the action log as dicts. `on_decision` sees every top-level and
-/// sub-choice decision (the actor, the state before, the action after it is applied is not available here).
-pub fn play_out(st: &mut State, bots: &mut [Bot; 2], epsilon: f64, eps_rng: &mut PyRandom, mut record: impl FnMut(&State, Player, bool)) -> Vec<sj::Value> {
+/// sub-choice decision (the actor, the state before, the action after it is applied is not available here). Before a
+/// decision the search's value of the position (its best root's score, the mover's side) comes with it: what the
+/// search found by looking ahead from there, `None` for a random or a one-option move.
+pub fn play_out(st: &mut State, bots: &mut [Bot; 2], epsilon: f64, eps_rng: &mut PyRandom, mut record: impl FnMut(&State, Player, bool, Option<f64>)) -> Vec<sj::Value> {
     let mut log = Vec::new();
     let mut guard = 0;
     while rules::is_terminal(st).is_none() && guard < 5000 {
@@ -198,16 +247,21 @@ pub fn play_out(st: &mut State, bots: &mut [Bot; 2], epsilon: f64, eps_rng: &mut
         if legal.is_empty() {
             break;
         }
-        record(st, actor, true);
-        let action = if legal.len() > 1 && epsilon > 0.0 && eps_rng.random() < epsilon {
-            legal[eps_rng.choice_index(legal.len())].clone()
+        let (action, value) = if legal.len() > 1 && epsilon > 0.0 && eps_rng.random() < epsilon {
+            (legal[eps_rng.choice_index(legal.len())].clone(), None)
+        } else if legal.len() == 1 {
+            (legal[0].clone(), None)
         } else {
-            bots[actor.min(1) as usize].choose(st, actor, &legal)
+            let bot = &mut bots[actor.min(1) as usize];
+            let a = bot.choose(st, actor, &legal);
+            let v = bot.root_scores().iter().map(|x| x.1).fold(None, |m: Option<f64>, v| Some(m.map_or(v, |m| m.max(v))));
+            (a, v)
         };
+        record(st, actor, true, value);
         log.push(action.to_json(st));
         let _ = rules::apply_action(st, &action, false);
         if rules::is_terminal(st).is_none() {
-            record(st, actor, false);
+            record(st, actor, false, None);
         }
     }
     log

@@ -57,12 +57,12 @@ def test_a_database_from_before_covers_gains_the_column(tmp_path):
 def test_a_profile_gets_the_starter_decks_once(monkeypatch):
     db = Profiles(":memory:")
     monkeypatch.setattr(server, "profiles", db)
+    monkeypatch.setattr(server, "STARTER_DECKS", [{"slug": s, "name": s.title(), "cards": {"lion": 3}} for s in ("cats", "fish")])
     _, p = db.create()
     decks = server.profile_view(p)["decks"]
-    assert [d["name"] for d in decks][:3] == ["Colony", "Circle of Life", "Roaming Pack"] and len(decks) == 12
-    assert all(sum(d["cards"].values()) == 30 for d in decks)
-    db.save_decks(p["id"], decks[:1])                                   # the player deletes eleven
-    assert len(server.profile_view(p)["decks"]) == 1                    # and they stay deleted
+    assert [d["name"] for d in decks] == ["Cats", "Fish"]
+    db.save_decks(p["id"], decks[:1])                                   # the player deletes one
+    assert len(server.profile_view(p)["decks"]) == 1                    # and it stays deleted
 
 
 def test_an_untouched_starter_copy_follows_its_starter(db):

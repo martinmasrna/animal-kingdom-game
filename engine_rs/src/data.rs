@@ -79,6 +79,67 @@ pub const K_HUNGRY: u32 = 1 << 8;
 pub const K_TITAN: u32 = 1 << 9;
 pub const K_FLEE: u32 = 1 << 10;
 
+/// A sentence after a Roar that starts one of these is an ability of its own (features.py `_LASTING_STARTS`).
+const LASTING_STARTS: [&str; 7] = ["When ", "Whenever ", "While ", "Dawn:", "Dusk:", "Deathrattle", "Evolves "];
+
+const TRIGGER_STARTS: [&str; 6] = ["Roar:", "Dawn:", "Dusk:", "When ", "Whenever ", "Deathrattle"];
+const PAYOFF_WORDS: [&[&str]; 6] = [&["food"], &["draw", "scout", "to your hand"], &["remove"], &["strength"], &["place "], &["action"]];
+
+/// `pat` in `t` with a word boundary on both sides (a regex `\b`).
+fn word_at(t: &str, pat: &str) -> bool {
+    let b = t.as_bytes();
+    let w = |i: usize| b[i].is_ascii_alphanumeric() || b[i] == b'_';
+    t.match_indices(pat).any(|(i, m)| (i == 0 || !w(i - 1)) && (i + m.len() == b.len() || !w(i + m.len())))
+}
+
+/// features.py `_TIMER_WORDS`: "in N turns" or "next turn", any case.
+fn has_timer_words(t: &str) -> bool {
+    let low = t.to_lowercase();
+    if word_at(&low, "next turn") {
+        return true;
+    }
+    low.match_indices("in ").any(|(i, _)| {
+        let b = low.as_bytes();
+        if i > 0 && (b[i - 1].is_ascii_alphanumeric() || b[i - 1] == b'_') {
+            return false;
+        }
+        let rest = &low[i + 3..];
+        let digits = rest.bytes().take_while(|c| c.is_ascii_digit()).count();
+        digits > 0 && rest[digits..].starts_with(" turns") && rest[digits + 6..].bytes().next().map_or(true, |c| !(c.is_ascii_alphanumeric() || c == b'_'))
+    })
+}
+
+/// features.py `ability_profile`: when the ability fires, what it pays, whether it is conditional, read from the
+/// printed text's shape.
+fn profile_of(text: &str, kw_names: &[&str], lasting: bool) -> [f64; 12] {
+    let mut sentences: Vec<(&str, bool)> = Vec::new();
+    let mut in_roar = false;
+    for t in text.split('.').map(|t| t.trim()).filter(|t| !t.is_empty()) {
+        if t.starts_with("Roar:") {
+            in_roar = true;
+        } else if in_roar && LASTING_STARTS.iter().any(|s| t.starts_with(s)) {
+            in_roar = false;
+        }
+        if (lasting && in_roar) || kw_names.contains(&t) || t.starts_with("Costs ") {
+            continue;
+        }
+        sentences.push((t, in_roar));
+    }
+    let low: Vec<String> = sentences.iter().map(|(t, _)| t.to_lowercase()).collect();
+    let mut out = [0.0; 12];
+    let flag = |b: bool| if b { 1.0 } else { 0.0 };
+    out[0] = flag(sentences.iter().any(|(t, _)| t.starts_with("Dawn:")));
+    out[1] = flag(sentences.iter().any(|(t, _)| t.starts_with("Dusk:")));
+    out[2] = flag(sentences.iter().any(|(t, _)| ["When ", "Whenever ", "Deathrattle"].iter().any(|s| t.starts_with(s))));
+    out[3] = flag(sentences.iter().any(|(t, _)| has_timer_words(t)));
+    out[4] = flag(sentences.iter().any(|(t, r)| !r && !TRIGGER_STARTS.iter().any(|s| t.starts_with(s))));
+    for (k, words) in PAYOFF_WORDS.iter().enumerate() {
+        out[5 + k] = flag(low.iter().any(|t| words.iter().any(|w| t.contains(w))));
+    }
+    out[11] = flag(low.iter().any(|t| t.starts_with("while ") || format!(" {t}").contains(" if ")));
+    out
+}
+
 #[derive(Clone, Debug)]
 pub struct Card {
     pub idx: CardId,
@@ -98,26 +159,35 @@ pub struct Card {
     pub has_roar: bool,
     /// Rules text beyond keywords and a food cost (features.has_ability).
     pub has_ability: bool,
-    /// The cards whose own text is a live "+X" (strength.py ANTHEM_CARDS): 0 none, 1 guard_wasp, 2 tuna, 3 hamster,
+    /// The ability once the Roar has fired: the text without the Roar's own sentences (features.lasting_ability).
+    pub has_lasting_ability: bool,
+    /// The ability as what it does (features.ability_profile, ABILITY_FEATURES order): in hand, and on the board
+    /// without the Roar's own sentences.
+    pub ability_profile: [f64; 12],
+    pub lasting_profile: [f64; 12],
+    /// The cards whose own text is a live "+X" (strength.py ANTHEM_CARDS): 0 none, 1 guard_wasp, 2 tuna, 3 marmot,
     /// 4 peacock, 5 giraffe, 6 crocodile, 7 capybara.
     pub anthem_kind: u8,
-    /// Family auras (strength.py FAMILY_AURAS): 0 none, 1 mackerel (Fish, always), 2 cape_buffalo (Hoofed, their turn).
+    /// Family auras (strength.py FAMILY_AURAS): 0 none, 1 mahi_mahi (Fish, always), 2 cape_buffalo (Hoofed, their turn).
     pub family_aura: u8,
-    /// Keyword auras (statics.py KEYWORD_AURAS): 0 none, 1 armadillo (Armor), 2 porcupine (Spikes), 3 jellyfish_legend
-    /// (Poison, Fish only).
+    /// Keyword auras (statics.py KEYWORD_AURAS): 0 none, 1 armadillo (Armor), 2 porcupine (Spikes), 3 jellyfish
+    /// (Poison).
     pub keyword_aura: u8,
 }
 
-pub const ANTHEM_KINDS: [&str; 8] = ["", "guard_wasp", "tuna", "hamster", "peacock", "giraffe", "crocodile", "capybara"];
-pub const FAMILY_AURAS: [&str; 3] = ["", "mackerel", "cape_buffalo"];
-pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish_legend"];
+pub const ANTHEM_KINDS: [&str; 8] = ["", "guard_wasp", "tuna", "marmot", "peacock", "giraffe", "crocodile", "capybara"];
+pub const FAMILY_AURAS: [&str; 3] = ["", "mahi_mahi", "cape_buffalo"];
+pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish"];
 
 /// The cards the engine's rules name (never a card's effect: those live with the card in effects): resolved once.
+#[derive(Clone)]
 pub struct Known {
     pub hercules_beetle: Option<CardId>,
+    pub bison: Option<CardId>,
     pub leopard: Option<CardId>,
-    pub piranha_legend: Option<CardId>,
-    pub dhole: Option<CardId>,
+    pub piranha: Option<CardId>,
+    pub sardine_legend: Option<CardId>,
+    pub moose: Option<CardId>,
     pub wolf_legend_3: Option<CardId>,
     pub great_white_shark: Option<CardId>,
     pub cougar: Option<CardId>,
@@ -145,9 +215,11 @@ impl Known {
         let k = |n: &str| cards.id_of(n);
         Known {
             hercules_beetle: k("hercules_beetle"),
+            bison: k("bison"),
             leopard: k("leopard"),
-            piranha_legend: k("piranha_legend"),
-            dhole: k("dhole"),
+            piranha: k("piranha"),
+            sardine_legend: k("sardine_legend"),
+            moose: k("moose"),
             wolf_legend_3: k("wolf_legend_3"),
             great_white_shark: k("great_white_shark"),
             cougar: k("cougar"),
@@ -184,6 +256,7 @@ impl Card {
     }
 }
 
+#[derive(Clone)]
 pub struct Cards {
     pub list: Vec<Card>,
     pub by_id: FxHashMap<String, CardId>,
@@ -223,11 +296,26 @@ impl Cards {
             }
             by_id.insert(id.clone(), idx);
             let kw_names: Vec<&str> = rec.get("keywords").and_then(|t| t.as_array()).map(|a| a.iter().filter_map(|x| x.as_str()).collect()).unwrap_or_default();
-            let has_ability = text.split('.').map(|t| t.trim()).filter(|t| !t.is_empty()).any(|t| !kw_names.contains(&t) && !t.starts_with("Costs "));
+            let is_ability = |t: &str| !kw_names.contains(&t) && !t.starts_with("Costs ");
+            let has_ability = text.split('.').map(|t| t.trim()).filter(|t| !t.is_empty()).any(is_ability);
+            let mut in_roar = false;
+            let has_lasting_ability = text.split('.').map(|t| t.trim()).filter(|t| !t.is_empty()).any(|t| {
+                if t.starts_with("Roar:") {
+                    in_roar = true;
+                } else if in_roar && LASTING_STARTS.iter().any(|s| t.starts_with(s)) {
+                    in_roar = false;
+                }
+                !in_roar && is_ability(t)
+            });
+            let ability_profile = profile_of(&text, &kw_names, false);
+            let lasting_profile = profile_of(&text, &kw_names, true);
             list.push(Card {
                 idx,
                 has_roar: text.contains("Roar:"),
                 has_ability,
+                has_lasting_ability,
+                ability_profile,
+                lasting_profile,
                 id,
                 name: rec.get("name").and_then(|t| t.as_str()).unwrap_or("").to_string(),
                 status: rec.get("status").and_then(|t| t.as_str()).unwrap_or("").to_string(),
@@ -270,6 +358,7 @@ pub struct Region {
     pub food: i32,
 }
 
+#[derive(Clone)]
 pub struct GameMap {
     pub id: String,
     pub crossroads: Vec<String>, // index -> name
@@ -358,6 +447,7 @@ impl GameMap {
 }
 
 /// The Python Config dataclass as a name -> value table, with the hot fields cached.
+#[derive(Clone)]
 pub struct Config {
     pub raw: sj::Map<String, sj::Value>,
     pub actions_per_turn: i32,
@@ -370,7 +460,7 @@ pub struct Config {
     pub mulligan_max: Option<i32>,
     pub first_player_opening_draw: i32,
     pub second_player_opening_draw: i32,
-    pub jelly_strength: i32,
+    pub jelly_grant: i32,
     pub egg_eater_growth: i32,
     pub capybara_small_max: i32,
 }
@@ -390,7 +480,7 @@ impl Config {
             mulligan_max: raw.get("mulligan_max").and_then(|x| x.as_i64()).map(|x| x as i32),
             first_player_opening_draw: gi("first_player_opening_draw", 4),
             second_player_opening_draw: gi("second_player_opening_draw", 4),
-            jelly_strength: gi("jelly_strength", 4),
+            jelly_grant: gi("jelly_grant", 2),
             egg_eater_growth: gi("egg_eater_growth", 2),
             capybara_small_max: gi("capybara_small_max", 3),
             raw,

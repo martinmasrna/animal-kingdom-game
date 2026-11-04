@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Candidate moves</title>
+<style>
+  :root { --line: #d0d4da; --head: #f2f4f7; --muted: #5f6368; --sel: #e8f0fe; --done: #e6f4ea; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #202124; background: #fff; overflow: hidden; }
+  header { display: flex; gap: 10px; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--line); background: var(--head); height: 37px; }
+  main { display: flex; height: calc(100vh - 37px); }
+  #left { flex: 0 0 60%; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+  #board { flex: 1; border: 0; width: 100%; background: #c9a46a; }
+  #nav { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-top: 1px solid var(--line); background: var(--head); min-height: 38px; }
+  #right { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #work { flex: 1; overflow: auto; padding: 6px 10px 10px; }
+  #list { height: 220px; overflow: auto; border-top: 1px solid var(--line); padding: 2px 0; }
+  #list div { padding: 2px 10px; cursor: pointer; white-space: nowrap; }
+  #list div.at { background: var(--sel); font-weight: 600; }
+  #list div.done { background: var(--done); }
+  #list div:hover { background: #f1f3f4; }
+  button { font: inherit; padding: 2px 8px; cursor: pointer; }
+  button.main { font-weight: 600; background: #1a73e8; color: #fff; border-color: #1a73e8; }
+  table { border-collapse: collapse; width: 100%; margin: 4px 0 8px; }
+  th, td { border: 1px solid var(--line); padding: 3px 6px; text-align: left; vertical-align: top; }
+  th { background: var(--head); font-weight: 600; }
+  td.r { width: 26px; color: var(--muted); text-align: right; }
+  td.pick { width: 70px; text-align: center; }
+  td.x { width: 30px; text-align: center; }
+  tr.cur td { background: #fef7e0; }
+  .muted { color: var(--muted); }
+  .err { color: #b3261e; white-space: pre-wrap; }
+  p { margin: 4px 0; }
+  textarea { width: 100%; height: 48px; font: inherit; }
+  a.x { cursor: pointer; color: #1a73e8; text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <span id="title">Candidate moves</span>
+  <span id="status" class="muted"></span>
+</header>
+<main>
+  <section id="left">
+    <iframe id="board" src="/#/lab/mid"></iframe>
+    <div id="nav">
+      <button id="reset" title="Put the position back and drop the moves played since">Reset position</button>
+      <button id="keep" title="Keep what's on the board as a candidate (the turn end does this by itself)">Keep as candidate</button>
+      <span id="cap" class="muted"></span>
+    </div>
+  </section>
+  <section id="right">
+    <div id="work">
+      <p><b>Play each turn you'd seriously consider here, on the board.</b> Both actions, Roar targets included. When the turn passes it is kept as a candidate and the position comes back. Mark the one you'd actually play, then Save &amp; next. Three to five candidates is plenty; thirty seconds a position; no need to be sure.</p>
+      <p id="info" class="muted"></p>
+      <table id="cands"><thead><tr><th>#</th><th>Turn you'd consider</th><th class="pick">I'd play</th><th></th></tr></thead><tbody></tbody></table>
+      <p id="cur" class="muted"></p>
+      <textarea id="note" placeholder="Anything worth saying about this position (optional)"></textarea>
+      <p><button id="save" class="main">Save &amp; next</button> <span id="saved" class="muted"></span></p>
+      <p id="err" class="err"></p>
+    </div>
+    <div id="list"></div>
+  </section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const S = { set: [], answers: {}, i: 0, sid: null, pos: null, k0: 0, cands: [], play: null, cur: null, ver: 1000 };
+
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {});
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+const frameWin = () => $('board').contentWindow;
+function boardReady() {
+  const w = frameWin();
+  return w && w.__ak && w.__ak.feed && w.__ak.cards && Object.keys(w.__ak.cards() || {}).length && w.__ak().V;
+}
+async function untilReady() { for (let i = 0; i < 150 && !boardReady(); i++) await new Promise(r => setTimeout(r, 100)); return boardReady(); }
+async function feed(view) {
+  if (!await untilReady()) return;
+  const w = frameWin();
+  w.__ak.onAct = action => onAct(action);
+  const v = JSON.parse(JSON.stringify(view)); v.version = S.ver++; v.analysed = v.version;
+  v.game.events = []; v.game.history = [];
+  w.__ak.feed(v);
+  for (let i = 0; i < 10; i++) {
+    await new Promise(r => setTimeout(r, 200));
+    if (S.ver - 1 !== v.version) return;
+    if ((w.__ak().V || {}).analysed !== v.version) w.__ak.feed(v);
+  }
+}
+
+async function open(i) {
+  S.i = i; $('err').textContent = ''; $('saved').textContent = '';
+  const r = await api('/api/candidates/open', { i });
+  S.sid = r.sid; S.pos = r.pos; S.k0 = r.k; S.cur = null;
+  const a = S.answers[String(i)];
+  S.cands = a ? a.candidates.map(c => ({ seq: c.seq, texts: c.texts })) : [];
+  S.play = a ? a.play : null;
+  $('note').value = a ? (a.note || '') : '';
+  $('info').textContent = `Position ${i + 1} of ${S.set.length}: ${S.pos.id.slice(4, 12)} ${S.pos.match} game ${S.pos.game}, your turn ${Math.ceil(r.turn / 2)}. Food you ${r.food[r.seat]}, opponent ${r.food[r.seat === 'A' ? 'B' : 'A']}. The opponent's hand is hidden, as it was.`;
+  await feed(r.view);
+  render(); renderList();
+}
+
+async function onAct(action) {
+  try {
+    const r = await api('/api/candidates/play', { sid: S.sid, action, k0: S.k0 });
+    await feed(r.view);
+    S.cur = { seq: r.seq, texts: r.texts };
+    $('cur').textContent = 'On the board now: ' + r.texts.join(' · ');
+    if (r.over || r.to_act !== S.pos.seat || r.taken === 0) await keep();   // the turn passed (or the game ended): kept
+  } catch (e) { $('err').textContent = e.message; }
+}
+async function keep() {
+  if (!S.cur || !S.cur.seq.length) return;
+  S.cands.push(S.cur); S.cur = null; $('cur').textContent = '';
+  await reset(); render();
+}
+async function reset() {
+  const r = await api('/api/candidates/reset', { sid: S.sid, k0: S.k0 });
+  S.cur = null; $('cur').textContent = '';
+  await feed(r.view);
+}
+function render() {
+  const tb = $('cands').querySelector('tbody');
+  tb.innerHTML = S.cands.map((c, j) => `<tr><td class="r">${j + 1}</td><td>${c.texts.join(' · ')}</td>
+    <td class="pick"><input type="radio" name="play" ${S.play === j ? 'checked' : ''} data-j="${j}"></td>
+    <td class="x"><a class="x" data-del="${j}">✕</a></td></tr>`).join('') ||
+    '<tr><td colspan="4" class="muted">No candidates yet. Play one on the board.</td></tr>';
+  tb.querySelectorAll('input[name=play]').forEach(el => el.onchange = () => { S.play = +el.dataset.j; });
+  tb.querySelectorAll('a[data-del]').forEach(el => el.onclick = () => {
+    const j = +el.dataset.del; S.cands.splice(j, 1);
+    if (S.play === j) S.play = null; else if (S.play > j) S.play--;
+    render();
+  });
+}
+function renderList() {
+  $('list').innerHTML = S.set.map((c, i) => `<div class="${i === S.i ? 'at' : ''} ${S.answers[String(i)] ? 'done' : ''}" data-i="${i}">
+    ${i + 1}. ${c.id.slice(4, 12)} ${c.match} game ${c.game}, turn ${Math.ceil(c.turn / 2)}${S.answers[String(i)] ? ' ✓' : ''}</div>`).join('');
+  $('list').querySelectorAll('div[data-i]').forEach(el => el.onclick = () => open(+el.dataset.i));
+  const done = Object.keys(S.answers).length;
+  $('status').textContent = `${done} of ${S.set.length} done`;
+}
+$('save').onclick = async () => {
+  if (!S.cands.length) { $('err').textContent = 'Play at least one candidate first.'; return; }
+  if (S.play == null) { $('err').textContent = 'Mark the one you would play.'; return; }
+  const r = await api('/api/candidates/save', { i: S.i, candidates: S.cands, play: S.play, note: $('note').value });
+  S.answers[String(S.i)] = { candidates: S.cands, play: S.play, note: $('note').value };
+  $('saved').textContent = `saved (${r.done} of ${S.set.length})`;
+  const next = S.set.findIndex((c, i) => i > S.i && !S.answers[String(i)]);
+  const any = S.set.findIndex((c, i) => !S.answers[String(i)]);
+  if (next >= 0) open(next); else if (any >= 0) open(any); else { renderList(); $('status').textContent = 'All done. Thank you.'; }
+};
+$('reset').onclick = () => reset().then(render);
+$('keep').onclick = () => keep();
+
+(async () => {
+  const r = await api('/api/candidates/set');
+  S.set = r.set; S.answers = r.answers || {};
+  const first = S.set.findIndex((c, i) => !S.answers[String(i)]);
+  await open(first >= 0 ? first : 0);
+})();
+</script>
+</body>
+</html>
