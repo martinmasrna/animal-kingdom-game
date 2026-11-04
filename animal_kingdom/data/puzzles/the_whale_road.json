@@ -1,0 +1,29 @@
+{
+  "id": "the_whale_road",
+  "title": "The whale road",
+  "theme": "Apex Predator",
+  "to_move": "A",
+  "turns": 1,
+  "order": 2,
+  "board": {
+    "1,2": [{"card": "sloth", "owner": "A"}],
+    "2,2": [{"card": "whale_shark", "owner": "A"}],
+    "3,2": [{"card": "oxpecker", "owner": "A"}],
+    "4,2": [{"card": "oxpecker", "owner": "B"}, {"card": "rhinoceros", "owner": "A"}, {"card": "elephant", "owner": "B"}, {"card": "blue_whale", "owner": "A"}],
+    "5,2": [{"card": "oxpecker", "owner": "B"}],
+    "5,3": [{"card": "sperm_whale_legend", "owner": "B"}]
+  },
+  "hands": {"A": ["crocodile", "blue_whale", "sloth"], "B": ["hippopotamus", "dung_beetle", "blue_whale", "tortoise_legend", "whale_shark", "whale_shark"]},
+  "food": {"A": 30, "B": 36},
+  "hint": "An Apex Predator can never land on a den.",
+  "why": "The Sloth and the Crocodile can both take the Oxpecker, but only the Sloth can take the den after: the predator clears, the weak card finishes.",
+  "source": "results/human_games/web/web_20261017T100008_DRXFAW.jsonl line 0, action 17",
+  "solution": [
+    {"kind": "place", "card_id": "crocodile", "target": ["cr", "5,2"]},
+    {"kind": "place", "card_id": "sloth", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "crocodile", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "sloth", "target": ["hq", "B"]}
+  ]
+}

@@ -29,6 +29,14 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   `animal_kingdom/web/test/puzzle.test.mjs` (the list, one solved by clicks, one failed and retried), with the click
   driver in `puzzleplay.mjs`; the server reads fixture puzzles from `AK_PUZZLE_DIR`.
 
+- **Phase 4, the first two puzzles**, from `tools/puzzles/forced_captures-2026-11-05.jsonl`, decks emptied, hands
+  kept, stacks in full (`solve.py from-log`), each with one winning first turn:
+  `empty_handed` ("Empty-handed", the audit's no. 1: roam the Bush Dog forward, its Pup keeps the chain, then the
+  Elephant roams in) and `the_whale_road` ("The whale road", no. 2: the Crocodile clears the Oxpecker, the Sloth takes
+  the den). `animal_kingdom/web/test/puzzles.test.mjs` clicks every shipped puzzle's main line to Solved (about 2 s
+  each, so it sits in the fast suite). The brief moved to the open ground left of the hand: at the top it covered the
+  defender's face-up hand.
+
 ## Calls I made (for Martin to overrule)
 
 - **A draw with an empty deck.** The engine offers no draw from an empty deck. Drawing nothing is the same move as ending
@@ -51,7 +59,10 @@ Nothing. (Chrome for Testing could not be downloaded here; the tests run on the 
 
 ## For Martin's own eyes
 
-- `./play`, then http://localhost:8000/#/puzzles: there are no shipped puzzles until phase 4, so the list is empty.
+- `./play`, then http://localhost:8000/#/puzzles: the two puzzles. The game screen with the brief box bottom left,
+  the defender's hand face up along the top, the end box (Solved / Not solved).
+- `empty_handed` shows the legendary Elephant, which has no painting yet: its piece is a dark disc with "[ELEPHANT]".
+  Fine to play, but not to show anyone until the art lands.
 - The web suite in this cloud container: 12 tests fail on a clean `main` too (collection filters, news dot, replays, the
   game's panels and hover labels), with the container's Chromium instead of Chrome (Chrome's download was blocked by
   the network). The same 12 fail with my changes, and the 3 new ones pass. Worth one `npm test` on the Mac. `.venv/bin/python tools/puzzles/solve.py solve <file>` prints a verdict.

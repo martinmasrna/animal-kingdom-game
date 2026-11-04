@@ -1,0 +1,30 @@
+{
+  "id": "empty_handed",
+  "title": "Empty-handed",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 1,
+  "order": 1,
+  "board": {
+    "1,2": [{"card": "pup", "owner": "A"}, {"card": "worker_wasp", "owner": "B"}, {"card": "pup", "owner": "A"}, {"card": "leopard_legend", "owner": "A", "counter": 5}],
+    "1,3": [{"card": "pup", "owner": "A"}, {"card": "worker_wasp", "owner": "B"}, {"card": "pup", "owner": "A"}],
+    "2,2": [{"card": "pup", "owner": "A"}, {"card": "nurse_bee", "owner": "B"}, {"card": "pup", "owner": "A"}, {"card": "nurse_bee", "owner": "B"}, {"card": "pup", "owner": "A"}],
+    "2,3": [{"card": "coyote", "owner": "A"}],
+    "3,2": [{"card": "pup", "owner": "A"}],
+    "3,3": [{"card": "bush_dog", "owner": "A"}],
+    "5,3": [{"card": "queen_ant", "owner": "B"}, {"card": "elephant_legend", "owner": "A"}]
+  },
+  "hands": {"A": [], "B": ["soldier_ant", "soldier_ant", "soldier_ant", "queen_ant", "nurse_bee", "worker_ant", "worker_ant", "termite_queen"]},
+  "food": {"A": 43, "B": 33},
+  "hint": "Your Elephant is already at their den: what is missing is a road back to yours.",
+  "why": "The hand is empty and the Elephant looks finished, but a Bush Dog that roams leaves a Pup behind, so it can step forward and still keep the chain whole.",
+  "source": "results/human_games/web/web_20261031T131750_ILXWMW.jsonl line 4, action 46",
+  "solution": [
+    {"kind": "roam", "from": "3,3", "target": ["cr", "4,3"]},
+    {"kind": "roam", "from": "5,3", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "roam", "from": "3,3", "target": ["cr", "4,3"]},
+    {"by": "A", "kind": "roam", "from": "5,3", "target": ["hq", "B"]}
+  ]
+}

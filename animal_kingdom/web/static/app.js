@@ -682,7 +682,7 @@ function puzzleBrief(bar) {
   const left = P.turns > 1 ? `<p>${P.turnsLeft === 1 ? 'Last turn.' : `${P.turnsLeft} turns left.`}</p>` : '';
   const hint = ui.hint === V.id ? `<p>${esc(P.hint)}</p>` : '';
   bar.innerHTML = `<div class="line"><b>${esc(P.brief)}</b>${left}${hint}${hint || !P.hint ? '' : '<span class="skip" id="hintbtn">Hint</span>'}<span class="skip" id="retry">Start over</span></div>`;
-  bar.classList.add('on');
+  bar.classList.add('on', 'brief');
   const h = document.getElementById('hintbtn'); if (h) h.onclick = e => { e.stopPropagation(); ui.hint = V.id; drawGame(); };
   document.getElementById('retry').onclick = e => { e.stopPropagation(); send({ t: 'rematch' }); };
   return true;
@@ -1347,7 +1347,7 @@ function drawGame() {
 
   // A pending choice: the asking card and its rule; card options float above the hand.
   const bar = $('choicebar'), opts = $('opts'), waiting = $('waiting');
-  waiting.textContent = ''; opts.classList.remove('on'); opts.innerHTML = '';
+  waiting.textContent = ''; opts.classList.remove('on'); opts.innerHTML = ''; bar.classList.remove('brief');
   bar.classList.toggle('mull', !!(d.pend && d.pend.kind === 'mulligan'));   // the mulligan asks in the middle of the empty board, over your hand
   if (d.pend && d.pend.kind === 'mulligan') {
     const k = d.pend.returned;
