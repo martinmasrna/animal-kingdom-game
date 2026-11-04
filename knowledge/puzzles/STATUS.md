@@ -21,6 +21,14 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   a new `puzzles` table on the profile; no game log, no match history, no rating, no Discord line, no rejoin. Puzzle
   moves are applied off the event loop (the verdict searches). Tests: `animal_kingdom/tests/test_puzzle_match.py`.
 
+- **Phase 3, client.** `#/puzzles` lists the puzzles (title, theme, turns, Solved) on the settings screen's layout;
+  `#/puzzle/<id>` starts one and opens the ordinary game screen (`#/m/<match>`). There the defender's hand is face up,
+  the brief ("Take the den in 2 turns.", the turns left) stands in the box where a card's question stands, with Hint
+  and Start over as that box's buttons; the flag becomes the house and goes back to the list; no versus intro. The end
+  box says Solved or Not solved, with Puzzles, See the board and Try again. No home entry. Web test:
+  `animal_kingdom/web/test/puzzle.test.mjs` (the list, one solved by clicks, one failed and retried), with the click
+  driver in `puzzleplay.mjs`; the server reads fixture puzzles from `AK_PUZZLE_DIR`.
+
 ## Calls I made (for Martin to overrule)
 
 - **A draw with an empty deck.** The engine offers no draw from an empty deck. Drawing nothing is the same move as ending
@@ -39,11 +47,14 @@ Phase 3 (client), 4 (two mined puzzles), 5 (twenty composed), 6 (every puzzle pl
 
 ## Blocked
 
-Nothing.
+Nothing. (Chrome for Testing could not be downloaded here; the tests run on the preinstalled Chromium.)
 
 ## For Martin's own eyes
 
-Nothing to see in the client yet (phase 3). `.venv/bin/python tools/puzzles/solve.py solve <file>` prints a verdict.
+- `./play`, then http://localhost:8000/#/puzzles: there are no shipped puzzles until phase 4, so the list is empty.
+- The web suite in this cloud container: 12 tests fail on a clean `main` too (collection filters, news dot, replays, the
+  game's panels and hover labels), with the container's Chromium instead of Chrome (Chrome's download was blocked by
+  the network). The same 12 fail with my changes, and the 3 new ones pass. Worth one `npm test` on the Mac. `.venv/bin/python tools/puzzles/solve.py solve <file>` prints a verdict.
 
 ## Supervisor
 

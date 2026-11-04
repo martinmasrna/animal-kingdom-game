@@ -214,6 +214,8 @@ function route() {
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard' || parts[0] === 'profile') { history.replaceState(null, '', '#/ladder' + (parts[1] ? '/' + parts[1] : '')); parts[0] = 'ladder'; }   // the old addresses
   if (parts[0] === 'settings') return settingsScreen();
+  if (parts[0] === 'puzzles') return puzzlesScreen();
+  if (parts[0] === 'puzzle' && parts[1]) return startPuzzle(parts[1]);
   if (parts[0] === 'news') { screen = 'news'; return newsScreen(app, { api, cards: CARDS, back: () => { location.hash = '#/'; } }); }
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'ladder') { ladderScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/ladder')) ladderScreen(); }); }   // a match just played shows
@@ -651,6 +653,47 @@ async function firstMatch() {
   const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats', name: 'You', bot: { level: 'Beginner', deck: EASY_POOL[Math.floor(Math.random() * EASY_POOL.length)] } }) });
   if (!r.ok) return toast(await r.text());
   const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+}
+// Puzzles: a position with both hands face up, the den to take within one or two turns against the best defence (the
+// server's search). #/puzzles lists them; #/puzzle/<id> starts one on the game screen. No entry on home yet (Martin designs it).
+const isPuzzle = () => !!(V && V.puzzle);
+async function puzzlesScreen() {
+  screen = 'puzzles';
+  const draw = list => {
+    const row = p => `<a class="slab" href="#/puzzle/${esc(p.id)}" data-puzzle="${esc(p.id)}">${esc(p.title)} <small>${esc(p.theme)} · ${p.turns === 1 ? '1 turn' : p.turns + ' turns'}${p.solved ? ' · Solved' : ''}</small></a>`;
+    app.innerHTML = `<div class="mscr lead sets"><div class="lcol"><div class="hhead"><h2>Puzzles</h2></div>
+      <div class="lbody"><div class="studies">${list === null ? '' : list.length ? list.map(row).join('') : '<p>No puzzles yet.</p>'}</div></div>
+      <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
+    document.getElementById('back').onclick = () => { location.hash = '#/'; };
+  };
+  draw(null);
+  const r = await api('/api/puzzles').catch(() => null), list = r && r.ok ? await r.json() : [];
+  if (screen === 'puzzles') draw(list);
+}
+async function startPuzzle(pid) {
+  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ puzzle: pid }) });
+  if (!r.ok) { toast(r.status === 404 ? 'No such puzzle' : await r.text()); location.hash = '#/puzzles'; return; }
+  const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+}
+// A puzzle's brief stands where a card's question does when nothing is being asked: the task, the turns left, the hint on request.
+function puzzleBrief(bar) {
+  const P = V.puzzle;
+  if (!P || V.phase !== 'playing' || RP.views.length) return false;
+  const left = P.turns > 1 ? `<p>${P.turnsLeft === 1 ? 'Last turn.' : `${P.turnsLeft} turns left.`}</p>` : '';
+  const hint = ui.hint === V.id ? `<p>${esc(P.hint)}</p>` : '';
+  bar.innerHTML = `<div class="line"><b>${esc(P.brief)}</b>${left}${hint}${hint || !P.hint ? '' : '<span class="skip" id="hintbtn">Hint</span>'}<span class="skip" id="retry">Start over</span></div>`;
+  bar.classList.add('on');
+  const h = document.getElementById('hintbtn'); if (h) h.onclick = e => { e.stopPropagation(); ui.hint = V.id; drawGame(); };
+  document.getElementById('retry').onclick = e => { e.stopPropagation(); send({ t: 'rematch' }); };
+  return true;
+}
+// Its end: solved, or the moment the den could no longer be forced; try again from the start, or back to the list.
+function puzzleEnd(ov, res) {
+  const P = V.puzzle, won = P.status === 'solved';
+  const how = won ? 'The den is yours.' : 'The den can no longer be taken against the best defence.';
+  ov.innerHTML = `<div class="endbox"><div class="res ${won ? 'A' : 'B'}">${won ? 'Solved' : 'Not solved'}</div><div class="how">${how}</div>
+    <div class="btns"><a class="slab" href="#/puzzles">Puzzles</a><button class="slab" id="peek">See the board</button><button class="play" id="again">${won ? 'Play again' : 'Try again'}</button></div></div>`;
+  document.getElementById('again').onclick = () => send({ t: 'rematch' });
 }
 function joinCode() { if (play.code) { play.open = null; location.hash = '#/join/' + play.code; } }
 
@@ -1127,7 +1170,7 @@ function gameScreen() {
     const ask = $('concov');
     $('fbbtn').onclick = e => { e.stopPropagation(); feedback(); };
     wireChatButton($('chatbtn'));
-    $('menubtn').onclick = e => { e.stopPropagation(); if (isTutorial()) { location.hash = '#/'; return; } ask.classList.add('on'); };
+    $('menubtn').onclick = e => { e.stopPropagation(); if (isTutorial()) { location.hash = '#/'; return; } if (isPuzzle()) { location.hash = '#/puzzles'; return; } ask.classList.add('on'); };
     ask.onclick = e => { e.stopPropagation(); if (e.target === ask) ask.classList.remove('on'); };
     $('keep').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); };
     $('concede').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); send({ t: 'concede' }); };
@@ -1158,7 +1201,7 @@ function gameScreen() {
 // the board. Nothing to press; a click skips it. Once per game, never in a lesson or a replay.
 function drawIntro() {
   const G = V.game, key = V.id + ':' + V.results.length;
-  if (V.phase !== 'playing' || !G || G.history.length || isTutorial() || RP.views.length || !V.id || ui.intro === key) return;
+  if (V.phase !== 'playing' || !G || G.history.length || isTutorial() || isPuzzle() || RP.views.length || !V.id || ui.intro === key) return;
   ui.intro = key;
   const side = p => { const s = V.seats[p] || {}, list = Object.keys(V.lists[p] || {}), mine = p === V.you;
     adoptRetired(list);   // a list from an old log may name a card this build no longer has; the cover must not stop the screen
@@ -1224,9 +1267,9 @@ function drawGame() {
     $('series').style.right = 16 + w * n + 'px'; $('pilebtn').style.right = 16 + w * (n + 1) + 'px';
     $('sndbtn').style.right = 16 + w * (n + 2) + 'px'; $('chatbtn').style.right = 16 + w * (n + 3) + 'px'; }   // the Remove Pile left of History; Friends, left of sound
   $('chatbtn').style.display = V.id && !isTutorial() && hasFriends() ? '' : 'none';   // a real match or replay, once you have a friend   // sound, left of History   // History, left of feedback and the flag
-  $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
-  // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
-  $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
+  $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : isPuzzle() ? 'Leave puzzle' : 'Concede';
+  // the flag concedes a match; a tutorial or a puzzle has nothing to concede, so the same button is a house: back home
+  $('menubtn').querySelector('svg').innerHTML = isTutorial() || isPuzzle() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
     : '<path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/>';
   if (!playing) $('concov').classList.remove('on');
   drawReplayBar();
@@ -1336,8 +1379,10 @@ function drawGame() {
     }
     bar.querySelectorAll('[data-x]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.otherOpts[el.dataset.x].v }); });
     const sk = $('skip'); if (sk) sk.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
-  } else {
+  } else if (!puzzleBrief(bar)) {
     bar.classList.remove('on');
+  }
+  if (!d.pend) {
     if (playing && G.decision === 'their_choice') waiting.textContent = 'Opponent is choosing';
     else if (playing && G.decision === 'mulligan' && G.toAct !== you) waiting.textContent = 'Opponent is mulliganing';
   }
@@ -1398,8 +1443,8 @@ function drawHistory(G) {
 function drawLists(G) {
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0), you = V.you, them = opp();
   const mine = document.getElementById('mine'), theirs = document.getElementById('theirs');
-  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>`;
-  theirs.innerHTML = `<h4>Opponent's cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
+  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you] || {}, G.deckLeft)}</div>`;
+  theirs.innerHTML = `<h4>Opponent's cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them] || {}, G.unseen)}</div>`;
   wirePops(mine); wirePops(theirs); fitStrips(mine); fitStrips(theirs);
   drawPile(G);
 }
@@ -1649,6 +1694,8 @@ function drawEnd() {
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (isTutorial()) {
     lessonEnd(ov, { res, how, won: w === you });
+  } else if (isPuzzle()) {
+    puzzleEnd(ov, res);
   } else if (V.takeover) {
     // a position played on from a logged game (a study): the result means little; on to the next position, or back to the list
     const nx = studyNext();

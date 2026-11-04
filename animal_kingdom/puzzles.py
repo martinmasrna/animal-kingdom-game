@@ -36,7 +36,8 @@ from .engine.maps import load_map
 from .engine.state import GameState, Rng, UnitInstance
 
 SOLVER, DEFENDER = "A", "B"
-PUZZLE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "puzzles")
+# AK_PUZZLE_DIR: another folder of puzzle files (a test server's fixtures)
+PUZZLE_DIR = os.environ.get("AK_PUZZLE_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "puzzles")
 FIRST_TURN = 2          # the position's turn_counter: past the first player's one-action first turn, A to move
 _CARDS = None
 
