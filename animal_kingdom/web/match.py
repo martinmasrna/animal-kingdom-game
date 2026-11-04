@@ -8,6 +8,7 @@ hand); the opponent's hand and both deck orders never leave this module.
 from __future__ import annotations
 
 import logging
+import os
 import random
 import secrets
 import time
@@ -44,6 +45,13 @@ CLOCK_CATCHUP_MAX = 8.0      # at most this long, a turn's clock waits for its p
 CLOCK_MULLIGAN = 30.0        # one window for both players' mulligans at once (Martin, 2026-10-01); what's left is kept
 EVENTS_KEPT = 200            # a view carries the game's last events: enough for a client that missed a few views
 TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
+# Daily matches (docs/async-play.md): take your turn when you visit. Whoever must act has this long from the moment the
+# decision came to them (a new turn, or the decision passing to the other player; a choice inside your own turn doesn't
+# restart it), no bank; when it runs out they lose the match. A starting guess for Martin to set (the doc's decision 1).
+DAILY_DAYS = 2
+if os.environ.get("AK_DAILY_DAYS"):   # the browser tests' forfeit runs a clock of seconds
+    DAILY_DAYS = float(os.environ["AK_DAILY_DAYS"])
+DAY = 86400.0
 
 # Menu labels for the shipped decks (starters and bot decks, decklists.json) and the tutorial's.
 DECK_NAMES = {**{d["slug"]: d["name"] for d in DECKLISTS}, **LADDER_DECK_NAMES, **tutorial.NAMES, "lions30": "30 Lions"}
@@ -224,6 +232,11 @@ class Match:
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
         self.schedule: Optional[list[dict]] = None   # gauntlet: one {seat, deck, first} per game, in order
+        # A daily match (docs/async-play.md): {days, deadline, key, invite, until, seen}; None for a live match. `invite`
+        # and `until`: the friend challenged and when the challenge lapses, while the match waits for them; `key`: whose
+        # decision the deadline belongs to; `seen`: the seats that have opened the match since it ended.
+        self.daily: Optional[dict] = None
+        self.present: set = set()        # the seats with the match open now (the server keeps it; not saved)
 
     def make_gauntlet(self, decks: list[str], games: int, rotating: str = "B", mirror: bool = False) -> None:
         """A fixed series instead of a best-of-3: `games` games with each of `decks`, one deck at a time, who starts
@@ -317,10 +330,14 @@ class Match:
         self.history = []
         self.events, self.seq = [], 0
         self.phase = "playing"
-        self.clock = None if any(seat.is_bot for seat in self.seats.values()) else \
+        self.clock = None if self.daily is not None or any(seat.is_bot for seat in self.seats.values()) else \
             {"bank": {"A": CLOCK_BANK, "B": CLOCK_BANK}, "holder": None, "turn": -1, "free": 0.0, "since": time.time(),
              "mull_until": time.time() + CLOCK_MULLIGAN, "out": {"A": 0, "B": 0}}
+        if self.daily is not None:
+            self.daily.pop("key", None)
+            self.daily["seen"] = []
         self._clock_update()
+        self._daily_update()
 
     def start_from(self, state: GameState, seed: int) -> None:
         """A game from a given position: a takeover of a logged game (server.create_match `from`; Martin, 2026-10-21:
@@ -392,6 +409,7 @@ class Match:
             self._take_events()
             self.actions.append({**action.to_dict(), "by": s})   # replays apply it the same way (replay.game_views)
             self.action_times.append(round(time.time() - self.started_at, 1))
+            self._daily_update()
             self.version += 1
             return
         if state.player_to_act() != s:
@@ -416,7 +434,44 @@ class Match:
             self.history[-1].fx = _effects(self.history[-1].events, self.history[-1])
         self._check_end()
         self._clock_update()
+        self._daily_update()
         self.version += 1
+
+    # ----------------------------------------------------------------- the daily clock
+    def yours(self, s: str) -> bool:
+        """Seat `s` has something to do in the game now: its turn, a choice, or its opening mulligan (both at once)."""
+        st = self.state
+        if self.phase != "playing" or st is None or st.result is not None:
+            return False
+        if self.mulliganing():
+            return st.player_to_act() == s or rules.early_mulligan(st, s) is not None
+        return st.player_to_act() == s
+
+    def _daily_update(self, now: Optional[float] = None) -> None:
+        """A daily match: a fresh deadline whenever the decision comes to someone new (a new turn, the other player's
+        choice, the opening mulligans as one window for both); a choice inside the same turn keeps the deadline."""
+        d = self.daily
+        if d is None or self.phase != "playing" or self.state is None or self.state.result is not None:
+            return
+        key = ["mulligan"] if self.mulliganing() else [self.to_act(), self.state.turn_counter]
+        if d.get("key") != key:
+            d["key"], d["deadline"] = key, (time.time() if now is None else now) + d["days"] * DAY
+
+    def daily_deadline(self) -> Optional[float]:
+        d = self.daily
+        return d.get("deadline") if d is not None and self.phase == "playing" and self.state and self.state.result is None else None
+
+    def daily_time_out(self, now: Optional[float] = None) -> bool:
+        """A daily match whose clock has run out: whoever had to act loses (both at the mulligan: a draw). Returns
+        whether it ended the game."""
+        deadline = self.daily_deadline()
+        now = time.time() if now is None else now
+        if deadline is None or now < deadline:
+            return False
+        late = [p for p in "AB" if self.yours(p)]
+        self._check_end(Result(other_player(late[0]) if len(late) == 1 else None, "timeout"))
+        self.version += 1
+        return True
 
     # ----------------------------------------------------------------- turn clock
     def _clock_update(self, now: Optional[float] = None) -> None:
@@ -554,7 +609,7 @@ class Match:
                 "actions": self.actions, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
                 "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
-                "takeover": self.takeover,
+                "takeover": self.takeover, "daily": self.daily,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history],
                 "events": self.events, "seq": self.seq}
@@ -572,6 +627,7 @@ class Match:
         m.last_log = d.get("last_log")
         m.takeover = d.get("takeover", False)
         m.clock = d.get("clock")
+        m.daily = d.get("daily")             # a daily deadline is a fixed time: a restart neither adds nor takes any
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's
         m.created = datetime.fromisoformat(d["created"])
@@ -614,6 +670,9 @@ class Match:
                                               "first": nxt["first"], "yours": nxt.get("seat", "B") == s},
                              "record": [{"deckName": DECK_NAMES.get(d, d), "w": w, "l": l}
                                         for d, (w, l) in record.items()]}
+        if self.daily is not None:
+            v["daily"] = {"days": self.daily["days"], "deadline": self.daily_deadline(), "now": time.time(),
+                          "yours": self.yours(s), "oppHere": opp in self.present}
         if self.state is not None:
             v["game"] = self._game_view(s, opp)
         return v

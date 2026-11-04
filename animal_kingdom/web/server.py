@@ -39,7 +39,7 @@ from . import oauth
 from .profiles import ProfileError, Profiles
 from . import replay
 from . import tutorial
-from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, STARTER_COVERS, Match, Seat, card_pool, map_info
+from .match import BOT_LEVELS, DAILY_DAYS, DAY, DECK_NAMES, MAP_ID, STARTER_COVERS, Match, Seat, card_pool, map_info
 from . import discord
 
 CARDS = load_cards()
@@ -105,6 +105,7 @@ class Hub:
         self.bot_tasks: dict[str, asyncio.Task] = {}
         self.noted: dict[str, tuple] = {}        # match id -> (phase, games ended) as last recorded (note)
         self.clock_tasks: dict[str, asyncio.Task] = {}
+        self.daily_told: dict[str, tuple] = {}   # match id -> (phase, whose turn) as last told to its players' home screens
 
     def new_id(self) -> str:
         while True:
@@ -144,9 +145,21 @@ class Hub:
             self.matches[match.id] = match
         log.info("reloaded %d saved matches", len(self.matches))
 
+    def drop(self, match: Match) -> None:
+        """Forget a match that never started (a daily challenge declined, withdrawn or lapsed), on disk too."""
+        self.matches.pop(match.id, None)
+        self.daily_told.pop(match.id, None)
+        if not os.environ.get("AK_NO_GAME_LOGS"):
+            try:
+                (MATCH_DIR / f"{match.id}.json").unlink(missing_ok=True)
+            except OSError:
+                log.exception("could not remove match %s", match.id)
+
     async def broadcast(self, match: Match) -> None:
         self.save(match)
         self.note(match)
+        if match.daily is not None:
+            await self.tell_daily(match)
         for ws, seat in list(self.sockets.get(match.id, ())):
             try:
                 await ws.send_json({"t": "view", "view": match.view(seat)})
@@ -182,6 +195,36 @@ class Hub:
                     text = discord.result_text(s.name, opp.name if opp else "", deck(s), deck(opp), opp.bot if opp and opp.is_bot else None, lesson)
                     if text:
                         asyncio.get_running_loop().run_in_executor(None, discord.post, "events", text)
+
+    async def tell_daily(self, match: Match, force: bool = False) -> None:
+        """A daily match changed hands (a turn, the end): both players' open tabs hear it, so a home screen shows it."""
+        now = (match.phase, tuple(p for p in "AB" if p in match.seats and match.yours(p)))
+        if not force and self.daily_told.get(match.id) == now:
+            return
+        self.daily_told[match.id] = now
+        for seat in match.seats.values():
+            if seat.profile:
+                await _tell(seat.profile, {"t": "daily", "id": match.id})
+        if match.daily.get("invite"):
+            await _tell(match.daily["invite"], {"t": "daily", "id": match.id})
+
+    async def sweep_daily(self, now: float | None = None) -> None:
+        """Daily matches whose time ran out: a challenge left unanswered lapses; a turn not taken loses the match."""
+        now = time.time() if now is None else now
+        for match in [m for m in self.matches.values() if m.daily is not None]:
+            try:
+                if match.phase == "lobby" and now >= match.daily.get("until", now + 1):
+                    self.drop(match)
+                    await self.tell_daily(match, force=True)
+                elif match.daily_time_out(now):
+                    await self.broadcast(match)
+            except Exception:
+                log.exception("daily sweep failed in match %s", match.id)
+
+    async def _run_daily(self) -> None:
+        while True:
+            await asyncio.sleep(DAILY_SWEEP)
+            await self.sweep_daily()
 
     async def push(self, match: Match) -> None:
         await self.broadcast(match)
@@ -460,7 +503,8 @@ def record_match(match: Match) -> None:
     except Exception:
         log.exception("could not rate match %s", match.id)
     kind = "gauntlet" if match.schedule else "bot" if any(s.is_bot for s in match.seats.values()) else "friend"
-    mode = "ranked" if all(s.ladder for s in match.seats.values()) else "practice" if kind == "bot" else "friendly"
+    mode = "ranked" if all(s.ladder for s in match.seats.values()) else "practice" if kind == "bot" else \
+        "daily" if match.daily is not None else "friendly"
     rotating = match.schedule[0].get("seat", "B") if match.schedule else None
     score = match.score()
     for p, seat in match.seats.items():
@@ -991,7 +1035,7 @@ async def current_match(req):
     live = lambda m: time.time() - (m.started_at + (m.action_times[-1] if m.action_times else 0)) < REJOIN_WITHIN
     # a person waits for you in PvP; a bot match only once you've made a move in it (one left at the mulligan is left)
     started = lambda m, seat: not any(o.is_bot for o in m.seats.values()) or any(h.seat == seat for h in m.history)
-    mine = [(m, s) for m in hub.matches.values() if m.phase == "playing" and not m.schedule and live(m)
+    mine = [(m, s) for m in hub.matches.values() if m.phase == "playing" and not m.schedule and m.daily is None and live(m)
             for seat, s in m.seats.items() if s.profile == p["id"] and started(m, seat)
             and not any(o.bot in lessons for o in m.seats.values())]
     if not mine:
@@ -1114,6 +1158,120 @@ async def challenge_answer(req):
     _open(match)
     c["fut"].set_result({"id": mid, "token": ta, "seat": "A"})
     return web.json_response({"id": mid, "token": tb, "seat": "B"})
+
+
+# ----------------------------------------------------------------- daily matches (docs/async-play.md)
+DAILY_INVITE_DAYS = 7        # days a daily challenge waits for its friend's answer before it lapses
+DAILY_MAX = 10               # daily matches a player may have open at once, challenges sent and received counted
+DAILY_SWEEP = 30             # seconds between looks for a daily clock run out
+if os.environ.get("AK_DAILY_SWEEP"):   # the browser tests' forfeit looks every half second
+    DAILY_SWEEP = float(os.environ["AK_DAILY_SWEEP"])
+
+
+def _daily_of(pid: str) -> list[tuple[Match, str | None]]:
+    """The daily matches a player is in, or is challenged to (seat None), not yet over or over and unseen."""
+    out = []
+    for m in hub.matches.values():
+        if m.daily is None:
+            continue
+        seat = next((p for p, s in m.seats.items() if s.profile == pid), None)
+        if seat or (m.phase == "lobby" and m.daily.get("invite") == pid):
+            out.append((m, seat))
+    return out
+
+
+def _daily_open(pid: str) -> int:
+    return sum(1 for m, _ in _daily_of(pid) if m.phase in ("lobby", "playing"))
+
+
+async def daily_list(req):
+    """Home's list: your daily matches where it's your turn, where it's theirs, challenges to you and from you, and
+    results you haven't opened yet. Each match you're in carries your seat's token, so any tab can open it."""
+    p = me(req)
+    out = {"turn": [], "waiting": [], "challenges": [], "sent": [], "results": [], "now": time.time(), "max": DAILY_MAX}
+    for m, seat in _daily_of(p["id"]):
+        if m.phase == "lobby":
+            if seat is None:
+                out["challenges"].append({"id": m.id, "from": friend_label(p["id"], m.seats["A"].profile), "until": m.daily["until"]})
+            else:
+                inv = profiles.get(m.daily["invite"])
+                out["sent"].append({"id": m.id, "token": m.seats[seat].token, "until": m.daily["until"],
+                                    "to": friend_label(p["id"], m.daily["invite"]) if inv else "?"})
+            continue
+        other = m.seats["B" if seat == "A" else "A"]
+        opp = friend_label(p["id"], other.profile) if other.profile and profiles.get(other.profile) else other.name
+        row = {"id": m.id, "token": m.seats[seat].token, "seat": seat, "opp": opp}
+        if m.phase == "playing":
+            row |= {"deadline": m.daily_deadline(), "round": m.state.turn_counter // 2 + 1 if m.state else 1}
+            out["turn" if m.yours(seat) else "waiting"].append(row)
+        elif seat not in m.daily.get("seen", []) and m.results:
+            r = m.results[-1]
+            out["results"].append(row | {"won": r["winner"] == seat, "draw": r["winner"] is None, "reason": r["reason"]})
+    out["turn"].sort(key=lambda r: r["deadline"] or 0)
+    out["waiting"].sort(key=lambda r: r["deadline"] or 0)
+    return web.json_response(out)
+
+
+async def daily_challenge(req):
+    """Challenge a friend to a daily match with a deck, online or not: it waits on their home for DAILY_INVITE_DAYS."""
+    p, body = me(req), await req.json()
+    to = body.get("friend")
+    if not friends.are(p["id"], to):
+        raise web.HTTPBadRequest(text="not your friend")
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    if _daily_open(p["id"]) >= DAILY_MAX:
+        raise web.HTTPConflict(text=f"You have {DAILY_MAX} daily matches already")
+    if _daily_open(to) >= DAILY_MAX:
+        raise web.HTTPConflict(text=f"{friend_label(p['id'], to)} has {DAILY_MAX} daily matches already")
+    mid, token = hub.new_id(), secrets.token_urlsafe(12)
+    match = Match(mid, Seat(token, display(p), deck=deck, profile=p["id"]))
+    match.daily = {"days": DAILY_DAYS, "invite": to, "until": time.time() + DAILY_INVITE_DAYS * DAY}
+    match.version += 1
+    match.on_game_end = save_game
+    match.on_match_end = record_match
+    hub.matches[mid] = match
+    hub.save(match)
+    await hub.tell_daily(match, force=True)
+    return web.json_response({"id": mid, "token": token, "seat": "A"})
+
+
+async def daily_answer(req):
+    """Accept a daily challenge to you (with your deck: the match starts, its first deadline running) or decline it."""
+    p, body = me(req), await req.json()
+    match = hub.matches.get(req.match_info["id"])
+    if not match or match.daily is None or match.phase != "lobby" or match.daily.get("invite") != p["id"]:
+        raise web.HTTPGone(text="that challenge has gone")
+    if not body.get("accept"):
+        hub.drop(match)
+        await hub.tell_daily(match, force=True)
+        return web.json_response({})
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    if _daily_open(p["id"]) > DAILY_MAX:     # this challenge is counted already
+        raise web.HTTPConflict(text=f"You have {DAILY_MAX} daily matches already")
+    token = secrets.token_urlsafe(12)
+    match.join(Seat(token, display(p), deck=deck, profile=p["id"]))
+    match.daily.pop("invite", None)
+    match.daily.pop("until", None)
+    await hub.push(match)
+    await hub.tell_daily(match, force=True)
+    return web.json_response({"id": match.id, "token": token, "seat": "B"})
+
+
+async def daily_withdraw(req):
+    """Take back a daily challenge you sent that is still waiting."""
+    p = me(req)
+    match = hub.matches.get(req.match_info["id"])
+    if not match or match.daily is None or match.phase != "lobby" or match.seats["A"].profile != p["id"]:
+        raise web.HTTPGone(text="that challenge has gone")
+    hub.drop(match)
+    await hub.tell_daily(match, force=True)
+    return web.json_response({})
 
 
 async def index(_req):
@@ -1335,6 +1493,8 @@ async def join_match(req):
     match = hub.matches.get(req.match_info["id"])
     if match is None:
         raise web.HTTPNotFound(text="no such match")
+    if match.daily is not None:      # a daily challenge is its friend's to answer (/api/daily/{id}/answer), not a code's
+        raise web.HTTPConflict(text="match is full")
     body = await req.json()
     try:
         deck = custom_decks.resolve(body.get("deck"))
@@ -1362,6 +1522,11 @@ async def socket(req):
         return ws
     conns = hub.sockets.setdefault(match.id, set())
     conns.add((ws, seat))
+    if match.daily is not None:      # the other player sees you came in (both in at once: it plays live, nobody goes home)
+        match.present = {s for _, s in conns}
+        if match.phase not in ("playing", "lobby") and seat not in match.daily.setdefault("seen", []):
+            match.daily["seen"].append(seat)   # the result has been seen: it leaves home's list
+        await hub.broadcast(match)
     await ws.send_json({"t": "build", "build": BUILD})
     await ws.send_json({"t": "view", "view": match.view(seat)})
     hub.kick_bot(match)
@@ -1401,6 +1566,9 @@ async def socket(req):
             await hub.push(match)
     finally:
         conns.discard((ws, seat))
+        if match.daily is not None and match.id in hub.matches:
+            match.present = {s for _, s in conns}
+            await hub.broadcast(match)
         s = match.seats.get(seat)
         if s and s.profile and match.phase == "playing":   # left a game in progress (closed the tab, lost the connection)
             events.record(profiles.db, s.profile, "left_mid_game", {
@@ -1460,6 +1628,10 @@ def make_app() -> web.Application:
         web.post("/api/challenge", challenge),
         web.delete("/api/challenge", challenge_cancel),
         web.post("/api/challenge/{id}/answer", challenge_answer),
+        web.get("/api/daily", daily_list),
+        web.post("/api/daily", daily_challenge),
+        web.post("/api/daily/{id}/answer", daily_answer),
+        web.delete("/api/daily/{id}", daily_withdraw),
         web.get("/ws/presence", presence_socket),
         web.post("/api/match", create_match),
         web.post("/api/match/{id}/join", join_match),
@@ -1495,7 +1667,16 @@ def make_app() -> web.Application:
         hub.load()
         for match in hub.matches.values():
             hub.kick_bot(match)
+        await hub.sweep_daily()            # what ran out while the server was down
+        sweeps.append(asyncio.create_task(hub._run_daily()))
+
+    sweeps: list[asyncio.Task] = []
+
+    async def stop_sweep(_app):
+        for task in sweeps:
+            task.cancel()
     app.on_startup.append(resume)
+    app.on_cleanup.append(stop_sweep)
     return app
 
 
