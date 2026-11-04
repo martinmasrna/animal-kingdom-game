@@ -92,7 +92,7 @@ Initial wording proposal:
 - [ ] Define eligible movers. The Kangaroo proposal allows moving itself or an ally; adjacency and visibility requirements remain open.
 - [ ] Test two destination models separately:
   1. **Empty-only Move:** pure repositioning.
-  2. **Covering Move:** occupied destinations are legal if every normal covering rule is satisfied, including strength, Snow Leopard, Chameleon, Porcupine, Fragile, and on-covered triggers.
+  2. **Covering Move:** occupied destinations are legal if every normal covering rule is satisfied, including strength, the Leopard, Chameleon, Porcupine, Fragile, and on-covered triggers.
 - [ ] If covering is allowed, decide whether all ordinary covering rules apply or whether Move needs exceptions.
 - [ ] Specify range measurement and whether intermediate crossroads matter.
 
@@ -112,7 +112,7 @@ Two distinct mechanics are under consideration:
 - [ ] Define the fallback when no eligible opponent unit has been played.
 - [ ] Define copy-of-copy behavior and prevent unintended recursion.
 - [ ] Define whether repeating a Roar counts as playing or copying any part of the original unit.
-- [ ] Enumerate dangerous Roars before approving an unrestricted legendary mimic: extra placements, sibling fetches, Pestis, Sirocco, Carmilla, Brutus, and future action modifiers.
+- [ ] Enumerate dangerous Roars before approving an unrestricted legendary mimic: extra placements, sibling fetches, Pestis, Rue, Carmilla, the legendary Rhinoceros, and future action modifiers.
 - [ ] Compare Parrot/Lyrebird, Mimic Octopus/cuttlefish, and other animals before assigning the mechanic's final identity.
 
 ### 1.7 Tokens
@@ -221,7 +221,7 @@ Cards must remain fully understandable without the ability word.
 - [ ] A Landmark pays the full card and placement-action cost despite having STR 0 and being unable to capture a den. Its immediate, recurring, or delayed effect must compensate for all three disadvantages; rarity does not do so.
 - [ ] Keep Landmarks as non-units that occupy crossroads, participate in connection, cannot capture a den, and are ignored by text that says “unit.”
 - [ ] Confirm that a player may cover their own Landmark normally. Fragile then removes it.
-- [ ] Create a type-neutral phrase for a Landmark leaving play. Deathrattle currently applies only to units. Candidate wording: `When this leaves the battlefield, ...`
+- [ ] Create a type-neutral phrase for a Landmark leaving play. Fall currently applies only to units. Candidate wording: `When this leaves the battlefield, ...`
 - [ ] Do not give Landmarks Armor by default; print it only when the delayed engine requires protection from abilities.
 - [ ] Decide whether filtered “draw a Landmark” effects are allowed. Recommended: yes, using the same random filtered-draw rule as tags/rarity.
 - [ ] Preserve the current mechanical Apex interaction but change flavor language: an Apex Predator **destroys** or **razes** a Landmark rather than eating it.
