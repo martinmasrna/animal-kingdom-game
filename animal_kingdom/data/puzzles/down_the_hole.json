@@ -1,0 +1,31 @@
+{
+  "id": "down_the_hole",
+  "title": "Down the hole",
+  "theme": "Free placements",
+  "to_move": "A",
+  "turns": 1,
+  "order": 3,
+  "board": {
+    "1,1": [{"card": "lion", "owner": "A"}],
+    "2,1": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "lion", "owner": "A"}],
+    "4,1": [{"card": "hamster", "owner": "B"}],
+    "4,2": [{"card": "tortoise", "owner": "B"}],
+    "5,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["lion", "lion", "mole"], "B": ["lion"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "Some Roars give you a placement for free.",
+  "why": "Two Lions reach the den front with no action left; the Mole at the den front plays the second Lion into the den for free.",
+  "solution": [
+    {"kind": "place", "card_id": "lion", "target": ["cr", "4,1"]},
+    {"kind": "place", "card_id": "mole", "target": ["cr", "5,1"]},
+    {"kind": "place", "card_id": "lion", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,1"]},
+    {"by": "A", "kind": "place", "card_id": "mole", "target": ["cr", "5,1"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["hq", "B"]}
+  ]
+}

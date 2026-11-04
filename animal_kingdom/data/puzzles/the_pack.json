@@ -1,0 +1,30 @@
+{
+  "id": "the_pack",
+  "title": "The pack",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 1,
+  "order": 4,
+  "board": {
+    "1,1": [{"card": "wolf", "owner": "A"}],
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "4,2": [{"card": "lion", "owner": "A"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,2": [{"card": "mouse", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["pup", "squirrel"], "B": ["lion"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "A Wolf can walk through every animal of yours it is connected to.",
+  "why": "The Wolf at the back looks out of play, but a roam travels through its whole pack and lands one step beyond it, on the Mouse.",
+  "solution": [
+    {"kind": "roam", "from": "1,1", "target": ["cr", "5,2"]},
+    {"kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "roam", "from": "1,1", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

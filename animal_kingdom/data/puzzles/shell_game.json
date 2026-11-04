@@ -1,0 +1,29 @@
+{
+  "id": "shell_game",
+  "title": "Shell game",
+  "theme": "Spikes and Armor",
+  "to_move": "A",
+  "turns": 1,
+  "order": 2,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "4,2": [{"card": "lion", "owner": "A"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,2": [{"card": "hedgehog", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["lion", "tortoise", "pup"], "B": ["lion"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "Spikes remove the first enemy that covers them, if they can.",
+  "why": "The Lion is the natural cover and dies on the Spikes; the Tortoise is weaker but its Armor survives them.",
+  "solution": [
+    {"kind": "place", "card_id": "tortoise", "target": ["cr", "5,2"]},
+    {"kind": "place", "card_id": "lion", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "tortoise", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["hq", "B"]}
+  ]
+}

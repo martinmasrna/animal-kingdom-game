@@ -1,0 +1,33 @@
+{
+  "id": "buried",
+  "title": "Buried",
+  "theme": "Removal",
+  "to_move": "A",
+  "turns": 1,
+  "order": 5,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "tortoise", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}, {"card": "grizzly_bear", "owner": "B"}],
+    "3,3": [{"card": "tortoise", "owner": "B"}],
+    "4,2": [{"card": "lion", "owner": "A"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,2": [{"card": "lion", "owner": "A"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["honey_badger", "black_mamba", "lion"], "B": ["lion"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "Your Lion under the Grizzly is not gone.",
+  "why": "Removing the Grizzly brings back your own buried Lion, which joins your cut-off Lions to your den; only the Honey Badger removes something that strong.",
+  "solution": [
+    {"kind": "place", "card_id": "honey_badger", "target": ["cr", "2,2"]},
+    {"kind": "choice", "choice": "3,2"},
+    {"kind": "place", "card_id": "black_mamba", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "honey_badger", "target": ["cr", "2,2"]},
+    {"by": "A", "kind": "choice", "choice": "3,2"},
+    {"by": "A", "kind": "place", "card_id": "black_mamba", "target": ["hq", "B"]}
+  ]
+}

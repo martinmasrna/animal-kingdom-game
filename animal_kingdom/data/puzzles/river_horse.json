@@ -1,0 +1,30 @@
+{
+  "id": "river_horse",
+  "title": "The river horse",
+  "theme": "Traps",
+  "to_move": "A",
+  "turns": 1,
+  "order": 1,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "4,2": [{"card": "lion", "owner": "A"}],
+    "5,2": [{"card": "hippopotamus", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["rabbit", "mouse"], "B": ["lion"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "A Roar happens before anything beside it can answer.",
+  "why": "The Hippo removes a weak animal placed next to it, but the Rabbit's Roar comes first: its Bunny is in the den before the Hippo answers.",
+  "solution": [
+    {"kind": "place", "card_id": "mouse", "target": ["cr", "4,1"]},
+    {"kind": "place", "card_id": "rabbit", "target": ["cr", "5,1"]},
+    {"kind": "place", "card_id": "bunny", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "mouse", "target": ["cr", "4,1"]},
+    {"by": "A", "kind": "place", "card_id": "rabbit", "target": ["cr", "5,1"]},
+    {"by": "A", "kind": "place", "card_id": "bunny", "target": ["hq", "B"]}
+  ]
+}

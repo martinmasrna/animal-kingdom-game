@@ -1,0 +1,35 @@
+{
+  "id": "thorns",
+  "title": "Thorns",
+  "theme": "Spikes",
+  "to_move": "A",
+  "turns": 2,
+  "order": 1,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "4,2": [{"card": "lion", "owner": "A"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "hedgehog", "owner": "B"}],
+    "5,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["skunk", "cheetah", "pup"], "B": ["pup", "stick_insect"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "An animal sent back to its owner's hand by a Skunk can't be played on their next turn.",
+  "why": "The Cheetah dies on the Hedgehog's Spikes; the Skunk sends the Hedgehog home instead, where it can't be played next turn, and the Cheetah must fill the gap at once, before the Stick Insect does (and the Skunk must not stand on your own Lion, where the Stick Insect could cover it and cut you off).",
+  "solution": [
+    {"kind": "place", "card_id": "skunk", "target": ["cr", "4,1"]},
+    {"kind": "choice", "choice": "5,1"},
+    {"kind": "place", "card_id": "cheetah", "target": ["cr", "5,1"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "skunk", "target": ["cr", "4,1"]},
+    {"by": "A", "kind": "choice", "choice": "5,1"},
+    {"by": "A", "kind": "place", "card_id": "cheetah", "target": ["cr", "5,1"]},
+    {"by": "B", "kind": "place", "card_id": "pup", "target": ["cr", "3,3"]},
+    {"by": "B", "kind": "place", "card_id": "stick_insect", "target": ["cr", "2,3"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

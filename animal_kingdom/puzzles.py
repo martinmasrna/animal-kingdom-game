@@ -219,6 +219,12 @@ def turn_key(state: GameState) -> str:
     return json.dumps(d, sort_keys=True, separators=(",", ":"))
 
 
+def won_key(state: GameState) -> str:
+    """A turn that took the den, by the board it leaves: the same win finished by a different spare card is one."""
+    d = json.loads(turn_key(state))
+    return json.dumps({"won": True, "board": d["board"]}, sort_keys=True)
+
+
 def _order(state: GameState, acts: list, actor: str) -> list:
     """Den captures first, passes last: the search finds a win (or a refutation) sooner."""
     def rank(a):
@@ -291,7 +297,7 @@ class Solver:
 
         def walk(s: GameState, line: list) -> None:
             if self.outcome(s) is not None or s.player_to_act() != SOLVER or s.turn_counter != state.turn_counter:
-                k = turn_key(s)
+                k = won_key(s) if self.outcome(s) else turn_key(s)
                 if k not in out:
                     out[k] = {"line": line, "lines": 1, "state": s}
                 else:
