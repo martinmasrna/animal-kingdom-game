@@ -262,9 +262,9 @@ def extract(state: GameState, me: str) -> dict:
         for _iid, cid in flags.get(f"played_{p}", []):
             bags[bag].append((idx[cid], 1.0))
     for p, bag in ((me, "macaw_mine"), (opp, "macaw_theirs")):
-        cid = state.last_roar.get(p)
-        if cid in idx:
-            bags[bag].append((idx[cid], 1.0))
+        last = state.last_roar.get(p)
+        if last in idx:
+            bags[bag].append((idx[last], 1.0))
 
     actions_left = (rules.turn_actions(state) - state.actions_taken_this_turn) if state.current == me else 0
     g = [

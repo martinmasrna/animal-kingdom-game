@@ -491,6 +491,7 @@ class RefereeBot(TurnSearcher):
                 for opening in openings[1:] if pre is not None else ():
                     if self._over_budget():
                         break
+                    assert pre is not None
                     alt = pre.clone()
                     self._advance(alt, me, opening=opening)
                     score = min(score, self._deep_line(alt, me, before))
@@ -744,5 +745,5 @@ class RefereeBot(TurnSearcher):
             score = self._clamped_eval(nxt, opp)
             if best_score is None or score > best_score:
                 best, best_score = opening, score
-        self._reply_openings = [best] + [o for o in openings if o != best]
+        self._reply_openings = ([best] if best is not None else []) + [o for o in openings if o != best]
         return best

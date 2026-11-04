@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import math
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Sequence
 
 from ..engine.state import GameState, other_player
 from . import raw_position as R
@@ -20,7 +20,7 @@ def _relu(v: list[float]) -> list[float]:
     return [x if x > 0.0 else 0.0 for x in v]
 
 
-def _linear(x: list[float], w: list[list[float]], b: list[float]) -> list[float]:
+def _linear(x: Sequence[float], w: Sequence[Sequence[float]], b: Sequence[float]) -> list[float]:
     h = list(b)
     for i, xi in enumerate(x):
         if xi != 0.0:

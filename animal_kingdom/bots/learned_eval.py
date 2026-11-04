@@ -140,7 +140,7 @@ class LinearEval:
 
 
 @lru_cache(maxsize=None)
-def load_eval(name_or_path: str) -> LinearEval:
+def load_eval(name_or_path: str) -> Any:
     """Resolve `name_or_path` to a `LinearEval`.
 
     A string containing a path separator, or one that names an existing file, is a literal

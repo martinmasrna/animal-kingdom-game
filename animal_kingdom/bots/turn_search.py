@@ -604,7 +604,7 @@ class TurnSearcher(Bot):
         """The placements after which my den capture is legal (its Roar settled by the fast policy): the first half of
         a two-action win, whose one-move score looks ordinary (Martin's 2TZBCA, 2026-10-29: a Tiger onto the
         Wildebeest guarding his den, then a Kitten in, never reached the search)."""
-        openers = []
+        openers: list[Action] = []
         for action in legal:
             if not isinstance(action, (PlaceAction, RoamAction)) or action.is_hq_capture:
                 continue
