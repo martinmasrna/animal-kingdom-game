@@ -48,4 +48,5 @@ NOTES = {
  'relay': dict(difficulty=3, obvious="The Dhole, the strongest card, to the den front: then the Mouse cuts the line at the Jackal and only Bush Dogs (3) are left to cover it."),
  'back_alley': dict(difficulty=4, obvious="The Pigeon onto the Mouse and the Opossum toward the Bobcat: the Bobcat (5) is stronger than anything in hand, and without the Mosquito's -2 nothing covers it."),
  'second_helping': dict(difficulty=4, obvious="The Pigeon onto the Hedgehog, the one card strong enough: the Spikes remove it, and the Mouse behind is still in the way."),
+ 'pack_line': dict(difficulty=4, obvious="The Wild Dogs from hand straight up the lane: neither covers the Mouse or the Bobcat, and the roaming animals that can leave holes behind them."),
 }

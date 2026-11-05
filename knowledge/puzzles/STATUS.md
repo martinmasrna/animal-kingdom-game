@@ -90,7 +90,8 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   Fish, walks past the Hippos), `relay` (Canines: keep the Dhole
   for the Mouse that cuts the line; the Wolf at the back roams in), `back_alley` (City: the Mosquito
   weakens the Bobcat from on top of your Pigeon, and the Opossum gives it back to you for the den), `second_helping` (City: the Skunk sends
-  the Hedgehog home, the Opossum returns the Skunk, and it takes the den next turn). Two-turn positions off the walled
+  the Hedgehog home, the Opossum returns the Skunk, and it takes the den next turn), `pack_line` (Canines: a Wild Dog fills the hole the
+  roaming Dhole leaves, and the second roams in beside the first). Two-turn positions off the walled
   lane come slowly: random open boards almost never give a forced, unique den, so batch 2 ports the proven ideas to
   other decks and varies the hands with the solver keeping the unique ones (a scratch search, `portgen`).
 
@@ -104,7 +105,7 @@ Nothing. (Chrome for Testing could not be downloaded here; the tests run on the 
 
 ## For Martin's own eyes
 
-- `./play`, then http://localhost:8000/#/puzzles: the puzzles, one-turn first (38 so far). Play a few of each kind: are the
+- `./play`, then http://localhost:8000/#/puzzles: the puzzles, one-turn first (39 so far). Play a few of each kind: are the
   ideas worth a puzzle, is the difficulty order right, do the titles and hints say too much or too little?
 - The set document, `knowledge/puzzles/set-1-2026-11-05.md`: every board as text with its obvious move and solution,
   to judge them without playing.
