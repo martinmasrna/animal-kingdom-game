@@ -2,7 +2,7 @@
 
 The pass that writes a legend (`docs/cards/legends/<animal>.md`, in the honey badger's form) for every collectible legendary whose name is still in brackets, on the branch `cards/legends`. Legends only: no card text, strength, rarity or name changes; names are Martin's. Whether societies exist is open (`knowledge/world-first-study-2026-10-24.md`), so no legend here states one as fact.
 
-Written in this pass: 24. Still to write: 6. Giraffe, Leopard and Rat had legends before the pass and are untouched.
+Written in this pass: 25. Still to write: 5. Giraffe, Leopard and Rat had legends before the pass and are untouched.
 
 
 | Card | id | Str | Legend | State |
@@ -35,7 +35,7 @@ Written in this pass: 24. Still to write: 6. Giraffe, Leopard and Rat had legend
 | [SARDINE] | `sardine_legend` | 1 | [sardine.md](../../docs/cards/legends/sardine.md) | written |
 | [SLOTH] | `sloth_legend` | 4 | [sloth.md](../../docs/cards/legends/sloth.md) | written |
 | [SPERM WHALE] | `sperm_whale_legend` | 8 | [sperm-whale.md](../../docs/cards/legends/sperm-whale.md) | written |
-| [TIGER] | `tiger_legend` | 7 | [tiger.md](../../docs/cards/legends/tiger.md) | to write |
+| [TIGER] | `tiger_legend` | 7 | [tiger.md](../../docs/cards/legends/tiger.md) | written |
 | [TUNA] | `tuna_legend` | 5 | [tuna.md](../../docs/cards/legends/tuna.md) | to write |
 | [WHITE WOLF] | `wolf_legend_3` | 5 | [white-wolf.md](../../docs/cards/legends/white-wolf.md) | to write |
 | [WILDEBEEST] | `wildebeest_legend` | 5 | [wildebeest.md](../../docs/cards/legends/wildebeest.md) | to write |
