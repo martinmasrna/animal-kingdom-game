@@ -6142,6 +6142,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1792682852
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793870060
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793870094
     }
   },
   "tiger_legend": {
