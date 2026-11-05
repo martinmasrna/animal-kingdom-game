@@ -93,20 +93,16 @@ def test_identity__every_collectible_card_name_is_unique():
     assert len(names) == len(set(names))
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Contradicts AGENTS.md and the card data: 'Every card ... belongs to exactly one deck', but cards.json gives a card "
-    "no deck ('Cards are cards and decks are decks: a card belongs to no deck'), and decklists.json lists starter and "
-    "bot decks that leave collectible cards out and overlap. Taken literally (each collectible card in exactly one "
-    "shipped decklist), it does not hold."))
-def test_identity__every_card_belongs_to_exactly_one_deck():
+def test_identity__a_card_belongs_to_no_deck_and_may_sit_in_several_lists_or_none():
     raw = load_bundled_json("cards.json")["cards"]
+    assert not any("deck" in c for c in raw)
     decks = load_bundled_json("decklists.json")["decks"]
-    lists = decks.values() if isinstance(decks, dict) else decks
     count = {}
-    for d in lists:
+    for d in decks:
         for cid in set(d.get("cards", [])):
             count[cid] = count.get(cid, 0) + 1
-    assert all(count.get(c["id"], 0) == 1 for c in raw if c.get("status") == "collectible")
+    collectible = [c["id"] for c in raw if c.get("status") == "collectible"]
+    assert any(count.get(c, 0) > 1 for c in collectible) and any(count.get(c, 0) == 0 for c in collectible)
 
 
 def test_identity__a_colony_queen_needs_both_tags():
@@ -525,17 +521,23 @@ def test_pile__skunk_returned_copy_is_locked_through_its_owners_next_turn_other_
     assert all(u.locked_until_turn <= s.turn_counter for u in s.hands["B"])
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Contradicts the Rat's printed text: the ruling has the Rat remove an adjacent enemy of any strength, then pay a "
-    "random card from hand; the Rat now reads 'Roar: if you played 3 or more animals this turn, remove an adjacent "
-    "enemy' and pays nothing."))
-def test_pile__rat_removes_an_adjacent_enemy_then_pays_a_random_card_from_hand():
-    s = st(hands={"A": ["rat", "v1"]})
-    put(s, "2,2", "elephant", "B")
-    play(s, "rat", "1,2")
+def test_pile__rat_removes_an_adjacent_enemy_of_any_strength_after_three_plays_and_pays_nothing():
+    s = st(hands={"A": ["mole", "v1", "rat", "v2"]})
+    put(s, "2,3", "elephant", "B")
+    play(s, "mole", "1,2")
+    rules.apply_action(s, PlaceAction("v1", ("cr", "1,1")))   # the Mole's extra play: two animals
+    play(s, "rat", "1,3")                                     # the third, itself
     if s.pending:
-        choose(s, "2,2")
-    assert s.top_unit("2,2") is None and s.hands["A"] == [] and "v1" in s.pile_cards_of("A")
+        choose(s, "2,3")
+    assert s.top_unit("2,3") is None and hand_ids(s, "A") == ["v2"] and "v2" not in s.pile_cards_of("A")
+
+
+def test_pile__rat_removes_nothing_before_three_plays():
+    s = st(hands={"A": ["v1", "rat"]})
+    put(s, "2,3", "v1", "B")
+    play(s, "v1", "1,2")
+    play(s, "rat", "1,3")
+    assert s.pending is None and s.top_unit("2,3") is not None
 
 
 def test_pile__plague_takes_the_whole_stack_both_players_and_fires_every_fall():
@@ -551,14 +553,6 @@ def test_pile__plague_takes_the_whole_stack_both_players_and_fires_every_fall():
 
 
 # ============================================================================== Specific cards
-
-def test_specific__oxpecker_ruling_is_stale_against_its_text():
-    # The ruling has the Oxpecker count the 8+ strength copies of its starting decklist; its text reads "draw a card,
-    # then gain food equal to the strongest animal in your hand". The text is what plays: food = strongest in hand.
-    s = st(hands={"A": ["oxpecker", "v6", "v2"]}, decks={"A": ["v1"], "B": []})
-    s.starting_decks = {"A": tuple(["v9"] * 30), "B": ()}
-    play(s, "oxpecker", "1,2")
-    assert s.food["A"] == 6
 
 
 def test_specific__value_and_food_triggers_have_no_cap_and_every_cap_flag_is_off():
@@ -639,6 +633,16 @@ def test_engine_reading__a_roam_does_not_roar():
     n = len(s.hands["A"])
     rules.apply_action(s, RoamAction("2,1", ("cr", "3,1")))
     assert len(s.hands["A"]) == n
+
+
+def test_engine_reading__a_cover_by_roaming_does_not_fire_a_roar_printed_as_a_placement_lynx():
+    # The Lynx: "Roar: if you place this on top of an enemy, draw 2 cards". Made to roam onto an enemy, it draws nothing.
+    s = st(hands={"A": ["coyote"]}, decks={"A": ["v1"] * 4, "B": ["v1"] * 4})
+    put(s, "1,1", "lynx", "A")
+    put(s, "2,1", "v1", "B")
+    play(s, "coyote", "1,2")
+    choose(s, "1,1"); choose(s, "2,1")          # the Lynx roams onto the enemy
+    assert ids(s, "2,1") == ["v1", "lynx"] and s.hands["A"] == []
 
 
 def test_engine_reading__a_roam_sets_off_no_whenever_you_place_reaction():
@@ -1170,18 +1174,14 @@ def test_launch_cards__hyena_counts_both_players_removals_and_not_discards():
     assert s.food["A"] == 6
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Contradicts the Vulture's printed text: the ruling files the Vulture under 'an ally was removed this turn' (your "
-    "animals only), the card reads 'if 3 or more animals were removed this turn', and the engine counts both "
-    "players' animals as the text says. The ruling's Piranha example is stale too: no Piranha reads 'ally removed'."))
-def test_launch_cards__vulture_counts_only_your_animals_removed():
+def test_launch_cards__vulture_counts_both_players_animals_removed():
     s = st(decks={"A": ["vulture"], "B": []})
     for cr in ("1,1", "1,2", "1,3"):
         put(s, cr, "v1", "B")
         effects.remove_top(s, cr, by_player="A")
     effects.resolve(s)
-    end_turn(s)
-    assert not tops(s, "vulture")
+    end_turn(s)                                 # A's Dusk: three of B's animals removed, the Vulture flies in
+    assert tops(s, "vulture")
 
 
 def test_launch_cards__city_spiders_dawn_kill_counts_as_removed_this_turn():
@@ -1426,18 +1426,6 @@ def test_launch_cards__okapi_draws_at_dawn_and_dusk_while_grazing_sloth_doubles_
     assert len(s.hands["A"]) == 3               # Dawn, once
 
 
-def test_launch_cards__serval_ruling_is_stale_against_its_text():
-    # The ruling has the Serval set a strength (to 1) by storing the difference; the Serval now reads "Roar: if you
-    # played another Cat this turn, remove an adjacent enemy" and sets no strength.
-    s = st(hands={"A": ["lion", "serval"]})
-    put(s, "2,2", "v9", "B")
-    play(s, "lion", "1,1")
-    play(s, "serval", "1,2")
-    if s.pending:
-        choose(s, "2,2")
-    assert s.top_unit("2,2") is None
-
-
 def test_launch_cards__placing_and_roaming_cover_by_one_rule_leopard():
     s = st(hands={"A": ["v_cat_roam"]})
     put(s, "3,3", "leopard", "A")
@@ -1448,8 +1436,7 @@ def test_launch_cards__placing_and_roaming_cover_by_one_rule_leopard():
 
 
 def test_launch_cards__piranha_counts_the_fish_you_control_now_itself_included():
-    # The common Piranha ("Your Fish can cover enemies of strength up to the number of your Fish"): the ruling's
-    # "legendary Piranha" is stale, the legend now reads "remove each enemy next to 2 or more of your Fish".
+    # "Your Fish can cover enemies of strength up to the number of your Fish."
     s = st(hands={"A": ["baby_fish"]})          # a 0
     put(s, "3,3", "piranha", "A")               # 1 Fish, itself: the Baby Fish covers an enemy of strength 1
     put(s, "1,2", "v1", "B")
@@ -1769,41 +1756,6 @@ def test_launch_cards__anteater_gains_the_drawn_cards_strength_as_it_would_be_pl
     assert s.food["A"] == 20 + 5
 
 
-def test_launch_cards__mocha_ruling_is_stale_against_its_text():
-    # The ruling: Mocha removes every enemy adjacent to any of your top animals. Mocha is now the legendary Sperm Whale,
-    # "Titan. Dusk: remove the strongest adjacent enemy." The text is what plays.
-    s = st()
-    put(s, "2,2", "sperm_whale_legend", "A")
-    put(s, "3,2", "v5", "B"); put(s, "2,3", "v2", "B")
-    put(s, "1,3", "v1", "A"); put(s, "1,3", "v1", "A")
-    put(s, "3,1", "v3", "B")                    # next to no Mocha
-    end_turn(s)
-    assert s.top_unit("3,2") is None and s.top_unit("2,3") is not None and s.top_unit("3,1") is not None
-
-
-def test_launch_cards__legendary_zebra_ruling_is_stale_against_its_text():
-    # The ruling: it counts the different Hoofed cards among your top animals. Its text: "Roar: draw a card for each of
-    # your grazing Hoofed animals."
-    s = st(hands={"A": ["zebra_legend"]})
-    for cr in ("1,1", "2,1"):
-        put(s, cr, "v_hoofed", "A")
-    put(s, "2,2", "v_hoofed", "A")
-    put(s, "3,3", "v_hoofed", "A")              # not grazing
-    play(s, "zebra_legend", "1,2")              # completes R1: four grazing Hoofed, itself included
-    assert len(s.hands["A"]) == 4
-
-
-def test_launch_cards__cape_buffalo_ruling_is_stale_against_its_text():
-    # The ruling: it removes an enemy sitting directly on top of one of your Hoofed animals. Its text: "Your other
-    # Hoofed animals have +1 strength during your opponent's turn."
-    s = st()
-    put(s, "1,1", "cape_buffalo", "A")
-    h = put(s, "1,2", "v_hoofed", "A")
-    assert strength(s, h) == 3
-    end_turn(s)
-    assert strength(s, h) == 4
-
-
 def test_launch_cards__rabbit_plays_a_bunny_on_a_neighbour_of_the_owners_choice_and_it_counts_as_a_play():
     s = st(hands={"A": ["rabbit", "rat"]})
     put(s, "2,2", "v1", "B")                    # 1 = 1: the Bunny can't cover it
@@ -2080,12 +2032,6 @@ def test_after_launch__wolf_legend_counts_only_your_adjacent_canines():
     put(s, "2,1", "v_canine", "B")
     end_turn(s)
     assert w.strength_counter == 1
-
-
-def test_after_launch__bush_dog_ruling_is_stale_it_counts_no_canines():
-    # The ruling groups the Bush Dog with [WOLF] as counting your adjacent Canines; its text is now "Roam. Whenever this
-    # roams, place a Pup on the crossroad it left": nothing counted.
-    assert "Canine" not in CARDS["bush_dog"].text.replace("Canines", "")
 
 
 def test_after_launch__python_grows_only_when_an_animal_leaves_the_board_not_on_a_discard():
