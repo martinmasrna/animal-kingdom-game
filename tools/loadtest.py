@@ -221,7 +221,7 @@ class Player:
                 seq = max((e.get("seq", 0) for e in g["events"]), default=0) if g and g.get("events") else 0
                 if g is not None and seq < seen_seq:     # a new game (a rematch) numbers its events afresh
                     seen_seq = sent_seq = 0
-                if sent_at is not None and (seq > sent_seq or (v["version"] > sent_version and now - sent_at > 2)):   # an action with no event: its view, after a wait
+                if sent_at is not None and (seq > sent_seq or v["version"] > sent_version):   # the view our action brought
                     self.stats.move.append(now - sent_at)
                     sent_at = None
                 if seq > seen_seq:
