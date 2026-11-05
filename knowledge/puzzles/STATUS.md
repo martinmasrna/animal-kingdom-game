@@ -71,33 +71,6 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 - **Timers are not in the format.** A puzzle board holds animals (with an optional `counter` for given strength, and
   `spent` for a used Spikes or Boar charge), not pending "in 2 turns" effects. `from-log` warns when it drops one.
 
-## Calls I made (for Martin to overrule)
-
-- **A draw with an empty deck.** The engine offers no draw from an empty deck. Drawing nothing is the same move as ending
-  the turn early, which both players may do at any point, so the search offers that instead of changing the engine.
-- **No chance.** A card whose text says "random" is refused, and so is any position where an effect draws on the random
-  stream with more than one possible outcome (a City Spider's Dawn choosing between two equally weak animals, a filtered
-  draw). A draw with one possible outcome (a choice among identical copies) is allowed.
-- **Chance anywhere in the tree refuses the position.** A City Spider or a Tarantula choosing between two equally
-  weak animals is chance even off the solution's line, so those cards only fit boards with no ties anywhere.
-- **A food win is not a solve.** Only the den counts; a position where the solver could win on food instead is a bad
-  puzzle, and `check` would show it as not forced.
-- **Timers are not in the format.** A puzzle board holds animals (with an optional `counter` for given strength, and
-  `spent` for a used Spikes or Boar charge), not pending "in 2 turns" effects. `from-log` warns when it drops one.
-
-## In progress
-
-- **Phase 5** (twenty composed): 17 of 20, all passing `check` with one winning first turn: five in one turn
-  (`river_horse`, `shell_game`, `down_the_hole`, `the_pack`, `buried`) and twelve in two (`thorns`, `dam`, `hunger`,
-  `first_in_line`, `ink`, `slow_poison`, `stripes`, `shock`, `two_doors`, `bite`, `stepping_stone`, `head_on`). A won turn is grouped by the board it leaves, so the same
-  win finished with a different spare card counts once. The two-turn ones are built around one idea in a walled lane;
-  the solver shows where a position leaks, and the defender's hand is what makes the solution unique. The notes are
-  in `knowledge/puzzles/set-1-2026-11-05.md` (board, hand, obvious move, solution, defence, difficulty).
-
-## Next
-
-The last seven two-turn puzzles, then phase 6 (every puzzle clicked to Solved, both fast suites), then phase 7.
-
 ## Next
 
 Phase 7: ten more puzzles at a time, each batch committed, until told to stop. A clean one-turn Ocelot puzzle is already
