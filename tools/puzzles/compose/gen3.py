@@ -54,5 +54,5 @@ if __name__ == '__main__':
         jobs = [(d, s) for s in range(n) for d in decks]
         for r in pool.imap_unordered(judge, jobs, chunksize=2):
             if r:
-                with open(fos.path.join(OUT, f'g3_{r["name"]}.jsonl'), 'a') as fh: fh.write(json.dumps(r) + '\n')
+                with open(os.path.join(OUT, f'g3_{r["name"]}.jsonl'), 'a') as fh: fh.write(json.dumps(r) + '\n')
     print('done', flush=True)
