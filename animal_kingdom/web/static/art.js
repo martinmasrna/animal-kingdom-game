@@ -1,6 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  hercules_beetle: [.6, .44, .8],
   electric_eel: [.72, .42, .56],
   ocelot: [.7, .47, .6],
   bunny: [.57, .47, .75],
@@ -161,7 +162,7 @@ export const CROP = {
   grizzly_bear: [.56, .4, .7], polar_bear: [.48, .36, .66],
   jaguar: [.66, .42, .55], andean_condor: [.55, .36, .88],
   bat: [.52, .4, .75], black_panther: [.66, .42, .5], borealis: [.62, .3, .66],
-  chameleon: [.55, .4, .8], cheetah: [.7, .42, .6], falcon: [.66, .5, .6], falcon_legend: [.56, .45, .9],
+  chameleon: [.72, .4, .5], cheetah: [.7, .42, .6], falcon: [.66, .5, .6], falcon_legend: [.56, .45, .9],
   hornet: [.58, .42, .8], jerboa: [.65, .32, .65],
   lemming: [.65, .36, .7], rat_legend_2: [.6, .38, .8], lion_legend: [.64, .33, .66],
   lion_legend_2: [.42, .36, .66], serval: [.64, .6, .7],
@@ -183,6 +184,7 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  hercules_beetle: [.6, .44, 1.3],
   electric_eel: [.72, .42, 1.4],
   ocelot: [.79, .475, 1.2],
   bunny: [.65, .495, 1.2],
@@ -347,7 +349,7 @@ export const STRIP = {
   octopus_legend_2: [.5, .48, 1.1], rat_legend: [.66, .28, 1.2], chipmunk_legend: [.58, .27, 1],
   flying_squirrel: [.65, .42, 1.1], porcupine: [.244, .504, 1.089], chinchilla: [.75, .4, 1], armadillo: [.622, .414, 1], squirrel: [.62, .31, 1.1], chipmunk: [.8, .47, 1.3],
   hedgehog: [.47, .47, 1], hamster: [.52, .38, 1], muskrat: [.4, .38, 1.3], groundhog: [.58, .3, 1], gopher: [.62, .37, 1],
-  rat_legend_2: [.66, .48, 1], skunk_legend: [.62, .5, 1.2], falcon_legend: [.76, .55, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.62, .28, 1.3],
+  rat_legend_2: [.66, .48, 1], skunk_legend: [.62, .5, 1.2], falcon_legend: [.76, .55, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.72, .4, 1.5],
   skunk: [.21, .55, 3.4], lemming: [.82, .38, 1.4], cheetah: [.87, .4, 1.3], falcon: [.8, .6, 1.7], bat: [.6, .42, 1.4],
   wolf_legend_2: [.55, .38, 1.2], wolf_legend_3: [.63, .16, 1.1], dhole: [.68, .22, 1.6],
   jackal: [.8, .5, 1], fox: [.7, .4, 1.3], dingo: [.73, .25, 1.1], fox_legend: [.6, .19, 1.2],
@@ -358,6 +360,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  hercules_beetle: .44,
   electric_eel: .42,
   ocelot: .455,
   bunny: .46,
@@ -520,7 +523,7 @@ export const FULL = {
   dung_beetle: .5,
   fox_legend: .355, anaconda: .485, andean_condor: .335, armadillo: .45, goose_legend: .5,
   bird_egg: .445, black_bear: .445, black_mamba: .445, black_panther: .455, borealis: .365,
-  cairn: .42, cape_buffalo: .4, chameleon: .38, cheetah: .415, chinchilla: .365, chipmunk: .405,
+  cairn: .42, cape_buffalo: .4, chameleon: .4, cheetah: .415, chinchilla: .365, chipmunk: .405,
   cougar: .455, dingo: .375, egg_eater: .42, elephant: .365, anaconda_legend: .375,
   falcon: .385, bumblebee_legend: .36, octopus_legend_2: .47, fox: .45, falcon_legend: .46, python: .45,
   grizzly_bear: .425, groundhog: .385, guard_wasp: .465, hamster: .455,
