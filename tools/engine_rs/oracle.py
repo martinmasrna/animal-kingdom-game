@@ -16,7 +16,7 @@ from animal_kingdom.engine.state import new_game
 from animal_kingdom.web.renamed import renamed
 import ak_engine
 
-ROOT = "/Users/martin/Work/fun/animal-kingdom/game"
+ROOT = _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))   # this tree
 CARDS_JSON = json.dumps(load_bundled_json("cards.json"))
 MAPS_JSON = json.dumps(load_bundled_json("maps.json"))
 _engines = {}
