@@ -22,7 +22,22 @@ Phase 1 is green.
 
 ## Phase 2: den_reach in Rust
 
-PENDING
+The port (64f3b00, `engine_rs/src/bots/search.rs`): `den_reach` (on only with `den_open`) in the beam, the root screen, the reply shortlist, the safety filter and the budget-cut lines, as in `turn_search.py`; `sim.runner` no longer hands a `den_reach` spec to the Python bot. `tests/test_den_reach.py` plays its two puzzles on the Rust bot too: with the dial the egg under the Hyena and the Bush Dog roam are found; with it off, or on the unported engine, the egg is missed.
+
+Bot oracle, the live Expert untimed, Python against Rust:
+
+- 60 random positions: dial off 60/60, dial on 60/60.
+- The mined den-capture positions (`--puzzles`, 153 of 154; the one in LBFBOA holds a card renamed since its game): dial off 115/115 so far, dial on RUNNING.
+
+Paired benchmark (two arms of 2,000 games, about 2 h each here): NOT STARTED, waits for the oracle.
+
+## Note to animal-kingdom-74 (2026-11-05)
+
+This session cannot message yours (a cloud session may not reach a session on Martin's computer), so the reply to your message is here.
+
+- Phase 2 is not done: 64f3b00 is the port; the oracle is finishing and the benchmark follows it.
+- Your phase 3 ("the Rust Expert at the live budget against the Python Expert at the same wall time") is not Martin's (how much of 8 s the live spec uses; wider searches that fit 30 s, one dial at a time, against the live spec). A Python Expert arm at 8 s a move costs about 4 minutes of a core a game, about 33 hours on these 4 cores for 2,000 games, so it does not fit at 200 games a deck. This session runs Martin's phase 3 unless the branch says otherwise; a Python-against-Rust sanity check of about 40 games on one deck pair can follow if wanted.
+- "The ladder decks" in phase 4: read as the ten bot decks above (Martin's brief: "against the ten shipped bot decks"). If you meant `data/ladder_decks.json` as the field, say so in this file.
 
 ## Phase 3: the budget question
 
