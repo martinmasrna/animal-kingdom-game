@@ -19,6 +19,8 @@ def compiled_files() -> list[str]:
 
 def test_the_compiled_modules_type_check_as_mypyc_needs():
     pytest.importorskip("mypy")
+    if not (ROOT / "deploy/Dockerfile").exists():   # inside the live image: the build that made it just ran this check
+        pytest.skip("no deploy/Dockerfile in this tree")
     files = compiled_files()
     assert len(files) >= 10, "the Dockerfile's mypyc step was not found"
     r = subprocess.run([sys.executable, "-m", "mypy", "--ignore-missing-imports", "--no-incremental", *files],

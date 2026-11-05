@@ -15,6 +15,8 @@ from animal_kingdom.engine import rules
 from animal_kingdom.engine.state import EngineError
 
 _PATH = pathlib.Path(__file__).resolve().parents[2] / "tools" / "engine_fuzz.py"
+if not _PATH.exists():   # the live image ships the package and its tests, not tools/ (deploy/Dockerfile)
+    pytest.skip("tools/engine_fuzz.py is not in this tree", allow_module_level=True)
 _spec = importlib.util.spec_from_file_location("engine_fuzz", _PATH)
 fuzz = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(fuzz)
