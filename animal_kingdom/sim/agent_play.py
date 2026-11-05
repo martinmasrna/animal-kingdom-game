@@ -12,7 +12,7 @@ import json, os, random, sys
 from collections import Counter
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine import rules
-from animal_kingdom.engine.actions import SKIP, ChoiceAction, DrawAction, PlaceAction, action_from_dict
+from animal_kingdom.engine.actions import SKIP, ChoiceAction, DrawAction, PlaceAction
 from animal_kingdom.engine.state import GameState, new_game
 from animal_kingdom.engine.strength import effective_strength, placement_strength
 from animal_kingdom.sim.runner import make_bot
@@ -88,7 +88,6 @@ def board_view(st, drawing=False):
 
 def board_drawing(st):
     """The same position as an ASCII picture, for a human looking at it."""
-    gm = st.game_map
     conn = {p: st.connected_occupied(p) for p in "AB"}
     W = 17
 
@@ -163,7 +162,7 @@ def show(g, st):
     out.extend(board_view(st, drawing="--drawing" in sys.argv))
     mine_left = Counter(st.decks[ME])
     out.append("your deck (copies left): " + ", ".join(f"{name(st,c)} {st.cards[c].base_strength}×{n}" for c, n in sorted(mine_left.items(), key=lambda x: str(st.cards[x[0]].base_strength))))
-    out.append(f"your hand: " + " ; ".join(f"{name(st,u.card_id)} [{placement_strength(st,u)}] {st.cards[u.card_id].text}" for u in st.hands[ME]))
+    out.append("your hand: " + " ; ".join(f"{name(st,u.card_id)} [{placement_strength(st,u)}] {st.cards[u.card_id].text}" for u in st.hands[ME]))
     out.append(f"their hand: {len(st.hands[OPP])} cards | decks: you {len(st.decks[ME])}, them {len(st.decks[OPP])}")
     unseen = Counter(st.decks[OPP]) + Counter(u.card_id for u in st.hands[OPP])
     out.append("their unseen cards: " + ", ".join(f"{name(st,c)} {st.cards[c].base_strength}×{n}" for c, n in sorted(unseen.items())))

@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from ..decks import LADDER_DECK_NAMES, PREMADE_DECKS, load_premade_deck
+from ..decks import LADDER_DECK_NAMES, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine.cards import DECKLISTS, load_cards

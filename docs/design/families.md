@@ -26,7 +26,7 @@ Not every family needs an archetype: a family can be a handful of individually u
 
 ## Fish
 
-The launch deck is Fish Token Aggro (`decklists.json`).
+The launch deck is Fish (`fish` in `decklists.json`).
 
 ## The target meta
 

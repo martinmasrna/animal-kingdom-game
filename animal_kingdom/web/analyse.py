@@ -48,8 +48,6 @@ LOG_DIR = ROOT / "results" / "human_games" / "web"
 MATCH_DIR = ROOT / "results" / "web_matches"
 PAGE = Path(__file__).resolve().parent / "static" / "analyse.html"
 CARDS = load_cards()
-REPLY_K = 40         # turns re-scored after the opponent's reply
-DEEP_K = 12          # turns re-scored one round deeper
 TURN_CAP = 1500      # whole turns enumerated at most; past it a line's remaining choices are left to the search's policy
 
 

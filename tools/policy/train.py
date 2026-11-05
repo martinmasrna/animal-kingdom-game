@@ -5,11 +5,10 @@ Usage: train.py OUT.pt --train A.npz [B.npz ...] --test C.npz [...] [--epochs N]
 Reports, on every test set, how often the taken action is the net's first pick, and inside its top 3, 5, 8, next to
 chance (8 of the legal actions at random).
 """
-import argparse, sys, time
+import argparse, time
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as Fn
 
 
 def load(files):

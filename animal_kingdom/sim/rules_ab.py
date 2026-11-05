@@ -193,46 +193,6 @@ def _summary_payload(
     }
 
 
-def run_ab(
-    games_per_matchup: int,
-    *,
-    seed: int = 0,
-    bots: tuple[str, str] = ("greedy", "greedy"),
-    map_id: str = "map_b",
-    jobs: int = 1,
-    control: Arm | None = None,
-    treatment: Arm | None = None,
-    slugs: Sequence[str] = DECK_SLUGS,
-) -> tuple[list[GameRecord], list[GameRecord]]:
-    if games_per_matchup <= 0:
-        raise ValueError("games_per_matchup must be positive")
-    control = control or Arm("control_draw1", Config.default())
-    treatment = treatment or Arm(
-        "treatment_draw2",
-        Config.default().sweep(draw_action_count=2),
-    )
-    pairs = _non_mirror_pairs(slugs)
-    control_records = run_pairs(
-        pairs,
-        games_per_matchup,
-        seed,
-        bots=bots,
-        config=control.config,
-        map_id=map_id,
-        jobs=jobs,
-    )
-    treatment_records = run_pairs(
-        pairs,
-        games_per_matchup,
-        seed,
-        bots=bots,
-        config=treatment.config,
-        map_id=map_id,
-        jobs=jobs,
-    )
-    return control_records, treatment_records
-
-
 def write_ab_artifacts(
     out_dir: str,
     *,

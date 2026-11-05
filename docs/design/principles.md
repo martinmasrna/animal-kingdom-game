@@ -28,7 +28,7 @@ What the game should become, and the rules every card is designed against. Read 
 
 There is no mana: every card costs one action. Low strength is a drawback, never a lower price. Free placements, tokens and deck-to-board effects are action economy, the game's only resource. A delayed payoff gives up board presence now and hands the opponent a window. A conditional card is priced for its common failed state, not the screenshot where everything lines up. A candidate that an existing card strictly dominates, or that strictly dominates one, is rejected.
 
-The references are the live cards, never a table: the Lion (7, vanilla) and the Eagle (5, Flight) for bodies, and for an effect, the cards that already carry it or its nearest shape, at the same rarity and strength (the sheet, `tools/cards/check.py`, prints them). How a condition is priced (Martin, 2026-10-22):
+The references are the live cards, never a table: the Lion (7, vanilla) and the Pigeon (5, Flight) for bodies, and for an effect, the cards that already carry it or its nearest shape, at the same rarity and strength (the sheet, `tools/cards/check.py`, prints them). How a condition is priced (Martin, 2026-10-22):
 
 - A conditional effect is priced by what meeting its condition costs on the turn you play it. Board state already there, or a body the deck wants gone, costs nothing; a condition that takes the turn's other action, or extra plays, costs the card strength.
 - Flight is worth what the flier can cover when it lands, so on a 1 or 2 it is little more than reach.

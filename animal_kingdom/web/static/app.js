@@ -4,12 +4,14 @@ import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
 import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan } from './timeline.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait } from './board.js';
+import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { track } from './log.js';
+import { prepare as prepareLocal, LocalMatch } from './local/match.js';
 import { loadNews, unread as newsUnread, newsScreen, showSince, hideSince } from './news.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
 import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends } from './chat.js';
@@ -19,7 +21,6 @@ const app = document.getElementById('app'), pop = document.getElementById('pop')
 let COVER = {};   // starter deck id -> the card covering it (the server's pool says, from cards.json)
 const RANK = { legendary: 0, rare: 1, common: 2 };
 const SKIP = '__skip__';
-const artStyle = id => hasArt(id) ? `style="background-image:url(${artUrl(id)})"` : '';
 const sv = c => c.str === '*' ? -1 : c.str;
 const store = (k, v) => { try { v === undefined ? null : localStorage.setItem(k, v); return localStorage.getItem(k); } catch { return null; } };
 const tokenKey = id => 'ak:seat:' + id;
@@ -218,9 +219,11 @@ function route() {
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'ladder') { ladderScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/ladder')) ladderScreen(); }); }   // a match just played shows
   if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
+  if (parts[0] === 'deck' && parts[1]) return deckLinkScreen(parts.slice(1).join('/'));
   if (parts[0] === 'study' && parts[1]) return studyScreen(parts[1]);
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
+  if (parts[0] === 'm' && id === 'LOCAL') return localScreen();
   if (parts[0] === 'm' && id) return matchScreen(id);
   if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1], parts[2]);
   homeScreen(); if (play.opp === 'ranked') loadProfile().then(() => { if (screen === 'home' && !play.open) homeScreen(); });   // your rating after a ranked game
@@ -232,7 +235,7 @@ function route() {
 // side opens its chooser above the piece. Collection and the profile stand beside it for now, until the hub holds more.
 // #/gauntlet is the same screen with the developer's gauntlet as the opponent; #/join/<code> the same with a friend's match.
 const BANDS = ['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Legendary'], OLD_LEVELS = { easy: 'Beginner', normal: 'Advanced', expert: 'Expert' };   // the five bots (web/ladder.py RUNGS): the same five on the ladder and in Practice
-const play = { opp: 'bot', level: 'Advanced', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
+const play = { opp: 'bot', level: 'Beginner', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };   // a newcomer starts on the weakest bot (it was Advanced after the tutorial; phone walkthrough finding 16)
 // The decks an Easy bot plays when nobody chose one (Random, and the tutorial's first match): the simpler half of the ones
 // Easy is weakest with (Martin, 2026-10-17: Easy with Cats or Fish beats the greedy bot 4 games in 10, with these 1 to 3;
 // Egg and Aristocrats are weaker still but the hardest to read). The ranked queue picks by rating instead.
@@ -368,6 +371,7 @@ function homeScreen(mode = {}) {
       if (q.get('mirror')) body.gauntlet.mirror = true;                          // both seats on each named deck: the pilot is the only variable
       if (q.get('games')) body.gauntlet.games = Math.max(1, Math.round(+q.get('games')));   // games per deck, who goes first alternating
     }
+    if (body.bot && LOCAL_PLAY && await startLocal(body)) return;
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); play.open = null;
@@ -681,8 +685,34 @@ const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  renderCollection(app, { open, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback,
+  renderCollection(app, { open, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
+}
+
+// ------------------------------------------------------------------ share links (docs/share-links.md)
+// A deck link: #/deck/<the deck code's AK1 part>?n=<name>. It holds the whole list; the server keeps nothing.
+const deckLink = (code, name) => `${location.origin}/#/deck/${(code.match(/AK1:([A-Za-z0-9_-]+)/) || [])[1]}?n=${encodeURIComponent(name)}`;
+function shareDeck(code, name) { shareLink(deckLink(code, name), `${name}, a deck in Animal Kingdom`); }
+// The list, shown to anyone; one tap puts it in your collection (a visitor's guest profile, made at boot, holds it).
+function deckLinkScreen(arg) {
+  screen = 'decklink';
+  const [code, q] = arg.split('?'), name = new URLSearchParams(q || '').get('n');
+  const d = decodeDeck(`${name ? '### ' + name + '\n' : ''}AK1:${code}`, CARDS);
+  if (!d) { history.replaceState(null, '', '#/'); homeScreen(); return toast('That deck link holds no cards'); }
+  app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="#/" aria-label="Back"></a><span class="ptab on">${esc(d.name)}</span></div></div>
+    <div class="hbody"><div class="dlink">${deckBody(d.list, CARDS, false)}</div><p><button class="slab" id="dimport">Add to my collection</button> <a class="slab" href="#/">Home</a></p></div></div></div>`;
+  document.getElementById('dimport').onclick = () => {
+    const mine = myDecks();
+    if (mine.length >= 20) return toast('20 decks is the most you can keep: delete one first');
+    const cards = {}; d.list.forEach(id => cards[id] = (cards[id] || 0) + 1);
+    const nd = { id: Date.now().toString(36), name: d.name, cards, cover: coverOf(d.list, CARDS) };
+    saveDecks([...mine, nd]); toast(`Imported ${d.name}`, true); location.hash = '#/collection/' + nd.id;
+  };
+}
+async function shareReplay(key) {
+  const r = await api(`/api/replay/${encodeURIComponent(key)}/share`, { method: 'POST' });
+  if (!r.ok) return toast(await r.text());
+  shareLink(`${location.origin}/#/replay/${(await r.json()).token}`, 'A match in Animal Kingdom');
 }
 
 // ------------------------------------------------------------------ ladder, and your account (in Settings)
@@ -716,7 +746,7 @@ function ladderScreen() {
   const side = (s, name) => `data-side="${s}" data-name="${esc(name)}"`;   // a deck in the row: hovered (tapped), its list shows
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
     ${piece(deckFace(h.my_cover, h.my_deck), side('mine', h.my_deck))}<span class="dk" ${side('mine', h.my_deck)}>${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck), side('theirs', h.opp_deck))}<span class="dk" ${side('theirs', h.opp_deck)}>${esc(h.opp_deck)}</span>
-    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)}</span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)}</span>`}</div>`).join('');
+    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)} · <a class="hshare" data-share="${esc(h.match)}" href="#">Share</a></span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)} · <a class="hshare" data-share="${esc(h.match)}" href="#">Share</a></span>`}</div>`).join('');
   // the leaderboard first (Martin, 2026-10-02), the match history its second tab, the meta report its third (2026-10-24)
   const meta = location.hash.startsWith('#/ladder/meta'), lead = !meta && location.hash !== '#/ladder/history';
   // back goes up one level: an archetype to every deck, a tab to home (Martin, 2026-10-26: it went home from an archetype)
@@ -728,6 +758,7 @@ function ladderScreen() {
   if (meta) fillMeta();
   wireDd(app, (k, v) => { ui.histDeck = v || null; ladderScreen(); });
   app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
+  app.querySelectorAll('[data-share]').forEach(el => el.onclick = e => { e.preventDefault(); e.stopPropagation(); shareReplay(el.dataset.share); });
   wireDeckPeek(app);
 }
 // A deck in a match's row shows its list as it was played, beside the row: on hover, or on a touch screen a tap (which
@@ -823,7 +854,29 @@ function wireAccount(root, redraw) {
 }
 
 // ------------------------------------------------------------------ match connection
-function disconnect() { if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; }   // a step still timed would redraw the game over the next screen
+// A practice match against a bot plays in the browser (static/local/match.js), the bot in a Web Worker, no round trip a
+// move; the server takes the finished match (Martin, 2026-11-05: the default). Without the wasm, or with one built from
+// other engine sources than the server's, the match plays on the server. ?local=0 plays it on the server anyway.
+const LOCAL_PLAY = new URLSearchParams(location.search).get('local') !== '0';
+let LOCAL = null;
+async function startLocal(body) {
+  const lib = await prepareLocal(api);
+  if (!lib) return false;
+  const r = await api('/api/local/setup', { method: 'POST', body: JSON.stringify(body) });
+  if (!r.ok) { toast(await r.text()); return true; }
+  const setup = await r.json();
+  disconnect();
+  LOCAL = new LocalMatch(lib, setup, body, v => { const prev = V; V = v; V.rx = Date.now() / 1000; onView(prev); }, { toast, api });
+  wsId = 'LOCAL'; play.open = null;
+  location.hash = '#/m/local';
+  return true;
+}
+function localScreen() {
+  if (!LOCAL) { history.replaceState(null, '', '#/'); return homeScreen(); }   // a reload: the match lived in the page
+  screen = null; V = null; ui.sel = null; ui.peek = false;
+  LOCAL.show();
+}
+function disconnect() { if (LOCAL) { LOCAL.close(); LOCAL = null; if (wsId === 'LOCAL') wsId = null; } if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; }   // a step still timed would redraw the game over the next screen
 
 async function matchScreen(id) {
   if (!getToken(id) && !(await rejoin(id))) { location.hash = '#/join/' + id; return; }   // a new tab: the server knows your seat
@@ -850,6 +903,7 @@ async function matchScreen(id) {
     if (!ws || ws.readyState > 1) { if (ws) ws.onclose = null; connect(); } };
 }
 const send = msg => { if (msg.t === 'act' && window.__ak.onAct) return window.__ak.onAct(msg.action), true;   // the position analyser plays the move itself
+  if (LOCAL && wsId === 'LOCAL') return LOCAL.handle(msg), true;   // a match in the browser (?local=1) takes the socket's messages
   clog('send ' + (msg.t === 'act' ? JSON.stringify(msg.action).slice(0, 50) : msg.t) + (ws && ws.readyState === 1 ? '' : ' DROPPED (socket ' + (ws ? ws.readyState : 'none') + ')')); if (!(ws && ws.readyState === 1)) { if (msg.t === 'act') toast('Reconnecting… try again in a moment'); return false; } return ws.send(JSON.stringify(msg)); };   // a dropped move says so (feedback 2026-10-04: clicks that did nothing)
 // ?clicklog: a live record of presses, clicks and what the game did with them, in a corner (chasing clicks that do
 // nothing, 2026-10-04). Off unless asked for; it costs nothing then.
@@ -1207,9 +1261,6 @@ function turnPlate() {
   const b = document.createElement('div'); b.className = 'yourturn'; b.innerHTML = '<b>Your turn</b>';
   document.getElementById('stage').appendChild(b); setTimeout(() => b.remove(), 1500);
 }
-// Did your turn's start change something of yours (an Egg hatching), or ask you something? Then it plays after the plate.
-const yoursChanged = (a, b, you) => { const mine = g => JSON.stringify(Object.entries(g.board).map(([cr, st]) => [cr, st.filter(u => u.owner === you).map(u => u.iid)]).filter(([, l]) => l.length).sort());
-  return mine(a) !== mine(b) || !!(b.pending && b.toAct === you); };
 
 // A phone in a match: a swipe down never reloads the page (pull-to-refresh is off on the game screen, game.css), and the
 // screen stays awake while a game is being played, so it can't lock and drop the connection during the opponent's turn.
@@ -1227,7 +1278,7 @@ function drawGame() {
   keepAwake(playing && !RP.views.length);
   lastDecision = d;
   drawIntro();
-  $('scr').classList.toggle('rp', !!RP.views.length);   // a replay: upright its controls take the deck's corner
+  if ($('scr').classList.contains('rp') !== !!RP.views.length) { $('scr').classList.toggle('rp', !!RP.views.length); fitStage(false); }   // a replay: upright its controls take a row under the stage
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
   { const n = [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length, w = VIEW.port ? 88 : 52;
@@ -1241,8 +1292,7 @@ function drawGame() {
   if (!playing) $('concov').classList.remove('on');
   drawReplayBar();
 
-  // Top left: the turn (a match is one game while there is one map); it opens the history. The gauntlet counts its games.
-  const gameNo = playing ? V.results.length + 1 : V.results.length;
+  // Top left: the turn (a match is one game while there is one map); it opens the history.
   drawHistory(G); drawLists(G); showPanel();
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
@@ -1373,7 +1423,7 @@ function drawGame() {
 
 // Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
 // deck's and End turn's centre tops.
-const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 216 : 300, handW: RP.views.length ? 400 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row
+const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 360 : 300, handW: RP.views.length ? 680 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row; a replay's hand takes the whole row, its controls under the stage
   : { hand: 590, handC: STAGE.w / 2, deck: [1299, 606], end: [1439, 664], handW: 940 };
 
 // The history strip and both decklists, shared by both game screens.
@@ -1441,13 +1491,19 @@ function fitStage(redraw = true) {
   // a window taller than wide gets the upright layout (board.js setView); turning the phone redraws the screen
   const port = innerHeight > innerWidth, flip = port !== VIEW.port;
   setView(port); document.getElementById('scr').classList.toggle('port', port);
-  const k = Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
+  // upright, a replay keeps a row under the stage for its controls (game.css .port .rbar): the stage fits the window less it,
+  // with 60 stage px of savanna kept above and below (about what a phone shows in play), so the hand, which sits at the edge,
+  // stays clear of your den: the board comes out a little smaller
+  const rp = port && RP.views.length ? 56 : 0, H = innerHeight - rp;
+  const k = Math.min(innerWidth / STAGE.w, H / (STAGE.h + (rp ? 120 : 0))), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
   st.style.transform = t; document.getElementById('world').style.transform = t;
+  st.style.top = document.getElementById('world').style.top = rp ? `calc(50% - ${rp / 2}px)` : '';
+  st.style.setProperty('--rp', `${rp / k}px`);
   const plate = document.querySelector('#world img'), src = `/static/kit2/plate_${port ? 'port' : 'wide'}.webp`;   // upright, its own painting
   if (!plate.src.endsWith(src)) plate.src = src;
   // the savanna around the stage, in stage px: the pieces at the screen's edges (hands, corners, deck, End turn) sit at the
   // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating
-  st.style.setProperty('--above', `${Math.max(0, (innerHeight / k - STAGE.h) / 2)}px`);
+  st.style.setProperty('--above', `${Math.max(0, (H / k - STAGE.h) / 2)}px`);
   st.style.setProperty('--side', `${Math.max(0, (innerWidth / k - STAGE.w) / 2)}px`);
   st.style.setProperty('--k', k);   // the stage's scale: a phone held sideways shows it at half size
   if (flip && redraw && V && V.game) drawGame();
@@ -1634,7 +1690,9 @@ function drawEnd() {
   drawEnd.sounded = key;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
   const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
-  const howLine = ['hq_capture', 'food'].includes(G.result.reason) && w !== null ? '' : `<div class="how">${how}.</div>`;   // a den taken, a full den: the board showed it
+  // a den taken: the board showed it (Martin, 2026-10-17); a full den says who reached the food, as the lessons' Victory does
+  // (phone walkthrough finding 20: a Defeat on food said nothing)
+  const howLine = G.result.reason === 'hq_capture' && w !== null ? '' : `<div class="how">${how}.</div>`;
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
   if (RP.views.length) {
@@ -1741,9 +1799,11 @@ async function replayScreen(key) {
   if (RP.key === key && RP.views.length) return;
   stopReplay(); screen = null; RP.key = key;
   app.innerHTML = `<div class="mscr pre"><p class="wait">Loading the replay…</p></div>`;
-  const back = msg => { RP.key = null; history.replaceState(null, '', '#/ladder/history'); ladderScreen(); toast(msg); };
+  // a link someone shared leads home; your own replay back to your history
+  const back = msg => { RP.key = null; const own = ME.history && ME.history.some(h => h.match === key);
+    history.replaceState(null, '', own ? '#/ladder/history' : '#/'); own ? ladderScreen() : homeScreen(); toast(msg); };
   let views;
-  try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); }
+  try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); RP.shared = r.headers.get('X-AK-Shared') === '1'; }
   catch (e) { if (RP.key === key) back(e.message || 'The replay didn\'t load, try again'); return; }
   if (RP.key !== key) return;   // left while it loaded
   adoptRetired(replayIds(views));
@@ -1760,7 +1820,7 @@ async function replayScreen(key) {
   RP.views = views; RP.eye = true; ui.peek = false; ui.sel = null; ui.panel = null;
   replayStep(0); replayPlay(true);
 }
-function stopReplay() { clearTimeout(RP.timer); if (RP.views.length) stopPlayback(); Object.assign(RP, { key: null, views: [], i: 0, playing: false, shown: [], turns: [] }); }
+function stopReplay() { clearTimeout(RP.timer); if (RP.views.length) stopPlayback(); Object.assign(RP, { key: null, views: [], i: 0, playing: false, shown: [], turns: [], shared: false }); }
 function replayStep(i) {
   i = Math.max(0, Math.min(RP.views.length - 1, i));
   const prev = V, step = i === RP.i + 1 || (i > RP.i && RP.shown.slice(RP.i + 1, i).every(s => !s)); RP.i = i; V = RP.views[i]; V.rx = Date.now() / 1000;
@@ -1794,10 +1854,10 @@ function drawReplayBar() {
       <button class="slab" id="rfwd" tabindex="-1" data-tip="Forward one move">${ric('fwd')}</button>
       <div class="track" id="rtrack"><i></i></div>
       <button class="slab" id="reye" tabindex="-1"></button>
-      <button class="slab take" id="rtake" tabindex="-1" data-tip="Take the other seat from this round and play on against the Expert">Play from here</button>
-      <a class="slab out" href="#/ladder/history">Leave</a>`;
+      ${RP.shared ? '' : '<button class="slab take" id="rtake" tabindex="-1" data-tip="Take the other seat from this round and play on against the Expert">Play from here</button>'}
+      ${RP.shared ? '<a class="slab out" href="#/">Home</a>' : '<a class="slab out" href="#/ladder/history">Leave</a>'}`;
     // Play from here (Martin, 2026-10-21): the other seat, from the start of its turn in the round shown, the Expert on yours.
-    $('rtake').onclick = stop(async () => {
+    if ($('rtake')) $('rtake').onclick = stop(async () => {
       const v = RP.views[RP.i]; if (!v || v.phase !== 'playing') return toast('Step to a round first');
       const key = RP.key.replace(/-\d+$/, ''), series = Number((RP.key.match(/-(\d+)$/) || [])[1] || 0);
       const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ from: { match: key, series, round: v.game.round, seat: v.you === 'A' ? 'B' : 'A' } }) });
@@ -1843,6 +1903,7 @@ function replayKey(e) {
 window.__ak = () => ({ V, ui, d: lastDecision, PB, RP });   // test hook: the headless play-through reads the view (and whether steps are playing, where a replay is)
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.build = checkBuild;   // test hook: a socket naming another build
+window.__ak.local = () => LOCAL;   // test hook: the match in the browser, its bot's times and its log
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
 window.__ak.adopt = views => adoptRetired(replayIds(views));   // test hook: what loading a replay does to the cards it names
 boot();

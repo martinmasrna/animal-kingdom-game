@@ -52,7 +52,7 @@ if ROOT not in sys.path:
 from animal_kingdom.bots.determinize import determinize  # noqa: E402
 from animal_kingdom.decks import load_premade_deck  # noqa: E402
 from animal_kingdom.engine import rules  # noqa: E402
-from animal_kingdom.engine.actions import SKIP, ChoiceAction, PlaceAction, RoamAction, action_from_dict  # noqa: E402
+from animal_kingdom.engine.actions import SKIP, ChoiceAction, PlaceAction, RoamAction  # noqa: E402
 from animal_kingdom.engine.config import Config  # noqa: E402
 from animal_kingdom.engine.state import EngineError, GameState, new_game, other_player  # noqa: E402
 from animal_kingdom.engine.strength import effective_strength  # noqa: E402

@@ -4,7 +4,7 @@
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))   # REPO_ROOT: this tree, not an installed copy
-import argparse, sys, dataclasses, json, math, sys
+import argparse, sys, dataclasses, json, math
 
 from animal_kingdom.bots import features
 from animal_kingdom.bots.greedy_bot import GreedyWeights, evaluate

@@ -111,7 +111,7 @@ pub struct AtomicBot {
     pub cand: Option<std::sync::Arc<super::cand::CandNet>>,
     // the move's deadline while a deeper level runs: a search past it stops (every tree node checks) and the level
     // is dropped, so the move is answered from the level above
-    deadline: Option<std::time::Instant>,
+    deadline: Option<crate::clock::Instant>,
     cut: Option<Arc<std::sync::atomic::AtomicBool>>,
     roomy: Option<Arc<Game>>,
     // by_card's searches by what I see after the draw: (no card, the best with each card), None when a line plays two
@@ -500,7 +500,7 @@ impl AtomicBot {
     fn tree(&mut self, mut s: State, actor: Player, me: Player, ctx: &mut Leaf, hist: &mut Vec<i64>,
             memo: &mut FxHashMap<(Vec<i64>, Vec<i64>), Option<(f64, Vec<Action>)>>, prob: f64, alpha: f64, beta: f64) -> Option<(f64, Vec<Action>)> {
         if let Some(d) = self.deadline {
-            if std::time::Instant::now() >= d {
+            if crate::clock::Instant::now() >= d {
                 if let Some(c) = &self.cut {
                     c.store(true, std::sync::atomic::Ordering::Relaxed);
                 }
@@ -894,7 +894,7 @@ impl AtomicBot {
         }
         let mut pool: Vec<usize> = (0..rows.len()).collect();
         pool.sort_by(|&a, &b| rows[b].board.partial_cmp(&rows[a].board).unwrap_or(std::cmp::Ordering::Equal));
-        let started = std::time::Instant::now();
+        let started = crate::clock::Instant::now();
         for lv in 0..self.rounds {
             // the move's time budget (the base's `time_budget`, 0: none): a deeper level starts only while less than
             // four tenths of it has gone, since each level costs several times the one above; the ranking keeps the
@@ -965,11 +965,11 @@ impl AtomicBot {
 
     /// The jobs' values; `None` when the deadline passed before every job was done (the level is then dropped).
     fn run_jobs(&mut self, rows: &[Row], jobs: &[(usize, usize)], me: Player, plies: usize,
-                deadline: Option<std::time::Instant>) -> Option<FxHashMap<(usize, usize), f64>> {
-        let past = |d: &Option<std::time::Instant>| d.map_or(false, |d| std::time::Instant::now() >= d);
+                deadline: Option<crate::clock::Instant>) -> Option<FxHashMap<(usize, usize), f64>> {
+        let past = |d: &Option<crate::clock::Instant>| d.map_or(false, |d| crate::clock::Instant::now() >= d);
         let cut = Arc::new(std::sync::atomic::AtomicBool::new(false));
         let mut out: FxHashMap<(usize, usize), f64> = FxHashMap::default();
-        let t = self.threads.max(1).min(jobs.len().max(1));
+        let t = if cfg!(target_arch = "wasm32") { 1 } else { self.threads.max(1).min(jobs.len().max(1)) };   // no threads in the browser
         if t <= 1 {
             self.deadline = deadline;
             self.cut = Some(cut.clone());

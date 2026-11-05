@@ -22,7 +22,7 @@ Only two ways: **covered** (enemy places strictly-greater strength on top — th
 
 ## The board is a graph; placement is gated by *connection*
 
-You may normally only place on a crossroad **connected back to your den through a chain of crossroads you occupy**. This spatial tempo is the heart of the game — it's why "reach" effects (Flight = ignore connection; Cougar = place adjacent to any of your units ignoring connection) are powerful: they let you deploy *away from your established territory* instead of grinding a chain forward crossroad by crossroad. Covering builds **stacks**; only the top unit counts (occupies, connects, is targetable, owns the crossroad).
+You may normally only place on a crossroad **connected back to your den through a chain of crossroads you occupy**. This spatial tempo is the heart of the game — it's why "reach" effects (Flight = ignore connection; Cougar = place next to any Cat you control ignoring connection) are powerful: they let you deploy *away from your established territory* instead of grinding a chain forward crossroad by crossroad. Covering builds **stacks**; only the top unit counts (occupies, connects, is targetable, owns the crossroad).
 
 ## Instinct → reality cheat-sheet
 

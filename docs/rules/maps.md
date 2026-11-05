@@ -27,7 +27,7 @@ All food numbers (region output, `win_food`, and every card's food numbers) live
 Game-wide setup and den rules are the source of truth in `overview.md` — **§4 (Game Setup)** and **§6 (Legal Placement)**. As they apply to every map:
 
 - **Empty board** start; both dens unoccupied. *(`overview.md` §4.1)*
-- **First player** draws **3** cards, **second player** draws **4**. *(`overview.md` §4.3; first-player determination still open — see §6)*
+- **Each player** draws **4** cards. *(`overview.md` §4.3; first-player determination still open — see §6)*
 - A player **cannot place on their own den**; they defend it by holding the crossroads **in front of it** (the crossroads the den connects to). *(`overview.md` §6)*
 
 **Capturing an enemy den** *(`overview.md` §11.1)*: the attacker places a unit onto the enemy den once it is connected to the attacker's own den through attacker-occupied crossroads — in practice, hold a front crossroad of the enemy den with a connected chain back home, then place onto the den to win. The defender's counterplay is to hold their own front crossroads with bodies strong enough not to be covered.
@@ -101,8 +101,8 @@ win_food: 100
 ---
 
 # 5. Tuning targets (Map B)
-- **Food curve:** region outputs (10 / 20) and `win_food` (100) vs. the card `F` scale — set together in the simulator.
-- **First-player win rate:** target ≈ 50% with the 3/4 opening-hand split; adjust the split or add another lever if skewed.
+- **Food curve:** region outputs (10 / 15) and `win_food` (100) vs. the card `F` scale — set together in the simulator.
+- **First-player win rate:** target ≈ 50% with the 4/4 opening hands and the first player's one-action first turn; adjust the split or add another lever if skewed.
 - **Win-condition split:** healthy if all three (den / food / both pass) appear; if both-pass endings dominate, the map is too stally or decks too removal-heavy.
 
 ---

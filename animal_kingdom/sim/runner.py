@@ -11,7 +11,6 @@ from __future__ import annotations
 import json
 import sys
 
-import random
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, replace
 from typing import Callable, Optional
@@ -206,17 +205,15 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
     raise ValueError(f"unknown bot kind {kind!r} (expected one of {BOT_KINDS})")
 
 
-def _rust_bot(kind: str, seed: int, weights, extra: dict):
-    """The RustBot for this kind and kwargs, or None when the Rust engine is not built, AK_PY_BOTS=1 is set, or the
-    request needs something only the Python bots do (a GreedyWeights object, a bot kind the port lacks)."""
-    from ..bots import rust_bot
-    if not rust_bot.available() or weights is not None:
-        return None
-    base = LEARNED_BASE_KIND.get(kind, kind)
-    if base not in ("greedy", "easy", "turn", "referee", "lookahead", "greedy_belief", "random", "atomic"):
-        return None
+def rust_spec(kind: str, extra: Optional[dict] = None) -> tuple[str, Optional[str]]:
+    """A bot kind (or `kind:k=v,...` spec) as the Rust bots take it: the spec string and, for a learned kind, its
+    evaluator artifact as JSON (the browser's bot is built from these too, web/local.py)."""
+    kind = kind.strip().lower()
+    kwargs = dict(extra or {})
+    if ":" in kind:
+        kind, more = parse_bot_spec(kind, "kind")
+        kwargs = {**dict(more), **kwargs}
     evaluator_json = None
-    kwargs = dict(extra)
     if kind in LEARNED_BASE_KIND:
         evaluator_json = json.dumps(load_eval(kwargs.pop("eval", DEFAULT_LEARNED_EVAL)).to_dict())
     parts = []
@@ -226,7 +223,22 @@ def _rust_bot(kind: str, seed: int, weights, extra: dict):
         elif v is None:
             continue
         parts.append(f"{k}={v}")
-    spec = kind if not parts else f"{kind}:{','.join(parts)}"
+    return (kind if not parts else f"{kind}:{','.join(parts)}"), evaluator_json
+
+
+def _rust_bot(kind: str, seed: int, weights, extra: dict):
+    """The RustBot for this kind and kwargs, or None when the Rust engine is not built, AK_PY_BOTS=1 is set, or the
+    request needs something only the Python bots do (a GreedyWeights object, a bot kind the port lacks)."""
+    from ..bots import rust_bot
+    if not rust_bot.available() or weights is not None:
+        return None
+    if extra.get("den_reach"):   # Python only (2026-11-04): the Rust port would ignore the key and measure a no-op
+        print("make_bot: den_reach is not in the Rust port; this bot is the Python one", file=sys.stderr)
+        return None
+    base = LEARNED_BASE_KIND.get(kind, kind)
+    if base not in ("greedy", "easy", "turn", "referee", "lookahead", "greedy_belief", "random", "atomic"):
+        return None
+    spec, evaluator_json = rust_spec(kind, extra)
     # a game with a card the Rust engine lacks (a test's fixture table) is played by the Python bot of the same spec
     fallback = lambda: make_bot(kind, seed, weights, dict(extra), python_only=True)
     return rust_bot.RustBot(spec, seed, evaluator_json, fallback=fallback)
@@ -376,14 +388,6 @@ def run_specs(
         return [_run_spec(spec, config) for spec in specs]
     with ProcessPoolExecutor(max_workers=jobs) as ex:
         return list(ex.map(_run_spec, specs, [config] * len(specs)))
-
-
-def run_spec_pair(
-    specs: tuple[MatchSpec, MatchSpec],
-    config: Optional[Config] = None,
-) -> tuple[GameRecord, GameRecord]:
-    """Run both seat assignments for one paired seed in a single worker."""
-    return (_run_spec(specs[0], config), _run_spec(specs[1], config))
 
 
 def run_matchup(

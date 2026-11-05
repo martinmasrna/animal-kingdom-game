@@ -12,7 +12,7 @@ nothing else: no verdict, no score. The agent reads the sheet; Martin sees the c
 
 Sections: card, keywords (the registry's ruling for every keyword and term in the text), pool (the animal, the tag, the
 nearest effects), anchors (the cards at this rarity and strength, what can cover the body), record (every line of the design record that names the animal), grid (map_b's neighbours
-and regions at the places the card will stand), text (lines on the real card at every width the client draws it),
+and regions at the places the card will stand),
 play (a placement in a scratch game, for a card the engine knows; otherwise the one fact that it isn't in the engine).
 """
 from __future__ import annotations
@@ -20,8 +20,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import shutil
-import subprocess
 import sys
 from pathlib import Path
 
@@ -34,7 +32,6 @@ from animal_kingdom.engine.resources import load_bundled_json  # noqa: E402
 DESIGN = ROOT / "docs" / "design"
 KEYWORDS_MD = ROOT / "docs" / "rules" / "keywords.md"
 LEVELS = Path(__file__).parent / "levels.json"
-FIT = Path(__file__).parent / "fit.mjs"
 RARITY = {"C": "common", "R": "rare", "L": "legendary", "common": "common", "rare": "rare", "legendary": "legendary"}
 
 # The registry's sections, found by the term in the text. Terms that are not keywords (Discard, Scout, "has +"/"give +")
@@ -187,27 +184,6 @@ def grid_section(c: dict) -> list[str]:
     if re.search(r"\badjacent\b|\bnext to\b|for each", c["text"], re.I):
         lines.append("an 'adjacent' payoff has 2 slots in a corner, 3 on an edge, 4 in the centre; the den is not a neighbour")
     return lines
-
-
-def text_section(c: dict, fit: bool) -> list[str]:
-    n = len(c["text"])
-    lines = [f"{n} characters"]
-    if not fit:
-        return lines + ["not measured (--no-fit)"]
-    node = shutil.which("node")
-    if not node or not FIT.exists():
-        return lines + ["not measured: node or fit.mjs missing"]
-    try:
-        r = subprocess.run([node, str(FIT), json.dumps({"id": c.get("id") or "new", "name": c["name"], "rarity": c["rarity"],
-                                                        "str": c["str"], "text": c["text"], "tags": c["tags"]})],
-                           capture_output=True, text=True, timeout=120, cwd=ROOT)
-    except subprocess.TimeoutExpired:
-        return lines + ["not measured: the browser took over two minutes"]
-    if r.returncode:
-        return lines + [f"not measured: {(r.stderr or r.stdout).strip().splitlines()[-1] if (r.stderr or r.stdout).strip() else 'fit.mjs failed'}"]
-    res = json.loads(r.stdout.strip().splitlines()[-1])
-    worst = max(res.values())
-    return lines + [f"{'fits' if worst <= 3 else 'does not fit'}: " + ", ".join(f"{k}px {v} lines" for k, v in res.items()) + " (limit 3)"]
 
 
 def play_section(cards: dict, c: dict) -> list[str]:
