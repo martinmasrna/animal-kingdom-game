@@ -10,6 +10,7 @@ import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { track } from './log.js';
+import { prepare as prepareLocal, LocalMatch } from './local/match.js';
 import { loadNews, unread as newsUnread, newsScreen, showSince, hideSince } from './news.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
 import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends } from './chat.js';
@@ -221,6 +222,7 @@ function route() {
   if (parts[0] === 'study' && parts[1]) return studyScreen(parts[1]);
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
+  if (parts[0] === 'm' && id === 'LOCAL') return localScreen();
   if (parts[0] === 'm' && id) return matchScreen(id);
   if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1], parts[2]);
   homeScreen(); if (play.opp === 'ranked') loadProfile().then(() => { if (screen === 'home' && !play.open) homeScreen(); });   // your rating after a ranked game
@@ -362,6 +364,7 @@ function homeScreen(mode = {}) {
       if (q.get('mirror')) body.gauntlet.mirror = true;                          // both seats on each named deck: the pilot is the only variable
       if (q.get('games')) body.gauntlet.games = Math.max(1, Math.round(+q.get('games')));   // games per deck, who goes first alternating
     }
+    if (body.bot && LOCAL_PLAY && await startLocal(body)) return;
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); play.open = null;
@@ -813,7 +816,29 @@ function wireAccount(root, redraw) {
 }
 
 // ------------------------------------------------------------------ match connection
-function disconnect() { if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; }   // a step still timed would redraw the game over the next screen
+// ?local=1: a practice match against a bot plays in the browser (static/local/match.js), the bot in a Web Worker, no
+// round trip a move; the server takes the finished match. Without the wasm, or with one built from other engine sources
+// than the server's, the match plays on the server as always.
+const LOCAL_PLAY = new URLSearchParams(location.search).get('local') === '1';
+let LOCAL = null;
+async function startLocal(body) {
+  const lib = await prepareLocal(api);
+  if (!lib) return false;
+  const r = await api('/api/local/setup', { method: 'POST', body: JSON.stringify(body) });
+  if (!r.ok) { toast(await r.text()); return true; }
+  const setup = await r.json();
+  disconnect();
+  LOCAL = new LocalMatch(lib, setup, body, v => { const prev = V; V = v; V.rx = Date.now() / 1000; onView(prev); }, { toast, api });
+  wsId = 'LOCAL'; play.open = null;
+  location.hash = '#/m/local';
+  return true;
+}
+function localScreen() {
+  if (!LOCAL) { history.replaceState(null, '', '#/'); return homeScreen(); }   // a reload: the match lived in the page
+  screen = null; V = null; ui.sel = null; ui.peek = false;
+  LOCAL.show();
+}
+function disconnect() { if (LOCAL) { LOCAL.close(); LOCAL = null; if (wsId === 'LOCAL') wsId = null; } if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; }   // a step still timed would redraw the game over the next screen
 
 async function matchScreen(id) {
   if (!getToken(id) && !(await rejoin(id))) { location.hash = '#/join/' + id; return; }   // a new tab: the server knows your seat
@@ -840,6 +865,7 @@ async function matchScreen(id) {
     if (!ws || ws.readyState > 1) { if (ws) ws.onclose = null; connect(); } };
 }
 const send = msg => { if (msg.t === 'act' && window.__ak.onAct) return window.__ak.onAct(msg.action), true;   // the position analyser plays the move itself
+  if (LOCAL && wsId === 'LOCAL') return LOCAL.handle(msg), true;   // a match in the browser (?local=1) takes the socket's messages
   clog('send ' + (msg.t === 'act' ? JSON.stringify(msg.action).slice(0, 50) : msg.t) + (ws && ws.readyState === 1 ? '' : ' DROPPED (socket ' + (ws ? ws.readyState : 'none') + ')')); if (!(ws && ws.readyState === 1)) { if (msg.t === 'act') toast('Reconnecting… try again in a moment'); return false; } return ws.send(JSON.stringify(msg)); };   // a dropped move says so (feedback 2026-10-04: clicks that did nothing)
 // ?clicklog: a live record of presses, clicks and what the game did with them, in a corner (chasing clicks that do
 // nothing, 2026-10-04). Off unless asked for; it costs nothing then.
@@ -1830,6 +1856,7 @@ function replayKey(e) {
 window.__ak = () => ({ V, ui, d: lastDecision, PB, RP });   // test hook: the headless play-through reads the view (and whether steps are playing, where a replay is)
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.build = checkBuild;   // test hook: a socket naming another build
+window.__ak.local = () => LOCAL;   // test hook: the match in the browser, its bot's times and its log
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
 window.__ak.adopt = views => adoptRetired(replayIds(views));   // test hook: what loading a replay does to the cards it names
 boot();

@@ -21,7 +21,21 @@ it ends so it counts and is kept. Branch `engine/wasm`.
    the Python side), the serialised position, the legal actions and both seats' views compared after every action.
    2026-11-05: 100 of 100 agree, 3,403 actions, 3,503 positions, 6 s. A changed number in a view fails it (checked by
    breaking one on purpose). `fuzz.py --all-cards --games 40` on the native module after the change: 40 of 40.
-3. **The client** — in progress.
+3. **The client** (done). With `?local=1` in the address, home's Play against a bot starts the match in the browser
+   (`static/local/match.js`): `/api/local/setup` gives the decks, the seats and the bot's spec; the client holds the
+   game, feeds the same game screen the views the server would send (the engine's part from the wasm `view`, the
+   match's part, seats, move history and numbered events, built the way `match.py` builds them), takes the screen's
+   messages in place of the socket (act, played, concede, rematch), and the bot thinks in a Web Worker
+   (`static/local/worker.js`) at the server's pace (it waits for the screen to play its last move out, then the same
+   beat; after 20 s the Easy bot's move is played, as on the server). When the game ends the log goes to
+   `/api/local/match`: the server replays it through a real `Match` (`web/local.py`), seed and first player as the
+   browser had them, every action validated by the Python engine, so it is saved as any match is (game log, history,
+   replay); a log the engine refuses is refused whole. A log that can't be sent (offline) waits in localStorage and goes
+   with the next match. No socket and no request a move (`web/test/local.test.mjs` checks it). Without the flag, or
+   when the hashes differ, nothing changes: the match plays on the server.
+   Not done: a local match lives in the page (a reload loses it); offline play needs the page and the art already
+   loaded; the player's browser holds the whole game, the bot's hand included, so a local practice match can be read
+   or edited by its player (the server checks only that the moves were legal: fine for practice, not for anything ranked).
 4. **Numbers** — not measured yet.
 
 ## Source hash
