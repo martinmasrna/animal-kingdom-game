@@ -2,7 +2,7 @@
 
 The pass that writes a legend (`docs/cards/legends/<animal>.md`, in the honey badger's form) for every collectible legendary whose name is still in brackets, on the branch `cards/legends`. Legends only: no card text, strength, rarity or name changes; names are Martin's. Whether societies exist is open (`knowledge/world-first-study-2026-10-24.md`), so no legend here states one as fact.
 
-Written in this pass: 8. Still to write: 22. Giraffe, Leopard and Rat had legends before the pass and are untouched.
+Written in this pass: 9. Still to write: 21. Giraffe, Leopard and Rat had legends before the pass and are untouched.
 
 
 | Card | id | Str | Legend | State |
@@ -15,7 +15,7 @@ Written in this pass: 8. Still to write: 22. Giraffe, Leopard and Rat had legend
 | [BUTTERFLY] | `butterfly_legend` | 0 | [butterfly.md](../../docs/cards/legends/butterfly.md) | written |
 | [CUCKOO] | `cuckoo_legend` | 6 | [cuckoo.md](../../docs/cards/legends/cuckoo.md) | written |
 | [DEER] | `deer_legend` | 3 | [deer.md](../../docs/cards/legends/deer.md) | written |
-| [DUNG BEETLE] | `dung_beetle_legend` | 4 | [dung-beetle.md](../../docs/cards/legends/dung-beetle.md) | to write |
+| [DUNG BEETLE] | `dung_beetle_legend` | 4 | [dung-beetle.md](../../docs/cards/legends/dung-beetle.md) | written |
 | [EAGLE] | `eagle_legend` | 3 | [eagle.md](../../docs/cards/legends/eagle.md) | to write |
 | [ELEPHANT] | `elephant_legend` | 9 | [elephant.md](../../docs/cards/legends/elephant.md) | to write |
 | [FALCON] | `falcon_legend` | 5 | [falcon.md](../../docs/cards/legends/falcon.md) | to write |
