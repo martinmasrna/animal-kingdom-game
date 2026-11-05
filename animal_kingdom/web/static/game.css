@@ -200,6 +200,7 @@
 .game .dcount { width: 84px; height: 84px; margin: -42px 0 0 -42px; display: grid; place-items: center; background: url(/static/kit2/gem_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.5)); }
 .game .dcount.B { background-image: url(/static/kit2/gem_b.webp); }
 .game .gemnum { display: flex; height: 34px; } .game .gemnum img { height: 100%; aspect-ratio: 54 / 72; object-fit: contain; display: block; margin: 0 -1px; }   /* every painted digit in one cell (the widest's): a count holds still as it climbs */
+.game .dcount .gemnum:has(img:nth-child(3)) { height: 26px; }   /* three digits (past 99 at a food win) stay inside the gem (phone walkthrough finding 23) */
 /* a piece landing: it drops from a little above and larger, its shadow growing and tightening, with a small settle.
    The painted piece moves; nothing new is drawn. A covered piece sinks into the buried disc behind. */
 .game .cr.unit.land { z-index: 5; animation: land .36s cubic-bezier(.3,.7,.4,1.15) both; }
