@@ -4,7 +4,7 @@
   "theme": "Two threats",
   "to_move": "A",
   "turns": 2,
-  "order": 9,
+  "order": 4,
   "board": {
     "1,2": [{"card": "lion", "owner": "A"}],
     "1,3": [{"card": "lion", "owner": "A"}],

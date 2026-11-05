@@ -4,7 +4,7 @@
   "theme": "Traps",
   "to_move": "A",
   "turns": 2,
-  "order": 5,
+  "order": 12,
   "board": {
     "1,2": [{"card": "lion", "owner": "A"}],
     "2,2": [{"card": "lion", "owner": "A"}],

@@ -4,7 +4,7 @@
   "theme": "Timers",
   "to_move": "A",
   "turns": 2,
-  "order": 2,
+  "order": 8,
   "board": {
     "1,2": [{"card": "lion", "owner": "A"}],
     "2,1": [{"card": "tortoise", "owner": "B"}],

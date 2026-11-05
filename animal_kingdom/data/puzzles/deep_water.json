@@ -1,0 +1,35 @@
+{
+  "id": "deep_water",
+  "title": "Deep water",
+  "theme": "Titans",
+  "to_move": "A",
+  "turns": 2,
+  "order": 13,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["krill", "sperm_whale", "lion", "pup"], "B": ["cheetah"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "The Sperm Whale's Roar spares nothing next to it, not even yours.",
+  "why": "After a Krill the Sperm Whale costs one action, and at 4,2 its Roar clears the Grizzlies round it, but also the top of your own 3,2; with the Krill placed on that Lion, the blast takes the Krill and the Lion beneath keeps the chain.",
+  "solution": [
+    {"kind": "place", "card_id": "krill", "target": ["cr", "3,2"]},
+    {"kind": "place", "card_id": "sperm_whale", "target": ["cr", "4,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "krill", "target": ["cr", "3,2"]},
+    {"by": "A", "kind": "place", "card_id": "sperm_whale", "target": ["cr", "4,2"]},
+    {"by": "B", "kind": "place", "card_id": "cheetah", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

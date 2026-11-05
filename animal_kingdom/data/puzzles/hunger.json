@@ -4,7 +4,7 @@
   "theme": "Dawn",
   "to_move": "A",
   "turns": 2,
-  "order": 3,
+  "order": 2,
   "board": {
     "1,2": [{"card": "lion", "owner": "A"}],
     "2,2": [{"card": "lion", "owner": "A"}],

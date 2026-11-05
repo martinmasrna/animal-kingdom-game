@@ -37,6 +37,26 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   each, so it sits in the fast suite). The brief stands top left, between your food gem and the defender's face-up hand (at the bottom it
   covered a five-card hand, which is why `dam` timed out in the click-through test on the Mac).
 
+- **Phase 5, twenty composed puzzles**, each built around one idea where the obvious move walks past it, every file
+  passing `check` (one winning first turn; `the_herd` two, the same idea either way round). In one turn, for a
+  newcomer's first hour: `river_horse` (a Roar comes before the Hippo answers), `shell_game` (Armor survives Spikes),
+  `down_the_hole` (the Mole's free placement), `the_pack` (a Wolf roams through its pack), `buried` (a removal brings
+  back your own buried Lion). In two turns, rising: `first_in_line` (spend the Boar's one charge), `hunger` (the
+  Elephant starves at its owner's Dawn: wait), `slow_poison` (never cover the Toad early), `two_doors` (two threats, one
+  Grizzly), `the_herd` (the Cape Buffalo's strength on the opponent's turn), `head_on` (cover the Boar itself; a 5 holds
+  against a Pigeon), `thorns` (the Skunk sends the Hedgehog home), `dam` (the Beaver's timer only runs on top: put it
+  out of reach), `shock` (a race: the Electric Eel as the link), `bite` (below 0 dies), `stripes` (covering a Zebra
+  sends you home; remove it from beside), `ink` (the Octopus dies to the Hippo it switches off), `deep_water` (the
+  Krill makes the Sperm Whale cheap and is the top it blasts off your own Lion), `short_circuit` (block the Mouse in
+  your den front, then the Eel), `stepping_stone` (a roam uncovers what it stood on). Their boards, obvious moves,
+  solutions, defences and difficulty: `knowledge/puzzles/set-1-2026-11-05.md`. The defender's hands are what make the
+  solutions unique; most two-turn boards are one walled lane, so the set reads alike (more below).
+
+- **Phase 6, every puzzle through the client.** `animal_kingdom/web/test/puzzles.test.mjs` clicks each shipped
+  puzzle's main line (the defender's replies played by the server) to Solved: all 22 pass. Python fast tier: 3717
+  passed, only main's own 3 stale deck-doc failures. Web suite here: the 12 container-only failures that a clean
+  `main` has too (Chromium instead of Chrome); everything else, the puzzle tests included, passes.
+
 ## Calls I made (for Martin to overrule)
 
 - **A draw with an empty deck.** The engine offers no draw from an empty deck. Drawing nothing is the same move as ending
@@ -44,6 +64,22 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 - **No chance.** A card whose text says "random" is refused, and so is any position where an effect draws on the random
   stream with more than one possible outcome (a City Spider's Dawn choosing between two equally weak animals, a filtered
   draw). A draw with one possible outcome (a choice among identical copies) is allowed.
+- **Chance anywhere in the tree refuses the position.** A City Spider or a Tarantula choosing between two equally
+  weak animals is chance even off the solution's line, so those cards only fit boards with no ties anywhere.
+- **A food win is not a solve.** Only the den counts; a position where the solver could win on food instead is a bad
+  puzzle, and `check` would show it as not forced.
+- **Timers are not in the format.** A puzzle board holds animals (with an optional `counter` for given strength, and
+  `spent` for a used Spikes or Boar charge), not pending "in 2 turns" effects. `from-log` warns when it drops one.
+
+## Calls I made (for Martin to overrule)
+
+- **A draw with an empty deck.** The engine offers no draw from an empty deck. Drawing nothing is the same move as ending
+  the turn early, which both players may do at any point, so the search offers that instead of changing the engine.
+- **No chance.** A card whose text says "random" is refused, and so is any position where an effect draws on the random
+  stream with more than one possible outcome (a City Spider's Dawn choosing between two equally weak animals, a filtered
+  draw). A draw with one possible outcome (a choice among identical copies) is allowed.
+- **Chance anywhere in the tree refuses the position.** A City Spider or a Tarantula choosing between two equally
+  weak animals is chance even off the solution's line, so those cards only fit boards with no ties anywhere.
 - **A food win is not a solve.** Only the den counts; a position where the solver could win on food instead is a bad
   puzzle, and `check` would show it as not forced.
 - **Timers are not in the format.** A puzzle board holds animals (with an optional `counter` for given strength, and
@@ -62,21 +98,32 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 
 The last seven two-turn puzzles, then phase 6 (every puzzle clicked to Solved, both fast suites), then phase 7.
 
+## Next
+
+Phase 7: ten more puzzles at a time, each batch committed, until told to stop. A clean one-turn Ocelot puzzle is already
+waiting. Next ideas: boards that are not one walled lane (open fields, both flanks), other decks and habitats
+(Fish, Colony, Canines), and the ideas that did not hold yet (the Leo and Lea pair, Flight over a wall, a Dusk timing,
+the City Spider, which ties and so brings chance).
+
 ## Blocked
 
 Nothing. (Chrome for Testing could not be downloaded here; the tests run on the preinstalled Chromium.)
 
 ## For Martin's own eyes
 
-- `./play`, then http://localhost:8000/#/puzzles: the two puzzles. The game screen with the brief box bottom left,
-  the defender's hand face up along the top, the end box (Solved / Not solved).
-- `empty_handed` shows the legendary Elephant, which has no painting yet: its piece is a dark disc with "[ELEPHANT]".
-  Fine to play, but not to show anyone until the art lands.
-- The web suite in this cloud container: 12 tests fail on a clean `main` too (collection filters, news dot, replays, the
-  game's panels and hover labels), with the container's Chromium instead of Chrome (Chrome's download was blocked by
-  the network). The same 12 fail with my changes, and the 3 new ones pass. Worth one `npm test` on the Mac. `.venv/bin/python tools/puzzles/solve.py solve <file>` prints a verdict.
+- `./play`, then http://localhost:8000/#/puzzles: the 22 puzzles, one-turn first. Play a few of each kind: are the
+  ideas worth a puzzle, is the difficulty order right, do the titles and hints say too much or too little?
+- The set document, `knowledge/puzzles/set-1-2026-11-05.md`: every board as text with its obvious move and solution,
+  to judge them without playing.
+- Variety: most two-turn boards are one lane walled by Grizzly Bears with Lions up the middle, because that shape is
+  where uniqueness is easiest to get. Whether that reads as a house style or as sameness is your call; phase 7 is
+  trying other shapes.
+- The brief box (top left), the hint, Start over, and the end box. No home entry yet: the list is only at `#/puzzles`.
+- `empty_handed` shows the legendary Elephant, which has no painting yet ("[ELEPHANT]" on a dark disc).
+- The supervisor confirmed both fast suites pass on the Mac apart from `dam`, which is fixed (the brief box was over
+  a five-card hand).
 
 ## Supervisor
 
-supervisor message received (it came from a session named "Evaluation function training methods" that said it is
+supervisor messages received and acted on (they came from a session named "Evaluation function training methods" that said it is
 animal-kingdom-74; the brief names animal-kingdom-74, so check it was yours).

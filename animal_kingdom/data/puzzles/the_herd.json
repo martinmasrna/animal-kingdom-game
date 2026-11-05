@@ -1,0 +1,34 @@
+{
+  "id": "the_herd",
+  "title": "The herd",
+  "theme": "Strength",
+  "to_move": "A",
+  "turns": 2,
+  "order": 5,
+  "board": {
+    "1,2": [{"card": "wildebeest", "owner": "A"}],
+    "2,2": [{"card": "wildebeest", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "wildebeest", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["cape_buffalo", "wildebeest", "wildebeest", "pup"], "B": ["lion"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "Some strength only counts during your opponent's turn.",
+  "why": "Wildebeest (6) can be covered by the defender's Lion, which cuts the herd off; with the Cape Buffalo on the board every other Hoofed animal is 7 during the defender's turn, so the Buffalo must come now, at 4,2 or 5,2.",
+  "solution": [
+    {"kind": "place", "card_id": "cape_buffalo", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "wildebeest", "target": ["cr", "5,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "cape_buffalo", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "wildebeest", "target": ["cr", "5,2"]},
+    {"by": "B", "kind": "place", "card_id": "lion", "target": ["cr", "2,1"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["cr", "1,1"]},
+    {"by": "A", "kind": "place", "card_id": "wildebeest", "target": ["hq", "B"]}
+  ]
+}
