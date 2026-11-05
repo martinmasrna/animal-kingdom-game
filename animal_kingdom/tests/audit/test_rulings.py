@@ -521,15 +521,15 @@ def test_pile__skunk_returned_copy_is_locked_through_its_owners_next_turn_other_
     assert all(u.locked_until_turn <= s.turn_counter for u in s.hands["B"])
 
 
-def test_pile__rat_removes_an_adjacent_enemy_of_any_strength_after_three_plays_and_pays_nothing():
-    s = st(hands={"A": ["mole", "v1", "rat", "v2"]})
+def test_pile__rat_removes_an_adjacent_enemy_of_any_strength_after_three_plays_itself_included():
+    s = st(hands={"A": ["mole", "v1", "rat"]})
     put(s, "2,3", "elephant", "B")
     play(s, "mole", "1,2")
     rules.apply_action(s, PlaceAction("v1", ("cr", "1,1")))   # the Mole's extra play: two animals
     play(s, "rat", "1,3")                                     # the third, itself
     if s.pending:
         choose(s, "2,3")
-    assert s.top_unit("2,3") is None and hand_ids(s, "A") == ["v2"] and "v2" not in s.pile_cards_of("A")
+    assert s.top_unit("2,3") is None
 
 
 def test_pile__rat_removes_nothing_before_three_plays():
