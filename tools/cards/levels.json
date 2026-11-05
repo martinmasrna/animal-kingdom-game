@@ -6986,6 +6986,24 @@
       "note": "Martin, 2026-10-28: the AOE roamer, Hungry 6 to compensate",
       "by": "claude",
       "at": 1793210584
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793890403
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793890404
     }
   },
   "wolverine": {
