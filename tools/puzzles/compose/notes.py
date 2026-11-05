@@ -45,4 +45,5 @@ NOTES = {
  'back_and_forth': dict(difficulty=4, obvious="Roam the Wolf first, as far as it goes: it leaves its crossroad empty behind it, and with no card in hand nothing fills the hole."),
  'hive': dict(difficulty=4, obvious="A Termite King onto the Hedgehog: the Spikes remove it. Or a Hornet at the den front: the Lion covers it."),
  'school': dict(difficulty=3, obvious="The Octopus to 4,2, as in Ink: the Hippos remove it, and the card it costs is the one needed later to mend the line."),
+ 'relay': dict(difficulty=3, obvious="The Dhole, the strongest card, to the den front: then the Mouse cuts the line at the Jackal and only Bush Dogs (3) are left to cover it."),
 }

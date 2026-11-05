@@ -87,7 +87,8 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 - **Batch 2** (in progress, two-turn, other decks and boards): `back_and_forth` (Canines, nothing in hand: the Bush
   Dog roams forward and back so its Pups keep the Wolf's line whole), `hive` (Colony: the Skunk sends the Hedgehog home,
   the Soldier Bee's Spikes hold the den front, and two Hornets re-link and finish), `school` (Fish: the Tuna, 6 with three other
-  Fish, walks past the Hippos). Two-turn positions off the walled
+  Fish, walks past the Hippos), `relay` (Canines: keep the Dhole
+  for the Mouse that cuts the line; the Wolf at the back roams in). Two-turn positions off the walled
   lane come slowly: random open boards almost never give a forced, unique den, so batch 2 ports the proven ideas to
   other decks and varies the hands with the solver keeping the unique ones (a scratch search, `portgen`).
 
@@ -101,7 +102,7 @@ Nothing. (Chrome for Testing could not be downloaded here; the tests run on the 
 
 ## For Martin's own eyes
 
-- `./play`, then http://localhost:8000/#/puzzles: the puzzles, one-turn first (34 so far). Play a few of each kind: are the
+- `./play`, then http://localhost:8000/#/puzzles: the puzzles, one-turn first (36 so far). Play a few of each kind: are the
   ideas worth a puzzle, is the difficulty order right, do the titles and hints say too much or too little?
 - The set document, `knowledge/puzzles/set-1-2026-11-05.md`: every board as text with its obvious move and solution,
   to judge them without playing.

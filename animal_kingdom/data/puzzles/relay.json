@@ -1,0 +1,33 @@
+{
+  "id": "relay",
+  "title": "Relay",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 2,
+  "order": 19,
+  "board": {
+    "1,1": [{"card": "wolf", "owner": "A"}],
+    "2,1": [{"card": "wolf", "owner": "A"}],
+    "3,1": [{"card": "jackal", "owner": "A"}],
+    "3,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "gazelle", "owner": "B"}],
+    "5,2": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["bush_dog", "bush_dog", "dhole"], "B": ["mouse"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "Keep something in hand for the animal that will cut your line.",
+  "why": "The two Bush Dogs reach the den front (the Gazelle flees home when covered); the Dhole must stay in hand, because the defender's Mouse will cover the Jackal and cut the line, and only the Dhole covers it back, after which the Wolf at the back roams the whole way in.",
+  "solution": [
+    {"kind": "place", "card_id": "bush_dog", "target": ["cr", "4,1"]},
+    {"kind": "place", "card_id": "bush_dog", "target": ["cr", "5,1"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "bush_dog", "target": ["cr", "4,1"]},
+    {"by": "A", "kind": "place", "card_id": "bush_dog", "target": ["cr", "5,1"]},
+    {"by": "B", "kind": "place", "card_id": "gazelle", "target": ["cr", "2,2"]},
+    {"by": "B", "kind": "place", "card_id": "mouse", "target": ["cr", "3,1"]},
+    {"by": "A", "kind": "place", "card_id": "dhole", "target": ["cr", "3,1"]},
+    {"by": "A", "kind": "roam", "from": "1,1", "target": ["hq", "B"]}
+  ]
+}
