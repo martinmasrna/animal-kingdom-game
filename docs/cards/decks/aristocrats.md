@@ -10,9 +10,9 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Ember** | 1 | Bird | 7 | Flight. Fall: shuffle this into your deck. |
+| **Ember** | 1 | Bird | 7 | Flight. Fall: shuffle Ember into your deck. |
 | **The First of Many** | 1 | — | 2 | Roar: cover the board with Locusts. |
-| **Roach King** | 1 | — | 1 | Fall: put this back where it was with +1 strength and draw a card. |
+| **Roach King** | 1 | — | 1 | Fall: put Roach King back where it was with +1 strength and draw a card. |
 | **Pestis** | 1 | Rodent | 3 | Roar: remove an adjacent animal and every animal under it. |
 
 ### Rare

@@ -347,7 +347,14 @@ fn take_from_hand(st: &mut State, player: Player, card: CardId) -> Unit {
 
 /// The same instance lands on the board. `roar` false: an effect's placement that doesn't Roar; `play` false: placed,
 /// not played; `reveal`: shown large as it lands.
-pub fn land_unit(st: &mut State, player: Player, mut unit: Unit, cr: Cr, from_hand: bool, roar: bool, play: bool, reveal: bool) {
+pub fn land_unit(st: &mut State, player: Player, unit: Unit, cr: Cr, from_hand: bool, roar: bool, play: bool, reveal: bool) {
+    land_unit_seeing(st, player, unit, cr, from_hand, roar, play, reveal, None)
+}
+
+/// `land_unit`, its reactions seeing `tops` (each crossroad's top animal, by crossroad) instead of the board as it is:
+/// the board before a placement that lands several animals at once, the Locust swarm (Martin, 2026-11-05).
+pub fn land_unit_seeing(st: &mut State, player: Player, mut unit: Unit, cr: Cr, from_hand: bool, roar: bool, play: bool,
+                        reveal: bool, tops: Option<&[Option<Unit>]>) {
     let covered = st.top(cr).cloned();
     let is_apex = st.card(unit.card).has_kw(K_APEX);
     let onto_enemy = covered.as_ref().map(|c| c.owner != player).unwrap_or(false);
@@ -373,7 +380,7 @@ pub fn land_unit(st: &mut State, player: Player, mut unit: Unit, cr: Cr, from_ha
             st.effect_stack.push(vmap!("op" => Value::s("apex_eat"), "iid" => Value::Int(unit.iid), "prey" => Value::Int(c.iid), "by_card" => card_v(st, unit.card), "cr" => cr_v(st, cr), "owner" => pn(unit.owner)));
         }
     }
-    push_reactions(st, &unit, cr, covered.as_ref(), onto_enemy);
+    push_reactions(st, &unit, cr, covered.as_ref(), onto_enemy, tops);
     if onto_enemy {
         let c = covered.as_ref().unwrap();
         fire_cover_event(st, &unit, c);
@@ -489,10 +496,11 @@ fn fire_place_event(st: &mut State, placed: &Unit) {
     }
 }
 
-fn push_reactions(st: &mut State, unit: &Unit, cr: Cr, covered: Option<&Unit>, _onto_enemy: bool) {
+fn push_reactions(st: &mut State, unit: &Unit, cr: Cr, covered: Option<&Unit>, _onto_enemy: bool, tops: Option<&[Option<Unit>]>) {
     let nbs: SmallVec<[Cr; 8]> = SmallVec::from_slice(st.map().neighbors(cr));
     for nb in nbs {
-        let Some(top) = st.top(nb).cloned() else { continue };
+        let seen = match tops { Some(t) => t[nb as usize].clone(), None => st.top(nb).cloned() };
+        let Some(top) = seen else { continue };
         if top.owner != unit.owner && st.g.has_hook(top.card, Hook::OnEnemyPlacedAdjacent) {
             cards::run(st, top.card, None, Hook::OnEnemyPlacedAdjacent, &top, &Args::PlacedAdjacent(unit.clone(), cr));
         }
@@ -514,7 +522,10 @@ fn push_reactions(st: &mut State, unit: &Unit, cr: Cr, covered: Option<&Unit>, _
         if covered.owner != unit.owner && st.card(covered.card).has_tag(T_COLONY) {
             push_queen_guards(st, covered.owner, unit, cr);
         }
-        let watchers: SmallVec<[Unit; 16]> = st.tops().filter(|(_, t)| t.owner == covered.owner && t.iid != covered.iid).map(|(_, t)| *t).collect();
+        let watchers: SmallVec<[Unit; 16]> = match tops {
+            Some(t) => t.iter().flatten().filter(|t| t.owner == covered.owner && t.iid != covered.iid).cloned().collect(),
+            None => st.tops().filter(|(_, t)| t.owner == covered.owner && t.iid != covered.iid).map(|(_, t)| *t).collect(),
+        };
         for top in watchers {
             if st.g.has_hook(top.card, Hook::OnAllyCovered) {
                 cards::run(st, top.card, None, Hook::OnAllyCovered, &top, &Args::AllyCovered(covered.clone(), unit.clone(), cr));
@@ -1115,7 +1126,7 @@ pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target, by_e
                     st.effect_stack.push(vmap!("op" => Value::s("apex_eat"), "iid" => Value::Int(unit.iid), "prey" => Value::Int(c.iid), "by_card" => card_v(st, unit.card), "cr" => cr_v(st, where_), "owner" => pn(unit.owner)));
                 }
             }
-            push_reactions(st, &unit, where_, covered.as_ref(), onto_enemy);
+            push_reactions(st, &unit, where_, covered.as_ref(), onto_enemy, None);
             if onto_enemy {
                 let c = covered.as_ref().unwrap();
                 fire_cover_event(st, &unit, c);

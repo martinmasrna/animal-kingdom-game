@@ -535,17 +535,17 @@ def test_oxpecker_legend_ignores_a_cover_under_8_and_an_own_cover():
     assert s2.pending is None
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "two readings of 'play an Oxpecker': A (literal, keywords.md: 'Play means from your hand') play an Oxpecker card "
-    "from your hand, nothing without one; B (the engine, as the Rabbit's Bunny) make a new Oxpecker and play it"))
-def test_oxpecker_legend_plays_the_oxpecker_from_your_hand():
+# Martin, 2026-11-05: "play an Oxpecker" makes a new one ("new one of course"), as the Rabbit's Bunny; an Oxpecker in
+# hand stays there, and none in hand is needed.
+def test_oxpecker_legend_plays_a_new_oxpecker_and_leaves_the_one_in_hand():
     s = _oxpecker_board(["elephant", "oxpecker"])
     rules.apply_action(s, PlaceAction("elephant", ("cr", "1,2")))
     rules.apply_action(s, PlaceAction("oxpecker", ("cr", "4,3")))
-    assert "oxpecker" not in hand_ids(s, "A")                    # the one in hand was played
+    assert s.top_unit("4,3").card_id == "oxpecker"
+    assert "oxpecker" in hand_ids(s, "A")                        # the one in hand stays
     s2 = _oxpecker_board(["elephant"])
     rules.apply_action(s2, PlaceAction("elephant", ("cr", "1,2")))
-    assert s2.pending is None                                    # no Oxpecker in hand: nothing to play
+    assert s2.pending is not None                                # no Oxpecker in hand: a new one all the same
 
 
 def test_rhinoceros_removes_all_adjacent_enemies_of_3_or_less():

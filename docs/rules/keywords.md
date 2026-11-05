@@ -113,5 +113,5 @@ Card text fits three lines on the full card (`docs/design/principles.md`). These
 - One card is **"draw a card"**; more are **"draw 2 cards"**.
 - The other player is always **"your opponent"**, never "they", "their" or "them". Stealing from the opponent's hand is random by nature (the hand is hidden), so the text doesn't say "random".
 - Thresholds read **"of strength 4 or less"**, **"6 or more"**, **"10 or more food"**.
-- Timed triggers read **"At the end of your turn, …"** and **"At the start of your next turn, …"**; a delayed effect reads **"In 2 turns, …"**, or **"Next turn, …"** where the long form doesn't fit (Bird Egg).
+- Timed triggers read **"At the end of your turn, …"** and **"At the start of your next turn, …"**; a delayed effect reads **"In 2 turns, …"**, or **"Next turn, …"** where the long form doesn't fit (Bird Egg). A timer counts its owner's turns; a Wild animal's counts every turn (Martin, 2026-11-05). "Next turn" is the next turn of the player the sentence names: yours on the Beaver and the Bird Egg, your opponent's on the Electric Eel and the Skunk.
 

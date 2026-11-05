@@ -689,10 +689,16 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("locust_legend", OnPlace) => {
             let locust = cid(st, "locust_swarm");
             let delay = cfg(st, "locust_delay");
+            // all at once (Martin, 2026-11-05): every Locust's reactions see the board as it stood before the swarm
+            let n = st.map().sorted.iter().map(|&c| c as usize + 1).max().unwrap_or(0);
+            let mut before: Vec<Option<Unit>> = vec![None; n];
+            for &c in st.map().sorted.clone().iter() {
+                before[c as usize] = st.top(c).cloned();
+            }
             for c in st.map().sorted.clone() {
                 let iid = st.new_iid();
                 let l = Unit::new(locust, WILD, iid);
-                land_unit(st, WILD, l.clone(), c, false, true, false, false);
+                crate::effects::land_unit_seeing(st, WILD, l.clone(), c, false, true, false, false, Some(&before));
                 let l_now = st.unit_by_iid(iid).cloned().unwrap_or(l);
                 schedule(st, &l_now, delay, vmap!("op" => Value::s("locust_eat"), "iid" => Value::Int(iid), "by_player" => pn(owner)), false, None);
             }

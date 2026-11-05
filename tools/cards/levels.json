@@ -1138,6 +1138,16 @@
       "by": "claude",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191059
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Once each turn, an ally can roam for free."
+      },
+      "note": "card audit 2026-11-04: the Clarion ruling (only allies with Roam) written on the card; the engine already does this",
+      "by": "claude",
+      "at": 1793820582
     }
   },
   "cod": {
@@ -2703,9 +2713,9 @@
         "prev_note": "",
         "prev": "Whenever an ally roams onto an enemy, draw a card."
       },
-      "note": "Martin, 2026-10-28",
+      "note": "card audit 2026-11-04: the ruling (your Canines only, itself included) written on the card; the engine already does this",
       "by": "claude",
-      "at": 1793210656
+      "at": 1793820582
     }
   },
   "lynx": {
@@ -7460,9 +7470,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-29: 'I like the effect but it 100% feels like a rare card'; Big Gus for one neighbour",
+      "note": "card audit 2026-11-04: Martin's ruling of 2026-10-29 (an allied Rodent) written on the card; the engine already does this",
       "by": "claude",
-      "at": 1793300215
+      "at": 1793820582
     },
     "animal": {
       "review": {

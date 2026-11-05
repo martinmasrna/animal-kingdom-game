@@ -1332,11 +1332,8 @@ def test_owl_scouts_three_different_cards():
     assert len(s.hands["A"]) == 1 and len(s.decks["A"]) == 4
 
 
-@pytest.mark.xfail(strict=True, reason="two readings: A) placing the Worker Wasp is placing a Colony animal, so it "
-                                       "pays for itself (as the Worker Ant and the Falcon legend count themselves); "
-                                       "B) a 'whenever' reaction sees only the animals placed after it. The engine "
-                                       "follows B.")
-def test_worker_wasp_pays_for_itself():
+# Martin, 2026-11-05: a "whenever" card doesn't see itself come into play.
+def test_worker_wasp_does_not_pay_for_itself():
     s = st(hands={"A": ["worker_wasp"]})
     play(s, "worker_wasp", "1,1")
-    assert s.food["A"] == 3
+    assert s.food["A"] == 0
