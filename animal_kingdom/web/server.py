@@ -95,6 +95,7 @@ def save_game(match: Match, record: dict) -> None:
         log.exception("could not save the game log for match %s", match.id)
 
 
+SEND_TIMEOUT = 5.0          # seconds a socket may take to accept one message before it is dropped (Hub._send)
 BOT_THINK_MAX = 20          # seconds a bot may think before the Easy bot's move is played for it (the Expert deepens for 8 s, then finishes the root in hand)
 
 
@@ -146,12 +147,23 @@ class Hub:
 
     async def broadcast(self, match: Match) -> None:
         self.save(match)
-        self.note(match)
-        for ws, seat in list(self.sockets.get(match.id, ())):
-            try:
-                await ws.send_json({"t": "view", "view": match.view(seat)})
-            except (ConnectionResetError, RuntimeError):
-                self.sockets[match.id].discard((ws, seat))
+        try:
+            self.note(match)
+        except Exception:
+            log.exception("could not note match %s", match.id)
+        conns = list(self.sockets.get(match.id, ()))
+        views = [{"t": "view", "view": match.view(seat)} for _, seat in conns]   # all from the same position
+        await asyncio.gather(*(self._send(match.id, ws, seat, v) for (ws, seat), v in zip(conns, views)))
+
+    async def _send(self, mid: str, ws, seat: str, msg: dict) -> None:
+        """One view to one socket, within SEND_TIMEOUT: a screen that stopped reading (a phone gone off the network without
+        closing, a stalled tab) is dropped, so it never holds up the match, its opponent's socket or the bot."""
+        try:
+            await asyncio.wait_for(ws.send_json(msg), SEND_TIMEOUT)
+        except Exception as e:
+            log.info("dropping a socket of match %s seat %s: %r", mid, seat, e)
+            self.sockets.get(mid, set()).discard((ws, seat))
+            asyncio.ensure_future(_close_quietly(ws))
 
     def note(self, match: Match) -> None:
         """Every game's start and end, for each person in it (web/events.py). Every change passes through broadcast,
@@ -259,6 +271,13 @@ class Hub:
                         continue
             failures = 0
             await self.broadcast(match)
+
+
+async def _close_quietly(ws) -> None:
+    try:
+        await asyncio.wait_for(ws.close(), SEND_TIMEOUT)
+    except Exception:
+        pass
 
 
 hub = Hub()
@@ -909,11 +928,13 @@ def friend_label(viewer: str, other: str) -> str:
 
 
 async def _tell(pid: str, msg: dict) -> None:
-    for ws in list(presence.get(pid, ())):
+    async def one(ws):
         try:
-            await ws.send_json(msg)
+            await asyncio.wait_for(ws.send_json(msg), SEND_TIMEOUT)
         except Exception:
-            pass
+            presence.get(pid, set()).discard(ws)
+            asyncio.ensure_future(_close_quietly(ws))
+    await asyncio.gather(*(one(ws) for ws in list(presence.get(pid, ()))))
 
 
 async def _tell_friends_online(pid: str, on: bool) -> None:
@@ -947,11 +968,11 @@ async def presence_socket(req):
         async for _ in ws:
             pass
     finally:
-        presence[p["id"]].discard(ws)
-        if not presence[p["id"]]:
+        presence.get(p["id"], set()).discard(ws)     # _tell may have dropped it already
+        if p["id"] in presence and not presence[p["id"]]:
             del presence[p["id"]]
             friends.seen(p["id"])
-            await _tell_friends_online(p["id"], False)
+            await asyncio.shield(_tell_friends_online(p["id"], False))   # the handler may be closing under a cancel
     return ws
 
 
@@ -1452,8 +1473,8 @@ async def socket(req):
                 # a message the match refuses, or one no client sends (a wrong type anywhere in it): said, and the view again
                 if not isinstance(e, (EngineError, KeyError, ValueError)):
                     log.info("match %s seat %s sent a malformed message: %r", match.id, seat, e)
-                await ws.send_json({"t": "error", "error": str(e)[:300]})
-                await ws.send_json({"t": "view", "view": match.view(seat)})
+                await hub._send(match.id, ws, seat, {"t": "error", "error": str(e)[:300]})    # the screen may have gone meanwhile
+                await hub._send(match.id, ws, seat, {"t": "view", "view": match.view(seat)})
                 continue
             if _changed(match) != before:
                 await hub.push(match)
