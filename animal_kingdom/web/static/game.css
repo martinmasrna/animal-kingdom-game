@@ -479,7 +479,8 @@
 .game .opts.many .hc { width: 140px; height: 205px; } .game .opts.many .hc .card { --w: 140px; }   /* more than six: smaller (nine in one row on PC; four to a row upright) */
 .game.port .reveal { top: 560px; }
 .game.port .pit { scale: .72; }   /* ten to a ridge, 41 stage px apart */
-.game.port .endbox { scale: 1.5; max-width: 440px; text-align: center; }   /* the end of a game and the concede question, read on a phone */
+.game.port .endbox { scale: 1.5; max-width: 440px; text-align: center; }
+.game.port .endbox .btns > * { height: 50px; }   /* 1.5 x 50 on the upright stage: 40 px on a phone (48 came to 39; phone walkthrough finding 22) */   /* the end of a game and the concede question, read on a phone */
 /* Touch (no hover): a tap only picks a card (it rises, the board stays clear); pressing and holding shows it large to read. */
 @media (hover: none) {
   .game .hc:hover { transform: none; } .game .hc:hover .card .ctext { display: none; }
