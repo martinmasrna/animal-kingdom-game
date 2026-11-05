@@ -105,7 +105,9 @@ export const LESSONS = [
   { id: 'roared', when: c => c.roared, ...talk, at: { gem: 'A' },
     text: 'The Squirrel roared and gave you 10 food! Roars are another way to gather food, besides regions.' },
   // lesson 1 ends on food, the win its regions teach: after the Roar every move is guided to the best spots for a region
-  { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
+  // said once a card is picked, so the circles it names are on the board (it showed before any were); Next, or a circle, moves on
+  { id: 'free', when: c => c.mine && (c.roared || c.round >= 6) && !!c.sel && c.feed.length > 0, next: true, untilAct: true,
+    only: c => ({ crs: c.feed }), at: { rings: true },
     text: 'Now gather 100 food to win. The circles show where your animals can take more regions.' },
   TARGET,
   { id: 'feed', again: true, when: c => c.mine && (c.roared || c.round >= 6) && c.feed.length > 0,
@@ -138,7 +140,7 @@ export const LESSONS_2 = [
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'Your opponent has a Pigeon too! It flew over and covered your Squirrel. But your Squirrel isn\'t gone, it\'s just waiting underneath the Pigeon.' },
   explain('mambainfo', 'black_mamba', c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
-    'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Pigeon.'),
+    c => `The Black Mamba's Roar removes an enemy next to it with strength ${c.upTo('black_mamba')} or less, like that Pigeon.`),   // the number is the card's
   { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
     only: c => ({ card: 'black_mamba', crs: c.nextToFlier }), at: { rings: true },
     text: c => ({ pick: 'Click the Black Mamba.', place: c.stackRescue ? 'Now click the circle next to the Pigeon. An animal can also go on top of one of your own.' : 'Now click the circle next to the Pigeon.' }) },
@@ -198,6 +200,7 @@ export function context(V, sel, cards) {
     // the rightmost of them (the coach stands beside it, clear of the others)
     rightmost: id => c.empty(id).sort((a, b) => b[0] - a[0])[0],
     name: id => (cards[id] || {}).name || id,
+    upTo: id => (((cards[id] || {}).text || '').match(/strength (\d+) or less/) || [])[1],   // a removal's limit, as its card prints it
     roar: id => /(^|\. )Roar:/.test((cards[id] || {}).text || ''),
     ready: id => G.hand.some(h => h.id === id && h.ready),   // the card glows: its Roar's condition holds now
     placed: id => G.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === id),

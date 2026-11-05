@@ -231,7 +231,7 @@ function route() {
 // side opens its chooser above the piece. Collection and the profile stand beside it for now, until the hub holds more.
 // #/gauntlet is the same screen with the developer's gauntlet as the opponent; #/join/<code> the same with a friend's match.
 const BANDS = ['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Legendary'], OLD_LEVELS = { easy: 'Beginner', normal: 'Advanced', expert: 'Expert' };   // the five bots (web/ladder.py RUNGS): the same five on the ladder and in Practice
-const play = { opp: 'bot', level: 'Advanced', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
+const play = { opp: 'bot', level: 'Beginner', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };   // a newcomer starts on the weakest bot (it was Advanced after the tutorial; phone walkthrough finding 16)
 // The decks an Easy bot plays when nobody chose one (Random, and the tutorial's first match): the simpler half of the ones
 // Easy is weakest with (Martin, 2026-10-17: Easy with Cats or Fish beats the greedy bot 4 games in 10, with these 1 to 3;
 // Egg and Aristocrats are weaker still but the hardest to read). The ranked queue picks by rating instead.
@@ -1213,7 +1213,7 @@ function drawGame() {
   keepAwake(playing && !RP.views.length);
   lastDecision = d;
   drawIntro();
-  $('scr').classList.toggle('rp', !!RP.views.length);   // a replay: upright its controls take the deck's corner
+  if ($('scr').classList.contains('rp') !== !!RP.views.length) { $('scr').classList.toggle('rp', !!RP.views.length); fitStage(false); }   // a replay: upright its controls take a row under the stage
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
   { const n = [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length, w = VIEW.port ? 88 : 52;
@@ -1358,7 +1358,7 @@ function drawGame() {
 
 // Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
 // deck's and End turn's centre tops.
-const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 216 : 300, handW: RP.views.length ? 400 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row
+const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 360 : 300, handW: RP.views.length ? 680 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row; a replay's hand takes the whole row, its controls under the stage
   : { hand: 590, handC: STAGE.w / 2, deck: [1299, 606], end: [1439, 664], handW: 940 };
 
 // The history strip and both decklists, shared by both game screens.
@@ -1426,13 +1426,19 @@ function fitStage(redraw = true) {
   // a window taller than wide gets the upright layout (board.js setView); turning the phone redraws the screen
   const port = innerHeight > innerWidth, flip = port !== VIEW.port;
   setView(port); document.getElementById('scr').classList.toggle('port', port);
-  const k = Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
+  // upright, a replay keeps a row under the stage for its controls (game.css .port .rbar): the stage fits the window less it,
+  // with 60 stage px of savanna kept above and below (about what a phone shows in play), so the hand, which sits at the edge,
+  // stays clear of your den: the board comes out a little smaller
+  const rp = port && RP.views.length ? 56 : 0, H = innerHeight - rp;
+  const k = Math.min(innerWidth / STAGE.w, H / (STAGE.h + (rp ? 120 : 0))), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
   st.style.transform = t; document.getElementById('world').style.transform = t;
+  st.style.top = document.getElementById('world').style.top = rp ? `calc(50% - ${rp / 2}px)` : '';
+  st.style.setProperty('--rp', `${rp / k}px`);
   const plate = document.querySelector('#world img'), src = `/static/kit2/plate_${port ? 'port' : 'wide'}.webp`;   // upright, its own painting
   if (!plate.src.endsWith(src)) plate.src = src;
   // the savanna around the stage, in stage px: the pieces at the screen's edges (hands, corners, deck, End turn) sit at the
   // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating
-  st.style.setProperty('--above', `${Math.max(0, (innerHeight / k - STAGE.h) / 2)}px`);
+  st.style.setProperty('--above', `${Math.max(0, (H / k - STAGE.h) / 2)}px`);
   st.style.setProperty('--side', `${Math.max(0, (innerWidth / k - STAGE.w) / 2)}px`);
   st.style.setProperty('--k', k);   // the stage's scale: a phone held sideways shows it at half size
   if (flip && redraw && V && V.game) drawGame();
@@ -1619,7 +1625,9 @@ function drawEnd() {
   drawEnd.sounded = key;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
   const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
-  const howLine = ['hq_capture', 'food'].includes(G.result.reason) && w !== null ? '' : `<div class="how">${how}.</div>`;   // a den taken, a full den: the board showed it
+  // a den taken: the board showed it (Martin, 2026-10-17); a full den says who reached the food, as the lessons' Victory does
+  // (phone walkthrough finding 20: a Defeat on food said nothing)
+  const howLine = G.result.reason === 'hq_capture' && w !== null ? '' : `<div class="how">${how}.</div>`;
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
   if (RP.views.length) {

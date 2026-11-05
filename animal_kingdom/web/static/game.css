@@ -196,6 +196,7 @@
 .game .dcount { width: 84px; height: 84px; margin: -42px 0 0 -42px; display: grid; place-items: center; background: url(/static/kit2/gem_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.5)); }
 .game .dcount.B { background-image: url(/static/kit2/gem_b.webp); }
 .game .gemnum { display: flex; height: 34px; } .game .gemnum img { height: 100%; aspect-ratio: 54 / 72; object-fit: contain; display: block; margin: 0 -1px; }   /* every painted digit in one cell (the widest's): a count holds still as it climbs */
+.game .dcount .gemnum:has(img:nth-child(3)) { height: 26px; }   /* three digits (past 99 at a food win) stay inside the gem (phone walkthrough finding 23) */
 /* a piece landing: it drops from a little above and larger, its shadow growing and tightening, with a small settle.
    The painted piece moves; nothing new is drawn. A covered piece sinks into the buried disc behind. */
 .game .cr.unit.land { z-index: 5; animation: land .36s cubic-bezier(.3,.7,.4,1.15) both; }
@@ -474,7 +475,8 @@
 .game .opts.many .hc { width: 140px; height: 205px; } .game .opts.many .hc .card { --w: 140px; }   /* more than six: smaller (nine in one row on PC; four to a row upright) */
 .game.port .reveal { top: 560px; }
 .game.port .pit { scale: .72; }   /* ten to a ridge, 41 stage px apart */
-.game.port .endbox { scale: 1.5; max-width: 440px; text-align: center; }   /* the end of a game and the concede question, read on a phone */
+.game.port .endbox { scale: 1.5; max-width: 440px; text-align: center; }
+.game.port .endbox .btns > * { height: 50px; }   /* 1.5 x 50 on the upright stage: 40 px on a phone (48 came to 39; phone walkthrough finding 22) */   /* the end of a game and the concede question, read on a phone */
 /* Touch (no hover): a tap only picks a card (it rises, the board stays clear); pressing and holding shows it large to read. */
 @media (hover: none) {
   .game .hc:hover { transform: none; } .game .hc:hover .card .ctext { display: none; }
@@ -492,10 +494,18 @@
 .game:not(.port).rp .rbar { right: auto; left: 1222px; top: 640px; width: 274px; flex-wrap: wrap; justify-content: space-between; row-gap: 12px; translate: var(--side, 0px) var(--above, 0px); }
 .game:not(.port).rp .rbar .track { order: 5; width: 100%; height: 32px; } .game:not(.port).rp .rbar .track::after { top: 12px; } .game:not(.port).rp .rbar .track b { top: 9px; }
 .game:not(.port).rp .rbar .out { margin-left: 0; padding: 0 12px; }
-.game.port .rbar { top: 1250px; right: 12px; width: 288px; flex-wrap: wrap; justify-content: flex-end; gap: 8px; translate: var(--side, 0px) var(--above, 0px); }
-.game.port .rbar .slab { width: 64px; height: 64px; } .game.port .rbar .slab svg { width: 30px; height: 30px; }
-.game.port .rbar .track { order: 5; width: 190px; height: 64px; } .game.port .rbar .track::after { top: 28px; } .game.port .rbar .track b { top: 25px; }
-.game.port .rbar .out { order: 6; width: auto; height: 64px; font-size: 22px; margin-left: 0; }
+/* Upright, a replay's controls are one row under the whole stage, the window's full width (Martin, 2026-11-05: the board
+   shorter, the controls full width). fitStage fits the stage into the window less this row (--rp, stage px), so on a tall
+   phone the row takes the savanna's margin and on a short one the stage shrinks to make room. Sizes are screen px over
+   --k: every control 40 px or more on any phone. */
+.game.port .rbar { left: calc(-1 * var(--side, 0px)); right: auto; top: calc(1440px + var(--above, 0px)); width: calc(720px + 2 * var(--side, 0px)); height: var(--rp, 0px);
+  box-sizing: border-box; padding: 0 calc(8px / var(--k, 1)); flex-wrap: nowrap; justify-content: center; gap: calc(4px / var(--k, 1)); translate: none; }
+.game.port .rbar > * { order: 0; flex: none; }
+.game.port .rbar .slab { width: calc(40px / var(--k, 1)); height: calc(40px / var(--k, 1)); } .game.port .rbar .slab svg { width: calc(18px / var(--k, 1)); height: calc(18px / var(--k, 1)); }
+.game.port .rbar .track { flex: 1 1 0; width: auto; min-width: 0; height: calc(40px / var(--k, 1)); }
+.game.port .rbar .track::after { top: calc(50% - 4px); } .game.port .rbar .track b { top: calc(50% - 7px); }
+.game.port .rbar .take, .game.port .rbar .out { width: auto; padding: 0 calc(7px / var(--k, 1)); margin-left: 0; font-size: calc(13px / var(--k, 1)); line-height: 1.05; }
+.game.port .rbar .take { max-width: calc(64px / var(--k, 1)); white-space: normal; text-align: center; }   /* "Play from here" on two lines */
 .game.port .clock { font-size: 24px; } .game.port .tbtn.B .clock { font-size: 22px; }   /* a timed match's clock, read on a phone */
 .game.port .prompt .skip, .game.port .prompt:not(.mull) .line .skip { height: 80px; padding: 0 28px; font-size: 30px; }   /* Skip and Keep hand, thumb-sized */
 .game.port .tbtn:not(.A):not(.B) { display: none; }   /* no game running (See the board): the empty stone leaves the corner to Back to results */

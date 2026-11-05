@@ -89,6 +89,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .home .top .backbtn.open { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
 .home .chooser.opps { left: calc(50% - 5px); width: 320px; }   /* its controls on the opponent slot's edges */
 .home .seg { display: flex; gap: 6px; } .home .seg .slab { flex: 1; min-width: 0; height: 40px; padding: 0; }
+@media (max-width: 480px) { .home .seg { gap: 4px; } .home .seg .slab { flex: 1 1 auto; padding: 0 2px; font-size: 15px; } }   /* a phone: each bot's name fits its button ("Intermediate" overran its neighbour) */
 .home .seg .slab.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); color: #fff; font-weight: 600; filter: brightness(1.12); }
 .home .chooser .dd .sel { width: 100%; text-align: left; }
 .home .frow .field { flex: 1; min-width: 0; } .home .frow .field:not(:placeholder-shown) { text-transform: uppercase; }
@@ -350,7 +351,8 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .srow { display: grid; grid-template-columns: 90px 1fr 56px; align-items: center; gap: 14px; height: 56px; padding: 0 18px; border-radius: 10px;
   background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #f0e8da; font: 600 18px 'Fira Sans Condensed', sans-serif; }
 .srow b { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
-.srow input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 4px; background: rgba(0,0,0,.55); box-shadow: inset 0 1px 2px rgba(0,0,0,.8); cursor: pointer; }
+/* the groove is drawn 8px tall, the slider itself is 40px, so a finger can take it anywhere along the row (phone walkthrough finding 24) */
+.srow input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 40px; margin: 0; background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)) center / 100% 8px no-repeat; cursor: pointer; }
 .srow input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; border: 0;
   background: #6a645c url(/static/kit2/coll_slab.webp) center / 120px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.3), 0 2px 4px rgba(0,0,0,.6); }
 .srow input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; border: 0; background: #6a645c url(/static/kit2/coll_slab.webp) center / 120px auto; box-shadow: 0 2px 4px rgba(0,0,0,.6); }

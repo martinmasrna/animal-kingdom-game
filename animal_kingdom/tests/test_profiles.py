@@ -144,7 +144,7 @@ def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
     assert m.phase == "match_over"
     (h,) = db.history(p["id"])
     assert (h["kind"], h["my_deck"], h["opp"], h["opp_deck"], h["won"], h["lost"]) == \
-        ("bot", "Cats", "Bot (Easy)", "Giants", 2, 0)
+        ("bot", "Cats", "Bot (Beginner)", "Giants", 2, 0)   # the band a player picks, never the engine's pilot ("Easy")
 
 
 def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path):
