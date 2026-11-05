@@ -37,6 +37,7 @@ from . import league as league_mod
 from . import meta as meta_mod
 from . import oauth
 from .profiles import ProfileError, Profiles
+from . import local
 from . import replay
 from . import tutorial
 from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, STARTER_COVERS, Match, Seat, card_pool, map_info
@@ -1350,6 +1351,62 @@ async def create_match(req):
     return web.json_response({"id": mid, "token": token, "seat": "A"})
 
 
+def _local_seats(req, body: dict) -> tuple[Seat, Seat]:
+    """A practice match's two seats, from the body home's Play sends (deck, bot: {level, deck}), checked as create_match
+    checks a bot match."""
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    bot = body.get("bot") or {}
+    level, bdeck = bot.get("level"), bot.get("deck")
+    if level in ranking.BANDS and bdeck in PREMADE_DECKS:
+        level = pilot_for(level, bdeck)
+    if level not in BOT_LEVELS or bdeck not in {*PREMADE_DECKS, *TEST_BOT_DECKS}:
+        raise web.HTTPBadRequest(text="bad bot")
+    player = profile_of(req)
+    host = Seat(secrets.token_urlsafe(12), display(player) if player else body.get("name") or "You", deck=deck,
+                profile=player and player["id"], ready=True)
+    return host, Seat(secrets.token_urlsafe(12), bot_seat_name(level, bdeck), bot=level, deck=bdeck, ready=True)
+
+
+async def local_engine(_req):
+    """What the browser's engine is built from (web/local.py): the cards, maps and Config, and the engine's source hash."""
+    return web.Response(text=local.engine_doc(), content_type="application/json")
+
+
+async def local_setup(req):
+    """A practice match to play in the browser: both decklists, the seats as the view shows them, the bot's spec."""
+    host, bot = _local_seats(req, await req.json())
+    return web.json_response({"lists": {"A": load_premade_deck(host.deck), "B": load_premade_deck(bot.deck)},
+                              "seats": local.seats_view(host, bot), "level": bot.bot, **local.bot_spec(bot.bot),
+                              "pause": BOT_PAUSE,   # the bot's beat, as the server keeps it (a test server's is 0)
+                              "source_hash": local.source_hash()})
+
+
+_local_done: dict[str, str] = {}     # a finished local match's key -> its match id: a resent log is saved once
+
+
+async def local_match(req):
+    """A practice match the browser played, finished: replayed and saved as any match (web/local.py)."""
+    body = await req.json()
+    key = str(body.get("key") or "")[:40]
+    if key and key in _local_done:
+        return web.json_response({"id": _local_done[key]})
+    host, bot = _local_seats(req, body)
+    mid = hub.new_id()
+    try:
+        local.replay(mid, host, bot, body, save_game, record_match)
+    except (EngineError, KeyError, ValueError, TypeError) as e:
+        log.warning("local match refused: %s", e)
+        raise web.HTTPBadRequest(text=f"the match does not replay: {e}")
+    if key:
+        _local_done[key] = mid
+        while len(_local_done) > 2000:
+            _local_done.pop(next(iter(_local_done)))
+    return web.json_response({"id": mid})
+
+
 async def join_match(req):
     match = hub.matches.get(req.match_info["id"])
     if match is None:
@@ -1482,6 +1539,9 @@ def make_app() -> web.Application:
         web.post("/api/challenge/{id}/answer", challenge_answer),
         web.get("/ws/presence", presence_socket),
         web.post("/api/match", create_match),
+        web.get("/api/local/engine", local_engine),
+        web.post("/api/local/setup", local_setup),
+        web.post("/api/local/match", local_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),
         web.static("/static", STATIC),

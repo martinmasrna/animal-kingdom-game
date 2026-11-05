@@ -11,6 +11,8 @@ cd engine_rs && ../.venv/bin/maturin develop --release
 
 That installs the module `ak_engine` into the venv. `cargo build --release --no-default-features --bin bench` builds the standalone timing binary without the Python glue (it prints ms per action and state clones per action).
 
+`engine_rs/wasm.sh` builds the browser module (feature `wasm`, no Python glue, for wasm32-unknown-unknown) into `animal_kingdom/web/static/wasm/`, which a practice match with `?local=1` plays on; it is committed, so rerun it after any change here (`knowledge/wasm/STATUS.md`).
+
 `engine_rs/pgo.sh` builds the venv module profile-guided (about 9% off the Expert's move): an instrumented timing binary plays Expert games across six deck pairs, the profiles are merged with Homebrew llvm's `llvm-profdata`, and `maturin develop --release` builds with them. The profile stays local under `engine_rs/target/pgo/`; the Fly image builds without it. Rerun the oracles after it like after any build.
 
 ## Speed, and where it goes
@@ -36,4 +38,4 @@ The two engines are meant to agree to the bit, not to a tolerance: a tie deep in
 
 ## Layout
 
-`state.rs` (the position, its cache, serialisation), `rules.rs`, `effects.rs` (the effect stack and its operations), `cards.rs` (every card's hooks, the THEN table), `statics.rs`, `strength.rs`, `data.rs` (cards, maps, config), `rng.rs` (CPython's `random.Random`, bit for bit), `value.rs` (the step data), `bots/` (features and evaluation, greedy, the determinized search for turn and referee, worlds), `py.rs` (the Python module), `bin/bench.rs`.
+`state.rs` (the position, its cache, serialisation), `rules.rs`, `effects.rs` (the effect stack and its operations), `cards.rs` (every card's hooks, the THEN table), `statics.rs`, `strength.rs`, `data.rs` (cards, maps, config), `rng.rs` (CPython's `random.Random`, bit for bit), `value.rs` (the step data), `bots/` (features and evaluation, greedy, the determinized search for turn and referee, worlds), `py.rs` (the Python module), `wasm.rs` (the browser module), `view.rs` (a seat's game view, as `web/match.py` builds it, for the browser), `clock.rs` (the bots' clock, the browser's on wasm32), `bin/bench.rs`.
