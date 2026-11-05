@@ -146,3 +146,19 @@ def test_the_server_remembers_a_solved_puzzle_and_keeps_nothing_else(puzzle_dir,
             assert current == {}                                         # nor a match to rejoin
     asyncio.run(run())
     assert saved == []                                                   # nor a game log
+
+
+def test_on_the_main_line_neither_verdict_nor_defender_searches(monkeypatch):
+    # The shipped line is proven by solve.py check; following it costs no search (a hard puzzle's proof takes seconds).
+    pid = next(i for i in P.all_ids() if P.load(i)["turns"] == 2)
+    line = P.load(pid)["main_line"]
+    m = _puzzle(pid)
+    monkeypatch.setattr(P.Solver, "wins", lambda *a, **k: (_ for _ in ()).throw(AssertionError("searched")))
+    monkeypatch.setattr(P.Solver, "defence", lambda *a, **k: (_ for _ in ()).throw(AssertionError("searched")))
+    for d in line:
+        if d["by"] == "A":
+            m.act("A", {k: v for k, v in d.items() if k != "by"})
+        else:
+            assert m.to_act() == "B"
+            m.act("B", m.bot_move())
+    assert m.view("A")["puzzle"]["status"] == "solved"

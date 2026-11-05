@@ -107,10 +107,14 @@ class PuzzleBot(Bot):
     """A puzzle's defender: of every whole-turn reply, one that escapes if any does, else the one that leaves the solver the
     fewest winning moves. A puzzle can never be solved by the defender's mistake."""
 
-    def __init__(self, solver: "puzzles.Solver"):
+    def __init__(self, solver: "puzzles.Solver", on_line=None):
         self.solver = solver
+        self.on_line = on_line   # the puzzle's next main-line action while the game follows it (no search needed)
 
     def choose(self, view, legal, state=None):
+        nxt = self.on_line() if self.on_line else None
+        if nxt is not None:
+            return action_from_dict(nxt)
         line = self.solver.defence(state)
         return line[0] if line else (legal[0] if legal else PassAction())
 
@@ -368,12 +372,34 @@ class Match:
         self.started_at = time.time()
         self.state = puzzles.build(pz)
         self.solver = puzzles.Solver(pz["turns"])
-        self.bots = {"B": PuzzleBot(self.solver)}
+        self.bots = {"B": PuzzleBot(self.solver, self._on_line)}
         self.history, self.events, self.seq = [], [], 0
         self.results = []
         self.phase = "playing"
         self.clock = None
         self.version += 1
+
+    def _main_line(self) -> list[dict]:
+        if getattr(self, "_line_cache", None) is None or self._line_cache[0] != self.puzzle:
+            self._line_cache = (self.puzzle, puzzles.load(self.puzzle).get("main_line") or [])
+        return self._line_cache[1]
+
+    def _on_line(self, any_seat: bool = False) -> Optional[dict]:
+        """While every action so far is the puzzle's main line (proven by `solve.py check`), its next action, if it is the
+        defender's (any seat's with `any_seat`); else None. Saves the search on the line a solver follows: the proof
+        of a hard puzzle takes seconds."""
+        ml = self._main_line()
+        n = len(self.actions)
+        if n >= len(ml) or [{k: v for k, v in d.items() if k != "by"} for d in ml[:n]] != self.actions:
+            return None
+        nxt = ml[n]
+        if not any_seat and nxt.get("by") != "B":
+            return None
+        return {k: v for k, v in nxt.items() if k != "by"}
+
+    def _line_done(self) -> bool:
+        ml = self._main_line()
+        return len(self.actions) == len(ml) and [{k: v for k, v in d.items() if k != "by"} for d in ml] == self.actions
 
     def _puzzle_verdict(self) -> None:
         """A puzzle in play: fail it as soon as the search proves the den can no longer be forced."""
@@ -381,7 +407,9 @@ class Match:
             return
         if self.solver is None:
             self.solver = puzzles.Solver(puzzles.load(self.puzzle)["turns"])
-            self.bots = {"B": PuzzleBot(self.solver)}
+            self.bots = {"B": PuzzleBot(self.solver, self._on_line)}
+        if self._on_line(any_seat=True) is not None or self._line_done():   # still on the proven main line: no search
+            return
         try:
             alive = self.solver.wins(self.state)
         except puzzles.Unproven:      # never fail a player on a guess
@@ -639,7 +667,7 @@ class Match:
         m.events, m.seq = d.get("events", []), d.get("seq", 0)
         if m.puzzle:
             m.solver = puzzles.Solver(puzzles.load(m.puzzle)["turns"])
-            m.bots = {"B": PuzzleBot(m.solver)}
+            m.bots = {"B": PuzzleBot(m.solver, m._on_line)}
         elif m.state is not None and m.seed is not None:
             m.bots = {s: bot_for(seat.bot, m.seed + i) for i, (s, seat) in enumerate(m.seats.items())
                       if seat.is_bot}

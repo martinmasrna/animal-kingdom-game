@@ -19,7 +19,9 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   `puzzle`). `rematch` retries from the start, at any time. A view carries `puzzle` (title, brief, hint, turns left,
   status). Server: `POST /api/match {"puzzle": id}`, `GET /api/puzzles` (with solved flags); a solved puzzle goes into
   a new `puzzles` table on the profile; no game log, no match history, no rating, no Discord line, no rejoin. Puzzle
-  moves are applied off the event loop (the verdict searches). Tests: `animal_kingdom/tests/test_puzzle_match.py`.
+  moves are applied off the event loop (the verdict searches). While the game follows the puzzle's own main line
+  (proven by `check`), neither the verdict nor the defender searches: `back_alley`'s proof takes about 18 s, which timed
+  out the click-through test on the Mac and would have kept a player waiting. Tests: `animal_kingdom/tests/test_puzzle_match.py`.
 
 - **Phase 3, client.** `#/puzzles` lists the puzzles (title, theme, turns, Solved) on the settings screen's layout;
   `#/puzzle/<id>` starts one and opens the ordinary game screen (`#/m/<match>`). There the defender's hand is face up,
