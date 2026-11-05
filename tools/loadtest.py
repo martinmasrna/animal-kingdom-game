@@ -102,6 +102,13 @@ class Stats:
         self.errors.append(what)
 
 
+def position(v: dict) -> str:
+    """What an action changes in a view (a clock's bump changes none of it): the ack of an action is a view where it moved."""
+    g = v.get("game") or {}
+    return json.dumps([v.get("phase"), g.get("round"), g.get("toAct"), g.get("decision"), g.get("actionsLeft"), g.get("pending"),
+                       [u["iid"] for u in g.get("hand", [])], g.get("board"), g.get("food"), len(g.get("history") or [])], sort_keys=True)
+
+
 class Player:
     def __init__(self, i: int, url: str, http: aiohttp.ClientSession, stats: Stats, args, pool: dict):
         self.i, self.url, self.http, self.stats, self.args, self.pool = i, url, http, stats, args, pool
@@ -188,7 +195,7 @@ class Player:
             self.stats.err(f"ws connect -> {type(e).__name__}")
             return
         sent_at = None              # our action in flight: when it was sent (one at a time, as a person clicks)
-        sent_seq = sent_version = 0  # the last event we had seen when we sent it: its view brings newer ones
+        sent_seq, sent_pos = 0, None  # the last event we had seen when we sent it: its view brings newer ones
         seen_seq = 0
         their_since = None          # when the decision last left us (a bot's turn began)
         bot_actions = 0             # the bot's top-level moves and choices seen since then
@@ -221,7 +228,7 @@ class Player:
                 seq = max((e.get("seq", 0) for e in g["events"]), default=0) if g and g.get("events") else 0
                 if g is not None and seq < seen_seq:     # a new game (a rematch) numbers its events afresh
                     seen_seq = sent_seq = 0
-                if sent_at is not None and (seq > sent_seq or v["version"] > sent_version):   # the view our action brought
+                if sent_at is not None and (seq > sent_seq or position(v) != sent_pos):   # the view our action brought
                     self.stats.move.append(now - sent_at)
                     sent_at = None
                 if seq > seen_seq:
@@ -251,7 +258,7 @@ class Player:
                 action = self.pick(g)
                 if action is None:
                     continue
-                sent_seq, sent_version = seen_seq, v["version"]
+                sent_seq, sent_pos = seen_seq, position(v)
                 sent_at = time.time()
                 self.stats.moves += 1
                 await ws.send_json({"t": "act", "action": action})
