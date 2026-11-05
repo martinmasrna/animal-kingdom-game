@@ -2973,9 +2973,17 @@
       "at": 1793452272
     },
     "animal": {
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-11-05: \"Borvald is the best of these\"; draft to live with, may iterate later",
       "by": "claude",
-      "at": 1792191061
+      "at": 1793883670,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[SPERM WHALE]",
+          "species": "Sperm Whale"
+        }
+      }
     },
     "strength": {
       "review": {
