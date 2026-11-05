@@ -498,10 +498,12 @@
 .game:not(.port).rp .rbar { right: auto; left: 1222px; top: 640px; width: 274px; flex-wrap: wrap; justify-content: space-between; row-gap: 12px; translate: var(--side, 0px) var(--above, 0px); }
 .game:not(.port).rp .rbar .track { order: 5; width: 100%; height: 32px; } .game:not(.port).rp .rbar .track::after { top: 12px; } .game:not(.port).rp .rbar .track b { top: 9px; }
 .game:not(.port).rp .rbar .out { margin-left: 0; padding: 0 12px; }
-.game.port .rbar { top: 1250px; right: 12px; width: 288px; flex-wrap: wrap; justify-content: flex-end; gap: 8px; translate: var(--side, 0px) var(--above, 0px); }
-.game.port .rbar .slab { width: 64px; height: 64px; } .game.port .rbar .slab svg { width: 30px; height: 30px; }
-.game.port .rbar .track { order: 5; width: 190px; height: 64px; } .game.port .rbar .track::after { top: 28px; } .game.port .rbar .track b { top: 25px; }
-.game.port .rbar .out { order: 6; width: auto; height: 64px; font-size: 22px; margin-left: 0; }
+/* upright, two rows of 74 (40 px on a 390-wide phone): the steps and the eye, then Play from here, the track and Leave (a third
+   row for Leave ran off the bottom; phone walkthrough finding 13) */
+.game.port .rbar { top: 1250px; right: 12px; width: 308px; flex-wrap: wrap; justify-content: flex-end; gap: 4px; translate: var(--side, 0px) var(--above, 0px); }
+.game.port .rbar .slab { width: 74px; height: 74px; } .game.port .rbar .slab svg { width: 30px; height: 30px; }
+.game.port .rbar .track { order: 5; flex: 1; width: auto; height: 74px; } .game.port .rbar .track::after { top: 33px; } .game.port .rbar .track b { top: 30px; }
+.game.port .rbar .out { order: 6; width: auto; height: 74px; font-size: 22px; margin-left: 0; }
 .game.port .clock { font-size: 24px; } .game.port .tbtn.B .clock { font-size: 22px; }   /* a timed match's clock, read on a phone */
 .game.port .prompt .skip, .game.port .prompt:not(.mull) .line .skip { height: 80px; padding: 0 28px; font-size: 30px; }   /* Skip and Keep hand, thumb-sized */
 .game.port .tbtn:not(.A):not(.B) { display: none; }   /* no game running (See the board): the empty stone leaves the corner to Back to results */
