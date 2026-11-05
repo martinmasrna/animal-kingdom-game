@@ -160,3 +160,46 @@ pub fn card_strength(st: &State, card: CardId, owner: Player) -> i32 {
 pub fn placement_strength(st: &State, inst: &Unit) -> i32 {
     (card_strength(st, inst.card, inst.owner) + inst.strength_counter as i32).max(0)
 }
+
+/// Where a unit's strength comes from, for the player to see (engine/strength.py `strength_breakdown`, the same JSON):
+/// printed, base, base_bonus, growth, changes [[source, n]], auras [[source, n]] (its own first, then allies' sorted), total.
+pub fn breakdown(st: &State, unit: &Unit) -> serde_json::Value {
+    use serde_json::{json, Value as J};
+    let card = st.card(unit.card);
+    let base = if st.is_inked(unit.iid) { card.base.unwrap_or(0) } else { base_or_dynamic(st, card) };
+    let name = |c: Option<CardId>| c.map(|c| J::String(st.cname(c).to_string())).unwrap_or(J::Null);
+    let mut base_bonus = 0;
+    let mut changes: Vec<J> = Vec::new();
+    let mut given = 0;
+    for e in st.strength_sources.iter().filter(|e| e.iid == unit.iid) {
+        if e.base {
+            base_bonus += e.n as i32;
+        } else {
+            given += e.n as i32;
+            changes.push(json!([name(e.src), e.n]));
+        }
+    }
+    let rest = unit.strength_counter as i32 - base_bonus - given;
+    if rest != 0 {
+        changes.push(json!([J::Null, rest]));
+    }
+    let their_turn = st.current != unit.owner;
+    let mut allies: Vec<(&'static str, i32)> = Vec::new();
+    for (so, si, kind) in aura_sources(st) {
+        if let Some(b) = aura_applies(st, kind, unit.owner, so, si, Some(unit.iid), card, their_turn) {
+            let src = st.find_instance(si).map(|u| u.card).unwrap_or(unit.card);
+            allies.push((st.cname(src), b));
+        }
+    }
+    allies.sort();
+    let own = anthem_bonus(st, card, unit.owner, Some(unit.iid), None) - allies.iter().map(|(_, b)| b).sum::<i32>();
+    let mut auras: Vec<J> = Vec::new();
+    if own != 0 {
+        auras.push(json!([st.cname(unit.card), own]));
+    }
+    auras.extend(allies.into_iter().map(|(c, b)| json!([c, b])));
+    json!({
+        "printed": card.base, "base": base, "base_bonus": base_bonus, "growth": st.growth(unit.owner, card.idx),
+        "changes": changes, "auras": auras, "total": raw_strength(st, unit, None),
+    })
+}

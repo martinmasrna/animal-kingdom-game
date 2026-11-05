@@ -53,6 +53,9 @@ def other_player(player: str) -> str:
     return "B" if player == "A" else "A"
 
 
+JELLY_SOURCE = "bee_legend_2"   # the legendary Bee whose royal jelly a deck card comes out with
+
+
 class UnitInstance:
     """One card instance: a card id + owner + unique instance id. Lives in a hand and then
     on the board - the *same* instance moves hand->board on placement, carrying its counter.
@@ -312,6 +315,7 @@ class GameState:
         hungry_eaten: Optional[dict[str, int]] = None,
         last_roar: Optional[dict[str, str]] = None,
         jelly: Optional[dict[str, dict[str, Any]]] = None,
+        strength_sources: Optional[dict[int, tuple]] = None,
     ):
         self.game_map = game_map
         self.cards = cards
@@ -338,6 +342,11 @@ class GameState:
         # strength 5 at the Roar]. Each comes out of the deck (drawn, played or placed from it) with that counter, so growth
         # since the Roar (the Python's) stays on it; copies shuffled in later are untouched (deck_instance).
         self.jelly = jelly if jelly is not None else {}
+        # Where each instance's stored strength came from (Martin, 2026-11-05: a card shows its buffs, as in Hearthstone):
+        # iid -> ((source card id or None, amount, base), ...), oldest first, summing to its strength_counter. `base` marks
+        # the card's own growth that raises its base (the Roach King's falls); the rest are what other cards gave it or
+        # took from it. Entries of an iid gone from the board and the hands are dead weight, never saved (to_dict).
+        self.strength_sources: dict[int, tuple] = strength_sources if strength_sources is not None else {}
         self.food = food
         self.current = current
         self.first_player = first_player
@@ -462,7 +471,31 @@ class GameState:
         counter = self.jelly_take(player, card_id)
         if counter is not None:
             inst.strength_counter = counter
+            self.note_strength(inst.iid, counter, JELLY_SOURCE)
         return inst
+
+    # --- where stored strength came from ---
+    def note_strength(self, iid: int, n: int, source: Optional[str], base: bool = False) -> None:
+        """Record that `n` of instance `iid`'s stored strength came from `source` (beside every counter change)."""
+        if n:
+            self.strength_sources[iid] = self.strength_sources.get(iid, ()) + ((source, n, base),)
+
+    def copy_strength_sources(self, from_iid: int, to_iid: int) -> None:
+        """`to_iid` now carries `from_iid`'s stored strength (a bounce, a copy): its sources replace whatever it had."""
+        entries = self.strength_sources.get(from_iid)
+        if entries:
+            self.strength_sources[to_iid] = entries
+        else:
+            self.strength_sources.pop(to_iid, None)
+
+    def base_bonus(self, iid: int) -> int:
+        """The part of `iid`'s stored strength that is its own growth raising its base (the Roach King's falls)."""
+        return sum(n for _, n, base in self.strength_sources.get(iid, ()) if base)
+
+    def _live_strength_sources(self) -> dict:
+        live = {u.iid for stack in self.board.values() for u in stack} | {u.iid for h in self.hands.values() for u in h}
+        return {str(iid): [list(e) for e in entries] for iid, entries in sorted(self.strength_sources.items())
+                if iid in live and entries}
 
     def add_to_hand(self, player: str, card_id: str, *, strength_counter: int = 0) -> "UnitInstance":
         """Create a fresh hand instance of `card_id` for `player` (test setup, Opossum return)."""
@@ -570,6 +603,7 @@ class GameState:
         new.hungry_eaten = dict(self.hungry_eaten)
         new.last_roar = dict(self.last_roar)
         new.jelly = {p: dict(j) for p, j in self.jelly.items()}
+        new.strength_sources = dict(self.strength_sources)   # values are tuples: shared safely
         new.result = self.result  # Result is frozen/immutable - safe to share
         return new
 
@@ -637,6 +671,7 @@ class GameState:
             "hungry_eaten": dict(sorted(self.hungry_eaten.items())),
             "last_roar": dict(sorted(self.last_roar.items())),
             "jelly": {p: dict(sorted(j.items())) for p, j in sorted(self.jelly.items())},
+            "strength_sources": self._live_strength_sources(),
         }
 
     @staticmethod
@@ -687,6 +722,8 @@ class GameState:
             hungry_eaten=dict(d.get("hungry_eaten") or {}),
             last_roar=dict(d.get("last_roar") or {}),
             jelly={p: dict(j) for p, j in (d.get("jelly") or {}).items()},
+            strength_sources={int(i): tuple((e[0], int(e[1]), bool(e[2])) for e in entries)
+                              for i, entries in (d.get("strength_sources") or {}).items()},
         )
 
 

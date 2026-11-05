@@ -103,6 +103,15 @@ impl GameState {
         self.st.to_json().to_string()
     }
 
+    /// Where the strength of the unit `iid` comes from, as JSON (strength::breakdown); "null" when it isn't in play or in hand.
+    #[wasm_bindgen(js_name = strengthBreakdown)]
+    pub fn strength_breakdown(&self, iid: f64) -> String {
+        match self.st.find_instance(iid as i64) {
+            Some(u) => crate::strength::breakdown(&self.st, u).to_string(),
+            None => "null".to_string(),
+        }
+    }
+
     /// The legal actions as a JSON array of action dicts.
     #[wasm_bindgen(js_name = legalActions)]
     pub fn legal_actions(&self) -> String {

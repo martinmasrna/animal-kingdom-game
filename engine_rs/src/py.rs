@@ -131,6 +131,14 @@ impl PyState {
         self.st.to_json().to_string()
     }
 
+    /// Where the strength of the unit `iid` comes from (strength.breakdown), or None when it isn't on the board or in a hand.
+    fn strength_breakdown(&self, py: Python<'_>, iid: i64) -> PyResult<Py<PyAny>> {
+        match self.st.find_instance(iid) {
+            Some(u) => json_to_py(py, &crate::strength::breakdown(&self.st, u)),
+            None => Ok(py.None()),
+        }
+    }
+
     /// The raw position from `player`'s side (bots.raw_position.extract), card ids as names, for the parity test.
     fn raw_position(&self, py: Python<'_>, player: &str) -> PyResult<Py<PyAny>> {
         let me = player_from(player);
