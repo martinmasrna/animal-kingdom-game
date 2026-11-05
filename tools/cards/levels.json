@@ -7334,6 +7334,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793293892
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793872882
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793872882
     }
   },
   "baby_impala": {
