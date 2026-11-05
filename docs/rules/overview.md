@@ -45,7 +45,7 @@ A region is a closed area surrounded by paths and crossroads. A player controls 
 Player's face-down cards, pile he draws from.
 
 ## 3.7 Remove Pile
-The Remove Pile is one shared, visible area for cards removed from hands, decks, or the map (there is no separate discard pile). Unless an effect states otherwise, cards in the Remove Pile do not return to the game. Sending any card here is a **remove** (fires remove triggers); a *unit leaving the board* is the narrower case that also fires **Deathrattle**. See `keywords.md` for the two trigger tiers.
+The Remove Pile is one shared, visible area for cards removed from hands, decks, or the map (there is no separate discard pile). Unless an effect states otherwise, cards in the Remove Pile do not return to the game. Sending any card here is a **remove** (fires remove triggers); a *unit leaving the board* is the narrower case that also fires **Fall**. See `keywords.md` for the two trigger tiers.
 
 # 4. Game Setup
 
@@ -61,7 +61,7 @@ One player is chosen to go first (by coin flip, until a better method is decided
 Each player draws **4** cards. The first player's one-action first turn (§5) compensates the second player for the turn-order disadvantage of a place-or-draw game.
 
 ## 4.4 Mulligan
-After the opening hands are dealt, **both players at once** (Martin, 2026-10-01: the choice is hidden and each draws only from their own deck, so there is nothing to wait for), each may return as many cards as their opening hand holds (**four**: Hearthstone's rule, Martin 2026-10-01), one at a time. Each returned card is replaced at once by the top card of the deck that is **not a copy of any card returned so far** (the blacklist: send away a Lion and no Lion comes back during the mulligan). A replacement may itself be returned, within that number. When the player stops, or has returned that many, the returned cards are shuffled into the deck. This is a hidden decision: neither player sees what the other returned. Mulligan draws and the shuffle are part of setup and trigger nothing (Omen, Rattlesnake, Eon do not fire).
+After the opening hands are dealt, **both players at once** (Martin, 2026-10-01: the choice is hidden and each draws only from their own deck, so there is nothing to wait for), each may return as many cards as their opening hand holds (**four**: Hearthstone's rule, Martin 2026-10-01), one at a time. Each returned card is replaced at once by the top card of the deck that is **not a copy of any card returned so far** (the blacklist: send away a Lion and no Lion comes back during the mulligan). A replacement may itself be returned, within that number. When the player stops, or has returned that many, the returned cards are shuffled into the deck. This is a hidden decision: neither player sees what the other returned. Mulligan draws and the shuffle are part of setup and trigger nothing (Black Swan, Rattlesnake, Eon do not fire).
 
 ---
 
@@ -151,7 +151,7 @@ Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at
 - **Removal cancels the effect outright.** A unit sent to the Remove Pile is gone, not waiting; its pending effect never resolves.
 - **Returning a unit to a hand resets its timer.** A replayed unit starts a fresh timer; it never resumes a partly-elapsed one.
 
-**Venom is the exception: it belongs to the bitten unit, not to the snake.** Taipan's bite ("at the start of your next turn, remove it") resolves even if the Taipan has been covered or removed, and even if the bitten unit is buried; it is cancelled only if the bitten unit leaves the board first.
+**Venom is the exception: it belongs to the bitten unit, not to the snake.** Cottonmouth's bite ("At the start of your next turn, remove it.") resolves even if the Cottonmouth has been covered or removed, and even if the bitten unit is buried; it is cancelled only if the bitten unit leaves the board first.
 
 **A copy carries the timers.** An animal that becomes a copy of one on the board (Iris) takes its ticking timers too, as far along as they are: its own seen from the copy's side (an enemy Sloth's food comes to the copy's owner, an enemy Electric Eel's cap falls on the copy's opponent), and the ones on it as they are (a poisoned or bitten animal's copy is removed when the original would be) (Martin, 2026-10-27).
 
@@ -184,7 +184,7 @@ The game ends when both players end a turn without taking an action, one right a
 
 # 12. Deck-Building Premise
 
-For 0.0.1 the game ships a set of **premade decks**, each with a distinct identity, game plan, and win condition. (A personalized construction format may follow; the deck rules in §13 are the legality ruleset either way.) The premise delivers:
+For 0.0.1 the game ships a set of **premade decks**, each with a distinct identity, game plan, and win condition. (Players also build their own decks in the collection; the deck rules in §13 are the legality ruleset either way.) The premise delivers:
 
 - distinct archetype identity;
 - matchup differences (a rock-paper-scissors metagame);

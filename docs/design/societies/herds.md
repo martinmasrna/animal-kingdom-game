@@ -1,6 +1,6 @@
 # The herds
 
-The first society page, written 2026-10-24 to the form in `knowledge/world-first-study-2026-10-24.md` (section 6): observed nature written down, so the playstyle the society's cards serve, their effects, the art and the names read from one source. A society is a way of living together that is also one playstyle (the study's section 5): it is not a family tag (a hippo carries Hoofed and lives in no herd), not a habitat (the forest's deer graze the way the plain's gazelles do) and not a deck (a player runs a few of these animals in a defensive or long-game deck beside other animals; the Hoofed precon is one deck built from them to teach). Lines 1 to 3 and 5 are written from nature and would read the same with no cards; section 4 is the bridge, one role per section with the cards that play it generated under it from `cards.json`, and a role with no card is an open slot. Line 5 is the one invented thing and is a proposal for Martin. Nothing here is settled.
+The first society page, written 2026-10-24 to the form in `knowledge/world-first-study-2026-10-24.md` (section 6): observed nature written down, so the playstyle the society's cards serve, their effects, the art and the names read from one source. A society is a way of living together that is also one playstyle (the study's section 5): it is not a family tag (a moose carries Hoofed and lives in no herd), not a habitat (the forest's deer graze the way the plain's gazelles do) and not a deck (a player runs a few of these animals in a defensive or long-game deck beside other animals; the Hoofed precon is one deck built from them to teach). Lines 1 to 3 and 5 are written from nature and would read the same with no cards; section 4 is the bridge, one role per section with the cards that play it generated under it from `cards.json`, and a role with no card is an open slot. Line 5 is the one invented thing and is a proposal for Martin. Nothing here is settled.
 
 ## 1. What they are
 
@@ -154,4 +154,4 @@ Legends that read from this page:
 
 Names taken: none.
 
-Hoofed cards that are not of the herd, for whoever writes the next pages: the moose, the rhino and the hippo, which graze alone and whose cards hold ground by size, not by numbers.
+Hoofed cards that are not of the herd, for whoever writes the next pages: the moose, which grazes alone and whose card holds ground by size, not by numbers.
