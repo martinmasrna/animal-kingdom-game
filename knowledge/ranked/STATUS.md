@@ -13,5 +13,5 @@ Branch `ranked/leagues`. The design is `docs/ranked-leagues.md`; the rules are o
 
 ## Open, Martin's
 
-- Names (recommendation: the food chain set), pictures (a sandbox design job), seasons (none while few play). The doc's "Open calls".
+- Names: open for a session of their own (Martin, 2026-11-05); League 1 to 10 meanwhile. Pictures (a sandbox design job), seasons (none while few play). The doc's "Open calls".
 - Play it on staging: a fresh profile's first ranked games in league 1, and his own profile placed by its rating.

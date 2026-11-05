@@ -96,19 +96,18 @@ Text only, as built on the branch; where a picture belongs is marked.
 
 ## Open calls
 
-1. **Names.** Recommendation: the food chain set (below). Until then the screens say "League 1" to "League 10".
+1. **Names.** Open, for a session of its own (Martin, 2026-11-05: "leave placeholder 1-10 for now"). The screens say "League 1" to "League 10" until then.
 2. **Pictures.** None in this build. Recommendation: each league's animal portrait from its card art, in the deck rim the history rows use (`kit2/rim_n.webp`), on the ladder screen and at the end of a match; the top league its own piece. A design job for the sandbox.
 3. **Season resets.** Recommendation: none while few people play. With opponents by league, a reset is only a fresh climb: everyone down a few leagues, back where they belong in a session or two.
 
 ## Names
 
-Three sets of ten, bottom first.
+Open (Martin, 2026-11-05: "leave placeholder 1-10 for now and I'll come back to this"). What the first look found:
 
-- **The food chain** (this game's own animals, from prey to Apex): Mouse, Rabbit, Squirrel, Fox, Badger, Lynx, Wolf, Leopard, Bear, Lion. The feel: you start as something everything eats and end as the animal nothing eats, and every step is a card you know.
-- **Stones** (the menus' own granite and slabs): Sand, Clay, Slate, Flint, Granite, Basalt, Marble, Jade, Obsidian, Diamond. The feel: quiet and of a piece with the screens, but it says nothing about animals, and only the last two sound like an achievement.
-- **A life** (an animal's life from the egg, and the Eggs are in the game): Egg, Hatchling, Cub, Yearling, Forager, Hunter, Stalker, Alpha, Elder, Apex. The feel: growing up rather than beating others; Apex as the top echoes Apex Predator, which is a strength (the top league as the keyword) and a risk (players may read it as the keyword).
-
-Bronze to Diamond reads instantly and says nothing; it is the fallback if none of these lands.
+- Names from the game's own cards (the food chain set: Mouse, Rabbit, Squirrel, Fox, Badger, Lynx, Wolf, Leopard, Bear, Lion) felt wrong to Martin ("there's a reason LoL leagues aren't named after champions and HS leagues aren't named after cards"). Why such names fail: a rank needs an order the player already knows; a card name as a league ranks the card itself (the bottom league's card reads as the weakest); cards are reworked and renamed, a rank must outlive that; "I'm Mouse" reads as an insult.
+- Gwent names none: ranks 30 down to 1, then Pro Rank. Hearthstone and League of Legends use metals and gems, an order everyone knows; ten of them runs out of instantly known ones after about six.
+- The other set drafted, a life (Egg, Hatchling, Cub, Yearling, Forager, Hunter, Stalker, Alpha, Elder, Apex), has the card-world problem less but Apex clashes with the Apex Predator keyword. Stones (Sand to Diamond) were drafted too.
+- Recommendation from that look: numbered leagues, and one name for the top league, where a name earns its place (Legend, Pro Rank).
 
 ## Migration
 
