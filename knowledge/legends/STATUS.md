@@ -2,7 +2,7 @@
 
 The pass that writes a legend (`docs/cards/legends/<animal>.md`, in the honey badger's form) for every collectible legendary whose name is still in brackets, on the branch `cards/legends`. Legends only: no card text, strength, rarity or name changes; names are Martin's. Whether societies exist is open (`knowledge/world-first-study-2026-10-24.md`), so no legend here states one as fact.
 
-Written in this pass: 19. Still to write: 11. Giraffe, Leopard and Rat had legends before the pass and are untouched.
+Written in this pass: 20. Still to write: 10. Giraffe, Leopard and Rat had legends before the pass and are untouched.
 
 
 | Card | id | Str | Legend | State |
@@ -30,7 +30,7 @@ Written in this pass: 19. Still to write: 11. Giraffe, Leopard and Rat had legen
 | [OXPECKER] | `oxpecker_legend` | 4 | [oxpecker.md](../../docs/cards/legends/oxpecker.md) | written |
 | [PIRANHA] | `piranha_legend` | 2 | [piranha.md](../../docs/cards/legends/piranha.md) | written |
 | [RAT] | `rat_legend` | 4 | [rat.md](../../docs/cards/legends/rat.md) | written before this pass |
-| [RHINOCEROS] | `rhinoceros_legend` | 8 | [rhinoceros.md](../../docs/cards/legends/rhinoceros.md) | to write |
+| [RHINOCEROS] | `rhinoceros_legend` | 8 | [rhinoceros.md](../../docs/cards/legends/rhinoceros.md) | written |
 | [RODENT] | `rodent_legend` | 3 | [rodent.md](../../docs/cards/legends/rodent.md) | to write |
 | [SARDINE] | `sardine_legend` | 1 | [sardine.md](../../docs/cards/legends/sardine.md) | to write |
 | [SLOTH] | `sloth_legend` | 4 | [sloth.md](../../docs/cards/legends/sloth.md) | to write |
