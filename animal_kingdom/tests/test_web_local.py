@@ -78,3 +78,12 @@ def test_the_browser_gets_the_engine_the_server_plays():
     spec = local.bot_spec("expert")
     assert spec["spec"].startswith("referee_learned:") and "eval=" not in spec["spec"] and json.loads(spec["evaluator"])
     assert local.bot_spec("normal") == {"spec": "turn:w.hq_threat_reach=0.5", "evaluator": None}
+
+
+def test_a_browser_games_log_opens_as_a_replay():
+    from animal_kingdom.web import replay
+    body, _ = _browser_game()
+    logs = []
+    local.replay("L7", *_seats(), body, lambda match, rec: logs.append(rec), lambda *a: None)
+    views = replay.game_views(logs[0], "A", {"A": "You", "B": "Easy Bot"})
+    assert len(views) > 3 and views[-1]["game"]["result"] is not None

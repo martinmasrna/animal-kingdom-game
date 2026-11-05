@@ -1,4 +1,4 @@
-// A practice match against a bot played in the browser (?local=1): the engine runs here as WebAssembly (static/wasm,
+// A practice match against a bot played in the browser (the default; ?local=0 plays it on the server): the engine runs here as WebAssembly (static/wasm,
 // engine_rs/wasm.sh), the bot thinks in a Web Worker (worker.js), and the game screen is fed the views the server would
 // have sent: the engine's part from the wasm (engine_rs/src/view.rs, held equal to the server's by
 // tools/engine_rs/wasm_oracle.mjs), the match's part (seats, history, numbered events) built here the way web/match.py
@@ -254,7 +254,7 @@ export class LocalMatch {
     this.ready.then(() => this.worker.postMessage({ t: 'choose', id, state: st.toJson() }));
     const t0 = performance.now();
     while (performance.now() - t0 < BOT_WAIT_MAX * 1000 && this.played < this.seq && !this.closed) await sleep(50);
-    await sleep(1000 * BOT_PAUSE[pending ? 'choice' : opening ? 'open' : 'move'] * (window.AK_BOT_PAUSE ?? 1));
+    await sleep(1000 * (this.setup.pause || BOT_PAUSE)[pending ? 'choice' : opening ? 'open' : 'move'] * (window.AK_BOT_PAUSE ?? 1));
     let action;
     try {
       action = await Promise.race([choice, sleep(BOT_THINK_MAX * 1000).then(() => { throw new Error('timeout'); })]);

@@ -1361,6 +1361,7 @@ async def local_setup(req):
     host, bot = _local_seats(req, await req.json())
     return web.json_response({"lists": {"A": load_premade_deck(host.deck), "B": load_premade_deck(bot.deck)},
                               "seats": local.seats_view(host, bot), "level": bot.bot, **local.bot_spec(bot.bot),
+                              "pause": BOT_PAUSE,   # the bot's beat, as the server keeps it (a test server's is 0)
                               "source_hash": local.source_hash()})
 
 

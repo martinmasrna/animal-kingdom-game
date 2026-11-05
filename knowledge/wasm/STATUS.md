@@ -21,7 +21,16 @@ it ends so it counts and is kept. Branch `engine/wasm`.
    the Python side), the serialised position, the legal actions and both seats' views compared after every action.
    2026-11-05: 100 of 100 agree, 3,403 actions, 3,503 positions, 6 s. A changed number in a view fails it (checked by
    breaking one on purpose). `fuzz.py --all-cards --games 40` on the native module after the change: 40 of 40.
-3. **The client** (done). With `?local=1` in the address, home's Play against a bot starts the match in the browser
+**Local play is the default (Martin, 2026-11-05).** Every practice match against a bot plays in the browser when the
+source hashes agree, the server match the fallback as before; `?local=0` plays it on the server, for debugging. Why: a
+turn without a round trip, the bot on the player's own device instead of the shared server CPU, and no connection
+needed during play. Its three costs are accepted: about 600 KB to download for an Expert match, a match lost on reload,
+and a bot's hand the player could read in a practice match. `web/test/localplay.test.mjs` proves it with no human:
+from home with no flag, a match against the bot played to its end by clicks on the game screen, no match socket and no
+request a move, then in the history; and with the hashes made to differ, the same match on the server, in the history
+too. A test server keeps no replays, so the replay of a browser's log is checked in `test_web_local.py`.
+
+3. **The client** (done). Home's Play against a bot starts the match in the browser
    (`static/local/match.js`): `/api/local/setup` gives the decks, the seats and the bot's spec; the client holds the
    game, feeds the same game screen the views the server would send (the engine's part from the wasm `view`, the
    match's part, seats, move history and numbered events, built the way `match.py` builds them), takes the screen's

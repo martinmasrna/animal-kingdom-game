@@ -1,4 +1,4 @@
-// A practice match in the browser (?local=1, static/local/match.js): the game and the bot run on the page, no socket and
+// A practice match in the browser (the default, static/local/match.js): the game and the bot run on the page, no socket and
 // no request a move; the finished match reaches the server and lands in the player's history. A browser engine built from
 // other sources than the server's plays the match on the server, as without the flag.
 import { test, before, after } from 'node:test';
@@ -60,7 +60,7 @@ const history = page => page.evaluate(async () => (await (await fetch('/api/me',
 test('a practice match plays in the browser, a full game with no socket, and counts when it ends', async t => {
   if (unplayable) return t.skip(unplayable);
   const { page, requests } = await localPage();
-  await page.goto(`${server.url}/?local=1#/`, { waitUntil: 'networkidle0' });
+  await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   const before = (await history(page)).length;
   await page.click('#go');
   await page.waitForFunction(() => location.hash === '#/m/local' && window.__ak().V && window.__ak().V.game, { timeout: 20000 });
@@ -81,7 +81,7 @@ test('a practice match plays in the browser, a full game with no socket, and cou
 test('a conceded local game counts as a loss', async t => {
   if (unplayable) return t.skip(unplayable);
   const { page } = await localPage();
-  await page.goto(`${server.url}/?local=1#/`, { waitUntil: 'networkidle0' });
+  await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await page.click('#go');
   await page.waitForFunction(() => location.hash === '#/m/local' && window.__ak().V && window.__ak().V.game, { timeout: 20000 });
   const r = await playOut(page, 6);
@@ -99,7 +99,7 @@ test('a browser engine that is not the server\'s plays the match on the server',
     const r = await fetch(q.url()), doc = await r.json();
     q.respond({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...doc, source_hash: 'another' }) });
   });
-  await page.goto(`${server.url}/?local=1#/`, { waitUntil: 'networkidle0' });
+  await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await page.click('#go');
   await page.waitForFunction(() => /^#\/m\/(?!local)/.test(location.hash) && window.__ak().V && window.__ak().V.game, { timeout: 20000 });
   assert.ok(requests.includes('POST /api/match'));

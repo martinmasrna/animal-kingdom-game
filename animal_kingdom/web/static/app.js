@@ -816,10 +816,10 @@ function wireAccount(root, redraw) {
 }
 
 // ------------------------------------------------------------------ match connection
-// ?local=1: a practice match against a bot plays in the browser (static/local/match.js), the bot in a Web Worker, no
-// round trip a move; the server takes the finished match. Without the wasm, or with one built from other engine sources
-// than the server's, the match plays on the server as always.
-const LOCAL_PLAY = new URLSearchParams(location.search).get('local') === '1';
+// A practice match against a bot plays in the browser (static/local/match.js), the bot in a Web Worker, no round trip a
+// move; the server takes the finished match (Martin, 2026-11-05: the default). Without the wasm, or with one built from
+// other engine sources than the server's, the match plays on the server. ?local=0 plays it on the server anyway.
+const LOCAL_PLAY = new URLSearchParams(location.search).get('local') !== '0';
 let LOCAL = null;
 async function startLocal(body) {
   const lib = await prepareLocal(api);

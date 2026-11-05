@@ -1,4 +1,4 @@
-"""A practice match played in the browser (`?local=1`, static/local/): the engine and the bot run there as WebAssembly
+"""A practice match played in the browser (the default for a practice match against a bot; `?local=0` opts out; static/local/): the engine and the bot run there as WebAssembly
 (engine_rs/wasm.sh), the server sees the match only when it ends. Here: what the browser needs to start one (the cards,
 maps and Config the server plays with, the decks, the bot's spec), and the finished match taken back in.
 
