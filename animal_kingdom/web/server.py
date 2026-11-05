@@ -329,6 +329,13 @@ def bot_seat_name(level: str, deck: str) -> str:
     return f"{band} Bot"
 
 
+def bot_band(seat) -> str:
+    """The band a bot seat was shown under ("Beginner Bot", "Fish (Expert Bot)"), for the match history: the player picked
+    a band, never saw the engine's pilot ("Easy"). A seat named otherwise falls back to its pilot's band."""
+    words = seat.name.rstrip(")").split()
+    return words[-2] if len(words) >= 2 and words[-1] == "Bot" and words[-2] in ranking.BANDS else ranking.PILOT_BAND.get(seat.bot, seat.bot.capitalize())
+
+
 def bot_rows(table) -> list[tuple[str, ranking.Rating]]:
     """The bots the leaderboard lists: one row per pilot-and-deck pairing on a deck still in the pool (Martin, 2026-10-24:
     every pairing is a player of its own on the ladder; a retired deck's rows keep their games but are not listed). A
@@ -471,7 +478,7 @@ def record_match(match: Match) -> None:
         deck = lambda q: "Starter decks" if q == rotating else DECK_NAMES.get(match.seats[q].deck, match.seats[q].deck)
         try:
             profiles.record(seat.profile, f"{match.id}-{match.rematches}", kind=kind, my_deck=deck(p),
-                            opp=f"Bot ({other.bot.capitalize()})" if other.is_bot else other.name,
+                            opp=f"Bot ({bot_band(other)})" if other.is_bot else other.name,
                             opp_deck=deck(o) if other.is_bot else "", won=score[p], lost=score[o], seat=p,   # a person's deck name is theirs
                             my_cover="" if p == rotating else deck_cover(seat), opp_cover="" if o == rotating else deck_cover(other), mode=mode)
         except Exception:
