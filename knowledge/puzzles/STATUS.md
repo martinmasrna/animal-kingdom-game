@@ -107,14 +107,17 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   found had many winning first turns. One-turn Colony puzzles come easily (`tools/puzzles/compose/gen1d.py`); Fish
   still none.
 
-## Where things stand
+## Where things stand (09:00 CET, 2026-11-05, end of the session)
 
 41 puzzles on the branch: 19 in one turn, 22 in two. Every file passes `tools/puzzles/solve.py check`, every one is
-clicked to Solved by `animal_kingdom/web/test/puzzles.test.mjs`, and the set document has a section for each.
+clicked to Solved by `animal_kingdom/web/test/puzzles.test.mjs` (44 of 44 puzzle web tests pass here at the last
+commit), and the set document has a section for each. The full Python fast tier passed at c62d474 on the Mac
+(the supervising session's run); here its last run did not finish before the stop (the 41 shipped-puzzle checks
+make it slower than before: about 4 minutes on 4 cores).
 
 ## Next
 
-Batch 2's last three (two-turn, Fish and Colony, if they can be made), the rest of batch 3.
+Batch 2's last three two-turn puzzles (Fish and Colony have not given one; see batch 3's note), the rest of batch 3.
 
 ## Blocked
 
