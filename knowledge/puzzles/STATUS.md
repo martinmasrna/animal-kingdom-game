@@ -80,7 +80,7 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   forward, and the Impala beats the Boar), `undermined` (Mole, a free Lion, then the Wolf roams in), `called_up` (the
   Coyote gives the back Cheetah Roam), and two for a first hour, `talons` (an Eagle lands on the Orb-Weaver) and
   `small_horns` (a Hercules Beetle covers the Hippo). Eight of them came from a search over open boards with the
-  idea's card in hand (`tools`-free, a scratch script), then picked by hand for an idea the obvious move misses; the
+  idea's card in hand (`tools/puzzles/compose/gen1.py`), then picked by hand for an idea the obvious move misses; the
   rest of that search's 576 finds were "play the one card that can" and were left out. The one-turn list now runs 17
   puzzles, ordered by difficulty; their notes are in the set document.
 
