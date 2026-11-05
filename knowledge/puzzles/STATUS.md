@@ -112,12 +112,9 @@ Three more two-turn puzzles finish batch 2 (Colony and Fish are the thinnest), t
 
 ## Blocked
 
-- **`back_alley` times out in the click-through test on the Mac** (Chrome for Testing), even run alone, though it
-  passes every time here (Chromium, about 2.5 s). The driver (`animal_kingdom/web/test/puzzleplay.mjs`) now moves the
-  pointer off the hand and waits for any enlarged card to close before clicking a crossroad (the solution places on
-  lane 3, the row beside the hand), and a timeout names its step and the screen's state (whose move, the pending
-  choice and its options, the picked card). If it still fails, that message says where.
-- Chrome for Testing could not be downloaded here; the web tests run on the preinstalled Chromium.
+Nothing. (`back_alley` timed out in the click-through test on the Mac; the driver now moves the pointer off the hand
+and waits for any enlarged card to close before clicking the board, and a timeout names its step. Green on the Mac.
+Chrome for Testing could not be downloaded here; the web tests run on the preinstalled Chromium.)
 
 ## For Martin's own eyes
 
