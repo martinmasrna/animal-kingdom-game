@@ -94,6 +94,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .home .top .backbtn.open { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
 .home .chooser.opps { left: calc(50% - 5px); width: 320px; }   /* its controls on the opponent slot's edges */
 .home .seg { display: flex; gap: 6px; } .home .seg .slab { flex: 1; min-width: 0; height: 40px; padding: 0; }
+@media (max-width: 480px) { .home .seg { gap: 4px; } .home .seg .slab { flex: 1 1 auto; padding: 0 2px; font-size: 15px; } }   /* a phone: each bot's name fits its button ("Intermediate" overran its neighbour) */
 .home .seg .slab.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); color: #fff; font-weight: 600; filter: brightness(1.12); }
 .home .chooser .dd .sel { width: 100%; text-align: left; }
 .home .frow .field { flex: 1; min-width: 0; } .home .frow .field:not(:placeholder-shown) { text-transform: uppercase; }
