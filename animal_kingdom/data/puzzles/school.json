@@ -1,0 +1,36 @@
+{
+  "id": "school",
+  "title": "School",
+  "theme": "Fish",
+  "to_move": "A",
+  "turns": 2,
+  "order": 18,
+  "board": {
+    "1,2": [{"card": "cod", "owner": "A"}],
+    "2,2": [{"card": "cod", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "cod", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "hippopotamus", "owner": "B"}],
+    "4,3": [{"card": "hippopotamus", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["octopus", "tuna", "cod", "cod"], "B": ["black_mamba", "hamster"]},
+  "food": {"A": 0, "B": 9},
+  "hint": "The Tuna counts your other Fish.",
+  "why": "The Octopus switches the Hippos off but is removed by them, as in Ink; here the Tuna is the way: with three other Fish on the board it is 6, too strong for the Hippos, so it takes 4,2 and a Cod the den front, and the spare Cod mends the line the Black Mamba cuts.",
+  "solution": [
+    {"kind": "place", "card_id": "tuna", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "cod", "target": ["cr", "5,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "tuna", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "cod", "target": ["cr", "5,2"]},
+    {"by": "B", "kind": "place", "card_id": "black_mamba", "target": ["cr", "2,1"]},
+    {"by": "B", "kind": "choice", "choice": "2,2"},
+    {"by": "B", "kind": "place", "card_id": "hamster", "target": ["cr", "1,1"]},
+    {"by": "A", "kind": "place", "card_id": "cod", "target": ["cr", "2,2"]},
+    {"by": "A", "kind": "place", "card_id": "octopus", "target": ["hq", "B"]}
+  ]
+}

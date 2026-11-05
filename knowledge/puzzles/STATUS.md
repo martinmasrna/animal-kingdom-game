@@ -86,7 +86,8 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 
 - **Batch 2** (in progress, two-turn, other decks and boards): `back_and_forth` (Canines, nothing in hand: the Bush
   Dog roams forward and back so its Pups keep the Wolf's line whole), `hive` (Colony: the Skunk sends the Hedgehog home,
-  the Soldier Bee's Spikes hold the den front, and two Hornets re-link and finish). Two-turn positions off the walled
+  the Soldier Bee's Spikes hold the den front, and two Hornets re-link and finish), `school` (Fish: the Tuna, 6 with three other
+  Fish, walks past the Hippos). Two-turn positions off the walled
   lane come slowly: random open boards almost never give a forced, unique den, so batch 2 ports the proven ideas to
   other decks and varies the hands with the solver keeping the unique ones (a scratch search, `portgen`).
 
