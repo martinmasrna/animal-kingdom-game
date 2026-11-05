@@ -2,9 +2,11 @@
 
 Martin, 2026-11-04: instead of ranked being a rating from the start, do what Hearthstone, Gwent, MTG Arena and League do: about ten leagues, each with a few stars; a win gains a star, a loss loses one; a bonus for win streaks; a few stars to move up; checkpoints below which you can't fall; the uncapped rating only in the highest league. Nothing elaborate. The point is progression instead of a flat number.
 
-This page: what those four games do and what each mechanic is for, the recommended design for this game, the simulation that set its numbers, the calls that are Martin's, the names, the migration, and a draft News entry.
+Settled (Martin, 2026-11-05): three rules, all on the screen. A win gains a star, two from your third win in a row. A loss loses a star, and at 0 stars drops you a league, never out of league 1. You play opponents from your own league; in the top league, from your rating, and the rating shows. In his words on what the top league means: the climb stops where your skill is, "yes, this is how it should be".
 
-Status: designed, simulated and built on the branch `ranked/leagues`; nothing shipped. The rules live in one file, `animal_kingdom/web/tiers.py`, which the server and the simulator both use.
+This page: what four other games do and what each mechanic is for, why this game's leagues work as they do, the rules, the simulation, what a player sees, the calls still open, the names, the migration, and a draft News entry.
+
+Status: built on the branch `ranked/leagues`; nothing shipped. The rules live in one file, `animal_kingdom/web/tiers.py`, which the server and the simulator both use.
 
 ## A word clash to know about
 
@@ -32,148 +34,71 @@ Sources were read through web search summaries; direct page fetches were blocked
 - **Resets (seasons).** Recurring goals, monthly rewards, a reshuffled ladder. Costly for a small player base: everyone has to climb again, and LoL cut back from three a year to one after players called it a grind.
 - **The uncapped top tier.** Where the milestones end and the rating itself is shown: HS Legend's number, Gwent's Pro Rank, MTGA Mythic, LoL Master and up. It is where the best players compete for a place, and where esports qualification reads.
 
-## Why the plain Hearthstone rules don't fit here
+## Why opponents come from your league
 
-The first draft was Hearthstone's rules alone (stars, streaks, floors, nothing tied to the rating). The simulation showed the flaw: here, the rating picks every ranked opponent from bots that are always there (`Ladder.nearest_bot`, within 75 points), so once a person's rating settles, they win about half their games, whatever their strength. Stars with floors and a streak bonus climb at 50%: floors stop the falls and streaks add extra wins. A weak player (true strength 1200) reached the top league in a median of 265 games, a 1500 player in 281. The league would measure games played, not skill.
+On this ladder the opponent is nearly always a bot, and a bot is always there. If the rating picks the opponent, every settled player wins about half their games whatever their strength, and stars can only measure games played: a plain win +1, loss −1 goes nowhere, and every rule that lets a 50% player climb (no losses at the bottom, checkpoints, streak bonuses, extra stars tied to a hidden rating) is a way to turn volume into progress. Tying stars to a hidden rating (Hearthstone's Star Bonus, League of Legends' LP by MMR) fixes the volume problem at the cost of a number the player can't see deciding what the number they can see does.
 
-HS and LoL avoid this by tying star gains to the hidden rating (the Star Bonus; LP by MMR). The recommended design does the same, in two rules that each fit in a sentence: a win pays double while your rating is ahead of your league, and a loss costs double while your rating is well behind it. With those, the 1200 player settles in league 4 (its checkpoint) and the 1500 player in league 7.
+Picking the opponent by league removes the problem at its root. Each league is a band of bot ratings, so a league's opponents get stronger as you climb, and the climb stops where you win as often as you lose: the league says how good you are. A loss at 0 stars has to be able to drop you a league, or a lucky run would leave a weak player in a league that beats them four games in five, for good; with drops, a drop from bad luck puts you among easier opponents and you climb back.
 
-## The recommended design
+## The design
 
-The rating keeps running for everyone, bots included, and still picks every ranked opponent; nothing about matchmaking or how bots are rated changes. Leagues and stars are the person's view, updated on every rated game where a person sat (a person against a bot, or two people), next to the rating, never instead of it. The number shows only in the top league.
+| League | Stars to move up | Bots it plays (rating) |
+|---|---|---|
+| 1 | 3 | under 1100 |
+| 2 | 3 | 1100 to 1200 |
+| 3 | 3 | 1200 to 1300 |
+| 4 | 5 | 1300 to 1400 |
+| 5 | 5 | 1400 to 1500 |
+| 6 | 5 | 1500 to 1600 |
+| 7 | 5 | 1600 to 1700 |
+| 8 | 5 | 1700 to 1800 |
+| 9 | 5 | 1800 to 1900 |
+| 10, the top | none: the rating shows | by your rating, as before leagues |
 
-Each league has a **par**: the rating it stands for, 1000 for league 1 up to 1900 for league 10, 100 apart. The top league's par is the bot band Legendary (1900), so the top league and the top bot band mean the same thing.
+The top league starts at the bot band Legendary (1900), so the top league and the top bot band mean the same thing. The 129 bot pairings run from 941 to 2246, with at least five in every league's band.
 
-| League | Stars to move up | Par rating | Checkpoint | A loss costs |
-|---|---|---|---|---|
-| 1 | 3 | 1000 | yes (the start) | nothing |
-| 2 | 3 | 1100 | | nothing |
-| 3 | 3 | 1200 | | nothing |
-| 4 | 5 | 1300 | yes | 1 star (2 if over-ranked); never below league 4 once reached |
-| 5 | 5 | 1400 | | 1 star (2 if over-ranked) |
-| 6 | 5 | 1500 | | 1 star (2 if over-ranked) |
-| 7 | 5 | 1600 | yes | 1 star (2 if over-ranked); never below league 7 once reached |
-| 8 | 5 | 1700 | | 1 star (2 if over-ranked) |
-| 9 | 5 | 1800 | | 1 star (2 if over-ranked) |
-| 10 (top) | none: the rating shows | 1900 | yes | nothing on the league; the rating moves as always |
-
-The rules, each one a test in `animal_kingdom/tests/test_tiers.py`:
+The rules, each a test in `animal_kingdom/tests/test_tiers.py`:
 
 1. **Start.** Everyone starts in league 1 with 0 stars.
-2. **A win** gains 1 star. It gains 2 if either bonus applies (never more than 2):
-   - **win streak**: it is your third win in a row or more, you are in leagues 1 to 7, and your rating is at least your league's par;
-   - **rating bonus**: your rating is at least the next league's par (you are ahead of your league).
-3. **Moving up.** Reaching the league's star count moves you up with 0 stars; a spare star carries over. Reaching league 10 ends stars.
-4. **A loss** costs 1 star, nothing in leagues 1 to 3, and 2 when you are **over-ranked**: your rating is more than 100 under your league's par.
-5. **Moving down.** A loss with no stars left (or fewer than it costs) moves you down a league, onto that league's top minus what was left to pay (5 stars needed, a 1-star loss: 4 stars).
-6. **Checkpoints.** Leagues 1, 4, 7 and 10. Once you reach one, you never go below it: a loss there at 0 stars costs nothing.
-7. **The top league** has no stars. It shows your rating, the ladder's own number, and you never leave it (there are no seasons; see Martin's calls).
-8. **The rating** the bonuses read is your ladder rating going into the game.
-9. **What you see**: the league's name, your stars as a count ("3 of 5 stars"), your checkpoint, your win streak; in the top league, the rating. The end of a ranked match says what the game did in one line ("+2 stars (win streak): League 5, 1 of 5 stars", "No star lost (League 4 is a checkpoint)", "Up to League 7, 0 stars").
-
-What each part is doing here: the three-star leagues with no losses are the first session (three promotions in the first ten or so games); the checkpoints at 4 and 7 keep what an evening earned; the streak bonus moves a winner fast but stops at league 7 and only pays a player who isn't already over-ranked; the rating bonus is Hearthstone's Star Bonus made continuous (a player whose rating is ahead of their league catches up at two stars a win, so a returning or migrated player is home in a few wins, and no reset is needed for it to work); the over-ranked double loss is LoL's LP-by-MMR, the brake that stops grinding past your strength.
+2. **A win** gains a star; your third win in a row and every one after it gains two, in every league below the top.
+3. **Moving up.** Reaching the league's star count moves you up, a spare star carried over. Reaching the top league ends stars.
+4. **A loss** loses a star and ends your streak. At 0 stars it drops you a league, onto that league's stars minus one; in league 1 it costs nothing more.
+5. **Opponents.** Below the top league, a person from your league if one is waiting, else a bot from your league's band (the strongest pilot there first, never the deck of your last four bot games). In the top league, a person or bot near your rating, as before leagues.
+6. **The top league** is kept once reached and shows your rating, the ladder's own number.
+7. **The rating** keeps running for everyone, bots included. Below the top league it decides nothing a player sees; it gives the number you start the top league with, and it places each bot in its league. Bots show no league.
+8. **What you see**: the league's name, your stars as a count ("3 of 5 stars"), your win streak from two wins; in the top league, the rating. The end of a ranked match says what the game did in one line ("+2 stars (win streak): League 5, 1 of 5 stars", "-1 star: League 5, 0 of 5 stars", "Up to League 7, 0 stars", "Down to League 4, 4 stars").
 
 ## The simulation
 
-`tools/ranked/simulate.py` replays the recorded results through `web/tiers.py`; `--players results/players.json` (from `deploy/deploy.sh players`, not available in this session) gives exact people and ranked-only games.
+`tools/ranked/simulate.py`: a player of fixed true strength meets what the server would pick (below the top a bot drawn from the league's band of the seeded bot ratings, in the top league one near the player's rating), the result drawn from the Glicko expectation. 300 runs of 400 games each:
 
-How the people were read without that file: the game logs carry the seats, decks, winner, match id and date, but not who played or whether the game was ranked. So every human-against-bot game from 1 October (the ladder's first day) counts, and the person is read off the deck: Kalista's mono Cats (at least 90% Cats, before 17 October), Laras's lists on Black Bear, Owl and Raven (until 6 October, her sixth day), Martin for the rest. That matches the playtest read of 2 October (Laras 208 games, Kalista mono Cats) but is an inference: some games are surely misfiled, practice games are counted as ranked, and the two guests are folded into Martin. Games between two people are left out (both sides unknown). The rating the rules read is replayed with the ladder's own Glicko-2 against each bot's 24 October seed rating, not the rating it had on the day, so the ratings below are close, not exact.
+| Strength | Reached the top | Median games to it | League after 400 games | Won of the last 100 |
+|---|---|---|---|---|
+| 1100 | 0% | | 2 | 45% |
+| 1300 | 0% | | 4 | 46% |
+| 1500 | 0% | | 6 | 46% |
+| 1700 | 72% | 151 | 10 | 49% |
+| 1900 | 100% | 35 | 10 | 50% |
+| 2100 | 100% | 23 | 10 | 51% |
 
-**The people** (games are every logged human-vs-bot game, ranked or not):
-
-| Person | Games | Won | Days | Reached league 4 / 7 / 9 / top after | League at the end |
-|---|---|---|---|---|---|
-| Martin | 1,228 | 62% | 31 | 5 / 14 / 25 / 33 games | top (1 Oct, his first day) |
-| Laras | 663 | 84% | 5 | 6 / 25 / 30 / 42 games | top (1 Oct, her first day) |
-| Kalista | 284 | 58% | 13 | 7 / 44 / 111 / 245 games | league 7 after day 1, 8 from 7 Oct, top on 10 Oct |
-
-None of the three played "a few games a day": Laras played 177 games on her first day, Martin 123, Kalista 87. Measured in games, Martin and Laras reach the top in 33 and 42, and Kalista, who started weak and improved (she lost three of four on day one and beat the Expert more often than not by day twelve), climbs over ten days and 245 games, sitting at league 7 for a week while her rating caught up. That is the shape wanted: the strong players' climb is quick, the learning player's climb follows her learning.
-
-**By day**, under the recommended rules: the league at the end of each day each person played ("top, 1850" is the top league with the rating replayed that day; the count in brackets is their games so far; a blank is a day they didn't play). Martin and Laras reach the top on their first day because they played over a hundred games that day; Kalista's row is the climb of a learning player.
-
-| Day | Martin | Laras | Kalista |
-|---|---|---|---|
-| 10-01 | top, 1850 (123) | top, 1858 (177) | 7, 4 of 5 stars (87) |
-| 10-02 | top, 1907 (170) | top, 2073 (269) | 7, 4 of 5 stars (116) |
-| 10-04 | top, 1918 (202) | top, 2000 (604) | 7, 2 of 5 stars (126) |
-| 10-05 | top, 1996 (217) | top, 2185 (652) | 7, 4 of 5 stars (148) |
-| 10-06 | top, 2011 (219) | top, 2213 (663) | 7, 3 of 5 stars (149) |
-| 10-07 | top, 2024 (221) |  | 8, 0 of 5 stars (163) |
-| 10-08 | top, 2016 (229) |  | 8, 2 of 5 stars (215) |
-| 10-09 | top, 1926 (246) |  | 8, 2 of 5 stars (233) |
-| 10-10 | top, 2019 (379) |  | top, 1986 (258) |
-| 10-11 | top, 1978 (385) |  |  |
-| 10-12 | top, 2071 (399) |  | top, 2023 (273) |
-| 10-13 | top, 2123 (418) |  | top, 2042 (276) |
-| 10-14 | top, 2003 (440) |  |  |
-| 10-15 | top, 1975 (528) |  | top, 2060 (279) |
-| 10-16 | top, 2053 (559) |  | top, 2026 (284) |
-| 10-17 | top, 2133 (617) |  |  |
-| 10-18 | top, 2089 (619) |  |  |
-| 10-19 | top, 2112 (632) |  |  |
-| 10-20 | top, 2108 (635) |  |  |
-| 10-21 | top, 1901 (669) |  |  |
-| 10-22 | top, 2015 (690) |  |  |
-| 10-23 | top, 2174 (717) |  |  |
-| 10-24 | top, 2148 (782) |  |  |
-| 10-25 | top, 2090 (828) |  |  |
-| 10-26 | top, 2100 (846) |  |  |
-| 10-27 | top, 1918 (896) |  |  |
-| 10-28 | top, 1908 (907) |  |  |
-| 10-29 | top, 1803 (1018) |  |  |
-| 10-30 | top, 1948 (1132) |  |  |
-| 10-31 | top, 1908 (1210) |  |  |
-| 11-04 | top, 1820 (1228) |  |  |
-
-**Synthetic players**, 300 runs each, 400 games. A fixed win rate, as asked (the rating moved by those results against opponents at the player's own rating):
-
-| Win rate | Games to reach league 4 | 6 | 8 | 9 | top |
-|---|---|---|---|---|---|
-| 40% | 13 | never (stops at 5) | | | |
-| 50% | 10 | 27 | 64 | 76 | not in 400 |
-| 60% | 8 | 19 | 33 | 44 | 64 |
-
-A fixed win rate isn't stable on this ladder (matchmaking pulls everyone to 50%), so the more honest model is a fixed strength, with opponents within the matchmaking window of the player's current rating:
-
-| True strength | League after 10 / 25 / 50 / 100 / 200 / 400 games | Games to the top |
-|---|---|---|
-| 1200 | 3 / 4 / 4 / 4 / 4 / 4 | never |
-| 1400 | 3–4 / 4 / 5 / 5 / 7 / 7 | never |
-| 1600 | 4 / 5 / 7 / 7 / 7 / 8 | never |
-| 1800 | 4 / 6 / 8 / 9 / 10 / 10 | 112 |
-| 2000 | 4 / 7 / 10 / 10 / 10 / 10 | 47 |
-| 2200 | 5 / 8 / 10 / 10 / 10 / 10 | 36 |
-
-For a person playing five ranked games a day: the first three promotions in the first session; a 2000 player (about Laras's level against the Expert) at the top in under two weeks, a 2200 player in about a week; an 1800 player (about where Martin's rating sits) in about three weeks, and their league then sits near their rating; players under 1800 settle at a league near their strength, held up a little by the checkpoints. Nobody reaches the top by playing a lot.
-
-**What moved during the tuning**, all on the same seeds:
-
-- The plain Hearthstone draft (3, 3, 3 then 4, 4, 4 then 5, 5, 5 stars; no rating ties): a 1200 player at the top in 265 games, a 1500 player in 281. Too easy for the weak, because of the 50% pull above.
-- Adding the over-ranked double loss alone: the 1200 player stops at league 4–5 and the 1500 player at 7; the strong players unchanged. It does most of the work.
-- Adding the streak-only-at-par rule alone: the 1200 player at league 6 after 300 games, the 1500 player at 8. Weaker on its own, but it stops a streak from pushing an over-ranked player further.
-- Leagues 4 to 6 at 5 stars instead of 4: about 5 more games to the top for strong players and a slower middle, chosen so the table reads "3 stars at the bottom, 5 above".
-- Over-ranked at 50 instead of 100 points: no difference worth the stricter rule.
+Every player settles in the league that matches their strength and wins a little under half there. Playing more doesn't push anyone past it; getting better does. The strong are at the top within a few sessions.
 
 ## What a player sees, screen by screen
 
-Text only, as built on the branch; where a picture belongs is marked. For Martin to design from.
+Text only, as built on the branch; where a picture belongs is marked.
 
-- **Home, the Ladder piece** (top-right corner): "Ladder", under it the league and place: "League 5 · 2 of 5 stars · #7"; in the top league "League 10 · 2011 · #2". A newcomer who hasn't played ranked sees "Ladder" alone. *Picture: the league's badge beside the word.*
-- **Home, the Ranked choice**: under "Ranked", the league instead of "your rating 1500?": "League 5 · 2 of 5 stars".
-- **The ladder screen, Leaderboard tab**: one line above the list, your standing: "League 5 · 2 of 5 stars · never below League 4 · 3 wins in a row" (the streak shows from two wins; the checkpoint always). In the top league: "League 10 · 2011". *Picture: the badge at the start of the line; perhaps the stars as pips instead of the count.*
-- **The leaderboard rows**: a person below the top league has their league where the number was ("League 5") and their stars beside their name ("2 of 5 stars"); a person in the top league has their rating where the number was and "League 10" beside their name; bots as before, "Fish (Expert Bot)" and its rating. The list is one, people and bots, people placed by league and stars. *Picture: a small badge in the row.*
-- **The versus moment** (two cards facing each other as a match opens): a person below the top league shows nothing under their card; in the top league their rating in the gem as before; a bot its rating in the gem. *A design spot: the gem could hold the league's badge.*
-- **The end of a ranked match**: under Victory or Defeat and how it ended, one line about the stars: "+1 star: League 5, 1 of 5 stars", "+2 stars (win streak): …", "+2 stars (rating bonus): …", "-1 star: …", "-2 stars: …", "No star lost (no stars lost in leagues 1 to 3): League 2, 1 of 3 stars", "No star lost (League 4 is a checkpoint): …", "Up to League 7, 0 stars", "Down to League 4, 4 stars". Below the top league no rating counter; in the top league the rating counts from before to after as it does today, and the line shows only on the game that brought you there ("Up to League 10"). *A design spot: moving up deserves its own moment (the badge arriving), and the stars could fill one by one.*
-- **The match history**: unchanged; a ranked game says "Ranked" as before.
+- **Home, the Ladder piece** (top-right corner): "Ladder", under it the league and place: "League 5 · 2 of 5 stars · #7"; in the top league "League 10 · 2011 · #2". *Picture: the league's badge beside the word.*
+- **Home, the Ranked choice**: under "Ranked", the league: "League 5 · 2 of 5 stars".
+- **The ladder screen, Leaderboard tab**: one line above the list, your standing: "League 5 · 2 of 5 stars · 3 wins in a row" (the streak shows from two wins). In the top league: "League 10 · 2011". *Picture: the badge at the start of the line; perhaps the stars as pips.*
+- **The leaderboard rows**: a person below the top league has their league where the number was and their stars beside their name; a person in the top league their rating, and "League 10" beside their name; bots as before, "Fish (Expert Bot)" and its rating. People and bots stay one list, a person below the top sorted by their league's band plus their stars' share of it (league 8 with 2 of 5 stars sorts as 1740).
+- **The versus moment**: a person below the top league shows nothing under their card; in the top league their rating in the gem; a bot its rating. *A design spot: the gem could hold the league's badge.*
+- **The end of a ranked match**: one line about the stars under Victory or Defeat. Below the top league no rating counter; in the top league the rating counts from before to after as today. *A design spot: moving up deserves its own moment.*
 
-## Martin's calls
+## Open calls
 
-1. **Names.** Recommendation: the food chain set (below). Each league then has a picture that already exists, the animal's own card painting, and the climb is the game's world. Until then the screens say "League 1" to "League 10".
-2. **Pictures.** None in this build. Recommendation: each league's animal portrait from its card art, in the rim the history rows already use for decks (`kit2/rim_n.webp`), on the ladder screen and at the end of a match; the top league its own piece. A design job for the sandbox, not an agent.
-3. **Whether bots show a league.** Recommendation: no. Bots aren't climbing: their rating is their identity and the band word already names it ("Fish (Expert Bot)"). A bot with a league computed from its rating would be a league that never moves by stars, next to people whose leagues do, and the leaderboard would show two meanings of the same word. So bot rows keep their band and rating; people's rows show their league.
-4. **Season resets.** Recommendation: none until there are enough players to fill a monthly ladder (dozens playing each week). A reset for five players is a chore, and the rating bonus already does what Hearthstone's reset bonus does. When seasons come: monthly, everyone down four leagues but never below checkpoint 4, the top league kept by the best few; the rating never resets.
-5. **The numbers on the versus moment and the leaderboard.** The design says the number shows only in the top league. This build follows it for people (a person's row and seat show their league; the top league shows the rating) and keeps the bots' numbers (they have no league). Recommendation: keep it that way.
-6. **The leaderboard's order.** People and bots are still one list. A person below the top is placed by their league, par plus their stars' share of the next 100 points (league 8 with 2 of 5 stars sorts as 1740), a person in the top league by their rating, a bot by its rating. Recommendation: keep one list; the alternative, people only, loses the bots as landmarks.
+1. **Names.** Recommendation: the food chain set (below). Until then the screens say "League 1" to "League 10".
+2. **Pictures.** None in this build. Recommendation: each league's animal portrait from its card art, in the deck rim the history rows use (`kit2/rim_n.webp`), on the ladder screen and at the end of a match; the top league its own piece. A design job for the sandbox.
+3. **Season resets.** Recommendation: none while few people play. With opponents by league, a reset is only a fresh climb: everyone down a few leagues, back where they belong in a session or two.
 
 ## Names
 
@@ -187,10 +112,8 @@ Bronze to Diamond reads instantly and says nothing; it is the fallback if none o
 
 ## Migration
 
-Existing profiles get a league from their current rating once, when the server first starts with leagues (`tiers.from_rating`, run by `server.migrate_tiers`): two leagues under the league their rating stands for (the highest league whose par is at or under the rating), so at most league 8 (the top is always earned), at that league's checkpoint, with 0 stars. A profile still placing (under 10 rated games) starts at league 1. Examples: 1820 stands for league 9, starts in league 7 (checkpoint 7); 1500 stands for league 6, starts in league 4; 1250 stands for league 3, starts in league 1.
-
-Why two under: putting everyone straight where their rating says would make the first ranked game after the release say nothing. Two leagues under, with the rating bonus, a player whose rating is ahead gains two stars a win and is back where they belong in about eight wins (an 1820 player from league 7 to the top: 15 stars at 2 a win), so the release is felt as a climb, not taken away. Bots get nothing: they have no league.
+Existing profiles get a league once, from their current rating, when the server first starts with leagues (`tiers.from_rating`, run by `Tiers.migrate`): the league whose band holds their rating, at most league 9 (the top is reached by a win), with 0 stars. A profile still placing (under 10 rated games) starts in league 1. Examples: 1820 is league 9, 1500 is league 6, 1250 is league 3. Opponents come from that league, so a profile placed a little wrong finds its level in a few games. Bots get no league row: theirs is read from their rating.
 
 ## News entry (draft, not shipped)
 
-**Ranked has leagues.** Ranked is now a climb: ten leagues, from League 1 to the top. A win gains a star, a loss loses one, and a few stars move you up a league; in the first three leagues a loss costs nothing. Three wins in a row pay double, and so does winning while your rating is ahead of your league, so a strong player climbs fast; leagues 4 and 7 are checkpoints you never fall below once you reach them. In the top league stars end and your rating shows, the same number that has always picked your opponents. Your league starts from your rating, two leagues under where it puts you, so your next few wins carry you back up. Bots don't have leagues; they keep their names, Beginner to Legendary.
+**Ranked has leagues.** Ranked is now a climb: ten leagues, from League 1 to the top. A win gains a star, and from your third win in a row two; a loss loses one, and with no stars left it drops you a league. Every league has its own opponents, stronger as you climb, so your league says how good you are. In the top league stars end and your rating shows, the number that picks your opponents there. Your league starts from your rating. Bots don't have leagues; they keep their names, Beginner to Legendary.

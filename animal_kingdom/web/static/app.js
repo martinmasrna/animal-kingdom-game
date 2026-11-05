@@ -258,8 +258,7 @@ let newsAsked = false;
 // league the rating instead. Text only: where a league's picture would go is Martin's call (knowledge/ranked/STATUS.md).
 const starsText = (n, of) => `${n} of ${of} star${of === 1 ? '' : 's'}`;
 const leagueShort = lg => !lg ? '' : lg.top ? `${lg.name} · ${lg.rating}` : `${lg.name} · ${starsText(lg.stars, lg.of)}`;
-const leagueLong = lg => !lg ? '' : [leagueShort(lg), lg.top ? '' : `never below ${lg.floor}`,
-  lg.streak >= 2 ? `${lg.streak} wins in a row` : ''].filter(Boolean).join(' · ');
+const leagueLong = lg => !lg ? '' : [leagueShort(lg), lg.streak >= 2 ? `${lg.streak} wins in a row` : ''].filter(Boolean).join(' · ');
 const mePiece = () => {   // the Ladder, with your league (or, before leagues, your rating) and your place once you have played ranked
   const sub = !ME ? '' : ME.league && ME.rank ? `${leagueShort(ME.league)} · #${ME.rank}` : ME.league && ME.league.stars ? leagueShort(ME.league)
     : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';

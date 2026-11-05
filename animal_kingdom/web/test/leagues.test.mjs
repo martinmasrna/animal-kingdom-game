@@ -11,8 +11,8 @@ before(async () => { server = await startServer(); browser = await openBrowser()
 after(async () => { await browser?.close(); server?.stop(); });
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const FIVE = { league: 5, name: 'League 5', top: false, floor: 'League 4', streak: 3, best: 'League 5', stars: 2, of: 5 };
-const TOP = { league: 10, name: 'League 10', top: true, floor: 'League 10', streak: 0, best: 'League 10', rating: '2011' };
+const FIVE = { league: 5, name: 'League 5', top: false, streak: 3, best: 'League 5', stars: 2, of: 5 };
+const TOP = { league: 10, name: 'League 10', top: true, streak: 0, best: 'League 10', rating: '2011' };
 
 // The page's own requests, answered by the real server, with `patch` applied to the JSON of the ones it names.
 async function patched(patch) {
@@ -29,11 +29,11 @@ async function patched(patch) {
   return p;
 }
 
-test('the ladder screen says your league, stars, checkpoint and streak; home\'s Ladder piece your league and place', async () => {
+test('the ladder screen says your league, stars and streak; home\'s Ladder piece your league and place', async () => {
   const p = await patched({ '/api/me': me => ({ ...me, league: FIVE, rank: 7 }) });
   await p.goto(`${server.url}/#/ladder`, { waitUntil: 'networkidle0' });
   await p.waitForSelector('#lstand');
-  assert.equal(await p.$eval('#lstand', e => e.textContent), 'League 5 · 2 of 5 stars · never below League 4 · 3 wins in a row');
+  assert.equal(await p.$eval('#lstand', e => e.textContent), 'League 5 · 2 of 5 stars · 3 wins in a row');
   await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await p.waitForSelector('.backbtn.me small');
   assert.equal(await p.$eval('.backbtn.me small', e => e.textContent), 'League 5 · 2 of 5 stars · #7');

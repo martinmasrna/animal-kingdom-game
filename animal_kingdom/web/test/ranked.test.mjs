@@ -37,14 +37,14 @@ const concede = async page => {
 };
 const endLine = page => page.waitForSelector('#lgline', { timeout: 30000 }).then(() => page.$eval('#lgline', e => e.textContent));
 
-test('a ranked match against a bot, conceded: its end says no star was lost in league 1, and shows no number', async () => {
+test('a ranked match against a bot, conceded: its end says your league and stars (nothing to lose at 0 stars in league 1), and shows no number', async () => {
   const p = await player();
   const m = await queue(p);   // nobody else queues: after the wait, the nearest bot
   assert.ok(m.id && m.token, 'a match');
   await open(p, m);
   assert.equal(await p.evaluate(() => window.__ak().V.seats[window.__ak().V.you].league), 'League 1', 'your seat states your league');
   await concede(p);
-  assert.equal(await endLine(p), 'No star lost (no stars lost in leagues 1 to 3): League 1, 0 of 3 stars');
+  assert.equal(await endLine(p), 'League 1, 0 of 3 stars');
   assert.equal(await p.$('#rnum'), null, 'no rating below the top league');
   assert.deepEqual(p.errors, []);
   await p.close();
@@ -56,16 +56,15 @@ test('a ranked match between two people: the winner\'s end says the stars gained
   assert.equal(ma.id, mb.id, 'two people queueing at once meet');
   await Promise.all([open(a, ma), open(b, mb)]);
   await concede(b);
-  // a new person's rating (1500) is ahead of league 1 (the next league's par is 1100): the win pays two stars
-  assert.equal(await endLine(a), '+2 stars (rating bonus): League 1, 2 of 3 stars');
-  assert.equal(await endLine(b), 'No star lost (no stars lost in leagues 1 to 3): League 1, 0 of 3 stars');
+  assert.equal(await endLine(a), '+1 star: League 1, 1 of 3 stars');
+  assert.equal(await endLine(b), 'League 1, 0 of 3 stars');
   await a.goto(`${server.url}/#/ladder`, { waitUntil: 'networkidle0' });
   // the ladder draws at once from the profile it holds, then again from the fresh one (app.js route), and the list fills
   // after each draw: wait for the fresh draw and its list before reading
-  await a.waitForFunction(() => document.querySelector('#lstand')?.textContent.includes('2 of 3 stars') && document.querySelector('#lboard .lr.you .nm small.lg'), { timeout: 15000 });
+  await a.waitForFunction(() => document.querySelector('#lstand')?.textContent.includes('1 of 3 stars') && document.querySelector('#lboard .lr.you .nm small.lg'), { timeout: 15000 });
   const mine = await a.$eval('#lboard .lr.you', e => [e.querySelector('.nm small.lg').textContent, e.querySelector('b').textContent]);
-  assert.deepEqual(mine, ['2 of 3 stars', 'League 1'], 'your row: your league in the number\'s place, your stars by your name');
-  assert.equal(await a.$eval('#lstand', e => e.textContent), 'League 1 · 2 of 3 stars · never below League 1');
+  assert.deepEqual(mine, ['1 of 3 stars', 'League 1'], 'your row: your league in the number\'s place, your stars by your name');
+  assert.equal(await a.$eval('#lstand', e => e.textContent), 'League 1 · 1 of 3 stars');
   assert.ok(await a.$$eval('#lboard .lr.bot b', els => els.length > 0 && els.every(e => /^\d+\??$/.test(e.textContent))), 'bots keep their numbers');
   assert.deepEqual([...a.errors, ...b.errors], []);
   await a.close(); await b.close();
