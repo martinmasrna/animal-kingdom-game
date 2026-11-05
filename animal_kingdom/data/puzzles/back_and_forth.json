@@ -1,0 +1,32 @@
+{
+  "id": "back_and_forth",
+  "title": "Back and forth",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 2,
+  "order": 16,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "bush_dog", "owner": "A"}],
+    "3,2": [{"card": "wolf", "owner": "A"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": [], "B": ["hamster"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "A Bush Dog leaves a Pup wherever it roams from, and a roam can go backwards.",
+  "why": "With nothing in hand, the two dogs must roam: the Bush Dog to 4,2 and the Wolf on to the den front leaves 3,2 empty, but next turn the Bush Dog roams back to 3,2, its Pup stays on 4,2, and the whole line connects for the Wolf to walk in.",
+  "solution": [
+    {"kind": "roam", "from": "2,2", "target": ["cr", "4,2"]},
+    {"kind": "roam", "from": "3,2", "target": ["cr", "5,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "roam", "from": "2,2", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "roam", "from": "3,2", "target": ["cr", "5,2"]},
+    {"by": "B", "kind": "place", "card_id": "hamster", "target": ["cr", "3,1"]},
+    {"by": "A", "kind": "roam", "from": "4,2", "target": ["cr", "3,2"]},
+    {"by": "A", "kind": "roam", "from": "5,2", "target": ["hq", "B"]}
+  ]
+}
