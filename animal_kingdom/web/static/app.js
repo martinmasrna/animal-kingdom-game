@@ -232,7 +232,7 @@ function route() {
 // side opens its chooser above the piece. Collection and the profile stand beside it for now, until the hub holds more.
 // #/gauntlet is the same screen with the developer's gauntlet as the opponent; #/join/<code> the same with a friend's match.
 const BANDS = ['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Legendary'], OLD_LEVELS = { easy: 'Beginner', normal: 'Advanced', expert: 'Expert' };   // the five bots (web/ladder.py RUNGS): the same five on the ladder and in Practice
-const play = { opp: 'bot', level: 'Advanced', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
+const play = { opp: 'bot', level: 'Beginner', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };   // a newcomer starts on the weakest bot (it was Advanced after the tutorial; phone walkthrough finding 16)
 // The decks an Easy bot plays when nobody chose one (Random, and the tutorial's first match): the simpler half of the ones
 // Easy is weakest with (Martin, 2026-10-17: Easy with Cats or Fish beats the greedy bot 4 games in 10, with these 1 to 3;
 // Egg and Aristocrats are weaker still but the hardest to read). The ranked queue picks by rating instead.
