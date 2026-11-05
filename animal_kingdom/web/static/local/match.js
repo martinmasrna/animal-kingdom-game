@@ -15,10 +15,12 @@ const other = p => (p === 'A' ? 'B' : 'A');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 let loaded = null;   // {module, doc, engine}: the wasm compiled once a page, the engine doc fetched once
+let broken = false;  // the engine panicked (a RuntimeError out of the wasm): this page plays its next matches on the server
 
 // The wasm and what it plays with, or null when this browser can't play locally (no wasm, or a build older or newer
 // than the server's engine: the source hashes differ). `api` is the client's fetch.
 export async function prepare(api) {
+  if (broken) return null;
   if (loaded) return loaded;
   try {
     const [wasm, doc] = await Promise.all([
@@ -200,9 +202,17 @@ export class LocalMatch {
       } else if (msg.t === 'ready' || msg.t === 'hold' || msg.t === 'next') return;
       else throw new Error(`unknown message ${msg.t}`);
     } catch (e) {
+      if (e instanceof WebAssembly.RuntimeError) return this.panicked(e);
       this.toast(e.message);
     }
     this.push();
+  }
+
+  panicked(e) {   // the module is gone with its state: the game can't go on here (the console has the panic's message)
+    console.error('local engine stopped:', e);
+    broken = true; loaded = null;
+    this.toast('This game stopped on an engine error. The next one plays on the server.');
+    this.close();
   }
 
   // ------------------------------------------------------------- views (match.py view, _game_view)
@@ -254,10 +264,13 @@ export class LocalMatch {
       action = this.fallback();
     }
     if (this.closed || this.version !== version || this.toAct() !== s) return;   // the position moved under it
-    try { this.act(s, action); } catch (e) {
-      console.error('local bot move refused:', e);
-      this.act(s, this.fallback());
-    }
+    try {
+      try { this.act(s, action); } catch (e) {
+        if (e instanceof WebAssembly.RuntimeError) throw e;
+        console.error('local bot move refused:', e);
+        this.act(s, this.fallback());
+      }
+    } catch (e) { return this.panicked(e); }
     this.wallMs.push(performance.now() - t0);
     this.push();
   }

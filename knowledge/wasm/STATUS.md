@@ -36,7 +36,23 @@ it ends so it counts and is kept. Branch `engine/wasm`.
    Not done: a local match lives in the page (a reload loses it); offline play needs the page and the art already
    loaded; the player's browser holds the whole game, the bot's hand included, so a local practice match can be read
    or edited by its player (the server checks only that the moves were legal: fine for practice, not for anything ranked).
-4. **Numbers** — not measured yet.
+4. **Numbers** (2026-11-05, a cloud container: 4 cores of a 2.8 GHz Xeon, headless Chromium 153; Martin's laptop will
+   differ). `tools/engine_rs/wasm_bench.py` then `wasm_bench.mjs`:
+   - **Size:** the wasm is 1.47 MB, 477 KB gzipped, 354 KB as the brotli copy the server sends over HTTPS
+     (`ak_engine_bg.wasm.br`; plain HTTP, localhost, gets the 1.47 MB). wasm-opt would take it to 1.27 MB raw and
+     458 KB gzipped: not worth requiring. A match also fetches the engine doc (76 KB of JSON, the cards) and the
+     Expert's evaluator with its setup (171 KB), both uncompressed: about 600 KB in all for an Expert match.
+   - **Load:** in a fresh browser from localhost, fetch and compile 39 ms, the engine ready in 68 ms. Over a real
+     connection add the download of those 600 KB (half a second at 10 Mbit/s).
+   - **The Expert's time per move:** 141 positions from the 40 newest human games, each chosen by a fresh bot. On the
+     server's engine (the Rust module the server's bots run, one core): median 384 ms, mean 602 ms, slowest 4.7 s. In
+     the browser (a Web Worker): median 516 ms, mean 817 ms, slowest 6.4 s. The browser is 1.36x slower, and chose the
+     same move in 141 of 141 positions (none reached the 8 s deepening budget on either side). Without the budget, the
+     same work: 1.35x. So the Expert ships locally.
+   - **Normal:** median 1 ms on both, mean 8 ms against 6 ms (1.44x), the same move 141 of 141.
+   - **A move of the player's:** the engine's part (apply and view) is 0.5 ms in the browser; on the server act and view
+     take 0.4 ms in Python. The rest of a move on screen is the drawing, the same either way (about 13 ms here). What
+     local play removes is the network round trip a move and the wait for a shared server CPU, not engine time.
 
 ## Source hash
 

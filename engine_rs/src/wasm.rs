@@ -19,6 +19,19 @@ fn parse(s: &str) -> Result<sj::Value, JsError> {
     sj::from_str(s).map_err(err)
 }
 
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn error(s: &str);
+}
+
+/// A panic says what it was in the console before the module stops (wasm32 aborts on a panic: the page then plays on
+/// the server, static/local/match.js).
+#[wasm_bindgen(start)]
+pub fn start() {
+    std::panic::set_hook(Box::new(|info| error(&format!("ak_engine panicked: {info}"))));
+}
+
 /// The hash of the sources this module was built from (build.rs), to match against the server's.
 #[wasm_bindgen(js_name = sourceHash)]
 pub fn source_hash() -> String {

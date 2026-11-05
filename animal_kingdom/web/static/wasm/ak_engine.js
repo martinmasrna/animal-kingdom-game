@@ -425,6 +425,14 @@ export function sourceHash() {
         wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
     }
 }
+
+/**
+ * A panic says what it was in the console before the module stops (wasm32 aborts on a panic: the page then plays on
+ * the server, static/local/match.js).
+ */
+export function start() {
+    wasm.start();
+}
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,
@@ -434,6 +442,9 @@ function __wbg_get_imports() {
         },
         __wbg___wbindgen_throw_4c88d8bf264fd984: function(arg0, arg1) {
             throw new Error(getStringFromWasm0(arg0, arg1));
+        },
+        __wbg_error_2943ca32cd49377b: function(arg0, arg1) {
+            console.error(getStringFromWasm0(arg0, arg1));
         },
         __wbg_now_463ac581d2fc7ea3: function() {
             const ret = Date.now();
