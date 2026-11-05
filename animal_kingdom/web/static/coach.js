@@ -107,7 +107,9 @@ export function drawCoach(el, L, rings = []) {
     [x, y, side] = port ? [16 + pb.offsetWidth / 2, pb.offsetTop + pb.offsetHeight - 14 - up, 'below'] : [STAGE.w / 2, 100 - up, 'below']; }
   else if (a.endturn) [x, y, side] = port ? [P.end[0] - 55 + out, 0, 'cleft'] : [P.end[0] + out, P.end[1] + up, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); if (port) [x, y, side] = vert(x, y, 52); else side = x > STAGE.w / 2 ? 'left' : 'right'; }
-  else if (a.den) { [x, y] = denMouthAt(a.den); if (port) [x, y, side] = vert(x, y, 40); else side = a.den === 'B' ? 'left' : 'right'; }
+  // upright, the move onto their den rings its mouth (game.css .mouth.tgt, 71 stage px out): the line stands just under the ring
+  // (Martin, 2026-11-05: down only as far as clears the circle, still by the den)
+  else if (a.den) { [x, y] = denMouthAt(a.den); if (port) [x, y, side] = vert(x, y, L.only && L.only.hq ? 76 : 40); else side = a.den === 'B' ? 'left' : 'right'; }
   else if (a.rings && !rings.length) [x, y, side] = [P.handC, H, 'above'];   // no card picked yet: the circles come with one, so point at the hand
   else if (a.rings) {   // beside the group of rings, clear of all of them, with no notch (the rings pulse instead)
     const rs = rings.map(crossroadAt);   // this frame's rings, before the board redraws
