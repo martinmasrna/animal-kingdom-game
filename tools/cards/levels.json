@@ -3506,6 +3506,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: \"they should be gold yeah\"",
+      "by": "claude",
+      "at": 1793883603
     }
   },
   "porcupine": {
@@ -3964,6 +3974,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: \"they should be gold yeah\"",
+      "by": "claude",
+      "at": 1793883603
     }
   },
   "sardine": {

@@ -3115,7 +3115,7 @@
       "id": "baby_fox",
       "name": "Poppy",
       "status": "token",
-      "rarity": "common",
+      "rarity": "legendary",
       "tags": [
         "Canine"
       ],
@@ -3127,7 +3127,7 @@
       "id": "baby_fox_2",
       "name": "Rusty",
       "status": "token",
-      "rarity": "common",
+      "rarity": "legendary",
       "tags": [
         "Canine"
       ],
