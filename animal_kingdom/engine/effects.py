@@ -263,11 +263,14 @@ def _take_from_hand(state: GameState, player: str, card_id: str) -> UnitInstance
 
 
 def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, from_hand: bool,
-               roar: bool = True, play: bool = True, reveal: bool = False) -> None:
+               roar: bool = True, play: bool = True, reveal: bool = False,
+               tops: dict[str, UnitInstance] | None = None) -> None:
     """The same hand instance lands on the board, carrying its strength counter. `roar=False` is a placement by an
     effect that doesn't set off the animal's Roar (the Sardines an effect fills in); every reaction to the landing still
     happens. `play=False`: the animal is placed, not played (rulings.md, "Place versus play"), so "when you play"
-    reactions (Queen Honoria) don't see it. `reveal`: the client shows the card large as it lands (Vesper)."""
+    reactions (Queen Honoria) don't see it. `reveal`: the client shows the card large as it lands (Vesper). `tops`: the
+    board's top animals as they stood before a placement that lands several animals at once (the Locust swarm): every
+    landing's reactions see that board, not the one the earlier landings left (Martin, 2026-11-05)."""
     covered = state.top_unit(cr)
     is_apex = "Apex Predator" in state.cards[unit.card_id].keywords
     onto_enemy = covered is not None and covered.owner != player
@@ -290,7 +293,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
 
     # Reactive triggers resolve AFTER the placed unit's roar (decision 8). The stack
     # is LIFO, so push reactive first (lower) and the roar last (on top).
-    _push_reactions(state, unit, cr, covered, onto_enemy)
+    _push_reactions(state, unit, cr, covered, onto_enemy, tops)
     if onto_enemy:
         _fire_cover_event(state, unit, covered)
         _push_flee(state, covered, unit, cr)
@@ -408,12 +411,12 @@ def _fire_place_event(state, placed) -> None:
             hook(state, top, placed)
 
 
-def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
+def _push_reactions(state, unit, cr, covered, onto_enemy, tops=None) -> None:
     # Traps reacting to a unit arriving adjacent: placed, or roamed in (keywords.md, Roam). An enemy's (Hippopotamus,
     # Meerkat, Golden Orb-Weaver) or anyone's (City Spider). A trap that cares which it was can tell from the arriving
     # unit's `roamed_{iid}` turn flag.
     for nb in sorted(state.game_map.neighbors(cr)):
-        top = state.top_unit(nb)
+        top = state.top_unit(nb) if tops is None else tops.get(nb)
         if top is None:
             continue
         if top.owner != unit.owner:
@@ -435,8 +438,8 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
         if covered.owner != unit.owner and "Colony" in state.cards[covered.card_id].tags:
             _push_queen_guards(state, covered.owner, unit, cr)
         # "When an ally is covered" / "Whenever your opponent covers an allied Fish": the covered unit's side watches.
-        for st in list(state.board.values()):
-            top = st[-1] if st else None
+        watching = [st[-1] if st else None for st in state.board.values()] if tops is None else list(tops.values())
+        for top in watching:
             if top and top.owner == covered.owner and top is not covered:
                 hook = _hook(state, top.card_id, "on_ally_covered")
                 if hook:
@@ -2155,10 +2158,14 @@ def _locust_legend_place(state, unit, cr):
     """Roar: cover the board with Locusts. A Wild Locust lands on every crossroad, this one too, as a placement would
     (Spikes, Poison, Flee and the traps all see it), each with its own timer: "In 2 turns, remove this and the animal
     under it". A Wild animal's timer ticks every turn, so the swarm eats at the start of the caster's next turn, after
-    the opponent's whole turn to see it; a covered Locust waits (overview.md §9.1), so covering one spares that crossroad."""
+    the opponent's whole turn to see it; a covered Locust waits (overview.md §9.1), so covering one spares that crossroad.
+    The swarm lands all at once (Martin, 2026-11-05): every Locust's reactions see the board as it stood before it, so a
+    Hippopotamus takes every Locust around it, not only those that landed before its own crossroad's buried it."""
+    before = {c: state.top_unit(c) for c in state.game_map.crossroads}
+    tops = {c: u for c, u in before.items() if u is not None}
     for c in sorted(state.game_map.crossroads):
         locust = UnitInstance("locust_swarm", WILD, state.new_iid())
-        _land_unit(state, WILD, locust, c, from_hand=False, play=False)
+        _land_unit(state, WILD, locust, c, from_hand=False, play=False, tops=tops)
         schedule(state, locust, state.config.locust_delay,
                  {"op": "locust_eat", "iid": locust.iid, "by_player": unit.owner}, while_buried=False)
 
