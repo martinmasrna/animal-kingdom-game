@@ -2,7 +2,7 @@
 
 The pass that writes a legend (`docs/cards/legends/<animal>.md`, in the honey badger's form) for every collectible legendary whose name is still in brackets, on the branch `cards/legends`. Legends only: no card text, strength, rarity or name changes; names are Martin's. Whether societies exist is open (`knowledge/world-first-study-2026-10-24.md`), so no legend here states one as fact.
 
-Written in this pass: 16. Still to write: 14. Giraffe, Leopard and Rat had legends before the pass and are untouched.
+Written in this pass: 17. Still to write: 13. Giraffe, Leopard and Rat had legends before the pass and are untouched.
 
 
 | Card | id | Str | Legend | State |
@@ -26,7 +26,7 @@ Written in this pass: 16. Still to write: 14. Giraffe, Leopard and Rat had legen
 | [MACAQUE] | `macaque_legend` | 2 | [macaque.md](../../docs/cards/legends/macaque.md) | written |
 | [MANTA RAY] | `manta_ray_legend` | 4 | [manta-ray.md](../../docs/cards/legends/manta-ray.md) | written |
 | [MOLE] | `mole_legend` | 1 | [mole.md](../../docs/cards/legends/mole.md) | written |
-| [OCTOPUS] | `octopus_legend_2` | 4 | [octopus.md](../../docs/cards/legends/octopus.md) | to write |
+| [OCTOPUS] | `octopus_legend_2` | 4 | [octopus.md](../../docs/cards/legends/octopus.md) | written |
 | [OXPECKER] | `oxpecker_legend` | 4 | [oxpecker.md](../../docs/cards/legends/oxpecker.md) | to write |
 | [PIRANHA] | `piranha_legend` | 2 | [piranha.md](../../docs/cards/legends/piranha.md) | to write |
 | [RAT] | `rat_legend` | 4 | [rat.md](../../docs/cards/legends/rat.md) | written before this pass |
