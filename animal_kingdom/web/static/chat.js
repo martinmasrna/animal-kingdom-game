@@ -184,6 +184,3 @@ function removeFriend(f, name) {
   ov.querySelector('[data-x="no"]').onclick = () => ov.remove();
   ov.querySelector('[data-x="yes"]').onclick = async () => { ov.remove(); await ctx.api('/api/friends/' + f.id, { method: 'DELETE' }); S.with = null; loadFriends(); };
 }
-
-// Your friends list changed elsewhere (added one, removed one): the panel's list follows.
-export const refreshChat = () => loadFriends();
