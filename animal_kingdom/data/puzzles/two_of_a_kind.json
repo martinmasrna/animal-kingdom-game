@@ -1,0 +1,34 @@
+{
+  "id": "two_of_a_kind",
+  "title": "Two of a kind",
+  "theme": "Free placements",
+  "to_move": "A",
+  "turns": 1,
+  "order": 8,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,2": [{"card": "bobcat", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["ocelot", "lion", "bobcat"], "B": ["lion", "pup"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "A Cat's Roar can call another Cat.",
+  "why": "The Lion has to cover the Bobcat at 4,2, which leaves one action for two steps; the Ocelot at the den front plays the Bobcat from your hand into the den.",
+  "solution": [
+    {"kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "ocelot", "target": ["cr", "5,2"]},
+    {"kind": "place", "card_id": "bobcat", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "ocelot", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "bobcat", "target": ["hq", "B"]}
+  ]
+}

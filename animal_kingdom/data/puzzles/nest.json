@@ -1,0 +1,37 @@
+{
+  "id": "nest",
+  "title": "Nest",
+  "theme": "Free placements",
+  "to_move": "A",
+  "turns": 1,
+  "order": 16,
+  "board": {
+    "1,1": [{"card": "pup", "owner": "A"}],
+    "1,2": [{"card": "cheetah", "owner": "A"}],
+    "2,1": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "cheetah", "owner": "A"}],
+    "3,1": [{"card": "mouse", "owner": "A"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,2": [{"card": "lion", "owner": "A"}],
+    "5,1": [{"card": "bobcat", "owner": "B"}],
+    "5,2": [{"card": "hedgehog", "owner": "B"}],
+    "5,3": [{"card": "hedgehog", "owner": "B"}]
+  },
+  "hands": {"A": ["cuckoo_legend", "pup", "cheetah"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "The legendary Cuckoo rewards you for removing one of your own.",
+  "why": "The Cuckoo covering the Hedgehog dies on the Spikes unless its Roar wins first; with a Pup put on your own Lion beside it, the Roar removes the Pup, gives a free placement, and the Cheetah takes the den before the Spikes answer.",
+  "solution": [
+    {"kind": "place", "card_id": "pup", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "cuckoo_legend", "target": ["cr", "5,2"]},
+    {"kind": "choice", "choice": "4,2"},
+    {"kind": "place", "card_id": "cheetah", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "cuckoo_legend", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "choice", "choice": "4,2"},
+    {"by": "A", "kind": "place", "card_id": "cheetah", "target": ["hq", "B"]}
+  ]
+}

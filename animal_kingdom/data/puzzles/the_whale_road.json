@@ -4,7 +4,7 @@
   "theme": "Apex Predator",
   "to_move": "A",
   "turns": 1,
-  "order": 6,
+  "order": 9,
   "board": {
     "1,2": [{"card": "sloth", "owner": "A"}],
     "2,2": [{"card": "whale_shark", "owner": "A"}],

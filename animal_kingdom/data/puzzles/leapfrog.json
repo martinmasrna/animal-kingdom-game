@@ -1,0 +1,33 @@
+{
+  "id": "leapfrog",
+  "title": "Leapfrog",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 1,
+  "order": 13,
+  "board": {
+    "1,2": [{"card": "tortoise", "owner": "A"}],
+    "2,2": [{"card": "tortoise", "owner": "A"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "4,1": [{"card": "armadillo", "owner": "B"}],
+    "4,2": [{"card": "wolf", "owner": "A"}],
+    "4,3": [{"card": "boar", "owner": "B"}],
+    "5,1": [{"card": "hippopotamus", "owner": "B"}],
+    "5,2": [{"card": "armadillo", "owner": "B"}],
+    "5,3": [{"card": "armadillo", "owner": "B"}]
+  },
+  "hands": {"A": ["impala", "bobcat"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "A roam leaves its crossroad free for someone else.",
+  "why": "The Wolf roams onto the Armadillo at the den front (Armor stops removal, not covering) and leaves 4,2 empty; the Impala placed there is next to the Boar, but its Roar plays the Baby Impala into the den before the Boar can answer.",
+  "solution": [
+    {"kind": "roam", "from": "4,2", "target": ["cr", "5,2"]},
+    {"kind": "place", "card_id": "impala", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "baby_impala", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "roam", "from": "4,2", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "impala", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "baby_impala", "target": ["hq", "B"]}
+  ]
+}

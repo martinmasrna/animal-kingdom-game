@@ -4,7 +4,7 @@
   "theme": "Free placements",
   "to_move": "A",
   "turns": 1,
-  "order": 3,
+  "order": 5,
   "board": {
     "1,1": [{"card": "lion", "owner": "A"}],
     "2,1": [{"card": "lion", "owner": "A"}],

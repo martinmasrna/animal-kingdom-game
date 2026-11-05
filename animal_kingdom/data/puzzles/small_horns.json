@@ -1,0 +1,30 @@
+{
+  "id": "small_horns",
+  "title": "Small horns",
+  "theme": "Covering",
+  "to_move": "A",
+  "turns": 1,
+  "order": 4,
+  "board": {
+    "1,2": [{"card": "wolf", "owner": "A"}],
+    "2,2": [{"card": "bobcat", "owner": "A"}],
+    "3,2": [{"card": "wolf", "owner": "A"}],
+    "4,1": [{"card": "hamster", "owner": "B"}],
+    "4,2": [{"card": "lion", "owner": "A"}],
+    "4,3": [{"card": "zebra", "owner": "B"}],
+    "5,2": [{"card": "hippopotamus", "owner": "B"}],
+    "5,3": [{"card": "lion", "owner": "B"}]
+  },
+  "hands": {"A": ["hercules_beetle", "wolf", "squirrel"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "The Hercules Beetle can cover an animal of any strength.",
+  "why": "Nothing in hand beats the Hippopotamus (8), and anything weak placed beside it is removed; the Hercules Beetle (0) covers it outright, and the Squirrel goes into the den.",
+  "solution": [
+    {"kind": "place", "card_id": "hercules_beetle", "target": ["cr", "5,2"]},
+    {"kind": "place", "card_id": "squirrel", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "hercules_beetle", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "squirrel", "target": ["hq", "B"]}
+  ]
+}

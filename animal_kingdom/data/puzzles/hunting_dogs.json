@@ -1,0 +1,30 @@
+{
+  "id": "hunting_dogs",
+  "title": "Hunting dogs",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 1,
+  "order": 10,
+  "board": {
+    "1,2": [{"card": "wolf", "owner": "A"}],
+    "2,2": [{"card": "wolf", "owner": "A"}],
+    "3,2": [{"card": "wolf", "owner": "A"}],
+    "4,1": [{"card": "bobcat", "owner": "B"}],
+    "5,1": [{"card": "tortoise", "owner": "B"}],
+    "5,2": [{"card": "hedgehog", "owner": "B"}]
+  },
+  "hands": {"A": ["african_wild_dog", "bobcat", "wolf"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "A Canine played next to the African Wild Dog roams at once.",
+  "why": "A Wolf onto the Hedgehog dies on its Spikes; played beside the African Wild Dog it roams the moment it lands, into the den, before the Spikes can answer.",
+  "solution": [
+    {"kind": "place", "card_id": "african_wild_dog", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "wolf", "target": ["cr", "5,2"]},
+    {"kind": "choice", "choice": "den"}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "african_wild_dog", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "wolf", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "choice", "choice": "den"}
+  ]
+}

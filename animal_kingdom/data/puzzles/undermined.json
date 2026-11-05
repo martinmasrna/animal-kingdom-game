@@ -1,0 +1,32 @@
+{
+  "id": "undermined",
+  "title": "Undermined",
+  "theme": "Free placements",
+  "to_move": "A",
+  "turns": 1,
+  "order": 15,
+  "board": {
+    "1,3": [{"card": "tortoise", "owner": "A"}],
+    "2,3": [{"card": "bobcat", "owner": "A"}],
+    "3,3": [{"card": "wolf", "owner": "A"}],
+    "4,1": [{"card": "hedgehog", "owner": "B"}],
+    "4,3": [{"card": "tortoise", "owner": "A"}],
+    "5,1": [{"card": "bobcat", "owner": "B"}],
+    "5,2": [{"card": "hamster", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["mole", "lion"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "The Wolf at the back can roam through every animal of yours it touches.",
+  "why": "The Mole at 4,2 plays the Lion onto the Hamster for free, and that puts your animals on the den front all the way from the Wolf: with its pack connected there, the Wolf roams straight into the den.",
+  "solution": [
+    {"kind": "place", "card_id": "mole", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "lion", "target": ["cr", "5,2"]},
+    {"kind": "roam", "from": "3,3", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "mole", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "roam", "from": "3,3", "target": ["hq", "B"]}
+  ]
+}

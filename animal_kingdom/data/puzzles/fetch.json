@@ -1,0 +1,33 @@
+{
+  "id": "fetch",
+  "title": "Fetch",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 1,
+  "order": 12,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,2": [{"card": "tortoise", "owner": "A"}],
+    "4,1": [{"card": "cheetah", "owner": "B"}],
+    "4,2": [{"card": "wolf", "owner": "A"}],
+    "4,3": [{"card": "toad", "owner": "B"}],
+    "5,2": [{"card": "stick_insect", "owner": "B"}]
+  },
+  "hands": {"A": ["street_dog", "cheetah", "squirrel"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "The Street Dog's Roar makes a roaming ally roam, and the roam goes as far as its pack.",
+  "why": "The Squirrel on 5,3 would reach the den front with no action left; the Street Dog there instead makes the Wolf roam, and with the Cheetah and the Street Dog in its pack it walks into the den.",
+  "solution": [
+    {"kind": "place", "card_id": "cheetah", "target": ["cr", "4,3"]},
+    {"kind": "place", "card_id": "street_dog", "target": ["cr", "5,3"]},
+    {"kind": "choice", "choice": "4,2"},
+    {"kind": "choice", "choice": "den"}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "cheetah", "target": ["cr", "4,3"]},
+    {"by": "A", "kind": "place", "card_id": "street_dog", "target": ["cr", "5,3"]},
+    {"by": "A", "kind": "choice", "choice": "4,2"},
+    {"by": "A", "kind": "choice", "choice": "den"}
+  ]
+}

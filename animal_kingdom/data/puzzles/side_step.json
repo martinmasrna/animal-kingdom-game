@@ -1,0 +1,36 @@
+{
+  "id": "side_step",
+  "title": "Side step",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 1,
+  "order": 11,
+  "board": {
+    "1,1": [{"card": "tortoise", "owner": "A"}],
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,1": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "cheetah", "owner": "A"}],
+    "3,1": [{"card": "bobcat", "owner": "A"}],
+    "3,2": [{"card": "pup", "owner": "A"}],
+    "4,1": [{"card": "wolf", "owner": "A"}],
+    "4,2": [{"card": "mouse", "owner": "B"}],
+    "4,3": [{"card": "armadillo", "owner": "B"}],
+    "5,1": [{"card": "zebra", "owner": "B"}],
+    "5,2": [{"card": "gazelle", "owner": "B"}],
+    "5,3": [{"card": "porcupine", "owner": "B"}]
+  },
+  "hands": {"A": ["rabbit", "mouse"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "Covering a Zebra sends your animal home, and a Gazelle runs home when covered.",
+  "why": "The Wolf on 4,1 is the obvious attacker of the Zebra beside it, but covering a Zebra bounces your animal; it roams sideways onto the Mouse instead, and the Rabbit covers the Gazelle so its Bunny can take the den.",
+  "solution": [
+    {"kind": "roam", "from": "4,1", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "rabbit", "target": ["cr", "5,2"]},
+    {"kind": "place", "card_id": "bunny", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "roam", "from": "4,1", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "rabbit", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "bunny", "target": ["hq", "B"]}
+  ]
+}

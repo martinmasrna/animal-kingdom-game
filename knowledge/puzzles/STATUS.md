@@ -71,12 +71,22 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 - **Timers are not in the format.** A puzzle board holds animals (with an optional `counter` for given strength, and
   `spent` for a used Spikes or Boar charge), not pending "in 2 turns" effects. `from-log` warns when it drops one.
 
+## Phase 7 (ten at a time, until told to stop)
+
+- **Batch 1** (10, all in one turn, each passing `check` with one winning turn): `two_of_a_kind` (the Ocelot calls a
+  second Cat), `hunting_dogs` (a Wolf beside the African Wild Dog roams before the Spikes act), `fetch` (the Street
+  Dog sends the Wolf through its pack into the den), `nest` (the legendary Cuckoo removes your own Pup to play a free
+  animal, ahead of the Spikes), `side_step` (the Wolf roams sideways instead of covering the Zebra), `leapfrog` (roam
+  forward, and the Impala beats the Boar), `undermined` (Mole, a free Lion, then the Wolf roams in), `called_up` (the
+  Coyote gives the back Cheetah Roam), and two for a first hour, `talons` (an Eagle lands on the Orb-Weaver) and
+  `small_horns` (a Hercules Beetle covers the Hippo). Eight of them came from a search over open boards with the
+  idea's card in hand (`tools`-free, a scratch script), then picked by hand for an idea the obvious move misses; the
+  rest of that search's 576 finds were "play the one card that can" and were left out. The one-turn list now runs 17
+  puzzles, ordered by difficulty; their notes are in the set document.
+
 ## Next
 
-Phase 7: ten more puzzles at a time, each batch committed, until told to stop. A clean one-turn Ocelot puzzle is already
-waiting. Next ideas: boards that are not one walled lane (open fields, both flanks), other decks and habitats
-(Fish, Colony, Canines), and the ideas that did not hold yet (the Leo and Lea pair, Flight over a wall, a Dusk timing,
-the City Spider, which ties and so brings chance).
+Batch 2: more two-turn puzzles off the walled lane (open boards, both flanks), and other decks (Fish, Colony).
 
 ## Blocked
 
@@ -84,7 +94,7 @@ Nothing. (Chrome for Testing could not be downloaded here; the tests run on the 
 
 ## For Martin's own eyes
 
-- `./play`, then http://localhost:8000/#/puzzles: the 22 puzzles, one-turn first. Play a few of each kind: are the
+- `./play`, then http://localhost:8000/#/puzzles: the 32 puzzles, one-turn first. Play a few of each kind: are the
   ideas worth a puzzle, is the difficulty order right, do the titles and hints say too much or too little?
 - The set document, `knowledge/puzzles/set-1-2026-11-05.md`: every board as text with its obvious move and solution,
   to judge them without playing.

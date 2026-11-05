@@ -4,7 +4,7 @@
   "theme": "Roam",
   "to_move": "A",
   "turns": 1,
-  "order": 4,
+  "order": 6,
   "board": {
     "1,1": [{"card": "wolf", "owner": "A"}],
     "1,2": [{"card": "lion", "owner": "A"}],

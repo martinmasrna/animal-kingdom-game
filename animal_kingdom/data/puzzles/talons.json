@@ -1,0 +1,30 @@
+{
+  "id": "talons",
+  "title": "Talons",
+  "theme": "Traps",
+  "to_move": "A",
+  "turns": 1,
+  "order": 3,
+  "board": {
+    "1,2": [{"card": "wolf", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,2": [{"card": "wolf", "owner": "A"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,2": [{"card": "wolf", "owner": "A"}],
+    "4,3": [{"card": "zebra", "owner": "B"}],
+    "5,2": [{"card": "golden_orb_weaver", "owner": "B"}],
+    "5,3": [{"card": "toad", "owner": "B"}]
+  },
+  "hands": {"A": ["eagle", "mouse"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "The Orb-Weaver answers Flight placed next to it, not on it.",
+  "why": "Only the Eagle can take the Orb-Weaver's crossroad, and as an Apex Predator landing on it, it eats it instead of being caught; the Mouse then takes the den, which no predator can.",
+  "solution": [
+    {"kind": "place", "card_id": "eagle", "target": ["cr", "5,2"]},
+    {"kind": "place", "card_id": "mouse", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "eagle", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "mouse", "target": ["hq", "B"]}
+  ]
+}

@@ -4,7 +4,7 @@
   "theme": "Roam",
   "to_move": "A",
   "turns": 1,
-  "order": 7,
+  "order": 17,
   "board": {
     "1,2": [{"card": "pup", "owner": "A"}, {"card": "worker_wasp", "owner": "B"}, {"card": "pup", "owner": "A"}, {"card": "leopard_legend", "owner": "A", "counter": 5}],
     "1,3": [{"card": "pup", "owner": "A"}, {"card": "worker_wasp", "owner": "B"}, {"card": "pup", "owner": "A"}],

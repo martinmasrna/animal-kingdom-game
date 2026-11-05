@@ -1,0 +1,38 @@
+{
+  "id": "called_up",
+  "title": "Called up",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 1,
+  "order": 14,
+  "board": {
+    "1,1": [{"card": "cheetah", "owner": "A"}],
+    "1,2": [{"card": "pup", "owner": "A"}],
+    "2,1": [{"card": "cheetah", "owner": "A"}],
+    "2,2": [{"card": "pup", "owner": "A"}],
+    "3,1": [{"card": "lion", "owner": "A"}],
+    "3,2": [{"card": "mouse", "owner": "B"}],
+    "3,3": [{"card": "porcupine", "owner": "B"}],
+    "4,2": [{"card": "pup", "owner": "B"}],
+    "4,3": [{"card": "lion", "owner": "B"}],
+    "5,1": [{"card": "toad", "owner": "B"}],
+    "5,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "armadillo", "owner": "B"}]
+  },
+  "hands": {"A": ["coyote", "pup", "cheetah"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "The Coyote can give Roam to any ally connected to it.",
+  "why": "The Cheetah at the back is far from the den, but the Coyote at 4,1 gives it Roam and it roams at once, through the whole line to cover the Toad at the den front; the other Cheetah takes the den.",
+  "solution": [
+    {"kind": "place", "card_id": "coyote", "target": ["cr", "4,1"]},
+    {"kind": "choice", "choice": "1,1"},
+    {"kind": "choice", "choice": "5,1"},
+    {"kind": "place", "card_id": "cheetah", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "coyote", "target": ["cr", "4,1"]},
+    {"by": "A", "kind": "choice", "choice": "1,1"},
+    {"by": "A", "kind": "choice", "choice": "5,1"},
+    {"by": "A", "kind": "place", "card_id": "cheetah", "target": ["hq", "B"]}
+  ]
+}

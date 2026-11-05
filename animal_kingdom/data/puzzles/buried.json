@@ -4,7 +4,7 @@
   "theme": "Removal",
   "to_move": "A",
   "turns": 1,
-  "order": 5,
+  "order": 7,
   "board": {
     "1,2": [{"card": "lion", "owner": "A"}],
     "2,2": [{"card": "lion", "owner": "A"}],
