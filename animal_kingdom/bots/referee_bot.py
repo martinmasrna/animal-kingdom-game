@@ -47,7 +47,6 @@ import random
 from typing import Optional, Sequence
 
 from ..engine import rules
-from .base import keep_hand
 from ..engine.actions import Action, DrawAction, PlaceAction, RoamAction
 from ..engine.state import GameState, StateView, other_player
 from ..engine.strength import card_strength

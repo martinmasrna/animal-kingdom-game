@@ -14,7 +14,6 @@ measured is what the network is shown. Games held out by game (every fifth game)
 from __future__ import annotations
 
 import argparse
-import sys
 import time
 
 import numpy as np

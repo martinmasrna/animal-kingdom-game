@@ -25,7 +25,7 @@
 .endbox .next { font-size: 15px; color: #c9b48f; }
 .endbox .btns { display: flex; gap: 12px; margin-top: 10px; }
 
-.game { --frame: #121110; --ground: #1c1b19; --path: #3d3a35; --clear: #252321; --clearline: #4a463f; --stone: #302d2a; --stonenum: #a39c90;
+.game { --frame: #121110; --clear: #252321; --clearline: #4a463f; --stone: #302d2a; --stonenum: #a39c90;
   --plaque: #2d2b28; --plaqueline: #4a4640; --ink: #f4efe6; --mute: #a39c90; --act: #efe6d4; --ready: #f2c230;
   --A: #7ab6f8; --Adk: #1f4a85; --Aghost: #4a7cb4; --Aink: #0f213b; --B: #d9442c; --Bdk: #5a160c; --Bghost: #8a2d1d;
   position: fixed; inset: 0; background: #0b0a09; overflow: hidden; font-family: 'Source Serif 4', Georgia, serif; color: var(--ink); }
@@ -41,8 +41,6 @@
 
 /* board */
 .game #board { position: absolute; inset: 0; }
-.game .boardbg { left: 0; right: 0; top: 66px; height: 518px; background: var(--ground); border-top: 1px solid #2a2825; border-bottom: 1px solid #2a2825; }
-.game svg.paths { position: absolute; left: 0; top: 0; pointer-events: none; } .game svg.paths g { stroke: var(--path); stroke-width: 12; stroke-linecap: round; }
 .game .cr { width: 124px; height: 124px; margin: -62px 0 0 -62px; z-index: 1; }
 .game .clear { border-radius: 50%; background: var(--clear); border: 3px solid var(--clearline); }
 .game .stone { width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; display: grid; place-items: center; font-size: 19px; background: var(--stone); color: var(--stonenum); border: 2px solid var(--clearline); }
@@ -177,8 +175,6 @@
 .game.kit .unit.B .boss { background-image: url(/static/kit2/boss_b.webp); } .game.kit .unit.W .boss { background-image: url(/static/kit2/boss_n.webp); }
 .game.kit .unit .buried { border: 0; inset: 6px; }
 /* painted numbers: payout stones with the number carved in; den counts in painted war-paint digits, laid into the rock */
-.game.kit .stone.carved { width: 50px; height: 50px; margin: -25px 0 0 -25px; background: none; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.55)); }
-.game.kit .stone.carved img { width: 100%; height: 100%; display: block; }
 .game .dcount { display: flex; justify-content: center; gap: 1px; width: 110px; margin-left: -55px; margin-top: -22px; text-shadow: none; }
 .game .dcount img { height: 44px; opacity: .92; }
 /* polish pass: in-game tips, calmer neutral stones, readable dimmed cards, End turn contrast */

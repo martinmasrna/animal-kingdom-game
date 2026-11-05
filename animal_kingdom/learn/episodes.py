@@ -20,7 +20,7 @@ Deck sampling draws from every unordered pair of the starter decks, mirrors incl
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from ..bots.base import Bot

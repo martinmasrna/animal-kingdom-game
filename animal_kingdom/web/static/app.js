@@ -4,7 +4,7 @@ import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
 import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan } from './timeline.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
@@ -19,7 +19,6 @@ const app = document.getElementById('app'), pop = document.getElementById('pop')
 let COVER = {};   // starter deck id -> the card covering it (the server's pool says, from cards.json)
 const RANK = { legendary: 0, rare: 1, common: 2 };
 const SKIP = '__skip__';
-const artStyle = id => hasArt(id) ? `style="background-image:url(${artUrl(id)})"` : '';
 const sv = c => c.str === '*' ? -1 : c.str;
 const store = (k, v) => { try { v === undefined ? null : localStorage.setItem(k, v); return localStorage.getItem(k); } catch { return null; } };
 const tokenKey = id => 'ak:seat:' + id;
@@ -1197,9 +1196,6 @@ function turnPlate() {
   const b = document.createElement('div'); b.className = 'yourturn'; b.innerHTML = '<b>Your turn</b>';
   document.getElementById('stage').appendChild(b); setTimeout(() => b.remove(), 1500);
 }
-// Did your turn's start change something of yours (an Egg hatching), or ask you something? Then it plays after the plate.
-const yoursChanged = (a, b, you) => { const mine = g => JSON.stringify(Object.entries(g.board).map(([cr, st]) => [cr, st.filter(u => u.owner === you).map(u => u.iid)]).filter(([, l]) => l.length).sort());
-  return mine(a) !== mine(b) || !!(b.pending && b.toAct === you); };
 
 // A phone in a match: a swipe down never reloads the page (pull-to-refresh is off on the game screen, game.css), and the
 // screen stays awake while a game is being played, so it can't lock and drop the connection during the opponent's turn.
@@ -1231,8 +1227,7 @@ function drawGame() {
   if (!playing) $('concov').classList.remove('on');
   drawReplayBar();
 
-  // Top left: the turn (a match is one game while there is one map); it opens the history. The gauntlet counts its games.
-  const gameNo = playing ? V.results.length + 1 : V.results.length;
+  // Top left: the turn (a match is one game while there is one map); it opens the history.
   drawHistory(G); drawLists(G); showPanel();
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.

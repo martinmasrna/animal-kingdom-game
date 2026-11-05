@@ -6,13 +6,12 @@ card reach the effects no logged game does.
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))   # REPO_ROOT: this tree, not an installed copy
-import argparse, dataclasses, json, os, random, sys, time
+import argparse, dataclasses, json, random, sys, time
 
 from animal_kingdom.engine import rules
-from animal_kingdom.engine.actions import PassAction, action_from_dict
+from animal_kingdom.engine.actions import PassAction
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.resources import load_bundled_json
 from animal_kingdom.engine.state import new_game
 import ak_engine
 

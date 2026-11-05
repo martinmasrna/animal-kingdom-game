@@ -5,7 +5,7 @@ Usage: extract.py OUT.npz {expert|human} LOG.jsonl [LOG.jsonl ...]
   expert: both seats' decisions; human: the human seat's only (logs whose `bots` name a human).
 A game that stops replaying on today's cards contributes the decisions before the break. The mulligan is skipped.
 """
-import json, os, sys
+import json, sys
 import numpy as np
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import action_from_dict
@@ -16,7 +16,6 @@ from animal_kingdom.bots import features as F
 
 KINDS = ("place", "roam", "draw", "choice_cr", "choice_opt", "choice_skip")
 CARD_N, SLOT_N, OPT_N = len(F.HAND_FEATURES), len(F.SLOT_FEATURES), 8
-ACTION_N = len(KINDS) + CARD_N + SLOT_N + F.BOARD_SLOTS + 8 + OPT_N
 
 
 def slot_vec(state, me, cr):
@@ -152,7 +151,6 @@ def main():
                 seats = {"A" if bots[0] == "human" else "B"}
             else:
                 seats = {"A", "B"}
-            n0 = len(chosen)
             for p, av, c, turn, me in decisions(g, seats):
                 pos.append(p); acts.extend(av); offs.append(len(acts)); chosen.append(c)
                 meta.append((games, turn, 0 if me == "A" else 1, len(av)))

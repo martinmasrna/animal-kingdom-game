@@ -70,7 +70,6 @@ class AtomicBot(Bot):
         self.draws = draws               # ways a draw can come out followed at most: the likeliest
         self._plan: list[Action] = []
         self._plan_key = None
-        self.last_ranking: list[dict] = []
 
     # ------------------------------------------------------------------ evaluation
 
@@ -526,7 +525,6 @@ class AtomicBot(Bot):
             self._plan_key = self._next_key(st, a, me) if self._plan else None
             return a
         ranking = self.rank(st, me)
-        self.last_ranking = ranking
         best = ranking[0]["turn"]
         a, self._plan = best[0], list(best[1:])
         if isinstance(a, DrawAction):      # what follows a draw is planned once the cards are seen

@@ -4,7 +4,7 @@ import json, sys, time
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.state import GameState
 from animal_kingdom.sim.runner import make_bot
-sys.path.insert(0, "tools"); from den_census import captures_in_two, end_turn
+sys.path.insert(0, "tools"); from den_census import captures_in_two
 CANDIDATE = {"depth": 1, "w.pending_target": 1.5, "w.buried_presence": 0.25, "den_sense": True, "reply_turns": 3, "time_budget": 8.0}
 data = json.load(open("results/census/den_census.json"))
 out = []

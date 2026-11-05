@@ -4,7 +4,7 @@ to (prune-by-value, what the search does today), and by chance.
 
 Usage: baseline.py {expert|human} LOG.jsonl [...] [--games N]  (expert logs need AK_EXTRA_DECKS as extract.py does)
 """
-import json, os, sys, random
+import json, os, sys
 os.environ.setdefault("AK_PY_BOTS", "1")
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import action_from_dict
