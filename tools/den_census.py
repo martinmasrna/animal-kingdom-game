@@ -8,7 +8,7 @@ For every logged human-vs-Expert game the bot lost, at the start of each bot tur
 Writes results/census/den_census.json: the counts, and every flagged position (state dict, game, turn, what the bot
 played) so the positions can be replayed by other bots and turned into puzzles.
 """
-import glob, json, sys, time, collections
+import glob, json, time, collections
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import ChoiceAction, SKIP, PassAction
 from animal_kingdom.engine.state import new_game
@@ -86,7 +86,7 @@ def main():
                 state = new_game(list(lists[0]), list(lists[1]), g["seed"], map_id=g.get("map_id", "map_b"),
                                  config=Config.default().for_log(g), first_player=g["first_player"])
             except Exception: counts["skipped_setup"] += 1; continue
-            games += 1; ok = True; turn_facts = []
+            games += 1; ok = True
             actions = g["actions"]; i = 0
             while i < len(actions):
                 adict = actions[i]

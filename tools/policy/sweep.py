@@ -1,7 +1,7 @@
 """Time and top pick of the whole-turn search under several settings on several positions, each run capped.
 Usage: sweep.py OUT_DIR CAP_SECONDS "setting1" "setting2" ... -- pos1.json pos2.json ...
 Writes OUT_DIR/<pos>.<tag>.txt per run (rank_pos.py's output, or TIMEOUT) and prints a summary table."""
-import os, re, subprocess, sys, time
+import re, subprocess, sys, time
 from pathlib import Path
 
 args = sys.argv[1:]

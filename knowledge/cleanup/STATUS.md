@@ -41,6 +41,7 @@ Branch: `claude/animal-kingdom-cleanup-yn3cqj` (the branch this cloud session ma
 | `learn/episodes.py` | 189 | 189 | unused `field` import |
 | `learn/rawnet.py` | 289 | 288 | unused `sys` import |
 | `learn/slotnet.py` | 296 | 295 | `np = _np()` in `split`, never read (its input is already a numpy array) |
+| `tools/` (12 scripts) | 1636 | 1631 | pyflakes' unused names: `sys`/`os`/`random` imports in `den_census`, `policy/{extract,baseline,sweep,train}`, `ladder/ladder`, `engine_rs/{fuzz,oracle}`; `feature_oracle` imported `sys` twice; `action_from_dict` in `fuzz` and `puzzles/mine`, `load_bundled_json` in `fuzz`, `end_turn` in `census_replay`, `torch.nn.functional` in `policy/train`; locals `turn_facts` (`den_census`), `n0` and the `ACTION_N` constant (`policy/extract`), an unread `as e` (`blunder_scan`) |
 
 ## Found but left
 

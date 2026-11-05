@@ -5,7 +5,7 @@ serialised position and the legal actions compared after every action. The port 
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))   # REPO_ROOT: this tree, not an installed copy
-import argparse, dataclasses, glob, json, sys, time
+import argparse, dataclasses, glob, json, time
 
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import SKIP, ChoiceAction
