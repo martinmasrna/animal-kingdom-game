@@ -2,7 +2,7 @@
 
 The pass that writes a legend (`docs/cards/legends/<animal>.md`, in the honey badger's form) for every collectible legendary whose name is still in brackets, on the branch `cards/legends`. Legends only: no card text, strength, rarity or name changes; names are Martin's. Whether societies exist is open (`knowledge/world-first-study-2026-10-24.md`), so no legend here states one as fact.
 
-Written in this pass: 13. Still to write: 17. Giraffe, Leopard and Rat had legends before the pass and are untouched.
+Written in this pass: 14. Still to write: 16. Giraffe, Leopard and Rat had legends before the pass and are untouched.
 
 
 | Card | id | Str | Legend | State |
@@ -23,7 +23,7 @@ Written in this pass: 13. Still to write: 17. Giraffe, Leopard and Rat had legen
 | [GIRAFFE] | `giraffe_legend` | 7 | [giraffe.md](../../docs/cards/legends/giraffe.md) | written before this pass |
 | [GORILLA] | `gorilla_legend` | 4 | [gorilla.md](../../docs/cards/legends/gorilla.md) | written |
 | [LEOPARD] | `leopard_legend` | 5 | [leopard.md](../../docs/cards/legends/leopard.md) | written before this pass |
-| [MACAQUE] | `macaque_legend` | 2 | [macaque.md](../../docs/cards/legends/macaque.md) | to write |
+| [MACAQUE] | `macaque_legend` | 2 | [macaque.md](../../docs/cards/legends/macaque.md) | written |
 | [MANTA RAY] | `manta_ray_legend` | 4 | [manta-ray.md](../../docs/cards/legends/manta-ray.md) | to write |
 | [MOLE] | `mole_legend` | 1 | [mole.md](../../docs/cards/legends/mole.md) | to write |
 | [OCTOPUS] | `octopus_legend_2` | 4 | [octopus.md](../../docs/cards/legends/octopus.md) | to write |
