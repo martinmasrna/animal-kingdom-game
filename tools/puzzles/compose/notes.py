@@ -50,4 +50,5 @@ NOTES = {
  'second_helping': dict(difficulty=4, obvious="The Pigeon onto the Hedgehog, the one card strong enough: the Spikes remove it, and the Mouse behind is still in the way."),
  'pack_line': dict(difficulty=4, obvious="Roam the Dhole onto the Mouse and keep both Wild Dogs: the hole it leaves at 2,3 cuts the line, and next turn there are not enough actions to mend it and finish."),
  'queens_call': dict(difficulty=3, obvious="The Termite King onto the Hedgehog, the one card strong enough to cover it: the Spikes remove it."),
+ 'running_mate': dict(difficulty=3, obvious="The Wolf up the right lane and the Bush Dog after it: two placements reach the den front but not the den."),
 }

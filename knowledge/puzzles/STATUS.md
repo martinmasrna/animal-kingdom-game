@@ -100,7 +100,8 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   and `gen3.py` in `tools/puzzles/compose`); Fish boards gave the least.
 
 - **Batch 3** (started): `queens_call` (Colony, one turn: the Soldier Ant removes the Hedgehog that would kill a
-  Termite King, and the Termite Queen on the empty den front plays the King into the den). Colony and Fish two-turn
+  Termite King, and the Termite Queen on the empty den front plays the King into the den), `running_mate` (Canines, one turn: the African Wild Dog roams
+  ahead, then the Wolf played beside it roams into the den). Colony and Fish two-turn
   positions have not come: Colony cards are 2s and 3s, so the defender's reply always breaks them or the solver's
   extra Colony card can go anywhere (a dozen winning first turns); Fish cards are so alike that every Fish position
   found had many winning first turns. One-turn Colony puzzles come easily (`tools/puzzles/compose/gen1d.py`); Fish
@@ -108,7 +109,7 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 
 ## Where things stand
 
-40 puzzles on the branch: 18 in one turn, 22 in two. Every file passes `tools/puzzles/solve.py check`, every one is
+41 puzzles on the branch: 19 in one turn, 22 in two. Every file passes `tools/puzzles/solve.py check`, every one is
 clicked to Solved by `animal_kingdom/web/test/puzzles.test.mjs`, and the set document has a section for each.
 
 ## Next
@@ -123,7 +124,7 @@ Chrome for Testing could not be downloaded here; the web tests run on the preins
 
 ## For Martin's own eyes
 
-- `./play`, then http://localhost:8000/#/puzzles: the 40 puzzles, one-turn first. Play a few of each kind: are the
+- `./play`, then http://localhost:8000/#/puzzles: the 41 puzzles, one-turn first. Play a few of each kind: are the
   ideas worth a puzzle, is the difficulty order right, do the titles and hints say too much or too little?
 - The set document, `knowledge/puzzles/set-1-2026-11-05.md`: every board as text with its obvious move and solution,
   to judge them without playing.

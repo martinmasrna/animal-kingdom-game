@@ -1,0 +1,37 @@
+{
+  "id": "running_mate",
+  "title": "Running mate",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 1,
+  "order": 19,
+  "board": {
+    "1,1": [{"card": "street_dog", "owner": "A"}],
+    "1,2": [{"card": "dhole", "owner": "A"}],
+    "1,3": [{"card": "dhole", "owner": "A"}],
+    "2,1": [{"card": "african_wild_dog", "owner": "A"}],
+    "2,2": [{"card": "dhole", "owner": "A"}],
+    "2,3": [{"card": "street_dog", "owner": "A"}],
+    "3,2": [{"card": "boar", "owner": "B"}],
+    "3,3": [{"card": "fox", "owner": "A"}],
+    "4,1": [{"card": "gorilla", "owner": "B"}],
+    "4,2": [{"card": "cheetah", "owner": "B"}],
+    "5,1": [{"card": "gorilla", "owner": "B"}],
+    "5,2": [{"card": "giraffe", "owner": "B"}],
+    "5,3": [{"card": "mouse", "owner": "B"}]
+  },
+  "hands": {"A": ["pup", "bush_dog", "wolf"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "An African Wild Dog makes a Canine played next to it roam, and it can roam itself first.",
+  "why": "The Wolf can't reach the den in two placements; the African Wild Dog at the back roams through the whole pack to 4,3 first, and the Wolf, covering the Mouse beside it, roams at once into the den.",
+  "solution": [
+    {"kind": "roam", "from": "2,1", "target": ["cr", "4,3"]},
+    {"kind": "place", "card_id": "wolf", "target": ["cr", "5,3"]},
+    {"kind": "choice", "choice": "den"}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "roam", "from": "2,1", "target": ["cr", "4,3"]},
+    {"by": "A", "kind": "place", "card_id": "wolf", "target": ["cr", "5,3"]},
+    {"by": "A", "kind": "choice", "choice": "den"}
+  ]
+}
