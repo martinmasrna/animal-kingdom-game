@@ -166,11 +166,6 @@ FEATURE_SETS: dict[str, tuple[str, ...]] = {
 BOARD_SETS = ("board", "board_live", "board_ability")
 
 
-def slot_layout(feature_set: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
-    """The per-crossroad and per-hand-card feature names of a board feature set."""
-    return (SLOT_FEATURES_AB, HAND_FEATURES_AB) if feature_set == "board_ability" else (SLOT_FEATURES, HAND_FEATURES)
-
-
 def feature_names(feature_set: str) -> tuple[str, ...]:
     """The ordered feature names for `feature_set` (`extract()`'s output order)."""
     try:

@@ -33,6 +33,14 @@ Branch: `claude/animal-kingdom-cleanup-yn3cqj` (the branch this cloud session ma
 | `sim/replay.py` | 202 | 201 | an `action_from_dict(adict)` whose result nobody read (`rules.apply_logged` parses the same dict) and its import |
 | `sim/report.py` | 315 | 313 | `total_matchups`, assigned, never read |
 | `sim/transcript.py` | 74 | 73 | unused `effective_strength` import |
+| `bots/features.py` | 995 | 990 | `slot_layout`, written with the board_ability features (`89ffee67`, 2026-10-29) and never called |
+| `bots/atomic_bot.py` | 565 | 563 | `last_ranking`, set on every ranked turn and never read |
+| `bots/referee_bot.py` | 749 | 748 | unused `keep_hand` import (the bot calls its own `_keep_hand`) |
+| `bots/raw_position.py` | 323 | 322 | `cards`, a local never read |
+| `learn/artifacts.py` | 76 | 55 | `promote_checkpoint`, unused since it was written (`95a3ce08`, 2026-07-17); `build_artifact` plus `.save()` is what callers do |
+| `learn/episodes.py` | 189 | 189 | unused `field` import |
+| `learn/rawnet.py` | 289 | 288 | unused `sys` import |
+| `learn/slotnet.py` | 296 | 295 | `np = _np()` in `split`, never read (its input is already a numpy array) |
 
 ## Found but left
 

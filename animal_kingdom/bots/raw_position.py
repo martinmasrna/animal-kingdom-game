@@ -169,7 +169,6 @@ def extract(state: GameState, me: str) -> dict:
         raise ValueError("the raw position is read only on a quiet position")
     opp = other_player(me)
     idx = card_index(state.cards)
-    cards = state.cards
     crs = mirrored_crossroads(state, me)
     flags = state.turn_flags
     tc = state.turn_counter
