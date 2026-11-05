@@ -27,7 +27,7 @@ The port (64f3b00, `engine_rs/src/bots/search.rs`): `den_reach` (on only with `d
 Bot oracle, the live Expert untimed, Python against Rust, moves and root scores:
 
 - 60 random positions (seed 0): dial off 60/60, dial on 60/60.
-- The mined den-capture positions (`--puzzles tools/puzzles/forced_captures-2026-11-05.jsonl`, 153 of 154; the one in LBFBOA holds a card renamed since its game): dial off 153/153, dial on 115/115 on the three shards that finished before the cloud credit ran out; the fourth shard (38 positions) was cut off unfinished. No disagreement anywhere. To finish it on the Mac: `.venv/bin/python tools/engine_rs/bot_oracle.py --puzzles tools/puzzles/forced_captures-2026-11-05.jsonl --specs expert_reach --shard 1/4` (about 20 minutes of Python).
+- The mined den-capture positions (`--puzzles tools/puzzles/forced_captures-2026-11-05.jsonl`, 153 of 154; the one in LBFBOA holds a card renamed since its game): dial off 153/153, dial on 153/153. No disagreement anywhere.
 
 The paired benchmark (wins, den captures, time per move) did not run here: the cloud credit ends at 09:00 CET (animal-kingdom-74, 2026-11-05). Its commands are below.
 
