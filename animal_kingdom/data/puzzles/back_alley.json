@@ -1,0 +1,35 @@
+{
+  "id": "back_alley",
+  "title": "Back alley",
+  "theme": "City",
+  "to_move": "A",
+  "turns": 2,
+  "order": 20,
+  "board": {
+    "1,3": [{"card": "opossum", "owner": "A"}],
+    "2,3": [{"card": "raccoon", "owner": "A"}],
+    "3,3": [{"card": "rat", "owner": "A"}],
+    "4,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "mouse", "owner": "B"}],
+    "5,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "bobcat", "owner": "B"}]
+  },
+  "hands": {"A": ["mosquito", "opossum", "pigeon"], "B": ["pup"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "The Opossum can give you back an animal you have already played.",
+  "why": "The Bobcat (5) is too strong for anything in hand until the Mosquito, on top of your own Pigeon, gives it -2; next turn the Opossum covers it, and with no card left for the den its Roar returns the Mosquito to your hand, and the Mosquito goes in.",
+  "solution": [
+    {"kind": "place", "card_id": "pigeon", "target": ["cr", "4,3"]},
+    {"kind": "place", "card_id": "mosquito", "target": ["cr", "4,3"]},
+    {"kind": "choice", "choice": "5,3"}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "pigeon", "target": ["cr", "4,3"]},
+    {"by": "A", "kind": "place", "card_id": "mosquito", "target": ["cr", "4,3"]},
+    {"by": "A", "kind": "choice", "choice": "5,3"},
+    {"by": "B", "kind": "place", "card_id": "pup", "target": ["cr", "3,2"]},
+    {"by": "A", "kind": "place", "card_id": "opossum", "target": ["cr", "5,3"]},
+    {"by": "A", "kind": "choice", "choice": "4,3"},
+    {"by": "A", "kind": "place", "card_id": "mosquito", "target": ["hq", "B"]}
+  ]
+}
