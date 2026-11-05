@@ -9,10 +9,22 @@ export async function waitMine(page, timeout = 20000) {
 
 const dcr = (you, cr) => { if (you === 'A') return cr; const [c, r] = cr.split(','); return `${6 - c},${r}`; };
 
+// After a card is picked, the pointer leaves the hand and any card shown large on hover closes first: on the bottom row
+// of the board (lane 3, beside the hand) the enlarged card would otherwise take the click meant for the crossroad.
+async function clearPointer(page) {
+  await page.mouse.move(8, 8);
+  await page.waitForFunction(() => { return ['pop', 'stackpop'].every(id => { const p = document.getElementById(id); return !p || getComputedStyle(p).display === 'none'; }); }, { timeout: 2000 }).catch(() => {});
+}
+
 async function clickTarget(page, you, target) {
+  await clearPointer(page);
   if (target[0] === 'hq') await page.click(`#board [data-hq="B"]`);
   else await page.click(`#board .cr[data-cr="${dcr(you, target[1])}"]`);
 }
+
+const state = page => page.evaluate(() => { const s = window.__ak(), G = s.V.game; return JSON.stringify({ phase: s.V.phase, toAct: G && G.toAct,
+  pending: G && G.pending && { kind: G.pending.kind, options: G.pending.options.map(o => [o.kind, o.v, o.cr]) }, sel: s.ui.sel, busy: s.PB.busy,
+  log: (document.querySelector('#clog') || {}).textContent?.slice(-300) }); });
 
 // Clicks one action; the caller waits for the next decision.
 export async function clickAction(page, a) {
@@ -32,6 +44,7 @@ export async function clickAction(page, a) {
     const opts = V.game.pending.options, o = opts.find(o => o.v === a.choice);
     if (!o) throw new Error(`no option ${JSON.stringify(a.choice)} among ${JSON.stringify(opts)}`);
     const ci = d.cardOpts.findIndex(c => c.v === a.choice), xi = d.otherOpts.findIndex(c => c.v === a.choice);
+    await clearPointer(page);
     if (o.kind === 'cr') await page.click(`#board .cr[data-cr="${dcr(you, o.cr || o.v)}"]`);
     else if (o.kind === 'hq') await page.click(`#board [data-hq="B"]`);
     else if (ci >= 0) await page.click(`#opts [data-o="${ci}"]`);
@@ -42,11 +55,13 @@ export async function clickAction(page, a) {
 
 // Plays the solver's actions in `line` (the defender's, marked "by": "B", are the server's to play: waited for, not clicked).
 export async function playLine(page, line, { timeout = 20000 } = {}) {
-  for (const a of line) {
+  for (const [i, a] of line.entries()) {
     if (a.by === 'B') continue;
-    await waitMine(page, timeout);
+    const where = `step ${i} ${JSON.stringify(a)}`;
+    try { await waitMine(page, timeout); } catch (e) { throw new Error(`${where}: never the player's move: ${await state(page)}`); }
     const before = await page.evaluate(() => window.__ak().V.version);
     await clickAction(page, a);
-    await page.waitForFunction(v => { const s = window.__ak(); return s.V.version !== v; }, { timeout }, before);
+    try { await page.waitForFunction(v => { const s = window.__ak(); return s.V.version !== v; }, { timeout }, before); }
+    catch (e) { throw new Error(`${where}: the click sent nothing: ${await state(page)}`); }
   }
 }
