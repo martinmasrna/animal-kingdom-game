@@ -100,7 +100,12 @@ if __name__ == "__main__":
                 if raw.strip():
                     rec = json.loads(raw)
                     try:
-                        pos.append((_seed_for(rec, a.seed), rebuild(rec["path"], rec["line"], rec["action_index"])))
+                        st = rebuild(rec["path"], rec["line"], rec["action_index"])
+                        ids = {c for d in (*st.decks.values(), *st.starting_decks.values()) for c in d}
+                        ids |= {u.card_id for h in st.hands.values() for u in h} | {u.card_id for x in st.board.values() for u in x}
+                        if not ids <= set(cards):   # a card renamed since the game, missed by the log's renaming
+                            raise KeyError(sorted(ids - set(cards))[0])
+                        pos.append((_seed_for(rec, a.seed), st))
                     except Exception as e:  # noqa: BLE001 - a log that no longer replays on these cards
                         print(f"  skip {rec['path']} line {rec['line']}: {type(e).__name__}", flush=True)
     else:
