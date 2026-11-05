@@ -111,8 +111,8 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 
 41 puzzles on the branch: 19 in one turn, 22 in two. Every file passes `tools/puzzles/solve.py check`, every one is
 clicked to Solved by `animal_kingdom/web/test/puzzles.test.mjs` (44 of 44 puzzle web tests pass here at the last
-commit), and the set document has a section for each. The full Python fast tier passed at c62d474 on the Mac
-(the supervising session's run); here its last run did not finish before the stop (the 41 shipped-puzzle checks
+commit), and the set document has a section for each. Both full fast suites were last confirmed green on the Mac at 8fc4ca4 (the supervising
+session's run; c62d474 was being tested at the stop); here its last run did not finish before the stop (the 41 shipped-puzzle checks
 make it slower than before: about 4 minutes on 4 cores).
 
 ## Next
