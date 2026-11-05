@@ -18,6 +18,7 @@ from email.message import EmailMessage
 from .oauth import LOCAL_CREDENTIALS
 
 TEXT_MAX = 4000
+VIEW_MAX = 300_000   # bytes of the attached view (a game screen's is about 30 KB); a larger one is dropped, the message kept
 PER_HOUR = 10      # messages one sender can send an hour: every message is a mail
 log = logging.getLogger("animal_kingdom.web")
 
@@ -43,7 +44,7 @@ def _credentials() -> tuple[str, str] | None:
 
 def keep(db, profile: str, sender: str, text: str, context: dict, view) -> None:
     """Store one message, after checking its length and the sender's rate."""
-    text = str(text or "").strip()
+    text = text.strip() if isinstance(text, str) else ""
     if not text:
         raise FeedbackError("write something first")
     if len(text) > TEXT_MAX:

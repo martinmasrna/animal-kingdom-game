@@ -29,14 +29,14 @@ from ..engine.state import EngineError
 from ..engine.cards import COPY_LIMITS, DECK_SLUGS, STARTER_DECKS, load_cards
 from . import custom_decks
 from .renamed import RENAMED_IDS, renamed as _renamed
-from . import events, feedback, news
+from . import events, feedback, guard, news
 from .chat import Chat, ChatError
 from .friends import FriendError, Friends
 from . import ladder as ranking
 from . import league as league_mod
 from . import meta as meta_mod
 from . import oauth
-from .profiles import ProfileError, Profiles
+from .profiles import ProfileError, Profiles, clean_name
 from . import replay
 from . import tutorial
 from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, STARTER_COVERS, Match, Seat, card_pool, map_info
@@ -383,7 +383,8 @@ async def auth_callback(req):
 
 
 async def auth_redeem(req):
-    key = flow.redeem((await req.json()).get("code", ""))
+    guard.limit_ip(req, "signin")
+    key = flow.redeem(str((await guard.body(req)).get("code") or ""))
     p = profiles.by_code(key) if key else None
     if p is None:
         raise web.HTTPNotFound(text="that sign-in expired, try again")
@@ -398,7 +399,8 @@ async def sign_out(req):
 
 
 async def create_profile(req):
-    body = await req.json() if req.can_read_body else {}
+    guard.limit_ip(req, "profile")
+    body = await guard.body(req)
     try:
         code, p = profiles.create(body.get("name") or "Player")
         events.record(profiles.db, p["id"], "profile_created", {"agent": req.headers.get("User-Agent", "")[:200]})
@@ -414,7 +416,7 @@ async def get_me(req):
 
 
 async def patch_me(req):
-    body = await req.json()
+    body = await guard.body(req)
     try:
         p = profiles.rename(me(req)["id"], body.get("name"))
     except ProfileError as e:
@@ -424,15 +426,16 @@ async def patch_me(req):
 
 async def put_decks(req):
     try:
-        decks = profiles.save_decks(me(req)["id"], await req.json(), starter_cards())
+        decks = profiles.save_decks(me(req)["id"], await guard.body(req, list), starter_cards())
     except ProfileError as e:
         raise web.HTTPBadRequest(text=str(e))
     return web.json_response(decks)
 
 
 async def sign_in(req):
-    body = await req.json()
-    p = profiles.by_code(body.get("code", ""))
+    guard.limit_ip(req, "signin")
+    body = await guard.body(req)
+    p = profiles.by_code(str(body.get("code") or ""))
     if p is None:
         raise web.HTTPNotFound(text="no profile has that sign-in code")
     return web.json_response(profile_view(p))
@@ -525,27 +528,34 @@ async def get_news(req):
 
 async def news_seen(req):
     """The player opened the News screen (opened), or saw "Since you last played" (shown), up to a release."""
-    p, body = me(req), await req.json()
+    p, body = me(req), await guard.body(req)
     news.mark(profiles.db, p["id"], opened=str(body.get("opened") or "")[:10], shown=str(body.get("shown") or "")[:10])
     return web.json_response({})
 
 
 async def client_events(req):
     """What the client saw the player do (web/events.py), in batches."""
-    p, body = me(req), await req.json()
+    p, body = me(req), await guard.body(req)
     return web.json_response({"kept": events.record_client(profiles.db, p["id"], body.get("events"))})
 
 
 async def send_feedback(req):
     """A player's message and the moment it was sent from: kept, then mailed to Martin in the background."""
-    p, body = me(req), await req.json()
-    context = {k: v for k, v in (body.get("context") or {}).items() if isinstance(v, (str, int, float))}
+    p, body = me(req), await guard.body(req)
+    guard.limit_ip(req, "feedback")
+    ctx = body.get("context")
+    context = {str(k)[:40]: guard.clean_text(v)[:200] if isinstance(v, str) else v
+               for k, v in (ctx.items() if isinstance(ctx, dict) else ()) if isinstance(v, (str, int, float))}
+    text, view = guard.clean_text(body.get("text")).strip(), body.get("view")
+    if view is not None and len(json.dumps(view)) > feedback.VIEW_MAX:
+        view = {"dropped": f"the view was over {feedback.VIEW_MAX} bytes"}
     try:
-        feedback.keep(profiles.db, p["id"], display(p), body.get("text"), context, body.get("view"))
+        feedback.keep(profiles.db, p["id"], display(p), text, context, view)
     except feedback.FeedbackError as e:
         raise web.HTTPBadRequest(text=str(e))
-    asyncio.get_running_loop().run_in_executor(None, feedback.mail, display(p), body["text"].strip(), context, body.get("view"))
-    asyncio.get_running_loop().run_in_executor(None, discord.post, "feedback", discord.feedback_text(display(p), body["text"].strip(), context))
+    if guard.limiter.allow("mail", "all"):    # kept either way; mailed while the server-wide hourly cap allows
+        asyncio.get_running_loop().run_in_executor(None, feedback.mail, display(p), text, context, view)
+        asyncio.get_running_loop().run_in_executor(None, discord.post, "feedback", discord.feedback_text(display(p), text, context))
     return web.json_response({})
 
 
@@ -564,7 +574,8 @@ async def join_ranked(req):
     """Join the ranked queue with a deck; the answer is your match ({id, token, seat}) once there is one: a person near
     your rating if one is waiting or arrives within RANKED_WAIT seconds, else the nearest bot. Leaving the request leaves
     the queue."""
-    p, body = me(req), await req.json()
+    p, body = me(req), await guard.body(req)
+    guard.limit("ranked", p["id"])
     try:
         deck = custom_decks.resolve(body.get("deck"))
     except EngineError as e:
@@ -699,7 +710,7 @@ async def league_games(req):
     """Bot games played by the runner, rated here like anyone's: [{gid, a, b, winner, seed, turns, reason}], a and b bot
     ladder ids. A game whose `gid` came before is skipped (the runner resends what it could not confirm), counted as `seen`."""
     league_auth(req)
-    body = await req.json()
+    body = await guard.body(req)
     games = body.get("games") if isinstance(body, dict) else None
     if not isinstance(games, list) or len(games) > 1000:
         raise web.HTTPBadRequest(text="games: a list of at most 1000")
@@ -729,7 +740,7 @@ async def league_games(req):
 async def league_facts(req):
     """Card facts of games already rated (a backfill from the runner's log): [{t, a, b, winner, ra, rb, A, B}], counted once."""
     league_auth(req)
-    body = await req.json()
+    body = await guard.body(req)
     games = body.get("games") if isinstance(body, dict) else None
     if not isinstance(games, list) or len(games) > 5000:
         raise web.HTTPBadRequest(text="games: a list of at most 5000")
@@ -740,7 +751,7 @@ async def league_meta_forget(req):
     """The Meta tab forgets every game of these lists, {slugs: [...]}: for a change to how a card plays that its print
     does not show (an engine fix, a config number)."""
     league_auth(req)
-    body = await req.json()
+    body = await guard.body(req)
     slugs = body.get("slugs") if isinstance(body, dict) else None
     if not isinstance(slugs, list) or not all(isinstance(s, str) for s in slugs):
         raise web.HTTPBadRequest(text="slugs: a list of list slugs")
@@ -793,7 +804,7 @@ async def league_retire(req):
     """Lists out of the pool for good (Martin's call, 2026-10-25): {slugs: [...]}; they leave the ranked offers and the runner's pool
     at once, their ratings and games stay on record."""
     league_auth(req)
-    body = await req.json()
+    body = await guard.body(req)
     slugs = body.get("slugs") if isinstance(body, dict) else None
     if not isinstance(slugs, list) or len(slugs) > 200:
         raise web.HTTPBadRequest(text="slugs: a list of at most 200")
@@ -807,7 +818,7 @@ async def league_levels(req):
     """The pilot levels pool lists play at: {slugs, levels}; the pairings at other levels leave the ladder, and a restart
     keeps it so (Martin, 2026-10-27: his 17 lists Expert only, after a restart had given them Easy and Normal pilots)."""
     league_auth(req)
-    body = await req.json()
+    body = await guard.body(req)
     slugs, levels = (body.get("slugs"), body.get("levels")) if isinstance(body, dict) else (None, None)
     if not isinstance(slugs, list) or not isinstance(levels, list) or not levels or any(lv not in ranking.LEVELS for lv in levels):
         raise web.HTTPBadRequest(text="slugs: a list; levels: some of " + ", ".join(ranking.LEVELS))
@@ -822,7 +833,7 @@ async def league_reset_people(req):
     """People back to a fresh 1500 with placement games ahead: {ids: [profile ids]}; bots can't be reset here (Martin,
     2026-10-27, once the league became his 17 Expert lists and the scale moved)."""
     league_auth(req)
-    body = await req.json()
+    body = await guard.body(req)
     ids = body.get("ids") if isinstance(body, dict) else None
     if not isinstance(ids, list) or len(ids) > 100:
         raise web.HTTPBadRequest(text="ids: a list of at most 100")
@@ -837,7 +848,7 @@ async def league_decks(req):
     placing player per pilot level (`levels`, every level when absent: Martin's 2026-10-27 league is Expert only), starting at
     `start` (the best prior the sender has: a parent's rating, a target's; 1500 when absent)."""
     league_auth(req)
-    body = await req.json()
+    body = await guard.body(req)
     decks = body.get("decks") if isinstance(body, dict) else None
     if not isinstance(decks, list) or len(decks) > 100:
         raise web.HTTPBadRequest(text="decks: a list of at most 100")
@@ -864,7 +875,7 @@ async def league_decks(req):
 async def league_report_post(req):
     """The morning's meta report from the runner (league/report.py), kept as the latest."""
     league_auth(req)
-    body = await req.json()
+    body = await guard.body(req)
     rep = body.get("report") if isinstance(body, dict) else None
     if not isinstance(rep, dict) or len(json.dumps(rep)) > 2_000_000:
         raise web.HTTPBadRequest(text="report: an object under 2 MB")
@@ -914,7 +925,7 @@ async def _tell_friends_online(pid: str, on: bool) -> None:
 async def presence_socket(req):
     """Online while open; carries challenges to you. The client opens it once it knows its profile."""
     p = profiles.by_code(req.query.get("key", ""))
-    ws = web.WebSocketResponse(heartbeat=20)
+    ws = web.WebSocketResponse(heartbeat=20, max_msg_size=guard.SOCKET_MSG_MAX)
     await ws.prepare(req)
     if p is None:
         await ws.close()
@@ -969,9 +980,10 @@ async def friend_peek(req):
 
 
 async def friend_add(req):
-    p, body = me(req), await req.json()
+    p, body = me(req), await guard.body(req)
+    guard.limit("friend", p["id"])
     try:
-        other = friends.add(p["id"], body.get("code"))
+        other = friends.add(p["id"], str(body.get("code") or ""))
     except FriendError as e:
         raise web.HTTPBadRequest(text=str(e))
     return web.json_response({"name": display(profiles.get(other))})
@@ -1002,7 +1014,8 @@ async def current_match(req):
 
 async def friend_request(req):
     """Ask a player on the leaderboard to be friends: they get it on their presence socket now, or when they next come."""
-    p, body = me(req), await req.json()
+    p, body = me(req), await guard.body(req)
+    guard.limit("friend", p["id"])
     other = str(body.get("to") or "")
     if not profiles.get(other):
         raise web.HTTPNotFound(text="no such player")
@@ -1016,7 +1029,7 @@ async def friend_request(req):
 
 
 async def friend_request_answer(req):
-    p, body = me(req), await req.json()
+    p, body = me(req), await guard.body(req)
     friends.answer(p["id"], req.match_info["frm"], bool(body.get("accept")))
     return web.json_response({})
 
@@ -1037,7 +1050,8 @@ async def chat_history(req):
 
 async def chat_send(req):
     """Send a friend a message: it reaches them at once if they are on (any tab), else waits in the conversation."""
-    p, other, body = me(req), req.match_info["id"], await req.json()
+    p, other, body = me(req), req.match_info["id"], await guard.body(req)
+    guard.limit_ip(req, "chat")
     if not friends.are(p["id"], other):
         raise web.HTTPBadRequest(text="not your friend")
     try:
@@ -1058,8 +1072,9 @@ async def chat_read(req):
 async def challenge(req):
     """Challenge an online friend with a deck; the answer is your match once they accept, or 409 when they decline, the
     challenge lapses, or they are offline. Leaving the request withdraws it."""
-    p, body = me(req), await req.json()
-    to = body.get("friend")
+    p, body = me(req), await guard.body(req)
+    guard.limit("challenge", p["id"])
+    to = str(body.get("friend") or "")
     if not friends.are(p["id"], to):
         raise web.HTTPBadRequest(text="not your friend")
     if to not in presence:
@@ -1097,7 +1112,7 @@ async def challenge_cancel(req):
 
 async def challenge_answer(req):
     """Accept (with your deck: the match starts) or decline a challenge to you."""
-    p, body = me(req), await req.json()
+    p, body = me(req), await guard.body(req)
     c = challenges.get(req.match_info["id"])
     if not c or c["to"] != p["id"] or c["fut"].done():
         raise web.HTTPGone(text="that challenge has gone")
@@ -1230,7 +1245,7 @@ async def takeover_match(req, src: dict):
     p = me(req)
     try:
         key, series, rnd = str(src.get("match", "")), int(src.get("series", 0)), int(src.get("round", 0))
-    except (TypeError, ValueError):
+    except (AttributeError, TypeError, ValueError, OverflowError):
         raise web.HTTPBadRequest(text="bad position")
     if not profiles.match(p["id"], f"{key}-{series}"):
         raise web.HTTPNotFound(text="Not one of your matches")
@@ -1258,12 +1273,24 @@ async def takeover_match(req, src: dict):
     return web.json_response({"id": mid, "token": token, "seat": seat})
 
 
+def guest_name(body: dict, default: str) -> str:
+    """A seat's name for a player with no profile: cleaned like a profile's, and with no #tag (a tag is a profile's)."""
+    try:
+        return clean_name(str(body.get("name") or "").split("#")[0])
+    except ProfileError:
+        return default
+
+
 async def create_match(req):
-    body = await req.json()
+    guard.limit_ip(req, "match")
+    body = await guard.body(req)
     if body.get("from"):
         return await takeover_match(req, body["from"])
     try:
-        lesson = int(body.get("tutorial") or 0)    # the tutorial's lesson: 1 or 2
+        try:
+            lesson = int(body.get("tutorial") or 0)    # the tutorial's lesson: 1 or 2
+        except (TypeError, ValueError, OverflowError):
+            raise EngineError("no such lesson")
         if lesson not in (0, *tutorial.BOTS):
             raise EngineError("no such lesson")
         deck = f"{tutorial.BOTS[lesson]}_you" if lesson else custom_decks.resolve(body.get("deck"))
@@ -1271,27 +1298,31 @@ async def create_match(req):
         raise web.HTTPBadRequest(text=str(e))
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
     player = profile_of(req)
-    match = Match(mid, Seat(token, display(player) if player else body.get("name") or "You", deck=deck,
+    match = Match(mid, Seat(token, display(player) if player else guest_name(body, "You"), deck=deck,
                             profile=player and player["id"]))
     bot = body.get("bot")
     gauntlet = body.get("gauntlet")
+    if (bot is not None and not isinstance(bot, dict)) or (gauntlet is not None and not isinstance(gauntlet, dict)):
+        raise web.HTTPBadRequest(text="bad bot")
     if lesson:     # the lesson's fixed deal against its opponent, straight into the game
         match.join(Seat(secrets.token_urlsafe(12), "Wild dogs", bot=tutorial.BOTS[lesson], deck=f"{tutorial.BOTS[lesson]}_them"))
         match.ready("A")
     elif gauntlet:
         level = gauntlet.get("level", "normal")
+        if not isinstance(level, str):
+            raise web.HTTPBadRequest(text="bad bot level")
         if level in ranking.BANDS:                   # the gauntlet's one pilot for the whole field: by the band's name
             level = next((l for l, b in ranking.PILOT_BAND.items() if b == level), "easy" if ranking.BANDS.index(level) < 2 else "expert")
         if level not in BOT_LEVELS:
             raise web.HTTPBadRequest(text="bad bot level")
         skip, games = gauntlet.get("skip") or [], gauntlet.get("games", 2 * gauntlet.get("per_seat", 5))   # games a deck
-        if not isinstance(skip, list) or games not in range(1, 11):
+        if not isinstance(skip, list) or not all(isinstance(d, str) for d in skip) or not isinstance(games, int) or games not in range(1, 11):
             raise web.HTTPBadRequest(text="bad gauntlet")
         # The player's deck is no opponent, even sent as a custom list identical to a premade (the mirror isn't a test).
         mine = sorted(load_premade_deck(deck))
         wanted = gauntlet.get("decks")       # an explicit field (any shipped deck, the bots' own, a test deck such as lions30, or a saved player deck), else the starters
         if wanted is not None:
-            if not isinstance(wanted, list):
+            if not isinstance(wanted, list) or not all(isinstance(d, (str, dict)) for d in wanted):
                 raise web.HTTPBadRequest(text="bad gauntlet field")
             try:
                 wanted = [custom_decks.resolve(d) if isinstance(d, dict) else d for d in wanted]   # a player's own deck as {name, list}, as the home piece sends its field
@@ -1316,6 +1347,8 @@ async def create_match(req):
         match.version += 1
     elif bot:
         level, bdeck = bot.get("level"), bot.get("deck")
+        if not isinstance(level, str) or not isinstance(bdeck, str):
+            raise web.HTTPBadRequest(text="bad bot")
         if level in ranking.BANDS and bdeck in PREMADE_DECKS:
             level = pilot_for(level, bdeck)          # one of the five bots, as on the ladder: the pilot follows the band
         if level not in BOT_LEVELS or bdeck not in {*PREMADE_DECKS, *TEST_BOT_DECKS}:
@@ -1332,10 +1365,11 @@ async def create_match(req):
 
 
 async def join_match(req):
+    guard.limit_ip(req, "match")
     match = hub.matches.get(req.match_info["id"])
     if match is None:
         raise web.HTTPNotFound(text="no such match")
-    body = await req.json()
+    body = await guard.body(req)
     try:
         deck = custom_decks.resolve(body.get("deck"))
     except EngineError as e:
@@ -1343,7 +1377,7 @@ async def join_match(req):
     token = secrets.token_urlsafe(12)
     player = profile_of(req)
     try:
-        seat = match.join(Seat(token, display(player) if player else body.get("name") or "Friend", deck=deck,
+        seat = match.join(Seat(token, display(player) if player else guest_name(body, "Friend"), deck=deck,
                                profile=player and player["id"]))
     except EngineError as e:
         raise web.HTTPConflict(text=str(e))
@@ -1351,10 +1385,15 @@ async def join_match(req):
     return web.json_response({"id": match.id, "token": token, "seat": seat})
 
 
+def _changed(match: Match) -> tuple:
+    """What a socket message may have changed, compared before and after it: only a change is pushed (and saved)."""
+    return match.version, match.phase, len(match.results), match.seq
+
+
 async def socket(req):
     match = hub.matches.get(req.match_info["id"])
     seat = match.seat_of(req.query.get("token", "")) if match else None
-    ws = web.WebSocketResponse(heartbeat=20)
+    ws = web.WebSocketResponse(heartbeat=20, max_msg_size=guard.SOCKET_MSG_MAX)
     await ws.prepare(req)
     if seat is None:
         await ws.send_json({"t": "error", "error": "unknown match or seat"})
@@ -1365,12 +1404,24 @@ async def socket(req):
     await ws.send_json({"t": "build", "build": BUILD})
     await ws.send_json({"t": "view", "view": match.view(seat)})
     hub.kick_bot(match)
+    burst, (burst_n, burst_s) = [], guard.SOCKET_BURST
     try:
         async for msg in ws:
             if msg.type != WSMsgType.TEXT:
                 continue
-            data = msg.json()
+            now = time.monotonic()
+            if '"played"' not in msg.data[:40]:     # a screen's acknowledgements are cheap and come one per view
+                burst = [t for t in burst if now - t < burst_s] + [now]
+            if len(burst) > burst_n:          # no screen sends this many: a loop, which would cost every player a view each
+                log.warning("socket of match %s seat %s sent %d messages in %ss: closed", match.id, seat, len(burst), burst_s)
+                await ws.send_json({"t": "error", "error": "too many messages"})
+                await ws.close()
+                break
+            before = _changed(match)
             try:
+                data = json.loads(msg.data)
+                if not isinstance(data, dict):
+                    raise ValueError("a message is a JSON object")
                 kind = data.get("t")
                 if kind == "act":
                     match.act(seat, data["action"])
@@ -1383,7 +1434,10 @@ async def socket(req):
                         continue
                     match.next_game()
                 elif kind == "played":                # the client has played the events up to this one on screen (_watched);
-                    if not match.played_out(seat, int(data.get("seq") or 0)):   # a clock that waited for it starts now
+                    seq = data.get("seq") or 0         # a clock that waited for it starts now
+                    if not isinstance(seq, (int, float)) or isinstance(seq, bool) or not -1 < seq < 1 << 53:
+                        raise ValueError("seq: a number")
+                    if not match.played_out(seat, int(seq)):
                         continue
                 elif kind == "hold":                  # the tutorial: its coach holds the opponent while a line awaits Next
                     match.hold = bool(data.get("on")) and match.tutorial
@@ -1393,12 +1447,16 @@ async def socket(req):
                 elif kind == "rematch":
                     match.rematch()
                 else:
-                    raise EngineError(f"unknown message {kind!r}")
-            except (EngineError, KeyError, ValueError) as e:
-                await ws.send_json({"t": "error", "error": str(e)})
+                    raise EngineError(f"unknown message {str(kind)[:40]!r}")
+            except (EngineError, KeyError, ValueError, TypeError, AttributeError, OverflowError) as e:
+                # a message the match refuses, or one no client sends (a wrong type anywhere in it): said, and the view again
+                if not isinstance(e, (EngineError, KeyError, ValueError)):
+                    log.info("match %s seat %s sent a malformed message: %r", match.id, seat, e)
+                await ws.send_json({"t": "error", "error": str(e)[:300]})
                 await ws.send_json({"t": "view", "view": match.view(seat)})
                 continue
-            await hub.push(match)
+            if _changed(match) != before:
+                await hub.push(match)
     finally:
         conns.discard((ws, seat))
         s = match.seats.get(seat)
@@ -1519,7 +1577,7 @@ def main(argv=None) -> None:
             asyncio.get_running_loop().call_later(0.5, webbrowser.open, url)
         app.on_startup.append(open_tab)
     print(f"Animal Kingdom at {url}")
-    web.run_app(app, host=args.host, port=args.port, print=None)
+    web.run_app(app, host=args.host, port=args.port, print=None, access_log_class=guard.RedactingAccessLogger)
 
 
 if __name__ == "__main__":

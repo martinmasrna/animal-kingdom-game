@@ -495,6 +495,7 @@ class Match:
             raise EngineError("no game to concede")
         self._clock_update()
         self._check_end(Result(other_player(s), "concede"))
+        self.version += 1
 
     def _check_end(self, result: Optional[Result] = None) -> None:
         result = result or rules.is_terminal(self.state)

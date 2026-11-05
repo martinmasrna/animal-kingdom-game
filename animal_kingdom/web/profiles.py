@@ -21,6 +21,8 @@ import time
 from pathlib import Path
 from typing import Optional
 
+from .guard import clean_text
+
 DB_FILE = Path(__file__).resolve().parents[2] / "results" / "web.db"
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"     # no 0/O, 1/I: codes get typed by hand
 NAME_MAX = 20
@@ -64,7 +66,7 @@ def _new_code() -> str:
 
 
 def clean_name(name) -> str:
-    name = " ".join(str(name or "").split())[:NAME_MAX]
+    name = " ".join(clean_text(name, name=True).split())[:NAME_MAX]
     if not name:
         raise ProfileError("a name can't be empty")
     return name
@@ -266,8 +268,8 @@ class Profiles:
         rows = []
         for pos, d in enumerate(decks):
             cards = d.get("cards") if isinstance(d, dict) else None
-            if not isinstance(cards, dict) or not all(isinstance(n, int) and 0 < n <= 3 for n in cards.values()) \
-                    or sum(cards.values()) > 30:
+            if not isinstance(cards, dict) or not all(type(n) is int and 0 < n <= 3 for n in cards.values()) \
+                    or sum(cards.values()) > 30 or not all(len(k) <= 40 for k in cards):   # a card id is a short word
                 raise ProfileError("bad deck")
             did = str(d.get("id") or pos)[:40]
             cards_norm = {str(k): n for k, n in cards.items()}
