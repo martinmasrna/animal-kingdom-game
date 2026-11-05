@@ -134,6 +134,8 @@ def _rust_bot(seed: int, reach: bool):
     from animal_kingdom.bots import rust_bot
     if rust_bot.ak_engine is None:
         pytest.skip("the Rust engine is not built")
+    if "den_reach" not in getattr(rust_bot.ak_engine, "FEATURES", ()):
+        pytest.skip("the installed ak_engine was built without den_reach (rebuild: cd engine_rs && maturin develop --release)")
     return rust_bot.RustBot(_RUST_SPEC.format("true" if reach else "false"), seed)
 
 

@@ -444,6 +444,8 @@ fn play_game(
 #[pymodule]
 fn ak_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Engine>()?;
+    // what this build plays beyond main's bots, for a test to skip on a venv built from an older tree
+    m.add("FEATURES", vec!["den_reach"])?;
     m.add_class::<PyState>()?;
     m.add_class::<PyBot>()?;
     m.add_function(wrap_pyfunction!(play_game, m)?)?;
