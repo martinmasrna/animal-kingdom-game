@@ -111,7 +111,7 @@ browsers, not in this repo)
 
 ## Totals
 
-25 files touched (one deleted), 11211 lines before, 11042 after: 169 lines removed, none added beyond this file. Nine
+25 files touched (one deleted), 11211 lines before, 11042 after: 169 lines removed, none added beyond this file. Eight
 commits, each removing one theme. Tests after every commit: the same 3683 Python passes and 96 web passes as main, the
 same failures, mypy clean on the twelve compiled modules; `tools/` and `animal_kingdom/{web,sim,learn}` pyflakes clean
 (the `bots/` exception is the re-export noted above).
