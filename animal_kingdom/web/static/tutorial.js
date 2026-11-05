@@ -105,7 +105,9 @@ export const LESSONS = [
   { id: 'roared', when: c => c.roared, ...talk, at: { gem: 'A' },
     text: 'The Squirrel roared and gave you 10 food! Roars are another way to gather food, besides regions.' },
   // lesson 1 ends on food, the win its regions teach: after the Roar every move is guided to the best spots for a region
-  { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
+  // said once a card is picked, so the circles it names are on the board (it showed before any were); Next, or a circle, moves on
+  { id: 'free', when: c => c.mine && (c.roared || c.round >= 6) && !!c.sel && c.feed.length > 0, next: true, untilAct: true,
+    only: c => ({ crs: c.feed }), at: { rings: true },
     text: 'Now gather 100 food to win. The circles show where your animals can take more regions.' },
   TARGET,
   { id: 'feed', again: true, when: c => c.mine && (c.roared || c.round >= 6) && c.feed.length > 0,
