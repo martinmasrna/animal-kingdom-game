@@ -34,8 +34,8 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   `empty_handed` ("Empty-handed", the audit's no. 1: roam the Bush Dog forward, its Pup keeps the chain, then the
   Elephant roams in) and `the_whale_road` ("The whale road", no. 2: the Crocodile clears the Oxpecker, the Sloth takes
   the den). `animal_kingdom/web/test/puzzles.test.mjs` clicks every shipped puzzle's main line to Solved (about 2 s
-  each, so it sits in the fast suite). The brief moved to the open ground left of the hand: at the top it covered the
-  defender's face-up hand.
+  each, so it sits in the fast suite). The brief stands top left, between your food gem and the defender's face-up hand (at the bottom it
+  covered a five-card hand, which is why `dam` timed out in the click-through test on the Mac).
 
 ## Calls I made (for Martin to overrule)
 

@@ -630,9 +630,9 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .pgrid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
 .game .pmodal .pc { position: relative; width: 156px; height: 229px; } .game .pmodal .pc .card { --w: 156px; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
-/* A puzzle's brief (app.js puzzleBrief) stands in the open ground left of the hand, not over the defender's face-up hand. */
-.game:not(.port) .prompt.brief:not(.mull) { left: 200px; top: auto; bottom: 24px; width: 300px; transform: none; white-space: normal; text-align: left;
-  translate: 0 var(--above, 0px); }
+/* A puzzle's brief (app.js puzzleBrief) stands top left, between your food gem and the defender's face-up hand: clear of
+   both hands, however many cards they hold. */
+.game:not(.port) .prompt.brief:not(.mull) { left: 196px; top: 10px; width: 290px; transform: none; white-space: normal; text-align: left; }
 .game:not(.port) .prompt.brief:not(.mull) .line { flex-wrap: wrap; justify-content: flex-start; row-gap: 6px; }
 .game:not(.port) .prompt.brief:not(.mull) .line b, .game:not(.port) .prompt.brief:not(.mull) .line p { flex-basis: 100%; }
 .game:not(.port) .prompt.brief:not(.mull) .line .skip { margin-left: 0; }
