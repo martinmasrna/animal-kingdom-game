@@ -43,6 +43,9 @@ CREATE TABLE IF NOT EXISTS history (
     profile TEXT NOT NULL, match TEXT NOT NULL, ended REAL NOT NULL, kind TEXT NOT NULL,
     my_deck TEXT NOT NULL, opp TEXT NOT NULL, opp_deck TEXT NOT NULL, won INTEGER NOT NULL, lost INTEGER NOT NULL,
     PRIMARY KEY (profile, match));
+CREATE TABLE IF NOT EXISTS shares (
+    token TEXT PRIMARY KEY, profile TEXT NOT NULL, match TEXT NOT NULL, seat TEXT NOT NULL, created REAL NOT NULL,
+    UNIQUE (profile, match));
 """
 
 
@@ -324,6 +327,22 @@ class Profiles:
     def set_seat(self, pid: str, match: str, seat: str) -> None:
         with self.db:
             self.db.execute("UPDATE history SET seat = ? WHERE profile = ? AND match = ?", (seat, pid, match))
+
+    def share(self, pid: str, match: str, seat: str) -> str:
+        """The share token of one of your matches' replays (docs/share-links.md): made on the first Share, the same after."""
+        r = self.db.execute("SELECT token FROM shares WHERE profile = ? AND match = ?", (pid, match)).fetchone()
+        if r:
+            return r[0]
+        token = secrets.token_urlsafe(12)
+        with self.db:
+            self.db.execute("INSERT INTO shares (token, profile, match, seat, created) VALUES (?, ?, ?, ?, ?)",
+                            (token, pid, match, seat, time.time()))
+        return token
+
+    def shared(self, token: str) -> Optional[dict]:
+        """The match and seat a share token opens, or None."""
+        r = self.db.execute("SELECT match, seat FROM shares WHERE token = ?", (token,)).fetchone()
+        return r and dict(r)
 
     def forget(self, pid: str, match: str) -> None:
         with self.db:

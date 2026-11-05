@@ -487,14 +487,26 @@ def record_match(match: Match) -> None:
 
 
 async def get_replay(req):
-    """Every view you saw in one of your finished matches (key: the history's match), as saved when it ended: a JSON list."""
+    """Every view you saw in one of your finished matches (key: the history's match), as saved when it ended: a JSON list.
+    The key can instead be a share token (`share_replay`): that replay, read-only, to anyone, with no profile needed."""
+    key = req.match_info["match"]
+    shared = profiles.shared(key)
+    row = shared or profiles.match(me(req)["id"], key)
+    saved = row and row["seat"] and replay.load(REPLAY_DIR, row["match"], row["seat"])
+    if not saved:
+        raise web.HTTPNotFound(text="This match can't be replayed")
+    return web.Response(body=saved, content_type="application/json",
+                        headers={"Content-Encoding": "gzip", "X-AK-Shared": "1" if shared else "0"})
+
+
+async def share_replay(req):
+    """A link to one of your finished matches' replays, for anyone (docs/share-links.md): {token}, opened at #/replay/<token>."""
     p = me(req)
     key = req.match_info["match"]
     row = profiles.match(p["id"], key)
-    saved = row and row["seat"] and replay.load(REPLAY_DIR, key, row["seat"])
-    if not saved:
+    if not (row and row["seat"] and replay.load(REPLAY_DIR, key, row["seat"])):
         raise web.HTTPNotFound(text="This match can't be replayed")
-    return web.Response(body=saved, content_type="application/json", headers={"Content-Encoding": "gzip"})
+    return web.json_response({"token": profiles.share(p["id"], key, row["seat"])})
 
 
 async def replay_lists(req):
@@ -1426,6 +1438,7 @@ def make_app() -> web.Application:
         web.get("/auth/{provider}/callback", auth_callback),
         web.get("/api/replay/{match}", get_replay),
         web.get("/api/replay/{match}/lists", replay_lists),
+        web.post("/api/replay/{match}/share", share_replay),
         web.get("/api/study/{name}", get_study),
         web.get("/api/studies", list_studies),
         web.post("/api/feedback", send_feedback),
