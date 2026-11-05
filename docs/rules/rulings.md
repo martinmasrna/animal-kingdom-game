@@ -4,7 +4,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 
 ## Card identity and tags
 
-- Every card is globally unique by name and belongs to exactly one deck. Apparent duplicates are deliberately different animals (Worker Ant and Soldier Ant, Black, Grizzly and Polar Bear).
+- Every collectible card is unique by name. A card belongs to no deck: the decks are lists over the cards in `decklists.json`, and a card may sit in several of them or in none. Apparent duplicates are deliberately different animals (Worker Ant and Soldier Ant, Black, Grizzly and Polar Bear).
 - A card's `tags` is a flat list holding species families (Cat, Canine, Colony, Snake, Lizard, Bird, Rodent, Arachnid, Bear, Megafauna, Egg, Fish) and roles (Queen, Worker). "A Colony Queen" means the tags contain both. A card may carry several families and then counts for every matching family effect. Tagless cards are allowed.
 - Eggs are units: counted by unit queries, hit by unit triggers, able to capture a den.
 
@@ -27,16 +27,15 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 
 ## Remove Pile, returns and shuffles
 
-- There is one shared Remove Pile, and each card in it is still its owner's: **"your Remove Pile"** (Raccoon) and **"your opponent's Remove Pile"** (the legendary Raven) are the owner's cards in it. A **remove** is any card sent there from hand, deck or board and fires remove triggers; **Deathrattle** is the narrower case of a unit leaving the board.
+- There is one shared Remove Pile, and each card in it is still its owner's: **"your Remove Pile"** (Raccoon) and **"your opponent's Remove Pile"** (the legendary Raven) are the owner's cards in it. A **remove** is any card sent there from hand, deck or board and fires remove triggers; **Fall** is the narrower case of a unit leaving the board.
 - **"…instead"** would replace the removal (the card never reaches the Remove Pile, fires nothing); no card in the pool does it now. **Fall** (Ember, Cockroach, Earthworm, Worm) is a real removal, then the effect: a Cockroach replaced by a Cockroach still counts as removed (Hyena, Piranha, Vulture). The new one stands at the same height in the stack and comes back rather than being placed: placement reactions (Golden Orb-Weaver, Hippopotamus) never see it, so nothing loops (Martin, 2026-10-10). It is a fresh Cockroach, keeping nothing the old one was given or lost; Roach King keeps its growth from fall to fall but no loss of strength, so one shrunk below 0 can't fall for ever (Martin, 2026-10-26).
 - **Shuffle events** are one per card shuffled into a deck (Raven's "shuffle 2 back" is two events). Incidental reorders don't count.
-- **Skunk's bounce** returns the enemy unit to its owner's hand. It is not a removal (no Deathrattle, no remove trigger). The returned copy is locked, unplayable through its owner's next turn; other copies of the same card stay playable.
-- **Rat** removes an adjacent enemy of any strength, then a random card from your hand goes to the Remove Pile (a remove, not a Deathrattle), target or not; an empty hand pays nothing.
-- **Plague effects** that "remove everything from a crossroad" take the whole stack, both players' units, and fire every Deathrattle.
+- **Skunk's bounce** returns the enemy unit to its owner's hand. It is not a removal (no Fall, no remove trigger). The returned copy is locked, unplayable through its owner's next turn; other copies of the same card stay playable.
+- **Rat** removes an adjacent enemy of any strength when you played 3 or more animals this turn, itself included; it pays nothing.
+- **Plague effects** that "remove everything from a crossroad" take the whole stack, both players' units, and fire every Fall.
 
 ## Specific cards
 
-- **Oxpecker** counts the fixed 30-card starting decklist: each copy with printed base strength 8 or more.
 - **Once-per-turn caps.** Value and food triggers print no cap and have none. Each one also has a `cap_*` flag in `engine/config.py` (off by default) for tuning experiments.
 
 ## Roam, Reach, Poison, Dawn and Dusk: the engine's reading
@@ -44,7 +43,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 The keywords are defined in [`keywords.md`](keywords.md); these are the calls the engine makes where the definitions leave room.
 
 - **Reach counts from the den too.** Ordinary placement lands on the den's front crossroads, so the den is a launch point: its front crossroads are one step away, and Reach lands one further. Reach never takes a den; a den is taken only along the ordinary chain.
-- **Roam lands like a placement in everything but the Roar.** Arriving sets off every adjacent trap (Hippopotamus), even one the animal already stood next to before it moved. A cover by roaming is a cover: Spikes, Poison, Pufferfish, King Theron and an Apex Predator's eat all happen. What is printed as a Roar does not (Caracal's "if placed on top of an enemy"), nor do "when you play" or "whenever you place" reactions (Red Wolf, the Worker Wasp): moving isn't placing. An Apex Predator roams only onto an animal, its own included, and eats it; it never roams onto a den.
+- **Roam lands like a placement in everything but the Roar.** Arriving sets off every adjacent trap (Hippopotamus), even one the animal already stood next to before it moved. A cover by roaming is a cover: Spikes, Poison, King Theron and an Apex Predator's eat all happen. What is printed as a Roar does not (the Lynx's "if you place this on top of an enemy"), nor do "when you play" or "whenever you place" reactions (the Worker Wasp): moving isn't placing. An Apex Predator roams only onto an animal, its own included, and eats it; it never roams onto a den.
 - **A roam keeps the animal's place in the play order.** Moving isn't playing; a bounced animal played again is newly played.
 - **Roaming onto a den ends the game where it stands.** The animal never leaves its crossroad.
 - **A roam onto the den is a capture like a placement from hand.** A roam takes the den only when the roamer's pack stands on the den front and is connected to your den (Martin, 2026-10-15); an animal Reach dropped behind the enemy's lines is cut off and can't take it (Martin, 2026-10-10).
@@ -64,7 +63,7 @@ The calls made where the card workbench's text left room when its twelve decks w
 Keywords:
 
 - **Hungry N** is a Dawn effect: it eats in play order with your other Dawn effects. Only a top animal eats; a buried one is skipped. With fewer than N food it eats all there is and gets −1 strength for good for each food short: an Elephant (Hungry 5) with 4 food eats the 4 and becomes an 8 (Martin, 2026-10-26). An inked animal isn't Hungry until the ink wears off.
-- **Titan** takes two actions, so it's offered only while two are left (an extra action from the Chipmunk counts). No free placement can play it ("play another animal", Remora, the Prince's twin).
+- **Titan** takes two actions, so it's offered only while two are left (an extra action from the Beaver counts). No free placement can play it ("play another animal", Remora, the Prince's twin).
 - **Flee** happens before every other reaction to the cover: the animal is back in hand before an Apex Predator eats, or King Theron removes it. Only an enemy cover sets it off, by placement or by roaming; your own cover of your fleer is a plain cover (Martin, 2026-10-29). The returned card is playable at once and keeps its stored strength, as every bounced card does. The Zebra's coverer goes back to its owner's hand unless it has Armor.
 - **King Theron** happens after every other reaction to the cover: the Cat acts first (an Apex Cat eats, and the legendary Leopard grows for it), then Theron removes whatever is left. It needs only the cover: a Cat removed by Spikes still had Theron remove the animal it covered.
 - **Octopus ink** lasts for good, while the animal stays on the board (Martin, 2026-10-17); the Octopus inks every adjacent enemy, so Stealth doesn't keep one out. An inked animal has no keywords (printed or given), no anthem of its own (a dynamic strength counts as its printed 0), no aura for others, and none of its triggered effects (Roar-less reactions, Dawn, Dusk, "when this is removed"). It keeps its stored counters and still gets other animals' auras; a timer it already started still runs.
@@ -79,8 +78,8 @@ Cards:
 - **A Roar's cost is never declined** (Praying Mantis, Hornet, Pestis): when the cost can be paid, it is, and the Roar only asks which target. The Mantis with an ally adjacent eats one; the Hornet with a spare copy and an enemy adjacent spends the copy; the Pestis next to only its own animals wipes one of them. When the cost cannot be paid, nothing happens.
 - **Tarantula** eats the weakest animal next to it at Dusk, yours or theirs (Armor excluded; ties at random, Dusk asks no decision), and keeps the strength it showed then, for good (Martin, 2026-10-29).
 - **Queen Ant** and **Sunfish** lay on a random adjacent empty crossroad, as the old African Wild Dog placed its Pup (Martin, 2026-10-10); the Sea Turtle's Baby Turtle goes to your hand instead (Martin, 2026-10-26).
-- **"An ally was removed this turn"** (Piranha, Vulture) counts your animals leaving the board this turn, whoever removed them; **"each animal removed this turn"** (Hyena) counts both players' (Martin, 2026-10-17). Discards from hand don't count.
-- **City Spider** eats like the Tarantula without growing: the weakest animal next to it at Dawn, yours or theirs (Armor excluded; ties at random). A Dawn death counts as removed this turn, so the Piranha, Hyena and Vulture see it. With a Cockroach as its only neighbour it's a death and a card every turn (Martin, 2026-10-11).
+- **"An ally was removed this turn"** (Hammerhead) counts your animals leaving the board this turn, whoever removed them; **"each animal removed this turn"** (Hyena) counts both players' (Martin, 2026-10-17), and so does the Vulture's "animals were removed this turn". Discards from hand don't count.
+- **City Spider** eats like the Tarantula without growing: the weakest animal next to it at Dawn, yours or theirs (Armor excluded; ties at random). A Dawn death counts as removed this turn, so the Hammerhead, Hyena and Vulture see it. With a Cockroach as its only neighbour it's a death every turn (Martin, 2026-10-11).
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.
 - **Clarion's** free roam is for any of your animals with Roam (the card says "an ally"), one per Clarion each turn, spent before an action.
 - **Warthog's** flanker must be another of your Hoofed animals, not the Warthog itself (Martin, 2026-10-29: the herd mobs the intruder; the old "covering an allied Hoofed" condition went dead once six Hoofed carry Flee).
@@ -97,9 +96,8 @@ Cards:
 - **Wolverine** can remove only an adjacent enemy that has no other enemy top animal next to it; Stealth and Armor protect from it as from any chosen removal.
 - **The legendary Black Wolf** gives +1 strength and draws a card whenever one of your Canines roams, itself included.
 - **Okapi** draws at your Dawn and at your Dusk, each time it is grazing then (Martin, 2026-10-29); the legendary Sloth doubles only the Dusk draw.
-- **Serval** sets the strength by storing the difference: later buffs and auras count on top of the 1.
 - **Placing and roaming cover by one rule** (Martin, 2026-10-24: "the rules for Roam and place from hand should not drift"): every card that changes who may cover whom (Leopard, the legendary Piranha, Chameleon) works for a roam exactly as for a placement.
-- **The legendary Piranha** counts the Fish you control now, itself included.
+- **Piranha** counts the Fish you control now, itself included.
 - **Swordfish** removes that many different random adjacent enemies (Stealth doesn't hide from random; Armor stays). **Barracuda** counts itself among your Fish.
 - **The repeat legend** (food aggro) repeats the plain Roar of each adjacent allied Rodent, in crossroad order; a Roar that depends on how it was placed (Lynx's) isn't repeated.
 - **The legendary Squirrel** loses all your food at once; its 2-turn timer is the Squirrel's (covering pauses it, removing it loses the stake, a return to hand restarts nothing). It pays three times the food it took.
@@ -109,16 +107,13 @@ Cards:
 - **The Macaw** repeats the last Roar the opponent played, at any point in the game, as its own: next to the Macaw, for its owner. A Macaw's copy counts as the copied Roar, so a Macaw repeating a Macaw repeats what that one repeated. It is not optional (Martin, 2026-10-17). Before the opponent has roared, it does nothing.
 - **Greywhisker's** "play another animal" is mandatory if able; the discard is the player's choice.
 - **Hare** counts the animals played from your hand this turn, itself included.
-- **Mole, Dormouse and Macaque** count the hand after the card that roars has left it.
+- **Macaque** counts the hand after it has left it.
 - **Peacock** counts every card in your hand, itself included while it is there: it covers with the strength it shows, then has one less once it lands (the text taken literally, Martin 2026-10-21).
 - **The legendary Butterfly** evolves in hand and on the board alike: each of your Dawns and each gain moves it one stage, whatever the gain's size (its Dawn works from the hand too, the one Dawn that does); a buried stage doesn't evolve at Dawn, and an evolution on the board never fires a Roar again; it keeps every point gained; stage 5 (Monarch) is the last. The stage shows as the card itself (Caterpillar, Chrysalis, Butterfly, Monarch), not as a badge on the art yet.
 - **The Caterpillar** becomes the pool's Butterfly (strength 2) and keeps its counter.
 - **The Eagles**: the legendary Eagle brings its mate whenever it enters your hand (a draw, a Scout, a steal, a return; the opening hand once the mulligans are done), one mate at a time. A buff to either while both are in hand gives the other the same. The mate never brings the Eagle back.
 - **Orangutan's** copy keeps the original's counter. **Baboon** (common): the player picks two different cards; **Baboon** (legendary): two random ones. **Stork**: two different younglings.
 - **Gorilla** reads its strength as it lands; **Anteater** gains the drawn card's strength as it would be played now.
-- **Mocha** removes every enemy adjacent to any of your top animals, itself included; Armor stays.
-- **The legendary Zebra** counts the different Hoofed cards among your top animals anywhere on the board, itself included: two copies of one card count once, enemies and buried animals never count. Different cards, not species: the legendary Zebra and the rare Zebra count as two.
-- **Cape Buffalo** removes an enemy sitting directly on top of one of your Hoofed animals.
 - **Rabbit** (Martin, 2026-10-29) makes a Bunny and plays it on a neighbouring crossroad of the owner's choice: a full placement (connection and strength checked, no action spent) that counts as a play, so the Hare and the Rat see it; a Bunny with no legal neighbour is gone. The Rabbit, the Hare and the Bunny are Rodents (Martin, 2026-10-29: "if Rabbit is a Rodent, then Hare needs to be a Rodent as well").
 - **Impala** (Martin, 2026-10-29) makes a Baby Impala and plays it at once: a full placement of the owner's choice, connection and strength checked, its Roar happening, no action spent; a calf with no legal place is gone. The calf has Flee, so a covered calf comes back to your hand as a card and can be played again; its Roar draws only if it lands grazing (as the fourth corner of a region you then hold).
 - **The legendary Deer** grows every animal of yours that flees, itself included (Martin, 2026-10-29): the fled card gains 2 strength in hand, keeps it when played again and through every later flight, so a fleer chased twice comes back 4 stronger. It must be on top of its crossroad to grow the others; its own flight grows itself.
@@ -136,6 +131,6 @@ Cards:
 ## After the launch (2026-10-17, Martin)
 
 - **Gale** counts itself: landing next to the opponent's den, it draws for itself too.
-- **[WOLF]** and **Bush Dog** count only your own adjacent Canines, never the opponent's; their text says "your".
+- **[WOLF]** counts only your own adjacent Canines, never the opponent's; its text says "your".
 - **Python** grows only when an animal leaves the board; a discard from hand isn't a remove (keywords.md, Discard).
 - **Spikes** are spent by the first enemy cover even when Armor keeps the coverer on the board.
