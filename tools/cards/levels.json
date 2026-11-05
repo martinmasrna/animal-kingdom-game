@@ -7364,6 +7364,34 @@
       "note": "Martin, 2026-10-29: the Impala's token",
       "by": "claude",
       "at": 1793293867
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793877385
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793877414
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: \"it should also have rare border\"",
+      "by": "claude",
+      "at": 1793877430
     }
   },
   "dung_beetle_legend_form4": {
