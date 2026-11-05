@@ -47,4 +47,5 @@ NOTES = {
  'school': dict(difficulty=3, obvious="The Octopus to 4,2, as in Ink: the Hippos remove it, and the card it costs is the one needed later to mend the line."),
  'relay': dict(difficulty=3, obvious="The Dhole, the strongest card, to the den front: then the Mouse cuts the line at the Jackal and only Bush Dogs (3) are left to cover it."),
  'back_alley': dict(difficulty=4, obvious="The Pigeon onto the Mouse and the Opossum toward the Bobcat: the Bobcat (5) is stronger than anything in hand, and without the Mosquito's -2 nothing covers it."),
+ 'second_helping': dict(difficulty=4, obvious="The Pigeon onto the Hedgehog, the one card strong enough: the Spikes remove it, and the Mouse behind is still in the way."),
 }

@@ -1,0 +1,36 @@
+{
+  "id": "second_helping",
+  "title": "Second helping",
+  "theme": "City",
+  "to_move": "A",
+  "turns": 2,
+  "order": 21,
+  "board": {
+    "1,1": [{"card": "mouse", "owner": "A"}],
+    "2,1": [{"card": "raccoon", "owner": "A"}],
+    "3,1": [{"card": "opossum", "owner": "A"}],
+    "4,1": [{"card": "hedgehog", "owner": "B"}],
+    "4,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "mouse", "owner": "B"}],
+    "5,2": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["opossum", "pigeon", "skunk"], "B": ["mouse"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "A Skunk sent back to your hand can be played again.",
+  "why": "Covering the Hedgehog costs your animal to its Spikes; the Skunk, played on your own Opossum at 3,1, sends it home instead, the Opossum from your hand takes 4,1 and its Roar returns the Skunk to you, so next turn the Pigeon covers the Mouse and the Skunk has a second use: the den.",
+  "solution": [
+    {"kind": "place", "card_id": "skunk", "target": ["cr", "3,1"]},
+    {"kind": "choice", "choice": "4,1"},
+    {"kind": "place", "card_id": "opossum", "target": ["cr", "4,1"]},
+    {"kind": "choice", "choice": "3,1"}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "skunk", "target": ["cr", "3,1"]},
+    {"by": "A", "kind": "choice", "choice": "4,1"},
+    {"by": "A", "kind": "place", "card_id": "opossum", "target": ["cr", "4,1"]},
+    {"by": "A", "kind": "choice", "choice": "3,1"},
+    {"by": "B", "kind": "place", "card_id": "mouse", "target": ["cr", "3,2"]},
+    {"by": "A", "kind": "place", "card_id": "pigeon", "target": ["cr", "5,1"]},
+    {"by": "A", "kind": "place", "card_id": "skunk", "target": ["hq", "B"]}
+  ]
+}
