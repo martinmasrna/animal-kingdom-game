@@ -22,16 +22,16 @@ Phase 1 is green.
 
 ## Phase 2: den_reach in Rust (done here: the port and the oracle; the benchmark runs on the Mac)
 
-The port (64f3b00, `engine_rs/src/bots/search.rs`): `den_reach` (on only with `den_open`) in the beam, the root screen, the reply shortlist, the safety filter and the budget-cut lines, as in `turn_search.py`; `sim.runner` no longer hands a `den_reach` spec to the Python bot. `tests/test_den_reach.py` plays its two puzzles on the Rust bot too: with the dial the egg under the Hyena and the Bush Dog roam are found; with it off, or on an engine without the port, the egg is missed.
+The port (64f3b00, `engine_rs/src/bots/search.rs`): `den_reach` (on only with `den_open`) in the beam, the root screen, the reply shortlist, the safety filter and the budget-cut lines, as in `turn_search.py`; `sim.runner` no longer hands a `den_reach` spec to the Python bot. `tests/test_den_reach.py` plays its two puzzles on the Rust bot too (skipped, with the reason, when the installed `ak_engine` lacks `"den_reach"` in `ak_engine.FEATURES`, i.e. was built from an older tree): with the dial the egg under the Hyena and the Bush Dog roam are found; with it off, or on an engine without the port, the egg is missed.
 
 Bot oracle, the live Expert untimed, Python against Rust, moves and root scores:
 
 - 60 random positions (seed 0): dial off 60/60, dial on 60/60.
-- The mined den-capture positions (`--puzzles tools/puzzles/forced_captures-2026-11-05.jsonl`, 153 of 154; the one in LBFBOA holds a card renamed since its game): dial off 153/153, dial on DIALON.
+- The mined den-capture positions (`--puzzles tools/puzzles/forced_captures-2026-11-05.jsonl`, 153 of 154; the one in LBFBOA holds a card renamed since its game): dial off 153/153, dial on 115/115 on the three shards that finished before the cloud credit ran out; the fourth shard (38 positions) was cut off unfinished. No disagreement anywhere. To finish it on the Mac: `.venv/bin/python tools/engine_rs/bot_oracle.py --puzzles tools/puzzles/forced_captures-2026-11-05.jsonl --specs expert_reach --shard 1/4` (about 20 minutes of Python).
 
 The paired benchmark (wins, den captures, time per move) did not run here: the cloud credit ends at 09:00 CET (animal-kingdom-74, 2026-11-05). Its commands are below.
 
-## Phases 3 and 4: ready to run on the Mac
+## Phases 3 and 4: ready to run on the Mac (not run here)
 
 Setup, once, from a checkout of `bot/rust-bench` (the benchmark plays what the venv's `ak_engine` is, so build it from this branch; the oracles after any build):
 
