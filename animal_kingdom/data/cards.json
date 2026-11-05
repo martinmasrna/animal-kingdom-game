@@ -3037,7 +3037,7 @@
       "id": "baby_turtle",
       "name": "Baby Turtle",
       "status": "token",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [],
       "base_strength": 0,
       "keywords": [],
@@ -3047,7 +3047,7 @@
       "id": "worm",
       "name": "Worm",
       "status": "token",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [],
       "base_strength": 0,
       "text": "Fall: draw a card.",
@@ -3079,7 +3079,7 @@
       "id": "cuckoo_egg",
       "name": "Cuckoo Egg",
       "status": "token",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Egg"
       ],
@@ -3753,7 +3753,7 @@
       "id": "young_ant",
       "name": "Young Ant",
       "status": "token",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Colony"
       ],

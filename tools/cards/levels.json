@@ -287,6 +287,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: a rare card's token wears the rare border, as Baby Impala",
+      "by": "claude",
+      "at": 1793877576
     }
   },
   "baby_wolf": {
@@ -1282,6 +1292,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: a rare card's token wears the rare border, as Baby Impala",
+      "by": "claude",
+      "at": 1793877576
     }
   },
   "dart_frog": {
@@ -4767,6 +4787,16 @@
       "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board",
       "by": "claude",
       "at": 1793023438
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: a rare card's token wears the rare border, as Baby Impala",
+      "by": "claude",
+      "at": 1793877576
     }
   },
   "zebra": {
@@ -7813,6 +7843,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793448250
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: a rare card's token wears the rare border, as Baby Impala",
+      "by": "claude",
+      "at": 1793877577
     }
   },
   "bunny": {
