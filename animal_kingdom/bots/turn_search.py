@@ -632,7 +632,7 @@ class TurnSearcher(Bot):
         takers = self._den_takers(world, legal, me)
         if takers:
             return sorted(takers, key=score, reverse=True)[:_DEN_REACH_TAKERS]
-        opens = []
+        opens: list[Action] = []
         for action in legal:
             if action in known or not isinstance(action, (PlaceAction, RoamAction, ChoiceAction)) \
                     or (isinstance(action, (PlaceAction, RoamAction)) and action.is_hq_capture):
@@ -734,7 +734,7 @@ class TurnSearcher(Bot):
         held = self._den_memo.get(id(world))
         if held is None or held[0] is not world:
             held = self._den_memo[id(world)] = (world, {})
-        memo = held[1]
+        memo: dict[Action, bool] = held[1]
         out = []
         for a in legal:
             if isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture:
