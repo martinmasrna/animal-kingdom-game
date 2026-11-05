@@ -2,10 +2,7 @@
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
 .A { color: var(--you); } .B { color: var(--them); }
-.gradart { background: linear-gradient(180deg, #7ec3ca 0%, #a9cdb8 46%, #cfab66 58%, #9b6d37 100%); background-size: cover; background-position: center 25%; }
-.lbl { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .btn { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 28px; border-radius: 10px; font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border: 1px solid var(--line-strong); color: var(--text); }
-.btn.primary { background: var(--you); border-color: var(--you); color: #111; }
 .btn[disabled] { opacity: 0.4; cursor: default; }
 #app { position: fixed; inset: 0; display: flex; flex-direction: column; }
 .toast { position: fixed; left: 50%; top: 60px; transform: translateX(-50%); z-index: 90; padding: 8px 14px; border-radius: 8px; background: #3a1f1b; border: 1px solid #c65a4a; font-size: 13px; display: none; }
@@ -15,8 +12,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 .body { flex: 1; display: flex; gap: 32px; padding: 20px 24px; min-height: 0; }
 .row { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); display: inline-flex; align-items: center; font-size: 12px; cursor: pointer; }
-.chip.on { color: var(--text); border-color: var(--line-strong); background: var(--surface-2); }
 .code { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: 0.08em; }
 
 
@@ -101,14 +96,12 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 
 /* ---------- deck rows and the card popup (shared) ---------- */
 .dr { position: relative; display: flex; align-items: center; height: 19px; margin-bottom: 1px; border-radius: 4px; background: var(--surface-2); overflow: hidden; cursor: default; }
-.dr .ban { position: absolute; right: 0; top: 0; bottom: 0; width: 60%; -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%); mask-image: linear-gradient(90deg, transparent, #000 60%); opacity: 0.7; }
 .dr .s { position: relative; width: 22px; height: 100%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 14px; color: #111; flex: none; background: var(--c); }
 .dr .nm { position: relative; flex: 1; padding-left: 7px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.9); color: var(--text); }
 .dr.legendary .nm { color: #f0d9a0; }
 .dr .x { position: relative; width: 22px; text-align: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.9); }
 .dr.gone { opacity: 0.28; }
 .dr:hover { outline: 1px solid var(--line-strong); }
-.grp { height: 5px; }
 .pop { position: fixed; z-index: 60; width: 190px; min-height: 266px; border-radius: 10px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--line-strong); display: none; flex-direction: column; box-shadow: 0 14px 36px rgba(0,0,0,0.6); pointer-events: none; }
 .pop.rare { border-color: #9aa3ab; } .pop.legendary { border: 2px solid #d9bd7a; }
 .pop .art { height: 140px; flex: none; }
@@ -366,8 +359,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .sets .credits pre { margin: 0; white-space: pre-wrap; font: 500 14px/1.45 'Fira Sans Condensed', sans-serif; color: #b3a996; }
 
 @media (max-width: 700px), (max-height: 500px) { .pre { padding-top: 16px; } .pre .lobbyp { margin-top: 16px; } }   /* the waiting lobby clear of the screen's top */
-.lead .lpin { padding: 10px 24px 0; } .lead .lpin .lr { margin: 0; }   /* still placing: your row pinned under the list, always in sight */ .lead .lr .nm small { margin-left: 10px; font-weight: 500; font-size: 15px; color: #a99f8e; }   /* not ranked yet: your progress */
-@media (max-width: 700px) { .lead .lpin { padding-left: 12px; padding-right: 12px; } }
+.lead .lr .nm small { margin-left: 10px; font-weight: 500; font-size: 15px; color: #a99f8e; }   /* not ranked yet: your progress */
 
 /* Touch: a long press reads a card (onHold), so it must not select text or open the browser's callout; fields stay editable. */
 @media (hover: none) {
@@ -463,7 +455,6 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mah { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 14px; }
 .ladder .metar .mah h3 { font: 700 26px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0; }
 .ladder .metar .mah .mwr { font-weight: 700; font-size: 18px; padding: 2px 8px; border-radius: 6px; color: #f0e8da; }
-.ladder .metar .mlist { flex: none; width: 250px; } .ladder .metar .mlh { display: flex; gap: 8px; align-items: baseline; margin: 0 2px 6px; } .ladder .metar .mlh b { color: #f0e8da; font-size: 17px; } .ladder .metar .mlh span { color: #8f8574; }
 .ladder .metar .mc tbody td, .ladder .metar .mc tbody th.an { height: 30px; padding-top: 0; padding-bottom: 0; }
 .ladder .metar .mc tbody th.an { padding: 0 0 0 4px; border-bottom: 0; }   /* the strips stack flush, as a deck list in the collection */
 .ladder .metar .mstrip { width: 230px; } .ladder .metar .mstrip .st { margin: 0; height: 30px; border-radius: 0; cursor: default; box-shadow: inset 0 -1px 0 rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.07); }
