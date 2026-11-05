@@ -23,6 +23,9 @@ const LOSS_TIEBREAK: f64 = 1e6;
 const SEARCH_WORLDS: usize = 24;
 const SEARCH_TURNS: i32 = 2;
 const SEARCH_MARGIN: f64 = 0.5;
+const DEN_REACH_NODES: usize = 200; // den_reach: sub-choice nodes tried per question (reaches_capture, opens_den)
+const DEN_REACH_TAKERS: usize = 2; // den_reach: den takers a shortlist keeps (den_reach_keep)
+const DEN_REACH_OPENERS: usize = 3; // den_reach: openers beyond den_open's a shortlist keeps
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Kind {
@@ -81,6 +84,8 @@ pub struct Searcher {
     pub reply_turns: usize,
     pub deepen_chase: bool,
     pub den_open: bool,
+    /// referee_bot.den_reach, on top of den_open: openers and den takers seen through my sub-choices.
+    pub den_reach: bool,
     /// Far den sense (referee_bot.den_far): hands dealt to read a capture built from several placements; 0 off.
     pub den_far: usize,
     /// referee_bot.den_far_margin / den_far_ratio: how much riskier an action may be and stay.
@@ -138,6 +143,7 @@ impl Searcher {
             reply_turns: 0,
             deepen_chase: false,
             den_open: false,
+            den_reach: false,
             den_far: 0,
             den_far_margin: 0,
             den_far_ratio: 0.0,
@@ -417,7 +423,11 @@ impl Searcher {
             let mut advanced = Vec::with_capacity(group.len());
             if actor == me {
                 let legal = self.safe_actions(&representative, &rules::legal_actions(&representative), me);
-                let action = self.policy.choose(&representative, me, &legal);
+                let reach = if self.den_reach { den_reach_move(&representative, &legal, me) } else { None };
+                let action = match reach {
+                    Some(a) => a,
+                    None => self.policy.choose(&representative, me, &legal),
+                };
                 for (s, penalty) in &group {
                     let mut nxt = s.clone();
                     let _ = rules::apply_action(&mut nxt, &action, false);
@@ -491,10 +501,22 @@ impl Searcher {
             }
         }
         if self.den_open {
-            for a in self.den_openers(&worlds[0], &candidates, me) {
-                let i = candidates.iter().position(|x| *x == a).unwrap();
+            let openers = self.den_openers(&worlds[0], &candidates, me);
+            for a in &openers {
+                let i = candidates.iter().position(|x| x == a).unwrap();
                 if !selected.contains(&i) {
                     selected.push(i);
+                }
+            }
+            if self.den_reach {
+                let mut score_of = vec![0.0; candidates.len()];
+                for &(sc, _, i) in &scored {
+                    score_of[i] = sc;
+                }
+                for i in den_reach_keep(&worlds[0], &candidates, me, &score_of, &openers) {
+                    if !selected.contains(&i) {
+                        selected.push(i);
+                    }
                 }
             }
         }
@@ -664,10 +686,19 @@ impl Searcher {
             }
         }
         if self.den_open {
-            for a in self.den_openers(world, legal, me) {
-                let i = legal.iter().position(|x| *x == a).unwrap();
+            let openers = self.den_openers(world, legal, me);
+            for a in &openers {
+                let i = legal.iter().position(|x| x == a).unwrap();
                 if !reserved.contains(&i) {
                     reserved.push(i);
+                }
+            }
+            if self.den_reach {
+                let scores: Vec<f64> = (0..legal.len()).map(score_of).collect();
+                for i in den_reach_keep(world, legal, me, &scores, &openers) {
+                    if !reserved.contains(&i) {
+                        reserved.push(i);
+                    }
                 }
             }
         }
@@ -737,7 +768,11 @@ impl Searcher {
         for action in legal {
             let mut nxt = world.clone();
             let _ = rules::apply_action(&mut nxt, action, false);
-            if nxt.result.is_some() || !opponent_lethal_next_turn(&nxt, opponent) || (self.den_open && self.capture_next(&nxt, me)) {
+            if nxt.result.is_some()
+                || !opponent_lethal_next_turn(&nxt, opponent)
+                || (self.den_open && self.capture_next(&nxt, me))
+                || (self.den_reach && (opens_den(&nxt, me, 2, &mut 0) || reaches_capture(&nxt, me, 1, &mut 0)))
+            {
                 safe.push(action.clone());
             }
         }
@@ -779,6 +814,17 @@ impl Searcher {
         for (i, a) in candidates.iter().enumerate() {
             if matches!(a, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. }) && !selected.contains(&i) {
                 selected.push(i);
+            }
+        }
+        if self.den_reach {
+            let mut score_of = vec![0.0; candidates.len()];
+            for &(sc, i) in &scored {
+                score_of[i] = sc;
+            }
+            for i in best_by_score(den_takers(st, &candidates, me), &score_of, DEN_REACH_TAKERS) {
+                if !selected.contains(&i) {
+                    selected.push(i);
+                }
             }
         }
         let home = scored.iter().find(|(_, i)| matches!(&candidates[*i], Action::Place { target: Target::Cr(c), .. } if st.map().in_front(me, *c)));
@@ -1397,4 +1443,145 @@ fn far_capture(st: &State, opp: Player, dist: &[i32], budget: &mut i64) -> bool 
         }
     }
     false
+}
+
+// ------------------------------------------------------------------ den reach (turn_search.py, den_reach)
+// den_open settles an opener's own sub-choices with the fast policy and asks only for a placement or roam onto the
+// den; den_reach tries every one of my sub-choices on the way (bounded by DEN_REACH_NODES) and keeps an action whose
+// own resolution ends in my capture (a den taker) like a capture. It reads the searched world only.
+
+fn is_capture(a: &Action) -> bool {
+    matches!(a, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. })
+}
+
+fn won_by_capture(r: &crate::state::GameResult, me: Player) -> bool {
+    r.winner == Some(me) && r.reason == "hq_capture"
+}
+
+/// The `n` best of `idx` by `score`, highest first, ties in their given order (Python's stable reverse sort).
+fn best_by_score(mut idx: Vec<usize>, score: &[f64], n: usize) -> Vec<usize> {
+    idx.sort_by(|&a, &b| score[b].partial_cmp(&score[a]).unwrap_or(std::cmp::Ordering::Equal));
+    idx.truncate(n);
+    idx
+}
+
+/// Whether some sequence of my own pending sub-choices from `st` ends in my den capture (`depth` more levels tried).
+fn reaches_capture(st: &State, me: Player, depth: i32, ctr: &mut usize) -> bool {
+    if let Some(r) = rules::is_terminal(st) {
+        return won_by_capture(&r, me);
+    }
+    if st.pending.is_none() || st.current != me || st.player_to_act() != me {
+        return false;
+    }
+    let legal = rules::legal_actions(st);
+    if legal.iter().any(is_capture) {
+        return true;
+    }
+    if depth <= 0 {
+        return false;
+    }
+    for a in &legal {
+        *ctr += 1;
+        if *ctr > DEN_REACH_NODES {
+            return false;
+        }
+        let mut nxt = st.clone();
+        let _ = rules::apply_action(&mut nxt, a, false);
+        if reaches_capture(&nxt, me, depth - 1, ctr) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Whether `action` captures the den, at once or through the sub-choices it opens (a Roar's free placement).
+fn takes_den(st: &State, action: &Action, me: Player, depth: i32, ctr: &mut usize) -> bool {
+    if is_capture(action) {
+        return true;
+    }
+    match action {
+        Action::Draw => return false,
+        Action::Place { card, .. } if st.pending.is_none() && !st.card(*card).has_roar => return false,
+        _ => {}
+    }
+    let mut nxt = st.clone();
+    let _ = rules::apply_action(&mut nxt, action, false);
+    if let Some(r) = &nxt.result {
+        return won_by_capture(r, me);
+    }
+    nxt.pending.is_some() && reaches_capture(&nxt, me, depth, ctr)
+}
+
+/// Whether, after my own pending sub-choices (`depth` levels tried), my next action can take the den.
+fn opens_den(st: &State, me: Player, depth: i32, ctr: &mut usize) -> bool {
+    if rules::is_terminal(st).is_some() || st.current != me || st.player_to_act() != me {
+        return false;
+    }
+    let legal = rules::legal_actions(st);
+    if st.pending.is_some() {
+        if depth <= 0 {
+            return false;
+        }
+        for a in &legal {
+            *ctr += 1;
+            if *ctr > DEN_REACH_NODES {
+                return false;
+            }
+            let mut nxt = st.clone();
+            let _ = rules::apply_action(&mut nxt, a, false);
+            if opens_den(&nxt, me, depth - 1, ctr) {
+                return true;
+            }
+        }
+        return false;
+    }
+    if legal.iter().any(is_capture) {
+        return true;
+    }
+    legal.iter().any(|b| takes_den(st, b, me, 0, ctr))
+}
+
+/// For a line the node budget hands to the fast policy: a den taker, else at one of my sub-choices an option after
+/// which my den can be taken; None otherwise.
+fn den_reach_move(st: &State, legal: &[Action], me: Player) -> Option<Action> {
+    if let Some(a) = legal.iter().find(|a| takes_den(st, a, me, 0, &mut 0)) {
+        return Some(a.clone());
+    }
+    if st.pending.is_none() {
+        return None;
+    }
+    for a in legal {
+        let mut nxt = st.clone();
+        let _ = rules::apply_action(&mut nxt, a, false);
+        if opens_den(&nxt, me, 1, &mut 0) {
+            return Some(a.clone());
+        }
+    }
+    None
+}
+
+/// Indices of the actions (not themselves a capture) whose own resolution ends in my capture.
+fn den_takers(world: &State, legal: &[Action], me: Player) -> Vec<usize> {
+    (0..legal.len()).filter(|&i| !is_capture(&legal[i]) && takes_den(world, &legal[i], me, 1, &mut 0)).collect()
+}
+
+/// What den_reach adds to a shortlist besides `known` (den_open's openers): the best DEN_REACH_TAKERS den takers by
+/// `score`, else the best DEN_REACH_OPENERS actions after which, my sub-choices tried, my next action takes the den.
+fn den_reach_keep(world: &State, legal: &[Action], me: Player, score: &[f64], known: &[Action]) -> Vec<usize> {
+    let takers = den_takers(world, legal, me);
+    if !takers.is_empty() {
+        return best_by_score(takers, score, DEN_REACH_TAKERS);
+    }
+    let mut opens = Vec::new();
+    for (i, a) in legal.iter().enumerate() {
+        if known.contains(a) || !matches!(a, Action::Place { .. } | Action::Roam { .. } | Action::Choice(_)) || is_capture(a) {
+            continue;
+        }
+        let mut nxt = world.clone();
+        let _ = rules::apply_action(&mut nxt, a, false);
+        if opens_den(&nxt, me, 2, &mut 0) {
+            opens.push(i);
+        }
+    }
+    best_by_score(opens, score, DEN_REACH_OPENERS)
 }

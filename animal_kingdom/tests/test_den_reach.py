@@ -122,3 +122,32 @@ def test_den_reach_keeps_the_bush_dog_roam():
 def test_den_reach_needs_den_open():
     assert not RefereeBot(den_reach=True).den_reach
     assert RefereeBot(den_open=True, den_reach=True).den_reach
+
+
+# The Rust port (engine_rs/src/bots/search.rs) plays the same puzzles with the same bot (skipped when it is not built).
+_RUST_SPEC = ("referee:determinizations=5,beam_width=8,root_width=5,reply_width=8,max_search_nodes=150,quiesce=true,"
+              "den_open=true,den_reach={}")
+
+
+def _rust_bot(seed: int, reach: bool):
+    import pytest
+    from animal_kingdom.bots import rust_bot
+    if rust_bot.ak_engine is None:
+        pytest.skip("the Rust engine is not built")
+    return rust_bot.RustBot(_RUST_SPEC.format("true" if reach else "false"), seed)
+
+
+def test_rust_den_reach_finds_the_egg_under_the_hyena():
+    for seed in (0, 1):
+        captured, moves = _plays_turn(egg_under_the_hyena(), _rust_bot(seed, True))
+        assert captured, moves
+        assert moves[0] == PlaceAction("hornet", ("cr", "2,2"))
+    captured, moves = _plays_turn(egg_under_the_hyena(), _rust_bot(0, False))
+    assert not captured, moves
+
+
+def test_rust_den_reach_keeps_the_bush_dog_roam():
+    for seed in (0, 1):
+        captured, moves = _plays_turn(bush_dog_steps_forward(), _rust_bot(seed, True))
+        assert captured, moves
+        assert moves[0] == RoamAction("2,2", ("cr", "3,2"))

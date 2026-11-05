@@ -190,8 +190,8 @@ class RefereeBot(TurnSearcher):
         # and a second action that takes the den through its Roar's free placement were never kept. With den_reach my
         # sub-choices are all tried (bounded), and the best two den takers of that kind, or else the best three such
         # openers, are kept through the beam, the root screen and the reply shortlist (`TurnSearcher._den_reach_keep`);
-        # a line the node budget hands to the fast policy still takes the den (`_den_reach_move`). Python only: the Rust
-        # port does not have it, so `sim.runner` builds the Python bot for a spec that sets it.
+        # a line the node budget hands to the fast policy still takes the den (`_den_reach_move`). The Rust port
+        # (`engine_rs/src/bots/search.rs`) plays it move for move.
         self.den_reach = den_reach and den_open
         # Reply minimax (2026-10-30, Martin's G2EFVA: Serval's Roar spared his 9-strength Capybara beside my den and
         # took an Owl): the deepened line plays the reply opening the opponent's own one-turn score likes, and my next

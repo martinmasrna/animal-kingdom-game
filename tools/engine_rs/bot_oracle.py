@@ -2,6 +2,10 @@
 their root scores) must agree. Positions come from random play through the Python engine.
 
     .venv/bin/python tools/engine_rs/bot_oracle.py [--specs greedy,turn,expert] [--positions 60] [--seed 0]
+
+`--puzzles FILE` takes the positions instead from a `tools/puzzles/mine.py` output (each mined den-capture position
+rebuilt from its game log, the player to move with a two-action den win on offer), where `den_open` and `den_reach`
+decide the move; `--shard K/N` keeps every Nth position from the Kth, so N processes split one run.
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))   # REPO_ROOT: this tree, not an installed copy
@@ -39,6 +43,7 @@ SPECS = {
     "normal": "turn:w.hq_threat_reach=0.5",
     "referee": "referee",
     "expert": EXPERT.replace("time_budget=8", "time_budget=0"),
+    "expert_reach": EXPERT.replace("time_budget=8", "time_budget=0") + ",den_reach=true",
     # the hand-evaluation Expert (the shipped one until 2026-10-23), still the baseline of the paired benchmark's history
     "expert_hand": re.sub(r"referee_learned:eval=[^,]*,", "referee:", EXPERT).replace("time_budget=8", "time_budget=0"),
 }
@@ -79,12 +84,29 @@ if __name__ == "__main__":
     ap.add_argument("--positions", type=int, default=60)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--stop", action="store_true")
+    ap.add_argument("--puzzles", default=None, help="a mine.py jsonl: its positions instead of random ones")
+    ap.add_argument("--shard", default="0/1", help="K/N: every Nth position from the Kth")
     a = ap.parse_args()
     cards = load_cards()
     pool = sorted(c for c, card in cards.items() if card.collectible)
     config = Config.default()
     eng = ak_engine.Engine(CARDS_JSON, MAPS_JSON, json.dumps(dataclasses.asdict(config)), "map_b")
-    pos = positions(a.positions, a.seed, cards, config, pool)
+    if a.puzzles:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "puzzles"))
+        from expert_finds import rebuild, _seed_for
+        pos = []
+        with open(a.puzzles, encoding="utf-8") as fh:
+            for raw in fh:
+                if raw.strip():
+                    rec = json.loads(raw)
+                    try:
+                        pos.append((_seed_for(rec, a.seed), rebuild(rec["path"], rec["line"], rec["action_index"])))
+                    except Exception as e:  # noqa: BLE001 - a log that no longer replays on these cards
+                        print(f"  skip {rec['path']} line {rec['line']}: {type(e).__name__}", flush=True)
+    else:
+        pos = positions(a.positions, a.seed, cards, config, pool)
+    k, n = (int(x) for x in a.shard.split("/"))
+    pos = pos[k::n]
     print(f"{len(pos)} positions", flush=True)
     for name in a.specs.replace(",greedy", ";greedy").split(";"):
         spec = SPECS.get(name, name)

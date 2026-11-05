@@ -190,6 +190,8 @@ impl Bot {
                     if let Some(v) = get("den_open") {
                         s.den_open = as_bool(v);
                     }
+                    // referee_bot: den_reach is on only with den_open
+                    s.den_reach = get("den_reach").map(as_bool).unwrap_or(false) && s.den_open;
                     if let Some(v) = get("reply_min") {
                         s.reply_min = as_bool(v);
                     }
