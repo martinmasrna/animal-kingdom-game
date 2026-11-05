@@ -470,11 +470,6 @@ def test_pile__a_fresh_cockroach_keeps_nothing_the_old_one_was_given():
     assert new.card_id == "cockroach" and new.iid != c.iid and strength(s, new) == 1
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Two readings of 'Roach King keeps its growth from fall to fall but no loss of strength'. A (the words): its +1s "
-    "are kept whatever it lost, so a king grown once and then shrunk below 0 comes back at 1+1+1 = 3. B (the engine): "
-    "growth and loss share one stored counter, floored at 0 on each fall, so a loss bigger than the growth wipes the "
-    "growth too and it comes back at 2."))
 def test_pile__roach_king_keeps_its_growth_but_not_a_loss():
     s = st()
     k = put(s, "1,2", "cockroach_legend", "A")

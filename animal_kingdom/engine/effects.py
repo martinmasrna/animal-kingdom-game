@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from typing import Callable, Optional
 
 from .actions import SKIP, ChoiceAction, PlaceAction, RoamAction
-from .state import WILD, EngineError, GameState, Result, UnitInstance, other_player
+from .state import JELLY_SOURCE, WILD, EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
 from .strength import effective_strength, placement_strength, raw_strength, small_starting_deck
 
@@ -614,6 +614,7 @@ def _op_apex_eat(state, step):
                 grown = state.config.leopard_legend_growth
             if grown:
                 apex.strength_counter += grown
+                state.note_strength(apex.iid, grown, apex.card_id)
                 state.emit("strength", iid=apex.iid, card=apex.card_id, owner=apex.owner, n=grown)
     return None
 
@@ -1177,6 +1178,7 @@ def _eat(state, unit, cr) -> None:
                     _transform(state, inst, form)
         if eaten < n:
             unit.strength_counter -= n - eaten
+            state.note_strength(unit.iid, eaten - n, unit.card_id)
             state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=eaten - n)
     finally:
         state.cause, state.cause_iid = prev
@@ -1381,7 +1383,8 @@ def _op_play_named(state, step):
         if not in_hand and cid in state.decks[player]:
             state.decks[player].remove(cid)
             jellied = state.jelly_take(player, cid)
-            state.add_to_hand(player, cid, strength_counter=jellied or 0)   # only to be placed at once: not a gain, so no hand-limit burn
+            inst = state.add_to_hand(player, cid, strength_counter=jellied or 0)   # only to be placed at once: not a gain, so no hand-limit burn
+            state.note_strength(inst.iid, jellied or 0, JELLY_SOURCE)
             step["fetched"] = True
         else:
             step["fetched"] = False
@@ -1425,6 +1428,7 @@ def _op_grant_strength(state, step):
         if inst is None:
             continue
         inst.strength_counter += amount
+        state.note_strength(iid, amount, state.cause)
         state.emit("strength", iid=iid, card=inst.card_id, owner=inst.owner, n=amount)   # a stored gain
         if amount <= 0:
             continue
@@ -1449,6 +1453,7 @@ def _gain_in_hand(state, inst, amount) -> None:
         partner = next((u for u in state.hands[inst.owner] if u.card_id == mate), None)
         if partner is not None:
             partner.strength_counter += amount
+            state.note_strength(partner.iid, amount, state.cause)
             state.emit("strength", iid=partner.iid, card=partner.card_id, owner=partner.owner, n=amount)
     hook = _hook(state, inst.card_id, "on_gain_in_hand")
     if hook:
@@ -1640,6 +1645,7 @@ def _bounce(state, cr, top, *, lock_until=0):
     if top.owner == WILD:       # a Wild animal has no hand to go back to: it just leaves
         return None
     inst = gain_to_hand(state, top.owner, top.card_id, strength_counter=top.strength_counter)
+    state.copy_strength_sources(top.iid, inst.iid)
     inst.locked_until_turn = lock_until
     return inst
 
@@ -1676,6 +1682,7 @@ def _then_set_strength(state, step, cr):
     if top is not None:
         delta = state.config.serval_set - effective_strength(state, top)
         top.strength_counter += delta
+        state.note_strength(top.iid, delta, state.cause)
         state.emit("strength", iid=top.iid, card=top.card_id, owner=top.owner, n=delta)
 
 
@@ -1684,6 +1691,7 @@ def _then_drain(state, step, cr):
     top = state.top_unit(cr)
     if top is not None:
         top.strength_counter -= step["amount"]
+        state.note_strength(top.iid, -step["amount"], state.cause)
         state.emit("strength", iid=top.iid, card=top.card_id, owner=top.owner, n=-step["amount"])
 
 
@@ -1744,13 +1752,14 @@ def _op_it_roams(state, step):
 OPS["it_roams"] = _op_it_roams
 
 
-def _become(state, step, card_id, counter) -> None:
+def _become(state, step, card_id, counter, from_iid) -> None:
     """The Chameleons: this becomes a copy of `card_id` - its strength, keywords and text, not its Roar (it isn't placed).
     It is that card from now on (a Faceless Manipulator: removed, it goes to the Remove Pile as the copy)."""
     me = _find_instance(state, step["self"])
     if me is None or _crossroad_of(state, me.iid) is None:
         return
     me.strength_counter = counter
+    state.copy_strength_sources(from_iid, me.iid)
     _transform(state, me, card_id)
 
 
@@ -1760,7 +1769,7 @@ def _then_copy_and_add(state, step, cr):
     target = state.top_unit(cr)
     if target is None:
         return
-    _become(state, step, target.card_id, target.strength_counter)
+    _become(state, step, target.card_id, target.strength_counter, target.iid)
     me = _find_instance(state, step["self"])
     if me is not None and _crossroad_of(state, me.iid) is not None:
         _copy_timers(state, target, me)
@@ -1787,7 +1796,7 @@ def _then_copy_from_hand(state, step, iid):
     """The Chameleon: "become a copy of an animal in your hand" (its counter included); the card stays in your hand."""
     inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
     if inst is not None:
-        _become(state, step, inst.card_id, inst.strength_counter)
+        _become(state, step, inst.card_id, inst.strength_counter, inst.iid)
 
 
 def _then_return_ally(state, step, cr):
@@ -1839,7 +1848,8 @@ def _then_duplicate(state, step, iid):
     """Orangutan: a copy of the chosen hand card, its strength counter included."""
     inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
     if inst is not None:
-        gain_to_hand(state, step["chooser"], inst.card_id, strength_counter=inst.strength_counter)
+        dup = gain_to_hand(state, step["chooser"], inst.card_id, strength_counter=inst.strength_counter)
+        state.copy_strength_sources(inst.iid, dup.iid)
 
 
 def _then_discard(state, step, iid):
@@ -2038,6 +2048,7 @@ def _tarantula_eot(state, unit, cr):
         remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
         if low > 0:
             unit.strength_counter += low
+            state.note_strength(unit.iid, low, unit.card_id)
             state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=low)
 
 
@@ -2121,12 +2132,13 @@ def _worm_remove(state, unit, cr, pos):
     draw_cards(state, unit.owner, 1)
 
 
-def _put_back(state, unit, cr, pos, *, counter) -> None:
-    """A fresh copy of a removed unit, carrying `counter`, goes back into the same stack at the same height (on top, or
-    still buried). It comes back, it isn't placed: nothing that reacts to a placement sees it (a City Spider beside it
-    would otherwise eat it for ever)."""
+def _put_back(state, unit, cr, pos, *, base) -> None:
+    """A fresh copy of a removed unit goes back into the same stack at the same height (on top, or still buried), with
+    `base` of its own growth raising its base and nothing else. It comes back, it isn't placed: nothing that reacts to a
+    placement sees it (a City Spider beside it would otherwise eat it for ever)."""
     if state.pile_take(unit.card_id, unit.owner):
-        back = UnitInstance(unit.card_id, unit.owner, state.new_iid(), strength_counter=counter)
+        back = UnitInstance(unit.card_id, unit.owner, state.new_iid(), strength_counter=base)
+        state.note_strength(back.iid, base, unit.card_id, base=True)
         stack = state.board.setdefault(cr, [])
         at = min(pos, len(stack))
         stack.insert(at, back)
@@ -2136,16 +2148,17 @@ def _put_back(state, unit, cr, pos, *, counter) -> None:
 def _cockroach_remove(state, unit, cr, pos):
     """Fall: replace this with a Cockroach (a fresh one: nothing it was given or lost comes back) and place a Roach on an
     adjacent empty crossroad (a random one)."""
-    _put_back(state, unit, cr, pos, counter=0)
+    _put_back(state, unit, cr, pos, base=0)
     empty = _empty_neighbors(state, cr)
     if empty and state.result is None:
         _spawn(state, unit.owner, "roach", state.rng.choice(empty))
 
 
 def _cockroach_legend_remove(state, unit, cr, pos):
-    """Fall: put this back where it was with +1 strength and draw a card. Its growth stacks from fall to fall; a loss of
-    strength doesn't come back with it (else one shrunk below 0 would fall for ever)."""
-    _put_back(state, unit, cr, pos, counter=max(unit.strength_counter, 0) + state.config.cockroach_legend_growth)
+    """Fall: put this back where it was with +1 strength and draw a card. The +1 raises its base, fall after fall: it
+    comes back at its printed strength plus 1 for every fall, and what other cards gave it or took from it is gone
+    (Martin, 2026-11-05)."""
+    _put_back(state, unit, cr, pos, base=state.base_bonus(unit.iid) + state.config.cockroach_legend_growth)
     draw_cards(state, unit.owner, 1)
 
 

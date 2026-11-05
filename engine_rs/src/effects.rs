@@ -656,6 +656,7 @@ fn op_apex_eat(st: &mut State, step: &mut Map) -> Option<Pending> {
                 if let Some(a) = st.unit_by_iid_mut(apex.iid) {
                     a.strength_counter += grown as i16;
                 }
+                st.note_strength(apex.iid, grown, Some(apex.card), false);
                 crate::emit!(st, "strength", vmap!("iid" => Value::Int(apex.iid), "card" => card_v(st, apex.card), "owner" => pn(apex.owner), "n" => Value::Int(grown as i64)));
             }
         }
@@ -1305,6 +1306,7 @@ fn eat(st: &mut State, unit: &Unit, cr: Cr) {
         if let Some(u) = st.unit_by_iid_mut(unit.iid) {
             u.strength_counter -= (n - eaten) as i16;
         }
+        st.note_strength(unit.iid, eaten - n, Some(unit.card), false);
         crate::emit!(st, "strength", vmap!("iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "owner" => pn(unit.owner), "n" => Value::Int((eaten - n) as i64)));
     }
     st.cause = prev.0;
@@ -1573,7 +1575,9 @@ fn op_play_named(st: &mut State, step: &mut Map) -> Option<Pending> {
             let pos = st.decks[p].iter().position(|c| *c == cid).unwrap();
             st.decks[p].remove(pos);
             let jellied = st.jelly_take(player, cid).unwrap_or(0);
-            st.add_to_hand(player, cid, jellied);
+            let inst = st.add_to_hand(player, cid, jellied);
+            let bee = st.card_id("bee_legend_2");
+            st.note_strength(inst.iid, jellied, bee, false);
             step.insert("fetched".into(), Value::Bool(true));
         } else {
             step.insert("fetched".into(), Value::Bool(false));
@@ -1627,6 +1631,8 @@ fn op_grant_strength(st: &mut State, step: &mut Map) -> Option<Pending> {
         let Some(inst) = st.find_instance_mut(iid) else { continue };
         inst.strength_counter += amount as i16;
         let inst = inst.clone();
+        let cause = st.cause;
+        st.note_strength(iid, amount, cause, false);
         crate::emit!(st, "strength", vmap!("iid" => Value::Int(iid), "card" => card_v(st, inst.card), "owner" => pn(inst.owner), "n" => Value::Int(amount as i64)));
         if amount <= 0 {
             continue;
@@ -1652,6 +1658,8 @@ fn gain_in_hand(st: &mut State, inst: &Unit, amount: i32) {
         if let Some(pos) = st.hands[p].iter().position(|u| u.card == mate) {
             st.hands[p][pos].strength_counter += amount as i16;
             let partner = st.hands[p][pos].clone();
+            let cause = st.cause;
+            st.note_strength(partner.iid, amount, cause, false);
             crate::emit!(st, "strength", vmap!("iid" => Value::Int(partner.iid), "card" => card_v(st, partner.card), "owner" => pn(partner.owner), "n" => Value::Int(amount as i64)));
         }
     }
@@ -1794,6 +1802,7 @@ pub fn bounce(st: &mut State, cr: Cr, top: &Unit, lock_until: i32) -> Option<Uni
         return None;
     }
     let inst = gain_to_hand(st, top.owner, top.card, top.strength_counter as i32);
+    st.copy_strength_sources(top.iid, inst.iid);
     let p = top.owner as usize;
     if let Some(u) = st.hands[p].iter_mut().find(|u| u.iid == inst.iid) {
         u.locked_until_turn = lock_until as i16;

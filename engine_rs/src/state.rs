@@ -472,11 +472,23 @@ pub struct State {
     pub jelly: [FxHashMap<CardId, (i32, i32)>; 2],
     /// Whether `jelly[p]` exists at all (Python keeps the player's dict once the legendary Bee roared, empty or not).
     pub jelly_set: [bool; 2],
+    pub strength_sources: CowVec<StrengthSource>,
     pub cache: BoardCache,
     pub events: Vec<Map>,
     pub cause: Option<CardId>,
     pub cause_iid: Option<i64>,
     pub record_events: bool,
+}
+
+/// One entry of where a unit's stored strength came from (engine/state.py `strength_sources`): `n` of instance `iid`'s
+/// counter came from `src` (None: set by hand); `base` marks its own growth raising its base (the Roach King's falls).
+/// The entries of an iid sum to its counter. A flat list behind an Arc: a search clone shares it, a change copies it.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct StrengthSource {
+    pub iid: i64,
+    pub src: Option<CardId>,
+    pub n: i16,
+    pub base: bool,
 }
 
 /// Clones made so far (the timing binary reports clones per action; relaxed, one increment per clone).
@@ -518,6 +530,7 @@ impl Clone for State {
             last_roar: self.last_roar,
             jelly: self.jelly.clone(),
             jelly_set: self.jelly_set,
+            strength_sources: self.strength_sources.clone(),
             cache: self.cache,
             events: Vec::new(),
             cause: None,
@@ -653,8 +666,32 @@ impl State {
         let mut inst = Unit::new(self.eaten_form(player, card), player, iid);
         if let Some(c) = self.jelly_take(player, card) {
             inst.strength_counter = c as i16;
+            let bee = self.card_id("bee_legend_2");
+            self.note_strength(iid, c, bee, false);
         }
         inst
+    }
+
+    /// Record that `n` of instance `iid`'s stored strength came from `src` (beside every counter change).
+    pub fn note_strength(&mut self, iid: i64, n: i32, src: Option<CardId>, base: bool) {
+        if n != 0 {
+            self.strength_sources.push(StrengthSource { iid, src, n: n as i16, base });
+        }
+    }
+
+    /// `to` now carries `from`'s stored strength (a bounce, a copy): its sources replace whatever it had.
+    pub fn copy_strength_sources(&mut self, from: i64, to: i64) {
+        if from == to || !self.strength_sources.iter().any(|e| e.iid == from || e.iid == to) {
+            return;
+        }
+        let mut v: Vec<StrengthSource> = self.strength_sources.iter().filter(|e| e.iid != to).copied().collect();
+        v.extend(self.strength_sources.iter().filter(|e| e.iid == from).map(|e| StrengthSource { iid: to, ..*e }));
+        self.strength_sources = CowVec::from(v);
+    }
+
+    /// The part of `iid`'s stored strength that is its own growth raising its base (the Roach King's falls).
+    pub fn base_bonus(&self, iid: i64) -> i32 {
+        self.strength_sources.iter().filter(|e| e.iid == iid && e.base).map(|e| e.n as i32).sum()
     }
 
     pub fn add_to_hand(&mut self, player: Player, card: CardId, strength_counter: i32) -> Unit {
@@ -890,6 +927,22 @@ impl State {
         }
     }
 
+    fn sources_json(&self) -> sj::Value {
+        let live: std::collections::BTreeSet<i64> = self.order.iter().flat_map(|&cr| self.stacks[cr as usize].iter().map(|u| u.iid))
+            .chain(self.hands.iter().flat_map(|h| h.iter().map(|u| u.iid))).collect();
+        let mut m = sj::Map::default();
+        let mut iids: Vec<i64> = self.strength_sources.iter().map(|e| e.iid).filter(|i| live.contains(i)).collect();
+        iids.sort();
+        iids.dedup();
+        for iid in iids {
+            let entries: Vec<sj::Value> = self.strength_sources.iter().filter(|e| e.iid == iid)
+                .map(|e| sj::json!([e.src.map(|c| sj::Value::String(self.cname(c).to_string())).unwrap_or(sj::Value::Null), e.n, e.base]))
+                .collect();
+            m.insert(iid.to_string(), sj::Value::Array(entries));
+        }
+        sj::Value::Object(m)
+    }
+
     pub fn to_json(&self) -> sj::Value {
         let mut board = sj::Map::default();
         for &cr in &self.order {
@@ -960,6 +1013,7 @@ impl State {
             "hungry_eaten": hungry_eaten,
             "last_roar": last_roar,
             "jelly": jelly_m,
+            "strength_sources": self.sources_json(),
         })
     }
 
@@ -1012,6 +1066,22 @@ impl State {
             }
         }
         st.remove_pile = cards_of(&d["remove_pile"]);
+        if let Some(m) = d.get("strength_sources").and_then(|x| x.as_object()) {
+            let mut v: Vec<StrengthSource> = Vec::new();
+            let mut keys: Vec<(i64, &sj::Value)> = m.iter().map(|(k, e)| (k.parse::<i64>().expect("an iid"), e)).collect();
+            keys.sort_by_key(|(k, _)| *k);
+            for (iid, entries) in keys {
+                for e in entries.as_array().into_iter().flatten() {
+                    v.push(StrengthSource {
+                        iid,
+                        src: e[0].as_str().map(|s| cid(s)),
+                        n: e[1].as_i64().unwrap_or(0) as i16,
+                        base: e[2].as_bool().unwrap_or(false),
+                    });
+                }
+            }
+            st.strength_sources = CowVec::from(v);
+        }
         st.pile_owners = match d.get("pile_owners").and_then(|p| p.as_array()) {
             Some(a) => a.iter().map(|o| o.as_str().map(player_from)).collect(),
             None => (0..st.remove_pile.len()).map(|_| None).collect(),
@@ -1095,6 +1165,7 @@ impl State {
             last_roar: [None, None],
             jelly: [FxHashMap::default(), FxHashMap::default()],
             jelly_set: [false, false],
+            strength_sources: CowVec::new(),
             cache: BoardCache::default(),
             events: Vec::new(),
             cause: None,

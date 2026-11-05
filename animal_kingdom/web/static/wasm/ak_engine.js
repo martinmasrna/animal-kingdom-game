@@ -350,6 +350,23 @@ export class GameState {
         wasm.gamestate_setResult(this.__wbg_ptr, ptr0, len0, ptr1, len1);
     }
     /**
+     * Where the strength of the unit `iid` comes from, as JSON (strength::breakdown); "null" when it isn't in play or in hand.
+     * @param {number} iid
+     * @returns {string}
+     */
+    strengthBreakdown(iid) {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.gamestate_strengthBreakdown(this.__wbg_ptr, iid);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
      * The engine's events since the last call, as a JSON array (and clears them).
      * @returns {string}
      */
