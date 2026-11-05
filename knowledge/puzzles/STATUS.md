@@ -84,20 +84,29 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   rest of that search's 576 finds were "play the one card that can" and were left out. The one-turn list now runs 17
   puzzles, ordered by difficulty; their notes are in the set document.
 
-- **Batch 2** (in progress, two-turn, other decks and boards): `back_and_forth` (Canines, nothing in hand: the Bush
-  Dog roams forward and back so its Pups keep the Wolf's line whole), `hive` (Colony: the Skunk sends the Hedgehog home,
-  the Soldier Bee's Spikes hold the den front, and two Hornets re-link and finish), `school` (Fish: the Tuna, 6 with three other
-  Fish, walks past the Hippos), `relay` (Canines: keep the Dhole
-  for the Mouse that cuts the line; the Wolf at the back roams in), `back_alley` (City: the Mosquito
-  weakens the Bobcat from on top of your Pigeon, and the Opossum gives it back to you for the den), `second_helping` (City: the Skunk sends
-  the Hedgehog home, the Opossum returns the Skunk, and it takes the den next turn), `pack_line` (Canines: a Wild Dog fills the hole the
-  roaming Dhole leaves, and the second roams in beside the first). Two-turn positions off the walled
-  lane come slowly: random open boards almost never give a forced, unique den, so batch 2 ports the proven ideas to
-  other decks and varies the hands with the solver keeping the unique ones (a scratch search, `portgen`).
+- **Batch 2: 7 of 10 when the night ended** (06:00 CET, the supervisor's stop). All two-turn, on other decks and off the
+  walled lane: `back_and_forth` (Canines, nothing in hand: the Bush Dog roams forward and back so its Pups keep the
+  Wolf's line whole), `hive` (Colony: the Skunk sends the Hedgehog home, the Soldier Bee's Spikes hold the den front,
+  two Hornets re-link and finish), `school` (Fish: the Tuna, 6 with three other Fish, walks past the Hippos),
+  `relay` (Canines: keep the Dhole for the Mouse that cuts the line; the Wolf at the back roams in), `back_alley`
+  (City: the Mosquito weakens the Bobcat from on top of your Pigeon, and the Opossum gives it back to you for the
+  den), `second_helping` (City: the Skunk sends the Hedgehog home, the Opossum returns the Skunk, and it takes the den
+  next turn), `pack_line` (Canines: an African Wild Dog fills the hole the roaming Dhole leaves, and the second roams
+  in beside the first). Two-turn positions off the walled lane come slowly: random open boards almost never give a
+  forced den with one winning first turn (about one in a thousand), so these came from boards I laid out by hand with
+  every combination of small hands solved and the unique ones read (the scratch helper is `vary`, beside `gen1.py`
+  and `gen3.py` in `tools/puzzles/compose`); Fish boards gave the least.
+
+## Where things stand (06:00 CET, 2026-11-05)
+
+39 puzzles on the branch: 17 in one turn, 22 in two. Every file passes `tools/puzzles/solve.py check` (one winning
+first turn; `the_herd` two, the same idea), and every one is clicked to Solved by `animal_kingdom/web/test/puzzles.test.mjs`.
+The set document (`knowledge/puzzles/set-1-2026-11-05.md`, written by `tools/puzzles/compose/doc.py` from the files and
+`notes.py`) has one section for each of the 39.
 
 ## Next
 
-The rest of batch 2, then batch 3.
+Three more two-turn puzzles finish batch 2 (Colony and Fish are the thinnest), then batch 3.
 
 ## Blocked
 
@@ -105,7 +114,7 @@ Nothing. (Chrome for Testing could not be downloaded here; the tests run on the 
 
 ## For Martin's own eyes
 
-- `./play`, then http://localhost:8000/#/puzzles: the puzzles, one-turn first (39 so far). Play a few of each kind: are the
+- `./play`, then http://localhost:8000/#/puzzles: the 39 puzzles, one-turn first. Play a few of each kind: are the
   ideas worth a puzzle, is the difficulty order right, do the titles and hints say too much or too little?
 - The set document, `knowledge/puzzles/set-1-2026-11-05.md`: every board as text with its obvious move and solution,
   to judge them without playing.
