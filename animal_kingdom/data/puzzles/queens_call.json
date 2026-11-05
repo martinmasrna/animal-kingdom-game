@@ -1,0 +1,36 @@
+{
+  "id": "queens_call",
+  "title": "Queen's call",
+  "theme": "Colony",
+  "to_move": "A",
+  "turns": 1,
+  "order": 18,
+  "board": {
+    "1,1": [{"card": "hornet", "owner": "A"}],
+    "1,2": [{"card": "worker_bee", "owner": "A"}],
+    "2,1": [{"card": "termite_queen", "owner": "A"}],
+    "2,2": [{"card": "worker_ant", "owner": "A"}],
+    "3,2": [{"card": "worker_ant", "owner": "A"}],
+    "3,3": [{"card": "soldier_ant", "owner": "A"}],
+    "4,1": [{"card": "boar", "owner": "B"}],
+    "4,2": [{"card": "tortoise", "owner": "B"}],
+    "5,2": [{"card": "porcupine", "owner": "B"}],
+    "5,3": [{"card": "hedgehog", "owner": "B"}]
+  },
+  "hands": {"A": ["soldier_ant", "termite_queen", "termite_king"], "B": ["lion"]},
+  "food": {"A": 0, "B": 20},
+  "hint": "With four Colony animals, the Soldier Ant removes; a Termite Queen plays another Colony animal for free.",
+  "why": "A Termite King onto the Hedgehog dies on its Spikes; the Soldier Ant beside it removes it instead (you control four Colony animals), the Termite Queen takes the empty den front, and her Roar plays the Termite King into the den.",
+  "solution": [
+    {"kind": "place", "card_id": "soldier_ant", "target": ["cr", "4,3"]},
+    {"kind": "choice", "choice": "5,3"},
+    {"kind": "place", "card_id": "termite_queen", "target": ["cr", "5,3"]},
+    {"kind": "place", "card_id": "termite_king", "target": ["hq", "B"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "soldier_ant", "target": ["cr", "4,3"]},
+    {"by": "A", "kind": "choice", "choice": "5,3"},
+    {"by": "A", "kind": "place", "card_id": "termite_queen", "target": ["cr", "5,3"]},
+    {"by": "A", "kind": "place", "card_id": "termite_king", "target": ["hq", "B"]}
+  ]
+}

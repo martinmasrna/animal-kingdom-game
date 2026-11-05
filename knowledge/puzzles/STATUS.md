@@ -99,16 +99,21 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   every combination of small hands solved and the unique ones read (the scratch helper is `vary`, beside `gen1.py`
   and `gen3.py` in `tools/puzzles/compose`); Fish boards gave the least.
 
-## Where things stand (06:00 CET, 2026-11-05)
+- **Batch 3** (started): `queens_call` (Colony, one turn: the Soldier Ant removes the Hedgehog that would kill a
+  Termite King, and the Termite Queen on the empty den front plays the King into the den). Colony and Fish two-turn
+  positions have not come: Colony cards are 2s and 3s, so the defender's reply always breaks them or the solver's
+  extra Colony card can go anywhere (a dozen winning first turns); Fish cards are so alike that every Fish position
+  found had many winning first turns. One-turn Colony puzzles come easily (`tools/puzzles/compose/gen1d.py`); Fish
+  still none.
 
-39 puzzles on the branch: 17 in one turn, 22 in two. Every file passes `tools/puzzles/solve.py check` (one winning
-first turn; `the_herd` two, the same idea), and every one is clicked to Solved by `animal_kingdom/web/test/puzzles.test.mjs`.
-The set document (`knowledge/puzzles/set-1-2026-11-05.md`, written by `tools/puzzles/compose/doc.py` from the files and
-`notes.py`) has one section for each of the 39.
+## Where things stand
+
+40 puzzles on the branch: 18 in one turn, 22 in two. Every file passes `tools/puzzles/solve.py check`, every one is
+clicked to Solved by `animal_kingdom/web/test/puzzles.test.mjs`, and the set document has a section for each.
 
 ## Next
 
-Three more two-turn puzzles finish batch 2 (Colony and Fish are the thinnest), then batch 3.
+Batch 2's last three (two-turn, Fish and Colony, if they can be made), the rest of batch 3.
 
 ## Blocked
 
@@ -118,7 +123,7 @@ Chrome for Testing could not be downloaded here; the web tests run on the preins
 
 ## For Martin's own eyes
 
-- `./play`, then http://localhost:8000/#/puzzles: the 39 puzzles, one-turn first. Play a few of each kind: are the
+- `./play`, then http://localhost:8000/#/puzzles: the 40 puzzles, one-turn first. Play a few of each kind: are the
   ideas worth a puzzle, is the difficulty order right, do the titles and hints say too much or too little?
 - The set document, `knowledge/puzzles/set-1-2026-11-05.md`: every board as text with its obvious move and solution,
   to judge them without playing.
