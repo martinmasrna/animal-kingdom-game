@@ -140,7 +140,7 @@ export const LESSONS_2 = [
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'Your opponent has a Pigeon too! It flew over and covered your Squirrel. But your Squirrel isn\'t gone, it\'s just waiting underneath the Pigeon.' },
   explain('mambainfo', 'black_mamba', c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
-    'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Pigeon.'),
+    c => `The Black Mamba's Roar removes an enemy next to it with strength ${c.upTo('black_mamba')} or less, like that Pigeon.`),   // the number is the card's
   { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
     only: c => ({ card: 'black_mamba', crs: c.nextToFlier }), at: { rings: true },
     text: c => ({ pick: 'Click the Black Mamba.', place: c.stackRescue ? 'Now click the circle next to the Pigeon. An animal can also go on top of one of your own.' : 'Now click the circle next to the Pigeon.' }) },
@@ -200,6 +200,7 @@ export function context(V, sel, cards) {
     // the rightmost of them (the coach stands beside it, clear of the others)
     rightmost: id => c.empty(id).sort((a, b) => b[0] - a[0])[0],
     name: id => (cards[id] || {}).name || id,
+    upTo: id => (((cards[id] || {}).text || '').match(/strength (\d+) or less/) || [])[1],   // a removal's limit, as its card prints it
     roar: id => /(^|\. )Roar:/.test((cards[id] || {}).text || ''),
     ready: id => G.hand.some(h => h.id === id && h.ready),   // the card glows: its Roar's condition holds now
     placed: id => G.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === id),
