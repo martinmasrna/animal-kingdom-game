@@ -1,0 +1,33 @@
+{
+  "id": "head_on",
+  "title": "Head on",
+  "theme": "Traps",
+  "to_move": "A",
+  "turns": 2,
+  "order": 12,
+  "board": {
+    "1,1": [{"card": "lion", "owner": "A"}],
+    "2,1": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "lion", "owner": "A"}],
+    "4,1": [{"card": "boar", "owner": "B"}],
+    "4,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,2": [{"card": "lion", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["beaver", "squirrel", "pup", "lion"], "B": ["pigeon"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "The Boar answers what is placed next to it, not what lands on top of it.",
+  "why": "Every way round the Boar is next to it, so the Lion covers the Boar itself; then the den front needs an animal the Pigeon can't cover, and of what is left only the Beaver (5) holds against a 5.",
+  "solution": [
+    {"kind": "place", "card_id": "lion", "target": ["cr", "4,1"]},
+    {"kind": "place", "card_id": "beaver", "target": ["cr", "5,1"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,1"]},
+    {"by": "A", "kind": "place", "card_id": "beaver", "target": ["cr", "5,1"]},
+    {"by": "B", "kind": "place", "card_id": "pigeon", "target": ["cr", "1,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["cr", "1,1"]},
+    {"by": "A", "kind": "place", "card_id": "squirrel", "target": ["hq", "B"]}
+  ]
+}

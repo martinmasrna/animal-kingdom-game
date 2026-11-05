@@ -1,0 +1,35 @@
+{
+  "id": "stepping_stone",
+  "title": "Stepping stone",
+  "theme": "Roam",
+  "to_move": "A",
+  "turns": 2,
+  "order": 11,
+  "board": {
+    "1,1": [{"card": "wolf", "owner": "A"}],
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["pup", "pup"], "B": ["bobcat"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "An animal that roams away uncovers whatever it stood on.",
+  "why": "The Wolf can roam through its pack to 4,2 at once, but next turn it must roam on to cover the Bobcat at 5,2, and leaving 4,2 empty cuts it off; with a Pup placed at 4,2 first and the Wolf roaming onto it, the Pup stays behind and the chain holds.",
+  "solution": [
+    {"kind": "place", "card_id": "pup", "target": ["cr", "4,2"]},
+    {"kind": "roam", "from": "1,1", "target": ["cr", "4,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "roam", "from": "1,1", "target": ["cr", "4,2"]},
+    {"by": "B", "kind": "place", "card_id": "bobcat", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "roam", "from": "4,2", "target": ["cr", "5,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}

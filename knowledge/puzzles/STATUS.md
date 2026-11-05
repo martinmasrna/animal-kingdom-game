@@ -51,9 +51,9 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
 
 ## In progress
 
-- **Phase 5** (twenty composed): 13 of 20, all passing `check` with one winning first turn: five in one turn
-  (`river_horse`, `shell_game`, `down_the_hole`, `the_pack`, `buried`) and eight in two (`thorns`, `dam`, `hunger`,
-  `first_in_line`, `ink`, `slow_poison`, `stripes`, `shock`). A won turn is grouped by the board it leaves, so the same
+- **Phase 5** (twenty composed): 17 of 20, all passing `check` with one winning first turn: five in one turn
+  (`river_horse`, `shell_game`, `down_the_hole`, `the_pack`, `buried`) and twelve in two (`thorns`, `dam`, `hunger`,
+  `first_in_line`, `ink`, `slow_poison`, `stripes`, `shock`, `two_doors`, `bite`, `stepping_stone`, `head_on`). A won turn is grouped by the board it leaves, so the same
   win finished with a different spare card counts once. The two-turn ones are built around one idea in a walled lane;
   the solver shows where a position leaks, and the defender's hand is what makes the solution unique. The notes are
   in `knowledge/puzzles/set-1-2026-11-05.md` (board, hand, obvious move, solution, defence, difficulty).

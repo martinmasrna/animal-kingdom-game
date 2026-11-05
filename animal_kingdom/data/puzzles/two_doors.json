@@ -1,0 +1,35 @@
+{
+  "id": "two_doors",
+  "title": "Two doors",
+  "theme": "Two threats",
+  "to_move": "A",
+  "turns": 2,
+  "order": 9,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "1,3": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "2,3": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "lion", "owner": "A"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["lion", "lion", "lion", "lion"], "B": ["grizzly_bear", "pup"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "The Grizzly can close one way in, not two.",
+  "why": "Straight up one lane, the Grizzly covers your front Lion and the den is out of reach; two Lions side by side at 4,2 and 4,3 open two doors, and whichever one the Grizzly shuts, the other leads in.",
+  "solution": [
+    {"kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"kind": "place", "card_id": "lion", "target": ["cr", "4,3"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,3"]},
+    {"by": "B", "kind": "place", "card_id": "grizzly_bear", "target": ["cr", "4,2"]},
+    {"by": "B", "kind": "place", "card_id": "pup", "target": ["cr", "2,1"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "5,3"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["hq", "B"]}
+  ]
+}

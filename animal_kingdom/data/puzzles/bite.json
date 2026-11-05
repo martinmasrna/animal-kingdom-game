@@ -1,0 +1,38 @@
+{
+  "id": "bite",
+  "title": "Bite",
+  "theme": "Strength",
+  "to_move": "A",
+  "turns": 2,
+  "order": 10,
+  "board": {
+    "1,2": [{"card": "lion", "owner": "A"}],
+    "2,2": [{"card": "lion", "owner": "A"}],
+    "3,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "3,2": [{"card": "lion", "owner": "A"}],
+    "3,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "4,2": [{"card": "pup", "owner": "B"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,2": [{"card": "pup", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["viper", "lion", "pup", "pup"], "B": ["bobcat"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "An animal whose strength drops below 0 dies.",
+  "why": "The Lion is the natural cover for the Pup at 4,2, but then nothing covers the Pup at 5,2 (1 can't cover 1); the Viper covers the first Pup and its -3 kills the second, and the Lion waits in hand for the Bobcat that will cover the Viper.",
+  "solution": [
+    {"kind": "place", "card_id": "viper", "target": ["cr", "4,2"]},
+    {"kind": "choice", "choice": "5,2"},
+    {"kind": "place", "card_id": "pup", "target": ["cr", "5,2"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "viper", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "choice", "choice": "5,2"},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["cr", "5,2"]},
+    {"by": "B", "kind": "place", "card_id": "bobcat", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "pup", "target": ["hq", "B"]}
+  ]
+}
