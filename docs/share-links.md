@@ -15,12 +15,12 @@ A replay link carries a token, not the match key (`ABC123-0`). Match keys are si
 - Anyone with a deck link sees the list, and one tap imports it into their collection as a new deck. A visitor with no profile gets a guest profile, as on any first visit, and the deck goes into it. Import leads to the collection, and Back leads home.
 - A bad link (an unknown token, or a code that holds no card) shows a toast and goes home.
 
-## Martin's decision points
+## Settled (Martin, 2026-11-05)
 
-1. **Who may share a replay.** Built: each player shares their own seat's replay, from their own match history. In a friend match both players can share, and each link shows the board from the sharer's side. Recommendation: keep it. Both players saw the whole game, and in the replay both hands are open anyway. The alternative, where the opponent must agree, adds a step for little gain.
-2. **Names in a shared replay.** Built: names show, as in the player's own replay (`Name#1234` and the bot's name). Recommendation: keep them. A replay sent to a friend is about who played, and the ladder already shows names publicly. If strangers start passing links around, hiding the opponent's name (not the sharer's) is the change to make: it is one line in `replay.game_views`' `names`.
-3. **Revoking.** There is no way to unshare a link. Recommendation: none for now. A link only shows a finished game. If someone asks, deleting the row from `shares` is enough.
-4. **Link previews.** A link pasted in a chat app shows the site's generic preview, not the match. Recommendation: later, once links are used at all.
+1. **Who may share a replay.** Each player shares their own seat's replay, from their own match history. In a friend match both can, and each link shows the board from the sharer's side.
+2. **Names in a shared replay.** Names show, as in the player's own replay. If strangers start passing links around, the change is to hide the opponent's name (not the sharer's), in `replay.game_views`' `names`.
+3. **Revoking.** No way to unshare a link: it only shows a finished game. If someone asks, delete its row from `shares`.
+4. **Link previews.** A pasted link shows the site's generic preview. A match preview waits until links are used.
 
 ## Where Share sits (no new art)
 
