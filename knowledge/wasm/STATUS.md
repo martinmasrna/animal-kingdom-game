@@ -63,6 +63,17 @@ as today: a wasm built from other engine sources than the server's never plays a
 `engine_rs/wasm.sh` after any change under `engine_rs/` and commit `static/wasm/` with it; until then `?local=1`
 quietly plays on the server.
 
+**The build is committed, not built on each machine** (`static/wasm/`: `ak_engine.js`, `ak_engine_bg.wasm`, its brotli
+copy, `manifest.json`). Why: the Fly image serves the client's static files from the commit and builds no wasm (its
+Dockerfile stays as it is), and the Windows PC has no Rust toolchain. The manifest names the source hash the build plays
+and, for people, the engine_rs commit it was built from (`engine_rs_commit`, `dirty` when built from uncommitted
+changes). `animal_kingdom/tests/test_wasm_build.py` fails when the sources under `engine_rs/` no longer give the
+manifest's hash, so a Rust change without a rebuild shows in the fast tier (it skips where there are no Rust sources:
+the Fly image's test stage). Two of the local-match browser tests (`web/test/local.test.mjs`) need the server's engine
+too, the venv's `ak_engine`, built from the same sources: when it isn't (a venv built from main has no source hash, the
+cause of the two 20 s timeouts on the Mac on 0ee7abe), they skip and say how to rebuild it
+(`cd engine_rs && ../.venv/bin/maturin develop --release`); the third checks the fallback to the server and always runs.
+
 ## Set up (once per machine)
 
 `rustup target add wasm32-unknown-unknown`, then `cargo install wasm-bindgen-cli --version 0.2.130` (the version in

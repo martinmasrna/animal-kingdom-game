@@ -3,10 +3,23 @@
 // other sources than the server's plays the match on the server, as without the flag.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { startServer, openBrowser } from './harness.mjs';
 
-let server, browser;
-before(async () => { server = await startServer(); browser = await openBrowser(); });
+const MANIFEST = join(dirname(fileURLToPath(import.meta.url)), '..', 'static', 'wasm', 'manifest.json');
+let server, browser, unplayable = null;   // why local play can't start here, when it can't
+before(async () => {
+  server = await startServer(); browser = await openBrowser();
+  // Local play needs the committed wasm and a server engine built from the same sources (the venv's ak_engine); else the
+  // client plays on the server, which the third test covers, and the first two say why they don't run.
+  const built = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf8')).source_hash : null;
+  const served = (await (await fetch(`${server.url}/api/local/engine`)).json()).source_hash;
+  if (!built) unplayable = 'no wasm build in static/wasm: run engine_rs/wasm.sh';
+  else if (served !== built) unplayable = `the venv's ak_engine (${served || 'no source hash: built before engine/wasm'}) is not the wasm's engine (${built}): `
+    + 'rebuild it, cd engine_rs && ../.venv/bin/maturin develop --release';
+});
 after(async () => { await browser?.close(); server?.stop(); });
 
 async function localPage() {
@@ -44,7 +57,8 @@ const playOut = (page, concedeAfter = Infinity) => page.evaluate(async concedeAf
 
 const history = page => page.evaluate(async () => (await (await fetch('/api/me', { headers: { 'X-AK-Key': localStorage.getItem('ak:key') || '' } })).json()).history || []);
 
-test('a practice match plays in the browser, a full game with no socket, and counts when it ends', async () => {
+test('a practice match plays in the browser, a full game with no socket, and counts when it ends', async t => {
+  if (unplayable) return t.skip(unplayable);
   const { page, requests } = await localPage();
   await page.goto(`${server.url}/?local=1#/`, { waitUntil: 'networkidle0' });
   const before = (await history(page)).length;
@@ -64,7 +78,8 @@ test('a practice match plays in the browser, a full game with no socket, and cou
   await page.close();
 });
 
-test('a conceded local game counts as a loss', async () => {
+test('a conceded local game counts as a loss', async t => {
+  if (unplayable) return t.skip(unplayable);
   const { page } = await localPage();
   await page.goto(`${server.url}/?local=1#/`, { waitUntil: 'networkidle0' });
   await page.click('#go');
