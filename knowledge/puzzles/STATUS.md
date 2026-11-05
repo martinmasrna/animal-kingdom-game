@@ -84,9 +84,15 @@ Branch `puzzles/mode` (from `main`), built overnight by a cloud session. Rewritt
   rest of that search's 576 finds were "play the one card that can" and were left out. The one-turn list now runs 17
   puzzles, ordered by difficulty; their notes are in the set document.
 
+- **Batch 2** (in progress, two-turn, other decks and boards): `back_and_forth` (Canines, nothing in hand: the Bush
+  Dog roams forward and back so its Pups keep the Wolf's line whole), `hive` (Colony: the Skunk sends the Hedgehog home,
+  the Soldier Bee's Spikes hold the den front, and two Hornets re-link and finish). Two-turn positions off the walled
+  lane come slowly: random open boards almost never give a forced, unique den, so batch 2 ports the proven ideas to
+  other decks and varies the hands with the solver keeping the unique ones (a scratch search, `portgen`).
+
 ## Next
 
-Batch 2: more two-turn puzzles off the walled lane (open boards, both flanks), and other decks (Fish, Colony).
+The rest of batch 2, then batch 3.
 
 ## Blocked
 
@@ -94,7 +100,7 @@ Nothing. (Chrome for Testing could not be downloaded here; the tests run on the 
 
 ## For Martin's own eyes
 
-- `./play`, then http://localhost:8000/#/puzzles: the 32 puzzles, one-turn first. Play a few of each kind: are the
+- `./play`, then http://localhost:8000/#/puzzles: the puzzles, one-turn first (34 so far). Play a few of each kind: are the
   ideas worth a puzzle, is the difficulty order right, do the titles and hints say too much or too little?
 - The set document, `knowledge/puzzles/set-1-2026-11-05.md`: every board as text with its obvious move and solution,
   to judge them without playing.

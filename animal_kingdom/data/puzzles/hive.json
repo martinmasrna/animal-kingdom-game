@@ -1,0 +1,35 @@
+{
+  "id": "hive",
+  "title": "Hive",
+  "theme": "Spikes",
+  "to_move": "A",
+  "turns": 2,
+  "order": 17,
+  "board": {
+    "1,2": [{"card": "termite_king", "owner": "A"}],
+    "2,2": [{"card": "termite_king", "owner": "A"}],
+    "3,2": [{"card": "termite_king", "owner": "A"}],
+    "4,2": [{"card": "termite_king", "owner": "A"}],
+    "4,3": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,1": [{"card": "hedgehog", "owner": "B"}],
+    "5,2": [{"card": "grizzly_bear", "owner": "B"}],
+    "5,3": [{"card": "grizzly_bear", "owner": "B"}]
+  },
+  "hands": {"A": ["skunk", "hornet", "hornet", "guard_bee"], "B": ["lion"]},
+  "food": {"A": 0, "B": 0},
+  "hint": "An animal a Skunk sends home can't be played on its owner's next turn.",
+  "why": "No Termite King can cover the Hedgehog and live; the Skunk sends it home instead, and the den front is taken by the Soldier Bee, whose own Spikes keep the Lion off it; when the Lion cuts the line at 4,2, a Hornet ties it again through 3,1 and the other walks in.",
+  "solution": [
+    {"kind": "place", "card_id": "skunk", "target": ["cr", "4,1"]},
+    {"kind": "choice", "choice": "5,1"},
+    {"kind": "place", "card_id": "guard_bee", "target": ["cr", "5,1"]}
+  ],
+  "main_line": [
+    {"by": "A", "kind": "place", "card_id": "skunk", "target": ["cr", "4,1"]},
+    {"by": "A", "kind": "choice", "choice": "5,1"},
+    {"by": "A", "kind": "place", "card_id": "guard_bee", "target": ["cr", "5,1"]},
+    {"by": "B", "kind": "place", "card_id": "lion", "target": ["cr", "4,2"]},
+    {"by": "A", "kind": "place", "card_id": "hornet", "target": ["cr", "3,1"]},
+    {"by": "A", "kind": "place", "card_id": "hornet", "target": ["hq", "B"]}
+  ]
+}

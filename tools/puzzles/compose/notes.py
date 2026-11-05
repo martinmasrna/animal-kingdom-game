@@ -42,4 +42,6 @@ NOTES = {
  'called_up': dict(difficulty=4, obvious="The Cheetah from your hand onto the Toad: it can't get there, lane 1 stops at 3,1; and the Coyote on its own only moves a Cheetah that is already near."),
  'talons': dict(difficulty=1, obvious="The Mouse first: it can't cover the Orb-Weaver (5), and the den needs the den front."),
  'small_horns': dict(difficulty=1, obvious="The Squirrel beside the Hippopotamus: the Hippo removes anything of strength 4 or less placed next to it."),
+ 'back_and_forth': dict(difficulty=4, obvious="Roam the Wolf first, as far as it goes: it leaves its crossroad empty behind it, and with no card in hand nothing fills the hole."),
+ 'hive': dict(difficulty=4, obvious="A Termite King onto the Hedgehog: the Spikes remove it. Or a Hornet at the den front: the Lion covers it."),
 }
