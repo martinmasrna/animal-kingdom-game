@@ -5,6 +5,7 @@ import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan } from './timeline.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait } from './board.js';
+import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
@@ -217,6 +218,7 @@ function route() {
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'ladder') { ladderScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/ladder')) ladderScreen(); }); }   // a match just played shows
   if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
+  if (parts[0] === 'deck' && parts[1]) return deckLinkScreen(parts.slice(1).join('/'));
   if (parts[0] === 'study' && parts[1]) return studyScreen(parts[1]);
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
@@ -670,8 +672,34 @@ const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  renderCollection(app, { open, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback,
+  renderCollection(app, { open, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
+}
+
+// ------------------------------------------------------------------ share links (docs/share-links.md)
+// A deck link: #/deck/<the deck code's AK1 part>?n=<name>. It holds the whole list; the server keeps nothing.
+const deckLink = (code, name) => `${location.origin}/#/deck/${(code.match(/AK1:([A-Za-z0-9_-]+)/) || [])[1]}?n=${encodeURIComponent(name)}`;
+function shareDeck(code, name) { shareLink(deckLink(code, name), `${name}, a deck in Animal Kingdom`); }
+// The list, shown to anyone; one tap puts it in your collection (a visitor's guest profile, made at boot, holds it).
+function deckLinkScreen(arg) {
+  screen = 'decklink';
+  const [code, q] = arg.split('?'), name = new URLSearchParams(q || '').get('n');
+  const d = decodeDeck(`${name ? '### ' + name + '\n' : ''}AK1:${code}`, CARDS);
+  if (!d) { history.replaceState(null, '', '#/'); homeScreen(); return toast('That deck link holds no cards'); }
+  app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="#/" aria-label="Back"></a><span class="ptab on">${esc(d.name)}</span></div></div>
+    <div class="hbody"><div class="dlink">${deckBody(d.list, CARDS, false)}</div><p><button class="slab" id="dimport">Add to my collection</button> <a class="slab" href="#/">Home</a></p></div></div></div>`;
+  document.getElementById('dimport').onclick = () => {
+    const mine = myDecks();
+    if (mine.length >= 20) return toast('20 decks is the most you can keep: delete one first');
+    const cards = {}; d.list.forEach(id => cards[id] = (cards[id] || 0) + 1);
+    const nd = { id: Date.now().toString(36), name: d.name, cards, cover: coverOf(d.list, CARDS) };
+    saveDecks([...mine, nd]); toast(`Imported ${d.name}`, true); location.hash = '#/collection/' + nd.id;
+  };
+}
+async function shareReplay(key) {
+  const r = await api(`/api/replay/${encodeURIComponent(key)}/share`, { method: 'POST' });
+  if (!r.ok) return toast(await r.text());
+  shareLink(`${location.origin}/#/replay/${(await r.json()).token}`, 'A match in Animal Kingdom');
 }
 
 // ------------------------------------------------------------------ ladder, and your account (in Settings)
@@ -705,7 +733,7 @@ function ladderScreen() {
   const side = (s, name) => `data-side="${s}" data-name="${esc(name)}"`;   // a deck in the row: hovered (tapped), its list shows
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
     ${piece(deckFace(h.my_cover, h.my_deck), side('mine', h.my_deck))}<span class="dk" ${side('mine', h.my_deck)}>${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck), side('theirs', h.opp_deck))}<span class="dk" ${side('theirs', h.opp_deck)}>${esc(h.opp_deck)}</span>
-    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)}</span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)}</span>`}</div>`).join('');
+    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)} · <a class="hshare" data-share="${esc(h.match)}" href="#">Share</a></span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)} · <a class="hshare" data-share="${esc(h.match)}" href="#">Share</a></span>`}</div>`).join('');
   // the leaderboard first (Martin, 2026-10-02), the match history its second tab, the meta report its third (2026-10-24)
   const meta = location.hash.startsWith('#/ladder/meta'), lead = !meta && location.hash !== '#/ladder/history';
   // back goes up one level: an archetype to every deck, a tab to home (Martin, 2026-10-26: it went home from an archetype)
@@ -717,6 +745,7 @@ function ladderScreen() {
   if (meta) fillMeta();
   wireDd(app, (k, v) => { ui.histDeck = v || null; ladderScreen(); });
   app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
+  app.querySelectorAll('[data-share]').forEach(el => el.onclick = e => { e.preventDefault(); e.stopPropagation(); shareReplay(el.dataset.share); });
   wireDeckPeek(app);
 }
 // A deck in a match's row shows its list as it was played, beside the row: on hover, or on a touch screen a tap (which
@@ -1731,9 +1760,11 @@ async function replayScreen(key) {
   if (RP.key === key && RP.views.length) return;
   stopReplay(); screen = null; RP.key = key;
   app.innerHTML = `<div class="mscr pre"><p class="wait">Loading the replay…</p></div>`;
-  const back = msg => { RP.key = null; history.replaceState(null, '', '#/ladder/history'); ladderScreen(); toast(msg); };
+  // a link someone shared leads home; your own replay back to your history
+  const back = msg => { RP.key = null; const own = ME.history && ME.history.some(h => h.match === key);
+    history.replaceState(null, '', own ? '#/ladder/history' : '#/'); own ? ladderScreen() : homeScreen(); toast(msg); };
   let views;
-  try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); }
+  try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); RP.shared = r.headers.get('X-AK-Shared') === '1'; }
   catch (e) { if (RP.key === key) back(e.message || 'The replay didn\'t load, try again'); return; }
   if (RP.key !== key) return;   // left while it loaded
   adoptRetired(replayIds(views));
@@ -1750,7 +1781,7 @@ async function replayScreen(key) {
   RP.views = views; RP.eye = true; ui.peek = false; ui.sel = null; ui.panel = null;
   replayStep(0); replayPlay(true);
 }
-function stopReplay() { clearTimeout(RP.timer); if (RP.views.length) stopPlayback(); Object.assign(RP, { key: null, views: [], i: 0, playing: false, shown: [], turns: [] }); }
+function stopReplay() { clearTimeout(RP.timer); if (RP.views.length) stopPlayback(); Object.assign(RP, { key: null, views: [], i: 0, playing: false, shown: [], turns: [], shared: false }); }
 function replayStep(i) {
   i = Math.max(0, Math.min(RP.views.length - 1, i));
   const prev = V, step = i === RP.i + 1 || (i > RP.i && RP.shown.slice(RP.i + 1, i).every(s => !s)); RP.i = i; V = RP.views[i]; V.rx = Date.now() / 1000;
@@ -1784,10 +1815,10 @@ function drawReplayBar() {
       <button class="slab" id="rfwd" tabindex="-1" data-tip="Forward one move">${ric('fwd')}</button>
       <div class="track" id="rtrack"><i></i></div>
       <button class="slab" id="reye" tabindex="-1"></button>
-      <button class="slab take" id="rtake" tabindex="-1" data-tip="Take the other seat from this round and play on against the Expert">Play from here</button>
-      <a class="slab out" href="#/ladder/history">Leave</a>`;
+      ${RP.shared ? '' : '<button class="slab take" id="rtake" tabindex="-1" data-tip="Take the other seat from this round and play on against the Expert">Play from here</button>'}
+      ${RP.shared ? '<a class="slab out" href="#/">Home</a>' : '<a class="slab out" href="#/ladder/history">Leave</a>'}`;
     // Play from here (Martin, 2026-10-21): the other seat, from the start of its turn in the round shown, the Expert on yours.
-    $('rtake').onclick = stop(async () => {
+    if ($('rtake')) $('rtake').onclick = stop(async () => {
       const v = RP.views[RP.i]; if (!v || v.phase !== 'playing') return toast('Step to a round first');
       const key = RP.key.replace(/-\d+$/, ''), series = Number((RP.key.match(/-(\d+)$/) || [])[1] || 0);
       const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ from: { match: key, series, round: v.game.round, seat: v.you === 'A' ? 'B' : 'A' } }) });
