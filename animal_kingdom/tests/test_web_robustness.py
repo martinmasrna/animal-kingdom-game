@@ -218,3 +218,29 @@ def test_a_restart_in_the_middle_of_a_game_keeps_the_match(monkeypatch, tmp_path
     assert (after["game"]["round"], after["game"]["hand"], after["game"]["board"]) == \
         (before["game"]["round"], before["game"]["hand"], before["game"]["board"])
     assert phase == "match_over"
+
+
+def test_an_idle_match_leaves_memory_and_comes_back_from_its_file(monkeypatch, tmp_path):
+    """A server keeping every match it ever made ran out of memory under load; forget() lets go of idle ones and get()
+    reloads one from its file the moment someone asks for it (a socket, a join). One with a socket open stays."""
+    monkeypatch.delenv("AK_NO_GAME_LOGS", raising=False)
+    monkeypatch.setattr(server, "MATCH_DIR", tmp_path / "web_matches")
+    hub = server.Hub()
+    monkeypatch.setattr(server, "hub", hub)
+    m = Match("IDLE01", server.Seat("ta", "A", deck="cats"))
+    m.join(server.Seat("tb", "B", deck="canines"))
+    w = Match("WATCH1", server.Seat("tc", "A", deck="cats"))
+    w.join(server.Seat("td", "B", deck="canines"))
+    for x in (m, w):
+        hub.matches[x.id] = x
+        hub.save(x)
+    hub.sockets["WATCH1"] = {(object(), "A")}
+    now = time.time()
+    assert hub.forget(now + 60) == 0                           # an hour is the rejoin window: not yet
+    assert hub.forget(now + server.FORGET_IDLE + 1) == 1
+    assert "IDLE01" not in hub.matches and "WATCH1" in hub.matches
+    async def get(mid):              # a reloaded match's clock and bot start again: that needs the event loop
+        return hub.get(mid)
+    back = asyncio.run(get("IDLE01"))
+    assert back is not None and back.state.to_dict() == m.state.to_dict() and back.seat_of("tb") == "B"
+    assert asyncio.run(get("../IDLE01")) is None and asyncio.run(get("NOSUCH")) is None

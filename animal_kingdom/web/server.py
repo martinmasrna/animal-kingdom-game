@@ -62,6 +62,8 @@ LOG_DIR = Path(__file__).resolve().parents[2] / "results" / "human_games" / "web
 REPLAY_DIR = Path(__file__).resolve().parents[2] / "results" / "replays"
 MATCH_DIR = Path(__file__).resolve().parents[2] / "results" / "web_matches"
 KEEP_FINISHED = 24 * 3600    # seconds a finished match is still reloaded after a restart
+FORGET_FINISHED = 600        # seconds a finished match, untouched and unwatched, stays in memory (its file stays; Hub.get reloads it)
+FORGET_IDLE = 3600           # the same for an unfinished one: REJOIN_WITHIN, after which nobody is taken back to it
 BOT_PAUSE = {"open": 0.6, "move": 0.4, "choice": 0.3}   # seconds: the bot's thinking beat, once the players have watched its last move
 BOT_WAIT_MAX = 6.0          # seconds a bot waits for a player's screen to play its last move out (a stalled client never stalls it)
 if os.environ.get("AK_BOT_PAUSE") is not None:   # the test harness sets 0: tests wait on nothing a player needs to follow
@@ -106,6 +108,7 @@ class Hub:
         self.bot_tasks: dict[str, asyncio.Task] = {}
         self.noted: dict[str, tuple] = {}        # match id -> (phase, games ended) as last recorded (note)
         self.clock_tasks: dict[str, asyncio.Task] = {}
+        self.touched: dict[str, float] = {}      # match id -> when it last changed (saved)
 
     def new_id(self) -> str:
         while True:
@@ -122,28 +125,60 @@ class Hub:
             tmp = MATCH_DIR / f".{match.id}.json.tmp"
             tmp.write_text(json.dumps(match.to_dict()), encoding="utf-8")
             tmp.replace(MATCH_DIR / f"{match.id}.json")
+            self.touched[match.id] = time.time()
         except Exception:
             log.exception("could not save match %s", match.id)
+
+    def _reload(self, path: Path) -> Match | None:
+        """A saved match back in memory: any unfinished one, a finished one from the last day."""
+        try:
+            d = json.loads(path.read_text(encoding="utf-8"))
+            if d["phase"] == "match_over" and time.time() - path.stat().st_mtime > KEEP_FINISHED:
+                return None
+            match = Match.from_dict(_renamed(d))
+        except Exception:
+            log.exception("could not reload %s", path.name)
+            return None
+        if not match.takeover:
+            match.on_game_end = save_game
+            match.on_match_end = record_match
+        self.matches[match.id] = match
+        self.touched[match.id] = time.time()
+        return match
 
     def load(self) -> None:
         """Reload saved matches: every unfinished one, and finished ones from the last day."""
         if not MATCH_DIR.is_dir():
             return
-        now = time.time()
         for path in MATCH_DIR.glob("*.json"):
-            try:
-                d = json.loads(path.read_text(encoding="utf-8"))
-                if d["phase"] == "match_over" and now - path.stat().st_mtime > KEEP_FINISHED:
-                    continue
-                match = Match.from_dict(_renamed(d))
-            except Exception:
-                log.exception("could not reload %s", path.name)
-                continue
-            if not match.takeover:
-                match.on_game_end = save_game
-                match.on_match_end = record_match
-            self.matches[match.id] = match
+            self._reload(path)
         log.info("reloaded %d saved matches", len(self.matches))
+
+    def get(self, mid: str) -> Match | None:
+        """The match with this id: in memory, or reloaded from its file when forget() let it go."""
+        match = self.matches.get(mid)
+        if match is None and mid.isalnum() and not os.environ.get("AK_NO_GAME_LOGS") and (MATCH_DIR / f"{mid}.json").is_file():
+            match = self._reload(MATCH_DIR / f"{mid}.json")
+            if match is not None:
+                self.kick_bot(match)
+        return match
+
+    def forget(self, now: float | None = None) -> int:
+        """Let go of the matches nobody is in: finished ones after FORGET_FINISHED, unfinished after FORGET_IDLE, never
+        one with a socket open or a bot or clock task running. Each is on disk (saved on every change), so get() brings
+        it back; a server keeping no files (AK_NO_GAME_LOGS) keeps everything. A finished match holds about half a MB, and
+        nothing else ever freed one (2026-11-05: 1.7 GB after an 8-minute load test, on a 2 GB machine)."""
+        if os.environ.get("AK_NO_GAME_LOGS"):
+            return 0
+        now = time.time() if now is None else now
+        busy = lambda tasks, mid: (t := tasks.get(mid)) is not None and not t.done()
+        gone = [mid for mid, m in self.matches.items()
+                if not self.sockets.get(mid) and not busy(self.bot_tasks, mid) and not busy(self.clock_tasks, mid)
+                and now - self.touched.get(mid, now) > (FORGET_FINISHED if m.phase == "match_over" else FORGET_IDLE)]
+        for mid in gone:
+            for table in (self.matches, self.sockets, self.bot_tasks, self.clock_tasks, self.touched):
+                table.pop(mid, None)
+        return len(gone)
 
     async def broadcast(self, match: Match) -> None:
         self.save(match)
@@ -271,6 +306,9 @@ class Hub:
                         continue
             failures = 0
             await self.broadcast(match)
+
+
+_background: set = set()      # tasks the server keeps running (a reference, so none is collected)
 
 
 async def _close_quietly(ws) -> None:
@@ -1387,7 +1425,7 @@ async def create_match(req):
 
 async def join_match(req):
     guard.limit_ip(req, "match")
-    match = hub.matches.get(req.match_info["id"])
+    match = hub.get(req.match_info["id"])
     if match is None:
         raise web.HTTPNotFound(text="no such match")
     body = await guard.body(req)
@@ -1412,7 +1450,7 @@ def _changed(match: Match) -> tuple:
 
 
 async def socket(req):
-    match = hub.matches.get(req.match_info["id"])
+    match = hub.get(req.match_info["id"])
     seat = match.seat_of(req.query.get("token", "")) if match else None
     ws = web.WebSocketResponse(heartbeat=20, max_msg_size=guard.SOCKET_MSG_MAX)
     await ws.prepare(req)
@@ -1574,6 +1612,13 @@ def make_app() -> web.Application:
         hub.load()
         for match in hub.matches.values():
             hub.kick_bot(match)
+
+        async def forget_idle():
+            while True:
+                await asyncio.sleep(60)
+                if (n := hub.forget()):
+                    log.info("let go of %d idle matches (%d in memory)", n, len(hub.matches))
+        _background.add(asyncio.create_task(forget_idle()))
     app.on_startup.append(resume)
     return app
 
