@@ -28,6 +28,10 @@ The raw material for a daily puzzle: every position in Martin's recorded games w
 - The 1-action count includes lines where one placement grants free placements that end on the den (a Mole or Princess Lea chain).
 - Distinct capturing lines per position, at the shortest length: 19 positions have exactly one, 37 have two, 19 have three, and 35 have ten or more. A position with one line or a few makes the better puzzle.
 
+## The Expert re-measured on main (2026-11-04)
+
+`tools/puzzles/expert_finds.py` rebuilds every one of the 154 positions on main's cards (all 154 match the recorded board and hand; one no longer replays, a card is gone; the recorded line still captures in 153) and lets the live Expert spec, on the Python bot, play the whole turn. It takes the den in **127** (142 turns won). Of the four Expert misses above, three are taken on today's main (puzzles 4 and 10, `OXHIXA` line 10); puzzle 3, the egg under the Hyena, is still missed. With the `den_reach` dial (docs/bots.md) it takes **137**, puzzle 3 among them, at the same time per move (7.42 s, 7.57 s).
+
 ## The first ten puzzles
 
 The map is the 5×3 grid map_b. Crossroads are "rank,lane": rank 1 is in front of A's den, rank 5 in front of B's. Each is a two-action line, chosen for a unique or near-unique solution, a player (or the Expert) who missed it, and a different idea each time. Ordered from the one to show first.
