@@ -107,6 +107,7 @@ export function drawCoach(el, L, rings = []) {
     [x, y, side] = port ? [16 + pb.offsetWidth / 2, pb.offsetTop + pb.offsetHeight - 14 - up, 'below'] : [STAGE.w / 2, 100 - up, 'below']; }
   else if (a.endturn) [x, y, side] = port ? [P.end[0] - 55 + out, 0, 'cleft'] : [P.end[0] + out, P.end[1] + up, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); if (port) [x, y, side] = vert(x, y, 52); else side = x > STAGE.w / 2 ? 'left' : 'right'; }
+  else if (a.den && port && L.only && a.den === 'B') [x, y, side] = [P.handC, H, 'above'];   // upright, a move onto their den: over the hand, off the animals guarding it
   else if (a.den) { [x, y] = denMouthAt(a.den); if (port) [x, y, side] = vert(x, y, 40); else side = a.den === 'B' ? 'left' : 'right'; }
   else if (a.rings && !rings.length) [x, y, side] = [P.handC, H, 'above'];   // no card picked yet: the circles come with one, so point at the hand
   else if (a.rings) {   // beside the group of rings, clear of all of them, with no notch (the rings pulse instead)
@@ -114,8 +115,9 @@ export function drawCoach(el, L, rings = []) {
     const xs = rs.map(r => r[0]), ys = rs.map(r => r[1]), cy = (Math.min(...ys) + Math.max(...ys)) / 2;
     const right = Math.max(...xs) + 78;
     const left = Math.min(...xs) - 78 - COACH_W;
-    if (port) [x, y, side] = Math.min(...ys) > 420 ? [STAGE.w / 2, Math.min(...ys) - 62, 'gabove']   // over the group, or under it
-      : Math.max(...ys) < 880 ? [STAGE.w / 2, Math.max(...ys) + 62, 'gbelow'] : [STAGE.w / 2, H, 'above'];
+    // over the group, or under it, clear of its animals (67 stage px round, their strength badge 22 below): 62 covered them
+    if (port) [x, y, side] = Math.min(...ys) > 420 ? [STAGE.w / 2, Math.min(...ys) - 80, 'gabove']
+      : Math.max(...ys) < 880 ? [STAGE.w / 2, Math.max(...ys) + 100, 'gbelow'] : [STAGE.w / 2, H, 'above'];
     else [x, y, side] = right + COACH_W < STAGE.w - 16 ? [right, cy, 'group'] : left >= 16 ? [left, cy, 'group']
       : [STAGE.w / 2, H, 'above'];   // circles across the whole board (Flight): above the hand, pointing at the picked card
   }
