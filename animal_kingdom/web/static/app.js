@@ -1217,7 +1217,7 @@ function drawGame() {
   keepAwake(playing && !RP.views.length);
   lastDecision = d;
   drawIntro();
-  $('scr').classList.toggle('rp', !!RP.views.length);   // a replay: upright its controls take the deck's corner
+  if ($('scr').classList.contains('rp') !== !!RP.views.length) { $('scr').classList.toggle('rp', !!RP.views.length); fitStage(false); }   // a replay: upright its controls take a row under the stage
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
   { const n = [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length, w = VIEW.port ? 88 : 52;
@@ -1363,7 +1363,7 @@ function drawGame() {
 
 // Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
 // deck's and End turn's centre tops.
-const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 216 : 300, handW: RP.views.length ? 400 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row
+const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 360 : 300, handW: RP.views.length ? 680 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row; a replay's hand takes the whole row, its controls under the stage
   : { hand: 590, handC: STAGE.w / 2, deck: [1299, 606], end: [1439, 664], handW: 940 };
 
 // The history strip and both decklists, shared by both game screens.
@@ -1431,13 +1431,19 @@ function fitStage(redraw = true) {
   // a window taller than wide gets the upright layout (board.js setView); turning the phone redraws the screen
   const port = innerHeight > innerWidth, flip = port !== VIEW.port;
   setView(port); document.getElementById('scr').classList.toggle('port', port);
-  const k = Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
+  // upright, a replay keeps a row under the stage for its controls (game.css .port .rbar): the stage fits the window less it,
+  // with 60 stage px of savanna kept above and below (about what a phone shows in play), so the hand, which sits at the edge,
+  // stays clear of your den: the board comes out a little smaller
+  const rp = port && RP.views.length ? 56 : 0, H = innerHeight - rp;
+  const k = Math.min(innerWidth / STAGE.w, H / (STAGE.h + (rp ? 120 : 0))), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
   st.style.transform = t; document.getElementById('world').style.transform = t;
+  st.style.top = document.getElementById('world').style.top = rp ? `calc(50% - ${rp / 2}px)` : '';
+  st.style.setProperty('--rp', `${rp / k}px`);
   const plate = document.querySelector('#world img'), src = `/static/kit2/plate_${port ? 'port' : 'wide'}.webp`;   // upright, its own painting
   if (!plate.src.endsWith(src)) plate.src = src;
   // the savanna around the stage, in stage px: the pieces at the screen's edges (hands, corners, deck, End turn) sit at the
   // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating
-  st.style.setProperty('--above', `${Math.max(0, (innerHeight / k - STAGE.h) / 2)}px`);
+  st.style.setProperty('--above', `${Math.max(0, (H / k - STAGE.h) / 2)}px`);
   st.style.setProperty('--side', `${Math.max(0, (innerWidth / k - STAGE.w) / 2)}px`);
   st.style.setProperty('--k', k);   // the stage's scale: a phone held sideways shows it at half size
   if (flip && redraw && V && V.game) drawGame();
