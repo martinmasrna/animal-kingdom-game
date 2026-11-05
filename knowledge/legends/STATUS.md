@@ -2,7 +2,7 @@
 
 The pass that writes a legend (`docs/cards/legends/<animal>.md`, in the honey badger's form) for every collectible legendary whose name is still in brackets, on the branch `cards/legends`. Legends only: no card text, strength, rarity or name changes; names are Martin's. Whether societies exist is open (`knowledge/world-first-study-2026-10-24.md`), so no legend here states one as fact.
 
-Written in this pass: 7. Still to write: 23. Giraffe, Leopard and Rat had legends before the pass and are untouched.
+Written in this pass: 8. Still to write: 22. Giraffe, Leopard and Rat had legends before the pass and are untouched.
 
 
 | Card | id | Str | Legend | State |
@@ -19,7 +19,7 @@ Written in this pass: 7. Still to write: 23. Giraffe, Leopard and Rat had legend
 | [EAGLE] | `eagle_legend` | 3 | [eagle.md](../../docs/cards/legends/eagle.md) | to write |
 | [ELEPHANT] | `elephant_legend` | 9 | [elephant.md](../../docs/cards/legends/elephant.md) | to write |
 | [FALCON] | `falcon_legend` | 5 | [falcon.md](../../docs/cards/legends/falcon.md) | to write |
-| [FAWN] | `deer_legend_2` | 2 | [fawn.md](../../docs/cards/legends/fawn.md) | to write |
+| [FAWN] | `deer_legend_2` | 2 | [fawn.md](../../docs/cards/legends/fawn.md) | written |
 | [GIRAFFE] | `giraffe_legend` | 7 | [giraffe.md](../../docs/cards/legends/giraffe.md) | written before this pass |
 | [GORILLA] | `gorilla_legend` | 4 | [gorilla.md](../../docs/cards/legends/gorilla.md) | to write |
 | [LEOPARD] | `leopard_legend` | 5 | [leopard.md](../../docs/cards/legends/leopard.md) | written before this pass |
