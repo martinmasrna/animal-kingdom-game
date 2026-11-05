@@ -466,7 +466,8 @@ def report(games: list[dict], skipped_files_lines: int) -> str:
     nfull = sum(g["replayed"] for g in hx)
     out.append(f"{len(hx)} person-vs-Expert games whose replay gets through both players' first two turns "
                f"({nfull} replay to the end, {len(hx) - nfull} break later). Counts are actions on the player's own first and second turn; "
-               "\"placements\" include those an effect grants (marked free). Going first, turn 1 is one action.\n")
+               "\"placements\" include those an effect grants (marked free). The first player's turn 1 has one action in "
+               "logs that record `first_turn_actions: 1` and two in older ones.\n")
     for first in (True, False):
         rows = []
         for t in (1, 2):
