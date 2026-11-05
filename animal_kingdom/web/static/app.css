@@ -485,3 +485,6 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mf b { position: absolute; right: -6px; bottom: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: #1b1916; color: #f0e8da; font-size: 12px; line-height: 18px; text-align: center; box-shadow: 0 0 0 1px rgba(255,245,230,.25); }
 .ladder .metar .mbody { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; } .ladder .metar .mside { flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 .ladder .metar .mside .mxw { align-self: flex-start; } .ladder .metar .mside .mxw + .msub { margin-top: 14px; } @media (max-width: 700px) { .ladder .metar { padding: 0 12px 20px; } .ladder .metar .mstrip { width: 180px; } }
+.ladder .hr .meta .hshare { color: inherit; text-decoration: underline; text-underline-offset: 2px; }   /* Share: text for now (docs/share-links.md) */
+.ladder .hr .meta .hshare:hover { color: #e0dcd4; }
+.ladder .dlink { margin: 8px 0 14px; }

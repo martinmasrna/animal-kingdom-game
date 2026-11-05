@@ -296,3 +296,4 @@ html { touch-action: manipulation; }
 :is(.mscr, .game) .st:is(.rare, .legendary) .s { background: none; isolation: isolate; }
 :is(.mscr, .game) .st:is(.rare, .legendary) .s::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
   background: url(/static/kit2/card_plaque.webp) center / 240% 240%; filter: var(--tint); }
+.mscr .ic.txt { width: auto; padding: 0 10px; font: inherit; font-size: 14px; }   /* Share, as text until it has an icon (docs/share-links.md) */
