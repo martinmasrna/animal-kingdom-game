@@ -1624,7 +1624,9 @@ function drawEnd() {
   drawEnd.sounded = key;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
   const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
-  const howLine = ['hq_capture', 'food'].includes(G.result.reason) && w !== null ? '' : `<div class="how">${how}.</div>`;   // a den taken, a full den: the board showed it
+  // a den taken: the board showed it (Martin, 2026-10-17); a full den says who reached the food, as the lessons' Victory does
+  // (phone walkthrough finding 20: a Defeat on food said nothing)
+  const howLine = G.result.reason === 'hq_capture' && w !== null ? '' : `<div class="how">${how}.</div>`;
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
   if (RP.views.length) {
