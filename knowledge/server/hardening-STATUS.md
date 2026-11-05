@@ -2,11 +2,57 @@
 
 Branch `server/hardening` from `main` (70dc14e). Scope: the web server's load limits, its security and its robustness. Nothing here changes how the game plays, the bots' strength, ratings or cards. Nothing is deployed.
 
-Checks on the branch: the Python fast tier passes but for the three `test_deck_docs.py` card tables, which fail on `main` too (the Dockerfile leaves that file out). The web client's fast suite passes but for 12 tests that fail the same way on `main` on this machine (no `sqlite3` command line tool for `news.test.mjs`; the replay, decklist-hover and hover-label tests; one collection filter test).
+Checks on the branch (last run at its tip): the Python fast tier passes but for the three `test_deck_docs.py` card tables, which fail on `main` too (the Dockerfile leaves that file out). The web client's fast suite passes but for 12 tests that fail the same way on `main` on this machine (no `sqlite3` command line tool for `news.test.mjs`; the replay, decklist-hover and hover-label tests; one collection filter test).
 
-## Phase 1, load: measuring
+## Phase 1, load: done
 
-`tools/loadtest.py` is in; the ramps against `main` and this branch are running. Numbers land here when they finish.
+`tools/loadtest.py --serve` runs the Dockerfile's command (Rust bots, no mypyc compile here: the engine runs about 1.5x slower than on Fly) over a temp copy of the package, and drives N players: guest sign-in, collection, a saved deck, a friend and a chat, then matches to the end with random legal moves and 0.3 to 1 s of thinking per move. The client shares the 4 cores (0.15 to 0.25 of a core at the top). Steps of 60 s (90 s for the Expert). "Bot turn" is the bot's whole turn less the server's fixed pacing (`BOT_PAUSE`); "move" is a player's action to the view that shows it.
+
+**Practice against the Easy bot, `main`, 4 cores**
+
+| players | move p50 / p95 | bot turn p50 / p95 / max | server CPU (cores) | server memory |
+|---|---|---|---|---|
+| 64 | 0.004 / 0.03 s | 0.13 / 0.84 / 1.7 s | 0.39 | 200 MB |
+| 128 | 0.014 / 0.14 s | 0.24 / 1.1 / 9.2 s | 0.66 | 405 MB |
+| 192 | 0.08 / 0.29 s | 0.70 / 2.1 / 5.7 s | 0.81 | 664 MB |
+| 256 | 0.18 / 0.40 s | 1.2 / 3.3 / 6.2 s | 0.85 | 960 MB |
+| 384 | 0.34 / 0.76 s | **2.3** / 5.5 / 14 s | 0.89 | 1.3 GB |
+| 512 | 0.48 / 1.1 s | 3.2 / 8.6 / 17 s | 0.89 | 1.7 GB |
+
+No HTTP or server error up to 512. Pinned to one core (Fly's `performance-1x`) the numbers to 128 players are the same (0.59 cores used at 128).
+
+**Friend matches, no bot, `main`, 4 cores** (move latency from a client that misread clock bumps as answers, so read p95 and max, not p50; CPU and errors are exact)
+
+| players | move p95 / max | server CPU | errors | server memory |
+|---|---|---|---|---|
+| 128 | 0.21 / 2.9 s | 0.62 | 0 | 131 MB |
+| 256 | 0.61 / 3.3 s | 0.85 | 0 | 258 MB |
+| 512 | 1.7 / 4.6 s | 0.86 | 6 tracebacks | 426 MB |
+| 768 | **2.3** / 5.3 s | 0.69 | 135 | 632 MB |
+| 1024 | 2.9 / 4.3 s | 0.86 | 393 | 895 MB |
+
+The tracebacks are the socket handler writing its error reply to a socket closed a moment before (fixed on this branch, Phase 3). One core: the same shape, 0.86 cores and 18 tracebacks at 384. With the corrected client, `main` at 128: move p50 0.013 s, p95 0.19 s, no refusal.
+
+**Practice against the Expert, `main`**
+
+| players | bot turn p50 / p95 / max | server CPU |
+|---|---|---|
+| 16 | 1.2 / 20 / 23 s | 2.1 cores |
+| 32 | 1.9 / 20 / 28 s | 3.2 |
+| 64 | **8.3** / 32 / 41 s | 3.6 |
+| 96 | 12 / 36 / 55 s | 3.6 |
+| one core: 1, 2, 4, 8 | 1.3, 1.0, 2.0, 2.1 / about 20 s | 0.2 to 0.7 |
+
+The Expert's p95 is about 20 s at any load: it thinks up to 8 s a move by design, two or three moves a turn. No move hit `BOT_THINK_MAX` (no fallback logged).
+
+**What breaks first**
+
+1. **The event loop's one core.** Every view, save and engine call runs on one Python thread: server CPU flattens at 0.85 to 0.9 of a core whatever the machine has. The Easy bot's turn median passes 2 s at about 384 players (p95 at about 192); friend matches' p95 passes 2 s at about 768. A view per seat per change, built and serialised, plus the whole match JSON rewritten to disk on every change, is where that core goes (not profiled further).
+2. **Memory, before latency, on Fly.** `main` never let a match go: 1.7 GB after the 8-minute Easy ramp, on a 2 GB machine; at today's traffic that is roughly 3,000 matches between restarts. Fixed on this branch (Phase 3); not re-measured over a long run.
+3. **Expert compute.** Each Expert search takes a core; on Fly's one core, a few players at the Expert at once already share it and each search thinks on less CPU within the same 8 s budget, so the Expert plays weaker under load (not measured in strength). See the open High finding.
+4. Errors: none from the server itself up to 1,024 players, beyond the closed-socket replies above.
+
+The same ramps on this branch (Easy, 64 to 384) match `main` within noise (move p50 0.004 to 0.36 s, bot turn p50 0.12 to 2.3 s, same CPU), so the guard costs nothing visible. The final side-by-side reruns were cut short by the session's end.
 
 ## Phase 2, security: done
 
