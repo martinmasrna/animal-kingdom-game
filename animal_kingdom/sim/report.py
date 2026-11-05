@@ -246,8 +246,6 @@ def main(
         pairs = [(a, b) for i, a in enumerate(slugs) for b in slugs[i + 1:]]
         label = f"{len(slugs)}-deck round-robin ({len(pairs)} matchups, mirrors excluded)"
 
-    total_matchups = len(pairs)
-
     def _pair_games(a: str, b: str) -> int:
         return args.games if a == b else 2 * args.games
 

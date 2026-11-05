@@ -8,7 +8,6 @@ from animal_kingdom.engine import rules
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.actions import SKIP, action_from_dict
 from animal_kingdom.engine.state import new_game
-from animal_kingdom.engine.strength import effective_strength
 from animal_kingdom.sim.agent_play import board_view
 
 ME = "A"
