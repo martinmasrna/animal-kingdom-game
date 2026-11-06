@@ -131,6 +131,14 @@ impl PyState {
         self.st.to_json().to_string()
     }
 
+    /// Where the strength of the unit `iid` comes from (strength.breakdown), or None when it isn't on the board or in a hand.
+    fn strength_breakdown(&self, py: Python<'_>, iid: i64) -> PyResult<Py<PyAny>> {
+        match self.st.find_instance(iid) {
+            Some(u) => json_to_py(py, &crate::strength::breakdown(&self.st, u)),
+            None => Ok(py.None()),
+        }
+    }
+
     /// The raw position from `player`'s side (bots.raw_position.extract), card ids as names, for the parity test.
     fn raw_position(&self, py: Python<'_>, player: &str) -> PyResult<Py<PyAny>> {
         let me = player_from(player);
@@ -441,8 +449,15 @@ fn play_game(
     json_to_py(py, &out)
 }
 
+/// The hash of the sources this module was built from (build.rs); the browser's wasm plays the same game when its own agrees.
+#[pyfunction]
+fn source_hash() -> &'static str {
+    env!("AK_SOURCE_HASH")
+}
+
 #[pymodule]
 fn ak_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(source_hash, m)?)?;
     m.add_class::<Engine>()?;
     m.add_class::<PyState>()?;
     m.add_class::<PyBot>()?;

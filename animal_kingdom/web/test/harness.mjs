@@ -62,7 +62,9 @@ export function recordMatches(n = 7) {
 
 // Pages open as a player who has done the tutorial (home shows the full piece); `newPlayer` opens them as a first visit.
 export async function openBrowser({ newPlayer = false } = {}) {
-  const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new', defaultViewport: { width: 1512, height: 800 } });
+  // root (a cloud container) can't run Chrome's sandbox
+  const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new', defaultViewport: { width: 1512, height: 800 },
+    args: process.getuid?.() === 0 ? ['--no-sandbox'] : [] });
   // Chrome's crash reporter (chrome_crashpad_handler) inherits its stdout and stderr and can outlive it; our end of those
   // pipes then keeps the test process alive for minutes after its last test (a hang seen on 2026-10-04). Close our end.
   const close = b.close.bind(b), proc = b.process();

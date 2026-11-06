@@ -38,7 +38,7 @@ def build_artifact(
     extra_provenance: Optional[Mapping[str, Any]] = None,
 ) -> LinearEval:
     """A `LinearEval` with standard provenance stamped on. Doesn't write anything - call
-    `.save(path)` on the result, or use `promote_checkpoint` below."""
+    `.save(path)` on the result."""
     provenance: dict[str, Any] = {
         "git_rev": git_rev(),
         "created_unix": time.time(),
@@ -53,24 +53,3 @@ def build_artifact(
         bias=float(bias),
         provenance=provenance,
     )
-
-
-def promote_checkpoint(
-    weights: Sequence[float],
-    feature_set: str,
-    dest_path: str,
-    *,
-    bias: float = 0.0,
-    run_id: Optional[str] = None,
-    notes: str = "",
-    extra_provenance: Optional[Mapping[str, Any]] = None,
-) -> LinearEval:
-    """Build a provenanced artifact from trained weights and write it to `dest_path`
-    (conventionally `animal_kingdom/data/learned/<name>.json`). Returns the artifact so a
-    caller can log/print its summary without re-reading the file."""
-    artifact = build_artifact(
-        weights, feature_set, bias=bias, run_id=run_id, notes=notes,
-        extra_provenance=extra_provenance,
-    )
-    artifact.save(dest_path)
-    return artifact

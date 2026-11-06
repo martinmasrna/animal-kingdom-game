@@ -37,6 +37,7 @@ from . import league as league_mod
 from . import meta as meta_mod
 from . import oauth
 from .profiles import ProfileError, Profiles, clean_name
+from . import local
 from . import replay
 from . import tutorial
 from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, STARTER_COVERS, Match, Seat, card_pool, map_info
@@ -386,6 +387,13 @@ def bot_seat_name(level: str, deck: str) -> str:
     return f"{band} Bot"
 
 
+def bot_band(seat) -> str:
+    """The band a bot seat was shown under ("Beginner Bot", "Fish (Expert Bot)"), for the match history: the player picked
+    a band, never saw the engine's pilot ("Easy"). A seat named otherwise falls back to its pilot's band."""
+    words = seat.name.rstrip(")").split()
+    return words[-2] if len(words) >= 2 and words[-1] == "Bot" and words[-2] in ranking.BANDS else ranking.PILOT_BAND.get(seat.bot, seat.bot.capitalize())
+
+
 def bot_rows(table) -> list[tuple[str, ranking.Rating]]:
     """The bots the leaderboard lists: one row per pilot-and-deck pairing on a deck still in the pool (Martin, 2026-10-24:
     every pairing is a player of its own on the ladder; a retired deck's rows keep their games but are not listed). A
@@ -531,7 +539,7 @@ def record_match(match: Match) -> None:
         deck = lambda q: "Starter decks" if q == rotating else DECK_NAMES.get(match.seats[q].deck, match.seats[q].deck)
         try:
             profiles.record(seat.profile, f"{match.id}-{match.rematches}", kind=kind, my_deck=deck(p),
-                            opp=f"Bot ({other.bot.capitalize()})" if other.is_bot else other.name,
+                            opp=f"Bot ({bot_band(other)})" if other.is_bot else other.name,
                             opp_deck=deck(o) if other.is_bot else "", won=score[p], lost=score[o], seat=p,   # a person's deck name is theirs
                             my_cover="" if p == rotating else deck_cover(seat), opp_cover="" if o == rotating else deck_cover(other), mode=mode)
         except Exception:
@@ -547,14 +555,26 @@ def record_match(match: Match) -> None:
 
 
 async def get_replay(req):
-    """Every view you saw in one of your finished matches (key: the history's match), as saved when it ended: a JSON list."""
+    """Every view you saw in one of your finished matches (key: the history's match), as saved when it ended: a JSON list.
+    The key can instead be a share token (`share_replay`): that replay, read-only, to anyone, with no profile needed."""
+    key = req.match_info["match"]
+    shared = profiles.shared(key)
+    row = shared or profiles.match(me(req)["id"], key)
+    saved = row and row["seat"] and replay.load(REPLAY_DIR, row["match"], row["seat"])
+    if not saved:
+        raise web.HTTPNotFound(text="This match can't be replayed")
+    return web.Response(body=saved, content_type="application/json",
+                        headers={"Content-Encoding": "gzip", "X-AK-Shared": "1" if shared else "0"})
+
+
+async def share_replay(req):
+    """A link to one of your finished matches' replays, for anyone (docs/share-links.md): {token}, opened at #/replay/<token>."""
     p = me(req)
     key = req.match_info["match"]
     row = profiles.match(p["id"], key)
-    saved = row and row["seat"] and replay.load(REPLAY_DIR, key, row["seat"])
-    if not saved:
+    if not (row and row["seat"] and replay.load(REPLAY_DIR, key, row["seat"])):
         raise web.HTTPNotFound(text="This match can't be replayed")
-    return web.Response(body=saved, content_type="application/json", headers={"Content-Encoding": "gzip"})
+    return web.json_response({"token": profiles.share(p["id"], key, row["seat"])})
 
 
 async def replay_lists(req):
@@ -1423,6 +1443,62 @@ async def create_match(req):
     return web.json_response({"id": mid, "token": token, "seat": "A"})
 
 
+def _local_seats(req, body: dict) -> tuple[Seat, Seat]:
+    """A practice match's two seats, from the body home's Play sends (deck, bot: {level, deck}), checked as create_match
+    checks a bot match."""
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    bot = body.get("bot") or {}
+    level, bdeck = bot.get("level"), bot.get("deck")
+    if level in ranking.BANDS and bdeck in PREMADE_DECKS:
+        level = pilot_for(level, bdeck)
+    if level not in BOT_LEVELS or bdeck not in {*PREMADE_DECKS, *TEST_BOT_DECKS}:
+        raise web.HTTPBadRequest(text="bad bot")
+    player = profile_of(req)
+    host = Seat(secrets.token_urlsafe(12), display(player) if player else body.get("name") or "You", deck=deck,
+                profile=player and player["id"], ready=True)
+    return host, Seat(secrets.token_urlsafe(12), bot_seat_name(level, bdeck), bot=level, deck=bdeck, ready=True)
+
+
+async def local_engine(_req):
+    """What the browser's engine is built from (web/local.py): the cards, maps and Config, and the engine's source hash."""
+    return web.Response(text=local.engine_doc(), content_type="application/json")
+
+
+async def local_setup(req):
+    """A practice match to play in the browser: both decklists, the seats as the view shows them, the bot's spec."""
+    host, bot = _local_seats(req, await req.json())
+    return web.json_response({"lists": {"A": load_premade_deck(host.deck), "B": load_premade_deck(bot.deck)},
+                              "seats": local.seats_view(host, bot), "level": bot.bot, **local.bot_spec(bot.bot),
+                              "pause": BOT_PAUSE,   # the bot's beat, as the server keeps it (a test server's is 0)
+                              "source_hash": local.source_hash()})
+
+
+_local_done: dict[str, str] = {}     # a finished local match's key -> its match id: a resent log is saved once
+
+
+async def local_match(req):
+    """A practice match the browser played, finished: replayed and saved as any match (web/local.py)."""
+    body = await req.json()
+    key = str(body.get("key") or "")[:40]
+    if key and key in _local_done:
+        return web.json_response({"id": _local_done[key]})
+    host, bot = _local_seats(req, body)
+    mid = hub.new_id()
+    try:
+        local.replay(mid, host, bot, body, save_game, record_match)
+    except (EngineError, KeyError, ValueError, TypeError) as e:
+        log.warning("local match refused: %s", e)
+        raise web.HTTPBadRequest(text=f"the match does not replay: {e}")
+    if key:
+        _local_done[key] = mid
+        while len(_local_done) > 2000:
+            _local_done.pop(next(iter(_local_done)))
+    return web.json_response({"id": mid})
+
+
 async def join_match(req):
     guard.limit_ip(req, "match")
     match = hub.get(req.match_info["id"])
@@ -1543,6 +1619,7 @@ def make_app() -> web.Application:
         web.get("/auth/{provider}/callback", auth_callback),
         web.get("/api/replay/{match}", get_replay),
         web.get("/api/replay/{match}/lists", replay_lists),
+        web.post("/api/replay/{match}/share", share_replay),
         web.get("/api/study/{name}", get_study),
         web.get("/api/studies", list_studies),
         web.post("/api/feedback", send_feedback),
@@ -1579,6 +1656,9 @@ def make_app() -> web.Application:
         web.post("/api/challenge/{id}/answer", challenge_answer),
         web.get("/ws/presence", presence_socket),
         web.post("/api/match", create_match),
+        web.get("/api/local/engine", local_engine),
+        web.post("/api/local/setup", local_setup),
+        web.post("/api/local/match", local_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),
         web.static("/static", STATIC),

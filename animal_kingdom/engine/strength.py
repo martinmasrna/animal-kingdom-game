@@ -10,7 +10,8 @@ matters (covering, removal thresholds, region holding, conditions like Coyote's 
 - global_growth: persistent per-player/card growth that applies in every zone (Rattlesnake).
 - stored_counters: `UnitInstance.strength_counter` - one-time "give +X" grants (Unnamed Rallier,
   Clarion, Dhole, Dingo, Bush Dog, Shuck). Stored on the instance; persist after the
-  granter dies; travel hand->board.
+  granter dies; travel hand->board. `GameState.strength_sources` says where each part came from
+  (`strength_breakdown`), and which part is the card's own growth raising its base (the Roach King's falls).
 - active_anthems: live "has +X" auras (Mackerel, Moose, Guard Wasp).
   Recomputed from the board every time; vanish when their condition lapses.
 
@@ -184,3 +185,30 @@ def card_strength(state: GameState, card_id: str, owner: str) -> int:
 def placement_strength(state: GameState, inst: UnitInstance) -> int:
     """Effective strength of a hand instance if it were placed now (for covering legality)."""
     return max(0, card_strength(state, inst.card_id, inst.owner) + inst.strength_counter)
+
+
+def strength_breakdown(state: GameState, unit: UnitInstance) -> dict:
+    """Where a unit's strength comes from, for the player to see (Martin, 2026-11-05, as Hearthstone shows a card's buffs):
+    `printed` (None for a dynamic strength), `base` (its printed or dynamic number as it stands; an inked dynamic one is its
+    printed 0), `base_bonus` (its own growth raising its base: the Roach King's falls), `growth` (card-wide, on every copy:
+    the Python's), `changes` (what other cards gave it or took from it, each [source, amount], oldest first; source None for
+    a counter set by hand), `auras` (live "has +X", each [source, amount]: its own text or an ally's aura) and `total`
+    (raw_strength, below 0 too)."""
+    card = state.cards[unit.card_id]
+    printed = card.base_strength if isinstance(card.base_strength, int) else None
+    base = (printed or 0) if _inked(state, unit.iid) else _base_or_dynamic(state, card, unit.owner)
+    entries = state.strength_sources.get(unit.iid, ())
+    base_bonus = sum(n for _, n, b in entries if b)
+    changes = [[src, n] for src, n, b in entries if not b]
+    rest = unit.strength_counter - base_bonus - sum(n for _, n in changes)
+    if rest:
+        changes.append([None, rest])
+    their_turn = state.current != unit.owner
+    auras = sorted([u.card_id, getattr(state.config, aura[1])] for u, aura in aura_sources(state)
+             if u.owner == unit.owner and u.iid != unit.iid and aura[0] in card.tags and not _inked(state, u.iid)
+             and not (aura[2] and not their_turn))
+    own = anthem_bonus(state, card, unit.owner, unit.iid) - sum(n for _, n in auras)
+    if own:
+        auras.insert(0, [card.id, own])
+    return {"printed": printed, "base": base, "base_bonus": base_bonus, "growth": _global_growth(state, card.id, unit.owner),
+            "changes": changes, "auras": auras, "total": raw_strength(state, unit)}

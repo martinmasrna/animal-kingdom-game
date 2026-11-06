@@ -451,10 +451,10 @@
         "Canine"
       ],
       "base_strength": 5,
-      "text": "Once each turn, an ally can roam for free.",
-      "keywords": [],
+      "text": "Once each turn, an ally with Roam can roam for free.",
       "species": "Wolf",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "wolf_legend_2",
@@ -465,7 +465,7 @@
         "Canine"
       ],
       "base_strength": 6,
-      "text": "Roam. Whenever a Canine roams, give it +1 strength and draw a card.",
+      "text": "Roam. Whenever one of your Canines roams, give it +1 strength and draw a card.",
       "species": "Wolf",
       "habitat": "Forest",
       "keywords": [
@@ -3037,7 +3037,7 @@
       "id": "baby_turtle",
       "name": "Baby Turtle",
       "status": "token",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [],
       "base_strength": 0,
       "keywords": [],
@@ -3047,7 +3047,7 @@
       "id": "worm",
       "name": "Worm",
       "status": "token",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [],
       "base_strength": 0,
       "text": "Fall: draw a card.",
@@ -3079,7 +3079,7 @@
       "id": "cuckoo_egg",
       "name": "Cuckoo Egg",
       "status": "token",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Egg"
       ],
@@ -3753,7 +3753,7 @@
       "id": "young_ant",
       "name": "Young Ant",
       "status": "token",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Colony"
       ],
@@ -3993,7 +3993,7 @@
       "id": "baby_impala",
       "name": "Baby Impala",
       "status": "token",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Hoofed"
       ],
@@ -4041,7 +4041,7 @@
         "Rodent"
       ],
       "base_strength": 2,
-      "text": "Roar: repeat the Roar of an adjacent Rodent.",
+      "text": "Roar: repeat the Roar of an adjacent allied Rodent.",
       "species": "Vole",
       "habitat": "Meadow",
       "keywords": []

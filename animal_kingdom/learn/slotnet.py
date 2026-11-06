@@ -50,7 +50,6 @@ def layout(names):
 
 
 def split(X, lay):
-    np = _np()
     G = X[:, lay["globals"]]
     S = X[:, lay["slot_offset"]:lay["slot_offset"] + lay["n_slots"] * lay["slot_width"]].reshape(len(X), lay["n_slots"], lay["slot_width"])
     H = X[:, lay["hand_offset"]:lay["hand_offset"] + lay["n_hands"] * lay["hand_width"]].reshape(len(X), lay["n_hands"], lay["hand_width"])

@@ -47,7 +47,7 @@ for gi, (g, bot, f) in enumerate(games):
                 captured.clear(); searcher._continuation_plan = {}
                 before = state.clone()
                 try: best = searcher.choose(state.view_for(bot), legal, state)
-                except Exception as e: best = None
+                except Exception: best = None
                 scores = captured.get("scores") or []
                 played = action_from_dict(adict)
                 by = {a: sc for a, sc in scores}

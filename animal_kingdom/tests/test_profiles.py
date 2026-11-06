@@ -144,7 +144,7 @@ def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
     assert m.phase == "match_over"
     (h,) = db.history(p["id"])
     assert (h["kind"], h["my_deck"], h["opp"], h["opp_deck"], h["won"], h["lost"]) == \
-        ("bot", "Cats", "Bot (Easy)", "Giants", 2, 0)
+        ("bot", "Cats", "Bot (Beginner)", "Giants", 2, 0)   # the band a player picks, never the engine's pilot ("Easy")
 
 
 def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path):
@@ -396,3 +396,37 @@ def test_a_card_whose_id_changed_follows_into_a_players_deck_within_its_copy_lim
     db.seed_decks(p["id"], [], pool={"lion", "jackal"}, renamed={"gray_wolf": "jackal"}, limits={"jackal": 2})
     d = db.decks(p["id"])[0]
     assert d["cards"] == {"lion": 3, "jackal": 2} and d["cover"] == "jackal"
+
+
+def test_a_shared_replay_opens_for_anyone_with_its_link(monkeypatch, tmp_path):
+    import asyncio
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import replay
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setattr(server, "REPLAY_DIR", tmp_path)
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            me, other = [await (await c.post("/api/profile", json={})).json() for _ in range(2)]
+            server.profiles.record(me["profile"]["id"], "M-0", kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Ramp",
+                                   won=1, lost=0, seat="B")
+            replay.save(tmp_path, "M-0", "B", [{"you": "B"}])
+            # only the match's player can share it, and only a match with a saved replay
+            assert (await c.post("/api/replay/M-0/share", headers={"X-AK-Key": other["code"]})).status == 404
+            assert (await c.post("/api/replay/M-0/share")).status == 401
+            assert (await c.post("/api/replay/X-0/share", headers={"X-AK-Key": me["code"]})).status == 404
+            r = await c.post("/api/replay/M-0/share", headers={"X-AK-Key": me["code"]})
+            token = (await r.json())["token"]
+            assert len(token) >= 16 and token != "M-0"
+            again = await c.post("/api/replay/M-0/share", headers={"X-AK-Key": me["code"]})
+            assert (await again.json())["token"] == token   # one link per match, however often it is shared
+            for headers in ({}, {"X-AK-Key": other["code"]}):   # no profile at all, or someone else's
+                r = await c.get(f"/api/replay/{token}", headers=headers)
+                assert r.status == 200 and await r.json() == [{"you": "B"}] and r.headers["X-AK-Shared"] == "1"
+            # the match key itself stays private, and a made-up token opens nothing
+            assert (await c.get("/api/replay/M-0", headers={"X-AK-Key": other["code"]})).status == 404
+            assert (await c.get("/api/replay/M-0")).status == 401
+            assert (await c.get("/api/replay/not-a-real-token-at-all")).status == 401
+            mine = await c.get("/api/replay/M-0", headers={"X-AK-Key": me["code"]})
+            assert mine.headers["X-AK-Shared"] == "0"
+    asyncio.run(run())

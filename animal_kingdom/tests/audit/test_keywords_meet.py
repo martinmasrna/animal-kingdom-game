@@ -1487,12 +1487,7 @@ def test_hungry_meets_a_hungry_death_it_counts_as_removed_hyena():
     assert removed(s, "elephant") and s.food["A"] == 3
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Two readings of a Locust swarm landing next to a trap. A: 'cover the board' is one placement, so every Locust "
-    "adjacent to the Hippopotamus is placed next to it and the trap takes them all, as a trap resolves even when the "
-    "placement covered or removed it (overview.md §9 timing). B: the Locusts land one at a time, so the Hippo removes "
-    "those that land before its own crossroad's Locust buries it and none after. The engine lands them in crossroad "
-    "order (B): of the Hippo's four neighbours on Map A, 2,2 and 3,1 lose their Locust, 3,3 and 4,2 keep theirs."))
+# Martin, 2026-11-05: the swarm lands all at once, and the Hippopotamus takes every Locust around it.
 def test_wild_meets_a_trap_every_locust_placed_next_to_a_hippo_is_removed():
     s = st(hands={"A": ["locust_legend"]})
     put(s, "3,2", "hippopotamus", "B")

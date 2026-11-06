@@ -287,6 +287,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: a rare card's token wears the rare border, as Baby Impala",
+      "by": "claude",
+      "at": 1793877576
     }
   },
   "baby_wolf": {
@@ -1022,12 +1032,22 @@
       "at": 1793028832
     },
     "art": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1793870446
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1793870459
     }
   },
   "cheetah": {
@@ -1128,6 +1148,16 @@
       "by": "claude",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191059
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Once each turn, an ally can roam for free."
+      },
+      "note": "card audit 2026-11-04: the Clarion ruling (only allies with Roam) written on the card; the engine already does this",
+      "by": "claude",
+      "at": 1793820582
     }
   },
   "cod": {
@@ -1262,6 +1292,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: a rare card's token wears the rare border, as Baby Impala",
+      "by": "claude",
+      "at": 1793877576
     }
   },
   "dart_frog": {
@@ -2693,9 +2733,9 @@
         "prev_note": "",
         "prev": "Whenever an ally roams onto an enemy, draw a card."
       },
-      "note": "Martin, 2026-10-28",
+      "note": "card audit 2026-11-04: the ruling (your Canines only, itself included) written on the card; the engine already does this",
       "by": "claude",
-      "at": 1793210656
+      "at": 1793820582
     }
   },
   "lynx": {
@@ -3169,7 +3209,7 @@
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "at": 1793029531,
+      "at": 1793871931,
       "review": {
         "prev_lv": "draft",
         "prev_note": "",
@@ -3191,7 +3231,11 @@
     "art": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792143575
+      "at": 1793871931,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      }
     },
     "animal": {
       "lv": "draft",
@@ -4743,6 +4787,16 @@
       "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board",
       "by": "claude",
       "at": 1793023438
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: a rare card's token wears the rare border, as Baby Impala",
+      "by": "claude",
+      "at": 1793877576
     }
   },
   "zebra": {
@@ -6142,6 +6196,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1792682852
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793870060
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793870094
     }
   },
   "tiger_legend": {
@@ -6383,6 +6455,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793028816
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793870445
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793870468
     }
   },
   "krill": {
@@ -7274,6 +7364,24 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793293892
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793872882
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793872882
     }
   },
   "baby_impala": {
@@ -7286,6 +7394,34 @@
       "note": "Martin, 2026-10-29: the Impala's token",
       "by": "claude",
       "at": 1793293867
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793877385
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793877414
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: \"it should also have rare border\"",
+      "by": "claude",
+      "at": 1793877430
     }
   },
   "dung_beetle_legend_form4": {
@@ -7410,9 +7546,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-29: 'I like the effect but it 100% feels like a rare card'; Big Gus for one neighbour",
+      "note": "card audit 2026-11-04: Martin's ruling of 2026-10-29 (an allied Rodent) written on the card; the engine already does this",
       "by": "claude",
-      "at": 1793300215
+      "at": 1793820582
     },
     "animal": {
       "review": {
@@ -7707,6 +7843,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793448250
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: a rare card's token wears the rare border, as Baby Impala",
+      "by": "claude",
+      "at": 1793877577
     }
   },
   "bunny": {

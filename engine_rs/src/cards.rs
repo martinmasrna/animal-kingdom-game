@@ -214,22 +214,24 @@ fn played_this_turn(st: &State, player: Player, tag: u32, unit: Option<&Unit>) -
     st.turn_flags.played[player as usize].iter().filter(|(iid, c)| st.card(*c).tags & tag != 0 && unit.map(|u| u.iid != *iid).unwrap_or(true)).count() as i32
 }
 
-fn add_strength(st: &mut State, iid: i64, n: i32) {
+fn add_strength(st: &mut State, iid: i64, n: i32, src: Option<CardId>) {
     if let Some(u) = st.unit_by_iid_mut(iid) {
         u.strength_counter += n as i16;
         let u = u.clone();
+        st.note_strength(iid, n, src, false);
         crate::emit!(st, "strength", vmap!("iid" => Value::Int(iid), "card" => card_v(st, u.card), "owner" => pn(u.owner), "n" => Value::Int(n as i64)));
     }
 }
 
 /// The Chameleons: the unit `me_iid`, if it is on the board, becomes a copy of `card` with `counter` (no Roar).
-fn become_copy(st: &mut State, me_iid: i64, card: CardId, counter: i16) {
+fn become_copy(st: &mut State, me_iid: i64, card: CardId, counter: i16, from_iid: i64) {
     if st.find_instance(me_iid).is_none() || st.find_unit(me_iid).is_none() {
         return;
     }
     if let Some(me) = st.find_instance_mut(me_iid) {
         me.strength_counter = counter;
     }
+    st.copy_strength_sources(from_iid, me_iid);
     transform(st, me_iid, card);
 }
 
@@ -272,11 +274,13 @@ fn copy_timers(st: &mut State, src: &Unit, me_iid: i64, me_owner: Player) {
     }
 }
 
-fn put_back(st: &mut State, unit: &Unit, cr: Cr, pos: usize, counter: i32) {
+/// A fresh copy of a removed unit back at the same height, with `base` of its own growth raising its base and nothing else.
+fn put_back(st: &mut State, unit: &Unit, cr: Cr, pos: usize, base: i32) {
     if st.pile_take(unit.card, Some(unit.owner)) {
         let iid = st.new_iid();
         let mut back = Unit::new(unit.card, unit.owner, iid);
-        back.strength_counter = counter as i16;
+        back.strength_counter = base as i16;
+        st.note_strength(iid, base, Some(unit.card), true);
         let at = pos.min(st.stack(cr).len());
         st.insert_unit(cr, at, back);
         crate::emit!(st, "place", vmap!("player" => pn(unit.owner), "iid" => Value::Int(iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, cr), "from_hand" => Value::Bool(false), "at" => Value::Int(at as i64)));
@@ -593,7 +597,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 let nb = lows[st.rng.choice_index(lows.len())];
                 remove_top(st, nb, owner, true, Some(unit.card));
                 if low > 0 {
-                    add_strength(st, unit.iid, low);
+                    add_strength(st, unit.iid, low, Some(unit.card));
                 }
             }
         }
@@ -678,7 +682,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("cockroach_legend", OnRemove) => {
             let Args::Remove(rcr, pos) = args else { return };
             let g = cfg(st, "cockroach_legend_growth");
-            put_back(st, unit, *rcr, *pos, (unit.strength_counter as i32).max(0) + g);
+            // printed strength plus 1 for every fall; what other cards gave it or took from it is gone (Martin, 2026-11-05)
+            put_back(st, unit, *rcr, *pos, st.base_bonus(unit.iid) + g);
             draw_cards(st, owner, 1);
         }
         ("dart_frog", OnRemove) => {
@@ -689,10 +694,16 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("locust_legend", OnPlace) => {
             let locust = cid(st, "locust_swarm");
             let delay = cfg(st, "locust_delay");
+            // all at once (Martin, 2026-11-05): every Locust's reactions see the board as it stood before the swarm
+            let n = st.map().sorted.iter().map(|&c| c as usize + 1).max().unwrap_or(0);
+            let mut before: Vec<Option<Unit>> = vec![None; n];
+            for &c in st.map().sorted.clone().iter() {
+                before[c as usize] = st.top(c).cloned();
+            }
             for c in st.map().sorted.clone() {
                 let iid = st.new_iid();
                 let l = Unit::new(locust, WILD, iid);
-                land_unit(st, WILD, l.clone(), c, false, true, false, false);
+                crate::effects::land_unit_seeing(st, WILD, l.clone(), c, false, true, false, false, Some(&before));
                 let l_now = st.unit_by_iid(iid).cloned().unwrap_or(l);
                 schedule(st, &l_now, delay, vmap!("op" => Value::s("locust_eat"), "iid" => Value::Int(iid), "by_player" => pn(owner)), false, None);
             }
@@ -1499,7 +1510,8 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             if let Some(cr) = cr_of(st) {
                 if let Some(top) = st.top(cr).cloned() {
                     let delta = cfg(st, "serval_set") - effective_strength(st, &top, None);
-                    add_strength(st, top.iid, delta);
+                    let cause = st.cause;
+                    add_strength(st, top.iid, delta, cause);
                 }
             }
         }
@@ -1507,7 +1519,8 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             if let Some(cr) = cr_of(st) {
                 if let Some(top) = st.top(cr).cloned() {
                     let amount = m_get_i(step, "amount").unwrap_or(0) as i32;
-                    add_strength(st, top.iid, -amount);
+                    let cause = st.cause;
+                    add_strength(st, top.iid, -amount, cause);
                 }
             }
         }
@@ -1561,7 +1574,7 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             let me_iid = m_get_i(step, "self").unwrap_or(-1);
             let Some(cr) = cr_of(st) else { return };
             let Some(target) = st.top(cr).cloned() else { return };
-            become_copy(st, me_iid, target.card, target.strength_counter);
+            become_copy(st, me_iid, target.card, target.strength_counter, target.iid);
             if st.find_unit(me_iid).is_some() {
                 copy_timers(st, &target, me_iid, chooser);
             }
@@ -1571,7 +1584,7 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             let me_iid = m_get_i(step, "self").unwrap_or(-1);
             let iid = choice.as_i64().unwrap_or(-1);
             if let Some(inst) = st.hands[chooser as usize].iter().find(|u| u.iid == iid).cloned() {
-                become_copy(st, me_iid, inst.card, inst.strength_counter);
+                become_copy(st, me_iid, inst.card, inst.strength_counter, inst.iid);
             }
         }
         "return_ally" => {
@@ -1625,7 +1638,8 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
         "duplicate" => {
             let iid = choice.as_i64().unwrap_or(-1);
             if let Some(inst) = st.hands[chooser as usize].iter().find(|u| u.iid == iid).cloned() {
-                gain_to_hand(st, chooser, inst.card, inst.strength_counter as i32);
+                let dup = gain_to_hand(st, chooser, inst.card, inst.strength_counter as i32);
+                st.copy_strength_sources(inst.iid, dup.iid);
             }
         }
         "discard" => {

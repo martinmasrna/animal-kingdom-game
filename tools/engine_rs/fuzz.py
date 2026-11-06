@@ -6,14 +6,14 @@ card reach the effects no logged game does.
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))   # REPO_ROOT: this tree, not an installed copy
-import argparse, dataclasses, json, os, random, sys, time
+import argparse, dataclasses, json, random, sys, time
 
 from animal_kingdom.engine import rules
-from animal_kingdom.engine.actions import PassAction, action_from_dict
+from animal_kingdom.engine.actions import PassAction
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.resources import load_bundled_json
 from animal_kingdom.engine.state import new_game
+from animal_kingdom.engine.strength import strength_breakdown
 import ak_engine
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
@@ -45,6 +45,11 @@ def play(seed, pool, cards, config, eng, pass_rate):
         a, b = py.to_dict(), rs.to_dict()
         if canon(a) != canon(b):
             return f"state differs after {label}: " + "; ".join(f"{p}: py={x!r} rs={y!r}" for p, x, y in diff_keys(a, b))
+        units = [u for stack in py.board.values() for u in stack] + [u for h in py.hands.values() for u in h]
+        for u in units:
+            ba, bb = strength_breakdown(py, u), rs.strength_breakdown(u.iid)
+            if canon(ba) != canon(bb):
+                return f"strength breakdown of {u.card_id} ({u.iid}) differs after {label}: py={ba} rs={bb}"
         la = [x.to_dict() for x in rules.legal_actions(py)]
         lb = rs.legal_actions()
         if [canon(x) for x in la] != [canon(x) for x in lb]:

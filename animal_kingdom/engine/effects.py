@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from typing import Callable, Optional
 
 from .actions import SKIP, ChoiceAction, PlaceAction, RoamAction
-from .state import WILD, EngineError, GameState, Result, UnitInstance, other_player
+from .state import JELLY_SOURCE, WILD, EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
 from .strength import effective_strength, placement_strength, raw_strength, small_starting_deck
 
@@ -263,11 +263,14 @@ def _take_from_hand(state: GameState, player: str, card_id: str) -> UnitInstance
 
 
 def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, from_hand: bool,
-               roar: bool = True, play: bool = True, reveal: bool = False) -> None:
+               roar: bool = True, play: bool = True, reveal: bool = False,
+               tops: dict[str, UnitInstance] | None = None) -> None:
     """The same hand instance lands on the board, carrying its strength counter. `roar=False` is a placement by an
     effect that doesn't set off the animal's Roar (the Sardines an effect fills in); every reaction to the landing still
     happens. `play=False`: the animal is placed, not played (rulings.md, "Place versus play"), so "when you play"
-    reactions (Queen Honoria) don't see it. `reveal`: the client shows the card large as it lands (Vesper)."""
+    reactions (Queen Honoria) don't see it. `reveal`: the client shows the card large as it lands (Vesper). `tops`: the
+    board's top animals as they stood before a placement that lands several animals at once (the Locust swarm): every
+    landing's reactions see that board, not the one the earlier landings left (Martin, 2026-11-05)."""
     covered = state.top_unit(cr)
     is_apex = "Apex Predator" in state.cards[unit.card_id].keywords
     onto_enemy = covered is not None and covered.owner != player
@@ -290,7 +293,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
 
     # Reactive triggers resolve AFTER the placed unit's roar (decision 8). The stack
     # is LIFO, so push reactive first (lower) and the roar last (on top).
-    _push_reactions(state, unit, cr, covered, onto_enemy)
+    _push_reactions(state, unit, cr, covered, onto_enemy, tops)
     if onto_enemy:
         _fire_cover_event(state, unit, covered)
         _push_flee(state, covered, unit, cr)
@@ -408,12 +411,12 @@ def _fire_place_event(state, placed) -> None:
             hook(state, top, placed)
 
 
-def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
+def _push_reactions(state, unit, cr, covered, onto_enemy, tops=None) -> None:
     # Traps reacting to a unit arriving adjacent: placed, or roamed in (keywords.md, Roam). An enemy's (Hippopotamus,
     # Meerkat, Golden Orb-Weaver) or anyone's (City Spider). A trap that cares which it was can tell from the arriving
     # unit's `roamed_{iid}` turn flag.
     for nb in sorted(state.game_map.neighbors(cr)):
-        top = state.top_unit(nb)
+        top = state.top_unit(nb) if tops is None else tops.get(nb)
         if top is None:
             continue
         if top.owner != unit.owner:
@@ -435,8 +438,8 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
         if covered.owner != unit.owner and "Colony" in state.cards[covered.card_id].tags:
             _push_queen_guards(state, covered.owner, unit, cr)
         # "When an ally is covered" / "Whenever your opponent covers an allied Fish": the covered unit's side watches.
-        for st in list(state.board.values()):
-            top = st[-1] if st else None
+        watching = [st[-1] if st else None for st in state.board.values()] if tops is None else list(tops.values())
+        for top in watching:
             if top and top.owner == covered.owner and top is not covered:
                 hook = _hook(state, top.card_id, "on_ally_covered")
                 if hook:
@@ -611,6 +614,7 @@ def _op_apex_eat(state, step):
                 grown = state.config.leopard_legend_growth
             if grown:
                 apex.strength_counter += grown
+                state.note_strength(apex.iid, grown, apex.card_id)
                 state.emit("strength", iid=apex.iid, card=apex.card_id, owner=apex.owner, n=grown)
     return None
 
@@ -1174,6 +1178,7 @@ def _eat(state, unit, cr) -> None:
                     _transform(state, inst, form)
         if eaten < n:
             unit.strength_counter -= n - eaten
+            state.note_strength(unit.iid, eaten - n, unit.card_id)
             state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=eaten - n)
     finally:
         state.cause, state.cause_iid = prev
@@ -1378,7 +1383,8 @@ def _op_play_named(state, step):
         if not in_hand and cid in state.decks[player]:
             state.decks[player].remove(cid)
             jellied = state.jelly_take(player, cid)
-            state.add_to_hand(player, cid, strength_counter=jellied or 0)   # only to be placed at once: not a gain, so no hand-limit burn
+            inst = state.add_to_hand(player, cid, strength_counter=jellied or 0)   # only to be placed at once: not a gain, so no hand-limit burn
+            state.note_strength(inst.iid, jellied or 0, JELLY_SOURCE)
             step["fetched"] = True
         else:
             step["fetched"] = False
@@ -1422,6 +1428,7 @@ def _op_grant_strength(state, step):
         if inst is None:
             continue
         inst.strength_counter += amount
+        state.note_strength(iid, amount, state.cause)
         state.emit("strength", iid=iid, card=inst.card_id, owner=inst.owner, n=amount)   # a stored gain
         if amount <= 0:
             continue
@@ -1446,6 +1453,7 @@ def _gain_in_hand(state, inst, amount) -> None:
         partner = next((u for u in state.hands[inst.owner] if u.card_id == mate), None)
         if partner is not None:
             partner.strength_counter += amount
+            state.note_strength(partner.iid, amount, state.cause)
             state.emit("strength", iid=partner.iid, card=partner.card_id, owner=partner.owner, n=amount)
     hook = _hook(state, inst.card_id, "on_gain_in_hand")
     if hook:
@@ -1637,6 +1645,7 @@ def _bounce(state, cr, top, *, lock_until=0):
     if top.owner == WILD:       # a Wild animal has no hand to go back to: it just leaves
         return None
     inst = gain_to_hand(state, top.owner, top.card_id, strength_counter=top.strength_counter)
+    state.copy_strength_sources(top.iid, inst.iid)
     inst.locked_until_turn = lock_until
     return inst
 
@@ -1673,6 +1682,7 @@ def _then_set_strength(state, step, cr):
     if top is not None:
         delta = state.config.serval_set - effective_strength(state, top)
         top.strength_counter += delta
+        state.note_strength(top.iid, delta, state.cause)
         state.emit("strength", iid=top.iid, card=top.card_id, owner=top.owner, n=delta)
 
 
@@ -1681,6 +1691,7 @@ def _then_drain(state, step, cr):
     top = state.top_unit(cr)
     if top is not None:
         top.strength_counter -= step["amount"]
+        state.note_strength(top.iid, -step["amount"], state.cause)
         state.emit("strength", iid=top.iid, card=top.card_id, owner=top.owner, n=-step["amount"])
 
 
@@ -1741,13 +1752,14 @@ def _op_it_roams(state, step):
 OPS["it_roams"] = _op_it_roams
 
 
-def _become(state, step, card_id, counter) -> None:
+def _become(state, step, card_id, counter, from_iid) -> None:
     """The Chameleons: this becomes a copy of `card_id` - its strength, keywords and text, not its Roar (it isn't placed).
     It is that card from now on (a Faceless Manipulator: removed, it goes to the Remove Pile as the copy)."""
     me = _find_instance(state, step["self"])
     if me is None or _crossroad_of(state, me.iid) is None:
         return
     me.strength_counter = counter
+    state.copy_strength_sources(from_iid, me.iid)
     _transform(state, me, card_id)
 
 
@@ -1757,7 +1769,7 @@ def _then_copy_and_add(state, step, cr):
     target = state.top_unit(cr)
     if target is None:
         return
-    _become(state, step, target.card_id, target.strength_counter)
+    _become(state, step, target.card_id, target.strength_counter, target.iid)
     me = _find_instance(state, step["self"])
     if me is not None and _crossroad_of(state, me.iid) is not None:
         _copy_timers(state, target, me)
@@ -1784,7 +1796,7 @@ def _then_copy_from_hand(state, step, iid):
     """The Chameleon: "become a copy of an animal in your hand" (its counter included); the card stays in your hand."""
     inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
     if inst is not None:
-        _become(state, step, inst.card_id, inst.strength_counter)
+        _become(state, step, inst.card_id, inst.strength_counter, inst.iid)
 
 
 def _then_return_ally(state, step, cr):
@@ -1836,7 +1848,8 @@ def _then_duplicate(state, step, iid):
     """Orangutan: a copy of the chosen hand card, its strength counter included."""
     inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
     if inst is not None:
-        gain_to_hand(state, step["chooser"], inst.card_id, strength_counter=inst.strength_counter)
+        dup = gain_to_hand(state, step["chooser"], inst.card_id, strength_counter=inst.strength_counter)
+        state.copy_strength_sources(inst.iid, dup.iid)
 
 
 def _then_discard(state, step, iid):
@@ -2035,6 +2048,7 @@ def _tarantula_eot(state, unit, cr):
         remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
         if low > 0:
             unit.strength_counter += low
+            state.note_strength(unit.iid, low, unit.card_id)
             state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=low)
 
 
@@ -2118,12 +2132,13 @@ def _worm_remove(state, unit, cr, pos):
     draw_cards(state, unit.owner, 1)
 
 
-def _put_back(state, unit, cr, pos, *, counter) -> None:
-    """A fresh copy of a removed unit, carrying `counter`, goes back into the same stack at the same height (on top, or
-    still buried). It comes back, it isn't placed: nothing that reacts to a placement sees it (a City Spider beside it
-    would otherwise eat it for ever)."""
+def _put_back(state, unit, cr, pos, *, base) -> None:
+    """A fresh copy of a removed unit goes back into the same stack at the same height (on top, or still buried), with
+    `base` of its own growth raising its base and nothing else. It comes back, it isn't placed: nothing that reacts to a
+    placement sees it (a City Spider beside it would otherwise eat it for ever)."""
     if state.pile_take(unit.card_id, unit.owner):
-        back = UnitInstance(unit.card_id, unit.owner, state.new_iid(), strength_counter=counter)
+        back = UnitInstance(unit.card_id, unit.owner, state.new_iid(), strength_counter=base)
+        state.note_strength(back.iid, base, unit.card_id, base=True)
         stack = state.board.setdefault(cr, [])
         at = min(pos, len(stack))
         stack.insert(at, back)
@@ -2133,16 +2148,17 @@ def _put_back(state, unit, cr, pos, *, counter) -> None:
 def _cockroach_remove(state, unit, cr, pos):
     """Fall: replace this with a Cockroach (a fresh one: nothing it was given or lost comes back) and place a Roach on an
     adjacent empty crossroad (a random one)."""
-    _put_back(state, unit, cr, pos, counter=0)
+    _put_back(state, unit, cr, pos, base=0)
     empty = _empty_neighbors(state, cr)
     if empty and state.result is None:
         _spawn(state, unit.owner, "roach", state.rng.choice(empty))
 
 
 def _cockroach_legend_remove(state, unit, cr, pos):
-    """Fall: put this back where it was with +1 strength and draw a card. Its growth stacks from fall to fall; a loss of
-    strength doesn't come back with it (else one shrunk below 0 would fall for ever)."""
-    _put_back(state, unit, cr, pos, counter=max(unit.strength_counter, 0) + state.config.cockroach_legend_growth)
+    """Fall: put this back where it was with +1 strength and draw a card. The +1 raises its base, fall after fall: it
+    comes back at its printed strength plus 1 for every fall, and what other cards gave it or took from it is gone
+    (Martin, 2026-11-05)."""
+    _put_back(state, unit, cr, pos, base=state.base_bonus(unit.iid) + state.config.cockroach_legend_growth)
     draw_cards(state, unit.owner, 1)
 
 
@@ -2155,10 +2171,14 @@ def _locust_legend_place(state, unit, cr):
     """Roar: cover the board with Locusts. A Wild Locust lands on every crossroad, this one too, as a placement would
     (Spikes, Poison, Flee and the traps all see it), each with its own timer: "In 2 turns, remove this and the animal
     under it". A Wild animal's timer ticks every turn, so the swarm eats at the start of the caster's next turn, after
-    the opponent's whole turn to see it; a covered Locust waits (overview.md §9.1), so covering one spares that crossroad."""
+    the opponent's whole turn to see it; a covered Locust waits (overview.md §9.1), so covering one spares that crossroad.
+    The swarm lands all at once (Martin, 2026-11-05): every Locust's reactions see the board as it stood before it, so a
+    Hippopotamus takes every Locust around it, not only those that landed before its own crossroad's buried it."""
+    before = {c: state.top_unit(c) for c in state.game_map.crossroads}
+    tops = {c: u for c, u in before.items() if u is not None}
     for c in sorted(state.game_map.crossroads):
         locust = UnitInstance("locust_swarm", WILD, state.new_iid())
-        _land_unit(state, WILD, locust, c, from_hand=False, play=False)
+        _land_unit(state, WILD, locust, c, from_hand=False, play=False, tops=tops)
         schedule(state, locust, state.config.locust_delay,
                  {"op": "locust_eat", "iid": locust.iid, "by_player": unit.owner}, while_buried=False)
 

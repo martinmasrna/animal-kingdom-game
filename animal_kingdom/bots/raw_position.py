@@ -77,7 +77,7 @@ EXCLUDED = {
     "inked": "encoded per piece", "pile_owners": "encoded (pile bags by owner)", "remove_pile": "encoded",
     "scheduled": "encoded per piece", "turn_flags": "see the flag keys", "idle_turns": "encoded",
     "board": "encoded", "hands": "encoded", "decks": "encoded", "food": "encoded", "current": "encoded (side_to_move)",
-    "events": "a log", "cause": "a log", "cause_iid": "a log",
+    "events": "a log", "cause": "a log", "cause_iid": "a log", "strength_sources": "where each counter came from: the counter is encoded",
     # UnitInstance
     "card_id": "encoded", "owner": "encoded", "iid": "bookkeeping",
     "placed_on_turn": "written by the engine, read by no rule", "strength_counter": "encoded",
@@ -169,7 +169,6 @@ def extract(state: GameState, me: str) -> dict:
         raise ValueError("the raw position is read only on a quiet position")
     opp = other_player(me)
     idx = card_index(state.cards)
-    cards = state.cards
     crs = mirrored_crossroads(state, me)
     flags = state.turn_flags
     tc = state.turn_counter

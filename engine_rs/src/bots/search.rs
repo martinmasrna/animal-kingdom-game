@@ -2,7 +2,7 @@
 //! bots/referee_bot.py), and the searched mulligan (bots/mulligan.py). Every ordering, tie-break and RNG draw follows
 //! the Python so the same seed plays the same move.
 
-use std::time::Instant;
+use crate::clock::Instant;
 
 use crate::actions::{Action, Target};
 use crate::bots::features::{capped, enabled_roar_count, opponent_lethal_next_turn, reframed_at_my_turn, roar_fizzled, Evaluator, Weights};

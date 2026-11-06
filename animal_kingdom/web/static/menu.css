@@ -86,7 +86,6 @@ html.kb .mscr { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phon
 :is(.mscr, .game) .st .x i.on { background: #e9e4da; }
 .mscr .clist { flex: 1; overflow-y: auto; padding: 16px 12px 14px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
 .mscr .clist > * { flex: none; }
-.mscr .dsep { height: 1px; margin: 10px 4px; background: #2e3134; }
 .mscr .dtile.on { border-radius: 8px 8px 0 0; }
 .mscr .tacts { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 5; display: flex; gap: 6px; opacity: 0; transition: opacity .12s; }
 .mscr .dtile.on:hover .tacts { opacity: 1; }
@@ -215,13 +214,12 @@ html { touch-action: manipulation; }
 
 /* Friends (friends.js): a friend's row (a dot when online, the name, when last on), the challenge piece over any menu,
    the friend-link and remove questions on the feedback box's granite. */
-.mscr .fr, .mscr .pfr { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; text-align: left; }
+.mscr .fr { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; text-align: left; }
 .mscr .fr { height: 40px; padding: 0 12px; } .mscr .fr.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
-.mscr .pfr { height: 44px; padding: 0 2px 0 4px; } .mscr .pfr .ic { width: 44px; height: 44px; color: #ff8a78; }
 .mscr .dot { width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; border: 1.5px solid #8f8577; }
 .mscr .dot.on { border: 0; background: #7fd07a; box-shadow: 0 0 6px rgba(127,208,122,.6); }
-.mscr .fr .nm, .mscr .pfr .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-.mscr .fr small, .mscr .pfr small { color: #a99f8e; font-size: 13px; }
+.mscr .fr .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.mscr .fr small { color: #a99f8e; font-size: 13px; }
 .mscr .flist { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
 .mscr .flist > * { flex: none; } .mscr #addfriend { height: 40px; }
 .chal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 150; width: min(380px, calc(100vw - 24px)); box-sizing: border-box; padding: 16px;
@@ -251,7 +249,7 @@ html { touch-action: manipulation; }
 .chatp.inmatch { top: 64px; max-height: min(520px, calc(100vh - 80px)); }   /* as tall as the conversation, up to a limit */
 .chatp .chead { flex: none; display: flex; align-items: center; gap: 8px; min-height: 36px; }
 .chatp .chead b { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font: 700 19px 'Fira Sans Condensed', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chatp .cx { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #cfc3ad; font: 400 26px/1 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.chatp .cx { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #cfc3ad; font: 400 26px/1 'Fira Sans Condensed', sans-serif; cursor: pointer; }
 .chatp .cx:hover { background: rgba(255,245,230,.08); color: #f3ead8; }
 .chatp .slab, .chatp .play { box-sizing: border-box; border: 0; border-radius: 10px; cursor: pointer; color: #f0e8da; font: 600 16px 'Fira Sans Condensed', sans-serif;
   background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); }
@@ -292,10 +290,10 @@ html { touch-action: manipulation; }
   .chatp, .chatp.inmatch { inset: 0; top: 0; width: auto; height: auto; max-height: none; border-radius: 0; padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
   .chatt { left: 12px; right: 12px !important; max-width: none; }
 }
-.mscr .pfr[data-chatwith] { cursor: pointer; border-radius: 8px; } .mscr .pfr[data-chatwith]:hover { background: rgba(255,245,230,.06); }   /* a friend row opens your conversation */
 @media (max-width: 440px) { .home .top .backbtn.lab { width: 48px; padding: 0; } .home .top .backbtn.lab span { display: none; } }   /* a phone: Collection is its icon, as the gear is, so Friends fits */
 .chatopen .ftab { display: none !important; }   /* the panel holds the right edge */
 /* The tab takes its rarity's tint (steel, gold) like the card's plaque, under the digits; commons stay driftwood. */
 :is(.mscr, .game) .st:is(.rare, .legendary) .s { background: none; isolation: isolate; }
 :is(.mscr, .game) .st:is(.rare, .legendary) .s::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
   background: url(/static/kit2/card_plaque.webp) center / 240% 240%; filter: var(--tint); }
+.mscr .ic.txt { width: auto; padding: 0 10px; font: inherit; font-size: 14px; }   /* Share, as text until it has an icon (docs/share-links.md) */

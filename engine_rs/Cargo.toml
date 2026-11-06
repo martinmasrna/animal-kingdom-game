@@ -14,11 +14,18 @@ serde_json = { version = "1", features = ["preserve_order", "float_roundtrip"] }
 indexmap = { version = "2", features = ["serde"] }
 rustc-hash = "2"
 smallvec = { version = "1", features = ["union", "const_generics"] }
+wasm-bindgen = { version = "0.2", optional = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 mimalloc = { version = "0.1", default-features = false }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys = "0.3"   # the clock (clock.rs): std::time::Instant panics on wasm32-unknown-unknown
 
 [features]
 default = ["python"]
 python = ["pyo3"]
+wasm = ["wasm-bindgen"]   # the browser module (wasm.rs): `--no-default-features --features wasm --target wasm32-unknown-unknown`
 
 [profile.release]
 opt-level = 3
@@ -26,3 +33,9 @@ lto = "fat"
 codegen-units = 1
 panic = "unwind"
 debug = 1
+
+# The browser build (engine_rs/wasm.sh): no unwinding on wasm32, no debug info in what the player downloads.
+[profile.wasm]
+inherits = "release"
+panic = "abort"
+debug = 0
