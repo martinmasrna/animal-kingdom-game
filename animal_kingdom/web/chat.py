@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import time
 
+from .guard import clean_text
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS chat (id INTEGER PRIMARY KEY AUTOINCREMENT, frm TEXT NOT NULL, dest TEXT NOT NULL, text TEXT NOT NULL, at REAL NOT NULL);
 CREATE INDEX IF NOT EXISTS chat_pair ON chat (frm, dest, id);
@@ -31,7 +33,7 @@ class Chat:
         self._sent: dict[str, list[float]] = {}   # sender -> the times of their messages in the last minute
 
     def send(self, frm: str, dest: str, text: str, now: float | None = None) -> dict:
-        text = " ".join(str(text or "").split())   # one line: the box sends on Enter
+        text = " ".join(clean_text(text).split())   # one line: the box sends on Enter
         if not text:
             raise ChatError("an empty message")
         if len(text) > MAX_LEN:

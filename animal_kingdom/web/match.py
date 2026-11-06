@@ -220,6 +220,8 @@ class Match:
         self.on_game_end = None          # callback(match, log record); the server saves human games
         self.on_match_end = None         # callback(match); the server adds it to the players' histories
         self.rematches = 0               # a rematch starts a new series in the same match
+        self.rematch_offer: Optional[str] = None     # a friend match: the seat that offered a rematch, until the other answers
+        self.rematch_declined: Optional[str] = None  # ...and the seat that declined it
         self.takeover = False            # a game played on from a logged position (start_from): neither logged nor rated
         self.last_log: Optional[dict] = None   # the last finished game (game_log), for its replay
         self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
@@ -346,9 +348,33 @@ class Match:
         self._start_game()
         self.version += 1
 
+    def friendly(self) -> bool:
+        """Two people, unranked: a rematch is an offer the other accepts or declines (Martin, 2026-11-05, as on chess.com)."""
+        b = self.seats.get("B")
+        return b is not None and not b.is_bot and not self.seats["A"].is_bot and not (self.seats["A"].ladder and b.ladder)
+
+    def offer_rematch(self, s: str) -> None:
+        """A seat's Rematch: against a bot it starts one; in a friend match it offers one, and the other's Rematch accepts."""
+        if self.phase != "match_over":
+            raise EngineError("the match is still on")
+        if not self.friendly() or self.rematch_offer == other_player(s):
+            self.rematch()
+        elif self.rematch_declined is not None:
+            raise EngineError("the rematch was declined")
+        elif self.rematch_offer is None:
+            self.rematch_offer = s
+            self.version += 1
+
+    def decline_rematch(self, s: str) -> None:
+        if self.phase != "match_over" or self.rematch_offer != other_player(s):
+            raise EngineError("no rematch to decline")
+        self.rematch_offer, self.rematch_declined = None, s
+        self.version += 1
+
     def rematch(self) -> None:
         if self.phase != "match_over":
             raise EngineError("the match is still on")
+        self.rematch_offer = self.rematch_declined = None
         self.last_game = self.results[-1]
         self.results = []
         self.state = None
@@ -497,6 +523,7 @@ class Match:
             raise EngineError("no game to concede")
         self._clock_update()
         self._check_end(Result(other_player(s), "concede"))
+        self.version += 1
 
     def _check_end(self, result: Optional[Result] = None) -> None:
         result = result or rules.is_terminal(self.state)
@@ -537,6 +564,10 @@ class Match:
         state = self.state.clone()
         return self.bots[s].choose(state.view_for(s), rules.legal_actions(state), state)
 
+    def fresh_bot(self, s: str) -> None:
+        """A new bot for seat `s`, when its search was abandoned: the stuck thread keeps the old one."""
+        self.bots[s] = bot_for(self.seats[s].bot, self.rng.randrange(1 << 30))
+
     def fallback_move(self):
         """A legal move when the bot's own choice failed: the Easy bot's, else the first legal action."""
         s = self.to_act()
@@ -556,7 +587,7 @@ class Match:
                 "actions": self.actions, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
                 "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
-                "takeover": self.takeover,
+                "takeover": self.takeover, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history],
                 "events": self.events, "seq": self.seq}
@@ -570,6 +601,7 @@ class Match:
         m.actions, m.action_times = d["actions"], d["action_times"]
         m.started_at, m.schedule, m.version = d["started_at"], d["schedule"], d["version"] + 1
         m.rematches = d.get("rematches", 0)
+        m.rematch_offer, m.rematch_declined = d.get("rematch_offer"), d.get("rematch_declined")
         m.last_game = d.get("last_game")
         m.last_log = d.get("last_log")
         m.takeover = d.get("takeover", False)
@@ -602,6 +634,8 @@ class Match:
             "game": None,
             "ranked": bool(self.seats["A"].ladder and self.seats.get("B") and self.seats["B"].ladder),
         }
+        if self.rematch_offer or self.rematch_declined:   # a friend match: who offered a rematch, or declined one
+            v["rematch"] = {"offer": self.rematch_offer, "declined": self.rematch_declined}
         if getattr(self, "rating_change", None) and s in self.rating_change:   # a ranked match just rated: your before and after
             v["rating"] = self.rating_change[s]
         if getattr(self, "tier_change", None) and s in self.tier_change:   # ...and what it did to your league and stars
