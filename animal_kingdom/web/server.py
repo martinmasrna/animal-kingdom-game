@@ -33,6 +33,7 @@ from . import events, feedback, guard, news
 from .chat import Chat, ChatError
 from .friends import FriendError, Friends
 from . import ladder as ranking
+from . import tiers as tiers_mod
 from . import league as league_mod
 from . import meta as meta_mod
 from . import oauth
@@ -368,6 +369,19 @@ def profile_view(p: dict) -> dict:
             "rating": ladder.get(p["id"]).shown() if ladder else None, **standing(p["id"])}
 
 
+def league_of(pid: str) -> dict | None:
+    """A person's league as the client shows it (web/tiers.py): its name, the stars as a count, the checkpoint, the
+    streak; in the top league the rating instead of stars (docs/ranked-leagues.md)."""
+    if not tiers:
+        return None
+    return tiers_mod.view(tiers.get(pid), ladder.get(pid).shown())
+
+
+def person_key(lid: str, r: ranking.Rating) -> float:
+    """Where a person sorts among the bots on the one leaderboard: by league and stars below the top, by rating in it."""
+    return tiers_mod.sort_key(tiers.get(lid), r.rating) if tiers else r.rating
+
+
 def pilot_for(band: str, deck: str) -> str:
     """Practice's bot (Martin, 2026-10-20): the player picks one of the five bots (ranking.BANDS) and a deck; the pilot is the
     one whose ladder rating with that deck sits nearest the band's middle. A deck without ladder rows gets the pilot by name."""
@@ -403,16 +417,18 @@ def bot_rows(table) -> list[tuple[str, ranking.Rating]]:
 
 
 def standing(pid: str) -> dict:
-    """Where you stand, for home's name piece: your place among the ranked (people and bots), or your placement games so far."""
+    """Where you stand, for home's name piece: your league (docs/ranked-leagues.md), and once you have played a rated game
+    your place on the leaderboard (people and bots, sorted as the leaderboard sorts them)."""
     if not ladder:
         return {}
     r = ladder.get(pid)
-    if r.provisional:
-        return {"placing": {"games": r.games, "of": ranking.PROVISIONAL}}
-    # your row's place on the leaderboard: the ranked people and the bot pairings above you
+    out = {"league": league_of(pid)} if tiers else {}
+    if r.games <= 0:
+        return out
     table = ladder.table()
-    above = sum(1 for lid, x in table if not lid.startswith("bot:") and not x.provisional and x.rating > r.rating)
-    return {"rank": 1 + above + sum(1 for _, x in bot_rows(table) if x.rating > r.rating)}
+    me_ = person_key(pid, r)
+    above = sum(1 for lid, x in table if not lid.startswith("bot:") and lid != pid and person_key(lid, x) > me_)
+    return {**out, "rank": 1 + above + sum(1 for _, x in bot_rows(table) if x.rating > me_)}
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord
@@ -640,6 +656,7 @@ async def send_feedback(req):
 RANKED_WAIT = 15            # seconds the queue waits for a person near your rating before giving you a bot
 waiting: list[dict] = []    # people in the ranked queue: {pid, name, deck, rating, since, fut}
 ladder: ranking.Ladder = None
+tiers: tiers_mod.Tiers = None   # each person's league and stars, beside the rating (web/tiers.py, docs/ranked-leagues.md)
 
 
 def _window(entry: dict, now: float) -> float:
@@ -647,10 +664,18 @@ def _window(entry: dict, now: float) -> float:
     return 200 + 20 * (now - entry["since"])
 
 
+def _meets(entry: dict, league: int | None, rating: float, now: float) -> bool:
+    """Whether a person in `league` at `rating` meets one waiting in the queue: the same league below the top; in the top
+    league (or before leagues) ratings within the window."""
+    if league is not None and entry.get("league") is not None and (league != tiers_mod.TOP or entry["league"] != tiers_mod.TOP):
+        return entry["league"] == league
+    return abs(entry["rating"] - rating) <= _window(entry, now)
+
+
 async def join_ranked(req):
-    """Join the ranked queue with a deck; the answer is your match ({id, token, seat}) once there is one: a person near
-    your rating if one is waiting or arrives within RANKED_WAIT seconds, else the nearest bot. Leaving the request leaves
-    the queue."""
+    """Join the ranked queue with a deck; the answer is your match ({id, token, seat}) once there is one: a person from
+    your league (in the top league, near your rating) if one is waiting or arrives within RANKED_WAIT seconds, else a bot
+    from your league's band (web/tiers.py; in the top league the nearest bot). Leaving the request leaves the queue."""
     p, body = me(req), await guard.body(req)
     guard.limit("ranked", p["id"])
     try:
@@ -658,8 +683,9 @@ async def join_ranked(req):
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
     r, now = ladder.get(p["id"]).rating, time.time()
-    for w in waiting:   # someone already waiting near enough: the match is theirs and yours
-        if w["pid"] != p["id"] and not w["fut"].done() and abs(w["rating"] - r) <= _window(w, now):
+    lg = tiers.get(p["id"]).league if tiers else None
+    for w in waiting:   # someone already waiting from your league (in the top league, near enough): theirs and yours
+        if w["pid"] != p["id"] and not w["fut"].done() and _meets(w, lg, r, now):
             waiting.remove(w)
             mid, ta, tb = hub.new_id(), secrets.token_urlsafe(12), secrets.token_urlsafe(12)
             match = Match(mid, Seat(ta, w["name"], deck=w["deck"], profile=w["pid"], ladder=w["pid"]))
@@ -667,7 +693,7 @@ async def join_ranked(req):
             _open(match)
             w["fut"].set_result({"id": mid, "token": ta, "seat": "A"})
             return web.json_response({"id": mid, "token": tb, "seat": "B"})
-    entry = {"pid": p["id"], "name": display(p), "deck": deck, "rating": r, "since": now,
+    entry = {"pid": p["id"], "name": display(p), "deck": deck, "rating": r, "league": lg, "since": now,
              "fut": asyncio.get_running_loop().create_future()}
     waiting[:] = [w for w in waiting if w["pid"] != p["id"]] + [entry]   # one place in the queue per person
     asyncio.get_running_loop().run_in_executor(None, discord.post, "events", discord.queue_text(display(p)))   # the Discord channel hears it: someone may queue too
@@ -684,7 +710,9 @@ async def join_ranked(req):
         return web.json_response(res if res else {"cancelled": True})
     recent = [h["opp_deck"] for h in profiles.history(p["id"]) if h.get("mode") == "ranked" and h["opp"].startswith("Bot (")][:ranking.RECENT_DECKS]
     slug = {name: s for s, name in DECK_NAMES.items()}
-    bid = ladder.nearest_bot(r, random, avoid={slug.get(d, d) for d in recent})   # never the deck of your last four bot games
+    avoid = {slug.get(d, d) for d in recent}   # never the deck of your last four bot games
+    bid = ladder.bot_in(*tiers_mod.band(lg), random, avoid) if lg and lg != tiers_mod.TOP else None
+    bid = bid or ladder.nearest_bot(r if not lg or lg == tiers_mod.TOP else tiers_mod.par(lg) + 50, random, avoid=avoid)
     level, bdeck = ranking.parse_bot(bid)
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
     match = Match(mid, Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"]))
@@ -710,6 +738,11 @@ def _open(match: Match) -> None:
     for seat in match.seats.values():
         if seat.ladder:
             seat.rating = ladder.get(seat.ladder).shown()
+            if tiers and not seat.ladder.startswith("bot:"):   # a person: their league; the number only in the top league
+                lg = league_of(seat.ladder)
+                seat.league = lg["name"]
+                if not lg["top"]:
+                    seat.rating = None
     match.on_game_end = save_game
     match.on_match_end = record_match
     hub.matches[match.id] = match
@@ -726,6 +759,15 @@ def rate_match(match: Match) -> None:
     win, lose = (a, b) if score["A"] > score["B"] else (b, a)
     before = {p: ladder.get(match.seats[p].ladder) for p in "AB"}
     ladder.result(win, lose)
+    # each person's league moves too (web/tiers.py); bots have no league
+    match.tier_change = {}
+    if tiers:
+        for p in "AB":
+            lid = match.seats[p].ladder
+            if lid.startswith("bot:"):
+                continue
+            ch = tiers.result(lid, lid == win)
+            match.tier_change[p] = {"line": ch.line(ladder.get(lid).shown()), **tiers_mod.view(ch.after, ladder.get(lid).shown())}
     match.rating_change = {p: {"before": before[p].shown(), "after": ladder.get(match.seats[p].ladder).shown(),
                                # the change between the numbers shown, so "1502 → 1490 (−12)" always adds up
                                "delta": round(ladder.get(match.seats[p].ladder).rating) - round(before[p].rating)} for p in "AB"}
@@ -748,9 +790,14 @@ async def leaderboard(req):
     p = profile_of(req)
     mine, asked = (set(friends.of(p["id"])), friends.asked(p["id"])) if p else (set(), set())
     table = ladder.table()
-    rows = [(r.rating, {"name": ladder_name(lid), "rating": r.shown(), "bot": False, "you": bool(p and lid == p["id"]),
-                        **({} if p and lid == p["id"] else {"id": lid, "friend": lid in mine, "asked": lid in asked})})   # whether you're friends or have asked
-            for lid, r in table if not lid.startswith("bot:") and not r.provisional]   # still placing: not ranked yet (as on Lichess)
+    # A person is listed from their first rated game, with their league; the number shows only in the top league
+    # (docs/ranked-leagues.md). Before leagues, a person still placing was left off (as on Lichess).
+    def person(lid, r):
+        lg = league_of(lid) if tiers else None
+        return {"name": ladder_name(lid), "rating": r.shown() if not lg or lg["top"] else None, "league": lg,
+                "bot": False, "you": bool(p and lid == p["id"]),
+                **({} if p and lid == p["id"] else {"id": lid, "friend": lid in mine, "asked": lid in asked})}   # whether you're friends or have asked
+    rows = [(person_key(lid, r), person(lid, r)) for lid, r in table if not lid.startswith("bot:") and (tiers or not r.provisional)]
     # The bots one row per pilot-and-deck pairing, each a player of its own (Martin, 2026-10-24; from 2026-10-02 to then the
     # bots were folded into one row per level, then per rung, to keep the board short).
     for lid, r in bot_rows(table):
@@ -759,7 +806,7 @@ async def leaderboard(req):
     rows = [row for _, row in sorted(rows, key=lambda x: -x[0])]
     me_ = ladder.get(p["id"]) if p else None
     placing = {"name": display(p), "rating": me_.shown(), "games": me_.games, "of": ranking.PROVISIONAL} \
-        if me_ and me_.provisional and me_.games else None
+        if me_ and me_.provisional and me_.games and not tiers else None
     return web.json_response({"rows": rows, "placing": placing})
 
 
@@ -1687,6 +1734,11 @@ def make_app() -> web.Application:
             log.info("meta: cards changed, %d lists count again from the new cards", len(stale))
         if ladder.apply_seed(Path(__file__).parent / "ladder_seed.json"):   # the bots' ratings from simulation (sim/ladder_seed.py)
             log.info("ladder: bots seeded from ladder_seed.json")
+        global tiers
+        tiers = tiers_mod.Tiers(profiles.db)
+        placed = tiers.migrate({lid: r for lid, r in ladder.table() if not lid.startswith("bot:")})
+        if placed:
+            log.info("leagues: %d rated profiles placed from their rating (docs/ranked-leagues.md, Migration)", placed)
         custom_decks.load()
         replay.backfill(profiles, LOG_DIR, REPLAY_DIR)
         hub.load()

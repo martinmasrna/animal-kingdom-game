@@ -233,6 +233,20 @@ class Ladder:
         fresh = [lid for lid, deck in five if deck not in avoid]
         return rng.choice(fresh or [lid for lid, _ in five])
 
+    def bot_in(self, lo: float, hi: float, rng, avoid=()) -> str | None:
+        """A bot for a ranked player whose league plays bots rated from `lo` up to `hi` (web/tiers.py band; Martin,
+        2026-11-05: you play opponents from your own league). As nearest_bot, minus `avoid` (the decks of the player's last
+        bot games) and the strongest pilot there first; None when the band holds no bot, and the caller falls back to
+        nearest_bot."""
+        rows = [(lid, r) for lid, r in self.bots().items() if parse_bot(lid)[1] in self.decks and not r.provisional
+                and lo <= r.rating < hi]
+        here = [(lid, r) for lid, r in rows if parse_bot(lid)[1] not in avoid] or rows
+        for level in reversed(LEVELS):     # expert, normal, easy
+            pick = [lid for lid, _ in here if parse_bot(lid)[0] == level]
+            if pick:
+                return rng.choice(pick)
+        return None
+
     def table(self) -> list[tuple[str, Rating]]:
         """Everyone who has a rating, people with at least one game, best first."""
         rows = self.db.execute("SELECT id, rating, rd, vol, games FROM ladder ORDER BY rating DESC").fetchall()
