@@ -709,8 +709,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191061
+      "note": "Martin 2026-11-06: \"Thorn is really really good for the Rhino\"; draft to live with",
+      "at": 1793968365,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[RHINOCEROS]",
+          "species": "Rhinoceros"
+        }
+      }
     },
     "effect": {
       "review": {
