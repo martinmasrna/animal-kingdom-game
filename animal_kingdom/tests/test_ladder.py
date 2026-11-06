@@ -2,7 +2,7 @@
 
 import pytest
 
-from animal_kingdom.web import ladder
+from animal_kingdom.web import ladder, tiers
 from animal_kingdom.web.ladder import Rating
 
 
@@ -48,11 +48,11 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
         async with TestClient(TestServer(server.make_app())) as c:
             a, b = [await (await c.post("/api/profile", json={})).json() for _ in range(2)]
             ha, hb = {"X-AK-Key": a["code"]}, {"X-AK-Key": b["code"]}
-            # alone: a bot near your rating, on the ladder
+            # alone: a bot from your league's band (a new person is in league 1: bots rated under 1100), on the ladder
             m = await (await c.post("/api/ranked", json={"deck": "cats"}, headers=ha)).json()
             match = server.hub.matches[m["id"]]
-            bot = match.seats["B"]   # a seeded bot within reach of a new player's 1500 (nearest_bot: among the five nearest decks)
-            assert bot.is_bot and bot.ladder.startswith("bot:") and abs(server.ladder.get(bot.ladder).rating - 1500) < 250
+            bot = match.seats["B"]
+            assert bot.is_bot and bot.ladder.startswith("bot:") and server.ladder.get(bot.ladder).rating < tiers.band(1)[1]
             assert match.seats["A"].ladder == a["profile"]["id"]
             # the match states both ratings as they stood going in, for the versus moment; an unrated match states none.
             # A bot states the rating of the pairing that plays: its own leaderboard row
@@ -60,7 +60,9 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             rung = ladder.rung_of(server.ladder.get(bot.ladder).rating)   # a bot is named by its rung, not its level
             assert bot.name.endswith(f"({rung} Bot)")
             row = next(r for r in (await (await c.get("/api/leaderboard", headers=ha)).json())["rows"] if r["name"] == bot.name and r["deck"] == bot.deck)
-            assert seats["A"]["rating"] == "1500?" and seats["B"]["rating"] == row["rating"] == server.ladder.get(bot.ladder).shown()
+            # a person below the top league states their league, not the number (docs/ranked-leagues.md); a bot its rating
+            assert "rating" not in seats["A"] and seats["A"]["league"] == "League 1"
+            assert seats["B"]["rating"] == row["rating"] == server.ladder.get(bot.ladder).shown() and "league" not in seats["B"]
             # two people at once: they meet each other
             ra, rb = await asyncio.gather(c.post("/api/ranked", json={"deck": "giants"}, headers=ha),
                                           c.post("/api/ranked", json={"deck": "den_rush"}, headers=hb))
@@ -68,18 +70,23 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             assert ma["id"] == mb["id"] and {ma["seat"], mb["seat"]} == {"A", "B"}
             pair = server.hub.matches[ma["id"]]
             assert not any(s.is_bot for s in pair.seats.values())
-            # a ranked result moves both ratings; the leaderboard shows the bots and the rated person
+            # a ranked result moves both ratings and both people's leagues; the leaderboard lists a person from their first
+            # rated game, with their league and no number (below the top league)
             pair.results = [{"winner": ma["seat"], "reason": "food", "turns": 9}]
             server.rate_match(pair)
+            assert server.ladder.get(a["profile"]["id"]).games == 1
+            won = pair.seats[ma["seat"]].ladder
+            assert pair.view(ma["seat"])["league"]["line"] == "+1 star: League 1, 1 of 3 stars"
             board = await (await c.get("/api/leaderboard", headers=ha)).json()
-            assert not any(r["you"] for r in board["rows"]), "placing: not ranked yet"
-            pl = board["placing"]
-            assert pl["rating"].endswith("?") and int(pl["rating"][:-1]) > 1500 and (pl["games"], pl["of"]) == (1, 10)
+            mine = next(r for r in board["rows"] if r["you"])
+            assert mine["league"]["name"] == "League 1" and mine["rating"] is None and board["placing"] is None
+            assert next(r for r in board["rows"] if r.get("id") == b["profile"]["id"])["league"]["stars"] == (1 if won == b["profile"]["id"] else 0)
             bots = [r for r in board["rows"] if r["bot"]]   # one row per pilot-and-deck pairing, best first
             assert len(bots) == len(ladder.LEVELS) * len(server.ladder.decks) and all(r["name"].endswith(" Bot)") for r in bots)
             assert [int(r["rating"]) for r in bots] == sorted((int(r["rating"]) for r in bots), reverse=True)
-            me = await (await c.get("/api/me", headers=ha)).json()   # home's name piece: placement progress, no rank yet
-            assert me["placing"] == {"games": 1, "of": 10} and "rank" not in me
+            assert all("league" not in r for r in bots), "bots have no league"
+            me = await (await c.get("/api/me", headers=ha)).json()   # home's name piece: the league, and a place on the board
+            assert me["league"]["name"] == "League 1" and me["rank"] >= 1
     asyncio.run(run())
 
 

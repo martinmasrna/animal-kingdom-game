@@ -112,7 +112,9 @@ class Seat:
     ready: bool = False
     profile: Optional[str] = None    # the player's profile id, when they have one
     ladder: Optional[str] = None     # on the ladder (a ranked match): a person's profile id, or a bot's ladder id
-    rating: Optional[str] = None     # a ranked match: the seat's rating as shown when it opened ("1781", "1500?")
+    rating: Optional[str] = None     # a ranked match: the seat's rating as shown when it opened ("1781", "1500?"); a person's
+                                     # only in the top league (docs/ranked-leagues.md)
+    league: Optional[str] = None     # a ranked match: a person's league when it opened ("League 5"); bots have none
 
     @property
     def is_bot(self) -> bool:
@@ -590,6 +592,7 @@ class Match:
             "id": self.id, "you": s, "phase": self.phase, "version": self.version, "takeover": self.takeover,
             # a seat's deck by name only for you or a bot: a person's deck name is theirs (their list is open, by rule)
             "seats": {p: {"name": seat.name, "bot": seat.bot, "ready": seat.ready, **({"rating": seat.rating} if seat.rating else {}),
+                          **({"league": seat.league} if seat.league else {}),
                           **({"deck": seat.deck, "deckName": DECK_NAMES.get(seat.deck, seat.deck)} if p == s or seat.is_bot else {})}
                       for p, seat in self.seats.items()},
             "results": [{k: r[k] for k in ("winner", "reason", "turns")} for r in self.results],
@@ -601,6 +604,8 @@ class Match:
         }
         if getattr(self, "rating_change", None) and s in self.rating_change:   # a ranked match just rated: your before and after
             v["rating"] = self.rating_change[s]
+        if getattr(self, "tier_change", None) and s in self.tier_change:   # ...and what it did to your league and stars
+            v["league"] = self.tier_change[s]
         if self.schedule:
             record = {}
             for r in self.results:

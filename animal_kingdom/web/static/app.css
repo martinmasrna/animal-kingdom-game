@@ -332,6 +332,8 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #f0e8da; font: 600 18px 'Fira Sans Condensed', sans-serif; }
 .lead .lr span:first-child { color: #9d917e; font-weight: 500; } .lead .lr b { text-align: right; font-weight: 700; }
 .lead .lr.bot { color: #a99f8e; } .lead .lr.bot b { font-weight: 600; }
+.lead .lr .nm small.lg { color: #9d917e; }   /* a person's stars beside their name (ranked leagues) */ .lead .lr b { white-space: nowrap; }
+.ladder .lstand { margin: 0 auto 10px; max-width: 760px; padding: 0 24px; box-sizing: border-box; font: 500 17px 'Fira Sans Condensed', sans-serif; color: #d8cfbf; }   /* your league, stars, checkpoint and streak */
 .lead .lr.you { box-shadow: inset 0 0 0 2px #cfc3ad, inset 0 1px 3px rgba(0,0,0,.6); }
 .lead .lr .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lead .lr .tg { font-style: normal; font-size: .72em; font-weight: 400; opacity: .45; margin-left: 2px; }
