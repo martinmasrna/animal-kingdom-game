@@ -7785,9 +7785,9 @@
           "species": "Deer"
         }
       },
-      "note": "Martin 2026-11-06: \"for the fawn, we can do Dapple sure\"; from the cloud pass legend; stage names still open",
+      "note": "Martin 2026-11-06: \"very very good already 8/10 at least, maybe 8.5/10\"; draft to live with",
       "by": "claude",
-      "at": 1793961236
+      "at": 1793963237
     },
     "rarity": {
       "review": {
@@ -7829,9 +7829,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-30: the fawn's arc, each stage handing you the next",
+      "note": "stage renamed, Martin 2026-11-06",
       "by": "claude",
-      "at": 1793388087
+      "at": 1793963237
     }
   },
   "young_stag": {
@@ -7841,9 +7841,9 @@
         "prev_note": "",
         "prev": ""
       },
-      "note": "Martin, 2026-10-30: the fawn's arc, each stage handing you the next",
+      "note": "stage renamed, Martin 2026-11-06",
       "by": "claude",
-      "at": 1793388087
+      "at": 1793963237
     },
     "rarity": {
       "review": {
@@ -7854,6 +7854,19 @@
       "note": "Martin, 2026-10-30: the Fawn's stages wear its legendary frame, as the Butterfly's do",
       "by": "claude",
       "at": 1793388269
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Young Stag",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-06: \"very very good already 8/10 at least, maybe 8.5/10\"; draft to live with",
+      "by": "claude",
+      "at": 1793963237
     }
   },
   "great_stag": {
@@ -7876,6 +7889,19 @@
       "note": "Martin, 2026-10-30: the Fawn's stages wear its legendary frame, as the Butterfly's do",
       "by": "claude",
       "at": 1793388269
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Great Stag",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-06: \"very very good already 8/10 at least, maybe 8.5/10\"; draft to live with",
+      "by": "claude",
+      "at": 1793963237
     }
   },
   "young_ant": {
