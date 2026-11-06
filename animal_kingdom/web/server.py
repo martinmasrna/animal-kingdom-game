@@ -16,6 +16,7 @@ import os
 import random
 import secrets
 import subprocess
+import threading
 import time
 import webbrowser
 from collections import Counter
@@ -65,6 +66,7 @@ REPLAY_DIR = Path(__file__).resolve().parents[2] / "results" / "replays"
 MATCH_DIR = Path(__file__).resolve().parents[2] / "results" / "web_matches"
 KEEP_FINISHED = 24 * 3600    # seconds a finished match is still reloaded after a restart
 FORGET_FINISHED = 600        # seconds a finished match, untouched and unwatched, stays in memory (its file stays; Hub.get reloads it)
+ARCHIVE_AFTER = 7 * 24 * 3600   # seconds untouched after which a match file moves to MATCH_DIR/archive at start, never reloaded (Martin, 2026-11-05)
 FORGET_IDLE = 3600           # the same for an unfinished one: REJOIN_WITHIN, after which nobody is taken back to it
 BOT_PAUSE = {"open": 0.6, "move": 0.4, "choice": 0.3}   # seconds: the bot's thinking beat, once the players have watched its last move
 BOT_WAIT_MAX = 6.0          # seconds a bot waits for a player's screen to play its last move out (a stalled client never stalls it)
@@ -101,6 +103,70 @@ def save_game(match: Match, record: dict) -> None:
 
 SEND_TIMEOUT = 5.0          # seconds a socket may take to accept one message before it is dropped (Hub._send)
 BOT_THINK_MAX = 20          # seconds a bot may think before the Easy bot's move is played for it (the Expert deepens for 8 s, then finishes the root in hand)
+
+
+BOT_THREADS = 4             # bot searches running at once, server-wide (the Expert takes a core each; the live machine has one)
+BOT_STUCK_MAX = 8           # searches abandoned past BOT_THINK_MAX and still running; beyond it a bot plays the fallback until some end
+
+
+class PoolFull(Exception):
+    """Too many abandoned searches still running: the move is the fallback's."""
+
+
+class BotPool:
+    """Bot searches off the event loop: at most `size` at once, and one at a time per person (the profile facing the bot),
+    so one person opening many Expert matches shares one search with nobody else's. Each runs in a daemon thread of its
+    own. A search past its timeout is abandoned: its slot and the person's turn go to the next, and the thread runs out
+    on its own (Python can't stop it); with `stuck_max` of those still running, no new search starts."""
+
+    def __init__(self, size: int = BOT_THREADS, stuck_max: int = BOT_STUCK_MAX):
+        self.size, self.stuck_max = size, stuck_max
+        self.sem: asyncio.Semaphore | None = None
+        self.locks: dict[str, asyncio.Lock] = {}
+        self.stuck: set[threading.Thread] = set()
+
+    def stuck_running(self) -> int:
+        self.stuck = {t for t in self.stuck if t.is_alive()}
+        return len(self.stuck)
+
+    async def run(self, key: str, fn, timeout: float):
+        if self.sem is None:
+            self.sem = asyncio.Semaphore(self.size)
+        lock = self.locks.setdefault(key, asyncio.Lock())
+        try:
+            async with lock, self.sem:
+                if self.stuck_running() >= self.stuck_max:
+                    raise PoolFull()
+                loop, fut = asyncio.get_running_loop(), None
+                fut = loop.create_future()
+
+                def done(result, error):
+                    if not fut.done():
+                        fut.set_exception(error) if error is not None else fut.set_result(result)
+
+                def work():
+                    try:
+                        result, error = fn(), None
+                    except BaseException as e:   # noqa: BLE001 — handed to the awaiting coroutine
+                        result, error = None, e
+                    try:
+                        loop.call_soon_threadsafe(done, result, error)
+                    except RuntimeError:          # the loop is gone (the server stopped)
+                        pass
+
+                t = threading.Thread(target=work, daemon=True, name=f"bot {key}")
+                t.start()
+                try:
+                    return await asyncio.wait_for(asyncio.shield(fut), timeout)
+                except asyncio.TimeoutError:
+                    self.stuck.add(t)
+                    raise
+        finally:
+            if not lock.locked() and not lock._waiters:   # noqa: SLF001 — drop idle locks so the table doesn't grow
+                self.locks.pop(key, None)
+
+
+bot_pool = BotPool()
 
 
 class Hub:
@@ -148,13 +214,25 @@ class Hub:
         self.touched[match.id] = time.time()
         return match
 
-    def load(self) -> None:
-        """Reload saved matches: every unfinished one, and finished ones from the last day."""
+    def load(self, now: float | None = None) -> None:
+        """Reload saved matches: every unfinished one, and finished ones from the last day. A file untouched for
+        ARCHIVE_AFTER (an abandoned lobby or bot game: nobody is taken back to one after the hour) moves to the archive
+        folder instead, so the folder and the start stop growing with every match ever made."""
         if not MATCH_DIR.is_dir():
             return
+        now = time.time() if now is None else now
+        archived = 0
         for path in MATCH_DIR.glob("*.json"):
+            try:
+                if now - path.stat().st_mtime > ARCHIVE_AFTER:
+                    (MATCH_DIR / "archive").mkdir(exist_ok=True)
+                    path.replace(MATCH_DIR / "archive" / path.name)
+                    archived += 1
+                    continue
+            except OSError:
+                log.exception("could not archive %s", path.name)
             self._reload(path)
-        log.info("reloaded %d saved matches", len(self.matches))
+        log.info("reloaded %d saved matches, archived %d", len(self.matches), archived)
 
     def get(self, mid: str) -> Match | None:
         """The match with this id: in memory, or reloaded from its file when forget() let it go."""
@@ -281,10 +359,15 @@ class Hub:
             while match.hold:                 # the tutorial's coach is talking: the opponent waits for its Next (the client
                 await asyncio.sleep(0.1)      # lets go only once what Next set off has played)
             version = match.version
+            person = next((x.profile for x in match.seats.values() if not x.is_bot and x.profile), None)
             try:
-                action = await asyncio.wait_for(asyncio.to_thread(match.bot_move), BOT_THINK_MAX)
+                action = await bot_pool.run(person or f"match {match.id}", match.bot_move, BOT_THINK_MAX)
             except asyncio.TimeoutError:   # never a hanging opponent (feedback 2026-10-01: an Expert move took 4 minutes on a throttled CPU)
-                log.warning("bot over %ss in match %s; playing a fallback move", BOT_THINK_MAX, match.id)
+                log.warning("bot over %ss in match %s; playing a fallback move, and a fresh bot from here", BOT_THINK_MAX, match.id)
+                match.fresh_bot(s)         # the abandoned search still holds the old one
+                action = match.fallback_move()
+            except PoolFull:
+                log.error("%d abandoned bot searches still running; match %s plays a fallback move", bot_pool.stuck_running(), match.id)
                 action = match.fallback_move()
             except Exception:   # nor a frozen match when a bot fails: a plain legal move instead
                 log.exception("bot failed in match %s; playing a fallback move", match.id)
@@ -435,9 +518,22 @@ def standing(pid: str) -> dict:
 flow = oauth.Flow()
 
 
+def base_url(req) -> str:
+    """The site's own address for absolute links: AK_BASE_URL, else on Fly the app's own name, never the request's Host
+    (a client sets that); only a local server takes it from the request."""
+    if os.environ.get("AK_BASE_URL"):
+        return os.environ["AK_BASE_URL"].rstrip("/")
+    if guard.on_fly():
+        return f"https://{os.environ['FLY_APP_NAME']}.fly.dev"
+    return f"{req.headers.get('X-Forwarded-Proto', req.scheme)}://{req.host}"
+
+
 def callback_url(req, provider: str) -> str:
-    base = os.environ.get("AK_BASE_URL") or f"{req.headers.get('X-Forwarded-Proto', req.scheme)}://{req.host}"
+    base = base_url(req)
     return f"{base}/auth/{provider}/callback"
+
+
+SIGNIN_COOKIE = "ak_signin"   # the sign-in's `state`, in the browser that started it: the callback must come back with it
 
 
 async def auth_start(req):
@@ -446,7 +542,12 @@ async def auth_start(req):
         url = flow.start(provider, player and player["id"], callback_url(req, provider))
     except oauth.OAuthError as e:
         raise web.HTTPBadRequest(text=str(e))
-    return web.json_response({"url": url})
+    resp = web.json_response({"url": url})
+    # Tied to this browser, so nobody can start a sign-in from their own guest and have someone else finish it (their
+    # Google account would land on the attacker's guest). Lax: sent on the provider's top-level redirect back.
+    resp.set_cookie(SIGNIN_COOKIE, oauth.URL(url).query.get("state", ""), max_age=int(oauth.PENDING_TTL), path="/auth/",
+                    httponly=True, samesite="Lax", secure=req.headers.get("X-Forwarded-Proto", req.scheme) == "https")
+    return resp
 
 
 async def auth_callback(req):
@@ -454,13 +555,18 @@ async def auth_callback(req):
     try:
         if "code" not in req.query:
             raise oauth.OAuthError(req.query.get("error", "sign-in cancelled"))
-        guest = flow.claim(provider, req.query.get("state", ""))
+        state = req.query.get("state", "")
+        if not state or not secrets.compare_digest(state.encode(), req.cookies.get(SIGNIN_COOKIE, "").encode()):
+            raise oauth.OAuthError("the sign-in wasn't started in this browser")
+        guest = flow.claim(provider, state)
         subject, label = await oauth.identify(provider, req.query["code"], callback_url(req, provider))
         p = profiles.sign_in(provider, subject, label, guest)
-        raise web.HTTPFound(f"/#/auth/{flow.hand_off(profiles.new_session(p['id']))}")
+        redirect = web.HTTPFound(f"/#/auth/{flow.hand_off(profiles.new_session(p['id']))}")
     except oauth.OAuthError as e:
         log.info("sign-in with %s failed: %s", provider, e)
-        raise web.HTTPFound("/#/auth/failed")
+        redirect = web.HTTPFound("/#/auth/failed")
+    redirect.del_cookie(SIGNIN_COOKIE, path="/auth/")
+    raise redirect
 
 
 async def auth_redeem(req):
@@ -817,7 +923,7 @@ meta: meta_mod.Meta = None          # the Meta tab's sums over every game's card
 
 def league_auth(req) -> None:
     k = league_mod.key()
-    if not k or req.headers.get("X-AK-League-Key") != k:
+    if not k or not secrets.compare_digest(req.headers.get("X-AK-League-Key", "").encode(), k.encode()):
         raise web.HTTPForbidden(text="the league key")
 
 
@@ -1461,6 +1567,8 @@ async def create_match(req):
                  if mirror or (d != deck and d not in skip and sorted(load_premade_deck(d)) != mine)]
         if not field:
             raise web.HTTPBadRequest(text="empty gauntlet")
+        if level == "expert" and player is None:
+            raise web.HTTPUnauthorized(text="the Expert needs a profile")
         match.join(Seat(secrets.token_urlsafe(12), f"{ranking.PILOT_BAND[level]} Bot", bot=level, deck=field[0]))
         if mirror:
             match.make_gauntlet(field, games, mirror=True)
@@ -1479,6 +1587,8 @@ async def create_match(req):
             level = pilot_for(level, bdeck)          # one of the five bots, as on the ladder: the pilot follows the band
         if level not in BOT_LEVELS or bdeck not in {*PREMADE_DECKS, *TEST_BOT_DECKS}:
             raise web.HTTPBadRequest(text="bad bot")
+        if level == "expert" and player is None:    # an Expert move takes a core for up to 8 s: only for a profile (Martin, 2026-11-05)
+            raise web.HTTPUnauthorized(text="the Expert needs a profile")
         match.join(Seat(secrets.token_urlsafe(12), bot_seat_name(level, bdeck), bot=level, deck=bdeck))
     else:
         match.version += 1
@@ -1627,7 +1737,9 @@ async def socket(req):
                 elif kind == "concede":
                     match.concede(seat)
                 elif kind == "rematch":
-                    match.rematch()
+                    match.offer_rematch(seat)
+                elif kind == "rematch_decline":
+                    match.decline_rematch(seat)
                 else:
                     raise EngineError(f"unknown message {str(kind)[:40]!r}")
             except (EngineError, KeyError, ValueError, TypeError, AttributeError, OverflowError) as e:
@@ -1759,6 +1871,7 @@ async def _revalidate(request: web.Request, response: web.StreamResponse) -> Non
     """Make the browser revalidate the client on every load (a 304 when unchanged), so an edit shows on reload."""
     if request.path in ("/", "/privacy") or request.path.startswith("/static/"):
         response.headers["Cache-Control"] = "no-cache"
+    response.headers["Server"] = "animal-kingdom"   # not aiohttp's and Python's versions (aiohttp only sets one when none is)
 
 
 def main(argv=None) -> None:

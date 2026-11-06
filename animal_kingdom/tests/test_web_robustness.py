@@ -43,7 +43,9 @@ def test_a_bot_that_always_fails_still_plays_the_match_to_its_end(quiet, monkeyp
 
     async def body():
         async with TestClient(TestServer(server.make_app())) as c:
-            m = await (await c.post("/api/match", json={"deck": "cats", "bot": {"level": "expert", "deck": "cats"}})).json()
+            p = await (await c.post("/api/profile", json={})).json()
+            m = await (await c.post("/api/match", json={"deck": "cats", "bot": {"level": "expert", "deck": "cats"}},
+                                    headers={"X-AK-Key": p["code"]})).json()
             match = server.hub.matches[m["id"]]
             server.hub.kick_bot(match)
             await _play_to_the_end(match, "A", random.Random(3), timeout=60)

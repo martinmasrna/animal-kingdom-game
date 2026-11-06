@@ -1737,10 +1737,16 @@ function drawEnd() {
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
     const won = S[you] > S[them], series = V.results.length > 1;
+    // a friend match: a Rematch is an offer the other player accepts or declines (Martin, 2026-11-05, as on chess.com)
+    const rm = V.rematch || {}, rmLine = rm.offer === them ? '<div class="how">Your opponent wants a rematch.</div>'
+      : rm.offer === you ? '<div class="how">Rematch offered.</div>' : rm.declined === them ? '<div class="how">Your opponent declined the rematch.</div>' : '';
+    const rmBtns = rm.offer === them ? '<button class="slab" id="decline">Decline</button><button class="play" id="rematch">Rematch</button>'
+      : rm.offer === you || rm.declined ? '' : '<button class="play" id="rematch">Rematch</button>';
     ov.innerHTML = `<div class="endbox">${series ? `<div class="res ${won ? 'A' : 'B'}">${won ? 'Match won' : 'Match lost'}</div><div class="how">${res[1]} in game ${V.results.length} · ${how}</div>${score}`
       : `<div class="res ${res[0]}">${res[1]}</div>${howLine}`}
-      <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="rematch">Rematch</button></div></div>`;
-    document.getElementById('rematch').onclick = () => send({ t: 'rematch' });
+      ${rmLine}<div class="btns"><a class="slab" href="#/">Menu</a>${peek}${rmBtns}</div></div>`;
+    const rb = document.getElementById('rematch'); if (rb) rb.onclick = () => send({ t: 'rematch' });
+    const db = document.getElementById('decline'); if (db) db.onclick = () => send({ t: 'rematch_decline' });
   }
   const pk = document.getElementById('peek'); if (pk) pk.onclick = () => { ui.peek = true; drawGame(); };   // a lesson has none
   ov.classList.toggle('won', w === you); ov.classList.toggle('lost', w !== null && w !== you);   // the board behind: lit for a win, dusk for a loss
