@@ -1,8 +1,8 @@
 # Server hardening: status
 
-Branch `server/hardening` from `main` (70dc14e). Scope: the web server's load limits, its security and its robustness. Nothing here changes how the game plays, the bots' strength, ratings or cards. Nothing is deployed.
+Branch `server/hardening`, up to date with `main` and `ranked/leagues` (2026-11-06). Scope: the web server's load limits, its security and its robustness. Nothing here changes how the game plays, the bots' strength, ratings or cards. Nothing is deployed.
 
-Checks on the branch (last run at its tip): the Python fast tier passes but for the three `test_deck_docs.py` card tables, which fail on `main` too (the Dockerfile leaves that file out). The web client's fast suite passes but for 12 tests that fail the same way on `main` on this machine (no `sqlite3` command line tool for `news.test.mjs`; the replay, decklist-hover and hover-label tests; one collection filter test).
+Phase 4 holds what Martin approved on 2026-11-05 and is built on the branch; the staging checks at its end are the only thing left before it merges.
 
 ## Phase 1, load: done
 
@@ -74,7 +74,7 @@ Every route in `server.py` and every socket message was tried with wrong types, 
 | Saved decks | card ids of any length, `true` as a count | ids over 40 characters and non-integer counts refused |
 | Sign-in keys in the log | the presence socket's URL carries the permanent sign-in code (`?key=`), and aiohttp's access log printed it on every connect; seat tokens too | `key=` and `token=` values blanked in the access log |
 
-The limits exempt the server's own machine when it is not on Fly (`FLY_APP_NAME` unset), so `./play`, the tests and the load test run as before. On Fly they key on `Fly-Client-IP`. **To check once on staging**: that Fly's proxy sets that header itself and overwrites one a client sends (Fly's documentation describes it as the address the proxy accepted the connection from). If it passed a client's value through, the per-address limits could be dodged.
+The limits exempt the server's own machine when it is not on Fly (`FLY_APP_NAME` unset), so `./play`, the tests and the load test run as before. On Fly they key on `Fly-Client-IP`; off Fly the header is ignored and the connection's own address counts (`guard.client_ip`). On Fly every request reaches the machine through Fly's proxy, so the one open question is whether the proxy overwrites a `Fly-Client-IP` a client sends: a staging check (Phase 4).
 
 ### Checked and sound
 
@@ -84,19 +84,9 @@ The limits exempt the server's own machine when it is not on Fly (`FLY_APP_NAME`
 - The client escapes every string another player controls (names, deck names, chat; covers go through `hasArt`).
 - Error texts name the problem, never a path, a query or a traceback; the 500 page is aiohttp's generic one.
 
-### Open, by severity
+### Open
 
-| Severity | Finding | Recommendation |
-|---|---|---|
-| High | **Free Expert compute.** Anyone can open practice matches against the Expert (no profile needed), and each Expert move takes a core for up to 8 s. The live machine has one core. Nothing caps how many bot searches one person or address runs at once (Phase 1 has what that does to everyone else). | Cap concurrent bot searches per profile and per address (one or two), and require a profile to make a match. Longer term: bots in a worker process or machine of their own. |
-| Medium | **Sign-in CSRF.** The OAuth `state` is not tied to the browser that started it. An attacker can start a Google sign-in from their own guest profile and get a victim to finish it: the victim's Google account is then linked to the attacker's guest, whose sign-in code the attacker still holds. | A short-lived cookie set at `/api/auth/{provider}` and required at the callback. Needs a real provider to test, so not done here. |
-| Medium | **Disk that only grows.** `results/web_matches/` keeps every match file forever, and every unfinished one (abandoned lobbies and bot games) is reloaded and its bot kicked at each start; each new custom deck name adds a slug to `results/web_decks.json` (rewritten whole each time) and to memory. Rate limits slow this; nothing bounds it. | Move match files untouched for weeks to an archive folder instead of reloading them at each start (Martin's call: what "restarts keep matches" means for one abandoned a month ago); key custom deck slugs by the list alone. (Memory is fixed, Phase 3.) |
-| Medium | **A stuck bot search holds a thread for good.** Past `BOT_THINK_MAX` the match plays a fallback move and goes on (tested), but the thread keeps searching. Python's default pool has `cores + 4` threads (5 on the live machine); five searches that never end leave every bot in every match waiting 20 s a move and playing the fallback until a restart, and the stuck threads delay shutdown. The bot's next move also runs on the bot object the stuck thread still holds. | Bot moves in a pool of their own, or in a process that can be killed; a fresh bot object after a timeout. |
-| Low | `POST /api/match` works without a profile (the old guest path; the client always has one). | Require `X-AK-Key`. |
-| Low | Either seat can start a rematch alone in a friend match. | A taste call. |
-| Low | The `Server` header names the aiohttp and Python versions. | Drop it in `_revalidate`. |
-| Low | `callback_url` trusts the Host header when `AK_BASE_URL` is unset. Providers check redirect URIs against their registered list, so the harm is a failed sign-in. | Set `AK_BASE_URL` on Fly. |
-| Low | The league key is compared with `!=`. | `secrets.compare_digest`. |
+Every finding of this phase is fixed (Phase 4) but two that only a real deploy can check, listed there. Still unbounded: each new custom deck name adds a slug to `results/web_decks.json` (rewritten whole each time) and to memory; the rate limits slow it. The fix is keying custom deck slugs by the list alone.
 
 ### What reaches the disk from a client
 
@@ -114,3 +104,22 @@ The profiles database (names, decks, chat, feedback with its view, client events
 | The server restarting mid-match | holds: every change is saved atomically and every unfinished match reloaded with its seat tokens; same position, played to the end | `test_a_restart_in_the_middle_of_a_game_keeps_the_match`; on a real process, `tools/restartcheck.py` (SIGKILL and SIGTERM, on `main` and on this branch: back up in 0.5 s, both matches at the same position, played out, no logged error) |
 
 What a restart loses: the ranked queue and standing challenges (players search again), the rate-limit counters, the bot's memory between moves (continuation plans, RNG streams: its next moves may differ, its strength doesn't), and the clock's time while the server was down (given to no one). A reloaded match records its `game_start` event again at each restart (`hub.noted` is not saved), a small double count in the funnel.
+
+## Phase 4, what Martin approved (2026-11-05): built
+
+| What | Now | Test |
+|---|---|---|
+| Old match files | At start, a match file untouched for 7 days moves to `results/web_matches/archive/` and is never reloaded (`ARCHIVE_AFTER`). An active match is saved on every change, so a restart keeps it | `test_web_hardening.py::test_a_match_file_untouched_for_a_week_is_archived_at_start_and_not_reloaded` |
+| A friend's rematch | An offer (Martin: "the same way it's done on chess.com"): Rematch shows the other player "Your opponent wants a rematch." with Decline and Rematch; the one who offered sees "Rematch offered."; a decline shows "Your opponent declined the rematch." and leaves Menu. A rematch against a bot starts at once, as before; ranked has none. Survives a restart (`Match.rematch_offer`, `rematch_declined`) | `test_a_friend_match_rematch_is_an_offer_the_other_player_accepts`, `test_a_declined_rematch_stays_declined`, `test_a_rematch_against_a_bot_starts_at_once`, `web/test/rematch.test.mjs` |
+| The Expert's compute | An Expert match (practice or gauntlet) needs a profile (401 without). Bot searches run in `BotPool`: at most `BOT_THREADS` (4) at once server-wide and one at a time per person (the profile facing the bot; a bot-only match counts as its own), so one person opening many Expert matches gets one search, not many | `test_the_expert_needs_a_profile`, `test_one_bot_search_at_a_time_per_person_and_a_bounded_number_in_all`, `test_a_person_never_runs_two_searches_at_once` |
+| A stuck search | Each search runs in a daemon thread of its own. Past `BOT_THINK_MAX` it is abandoned: its slot goes to the next search, the match plays the fallback move and gets a fresh bot (the stuck thread keeps the old one). With `BOT_STUCK_MAX` (8) abandoned searches still running, no new one starts and bots play the fallback until some end; daemon threads never hold up a shutdown | `test_a_stuck_search_is_abandoned_its_slot_freed_and_too_many_stop_new_searches`, `test_a_bot_whose_search_was_abandoned_gets_a_fresh_bot` |
+| Sign-in CSRF | `/api/auth/{provider}` sets an `ak_signin` cookie holding the sign-in's `state` (HttpOnly, SameSite=Lax, Secure over https, 10 minutes, path `/auth/`); the callback refuses a `state` without the matching cookie and clears it | `test_a_sign_in_callback_must_come_back_to_the_browser_that_started_it` (with a stand-in provider) |
+| The Server header | `animal-kingdom`, no versions | `test_the_server_header_names_no_versions` |
+| Absolute links | `base_url`: `AK_BASE_URL`, else on Fly `https://<FLY_APP_NAME>.fly.dev`, never the request's Host; a local server alone takes it from the request | `test_absolute_links_never_come_from_the_request_host` |
+| The league key | `secrets.compare_digest` | `test_the_league_key_is_checked_in_constant_time` |
+
+**To check on staging before this merges** (nothing local can):
+
+1. Sign in with Google and with Discord, from a guest: both land signed in (the cookie comes back on the provider's redirect). A sign-in link opened in another browser fails to `#/auth/failed`.
+2. Past the profile limit in `guard.LIMITS`, `curl -s -X POST -H "Fly-Client-IP: 10.0.0.$i" https://animal-kingdom-staging.fly.dev/api/profile -d '{}'` with a new address each time: if it still answers 429, the proxy overwrote the header and the per-address limits hold.
+3. A friend match played to its end on two devices: the offer, the decline, the accept.
