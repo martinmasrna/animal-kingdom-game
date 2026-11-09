@@ -1944,8 +1944,8 @@ def roar_condition(state, player, card_id, unit=None):
         "soldier_ant": lambda: others("Colony") + 1 >= colony_min,
         "nurse_bee": lambda: others("Colony") + 1 >= colony_min,
         "hammerhead": lambda: _lost_this_turn(state, player) >= 1,
-        "hare": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
-        "rat": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
+        "hare": lambda: hand_after() == 0,
+        "rat": lambda: hand_after() == 0,
         "macaque": lambda: hand_after() >= cfg.macaque_hand_min,
         "gorilla": lambda: strength() >= cfg.gorilla_min,
         "fox": lambda: bool(state.turn_flags.get("any_roamed")),
@@ -2462,7 +2462,7 @@ def _adjacent_enemy_unit_crossroads(state, unit, cr, *, chosen=True):
 
 
 def _rat_place(state, unit, cr):
-    """Roar: if you played 3 or more animals this turn, remove an adjacent enemy (the swarm; Hare's condition)."""
+    """Roar: if your hand is empty, remove an adjacent enemy (Hare's condition)."""
     _push_remove_choice(state, unit.owner, "rat", _adjacent_enemy_targets(state, unit, cr))
 
 

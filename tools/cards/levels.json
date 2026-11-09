@@ -2177,9 +2177,14 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-15, after his Canines gauntlet: buff to 2 cards.",
+      "note": "Martin, 2026-11-09: Rat and Hare condition is now 'if your hand is empty'",
       "by": "claude",
-      "at": 1792089833
+      "at": 1794257711,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15, after his Canines gauntlet: buff to 2 cards.",
+        "prev": "Flee. Roar: if you played 3 or more animals this turn, draw 2 cards."
+      }
     },
     "tag": {
       "review": {
@@ -3863,9 +3868,9 @@
         "prev_note": "",
         "prev": "Roar: remove an adjacent enemy, then discard a random card."
       },
-      "note": "Martin, 2026-10-22: the swarm; Den Rush's own condition (Hare's) replaces the random discard, so only the swarm deck gets any-size removal at common",
+      "note": "Martin, 2026-11-09: Rat and Hare condition is now 'if your hand is empty'",
       "by": "claude",
-      "at": 1792669373
+      "at": 1794257711
     },
     "strength": {
       "review": {
@@ -7603,9 +7608,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793295830
+      "at": 1794257711
     },
     "art": {
       "review": {
