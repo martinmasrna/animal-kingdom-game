@@ -2067,7 +2067,7 @@
     },
     {
       "id": "rhinoceros_legend",
-      "name": "[RHINOCEROS]",
+      "name": "Thorn",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [],
@@ -2096,7 +2096,7 @@
     },
     {
       "id": "sperm_whale_legend",
-      "name": "[SPERM WHALE]",
+      "name": "Borvald",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [],
@@ -3115,7 +3115,7 @@
       "id": "baby_fox",
       "name": "Poppy",
       "status": "token",
-      "rarity": "common",
+      "rarity": "legendary",
       "tags": [
         "Canine"
       ],
@@ -3127,7 +3127,7 @@
       "id": "baby_fox_2",
       "name": "Rusty",
       "status": "token",
-      "rarity": "common",
+      "rarity": "legendary",
       "tags": [
         "Canine"
       ],
@@ -3900,7 +3900,7 @@
     },
     {
       "id": "elephant_legend",
-      "name": "[ELEPHANT]",
+      "name": "Hollow",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [],
@@ -3944,7 +3944,7 @@
     },
     {
       "id": "deer_legend",
-      "name": "[DEER]",
+      "name": "Denae",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -4076,44 +4076,45 @@
     },
     {
       "id": "deer_legend_2",
-      "name": "[FAWN]",
+      "name": "Elari",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
       ],
       "base_strength": 2,
-      "text": "Flee. Roar: add a Young Stag to your hand.",
+      "text": "Flee. Roar: add Elaren to your hand.",
       "species": "Deer",
       "habitat": "Forest",
-      "keywords": [
-        "Flee"
-      ],
       "related": [
         "young_stag",
         "great_stag"
+      ],
+      "keywords": [
+        "Flee"
       ]
     },
     {
       "id": "young_stag",
-      "name": "Young Stag",
+      "name": "Elaren",
       "status": "token",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Flee. Roar: add a Great Stag to your hand.",
-      "keywords": [
-        "Flee"
-      ],
+      "text": "Flee. Roar: add Elarion to your hand.",
       "related": [
         "great_stag"
+      ],
+      "species": "",
+      "keywords": [
+        "Flee"
       ]
     },
     {
       "id": "great_stag",
-      "name": "Great Stag",
+      "name": "Elarion",
       "status": "token",
       "rarity": "legendary",
       "tags": [
@@ -4121,7 +4122,8 @@
       ],
       "base_strength": 8,
       "text": "Roar: return every adjacent enemy weaker than this to its owner's hand.",
-      "keywords": []
+      "keywords": [],
+      "species": ""
     }
   ]
 }

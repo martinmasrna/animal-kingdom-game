@@ -709,8 +709,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191061
+      "note": "Martin 2026-11-06: \"Thorn is really really good for the Rhino\"; draft to live with",
+      "at": 1793968365,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[RHINOCEROS]",
+          "species": "Rhinoceros"
+        }
+      }
     },
     "effect": {
       "review": {
@@ -2973,9 +2981,17 @@
       "at": 1793452272
     },
     "animal": {
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-11-05: \"Borvald is the best of these\"; draft to live with, may iterate later",
       "by": "claude",
-      "at": 1792191061
+      "at": 1793883670,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[SPERM WHALE]",
+          "species": "Sperm Whale"
+        }
+      }
     },
     "strength": {
       "review": {
@@ -3506,6 +3522,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: \"they should be gold yeah\"",
+      "by": "claude",
+      "at": 1793883603
     }
   },
   "porcupine": {
@@ -3964,6 +3990,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-11-05: \"they should be gold yeah\"",
+      "by": "claude",
+      "at": 1793883603
     }
   },
   "sardine": {
@@ -4971,10 +5007,9 @@
         "prev_lv": "empty",
         "prev_note": ""
       },
-      "lv": "problem",
+      "lv": "draft",
       "by": "claude",
-      "at": 1792201507,
-      "note": "Placeholder (Martin, 2026-10-17): the thrashing idea is right, execution 'almost'; revisit."
+      "at": 1793887503
     },
     "crop": {
       "review": {
@@ -4983,7 +5018,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792201506
+      "at": 1793887526
     }
   },
   "cockroach": {
@@ -5332,14 +5367,22 @@
       "at": 1792191132
     },
     "art": {
-      "lv": "problem",
-      "by": "martin",
-      "at": 1792657159
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793887503,
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": ""
+      }
     },
     "crop": {
-      "lv": "problem",
-      "by": "martin",
-      "at": 1792657160
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793887526,
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": ""
+      }
     },
     "rarity": {
       "lv": "draft",
@@ -6915,9 +6958,9 @@
           "species": "Elephant"
         }
       },
-      "note": "into the collection",
+      "note": "Martin 2026-11-06: \"we can try Hollow I guess\"; draft to live with",
       "by": "claude",
-      "at": 1793210602
+      "at": 1793970670
     },
     "rarity": {
       "review": {
@@ -6951,6 +6994,24 @@
       "note": "Martin, 2026-10-28: the AOE roamer, Hungry 6 to compensate",
       "by": "claude",
       "at": 1793210584
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793890403
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793890404
     }
   },
   "wolverine": {
@@ -7209,8 +7270,8 @@
         }
       },
       "by": "claude",
-      "at": 1793291108,
-      "note": "into the collection"
+      "at": 1793967091,
+      "note": "Martin 2026-11-06: his own name, from Dinae, Dinya, Denya, Denae; \"okay, let's try it\"; draft to live with"
     },
     "rarity": {
       "review": {
@@ -7732,9 +7793,9 @@
           "species": "Deer"
         }
       },
-      "note": "into the collection",
+      "note": "Martin 2026-11-06: \"very very good already 8/10 at least, maybe 8.5/10\"; draft to live with",
       "by": "claude",
-      "at": 1793388087
+      "at": 1793963237
     },
     "rarity": {
       "review": {
@@ -7776,9 +7837,27 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-30: the fawn's arc, each stage handing you the next",
+      "note": "stage renamed, Martin 2026-11-06",
       "by": "claude",
-      "at": 1793388087
+      "at": 1793963237
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793966566
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793966590
     }
   },
   "young_stag": {
@@ -7788,9 +7867,9 @@
         "prev_note": "",
         "prev": ""
       },
-      "note": "Martin, 2026-10-30: the fawn's arc, each stage handing you the next",
+      "note": "stage renamed, Martin 2026-11-06",
       "by": "claude",
-      "at": 1793388087
+      "at": 1793963237
     },
     "rarity": {
       "review": {
@@ -7801,6 +7880,37 @@
       "note": "Martin, 2026-10-30: the Fawn's stages wear its legendary frame, as the Butterfly's do",
       "by": "claude",
       "at": 1793388269
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Young Stag",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-06: \"very very good already 8/10 at least, maybe 8.5/10\"; draft to live with",
+      "by": "claude",
+      "at": 1793963237
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793966566
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793966590
     }
   },
   "great_stag": {
@@ -7823,6 +7933,37 @@
       "note": "Martin, 2026-10-30: the Fawn's stages wear its legendary frame, as the Butterfly's do",
       "by": "claude",
       "at": 1793388269
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Great Stag",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-06: \"very very good already 8/10 at least, maybe 8.5/10\"; draft to live with",
+      "by": "claude",
+      "at": 1793963237
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793966567
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793966590
     }
   },
   "young_ant": {

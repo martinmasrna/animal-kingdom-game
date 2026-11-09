@@ -4,7 +4,7 @@ The values live where the game keeps them, one place each: animal_kingdom/data/c
 species, tags, strength, text, and the status: collectible, reserve, planned; the keywords are read from the text as it
 is written), animal_kingdom/data/decklists.json (which starter deck a card ships in, and the starters' names) and
 animal_kingdom/web/static/art.js (the crops). The cards the engine makes itself (tokens, evolution stages, the Eagle's
-mate) are shown under the card that makes them; only their strength and text are edited here. The old pool's shelved cards (no
+mate) are shown under the card that makes them; only their name, strength and text are edited here. The old pool's shelved cards (no
 habitat) and the tutorial's deal stay off the table.
 
 How settled each value is lives in tools/cards/levels.json, one entry per card id and column:
@@ -310,7 +310,7 @@ def _apply_value(r: dict, col: str, value) -> None:
     _save_cards(cards)
 
 
-TOKEN_COLS = ("strength", "effect", "rarity")   # what a token's card says, and its frame (a legendary's stages wear its gold); where it sits stays its maker's business
+TOKEN_COLS = ("strength", "effect", "rarity", "animal")   # what a token's card says, its frame (a legendary's stages wear its gold) and its name (a legendary's stages carry its name); where it sits stays its maker's business
 
 
 def set_value(card_id: str, col: str, value, by: str = "martin", note: str | None = None) -> str:
