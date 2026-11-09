@@ -3789,7 +3789,7 @@
     },
     {
       "id": "dung_beetle_legend",
-      "name": "El'Rahhal",
+      "name": "El'Rahhal: Birth",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -3834,7 +3834,7 @@
     },
     {
       "id": "dung_beetle_legend_form2",
-      "name": "El'Rahhal",
+      "name": "El'Rahhal: Journey",
       "status": "token",
       "rarity": "legendary",
       "tags": [
@@ -3848,7 +3848,7 @@
     },
     {
       "id": "dung_beetle_legend_form3",
-      "name": "El'Rahhal",
+      "name": "El'Rahhal: Trial",
       "status": "token",
       "rarity": "legendary",
       "tags": [
@@ -3862,7 +3862,7 @@
     },
     {
       "id": "dung_beetle_legend_form4",
-      "name": "El'Rahhal",
+      "name": "El'Rahhal: Ascension",
       "status": "token",
       "rarity": "legendary",
       "tags": [
