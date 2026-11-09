@@ -3789,7 +3789,7 @@
     },
     {
       "id": "dung_beetle_legend",
-      "name": "[DUNG BEETLE]",
+      "name": "El'Rahhal",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -3799,7 +3799,6 @@
       "text": "Evolves at 10 food eaten by your Hungry animals.",
       "species": "Dung Beetle",
       "habitat": "Savanna",
-      "unnamed": true,
       "related": [
         "dung_beetle_legend_form2",
         "dung_beetle_legend_form3",
@@ -3835,7 +3834,7 @@
     },
     {
       "id": "dung_beetle_legend_form2",
-      "name": "[DUNG BEETLE]",
+      "name": "El'Rahhal",
       "status": "token",
       "rarity": "legendary",
       "tags": [
@@ -3844,11 +3843,12 @@
       "base_strength": 4,
       "text": "Roar: draw a card. Evolves at 25 food eaten by your Hungry animals.",
       "stage": 2,
-      "keywords": []
+      "keywords": [],
+      "species": "Dung Beetle"
     },
     {
       "id": "dung_beetle_legend_form3",
-      "name": "[DUNG BEETLE]",
+      "name": "El'Rahhal",
       "status": "token",
       "rarity": "legendary",
       "tags": [
@@ -3857,11 +3857,12 @@
       "base_strength": 4,
       "text": "Roar: draw a card and remove an adjacent enemy. Evolves at 40 food your Hungry animals ate.",
       "stage": 3,
-      "keywords": []
+      "keywords": [],
+      "species": "Dung Beetle"
     },
     {
       "id": "dung_beetle_legend_form4",
-      "name": "[DUNG BEETLE]",
+      "name": "El'Rahhal",
       "status": "token",
       "rarity": "legendary",
       "tags": [
@@ -3870,7 +3871,8 @@
       "base_strength": 4,
       "text": "Roar: draw a card, remove an adjacent enemy and play another animal.",
       "stage": 4,
-      "keywords": []
+      "keywords": [],
+      "species": "Dung Beetle"
     },
     {
       "id": "mara",

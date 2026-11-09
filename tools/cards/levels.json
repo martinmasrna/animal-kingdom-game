@@ -6612,9 +6612,10 @@
           "species": "Dung Beetle"
         }
       },
-      "note": "into the collection",
+      "note": "Martin 2026-11-09: \"El'Rahhal is good\"; draft to live with, stage words to come",
       "by": "claude",
-      "at": 1793104319
+      "at": 1794228300,
+      "lv": "draft"
     },
     "tag": {
       "review": {
@@ -6801,6 +6802,19 @@
       },
       "by": "claude",
       "at": 1793127998
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "[DUNG BEETLE]",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-09: \"El'Rahhal is good\"; draft to live with, stage words to come",
+      "by": "claude",
+      "at": 1794228302
     }
   },
   "dung_beetle_legend_form3": {
@@ -6813,6 +6827,19 @@
       "by": "claude",
       "at": 1793295715,
       "note": "Martin, 2026-10-29: the removal; 'your Hungry animals ate' so it fits three lines"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "[DUNG BEETLE]",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-09: \"El'Rahhal is good\"; draft to live with, stage words to come",
+      "by": "claude",
+      "at": 1794228303
     }
   },
   "duck": {
@@ -7495,6 +7522,19 @@
       "note": "Martin, 2026-10-29: the forms build on each other, so the removal carries into the last",
       "by": "claude",
       "at": 1793295478
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "[DUNG BEETLE]",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-09: \"El'Rahhal is good\"; draft to live with, stage words to come",
+      "by": "claude",
+      "at": 1794228304
     }
   },
   "rabbit": {
