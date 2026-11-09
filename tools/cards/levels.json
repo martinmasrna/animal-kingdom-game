@@ -6649,6 +6649,24 @@
       "note": "forms with a progress count (Martin, 2026-10-27)",
       "by": "claude",
       "at": 1793127998
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794241322
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794241368
     }
   },
   "black_widow": {

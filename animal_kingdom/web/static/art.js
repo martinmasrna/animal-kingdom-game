@@ -1,6 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  dung_beetle_legend: [.52, .4, .75],
   great_stag: [.7, .3, .6],
   young_stag: [.7, .27, .5],
   deer_legend_2: [.64, .46, .68],
@@ -191,6 +192,7 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  dung_beetle_legend: [.5, .42, 1.2],
   great_stag: [.7, .3, 1.2],
   young_stag: [.7, .27, 1.2],
   deer_legend_2: [.64, .45, 1.3],
@@ -374,6 +376,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  dung_beetle_legend: .4,
   great_stag: .33,
   young_stag: .3,
   deer_legend_2: .45,
