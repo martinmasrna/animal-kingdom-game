@@ -192,14 +192,13 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
         let c = st.card_id(card).unwrap();
         playable_copy(st, player, c).map(|inst| crate::strength::placement_strength(st, &inst)).unwrap_or(0)
     };
-    let placed_plus = st.units_placed_this_turn + if unit.is_some() { 0 } else { 1 };
     Some(match card {
         "gopher" | "mara" => fed_this_turn(st, player),
         "bobcat" | "tutorial_lynx" | "ocelot" => others(T_CAT) >= 1,
         "serval" => played_this_turn(st, player, T_CAT, unit) >= 1,
         "soldier_ant" | "nurse_bee" => others(T_COLONY) + 1 >= colony_min,
         "hammerhead" => lost_this_turn(st, player) >= 1,
-        "hare" | "rat" => placed_plus >= cfg(st, "hare_played_min"),
+        "hare" | "rat" => hand_after() == 0,
         "macaque" => hand_after() >= cfg(st, "macaque_hand_min"),
         "gorilla" => strength() >= cfg(st, "gorilla_min"),
         "fox" => st.turn_flags.any_roamed,
