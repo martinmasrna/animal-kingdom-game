@@ -1,6 +1,6 @@
 # Legends for the unnamed legendaries: status
 
-The pass that writes a legend (`docs/cards/legends/<animal>.md`, in the honey badger's form) for every collectible legendary whose name is still in brackets, on the branch `cards/legends`. Legends only: no card text, strength, rarity or name changes; names are Martin's. Whether societies exist is open (`knowledge/world-first-study-2026-10-24.md`), so no legend here states one as fact.
+The pass that writes a legend (`docs/cards/legends/<animal>.md`, in the honey badger's form) for every collectible legendary whose name was still in brackets on 2026-11-05. Legends only: no card text, strength, rarity or name changes; names are Martin's. Whether societies exist is open (`knowledge/world-first-study-2026-10-24.md`), so no legend here states one as fact.
 
 Written in this pass: 30. Still to write: 0. Giraffe, Leopard and Rat had legends before the pass and are untouched.
 
@@ -15,12 +15,14 @@ The pass is complete. My reading of which three legends name themselves, for Mar
 | [BOAR] | `boar_legend` | 5 | [boar.md](../../docs/cards/legends/boar.md) | written |
 | [BUTTERFLY] | `butterfly_legend` | 0 | [butterfly.md](../../docs/cards/legends/butterfly.md) | written |
 | [CUCKOO] | `cuckoo_legend` | 6 | [cuckoo.md](../../docs/cards/legends/cuckoo.md) | written |
-| [DEER] | `deer_legend` | 3 | [deer.md](../../docs/cards/legends/deer.md) | written |
+| Denae | `deer_legend` | 3 | [deer.md](../../docs/cards/legends/deer.md) | named, draft (Martin, 2026-11-06) |
 | [DUNG BEETLE] | `dung_beetle_legend` | 4 | [dung-beetle.md](../../docs/cards/legends/dung-beetle.md) | written |
 | [EAGLE] | `eagle_legend` | 3 | [eagle.md](../../docs/cards/legends/eagle.md) | written |
-| [ELEPHANT] | `elephant_legend` | 9 | [elephant.md](../../docs/cards/legends/elephant.md) | written |
+| [ELEPHANT] | `elephant_legend` | 9 | [elephant.md](../../docs/cards/legends/elephant.md) | open: name and legend to go over again with Martin (2026-11-09) |
 | [FALCON] | `falcon_legend` | 5 | [falcon.md](../../docs/cards/legends/falcon.md) | written |
-| [FAWN] | `deer_legend_2` | 2 | [fawn.md](../../docs/cards/legends/fawn.md) | written |
+| Elari | `deer_legend_2` | 2 | [fawn.md](../../docs/cards/legends/fawn.md) | named, draft (Martin, 2026-11-06) |
+| Elaren | `young_stag` | 4 | [fawn.md](../../docs/cards/legends/fawn.md) | named, draft (Martin, 2026-11-06) |
+| Elarion | `great_stag` | 8 | [fawn.md](../../docs/cards/legends/fawn.md) | named, draft (Martin, 2026-11-06) |
 | [GIRAFFE] | `giraffe_legend` | 7 | [giraffe.md](../../docs/cards/legends/giraffe.md) | written before this pass |
 | [GORILLA] | `gorilla_legend` | 4 | [gorilla.md](../../docs/cards/legends/gorilla.md) | written |
 | [LEOPARD] | `leopard_legend` | 5 | [leopard.md](../../docs/cards/legends/leopard.md) | written before this pass |
@@ -31,11 +33,11 @@ The pass is complete. My reading of which three legends name themselves, for Mar
 | [OXPECKER] | `oxpecker_legend` | 4 | [oxpecker.md](../../docs/cards/legends/oxpecker.md) | written |
 | [PIRANHA] | `piranha_legend` | 2 | [piranha.md](../../docs/cards/legends/piranha.md) | written |
 | [RAT] | `rat_legend` | 4 | [rat.md](../../docs/cards/legends/rat.md) | written before this pass |
-| [RHINOCEROS] | `rhinoceros_legend` | 8 | [rhinoceros.md](../../docs/cards/legends/rhinoceros.md) | written |
+| Thorn | `rhinoceros_legend` | 8 | [rhinoceros.md](../../docs/cards/legends/rhinoceros.md) | named, draft (Martin, 2026-11-06) |
 | [RODENT] | `rodent_legend` | 3 | [rodent.md](../../docs/cards/legends/rodent.md) | written |
 | [SARDINE] | `sardine_legend` | 1 | [sardine.md](../../docs/cards/legends/sardine.md) | written |
 | [SLOTH] | `sloth_legend` | 4 | [sloth.md](../../docs/cards/legends/sloth.md) | written |
-| [SPERM WHALE] | `sperm_whale_legend` | 8 | [sperm-whale.md](../../docs/cards/legends/sperm-whale.md) | written |
+| Borvald | `sperm_whale_legend` | 8 | [sperm-whale.md](../../docs/cards/legends/sperm-whale.md) | named, draft (Martin, 2026-11-05) |
 | [TIGER] | `tiger_legend` | 7 | [tiger.md](../../docs/cards/legends/tiger.md) | written |
 | [TUNA] | `tuna_legend` | 5 | [tuna.md](../../docs/cards/legends/tuna.md) | written |
 | [WHITE WOLF] | `wolf_legend_3` | 5 | [white-wolf.md](../../docs/cards/legends/white-wolf.md) | written |
