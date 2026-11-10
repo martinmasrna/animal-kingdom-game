@@ -9,7 +9,7 @@ import init, { Engine, Bot, sourceHash } from '../wasm/ak_engine.js';
 const EVENTS_KEPT = 200;                                   // match.py EVENTS_KEPT
 const BOT_PAUSE = { open: 0.6, move: 0.4, choice: 0.3 };   // server.py: the bot's beat once its last move has been watched
 const BOT_WAIT_MAX = 6.0;                                  // server.py: at most this long for the screen to play it out
-const BOT_THINK_MAX = 20;                                  // server.py: then the Easy bot's move is played for it
+const BOT_THINK_MAX = 45;                                  // server.py: then the Easy bot's move is played for it
 const OUTBOX = 'ak:local:outbox';
 const other = p => (p === 'A' ? 'B' : 'A');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -124,7 +124,11 @@ export class LocalMatch {
         if (m.t === 'chose') { this.thinkMs.push(m.ms); w.resolve(m.action); } else w.reject(new Error(m.error));
       };
     });
-    this.worker.postMessage({ t: 'init', module: this.lib.module, doc: this.lib.doc, spec: this.setup.spec, evaluator: this.setup.evaluator, seed });
+    // the whole-turn search's candidate network is fetched once a page (setup.cand: its address, the same for every match)
+    const worker = this.worker, url = this.setup.cand;
+    const nets = this.lib.nets || (this.lib.nets = {});
+    const cand = url ? (nets[url] || (nets[url] = this.api(url).then(r => { if (!r.ok) throw new Error(`candidate network: ${r.status}`); return r.text(); }))) : Promise.resolve('');
+    cand.catch(() => { delete nets[url]; return ''; }).then(text => worker.postMessage({ t: 'init', module: this.lib.module, doc: this.lib.doc, spec: this.setup.spec, evaluator: this.setup.evaluator, cand: text, seed }));
     this.asked = 0;
   }
 

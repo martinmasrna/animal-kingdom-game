@@ -338,14 +338,20 @@ def test_the_expert_is_the_deepened_referee():
     target-aware weights, deepening under a time budget below BOT_THINK_MAX; since 2026-10-21 it values food as the race
     on a curve, with no net-food term, ranks a placement after its sub-choice resolves (quiesce) and searches its mulligan
     (2026-10-22); since 2026-10-23 its evaluation is the slot network (rounds 4 to 6). Normal is the TurnBot. On the Rust engine
-    (AK_RUST_BOTS=1, the image) `bot_for` hands out the same bots as RustBots; the dials are read off the Python build."""
+    (AK_RUST_BOTS=1, the image) `bot_for` hands out the same bots as RustBots; the dials are read off the Python build.
+    Since 2026-11-10 that referee is the base of the whole-turn search the Expert plays (EXPERT_TURN): one search and the
+    whole turn both end below BOT_THINK_MAX."""
     import os
-    from animal_kingdom.sim.runner import make_bot
-    from animal_kingdom.web.match import BOT_LEVELS, bot_for
+    from animal_kingdom.sim.runner import make_bot, parse_bot_spec
+    from animal_kingdom.web.match import BOT_LEVELS, EXPERT, bot_for
     from animal_kingdom.web.server import BOT_THINK_MAX
     if os.environ.get("AK_RUST_BOTS") == "1":
         assert bot_for("expert", 7).__class__.__name__ == "RustBot"
-    bot = make_bot(BOT_LEVELS["expert"], 7, python_only=True)
+    kind, dials = parse_bot_spec(BOT_LEVELS["expert"], "kind")
+    dials = dict(dials)
+    assert kind == "atomic_learned" and dials["rounds"] == 2 and os.path.exists(dials["cand"])
+    assert 0 < dials["time_budget"] <= dials["turn_budget"] < BOT_THINK_MAX
+    bot = make_bot(EXPERT, 7, python_only=True)
     assert bot.evaluator.__class__.__name__ == "SlotEval"
     assert bot.depth == 1 and bot.den_sense and bot.reply_turns == 3 and 0 < bot.time_budget < BOT_THINK_MAX
     assert bot.weights.pending_target > 0 and bot.weights.buried_presence > 0
