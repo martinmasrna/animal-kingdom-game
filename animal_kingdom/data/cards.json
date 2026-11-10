@@ -3671,7 +3671,7 @@
     },
     {
       "id": "bee_legend_2",
-      "name": "[BEE]",
+      "name": "Lady Beatrix",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -3681,7 +3681,6 @@
       "text": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
       "species": "Bee",
       "habitat": "Meadow",
-      "unnamed": true,
       "keywords": []
     },
     {
