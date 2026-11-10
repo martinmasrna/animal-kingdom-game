@@ -652,8 +652,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792191060,
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      "at": 1794305305,
+      "note": "Martin 2026-11-10: back on the card as a draft (settled 2026-10-16, bracketed in the 10-17 sweep)",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[BOAR]",
+          "species": "Boar"
+        }
+      }
     }
   },
   "bobcat": {
@@ -2018,9 +2026,17 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-11-10: Miradel and Galwen \"the best two I think\", with a worry about mush; draft to live with a week",
       "by": "claude",
-      "at": 1792191064
+      "at": 1794305938,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[GIRAFFE]",
+          "species": "Giraffe"
+        }
+      }
     }
   },
   "golden_orb_weaver": {
@@ -3461,8 +3477,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792191060,
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      "at": 1794305304,
+      "note": "Martin 2026-11-10: back on the card as a draft (settled 2026-10-16, bracketed in the 10-17 sweep)",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[OXPECKER]",
+          "species": "Oxpecker"
+        }
+      }
     },
     "effect": {
       "review": {
@@ -4227,10 +4251,18 @@
       "at": 1792229409
     },
     "animal": {
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-11-10: \"for Sloth we had Aya ... I think it was quite fine\"; back on the card as a draft",
       "by": "claude",
-      "at": 1792191059,
-      "lv": "draft"
+      "at": 1794305020,
+      "lv": "draft",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[SLOTH]",
+          "species": "Sloth"
+        }
+      }
     }
   },
   "snake_egg": {
@@ -4754,9 +4786,17 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-10-21: \"9/10\"; 2026-11-10: onto the card as a draft, the herd named beside Denae and Elari",
       "by": "claude",
-      "at": 1792191064
+      "at": 1794305673,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[WILDEBEEST]",
+          "species": "Wildebeest"
+        }
+      }
     },
     "strength": {
       "note": "5, under the common's 6: an engine has to stay coverable (Martin, 2026-10-08)",
@@ -4952,9 +4992,17 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-11-10: Miradel and Galwen \"the best two I think\", with a worry about mush; draft to live with a week",
       "by": "claude",
-      "at": 1792191064
+      "at": 1794305939,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[ZEBRA]",
+          "species": "Zebra"
+        }
+      }
     },
     "effect": {
       "review": {

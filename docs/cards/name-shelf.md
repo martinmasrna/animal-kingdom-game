@@ -18,7 +18,6 @@ Names that would suit a legendary one day and have no card yet. The second shelf
 - Spark / Sparky
 - Fluffy (Harry Potter's three-headed dog; the joke of it on something huge still works)
 - A bunch of them can be named after flowers and plants
-- Moon Paw, Shadow Paw (from the voice note of the same day)
 
 ## Reserved during naming rounds
 

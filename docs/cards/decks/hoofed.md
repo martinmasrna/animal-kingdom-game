@@ -10,10 +10,10 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **[WILDEBEEST]** | 1 | Hoofed | 5 | Your regions produce 5 more food. |
+| **Haldaran** | 1 | Hoofed | 5 | Your regions produce 5 more food. |
 | **Denae** | 1 | Hoofed | 3 | Flee. Roar: draw 2 animals with Flee. Whenever one of your animals flees, give it +2 strength. |
-| **[ZEBRA]** | 1 | Hoofed | 4 | Roar: draw a card for each of your grazing Hoofed animals. |
-| **[GIRAFFE]** | 1 | Hoofed | 7 | Your opponent's hand is revealed. |
+| **Galwen** | 1 | Hoofed | 4 | Roar: draw a card for each of your grazing Hoofed animals. |
+| **Miradel** | 1 | Hoofed | 7 | Your opponent's hand is revealed. |
 
 ### Rare
 
