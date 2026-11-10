@@ -101,6 +101,7 @@ Text only, as built on the branch; where a picture belongs is marked.
 3. **Season resets.** Recommendation: none while few people play. With opponents by league, a reset is only a fresh climb: everyone down a few leagues, back where they belong in a session or two.
 4. **What the leaderboard lists.** Open (Martin, 2026-11-10, two ideas: open on your own league as League of Legends does, or only the top league sorted by rating with your own row pinned under it). Recommendation: the second; below the top league a place among everyone means little, your league and stars are your standing, and a rating ordering only exists in the top league. Also open from the same day: whether rows carry portraits at all (League of Legends shows none).
 5. **Who you play, during the game.** The opponent's name shows only at the versus moment, then nowhere on the board (Martin, 2026-11-10: it probably should, and the profile picture fits there). A board-layout job: vertical room is the scarce part.
+6. **What marks progress inside a league.** Stars were the default from the first design; open (Martin, 2026-11-10: "maybe they don't have to be stars at all"). Its own round once the border is chosen.
 
 ## Names
 
