@@ -86,7 +86,7 @@ LEARNED_BASE_KIND = {"greedy_learned": "greedy", "turn_learned": "turn",
 # The whole-turn search (bots/atomic_bot.py) takes these keys of its own; the rest of its spec builds the referee it
 # stands on (evaluation, imagined hands, decided-game value), in both engines.
 ATOMIC_KEYS = ("rounds", "width1", "width2", "inner", "cap", "threads", "workers", "hands", "temperature", "draws", "bycard",
-               "beam", "cand", "turn_budget", "partial", "bank", "bank_turn", "by_hand")     # beam and cand (the candidate network, engine_rs/src/bots/cand.rs) are the Rust search's
+               "beam", "cand", "turn_budget", "partial", "bank", "bank_turn", "by_hand", "narrow")     # beam and cand (the candidate network, engine_rs/src/bots/cand.rs) are the Rust search's
 
 # Bare name resolved via bots.learned_eval.load_eval when a '<kind>_learned' bot's `extra`
 # doesn't set `eval=` explicitly (e.g. `--candidate-kind turn_learned:eval=rung0`).

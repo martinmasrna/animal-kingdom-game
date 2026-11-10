@@ -108,6 +108,12 @@ impl Bot {
             bot.bank = secs("bank");
             bot.bank_turn = secs("bank_turn");
             bot.by_hand = get("by_hand").map(as_usize).unwrap_or(0);
+            if let Some(text) = get("narrow").and_then(|v| v.as_str()) {   // "10x3/4x8/2x20": turns x hands, stage by stage
+                for part in text.split('/') {
+                    let (w, h) = part.split_once('x').ok_or_else(|| format!("narrow: {part}"))?;
+                    bot.narrow.push((w.parse().map_err(|_| format!("narrow: {part}"))?, h.parse().map_err(|_| format!("narrow: {part}"))?));
+                }
+            }
             bot.partial = get("partial").map(as_usize).unwrap_or(0) != 0;
             if let Some(path) = get("cand").and_then(|v| v.as_str()) {   // the candidate network (cand.rs) chooses the beam
                 bot.cand = Some(cand::named(path)?);

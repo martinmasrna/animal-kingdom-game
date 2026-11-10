@@ -138,6 +138,9 @@ pub struct AtomicBot {
     // >0: a level's jobs go hand by hand (every turn against the likeliest hand, then the next), and a cut level
     // keeps the hands it finished when there are this many
     pub by_hand: usize,
+    /// The deeper level in stages, (turns, hands) each: the best `turns` so far scored on the likeliest `hands`, the
+    /// next stage keeping fewer turns on more hands. A stage the clock cuts leaves the hands every kept turn has.
+    pub narrow: Vec<(usize, usize)>,
     bank_left: f64,
     turn_banked: f64,
 }
@@ -182,7 +185,7 @@ fn key(s: &State) -> Vec<i64> {
 
 impl AtomicBot {
     pub fn new(base: Searcher, rounds: usize, widths: Vec<usize>, inner: usize, cap: usize, threads: usize, hands: usize, temperature: f64, draws: usize) -> AtomicBot {
-        AtomicBot { base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, beam: 0, cand: None, deadline: None, cut: None, roomy: None, kinds_seen: FxHashMap::default(), memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new(), turn_budget: 0.0, partial: false, turn_started: None, bank: 0.0, bank_turn: 0.0, by_hand: 0, bank_left: 0.0, turn_banked: 0.0 }
+        AtomicBot { base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, beam: 0, cand: None, deadline: None, cut: None, roomy: None, kinds_seen: FxHashMap::default(), memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new(), turn_budget: 0.0, partial: false, turn_started: None, bank: 0.0, bank_turn: 0.0, by_hand: 0, narrow: Vec::new(), bank_left: 0.0, turn_banked: 0.0 }
     }
 
     // ------------------------------------------------------------------ evaluation
@@ -239,7 +242,7 @@ impl AtomicBot {
         if self.beam > 0 && legal.len() > self.beam {
             if let Some(net) = &self.cand {
                 let net = net.clone();
-                legal = self.cand_beam(&net, &st, actor, legal);
+                legal = self.cand_beam(&net, &st, actor, legal, false);
             }
         }
         for a in legal {
@@ -513,7 +516,7 @@ impl AtomicBot {
     /// The candidate network's beam at a decision of `actor` in `s`: its `beam` likeliest of `legal`, in its order,
     /// plus a den capture, whatever it scored (the net ranks wins first anyway; checking every action for a win
     /// would cost an engine run each, which the net is there to save).
-    fn cand_beam(&self, net: &super::cand::CandNet, s: &State, actor: Player, legal: Vec<Action>) -> Vec<Action> {
+    fn cand_beam(&self, net: &super::cand::CandNet, s: &State, actor: Player, legal: Vec<Action>, each_card: bool) -> Vec<Action> {
         let scores = net.scores(s, actor, &legal);
         let mut order: Vec<usize> = (0..legal.len()).collect();
         order.sort_by(|&i, &j| scores[j].partial_cmp(&scores[i]).unwrap_or(std::cmp::Ordering::Equal).then(i.cmp(&j)));
@@ -524,6 +527,19 @@ impl AtomicBot {
         for (i, a) in legal.iter().enumerate() {
             if !keep[i] && matches!(a, Action::Roam { target: Target::Hq(_), .. }) {   // a den capture is never cut
                 keep[i] = true;
+            }
+        }
+        if each_card {
+            // the draw search holds one of every card they could have: each card keeps its likeliest placement, or a
+            // card outside the beam would count as never drawn (values up to 51 points too good for me, 2026-11-10)
+            let mut had: Vec<CardId> = Vec::new();
+            for &i in order.iter() {
+                if let Action::Place { card, .. } = &legal[i] {
+                    if !had.contains(card) {
+                        had.push(*card);
+                        keep[i] = true;
+                    }
+                }
             }
         }
         order.iter().filter(|&&i| keep[i]).map(|&i| legal[i].clone()).collect()
@@ -557,7 +573,7 @@ impl AtomicBot {
                 // the candidate network's beam: its `beam` likeliest actions for the side choosing, plus any that
                 // decide the game at once
                 let net = net.clone();
-                legal = self.cand_beam(&net, &s, actor, legal);
+                legal = self.cand_beam(&net, &s, actor, legal, ctx.mode == LeafMode::Kinds);
             } else {
             // the actions that leave the turn open, best first for the side choosing by the board they leave; the rest
             // of those are not searched on
@@ -950,7 +966,8 @@ impl AtomicBot {
             // the move's time budget (the base's `time_budget`, 0: none): a deeper level starts only while less than
             // four tenths of it has gone, since each level costs several times the one above; the ranking keeps the
             // levels it has, and the order key already puts a turn's deepest level first
-            if lv > 0 && capped && started.elapsed().as_secs_f64() >= 0.4 * (budget + extra) {
+            let narrowing = lv > 0 && !self.narrow.is_empty();     // staged: every job counts, so it starts whenever time is left
+            if lv > 0 && capped && started.elapsed().as_secs_f64() >= (if narrowing { 1.0 } else { 0.4 }) * (budget + extra) {
                 outcome = "skipped";
                 break;
             }
@@ -962,7 +979,7 @@ impl AtomicBot {
             let soft_secs = if lv > 0 && capped { Some(budget) } else if lv == 0 && self.base.time_budget > 0.0 { Some(self.base.time_budget) } else { None };
             let soft = soft_secs.map(|b| started + std::time::Duration::from_secs_f64(b));
             let deadline = soft_secs.map(|b| started + std::time::Duration::from_secs_f64(if lv > 0 { b + extra } else { b.max(budget + extra) }));
-            let width = self.widths[lv.min(self.widths.len() - 1)];
+            let width = if narrowing { self.narrow[0].0 } else { self.widths[lv.min(self.widths.len() - 1)] };
             let go: Vec<usize> = pool.iter().take(width).copied().collect();
             let plies = 2 * lv + 1;
             // a turn already won or lost outright in a hand one level up stays so deeper: nothing to search there
@@ -982,6 +999,56 @@ impl AtomicBot {
             // a level the clock cuts has all its turns scored on the same hands
             let mut ks: Vec<usize> = (0..worlds.len()).collect();
             ks.sort_by(|&a, &b| weights[b].partial_cmp(&weights[a]).unwrap_or(std::cmp::Ordering::Equal).then(a.cmp(&b)));
+            if narrowing {
+                let mut go = go;
+                let mut values: FxHashMap<(usize, usize), f64> = decided;
+                let mut have = 0usize;     // the likeliest hands every turn still in `go` is scored on
+                let mut whole = true;
+                for (w, h) in self.narrow.clone() {
+                    let h = h.min(ks.len());
+                    go.truncate(w.max(1));
+                    if h <= have {
+                        continue;
+                    }
+                    let jobs: Vec<(usize, usize)> = {
+                        let g = &go;
+                        ks[have..h].iter().flat_map(|&k| g.iter().map(move |&i| (i, k))).filter(|j| !values.contains_key(j)).collect()
+                    };
+                    let (got, all) = self.run_jobs(&rows, &jobs, me, plies, deadline, soft);
+                    values.extend(got);
+                    have = ks[..h].iter().take_while(|&&k| go.iter().all(|&i| values.contains_key(&(i, k)))).count();
+                    if have > 0 {
+                        let total: f64 = ks[..have].iter().map(|&k| weights[k]).sum();
+                        let ws: Vec<f64> = ks[..have].iter().map(|&k| weights[k] / total).collect();
+                        let mut scored: Vec<(f64, usize)> = go.iter().map(|&i| {
+                            let vs: Vec<f64> = ks[..have].iter().map(|&k| values[&(i, k)]).collect();
+                            (self.mix(&vs, &ws), i)
+                        }).collect();
+                        scored.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+                        go = scored.iter().map(|x| x.1).collect();
+                        for (v, i) in scored {
+                            rows[i].levels[lv] = Some(v);
+                        }
+                    }
+                    if !all {
+                        whole = false;
+                        break;
+                    }
+                }
+                // a turn dropped at an earlier stage keeps no score here: it ranks below the turns that stayed
+                for i in 0..rows.len() {
+                    if !go.contains(&i) {
+                        rows[i].levels[lv] = None;
+                    }
+                }
+                kept = have;
+                outcome = if have == 0 { "dropped" } else if whole { "full" } else { "partial" };
+                if have == 0 || !whole {
+                    break;
+                }
+                pool = go;
+                continue;
+            }
             let jobs: Vec<(usize, usize)> = if self.by_hand > 0 {
                 ks.iter().flat_map(|&k| go.iter().map(move |&i| (i, k))).filter(|j| !decided.contains_key(j)).collect()
             } else {
