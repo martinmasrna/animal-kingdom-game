@@ -925,9 +925,13 @@ impl AtomicBot {
                 outcome = "skipped";
                 break;
             }
-            // level 0 always completes (there is nothing to fall back on); a deeper level stops at the budget and is dropped
+            // a deeper level stops at the budget; level 0 at the move's own (the turn's clock never shortens it: 2 in 100
+            // ran past 20 s uncut, the longest 72 s, and a search over the server's limit is the Easy bot's move). A cut
+            // level 0 with nothing kept leaves the turns ranked by their boards
             let deadline = if lv > 0 && capped {
                 Some(started + std::time::Duration::from_secs_f64(budget))
+            } else if lv == 0 && self.base.time_budget > 0.0 {
+                Some(started + std::time::Duration::from_secs_f64(self.base.time_budget))
             } else {
                 None
             };
@@ -955,14 +959,14 @@ impl AtomicBot {
                 // cut by the deadline: the turns done in every hand stay when there are two to choose between
                 go.retain(|&i| (0..worlds.len()).all(|k| values.contains_key(&(i, k))));
                 if !self.partial || go.len() < 2 {
-                    outcome = "dropped";
+                    outcome = if lv == 0 { "first_dropped" } else { "dropped" };
                     break;
                 }
-                outcome = "partial";
+                outcome = if lv == 0 { "first_partial" } else { "partial" };
             } else if lv > 0 {
                 outcome = "full";
             }
-            if lv > 0 {
+            if lv > 0 || !whole {
                 kept = go.len();
             }
             for &i in &go {

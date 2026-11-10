@@ -89,11 +89,11 @@ NORMAL = "turn:w.hq_threat_reach=0.5"
 # evaluation, the imagined hands and the mulligan are that search's, and the tools build their bots from it. Against
 # that search on Martin's 12 decks it won 61.2% of the games the old one won 53.2% of (+9.1 points a deck, 95% interval
 # +4.3 to +13.7, 11 decks, results/bot_quality/wts20-m12*). A search has 20 s and the whole turn 30 (Martin's number;
-# a turn that draws searches again with what is left; `turn_budget`). A reply level the clock cuts is dropped whole and
-# the turn chosen by the boards (a quarter of the searches on the Mac, more in a slower browser); `partial=1` keeps the
-# turns it finished and waits for its own benchmark.
+# a turn that draws searches again with what is left; `turn_budget`). A level the clock cuts keeps the turns it finished
+# when there are two or more (`partial=1`: the same level at a narrower width, chosen among turns that include the one
+# it would have played anyway; a quarter of the searches on the Mac were cut and dropped whole, more in a slower browser).
 EXPERT_TURN = (EXPERT.replace("referee_learned", "atomic_learned").replace("time_budget=8", "time_budget=20")
-               + ",rounds=2,draws=1,inner=1,width2=6,beam=6,hands=20,cand=animal_kingdom/data/learned/cand_v4.json,threads=1,turn_budget=30")
+               + ",rounds=2,draws=1,inner=1,width2=6,beam=6,hands=20,cand=animal_kingdom/data/learned/cand_v4.json,threads=1,turn_budget=30,partial=1")
 BOT_LEVELS = {"easy": "easy", "normal": NORMAL, "expert": EXPERT_TURN}
 
 
