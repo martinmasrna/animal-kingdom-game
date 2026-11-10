@@ -9,8 +9,10 @@ history and the replay (the callbacks the server gives every match). A log the e
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import json
 import time
+from pathlib import Path
 from typing import Callable, Optional
 
 from ..engine.config import Config
@@ -47,7 +49,29 @@ def engine_doc() -> str:
 def bot_spec(level: str) -> dict:
     """The bot of a level as the browser builds it: the Rust spec and, for a learned evaluator, its artifact."""
     spec, evaluator = rust_spec(BOT_LEVELS[level])
-    return {"spec": spec, "evaluator": evaluator}
+    return {"spec": spec, "evaluator": evaluator, "cand": cand_url(spec)}
+
+
+_cands: dict[str, tuple[str, str]] = {}     # a candidate network's path -> (its address, its text)
+
+
+def _cand(path: str) -> tuple[str, str]:
+    if path not in _cands:
+        text = (Path(__file__).resolve().parents[2] / path).read_text()
+        _cands[path] = (f"/api/local/cand/{hashlib.sha1(text.encode()).hexdigest()[:16]}", text)
+    return _cands[path]
+
+
+def cand_url(spec: str) -> Optional[str]:
+    """Where the browser fetches the candidate network a spec's `cand=` names (the whole-turn search), None without one.
+    The address carries the artifact's hash, so a browser keeps it until the network changes."""
+    path = next((kv[5:] for kv in spec.replace(":", ",").split(",") if kv.startswith("cand=")), None)
+    return _cand(path)[0] if path else None
+
+
+def cand_text(url: str) -> Optional[str]:
+    """The artifact at an address `cand_url` gave, None for any other."""
+    return next((text for u, text in _cands.values() if u == url), None)
 
 
 def seats_view(host: Seat, bot: Seat) -> dict:

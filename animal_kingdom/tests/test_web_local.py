@@ -76,8 +76,9 @@ def test_the_browser_gets_the_engine_the_server_plays():
     doc = json.loads(local.engine_doc())
     assert doc["map_id"] == "map_b" and doc["cards"] and doc["maps"]["maps"] and doc["config"]["actions_per_turn"] == 2
     spec = local.bot_spec("expert")
-    assert spec["spec"].startswith("referee_learned:") and "eval=" not in spec["spec"] and json.loads(spec["evaluator"])
-    assert local.bot_spec("normal") == {"spec": "turn:w.hq_threat_reach=0.5", "evaluator": None}
+    assert spec["spec"].startswith("atomic_learned:") and "eval=" not in spec["spec"] and json.loads(spec["evaluator"])
+    assert json.loads(local.cand_text(spec["cand"]))["hidden"] and local.cand_text("/api/local/cand/other") is None   # the whole-turn search's candidate network, by address
+    assert local.bot_spec("normal") == {"spec": "turn:w.hq_threat_reach=0.5", "evaluator": None, "cand": None}
 
 
 def test_a_browser_games_log_opens_as_a_replay():

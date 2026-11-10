@@ -280,10 +280,9 @@ def test_roar_fizzles_with_no_target():
 def test_roar_with_a_pending_choice_is_not_fizzled():
     # Rat with two valid adjacent targets leaves an unresolved pending choice (which enemy) -
     # that's a live effect mid-resolution, not a fizzle, even though nothing has happened yet.
-    s = make_state(hands={"A": ["rat", "mouse"]})
+    s = make_state(hands={"A": ["rat"]})                    # the Rat is the last card: its Roar is live
     put(s, "2,2", "pup", "B")
     put(s, "1,3", "pup", "B")
-    s.units_placed_this_turn = 2                            # the Rat swarms: its Roar is live
     action = PlaceAction("rat", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)

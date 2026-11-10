@@ -123,6 +123,13 @@ pub struct AtomicBot {
     plan: Vec<Action>,
     plan_key: Option<String>,
     pub last_ranking: Vec<Row>,
+    // seconds a whole turn's deeper levels may take, every search of the turn together (0: none): a search after a
+    // mid-turn draw has what the turn's earlier searches left, where `time_budget` alone gives each search its own
+    pub turn_budget: f64,
+    // a deeper level cut by the deadline keeps the turns it finished (best board first, so the search is that level at
+    // a narrower width) when at least two are done; off, the whole level is dropped
+    pub partial: bool,
+    turn_started: Option<(i32, crate::clock::Instant)>,
 }
 
 /// A position, for merging turns that reach it by different orders: the board's stacks, both hands, food, decks, the
@@ -163,7 +170,7 @@ fn key(s: &State) -> Vec<i64> {
 
 impl AtomicBot {
     pub fn new(base: Searcher, rounds: usize, widths: Vec<usize>, inner: usize, cap: usize, threads: usize, hands: usize, temperature: f64, draws: usize) -> AtomicBot {
-        AtomicBot { base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, beam: 0, cand: None, deadline: None, cut: None, roomy: None, kinds_seen: FxHashMap::default(), memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new() }
+        AtomicBot { base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, beam: 0, cand: None, deadline: None, cut: None, roomy: None, kinds_seen: FxHashMap::default(), memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new(), turn_budget: 0.0, partial: false, turn_started: None }
     }
 
     // ------------------------------------------------------------------ evaluation
@@ -863,6 +870,7 @@ impl AtomicBot {
     pub fn rank(&mut self, st: &State, me: Player, worlds: &[State], weights: &[f64]) -> Vec<Row> {
         self.memo.clear();
         self.passes.clear();
+        let entered = crate::clock::Instant::now();
         let mut rows: Vec<Row> = Vec::new();
         for (path, _) in self.turns(st, me, false) {
             let mut ends: Vec<State> = Vec::with_capacity(worlds.len());
@@ -895,16 +903,31 @@ impl AtomicBot {
         let mut pool: Vec<usize> = (0..rows.len()).collect();
         pool.sort_by(|&a, &b| rows[b].board.partial_cmp(&rows[a].board).unwrap_or(std::cmp::Ordering::Equal));
         let started = crate::clock::Instant::now();
+        let count = std::env::var("AK_COUNT").is_ok();
+        let board_secs = entered.elapsed().as_secs_f64();
+        let mut outcome = "board";
+        let mut kept = 0usize;
+        // this search's budget: the move's, and no more than the turn has left
+        let mut budget = self.base.time_budget;
+        let mut capped = budget > 0.0;
+        if self.turn_budget > 0.0 {
+            if let Some((_, t0)) = self.turn_started.filter(|(t, _)| *t == st.turn_counter) {
+                let left = (self.turn_budget - t0.elapsed().as_secs_f64()).max(0.0);
+                budget = if capped { budget.min(left) } else { left };
+                capped = true;
+            }
+        }
         for lv in 0..self.rounds {
             // the move's time budget (the base's `time_budget`, 0: none): a deeper level starts only while less than
             // four tenths of it has gone, since each level costs several times the one above; the ranking keeps the
             // levels it has, and the order key already puts a turn's deepest level first
-            if lv > 0 && self.base.time_budget > 0.0 && started.elapsed().as_secs_f64() >= 0.4 * self.base.time_budget {
+            if lv > 0 && capped && started.elapsed().as_secs_f64() >= 0.4 * budget {
+                outcome = "skipped";
                 break;
             }
             // level 0 always completes (there is nothing to fall back on); a deeper level stops at the budget and is dropped
-            let deadline = if lv > 0 && self.base.time_budget > 0.0 {
-                Some(started + std::time::Duration::from_secs_f64(self.base.time_budget))
+            let deadline = if lv > 0 && capped {
+                Some(started + std::time::Duration::from_secs_f64(budget))
             } else {
                 None
             };
@@ -925,8 +948,23 @@ impl AtomicBot {
                 }
             }
             let jobs: Vec<(usize, usize)> = go.iter().flat_map(|&i| (0..worlds.len()).map(move |k| (i, k))).filter(|j| !decided.contains_key(j)).collect();
-            let Some(mut values) = self.run_jobs(&rows, &jobs, me, plies, deadline) else { break };
+            let (mut values, whole) = self.run_jobs(&rows, &jobs, me, plies, deadline);
             values.extend(decided);
+            let mut go = go;
+            if !whole {
+                // cut by the deadline: the turns done in every hand stay when there are two to choose between
+                go.retain(|&i| (0..worlds.len()).all(|k| values.contains_key(&(i, k))));
+                if !self.partial || go.len() < 2 {
+                    outcome = "dropped";
+                    break;
+                }
+                outcome = "partial";
+            } else if lv > 0 {
+                outcome = "full";
+            }
+            if lv > 0 {
+                kept = go.len();
+            }
             for &i in &go {
                 let vs: Vec<f64> = (0..worlds.len()).map(|k| values[&(i, k)]).collect();
                 rows[i].levels[lv] = Some(self.mix(&vs, weights));
@@ -935,6 +973,13 @@ impl AtomicBot {
             let mut next = go.clone();
             next.sort_by(|&a, &b| rows[b].levels[lv].unwrap().partial_cmp(&rows[a].levels[lv].unwrap()).unwrap_or(std::cmp::Ordering::Equal));
             pool = next;
+            if !whole {
+                break;
+            }
+        }
+        if count {
+            eprintln!("RANK turn={} rows={} board={:.2}s deep={:.2}s budget={:.1} level={} kept={}", st.turn_counter, rows.len(),
+                      board_secs, started.elapsed().as_secs_f64(), if capped { budget } else { -1.0 }, outcome, kept);
         }
         if std::env::var("AK_COUNT").is_ok() {
             eprintln!("KINDS searched={} fell_back={}", FALLBACKS[0].load(std::sync::atomic::Ordering::Relaxed), FALLBACKS[1].load(std::sync::atomic::Ordering::Relaxed));
@@ -963,9 +1008,10 @@ impl AtomicBot {
         rows
     }
 
-    /// The jobs' values; `None` when the deadline passed before every job was done (the level is then dropped).
+    /// The values of the jobs that finished, and whether that is all of them: the deadline stops the rest, and a job it
+    /// cut short is left out.
     fn run_jobs(&mut self, rows: &[Row], jobs: &[(usize, usize)], me: Player, plies: usize,
-                deadline: Option<crate::clock::Instant>) -> Option<FxHashMap<(usize, usize), f64>> {
+                deadline: Option<crate::clock::Instant>) -> (FxHashMap<(usize, usize), f64>, bool) {
         let past = |d: &Option<crate::clock::Instant>| d.map_or(false, |d| crate::clock::Instant::now() >= d);
         let cut = Arc::new(std::sync::atomic::AtomicBool::new(false));
         let mut out: FxHashMap<(usize, usize), f64> = FxHashMap::default();
@@ -978,14 +1024,15 @@ impl AtomicBot {
                     break;
                 }
                 let v = self.after_my_turn(&rows[i].ends[k], me, rows[i].open, plies, k as i64);
+                if cut.load(std::sync::atomic::Ordering::Relaxed) {
+                    break;
+                }
                 out.insert((i, k), v);
             }
             self.deadline = None;
             self.cut = None;
-            if cut.load(std::sync::atomic::Ordering::Relaxed) || out.len() < jobs.len() {
-                return None;
-            }
-            return Some(out);
+            let whole = out.len() == jobs.len();
+            return (out, whole);
         }
         // one shared queue: a thread takes the next job when it is free, so no core waits on another's slow share
         let next = std::sync::atomic::AtomicUsize::new(0);
@@ -1008,7 +1055,11 @@ impl AtomicBot {
                                 break;
                             }
                             let (i, k) = jobs[n];
-                            done.push(((i, k), me_bot.after_my_turn(&rows[i].ends[k], me, rows[i].open, plies, k as i64)));
+                            let v = me_bot.after_my_turn(&rows[i].ends[k], me, rows[i].open, plies, k as i64);
+                            if me_bot.cut.as_ref().map_or(false, |c| c.load(std::sync::atomic::Ordering::Relaxed)) {
+                                break;     // cut short by the deadline (this job or another thread's): not a value
+                            }
+                            done.push(((i, k), v));
                         }
                         done
                     })
@@ -1021,10 +1072,8 @@ impl AtomicBot {
                 out.insert(job, v);
             }
         }
-        if cut.load(std::sync::atomic::Ordering::Relaxed) || out.len() < jobs.len() {
-            return None;
-        }
-        Some(out)
+        let whole = out.len() == jobs.len();
+        (out, whole)
     }
 
     pub fn choose(&mut self, st: &State, me: Player, legal: &[Action]) -> Action {
@@ -1040,6 +1089,9 @@ impl AtomicBot {
             let a = self.plan.remove(0);
             self.plan_key = if self.plan.is_empty() { None } else { Some(self.next_key(st, &a, me)) };
             return a;
+        }
+        if self.turn_started.map_or(true, |(t, _)| t != st.turn_counter) {
+            self.turn_started = Some((st.turn_counter, crate::clock::Instant::now()));
         }
         let (worlds, weights) = self.spread(st, me);
         let ranking = self.rank(st, me, &worlds, &weights);

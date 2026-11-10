@@ -102,7 +102,7 @@ def save_game(match: Match, record: dict) -> None:
 
 
 SEND_TIMEOUT = 5.0          # seconds a socket may take to accept one message before it is dropped (Hub._send)
-BOT_THINK_MAX = 20          # seconds a bot may think before the Easy bot's move is played for it (the Expert deepens for 8 s, then finishes the root in hand)
+BOT_THINK_MAX = 45          # seconds one bot search may take before the Easy bot's move is played for it (the Expert's whole turn has 30 s, match.py)
 
 
 BOT_THREADS = 4             # bot searches running at once, server-wide (the Expert takes a core each; the live machine has one)
@@ -1633,6 +1633,22 @@ async def local_setup(req):
                               "source_hash": local.source_hash()})
 
 
+async def local_cand(req):
+    """The candidate network the Expert's whole-turn search reads, for the browser's bot (web/local.py cand_url)."""
+    for level in BOT_LEVELS:          # after a restart nothing has asked for a setup yet: the addresses are built here
+        local.bot_spec(level)
+    text = local.cand_text(req.path)
+    if text is None:
+        raise web.HTTPNotFound()
+    if req.path not in _cand_gz:
+        _cand_gz[req.path] = gzip.compress(text.encode(), 6)
+    return web.Response(body=_cand_gz[req.path], content_type="application/json",
+                        headers={"Content-Encoding": "gzip", "Cache-Control": "public, max-age=31536000, immutable"})
+
+
+_cand_gz: dict[str, bytes] = {}
+
+
 _local_done: dict[str, str] = {}     # a finished local match's key -> its match id: a resent log is saved once
 
 
@@ -1817,6 +1833,7 @@ def make_app() -> web.Application:
         web.post("/api/match", create_match),
         web.get("/api/local/engine", local_engine),
         web.post("/api/local/setup", local_setup),
+        web.get("/api/local/cand/{hash}", local_cand),
         web.post("/api/local/match", local_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),

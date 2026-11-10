@@ -415,43 +415,26 @@ def test_raccoon_with_an_empty_remove_pile_just_lands():
 
 # ===================================================================================== Rat
 
-def test_rat_as_the_third_animal_played_removes_an_adjacent_enemy_of_any_strength():
-    s = make_state(hands={"A": ["rabbit", "rat"]})              # Rabbit plays a Bunny: two plays, one action
+def test_rat_with_an_empty_hand_removes_an_adjacent_enemy_of_any_strength():
+    s = make_state(hands={"A": ["rat"]})
     put(s, "2,2", "elephant", "B")
-    rules.apply_action(s, PlaceAction("rabbit", ("cr", "1,1")))
-    rules.apply_action(s, PlaceAction("bunny", ("cr", "2,1")))   # the Bunny is played: the second play
-    assert s.units_placed_this_turn == 2
     apply_click(s, PlaceAction("rat", ("cr", "1,2")))
     assert s.top_unit("2,2") is None
 
 
-def test_rat_as_the_second_animal_played_removes_nothing():
+def test_rat_with_a_card_left_in_hand_removes_nothing():
     s = make_state(hands={"A": ["lion", "rat"]})
     put(s, "2,2", "elephant", "B")
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
     apply_click(s, PlaceAction("rat", ("cr", "1,2")))
     assert s.top_unit("2,2").card_id == "elephant"
 
 
-def test_rat_does_not_count_animals_an_effect_placed():
-    s = make_state(hands={"A": ["rat_legend_2", "rat"]})
-    put(s, "1,1", "cockroach", "A")
-    put(s, "2,2", "elephant", "B")
-    rules.apply_action(s, PlaceAction("rat_legend_2", ("cr", "1,2")))
-    choose(s, "1,1")                                            # Pestis takes the Cockroach: it falls, a Cockroach and a Roach are placed
-    apply_click(s, PlaceAction("rat", ("cr", "2,1")))           # only the second animal played
-    assert s.top_unit("2,2").card_id == "elephant"
-
-
-def test_rat_with_the_count_met_never_removes_an_ally():
+def test_rat_with_an_empty_hand_never_removes_an_ally():
     s = make_state(hands={"A": ["rat"]})
-    s.units_placed_this_turn = 2
     put(s, "2,2", "lion", "A")
     rules.apply_action(s, PlaceAction("rat", ("cr", "1,2")))
     assert s.top_unit("2,2").card_id == "lion"
 
-
-# ======================================================================= [RAT] (legendary)
 
 def test_rat_legend_gains_four_food_for_each_other_rodent_you_control_and_draws():
     s = make_state(hands={"A": ["rat_legend"]}, decks={"A": ["tiger"], "B": []})

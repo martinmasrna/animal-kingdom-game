@@ -107,7 +107,6 @@ class Config:
 
     # --- Thresholds / strength gates ---
     colony_synergy_threshold: int = 4    # Nurse Bee / Soldier Ant "4 or more Colony"
-    hare_played_min: int = 3             # Hare and Rat: their Roar if you played this many animals this turn
     hare_draw: int = 2                   # ...this many cards
     macaque_hand_min: int = 5            # Macaque: remove if you have this many cards in hand
     gorilla_min: int = 8                 # Gorilla: draw if this has this much strength

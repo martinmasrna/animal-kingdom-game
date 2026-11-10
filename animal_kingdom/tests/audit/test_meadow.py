@@ -285,23 +285,17 @@ def test_locust_legend_covers_the_board_with_wild_locusts_that_eat_in_two_turns(
 
 # ------------------------------------------------------------------------------------------------ Hare
 
-def test_hare_draws_two_as_the_third_animal_played_this_turn():
-    # "Flee. Roar: if you played 3 or more animals this turn, draw 2 cards." Mole's free play is a play.
-    s = make_state(hands={"A": ["mole", "fox", "hare"]}, decks=decks())
-    rules.apply_action(s, PlaceAction("mole", ("cr", "1,1")))
-    rules.apply_action(s, PlaceAction("fox", ("cr", "2,1")))          # Mole: play another animal next to this
-    rules.apply_action(s, PlaceAction("hare", ("cr", "1,3")))         # the third
+def test_hare_draws_two_when_it_leaves_the_hand_empty():
+    # "Flee. Roar: if your hand is empty, draw 2 cards."
+    s = make_state(hands={"A": ["hare"]}, decks=decks())
+    rules.apply_action(s, PlaceAction("hare", ("cr", "1,3")))
     assert hand_ids(s, "A") == ["lion"] * CFG.hare_draw
 
 
-def test_hare_second_animal_played_draws_nothing_and_placed_worms_are_not_plays():
-    s = make_state(hands={"A": ["praying_mantis", "hare"]}, decks=decks())
-    put(s, "1,1", "earthworm", "A")
-    rules.apply_action(s, PlaceAction("praying_mantis", ("cr", "1,2")))
-    choose(s, "1,1")                                         # two Worms placed, not played
-    n = len(s.hands["A"])
+def test_hare_draws_nothing_with_a_card_left_in_hand():
+    s = make_state(hands={"A": ["fox", "hare"]}, decks=decks())
     rules.apply_action(s, PlaceAction("hare", ("cr", "1,3")))
-    assert len(s.hands["A"]) == n - 1
+    assert hand_ids(s, "A") == ["fox"]
 
 
 def test_hare_flees_to_hand_when_an_enemy_covers_it():

@@ -717,12 +717,12 @@
         "Rodent"
       ],
       "base_strength": 4,
-      "text": "Flee. Roar: if you played 3 or more animals this turn, draw 2 cards.",
+      "text": "Flee. Roar: if your hand is empty, draw 2 cards.",
+      "species": "Hare",
+      "habitat": "Meadow",
       "keywords": [
         "Flee"
-      ],
-      "species": "Hare",
-      "habitat": "Meadow"
+      ]
     },
     {
       "id": "cheetah",
@@ -747,7 +747,7 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Roar: if you played 3 or more animals this turn, remove an adjacent enemy.",
+      "text": "Roar: if your hand is empty, remove an adjacent enemy.",
       "species": "Rat",
       "habitat": "City",
       "keywords": []
@@ -4012,7 +4012,7 @@
     {
       "id": "rabbit",
       "name": "Rabbit",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"

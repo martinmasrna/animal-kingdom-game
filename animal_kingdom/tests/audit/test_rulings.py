@@ -176,15 +176,6 @@ def test_placement__eon_above_zero_shuffles_back():
     assert "anaconda_legend" in s.decks["A"] or "anaconda_legend" in hand_ids(s, "A")
 
 
-def test_placement__a_placed_animal_is_not_played_hare_does_not_count_it():
-    # Sunfish places a Baby Fish; the Hare counts animals played from hand: Sunfish + Hare = 2, not 3.
-    s = st(hands={"A": ["sunfish", "hare"]}, decks={"A": ["v1"] * 4, "B": ["v1"] * 4})
-    play(s, "sunfish", "1,2")
-    assert len(tops(s, "baby_fish")) == 1
-    play(s, "hare", "1,1") if s.top_unit("1,1") is None else play(s, "hare", "1,3")
-    assert "v1" not in hand_ids(s, "A")
-
-
 def test_placement__a_placed_animal_sets_off_whenever_you_place_reactions():
     # The Worker Wasp ("Whenever you place a Colony animal, gain 3 food") pays for a Young Ant the Queen Ant lays.
     s = st()
@@ -516,21 +507,18 @@ def test_pile__skunk_returned_copy_is_locked_through_its_owners_next_turn_other_
     assert all(u.locked_until_turn <= s.turn_counter for u in s.hands["B"])
 
 
-def test_pile__rat_removes_an_adjacent_enemy_of_any_strength_after_three_plays_itself_included():
-    s = st(hands={"A": ["mole", "v1", "rat"]})
+def test_pile__rat_with_an_empty_hand_removes_an_adjacent_enemy_of_any_strength():
+    s = st(hands={"A": ["rat"]})
     put(s, "2,3", "elephant", "B")
-    play(s, "mole", "1,2")
-    rules.apply_action(s, PlaceAction("v1", ("cr", "1,1")))   # the Mole's extra play: two animals
-    play(s, "rat", "1,3")                                     # the third, itself
+    play(s, "rat", "1,3")                                     # its own card has left the hand: empty
     if s.pending:
         choose(s, "2,3")
     assert s.top_unit("2,3") is None
 
 
-def test_pile__rat_removes_nothing_before_three_plays():
+def test_pile__rat_removes_nothing_with_a_card_left_in_hand():
     s = st(hands={"A": ["v1", "rat"]})
     put(s, "2,3", "v1", "B")
-    play(s, "v1", "1,2")
     play(s, "rat", "1,3")
     assert s.pending is None and s.top_unit("2,3") is not None
 
@@ -1604,10 +1592,9 @@ def test_launch_cards__greywhisker_must_play_another_and_the_discard_is_the_play
     assert len(s.pending["options"]) == len(s.hands["A"])
 
 
-def test_launch_cards__hare_counts_the_animals_played_from_hand_itself_included():
-    s = st(hands={"A": ["mole", "v1", "hare"]})
-    play(s, "mole", "1,2")
-    rules.apply_action(s, PlaceAction("v1", ("cr", "1,1")))   # the Mole's extra play
+def test_launch_cards__hare_draws_when_it_was_the_last_card_in_hand():
+    s = st(hands={"A": ["v1", "hare"]})
+    play(s, "v1", "1,2")
     play(s, "hare", "1,3")
     assert len(s.hands["A"]) == 2
 
