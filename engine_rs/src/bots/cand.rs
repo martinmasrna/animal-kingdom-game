@@ -62,7 +62,12 @@ fn linear(w: &[f64], b: &[f64], x: &[f64], n_out: usize, relu: bool) -> Vec<f64>
 impl CandNet {
     pub fn load(path: &str) -> Result<CandNet, String> {
         let text = std::fs::read_to_string(path).map_err(|e| format!("candidate net {path}: {e}"))?;
-        let d: sj::Value = sj::from_str(&text).map_err(|e| format!("candidate net {path}: {e}"))?;
+        CandNet::from_json(&text).map_err(|e| format!("candidate net {path}: {e}"))
+    }
+
+    /// The network from its artifact's JSON text (the browser has no file to read: wasm.rs hands it over).
+    pub fn from_json(text: &str) -> Result<CandNet, String> {
+        let d: sj::Value = sj::from_str(text).map_err(|e| e.to_string())?;
         let hidden = d["hidden"].as_u64().ok_or("candidate net: hidden")? as usize;
         let pos_n = d["pos_n"].as_u64().ok_or("candidate net: pos_n")? as usize;
         let act_n = d["act_n"].as_u64().ok_or("candidate net: act_n")? as usize;
@@ -244,4 +249,25 @@ pub fn action_vec(st: &State, me: Player, a: &Action, legal_index: usize) -> Vec
     out.extend_from_slice(&extra);
     out.extend_from_slice(&opt);
     out
+}
+
+static GIVEN: std::sync::Mutex<Vec<(String, std::sync::Arc<CandNet>)>> = std::sync::Mutex::new(Vec::new());
+
+/// A network handed over as text under the name a spec's `cand=` will ask for.
+pub fn give(name: &str, text: &str) -> Result<(), String> {
+    let net = std::sync::Arc::new(CandNet::from_json(text)?);
+    let mut g = GIVEN.lock().unwrap();
+    g.retain(|(n, _)| n != name);
+    g.push((name.to_string(), net));
+    Ok(())
+}
+
+/// The network a spec's `cand=` names: one handed over under that name, else the file at that path (read once).
+pub fn named(name: &str) -> Result<std::sync::Arc<CandNet>, String> {
+    if let Some((_, net)) = GIVEN.lock().unwrap().iter().find(|(n, _)| n == name) {
+        return Ok(net.clone());
+    }
+    let net = std::sync::Arc::new(CandNet::load(name)?);
+    GIVEN.lock().unwrap().push((name.to_string(), net.clone()));
+    Ok(net)
 }

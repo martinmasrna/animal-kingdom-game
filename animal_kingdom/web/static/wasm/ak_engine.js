@@ -36,24 +36,29 @@ export class Bot {
     /**
      * A bot by spec string (`sim.runner` specs: `turn:w.hq_threat_reach=0.5`), with a learned evaluator's artifact
      * as JSON for a `*_learned` kind ("" otherwise).
+     * `cand_json`: the artifact of the candidate network the spec's `cand=` names (the whole-turn search), when it has one.
      * @param {string} spec
      * @param {number} seed
      * @param {string} evaluator_json
+     * @param {string | null} [cand_json]
      */
-    constructor(spec, seed, evaluator_json) {
-        const val3 = +seed;
-        let ptr0, len0, ptr1, len1;
+    constructor(spec, seed, evaluator_json, cand_json) {
+        const val4 = +seed;
+        let ptr0, len0, ptr1, len1, ptr2, len2;
         try {
             ptr0 = passStringToWasm0(spec, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             len0 = WASM_VECTOR_LEN;
             ptr1 = passStringToWasm0(evaluator_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             len1 = WASM_VECTOR_LEN;
+            ptr2 = isLikeNone(cand_json) ? 0 : passStringToWasm0(cand_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            len2 = WASM_VECTOR_LEN;
         } catch (e) {
+            if (ptr2) { wasm.__wbindgen_free(ptr2, len2 * 1, 1); }
             if (ptr1) { wasm.__wbindgen_free(ptr1, len1 * 1, 1); }
             if (ptr0) { wasm.__wbindgen_free(ptr0, len0 * 1, 1); }
             throw e;
         }
-        const ret = wasm.bot_new(ptr0, len0, val3, ptr1, len1);
+        const ret = wasm.bot_new(ptr0, len0, val4, ptr1, len1, ptr2, len2);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }
@@ -533,6 +538,10 @@ function getUint8ArrayMemory0() {
         cachedUint8ArrayMemory0 = new Uint8Array(wasm.memory.buffer);
     }
     return cachedUint8ArrayMemory0;
+}
+
+function isLikeNone(x) {
+    return x === undefined || x === null;
 }
 
 function passStringToWasm0(arg, malloc, realloc) {

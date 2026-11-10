@@ -199,8 +199,13 @@ pub struct Bot {
 impl Bot {
     /// A bot by spec string (`sim.runner` specs: `turn:w.hq_threat_reach=0.5`), with a learned evaluator's artifact
     /// as JSON for a `*_learned` kind ("" otherwise).
+    /// `cand_json`: the artifact of the candidate network the spec's `cand=` names (the whole-turn search), when it has one.
     #[wasm_bindgen(constructor)]
-    pub fn new(spec: &str, seed: f64, evaluator_json: &str) -> Result<Bot, JsError> {
+    pub fn new(spec: &str, seed: f64, evaluator_json: &str, cand_json: Option<String>) -> Result<Bot, JsError> {
+        if let Some(text) = cand_json.filter(|t| !t.is_empty()) {
+            let name = spec.split(|c| c == ':' || c == ',').find_map(|kv| kv.strip_prefix("cand=")).ok_or_else(|| err("a candidate network, and no cand= in the spec"))?;
+            bots::cand::give(name, &text).map_err(err)?;
+        }
         let ev = if evaluator_json.is_empty() { None } else { Some(parse(evaluator_json)?) };
         Ok(Bot { bot: bots::Bot::from_spec(spec, seed as i64, ev.as_ref()).map_err(err)? })
     }
