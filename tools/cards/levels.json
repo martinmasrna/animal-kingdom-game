@@ -6241,6 +6241,24 @@
       "by": "claude",
       "at": 1794304790,
       "lv": "draft"
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794318350
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794318377
     }
   },
   "locust_swarm": {
