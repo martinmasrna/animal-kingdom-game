@@ -1,8 +1,8 @@
-# [GIRAFFE], the one who sees first
+# Miradel, the one who sees first
 
 > Nothing gets tried where she can see, and she can see everything.
 
-Legendary, Savanna, strength 7. Hoofed. Your opponent's hand is revealed. Deck: Hoofed. Name: open.
+Legendary, Savanna, strength 7. Hoofed. Your opponent's hand is revealed. Deck: Hoofed. Name: Miradel (draft, Martin, 2026-11-10: Miradel and Galwen "the best two I think", with a worry that the herd's names slip into mush), from the Latin for "to look, to wonder at". The herd beside her: Haldaran the Wildebeest, Galwen the Zebra.
 
 Internal: a legend is the card's character for naming and art, told from the animals' point of view. No player ever sees this text.
 
