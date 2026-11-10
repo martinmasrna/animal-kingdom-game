@@ -131,7 +131,7 @@ Cards of the herd whose job the page can't yet name.
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **[BOAR]** | legendary | 5 | Your opponent's regions produce 5 less food. | Forest |
+| **Stonetusk** | legendary | 5 | Your opponent's regions produce 5 less food. | Forest |
 
 <!-- cards:end -->
 

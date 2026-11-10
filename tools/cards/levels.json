@@ -652,8 +652,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792191060,
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      "at": 1794305305,
+      "note": "Martin 2026-11-10: back on the card as a draft (settled 2026-10-16, bracketed in the 10-17 sweep)",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[BOAR]",
+          "species": "Boar"
+        }
+      }
     }
   },
   "bobcat": {
@@ -3461,8 +3469,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792191060,
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      "at": 1794305304,
+      "note": "Martin 2026-11-10: back on the card as a draft (settled 2026-10-16, bracketed in the 10-17 sweep)",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[OXPECKER]",
+          "species": "Oxpecker"
+        }
+      }
     },
     "effect": {
       "review": {
