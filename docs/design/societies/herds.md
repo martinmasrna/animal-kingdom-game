@@ -36,7 +36,7 @@ The one who sees first, and the wall when the hunters come at night.
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **[GIRAFFE]** | legendary | 7 | Your opponent's hand is revealed. | Savanna |
+| **Miradel** | legendary | 7 | Your opponent's hand is revealed. | Savanna |
 | **Giraffe** | common | 6 | Hungry 2. Has +3 strength during your opponent's turn. | Savanna |
 
 <!-- cards:end -->
@@ -49,7 +49,7 @@ The one whose bark brings the others in; worth more the more of the herd stands 
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **[ZEBRA]** | legendary | 4 | Roar: draw a card for each of your grazing Hoofed animals. | Savanna |
+| **Galwen** | legendary | 4 | Roar: draw a card for each of your grazing Hoofed animals. | Savanna |
 | **Zebra** | common | 5 | Flee. When this flees, return the enemy that covered it to its owner's hand. | Savanna |
 
 <!-- cards:end -->

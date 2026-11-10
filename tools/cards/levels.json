@@ -2026,9 +2026,17 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-11-10: Miradel and Galwen \"the best two I think\", with a worry about mush; draft to live with a week",
       "by": "claude",
-      "at": 1792191064
+      "at": 1794305938,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[GIRAFFE]",
+          "species": "Giraffe"
+        }
+      }
     }
   },
   "golden_orb_weaver": {
@@ -4984,9 +4992,17 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-11-10: Miradel and Galwen \"the best two I think\", with a worry about mush; draft to live with a week",
       "by": "claude",
-      "at": 1792191064
+      "at": 1794305939,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[ZEBRA]",
+          "species": "Zebra"
+        }
+      }
     },
     "effect": {
       "review": {

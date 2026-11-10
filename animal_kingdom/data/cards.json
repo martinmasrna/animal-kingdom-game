@@ -2306,7 +2306,7 @@
     },
     {
       "id": "zebra_legend",
-      "name": "[ZEBRA]",
+      "name": "Galwen",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -2320,7 +2320,7 @@
     },
     {
       "id": "giraffe_legend",
-      "name": "[GIRAFFE]",
+      "name": "Miradel",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
