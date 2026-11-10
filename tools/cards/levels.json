@@ -4227,10 +4227,18 @@
       "at": 1792229409
     },
     "animal": {
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-11-10: \"for Sloth we had Aya ... I think it was quite fine\"; back on the card as a draft",
       "by": "claude",
-      "at": 1792191059,
-      "lv": "draft"
+      "at": 1794305020,
+      "lv": "draft",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[SLOTH]",
+          "species": "Sloth"
+        }
+      }
     }
   },
   "snake_egg": {
