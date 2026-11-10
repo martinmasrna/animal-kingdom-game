@@ -42,21 +42,56 @@ fn mat(d: &sj::Value, key: &str) -> Result<Vec<f64>, String> {
     Ok(out)
 }
 
+/// `w` is column-major here (transposed at load: w[i * n_out + o]); each output still receives its additions in
+/// ascending input order, skipping zero inputs, so the sums are bit-identical to the row-major loop.
 fn linear(w: &[f64], b: &[f64], x: &[f64], n_out: usize, relu: bool) -> Vec<f64> {
-    let n_in = x.len();
-    let mut out = Vec::with_capacity(n_out);
-    for o in 0..n_out {
-        let row = &w[o * n_in..(o + 1) * n_in];
-        let mut s = b[o];
-        for i in 0..n_in {
-            let xi = x[i];
-            if xi != 0.0 {
-                s += row[i] * xi;
+    let mut out: Vec<f64> = b[..n_out].to_vec();
+    for (i, &xi) in x.iter().enumerate() {
+        if xi != 0.0 {
+            let col = &w[i * n_out..(i + 1) * n_out];
+            for (o, c) in out.iter_mut().zip(col.iter()) {
+                *o += c * xi;
             }
         }
-        out.push(if relu && s < 0.0 { 0.0 } else { s });
+    }
+    if relu {
+        for o in out.iter_mut() {
+            if *o < 0.0 {
+                *o = 0.0;
+            }
+        }
     }
     out
+}
+
+fn linear_into(w: &[f64], b: &[f64], x: &[f64], out: &mut [f64]) {
+    let n_out = out.len();
+    out.copy_from_slice(&b[..n_out]);
+    for (i, &xi) in x.iter().enumerate() {
+        if xi != 0.0 {
+            let col = &w[i * n_out..(i + 1) * n_out];
+            for (o, c) in out.iter_mut().zip(col.iter()) {
+                *o += c * xi;
+            }
+        }
+    }
+    for o in out.iter_mut() {
+        if *o < 0.0 {
+            *o = 0.0;
+        }
+    }
+}
+
+fn transpose(w: Vec<f64>, n_out: usize) -> Vec<f64> {
+    if n_out == 0 || w.is_empty() { return w; }
+    let n_in = w.len() / n_out;
+    let mut t = vec![0.0; w.len()];
+    for o in 0..n_out {
+        for i in 0..n_in {
+            t[i * n_out + o] = w[o * n_in + i];
+        }
+    }
+    t
 }
 
 impl CandNet {
@@ -75,13 +110,13 @@ impl CandNet {
         let (head1_w, head1_b, head2_w, head2_b, bias_w, bias_b) = if dot {
             (Vec::new(), Vec::new(), Vec::new(), 0.0, mat(&d, "bias_w")?, mat(&d, "bias_b")?[0])
         } else {
-            (mat(&d, "head1_w")?, mat(&d, "head1_b")?, mat(&d, "head2_w")?, mat(&d, "head2_b")?[0], Vec::new(), 0.0)
+            (transpose(mat(&d, "head1_w")?, hidden), mat(&d, "head1_b")?, mat(&d, "head2_w")?, mat(&d, "head2_b")?[0], Vec::new(), 0.0)
         };
         Ok(CandNet {
             dot, hidden, pos_n, act_n,
-            pos1_w: mat(&d, "pos1_w")?, pos1_b: mat(&d, "pos1_b")?,
-            pos2_w: mat(&d, "pos2_w")?, pos2_b: mat(&d, "pos2_b")?,
-            act1_w: mat(&d, "act1_w")?, act1_b: mat(&d, "act1_b")?,
+            pos1_w: transpose(mat(&d, "pos1_w")?, hidden), pos1_b: mat(&d, "pos1_b")?,
+            pos2_w: transpose(mat(&d, "pos2_w")?, hidden), pos2_b: mat(&d, "pos2_b")?,
+            act1_w: transpose(mat(&d, "act1_w")?, hidden), act1_b: mat(&d, "act1_b")?,
             head1_w, head1_b, head2_w, head2_b, bias_w, bias_b,
         })
     }
@@ -93,10 +128,12 @@ impl CandNet {
         let h = linear(&self.pos1_w, &self.pos1_b, &pos, self.hidden, true);
         let p = linear(&self.pos2_w, &self.pos2_b, &h, self.hidden, true);
         let mut out = Vec::with_capacity(legal.len());
+        let mut av: Vec<f64> = Vec::with_capacity(self.act_n);
+        let mut q: Vec<f64> = vec![0.0; self.hidden];
         for (i, a) in legal.iter().enumerate() {
-            let av = action_vec(st, actor, a, i);
+            action_vec_into(st, actor, a, i, &mut av);
             debug_assert_eq!(av.len(), self.act_n);
-            let q = linear(&self.act1_w, &self.act1_b, &av, self.hidden, true);
+            linear_into(&self.act1_w, &self.act1_b, &av, &mut q);
             if self.dot {
                 let mut s = self.bias_b;
                 for (w, v) in self.bias_w.iter().zip(av.iter()) {
@@ -155,20 +192,27 @@ fn card_vec(st: &State, u: &Unit, strength: i32, v: &mut Vec<f64>) {
 /// extract.py `action_vec`: kind, the card played or moved, the target crossroad's slot, where it is, what the
 /// placement does there, and the option index of a non-crossroad choice.
 pub fn action_vec(st: &State, me: Player, a: &Action, legal_index: usize) -> Vec<f64> {
+    let mut out = Vec::new();
+    action_vec_into(st, me, a, legal_index, &mut out);
+    out
+}
+
+/// `action_vec` written into `out` (cleared first): the same columns in the same order, no temporary vectors.
+pub fn action_vec_into(st: &State, me: Player, a: &Action, legal_index: usize, out: &mut Vec<f64>) {
     let gm = st.map();
     let opp = crate::data::other(me);
     let n_props = 2 + crate::data::KEYWORDS.len() + crate::data::BOT_TAG_COUNT;
     let card_n = 3 + n_props;
     let slot_n = 7 + n_props;
-    let mut kind = [0.0; KINDS];
-    let mut card: Vec<f64> = Vec::with_capacity(card_n);
+    out.clear();
+    out.resize(KINDS, 0.0);
     let mut extra = [0.0; EXTRA_N];
     let mut opt = [0.0; OPT_N];
     let mut target: Option<u8> = None;
     let mut strength: Option<i32> = None;
     match a {
         Action::Place { card: cid, target: t, iid } => {
-            kind[0] = 1.0;
+            out[0] = 1.0;
             let hand = &st.hands[me as usize];
             let u = match iid {
                 Some(i) => hand.iter().find(|x| x.iid == *i),
@@ -176,7 +220,7 @@ pub fn action_vec(st: &State, me: Player, a: &Action, legal_index: usize) -> Vec
             }.or_else(|| hand.iter().find(|x| x.card == *cid));
             if let Some(u) = u {
                 let s = placement_strength(st, u);
-                card_vec(st, u, s, &mut card);
+                card_vec(st, u, s, out);
                 strength = Some(s);
             }
             if let Target::Cr(c) = t {
@@ -184,10 +228,10 @@ pub fn action_vec(st: &State, me: Player, a: &Action, legal_index: usize) -> Vec
             }
         }
         Action::Roam { origin, target: t } => {
-            kind[1] = 1.0;
+            out[1] = 1.0;
             if let Some(u) = st.stacks[*origin as usize].last() {
                 let s = effective_strength(st, u, None);
-                card_vec(st, u, s, &mut card);
+                card_vec(st, u, s, out);
                 strength = Some(s);
             }
             match t {
@@ -195,30 +239,32 @@ pub fn action_vec(st: &State, me: Player, a: &Action, legal_index: usize) -> Vec
                 Target::Hq(_) => extra[7] = 1.0,
             }
         }
-        Action::Draw => kind[2] = 1.0,
-        Action::Pass => kind[5] = 1.0,
+        Action::Draw => out[2] = 1.0,
+        Action::Pass => out[5] = 1.0,
         Action::Choice(v) => match v {
-            Value::Str(s) if *s == SKIP => kind[5] = 1.0,
+            Value::Str(s) if *s == SKIP => out[5] = 1.0,
             Value::Str(s) if gm.by_name.contains_key(*s) => {
-                kind[3] = 1.0;
+                out[3] = 1.0;
                 target = Some(gm.by_name[*s]);
             }
             _ => {
-                kind[4] = 1.0;
+                out[4] = 1.0;
                 opt[legal_index.min(OPT_N - 1)] = 1.0;
             }
         },
     }
-    if card.is_empty() {
-        card.resize(card_n, 0.0);
+    if out.len() == KINDS {
+        out.resize(KINDS + card_n, 0.0);
     }
-    let mut slot: Vec<f64> = Vec::with_capacity(slot_n);
-    let mut where_: Vec<f64> = vec![0.0; BOARD_SLOTS];
+    debug_assert_eq!(out.len(), KINDS + card_n);
+    let where_at = KINDS + card_n + slot_n;
     if let Some(cr) = target {
-        slot_vec(st, me, cr, &mut slot);
+        slot_vec(st, me, cr, out);
+        debug_assert_eq!(out.len(), where_at);
+        out.resize(where_at + BOARD_SLOTS, 0.0);
         if let Some(k) = gm.sorted.iter().position(|&c| c == cr) {
             if k < BOARD_SLOTS {
-                where_[k] = 1.0;
+                out[where_at + k] = 1.0;
             }
         }
         let stack = &st.stacks[cr as usize];
@@ -239,16 +285,10 @@ pub fn action_vec(st: &State, me: Player, a: &Action, legal_index: usize) -> Vec
         extra[5] = en as f64 / 4.0;
         extra[6] = al as f64 / 4.0;
     } else {
-        slot.resize(slot_n, 0.0);
+        out.resize(where_at + BOARD_SLOTS, 0.0);
     }
-    let mut out = Vec::with_capacity(KINDS + card_n + slot_n + BOARD_SLOTS + EXTRA_N + OPT_N);
-    out.extend_from_slice(&kind);
-    out.extend(card);
-    out.extend(slot);
-    out.extend(where_);
     out.extend_from_slice(&extra);
     out.extend_from_slice(&opt);
-    out
 }
 
 static GIVEN: std::sync::Mutex<Vec<(String, std::sync::Arc<CandNet>)>> = std::sync::Mutex::new(Vec::new());

@@ -104,6 +104,10 @@ impl Bot {
             bot.by_card = get("bycard").map(as_usize).unwrap_or(1) != 0;     // 0: every set of cards drawn, for checking it
             bot.beam = get("beam").map(as_usize).unwrap_or(0);     // >0: only that many actions in mid-turn searched on (AtomicBot::beam)
             bot.turn_budget = get("turn_budget").and_then(|v| v.as_f64().or_else(|| v.as_str().and_then(|s| s.parse().ok()))).unwrap_or(0.0);
+            let secs = |name: &str| get(name).and_then(|v| v.as_f64().or_else(|| v.as_str().and_then(|s| s.parse().ok()))).unwrap_or(0.0);
+            bot.bank = secs("bank");
+            bot.bank_turn = secs("bank_turn");
+            bot.by_hand = get("by_hand").map(as_usize).unwrap_or(0);
             bot.partial = get("partial").map(as_usize).unwrap_or(0) != 0;
             if let Some(path) = get("cand").and_then(|v| v.as_str()) {   // the candidate network (cand.rs) chooses the beam
                 bot.cand = Some(cand::named(path)?);

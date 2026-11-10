@@ -130,9 +130,19 @@ pub struct AtomicBot {
     // a narrower width) when at least two are done; off, the whole level is dropped
     pub partial: bool,
     turn_started: Option<(i32, crate::clock::Instant)>,
+    // the game's bank, a player's clock (web/match.py CLOCK_FREE, CLOCK_BANK): `turn_budget` is the turn's free window,
+    // and a level the clock would cut may run on into the bank, by at most half of what is left and `bank_turn` a turn.
+    // A turn is charged what it ran past its free window; 0: no bank
+    pub bank: f64,
+    pub bank_turn: f64,
+    // >0: a level's jobs go hand by hand (every turn against the likeliest hand, then the next), and a cut level
+    // keeps the hands it finished when there are this many
+    pub by_hand: usize,
+    bank_left: f64,
+    turn_banked: f64,
 }
 
-/// A position, for merging turns that reach it by different orders: the board's stacks, both hands, food, decks, the
+/// A position, for merging turns that reach it by different orders: the board's stacks, both hands (each card with its buff and lock), food, decks, the
 /// side to move and whether the game is decided (atomic_bot._key). Unit ids are left out.
 fn key(s: &State) -> Vec<i64> {
     let mut k: Vec<i64> = Vec::with_capacity(96);
@@ -150,10 +160,12 @@ fn key(s: &State) -> Vec<i64> {
         }
     }
     for p in 0..2 {
-        let mut h: Vec<i64> = s.hands[p].iter().map(|u| u.card as i64).collect();
+        let mut h: Vec<[i64; 3]> = s.hands[p].iter().map(|u| [u.card as i64, u.strength_counter as i64, u.locked_until_turn as i64]).collect();
         h.sort_unstable();
         k.push(-2);
-        k.extend(h);
+        for e in h {
+            k.extend(e);
+        }
     }
     k.push(-3);
     k.push(s.food[0] as i64);
@@ -170,7 +182,7 @@ fn key(s: &State) -> Vec<i64> {
 
 impl AtomicBot {
     pub fn new(base: Searcher, rounds: usize, widths: Vec<usize>, inner: usize, cap: usize, threads: usize, hands: usize, temperature: f64, draws: usize) -> AtomicBot {
-        AtomicBot { base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, beam: 0, cand: None, deadline: None, cut: None, roomy: None, kinds_seen: FxHashMap::default(), memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new(), turn_budget: 0.0, partial: false, turn_started: None }
+        AtomicBot { base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, beam: 0, cand: None, deadline: None, cut: None, roomy: None, kinds_seen: FxHashMap::default(), memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new(), turn_budget: 0.0, partial: false, turn_started: None, bank: 0.0, bank_turn: 0.0, by_hand: 0, bank_left: 0.0, turn_banked: 0.0 }
     }
 
     // ------------------------------------------------------------------ evaluation
@@ -234,9 +246,12 @@ impl AtomicBot {
             let mut nxt = st.clone();
             let _ = rules::apply_action(&mut nxt, &a, false);
             if !through_draws && (matches!(a, Action::Draw) || nxt.decks[a_idx].len() != st.decks[a_idx].len()) {
-                let mut p = path.clone();
-                p.push(a);
-                out.push((p, nxt));
+                // the same draw from the same position by another order of the actions before it is one turn
+                if seen.insert(key(&nxt)) {
+                    let mut p = path.clone();
+                    p.push(a);
+                    out.push((p, nxt));
+                }
                 continue;
             }
             path.push(a);
@@ -355,6 +370,16 @@ impl AtomicBot {
         let kept: Vec<i64> = s.hands[o].iter().filter(|u| u.locked_until_turn as i32 > s.turn_counter).map(|u| u.iid).collect();
         let mut hand: Vec<CardId> = s.hands[o].iter().filter(|u| !kept.contains(&u.iid)).map(|u| u.card).collect();
         hand.sort_unstable();
+        // only the Draw action is judged this way: it brings any k cards of their deck at their odds, into the hand they
+        // hold. A draw by a card they play is neither (the card has left the hand; a Mouse draws a Rodent, not any
+        // card), and judged so it gave them plays they did not have: 13% of the calls in the parity test's position
+        // came out better for them than every draw searched, by 10 points and up to 24 (2026-11-10)
+        if !matches!(a, Action::Draw) {
+            return None;
+        }
+        if (kept.len() + hand.len() + k.min(deck.len())) as i32 > s.g.cfg.hand_limit {
+            return None;     // the draw overfills their hand: what is lost depends on the cards, searched set by set
+        }
         let mut sdeck = deck.clone();
         sdeck.sort_unstable();
         let mut pool = hand.clone();
@@ -439,8 +464,8 @@ impl AtomicBot {
                 if !ctx.followed.get(hist).map_or(false, |f| f.contains(&k)) {
                     return None;
                 }
-                if !hist.is_empty() {
-                    return Some(self.line_value(e, me, ctx.plies));     // after a draw: one of an average, so exact
+                if !hist.is_empty() && self.draws != 1 {
+                    return Some(self.line_value(e, me, ctx.plies));     // after a draw: one of an average, so exact (one outcome a draw is no average: the window holds)
                 }
                 let (a, b) = if ctx.mine { (ctx.achieved, ctx.beta) } else { (ctx.alpha, ctx.achieved) };
                 let v = self.best_line(e, me, ctx.plies, a, b).0;
@@ -576,7 +601,8 @@ impl AtomicBot {
                 // a second draw that ends their turn: one position, whatever it brings
                 let mut x = nxt.clone();
                 self.resolve_others(&mut x, actor);
-                if rules::is_terminal(&x).is_some() || x.player_to_act() != actor {
+                let roomy = { let acc = ctx.kinds.as_ref().unwrap(); (acc.kept.len() + acc.n + before - after) as i32 <= acc.g.cfg.hand_limit };
+                if roomy && (rules::is_terminal(&x).is_some() || x.player_to_act() != actor) {
                     ctx.kinds.as_mut().unwrap().n += before - after;
                     let r = self.leaf(ctx, &x, hist, prob, me);
                     ctx.kinds.as_mut().unwrap().n -= before - after;
@@ -587,7 +613,7 @@ impl AtomicBot {
                     }
                     continue;
                 }
-                ctx.chain = true;     // a second draw: judged the old way
+                ctx.chain = true;     // a second draw, or one their real hand has no room for: judged the old way
                 continue;
             }
             let (v, path) = if let Some(v) = judged {
@@ -600,7 +626,8 @@ impl AtomicBot {
                     let n = hist.len();
                     hist.push(-1);
                     hist.extend(taken.iter().copied());
-                    let r = self.tree(x.clone(), actor, me, ctx, hist, memo, prob * w, f64::NEG_INFINITY, f64::INFINITY);
+                    let single = outs.len() == 1;     // one outcome is no average: the window passes through
+                    let r = self.tree(x.clone(), actor, me, ctx, hist, memo, prob * w, if single { alpha } else { f64::NEG_INFINITY }, if single { beta } else { f64::INFINITY });
                     hist.truncate(n);
                     match r {
                         Some((v, _)) => {
@@ -636,8 +663,8 @@ impl AtomicBot {
                 if if mine { v >= self.base.decisive } else { v <= -self.base.decisive } {
                     break;     // a decided win for the actor: nothing can beat it
                 }
-                if hist.is_empty() && if mine { v >= beta } else { v <= alpha } {
-                    break;     // the side choosing above would never allow it (before any draw only)
+                if (hist.is_empty() || self.draws == 1) && if mine { v >= beta } else { v <= alpha } {
+                    break;     // the side choosing above would never allow it (before any draw, or when each draw has one outcome)
                 }
             }
         }
@@ -870,6 +897,7 @@ impl AtomicBot {
     pub fn rank(&mut self, st: &State, me: Player, worlds: &[State], weights: &[f64]) -> Vec<Row> {
         self.memo.clear();
         self.passes.clear();
+        self.kinds_seen.clear();
         let entered = crate::clock::Instant::now();
         let mut rows: Vec<Row> = Vec::new();
         for (path, _) in self.turns(st, me, false) {
@@ -910,31 +938,30 @@ impl AtomicBot {
         // this search's budget: the move's, and no more than the turn has left
         let mut budget = self.base.time_budget;
         let mut capped = budget > 0.0;
-        if self.turn_budget > 0.0 {
-            if let Some((_, t0)) = self.turn_started.filter(|(t, _)| *t == st.turn_counter) {
-                let left = (self.turn_budget - t0.elapsed().as_secs_f64()).max(0.0);
-                budget = if capped { budget.min(left) } else { left };
-                capped = true;
-            }
+        let mut extra = 0.0;     // what this search may take from the bank
+        let turn_clock = if self.turn_budget > 0.0 { self.turn_started.filter(|(t, _)| *t == st.turn_counter).map(|(_, t0)| t0) } else { None };
+        if let Some(t0) = turn_clock {
+            let left = (self.turn_budget - t0.elapsed().as_secs_f64()).max(0.0);
+            budget = if capped { budget.min(left) } else { left };
+            capped = true;
+            extra = (self.bank_left / 2.0).min(self.bank_turn - self.turn_banked).max(0.0);
         }
         for lv in 0..self.rounds {
             // the move's time budget (the base's `time_budget`, 0: none): a deeper level starts only while less than
             // four tenths of it has gone, since each level costs several times the one above; the ranking keeps the
             // levels it has, and the order key already puts a turn's deepest level first
-            if lv > 0 && capped && started.elapsed().as_secs_f64() >= 0.4 * budget {
+            if lv > 0 && capped && started.elapsed().as_secs_f64() >= 0.4 * (budget + extra) {
                 outcome = "skipped";
                 break;
             }
             // a deeper level stops at the budget; level 0 at the move's own (the turn's clock never shortens it: 2 in 100
             // ran past 20 s uncut, the longest 72 s, and a search over the server's limit is the Easy bot's move). A cut
             // level 0 with nothing kept leaves the turns ranked by their boards
-            let deadline = if lv > 0 && capped {
-                Some(started + std::time::Duration::from_secs_f64(budget))
-            } else if lv == 0 && self.base.time_budget > 0.0 {
-                Some(started + std::time::Duration::from_secs_f64(self.base.time_budget))
-            } else {
-                None
-            };
+            // `soft` is where the level stops on its free time, `deadline` where the bank ends: it runs on between
+            // them only while, at the pace so far, it would finish there (run_jobs)
+            let soft_secs = if lv > 0 && capped { Some(budget) } else if lv == 0 && self.base.time_budget > 0.0 { Some(self.base.time_budget) } else { None };
+            let soft = soft_secs.map(|b| started + std::time::Duration::from_secs_f64(b));
+            let deadline = soft_secs.map(|b| started + std::time::Duration::from_secs_f64(if lv > 0 { b + extra } else { b.max(budget + extra) }));
             let width = self.widths[lv.min(self.widths.len() - 1)];
             let go: Vec<usize> = pool.iter().take(width).copied().collect();
             let plies = 2 * lv + 1;
@@ -951,10 +978,36 @@ impl AtomicBot {
                     }
                 }
             }
-            let jobs: Vec<(usize, usize)> = go.iter().flat_map(|&i| (0..worlds.len()).map(move |k| (i, k))).filter(|j| !decided.contains_key(j)).collect();
-            let (mut values, whole) = self.run_jobs(&rows, &jobs, me, plies, deadline);
+            // the hands likeliest first; `by_hand`: every turn against one hand, then every turn against the next, so
+            // a level the clock cuts has all its turns scored on the same hands
+            let mut ks: Vec<usize> = (0..worlds.len()).collect();
+            ks.sort_by(|&a, &b| weights[b].partial_cmp(&weights[a]).unwrap_or(std::cmp::Ordering::Equal).then(a.cmp(&b)));
+            let jobs: Vec<(usize, usize)> = if self.by_hand > 0 {
+                ks.iter().flat_map(|&k| go.iter().map(move |&i| (i, k))).filter(|j| !decided.contains_key(j)).collect()
+            } else {
+                go.iter().flat_map(|&i| (0..worlds.len()).map(move |k| (i, k))).filter(|j| !decided.contains_key(j)).collect()
+            };
+            let (mut values, whole) = self.run_jobs(&rows, &jobs, me, plies, deadline, soft);
             values.extend(decided);
             let mut go = go;
+            if !whole && self.by_hand > 0 {
+                // cut by the deadline: the hands every turn was scored on, at their odds among themselves, when there
+                // are `by_hand` of them; fewer, and the level above (every hand, one level shallower) is the better judge
+                let done: Vec<usize> = ks.iter().copied().filter(|&k| go.iter().all(|&i| values.contains_key(&(i, k)))).collect();
+                if !self.partial || done.len() < self.by_hand || go.len() < 2 {
+                    outcome = if lv == 0 { "first_dropped" } else { "dropped" };
+                    break;
+                }
+                outcome = if lv == 0 { "first_partial" } else { "partial" };
+                kept = done.len();
+                let total: f64 = done.iter().map(|&k| weights[k]).sum();
+                let ws: Vec<f64> = done.iter().map(|&k| weights[k] / total).collect();
+                for &i in &go {
+                    let vs: Vec<f64> = done.iter().map(|&k| values[&(i, k)]).collect();
+                    rows[i].levels[lv] = Some(self.mix(&vs, &ws));
+                }
+                break;
+            }
             if !whole {
                 // cut by the deadline: the turns done in every hand stay when there are two to choose between
                 go.retain(|&i| (0..worlds.len()).all(|k| values.contains_key(&(i, k))));
@@ -974,6 +1027,25 @@ impl AtomicBot {
                 rows[i].levels[lv] = Some(self.mix(&vs, weights));
                 rows[i].per_hand[lv] = Some(vs);
             }
+            if count && whole && lv > 0 && go.len() > 1 {
+                // how soon the hands, likeliest first, already name the turn all of them name, and what a wrong pick
+                // costs on all of them; `above`: the same for the level above's pick
+                let full = |i: usize| rows[i].levels[lv].unwrap();
+                let best = go.iter().copied().fold(go[0], |b, i| if full(i) > full(b) { i } else { b });
+                let mut line = String::new();
+                for n in 1..=ks.len() {
+                    let total: f64 = ks[..n].iter().map(|&k| weights[k]).sum();
+                    let ws: Vec<f64> = ks[..n].iter().map(|&k| weights[k] / total).collect();
+                    let score = |i: usize| { let vs: Vec<f64> = ks[..n].iter().map(|&k| values[&(i, k)]).collect(); self.mix(&vs, &ws) };
+                    let scores: Vec<f64> = go.iter().map(|&i| score(i)).collect();
+                    let mut pick = 0;
+                    for (j, v) in scores.iter().enumerate() {
+                        if *v > scores[pick] { pick = j; }
+                    }
+                    line += &format!(" {:.2}", full(best) - full(go[pick]));
+                }
+                eprintln!("HANDS turns={} above={:.2} loss_by_n{}", go.len(), full(best) - full(go[0]), line);
+            }
             let mut next = go.clone();
             next.sort_by(|&a, &b| rows[b].levels[lv].unwrap().partial_cmp(&rows[a].levels[lv].unwrap()).unwrap_or(std::cmp::Ordering::Equal));
             pool = next;
@@ -981,9 +1053,15 @@ impl AtomicBot {
                 break;
             }
         }
+        if let Some(t0) = turn_clock {
+            // the turn pays the bank for what it has run past its free window, this search's share of it
+            let over = (t0.elapsed().as_secs_f64() - self.turn_budget).max(0.0);
+            self.bank_left = (self.bank_left - (over - self.turn_banked).max(0.0)).max(0.0);
+            self.turn_banked = self.turn_banked.max(over);
+        }
         if count {
-            eprintln!("RANK turn={} rows={} board={:.2}s deep={:.2}s budget={:.1} level={} kept={}", st.turn_counter, rows.len(),
-                      board_secs, started.elapsed().as_secs_f64(), if capped { budget } else { -1.0 }, outcome, kept);
+            eprintln!("RANK turn={} rows={} board={:.2}s deep={:.2}s budget={:.1} level={} kept={} bank={:.1}", st.turn_counter, rows.len(),
+                      board_secs, started.elapsed().as_secs_f64(), if capped { budget } else { -1.0 }, outcome, kept, self.bank_left);
         }
         if std::env::var("AK_COUNT").is_ok() {
             eprintln!("KINDS searched={} fell_back={}", FALLBACKS[0].load(std::sync::atomic::Ordering::Relaxed), FALLBACKS[1].load(std::sync::atomic::Ordering::Relaxed));
@@ -1015,17 +1093,26 @@ impl AtomicBot {
     /// The values of the jobs that finished, and whether that is all of them: the deadline stops the rest, and a job it
     /// cut short is left out.
     fn run_jobs(&mut self, rows: &[Row], jobs: &[(usize, usize)], me: Player, plies: usize,
-                deadline: Option<crate::clock::Instant>) -> (FxHashMap<(usize, usize), f64>, bool) {
+                deadline: Option<crate::clock::Instant>, soft: Option<crate::clock::Instant>) -> (FxHashMap<(usize, usize), f64>, bool) {
         let past = |d: &Option<crate::clock::Instant>| d.map_or(false, |d| crate::clock::Instant::now() >= d);
+        let began = crate::clock::Instant::now();
         let cut = Arc::new(std::sync::atomic::AtomicBool::new(false));
         let mut out: FxHashMap<(usize, usize), f64> = FxHashMap::default();
         let t = if cfg!(target_arch = "wasm32") { 1 } else { self.threads.max(1).min(jobs.len().max(1)) };   // no threads in the browser
         if t <= 1 {
             self.deadline = deadline;
             self.cut = Some(cut.clone());
-            for &(i, k) in jobs {
+            for (j, &(i, k)) in jobs.iter().enumerate() {
                 if past(&deadline) {
                     break;
+                }
+                if past(&soft) {
+                    // on the bank from here: only a level that finishes inside it at the pace so far is worth it
+                    let need = if j == 0 { f64::INFINITY } else { began.elapsed().as_secs_f64() * (jobs.len() - j) as f64 / j as f64 };
+                    let left = deadline.map_or(0.0, |d| (d - crate::clock::Instant::now()).as_secs_f64());
+                    if need > left {
+                        break;
+                    }
                 }
                 let v = self.after_my_turn(&rows[i].ends[k], me, rows[i].open, plies, k as i64);
                 if cut.load(std::sync::atomic::Ordering::Relaxed) {
@@ -1038,6 +1125,7 @@ impl AtomicBot {
             let whole = out.len() == jobs.len();
             return (out, whole);
         }
+        let deadline = soft.or(deadline);     // several threads: no running on into the bank
         // one shared queue: a thread takes the next job when it is free, so no core waits on another's slow share
         let next = std::sync::atomic::AtomicUsize::new(0);
         let results: Vec<Vec<((usize, usize), f64)>> = std::thread::scope(|scope| {
@@ -1095,7 +1183,11 @@ impl AtomicBot {
             return a;
         }
         if self.turn_started.map_or(true, |(t, _)| t != st.turn_counter) {
+            if self.turn_started.map_or(true, |(t, _)| t > st.turn_counter) {
+                self.bank_left = self.bank;     // a new game: a full bank
+            }
             self.turn_started = Some((st.turn_counter, crate::clock::Instant::now()));
+            self.turn_banked = 0.0;
         }
         let (worlds, weights) = self.spread(st, me);
         let ranking = self.rank(st, me, &worlds, &weights);
