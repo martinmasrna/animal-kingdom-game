@@ -921,7 +921,7 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
     let opp = other(me);
     let my_connection = st.connected_occupied(me);
     let opp_connection = st.connected_occupied(opp);
-    let mut v: Vec<f64> = Vec::with_capacity(48);
+    let mut v: Vec<f64> = Vec::with_capacity(if is_board_set(set) { 1024 } else { 48 });
     let (food_progress, food_proximity) = food_terms(st, me, opp);
     v.push(food_progress);
     v.push(food_proximity);
@@ -1173,16 +1173,15 @@ impl SlotEval {
         let th = self.b1f.len();
         let mut sum_s = vec![0.0; sh];
         let mut max_s = vec![f64::NEG_INFINITY; sh];
+        let mut a = vec![0.0; sh];
         for k in 0..self.n_slots {
-            let mut a = self.slot_bias[k].clone();
+            a.copy_from_slice(&self.slot_bias[k]);
             let base = self.slot_offset + k * self.slot_width;
             for i in 0..self.slot_width {
                 let x = phi[base + i];
                 if x != 0.0 {
                     let row = &self.we_s[i];
-                    for j in 0..sh {
-                        a[j] += x * row[j];
-                    }
+                    axpy(&mut a, x, row);
                 }
             }
             for j in 0..sh {
@@ -1195,16 +1194,15 @@ impl SlotEval {
         }
         let mut sum_h = vec![0.0; hh];
         let mut max_h = vec![f64::NEG_INFINITY; hh];
+        let mut a = vec![0.0; hh];
         for k in 0..self.n_hands {
-            let mut a = self.be_h.clone();
+            a.copy_from_slice(&self.be_h);
             let base = self.hand_offset + k * self.hand_width;
             for i in 0..self.hand_width {
                 let x = phi[base + i];
                 if x != 0.0 {
                     let row = &self.we_h[i];
-                    for j in 0..hh {
-                        a[j] += x * row[j];
-                    }
+                    axpy(&mut a, x, row);
                 }
             }
             for j in 0..hh {
@@ -1220,9 +1218,7 @@ impl SlotEval {
             let x = phi[col];
             if x != 0.0 {
                 let row = &self.w1g[i];
-                for j in 0..th {
-                    t[j] += x * row[j];
-                }
+                axpy(&mut t, x, row);
             }
         }
         let ng = self.globals.len();
@@ -1230,9 +1226,7 @@ impl SlotEval {
         for (i, &x) in pooled.iter().enumerate() {
             if x != 0.0 {
                 let row = &self.w1[ng + i];
-                for j in 0..th {
-                    t[j] += x * row[j];
-                }
+                axpy(&mut t, x, row);
             }
         }
         let mut out = self.b2;
@@ -1242,6 +1236,14 @@ impl SlotEval {
             }
         }
         out
+    }
+}
+
+/// a[j] += x * row[j], element by element (each element's own sum is untouched, so the result is bit-identical).
+#[inline(always)]
+fn axpy(a: &mut [f64], x: f64, row: &[f64]) {
+    for (aj, rj) in a.iter_mut().zip(row.iter()) {
+        *aj += x * rj;
     }
 }
 

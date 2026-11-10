@@ -142,7 +142,7 @@ pub struct AtomicBot {
     turn_banked: f64,
 }
 
-/// A position, for merging turns that reach it by different orders: the board's stacks, both hands, food, decks, the
+/// A position, for merging turns that reach it by different orders: the board's stacks, both hands (each card with its buff and lock), food, decks, the
 /// side to move and whether the game is decided (atomic_bot._key). Unit ids are left out.
 fn key(s: &State) -> Vec<i64> {
     let mut k: Vec<i64> = Vec::with_capacity(96);
@@ -160,10 +160,12 @@ fn key(s: &State) -> Vec<i64> {
         }
     }
     for p in 0..2 {
-        let mut h: Vec<i64> = s.hands[p].iter().map(|u| u.card as i64).collect();
+        let mut h: Vec<[i64; 3]> = s.hands[p].iter().map(|u| [u.card as i64, u.strength_counter as i64, u.locked_until_turn as i64]).collect();
         h.sort_unstable();
         k.push(-2);
-        k.extend(h);
+        for e in h {
+            k.extend(e);
+        }
     }
     k.push(-3);
     k.push(s.food[0] as i64);
@@ -244,9 +246,12 @@ impl AtomicBot {
             let mut nxt = st.clone();
             let _ = rules::apply_action(&mut nxt, &a, false);
             if !through_draws && (matches!(a, Action::Draw) || nxt.decks[a_idx].len() != st.decks[a_idx].len()) {
-                let mut p = path.clone();
-                p.push(a);
-                out.push((p, nxt));
+                // the same draw from the same position by another order of the actions before it is one turn
+                if seen.insert(key(&nxt)) {
+                    let mut p = path.clone();
+                    p.push(a);
+                    out.push((p, nxt));
+                }
                 continue;
             }
             path.push(a);
@@ -459,8 +464,8 @@ impl AtomicBot {
                 if !ctx.followed.get(hist).map_or(false, |f| f.contains(&k)) {
                     return None;
                 }
-                if !hist.is_empty() {
-                    return Some(self.line_value(e, me, ctx.plies));     // after a draw: one of an average, so exact
+                if !hist.is_empty() && self.draws != 1 {
+                    return Some(self.line_value(e, me, ctx.plies));     // after a draw: one of an average, so exact (one outcome a draw is no average: the window holds)
                 }
                 let (a, b) = if ctx.mine { (ctx.achieved, ctx.beta) } else { (ctx.alpha, ctx.achieved) };
                 let v = self.best_line(e, me, ctx.plies, a, b).0;
@@ -621,7 +626,8 @@ impl AtomicBot {
                     let n = hist.len();
                     hist.push(-1);
                     hist.extend(taken.iter().copied());
-                    let r = self.tree(x.clone(), actor, me, ctx, hist, memo, prob * w, f64::NEG_INFINITY, f64::INFINITY);
+                    let single = outs.len() == 1;     // one outcome is no average: the window passes through
+                    let r = self.tree(x.clone(), actor, me, ctx, hist, memo, prob * w, if single { alpha } else { f64::NEG_INFINITY }, if single { beta } else { f64::INFINITY });
                     hist.truncate(n);
                     match r {
                         Some((v, _)) => {
@@ -657,8 +663,8 @@ impl AtomicBot {
                 if if mine { v >= self.base.decisive } else { v <= -self.base.decisive } {
                     break;     // a decided win for the actor: nothing can beat it
                 }
-                if hist.is_empty() && if mine { v >= beta } else { v <= alpha } {
-                    break;     // the side choosing above would never allow it (before any draw only)
+                if (hist.is_empty() || self.draws == 1) && if mine { v >= beta } else { v <= alpha } {
+                    break;     // the side choosing above would never allow it (before any draw, or when each draw has one outcome)
                 }
             }
         }
@@ -891,6 +897,7 @@ impl AtomicBot {
     pub fn rank(&mut self, st: &State, me: Player, worlds: &[State], weights: &[f64]) -> Vec<Row> {
         self.memo.clear();
         self.passes.clear();
+        self.kinds_seen.clear();
         let entered = crate::clock::Instant::now();
         let mut rows: Vec<Row> = Vec::new();
         for (path, _) in self.turns(st, me, false) {

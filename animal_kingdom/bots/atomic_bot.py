@@ -43,11 +43,11 @@ from .determinize import determinize
 
 
 def _key(s: GameState) -> tuple:
-    """A position, for merging turns that reach it by different orders: the board's stacks, both hands, food, decks
+    """A position, for merging turns that reach it by different orders: the board's stacks, both hands (each card with its buff and lock), food, decks
     and whether the game is decided. Unit ids are left out (tokens made in another order get other ids)."""
     board = tuple(sorted((cr, tuple((u.card_id, u.owner, effective_strength(s, u)) for u in st))
                          for cr, st in s.board.items() if st))
-    hands = tuple(tuple(sorted(u.card_id for u in s.hands[p])) for p in ("A", "B"))
+    hands = tuple(tuple(sorted((u.card_id, u.strength_counter, u.locked_until_turn) for u in s.hands[p])) for p in ("A", "B"))
     result = rules.is_terminal(s)
     return (board, hands, tuple(sorted(s.food.items())), tuple(len(s.decks[p]) for p in ("A", "B")),
             s.current, result.winner if result else None)
@@ -179,7 +179,10 @@ class AtomicBot(Bot):
                 # anything taken from my own deck (a draw, a card an effect plays or shows from it) is unseen until it
                 # happens: the turn splits there, as at a draw
                 if not through_draws and (isinstance(a, DrawAction) or len(nxt.decks[actor]) != len(st.decks[actor])):
-                    out.append((path + [a], nxt))
+                    k = _key(nxt)        # the same draw from the same position by another order is one turn
+                    if k not in seen:
+                        seen[k] = True
+                        out.append((path + [a], nxt))
                     continue
                 walk(nxt, path + [a])
 
