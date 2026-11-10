@@ -4778,9 +4778,17 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-10-21: \"9/10\"; 2026-11-10: onto the card as a draft, the herd named beside Denae and Elari",
       "by": "claude",
-      "at": 1792191064
+      "at": 1794305673,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[WILDEBEEST]",
+          "species": "Wildebeest"
+        }
+      }
     },
     "strength": {
       "note": "5, under the common's 6: an engine has to stay coverable (Martin, 2026-10-08)",
