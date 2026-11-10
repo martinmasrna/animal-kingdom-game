@@ -799,9 +799,17 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin 2026-11-10: \"let's do Xanthe\"; draft to live with; the stage after the colon",
       "by": "claude",
-      "at": 1792191063
+      "at": 1794302633,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[BUTTERFLY]",
+          "species": "Butterfly"
+        }
+      }
     }
   },
   "butterfly_legend_butterfly": {
@@ -818,6 +826,19 @@
       "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
       "by": "claude",
       "at": 1792660242
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Butterfly",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-10: \"let's do Xanthe\"; draft to live with; the stage after the colon",
+      "by": "claude",
+      "at": 1794302637
     }
   },
   "butterfly_legend_caterpillar": {
@@ -834,6 +855,19 @@
       "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
       "by": "claude",
       "at": 1792660241
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Caterpillar",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-10: \"let's do Xanthe\"; draft to live with; the stage after the colon",
+      "by": "claude",
+      "at": 1794302635
     }
   },
   "butterfly_legend_chrysalis": {
@@ -850,6 +884,19 @@
       "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
       "by": "claude",
       "at": 1792660242
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Chrysalis",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-10: \"let's do Xanthe\"; draft to live with; the stage after the colon",
+      "by": "claude",
+      "at": 1794302636
     }
   },
   "butterfly_legend_monarch": {
@@ -860,6 +907,19 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Monarch",
+          "species": ""
+        }
+      },
+      "note": "Martin 2026-11-10: \"let's do Xanthe\"; draft to live with; the stage after the colon",
+      "by": "claude",
+      "at": 1794302638
     }
   },
   "cairn": {

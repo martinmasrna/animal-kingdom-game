@@ -1871,7 +1871,7 @@
     },
     {
       "id": "butterfly_legend",
-      "name": "[BUTTERFLY]",
+      "name": "Xanthe: Egg",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [],
@@ -3233,18 +3233,19 @@
     },
     {
       "id": "butterfly_legend_caterpillar",
-      "name": "Caterpillar",
+      "name": "Xanthe: Caterpillar",
       "status": "token",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
       "text": "Roar: draw a card. Dawn: evolve. Whenever this gains strength, evolve.",
       "stage": 2,
-      "keywords": []
+      "keywords": [],
+      "species": "Butterfly"
     },
     {
       "id": "butterfly_legend_chrysalis",
-      "name": "Chrysalis",
+      "name": "Xanthe: Chrysalis",
       "status": "token",
       "rarity": "legendary",
       "tags": [],
@@ -3253,11 +3254,12 @@
       "stage": 3,
       "keywords": [
         "Stealth"
-      ]
+      ],
+      "species": "Butterfly"
     },
     {
       "id": "butterfly_legend_butterfly",
-      "name": "Butterfly",
+      "name": "Xanthe: Butterfly",
       "status": "token",
       "rarity": "legendary",
       "tags": [],
@@ -3267,11 +3269,12 @@
       "keywords": [
         "Stealth",
         "Flight"
-      ]
+      ],
+      "species": "Butterfly"
     },
     {
       "id": "butterfly_legend_monarch",
-      "name": "Monarch",
+      "name": "Xanthe: Monarch",
       "status": "token",
       "rarity": "legendary",
       "tags": [],
@@ -3281,7 +3284,8 @@
         "Flight"
       ],
       "text": "Stealth. Flight. Roar: draw 2 cards, then give all animals in your hand +2 strength.",
-      "stage": 5
+      "stage": 5,
+      "species": "Butterfly"
     },
     {
       "id": "eagle_legend_2",
