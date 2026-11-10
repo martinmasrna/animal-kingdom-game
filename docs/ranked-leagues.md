@@ -6,7 +6,7 @@ Settled (Martin, 2026-11-05): three rules, all on the screen. A win gains a star
 
 This page: what four other games do and what each mechanic is for, why this game's leagues work as they do, the rules, the simulation, what a player sees, the calls still open, the names, the migration, and a draft News entry.
 
-Status: built on the branch `ranked/leagues`; nothing shipped. The rules live in one file, `animal_kingdom/web/tiers.py`, which the server and the simulator both use.
+Status: live since 2026-11-06 (merged from `ranked/leagues`), the screens in text only. The rules live in one file, `animal_kingdom/web/tiers.py`, which the server and the simulator both use.
 
 ## A word clash to know about
 
@@ -97,7 +97,7 @@ Text only, as built on the branch; where a picture belongs is marked.
 ## Open calls
 
 1. **Names.** Open, for a session of its own (Martin, 2026-11-05: "leave placeholder 1-10 for now"). The screens say "League 1" to "League 10" until then.
-2. **Pictures.** None in this build. Recommendation: each league's animal portrait from its card art, in the deck rim the history rows use (`kit2/rim_n.webp`), on the ladder screen and at the end of a match; the top league its own piece. A design job for the sandbox.
+2. **Pictures.** None in this build. Settled (Martin, 2026-11-10): the player owns the picture, the league owns the border, the way League of Legends rings a player's own icon with a rank border; Hearthstone's way, a picture per rank, is out. In his words, on profile pictures: "I wanted to create something like that anyway, it naturally transitions into achievement feature as well". The game has no profile pictures yet, so they come first. Open: what the border is made of, how a league reads in it, the top league's piece, the promotion moment. The rounds of 2026-11-06 (`design/league-progress/`, an animal per league in a rim) are superseded. What other games draw: https://claude.ai/artifact/WBVqUZAfNmR6k1ZDKFSna9
 3. **Season resets.** Recommendation: none while few people play. With opponents by league, a reset is only a fresh climb: everyone down a few leagues, back where they belong in a session or two.
 
 ## Names
