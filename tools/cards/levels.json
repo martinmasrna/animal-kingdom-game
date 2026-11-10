@@ -6241,6 +6241,24 @@
       "by": "claude",
       "at": 1794304790,
       "lv": "draft"
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794318350
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794318377
     }
   },
   "locust_swarm": {
@@ -6394,8 +6412,9 @@
         }
       },
       "by": "claude",
-      "at": 1792754583,
-      "note": "into the collection"
+      "at": 1794323225,
+      "note": "Martin 2026-11-10: \"I guess One-Eye can be this tiger, sure\"; from his shelf, draft to live with",
+      "lv": "draft"
     },
     "tag": {
       "review": {
