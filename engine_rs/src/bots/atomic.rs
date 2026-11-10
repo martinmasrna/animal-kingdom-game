@@ -148,6 +148,11 @@ pub struct AtomicBot {
 /// A position, for merging turns that reach it by different orders: the board's stacks, both hands (each card with its buff and lock), food, decks, the
 /// side to move and whether the game is decided (atomic_bot._key). Unit ids are left out.
 fn key(s: &State) -> Vec<i64> {
+    key_hiding(s, None)
+}
+
+/// `key`, with player `hide`'s hand written as its size only.
+fn key_hiding(s: &State, hide: Option<usize>) -> Vec<i64> {
     let mut k: Vec<i64> = Vec::with_capacity(96);
     for cr in 0..s.stacks.len() {
         let st = s.stack(cr as Cr);
@@ -163,6 +168,11 @@ fn key(s: &State) -> Vec<i64> {
         }
     }
     for p in 0..2 {
+        if hide == Some(p) {
+            k.push(-2);
+            k.push(1000 + s.hands[p].len() as i64);
+            continue;
+        }
         let mut h: Vec<[i64; 3]> = s.hands[p].iter().map(|u| [u.card as i64, u.strength_counter as i64, u.locked_until_turn as i64]).collect();
         h.sort_unstable();
         k.push(-2);
@@ -1306,15 +1316,7 @@ fn dealt(st: &State, actor: Player, a: &Action, taken: &[CardId]) -> State {
 
 /// `key` with the opponent's hand as its size only: what `me` can see of the position.
 fn seen_key(s: &State, me: Player) -> Vec<i64> {
-    let mut k = key(s);
-    let o = other(me) as usize;
-    // the hands follow the first -2 (A) and the second -2 (B) markers; replace the opponent's by its size
-    let marks: Vec<usize> = k.iter().enumerate().filter(|(_, &x)| x == -2).map(|(i, _)| i).collect();
-    let end = k.iter().position(|&x| x == -3).unwrap();
-    let (from, to) = if o == 0 { (marks[0] + 1, marks[1]) } else { (marks[1] + 1, end) };
-    let n = (to - from) as i64;
-    k.splice(from..to, std::iter::once(1000 + n));
-    k
+    key_hiding(s, Some(other(me) as usize))
 }
 
 /// The whole position as `me` sees it, as text: the opponent's hand as its size, both decks as their contents, no
