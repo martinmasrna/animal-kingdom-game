@@ -1,5 +1,5 @@
 //! The bots' clock: `std::time::Instant` natively; on wasm32, where `Instant::now` panics, the browser's `Date.now()`
-//! behind the same few methods the search uses (now, elapsed, a deadline as now + duration, comparison).
+//! behind the same few methods the search uses (now, elapsed, a deadline as now + duration, the time between two, comparison).
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use std::time::Instant;
@@ -28,6 +28,13 @@ mod web {
         type Output = Instant;
         fn add(self, d: Duration) -> Instant {
             Instant(self.0 + d.as_secs_f64() * 1000.0)
+        }
+    }
+
+    impl std::ops::Sub for Instant {
+        type Output = Duration;
+        fn sub(self, earlier: Instant) -> Duration {
+            Duration::from_secs_f64(((self.0 - earlier.0) / 1000.0).max(0.0))
         }
     }
 }
