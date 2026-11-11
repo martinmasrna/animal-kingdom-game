@@ -1,8 +1,8 @@
-# [RAT], the granary capo
+# Fat Moe, the granary capo
 
 > Everyone eats because of him.
 
-Legendary, City, strength 4. Roar: gain 4 food for each other Rodent you control. Draw a card. Deck: Rodents. Name: open. Fat Bob was the draft (Martin, 2026-10-20) and went back to a bracket the next day ("too basic and half-assed"): the Fat is right, the street word for him; the second half has to carry something, a seen thing or a name the street would use.
+Legendary, City, strength 4. Roar: gain 4 food for each other Rodent you control. Draw a card. Deck: Rodents. Name: Fat Moe (draft, Martin, 2026-11-11: "yeah, let's do it"; Fat Moe "reads gangster to me", Fat Sal "looks good visually" but sounds awkward aloud, a 3-letter word works after Fat). Fat Bob was the earlier draft (Martin, 2026-10-20) and went back to a bracket the next day ("too basic and half-assed"): the Fat is right, the street word for him; the second half has to carry something, a seen thing or a name the street would use.
 
 Internal: a legend is the card's character for naming and art, told from the animals' point of view. No player ever sees this text.
 
