@@ -2,7 +2,7 @@
 
 Martin, 2026-11-04: instead of ranked being a rating from the start, do what Hearthstone, Gwent, MTG Arena and League do: about ten leagues, each with a few stars; a win gains a star, a loss loses one; a bonus for win streaks; a few stars to move up; checkpoints below which you can't fall; the uncapped rating only in the highest league. Nothing elaborate. The point is progression instead of a flat number.
 
-Settled (Martin, 2026-11-05): three rules, all on the screen. A win gains a star, two from your third win in a row. A loss loses a star, and at 0 stars drops you a league, never out of league 1. You play opponents from your own league; in the top league, from your rating, and the rating shows. In his words on what the top league means: the climb stops where your skill is, "yes, this is how it should be".
+Nothing on this page is settled (Martin, 2026-11-11: "NOTHING is settled yet"). The number of leagues, the rules, the stars and the look are all open; what follows is the first build and the reasoning behind it, not a decision. The build runs on three rules, all on the screen: a win gains a star, two from your third win in a row; a loss loses a star, and at 0 stars drops you a league, never out of league 1; you play opponents from your own league, and in the top league from your rating, which shows. Martin's reaction to the top league (2026-11-05), the climb stopping where your skill is: "yes, this is how it should be".
 
 This page: what four other games do and what each mechanic is for, why this game's leagues work as they do, the rules, the simulation, what a player sees, the calls still open, the names, the migration, and a draft News entry.
 
@@ -40,7 +40,7 @@ On this ladder the opponent is nearly always a bot, and a bot is always there. I
 
 Picking the opponent by league removes the problem at its root. Each league is a band of bot ratings, so a league's opponents get stronger as you climb, and the climb stops where you win as often as you lose: the league says how good you are. A loss at 0 stars has to be able to drop you a league, or a lucky run would leave a weak player in a league that beats them four games in five, for good; with drops, a drop from bad luck puts you among easier opponents and you climb back.
 
-## The design
+## The first build
 
 | League | Stars to move up | Bots it plays (rating) |
 |---|---|---|
@@ -97,7 +97,7 @@ Text only, as built on the branch; where a picture belongs is marked.
 ## Open calls
 
 1. **Names.** Open, for a session of its own (Martin, 2026-11-05: "leave placeholder 1-10 for now"). The screens say "League 1" to "League 10" until then.
-2. **Pictures.** None in this build. Settled (Martin, 2026-11-10): the player owns the picture, the league owns the border, the way League of Legends rings a player's own icon with a rank border; Hearthstone's way, a picture per rank, is out. In his words, on profile pictures: "I wanted to create something like that anyway, it naturally transitions into achievement feature as well". The game has no profile pictures yet, so they come first. Open: what the border is made of, how a league reads in it, the top league's piece, the promotion moment. The rounds of 2026-11-06 (`design/league-progress/`, an animal per league in a rim) are superseded. What other games draw: https://claude.ai/artifact/WBVqUZAfNmR6k1ZDKFSna9
+2. **Pictures.** None in this build, and all of it open: whether a league is a border around the player's own picture (as League of Legends rings a player's icon) or an emblem of its own, what it is made of, how a league reads at badge size, the top league's piece, the promotion moment. Martin on profile pictures (2026-11-10): "I wanted to create something like that anyway, it naturally transitions into achievement feature as well"; the game has none yet. Design rounds so far: `design/league-progress/` (an animal per league in a rim), `design/league-borders/` (borders around a portrait), and antler crests (2026-11-11, https://claude.ai/artifact/PTHsmyvLKtqcWkNShdwXWT). What other games draw: https://claude.ai/artifact/WBVqUZAfNmR6k1ZDKFSna9
 3. **Season resets.** Recommendation: none while few people play. With opponents by league, a reset is only a fresh climb: everyone down a few leagues, back where they belong in a session or two.
 4. **What the leaderboard lists.** Open (Martin, 2026-11-10, two ideas: open on your own league as League of Legends does, or only the top league sorted by rating with your own row pinned under it). Recommendation: the second; below the top league a place among everyone means little, your league and stars are your standing, and a rating ordering only exists in the top league. Also open from the same day: whether rows carry portraits at all (League of Legends shows none).
 5. **Who you play, during the game.** The opponent's name shows only at the versus moment, then nowhere on the board (Martin, 2026-11-10: it probably should, and the profile picture fits there). A board-layout job: vertical room is the scarce part.
