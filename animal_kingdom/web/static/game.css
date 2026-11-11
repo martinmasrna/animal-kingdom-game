@@ -636,3 +636,9 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .pgrid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
 .game .pmodal .pc { position: relative; width: 156px; height: 229px; } .game .pmodal .pc .card { --w: 156px; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
+
+/* League emblem beside a ranked game's one-line result (prototype, branch league-emblems-proto) */
+.game .endbox .lgline { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.game .endbox .lgline .lgem.end { width: 48px; height: 48px; }
+.game .endbox .lgline.up { flex-direction: column; gap: 4px; }
+.game .endbox .lgline.up .lgem.end { width: 112px; height: 112px; }

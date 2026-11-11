@@ -260,12 +260,20 @@ let newsAsked = false;
 // Ranked leagues (docs/ranked-leagues.md; the server's web/tiers.py): your league's name and your stars as a count; in the top
 // league the rating instead. Text only: where a league's picture would go is Martin's call (knowledge/ranked/STATUS.md).
 const starsText = (n, of) => `${n} of ${of} star${of === 1 ? '' : 's'}`;
-const leagueShort = lg => !lg ? '' : lg.top ? `${lg.name} · ${lg.rating}` : `${lg.name} · ${starsText(lg.stars, lg.of)}`;
-const leagueLong = lg => !lg ? '' : [leagueShort(lg), lg.streak >= 2 ? `${lg.streak} wins in a row` : ''].filter(Boolean).join(' · ');
+// League emblems, a look-only prototype (design/league-antlers/, branch league-emblems-proto): league N shows material N,
+// the top league (10) Diamond for now. The server still says "League N"; the client shows the material's name. To swap
+// the art, replace the ten PNGs in static/league/ (same file names).
+const LEAGUE_ART = ['01-wood', '02-bone', '03-stone', '04-copper', '05-silver', '06-gold', '07-jade', '08-sapphire', '09-ruby', '10-diamond'];
+const LEAGUE_NAME = LEAGUE_ART.map(f => f[3].toUpperCase() + f.slice(4));
+const lgIdx = lg => Math.min(10, Math.max(1, (lg && lg.league) | 0 || 1)) - 1;
+const lgName = lg => LEAGUE_NAME[lgIdx(lg)];
+const lgText = t => String(t).replace(/League (\d+)/g, (m, n) => LEAGUE_NAME[n - 1] || m);   // the server's "League N" in a line
+const lgEmblem = (lg, cls = '') => `<img class="lgem${cls ? ' ' + cls : ''}" src="/static/league/${LEAGUE_ART[lgIdx(lg)]}.png" alt="${lgName(lg)}" draggable="false">`;
+const leagueShort = lg => !lg ? '' : lg.top ? `${lgName(lg)} · ${lg.rating}` : `${lgName(lg)} · ${starsText(lg.stars, lg.of)}`;
 const mePiece = () => {   // the Ladder, with your league (or, before leagues, your rating) and your place once you have played ranked
   const sub = !ME ? '' : ME.league && ME.rank ? `${leagueShort(ME.league)} · #${ME.rank}` : ME.league && ME.league.stars ? leagueShort(ME.league)
     : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
-  return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
+  return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${ME && ME.league ? lgEmblem(ME.league, 'tic') : TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
 };
 let homeMode = {};   // the mode home was last drawn in: a late redraw keeps to it (not to the mode it was first opened with)
 function homeScreen(mode = {}) {
@@ -305,7 +313,7 @@ function homeScreen(mode = {}) {
   app.innerHTML = `<div class="mscr home">${chooser}
     <div class="top">${mePiece()}<a class="backbtn lab" href="#/collection" aria-label="Collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.menu}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar">${chosen ? `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>` : `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn"><b>Choose a deck</b><i class="chev"></i></button>`}
-      <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}<i class="chev"></i></button>
+      <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}${opp[0] === 'Ranked' && ME && ME.league ? ' haslg' : ''}" id="oppbtn">${opp[0] === 'Ranked' && ME && ME.league ? lgEmblem(ME.league, 'pk') : ''}<b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}<i class="chev"></i></button>
       <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
   fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
@@ -459,8 +467,8 @@ const nameTag = n => { const [a, t] = String(n).split('#'); return esc(a) + (t ?
 // in view, or, while you're placing, your progress pinned over it.
 // A person's row: their league in the number's place, their stars beside the name; in the top league the rating, the
 // league's name beside the name. A bot's row is as it was (bots have no league).
-const lgCell = x => !x.league ? x.rating : x.league.top ? x.rating : esc(x.league.name);
-const lgNote = lg => !lg ? '' : `<small class="lg">${lg.top ? esc(lg.name) : starsText(lg.stars, lg.of)}</small>`;
+const lgCell = x => !x.league ? x.rating : x.league.top ? x.rating : `<em class="lgc">${lgEmblem(x.league, 'row')}${lgName(x.league)}</em>`;
+const lgNote = lg => !lg ? '' : lg.top ? `<small class="lg lgtop">${lgEmblem(lg, 'row')}${lgName(lg)}</small>` : `<small class="lg">${starsText(lg.stars, lg.of)}</small>`;
 async function fillLeaderboard() {
   const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, pl = j.placing, box = document.getElementById('lboard');
   if (!box) return;
@@ -752,7 +760,7 @@ function ladderScreen() {
   // back goes up one level: an archetype to every deck, a tab to home (Martin, 2026-10-26: it went home from an archetype)
   const up = /^#\/ladder\/meta\/./.test(location.hash) ? '#/ladder/meta' : '#/';
   app.innerHTML = `<div class="mscr ladder"><div class="hist${meta ? ' wide' : ''}"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="${up}" aria-label="Back"></a><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
-    <div class="hbody">${lead ? `${ME.league ? `<p class="lstand" id="lstand">${esc(leagueLong(ME.league))}</p>` : ''}<div class="lead lb" id="lboard"></div>` : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+    <div class="hbody">${lead ? `${ME.league ? `<div class="lstand" id="lstand">${lgEmblem(ME.league, 'big')}<div><b>${lgName(ME.league)}</b><span>${esc([ME.league.top ? `Rating ${ME.league.rating}` : starsText(ME.league.stars, ME.league.of), ME.league.streak >= 2 ? `${ME.league.streak} wins in a row` : ''].filter(Boolean).join(' · '))}</span></div></div>` : ''}<div class="lead lb" id="lboard"></div>` : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
     </div></div>`;
   if (lead) fillLeaderboard();
   if (meta) fillMeta();
@@ -1728,7 +1736,7 @@ function drawEnd() {
     // With leagues (V.league, the server's web/tiers.py) one line says what the game did to your stars, and the number
     // shows only in the top league (docs/ranked-leagues.md); before leagues, the rating alone.
     const lg = V.league, rt = lg && !lg.top ? null : V.rating, d = rt && rt.delta;
-    const lgLine = lg && (!lg.top || /^Up to/.test(lg.line)) ? `<div class="how lgline" id="lgline">${esc(lg.line)}</div>` : '';
+    const lgLine = lg && (!lg.top || /^Up to/.test(lg.line)) ? `<div class="how lgline${/^Up to/.test(lg.line) ? ' up' : ''}" id="lgline">${lgEmblem(lg, 'end')}<span>${esc(lgText(lg.line))}</span></div>` : '';
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${lgLine}
       ${rt ? `<div class="rating"><small>Rating</small><div><b id="rnum">${live ? rt.before : rt.after}</b><span class="rd ${d >= 0 ? 'up' : 'down'}${live ? '' : ' on'}">${d >= 0 ? '+' : '−'}${Math.abs(d)}</span></div></div>` : ''}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
