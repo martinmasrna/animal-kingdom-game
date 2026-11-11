@@ -27,4 +27,5 @@ Names that would suit a legendary one day and have no card yet. The second shelf
 - One-Eye (honey badger list, 2026-10-09: "some old, probably large cat that has been scarred with a lot of fights")
 - Ghost (sperm whale and white squirrel lists, 2026-10-09 and 10-14: "close to perfect", for a white predator)
 - Mnuul, Uulm, Hlua (octopus, 2026-11-05: "let's shelf these for now"; coined, for a cast's one strange name, the nearest anyone can get to saying hers)
+- Lucky [XYZ] (macaque, 2026-11-11: "a good template, but not for this effect")
 - Lady Honeycombe (bee legendary, 2026-11-10: "sounds fine, but not exactly for this effect, I'd expect that to be for something with gaining food")
