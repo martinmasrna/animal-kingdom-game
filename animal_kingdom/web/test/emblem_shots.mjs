@@ -1,5 +1,6 @@
 // Screenshots of the league-emblem prototype for review: home, the ladder and two ranked ends, desktop and phone.
 // Not a test. node emblem_shots.mjs <out dir> (AK_PYTHON=<a venv python> from a worktree without its own .venv)
+import { startServer, openBrowser, gamePage } from './harness.mjs';
 const OUT = process.argv[2];
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const L = (n, stars, of, extra = {}) => ({ league: n, name: `League ${n}`, top: n === 10, streak: 0, best: `League ${n}`, ...(n === 10 ? { rating: '2011' } : { stars, of }), ...extra });
