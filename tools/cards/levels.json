@@ -6446,6 +6446,24 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792783031
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794412734
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794412809
     }
   },
   "ocelot": {

@@ -17,4 +17,6 @@ Martin, 2026-11-10: "what I'm going for would be 'warrior' or 'fighter' effect. 
 
 ## Art
 
-Open. Five rounds on 2026-11-10 and 11 missed the effect and were deleted (Martin, 2026-11-11: "he looks like a fat lazy bum in all of them"); the job files in the design repo (`cards/bar/one-eye-*.jsonl`) hold what was tried and his words on each round.
+Installed as a draft (Martin, 2026-11-11: "Let's go with #6"): him alone, wading the black water of a flooded jungle at night, mouth a little open. The line that made it, in full: "Logen Ninefingers, if he were a tiger. A real tiger with one eye long gone, wading through the black water of a flooded jungle at night." Naming the character was Martin's idea ("what happens if you try telling the picture model to paint 'tiger that looks like Logen Ninefingers'") and the first thing in fifteen rounds he called "not bad at all".
+
+His words on the way there, each about the pictures in front of him that day: alone on the card ("stop trying to make a scene with two animals, the model doesn't handle it"); the scars on the body "AI-slopped"; a handsome face "like some handsome actor from a movie with makeup"; a tiger facing the camera "posing"; red flowers behind him wrong for who he is ("THINK ABOUT PSYCHOLOGY"). The job files in the design repo (`cards/bar/one-eye-*.jsonl`, `gorrak-*.jsonl`) hold every round and what he said of it.
