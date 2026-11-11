@@ -35,7 +35,10 @@ const concede = async page => {
   await page.waitForFunction(() => window.__ak().V.phase === 'playing', { timeout: 30000 });
   await page.click('#menubtn'); await page.waitForSelector('#concov.on'); await page.click('#concede');
 };
-const endLine = page => page.waitForSelector('#lgline', { timeout: 30000 }).then(() => page.$eval('#lgline', e => e.textContent));
+// the league at a ranked game's end, as "<emblem> <lit stars>/<stars> <any words>" (the emblem and the pips carry it)
+const endLine = page => page.waitForSelector('#lgline', { timeout: 30000 }).then(() => page.$eval('#lgline', e => {
+  const lgSum = e => `${e.querySelector('.lgem')?.alt || ''} ${[...e.querySelectorAll('.pip')].filter(p => /\/star\.webp$/.test(p.src)).length}/${e.querySelectorAll('.pip').length}${e.textContent.trim() ? ' ' + e.textContent.trim() : ''}`;
+  return lgSum(e); }));
 
 test('a ranked match against a bot, conceded: its end says your league and stars (nothing to lose at 0 stars in league 1), and shows no number', async () => {
   const p = await player();
@@ -44,7 +47,7 @@ test('a ranked match against a bot, conceded: its end says your league and stars
   await open(p, m);
   assert.equal(await p.evaluate(() => window.__ak().V.seats[window.__ak().V.you].league), 'League 1', 'your seat states your league');
   await concede(p);
-  assert.equal(await endLine(p), 'Wood, 0 of 3 stars');
+  assert.equal(await endLine(p), 'Wood 0/3');
   assert.equal(await p.$('#rnum'), null, 'no rating below the top league');
   assert.deepEqual(p.errors, []);
   await p.close();
@@ -56,15 +59,15 @@ test('a ranked match between two people: the winner\'s end says the stars gained
   assert.equal(ma.id, mb.id, 'two people queueing at once meet');
   await Promise.all([open(a, ma), open(b, mb)]);
   await concede(b);
-  assert.equal(await endLine(a), '+1 star: Wood, 1 of 3 stars');
-  assert.equal(await endLine(b), 'Wood, 0 of 3 stars');
+  assert.equal(await endLine(a), 'Wood 1/3');
+  assert.equal(await endLine(b), 'Wood 0/3');
   await a.goto(`${server.url}/#/ladder`, { waitUntil: 'networkidle0' });
   // the ladder draws at once from the profile it holds, then again from the fresh one (app.js route), and the list fills
   // after each draw: wait for the fresh draw and its list before reading
-  await a.waitForFunction(() => document.querySelector('#lstand')?.textContent.includes('1 of 3 stars') && document.querySelector('#lboard .lr.you .nm small.lg'), { timeout: 15000 });
-  const mine = await a.$eval('#lboard .lr.you', e => [e.querySelector('.nm small.lg').textContent, e.querySelector('b').textContent]);
-  assert.deepEqual(mine, ['1 of 3 stars', 'Wood'], 'your row: your league in the number\'s place, your stars by your name');
-  assert.equal(await a.$eval('#lstand', e => e.textContent), 'Wood1 of 3 stars');
+  await a.waitForFunction(() => document.querySelectorAll('#lstand .pip[src$="/star.webp"]').length === 1 && document.querySelector('#lboard .lr.you'), { timeout: 15000 });
+  const mine = await a.$eval('#lboard .lr.you', e => [e.querySelector('.nm').textContent.replace(/#.*/, ''), e.querySelector('b').textContent]);
+  assert.equal(mine[1], '', 'your row: no league and no number (the leaderboard shows no league)');
+  assert.equal(await a.$eval('#lstand', e => { const lgSum = e => `${e.querySelector('.lgem')?.alt || ''} ${[...e.querySelectorAll('.pip')].filter(p => /\/star\.webp$/.test(p.src)).length}/${e.querySelectorAll('.pip').length}${e.textContent.trim() ? ' ' + e.textContent.trim() : ''}`; return lgSum(e); }), 'Wood 1/3 Wood');
   assert.ok(await a.$$eval('#lboard .lr.bot b', els => els.length > 0 && els.every(e => /^\d+\??$/.test(e.textContent))), 'bots keep their numbers');
   assert.deepEqual([...a.errors, ...b.errors], []);
   await a.close(); await b.close();

@@ -267,13 +267,18 @@ const LEAGUE_ART = ['01-wood', '02-bone', '03-stone', '04-copper', '05-silver', 
 const LEAGUE_NAME = LEAGUE_ART.map(f => f[3].toUpperCase() + f.slice(4));
 const lgIdx = lg => Math.min(10, Math.max(1, (lg && lg.league) | 0 || 1)) - 1;
 const lgName = lg => LEAGUE_NAME[lgIdx(lg)];
-const lgText = t => String(t).replace(/League (\d+)/g, (m, n) => LEAGUE_NAME[n - 1] || m);   // the server's "League N" in a line
 const lgEmblem = (lg, cls = '') => `<img class="lgem${cls ? ' ' + cls : ''}" src="/static/league/${LEAGUE_ART[lgIdx(lg)]}.png" alt="${lgName(lg)}" draggable="false">`;
-const leagueShort = lg => !lg ? '' : lg.top ? `${lgName(lg)} · ${lg.rating}` : `${lgName(lg)} · ${starsText(lg.stars, lg.of)}`;
+// Progress inside a league as the painted star pips (design/league-progress/paint/r1), never as words; in the top league
+// the rating. On a ranked game's end, `gained` pips pop in and a lost star shows cracked.
+const pips = (lg, { gained = 0, lost = false } = {}) => lg.top ? `<b class="lgnum">${esc(lg.rating || '')}</b>`
+  : `<span class="pips" aria-label="${starsText(lg.stars, lg.of)}">${Array.from({ length: lg.of }, (_, i) => {
+    const on = i < lg.stars, broke = lost && i === lg.stars, fresh = on && i >= lg.stars - gained;
+    return `<img class="pip${fresh ? ' new' : ''}${broke ? ' broke' : ''}" style="--i:${i - (lg.stars - gained)}" src="/static/league/${on ? 'star' : broke ? 'star-broken' : 'star-empty'}.webp" alt="" draggable="false">`;
+  }).join('')}</span>`;
 const mePiece = () => {   // the Ladder, with your league (or, before leagues, your rating) and your place once you have played ranked
-  const sub = !ME ? '' : ME.league && ME.rank ? `${leagueShort(ME.league)} · #${ME.rank}` : ME.league && ME.league.stars ? leagueShort(ME.league)
-    : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
-  return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${ME && ME.league ? lgEmblem(ME.league, 'tic') : TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
+  if (ME && ME.league) return `<a class="backbtn me lg" href="#/ladder" aria-label="Ladder">${lgEmblem(ME.league, 'tic')}<span><b>Ladder</b>${pips(ME.league)}</span></a>`;
+  const sub = !ME ? '' : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
+  return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
 };
 let homeMode = {};   // the mode home was last drawn in: a late redraw keeps to it (not to the mode it was first opened with)
 function homeScreen(mode = {}) {
@@ -293,7 +298,7 @@ function homeScreen(mode = {}) {
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
   const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? friendLabel(fr, play.friends) : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
-    : play.opp === 'ranked' ? ['Ranked', ME && ME.league ? leagueShort(ME.league) : `your rating ${(ME && ME.rating) || '1500?'}`]
+    : play.opp === 'ranked' ? ['Ranked', ME && ME.league ? '' : `your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : isTest ? label(TEST_BOTS, play.botDeck) : 'Random'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.short ? `<span class="left">${30 - d.short}/30</span>` : ''}</div>`;
@@ -313,7 +318,7 @@ function homeScreen(mode = {}) {
   app.innerHTML = `<div class="mscr home">${chooser}
     <div class="top">${mePiece()}<a class="backbtn lab" href="#/collection" aria-label="Collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.menu}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar">${chosen ? `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>` : `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn"><b>Choose a deck</b><i class="chev"></i></button>`}
-      <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}${opp[0] === 'Ranked' && ME && ME.league ? ' haslg' : ''}" id="oppbtn">${opp[0] === 'Ranked' && ME && ME.league ? lgEmblem(ME.league, 'pk') : ''}<b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}<i class="chev"></i></button>
+      <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}${opp[0] === 'Ranked' && ME && ME.league ? ' haslg' : ''}" id="oppbtn">${opp[0] === 'Ranked' && ME && ME.league ? lgEmblem(ME.league, 'pk') : ''}<b>${opp[0]}</b>${opp[0] === 'Ranked' && ME && ME.league ? pips(ME.league) : opp[1] ? `<span>${esc(opp[1])}</span>` : ''}<i class="chev"></i></button>
       <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
   fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
@@ -467,8 +472,10 @@ const nameTag = n => { const [a, t] = String(n).split('#'); return esc(a) + (t ?
 // in view, or, while you're placing, your progress pinned over it.
 // A person's row: their league in the number's place, their stars beside the name; in the top league the rating, the
 // league's name beside the name. A bot's row is as it was (bots have no league).
-const lgCell = x => !x.league ? x.rating : x.league.top ? x.rating : `<em class="lgc">${lgEmblem(x.league, 'row')}${lgName(x.league)}</em>`;
-const lgNote = lg => !lg ? '' : lg.top ? `<small class="lg lgtop">${lgEmblem(lg, 'row')}${lgName(lg)}</small>` : `<small class="lg">${starsText(lg.stars, lg.of)}</small>`;
+// No league marks on the rows (Martin, 2026-11-10 and 11-11: the leaderboard doesn't show the league); a person below the
+// top league has no number to show.
+const lgCell = x => !x.league || x.league.top ? x.rating : '';
+const lgNote = () => '';
 async function fillLeaderboard() {
   const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, pl = j.placing, box = document.getElementById('lboard');
   if (!box) return;
@@ -482,7 +489,7 @@ async function fillLeaderboard() {
     if ((await r.json()).friends) { b.replaceWith(''); toast(`You and ${name} are friends`, true); }
     else { b.outerHTML = '<small class="asked">Request sent</small>'; toast(`Friend request sent to ${name}`, true); }
   });
-  const mine = box.querySelector('.lr.you:not(.placing)'); if (mine) mine.scrollIntoView({ block: 'center' });
+  const mine = box.querySelector('.lr.you:not(.placing)'); if (mine) mine.scrollIntoView({ block: 'nearest' });   // nearest: your league's header above the list stays in view when your row already is
 }
 
 // The Meta tab (docs/meta-tab.md): the competitive player's two questions, which deck to play and how to play it, answered
@@ -760,7 +767,8 @@ function ladderScreen() {
   // back goes up one level: an archetype to every deck, a tab to home (Martin, 2026-10-26: it went home from an archetype)
   const up = /^#\/ladder\/meta\/./.test(location.hash) ? '#/ladder/meta' : '#/';
   app.innerHTML = `<div class="mscr ladder"><div class="hist${meta ? ' wide' : ''}"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="${up}" aria-label="Back"></a><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
-    <div class="hbody">${lead ? `${ME.league ? `<div class="lstand" id="lstand">${lgEmblem(ME.league, 'big')}<div><b>${lgName(ME.league)}</b><span>${esc([ME.league.top ? `Rating ${ME.league.rating}` : starsText(ME.league.stars, ME.league.of), ME.league.streak >= 2 ? `${ME.league.streak} wins in a row` : ''].filter(Boolean).join(' · '))}</span></div></div>` : ''}<div class="lead lb" id="lboard"></div>` : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+    ${lead && ME.league ? `<div class="lstand" id="lstand">${lgEmblem(ME.league, 'big')}<b>${lgName(ME.league)}</b>${pips(ME.league)}</div>` : ''}
+    <div class="hbody">${lead ? `<div class="lead lb" id="lboard"></div>` : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
     </div></div>`;
   if (lead) fillLeaderboard();
   if (meta) fillMeta();
@@ -1736,7 +1744,11 @@ function drawEnd() {
     // With leagues (V.league, the server's web/tiers.py) one line says what the game did to your stars, and the number
     // shows only in the top league (docs/ranked-leagues.md); before leagues, the rating alone.
     const lg = V.league, rt = lg && !lg.top ? null : V.rating, d = rt && rt.delta;
-    const lgLine = lg && (!lg.top || /^Up to/.test(lg.line)) ? `<div class="how lgline${/^Up to/.test(lg.line) ? ' up' : ''}" id="lgline">${lgEmblem(lg, 'end')}<span>${esc(lgText(lg.line))}</span></div>` : '';
+    // The emblem in the middle, the pips under it filling (or a star cracking); words only for an event: a streak's bonus
+    // star, or the new league's name on a move (Hearthstone's end of a ranked game, docs/ranked-leagues.md open call 8).
+    const up = lg && /^Up to/.test(lg.line), down = lg && /^Down to/.test(lg.line), gained = lg && +((lg.line.match(/^\+(\d)/) || [])[1] || 0);
+    const event = up || down ? `<b class="lgname">${lgName(lg)}</b>` : / \(win streak\)/.test(lg ? lg.line : '') ? '<div class="how">Win streak: bonus star</div>' : '';
+    const lgLine = lg && (!lg.top || up) ? `<div class="lgend${up ? ' up' : down ? ' down' : ''}" id="lgline">${lgEmblem(lg, 'end')}${event}${lg.top ? '' : pips(lg, { gained: up || down ? 0 : gained, lost: /^-1 star/.test(lg.line) })}</div>` : '';
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${lgLine}
       ${rt ? `<div class="rating"><small>Rating</small><div><b id="rnum">${live ? rt.before : rt.after}</b><span class="rd ${d >= 0 ? 'up' : 'down'}${live ? '' : ' on'}">${d >= 0 ? '+' : '−'}${Math.abs(d)}</span></div></div>` : ''}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;

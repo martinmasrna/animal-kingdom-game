@@ -637,8 +637,16 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .pc { position: relative; width: 156px; height: 229px; } .game .pmodal .pc .card { --w: 156px; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
 
-/* League emblem beside a ranked game's one-line result (prototype, branch league-emblems-proto) */
-.game .endbox .lgline { display: flex; align-items: center; justify-content: center; gap: 10px; }
-.game .endbox .lgline .lgem.end { width: 48px; height: 48px; }
-.game .endbox .lgline.up { flex-direction: column; gap: 4px; }
-.game .endbox .lgline.up .lgem.end { width: 112px; height: 112px; }
+/* A ranked game's end (prototype, branch league-emblems-proto): the emblem in the middle, the pips under it; a won star
+   pops into its socket, a lost one shows cracked; a move between leagues shows the new emblem larger, with its name. */
+.game .endbox .lgend { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 2px; }
+.game .endbox .lgend .lgem.end { width: 132px; height: 132px; }
+.game .endbox .lgend.up .lgem.end, .game .endbox .lgend.down .lgem.end { width: 160px; height: 160px; }
+.game .endbox .lgend .lgname { font: 800 28px/1 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
+.game .endbox .lgend .pips { gap: 4px; } .game .endbox .lgend .pips .pip { width: 34px; height: 34px; }
+.game .endbox .lgend .pip.new { animation: pipin .45s cubic-bezier(.3,1.6,.6,1) both; animation-delay: calc(.6s + var(--i) * .25s); }
+.game .endbox .lgend.up .lgem.end { animation: lgin .6s cubic-bezier(.3,1.4,.6,1) .4s both; }
+@keyframes pipin { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes lgin { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .game .endbox .lgend .pip.new, .game .endbox .lgend.up .lgem.end { animation: none; } }
+@media (max-width: 480px) { .game .endbox .lgend .lgem.end { width: 112px; height: 112px; } .game .endbox .lgend.up .lgem.end, .game .endbox .lgend.down .lgem.end { width: 136px; height: 136px; } .game .endbox .lgend .pips .pip { width: 28px; height: 28px; } }

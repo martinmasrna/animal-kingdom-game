@@ -45,13 +45,15 @@ for (const [sz, vp] of Object.entries(SIZES)) {
   errs.push(...p.errors); await p.close();
   for (const [name, extra] of [
     ['end-win', { rating: { before: '1512', after: '1530', delta: 18 }, league: { ...L(6, 4, 5, { streak: 3 }), line: '+2 stars (win streak): League 6, 4 of 5 stars' } }],
+    ['end-loss', { lost: true, rating: { before: '1530', after: '1514', delta: -16 }, league: { ...L(6, 3, 5), line: '-1 star: League 6, 3 of 5 stars' } }],
     ['end-up', { rating: { before: '1580', after: '1601', delta: 21 }, league: { ...L(7, 0, 5, { streak: 4 }), line: 'Up to League 7, 0 stars' } }]]) {
     const g = await gamePage(browser, server.url); await g.setViewport(vp);
     await g.goto(g.url(), { waitUntil: 'networkidle0' });
     await g.evaluate(async extra => {
       const v = await fetch('/static/lab/mid.json').then(r => r.json()), o = v.you === 'A' ? 'B' : 'A';
-      v.version += 50; v.phase = 'match_over'; v.results = [{ winner: v.you }]; v.score = { [v.you]: 1, [o]: 0 };
-      v.game.result = { winner: v.you, reason: 'food' }; v.ranked = true; Object.assign(v, extra); window.__ak.feed(v);
+      const w = extra.lost ? o : v.you; delete extra.lost;
+      v.version += 50; v.phase = 'match_over'; v.results = [{ winner: w }]; v.score = { [w]: 1, [w === v.you ? o : v.you]: 0 };
+      v.game.result = { winner: w, reason: 'food' }; v.ranked = true; Object.assign(v, extra); window.__ak.feed(v);
     }, extra);
     await g.waitForSelector('#lgline'); await wait(1200);
     await g.screenshot({ path: `${OUT}/${name}-${sz}.png` });

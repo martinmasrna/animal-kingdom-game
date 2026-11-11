@@ -11,6 +11,8 @@ before(async () => { server = await startServer(); browser = await openBrowser()
 after(async () => { await browser?.close(); server?.stop(); });
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
+// a league as shown: "<emblem> <lit stars>/<stars> <any words>"
+const lgSum = e => `${e.querySelector('.lgem')?.alt || ''} ${[...e.querySelectorAll('.pip')].filter(p => /\/star\.webp$/.test(p.src)).length}/${e.querySelectorAll('.pip').length}${e.textContent.trim() ? ' ' + e.textContent.trim() : ''}`;
 const FIVE = { league: 5, name: 'League 5', top: false, streak: 3, best: 'League 5', stars: 2, of: 5 };
 const TOP = { league: 10, name: 'League 10', top: true, streak: 0, best: 'League 10', rating: '2011' };
 
@@ -29,14 +31,14 @@ async function patched(patch) {
   return p;
 }
 
-test('the ladder screen says your league, stars and streak; home\'s Ladder piece your league and place', async () => {
+test('the ladder screen shows your emblem, its name and its stars; home\'s Ladder piece the emblem and stars', async () => {
   const p = await patched({ '/api/me': me => ({ ...me, league: FIVE, rank: 7 }) });
   await p.goto(`${server.url}/#/ladder`, { waitUntil: 'networkidle0' });
   await p.waitForSelector('#lstand');
-  assert.equal(await p.$eval('#lstand', e => e.textContent), 'Silver2 of 5 stars · 3 wins in a row');
+  assert.equal(await p.evaluate(`(${lgSum})(document.querySelector('#lstand'))`), 'Silver 2/5 Silver');
   await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
-  await p.waitForSelector('.backbtn.me small');
-  assert.equal(await p.$eval('.backbtn.me small', e => e.textContent), 'Silver · 2 of 5 stars · #7');
+  await p.waitForSelector('.backbtn.me .pips');
+  assert.equal(await p.evaluate(`(${lgSum})(document.querySelector('.backbtn.me'))`), 'Silver 2/5 Ladder', 'home: the emblem and the pips, no words but the button\'s');
   assert.deepEqual(p.errors, []);
   await p.close();
 });
@@ -45,11 +47,11 @@ test('in the top league the ladder screen shows the rating instead of stars', as
   const p = await patched({ '/api/me': me => ({ ...me, league: TOP, rank: 2 }) });
   await p.goto(`${server.url}/#/ladder`, { waitUntil: 'networkidle0' });
   await p.waitForSelector('#lstand');
-  assert.equal(await p.$eval('#lstand', e => e.textContent), 'DiamondRating 2011');
+  assert.equal(await p.evaluate(`(${lgSum})(document.querySelector('#lstand'))`), 'Diamond 0/0 Diamond2011');
   await p.close();
 });
 
-test('the leaderboard: a person\'s league in the number\'s place and their stars by the name; the top league its number; bots unchanged', async () => {
+test('the leaderboard shows no league: a person below the top no number, the top league its rating, bots unchanged', async () => {
   const p = await patched({
     '/api/me': me => ({ ...me, league: FIVE, rank: 2 }),
     '/api/leaderboard': j => ({ ...j, rows: [
@@ -61,9 +63,9 @@ test('the leaderboard: a person\'s league in the number\'s place and their stars
   await p.goto(`${server.url}/#/ladder`, { waitUntil: 'networkidle0' });
   await p.waitForSelector('#lboard .lr');
   const rows = await p.$$eval('#lboard .lr', els => els.map(e => [e.querySelector('.nm').textContent, e.querySelector('b').textContent]));
-  assert.deepEqual(rows[0], ['Laras#0001Diamond', '2213'], 'the top league: its name by the person, the rating as the number');
+  assert.deepEqual(rows[0], ['Laras#0001', '2213'], 'the top league: the rating as the number, no league mark');
   assert.deepEqual(rows[1], ['Fish (Legendary Bot)', '2175'], 'a bot as before');
-  assert.deepEqual(rows[2], ['Martin#00022 of 5 stars', 'Silver'], 'below the top: the league, no number');
+  assert.deepEqual(rows[2], ['Martin#0002', ''], 'below the top: no league mark and no number');
   assert.ok(rows.slice(3).every(([, n]) => /^\d+\??$/.test(n)), 'the other bots keep their numbers');
   assert.deepEqual(p.errors, []);
   await p.close();
@@ -76,19 +78,19 @@ const endRanked = (pg, extra) => pg.evaluate(async extra => {
   v.game.result = { winner: v.you, reason: 'food' }; v.ranked = true; Object.assign(v, extra); window.__ak.feed(v);
 }, extra);
 
-test('a ranked game\'s end says in one line what it did to your stars, and shows no number below the top league', async () => {
+test('a ranked game\'s end shows your emblem and its stars, words only for a bonus star, and no number below the top league', async () => {
   const pg = await gamePage(browser, server.url);
   await endRanked(pg, { rating: { before: '1512', after: '1530', delta: 18 },
     league: { ...FIVE, line: '+2 stars (win streak): League 5, 2 of 5 stars' } });
   await pg.waitForSelector('#lgline');
-  assert.equal(await pg.$eval('#lgline', e => e.textContent), '+2 stars (win streak): Silver, 2 of 5 stars');
+  assert.equal(await pg.evaluate(`(${lgSum})(document.querySelector('#lgline'))`), 'Silver 2/5 Win streak: bonus star');
   assert.equal(await pg.$('#rnum'), null, 'no rating below the top league');
-  assert.equal(await pg.$$eval('#endov .lgline', e => e.length), 1, 'one line');
+  assert.equal(await pg.$$eval('#endov .lgend', e => e.length), 1, 'one emblem');
   assert.deepEqual(pg.errors, []);
   await pg.close();
 });
 
-test('in the top league the end shows the rating, and the line only on the game that brought you there', async () => {
+test('in the top league the end shows the rating, and the emblem only on the game that brought you there', async () => {
   const pg = await gamePage(browser, server.url);
   await endRanked(pg, { rating: { before: '1990', after: '2004', delta: 14 }, league: { ...TOP, rating: '2004', line: 'League 10: rating 2004' } });
   await pg.waitForSelector('#rnum');
@@ -97,7 +99,7 @@ test('in the top league the end shows the rating, and the line only on the game 
   await pg.goto(pg.url().replace(/#.*/, '#/lab/mid'), { waitUntil: 'networkidle0' });
   await endRanked(pg, { rating: { before: '1890', after: '1904', delta: 14 }, league: { ...TOP, rating: '1904', line: 'Up to League 10' } });
   await pg.waitForSelector('#lgline');
-  assert.equal(await pg.$eval('#lgline', e => e.textContent), 'Up to Diamond');
+  assert.equal(await pg.evaluate(`(${lgSum})(document.querySelector('#lgline'))`), 'Diamond 0/0 Diamond');
   assert.ok(await pg.$('#rnum'), 'and the number with it');
   await wait(100);
   assert.deepEqual(pg.errors, []);

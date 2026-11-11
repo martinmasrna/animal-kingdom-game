@@ -493,20 +493,23 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .hr .meta .hshare:hover { color: #e0dcd4; }
 .ladder .dlink { margin: 8px 0 14px; }
 
-/* League emblems, look-only prototype (branch league-emblems-proto; art in static/league/, design/league-antlers/) */
-.lgem { display: block; flex: none; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
-.home .top .backbtn.me .lgem.tic { width: 44px; height: 44px; margin: 0 -4px 0 -2px; }
-.home .pick.opp.haslg { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; column-gap: 10px; padding-left: 8px; }
-.home .pick.opp.haslg .lgem.pk { grid-row: 1 / 3; align-self: center; width: 44px; height: 44px; }
-.ladder .lstand { display: flex; align-items: center; gap: 16px; }
-.ladder .lstand .lgem.big { width: 96px; height: 96px; }
-.ladder .lstand > div { display: flex; flex-direction: column; line-height: 1.2; }
-.ladder .lstand b { font: 700 28px 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
-.ladder .lstand span { font: 500 17px 'Fira Sans Condensed', sans-serif; color: #b3a996; }
-.lead .lr .lgc { font-style: normal; display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
-.lead .lr .lgem.row { width: 30px; height: 30px; }
-.lead.lb .lr { grid-template-columns: 44px 1fr 130px; }
-.lead .lr .nm small.lgtop { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
-.lead .lr .nm small.lgtop .lgem.row { width: 26px; height: 26px; }
-@media (max-width: 700px) { .lead.lb .lr { grid-template-columns: 36px 1fr 112px; } .ladder .lstand .lgem.big { width: 72px; height: 72px; } .ladder .lstand b { font-size: 24px; } }
-@media (max-width: 480px) { .home .top .backbtn.me .lgem.tic { width: 38px; height: 38px; margin: 0 -6px 0 -4px; } .home .pick.opp.haslg { column-gap: 6px; padding-left: 6px; padding-right: 30px; } .home .pick.opp.haslg .lgem.pk { width: 36px; height: 36px; } }
+/* League emblems, look-only prototype (branch league-emblems-proto; art in static/league/, design/league-antlers/).
+   The emblem says the league and the painted pips the stars: no words beside them (docs/ranked-leagues.md open call 8). */
+.lgem { display: block; flex: none; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,.55)); }
+.pips { display: inline-flex; gap: 2px; } .pips .pip { display: block; width: 18px; height: 18px; }
+.lgnum { font: 700 15px 'Fira Sans Condensed', sans-serif; color: #e4dbcb; }
+.home .top .backbtn.me.lg { gap: 8px; padding-left: 6px; }
+.home .top .backbtn.me.lg .lgem.tic { width: 50px; height: 50px; margin-top: -2px; }
+.home .top .backbtn.me.lg > span { gap: 3px; }
+.home .pick.opp.haslg { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; column-gap: 10px; row-gap: 3px; padding-left: 6px; }
+.home .pick.opp.haslg .lgem.pk { grid-row: 1 / 3; align-self: center; width: 52px; height: 52px; }
+.home .pick.opp.haslg .pips .pip { width: 18px; height: 18px; }
+.ladder .hist:has(> .lstand) { grid-template-rows: 72px auto minmax(0, 1fr) auto; }
+.ladder .lstand { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 4px 0 18px; }
+.ladder .lstand .lgem.big { width: 168px; height: 168px; }
+.ladder .lstand b { font: 800 30px/1 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
+.ladder .lstand .pips { gap: 4px; } .ladder .lstand .pips .pip { width: 30px; height: 30px; }
+.ladder .lstand .lgnum { font-size: 22px; }
+@media (max-width: 700px) { .ladder .lstand .lgem.big { width: 120px; height: 120px; } .ladder .lstand b { font-size: 24px; } .ladder .lstand .pips .pip { width: 24px; height: 24px; } }
+@media (max-width: 480px) { .home .top .backbtn.me.lg .lgem.tic { width: 44px; height: 44px; } .home .top .backbtn.me.lg .pips .pip { width: 13px; height: 13px; }
+  .home .pick.opp.haslg { padding-right: 28px; column-gap: 6px; } .home .pick.opp.haslg .lgem.pk { width: 42px; height: 42px; } .home .pick.opp.haslg .pips { gap: 1px; } .home .pick.opp.haslg .pips .pip { width: 14px; height: 14px; } }
