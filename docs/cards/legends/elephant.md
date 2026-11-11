@@ -1,8 +1,8 @@
-# Hollow, the bull who walks a plain that isn't there anymore
+# [ELEPHANT], the bull who walks a plain that isn't there anymore
 
 > He sets his foot where the path has always been.
 
-Legendary, Savanna, strength 9. Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less. Name: Hollow (draft, Martin, 2026-11-06: "we can try Hollow I guess").
+Legendary, Savanna, strength 9. Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less. Name: open. Hollow was the draft (Martin, 2026-11-06) and went back to a bracket on 2026-11-09 ("primarily adjective, and a bit too on the nose"); the character below is open too (Martin, 2026-11-09: "we need to go over that once again"; he never felt the bull was very old, and the small animals should not be the ones who name him).
 
 Internal: a legend is the card's character for naming and art. No player ever sees this text. Martin on this legend, 2026-11-06: "Sounds great. Pretty bleak and depressing, but I like it."
 
