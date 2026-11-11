@@ -8,7 +8,7 @@ Internal: a legend is the card's character for naming and art, told from the ani
 
 ## Who he is
 
-Martin, 2026-11-11: "he is the Alpha male of the gorillas".
+Martin, 2026-11-11: "he is the Alpha male of the gorillas". Not a tyrant who rules by fear ("not 'the tyrant' that's for sure"). The agent's reading, which he did not confirm in words: the wall, the strongest one, whose troop is brave because he stands in front of it.
 
 ## Where the name stands
 
