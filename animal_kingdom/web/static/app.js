@@ -4,7 +4,7 @@ import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
 import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan, DUR } from './timeline.js';
-import { fly, landed as flightLanded, flying, flightEnd } from './flight.js';
+import { fly, landed as flightLanded, flying, flightEnd, FLIGHT } from './flight.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait } from './board.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
@@ -1342,7 +1342,7 @@ function drawGame() {
   }).join('');
   fitNames(hand);
   // a card that left (played, discarded) or came: the others slide to their new places rather than jump
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) hand.querySelectorAll('.hc:not(.drawn):not(.made)').forEach(el => {
+  if (FLIGHT && !matchMedia('(prefers-reduced-motion: reduce)').matches) hand.querySelectorAll('.hc:not(.drawn):not(.made)').forEach(el => {
     const dx = was.get(el.dataset.iid) - el.offsetLeft;
     if (dx) el.animate([{ translate: `${dx}px 0` }, { translate: '0 0' }], { duration: 260 / (window.AK_SPEED || 1), easing: 'cubic-bezier(.3,.7,.4,1)' });
   });

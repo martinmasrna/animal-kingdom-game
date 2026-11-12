@@ -28,8 +28,11 @@ const clamp = (v, m) => Math.max(-m, Math.min(m, v));
 // (cardHTML), else `from` itself; `id`: its card; `cr`: the crossroad's key, which the board asks about (inFlight, flightEnd);
 // `before`: the units there before the play, shown until the cut; `onArrive(covered)`: redraws the board. Returns false
 // when it can't fly (no art, reduced motion), and the play looks as it always did.
+// Off on live (Martin, 2026-11-12: live plays without it while he compares); on staging and localhost.
+export const FLIGHT = globalThis.location?.hostname !== 'animal-kingdom.fly.dev';
+
 export function fly(from, target, id, cr, before, onArrive, html = null) {
-  if (!from || !target || !hasArt(id) || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  if (!FLIGHT || !from || !target || !hasArt(id) || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
   const stage = document.getElementById('stage'), k = stage.getBoundingClientRect().width / stage.offsetWidth;
   const C = from.getBoundingClientRect(), t = target.getBoundingClientRect();
   const w = from.offsetWidth, h = from.offsetHeight;   // the card's own size (the full card has the same outline)
