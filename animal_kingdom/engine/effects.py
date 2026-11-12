@@ -300,7 +300,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     if play:
         key = f"played_{player}"         # what each player played this turn, for "if you played another Cat" (Serval)
         state.turn_flags[key] = [*state.turn_flags.get(key, []), [unit.iid, unit.card_id]]
-    _fire_place_event(state, unit)       # the Worker Wasp: gain food whenever you place a Colony animal, played or not
+    _fire_place_event(state, unit)       # the Worker Wasp: gain food whenever you place an animal, played or not
     if roar:
         if unit.card_id != "macaw" and _hook(state, unit.card_id, "on_place"):
             state.last_roar[player] = unit.card_id        # the Macaw repeats it (its own copy records the copied card)
@@ -2364,9 +2364,8 @@ def _worker_ant_place(state, unit, cr):
 
 
 def _worker_wasp_friendly_place(state, watcher, placed) -> None:
-    """Worker Wasp: whenever you place a Colony animal, gain 2 food."""
-    if "Colony" in state.cards[placed.card_id].tags:
-        gain_food(state, placed.owner, state.config.worker_wasp_per_place)
+    """Worker Wasp: whenever you place an animal, gain 3 food."""
+    gain_food(state, placed.owner, state.config.worker_wasp_per_place)
 
 
 def _termite_king_place(state, unit, cr):

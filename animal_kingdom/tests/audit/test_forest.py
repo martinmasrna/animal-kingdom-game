@@ -106,9 +106,9 @@ def test_hornet_legend_has_flight():
 
 
 # ============================================================ guard_wasp (Soldier Wasp)
-# "Flight. Has +4 strength while you control 4 or more Colony animals."
+# "Flight. Has +3 strength while you control 4 or more Colony animals."
 
-def test_guard_wasp_has_plus_4_only_with_4_colony_animals():
+def test_guard_wasp_has_plus_3_only_with_4_colony_animals():
     s = st()
     w = put(s, "1,1", "guard_wasp", "A")
     put(s, "1,2", "worker_ant", "A")
@@ -116,7 +116,7 @@ def test_guard_wasp_has_plus_4_only_with_4_colony_animals():
     put(s, "3,3", "worker_ant", "B")                                     # an enemy Colony animal doesn't count
     assert strength(s, w) == 3                                            # 3 Colony, itself included
     put(s, "2,1", "worker_ant", "A")
-    assert strength(s, w) == 7                                            # 4: +4
+    assert strength(s, w) == 6                                            # 4: +3
     s.board["2,1"].pop()
     assert strength(s, w) == 3                                            # live: gone again
 
@@ -145,18 +145,18 @@ def test_worker_ant_alone_gains_3():
 
 
 # ============================================================ worker_wasp
-# "Flight. Whenever you place a Colony animal, gain 3 food."
+# "Flight. Whenever you place an animal, gain 3 food."
 
-def test_worker_wasp_gains_3_when_you_place_a_colony_animal():
+def test_worker_wasp_gains_3_when_you_place_any_animal():
     s = st(hands={"A": ["guard_wasp", "v1"]})
     put(s, "3,3", "worker_wasp", "A")
     play(s, "guard_wasp", "1,1")
     assert s.food["A"] == 3
-    play(s, "v1", "1,2")                                                   # not Colony
-    assert s.food["A"] == 3
+    play(s, "v1", "1,2")                                                   # not Colony: counts all the same
+    assert s.food["A"] == 6
 
 
-def test_worker_wasp_ignores_the_opponents_colony_animal():
+def test_worker_wasp_ignores_the_opponents_animal():
     s = st(current="B", hands={"B": ["guard_wasp"]})
     put(s, "1,1", "worker_wasp", "A")
     play(s, "guard_wasp", "4,1")

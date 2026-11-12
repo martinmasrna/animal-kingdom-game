@@ -27,7 +27,7 @@ class Config:
     rat_king_per_rodent: int = 4         # Roar: gain N food per OTHER Rodent you control
     worker_bee_food: int = 12            # Worker Bee: Roar: gain 12 food
     worker_ant_per: int = 3              # Worker Ant: Roar: gain 3 food for each animal you control
-    worker_wasp_per_place: int = 3       # Worker Wasp: whenever you place a Colony animal, gain 3 food (2 on Martin's sheet; 3 after his first games, 2026-10-24)
+    worker_wasp_per_place: int = 3       # Worker Wasp: whenever you place an animal, gain 3 food (any animal since 2026-11-12; 2 on Martin's sheet; 3 after his first games, 2026-10-24)
     tortoise_legend_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)
     tortoise_legend_food_cap: int = 20        # Methuselah: each player gains at most this much food per turn
@@ -62,7 +62,7 @@ class Config:
                                           # top of its crossroad - see rules overview.md 9.1)
 
     # --- Strength anthems ("has +X", live; decision E) ---
-    guard_hornet_bonus: int = 4          # while >= threshold Colony units
+    guard_hornet_bonus: int = 3          # while >= threshold Colony units (4 until Martin's round robin of 2026-11-12)
     guard_hornet_colony_threshold: int = 4
     mahi_mahi_anthem: int = 1            # Mahi-mahi: your other Fish have +1 (the Mackerel's aura, Martin 2026-10-30)
     tuna_per_fish: int = 1               # Tuna: +1 for each other Fish you control

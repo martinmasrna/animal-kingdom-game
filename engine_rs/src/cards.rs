@@ -870,10 +870,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("worker_wasp", OnFriendlyPlace) => {
             if let Args::FriendlyPlace(placed) = args {
-                if st.card(placed.card).has_tag(T_COLONY) {
-                    let n = cfg(st, "worker_wasp_per_place");
-                    gain_food(st, placed.owner, n, true, false);
-                }
+                let n = cfg(st, "worker_wasp_per_place");
+                gain_food(st, placed.owner, n, true, false);
             }
         }
         ("worker_bee", OnPlace) => gains(st, unit, "worker_bee_food"),

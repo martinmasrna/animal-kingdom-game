@@ -2184,9 +2184,9 @@
       "at": 1792076082
     },
     "effect": {
-      "note": "Martin 2026-10-31: Colony conditions back at 4",
+      "note": "Martin, 2026-11-12, after the round robin of his 12 decks",
       "by": "claude",
-      "at": 1793454475,
+      "at": 1794488295,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers. (3 base, +3: a 6 with Flight, so never a worse Eagle)",
@@ -4036,9 +4036,9 @@
         "prev_note": "",
         "prev": 3
       },
-      "note": "Martin, 2026-10-30 (card board review)",
+      "note": "Martin, 2026-11-12, after the round robin of his 12 decks: the extra-play rares down to 1",
       "by": "claude",
-      "at": 1793370875
+      "at": 1794488295
     }
   },
   "rhinoceros": {
@@ -4556,9 +4556,9 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin, 2026-10-26",
+      "note": "Martin, 2026-11-12, after the round robin of his 12 decks: the extra-play rares down to 1",
       "by": "claude",
-      "at": 1793016193,
+      "at": 1794488295,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
@@ -4899,9 +4899,9 @@
         "prev_note": "",
         "prev": "Flight. Dusk: gain 3 food."
       },
-      "note": "Martin, 2026-10-24, playing it: at 2 it felt too weak",
+      "note": "Martin, 2026-11-12, after the round robin of his 12 decks: any animal, not only Colony",
       "by": "claude",
-      "at": 1792866671
+      "at": 1794488295
     },
     "strength": {
       "review": {
@@ -5505,9 +5505,14 @@
     },
     "strength": {
       "lv": "draft",
-      "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "note": "Martin, 2026-11-12, after the round robin of his 12 decks: the extra-play rares down to 1",
       "by": "claude",
-      "at": 1792191132
+      "at": 1794488294,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
+        "prev": 2
+      }
     }
   },
   "mole_legend": {
@@ -6494,9 +6499,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-30 (card board review)",
+      "note": "Martin, 2026-11-12, after the round robin of his 12 decks: the extra-play rares down to 1",
       "by": "claude",
-      "at": 1793370875
+      "at": 1794488295
     },
     "effect": {
       "review": {

@@ -125,7 +125,7 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], so
     cid = card.id
     bonus = 0
     if not _inked(state, self_iid):
-        if cid == "guard_wasp":             # +5 while you control >= threshold Colony units (itself once on the board)
+        if cid == "guard_wasp":             # +3 while you control >= threshold Colony units (itself once on the board)
             if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
                 bonus += cfg.guard_hornet_bonus
         elif cid == "tuna":                     # +1 for each other Fish you control

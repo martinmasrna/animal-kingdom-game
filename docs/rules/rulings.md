@@ -36,7 +36,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 
 ## Specific cards
 
-- **A "whenever" card doesn't see itself come into play** (Martin, 2026-11-05): the Worker Wasp's "Whenever you place a Colony animal" pays for the Colony animals placed after it, not for itself.
+- **A "whenever" card doesn't see itself come into play** (Martin, 2026-11-05): the Worker Wasp's "Whenever you place an animal" pays for the animals placed after it, not for itself.
 - **"Play a [card]" makes a new one** (Martin, 2026-11-05): the legendary Oxpecker's "play an Oxpecker" plays a new Oxpecker, as the Rabbit's Bunny and the Impala's Baby Impala; an Oxpecker in your hand stays there, and none is needed.
 - **The Locust swarm lands all at once** (Martin, 2026-11-05): "cover the board" is one placement, so every Locust's arrival is seen against the board as it stood before the swarm. A Hippopotamus takes every Locust around it, its own crossroad's Locust burying it changes nothing; the same holds for every trap and every "when an ally is covered" watcher.
 - **Once-per-turn caps.** Value and food triggers print no cap and have none. Each one also has a `cap_*` flag in `engine/config.py` (off by default) for tuning experiments.
