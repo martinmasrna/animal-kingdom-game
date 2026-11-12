@@ -2,7 +2,7 @@
 
 > The safe place is where he hunts.
 
-Legendary, Savanna, strength 5. Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength (Martin, 2026-10-20; wired in 2026-10-21). Name: Ishar, a placeholder draft (Martin, 2026-11-12: "I don't like Ishar, but let's put it on.").
+Legendary, Savanna, strength 5. Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength (Martin, 2026-10-20; wired in 2026-10-21). Name: Ishar the Unseen, a draft to live with for a week (Martin, 2026-11-12).
 
 On 2026-11-12 the herd-as-namer frame was dropped (Martin: "maybe the 'herd names him' is causing us too many problems") after stand-in words for the bogeyman (Furtim, Mormo, Caligo, Strix) read as "gibberish". The sound came first instead, the way Gorrak was found: soft and sly with a hard edge at the end was proposed, and Martin: "Ish- sounds like a good beginning, yeah". Of Ishar, Ishmar, Ishel, Ishvet, Ishkel and Isharak, Ishar went on as the placeholder.
 
