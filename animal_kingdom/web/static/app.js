@@ -496,8 +496,9 @@ async function fillMeta() {
   if (META.lo === null) {   // first visit: the range around your rating, else every rating
     const j0 = await (await api(`/api/meta?lo=0&hi=10000&days=${META.days}`)).json();
     const b = j0.bands || [];
-    if (j0.you && b.length) { const c = Math.floor(j0.you / 100) * 100; META.lo = Math.max(b[0], c - 200); META.hi = Math.min(b[b.length - 1] + 100, c + 300); }
-    else if (b.length) { META.lo = b[0]; META.hi = b[b.length - 1] + 100; }
+    const c = j0.you ? Math.floor(j0.you / 100) * 100 : null;
+    if (c !== null && b.some(x => x >= c - 200 && x < c + 300)) { META.lo = Math.max(b[0], c - 200); META.hi = Math.min(b[b.length - 1] + 100, c + 300); }
+    else if (b.length) { META.lo = b[0]; META.hi = b[b.length - 1] + 100; }   // no games near your rating: every rating, never an empty first page
     META.bands = b;
   }
   if (id) return metaArchetype(box, id, q);
