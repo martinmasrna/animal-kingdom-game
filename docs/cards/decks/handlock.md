@@ -13,7 +13,7 @@ The table below is generated from cards.json, where the cards live.
 | **Kiron** | 1 | Primate | 3 | Dawn: give 2 random animals in your hand +1 strength. |
 | **[GORILLA]** | 1 | Primate | 4 | Roar: give all animals in your hand +1 strength. |
 | **Xanthe: Egg** | 1 | — | 0 | Dawn: evolve. Whenever this gains strength, evolve. |
-| **[EAGLE]** | 1 | Bird | 3 | Flight. Apex Predator. When this enters your hand, add [NAME] to your hand. |
+| **Arne** | 1 | Bird | 3 | Flight. Apex Predator. When this enters your hand, add [NAME] to your hand. |
 
 ### Rare
 

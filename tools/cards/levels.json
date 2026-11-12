@@ -154,8 +154,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191060
+      "note": "Martin, 2026-11-12: \"Arne\"",
+      "at": 1794497598,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[EAGLE]",
+          "species": "Eagle"
+        }
+      }
     },
     "effect": {
       "note": "placeholder names: the text names the mate, not a name",
