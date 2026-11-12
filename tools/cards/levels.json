@@ -1860,8 +1860,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191060
+      "note": "Martin, 2026-11-12: \"Madame Octavia I think works better, no?\" (the fixer who knows where every legend sleeps; French, a Madame)",
+      "at": 1794507176,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[OCTOPUS]",
+          "species": "Octopus"
+        }
+      }
     },
     "strength": {
       "note": "Martin, 2026-10-21: no reason for a 7 body on top of a legendary tutor (f107dcef set it in the generated file only)",
