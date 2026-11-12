@@ -465,6 +465,12 @@ def person_key(lid: str, r: ranking.Rating) -> float:
     return tiers_mod.sort_key(tiers.get(lid), r.rating) if tiers else r.rating
 
 
+def bot_deck_ok(deck) -> bool:
+    """A deck Practice may give a bot: a shipped one, a test one, or one in the ladder's pool (the league's lists, which
+    /api/pool offers as the bots' decks)."""
+    return isinstance(deck, str) and (deck in PREMADE_DECKS or deck in TEST_BOT_DECKS or (ladder is not None and deck in ladder.decks))
+
+
 def pilot_for(band: str, deck: str) -> str:
     """Practice's bot (Martin, 2026-10-20): the player picks one of the five bots (ranking.BANDS) and a deck; the pilot is the
     one whose ladder rating with that deck sits nearest the band's middle. A deck without ladder rows gets the pilot by name."""
@@ -1586,9 +1592,9 @@ async def create_match(req):
         level, bdeck = bot.get("level"), bot.get("deck")
         if not isinstance(level, str) or not isinstance(bdeck, str):
             raise web.HTTPBadRequest(text="bad bot")
-        if level in ranking.BANDS and bdeck in PREMADE_DECKS:
+        if level in ranking.BANDS and bot_deck_ok(bdeck):
             level = pilot_for(level, bdeck)          # one of the five bots, as on the ladder: the pilot follows the band
-        if level not in BOT_LEVELS or bdeck not in {*PREMADE_DECKS, *TEST_BOT_DECKS}:
+        if level not in BOT_LEVELS or not bot_deck_ok(bdeck):
             raise web.HTTPBadRequest(text="bad bot")
         if level == "expert" and player is None:    # an Expert move takes a core for up to 8 s: only for a profile (Martin, 2026-11-05)
             raise web.HTTPUnauthorized(text="the Expert needs a profile")
@@ -1612,9 +1618,9 @@ def _local_seats(req, body: dict) -> tuple[Seat, Seat]:
         raise web.HTTPBadRequest(text=str(e))
     bot = body.get("bot") or {}
     level, bdeck = bot.get("level"), bot.get("deck")
-    if level in ranking.BANDS and bdeck in PREMADE_DECKS:
+    if level in ranking.BANDS and bot_deck_ok(bdeck):
         level = pilot_for(level, bdeck)
-    if level not in BOT_LEVELS or bdeck not in {*PREMADE_DECKS, *TEST_BOT_DECKS}:
+    if level not in BOT_LEVELS or not bot_deck_ok(bdeck):
         raise web.HTTPBadRequest(text="bad bot")
     player = profile_of(req)
     host = Seat(secrets.token_urlsafe(12), display(player) if player else body.get("name") or "You", deck=deck,

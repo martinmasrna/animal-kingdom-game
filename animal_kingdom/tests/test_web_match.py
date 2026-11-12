@@ -705,3 +705,13 @@ def test_a_saved_match_from_before_a_card_was_renamed_reloads_and_plays_on():
     r = Match.from_dict(server._renamed(back(saved)))
     assert r.view("A")["game"] == m.view("A")["game"]
     _play_out_game(r, rng)
+
+
+def test_practice_accepts_a_bot_deck_from_the_ladders_pool(monkeypatch):
+    """Practice offers the ladder's decks (the league's lists, registered at runtime, in no shipped file) as the bots'
+    decks; the server takes them too (2026-11-12: live answered every Random practice match with 'bad bot')."""
+    from types import SimpleNamespace
+    from animal_kingdom.web import server
+    monkeypatch.setattr(server, "ladder", SimpleNamespace(decks=["martin_league_list"]))
+    assert server.bot_deck_ok("martin_league_list") and server.bot_deck_ok("lions30")
+    assert not server.bot_deck_ok("nobody_s_list") and not server.bot_deck_ok(None)
