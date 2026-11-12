@@ -3935,14 +3935,14 @@
     },
     {
       "id": "sardine_legend",
-      "name": "[SARDINE]",
+      "name": "Santa Sardinia",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Fish"
       ],
       "base_strength": 1,
-      "text": "[SARDINE] and your adjacent Fish count as 2 Fish.",
+      "text": "Santa Sardinia and your adjacent Fish count as 2 Fish.",
       "species": "Sardine",
       "habitat": "Open Ocean",
       "keywords": []
