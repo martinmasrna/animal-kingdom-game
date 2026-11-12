@@ -2865,8 +2865,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191059
+      "note": "Martin, 2026-11-12: \"Karakhan sounds very good, nice. It also sounds male and like a fighter, which is exactly how I imaged the wolf.\"",
+      "at": 1794504297,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[BLACK WOLF]",
+          "species": "Wolf"
+        }
+      }
     },
     "effect": {
       "review": {
