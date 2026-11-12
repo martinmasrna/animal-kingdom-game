@@ -1487,7 +1487,10 @@ async def takeover_match(req, src: dict):
     seat = src.get("seat")
     if seat not in ("A", "B"):
         seat = "A" if rec["bots"][0] != "human" else "B"       # the seat that wasn't yours
-    state = position_at(rec, rnd, seat)
+    try:
+        state = position_at(rec, rnd, seat)
+    except EngineError:                 # a card it used has changed since: the log no longer replays that far
+        raise web.HTTPBadRequest(text="This game was played on older cards and can't be replayed to that round")
     if state is None:
         raise web.HTTPBadRequest(text=f"Round {rnd} has no turn of that seat")
     for slug, lst in zip((rec["deck_a"], rec["deck_b"]), rec["lists"]):

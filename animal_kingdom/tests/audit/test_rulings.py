@@ -633,8 +633,8 @@ def test_engine_reading__a_roam_sets_off_no_whenever_you_place_reaction():
     put(s, "3,3", "worker_wasp", "A")
     put(s, "1,1", "young_ant", "A")
     play(s, "coyote", "1,2")
-    choose(s, "1,1"); choose(s, "2,1")          # a Colony animal roams: no food
-    assert s.food["A"] == 0
+    choose(s, "1,1"); choose(s, "2,1")          # an animal roams: no food for the move
+    assert s.food["A"] == 3                     # only the Coyote's own placement paid
 
 
 def test_engine_reading__an_apex_predator_roams_only_onto_an_animal_its_own_included_and_eats_it():
