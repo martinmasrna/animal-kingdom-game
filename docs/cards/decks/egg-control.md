@@ -12,7 +12,7 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Eon** | 1 | Snake | 10 | Apex Predator. Dusk: shuffle Eon into your deck with -1 strength and draw a card. |
 | **Grimm** | 1 | Bird | 3 | Flight. Roar: put 2 animals from your opponent's Remove Pile into your hand. |
-| **[CUCKOO]** | 1 | Bird | 6 | Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal. |
+| **Cuco** | 1 | Bird | 6 | Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal. |
 | **[BAT]** | 1 | — | 1 | Flight. Dawn: draw a card. |
 
 ### Rare

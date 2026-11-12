@@ -2,7 +2,7 @@
 
 > Just doing whatever they want and not caring who they hurt in the process.
 
-Legendary, Meadow. `[CUCKOO]`: Roar: remove an adjacent animal of strength 4 or less; if it was yours, play another animal. Name: open. No legend is written yet.
+Legendary, Meadow. `Cuco`: Roar: remove an adjacent animal of strength 4 or less; if it was yours, play another animal. Name: Cuco, draft (Martin, 2026-11-12). No legend is written yet.
 
 Internal: a legend is the card's character for naming and art, told from the animals' point of view. No player ever sees this text.
 
@@ -16,4 +16,4 @@ The agent's reading, put to Martin on 2026-11-12: the warblers who raised him. H
 
 ## Where the name stands
 
-Open. Bent versions of dusty English boys' names (Obrey, Humfrey, Godrey, Dudly, Budley, Cubbert, Eustas, Pursey, Wilfry) did not sound like him (Martin, 2026-11-11: "no"). Words about the bird itself (egg, nest, gowk) were dropped as material: they lead to puns.
+Cuco, as a draft (Martin, 2026-11-12: "let's go for Cuco"), his own name for the card from 2026-10-09, after a list of English pet names missed and Regulus, Infante and Cosimo were put to him. Bent versions of dusty English boys' names (Obrey, Humfrey, Godrey, Dudly, Budley, Cubbert, Eustas, Pursey, Wilfry) did not sound like him (Martin, 2026-11-11: "no"). Words about the bird itself (egg, nest, gowk) were dropped as material: they lead to puns.
