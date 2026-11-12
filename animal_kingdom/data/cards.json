@@ -1897,7 +1897,7 @@
         "Bird"
       ],
       "base_strength": 3,
-      "text": "Flight. Apex Predator. When this enters your hand, add [NAME] to your hand.",
+      "text": "Flight. Apex Predator. When this enters your hand, add Skya to your hand.",
       "related": [
         "eagle_legend_2"
       ],
@@ -3289,7 +3289,7 @@
     },
     {
       "id": "eagle_legend_2",
-      "name": "[EAGLE'S MATE]",
+      "name": "Skya",
       "status": "token",
       "rarity": "legendary",
       "tags": [
@@ -3301,7 +3301,8 @@
         "Apex Predator"
       ],
       "text": "Flight. Apex Predator. While this and its mate are in your hand, they share their strength.",
-      "mate": "eagle_legend"
+      "mate": "eagle_legend",
+      "species": "Eagle"
     },
     {
       "id": "tutorial_cape_buffalo",

@@ -2,7 +2,7 @@
 
 > Two partners, bonded for life.
 
-Two legendaries, Forest, both with Flight and Apex Predator: `[EAGLE]` puts its mate into your hand when it enters your hand; `[EAGLE'S MATE]` shares strength with its mate while both are in hand. Names: open. No legend is written yet.
+Two legendaries, Forest, both with Flight and Apex Predator: `Arne` puts its mate into your hand when it enters your hand; `Skya` shares strength with its mate while both are in hand. Names: Arne and Skya, drafts (Martin, 2026-11-12). No legend is written yet.
 
 Internal: a legend is the card's character for naming and art, told from the animals' point of view. No player ever sees this text.
 
@@ -25,7 +25,9 @@ What missed, in his words:
 
 ## Where it stands
 
-A direction, not a pick (Martin, 2026-11-11: "let's write this down as a direction for now, and I'll try to have my subconscious mind work on it"). On the last list he said "okay, better" and "Skye is fine but doesn't really sound northern". The candidates on the table, none chosen:
+Arne and Skya, as drafts (Martin, 2026-11-12). He brought Arne back himself ("Arne?"); her name had to be Scandinavian, two syllables ending in -a, four letters so the pair sounds well together "like Bonnie and Clyde", and built on a root that means something for an eagle the way *arn* does, not necessarily a real name ("don't worry about it being a real name!!!"). Gyda and Tyra were "best so far, but neither of them good enough"; of Vyda, Skya (Old Norse *ský*, cloud), Byla and Lyfa: "Skya is fine". On 2026-11-11 he had said "Skye is fine but doesn't really sound northern"; the Norse root and the -a ending are what moved it.
+
+The candidates from 2026-11-11, before Arne came back:
 
 - Eyrik (Erik, "eyrie")
 - Sturm ("storm")

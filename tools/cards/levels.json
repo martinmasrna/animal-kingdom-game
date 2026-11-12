@@ -140,6 +140,19 @@
       "note": "Martin, 2026-10-22: the mate matches the Eagle (they share strength)",
       "by": "claude",
       "at": 1792655320
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "[EAGLE'S MATE]",
+          "species": ""
+        }
+      },
+      "note": "Martin, 2026-11-12: \"Skya is fine\"",
+      "by": "claude",
+      "at": 1794498111
     }
   },
   "eagle_legend": {
@@ -166,9 +179,14 @@
       }
     },
     "effect": {
-      "note": "placeholder names: the text names the mate, not a name",
-      "by": "martin",
-      "at": 1792657587
+      "note": "the mate's name in place of [NAME] (Martin named her Skya, 2026-11-12)",
+      "by": "claude",
+      "at": 1794498111,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "placeholder names: the text names the mate, not a name",
+        "prev": "Flight. Apex Predator. When this enters your hand, add [NAME] to your hand."
+      }
     },
     "strength": {
       "note": "Martin, 2026-10-22: buffed to 3",
