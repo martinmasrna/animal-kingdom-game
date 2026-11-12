@@ -1256,8 +1256,16 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191059
+      "note": "Martin, 2026-11-12: \"okay then, you win\" (Akana, 'white mother', the mirror of Karakhan: a steppe colour plus a role)",
+      "at": 1794505471,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[WHITE WOLF]",
+          "species": "Wolf"
+        }
+      }
     },
     "effect": {
       "review": {
