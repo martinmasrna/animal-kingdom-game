@@ -940,7 +940,8 @@ const PB = { busy: false, queue: [], t: null };
 const DUR_REVEAL_HOLD = DUR.reveal * 0.62;   // s: the opponent's card held at the centre before it flies (game.css @keyframes reveal)
 // A flown card touches down (flight.js): the board draws the piece landing, with the landing's sound (the step that put it
 // there drew the crossroad as it was, so it made none).
-const landNow = covered => { if (screen !== 'game') return; drawBoard(); sfx(covered ? 'cover' : 'land'); };
+const landNow = covered => { if (screen !== 'game') return; drawBoard(); sfx(covered ? 'cover' : 'land', LAND_HIT); };
+const LAND_HIT = 0.32;   // s from the cut to the piece's impact (game.css @keyframes landf)
 function onView(prev) {
   if (PB.busy) { PB.queue.push(V); V = PB.shown; return; }   // keep showing the step in play
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once
@@ -1431,7 +1432,7 @@ function drawGame() {
     rv.style.setProperty('--hx', `${VIEW.port ? 184 - STAGE.w / 2 : 0}px`); rv.style.setProperty('--hy', `${5 - (VIEW.port ? 560 : 300)}px`);   // their hand's centre
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
     // after its hold the card flies down and lands as the piece (flight.js); without art it shrinks away as before
-    clearTimeout(drawGame.rvfly); drawGame.rvfly = setTimeout(() => { if (ui.step === st && fly(rv.querySelector('.card'), $('board').querySelector(`[data-cr="${dcr(st.cr)}"]`), st.card, 'B', dcr(st.cr), viewerGame().board[dcr(st.cr)], landNow)) rv.classList.remove('on'); },
+    clearTimeout(drawGame.rvfly); drawGame.rvfly = setTimeout(() => { if (ui.step === st && fly(rv.querySelector('.card'), $('board').querySelector(`[data-cr="${dcr(st.cr)}"]`), st.card, dcr(st.cr), viewerGame().board[dcr(st.cr)], landNow)) rv.classList.remove('on'); },
       DUR_REVEAL_HOLD * 1000 / (window.AK_SPEED || 1));
   }
   drawCoach($('coach'), d.lesson, d.rings);   // a lesson's coach (coach.js); none while steps play
@@ -1632,7 +1633,8 @@ function wireBoard() {
     const cr = g.dataset.cr;
     if (cr in d.crChoice) return act({ kind: 'choice', choice: d.crChoice[cr] });
     if (ui.sel && d.rings.includes(cr)) {   // the card flies from the hand to its crossroad (flight.js); the hand closes up behind it
-      const iid = selCopy().iid, flew = fly(document.querySelector(`#hand .hc[data-iid="${iid}"] .card`), g, ui.sel, 'A', cr, viewerGame().board[cr], landNow);
+      const iid = selCopy().iid, flew = fly(document.querySelector(`#hand .hc[data-iid="${iid}"] .card`), g, ui.sel, cr, viewerGame().board[cr], landNow,
+        cardHTML(formOf(ui.sel, V.you), { str: selCopy().str }));   // in full, text and all, as the opponent's
       act(placeAction(['cr', dcr(cr)]));
       if (flew) { ui.flyIid = iid; drawGame();
         setTimeout(() => { if (ui.flyIid === iid && screen === 'game') { ui.flyIid = null; drawGame(); } }, 5000); }   // a refused play: the card is back
