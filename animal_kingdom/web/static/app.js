@@ -359,7 +359,7 @@ function homeScreen(mode = {}) {
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const pool = play.level === 'Beginner' ? botAll.filter(d => EASY_POOL.includes(d.id)) : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
+      const easy = play.level === 'Beginner' ? botAll.filter(d => EASY_POOL.includes(d.id)) : [], pool = easy.length ? easy : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck };
     }
     if (play.opp === 'gauntlet') {
