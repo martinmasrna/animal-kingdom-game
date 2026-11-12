@@ -4,7 +4,6 @@
 // draws it. Layout and look: the design sandbox's screen/plan.md and screen/kit/.
 import { CROP, hasArt, artUrl } from './art.js';
 import { KEYWORDS } from './card.js';
-import { flightEnd, inFlight } from './flight.js';
 import { pitStates, heldRegions, boardChanges, incomeFlights, eatFlights } from './turn.js';
 
 export const STAGE = { w: 1512, h: 800 };
@@ -135,15 +134,7 @@ export function renderBoard(el, M, g, cards, ui) {
     let strike = '';
     if (ui.strike && ui.strike.from === cr) { const [tx, ty] = at(...ui.strike.to.split(',').map(Number)), dx = tx - x, dy = ty - y, n = Math.hypot(dx, dy) || 1;
       strike = `--sx:${(dx / n * 26).toFixed(1)}px;--sy:${(dy / n * 26).toFixed(1)}px`; }
-    // a card flying here from a hand (flight.js): until it touches down the crossroad shows what it had; then the piece lands
-    // in its place (--fd: when it touched down, from this step's start; negative once that is past, so it never replays)
-    const was = inFlight(cr);
-    if (was) {
-      s += was.length ? put(`cr unit ${was[was.length - 1].owner}`, x, y, unit(was[was.length - 1], was.slice(0, -1).reverse(), cards), `data-cr="${cr}" data-card="${was[was.length - 1].id}"`)
-        : put('cr clear', x, y, '', `data-cr="${cr}"`);
-      continue; }
-    const fe = flightEnd(cr), flown = fe ? `--fd:${Math.round(fe - (Date.now() - (ui.ago || 0)))}ms` : '';
-    s += put(`cr unit ${u.owner}${cls}${flown ? ' flown' : ''}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}${eating.has(cr) ? ' eat' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards, fire.has(cr)), `data-cr="${cr}" data-card="${u.id}"`, [strike, flown].filter(Boolean).join(';'));
+    s += put(`cr unit ${u.owner}${cls}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}${eating.has(cr) ? ' eat' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards, fire.has(cr)), `data-cr="${cr}" data-card="${u.id}"`, strike);
   }
 
   // Removed units drain, sink and leave dust; returned ones lift and fly to their owner's side of the screen.
