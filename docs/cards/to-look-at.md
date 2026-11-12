@@ -8,6 +8,8 @@ Cards Martin flagged from play for a closer look. A card leaves the list once it
 - **Viper** (Egg, common, 3): "Roar: an adjacent enemy unit gets -3 strength." Martin: this effect needs to be on a flying unit.
 - **[RAT]** (Rodents, legendary, 4): "Roar: gain 4 food for each other Rodent you control. Draw a card." The worst of the deck's legendaries over 2,160 Expert games (2026-10-11); left alone in the redesign until Martin plays the deck with the Hamster.
 
+- **[TUNA]** (Fish, legendary, 5): "Roar: for each region you control, draw a card and gain 5 food." Martin (2026-11-12), asked for its character before naming: "no strong feelings about the Tuna to be honest, it's a pretty forgettable card :D (maybe a signal that the effect should change?)". Unnamed until the effect is looked at.
+
 - **Tarantula** (rare, 5): "Dawn: remove a random adjacent ally and gain its strength." Martin (2026-10-12): it should be placed on top of one of your animals and eat it, gaining its strength, rather than eating a neighbour at Dawn: less clunky, and clearly apart from the City Spider. With a future "take control of an enemy animal for a turn" card it eats an enemy 10 and becomes huge.
 
 ## Pool-wide sweep: untagged means generalist
