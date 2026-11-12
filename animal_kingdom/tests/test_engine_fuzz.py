@@ -31,9 +31,9 @@ def test_random_games_raise_nothing(seed):
 
 def test_long_game_ends_at_the_turn_cap():
     """A random game in which both decks and hands run dry and roaming keeps a player acting, so the two-idle-turns end
-    never fires; the turn cap ends it. Seed 440 on the 2026-11-09 card pool (a card change can move it: find the first
+    never fires; the turn cap ends it. Seed 2077 on the 2026-11-12 card pool (a card change can move it: find the first
     seed whose game ends at the cap with both decks and hands empty)."""
-    rec, n, state = fuzz.play(440, max_actions=100_000)
+    rec, n, state = fuzz.play(2077, max_actions=100_000)
     assert rec is None
     result = rules.is_terminal(state)
     assert result is not None and result.reason == "max_turns"
