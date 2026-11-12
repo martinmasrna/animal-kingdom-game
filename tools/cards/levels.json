@@ -236,9 +236,17 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin, 2026-11-12: \"Kiron is the best of these, not 100% in love with it\"",
       "by": "claude",
-      "at": 1792191063
+      "at": 1794497161,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[BABOON]",
+          "species": "Baboon"
+        }
+      }
     }
   },
   "baby_bear": {
