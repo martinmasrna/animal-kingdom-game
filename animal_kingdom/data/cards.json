@@ -450,7 +450,7 @@
       "tags": [
         "Canine"
       ],
-      "base_strength": 5,
+      "base_strength": 3,
       "text": "Once each turn, an ally with Roam can roam for free.",
       "species": "Wolf",
       "habitat": "Forest",

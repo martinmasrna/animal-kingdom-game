@@ -1268,6 +1268,16 @@
       "note": "card audit 2026-11-04: the Clarion ruling (only allies with Roam) written on the card; the engine already does this",
       "by": "claude",
       "at": 1793820582
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "note": "Martin, 2026-11-12: down to 3 strength",
+      "by": "claude",
+      "at": 1794499881
     }
   },
   "cod": {
