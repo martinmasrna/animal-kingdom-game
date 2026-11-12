@@ -12,4 +12,4 @@ Martin, 2026-11-11: "he is the Alpha male of the gorillas". Not a tyrant who rul
 
 ## Where the name stands
 
-Open. The card was called Silverback until the 2026-10-17 sweep; a silverback is the word for any adult male gorilla, a type and not one animal's name.
+Open. On 2026-11-12 the agent read him as the father of the troop, calm and unquestioned, his family brave because he is behind them (Mufasa as the film equivalent), named by his own troop; Martin: "yeah, it should be a 'normal Gorilla name' that just sounds right, meaning creating right psychological effect". Put to him that day, none taken: Boaz, Robur, Barnabas, Abram, Mungo, Amos (known human names, "you imagine kind of like some Jew guy"), then Robur, Gravis, Umber, Ombaran; he moved on. The card was called Silverback until the 2026-10-17 sweep; a silverback is the word for any adult male gorilla, a type and not one animal's name.
