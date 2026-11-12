@@ -93,7 +93,7 @@ Most of the record no longer replays: only 12% of games (299) replay on today's 
 | Caterpillar (`caterpillar`) | collectible | 5% (119/2295) | 3.0 | 31% (37/118) | 6% (1/18) | 78% (29/37) | 67% (79/118) | +11 |
 | The First of Many (`locust_legend`) | collectible | 5% (118/2295) | 1.0 | 35% (41/116) | 67% (8/12) | 71% (29/41) | 61% (71/116) | +10 |
 | Baboon (`baboon`) | collectible | 5% (115/2295) | 3.0 | 69% (79/114) | 69% (11/16) | 71% (56/79) | 68% (78/114) | +2 |
-| [GORILLA] (`gorilla_legend`) | collectible | 5% (115/2295) | 1.0 | 53% (60/114) | 67% (8/12) | 75% (45/60) | 68% (78/114) | +7 |
+| [GORILLA] (`orangutan_legend`) | collectible | 5% (115/2295) | 1.0 | 53% (60/114) | 67% (8/12) | 75% (45/60) | 68% (78/114) | +7 |
 | Macaque (`macaque`) | collectible | 5% (113/2295) | 2.2 | 49% (55/112) | 43% (6/14) | 80% (44/55) | 65% (73/112) | +15 |
 | Leopard (`leopard`) | collectible | 5% (112/2295) | 2.0 | 69% (73/106) | 100% (16/16) | 70% (51/73) | 76% (81/106) | -7 |
 | Pestis (`rat_legend_2`) | collectible | 5% (109/2295) | 1.0 | 36% (36/101) | 100% (3/3) | 61% (22/36) | 59% (60/101) | +2 |

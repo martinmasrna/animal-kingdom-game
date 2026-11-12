@@ -323,7 +323,7 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "mahi_mahi": ["mahi_mahi_anthem"],
     "tuna": ["tuna_per_fish"],
     "baboon_legend": ["baboon_legend_grant"],
-    "gorilla_legend": ["gorilla_legend_grant"],
+    "orangutan_legend": ["orangutan_legend_grant"],
     "tarsier": ["tarsier_grant"],
     "baboon": ["baboon_grant"],
     "marmot": ["marmot_per_step"],

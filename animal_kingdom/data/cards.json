@@ -1843,7 +1843,7 @@
     },
     {
       "id": "baboon_legend",
-      "name": "Kiron",
+      "name": "Babaji",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -1856,8 +1856,8 @@
       "habitat": "Savanna"
     },
     {
-      "id": "gorilla_legend",
-      "name": "[GORILLA]",
+      "id": "orangutan_legend",
+      "name": "[ORANGUTAN]",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -1866,7 +1866,7 @@
       "base_strength": 4,
       "text": "Roar: give all animals in your hand +1 strength.",
       "keywords": [],
-      "species": "Gorilla",
+      "species": "Orangutan",
       "habitat": "Jungle"
     },
     {

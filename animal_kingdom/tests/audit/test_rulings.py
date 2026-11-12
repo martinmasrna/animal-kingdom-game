@@ -1631,8 +1631,8 @@ def test_launch_cards__legendary_butterfly_evolving_on_the_board_fires_no_roar_a
 
 
 def test_launch_cards__legendary_butterfly_each_gain_moves_one_stage_and_keeps_the_points():
-    s = st(hands={"A": ["gorilla_legend", "butterfly_legend"]})   # "give all animals in your hand +1"
-    play(s, "gorilla_legend", "1,2")
+    s = st(hands={"A": ["orangutan_legend", "butterfly_legend"]})   # "give all animals in your hand +1"
+    play(s, "orangutan_legend", "1,2")
     b = s.hands["A"][0]
     assert b.card_id == "butterfly_legend_caterpillar" and b.strength_counter == 1
 
@@ -1645,8 +1645,8 @@ def test_launch_cards__legendary_butterfly_stops_at_monarch():
 
 
 def test_launch_cards__caterpillar_becomes_the_pools_butterfly_and_keeps_its_counter():
-    s = st(hands={"A": ["gorilla_legend", "caterpillar"]})
-    play(s, "gorilla_legend", "1,2")
+    s = st(hands={"A": ["orangutan_legend", "caterpillar"]})
+    play(s, "orangutan_legend", "1,2")
     bf = [u for u in s.hands["A"] if u.card_id == "butterfly"]
     assert len(bf) == 1 and bf[0].strength_counter == 1 and len(s.hands["A"]) == 2   # and it drew a card
 

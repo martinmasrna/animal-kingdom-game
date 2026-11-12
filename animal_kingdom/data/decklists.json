@@ -210,11 +210,11 @@
    "slug": "handlock",
    "name": "Primates",
    "order": 9,
-   "cover": "gorilla_legend",
+   "cover": "orangutan_legend",
    "bot": true,
    "cards": {
     "baboon_legend": 1,
-    "gorilla_legend": 1,
+    "orangutan_legend": 1,
     "butterfly_legend": 1,
     "eagle_legend": 1,
     "hummingbird": 2,

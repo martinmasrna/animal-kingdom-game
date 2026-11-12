@@ -262,9 +262,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-11-12: \"Kiron is the best of these, not 100% in love with it\"",
+      "note": "Martin, 2026-11-12: \"'Babaji' is good\" (Primates sound Indian; Kiron dropped)",
       "by": "claude",
-      "at": 1794497161,
+      "at": 1794515046,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -4259,7 +4259,7 @@
       "at": 1792661449
     }
   },
-  "gorilla_legend": {
+  "orangutan_legend": {
     "effect": {
       "note": "Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).; Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).",
       "by": "martin"
@@ -4269,15 +4269,32 @@
       "by": "martin"
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792143287
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794515064,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      }
     },
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191061
+      "note": "Martin, 2026-11-12: the Roar is a raiser's, not a fighter's; the Gorilla legendary becomes the Orangutan, the grandmother everyone was raised by (Primates, Indian-sounding society); a new painting needed",
+      "at": 1794515046,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[GORILLA]",
+          "species": "Gorilla"
+        }
+      }
     }
   },
   "skunk_legend": {
