@@ -37,7 +37,7 @@ const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${
 
 // The launch habitats, in the order the sets are presented.
 const HABITATS = ['Savanna', 'Forest', 'Meadow', 'Jungle', 'City', 'Open Ocean'];
-let B = 0, X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', q: '', sheet: false }, flash = null, wired = false;
+let B = 0, X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', pr: '', q: '', sheet: false }, flash = null, wired = false;
 const N = 20;   // the provisions test: a deck holds 20
 const limit = c => LIMIT[c.rarity];
 // The provisions test: a deck's cards cost their prices from one budget, in place of the rarity caps.
@@ -102,9 +102,9 @@ function render(app, all) {
   const q = st.q.toLowerCase();
   // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
   const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
-  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str))
+  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.pr === '' || String(c.price) === st.pr) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str))
     && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ') + ' ' + made(c)).toLowerCase().includes(q)))
-    .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
+    .sort((a, b) => a.price - b.price || sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));   // the provisions test: by price first
 
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
     : '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0;
@@ -114,9 +114,10 @@ function render(app, all) {
   const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
   const strengths = [...Array(8).keys()].map(String).concat('8+');   // 0 to 7, then 8 and up together: few animals are 8 or more (Martin, 2026-10-30)
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
+    ${dd('pr', st.pr, [['', 'Any price'], ...['1', '2', '3', '4', '5'].map(v => [v, 'Price ' + v])])}
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
-    ${dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
+    <!-- the provisions test: no habitat filter, the 40-card pool needs the room for the price filter -->
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
   // The provisions test: the deck in the builder is one list sorted by price, each strip showing its price in place of strength.

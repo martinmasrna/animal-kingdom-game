@@ -155,14 +155,14 @@
     "mosquito": 2,
     "viper": 2,
     "rat": 2,
-    "pigeon": 2,
-    "bat": 2,
     "wolf": 2,
     "lion": 2,
     "caracal": 2,
     "honey_badger": 2,
-    "black_mamba": 1,
-    "mole": 1
+    "black_mamba": 2,
+    "mole": 1,
+    "eagle": 2,
+    "tiger_legend": 1
    }
   },
   {
@@ -175,15 +175,15 @@
    "cards": {
     "squirrel": 2,
     "hamster": 2,
-    "mouse": 2,
-    "gazelle": 2,
     "toad": 2,
-    "hedgehog": 2,
     "sloth": 2,
     "tortoise": 2,
     "boar": 2,
-    "beaver": 1,
-    "hippopotamus": 1
+    "beaver": 2,
+    "hippopotamus": 2,
+    "rhinoceros": 2,
+    "honey_badger_legend": 1,
+    "rhinoceros_legend": 1
    }
   },
   {
