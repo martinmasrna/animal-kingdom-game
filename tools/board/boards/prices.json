@@ -1,5 +1,5 @@
 {
- "rev": 110,
+ "rev": 114,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -344,10 +344,6 @@
   },
   "termite_king": {
    "x": 970,
-   "y": 1522
-  },
-  "eagle": {
-   "x": 1358,
    "y": 1522
   },
   "jaguar": {
@@ -755,7 +751,8 @@
    "stacked": false,
    "cards": [
     "lion",
-    "hornet"
+    "hornet",
+    "eagle"
    ],
    "tint": "none"
   },
@@ -834,7 +831,8 @@
   "beaver": 3,
   "mole": 2,
   "wolf_legend_3": 5,
-  "sardine": 1
+  "sardine": 1,
+  "eagle": 5
  },
  "only": [
   "african_wild_dog",
