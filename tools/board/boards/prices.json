@@ -1,5 +1,5 @@
 {
- "rev": 394,
+ "rev": 396,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -125,10 +125,6 @@
   "armadillo": {
    "x": 1377,
    "y": 45
-  },
-  "orca": {
-   "x": 1825,
-   "y": 52
   }
  },
  "piles": [
@@ -203,7 +199,8 @@
     "octopus_legend_2",
     "fox_legend",
     "deer_legend_2",
-    "jaguar"
+    "jaguar",
+    "orca"
    ],
    "tint": "none"
   },
@@ -429,7 +426,8 @@
   "rat_legend_2": 1,
   "owl": 3,
   "raven": 2,
-  "hercules_beetle": 1
+  "hercules_beetle": 1,
+  "orca": 7
  },
  "only": [
   "african_wild_dog",
