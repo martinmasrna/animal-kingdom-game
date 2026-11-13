@@ -1,5 +1,5 @@
 {
- "rev": 0,
+ "rev": 1,
  "name": "Prices",
  "only": [
   "squirrel",
@@ -43,7 +43,164 @@
   "tiger_legend",
   "sperm_whale_legend"
  ],
- "cards": {},
+ "cards": {
+  "rat_legend_2": {
+   "x": 0,
+   "y": 0
+  },
+  "lion_legend": {
+   "x": 194,
+   "y": 0
+  },
+  "lion_legend_2": {
+   "x": 388,
+   "y": 0
+  },
+  "honey_badger_legend": {
+   "x": 582,
+   "y": 0
+  },
+  "giraffe_legend": {
+   "x": 776,
+   "y": 0
+  },
+  "sperm_whale_legend": {
+   "x": 970,
+   "y": 0
+  },
+  "tiger_legend": {
+   "x": 1164,
+   "y": 0
+  },
+  "rhinoceros_legend": {
+   "x": 1358,
+   "y": 0
+  },
+  "mole": {
+   "x": 0,
+   "y": 410
+  },
+  "honey_badger": {
+   "x": 194,
+   "y": 410
+  },
+  "beaver": {
+   "x": 388,
+   "y": 410
+  },
+  "black_mamba": {
+   "x": 582,
+   "y": 410
+  },
+  "eagle": {
+   "x": 776,
+   "y": 410
+  },
+  "black_panther": {
+   "x": 970,
+   "y": 410
+  },
+  "hippopotamus": {
+   "x": 1164,
+   "y": 410
+  },
+  "rhinoceros": {
+   "x": 1358,
+   "y": 410
+  },
+  "hamster": {
+   "x": 0,
+   "y": 820
+  },
+  "mosquito": {
+   "x": 194,
+   "y": 820
+  },
+  "mouse": {
+   "x": 388,
+   "y": 820
+  },
+  "sloth": {
+   "x": 582,
+   "y": 820
+  },
+  "bat": {
+   "x": 776,
+   "y": 820
+  },
+  "rat": {
+   "x": 970,
+   "y": 820
+  },
+  "squirrel": {
+   "x": 1164,
+   "y": 820
+  },
+  "toad": {
+   "x": 1358,
+   "y": 820
+  },
+  "gazelle": {
+   "x": 1552,
+   "y": 820
+  },
+  "hedgehog": {
+   "x": 1746,
+   "y": 820
+  },
+  "pigeon": {
+   "x": 1940,
+   "y": 820
+  },
+  "viper": {
+   "x": 2134,
+   "y": 820
+  },
+  "boar": {
+   "x": 2328,
+   "y": 820
+  },
+  "caracal": {
+   "x": 2522,
+   "y": 820
+  },
+  "dolphin": {
+   "x": 2716,
+   "y": 820
+  },
+  "tortoise": {
+   "x": 2910,
+   "y": 820
+  },
+  "giraffe": {
+   "x": 3104,
+   "y": 820
+  },
+  "wolf": {
+   "x": 3298,
+   "y": 820
+  },
+  "black_bear": {
+   "x": 3492,
+   "y": 820
+  },
+  "gorilla": {
+   "x": 3686,
+   "y": 820
+  },
+  "grizzly_bear": {
+   "x": 3880,
+   "y": 820
+  },
+  "tiger": {
+   "x": 4074,
+   "y": 820
+  },
+  "elephant": {
+   "x": 4268,
+   "y": 820
+  }
+ },
  "piles": [
   {
    "id": "price1",
@@ -97,5 +254,7 @@
    "cards": [],
    "tint": "none"
   }
- ]
+ ],
+ "gone": [],
+ "marks": {}
 }
