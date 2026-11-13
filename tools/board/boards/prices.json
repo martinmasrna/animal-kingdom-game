@@ -1,5 +1,5 @@
 {
- "rev": 29,
+ "rev": 69,
  "name": "Prices",
  "only": [
   "squirrel",
@@ -44,89 +44,17 @@
   "sperm_whale_legend"
  ],
  "cards": {
-  "hamster": {
-   "x": 0,
-   "y": 820
-  },
-  "mosquito": {
-   "x": 194,
-   "y": 820
-  },
-  "rat": {
-   "x": 970,
-   "y": 820
-  },
-  "squirrel": {
-   "x": 1164,
-   "y": 820
-  },
-  "toad": {
-   "x": 1358,
-   "y": 820
-  },
-  "gazelle": {
-   "x": 1552,
-   "y": 820
-  },
-  "hedgehog": {
-   "x": 1746,
-   "y": 820
-  },
-  "pigeon": {
-   "x": 1940,
-   "y": 820
-  },
-  "viper": {
-   "x": 2134,
-   "y": 820
-  },
-  "boar": {
-   "x": 2328,
-   "y": 820
-  },
-  "caracal": {
-   "x": 2522,
-   "y": 820
-  },
-  "dolphin": {
-   "x": 2716,
-   "y": 820
-  },
-  "tortoise": {
-   "x": 2910,
-   "y": 820
-  },
-  "giraffe": {
-   "x": 3104,
-   "y": 820
-  },
-  "wolf": {
-   "x": 3298,
-   "y": 820
-  },
-  "black_bear": {
-   "x": 3492,
-   "y": 820
-  },
-  "gorilla": {
-   "x": 3686,
-   "y": 820
-  },
-  "grizzly_bear": {
-   "x": 3880,
-   "y": 820
-  },
-  "elephant": {
-   "x": 4268,
-   "y": 820
-  },
-  "rat_legend_2": {
-   "x": -386,
-   "y": -1127
-  },
   "bat": {
    "x": -160,
    "y": -1612
+  },
+  "rat_legend_2": {
+   "x": -154,
+   "y": -1301
+  },
+  "gorilla": {
+   "x": -129,
+   "y": -979
   }
  },
  "piles": [
@@ -138,7 +66,15 @@
    "cols": 14,
    "stacked": false,
    "cards": [
-    "mouse"
+    "mouse",
+    "hamster",
+    "mosquito",
+    "wolf",
+    "pigeon",
+    "squirrel",
+    "toad",
+    "caracal",
+    "hedgehog"
    ],
    "tint": "none"
   },
@@ -151,7 +87,15 @@
    "stacked": false,
    "cards": [
     "lion",
-    "sloth"
+    "sloth",
+    "grizzly_bear",
+    "dolphin",
+    "tortoise",
+    "boar",
+    "viper",
+    "giraffe",
+    "gazelle",
+    "rat"
    ],
    "tint": "none"
   },
@@ -170,7 +114,9 @@
     "black_panther",
     "tiger",
     "black_mamba",
-    "hippopotamus"
+    "hippopotamus",
+    "elephant",
+    "black_bear"
    ],
    "tint": "none"
   },
@@ -184,8 +130,9 @@
    "cards": [
     "mole",
     "beaver",
+    "rhinoceros",
     "giraffe_legend",
-    "rhinoceros"
+    "sperm_whale_legend"
    ],
    "tint": "none"
   },
@@ -198,9 +145,8 @@
    "stacked": false,
    "cards": [
     "tiger_legend",
-    "honey_badger_legend",
-    "sperm_whale_legend",
-    "rhinoceros_legend"
+    "rhinoceros_legend",
+    "honey_badger_legend"
    ],
    "tint": "none"
   }
@@ -210,6 +156,14 @@
   "rat_legend_2": {
    "note": "idk, is trictly stornger than honey badger but feels too weak for a 4 I think",
    "flag": true
+  },
+  "bat": {
+   "flag": true,
+   "note": "well, at 1 cost it would be strictly better than mouse, at 2 cost it's too weak cause it was priced at 3 strength to be equal to Lion ... so we'd have to make it 3 strength 2 cost or 2 streagth 1 cost, at which point it might be too weak cause \"flying\" at 1 steength does nothing"
+  },
+  "gorilla": {
+   "flag": true,
+   "note": "bro, really? :D read the card effect again"
   }
  }
 }
