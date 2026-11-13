@@ -11,7 +11,7 @@ before(async () => { server = await startServer(); browser = await openBrowser()
 after(async () => { await browser?.close(); server?.stop(); });
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const FIVE = { league: 5, name: 'Silver', label: 'Silver 2', colour: '#c9d0d8', top: false, streak: 3, best: 'Silver', stage: 2, stages: 3, stars: 2, of: 5 };
+const FIVE = { league: 5, name: 'Silver', label: 'Silver 2', colour: '#c9d0d8', emblem: 'silver_2', top: false, streak: 3, best: 'Silver', division: 2, stars: 2, of: 5 };
 const TOP = { league: 11, name: 'Legend', label: 'Legend', colour: '#f4f1e8', top: true, streak: 0, best: 'Legend', rating: '2011' };
 
 // The page's own requests, answered by the real server, with `patch` applied to the JSON of the ones it names.
@@ -33,11 +33,12 @@ test('the ladder screen says your league, stars and streak; home\'s Ladder piece
   const p = await patched({ '/api/me': me => ({ ...me, league: FIVE, rank: 7 }) });
   await p.goto(`${server.url}/#/ladder`, { waitUntil: 'networkidle0' });
   await p.waitForSelector('#lstand');
-  assert.equal(await p.$eval('#lstand', e => e.textContent), 'Silver 2 · 3 wins in a row');
-  assert.deepEqual(await p.$eval('#lstand', e => [e.querySelectorAll('.lgdisc s').length, e.querySelectorAll('.lgpips s').length, e.querySelectorAll('.lgpips s.on').length]), [2, 5, 2], 'a dot per stage, a pip per win');
+  assert.equal(await p.$eval('#lstand', e => e.textContent), 'Silver · 3 wins in a row');
+  assert.deepEqual(await p.$eval('#lstand', e => [e.querySelector('.lgem').getAttribute('src'), e.querySelector('.lgem').naturalWidth > 0, e.querySelectorAll('.lgpips s').length, e.querySelectorAll('.lgpips s.on').length]), ['/static/kit2/league/silver_2.webp', true, 5, 2], 'the emblem says league and division, a pip per win');
   await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await p.waitForSelector('.backbtn.me small');
-  assert.equal(await p.$eval('.backbtn.me small', e => e.textContent), 'Silver 2 · #7');
+  assert.equal(await p.$eval('.backbtn.me small', e => e.textContent), ' · #7');
+  assert.equal(await p.$eval('.backbtn.me small .lgem', e => e.alt), 'Silver 2', 'the emblem alone, no words');
   assert.deepEqual(p.errors, []);
   await p.close();
 });
@@ -64,7 +65,8 @@ test('the leaderboard: a person\'s league in the number\'s place and their stars
   const rows = await p.$$eval('#lboard .lr', els => els.map(e => [e.querySelector('.nm').textContent, e.querySelector('b').textContent]));
   assert.deepEqual(rows[0], ['Laras#0001Legend', '2213'], 'the top league: its name by the person, the rating as the number');
   assert.deepEqual(rows[1], ['Fish (Legendary Bot)', '2175'], 'a bot as before');
-  assert.deepEqual(rows[2], ['Martin#0002', 'Silver 2'], 'below the top: the league and stage, no number');
+  assert.deepEqual(rows[2], ['Martin#0002', ''], 'below the top: the emblem alone, no number');
+  assert.equal(await p.$eval('#lboard .lr.you b .lgem', e => e.alt), 'Silver 2');
   assert.ok(rows.slice(3).every(([, n]) => /^\d+\??$/.test(n)), 'the other bots keep their numbers');
   assert.deepEqual(p.errors, []);
   await p.close();
@@ -80,9 +82,10 @@ const endRanked = (pg, extra) => pg.evaluate(async extra => {
 test('a ranked game\'s end says in one line what it did to your stars, and shows no number below the top league', async () => {
   const pg = await gamePage(browser, server.url);
   await endRanked(pg, { rating: { before: '1512', after: '1530', delta: 18 },
-    league: { ...FIVE, line: 'Silver 2, win streak: +2' } });
+    league: { ...FIVE, line: 'Win streak: +2' } });
   await pg.waitForSelector('#lgline');
-  assert.equal(await pg.$eval('#lgline', e => e.textContent), 'Silver 2, win streak: +2');
+  assert.equal(await pg.$eval('#lgline', e => e.textContent), 'Win streak: +2');
+  assert.equal(await pg.$eval('#lgline .lgem', e => e.alt), 'Silver 2', 'the emblem says where you stand');
   assert.equal(await pg.$('#rnum'), null, 'no rating below the top league');
   assert.equal(await pg.$$eval('#endov .lgline', e => e.length), 1, 'one line');
   assert.deepEqual(pg.errors, []);

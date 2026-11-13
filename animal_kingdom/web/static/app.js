@@ -258,15 +258,17 @@ const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" dragga
 const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends'), menu: TI('menu') };
 let newsAsked = false;
 // Ranked leagues (docs/ranked-leagues.md; the server's web/tiers.py): a league named by its material, three stages in it,
-// five wins a stage; in the top league the rating instead. The look is a placeholder until the league art exists: a disc
-// in the league's colour with a dot per stage, and a pip per win beside it.
-const lgDisc = lg => `<i class="lgdisc" style="--c:${lg.colour}">${lg.top ? '' : '<s></s>'.repeat(lg.stage)}</i>`;
+// five wins a stage, the stages numbered as divisions III to I; in the top league the rating instead. The emblem (a
+// placeholder until the league art exists: a shield of the material with the division carved in) says league and
+// division by itself, so the name is written only where the word is wanted, and the wins are a pip each beside it.
+const lgDisc = lg => lg.top ? '' : `<img class="lgem" src="/static/kit2/league/${lg.emblem}.webp" alt="${esc(lg.label)}" title="${esc(lg.label)}">`;
 const lgPips = lg => lg.top ? '' : `<i class="lgpips" aria-label="${lg.stars} of ${lg.of} wins">${Array.from({ length: lg.of }, (_, i) => `<s${i < lg.stars ? ' class="on"' : ''}></s>`).join('')}</i>`;
-const leagueShort = lg => !lg ? '' : lg.top ? `${lgDisc(lg)}${esc(lg.label)} · ${lg.rating}` : `${lgDisc(lg)}${esc(lg.label)}${lgPips(lg)}`;
+const leagueShort = lg => !lg ? '' : lg.top ? `${esc(lg.label)} · ${lg.rating}` : `${lgDisc(lg)}${lgPips(lg)}`;   // the emblem and the wins, no words
+const leagueNamed = lg => !lg ? '' : lg.top ? leagueShort(lg) : `${lgDisc(lg)}${esc(lg.name)}${lgPips(lg)}`;   // with the league's name, where the word is wanted
 const leagueText = lg => !lg ? '' : lg.top ? `${lg.label} · ${lg.rating}` : lg.label;   // where only text fits
-const leagueLong = lg => !lg ? '' : [leagueShort(lg), lg.streak >= 2 ? `${lg.streak} wins in a row` : ''].filter(Boolean).join(' · ');
+const leagueLong = lg => !lg ? '' : [leagueNamed(lg), lg.streak >= 2 ? `${lg.streak} wins in a row` : ''].filter(Boolean).join(' · ');
 const mePiece = () => {   // the Ladder, with your league (or, before leagues, your rating) and your place once you have played ranked
-  const sub = !ME ? '' : ME.league && ME.rank ? `${leagueShort(ME.league)} · #${ME.rank}` : ME.league && (ME.league.stars || ME.league.stage > 1 || ME.league.league > 1) ? leagueShort(ME.league)
+  const sub = !ME ? '' : ME.league && ME.rank ? `${leagueShort(ME.league)} · #${ME.rank}` : ME.league && (ME.league.stars || ME.league.division < 3 || ME.league.league > 1) ? leagueShort(ME.league)
     : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
   return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
 };
@@ -462,7 +464,7 @@ const nameTag = n => { const [a, t] = String(n).split('#'); return esc(a) + (t ?
 // in view, or, while you're placing, your progress pinned over it.
 // A person's row: their league in the number's place, their stars beside the name; in the top league the rating, the
 // league's name beside the name. A bot's row is as it was (bots have no league).
-const lgCell = x => !x.league ? x.rating : x.league.top ? x.rating : `${lgDisc(x.league)}${esc(x.league.label)}`;
+const lgCell = x => !x.league ? x.rating : x.league.top ? x.rating : lgDisc(x.league);
 const lgNote = lg => !lg ? '' : lg.top ? `<small class="lg">${esc(lg.name)}</small>` : '';
 async function fillLeaderboard() {
   const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, pl = j.placing, box = document.getElementById('lboard');

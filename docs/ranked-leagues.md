@@ -2,7 +2,7 @@
 
 Martin, 2026-11-04: instead of ranked being a rating from the start, do what Hearthstone, Gwent, MTG Arena and League do: about ten leagues, each with a few stars; a win gains a star, a loss loses one; a bonus for win streaks; a few stars to move up; checkpoints below which you can't fall; the uncapped rating only in the highest league. Nothing elaborate. The point is progression instead of a flat number.
 
-Nothing on this page is settled (Martin, 2026-11-11: "NOTHING is settled yet"). The number of leagues, the rules, the counts and the look are all open; what follows is the build and the reasoning behind it, not a decision. The build: ten leagues named by material and a top league above them; three stages in a league, five wins a stage; a win gains one, two from your third win in a row; a loss loses one, and from a league's first stage with none left drops you a league, never out of the bottom; you play opponents from your own league, and in the top league from your rating, which shows. Martin's reaction to the top league (2026-11-05), the climb stopping where your skill is: "yes, this is how it should be".
+Nothing on this page is settled (Martin, 2026-11-11: "NOTHING is settled yet"). The number of leagues, the rules, the counts and the look are all open; what follows is the build and the reasoning behind it, not a decision. The build: ten leagues named by material and a top league above them; three divisions in a league, numbered 3 up to 1, five wins a division; a win gains one, two from your third win in a row; a loss loses one, and from a league's first stage with none left drops you a league, never out of the bottom; you play opponents from your own league, and in the top league from your rating, which shows. Martin's reaction to the top league (2026-11-05), the climb stopping where your skill is: "yes, this is how it should be".
 
 This page: what four other games do and what each mechanic is for, why this game's leagues work as they do, the rules, the simulation, what a player sees, the calls still open, the names, the migration, and a draft News entry.
 
@@ -56,18 +56,18 @@ Picking the opponent by league removes the problem at its root. Each league is a
 | 10 Diamond | 3 × 5 | 1900 to 2000 |
 | 11 Legend, the top | none: the rating shows | by your rating |
 
-150 wins over losses from Wood 1 to the top. The top league starts at 2000; eleven of the 129 bot pairings are rated above it, and every league's band holds at least five. "Legend" is a placeholder name.
+150 wins over losses from Wood 3 to the top. The top league starts at 2000; eleven of the 129 bot pairings are rated above it, and every league's band holds at least five. "Legend" is a placeholder name.
 
 The rules, each a test in `animal_kingdom/tests/test_tiers.py`:
 
-1. **Start.** Everyone starts in Wood 1 with no wins.
+1. **Start.** Everyone starts in Wood 3 with no wins. A league's three stages are numbered as divisions 3, 2, 1, the last the best (Martin, 2026-11-13: "divison 3 should be worst one and division 1 best one").
 2. **A win** gains one; your third win in a row and every one after it gains two, in every league below the top.
-3. **Moving up.** Five wins fill a stage and start the next; the third stage filled moves you up a league, a spare win carried over. Reaching the top league ends the count.
-4. **A loss** loses one and ends your streak. With none left in a stage it drops you to the stage below at four of five; from a league's first stage, to the league below, third stage, four of five; in Wood 1 it costs nothing more.
+3. **Moving up.** Five wins fill a division and start the next (3, then 2, then 1); division 1 filled moves you up a league into its division 3, a spare win carried over. Reaching the top league ends the count.
+4. **A loss** loses one and ends your streak. With none left in a division it drops you to the division below at four of five; from a league's division 3, to the league below, division 1, four of five; in Wood 3 it costs nothing more.
 5. **Opponents.** Below the top league, a person from your league if one is waiting, else a bot from your league's band (the strongest pilot there first, never the deck of your last four bot games). In the top league, a person or bot near your rating.
 6. **The top league** is kept once reached and shows your rating, the ladder's own number.
 7. **The rating** keeps running for everyone, bots included. Below the top league it decides nothing a player sees; it gives the number you start the top league with, and it places each bot in its league. Bots show no league.
-8. **What you see**: the league and stage ("Gold 2") beside a disc in the league's colour with a dot per stage, the wins in the stage as five pips, your win streak from two wins; in the top league, the rating. The end of a ranked match names only a move ("Up to Gold 3", "Down to Silver 3", "Up to Legend") or the streak bonus ("Gold 2, win streak: +2"); the pips show the rest.
+8. **What you see**: the league's emblem, a painted shield of its material with the division carved in as I, II or III, the wins in the division as five pips, your win streak from two wins; in the top league, the rating. The emblem says league and division by itself, so the name is written only on your own standing line. The end of a ranked match shows the emblem and the pips, and words only for a move ("Up to Gold 2", "Down to Silver 1", "Up to Legend") or the streak bonus ("Win streak: +2").
 
 ## The simulation
 
@@ -86,19 +86,19 @@ Every player settles in the league that matches their strength and wins a little
 
 ## What a player sees, screen by screen
 
-The look is a placeholder, plain on purpose: a flat disc in the league's colour with one, two or three dots for the stage, the league and stage in text, five pips for the wins.
+The look is a placeholder Martin accepted as one (2026-11-13: "okay, fine as placeholders"): thirty painted shields, one per league and division, in `static/kit2/league/` (`gold_2.webp`), cut from one sheet (`~/Work/fun/league-fresh/rounds/placeholder-art/b/`).
 
-- **Home, the Ladder piece** (top-right corner): "Ladder", under it the disc, the league and stage, the pips and the place: "Silver 2 ●●○○○ · #7"; in the top league "Legend · 2011 · #2".
-- **Home, the Ranked choice**: under "Ranked", the league and stage in text: "Silver 2".
-- **The ladder screen, Leaderboard tab**: one line above the list, your standing: the disc, "Silver 2", the pips, and the streak from two wins ("3 wins in a row"). In the top league: "Legend · 2011".
-- **The leaderboard rows**: a person below the top league has their disc, league and stage where the number was, no pips (the wins are your own business); a person in the top league their rating, and "Legend" beside their name; bots as before, "Fish (Expert Bot)" and its rating. People and bots stay one list, a person below the top sorted by their league's band plus their wins' share of it (league 8 with 6 of 15 wins sorts as 1740).
-- **The versus moment**: a person below the top league shows their league and stage; in the top league their rating in the gem; a bot its rating.
-- **The end of a ranked match**: one line under Victory or Defeat, the disc, the league and stage or the move, the pips. Below the top league no rating counter; in the top league the rating counts from before to after. *A design spot: moving up deserves its own moment.*
+- **Home, the Ladder piece** (top-right corner): "Ladder", under it the emblem, the pips and the place; in the top league "Legend · 2011 · #2".
+- **Home, the Ranked choice**: under "Ranked", the league and division in text: "Silver 2".
+- **The ladder screen, Leaderboard tab**: one line above the list, your standing: the emblem, the league's name, the pips, and the streak from two wins ("3 wins in a row"). In the top league: "Legend · 2011".
+- **The leaderboard rows**: a person below the top league has their emblem where the number was, no words and no pips (the wins are your own business); a person in the top league their rating, and "Legend" beside their name; bots as before, "Fish (Expert Bot)" and its rating. People and bots stay one list, a person below the top sorted by their league's band plus their wins' share of it (league 8 with 6 of 15 wins sorts as 1740).
+- **The versus moment**: a person below the top league shows their league and division in text; in the top league their rating in the gem; a bot its rating.
+- **The end of a ranked match**: under Victory or Defeat the emblem and the pips, with words only for a move or the streak bonus. Below the top league no rating counter; in the top league the rating counts from before to after. *A design spot: moving up deserves its own moment.*
 
 ## Open calls
 
 1. **Names.** The build uses the materials, Wood to Diamond (Martin, 2026-11-11: "yeah, materials as names are fine"); the top league's name, "Legend", is a placeholder.
-2. **Pictures.** Parked (Martin, 2026-11-13: "Maybe we should just settle for some super simple placholders so we can wire ou the backend, and come back to this later"). The game shows the placeholder disc. The design rounds, what was learned about how to run them, and the open questions are in `~/Work/fun/league-fresh/` (start at its `README.md`); earlier rounds are in `design/league-progress/`, `design/league-borders/` and `design/league-antlers/`. From the last session, Martin's words, not decisions: the win counter can live off the badge; the league could be called a den. Still open with it: profile pictures, the top league's piece, the promotion moment. What other games draw: https://claude.ai/artifact/WBVqUZAfNmR6k1ZDKFSna9
+2. **Pictures.** Parked (Martin, 2026-11-13: "Maybe we should just settle for some super simple placholders so we can wire ou the backend, and come back to this later"). The game shows placeholder shields. The design rounds, what was learned about how to run them, and the open questions are in `~/Work/fun/league-fresh/` (start at its `README.md`); earlier rounds are in `design/league-progress/`, `design/league-borders/` and `design/league-antlers/`. From the last session, Martin's words, not decisions: the win counter can live off the badge; the league could be called a den. Still open with it: profile pictures, the top league's piece, the promotion moment. What other games draw: https://claude.ai/artifact/WBVqUZAfNmR6k1ZDKFSna9
 3. **Season resets.** Recommendation: none while few people play. With opponents by league, a reset is only a fresh climb: everyone down a few leagues, back where they belong in a session or two.
 4. **What the leaderboard lists.** Open (Martin, 2026-11-10, two ideas: open on your own league as League of Legends does, or only the top league sorted by rating with your own row pinned under it). Recommendation: the second; below the top league a place among everyone means little, your league and stars are your standing, and a rating ordering only exists in the top league. Also open from the same day: whether rows carry portraits at all (League of Legends shows none).
 5. **Who you play, during the game.** The opponent's name shows only at the versus moment, then nowhere on the board (Martin, 2026-11-10: it probably should, and the profile picture fits there). A board-layout job: vertical room is the scarce part.
@@ -114,10 +114,10 @@ The leagues are named by material: Wood, Bone, Stone, Copper, Silver, Gold, Jade
 
 ## Migration
 
-A profile rated before leagues existed gets a league once, from its rating (`tiers.from_rating`, run by `Tiers.migrate`): the league whose band holds its rating, at most Diamond (the top is reached by a win), at the first stage with no wins. A profile still placing (under 10 rated games) starts in Wood 1. Bots get no league row: theirs is read from their rating.
+A profile rated before leagues existed gets a league once, from its rating (`tiers.from_rating`, run by `Tiers.migrate`): the league whose band holds its rating, at most Diamond (the top is reached by a win), at division 3 with no wins. A profile still placing (under 10 rated games) starts in Wood 3. Bots get no league row: theirs is read from their rating.
 
-A standing kept under the first build (ten numbered leagues of 3 or 5 stars, the tenth the top) is converted once at startup (`Tiers._to_stages`, marked `tiers_stages` in `ladder_meta`): the same league number, the stars as the same share of the fifteen wins (2 of 3 stars is ten wins, Bone 3; 3 of 5 stars is nine wins, stage 2), and the old top league to the new one.
+A standing kept under the first build (ten numbered leagues of 3 or 5 stars, the tenth the top) is converted once at startup (`Tiers._to_stages`, marked `tiers_stages` in `ladder_meta`): the same league number, the stars as the same share of the fifteen wins (2 of 3 stars is ten wins, division 1; 3 of 5 stars is nine wins, division 2), and the old top league to the new one.
 
 ## News entry (draft, not shipped)
 
-**Ranked leagues have names and stages.** The ten leagues are now Wood, Bone, Stone, Copper, Silver, Gold, Jade, Sapphire, Ruby and Diamond, with Legend above them. Each league has three stages of five wins. A win gains one, and from your third win in a row two; a loss loses one. Your league carries over from before, with your stars turned into wins. The look is a placeholder.
+**Ranked leagues have names and stages.** The ten leagues are now Wood, Bone, Stone, Copper, Silver, Gold, Jade, Sapphire, Ruby and Diamond, with Legend above them. Each league has three divisions of five wins, 3 up to 1. A win gains one, and from your third win in a row two; a loss loses one. Your league carries over from before, with your stars turned into wins. The emblems are placeholders.

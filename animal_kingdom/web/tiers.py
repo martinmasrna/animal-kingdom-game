@@ -1,7 +1,7 @@
 """Ranked leagues: the climb a person sees on the one ladder (docs/ranked-leagues.md).
 
 Ten leagues named by material, Wood to Diamond, and a top league above them. A league has three stages, a stage takes
-five wins: a win gains one, two from your third win in a row; a loss loses one, and with none left drops you a stage,
+five wins, and the stages count down as divisions 3, 2, 1: a win gains one, two from your third win in a row; a loss loses one, and with none left drops you a stage,
 and from a league's first stage a league (never out of the bottom). You play opponents from your own league. Each league
 is a band of bot ratings, so the climb stops where a player's skill is: the league says how good you are, not how much
 you played. The top league has no stages: it shows the rating, and the rating picks its opponents.
@@ -63,9 +63,15 @@ def stage_of(stars: int) -> tuple[int, int]:
     return stars // WINS + 1, stars % WINS
 
 
+def division(stars: int) -> int:
+    """The number a stage shows: III is where a league starts and I is its last stage (Martin, 2026-11-13: "divison 3
+    should be worst one and division 1 best one"), as in League of Legends."""
+    return STAGES + 1 - stage_of(stars)[0]
+
+
 def label(s: "Standing") -> str:
     """What a standing is called: "Gold 2"; the top league by its name alone."""
-    return name(s.league) if s.league == TOP else f"{name(s.league)} {stage_of(s.stars)[0]}"
+    return name(s.league) if s.league == TOP else f"{name(s.league)} {division(s.stars)}"
 
 
 def par(league: int) -> float:
@@ -111,8 +117,8 @@ class Change:
     demoted: bool = False
 
     def line(self, rating: str | None = None) -> str:
-        """The one line the end of a ranked match says about the climb. The wins inside a stage are drawn by the client
-        (the pips), so the line names only a move between stages or leagues, and the streak bonus."""
+        """The words the end of a ranked match adds to the emblem and the pips, which the client draws: a move between
+        divisions or leagues, or the streak bonus; otherwise nothing, since the emblem already says where you stand."""
         a, b = self.after, self.before
         if a.league == TOP and b.league == TOP:
             return f"{name(TOP)}: rating {rating}" if rating else name(TOP)
@@ -120,7 +126,7 @@ class Change:
             return f"Up to {label(a)}"
         if (a.league, stage_of(a.stars)[0]) < (b.league, stage_of(b.stars)[0]):
             return f"Down to {label(a)}"
-        return f"{label(a)}, win streak: +2" if self.streak_bonus else label(a)
+        return "Win streak: +2" if self.streak_bonus else ""
 
 
 def after_game(s: Standing, won: bool) -> Change:
@@ -160,15 +166,15 @@ def from_rating(rating: float, games: int) -> Standing:
 
 
 def view(s: Standing, rating_shown: str | None = None) -> dict:
-    """The standing as the client shows it: the league's name and colour, the stage, the wins in the stage (`stars` of
-    `of`), the streak; the top league shows the rating instead."""
+    """The standing as the client shows it: the league's name and colour, the division (3 down to 1), its emblem, the wins in the
+    stage (`stars` of `of`), the streak; the top league shows the rating instead."""
     v = {"league": s.league, "name": name(s.league), "label": label(s), "colour": colour(s.league),
          "top": s.league == TOP, "streak": s.streak, "best": name(s.best)}
     if s.league == TOP:
         v["rating"] = rating_shown
     else:
-        v["stage"], v["stars"] = stage_of(s.stars)
-        v["stages"], v["of"] = STAGES, WINS
+        v["division"], v["stars"], v["of"] = division(s.stars), stage_of(s.stars)[1], WINS
+        v["emblem"] = f"{name(s.league).lower()}_{division(s.stars)}"   # static/kit2/league/<emblem>.webp
     return v
 
 

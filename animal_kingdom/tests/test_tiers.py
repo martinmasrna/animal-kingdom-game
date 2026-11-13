@@ -21,6 +21,7 @@ def test_the_table():
 def test_three_stages_of_five_wins():
     assert [T.stage_of(n) for n in (0, 4, 5, 9, 10, 14)] == [(1, 0), (1, 4), (2, 0), (2, 4), (3, 0), (3, 4)]
     assert T.label(at(6, 7)) == "Gold 2" and T.label(at(T.TOP)) == "Legend"
+    assert [T.label(at(6, n)) for n in (0, 5, 10)] == ["Gold 3", "Gold 2", "Gold 1"], "a league starts at 3 and ends at 1"
 
 
 def test_everyone_starts_in_league_1():
@@ -64,7 +65,8 @@ def test_the_top_league_is_kept_and_shows_the_rating():
     v = T.view(at(T.TOP), "2087")
     assert v["top"] and v["rating"] == "2087" and "stars" not in v
     v = T.view(at(6, 7), "1500")
-    assert (v["label"], v["stage"], v["stars"], v["of"], v["stages"]) == ("Gold 2", 2, 2, 5, 3) and "rating" not in v
+    assert (v["label"], v["division"], v["stars"], v["of"], v["emblem"]) == ("Gold 2", 2, 2, 5, "gold_2") and "rating" not in v
+    assert T.view(at(6, 12), "1500")["emblem"] == "gold_1"
 
 
 def test_each_league_plays_a_band_of_bot_ratings():
@@ -84,13 +86,13 @@ def test_a_ranked_bot_comes_from_the_league_band():
 
 
 def test_the_end_of_match_line():
-    assert after_game(at(5, 0, streak=2), True).line() == "Silver 1, win streak: +2"
-    assert after_game(at(5, 0), True).line() == "Silver 1"
-    assert after_game(at(5, 2), False).line() == "Silver 1"
+    assert after_game(at(5, 0, streak=2), True).line() == "Win streak: +2"
+    assert after_game(at(5, 0), True).line() == ""
+    assert after_game(at(5, 2), False).line() == ""
     assert after_game(at(5, 4), True).line() == "Up to Silver 2"
-    assert after_game(at(5, 5), False).line() == "Down to Silver 1"
-    assert after_game(at(6, 14), True).line() == "Up to Jade 1"
-    assert after_game(at(5, 0), False).line() == "Down to Copper 3"
+    assert after_game(at(5, 5), False).line() == "Down to Silver 3"
+    assert after_game(at(6, 14), True).line() == "Up to Jade 3"
+    assert after_game(at(5, 0), False).line() == "Down to Copper 1"
     assert after_game(at(10, 14), True).line("2004") == "Up to Legend"
     assert after_game(at(T.TOP), True).line("2011") == "Legend: rating 2011"
 
