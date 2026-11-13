@@ -1,11 +1,7 @@
 {
- "rev": 360,
+ "rev": 368,
  "name": "Prices",
  "cards": {
-  "albatross": {
-   "x": 970,
-   "y": 1244
-  },
   "black_mamba": {
    "x": 1358,
    "y": 1244
@@ -34,10 +30,6 @@
    "x": 3686,
    "y": 1932
   },
-  "butterfly": {
-   "x": 3880,
-   "y": 1932
-  },
   "owl": {
    "x": 0,
    "y": 2210
@@ -62,10 +54,6 @@
    "x": 3492,
    "y": 2210
   },
-  "pigeon": {
-   "x": 4462,
-   "y": 2210
-  },
   "viper": {
    "x": 776,
    "y": 2488
@@ -76,18 +64,6 @@
   },
   "hare": {
    "x": 2522,
-   "y": 2488
-  },
-  "anaconda": {
-   "x": 4074,
-   "y": 2488
-  },
-  "baboon": {
-   "x": 4268,
-   "y": 2488
-  },
-  "boar": {
-   "x": 4462,
    "y": 2488
   },
   "bobcat": {
@@ -149,6 +125,22 @@
   "eagle": {
    "x": -212,
    "y": -457
+  },
+  "pigeon": {
+   "x": 3954,
+   "y": 1931
+  },
+  "anaconda": {
+   "x": 4169,
+   "y": 2039
+  },
+  "baboon": {
+   "x": 4399,
+   "y": 2051
+  },
+  "boar": {
+   "x": 4662,
+   "y": 2005
   }
  },
  "piles": [
@@ -394,7 +386,9 @@
   "tortoise_legend",
   "mole_legend",
   "sperm_whale_legend",
-  "butterfly_legend"
+  "butterfly_legend",
+  "albatross",
+  "butterfly"
  ],
  "marks": {
   "rat_legend_2": {
