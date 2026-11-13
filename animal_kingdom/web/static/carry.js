@@ -6,7 +6,7 @@
 import { fitNames } from './card.js';
 import { LIFT, CARD_END, PIC_UP } from './flight.js';
 
-const HELD = 1.3;                 // held, it is that much larger than over its place: nearer the eye, it comes down as it settles
+const HELD = 1.15;                // held, it is that much larger than over its place: nearer the eye, it comes down as it settles
 const REST_X = 9;                 // and tipped back a little, even still, so it reads as a card in the hand's grip, not a tile
 let C = null;                     // { el, fc, w, h, k, x, y, s, rx, ry, rz, raf, t }
 let px = innerWidth / 2, py = innerHeight / 2;   // the pointer, always known
@@ -32,9 +32,9 @@ export function carry(from, html) {
   const tick = now => {
     if (C !== me) return;
     const dt = Math.min(50, now - me.t) || 16; me.t = now;
-    // where it hangs: its painting LIFT above the pointer, the place flight.js turns a card over the crossroad under it
-    // (its bottom edge kept clear of the pointer, so the crossroad aimed at stays in sight)
-    const ts = HELD * CARD_END * k / w, tx = px, ty = Math.min(py - LIFT * k + PIC_UP * CARD_END * k, py - 14 * k - h * ts / 2);
+    // where it hangs: its painting on the pointer (Martin, 2026-11-13: a card hung above the pointer sat over the next
+    // crossroad, "a disconnect between where my cursor is and where the card is"), so what it covers is where it goes
+    const ts = HELD * CARD_END * k / w, tx = px, ty = py - LIFT * k + PIC_UP * HELD * CARD_END * k;
     const f = 1 - Math.exp(-dt / 55), x = me.x + (tx - me.x) * f, y = me.y + (ty - me.y) * f;
     const vx = (x - me.x) / dt, vy = (y - me.y) / dt;   // px per ms
     me.x = x; me.y = y; me.s += (ts - me.s) * (1 - Math.exp(-dt / 70));

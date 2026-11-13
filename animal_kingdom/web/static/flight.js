@@ -14,7 +14,7 @@ import { hasArt } from './art.js';
 import { fitNames } from './card.js';
 
 export const FLY_MS = 520;
-export const LIFT = 160;              // stage pixels above its crossroad the card stops, turns, and the piece falls from (game.css landf)
+export const LIFT = 0;                // stage pixels above its crossroad the card stops and turns: none, it turns right over it and the piece falls toward the board (game.css landf)
 const POP_MS = 90;                    // the pop out of the hand
 export const CARD_END = 130;                 // the card's width over its place, in stage pixels: its painting about the piece's size
 export const PIC_UP = 2.55 / 20;             // the card's painting's centre above the card's centre, in card widths (app.css .card)
