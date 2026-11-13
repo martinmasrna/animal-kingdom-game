@@ -1,5 +1,5 @@
 {
- "rev": 135,
+ "rev": 139,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -188,10 +188,6 @@
   },
   "hummingbird": {
    "x": 582,
-   "y": 966
-  },
-  "chameleon": {
-   "x": 1552,
    "y": 966
   },
   "coyote": {
@@ -740,7 +736,8 @@
    "cards": [
     "lion",
     "hornet",
-    "black_panther"
+    "black_panther",
+    "tiger"
    ],
    "tint": "none"
   },
@@ -756,7 +753,7 @@
     "lion_legend",
     "lion_legend_2",
     "sardine",
-    "tiger"
+    "chameleon"
    ],
    "tint": "none"
   },
@@ -823,8 +820,7 @@
   "sardine": 1,
   "eagle": 5,
   "wolf": 5,
-  "black_panther": 6,
-  "tiger": 8
+  "black_panther": 6
  },
  "only": [
   "african_wild_dog",
