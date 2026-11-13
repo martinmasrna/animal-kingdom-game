@@ -10,7 +10,7 @@
 // its own layer over the page, so no redraw of the board or the hand can stall or cut it. Until the cut the crossroad shows
 // what it showed before (board.js); at the cut the board is redrawn (`onArrive`) with the piece landing, and the layer goes
 // in that frame.
-import { hasArt, CROP } from './art.js';
+import { hasArt } from './art.js';
 import { fitNames } from './card.js';
 
 export const FLY_MS = 520;
@@ -18,16 +18,11 @@ export const LIFT = 0;                // stage pixels above its crossroad the ca
 const POP_MS = 90;                    // the pop out of the hand
 export const CARD_END = 130;                 // the card's width over its place, in stage pixels: its painting about the piece's size
 export const PIC_UP = 2.55 / 20;             // the card's painting's centre above the card's centre, in card widths (app.css .card)
-// The burst that hides the cut, painted (kit2/burst_<name>.webp): it swells over the card in the flight's last moment, the
-// card becomes the piece under it, and it thins away as the piece drops. `?burst=` picks one while they are compared.
-const BURST = new URLSearchParams(globalThis.location?.search || '').get('burst') || 'none';
-// The turn, as Hearthstone turns a minion (its 60 fps frames, design sandbox screen/play-flight/hs-ref/): nothing covers the
-// card; it burns away from its edges in toward its own painting, which closes into the piece's round portrait as it zooms
-// in on the animal's head (the piece's crop, art.js CROP), a little nearer the eye than the piece; then the rim is there
-// and the piece settles onto the board (game.css landf).
-const TURN_MS = 340, NEAR = 1.12;     // the turn's length; the portrait's size at its end, over the piece's
-const FACE = 98;                      // the piece's portrait, stage px across, centred on its crossroad (game.css .unit .ring)
-const BURST_IN = 150, BURST_OUT = 380, BURST_W = 300;   // ms from the card's stop to the burst's peak (the cut), ms to thin away; width in stage px
+// The turn, as Hearthstone turns a minion (its 60 fps frames, design sandbox screen/play-flight/hs-ref/): at rest over its
+// crossroad the card turns to light, a painted plate of sunlight in its shape (kit2/glow_plate.webp) brightening over it;
+// under the light the card becomes the piece; the light thins and draws in to the portrait, which settles onto the board
+// (game.css landf). Light, not a cover laid on top: the card itself is what glows.
+const GLOW_IN = 90, GLOW_HOLD = 90, GLOW_OUT = 260;   // ms: the card lights up, stays lit (the cut at its middle), the light goes
 let cur = null;                       // the flight in the air: { cr, el, arrived, onArrive, before, anim }
 let last = null;                      // the latest flight's { cr, end }, kept after its layer goes: the landing it handed to runs on
 
@@ -93,17 +88,10 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
     }
   }
   const me = cur = { cr, el, arrived: false, onArrive, before: before || [] };
-  const cutAt = dur + (BURST !== 'none' ? BURST_IN : TURN_MS) / speed;   // the card stops, turns (or a burst swells over it), then the cut
+  const cutAt = dur + (GLOW_IN + GLOW_HOLD / 2) / speed;   // the card stops, lights up, and turns under the light
   last = { cr, end: Date.now() + cutAt };
   me.anim = fc.animate(frames, { duration: dur, fill: 'forwards' });
-  if (BURST !== 'none') {
-    burst(x1, y1 - PIC_UP * CARD_END * k * .5, BURST_W * k, dur, speed);
-    // the card is drawn into the burst as it swells: it pulls in toward its painting, so no frame or text is left to vanish
-    card.style.transformOrigin = `50% ${h / 2 - PIC_UP * w}px`;
-    card.animate([{ transform: 'scale(1)' }, { transform: 'scale(.62)' }],
-      { duration: BURST_IN / speed, delay: dur, easing: 'cubic-bezier(.5,0,.9,.6)', fill: 'forwards' });
-  }
-  else me.anim.finished.then(() => { if (cur === me) turn(card, w, h, s1, x1, y1, t.left + t.width / 2, t.top + t.height / 2, FACE * k, id, TURN_MS / speed); }, () => {});
+  glow(x1, y1, w * s1, h * s1, PIC_UP * w * s1, dur, speed);
   // the cut: the piece in the card's place in the same frame (board.js, game.css .flown); a view still on its way keeps the
   // card there until it comes
   me.anim.finished.then(() => setTimeout(() => {
@@ -113,49 +101,22 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
   return true;
 }
 
-// The card, at rest over its crossroad (its holder at x1, y1, scale s1), turns into the piece's portrait centred at fx, fy,
-// D across: one object, its painting carried continuously from the card's framing to the piece's crop while a soft-edged
-// circle closes in on it from the card's corners and its frame and text fade with what the circle leaves.
-function turn(card, w, h, s1, x1, y1, fx, fy, D, id, ms) {
-  const pic = card.querySelector('.pic'), cs = getComputedStyle(pic), pw = pic.offsetWidth, ph = pic.offsetHeight;
-  const Wc = Math.max(pw, ph / 1.5), Hc = Wc * 1.5;   // background-size: cover, on a 2:3 painting
-  const px = v => v.endsWith('%') ? parseFloat(v) / 100 : null;
-  const [bxs, bys] = cs.backgroundPosition.split(' ');
-  const bx = px(bxs) !== null ? (pw - Wc) * px(bxs) : parseFloat(bxs), by = px(bys) !== null ? (ph - Hc) * px(bys) : parseFloat(bys);
-  const [cx0, cy0, d] = CROP[id];
-  const cx = pic.offsetLeft + bx + cx0 * Wc, cy = pic.offsetTop + by + cy0 * Hc, dd = d * Wc;   // the crop, in the card's own px
-  const ux = w / 2 + (fx - x1) / s1, uy = h / 2 + (fy - y1) / s1, Z = NEAR * D / (dd * s1);    // where it goes, and how large
-  const R0 = Math.hypot(Math.max(cx, w - cx), Math.max(cy, h - cy)) + 8, R1 = dd / 2;
-  const frame = [...card.children].filter(e => e !== pic);
-  card.style.transformOrigin = '0 0';
-  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  const t0 = performance.now();
-  const step = now => {
-    if (!card.isConnected) return;
-    const f = Math.min(1, (now - t0) / ms), e = ease(f), z = 1 + (Z - 1) * e;
-    const ox = cx + (ux - cx) * e, oy = cy + (uy - cy) * e;
-    card.style.transform = `translate(${ox - z * cx}px,${oy - z * cy}px) scale(${z})`;
-    const r = R0 + (R1 - R0) * Math.min(1, e * 1.15), soft = 10 * (1 - f) + 1;
-    const m = `radial-gradient(circle at ${cx}px ${cy}px, #000 ${Math.max(0, r - soft)}px, transparent ${r}px)`;
-    card.style.webkitMaskImage = card.style.maskImage = m;
-    for (const el of frame) el.style.opacity = Math.max(0, 1 - f * 1.8);
-    if (f < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-
-// The painted burst over the card's last place: in, peaking at the cut, then out while the piece drops under it. Its own
-// element, so the flight layer going at the cut doesn't take it.
-function burst(x, y, w, dur, speed) {
-  const b = document.createElement('div'); b.className = 'fburst';
-  b.style.cssText = `width:${w}px;height:${w}px;left:${x - w / 2}px;top:${y - w / 2}px;background-image:url(/static/kit2/burst_${BURST}.webp)`;
-  document.body.appendChild(b);
-  const tin = BURST_IN / speed, tout = BURST_OUT / speed, rot = (Math.random() * 2 - 1) * 40;
-  b.animate([
-    { transform: `rotate(${rot}deg) scale(.35)`, opacity: 0, offset: 0, easing: 'cubic-bezier(.3,.7,.4,1)' },
-    { transform: `rotate(${rot + 6}deg) scale(1)`, opacity: 1, offset: tin / (tin + tout), easing: 'cubic-bezier(.2,.6,.3,1)' },
-    { transform: `rotate(${rot + 14}deg) scale(1.35)`, opacity: 0, offset: 1 },
-  ], { duration: tin + tout, delay: dur, fill: 'both' }).finished.then(() => b.remove(), () => b.remove());
+// The light over the card at rest (centred at x, y, cw x ch on screen; its painting `up` above that): it brightens over the
+// card, holds while the card becomes the piece beneath it, then thins and draws in to the portrait. Its own element, so the
+// flight layer going at the cut doesn't take it.
+const PLATE = { w: 1.32, h: 1.21 };   // the painted plate's size over the card's outline (its halo around it; design sandbox key.py)
+function glow(x, y, cw, ch, up, dur, speed) {
+  const g = document.createElement('div'); g.className = 'fglow';
+  const pw = cw * PLATE.w, ph = ch * PLATE.h;
+  g.style.cssText = `width:${pw}px;height:${ph}px;left:${x - pw / 2}px;top:${y - ph / 2}px;transform-origin:50% ${ph / 2 - up}px`;
+  document.body.appendChild(g);
+  const a = GLOW_IN / speed, b = GLOW_HOLD / speed, c = GLOW_OUT / speed, T = a + b + c;
+  g.animate([
+    { opacity: 0, transform: 'scale(.98)', offset: 0, easing: 'cubic-bezier(.3,.6,.5,1)' },
+    { opacity: 1, transform: 'scale(1.02)', offset: a / T },
+    { opacity: 1, transform: 'scale(1)', offset: (a + b) / T, easing: 'cubic-bezier(.4,0,.7,.6)' },
+    { opacity: 0, transform: 'scale(.62)', offset: 1 },
+  ], { duration: T, delay: dur, fill: 'both' }).finished.then(() => g.remove(), () => g.remove());
 }
 
 // A card is still on its way to `cr`: the units the crossroad shows meanwhile (what it had), else null.

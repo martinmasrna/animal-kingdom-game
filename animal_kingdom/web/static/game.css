@@ -212,15 +212,15 @@
    thins, then falls toward the board, seen from above: it shrinks onto its place as its shadow draws in under it, faster and
    faster, is squashed by the impact and springs back; the dust kicks up as it hits (--fd: when the cut came, from the step's
    start; app.js LAND_HIT) */
-.game .cr.unit.flown { z-index: 5; animation: landf .36s var(--fd, 0ms) both; }
+.game .cr.unit.flown { z-index: 5; animation: landf .6s var(--fd, 0ms) both; }
 .game .cr.unit.flown::after, .game .cr.unit.land.flown::after { content: ''; position: absolute; left: 50%; top: 50%; width: 180px; height: 180px; margin: -90px 0 0 -90px; z-index: -2;
-  background: url(/static/kit2/dust.webp) center / contain no-repeat; pointer-events: none; opacity: 0; animation: dust .7s ease-out calc(var(--fd, 0ms) + .19s) both; }
-.game .cr.unit.cover.flown .buried:first-child { animation-delay: calc(var(--fd, 0ms) + .19s); }
+  background: url(/static/kit2/dust.webp) center / contain no-repeat; pointer-events: none; opacity: 0; animation: dust .7s ease-out calc(var(--fd, 0ms) + .41s) both; }
+.game .cr.unit.cover.flown .buried:first-child { animation-delay: calc(var(--fd, 0ms) + .41s); }
 @keyframes landf {
   0% { transform: scale(1.12); filter: drop-shadow(10px 18px 9px rgba(12,6,0,.5)); animation-timing-function: linear; }
-  10% { transform: scale(1.12); filter: drop-shadow(10px 18px 9px rgba(12,6,0,.5)); animation-timing-function: cubic-bezier(.5,0,1,.55); }
-  52% { transform: scale(1.04, .93); filter: drop-shadow(1px 2px 2px rgba(20,12,4,.55)); animation-timing-function: cubic-bezier(.3,.6,.4,1); }
-  76% { transform: scale(.985, 1.02); }
+  40% { transform: scale(1.12); filter: drop-shadow(10px 18px 9px rgba(12,6,0,.5)); animation-timing-function: cubic-bezier(.5,0,1,.55); }
+  68% { transform: scale(1.04, .93); filter: drop-shadow(1px 2px 2px rgba(20,12,4,.55)); animation-timing-function: cubic-bezier(.3,.6,.4,1); }
+  84% { transform: scale(.985, 1.02); }
   100% { transform: none; filter: drop-shadow(0 0 0 rgba(20,12,4,0)); } }
 @keyframes sink { 0% { transform: translate(0, 0) scale(1.06); filter: brightness(1.2); } 100% { } }
 /* the dust kicked up where a piece lands: one painted puff that spreads and fades, under the piece */
@@ -659,7 +659,7 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
 
 /* the flight layer (flight.js): over everything, clicks pass through; the card moves on the compositor */
-.fburst { position: fixed; z-index: 901; pointer-events: none; will-change: transform, opacity; background: center / contain no-repeat; }
+.fglow { position: fixed; z-index: 901; pointer-events: none; will-change: transform, opacity; background: url(/static/kit2/glow_plate.webp) center / 100% 100% no-repeat; }
 .flight { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
 /* the shadow is the card's own, inside its tilting holder: Chrome drops a filter set on the 3D-transformed holder itself */
 .flight .fcard { position: absolute; will-change: transform; outline: 80px solid transparent; }   /* the outline widens its layer: Chrome crops the layer to the box, and the card's soft shadow with it */
