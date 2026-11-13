@@ -1,5 +1,5 @@
 {
- "rev": 467,
+ "rev": 471,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -26,17 +26,13 @@
    "x": 339,
    "y": 1421
   },
-  "bat": {
-   "x": 3443,
-   "y": 1143
-  },
   "giraffe": {
    "x": 1309,
    "y": 1977
   },
-  "boar": {
-   "x": 2301,
-   "y": 139
+  "bat": {
+   "x": -516,
+   "y": -1597
   }
  },
  "piles": [
@@ -112,7 +108,8 @@
     "serval",
     "hawk",
     "black_mamba",
-    "eagle"
+    "eagle",
+    "boar"
    ],
    "tint": "none"
   },
@@ -376,7 +373,8 @@
   "caracal": 4,
   "serval": 3,
   "black_mamba": 3,
-  "lynx": 4
+  "lynx": 4,
+  "boar": 6
  },
  "only": [
   "african_wild_dog",
