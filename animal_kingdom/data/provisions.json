@@ -1,6 +1,6 @@
 {
  "_comment": "The provisions test: only these cards are collectible, at Martin's prices from the Prices board (2026-11-13) and the strengths he set there. Unlisted cards are out of the test.",
- "budget": 60,
+ "budget": 65,
  "only_pool": true,
  "cards": {
   "wolf": {
@@ -246,8 +246,8 @@
     "tiger": 2,
     "black_panther": 2,
     "bobcat": 2,
-    "alley_cat": 2,
-    "caracal": 2,
+    "alley_cat": 1,
+    "caracal": 1,
     "serval": 2,
     "jaguar": 2,
     "leopard": 2,
@@ -255,7 +255,9 @@
     "lion_legend_3": 1,
     "lion_legend_4": 1,
     "lynx": 2,
-    "ocelot": 1
+    "ocelot": 1,
+    "tiger_legend": 1,
+    "honey_badger": 1
    }
   },
   {
@@ -268,18 +270,20 @@
    "cards": {
     "bee_legend_2": 1,
     "capybara": 2,
-    "mosquito": 2,
+    "mosquito": 1,
     "bat": 2,
     "hedgehog": 2,
     "jellyfish": 2,
     "honey_badger": 2,
-    "hornet": 1,
-    "toad": 2,
+    "toad": 1,
     "raven": 2,
     "hummingbird": 2,
     "mole": 2,
     "locust_legend": 1,
-    "owl": 2
+    "owl": 2,
+    "rat_legend_2": 1,
+    "macaque_legend": 1,
+    "bat_legend": 1
    }
   },
   {
@@ -290,7 +294,7 @@
    "starter": true,
    "bot": true,
    "cards": {
-    "wolf": 2,
+    "wolf": 1,
     "street_dog": 2,
     "wolf_legend_3": 1,
     "falcon": 2,
@@ -303,7 +307,8 @@
     "black_mamba": 2,
     "fox_legend": 1,
     "beaver": 2,
-    "mosquito": 1
+    "leopard_legend": 1,
+    "hornet": 1
    }
   },
   {
@@ -325,10 +330,10 @@
     "great_white_shark": 2,
     "anaconda_legend": 1,
     "honey_badger_legend": 1,
-    "hawk": 1,
-    "toad": 2,
-    "falcon": 1,
-    "jaguar": 1
+    "hawk": 2,
+    "toad": 1,
+    "jaguar": 1,
+    "tiger_legend": 1
    }
   },
   {
@@ -348,12 +353,12 @@
     "porcupine": 2,
     "jellyfish": 2,
     "armadillo": 2,
-    "bat": 1,
     "falcon": 1,
     "mole": 2,
     "sloth": 2,
     "toad": 2,
-    "hedgehog": 2
+    "hummingbird": 2,
+    "hornet": 1
    }
   }
  ]
