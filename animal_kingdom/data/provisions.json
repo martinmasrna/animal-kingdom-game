@@ -256,8 +256,9 @@
     "lion_legend_3": 1,
     "lion_legend_4": 1,
     "cheetah": 2,
-    "viper": 2,
-    "mosquito": 2
+    "viper": 1,
+    "mosquito": 2,
+    "honey_badger": 1
    }
   },
   {
@@ -270,9 +271,9 @@
    "cards": {
     "capybara": 2,
     "bee_legend_2": 1,
-    "pigeon": 2,
+    "pigeon": 1,
     "toad": 2,
-    "hedgehog": 2,
+    "hedgehog": 1,
     "mosquito": 2,
     "viper": 2,
     "bat": 2,
@@ -283,7 +284,9 @@
     "raven": 2,
     "hummingbird": 2,
     "hercules_beetle": 2,
-    "rat_legend_2": 1
+    "rat_legend_2": 1,
+    "macaque_legend": 1,
+    "locust_legend": 1
    }
   },
   {
@@ -301,7 +304,7 @@
     "falcon": 2,
     "cheetah": 2,
     "caracal": 2,
-    "mosquito": 2,
+    "mosquito": 1,
     "hawk": 2,
     "eagle": 2,
     "mole": 2,
@@ -309,7 +312,9 @@
     "bat": 2,
     "orca": 2,
     "fox_legend": 1,
-    "viper": 2
+    "viper": 1,
+    "black_mamba": 1,
+    "hornet": 1
    }
   },
   {
@@ -335,8 +340,9 @@
     "macaque_legend": 1,
     "viper": 2,
     "toad": 2,
-    "hedgehog": 2,
-    "raven": 1
+    "hedgehog": 1,
+    "raven": 1,
+    "hawk": 1
    }
   },
   {
@@ -363,7 +369,7 @@
     "bat": 2,
     "beaver": 2,
     "mole": 2,
-    "tortoise": 1
+    "honey_badger": 1
    }
   }
  ]
