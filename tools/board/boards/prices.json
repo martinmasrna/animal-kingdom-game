@@ -1,5 +1,5 @@
 {
- "rev": 474,
+ "rev": 481,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -30,10 +30,6 @@
    "x": 1309,
    "y": 1977
   },
-  "bat": {
-   "x": -516,
-   "y": -1597
-  },
   "mouse": {
    "x": -526,
    "y": -1887
@@ -55,7 +51,8 @@
     "viper",
     "tortoise",
     "hedgehog",
-    "caracal"
+    "caracal",
+    "bat"
    ],
    "tint": "none"
   },
@@ -335,7 +332,7 @@
    "note": "this can be safely reworked"
   },
   "mouse": {
-   "note": "we can cafely chsange to draw a card now I think",
+   "note": "this should get changed to draw 2 cards, and hummingbird will get new effect",
    "flag": true
   },
   "black_bear": {
@@ -378,7 +375,8 @@
   "serval": 3,
   "black_mamba": 3,
   "lynx": 4,
-  "boar": 6
+  "boar": 6,
+  "bat": 2
  },
  "only": [
   "african_wild_dog",
