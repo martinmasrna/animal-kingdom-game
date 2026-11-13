@@ -1,38 +1,22 @@
 {
- "rev": 481,
+ "rev": 507,
  "name": "Prices",
  "cards": {
-  "crocodile": {
-   "x": -766,
-   "y": 1627
-  },
-  "grizzly_bear": {
-   "x": -573,
-   "y": 1627
-  },
-  "street_dog": {
-   "x": 1115,
-   "y": 1421
-  },
-  "hare": {
-   "x": 2279,
-   "y": 1699
-  },
-  "cheetah": {
-   "x": 921,
-   "y": 1977
-  },
-  "rat": {
-   "x": 339,
-   "y": 1421
-  },
-  "giraffe": {
-   "x": 1309,
-   "y": 1977
-  },
   "mouse": {
    "x": -526,
    "y": -1887
+  },
+  "grizzly_bear": {
+   "x": -519,
+   "y": -1604
+  },
+  "crocodile": {
+   "x": -518,
+   "y": -1316
+  },
+  "giraffe": {
+   "x": -515,
+   "y": -1032
   }
  },
  "piles": [
@@ -52,7 +36,10 @@
     "tortoise",
     "hedgehog",
     "caracal",
-    "bat"
+    "bat",
+    "rat",
+    "hare",
+    "cheetah"
    ],
    "tint": "none"
   },
@@ -77,7 +64,8 @@
     "armadillo",
     "porcupine",
     "bobcat",
-    "baboon"
+    "baboon",
+    "hornet"
    ],
    "tint": "none"
   },
@@ -86,7 +74,7 @@
    "name": "Price 3",
    "x": 166,
    "y": -1360,
-   "cols": 22,
+   "cols": 24,
    "stacked": false,
    "cards": [
     "beaver",
@@ -109,7 +97,10 @@
     "hawk",
     "black_mamba",
     "eagle",
-    "boar"
+    "boar",
+    "lion_legend",
+    "lion_legend_2",
+    "street_dog"
    ],
    "tint": "none"
   },
@@ -150,29 +141,6 @@
     "leopard_legend"
    ],
    "tint": "none"
-  },
-  {
-   "id": "pmwffwzv80",
-   "name": "3",
-   "x": 5472,
-   "y": -2302,
-   "cols": 4,
-   "stacked": false,
-   "cards": [
-    "lion_legend",
-    "lion_legend_2"
-   ]
-  },
-  {
-   "id": "pmwffxdqx1",
-   "name": "2",
-   "x": 5458,
-   "y": -2709,
-   "cols": 4,
-   "stacked": true,
-   "cards": [
-    "hornet"
-   ]
   }
  ],
  "gone": [
@@ -342,6 +310,9 @@
   "sloth": {
    "flag": true,
    "note": "this and Black Bear effect should be on as similar animals as possible"
+  },
+  "giraffe": {
+   "flag": true
   }
  },
  "strs": {
@@ -376,7 +347,11 @@
   "black_mamba": 3,
   "lynx": 4,
   "boar": 6,
-  "bat": 2
+  "bat": 2,
+  "rat": 1,
+  "hare": 3,
+  "street_dog": 3,
+  "cheetah": 5
  },
  "only": [
   "african_wild_dog",
