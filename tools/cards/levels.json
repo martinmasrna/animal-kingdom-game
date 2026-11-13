@@ -7125,6 +7125,24 @@
       "note": "Martin 2026-11-09: stage words Birth, Journey, Trial, Ascension",
       "by": "claude",
       "at": 1794231382
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794530081
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794530128
     }
   },
   "duck": {
