@@ -18,6 +18,7 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
 .top button:hover { background: #f1f0ec; }
 .top input { width: 220px; border: 1px solid #cfccc5; border-radius: 5px; padding: 5px 9px; font: 13px system-ui, sans-serif; }
 .top .sp { flex: 1; }
+.top select { border: 1px solid #cfccc5; border-radius: 5px; padding: 5px 8px; font: 600 13px system-ui, sans-serif; background: #fff; color: var(--ink); }
 .top .msg { color: #b3261e; }
 #view { position: fixed; left: 0; right: 0; top: 44px; bottom: 0; overflow: hidden; cursor: default; touch-action: none; }
 #view.panning { cursor: grabbing; }
@@ -69,6 +70,8 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
 </head>
 <body>
 <div class="top">
+  <select id="boards" aria-label="Board"></select>
+  <button id="newboard">New board</button>
   <button id="newpile">New pile</button>
   <input id="q" type="search" placeholder="Find a card" aria-label="Find a card">
   <button id="fit">Fit</button>
@@ -95,6 +98,10 @@ const ICON = {
 const view = $('#view'), world = $('#world');
 
 let CARDS = {}, B = { rev: 0, cards: {}, piles: [] };
+// The board on the page: Main, or another from the list; the address keeps it (#b=<id>), so a reload stays on it.
+let BID = new URLSearchParams(location.hash.slice(1)).get('b') || 'main';
+const api = () => '/api/state?b=' + encodeURIComponent(BID);
+const camKey = () => BID === 'main' ? 'board-cam' : 'board-cam:' + BID;   // each board keeps its own view
 let cam = { x: 40, y: 30, z: 0.3 };
 let sel = new Set(), psel = new Set(), undo = [], redo = [];   // the picked cards, the picked piles
 const els = {}, pileEls = {};
@@ -135,7 +142,7 @@ function placeNew() {
 }
 
 // ---------- drawing ----------
-function setCam() { world.style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.z})`; world.style.setProperty('--z', cam.z); try { localStorage.setItem('board-cam', JSON.stringify(cam)); } catch (e) {} }
+function setCam() { world.style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.z})`; world.style.setProperty('--z', cam.z); try { localStorage.setItem(camKey(), JSON.stringify(cam)); } catch (e) {} }
 
 function buildCards() {
   for (const id of Object.keys(els)) if (!CARDS[id]) { els[id].remove(); delete els[id]; }
@@ -189,7 +196,7 @@ function changed(before) {
 }
 function queueSave() { clearTimeout(saveT); saveT = setTimeout(() => saving = saving.then(save), 300); }
 async function save() {
-  const r = await fetch('/api/state', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(B) }).catch(() => null);
+  const r = await fetch(api(), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(B) }).catch(() => null);
   if (!r) return msg('Not saved: the board server is not running (./board).');
   if (r.status === 409) { msg('The board changed in another tab; reloaded.'); return load(); }
   if (!r.ok) return msg('Not saved: ' + await r.text());
@@ -201,10 +208,11 @@ function msg(t) { $('#msg').textContent = t; }
 
 // `cardsOnly`: card edits made elsewhere come in, the arrangement on the page stays as it is
 async function load(cardsOnly = false) {
-  const r = await fetch('/api/state', { cache: 'no-store' }).catch(() => null);
+  const r = await fetch(api(), { cache: 'no-store' }).catch(() => null);
   if (!r) return msg('The board server is not running: ./board');
   const d = await r.json();
   CARDS = Object.fromEntries(d.cards.map(c => [c.id, c]));
+  $('#boards').innerHTML = d.boards.map(b => `<option value="${b.id}"${b.id === BID ? ' selected' : ''}>${b.name.replace(/</g, '&lt;')}</option>`).join('');
   if (!cardsOnly) { B = d.board; B.cards ||= {}; B.piles ||= []; B.gone ||= []; B.marks ||= {}; }
   buildCards();
   if (placeNew()) queueSave();
@@ -494,12 +502,29 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
 $('#fit').onclick = fit;
+// Switching boards: each keeps its own arrangement, undo history and camera.
+async function openBoard(id) {
+  await saving; clearTimeout(saveT); saving = saving.then(save);
+  await saving;
+  BID = id; location.hash = id === 'main' ? '' : 'b=' + id;
+  undo = []; redo = []; sel.clear(); psel.clear();
+  try { const c = JSON.parse(localStorage.getItem(camKey())); if (c && c.z) cam = c; } catch (e) {}
+  setCam(); await load();
+  if (!localStorage.getItem(camKey())) fit();
+}
+$('#boards').onchange = e => openBoard(e.target.value);
+$('#newboard').onclick = async () => {
+  const name = prompt('Name of the new board'); if (!name) return;
+  const r = await fetch('/api/boards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) }).catch(() => null);
+  if (!r || !r.ok) return msg('The board could not be made.');
+  openBoard((await r.json()).id);
+};
 addEventListener('focus', () => { if (!act) load(true); });   // card edits made elsewhere show when he comes back
 
-try { const c = JSON.parse(localStorage.getItem('board-cam')); if (c && c.z) cam = c; } catch (e) {}
+try { const c = JSON.parse(localStorage.getItem(camKey())); if (c && c.z) cam = c; } catch (e) {}
 setCam();
 await load();
-if (!localStorage.getItem('board-cam')) fit();
+if (!localStorage.getItem(camKey())) fit();
 </script>
 </body>
 </html>
