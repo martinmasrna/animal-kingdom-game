@@ -660,5 +660,9 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 /* the flight layer (flight.js): over everything, clicks pass through; the card moves on the compositor */
 .fburst { position: fixed; z-index: 901; pointer-events: none; will-change: transform, opacity; background: center / contain no-repeat; }
 .flight { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
-.flight .fcard { position: absolute; will-change: transform; filter: drop-shadow(4px 10px 8px rgba(20,12,4,.4)); }
+/* the shadow is the card's own, inside its tilting holder: Chrome drops a filter set on the 3D-transformed holder itself */
+.flight .fcard { position: absolute; will-change: transform; outline: 80px solid transparent; }   /* the outline widens its layer: Chrome crops the layer to the box, and the card's soft shadow with it */
+.flight .fcard > .card { filter: drop-shadow(0 0 1px rgba(30,18,6,.4)) drop-shadow(4px 10px 8px rgba(20,12,4,.4)); }
+/* held in the grip (carry.js): its edge in shadow, and its shadow cast far and soft on the board below, as high as it is */
+.flight.carry .fcard > .card { filter: drop-shadow(0 0 1px rgba(30,18,6,.8)) drop-shadow(30px 46px 14px rgba(12,6,0,.85)); }
 .flight .fcard > .card { position: absolute; left: 0; top: 0; box-shadow: none; }

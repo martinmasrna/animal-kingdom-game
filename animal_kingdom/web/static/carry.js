@@ -6,6 +6,8 @@
 import { fitNames } from './card.js';
 import { LIFT, CARD_END, PIC_UP } from './flight.js';
 
+const HELD = 1.3;                 // held, it is that much larger than over its place: nearer the eye, it comes down as it settles
+const REST_X = 9;                 // and tipped back a little, even still, so it reads as a card in the hand's grip, not a tile
 let C = null;                     // { el, fc, w, h, k, x, y, s, rx, ry, rz, raf, t }
 let px = innerWidth / 2, py = innerHeight / 2;   // the pointer, always known
 addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; }, { passive: true, capture: true });
@@ -31,12 +33,13 @@ export function carry(from, html) {
     if (C !== me) return;
     const dt = Math.min(50, now - me.t) || 16; me.t = now;
     // where it hangs: its painting LIFT above the pointer, the place flight.js turns a card over the crossroad under it
-    const tx = px, ty = py - LIFT * k + PIC_UP * CARD_END * k, ts = CARD_END * k / w;
+    // (its bottom edge kept clear of the pointer, so the crossroad aimed at stays in sight)
+    const ts = HELD * CARD_END * k / w, tx = px, ty = Math.min(py - LIFT * k + PIC_UP * CARD_END * k, py - 14 * k - h * ts / 2);
     const f = 1 - Math.exp(-dt / 55), x = me.x + (tx - me.x) * f, y = me.y + (ty - me.y) * f;
     const vx = (x - me.x) / dt, vy = (y - me.y) / dt;   // px per ms
     me.x = x; me.y = y; me.s += (ts - me.s) * (1 - Math.exp(-dt / 70));
     const g = 1 - Math.exp(-dt / 60);   // the tilt eases toward what the speed asks, so it rocks rather than snaps
-    me.ry += (clamp(vx * 14, 26) - me.ry) * g; me.rx += (clamp(-vy * 14, 26) - me.rx) * g; me.rz += (clamp(vx * 4, 8) - me.rz) * g;
+    me.ry += (clamp(vx * 14, 26) - me.ry) * g; me.rx += (REST_X + clamp(-vy * 14, 26) - me.rx) * g; me.rz += (clamp(vx * 4, 8) - me.rz) * g;
     fc.style.transform = pose(me);
     me.raf = requestAnimationFrame(tick);
   };

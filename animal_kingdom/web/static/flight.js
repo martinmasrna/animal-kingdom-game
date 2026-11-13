@@ -65,9 +65,12 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
   let dur, frames;
   if (start) {   // held: it settles from where the grip left it, its tilt easing out as it stops (a little longer the farther)
     dur = Math.min(FLY_MS, 150 + len / k * .35) / speed;
+    // its shadow draws in under it as it comes down from the grip's height (game.css .flight.carry)
+    const sh = (o, x, y, b, a) => `drop-shadow(0 0 1px rgba(30,18,6,${o})) drop-shadow(${x}px ${y}px ${b}px rgba(20,12,4,${a}))`;
     frames = [{ ...pose(x0, y0, s0, start.rx, start.ry, start.rz), offset: 0, easing: 'cubic-bezier(.25,.7,.35,1)' },
       { ...pose(x1 + (x0 - x1) * .04, y1 + (y0 - y1) * .04, s1, -start.rx * .15, -start.ry * .15, 0), offset: .8, easing: 'ease-in-out' },
       { ...pose(x1, y1, s1, 0, 0, 0), offset: 1 }];
+    card.animate([{ filter: sh(.8, 30, 46, 14, .85) }, { filter: sh(.4, 4, 10, 8, .4) }], { duration: dur * .8, easing: 'cubic-bezier(.25,.7,.35,1)', fill: 'forwards' });
   } else {
     dur = FLY_MS / speed; const pop = POP_MS / FLY_MS;
     frames = [{ ...pose(x0, y0, s0, 0, 0, 0), offset: 0, easing: 'cubic-bezier(.2,.6,.4,1)' },
