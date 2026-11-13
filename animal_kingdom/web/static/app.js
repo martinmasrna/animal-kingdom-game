@@ -958,7 +958,7 @@ const DUR_REVEAL_HOLD = DUR.reveal * 0.62;   // s: the opponent's card held at t
 // A flown card touches down (flight.js): the board draws the piece landing, with the landing's sound (the step that put it
 // there drew the crossroad as it was, so it made none).
 const landNow = covered => { if (screen !== 'game') return; drawBoard(); sfx(covered ? 'cover' : 'land', LAND_HIT); };
-const LAND_HIT = 0.32;   // s from the cut to the piece's impact (game.css @keyframes landf)
+const LAND_HIT = 0.19;   // s from the cut to the piece's impact (game.css @keyframes landf)
 function onView(prev) {
   if (PB.busy) { PB.queue.push(V); V = PB.shown; return; }   // keep showing the step in play
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once

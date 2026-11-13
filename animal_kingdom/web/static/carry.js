@@ -6,7 +6,7 @@
 import { fitNames } from './card.js';
 import { LIFT, CARD_END, PIC_UP } from './flight.js';
 
-const HELD = 1.15;                // held, it is that much larger than over its place: nearer the eye, it comes down as it settles
+const HELD = 1;                   // held, its size over its place (Hearthstone shrinks a lifted card to about its minion's size)
 const REST_X = 9;                 // and tipped back a little, even still, so it reads as a card in the hand's grip, not a tile
 let C = null;                     // { el, fc, w, h, k, x, y, s, rx, ry, rz, raf, t }
 let px = innerWidth / 2, py = innerHeight / 2;   // the pointer, always known
@@ -35,9 +35,9 @@ export function carry(from, html) {
     // where it hangs: its painting on the pointer (Martin, 2026-11-13: a card hung above the pointer sat over the next
     // crossroad, "a disconnect between where my cursor is and where the card is"), so what it covers is where it goes
     const ts = HELD * CARD_END * k / w, tx = px, ty = py - LIFT * k + PIC_UP * HELD * CARD_END * k;
-    const f = 1 - Math.exp(-dt / 55), x = me.x + (tx - me.x) * f, y = me.y + (ty - me.y) * f;
+    const f = 1 - Math.exp(-dt / 26), x = me.x + (tx - me.x) * f, y = me.y + (ty - me.y) * f;
     const vx = (x - me.x) / dt, vy = (y - me.y) / dt;   // px per ms
-    me.x = x; me.y = y; me.s += (ts - me.s) * (1 - Math.exp(-dt / 70));
+    me.x = x; me.y = y; me.s += (ts - me.s) * (1 - Math.exp(-dt / 40));
     const g = 1 - Math.exp(-dt / 60);   // the tilt eases toward what the speed asks, so it rocks rather than snaps
     me.ry += (clamp(vx * 14, 26) - me.ry) * g; me.rx += (REST_X + clamp(-vy * 14, 26) - me.rx) * g; me.rz += (clamp(vx * 4, 8) - me.rz) * g;
     fc.style.transform = pose(me);

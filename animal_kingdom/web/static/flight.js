@@ -10,7 +10,7 @@
 // its own layer over the page, so no redraw of the board or the hand can stall or cut it. Until the cut the crossroad shows
 // what it showed before (board.js); at the cut the board is redrawn (`onArrive`) with the piece landing, and the layer goes
 // in that frame.
-import { hasArt } from './art.js';
+import { hasArt, CROP } from './art.js';
 import { fitNames } from './card.js';
 
 export const FLY_MS = 520;
@@ -20,7 +20,13 @@ export const CARD_END = 130;                 // the card's width over its place,
 export const PIC_UP = 2.55 / 20;             // the card's painting's centre above the card's centre, in card widths (app.css .card)
 // The burst that hides the cut, painted (kit2/burst_<name>.webp): it swells over the card in the flight's last moment, the
 // card becomes the piece under it, and it thins away as the piece drops. `?burst=` picks one while they are compared.
-const BURST = new URLSearchParams(globalThis.location?.search || '').get('burst') || 'poof';
+const BURST = new URLSearchParams(globalThis.location?.search || '').get('burst') || 'none';
+// The turn, as Hearthstone turns a minion (its 60 fps frames, design sandbox screen/play-flight/hs-ref/): nothing covers the
+// card; it burns away from its edges in toward its own painting, which closes into the piece's round portrait as it zooms
+// in on the animal's head (the piece's crop, art.js CROP), a little nearer the eye than the piece; then the rim is there
+// and the piece settles onto the board (game.css landf).
+const TURN_MS = 340, NEAR = 1.12;     // the turn's length; the portrait's size at its end, over the piece's
+const FACE = 98;                      // the piece's portrait, stage px across, centred on its crossroad (game.css .unit .ring)
 const BURST_IN = 150, BURST_OUT = 380, BURST_W = 300;   // ms from the card's stop to the burst's peak (the cut), ms to thin away; width in stage px
 let cur = null;                       // the flight in the air: { cr, el, arrived, onArrive, before, anim }
 let last = null;                      // the latest flight's { cr, end }, kept after its layer goes: the landing it handed to runs on
@@ -87,7 +93,7 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
     }
   }
   const me = cur = { cr, el, arrived: false, onArrive, before: before || [] };
-  const cutAt = dur + (BURST !== 'none' ? BURST_IN / speed : 0);   // the card stops, the burst swells over it, then the cut
+  const cutAt = dur + (BURST !== 'none' ? BURST_IN : TURN_MS) / speed;   // the card stops, turns (or a burst swells over it), then the cut
   last = { cr, end: Date.now() + cutAt };
   me.anim = fc.animate(frames, { duration: dur, fill: 'forwards' });
   if (BURST !== 'none') {
@@ -97,6 +103,7 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
     card.animate([{ transform: 'scale(1)' }, { transform: 'scale(.62)' }],
       { duration: BURST_IN / speed, delay: dur, easing: 'cubic-bezier(.5,0,.9,.6)', fill: 'forwards' });
   }
+  else me.anim.finished.then(() => { if (cur === me) turn(card, w, h, s1, x1, y1, t.left + t.width / 2, t.top + t.height / 2, FACE * k, id, TURN_MS / speed); }, () => {});
   // the cut: the piece in the card's place in the same frame (board.js, game.css .flown); a view still on its way keeps the
   // card there until it comes
   me.anim.finished.then(() => setTimeout(() => {
@@ -104,6 +111,37 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
   }, cutAt - dur), () => {});
   me.giveUp = setTimeout(() => { if (cur === me) done(); }, dur + 4000);   // a play the server refused: the card lets go
   return true;
+}
+
+// The card, at rest over its crossroad (its holder at x1, y1, scale s1), turns into the piece's portrait centred at fx, fy,
+// D across: one object, its painting carried continuously from the card's framing to the piece's crop while a soft-edged
+// circle closes in on it from the card's corners and its frame and text fade with what the circle leaves.
+function turn(card, w, h, s1, x1, y1, fx, fy, D, id, ms) {
+  const pic = card.querySelector('.pic'), cs = getComputedStyle(pic), pw = pic.offsetWidth, ph = pic.offsetHeight;
+  const Wc = Math.max(pw, ph / 1.5), Hc = Wc * 1.5;   // background-size: cover, on a 2:3 painting
+  const px = v => v.endsWith('%') ? parseFloat(v) / 100 : null;
+  const [bxs, bys] = cs.backgroundPosition.split(' ');
+  const bx = px(bxs) !== null ? (pw - Wc) * px(bxs) : parseFloat(bxs), by = px(bys) !== null ? (ph - Hc) * px(bys) : parseFloat(bys);
+  const [cx0, cy0, d] = CROP[id];
+  const cx = pic.offsetLeft + bx + cx0 * Wc, cy = pic.offsetTop + by + cy0 * Hc, dd = d * Wc;   // the crop, in the card's own px
+  const ux = w / 2 + (fx - x1) / s1, uy = h / 2 + (fy - y1) / s1, Z = NEAR * D / (dd * s1);    // where it goes, and how large
+  const R0 = Math.hypot(Math.max(cx, w - cx), Math.max(cy, h - cy)) + 8, R1 = dd / 2;
+  const frame = [...card.children].filter(e => e !== pic);
+  card.style.transformOrigin = '0 0';
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const t0 = performance.now();
+  const step = now => {
+    if (!card.isConnected) return;
+    const f = Math.min(1, (now - t0) / ms), e = ease(f), z = 1 + (Z - 1) * e;
+    const ox = cx + (ux - cx) * e, oy = cy + (uy - cy) * e;
+    card.style.transform = `translate(${ox - z * cx}px,${oy - z * cy}px) scale(${z})`;
+    const r = R0 + (R1 - R0) * Math.min(1, e * 1.15), soft = 10 * (1 - f) + 1;
+    const m = `radial-gradient(circle at ${cx}px ${cy}px, #000 ${Math.max(0, r - soft)}px, transparent ${r}px)`;
+    card.style.webkitMaskImage = card.style.maskImage = m;
+    for (const el of frame) el.style.opacity = Math.max(0, 1 - f * 1.8);
+    if (f < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 // The painted burst over the card's last place: in, peaking at the cut, then out while the piece drops under it. Its own
