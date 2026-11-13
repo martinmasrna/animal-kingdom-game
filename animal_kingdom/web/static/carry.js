@@ -20,7 +20,7 @@ const pose = c => `translate(${c.x}px,${c.y}px) perspective(${900 * c.k}px) rota
 // up read better than a card over a ghost of the piece? ?held=token), centred on the pointer, popping out of the card.
 export const HELD_TOKEN = new URLSearchParams(globalThis.location?.search || '').get('held') === 'token';
 export function carry(from, html, token = false) {
-  drop();
+  drop(); aimAt = null;
   const stage = document.getElementById('stage'), k = stage.getBoundingClientRect().width / stage.offsetWidth;
   const r = from.getBoundingClientRect(), w = token ? 134 : from.offsetWidth, h = token ? 134 : from.offsetHeight;
   const el = document.createElement('div'); el.className = 'flight carry';
@@ -38,8 +38,9 @@ export function carry(from, html, token = false) {
     const dt = Math.min(50, now - me.t) || 16; me.t = now;
     // where it hangs: its painting on the pointer (Martin, 2026-11-13: a card hung above the pointer sat over the next
     // crossroad, "a disconnect between where my cursor is and where the card is"), so what it covers is where it goes
-    const ts = me.token ? k : HELD * CARD_END * k / w, tx = px, ty = py - LIFT * k + (me.token ? 0 : PIC_UP * HELD * CARD_END * k);
-    const f = 1 - Math.exp(-dt / 26), x = me.x + (tx - me.x) * f, y = me.y + (ty - me.y) * f;
+    const at = me.token ? aimed() : null;
+    const ts = me.token ? k : HELD * CARD_END * k / w, tx = at ? at.x : px, ty = at ? at.y : py - LIFT * k + (me.token ? 0 : PIC_UP * HELD * CARD_END * k);
+    const f = 1 - Math.exp(-dt / (at ? 40 : 26)), x = me.x + (tx - me.x) * f, y = me.y + (ty - me.y) * f;
     const vx = (x - me.x) / dt, vy = (y - me.y) / dt;   // px per ms
     me.x = x; me.y = y; me.s += (ts - me.s) * (1 - Math.exp(-dt / 40));
     const g = 1 - Math.exp(-dt / 60);   // the tilt eases toward what the speed asks, so it rocks rather than snaps
@@ -51,6 +52,13 @@ export function carry(from, html, token = false) {
 }
 
 export const carrying = () => !!C;
+
+// The crossroad the held token would go to (null: none). A held token is its own preview (Martin, 2026-11-13: placement
+// matters, so the board must show where it lands): it leaves the pointer and settles onto that crossroad, as a chess piece
+// held over a square; off it, it follows the pointer again. The card held is shown over a ghost of the piece instead.
+let aimAt = null;
+export function aim(cr) { aimAt = cr; }
+const aimed = () => { const g = aimAt && document.querySelector(`#board [data-cr="${aimAt}"]`); if (!g) return null; const r = g.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
 
 // Its pose now, and it lets go of it (fly() takes the card on from here, in the same frame); null when nothing is held.
 export function release() {
