@@ -1,5 +1,5 @@
 {
- "rev": 471,
+ "rev": 474,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -33,6 +33,10 @@
   "bat": {
    "x": -516,
    "y": -1597
+  },
+  "mouse": {
+   "x": -526,
+   "y": -1887
   }
  },
  "piles": [
@@ -45,7 +49,6 @@
    "stacked": false,
    "cards": [
     "wolf",
-    "mouse",
     "pigeon",
     "toad",
     "mosquito",
@@ -332,7 +335,8 @@
    "note": "this can be safely reworked"
   },
   "mouse": {
-   "note": "we can cafely chsange to draw a card now I think"
+   "note": "we can cafely chsange to draw a card now I think",
+   "flag": true
   },
   "black_bear": {
    "flag": true,
