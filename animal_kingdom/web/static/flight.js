@@ -14,14 +14,14 @@ import { hasArt } from './art.js';
 import { fitNames } from './card.js';
 
 export const FLY_MS = 520;
-export const LIFT = 120;              // stage pixels above its crossroad the card stops, turns, and the piece falls from (game.css landf)
+export const LIFT = 160;              // stage pixels above its crossroad the card stops, turns, and the piece falls from (game.css landf)
 const POP_MS = 90;                    // the pop out of the hand
-const CARD_END = 150;                 // the card's width over its place, in stage pixels: its painting about the piece's size
-const PIC_UP = 2.55 / 20;             // the card's painting's centre above the card's centre, in card widths (app.css .card)
+export const CARD_END = 130;                 // the card's width over its place, in stage pixels: its painting about the piece's size
+export const PIC_UP = 2.55 / 20;             // the card's painting's centre above the card's centre, in card widths (app.css .card)
 // The burst that hides the cut, painted (kit2/burst_<name>.webp): it swells over the card in the flight's last moment, the
 // card becomes the piece under it, and it thins away as the piece drops. `?burst=` picks one while they are compared.
 const BURST = new URLSearchParams(globalThis.location?.search || '').get('burst') || 'poof';
-const BURST_IN = 150, BURST_OUT = 380, BURST_W = 340;   // ms from the card's stop to the burst's peak (the cut), ms to thin away; width in stage px
+const BURST_IN = 150, BURST_OUT = 380, BURST_W = 300;   // ms from the card's stop to the burst's peak (the cut), ms to thin away; width in stage px
 let cur = null;                       // the flight in the air: { cr, el, arrived, onArrive, before, anim }
 let last = null;                      // the latest flight's { cr, end }, kept after its layer goes: the landing it handed to runs on
 
@@ -35,12 +35,14 @@ const clamp = (v, m) => Math.max(-m, Math.min(m, v));
 // Off on live (Martin, 2026-11-12: live plays without it while he compares); on staging and localhost.
 export const FLIGHT = globalThis.location?.hostname !== 'animal-kingdom.fly.dev';
 
-export function fly(from, target, id, cr, before, onArrive, html = null) {
-  if (!FLIGHT || !from || !target || !hasArt(id) || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+// `start`: the pose of a card held in the pointer's grip (carry.js release()), which it flies on from, without the pop out of
+// the hand: a held card is already over its crossroad, so its flight is the short settle into place.
+export function fly(from, target, id, cr, before, onArrive, html = null, start = null) {
+  if (!FLIGHT || (!from && !start) || !target || !hasArt(id) || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
   const stage = document.getElementById('stage'), k = stage.getBoundingClientRect().width / stage.offsetWidth;
-  const C = from.getBoundingClientRect(), t = target.getBoundingClientRect();
-  const w = from.offsetWidth, h = from.offsetHeight;   // the card's own size (the full card has the same outline)
-  const x0 = C.left + C.width / 2, y0 = C.top + C.height / 2, s0 = C.width / w, s1 = CARD_END * k / w;
+  const C = start ? null : from.getBoundingClientRect(), t = target.getBoundingClientRect();
+  const w = start ? start.w : from.offsetWidth, h = start ? start.h : from.offsetHeight;   // the card's own size (the full card has the same outline)
+  const x0 = start ? start.x : C.left + C.width / 2, y0 = start ? start.y : C.top + C.height / 2, s0 = start ? start.s : C.width / w, s1 = CARD_END * k / w;
   const x1 = t.left + t.width / 2, y1 = t.top + t.height / 2 - LIFT * k + PIC_UP * CARD_END * k;   // its painting over the piece's
 
   done();
@@ -59,18 +61,27 @@ export function fly(from, target, id, cr, before, onArrive, html = null) {
   const cx = x0 + dx * .45 + (-dy / len) * side * Math.min(80, len * .18) * k, cy = y0 + dy * .45 - 30 * k;
   const at = u => [(1 - u) * (1 - u) * x0 + 2 * (1 - u) * u * cx + u * u * x1, (1 - u) * (1 - u) * y0 + 2 * (1 - u) * u * cy + u * u * y1];
   const pose = (x, y, s, rx, ry, rz) => ({ transform: `translate(${x}px,${y}px) perspective(${900 * k}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${s})` });
-  const speed = window.AK_SPEED || 1, dur = FLY_MS / speed, pop = POP_MS / FLY_MS;
-  const frames = [{ ...pose(x0, y0, s0, 0, 0, 0), offset: 0, easing: 'cubic-bezier(.2,.6,.4,1)' },
-    { ...pose(x0, y0 - 18 * k, s0 * 1.08, 14, 0, 0), offset: pop }];   // the pop: it lifts and tips back
-  const N = 16;
-  let [px, py] = [x0, y0 - 18 * k];
-  for (let i = 1; i <= N; i++) {
-    const f = i / N, q = quadOut(f), [x, y] = at(q), vx = (x - px) / (len / N), vy = (y - py) / (len / N), fade = 1 - f;
-    const rx = i === N ? 0 : i === N - 1 ? -3 : clamp(-vy * 16, 22) * fade + 14 * (1 - Math.min(1, f * 3));   // nose toward its way
-    const ry = i === N ? 0 : i === N - 1 ? 2 * side : clamp(vx * 18, 24) * fade;
-    const rz = i === N ? 0 : clamp(vx * 7, 8) * fade;
-    frames.push({ ...pose(x, y - 18 * k * (1 - q), s0 * 1.08 + (s1 - s0 * 1.08) * q, rx, ry, rz), offset: pop + (1 - pop) * f });
-    px = x; py = y;
+  const speed = window.AK_SPEED || 1;
+  let dur, frames;
+  if (start) {   // held: it settles from where the grip left it, its tilt easing out as it stops (a little longer the farther)
+    dur = Math.min(FLY_MS, 150 + len / k * .35) / speed;
+    frames = [{ ...pose(x0, y0, s0, start.rx, start.ry, start.rz), offset: 0, easing: 'cubic-bezier(.25,.7,.35,1)' },
+      { ...pose(x1 + (x0 - x1) * .04, y1 + (y0 - y1) * .04, s1, -start.rx * .15, -start.ry * .15, 0), offset: .8, easing: 'ease-in-out' },
+      { ...pose(x1, y1, s1, 0, 0, 0), offset: 1 }];
+  } else {
+    dur = FLY_MS / speed; const pop = POP_MS / FLY_MS;
+    frames = [{ ...pose(x0, y0, s0, 0, 0, 0), offset: 0, easing: 'cubic-bezier(.2,.6,.4,1)' },
+      { ...pose(x0, y0 - 18 * k, s0 * 1.08, 14, 0, 0), offset: pop }];   // the pop: it lifts and tips back
+    const N = 16;
+    let [px, py] = [x0, y0 - 18 * k];
+    for (let i = 1; i <= N; i++) {
+      const f = i / N, q = quadOut(f), [x, y] = at(q), vx = (x - px) / (len / N), vy = (y - py) / (len / N), fade = 1 - f;
+      const rx = i === N ? 0 : i === N - 1 ? -3 : clamp(-vy * 16, 22) * fade + 14 * (1 - Math.min(1, f * 3));   // nose toward its way
+      const ry = i === N ? 0 : i === N - 1 ? 2 * side : clamp(vx * 18, 24) * fade;
+      const rz = i === N ? 0 : clamp(vx * 7, 8) * fade;
+      frames.push({ ...pose(x, y - 18 * k * (1 - q), s0 * 1.08 + (s1 - s0 * 1.08) * q, rx, ry, rz), offset: pop + (1 - pop) * f });
+      px = x; py = y;
+    }
   }
   const me = cur = { cr, el, arrived: false, onArrive, before: before || [] };
   const cutAt = dur + (BURST !== 'none' ? BURST_IN / speed : 0);   // the card stops, the burst swells over it, then the cut

@@ -88,6 +88,7 @@
 .game .hc.dim { opacity: .45; filter: none; }
 .game .hc:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; }
 .game .hc:hover .card .ctext { display: flex; }   /* the hand shows paintings; the hovered card is read in full */
+.game .hc.away { visibility: hidden; }   /* a card put back from the grip, on its way to this place (carry.js) */
 .game .hc.sel { transform: translateY(-18px); z-index: 3; } .game .hc.sel:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; }
 .game .hc.ready .card { filter: drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 6px var(--ready)) drop-shadow(0 0 12px var(--ready)); }   /* its "if ..." holds right now */
 .game .hc.sel .card, .game .hc.pick .card { filter: drop-shadow(0 0 0 var(--act)) drop-shadow(0 0 3px var(--act)) drop-shadow(0 0 2px var(--act)); }
@@ -215,8 +216,8 @@
   background: url(/static/kit2/dust.webp) center / contain no-repeat; pointer-events: none; opacity: 0; animation: dust .7s ease-out calc(var(--fd, 0ms) + .32s) both; }
 .game .cr.unit.cover.flown .buried:first-child { animation-delay: calc(var(--fd, 0ms) + .32s); }
 @keyframes landf {
-  0% { transform: translate(0, -120px) scale(1.15); filter: drop-shadow(14px 40px 14px rgba(20,12,4,.3)); animation-timing-function: linear; }
-  12% { transform: translate(0, -120px) scale(1.15); filter: drop-shadow(14px 40px 14px rgba(20,12,4,.3)); animation-timing-function: cubic-bezier(.5,0,1,.55); }
+  0% { transform: translate(0, -160px) scale(1.15); filter: drop-shadow(14px 40px 14px rgba(20,12,4,.3)); animation-timing-function: linear; }
+  12% { transform: translate(0, -160px) scale(1.15); filter: drop-shadow(14px 40px 14px rgba(20,12,4,.3)); animation-timing-function: cubic-bezier(.5,0,1,.55); }
   64% { transform: translate(0, 3px) scale(1.1, .86); filter: drop-shadow(1px 2px 2px rgba(20,12,4,.55)); animation-timing-function: cubic-bezier(.3,.6,.4,1); }
   82% { transform: scale(.97, 1.04); }
   100% { transform: none; filter: drop-shadow(0 0 0 rgba(20,12,4,0)); } }
