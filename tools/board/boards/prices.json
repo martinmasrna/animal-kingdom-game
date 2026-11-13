@@ -1,5 +1,5 @@
 {
- "rev": 79,
+ "rev": 87,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -186,10 +186,6 @@
    "x": 970,
    "y": 556
   },
-  "giraffe_legend": {
-   "x": 1164,
-   "y": 556
-  },
   "sperm_whale_legend": {
    "x": 1358,
    "y": 556
@@ -230,20 +226,8 @@
    "x": 582,
    "y": 966
   },
-  "mole": {
-   "x": 776,
-   "y": 966
-  },
   "ocelot": {
    "x": 970,
-   "y": 966
-  },
-  "remora": {
-   "x": 1164,
-   "y": 966
-  },
-  "termite_queen": {
-   "x": 1358,
    "y": 966
   },
   "chameleon": {
@@ -324,10 +308,6 @@
   },
   "albatross": {
    "x": 970,
-   "y": 1244
-  },
-  "beaver": {
-   "x": 1164,
    "y": 1244
   },
   "black_mamba": {
@@ -833,7 +813,9 @@
    "y": -1360,
    "cols": 14,
    "stacked": false,
-   "cards": [],
+   "cards": [
+    "beaver"
+   ],
    "tint": "none"
   },
   {
@@ -843,7 +825,12 @@
    "y": -940,
    "cols": 14,
    "stacked": false,
-   "cards": [],
+   "cards": [
+    "mole",
+    "remora",
+    "termite_queen",
+    "giraffe_legend"
+   ],
    "tint": "none"
   },
   {
@@ -875,7 +862,10 @@
    "note": "bro, really? :D read the card effect again"
   }
  },
- "strs": {},
+ "strs": {
+  "locust_legend": 1,
+  "beaver": 3
+ },
  "only": [
   "african_wild_dog",
   "albatross",
