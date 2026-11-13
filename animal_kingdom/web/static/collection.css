@@ -164,3 +164,7 @@
   .coll .zside.row .kws { flex-direction: column; width: min(78vw, 340px); }
   .coll .zside.row .kws .kw { flex: none; }
 }
+
+/* The provisions test: a card's price, top left of its tile. */
+.coll .tl .price { position: absolute; right: -6px; top: -6px; z-index: 7; width: 26px; height: 26px; border-radius: 50%; background: #16181a; color: #f3e9c9; font: 700 15px/26px 'Fira Sans Condensed', sans-serif; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,.6); border: 2px solid #c9a24a; }
+.coll .clist .bud { padding: 6px 10px 8px; color: #e9e4da; font: 600 16px 'Fira Sans Condensed', sans-serif; } .coll .clist .bud b { color: #f3e9c9; font-size: 18px; }

@@ -27,7 +27,7 @@ const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
-let CARDS = {}, MAP, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null;   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
+let BUDGET = 0, CARDS = {}, MAP, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null;   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
 
@@ -133,7 +133,7 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; BUDGET = p.budget; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
   COVER = Object.fromEntries([...DECKS, ...BOT_ONLY].map(d => [d.id, d.cover]));
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
@@ -686,7 +686,7 @@ const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  renderCollection(app, { open, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
+  renderCollection(app, { open, budget: BUDGET, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
 }
 

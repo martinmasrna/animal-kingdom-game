@@ -78,7 +78,8 @@ def register_deck(slug: str, decklist: Sequence[str]) -> None:
 
 
 DECK_SIZE = 30
-RARITY_CAPS = {"rare": 8, "legendary": 4}   # rules §13: at most 8 rares and 4 legendaries in a deck
+from .engine.resources import provisions as _provisions
+BUDGET = _provisions()["budget"]   # the provisions test: the cards' prices add up to at most this (replaces the rarity caps)
 
 
 def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
@@ -101,9 +102,9 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
         if n > limit:
             problems.append(f"at most {limit} {card.name}")
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + n
-    for rarity, cap in RARITY_CAPS.items():
-        if by_rarity.get(rarity, 0) > cap:
-            problems.append(f"at most {cap} {rarity} cards")
+    spent = sum(cards[cid].price * n for cid, n in counts.items() if cid in cards)
+    if spent > BUDGET:
+        problems.append(f"the cards cost {spent}, over the budget of {BUDGET}")
     return problems
 
 

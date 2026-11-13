@@ -79,6 +79,7 @@ class Card:
     habitat: str = ""              # the habitat (set) the card belongs to; display only, no rule reads it
     related: tuple[str, ...] = ()  # the cards it makes, shown beside it when read large; display only
     evolves: bool = False          # its related cards are what it becomes, in order (display only)
+    price: int = 2                 # the provisions test: what the card costs from the deck's budget (data/provisions.json)
 
     @property
     def is_dynamic(self) -> bool:
@@ -176,6 +177,7 @@ def _build_card(rec: dict) -> Card:
         habitat=rec.get("habitat", ""),
         related=tuple(rec.get("related", ())),
         evolves=bool(rec.get("evolves", False)),
+        price=rec.get("price", 2),
     )
 
 

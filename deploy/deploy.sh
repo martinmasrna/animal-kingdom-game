@@ -18,6 +18,8 @@ target=live
 if [[ "${1:-}" == "staging" ]]; then target=staging; shift; fi
 if [[ "${1:-}" == "pull" && "${2:-}" == "staging" ]]; then target=staging; fi
 [[ "$target" == staging ]] && cfg="$repo/deploy/fly.staging.toml"
+# The provisions test (branch provisions, never merged): its own app, deploy/fly.provisions.toml
+if [[ "${1:-}" == "provisions" ]]; then target=provisions; shift; cfg="$repo/deploy/fly.provisions.toml"; fi
 app="$(sed -n 's/^app = "\(.*\)"/\1/p' "$cfg")"
 
 if [[ "${1:-}" == "pull" ]]; then
@@ -108,7 +110,7 @@ retry() { attempt "$@" || { echo "retrying once"; attempt "$@" || { echo "DEPLOY
 # keyed by their git trees; the app's build copies them from it, so a card or code change uploads a few MB. The Fly builder
 # keeps no context between builds, so without this every deploy sent all of it (two minutes, ten on a slow line).
 art="art-$(git -C "$repo" rev-parse HEAD:animal_kingdom/web/static/art HEAD:animal_kingdom/web/static/kit2 | shasum | cut -c1-16)"
-artmark="$cache/art"; [[ "$target" == staging ]] && artmark="$cache/art-staging"   # each app's registry holds its own copy
+artmark="$cache/art"; [[ "$target" == staging ]] && artmark="$cache/art-staging"; [[ "$target" == provisions ]] && artmark="$cache/art-provisions"   # each app's registry holds its own copy
 if [[ "$(cat "$artmark" 2>/dev/null)" != "$art" ]]; then
   echo "the paintings changed: pushing them as $art"
   mkdir -p "$tmp/art"
