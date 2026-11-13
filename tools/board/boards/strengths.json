@@ -1,5 +1,5 @@
 {
- "rev": 27,
+ "rev": 39,
  "name": "Strengths",
  "only": [
   "african_wild_dog",
@@ -299,18 +299,12 @@
     "lynx",
     "mara",
     "octopus",
-    "okapi",
-    "opossum",
     "porcupine",
     "raccoon",
-    "skunk",
     "squirrel",
     "stag_beetle",
     "stork",
-    "sunfish",
-    "tortoise",
-    "warthog",
-    "wolverine"
+    "tortoise"
    ],
    "tint": "none"
   },
@@ -323,18 +317,14 @@
    "stacked": false,
    "cards": [
     "baboon",
-    "bobcat",
     "cheetah",
-    "dhole",
     "dolphin",
     "eagle",
-    "golden_orb_weaver",
     "orangutan",
     "queen_ant",
     "queen_bee",
     "sea_turtle",
     "tarantula",
-    "termite_king",
     "wolf",
     "zebra"
    ],
@@ -353,8 +343,6 @@
     "boar",
     "jaguar",
     "leopard",
-    "manta_ray",
-    "stick_insect",
     "wildebeest"
    ],
    "tint": "none"
@@ -467,7 +455,19 @@
  },
  "gone": [
   "python",
-  "egg_eater"
+  "egg_eater",
+  "manta_ray",
+  "stick_insect",
+  "bobcat",
+  "dhole",
+  "golden_orb_weaver",
+  "termite_king",
+  "okapi",
+  "opossum",
+  "skunk",
+  "sunfish",
+  "warthog",
+  "wolverine"
  ],
  "marks": {}
 }
