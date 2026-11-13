@@ -1,5 +1,5 @@
 {
- "rev": 443,
+ "rev": 445,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -70,10 +70,6 @@
    "x": 3254,
    "y": -163
   },
-  "jellyfish": {
-   "x": 3056,
-   "y": -163
-  },
   "porcupine": {
    "x": 3460,
    "y": -159
@@ -115,7 +111,8 @@
     "falcon",
     "anaconda",
     "alley_cat",
-    "dolphin"
+    "dolphin",
+    "jellyfish"
    ],
    "tint": "none"
   },
@@ -399,7 +396,8 @@
   "mosquito": 1,
   "viper": 2,
   "tortoise": 4,
-  "hedgehog": 3
+  "hedgehog": 3,
+  "jellyfish": 3
  },
  "only": [
   "african_wild_dog",
