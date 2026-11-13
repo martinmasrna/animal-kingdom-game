@@ -1,11 +1,7 @@
 {
- "rev": 328,
+ "rev": 360,
  "name": "Prices",
  "cards": {
-  "bat_legend": {
-   "x": 194,
-   "y": 0
-  },
   "albatross": {
    "x": 970,
    "y": 1244
@@ -18,14 +14,6 @@
    "x": 1940,
    "y": 1244
   },
-  "jaguar": {
-   "x": 1552,
-   "y": 1522
-  },
-  "leopard": {
-   "x": 1746,
-   "y": 1522
-  },
   "orca": {
    "x": 2134,
    "y": 1522
@@ -36,10 +24,6 @@
   },
   "raven": {
    "x": 3104,
-   "y": 1932
-  },
-  "sloth": {
-   "x": 3298,
    "y": 1932
   },
   "alley_cat": {
@@ -130,18 +114,6 @@
    "x": 1552,
    "y": 2766
   },
-  "black_bear": {
-   "x": 2328,
-   "y": 2766
-  },
-  "macaque_legend": {
-   "x": 405,
-   "y": -12
-  },
-  "deer_legend_2": {
-   "x": 614,
-   "y": -17
-  },
   "porcupine": {
    "x": 463,
    "y": 1255
@@ -162,10 +134,6 @@
    "x": 2350,
    "y": 1521
   },
-  "honey_badger": {
-   "x": 2762,
-   "y": 1203
-  },
   "crocodile": {
    "x": -766,
    "y": 1627
@@ -174,29 +142,13 @@
    "x": -573,
    "y": 1627
   },
-  "fox_legend": {
-   "x": -15,
-   "y": 1
-  },
-  "rat_legend_2": {
-   "x": 848,
-   "y": 2
-  },
-  "pheasant_legend": {
-   "x": 1053,
-   "y": 18
-  },
-  "eagle": {
-   "x": -305,
-   "y": 0
-  },
-  "queen_ant": {
-   "x": 8,
-   "y": 369
-  },
   "hercules_beetle": {
    "x": -309,
    "y": 350
+  },
+  "eagle": {
+   "x": -212,
+   "y": -457
   }
  },
  "piles": [
@@ -224,7 +176,9 @@
     "lion",
     "black_panther",
     "tiger",
-    "capybara"
+    "capybara",
+    "black_bear",
+    "sloth"
    ],
    "tint": "none"
   },
@@ -238,7 +192,14 @@
    "cards": [
     "beaver",
     "sardine",
-    "hummingbird"
+    "hummingbird",
+    "queen_ant",
+    "bat_legend",
+    "macaque_legend",
+    "pheasant_legend",
+    "rat_legend_2",
+    "honey_badger",
+    "leopard"
    ],
    "tint": "none"
   },
@@ -256,7 +217,10 @@
     "lion_legend_4",
     "anaconda_legend",
     "honey_badger_legend",
-    "octopus_legend_2"
+    "octopus_legend_2",
+    "fox_legend",
+    "deer_legend_2",
+    "jaguar"
    ],
    "tint": "none"
   },
@@ -456,6 +420,14 @@
   },
   "mouse": {
    "note": "we can cafely chsange to draw a card now I think"
+  },
+  "black_bear": {
+   "flag": true,
+   "note": "this and Sloth effect should be on similar animals"
+  },
+  "sloth": {
+   "flag": true,
+   "note": "this and Black Bear effect should be on as similar animals as possible"
   }
  },
  "strs": {
@@ -468,7 +440,8 @@
   "wolf": 5,
   "black_panther": 6,
   "leopard_legend": 6,
-  "mouse": 1
+  "mouse": 1,
+  "rat_legend_2": 1
  },
  "only": [
   "african_wild_dog",
