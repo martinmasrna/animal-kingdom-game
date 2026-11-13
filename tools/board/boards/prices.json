@@ -1,5 +1,5 @@
 {
- "rev": 406,
+ "rev": 412,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -22,10 +22,6 @@
    "x": 2397,
    "y": 403
   },
-  "toad": {
-   "x": 1309,
-   "y": 1421
-  },
   "street_dog": {
    "x": 1115,
    "y": 1421
@@ -45,10 +41,6 @@
   "bat": {
    "x": 3443,
    "y": 1143
-  },
-  "serval": {
-   "x": 533,
-   "y": 1421
   },
   "alley_cat": {
    "x": 3249,
@@ -117,6 +109,10 @@
   "armadillo": {
    "x": 1377,
    "y": 45
+  },
+  "serval": {
+   "x": 1749,
+   "y": 91
   }
  },
  "piles": [
@@ -130,7 +126,8 @@
    "cards": [
     "wolf",
     "mouse",
-    "pigeon"
+    "pigeon",
+    "toad"
    ],
    "tint": "none"
   },
@@ -423,7 +420,8 @@
   "hercules_beetle": 1,
   "orca": 7,
   "pigeon": 3,
-  "black_bear": 6
+  "black_bear": 6,
+  "toad": 2
  },
  "only": [
   "african_wild_dog",
