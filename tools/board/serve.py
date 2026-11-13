@@ -3,7 +3,7 @@ Nothing on it means anything to the game; it is a sandbox. The cards are read fr
 page asks, and each board's arrangement (where each card lies, the piles, which are squared into a stack) lives in its own
 file, committed and pushed by itself once he stops moving things for QUIET seconds. The first board, Main, is
 tools/board/board.json; every other board is tools/board/boards/<id>.json, named inside the file. A board whose file lists
-`only` (card ids) shows just those cards.
+`only` (card ids) shows just those cards; one with `notext` draws them without their effect text.
 
     ./board                 # http://localhost:8004
     ./board --port 8005 --no-open
@@ -32,7 +32,7 @@ BOARDS = HERE / "boards"          # every other board, one file each
 ON_BOARD = {"collectible", "reserve", "planned"}   # tokens, evolution stages and the tutorial's deal stay off
 
 
-def cards(only: list[str] | None = None) -> list[dict]:
+def cards(only: list[str] | None = None, notext: bool = False) -> list[dict]:
     """The cards in the shape the game's cardHTML (static/card.js) draws; planned cards (no rarity or strength yet) as blanks."""
     raw = json.loads(hq.CARDS.read_text(encoding="utf-8"))["cards"]
     real = load_cards({"cards": raw}, validate=False)
@@ -43,7 +43,7 @@ def cards(only: list[str] | None = None) -> list[dict]:
         c = real.get(r["id"])
         if c:
             out.append({"id": c.id, "name": c.name, "rarity": c.rarity, "str": "*" if c.is_dynamic else c.base_strength,
-                        "text": c.text, "tags": sorted(c.tags), "species": r.get("species", ""), "habitat": c.habitat})
+                        "text": "" if notext else c.text, "tags": sorted(c.tags), "species": r.get("species", ""), "habitat": c.habitat})
         else:
             out.append({"id": r["id"], "name": r.get("name") or r.get("species") or r["id"], "rarity": "common", "str": "",
                         "text": "", "tags": [], "species": r.get("species", ""), "habitat": r.get("habitat", ""), "planned": True})
@@ -76,7 +76,7 @@ async def index(_req):
 
 async def get_state(req):
     b = board(req.query.get("b", "main"))
-    return web.json_response({"cards": cards(b.get("only")), "board": b, "boards": boards()}, headers={"Cache-Control": "no-store"})
+    return web.json_response({"cards": cards(b.get("only"), bool(b.get("notext"))), "board": b, "boards": boards()}, headers={"Cache-Control": "no-store"})
 
 
 async def new_board(req):
@@ -118,7 +118,7 @@ async def put_state(req):
     if new.get("rev") != cur.get("rev"):
         raise web.HTTPConflict(text="The board changed elsewhere; reloading.")
     new["rev"] = cur.get("rev", 0) + 1
-    for k in ("name", "only"):   # set when the board is made, never by the page
+    for k in ("name", "only", "notext"):   # set when the board is made, never by the page
         if k in cur:
             new[k] = cur[k]
     tmp = f.with_suffix(".tmp")
