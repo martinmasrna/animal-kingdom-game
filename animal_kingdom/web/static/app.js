@@ -5,8 +5,8 @@ import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan, DUR } from './timeline.js';
 import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
-import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait } from './board.js';
+import { carry, carrying, release, drop as carryDrop, HELD_TOKEN } from './carry.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, pieceHTML } from './board.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
@@ -940,7 +940,8 @@ const act = action => { if (action.kind === 'place' && ui.carry != null) { relea
 const canGrip = id => FLIGHT && !touch() && hasArt(id) && !matchMedia('(prefers-reduced-motion: reduce)').matches;
 function grip(el, id, iid) {
   const h = (V.game.hand || []).find(h => h.iid === iid);
-  carry(el.querySelector('.card'), cardHTML(formOf(id, V.you), { str: h ? h.str : undefined })); ui.carry = iid;
+  const str = h ? h.str : undefined;
+  carry(el.querySelector('.card'), HELD_TOKEN ? pieceHTML({ id, owner: 'A', str }, CARDS) : cardHTML(formOf(id, V.you), { str }), HELD_TOKEN); ui.carry = iid;
 }
 // A card let go of without being placed goes back to its place in the hand, which opens for it as it comes.
 function ungrip() {
@@ -1594,7 +1595,7 @@ function drawBoard(d) {
   d = d || lastDecision; lastDecision = d;
   let g = viewerGame();
   let preview = null;
-  if (ui.sel && ui.hover && d.rings.includes(ui.hover)) {
+  if (ui.sel && ui.hover && d.rings.includes(ui.hover) && !carrying()) {   // a held card or token is its own preview: no ghost under it
     preview = { cr: ui.hover, id: ui.sel, str: selCopy().str };
   }
   // A step's animations play once. A redraw while they run (the pointer moving over the board, a card picked) draws the
@@ -1648,7 +1649,7 @@ const endBeat = () => { const key = V && `${V.id}-${V.results.length}`;
 function placeAt(g, cr) {
   const iid = selCopy().iid, start = ui.carry === iid ? release() : null; ui.carry = null;
   const flew = fly(start ? null : document.querySelector(`#hand .hc[data-iid="${iid}"] .card`), g, ui.sel, cr, viewerGame().board[cr], landNow,
-    cardHTML(formOf(ui.sel, V.you), { str: selCopy().str }), start);   // in full, text and all, as the opponent's
+    start && start.token ? pieceHTML({ id: ui.sel, owner: 'A', str: selCopy().str }, CARDS) : cardHTML(formOf(ui.sel, V.you), { str: selCopy().str }), start);   // in full, text and all, as the opponent's
   act(placeAction(['cr', dcr(cr)]));
   if (flew) { ui.flyIid = iid; drawGame();
     setTimeout(() => { if (ui.flyIid === iid && screen === 'game') { ui.flyIid = null; drawGame(); } }, 5000); }   // a refused play: the card is back

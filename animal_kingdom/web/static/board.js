@@ -79,6 +79,9 @@ export function portrait(id, D) {
 }
 
 // A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer and board keywords as badges.
+// A piece by itself (the grip's token, carry.js): the unit as the board draws it, in a box of its own size.
+export const pieceHTML = (u, cards) => `<div class="game kit token" style="position:relative;width:134px;height:134px;background:transparent">`
+  + `<div class="abs cr unit ${u.owner}" style="left:67px;top:67px">${unit(u, [], cards)}</div></div>`;
 function unit(u, under, cards, fire = false) {
   // Board keywords: the card's own, plus Stealth whenever the enemy can't choose it (an adjacent Armadillo gives it).
   // Spikes only until they've removed a coverer (the view says so): after that it's an ordinary animal.
