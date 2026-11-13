@@ -38,7 +38,7 @@ const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${
 // The launch habitats, in the order the sets are presented.
 const HABITATS = ['Savanna', 'Forest', 'Meadow', 'Jungle', 'City', 'Open Ocean'];
 let B = 0, X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', pr: '', q: '', sheet: false }, flash = null, wired = false;
-const N = 30;   // a deck holds 30
+const N = 25;   // the provisions test: a deck holds 25
 const limit = c => LIMIT[c.rarity];
 // The provisions test: a deck's cards cost their prices from one budget, in place of the rarity caps.
 const spent = list => list.reduce((a, id) => a + (C[id] ? C[id].price : 0), 0);   // copies per deck: the rarity's (a card's starter count is the starter's business)

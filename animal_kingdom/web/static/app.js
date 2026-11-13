@@ -115,7 +115,7 @@ const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 // The decks you can play: your complete decks (a profile starts with the starters as its own); with none, the starters.
 // A deck under 30 cards is listed too, so it doesn't vanish from home while you build it: shown with its count, opened in
 // the collection to finish, never chosen to play (Martin, 2026-10-31: "affordance for decklist with less than 30 cards").
-const playable = () => { const mine = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: Math.max(0, 30 - deckSize(d.cards)), list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
+const playable = () => { const mine = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: Math.max(0, 25 - deckSize(d.cards)), list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
   return mine.some(d => !d.short) ? mine : [...DECKS, ...mine]; };
 const chosenDeck = () => { const all = playable().filter(d => !d.short), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;

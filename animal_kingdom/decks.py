@@ -81,7 +81,7 @@ def register_deck(slug: str, decklist: Sequence[str]) -> None:
         {s: d for s, d in EXTRA_DECKS.items() if s != "baseline"})
 
 
-DECK_SIZE = 30
+DECK_SIZE = 25   # the provisions test
 from .engine.resources import provisions as _provisions
 BUDGET = _provisions()["budget"]   # the provisions test: the cards' prices add up to at most this (replaces the rarity caps)
 
