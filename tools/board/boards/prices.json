@@ -1,5 +1,5 @@
 {
- "rev": 412,
+ "rev": 429,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -17,10 +17,6 @@
   "jellyfish": {
    "x": 2432,
    "y": 702
-  },
-  "great_white_shark": {
-   "x": 2397,
-   "y": 403
   },
   "street_dog": {
    "x": 1115,
@@ -42,10 +38,6 @@
    "x": 3443,
    "y": 1143
   },
-  "alley_cat": {
-   "x": 3249,
-   "y": 1143
-  },
   "hedgehog": {
    "x": 3249,
    "y": 1421
@@ -54,32 +46,8 @@
    "x": 533,
    "y": 1977
   },
-  "mosquito": {
-   "x": 2279,
-   "y": 1143
-  },
-  "viper": {
-   "x": 533,
-   "y": 1699
-  },
-  "baboon": {
-   "x": 4156,
-   "y": 1262
-  },
   "giraffe": {
    "x": 1309,
-   "y": 1977
-  },
-  "boar": {
-   "x": 4419,
-   "y": 1216
-  },
-  "anaconda": {
-   "x": 3926,
-   "y": 1250
-  },
-  "dolphin": {
-   "x": 339,
    "y": 1977
   },
   "eagle": {
@@ -113,6 +81,14 @@
   "serval": {
    "x": 1749,
    "y": 91
+  },
+  "boar": {
+   "x": 2301,
+   "y": 139
+  },
+  "baboon": {
+   "x": 2598,
+   "y": 87
   }
  },
  "piles": [
@@ -127,7 +103,9 @@
     "wolf",
     "mouse",
     "pigeon",
-    "toad"
+    "toad",
+    "mosquito",
+    "viper"
    ],
    "tint": "none"
   },
@@ -144,7 +122,10 @@
     "tiger",
     "capybara",
     "sloth",
-    "falcon"
+    "falcon",
+    "anaconda",
+    "alley_cat",
+    "dolphin"
    ],
    "tint": "none"
   },
@@ -169,7 +150,8 @@
     "owl",
     "raven",
     "hercules_beetle",
-    "black_bear"
+    "black_bear",
+    "great_white_shark"
    ],
    "tint": "none"
   },
@@ -421,7 +403,10 @@
   "orca": 7,
   "pigeon": 3,
   "black_bear": 6,
-  "toad": 2
+  "toad": 2,
+  "anaconda": 6,
+  "mosquito": 1,
+  "viper": 2
  },
  "only": [
   "african_wild_dog",
