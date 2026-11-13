@@ -1,5 +1,5 @@
 {
- "rev": 516,
+ "rev": 518,
  "name": "Prices",
  "cards": {
   "mouse": {
@@ -21,6 +21,10 @@
   "octopus_legend_2": {
    "x": -511,
    "y": -747
+  },
+  "black_bear": {
+   "x": -504,
+   "y": -460
   }
  },
  "piles": [
@@ -94,7 +98,6 @@
     "owl",
     "raven",
     "hercules_beetle",
-    "black_bear",
     "lynx",
     "great_white_shark",
     "serval",
@@ -338,7 +341,7 @@
   "hercules_beetle": 1,
   "orca": 7,
   "pigeon": 3,
-  "black_bear": 6,
+  "black_bear": 7,
   "toad": 2,
   "anaconda": 6,
   "mosquito": 1,
