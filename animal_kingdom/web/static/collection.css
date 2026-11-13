@@ -81,7 +81,7 @@
 /* The card zoom. */
 .coll .modal.zoom { background: rgba(0,0,0,.86); cursor: zoom-out; }
 .coll .zbox { display: flex; align-items: center; gap: 22px; }
-.coll .zbox .card { --w: max(340px, min(58vh, 30vw)); }   /* as the game's card view: 58% of the window's height */
+.coll .zbox .card { --w: 360px; }
 .coll .zside { display: flex; flex-direction: column; gap: 18px; }
 .coll .rel { display: flex; align-items: center; gap: 6px; }
 .coll .rel .card { --w: 210px; }
