@@ -1,5 +1,5 @@
 {
- "rev": 510,
+ "rev": 516,
  "name": "Prices",
  "cards": {
   "mouse": {
@@ -17,6 +17,10 @@
   "giraffe": {
    "x": -515,
    "y": -1032
+  },
+  "octopus_legend_2": {
+   "x": -511,
+   "y": -747
   }
  },
  "piles": [
@@ -74,7 +78,7 @@
    "name": "Price 3",
    "x": 166,
    "y": -1360,
-   "cols": 24,
+   "cols": 25,
    "stacked": false,
    "cards": [
     "beaver",
@@ -100,7 +104,8 @@
     "boar",
     "lion_legend",
     "lion_legend_2",
-    "street_dog"
+    "street_dog",
+    "jaguar"
    ],
    "tint": "none"
   },
@@ -118,10 +123,8 @@
     "lion_legend_4",
     "anaconda_legend",
     "honey_badger_legend",
-    "octopus_legend_2",
     "fox_legend",
     "deer_legend_2",
-    "jaguar",
     "orca"
    ],
    "tint": "none"
@@ -313,6 +316,9 @@
   },
   "giraffe": {
    "flag": true
+  },
+  "octopus_legend_2": {
+   "flag": true
   }
  },
  "strs": {
@@ -344,7 +350,6 @@
   "porcupine": 4,
   "caracal": 4,
   "serval": 3,
-  "black_mamba": 3,
   "lynx": 4,
   "boar": 6,
   "bat": 2,
@@ -352,7 +357,8 @@
   "hare": 3,
   "street_dog": 3,
   "cheetah": 5,
-  "anaconda_legend": 8
+  "anaconda_legend": 8,
+  "octopus_legend_2": 3
  },
  "only": [
   "african_wild_dog",
