@@ -44,8 +44,12 @@ PREMADE_DECKS.update({d["slug"]: list(d["list"]) for d in LADDER_DECKS})
 # low on the ladder, which is the ladder's own information). Ranked matchmaking, the ladder seed, Practice's 'Random'
 # and the bot benchmark panel draw from these.
 BOT_DECKS: tuple[str, ...] = tuple(d["slug"] for d in DECKLISTS) + tuple(d["slug"] for d in LADDER_DECKS)
+from .engine.resources import provisions as _prov
+_TEST = tuple(d["slug"] for d in _prov().get("decks", []))
 PANEL_OPPONENTS: tuple[str, ...] = ("cats", "den_rush", "fish")   # the benchmark's standing opponents, from the pool
 assert all(d in BOT_DECKS for d in PANEL_OPPONENTS), PANEL_OPPONENTS
+if _TEST:   # the provisions test: the bots play only the test decks
+    BOT_DECKS = _TEST
 
 
 # The goodstuff pile: the greedy optimizer's best cross-deck list over the old seven-deck pool

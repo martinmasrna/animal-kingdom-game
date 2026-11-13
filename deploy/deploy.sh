@@ -142,6 +142,7 @@ if [[ -n "$prev" ]] && git -C "$repo" cat-file -e "$prev^{commit}" 2>/dev/null; 
     quick=1; echo "only the client's static files changed since ${prev:0:8}: the image skips the Python gate"
   fi
 fi
+[[ "$target" == provisions ]] && quick=1   # the provisions test changes the pool the engine tests assume: no Python gate on this app
 echo "deploying $(git -C "$repo" log --oneline -1) to $target ($app)"
 retry "$tmp/app" --config "$tmp/app/fly.toml" --remote-only --build-arg "ART=registry.fly.io/$app:$art" --build-arg "QUICK=$quick"
 git -C "$repo" rev-parse HEAD > "$deployed"

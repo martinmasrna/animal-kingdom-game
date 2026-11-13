@@ -1,4 +1,212 @@
 {
-  "budget": 76,
-  "cards": {}
+ "_comment": "The provisions test pool: only these cards are collectible; price 1-5 and, where given, a changed strength. Unlisted cards are out of the test. Decks replace decklists.json.",
+ "budget": 70,
+ "only_pool": true,
+ "cards": {
+  "squirrel": {
+   "price": 1,
+   "strength": 2
+  },
+  "mosquito": {
+   "price": 1,
+   "strength": 1
+  },
+  "viper": {
+   "price": 1
+  },
+  "bat": {
+   "price": 1,
+   "strength": 2
+  },
+  "hedgehog": {
+   "price": 1,
+   "strength": 3
+  },
+  "toad": {
+   "price": 1,
+   "strength": 2
+  },
+  "rat": {
+   "price": 1,
+   "strength": 2
+  },
+  "gazelle": {
+   "price": 1,
+   "strength": 3
+  },
+  "pigeon": {
+   "price": 1,
+   "strength": 3
+  },
+  "hamster": {
+   "price": 1,
+   "strength": 1
+  },
+  "mouse": {
+   "price": 1,
+   "strength": 1
+  },
+  "lion": {
+   "price": 2
+  },
+  "wolf": {
+   "price": 2
+  },
+  "caracal": {
+   "price": 2,
+   "strength": 5
+  },
+  "tortoise": {
+   "price": 2,
+   "strength": 5
+  },
+  "dolphin": {
+   "price": 2
+  },
+  "sloth": {
+   "price": 2,
+   "strength": 1
+  },
+  "boar": {
+   "price": 2
+  },
+  "grizzly_bear": {
+   "price": 2
+  },
+  "giraffe": {
+   "price": 2
+  },
+  "tiger": {
+   "price": 3,
+   "strength": 8
+  },
+  "black_bear": {
+   "price": 3,
+   "strength": 7
+  },
+  "honey_badger": {
+   "price": 3
+  },
+  "black_mamba": {
+   "price": 3
+  },
+  "black_panther": {
+   "price": 3
+  },
+  "hippopotamus": {
+   "price": 3
+  },
+  "gorilla": {
+   "price": 3,
+   "strength": 8
+  },
+  "beaver": {
+   "price": 3,
+   "strength": 4
+  },
+  "lion_legend": {
+   "price": 3
+  },
+  "lion_legend_2": {
+   "price": 3
+  },
+  "giraffe_legend": {
+   "price": 3
+  },
+  "mole": {
+   "price": 4
+  },
+  "rhinoceros": {
+   "price": 4
+  },
+  "elephant": {
+   "price": 4,
+   "strength": 10
+  },
+  "eagle": {
+   "price": 4
+  },
+  "rhinoceros_legend": {
+   "price": 4
+  },
+  "honey_badger_legend": {
+   "price": 4
+  },
+  "rat_legend_2": {
+   "price": 4
+  },
+  "tiger_legend": {
+   "price": 5,
+   "strength": 8
+  },
+  "sperm_whale_legend": {
+   "price": 5
+  }
+ },
+ "decks": [
+  {
+   "slug": "prov_rush",
+   "name": "Test: Rush",
+   "cover": "wolf",
+   "order": 1,
+   "starter": true,
+   "bot": true,
+   "cards": {
+    "mosquito": 3,
+    "viper": 3,
+    "rat": 3,
+    "pigeon": 3,
+    "bat": 3,
+    "caracal": 3,
+    "wolf": 3,
+    "lion": 3,
+    "honey_badger": 2,
+    "black_mamba": 2,
+    "mole": 2
+   }
+  },
+  {
+   "slug": "prov_food",
+   "name": "Test: Food",
+   "cover": "squirrel",
+   "order": 2,
+   "starter": true,
+   "bot": true,
+   "cards": {
+    "squirrel": 3,
+    "hamster": 3,
+    "mouse": 3,
+    "gazelle": 3,
+    "toad": 3,
+    "hedgehog": 3,
+    "sloth": 3,
+    "tortoise": 3,
+    "boar": 3,
+    "beaver": 2,
+    "hippopotamus": 1
+   }
+  },
+  {
+   "slug": "prov_big",
+   "name": "Test: Big",
+   "cover": "tiger",
+   "order": 3,
+   "starter": true,
+   "bot": true,
+   "cards": {
+    "lion": 3,
+    "tiger": 2,
+    "gorilla": 3,
+    "grizzly_bear": 3,
+    "giraffe": 3,
+    "elephant": 2,
+    "wolf": 3,
+    "viper": 3,
+    "squirrel": 3,
+    "black_panther": 2,
+    "tiger_legend": 1,
+    "mosquito": 2
+   }
+  }
+ ]
 }

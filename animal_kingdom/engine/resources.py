@@ -35,8 +35,11 @@ def provisions() -> dict:
 
 
 def _apply_provisions(data: dict) -> None:
-    over = provisions().get("cards", {})
+    prov = provisions()
+    over = prov.get("cards", {})
     for rec in data.get("cards", []):
+        if prov.get("only_pool") and rec.get("status") == "collectible" and rec.get("id") not in over:
+            rec["status"] = "reserve"   # out of the test pool
         o = over.get(rec.get("id"), {})
         rec["price"] = o.get("price", DEFAULT_PRICE.get(rec.get("rarity"), 2))
         if "strength" in o:
