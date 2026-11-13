@@ -1,5 +1,5 @@
 {
- "rev": 509,
+ "rev": 510,
  "name": "Prices",
  "cards": {
   "mouse": {
@@ -317,7 +317,7 @@
  },
  "strs": {
   "locust_legend": 1,
-  "beaver": 3,
+  "beaver": 4,
   "mole": 2,
   "wolf_legend_3": 4,
   "sardine": 1,
