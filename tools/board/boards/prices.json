@@ -1,5 +1,5 @@
 {
- "rev": 9,
+ "rev": 29,
  "name": "Prices",
  "only": [
   "squirrel",
@@ -44,64 +44,12 @@
   "sperm_whale_legend"
  ],
  "cards": {
-  "honey_badger_legend": {
-   "x": 582,
-   "y": 0
-  },
-  "giraffe_legend": {
-   "x": 776,
-   "y": 0
-  },
-  "sperm_whale_legend": {
-   "x": 970,
-   "y": 0
-  },
-  "rhinoceros_legend": {
-   "x": 1358,
-   "y": 0
-  },
-  "beaver": {
-   "x": 388,
-   "y": 410
-  },
-  "black_mamba": {
-   "x": 582,
-   "y": 410
-  },
-  "eagle": {
-   "x": 776,
-   "y": 410
-  },
-  "black_panther": {
-   "x": 970,
-   "y": 410
-  },
-  "hippopotamus": {
-   "x": 1164,
-   "y": 410
-  },
-  "rhinoceros": {
-   "x": 1358,
-   "y": 410
-  },
   "hamster": {
    "x": 0,
    "y": 820
   },
   "mosquito": {
    "x": 194,
-   "y": 820
-  },
-  "mouse": {
-   "x": 388,
-   "y": 820
-  },
-  "sloth": {
-   "x": 582,
-   "y": 820
-  },
-  "bat": {
-   "x": 776,
    "y": 820
   },
   "rat": {
@@ -168,10 +116,6 @@
    "x": 3880,
    "y": 820
   },
-  "tiger": {
-   "x": 4074,
-   "y": 820
-  },
   "elephant": {
    "x": 4268,
    "y": 820
@@ -179,6 +123,10 @@
   "rat_legend_2": {
    "x": -386,
    "y": -1127
+  },
+  "bat": {
+   "x": -160,
+   "y": -1612
   }
  },
  "piles": [
@@ -189,7 +137,9 @@
    "y": -2200,
    "cols": 14,
    "stacked": false,
-   "cards": [],
+   "cards": [
+    "mouse"
+   ],
    "tint": "none"
   },
   {
@@ -200,7 +150,8 @@
    "cols": 14,
    "stacked": false,
    "cards": [
-    "lion"
+    "lion",
+    "sloth"
    ],
    "tint": "none"
   },
@@ -214,7 +165,12 @@
    "cards": [
     "lion_legend",
     "lion_legend_2",
-    "honey_badger"
+    "honey_badger",
+    "eagle",
+    "black_panther",
+    "tiger",
+    "black_mamba",
+    "hippopotamus"
    ],
    "tint": "none"
   },
@@ -226,7 +182,10 @@
    "cols": 14,
    "stacked": false,
    "cards": [
-    "mole"
+    "mole",
+    "beaver",
+    "giraffe_legend",
+    "rhinoceros"
    ],
    "tint": "none"
   },
@@ -238,11 +197,19 @@
    "cols": 14,
    "stacked": false,
    "cards": [
-    "tiger_legend"
+    "tiger_legend",
+    "honey_badger_legend",
+    "sperm_whale_legend",
+    "rhinoceros_legend"
    ],
    "tint": "none"
   }
  ],
  "gone": [],
- "marks": {}
+ "marks": {
+  "rat_legend_2": {
+   "note": "idk, is trictly stornger than honey badger but feels too weak for a 4 I think",
+   "flag": true
+  }
+ }
 }
