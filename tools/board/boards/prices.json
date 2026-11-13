@@ -1,5 +1,5 @@
 {
- "rev": 151,
+ "rev": 155,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -759,8 +759,6 @@
    "stacked": false,
    "cards": [
     "mole",
-    "remora",
-    "termite_queen",
     "ocelot",
     "giraffe_legend",
     "lion_legend_3",
@@ -781,9 +779,7 @@
     "bee_legend_2",
     "locust_legend",
     "wolf_legend_3",
-    "cockroach_legend",
-    "mole_legend",
-    "orangutan_legend"
+    "mole_legend"
    ],
    "tint": "none"
   },
@@ -811,7 +807,12 @@
    ]
   }
  ],
- "gone": [],
+ "gone": [
+  "remora",
+  "termite_queen",
+  "orangutan_legend",
+  "cockroach_legend"
+ ],
  "marks": {
   "rat_legend_2": {
    "note": "idk, is trictly stornger than honey badger but feels too weak for a 4 I think",
