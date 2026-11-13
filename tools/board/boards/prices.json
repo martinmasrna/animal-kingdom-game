@@ -1,5 +1,5 @@
 {
- "rev": 69,
+ "rev": 70,
  "name": "Prices",
  "cards": {
   "bat": {
@@ -13,6 +13,850 @@
   "gorilla": {
    "x": -129,
    "y": -979
+  },
+  "butterfly_legend": {
+   "x": 0,
+   "y": 0
+  },
+  "bat_legend": {
+   "x": 194,
+   "y": 0
+  },
+  "krill_legend": {
+   "x": 388,
+   "y": 0
+  },
+  "mole_legend": {
+   "x": 582,
+   "y": 0
+  },
+  "goose_legend": {
+   "x": 776,
+   "y": 0
+  },
+  "bee_legend_2": {
+   "x": 970,
+   "y": 0
+  },
+  "cockroach_legend": {
+   "x": 1164,
+   "y": 0
+  },
+  "sardine_legend": {
+   "x": 1358,
+   "y": 0
+  },
+  "macaque_legend": {
+   "x": 1552,
+   "y": 0
+  },
+  "deer_legend_2": {
+   "x": 1746,
+   "y": 0
+  },
+  "piranha_legend": {
+   "x": 1940,
+   "y": 0
+  },
+  "bee_legend": {
+   "x": 2134,
+   "y": 0
+  },
+  "locust_legend": {
+   "x": 2328,
+   "y": 0
+  },
+  "jellyfish_legend": {
+   "x": 2522,
+   "y": 0
+  },
+  "rodent_legend": {
+   "x": 2716,
+   "y": 0
+  },
+  "scout_bee": {
+   "x": 2910,
+   "y": 0
+  },
+  "wolf_legend_3": {
+   "x": 3104,
+   "y": 0
+  },
+  "eagle_legend": {
+   "x": 3298,
+   "y": 0
+  },
+  "tortoise_legend": {
+   "x": 3492,
+   "y": 0
+  },
+  "baboon_legend": {
+   "x": 3686,
+   "y": 0
+  },
+  "swan_legend": {
+   "x": 3880,
+   "y": 0
+  },
+  "deer_legend": {
+   "x": 4074,
+   "y": 0
+  },
+  "raven_legend": {
+   "x": 4268,
+   "y": 0
+  },
+  "chameleon_legend": {
+   "x": 4462,
+   "y": 0
+  },
+  "bumblebee_legend": {
+   "x": 0,
+   "y": 278
+  },
+  "army_ant_legend": {
+   "x": 194,
+   "y": 278
+  },
+  "hornet_legend": {
+   "x": 388,
+   "y": 278
+  },
+  "squirrel_legend": {
+   "x": 582,
+   "y": 278
+  },
+  "manta_ray_legend": {
+   "x": 776,
+   "y": 278
+  },
+  "wolf_legend": {
+   "x": 970,
+   "y": 278
+  },
+  "sloth_legend": {
+   "x": 1164,
+   "y": 278
+  },
+  "dung_beetle_legend": {
+   "x": 1358,
+   "y": 278
+  },
+  "rat_legend": {
+   "x": 1552,
+   "y": 278
+  },
+  "zebra_legend": {
+   "x": 1746,
+   "y": 278
+  },
+  "octopus_legend_2": {
+   "x": 1940,
+   "y": 278
+  },
+  "orangutan_legend": {
+   "x": 2134,
+   "y": 278
+  },
+  "oxpecker_legend": {
+   "x": 2328,
+   "y": 278
+  },
+  "chipmunk_legend": {
+   "x": 2522,
+   "y": 278
+  },
+  "falcon_legend": {
+   "x": 2716,
+   "y": 278
+  },
+  "tuna_legend": {
+   "x": 2910,
+   "y": 278
+  },
+  "wildebeest_legend": {
+   "x": 3104,
+   "y": 278
+  },
+  "leopard_legend": {
+   "x": 3298,
+   "y": 278
+  },
+  "lion_legend_4": {
+   "x": 3492,
+   "y": 278
+  },
+  "skunk_legend": {
+   "x": 3686,
+   "y": 278
+  },
+  "fox_legend": {
+   "x": 3880,
+   "y": 278
+  },
+  "boar_legend": {
+   "x": 4074,
+   "y": 278
+  },
+  "capybara_legend": {
+   "x": 4268,
+   "y": 278
+  },
+  "cuckoo_legend": {
+   "x": 4462,
+   "y": 278
+  },
+  "wolf_legend_2": {
+   "x": 0,
+   "y": 556
+  },
+  "pheasant_legend": {
+   "x": 194,
+   "y": 556
+  },
+  "lion_legend_3": {
+   "x": 388,
+   "y": 556
+  },
+  "elephant_legend": {
+   "x": 582,
+   "y": 556
+  },
+  "cairn": {
+   "x": 776,
+   "y": 556
+  },
+  "borealis": {
+   "x": 970,
+   "y": 556
+  },
+  "anaconda_legend": {
+   "x": 1164,
+   "y": 556
+  },
+  "hercules_beetle": {
+   "x": 0,
+   "y": 966
+  },
+  "dart_frog": {
+   "x": 194,
+   "y": 966
+  },
+  "earthworm": {
+   "x": 388,
+   "y": 966
+  },
+  "hummingbird": {
+   "x": 582,
+   "y": 966
+  },
+  "ocelot": {
+   "x": 776,
+   "y": 966
+  },
+  "remora": {
+   "x": 970,
+   "y": 966
+  },
+  "termite_queen": {
+   "x": 1164,
+   "y": 966
+  },
+  "chameleon": {
+   "x": 1358,
+   "y": 966
+  },
+  "coyote": {
+   "x": 1552,
+   "y": 966
+  },
+  "hornet": {
+   "x": 1746,
+   "y": 966
+  },
+  "impala": {
+   "x": 1940,
+   "y": 966
+  },
+  "jerboa": {
+   "x": 2134,
+   "y": 966
+  },
+  "naked_mole_rat": {
+   "x": 2328,
+   "y": 966
+  },
+  "tarsier": {
+   "x": 2522,
+   "y": 966
+  },
+  "vole": {
+   "x": 2716,
+   "y": 966
+  },
+  "cuckoo": {
+   "x": 2910,
+   "y": 966
+  },
+  "dormouse": {
+   "x": 3104,
+   "y": 966
+  },
+  "electric_eel": {
+   "x": 3298,
+   "y": 966
+  },
+  "flying_squirrel": {
+   "x": 3492,
+   "y": 966
+  },
+  "groundhog": {
+   "x": 3686,
+   "y": 966
+  },
+  "jackal": {
+   "x": 3880,
+   "y": 966
+  },
+  "macaw": {
+   "x": 4074,
+   "y": 966
+  },
+  "magpie": {
+   "x": 4268,
+   "y": 966
+  },
+  "meerkat": {
+   "x": 4462,
+   "y": 966
+  },
+  "piranha": {
+   "x": 0,
+   "y": 1244
+  },
+  "swordfish": {
+   "x": 194,
+   "y": 1244
+  },
+  "woodpecker": {
+   "x": 388,
+   "y": 1244
+  },
+  "albatross": {
+   "x": 582,
+   "y": 1244
+  },
+  "chimpanzee": {
+   "x": 776,
+   "y": 1244
+  },
+  "chinchilla": {
+   "x": 970,
+   "y": 1244
+  },
+  "hawk": {
+   "x": 1164,
+   "y": 1244
+  },
+  "octopus": {
+   "x": 1358,
+   "y": 1244
+  },
+  "okapi": {
+   "x": 1552,
+   "y": 1244
+  },
+  "opossum": {
+   "x": 1746,
+   "y": 1244
+  },
+  "raccoon": {
+   "x": 1940,
+   "y": 1244
+  },
+  "skunk": {
+   "x": 2134,
+   "y": 1244
+  },
+  "andean_condor": {
+   "x": 2328,
+   "y": 1244
+  },
+  "armadillo": {
+   "x": 2522,
+   "y": 1244
+  },
+  "cottonmouth": {
+   "x": 2716,
+   "y": 1244
+  },
+  "dhole": {
+   "x": 2910,
+   "y": 1244
+  },
+  "golden_orb_weaver": {
+   "x": 3104,
+   "y": 1244
+  },
+  "jellyfish": {
+   "x": 3298,
+   "y": 1244
+  },
+  "lynx": {
+   "x": 3492,
+   "y": 1244
+  },
+  "orangutan": {
+   "x": 3686,
+   "y": 1244
+  },
+  "porcupine": {
+   "x": 3880,
+   "y": 1244
+  },
+  "queen_ant": {
+   "x": 4074,
+   "y": 1244
+  },
+  "queen_bee": {
+   "x": 4268,
+   "y": 1244
+  },
+  "sea_turtle": {
+   "x": 4462,
+   "y": 1244
+  },
+  "tarantula": {
+   "x": 0,
+   "y": 1522
+  },
+  "termite_king": {
+   "x": 194,
+   "y": 1522
+  },
+  "outrider": {
+   "x": 388,
+   "y": 1522
+  },
+  "jaguar": {
+   "x": 582,
+   "y": 1522
+  },
+  "leopard": {
+   "x": 776,
+   "y": 1522
+  },
+  "manta_ray": {
+   "x": 970,
+   "y": 1522
+  },
+  "orca": {
+   "x": 1164,
+   "y": 1522
+  },
+  "snow_leopard": {
+   "x": 1358,
+   "y": 1522
+  },
+  "bison": {
+   "x": 1552,
+   "y": 1522
+  },
+  "cape_buffalo": {
+   "x": 1746,
+   "y": 1522
+  },
+  "great_white_shark": {
+   "x": 1940,
+   "y": 1522
+  },
+  "polar_bear": {
+   "x": 2134,
+   "y": 1522
+  },
+  "sperm_whale": {
+   "x": 2328,
+   "y": 1522
+  },
+  "whale_shark": {
+   "x": 2522,
+   "y": 1522
+  },
+  "bird_egg": {
+   "x": 0,
+   "y": 1932
+  },
+  "python": {
+   "x": 194,
+   "y": 1932
+  },
+  "rattlesnake": {
+   "x": 388,
+   "y": 1932
+  },
+  "sardine": {
+   "x": 582,
+   "y": 1932
+  },
+  "snake_egg": {
+   "x": 776,
+   "y": 1932
+  },
+  "caterpillar": {
+   "x": 970,
+   "y": 1932
+  },
+  "chipmunk": {
+   "x": 1164,
+   "y": 1932
+  },
+  "cockroach": {
+   "x": 1358,
+   "y": 1932
+  },
+  "dung_beetle": {
+   "x": 1552,
+   "y": 1932
+  },
+  "forager_ant": {
+   "x": 1746,
+   "y": 1932
+  },
+  "krill": {
+   "x": 1940,
+   "y": 1932
+  },
+  "lemming": {
+   "x": 2134,
+   "y": 1932
+  },
+  "peacock": {
+   "x": 2328,
+   "y": 1932
+  },
+  "raven": {
+   "x": 2522,
+   "y": 1932
+  },
+  "alley_cat": {
+   "x": 2716,
+   "y": 1932
+  },
+  "butterfly": {
+   "x": 2910,
+   "y": 1932
+  },
+  "capybara": {
+   "x": 3104,
+   "y": 1932
+  },
+  "macaque": {
+   "x": 3298,
+   "y": 1932
+  },
+  "nurse_bee": {
+   "x": 3492,
+   "y": 1932
+  },
+  "owl": {
+   "x": 3686,
+   "y": 1932
+  },
+  "oxpecker": {
+   "x": 3880,
+   "y": 1932
+  },
+  "praying_mantis": {
+   "x": 4074,
+   "y": 1932
+  },
+  "serval": {
+   "x": 4268,
+   "y": 1932
+  },
+  "soldier_ant": {
+   "x": 4462,
+   "y": 1932
+  },
+  "street_dog": {
+   "x": 0,
+   "y": 2210
+  },
+  "vulture": {
+   "x": 194,
+   "y": 2210
+  },
+  "worker_ant": {
+   "x": 388,
+   "y": 2210
+  },
+  "worker_bee": {
+   "x": 582,
+   "y": 2210
+  },
+  "worker_wasp": {
+   "x": 776,
+   "y": 2210
+  },
+  "bush_dog": {
+   "x": 970,
+   "y": 2210
+  },
+  "deer": {
+   "x": 1164,
+   "y": 2210
+  },
+  "fox": {
+   "x": 1358,
+   "y": 2210
+  },
+  "gopher": {
+   "x": 1552,
+   "y": 2210
+  },
+  "mahi_mahi": {
+   "x": 1746,
+   "y": 2210
+  },
+  "marmot": {
+   "x": 1940,
+   "y": 2210
+  },
+  "muskrat": {
+   "x": 2134,
+   "y": 2210
+  },
+  "nurse_bumblebee": {
+   "x": 2328,
+   "y": 2210
+  },
+  "rabbit": {
+   "x": 2522,
+   "y": 2210
+  },
+  "guard_bee": {
+   "x": 2716,
+   "y": 2210
+  },
+  "guard_wasp": {
+   "x": 2910,
+   "y": 2210
+  },
+  "tuna": {
+   "x": 3104,
+   "y": 2210
+  },
+  "african_wild_dog": {
+   "x": 3298,
+   "y": 2210
+  },
+  "anteater": {
+   "x": 3492,
+   "y": 2210
+  },
+  "badger": {
+   "x": 3686,
+   "y": 2210
+  },
+  "barracuda": {
+   "x": 3880,
+   "y": 2210
+  },
+  "city_spider": {
+   "x": 4074,
+   "y": 2210
+  },
+  "cod": {
+   "x": 4268,
+   "y": 2210
+  },
+  "falcon": {
+   "x": 4462,
+   "y": 2210
+  },
+  "hammerhead": {
+   "x": 0,
+   "y": 2488
+  },
+  "hare": {
+   "x": 194,
+   "y": 2488
+  },
+  "hyena": {
+   "x": 388,
+   "y": 2488
+  },
+  "mara": {
+   "x": 582,
+   "y": 2488
+  },
+  "stag_beetle": {
+   "x": 776,
+   "y": 2488
+  },
+  "stork": {
+   "x": 970,
+   "y": 2488
+  },
+  "sunfish": {
+   "x": 1164,
+   "y": 2488
+  },
+  "warthog": {
+   "x": 1358,
+   "y": 2488
+  },
+  "wolverine": {
+   "x": 1552,
+   "y": 2488
+  },
+  "anaconda": {
+   "x": 1746,
+   "y": 2488
+  },
+  "baboon": {
+   "x": 1940,
+   "y": 2488
+  },
+  "bobcat": {
+   "x": 2134,
+   "y": 2488
+  },
+  "dingo": {
+   "x": 2328,
+   "y": 2488
+  },
+  "zebra": {
+   "x": 2522,
+   "y": 2488
+  },
+  "cheetah": {
+   "x": 2716,
+   "y": 2488
+  },
+  "cougar": {
+   "x": 2910,
+   "y": 2488
+  },
+  "stick_insect": {
+   "x": 3104,
+   "y": 2488
+  },
+  "wildebeest": {
+   "x": 3298,
+   "y": 2488
+  },
+  "crocodile": {
+   "x": 3492,
+   "y": 2488
+  },
+  "moose": {
+   "x": 3686,
+   "y": 2488
+  },
+  "blue_whale": {
+   "x": 3880,
+   "y": 2488
+  },
+  "egg_eater": {
+   "x": 4074,
+   "y": 2488
+  },
+  "basilisk": {
+   "x": 0,
+   "y": 2898
+  },
+  "black_widow": {
+   "x": 194,
+   "y": 2898
+  },
+  "centipede": {
+   "x": 388,
+   "y": 2898
+  },
+  "coral_snake": {
+   "x": 582,
+   "y": 2898
+  },
+  "dragonfly": {
+   "x": 776,
+   "y": 2898
+  },
+  "duck": {
+   "x": 970,
+   "y": 2898
+  },
+  "firefly": {
+   "x": 1164,
+   "y": 2898
+  },
+  "frog": {
+   "x": 1358,
+   "y": 2898
+  },
+  "gecko": {
+   "x": 1552,
+   "y": 2898
+  },
+  "grasshopper": {
+   "x": 1746,
+   "y": 2898
+  },
+  "iguana": {
+   "x": 1940,
+   "y": 2898
+  },
+  "ladybird": {
+   "x": 2134,
+   "y": 2898
+  },
+  "leech": {
+   "x": 2328,
+   "y": 2898
+  },
+  "ostrich": {
+   "x": 2522,
+   "y": 2898
+  },
+  "pond_skater": {
+   "x": 2716,
+   "y": 2898
+  },
+  "salamander": {
+   "x": 2910,
+   "y": 2898
+  },
+  "snail": {
+   "x": 3104,
+   "y": 2898
+  },
+  "sparrow": {
+   "x": 3298,
+   "y": 2898
+  },
+  "squid": {
+   "x": 3492,
+   "y": 2898
+  },
+  "strawberry_leopard": {
+   "x": 3686,
+   "y": 2898
+  },
+  "swallow": {
+   "x": 3880,
+   "y": 2898
+  },
+  "tapir": {
+   "x": 4074,
+   "y": 2898
+  },
+  "tick": {
+   "x": 4268,
+   "y": 2898
+  },
+  "weasel": {
+   "x": 4462,
+   "y": 2898
   }
  },
  "piles": [
@@ -123,5 +967,6 @@
    "flag": true,
    "note": "bro, really? :D read the card effect again"
   }
- }
+ },
+ "strs": {}
 }
