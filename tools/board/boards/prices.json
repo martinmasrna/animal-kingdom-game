@@ -1,5 +1,5 @@
 {
- "rev": 451,
+ "rev": 467,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -34,33 +34,9 @@
    "x": 1309,
    "y": 1977
   },
-  "eagle": {
-   "x": 159,
-   "y": 24
-  },
-  "bobcat": {
-   "x": 564,
-   "y": 30
-  },
-  "black_mamba": {
-   "x": 976,
-   "y": 41
-  },
-  "hawk": {
-   "x": 1175,
-   "y": 42
-  },
-  "serval": {
-   "x": 1749,
-   "y": 91
-  },
   "boar": {
    "x": 2301,
    "y": 139
-  },
-  "baboon": {
-   "x": 2598,
-   "y": 87
   }
  },
  "piles": [
@@ -89,7 +65,7 @@
    "name": "Price 2",
    "x": 166,
    "y": -1780,
-   "cols": 14,
+   "cols": 22,
    "stacked": false,
    "cards": [
     "lion",
@@ -103,7 +79,9 @@
     "dolphin",
     "jellyfish",
     "armadillo",
-    "porcupine"
+    "porcupine",
+    "bobcat",
+    "baboon"
    ],
    "tint": "none"
   },
@@ -112,7 +90,7 @@
    "name": "Price 3",
    "x": 166,
    "y": -1360,
-   "cols": 20,
+   "cols": 22,
    "stacked": false,
    "cards": [
     "beaver",
@@ -129,8 +107,12 @@
     "raven",
     "hercules_beetle",
     "black_bear",
+    "lynx",
     "great_white_shark",
-    "lynx"
+    "serval",
+    "hawk",
+    "black_mamba",
+    "eagle"
    ],
    "tint": "none"
   },
@@ -391,7 +373,10 @@
   "jellyfish": 3,
   "armadillo": 4,
   "porcupine": 4,
-  "caracal": 4
+  "caracal": 4,
+  "serval": 3,
+  "black_mamba": 3,
+  "lynx": 4
  },
  "only": [
   "african_wild_dog",
