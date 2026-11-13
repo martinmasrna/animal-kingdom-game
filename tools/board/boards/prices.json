@@ -1,5 +1,5 @@
 {
- "rev": 396,
+ "rev": 406,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -41,10 +41,6 @@
   "rat": {
    "x": 339,
    "y": 1421
-  },
-  "falcon": {
-   "x": 1891,
-   "y": 1699
   },
   "bat": {
    "x": 3443,
@@ -94,10 +90,6 @@
    "x": 339,
    "y": 1977
   },
-  "pigeon": {
-   "x": 3711,
-   "y": 1142
-  },
   "eagle": {
    "x": 159,
    "y": 24
@@ -137,7 +129,8 @@
    "stacked": false,
    "cards": [
     "wolf",
-    "mouse"
+    "mouse",
+    "pigeon"
    ],
    "tint": "none"
   },
@@ -153,8 +146,8 @@
     "black_panther",
     "tiger",
     "capybara",
-    "black_bear",
-    "sloth"
+    "sloth",
+    "falcon"
    ],
    "tint": "none"
   },
@@ -163,7 +156,7 @@
    "name": "Price 3",
    "x": 166,
    "y": -1360,
-   "cols": 14,
+   "cols": 16,
    "stacked": false,
    "cards": [
     "beaver",
@@ -178,7 +171,8 @@
     "leopard",
     "owl",
     "raven",
-    "hercules_beetle"
+    "hercules_beetle",
+    "black_bear"
    ],
    "tint": "none"
   },
@@ -427,7 +421,9 @@
   "owl": 3,
   "raven": 2,
   "hercules_beetle": 1,
-  "orca": 7
+  "orca": 7,
+  "pigeon": 3,
+  "black_bear": 6
  },
  "only": [
   "african_wild_dog",
