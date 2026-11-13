@@ -5,7 +5,7 @@ import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan, DUR } from './timeline.js';
 import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
-import { carry, carrying, release, drop as carryDrop, aim, HELD_TOKEN } from './carry.js';
+import { carry, carrying, release, drop as carryDrop, HELD_TOKEN } from './carry.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, pieceHTML } from './board.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
@@ -1595,7 +1595,7 @@ function drawBoard(d) {
   d = d || lastDecision; lastDecision = d;
   let g = viewerGame();
   let preview = null;
-  if (ui.sel && ui.hover && d.rings.includes(ui.hover) && !(HELD_TOKEN && carrying())) {   // a held token is its own preview (carry.js aim), a held card has the piece's ghost under it
+  if (ui.sel && ui.hover && d.rings.includes(ui.hover) && !carrying()) {   // a held card or token is its own preview: no ghost under it
     preview = { cr: ui.hover, id: ui.sel, str: selCopy().str };
   }
   // A step's animations play once. A redraw while they run (the pointer moving over the board, a card picked) draws the
@@ -1701,7 +1701,7 @@ function wireBoard() {
     const g = e.target.closest('[data-cr]'), cr = g ? g.dataset.cr : null;
     showStack(g, cr);
     if (cr === ui.hover) return;
-    ui.hover = cr; aim(ui.sel && cr && lastDecision && lastDecision.rings.includes(cr) ? cr : null);
+    ui.hover = cr;
     if (ui.sel) drawBoard();
   });
   // touch: holding a piece reads its stack; so does tapping one when the tap would do nothing else
@@ -1709,7 +1709,7 @@ function wireBoard() {
   holdEvents(board, e => { held = false; clearTimeout(holdT); const g = e.target.closest('[data-cr]'); if (!g) return;
     holdT = setTimeout(() => { held = true; readStack(g.dataset.cr); }, 350); }, () => clearTimeout(holdT), () => clearTimeout(holdT));
   board.addEventListener('click', e => { if (held) { held = false; e.stopImmediatePropagation(); } }, true);   // a hold's lift does nothing else
-  board.addEventListener('mouseleave', () => { showStack(null, null); aim(null); if (ui.hover) { ui.hover = null; if (ui.sel) drawBoard(); } });
+  board.addEventListener('mouseleave', () => { showStack(null, null); if (ui.hover) { ui.hover = null; if (ui.sel) drawBoard(); } });
   board.addEventListener('contextmenu', e => { if (ui.sel || ui.roam) { e.preventDefault(); ui.sel = null; ui.roam = null; drawGame(); } });
 }
 
