@@ -1,5 +1,5 @@
 {
- "rev": 139,
+ "rev": 151,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -116,10 +116,6 @@
   },
   "tuna_legend": {
    "x": 3492,
-   "y": 278
-  },
-  "honey_badger_legend": {
-   "x": 3686,
    "y": 278
   },
   "wildebeest_legend": {
@@ -735,7 +731,6 @@
    "stacked": false,
    "cards": [
     "lion",
-    "hornet",
     "black_panther",
     "tiger"
    ],
@@ -750,8 +745,6 @@
    "stacked": false,
    "cards": [
     "beaver",
-    "lion_legend",
-    "lion_legend_2",
     "sardine",
     "chameleon"
    ],
@@ -772,7 +765,8 @@
     "giraffe_legend",
     "lion_legend_3",
     "lion_legend_4",
-    "anaconda_legend"
+    "anaconda_legend",
+    "honey_badger_legend"
    ],
    "tint": "none"
   },
@@ -792,6 +786,29 @@
     "orangutan_legend"
    ],
    "tint": "none"
+  },
+  {
+   "id": "pmwffwzv80",
+   "name": "3",
+   "x": 5472,
+   "y": -2302,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "lion_legend",
+    "lion_legend_2"
+   ]
+  },
+  {
+   "id": "pmwffxdqx1",
+   "name": "2",
+   "x": 5458,
+   "y": -2709,
+   "cols": 4,
+   "stacked": true,
+   "cards": [
+    "hornet"
+   ]
   }
  ],
  "gone": [],
