@@ -35,8 +35,6 @@ ON_BOARD = {"collectible", "reserve", "planned"}   # tokens, evolution stages an
 def cards(only: list[str] | None = None) -> list[dict]:
     """The cards in the shape the game's cardHTML (static/card.js) draws; planned cards (no rarity or strength yet) as blanks."""
     raw = json.loads(hq.CARDS.read_text(encoding="utf-8"))["cards"]
-    from animal_kingdom.engine.resources import _apply_provisions   # the provisions test: the test strengths
-    _apply_provisions({"cards": raw})
     real = load_cards({"cards": raw}, validate=False)
     out = []
     for r in raw:
