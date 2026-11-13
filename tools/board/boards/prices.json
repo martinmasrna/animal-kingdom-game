@@ -1,5 +1,5 @@
 {
- "rev": 104,
+ "rev": 110,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -174,10 +174,6 @@
    "x": 2134,
    "y": 556
   },
-  "anaconda_legend": {
-   "x": 2716,
-   "y": 556
-  },
   "hercules_beetle": {
    "x": 0,
    "y": 966
@@ -192,10 +188,6 @@
   },
   "hummingbird": {
    "x": 582,
-   "y": 966
-  },
-  "ocelot": {
-   "x": 970,
    "y": 966
   },
   "chameleon": {
@@ -793,9 +785,11 @@
     "mole",
     "remora",
     "termite_queen",
+    "ocelot",
     "giraffe_legend",
     "lion_legend_3",
-    "lion_legend_4"
+    "lion_legend_4",
+    "anaconda_legend"
    ],
    "tint": "none"
   },
