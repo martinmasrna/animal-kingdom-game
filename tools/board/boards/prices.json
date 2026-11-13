@@ -1,5 +1,5 @@
 {
- "rev": 92,
+ "rev": 96,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -66,14 +66,6 @@
    "x": 194,
    "y": 278
   },
-  "lion_legend": {
-   "x": 388,
-   "y": 278
-  },
-  "lion_legend_2": {
-   "x": 582,
-   "y": 278
-  },
   "army_ant_legend": {
    "x": 776,
    "y": 278
@@ -108,10 +100,6 @@
   },
   "octopus_legend_2": {
    "x": 2522,
-   "y": 278
-  },
-  "orangutan_legend": {
-   "x": 2716,
    "y": 278
   },
   "oxpecker_legend": {
@@ -802,7 +790,9 @@
    "cols": 14,
    "stacked": false,
    "cards": [
-    "beaver"
+    "beaver",
+    "lion_legend",
+    "lion_legend_2"
    ],
    "tint": "none"
   },
@@ -833,7 +823,8 @@
     "locust_legend",
     "wolf_legend_3",
     "cockroach_legend",
-    "mole_legend"
+    "mole_legend",
+    "orangutan_legend"
    ],
    "tint": "none"
   }
@@ -851,6 +842,9 @@
   "gorilla": {
    "flag": true,
    "note": "bro, really? :D read the card effect again"
+  },
+  "mole_legend": {
+   "note": "I think we can remove the discard, and should be fine at 5 cost"
   }
  },
  "strs": {
