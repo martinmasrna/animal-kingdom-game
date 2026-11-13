@@ -53,7 +53,7 @@ STARTER_DECKS: list[dict] = [d for d in DECKLISTS if d.get("starter")]   # none 
 DECK_SLUGS = {d["slug"] for d in DECKLISTS}               # every shipped deck: the sims' field and the gauntlet's
 
 # Copy limits per rarity for the locked 4-4-6 decklist shape (legendary 1 / rare 2 / common 3).
-COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}
+COPY_LIMITS = {"common": 2, "rare": 2, "legendary": 1}   # the provisions test: 2 copies, 1 of a legendary
 
 
 class CardDataError(ValueError):

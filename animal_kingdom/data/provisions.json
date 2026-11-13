@@ -1,6 +1,6 @@
 {
  "_comment": "The provisions test pool: only these cards are collectible; price 1-5 and, where given, a changed strength. Unlisted cards are out of the test. Decks replace decklists.json.",
- "budget": 70,
+ "budget": 47,
  "only_pool": true,
  "cards": {
   "squirrel": {
@@ -152,17 +152,17 @@
    "starter": true,
    "bot": true,
    "cards": {
-    "mosquito": 3,
-    "viper": 3,
-    "rat": 3,
-    "pigeon": 3,
-    "bat": 3,
-    "caracal": 3,
-    "wolf": 3,
-    "lion": 3,
+    "mosquito": 2,
+    "viper": 2,
+    "rat": 2,
+    "pigeon": 2,
+    "bat": 2,
+    "wolf": 2,
+    "lion": 2,
+    "caracal": 2,
     "honey_badger": 2,
-    "black_mamba": 2,
-    "mole": 2
+    "black_mamba": 1,
+    "mole": 1
    }
   },
   {
@@ -173,16 +173,16 @@
    "starter": true,
    "bot": true,
    "cards": {
-    "squirrel": 3,
-    "hamster": 3,
-    "mouse": 3,
-    "gazelle": 3,
-    "toad": 3,
-    "hedgehog": 3,
-    "sloth": 3,
-    "tortoise": 3,
-    "boar": 3,
-    "beaver": 2,
+    "squirrel": 2,
+    "hamster": 2,
+    "mouse": 2,
+    "gazelle": 2,
+    "toad": 2,
+    "hedgehog": 2,
+    "sloth": 2,
+    "tortoise": 2,
+    "boar": 2,
+    "beaver": 1,
     "hippopotamus": 1
    }
   },
@@ -194,18 +194,18 @@
    "starter": true,
    "bot": true,
    "cards": {
-    "lion": 3,
+    "lion": 2,
     "tiger": 2,
-    "gorilla": 3,
-    "grizzly_bear": 3,
-    "giraffe": 3,
+    "gorilla": 2,
     "elephant": 2,
-    "wolf": 3,
-    "viper": 3,
-    "squirrel": 3,
-    "black_panther": 2,
+    "grizzly_bear": 2,
+    "giraffe": 2,
+    "black_panther": 1,
     "tiger_legend": 1,
-    "mosquito": 2
+    "viper": 2,
+    "squirrel": 2,
+    "mosquito": 1,
+    "wolf": 1
    }
   }
  ]
