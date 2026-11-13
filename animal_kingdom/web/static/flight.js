@@ -14,14 +14,14 @@ import { hasArt } from './art.js';
 import { fitNames } from './card.js';
 
 export const FLY_MS = 520;
-export const LIFT = 40;               // stage pixels above its crossroad the piece hangs before it drops (game.css landf)
+export const LIFT = 120;              // stage pixels above its crossroad the card stops, turns, and the piece falls from (game.css landf)
 const POP_MS = 90;                    // the pop out of the hand
 const CARD_END = 150;                 // the card's width over its place, in stage pixels: its painting about the piece's size
 const PIC_UP = 2.55 / 20;             // the card's painting's centre above the card's centre, in card widths (app.css .card)
 // The burst that hides the cut, painted (kit2/burst_<name>.webp): it swells over the card in the flight's last moment, the
 // card becomes the piece under it, and it thins away as the piece drops. `?burst=` picks one while they are compared.
 const BURST = new URLSearchParams(globalThis.location?.search || '').get('burst') || 'poof';
-const BURST_IN = 90, BURST_OUT = 420, BURST_W = 340;   // ms to its peak at the cut, ms to thin away; its width in stage px
+const BURST_IN = 150, BURST_OUT = 380, BURST_W = 340;   // ms from the card's stop to the burst's peak (the cut), ms to thin away; width in stage px
 let cur = null;                       // the flight in the air: { cr, el, arrived, onArrive, before, anim }
 let last = null;                      // the latest flight's { cr, end }, kept after its layer goes: the landing it handed to runs on
 
@@ -73,18 +73,21 @@ export function fly(from, target, id, cr, before, onArrive, html = null) {
     px = x; py = y;
   }
   const me = cur = { cr, el, arrived: false, onArrive, before: before || [] };
-  last = { cr, end: Date.now() + dur };
+  const cutAt = dur + (BURST !== 'none' ? BURST_IN / speed : 0);   // the card stops, the burst swells over it, then the cut
+  last = { cr, end: Date.now() + cutAt };
   me.anim = fc.animate(frames, { duration: dur, fill: 'forwards' });
   if (BURST !== 'none') {
     burst(x1, y1 - PIC_UP * CARD_END * k * .5, BURST_W * k, dur, speed);
     // the card is drawn into the burst as it swells: it pulls in toward its painting, so no frame or text is left to vanish
     card.style.transformOrigin = `50% ${h / 2 - PIC_UP * w}px`;
     card.animate([{ transform: 'scale(1)' }, { transform: 'scale(.62)' }],
-      { duration: BURST_IN / speed, delay: dur - BURST_IN / speed, easing: 'cubic-bezier(.5,0,.9,.6)', fill: 'forwards' });
+      { duration: BURST_IN / speed, delay: dur, easing: 'cubic-bezier(.5,0,.9,.6)', fill: 'forwards' });
   }
   // the cut: the piece in the card's place in the same frame (board.js, game.css .flown); a view still on its way keeps the
   // card there until it comes
-  me.anim.finished.then(() => { if (cur !== me) return; me.arrived = true; last.end = Date.now(); if (me.onArrive) me.onArrive(me.before.length > 0); }, () => {});
+  me.anim.finished.then(() => setTimeout(() => {
+    if (cur !== me) return; me.arrived = true; last.end = Date.now(); if (me.onArrive) me.onArrive(me.before.length > 0);
+  }, cutAt - dur), () => {});
   me.giveUp = setTimeout(() => { if (cur === me) done(); }, dur + 4000);   // a play the server refused: the card lets go
   return true;
 }
@@ -100,7 +103,7 @@ function burst(x, y, w, dur, speed) {
     { transform: `rotate(${rot}deg) scale(.35)`, opacity: 0, offset: 0, easing: 'cubic-bezier(.3,.7,.4,1)' },
     { transform: `rotate(${rot + 6}deg) scale(1)`, opacity: 1, offset: tin / (tin + tout), easing: 'cubic-bezier(.2,.6,.3,1)' },
     { transform: `rotate(${rot + 14}deg) scale(1.35)`, opacity: 0, offset: 1 },
-  ], { duration: tin + tout, delay: Math.max(0, dur - tin), fill: 'both' }).finished.then(() => b.remove(), () => b.remove());
+  ], { duration: tin + tout, delay: dur, fill: 'both' }).finished.then(() => b.remove(), () => b.remove());
 }
 
 // A card is still on its way to `cr`: the units the crossroad shows meanwhile (what it had), else null.
