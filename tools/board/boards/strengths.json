@@ -1,5 +1,5 @@
 {
- "rev": 12,
+ "rev": 23,
  "name": "Strengths",
  "only": [
   "african_wild_dog",
@@ -351,8 +351,6 @@
     "anaconda",
     "black_panther",
     "boar",
-    "giraffe",
-    "gorilla",
     "jaguar",
     "leopard",
     "manta_ray",
@@ -375,7 +373,9 @@
     "lion",
     "orca",
     "great_white_shark",
-    "tiger"
+    "tiger",
+    "crocodile",
+    "gorilla"
    ],
    "tint": "none"
   },
@@ -387,11 +387,11 @@
    "cols": 16,
    "stacked": false,
    "cards": [
-    "crocodile",
-    "grizzly_bear",
     "hippopotamus",
     "moose",
-    "rhinoceros"
+    "rhinoceros",
+    "grizzly_bear",
+    "giraffe"
    ],
    "tint": "none"
   },
@@ -457,7 +457,10 @@
   "capybara": 3,
   "blue_whale": 10,
   "sperm_whale": 10,
-  "whale_shark": 10
+  "whale_shark": 10,
+  "crocodile": 7,
+  "gorilla": 7,
+  "giraffe": 8
  },
  "gone": [
   "python",
