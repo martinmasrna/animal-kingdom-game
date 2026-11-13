@@ -659,6 +659,15 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
 
 /* the flight layer (flight.js): over everything, clicks pass through; the card moves on the compositor */
+:root[data-turn="impact"] .game .cr.unit.flown { animation: landi .28s var(--fd, 0ms) both; }
+:root[data-turn="impact"] .game .cr.unit.flown::after { background-image: url(/static/kit2/dust_ring.webp); width: 220px; height: 220px; margin: -110px 0 0 -110px; animation-delay: calc(var(--fd, 0ms) - 10ms); }
+:root[data-turn="impact"] .game .cr.unit.cover.flown .buried:first-child { animation-delay: var(--fd, 0ms); }
+/* Impact's landing: the piece arrives on the frame the thrown card hits, squashed by the hit, and springs back */
+@keyframes landi {
+  0% { transform: scale(1.06); filter: brightness(1.25); animation-timing-function: cubic-bezier(.3,.6,.4,1); }
+  28% { transform: scale(1.05, .9); filter: brightness(1.12); animation-timing-function: cubic-bezier(.3,.6,.4,1.4); }
+  100% { transform: none; filter: none; } }
+.fflash { position: fixed; z-index: 901; pointer-events: none; mix-blend-mode: plus-lighter; background: url(/static/kit2/flash.webp) center / contain no-repeat; }
 .fglow { position: fixed; z-index: 901; pointer-events: none; will-change: transform, opacity; background: url(/static/kit2/glow_plate.webp) center / 100% 100% no-repeat; }
 .flight { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
 /* the shadow is the card's own, inside its tilting holder: Chrome drops a filter set on the 3D-transformed holder itself */

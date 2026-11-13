@@ -23,6 +23,15 @@ export const PIC_UP = 2.55 / 20;             // the card's painting's centre abo
 // under the light the card becomes the piece; the light thins and draws in to the portrait, which settles onto the board
 // (game.css landf). Light, not a cover laid on top: the card itself is what glows.
 const GLOW_IN = 90, GLOW_HOLD = 90, GLOW_OUT = 260;   // ms: the card lights up, stays lit (the cut at its middle), the light goes
+// Impact (Martin, 2026-11-13, the best of the card-play study's prototypes, design sandbox screen/play-flight/study/): over its
+// crossroad the card rears up toward the eye, then is thrown down, shrinking as it falls away to the piece's size, and on the
+// frame it hits it is the piece, squashed by the hit, inside a flash of painted light and a ring of dust, the board jolting,
+// with the landing's sound. `?turn=glow` keeps the earlier turn (the card turned to light over its place) to compare.
+export const TURN = new URLSearchParams(globalThis.location?.search || '').get('turn') === 'glow' ? 'glow' : 'impact';
+if (globalThis.document) document.documentElement.dataset.turn = TURN;
+const REAR_MS = 120, THROW_MS = 180;  // the card rears up toward the eye, then is thrown down onto its place
+const REAR_W = 152, HIT_W = 128;      // its width reared up, and as it hits (the piece's rim is 134), in stage pixels
+export const HIT_DELAY = TURN === 'impact' ? 0 : .41;   // s from the cut to the piece's impact (game.css landf / landi)
 let cur = null;                       // the flight in the air: { cr, el, arrived, onArrive, before, anim }
 let last = null;                      // the latest flight's { cr, end }, kept after its layer goes: the landing it handed to runs on
 
@@ -65,7 +74,8 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
   const speed = window.AK_SPEED || 1;
   let dur, frames;
   if (start) {   // held: it settles from where the grip left it, its tilt easing out as it stops (a little longer the farther)
-    dur = Math.min(FLY_MS, 150 + len / k * .35) / speed;
+    // (Impact: no settle of its own when it is already there, the rear-up starts at once; a still beat reads as a pause)
+    dur = (TURN === 'impact' ? Math.min(FLY_MS, 30 + len / k * .45) : Math.min(FLY_MS, 150 + len / k * .35)) / speed;
     // its shadow draws in under it as it comes down from the grip's height (game.css .flight.carry)
     const sh = (o, x, y, b, a) => `drop-shadow(0 0 1px rgba(30,18,6,${o})) drop-shadow(${x}px ${y}px ${b}px rgba(20,12,4,${a}))`;
     frames = [{ ...pose(x0, y0, s0, start.rx, start.ry, start.rz), offset: 0, easing: 'cubic-bezier(.25,.7,.35,1)' },
@@ -88,10 +98,25 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
     }
   }
   const me = cur = { cr, el, arrived: false, onArrive, before: before || [] };
-  const cutAt = dur + (GLOW_IN + GLOW_HOLD / 2) / speed;   // the card stops, lights up, and turns under the light
+  const cx0 = t.left + t.width / 2, cy0 = t.top + t.height / 2;
+  let cutAt;
+  if (TURN === 'impact') {
+    // rear up and throw down, after the travel: the travel's keyframes shrink into the first part of one longer animation
+    const T = dur + (REAR_MS + THROW_MS) / speed, sr = REAR_W * k / w, sh = HIT_W * k / w;
+    frames.forEach(f => { f.offset *= dur / T; });
+    frames[frames.length - 1].easing = 'cubic-bezier(.3,.6,.4,1)';
+    frames.push({ ...pose(cx0, cy0 + PIC_UP * REAR_W * k - 10 * k, sr, 8, 0, 0), offset: (dur + REAR_MS / speed) / T, easing: 'cubic-bezier(.5,0,.85,.4)' });
+    frames.push({ ...pose(cx0, cy0 + PIC_UP * HIT_W * k, sh, 0, 0, 0), offset: 1 });
+    const sha = (x, y, b, a) => `drop-shadow(0 0 1px rgba(30,18,6,.5)) drop-shadow(${x}px ${y}px ${b}px rgba(20,12,4,${a}))`;
+    card.animate([{ filter: sha(4, 10, 8, .4), offset: 0 }, { filter: sha(4, 10, 8, .4), offset: dur / T, easing: 'ease-out' },
+      { filter: sha(22, 34, 14, .5), offset: (dur + REAR_MS / speed) / T, easing: 'cubic-bezier(.5,0,.85,.4)' },
+      { filter: sha(1, 2, 2, .6), offset: 1 }], { duration: T, fill: 'forwards' });
+    dur = T; cutAt = T;
+  } else cutAt = dur + (GLOW_IN + GLOW_HOLD / 2) / speed;   // the card stops, lights up, and turns under the light
   last = { cr, end: Date.now() + cutAt };
   me.anim = fc.animate(frames, { duration: dur, fill: 'forwards' });
-  glow(x1, y1, w * s1, h * s1, PIC_UP * w * s1, dur, speed);
+  if (TURN === 'glow') glow(x1, y1, w * s1, h * s1, PIC_UP * w * s1, dur, speed);
+  else me.anim.finished.then(() => { if (cur === me) hit(cx0, cy0, k); }, () => {});
   // the cut: the piece in the card's place in the same frame (board.js, game.css .flown); a view still on its way keeps the
   // card there until it comes
   me.anim.finished.then(() => setTimeout(() => {
@@ -99,6 +124,17 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
   }, cutAt - dur), () => {});
   me.giveUp = setTimeout(() => { if (cur === me) done(); }, dur + 4000);   // a play the server refused: the card lets go
   return true;
+}
+
+// The hit: a flash of painted light added over the place (plus-lighter: it brightens what is under it), and the board jolts.
+function hit(x, y, k) {
+  const f = document.createElement('div'); f.className = 'fflash';
+  const d = 300 * k; f.style.cssText = `width:${d}px;height:${d}px;left:${x - d / 2}px;top:${y - d / 2}px`;
+  document.body.appendChild(f);
+  f.animate([{ opacity: .55, transform: 'scale(.9)' }, { opacity: 0, transform: 'scale(1.25)' }], { duration: 240, easing: 'cubic-bezier(.2,.6,.4,1)', fill: 'both' })
+    .finished.then(() => f.remove(), () => f.remove());
+  const b = document.getElementById('board');
+  if (b) b.animate([0, 1, 2, 3, 4, 5, 6].map(i => { const d = 5 * (1 - i / 6); return { transform: `translate(${Math.sin(i * 2.6) * d}px,${Math.cos(i * 2.1) * d * .7}px)` }; }), { duration: 220, easing: 'linear' });
 }
 
 // The light over the card at rest (centred at x, y, cw x ch on screen; its painting `up` above that): it brightens over the

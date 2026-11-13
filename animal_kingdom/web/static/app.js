@@ -4,7 +4,7 @@ import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
 import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan, DUR } from './timeline.js';
-import { fly, landed as flightLanded, flying, flightEnd, FLIGHT } from './flight.js';
+import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait } from './board.js';
 import { decodeDeck } from './deckcode.js';
@@ -958,7 +958,7 @@ const DUR_REVEAL_HOLD = DUR.reveal * 0.62;   // s: the opponent's card held at t
 // A flown card touches down (flight.js): the board draws the piece landing, with the landing's sound (the step that put it
 // there drew the crossroad as it was, so it made none).
 const landNow = covered => { if (screen !== 'game') return; drawBoard(); sfx(covered ? 'cover' : 'land', LAND_HIT); };
-const LAND_HIT = 0.41;   // s from the cut to the piece's impact (game.css @keyframes landf)
+const LAND_HIT = HIT_DELAY;   // s from the cut to the piece's impact (flight.js: none for Impact, game.css landf for the glow)
 function onView(prev) {
   if (PB.busy) { PB.queue.push(V); V = PB.shown; return; }   // keep showing the step in play
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once
