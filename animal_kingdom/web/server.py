@@ -852,7 +852,7 @@ def _open(match: Match) -> None:
             seat.rating = ladder.get(seat.ladder).shown()
             if tiers and not seat.ladder.startswith("bot:"):   # a person: their league; the number only in the top league
                 lg = league_of(seat.ladder)
-                seat.league = lg["name"]
+                seat.league = lg["label"]
                 if not lg["top"]:
                     seat.rating = None
     match.on_game_end = save_game

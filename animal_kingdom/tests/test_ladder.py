@@ -61,7 +61,7 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             assert bot.name.endswith(f"({rung} Bot)")
             row = next(r for r in (await (await c.get("/api/leaderboard", headers=ha)).json())["rows"] if r["name"] == bot.name and r["deck"] == bot.deck)
             # a person below the top league states their league, not the number (docs/ranked-leagues.md); a bot its rating
-            assert "rating" not in seats["A"] and seats["A"]["league"] == "League 1"
+            assert "rating" not in seats["A"] and seats["A"]["league"] == "Wood 1"
             assert seats["B"]["rating"] == row["rating"] == server.ladder.get(bot.ladder).shown() and "league" not in seats["B"]
             # two people at once: they meet each other
             ra, rb = await asyncio.gather(c.post("/api/ranked", json={"deck": "giants"}, headers=ha),
@@ -76,17 +76,17 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             server.rate_match(pair)
             assert server.ladder.get(a["profile"]["id"]).games == 1
             won = pair.seats[ma["seat"]].ladder
-            assert pair.view(ma["seat"])["league"]["line"] == "+1 star: League 1, 1 of 3 stars"
+            assert pair.view(ma["seat"])["league"]["line"] == "Wood 1"
             board = await (await c.get("/api/leaderboard", headers=ha)).json()
             mine = next(r for r in board["rows"] if r["you"])
-            assert mine["league"]["name"] == "League 1" and mine["rating"] is None and board["placing"] is None
+            assert mine["league"]["label"] == "Wood 1" and mine["rating"] is None and board["placing"] is None
             assert next(r for r in board["rows"] if r.get("id") == b["profile"]["id"])["league"]["stars"] == (1 if won == b["profile"]["id"] else 0)
             bots = [r for r in board["rows"] if r["bot"]]   # one row per pilot-and-deck pairing, best first
             assert len(bots) == len(ladder.LEVELS) * len(server.ladder.decks) and all(r["name"].endswith(" Bot)") for r in bots)
             assert [int(r["rating"]) for r in bots] == sorted((int(r["rating"]) for r in bots), reverse=True)
             assert all("league" not in r for r in bots), "bots have no league"
             me = await (await c.get("/api/me", headers=ha)).json()   # home's name piece: the league, and a place on the board
-            assert me["league"]["name"] == "League 1" and me["rank"] >= 1
+            assert me["league"]["label"] == "Wood 1" and me["rank"] >= 1
     asyncio.run(run())
 
 

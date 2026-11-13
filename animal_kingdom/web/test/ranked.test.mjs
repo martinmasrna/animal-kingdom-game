@@ -42,9 +42,9 @@ test('a ranked match against a bot, conceded: its end says your league and stars
   const m = await queue(p);   // nobody else queues: after the wait, the nearest bot
   assert.ok(m.id && m.token, 'a match');
   await open(p, m);
-  assert.equal(await p.evaluate(() => window.__ak().V.seats[window.__ak().V.you].league), 'League 1', 'your seat states your league');
+  assert.equal(await p.evaluate(() => window.__ak().V.seats[window.__ak().V.you].league), 'Wood 1', 'your seat states your league');
   await concede(p);
-  assert.equal(await endLine(p), 'League 1, 0 of 3 stars');
+  assert.equal(await endLine(p), 'Wood 1');
   assert.equal(await p.$('#rnum'), null, 'no rating below the top league');
   assert.deepEqual(p.errors, []);
   await p.close();
@@ -56,15 +56,16 @@ test('a ranked match between two people: the winner\'s end says the stars gained
   assert.equal(ma.id, mb.id, 'two people queueing at once meet');
   await Promise.all([open(a, ma), open(b, mb)]);
   await concede(b);
-  assert.equal(await endLine(a), '+1 star: League 1, 1 of 3 stars');
-  assert.equal(await endLine(b), 'League 1, 0 of 3 stars');
+  assert.equal(await endLine(a), 'Wood 1');
+  assert.equal(await a.$$eval('#lgline .lgpips s.on', e => e.length), 1, 'the win shows as a pip');
+  assert.equal(await endLine(b), 'Wood 1');
   await a.goto(`${server.url}/#/ladder`, { waitUntil: 'networkidle0' });
   // the ladder draws at once from the profile it holds, then again from the fresh one (app.js route), and the list fills
   // after each draw: wait for the fresh draw and its list before reading
-  await a.waitForFunction(() => document.querySelector('#lstand')?.textContent.includes('1 of 3 stars') && document.querySelector('#lboard .lr.you .nm small.lg'), { timeout: 15000 });
-  const mine = await a.$eval('#lboard .lr.you', e => [e.querySelector('.nm small.lg').textContent, e.querySelector('b').textContent]);
-  assert.deepEqual(mine, ['1 of 3 stars', 'League 1'], 'your row: your league in the number\'s place, your stars by your name');
-  assert.equal(await a.$eval('#lstand', e => e.textContent), 'League 1 · 1 of 3 stars');
+  await a.waitForFunction(() => document.querySelector('#lstand .lgpips s.on') && document.querySelector('#lboard .lr.you b .lgdisc'), { timeout: 15000 });
+  assert.equal(await a.$eval('#lboard .lr.you b', e => e.textContent), 'Wood 1', 'your row: your league and stage in the number\'s place');
+  assert.equal(await a.$eval('#lstand', e => e.textContent), 'Wood 1');
+  assert.equal(await a.$$eval('#lstand .lgpips s.on', e => e.length), 1, 'one win of five');
   assert.ok(await a.$$eval('#lboard .lr.bot b', els => els.length > 0 && els.every(e => /^\d+\??$/.test(e.textContent))), 'bots keep their numbers');
   assert.deepEqual([...a.errors, ...b.errors], []);
   await a.close(); await b.close();

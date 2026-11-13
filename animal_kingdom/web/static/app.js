@@ -257,13 +257,16 @@ const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
 const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends'), menu: TI('menu') };
 let newsAsked = false;
-// Ranked leagues (docs/ranked-leagues.md; the server's web/tiers.py): your league's name and your stars as a count; in the top
-// league the rating instead. Text only: where a league's picture would go is Martin's call (knowledge/ranked/STATUS.md).
-const starsText = (n, of) => `${n} of ${of} star${of === 1 ? '' : 's'}`;
-const leagueShort = lg => !lg ? '' : lg.top ? `${lg.name} · ${lg.rating}` : `${lg.name} · ${starsText(lg.stars, lg.of)}`;
+// Ranked leagues (docs/ranked-leagues.md; the server's web/tiers.py): a league named by its material, three stages in it,
+// five wins a stage; in the top league the rating instead. The look is a placeholder until the league art exists: a disc
+// in the league's colour with a dot per stage, and a pip per win beside it.
+const lgDisc = lg => `<i class="lgdisc" style="--c:${lg.colour}">${lg.top ? '' : '<s></s>'.repeat(lg.stage)}</i>`;
+const lgPips = lg => lg.top ? '' : `<i class="lgpips" aria-label="${lg.stars} of ${lg.of} wins">${Array.from({ length: lg.of }, (_, i) => `<s${i < lg.stars ? ' class="on"' : ''}></s>`).join('')}</i>`;
+const leagueShort = lg => !lg ? '' : lg.top ? `${lgDisc(lg)}${esc(lg.label)} · ${lg.rating}` : `${lgDisc(lg)}${esc(lg.label)}${lgPips(lg)}`;
+const leagueText = lg => !lg ? '' : lg.top ? `${lg.label} · ${lg.rating}` : lg.label;   // where only text fits
 const leagueLong = lg => !lg ? '' : [leagueShort(lg), lg.streak >= 2 ? `${lg.streak} wins in a row` : ''].filter(Boolean).join(' · ');
 const mePiece = () => {   // the Ladder, with your league (or, before leagues, your rating) and your place once you have played ranked
-  const sub = !ME ? '' : ME.league && ME.rank ? `${leagueShort(ME.league)} · #${ME.rank}` : ME.league && ME.league.stars ? leagueShort(ME.league)
+  const sub = !ME ? '' : ME.league && ME.rank ? `${leagueShort(ME.league)} · #${ME.rank}` : ME.league && (ME.league.stars || ME.league.stage > 1 || ME.league.league > 1) ? leagueShort(ME.league)
     : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
   return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
 };
@@ -285,7 +288,7 @@ function homeScreen(mode = {}) {
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
   const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? friendLabel(fr, play.friends) : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
-    : play.opp === 'ranked' ? ['Ranked', ME && ME.league ? leagueShort(ME.league) : `your rating ${(ME && ME.rating) || '1500?'}`]
+    : play.opp === 'ranked' ? ['Ranked', ME && ME.league ? leagueText(ME.league) : `your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : isTest ? label(TEST_BOTS, play.botDeck) : 'Random'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.short ? `<span class="left">${30 - d.short}/30</span>` : ''}</div>`;
@@ -459,8 +462,8 @@ const nameTag = n => { const [a, t] = String(n).split('#'); return esc(a) + (t ?
 // in view, or, while you're placing, your progress pinned over it.
 // A person's row: their league in the number's place, their stars beside the name; in the top league the rating, the
 // league's name beside the name. A bot's row is as it was (bots have no league).
-const lgCell = x => !x.league ? x.rating : x.league.top ? x.rating : esc(x.league.name);
-const lgNote = lg => !lg ? '' : `<small class="lg">${lg.top ? esc(lg.name) : starsText(lg.stars, lg.of)}</small>`;
+const lgCell = x => !x.league ? x.rating : x.league.top ? x.rating : `${lgDisc(x.league)}${esc(x.league.label)}`;
+const lgNote = lg => !lg ? '' : lg.top ? `<small class="lg">${esc(lg.name)}</small>` : '';
 async function fillLeaderboard() {
   const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, pl = j.placing, box = document.getElementById('lboard');
   if (!box) return;
@@ -753,7 +756,7 @@ function ladderScreen() {
   // back goes up one level: an archetype to every deck, a tab to home (Martin, 2026-10-26: it went home from an archetype)
   const up = /^#\/ladder\/meta\/./.test(location.hash) ? '#/ladder/meta' : '#/';
   app.innerHTML = `<div class="mscr ladder"><div class="hist${meta ? ' wide' : ''}"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="${up}" aria-label="Back"></a><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
-    <div class="hbody">${lead ? `${ME.league ? `<p class="lstand" id="lstand">${esc(leagueLong(ME.league))}</p>` : ''}<div class="lead lb" id="lboard"></div>` : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+    <div class="hbody">${lead ? `${ME.league ? `<p class="lstand" id="lstand">${leagueLong(ME.league)}</p>` : ''}<div class="lead lb" id="lboard"></div>` : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
     </div></div>`;
   if (lead) fillLeaderboard();
   if (meta) fillMeta();
@@ -1729,7 +1732,7 @@ function drawEnd() {
     // With leagues (V.league, the server's web/tiers.py) one line says what the game did to your stars, and the number
     // shows only in the top league (docs/ranked-leagues.md); before leagues, the rating alone.
     const lg = V.league, rt = lg && !lg.top ? null : V.rating, d = rt && rt.delta;
-    const lgLine = lg && (!lg.top || /^Up to/.test(lg.line)) ? `<div class="how lgline" id="lgline">${esc(lg.line)}</div>` : '';
+    const lgLine = lg && (!lg.top || /^Up to/.test(lg.line)) ? `<div class="how lgline" id="lgline">${lgDisc(lg)}${esc(lg.line)}${lgPips(lg)}</div>` : '';
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${lgLine}
       ${rt ? `<div class="rating"><small>Rating</small><div><b id="rnum">${live ? rt.before : rt.after}</b><span class="rd ${d >= 0 ? 'up' : 'down'}${live ? '' : ' on'}">${d >= 0 ? '+' : '−'}${Math.abs(d)}</span></div></div>` : ''}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;

@@ -1,14 +1,17 @@
 """Ranked leagues: the climb a person sees on the one ladder (docs/ranked-leagues.md).
 
-Three rules, all on the screen (Martin, 2026-11-05): a win gains a star, two from your third win in a row; a loss loses
-a star, and at 0 stars drops you a league (never out of league 1); you play opponents from your own league. Each league
+Ten leagues named by material, Wood to Diamond, and a top league above them. A league has three stages, a stage takes
+five wins: a win gains one, two from your third win in a row; a loss loses one, and with none left drops you a stage,
+and from a league's first stage a league (never out of the bottom). You play opponents from your own league. Each league
 is a band of bot ratings, so the climb stops where a player's skill is: the league says how good you are, not how much
-you played. The top league has no stars: it shows the rating, and the rating picks its opponents.
+you played. The top league has no stages: it shows the rating, and the rating picks its opponents.
 
 The rating (web/ladder.py) keeps running for everyone. Below the top league it decides nothing a player sees; it gives
 the number a player starts the top league with, and it places a bot in its league.
 
 Players see the word "league". The code says `tier` because `web/league.py` is already the bot population (docs/league.md).
+A standing keeps a league and the wins inside it (0 to 14, the code's `stars`); the stage and the wins in it are read off
+that count (`stage_of`).
 
 Pure and stdlib-only: the server (web/server.py) and the simulator (tools/ranked/simulate.py) both call `after_game`, so
 the numbers in the design doc are the rules that ship.
@@ -18,23 +21,27 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
 
-# One row per league, bottom first: (name, stars to move up, par rating). The top league has no stars.
+STAGES = 3                         # stages inside a league
+WINS = 5                           # wins a stage takes
+
+# One row per league, bottom first: (name, par rating, placeholder colour). The last row is the top league: no stages.
 # A league's bots are those rated from its par to the next league's par (league 1 also takes every bot under it, the
-# top league every bot from its par up). The names are placeholders until Martin picks a set (docs/ranked-leagues.md).
+# top league every bot from its par up). The look is a placeholder (docs/ranked-leagues.md): a disc in the colour.
 LEAGUES = (
-    ("League 1", 3, 1000),
-    ("League 2", 3, 1100),
-    ("League 3", 3, 1200),
-    ("League 4", 5, 1300),
-    ("League 5", 5, 1400),
-    ("League 6", 5, 1500),
-    ("League 7", 5, 1600),
-    ("League 8", 5, 1700),
-    ("League 9", 5, 1800),
-    ("League 10", 0, 1900),
+    ("Wood", 1000, "#8a5a33"),
+    ("Bone", 1100, "#e4d8bd"),
+    ("Stone", 1200, "#8c8f93"),
+    ("Copper", 1300, "#c56f3c"),
+    ("Silver", 1400, "#c9d0d8"),
+    ("Gold", 1500, "#e2b23a"),
+    ("Jade", 1600, "#4fa878"),
+    ("Sapphire", 1700, "#3566d6"),
+    ("Ruby", 1800, "#c8324a"),
+    ("Diamond", 1900, "#a8e3f5"),
+    ("Legend", 2000, "#f4f1e8"),
 )
 TOP = len(LEAGUES)                 # leagues count from 1; the top league shows the rating
-STREAK = 3                         # the third win in a row and every one after it gains two stars
+STREAK = 3                         # the third win in a row and every one after it gains two
 PLACING = 10                       # a profile with fewer rated games than this migrates to league 1 (web/ladder.py PROVISIONAL)
 
 
@@ -42,17 +49,32 @@ def name(league: int) -> str:
     return LEAGUES[league - 1][0]
 
 
+def colour(league: int) -> str:
+    return LEAGUES[league - 1][2]
+
+
 def stars_needed(league: int) -> int:
-    return LEAGUES[league - 1][1]
+    """Wins to climb a whole league (none in the top league)."""
+    return 0 if league == TOP else STAGES * WINS
+
+
+def stage_of(stars: int) -> tuple[int, int]:
+    """A league's win count as (stage 1 to 3, wins in that stage 0 to 4)."""
+    return stars // WINS + 1, stars % WINS
+
+
+def label(s: "Standing") -> str:
+    """What a standing is called: "Gold 2"; the top league by its name alone."""
+    return name(s.league) if s.league == TOP else f"{name(s.league)} {stage_of(s.stars)[0]}"
 
 
 def par(league: int) -> float:
-    return LEAGUES[league - 1][2]
+    return LEAGUES[league - 1][1]
 
 
 def league_of(rating: float) -> int:
     """The league a rating stands for: the highest whose par is at or under it (league 1 under the lowest par)."""
-    return max((i + 1 for i, (_, _, p) in enumerate(LEAGUES) if rating >= p), default=1)
+    return max((i + 1 for i, (_, p, _) in enumerate(LEAGUES) if rating >= p), default=1)
 
 
 def band(league: int) -> tuple[float, float]:
@@ -65,7 +87,7 @@ def band(league: int) -> tuple[float, float]:
 @dataclass(frozen=True)
 class Standing:
     league: int = 1
-    stars: int = 0
+    stars: int = 0        # wins inside the league, 0 to STAGES * WINS - 1 (stage_of)
     streak: int = 0       # wins in a row (0 after a loss)
     best: int = 1         # the highest league reached
 
@@ -89,22 +111,16 @@ class Change:
     demoted: bool = False
 
     def line(self, rating: str | None = None) -> str:
-        """The one line the end of a ranked match says about the stars."""
-        a = self.after
-        if a.league == TOP and self.before.league == TOP:
+        """The one line the end of a ranked match says about the climb. The wins inside a stage are drawn by the client
+        (the pips), so the line names only a move between stages or leagues, and the streak bonus."""
+        a, b = self.after, self.before
+        if a.league == TOP and b.league == TOP:
             return f"{name(TOP)}: rating {rating}" if rating else name(TOP)
-        if self.promoted:
-            return f"Up to {name(a.league)}" + ("" if a.league == TOP else f", {_stars(a.stars)}")
-        if self.demoted:
-            return f"Down to {name(a.league)}, {_stars(a.stars)}"
-        here = f"{name(a.league)}, {a.stars} of {stars_needed(a.league)} stars"
-        if self.won:
-            return f"+{self.gained} star{'s' if self.gained > 1 else ''}{' (win streak)' if self.streak_bonus else ''}: {here}"
-        return f"-1 star: {here}" if self.gained else here
-
-
-def _stars(n: int) -> str:
-    return f"{n} star{'' if n == 1 else 's'}"
+        if (a.league, stage_of(a.stars)[0]) > (b.league, stage_of(b.stars)[0]):
+            return f"Up to {label(a)}"
+        if (a.league, stage_of(a.stars)[0]) < (b.league, stage_of(b.stars)[0]):
+            return f"Down to {label(a)}"
+        return f"{label(a)}, win streak: +2" if self.streak_bonus else label(a)
 
 
 def after_game(s: Standing, won: bool) -> Change:
@@ -134,7 +150,7 @@ def after_game(s: Standing, won: bool) -> Change:
 
 def from_rating(rating: float, games: int) -> Standing:
     """A standing for a profile that played ranked before leagues existed (docs/ranked-leagues.md, "Migration"): the
-    league its rating stands for, at most league 9 (the top is reached by a win), no stars. Opponents come from that
+    league its rating stands for, at most the league under the top (the top is reached by a win), at its first stage. Opponents come from that
     league, so a profile placed a little wrong finds its level in a few games. A profile still placing (fewer than PLACING
     rated games) starts at the bottom."""
     if games < PLACING:
@@ -144,19 +160,21 @@ def from_rating(rating: float, games: int) -> Standing:
 
 
 def view(s: Standing, rating_shown: str | None = None) -> dict:
-    """The standing as the client shows it: the league's name, stars as a count, the streak; the top league shows the
-    rating instead of stars."""
-    v = {"league": s.league, "name": name(s.league), "top": s.league == TOP, "streak": s.streak, "best": name(s.best)}
+    """The standing as the client shows it: the league's name and colour, the stage, the wins in the stage (`stars` of
+    `of`), the streak; the top league shows the rating instead."""
+    v = {"league": s.league, "name": name(s.league), "label": label(s), "colour": colour(s.league),
+         "top": s.league == TOP, "streak": s.streak, "best": name(s.best)}
     if s.league == TOP:
         v["rating"] = rating_shown
     else:
-        v["stars"], v["of"] = s.stars, stars_needed(s.league)
+        v["stage"], v["stars"] = stage_of(s.stars)
+        v["stages"], v["of"] = STAGES, WINS
     return v
 
 
 def sort_key(s: Standing, rating: float) -> float:
     """Where a person sits on the one leaderboard beside the bots, on the rating's scale: below the top their league's par
-    plus their stars' share of the 100 points to the next league (league 8, 2 of 5 stars: 1740); in the top league their
+    plus their wins' share of the 100 points to the next league (league 8, 6 of 15 wins: 1740); in the top league their
     rating."""
     return rating if s.league == TOP else par(s.league) + 100 * s.stars / stars_needed(s.league)
 
@@ -204,6 +222,7 @@ class Tiers:
         `ratings`: ladder id -> ladder.Rating for the people (not the bots). Returns how many were placed."""
         self.db.execute("CREATE TABLE IF NOT EXISTS ladder_meta (k TEXT PRIMARY KEY, v TEXT NOT NULL)")
         if self.db.execute("SELECT 1 FROM ladder_meta WHERE k = 'tiers_migrated'").fetchone():
+            self._to_stages()
             return 0
         n = 0
         with self.db:
@@ -215,4 +234,20 @@ class Tiers:
                     self.db.execute("INSERT INTO tiers VALUES (?, ?, ?, ?, ?, ?)", (lid, s.league, s.stars, 0, s.best, 0))
                     n += 1
             self.db.execute("INSERT OR REPLACE INTO ladder_meta VALUES ('tiers_migrated', '1')")
+            self.db.execute("INSERT OR REPLACE INTO ladder_meta VALUES ('tiers_stages', '1')")
         return n
+
+    def _to_stages(self) -> None:
+        """Once, for standings kept under the first build (ten numbered leagues of 3 or 5 stars, the tenth the top):
+        the same league number, the stars as the same share of the fifteen wins, and the old top league to the new
+        one. A `tiers_stages` mark in ladder_meta keeps it from running again."""
+        if self.db.execute("SELECT 1 FROM ladder_meta WHERE k = 'tiers_stages'").fetchone():
+            return
+        old_top, old_needed = 10, lambda lg: 3 if lg <= 3 else 5
+        with self.db:
+            for lid, lg, stars, best in self.db.execute("SELECT id, league, stars, best FROM tiers").fetchall():
+                new_lg = TOP if lg >= old_top else lg
+                new_stars = 0 if lg >= old_top else min(STAGES * WINS - 1, stars * STAGES * WINS // old_needed(lg))
+                self.db.execute("UPDATE tiers SET league = ?, stars = ?, best = ? WHERE id = ?",
+                                (new_lg, new_stars, TOP if best >= old_top else best, lid))
+            self.db.execute("INSERT OR REPLACE INTO ladder_meta VALUES ('tiers_stages', '1')")
