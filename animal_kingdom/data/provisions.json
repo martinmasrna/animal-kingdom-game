@@ -1,6 +1,6 @@
 {
  "_comment": "The provisions test: only these cards are collectible, at Martin's prices from the Prices board (2026-11-13) and the strengths he set there. Unlisted cards are out of the test.",
- "budget": 80,
+ "budget": 60,
  "only_pool": true,
  "cards": {
   "wolf": {
@@ -251,14 +251,11 @@
     "serval": 2,
     "jaguar": 2,
     "leopard": 2,
-    "lynx": 2,
-    "ocelot": 2,
+    "cheetah": 2,
     "lion_legend_3": 1,
     "lion_legend_4": 1,
-    "cheetah": 2,
-    "honey_badger": 2,
-    "tiger_legend": 1,
-    "leopard_legend": 1
+    "lynx": 2,
+    "ocelot": 1
    }
   },
   {
@@ -269,24 +266,20 @@
    "starter": true,
    "bot": true,
    "cards": {
-    "capybara": 2,
     "bee_legend_2": 1,
-    "hedgehog": 1,
+    "capybara": 2,
     "mosquito": 2,
     "bat": 2,
-    "mole": 2,
+    "hedgehog": 2,
     "jellyfish": 2,
     "honey_badger": 2,
-    "hornet": 2,
+    "hornet": 1,
+    "toad": 2,
     "raven": 2,
     "hummingbird": 2,
-    "hercules_beetle": 2,
-    "rat_legend_2": 1,
-    "macaque_legend": 1,
+    "mole": 2,
     "locust_legend": 1,
-    "bat_legend": 1,
-    "owl": 2,
-    "street_dog": 2
+    "owl": 2
    }
   },
   {
@@ -306,14 +299,11 @@
     "hawk": 2,
     "eagle": 2,
     "mole": 2,
-    "beaver": 2,
     "bat": 2,
-    "orca": 2,
-    "fox_legend": 1,
     "black_mamba": 2,
-    "hornet": 1,
-    "leopard_legend": 1,
-    "jaguar": 2
+    "fox_legend": 1,
+    "beaver": 2,
+    "mosquito": 1
    }
   },
   {
@@ -326,7 +316,6 @@
    "cards": {
     "honey_badger": 2,
     "black_mamba": 2,
-    "jaguar": 2,
     "boar": 2,
     "armadillo": 2,
     "tortoise": 2,
@@ -336,12 +325,10 @@
     "great_white_shark": 2,
     "anaconda_legend": 1,
     "honey_badger_legend": 1,
-    "macaque_legend": 1,
-    "toad": 1,
-    "raven": 1,
-    "hawk": 2,
-    "tiger_legend": 1,
-    "leopard": 2
+    "hawk": 1,
+    "toad": 2,
+    "falcon": 1,
+    "jaguar": 1
    }
   },
   {
@@ -358,17 +345,15 @@
     "locust_legend": 1,
     "fox_legend": 1,
     "deer_legend_2": 1,
-    "sloth": 2,
     "porcupine": 2,
     "jellyfish": 2,
     "armadillo": 2,
-    "toad": 1,
-    "bat": 2,
-    "beaver": 2,
+    "bat": 1,
+    "falcon": 1,
     "mole": 2,
-    "honey_badger": 2,
-    "hummingbird": 2,
-    "hercules_beetle": 2
+    "sloth": 2,
+    "toad": 2,
+    "hedgehog": 2
    }
   }
  ]
