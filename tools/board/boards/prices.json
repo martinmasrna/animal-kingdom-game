@@ -1,5 +1,5 @@
 {
- "rev": 3,
+ "rev": 9,
  "name": "Prices",
  "only": [
   "squirrel",
@@ -44,18 +44,6 @@
   "sperm_whale_legend"
  ],
  "cards": {
-  "rat_legend_2": {
-   "x": 0,
-   "y": 0
-  },
-  "lion_legend": {
-   "x": 194,
-   "y": 0
-  },
-  "lion_legend_2": {
-   "x": 388,
-   "y": 0
-  },
   "honey_badger_legend": {
    "x": 582,
    "y": 0
@@ -71,10 +59,6 @@
   "rhinoceros_legend": {
    "x": 1358,
    "y": 0
-  },
-  "honey_badger": {
-   "x": 194,
-   "y": 410
   },
   "beaver": {
    "x": 388,
@@ -191,6 +175,10 @@
   "elephant": {
    "x": 4268,
    "y": 820
+  },
+  "rat_legend_2": {
+   "x": -386,
+   "y": -1127
   }
  },
  "piles": [
@@ -223,7 +211,11 @@
    "y": -1360,
    "cols": 14,
    "stacked": false,
-   "cards": [],
+   "cards": [
+    "lion_legend",
+    "lion_legend_2",
+    "honey_badger"
+   ],
    "tint": "none"
   },
   {
