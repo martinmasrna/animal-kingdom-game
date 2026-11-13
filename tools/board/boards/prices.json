@@ -1,5 +1,5 @@
 {
- "rev": 96,
+ "rev": 104,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -130,10 +130,6 @@
    "x": 4074,
    "y": 278
   },
-  "lion_legend_4": {
-   "x": 4268,
-   "y": 278
-  },
   "skunk_legend": {
    "x": 4462,
    "y": 278
@@ -168,10 +164,6 @@
   },
   "tiger_legend": {
    "x": 1552,
-   "y": 556
-  },
-  "lion_legend_3": {
-   "x": 1746,
    "y": 556
   },
   "rhinoceros_legend": {
@@ -212,10 +204,6 @@
   },
   "coyote": {
    "x": 1746,
-   "y": 966
-  },
-  "hornet": {
-   "x": 1940,
    "y": 966
   },
   "impala": {
@@ -424,10 +412,6 @@
   },
   "python": {
    "x": 194,
-   "y": 1932
-  },
-  "sardine": {
-   "x": 582,
    "y": 1932
   },
   "snake_egg": {
@@ -778,7 +762,8 @@
    "cols": 14,
    "stacked": false,
    "cards": [
-    "lion"
+    "lion",
+    "hornet"
    ],
    "tint": "none"
   },
@@ -792,7 +777,8 @@
    "cards": [
     "beaver",
     "lion_legend",
-    "lion_legend_2"
+    "lion_legend_2",
+    "sardine"
    ],
    "tint": "none"
   },
@@ -807,7 +793,9 @@
     "mole",
     "remora",
     "termite_queen",
-    "giraffe_legend"
+    "giraffe_legend",
+    "lion_legend_3",
+    "lion_legend_4"
    ],
    "tint": "none"
   },
@@ -851,7 +839,8 @@
   "locust_legend": 1,
   "beaver": 3,
   "mole": 2,
-  "wolf_legend_3": 5
+  "wolf_legend_3": 5,
+  "sardine": 1
  },
  "only": [
   "african_wild_dog",
