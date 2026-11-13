@@ -656,6 +656,7 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
 
 /* the flight layer (flight.js): over everything, clicks pass through; the card moves on the compositor */
+.fburst { position: fixed; z-index: 901; pointer-events: none; will-change: transform, opacity; background: center / contain no-repeat; }
 .flight { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
 .flight .fcard { position: absolute; will-change: transform; filter: drop-shadow(4px 10px 8px rgba(20,12,4,.4)); }
 .flight .fcard > .card { position: absolute; left: 0; top: 0; box-shadow: none; }
