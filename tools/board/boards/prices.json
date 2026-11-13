@@ -1,5 +1,5 @@
 {
- "rev": 449,
+ "rev": 451,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -37,10 +37,6 @@
   "eagle": {
    "x": 159,
    "y": 24
-  },
-  "caracal": {
-   "x": 358,
-   "y": 29
   },
   "bobcat": {
    "x": 564,
@@ -83,7 +79,8 @@
     "mosquito",
     "viper",
     "tortoise",
-    "hedgehog"
+    "hedgehog",
+    "caracal"
    ],
    "tint": "none"
   },
@@ -393,7 +390,8 @@
   "hedgehog": 3,
   "jellyfish": 3,
   "armadillo": 4,
-  "porcupine": 4
+  "porcupine": 4,
+  "caracal": 4
  },
  "only": [
   "african_wild_dog",
