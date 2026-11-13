@@ -1,0 +1,101 @@
+{
+ "rev": 0,
+ "name": "Prices",
+ "only": [
+  "squirrel",
+  "mosquito",
+  "viper",
+  "bat",
+  "hedgehog",
+  "toad",
+  "rat",
+  "gazelle",
+  "pigeon",
+  "hamster",
+  "mouse",
+  "lion",
+  "wolf",
+  "caracal",
+  "tortoise",
+  "dolphin",
+  "sloth",
+  "boar",
+  "grizzly_bear",
+  "giraffe",
+  "tiger",
+  "black_bear",
+  "honey_badger",
+  "black_mamba",
+  "black_panther",
+  "hippopotamus",
+  "gorilla",
+  "beaver",
+  "lion_legend",
+  "lion_legend_2",
+  "giraffe_legend",
+  "mole",
+  "rhinoceros",
+  "elephant",
+  "eagle",
+  "rhinoceros_legend",
+  "honey_badger_legend",
+  "rat_legend_2",
+  "tiger_legend",
+  "sperm_whale_legend"
+ ],
+ "cards": {},
+ "piles": [
+  {
+   "id": "price1",
+   "name": "Price 1",
+   "x": 166,
+   "y": -2200,
+   "cols": 14,
+   "stacked": false,
+   "cards": [],
+   "tint": "none"
+  },
+  {
+   "id": "price2",
+   "name": "Price 2",
+   "x": 166,
+   "y": -1780,
+   "cols": 14,
+   "stacked": false,
+   "cards": [
+    "lion"
+   ],
+   "tint": "none"
+  },
+  {
+   "id": "price3",
+   "name": "Price 3",
+   "x": 166,
+   "y": -1360,
+   "cols": 14,
+   "stacked": false,
+   "cards": [],
+   "tint": "none"
+  },
+  {
+   "id": "price4",
+   "name": "Price 4",
+   "x": 166,
+   "y": -940,
+   "cols": 14,
+   "stacked": false,
+   "cards": [],
+   "tint": "none"
+  },
+  {
+   "id": "price5",
+   "name": "Price 5",
+   "x": 166,
+   "y": -520,
+   "cols": 14,
+   "stacked": false,
+   "cards": [],
+   "tint": "none"
+  }
+ ]
+}
