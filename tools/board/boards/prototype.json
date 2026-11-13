@@ -1,16 +1,13 @@
 {
- "rev": 0,
+ "rev": 1,
  "name": "Prototype",
  "only": [
   "lion",
-  "bat",
   "dolphin",
   "meerkat",
   "honey_badger",
   "black_mamba",
-  "viper",
   "beaver",
-  "mosquito",
   "falcon",
   "hawk",
   "eagle",
@@ -21,9 +18,7 @@
   "wolf_legend_3",
   "squirrel",
   "chipmunk",
-  "worker_bee",
   "groundhog",
-  "hamster",
   "sloth",
   "wildebeest",
   "chipmunk_legend",
@@ -32,7 +27,6 @@
   "tortoise",
   "boar",
   "hippopotamus",
-  "city_spider",
   "armadillo",
   "honey_badger_legend",
   "elephant",
@@ -42,7 +36,13 @@
   "dung_beetle",
   "rhinoceros_legend",
   "tiger_legend",
-  "elephant_legend"
+  "elephant_legend",
+  "owl",
+  "wolverine",
+  "coyote",
+  "marmot",
+  "gazelle",
+  "raccoon"
  ],
  "cards": {},
  "piles": [
@@ -57,13 +57,8 @@
     "hedgehog",
     "toad",
     "tortoise",
-    "hamster",
     "squirrel",
-    "worker_bee",
-    "mosquito",
-    "bat",
-    "meerkat",
-    "viper"
+    "meerkat"
    ],
    "tint": "none"
   },
@@ -76,20 +71,24 @@
    "stacked": false,
    "cards": [
     "armadillo",
-    "city_spider",
+    "raccoon",
     "chipmunk",
+    "gazelle",
+    "marmot",
     "sloth",
     "dung_beetle",
     "moose",
     "oxpecker",
     "african_wild_dog",
     "cheetah",
+    "coyote",
     "eagle",
     "falcon",
     "hawk",
     "wolf",
     "dolphin",
-    "lion"
+    "lion",
+    "owl"
    ],
    "tint": "none"
   },
@@ -97,7 +96,7 @@
    "id": "pp3",
    "name": "Price 3",
    "x": 0,
-   "y": 932,
+   "y": 1210,
    "cols": 16,
    "stacked": false,
    "cards": [
@@ -108,7 +107,8 @@
     "mole",
     "beaver",
     "black_mamba",
-    "honey_badger"
+    "honey_badger",
+    "wolverine"
    ],
    "tint": "none"
   },
@@ -116,7 +116,7 @@
    "id": "pp4",
    "name": "Price 4",
    "x": 0,
-   "y": 1398,
+   "y": 1676,
    "cols": 16,
    "stacked": false,
    "cards": [
@@ -131,7 +131,7 @@
    "id": "pp5",
    "name": "Price 5",
    "x": 0,
-   "y": 1864,
+   "y": 2142,
    "cols": 16,
    "stacked": false,
    "cards": [
@@ -145,14 +145,11 @@
  ],
  "strs": {
   "lion": 7,
-  "bat": 1,
   "dolphin": 5,
   "meerkat": 2,
   "honey_badger": 4,
   "black_mamba": 3,
-  "viper": 1,
   "beaver": 5,
-  "mosquito": 1,
   "falcon": 4,
   "hawk": 4,
   "eagle": 5,
@@ -163,9 +160,7 @@
   "wolf_legend_3": 5,
   "squirrel": 2,
   "chipmunk": 1,
-  "worker_bee": 1,
   "groundhog": 3,
-  "hamster": 1,
   "sloth": 3,
   "wildebeest": 7,
   "chipmunk_legend": 1,
@@ -174,7 +169,6 @@
   "tortoise": 4,
   "boar": 6,
   "hippopotamus": 9,
-  "city_spider": 1,
   "armadillo": 3,
   "honey_badger_legend": 4,
   "elephant": 11,
@@ -184,13 +178,16 @@
   "dung_beetle": 1,
   "rhinoceros_legend": 10,
   "tiger_legend": 7,
-  "elephant_legend": 11
+  "elephant_legend": 11,
+  "owl": 5,
+  "wolverine": 4,
+  "coyote": 4,
+  "marmot": 3,
+  "gazelle": 5,
+  "raccoon": 3
  },
  "marks": {
   "lion": {
-   "note": "Staple"
-  },
-  "bat": {
    "note": "Staple"
   },
   "dolphin": {
@@ -205,14 +202,8 @@
   "black_mamba": {
    "note": "Staple"
   },
-  "viper": {
-   "note": "Staple"
-  },
   "beaver": {
    "note": "Staple"
-  },
-  "mosquito": {
-   "note": "Rush"
   },
   "falcon": {
    "note": "Rush"
@@ -244,13 +235,7 @@
   "chipmunk": {
    "note": "Food"
   },
-  "worker_bee": {
-   "note": "Food"
-  },
   "groundhog": {
-   "note": "Food"
-  },
-  "hamster": {
    "note": "Food"
   },
   "sloth": {
@@ -275,9 +260,6 @@
    "note": "Control"
   },
   "hippopotamus": {
-   "note": "Control"
-  },
-  "city_spider": {
    "note": "Control"
   },
   "armadillo": {
@@ -309,6 +291,24 @@
   },
   "elephant_legend": {
    "note": "Giants"
+  },
+  "owl": {
+   "note": "Staple"
+  },
+  "wolverine": {
+   "note": "Staple"
+  },
+  "coyote": {
+   "note": "Rush"
+  },
+  "marmot": {
+   "note": "Food"
+  },
+  "gazelle": {
+   "note": "Food"
+  },
+  "raccoon": {
+   "note": "Control"
   }
  }
 }
