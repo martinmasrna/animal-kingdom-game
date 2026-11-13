@@ -1,5 +1,5 @@
 {
- "rev": 507,
+ "rev": 509,
  "name": "Prices",
  "cards": {
   "mouse": {
@@ -319,7 +319,7 @@
   "locust_legend": 1,
   "beaver": 3,
   "mole": 2,
-  "wolf_legend_3": 5,
+  "wolf_legend_3": 4,
   "sardine": 1,
   "eagle": 5,
   "wolf": 5,
@@ -351,7 +351,8 @@
   "rat": 1,
   "hare": 3,
   "street_dog": 3,
-  "cheetah": 5
+  "cheetah": 5,
+  "anaconda_legend": 8
  },
  "only": [
   "african_wild_dog",
