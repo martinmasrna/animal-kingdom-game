@@ -1,5 +1,5 @@
 {
- "rev": 519,
+ "rev": 520,
  "name": "Prices",
  "cards": {
   "mouse": {
@@ -360,7 +360,6 @@
   "hare": 3,
   "street_dog": 3,
   "cheetah": 5,
-  "anaconda_legend": 8,
   "octopus_legend_2": 3,
   "capybara": 3
  },
