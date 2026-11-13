@@ -43,5 +43,5 @@ export function decodeDeck(text, cards) {
     }
   }
   const name = (String(text).match(/^###\s*(.+)$/m) || [])[1];
-  return list.length ? { name: (name || 'Imported deck').trim().slice(0, 40), list: list.slice(0, 20) } : null;   // a deck holds 20 (the provisions test)
+  return list.length ? { name: (name || 'Imported deck').trim().slice(0, 40), list: list.slice(0, 30) } : null;   // a deck holds 30
 }

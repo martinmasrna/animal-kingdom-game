@@ -1,9 +1,17 @@
 {
- "_comment": "The provisions test pool: only these cards are collectible; price 1-5 and, where given, a changed strength. Unlisted cards are out of the test. Decks replace decklists.json.",
- "budget": 47,
+ "_comment": "The provisions test: only these cards are collectible, at Martin's prices from the Prices board (2026-11-13) and the strengths he set there. Unlisted cards are out of the test.",
+ "budget": 70,
  "only_pool": true,
  "cards": {
-  "squirrel": {
+  "wolf": {
+   "price": 1,
+   "strength": 5
+  },
+  "pigeon": {
+   "price": 1,
+   "strength": 3
+  },
+  "toad": {
    "price": 1,
    "strength": 2
   },
@@ -12,97 +20,157 @@
    "strength": 1
   },
   "viper": {
-   "price": 1
-  },
-  "bat": {
    "price": 1,
    "strength": 2
+  },
+  "tortoise": {
+   "price": 1,
+   "strength": 4
   },
   "hedgehog": {
    "price": 1,
    "strength": 3
   },
-  "toad": {
+  "caracal": {
+   "price": 1,
+   "strength": 4
+  },
+  "bat": {
    "price": 1,
    "strength": 2
   },
   "rat": {
    "price": 1,
-   "strength": 2
+   "strength": 1
   },
-  "gazelle": {
+  "hare": {
    "price": 1,
    "strength": 3
   },
-  "pigeon": {
+  "cheetah": {
    "price": 1,
-   "strength": 3
-  },
-  "hamster": {
-   "price": 1,
-   "strength": 1
-  },
-  "mouse": {
-   "price": 1,
-   "strength": 1
+   "strength": 5
   },
   "lion": {
    "price": 2
   },
-  "wolf": {
+  "black_panther": {
+   "price": 2,
+   "strength": 6
+  },
+  "tiger": {
    "price": 2
   },
-  "caracal": {
+  "capybara": {
    "price": 2,
-   "strength": 5
+   "strength": 3
   },
-  "tortoise": {
+  "sloth": {
+   "price": 2
+  },
+  "falcon": {
+   "price": 2
+  },
+  "anaconda": {
    "price": 2,
-   "strength": 5
+   "strength": 6
+  },
+  "alley_cat": {
+   "price": 2
   },
   "dolphin": {
    "price": 2
   },
-  "sloth": {
+  "jellyfish": {
    "price": 2,
+   "strength": 3
+  },
+  "armadillo": {
+   "price": 2,
+   "strength": 4
+  },
+  "porcupine": {
+   "price": 2,
+   "strength": 4
+  },
+  "bobcat": {
+   "price": 2
+  },
+  "baboon": {
+   "price": 2
+  },
+  "hornet": {
+   "price": 2
+  },
+  "beaver": {
+   "price": 3,
+   "strength": 4
+  },
+  "sardine": {
+   "price": 3,
    "strength": 1
   },
-  "boar": {
-   "price": 2
+  "hummingbird": {
+   "price": 3
   },
-  "grizzly_bear": {
-   "price": 2
+  "queen_ant": {
+   "price": 3
   },
-  "giraffe": {
-   "price": 2
+  "bat_legend": {
+   "price": 3
   },
-  "tiger": {
+  "macaque_legend": {
+   "price": 3
+  },
+  "pheasant_legend": {
+   "price": 3
+  },
+  "rat_legend_2": {
    "price": 3,
-   "strength": 8
-  },
-  "black_bear": {
-   "price": 3,
-   "strength": 7
+   "strength": 1
   },
   "honey_badger": {
+   "price": 3
+  },
+  "leopard": {
+   "price": 3
+  },
+  "owl": {
+   "price": 3,
+   "strength": 3
+  },
+  "raven": {
+   "price": 3,
+   "strength": 2
+  },
+  "hercules_beetle": {
+   "price": 3,
+   "strength": 1
+  },
+  "lynx": {
+   "price": 3,
+   "strength": 4
+  },
+  "great_white_shark": {
+   "price": 3
+  },
+  "serval": {
+   "price": 3,
+   "strength": 3
+  },
+  "hawk": {
    "price": 3
   },
   "black_mamba": {
    "price": 3
   },
-  "black_panther": {
-   "price": 3
-  },
-  "hippopotamus": {
-   "price": 3
-  },
-  "gorilla": {
+  "eagle": {
    "price": 3,
-   "strength": 8
+   "strength": 5
   },
-  "beaver": {
+  "boar": {
    "price": 3,
-   "strength": 4
+   "strength": 6
   },
   "lion_legend": {
    "price": 3
@@ -110,102 +178,192 @@
   "lion_legend_2": {
    "price": 3
   },
-  "giraffe_legend": {
+  "street_dog": {
+   "price": 3,
+   "strength": 3
+  },
+  "jaguar": {
    "price": 3
   },
   "mole": {
-   "price": 4
-  },
-  "rhinoceros": {
-   "price": 4
-  },
-  "elephant": {
    "price": 4,
-   "strength": 10
+   "strength": 2
   },
-  "eagle": {
+  "ocelot": {
    "price": 4
   },
-  "rhinoceros_legend": {
+  "lion_legend_3": {
+   "price": 4
+  },
+  "lion_legend_4": {
+   "price": 4
+  },
+  "anaconda_legend": {
    "price": 4
   },
   "honey_badger_legend": {
    "price": 4
   },
-  "rat_legend_2": {
+  "fox_legend": {
    "price": 4
   },
-  "tiger_legend": {
-   "price": 5,
-   "strength": 8
+  "deer_legend_2": {
+   "price": 4
   },
-  "sperm_whale_legend": {
+  "orca": {
+   "price": 4,
+   "strength": 7
+  },
+  "bee_legend_2": {
    "price": 5
+  },
+  "locust_legend": {
+   "price": 5,
+   "strength": 1
+  },
+  "wolf_legend_3": {
+   "price": 5,
+   "strength": 4
+  },
+  "tiger_legend": {
+   "price": 5
+  },
+  "leopard_legend": {
+   "price": 5,
+   "strength": 6
   }
  },
  "decks": [
   {
-   "slug": "prov_rush",
-   "name": "Test: Rush",
-   "cover": "wolf",
+   "slug": "prov_1",
+   "name": "Test 1",
+   "cover": "lion_legend_3",
    "order": 1,
-   "starter": true,
-   "bot": true,
-   "cards": {
-    "mosquito": 2,
-    "viper": 2,
-    "rat": 2,
-    "wolf": 2,
-    "lion": 2,
-    "caracal": 2,
-    "honey_badger": 2,
-    "black_mamba": 2,
-    "mole": 1,
-    "eagle": 2,
-    "tiger_legend": 1
-   }
-  },
-  {
-   "slug": "prov_food",
-   "name": "Test: Food",
-   "cover": "squirrel",
-   "order": 2,
-   "starter": true,
-   "bot": true,
-   "cards": {
-    "squirrel": 2,
-    "hamster": 2,
-    "toad": 2,
-    "sloth": 2,
-    "tortoise": 2,
-    "boar": 2,
-    "beaver": 2,
-    "hippopotamus": 2,
-    "rhinoceros": 2,
-    "honey_badger_legend": 1,
-    "rhinoceros_legend": 1
-   }
-  },
-  {
-   "slug": "prov_big",
-   "name": "Test: Big",
-   "cover": "tiger",
-   "order": 3,
    "starter": true,
    "bot": true,
    "cards": {
     "lion": 2,
     "tiger": 2,
-    "gorilla": 2,
-    "elephant": 2,
-    "grizzly_bear": 2,
-    "giraffe": 2,
-    "black_panther": 1,
-    "tiger_legend": 1,
+    "black_panther": 2,
+    "bobcat": 2,
+    "alley_cat": 2,
+    "caracal": 2,
+    "serval": 2,
+    "jaguar": 2,
+    "leopard": 2,
+    "lynx": 2,
+    "ocelot": 2,
+    "lion_legend_3": 1,
+    "lion_legend_4": 1,
+    "cheetah": 2,
     "viper": 2,
-    "squirrel": 2,
-    "mosquito": 1,
-    "wolf": 1
+    "mosquito": 2
+   }
+  },
+  {
+   "slug": "prov_2",
+   "name": "Test 2",
+   "cover": "bee_legend_2",
+   "order": 2,
+   "starter": true,
+   "bot": true,
+   "cards": {
+    "capybara": 2,
+    "bee_legend_2": 1,
+    "pigeon": 2,
+    "toad": 2,
+    "hedgehog": 2,
+    "mosquito": 2,
+    "viper": 2,
+    "bat": 2,
+    "mole": 2,
+    "jellyfish": 2,
+    "honey_badger": 2,
+    "hornet": 2,
+    "raven": 2,
+    "hummingbird": 2,
+    "hercules_beetle": 2,
+    "rat_legend_2": 1
+   }
+  },
+  {
+   "slug": "prov_3",
+   "name": "Test 3",
+   "cover": "wolf_legend_3",
+   "order": 3,
+   "starter": true,
+   "bot": true,
+   "cards": {
+    "wolf": 2,
+    "street_dog": 2,
+    "wolf_legend_3": 1,
+    "pigeon": 2,
+    "falcon": 2,
+    "cheetah": 2,
+    "caracal": 2,
+    "mosquito": 2,
+    "hawk": 2,
+    "eagle": 2,
+    "mole": 2,
+    "beaver": 2,
+    "bat": 2,
+    "orca": 2,
+    "fox_legend": 1,
+    "viper": 2
+   }
+  },
+  {
+   "slug": "prov_4",
+   "name": "Test 4",
+   "cover": "anaconda_legend",
+   "order": 4,
+   "starter": true,
+   "bot": true,
+   "cards": {
+    "honey_badger": 2,
+    "black_mamba": 2,
+    "jaguar": 2,
+    "boar": 2,
+    "armadillo": 2,
+    "tortoise": 2,
+    "dolphin": 2,
+    "sloth": 2,
+    "anaconda": 2,
+    "great_white_shark": 2,
+    "anaconda_legend": 1,
+    "honey_badger_legend": 1,
+    "macaque_legend": 1,
+    "viper": 2,
+    "toad": 2,
+    "hedgehog": 2,
+    "raven": 1
+   }
+  },
+  {
+   "slug": "prov_5",
+   "name": "Test 5",
+   "cover": "locust_legend",
+   "order": 5,
+   "starter": true,
+   "bot": true,
+   "cards": {
+    "sardine": 2,
+    "queen_ant": 2,
+    "alley_cat": 2,
+    "locust_legend": 1,
+    "fox_legend": 1,
+    "deer_legend_2": 1,
+    "sloth": 2,
+    "porcupine": 2,
+    "jellyfish": 2,
+    "armadillo": 2,
+    "hedgehog": 2,
+    "toad": 2,
+    "mosquito": 2,
+    "bat": 2,
+    "beaver": 2,
+    "mole": 2,
+    "tortoise": 1
    }
   }
  ]

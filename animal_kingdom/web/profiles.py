@@ -272,7 +272,7 @@ class Profiles:
         for pos, d in enumerate(decks):
             cards = d.get("cards") if isinstance(d, dict) else None
             if not isinstance(cards, dict) or not all(type(n) is int and 0 < n <= 3 for n in cards.values()) \
-                    or sum(cards.values()) > 20 or not all(len(k) <= 40 for k in cards):   # a card id is a short word
+                    or sum(cards.values()) > 30 or not all(len(k) <= 40 for k in cards):   # a card id is a short word
                 raise ProfileError("bad deck")
             did = str(d.get("id") or pos)[:40]
             cards_norm = {str(k): n for k, n in cards.items()}
