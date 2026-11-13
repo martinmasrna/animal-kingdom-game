@@ -262,9 +262,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-11-12: \"Kiron is the best of these, not 100% in love with it\"",
+      "note": "Martin, 2026-11-12: \"'Babaji' is good\" (Primates sound Indian; Kiron dropped)",
       "by": "claude",
-      "at": 1794497161,
+      "at": 1794515046,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -2086,9 +2086,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-11-10: Miradel and Galwen \"the best two I think\", with a worry about mush; draft to live with a week",
+      "note": "Martin, 2026-11-12: \"'Longwatch' is good\" (the longest night, when she stood watch until dawn)",
       "by": "claude",
-      "at": 1794305938,
+      "at": 1794523758,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -2807,9 +2807,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-11-12: \"I don't like Ishar, but let's put it on.\" (a placeholder, Ish- is the direction)",
+      "note": "Martin, 2026-11-12: \"let's put it there\" (7/10, to live with for a week; Ishar alone was 5/10)",
       "by": "claude",
-      "at": 1794499311,
+      "at": 1794521018,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -3651,9 +3651,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "into the collection",
+      "note": "Martin, 2026-11-12: \"Picardinha?\" (a giggling little maniac, Li'l Zé from City of God; built on picadinho, minced meat)",
       "by": "claude",
-      "at": 1793269317,
+      "at": 1794509678,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
@@ -4259,7 +4259,7 @@
       "at": 1792661449
     }
   },
-  "gorilla_legend": {
+  "orangutan_legend": {
     "effect": {
       "note": "Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).; Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).",
       "by": "martin"
@@ -4269,15 +4269,32 @@
       "by": "martin"
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792143287
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794515064,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      }
     },
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191061
+      "note": "Martin, 2026-11-12: \"how about 'Nani' for the orangutan?\" ... \"okay then\" (the grandmother everyone was raised by; Primates sound Indian, beside Babaji)",
+      "at": 1794515864,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+        "prev": {
+          "name": "[GORILLA]",
+          "species": "Gorilla"
+        }
+      }
     }
   },
   "skunk_legend": {
@@ -4862,9 +4879,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-21: \"9/10\"; 2026-11-10: onto the card as a draft, the herd named beside Denae and Elari",
+      "note": "Martin, 2026-11-12: \"dusthoof is fine\" (he led the starving herd on the long dry march to the grass)",
       "by": "claude",
-      "at": 1794305673,
+      "at": 1794524398,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -5068,9 +5085,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-11-10: Miradel and Galwen \"the best two I think\", with a worry about mush; draft to live with a week",
+      "note": "Martin, 2026-11-13: \"Let's keep it 'Galwen [X]' and for now, we need to come back to it later\" (her epithet open; 'the Wise' was the herd's odd one out)",
       "by": "claude",
-      "at": 1794305939,
+      "at": 1794525006,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -7065,6 +7082,24 @@
       "note": "Martin 2026-11-09: stage words Birth, Journey, Trial, Ascension",
       "by": "claude",
       "at": 1794231381
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794528588
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794528597
     }
   },
   "dung_beetle_legend_form3": {
@@ -7499,8 +7534,8 @@
         }
       },
       "by": "claude",
-      "at": 1793269323,
-      "note": "into the collection",
+      "at": 1794508540,
+      "note": "Martin, 2026-11-12: \"how about 'Santa Sardinia'? too on the nose?\" (the fish's own saint, a figure from their mythology, not one sardine)",
       "lv": "draft"
     },
     "tag": {
@@ -7532,8 +7567,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1793403518,
-      "note": "Martin 2026-10-31: the doubling is local, the legendary and its neighbours"
+      "at": 1794508545,
+      "note": "her name in place of [SARDINE] (Martin named her, 2026-11-12)"
     }
   },
   "deer_legend": {
@@ -7547,8 +7582,8 @@
         }
       },
       "by": "claude",
-      "at": 1793967091,
-      "note": "Martin 2026-11-06: his own name, from Dinae, Dinya, Denya, Denae; \"okay, let's try it\"; draft to live with"
+      "at": 1794525055,
+      "note": "Martin, 2026-11-13: \"swiftfoot yes yes\""
     },
     "rarity": {
       "review": {

@@ -1423,9 +1423,9 @@ def test_whale_shark_draws_a_card_at_the_end_of_your_turn():
 # ================================================================================ Handlock
 
 def test_silverback_trains_the_whole_hand():
-    s = make_state(hands={"A": ["gorilla_legend", "lion"]})
-    rules.apply_action(s, PlaceAction("gorilla_legend", ("cr", "1,2")))
-    assert hand_inst(s, "A", "lion").strength_counter == CFG.gorilla_legend_grant
+    s = make_state(hands={"A": ["orangutan_legend", "lion"]})
+    rules.apply_action(s, PlaceAction("orangutan_legend", ("cr", "1,2")))
+    assert hand_inst(s, "A", "lion").strength_counter == CFG.orangutan_legend_grant
 
 
 def test_the_grizzly_is_an_eight_that_gives_its_opponent_a_card():
@@ -1435,11 +1435,11 @@ def test_the_grizzly_is_an_eight_that_gives_its_opponent_a_card():
 
 
 def test_the_legendary_butterfly_moves_one_stage_per_buff():
-    s = make_state(hands={"A": ["butterfly_legend", "gorilla_legend", "gorilla_legend"]}, decks={"A": ["lion"] * 9, "B": ["lion"] * 9})
+    s = make_state(hands={"A": ["butterfly_legend", "orangutan_legend", "orangutan_legend"]}, decks={"A": ["lion"] * 9, "B": ["lion"] * 9})
     bf = hand_inst(s, "A", "butterfly_legend")
-    rules.apply_action(s, PlaceAction("gorilla_legend", ("cr", "1,1")))
-    assert bf.card_id == "butterfly_legend_caterpillar" and placement_strength(s, bf) == CFG.gorilla_legend_grant
-    rules.apply_action(s, PlaceAction("gorilla_legend", ("cr", "1,3")))
+    rules.apply_action(s, PlaceAction("orangutan_legend", ("cr", "1,1")))
+    assert bf.card_id == "butterfly_legend_caterpillar" and placement_strength(s, bf) == CFG.orangutan_legend_grant
+    rules.apply_action(s, PlaceAction("orangutan_legend", ("cr", "1,3")))
     assert bf.card_id == "butterfly_legend_chrysalis"         # one buff, one stage
     end_turn(s)                                                 # the opponent's turn passes: A's Dawn
     assert bf.card_id == "butterfly_legend_butterfly"         # Dawn: evolve, in the hand
@@ -1459,9 +1459,9 @@ def test_the_legendary_butterfly_evolves_when_it_gains_strength_on_the_board():
 
 
 def test_the_caterpillar_turns_into_a_butterfly_and_draws_when_trained():
-    s = make_state(hands={"A": ["caterpillar", "gorilla_legend"]}, decks={"A": ["lion"], "B": []})
+    s = make_state(hands={"A": ["caterpillar", "orangutan_legend"]}, decks={"A": ["lion"], "B": []})
     cat = hand_inst(s, "A", "caterpillar")
-    rules.apply_action(s, PlaceAction("gorilla_legend", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("orangutan_legend", ("cr", "1,2")))
     assert cat.card_id == "butterfly" and "lion" in hand_ids(s, "A")
 
 

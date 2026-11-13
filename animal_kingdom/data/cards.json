@@ -426,7 +426,7 @@
     },
     {
       "id": "leopard_legend",
-      "name": "Ishar",
+      "name": "Ishar the Unseen",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -1092,7 +1092,7 @@
     },
     {
       "id": "piranha_legend",
-      "name": "[PIRANHA]",
+      "name": "Picardinha",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -1843,7 +1843,7 @@
     },
     {
       "id": "baboon_legend",
-      "name": "Kiron",
+      "name": "Babaji",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -1856,8 +1856,8 @@
       "habitat": "Savanna"
     },
     {
-      "id": "gorilla_legend",
-      "name": "[GORILLA]",
+      "id": "orangutan_legend",
+      "name": "Nani",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -1866,7 +1866,7 @@
       "base_strength": 4,
       "text": "Roar: give all animals in your hand +1 strength.",
       "keywords": [],
-      "species": "Gorilla",
+      "species": "Orangutan",
       "habitat": "Jungle"
     },
     {
@@ -2278,7 +2278,7 @@
     },
     {
       "id": "wildebeest_legend",
-      "name": "Haldaran",
+      "name": "Haldaran Dusthoof",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -2306,7 +2306,7 @@
     },
     {
       "id": "zebra_legend",
-      "name": "Galwen",
+      "name": "Galwen [X]",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -2320,7 +2320,7 @@
     },
     {
       "id": "giraffe_legend",
-      "name": "Miradel",
+      "name": "Miradel Longwatch",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -3935,21 +3935,21 @@
     },
     {
       "id": "sardine_legend",
-      "name": "[SARDINE]",
+      "name": "Santa Sardinia",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Fish"
       ],
       "base_strength": 1,
-      "text": "[SARDINE] and your adjacent Fish count as 2 Fish.",
+      "text": "Santa Sardinia and your adjacent Fish count as 2 Fish.",
       "species": "Sardine",
       "habitat": "Open Ocean",
       "keywords": []
     },
     {
       "id": "deer_legend",
-      "name": "Denae",
+      "name": "Denae Swiftfoot",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [

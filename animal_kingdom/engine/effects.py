@@ -3086,9 +3086,9 @@ def _bee_legend_2_place(state, unit, cr):
     _grant(state, [inst.iid for inst in mine], state.config.jelly_grant)
 
 
-def _gorilla_legend_place(state, unit, cr):
+def _orangutan_legend_place(state, unit, cr):
     """Roar: give all animals in your hand +2 strength."""
-    _grant(state, _hand_iids(state, unit.owner), state.config.gorilla_legend_grant)
+    _grant(state, _hand_iids(state, unit.owner), state.config.orangutan_legend_grant)
 
 
 BUTTERFLY_STAGES = ["butterfly_legend", "butterfly_legend_caterpillar", "butterfly_legend_chrysalis",
@@ -3523,7 +3523,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "sloth": {"on_place": _sloth_place},
     # Handlock (Grizzly Bear is an anthem; the Eagles' sharing lives in _gain_in_hand, the mate in state.ensure_mates).
     "baboon_legend": {"on_start_of_turn": _baboon_legend_sot},
-    "gorilla_legend": {"on_place": _gorilla_legend_place},
+    "orangutan_legend": {"on_place": _orangutan_legend_place},
     "bee_legend_2": {"on_place": _bee_legend_2_place},
     "butterfly_legend": _BUTTERFLY_GROWS,
     "butterfly_legend_caterpillar": {"on_place": _draw1, **_BUTTERFLY_GROWS},

@@ -83,7 +83,7 @@ class Config:
     fox_draw: int = 2                    # Fox: Roar: if a Canine roamed this turn, draw 2 cards
     dhole_draw: int = 2                  # Dhole: whenever it covers an enemy with no other enemy next to it, draw 2 cards
     elephant_legend_max: int = 3         # the legendary Elephant: whenever it lands, remove all adjacent enemies of strength 3 or less
-    gorilla_legend_grant: int = 1            # Silverback: Roar: every animal in your hand +1
+    orangutan_legend_grant: int = 1            # Silverback: Roar: every animal in your hand +1
     baboon_grant: int = 1                # Baboon: Roar: 2 animals in your hand +1...
     baboon_count: int = 2                # ...this many of them
     baboon_legend_grant: int = 1         # the legendary Baboon: Dawn: 2 random animals in your hand +1...

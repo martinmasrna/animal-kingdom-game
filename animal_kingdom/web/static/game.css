@@ -578,6 +578,10 @@
 .readov { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: rgba(0,0,0,.72); }
 .readov .rbox { display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(78vw, 340px); max-height: 100dvh; overflow-y: auto; padding: 12px 0; scrollbar-width: none; }   /* a card with its related cards outgrows a phone: it scrolls */
 .readov .card { --w: min(78vw, 340px); }
+/* A card read large is for reading: its text starts larger than the card face's and fitNames (card.js) steps it down until it
+   fits the text box, so a short text reads big and a long one fills the box. Only the card itself, not its related cards. */
+.readov .rcard > .card .ctext p, .coll .zbox > .card .ctext p { font-size: 1.75em; }
+.readov .rcard > .card .ctext, .coll .zbox > .card .ctext { padding-top: .45em; padding-bottom: 1.6em; }   /* air above the text and over the family line */
 .readov .kw { align-self: stretch; padding: 10px 12px; border-radius: 10px; background: #25221f url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.18), 0 4px 10px rgba(0,0,0,.5); }
 .readov .kw b { display: block; font: 700 17px 'Fira Sans Condensed', sans-serif; color: #fff; margin-bottom: 2px; }
 .readov .kw p { margin: 0; font: 500 14px/1.35 'Fira Sans Condensed', sans-serif; color: #e4dccd; }

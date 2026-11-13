@@ -1,8 +1,8 @@
-# Ishar, the bogeyman of the herds
+# Ishar the Unseen, the bogeyman of the herds
 
 > The safe place is where he hunts.
 
-Legendary, Savanna, strength 5. Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength (Martin, 2026-10-20; wired in 2026-10-21). Name: Ishar, a placeholder draft (Martin, 2026-11-12: "I don't like Ishar, but let's put it on.").
+Legendary, Savanna, strength 5. Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength (Martin, 2026-10-20; wired in 2026-10-21). Name: Ishar the Unseen, a draft to live with for a week (Martin, 2026-11-12).
 
 On 2026-11-12 the herd-as-namer frame was dropped (Martin: "maybe the 'herd names him' is causing us too many problems") after stand-in words for the bogeyman (Furtim, Mormo, Caligo, Strix) read as "gibberish". The sound came first instead, the way Gorrak was found: soft and sly with a hard edge at the end was proposed, and Martin: "Ish- sounds like a good beginning, yeah". Of Ishar, Ishmar, Ishel, Ishvet, Ishkel and Isharak, Ishar went on as the placeholder.
 
@@ -33,3 +33,5 @@ Real analogue (Martin, 2026-10-20: "sounds pretty good"): the man-eating leopard
 - An injury as the origin (a hind leg or a lost tail that took his speed, so he learned to hunt the sleeping) was my first pick. Dropped when Martin proposed the growth mechanic: a leopard who grows with every kill starts ordinary and is made by what he does, not by what was done to him. The Rudraprayag leopard was made the same way.
 - He has no visible made mark, unlike Ash. Open to Martin: whether a card needs a mark the eye reads at a glance. The current painting (a leopard in burning grass at dusk) may need re-examining against this legend (Martin, 2026-10-20); that is a card-art question, not this file's.
 - Martin cut the section on what he wants (2026-10-20): a legend is told from the herds' point of view, and the herds don't know what he wants. The inner life stays out.
+
+Ishar the Unseen went on as a draft the same day, to live with for a week (Martin: Ishar alone "5/10", the epithets "7/10 at most"; "let's put it there"). Unseen, Nightmare and Nightwalker were his top three; the agent's reading of why none went higher: the epithets fit every bogeyman rather than this one, and Ishar came from sound with no culture behind it (Adira, the lions' queen, is Hebrew, so Ishar may already sit in the lions' world).

@@ -10,7 +10,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Ishar** | 1 | Cat | 5 | Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength. |
+| **Ishar the Unseen** | 1 | Cat | 5 | Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength. |
 | **Akana** | 1 | Canine | 3 | Once each turn, an ally with Roam can roam for free. |
 | **Karakhan** | 1 | Canine | 6 | Roam. Whenever one of your Canines roams, give it +1 strength and draw a card. |
 | **[ELEPHANT]** | 1 | — | 9 | Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less. |

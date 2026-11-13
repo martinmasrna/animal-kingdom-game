@@ -82,7 +82,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
         | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
-        | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
+        | "orangutan_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "gazelle" | "deer" | "impala" | "baby_impala" | "rabbit" | "vole"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
@@ -1255,9 +1255,9 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let g = cfg(st, "baboon_legend_grant");
             grant(st, picks, g);
         }
-        ("gorilla_legend", OnPlace) => {
+        ("orangutan_legend", OnPlace) => {
             let iids = hand_iids(st, owner, 0);
-            let g = cfg(st, "gorilla_legend_grant");
+            let g = cfg(st, "orangutan_legend_grant");
             grant(st, iids, g);
         }
         ("bee_legend_2", OnPlace) => {

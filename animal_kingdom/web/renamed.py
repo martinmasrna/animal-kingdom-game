@@ -12,12 +12,12 @@ CARDS = load_cards()
 # animal under a new id, or the same effect on another animal (Martin, 2026-10-17: "if one card kept the exact effect,
 # just changed the animal, then it should get replaced in the deck"; the effect wins when the two disagree, the Jackal).
 # An id changed by tools/cards/hq.py rename (ids name the animal, AGENTS.md) goes in front: saved matches follow it too.
-RENAMED_IDS = {"pilot_fish": "krill", "octopus_legend": "chameleon_legend", "young_wasp": "young_ant", "queen_wasp": "queen_ant", "black_swan": "swan_legend", "locust": "locust_legend", "fathom": "octopus_legend_2",
+RENAMED_IDS = {"gorilla_legend": "orangutan_legend", "pilot_fish": "krill", "octopus_legend": "chameleon_legend", "young_wasp": "young_ant", "queen_wasp": "queen_ant", "black_swan": "swan_legend", "locust": "locust_legend", "fathom": "octopus_legend_2",
                "pestis": "rat_legend_2", "barley": "rat_legend", "clarion": "wolf_legend_3", "lobo": "wolf_legend_2",
                "queen_adira": "lion_legend_4", "king_theron": "lion_legend_3", "princess_lea": "lion_legend_2",
                "prince_leo": "lion_legend", "cuco": "cuckoo_legend", "mocha": "sperm_whale_legend",
                "methuselah": "tortoise_legend", "brutus": "rhinoceros_legend", "arna": "eagle_legend_2",
-               "arne": "eagle_legend", "silverback": "gorilla_legend", "aurum": "goose_legend",
+               "arne": "eagle_legend", "silverback": "orangutan_legend", "aurum": "goose_legend",
                "eon": "anaconda_legend", "scrooge": "chipmunk_legend", "big_gus": "capybara_legend",
                "rusty": "baby_fox_2", "poppy": "baby_fox", "scarlett": "fox_legend", "gale": "falcon_legend",
                "sirocco": "skunk_legend", "roach_king": "cockroach_legend", "ember": "pheasant_legend",

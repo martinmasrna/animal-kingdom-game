@@ -541,8 +541,8 @@ def test_snake_egg_with_no_snake_in_the_deck_draws_nothing():
 # --------------------------------------------- gorilla_legend: Roar: give all animals in your hand +1 strength
 
 def test_gorilla_legend_gives_every_card_in_your_hand_plus_one_for_good():
-    s = make_state(hands={"A": ["gorilla_legend", "lion", "mouse"], "B": ["lion"]}, decks=decks())
-    rules.apply_action(s, PlaceAction("gorilla_legend", ("cr", "1,2")))
+    s = make_state(hands={"A": ["orangutan_legend", "lion", "mouse"], "B": ["lion"]}, decks=decks())
+    rules.apply_action(s, PlaceAction("orangutan_legend", ("cr", "1,2")))
     assert [u.strength_counter for u in s.hands["A"]] == [1, 1]
     assert s.hands["B"][0].strength_counter == 0
     rules.apply_action(s, DrawAction())                          # drawn after: not buffed
