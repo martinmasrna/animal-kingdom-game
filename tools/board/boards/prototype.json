@@ -1,5 +1,5 @@
 {
- "rev": 1,
+ "rev": 2,
  "name": "Prototype",
  "only": [
   "lion",
@@ -56,8 +56,11 @@
    "cards": [
     "hedgehog",
     "toad",
-    "tortoise",
+    "chipmunk",
+    "marmot",
     "squirrel",
+    "dung_beetle",
+    "oxpecker",
     "meerkat"
    ],
    "tint": "none"
@@ -72,22 +75,15 @@
    "cards": [
     "armadillo",
     "raccoon",
-    "chipmunk",
+    "tortoise",
     "gazelle",
-    "marmot",
     "sloth",
-    "dung_beetle",
-    "moose",
-    "oxpecker",
     "african_wild_dog",
     "cheetah",
     "coyote",
-    "eagle",
     "falcon",
-    "hawk",
     "wolf",
     "dolphin",
-    "lion",
     "owl"
    ],
    "tint": "none"
@@ -96,18 +92,15 @@
    "id": "pp3",
    "name": "Price 3",
    "x": 0,
-   "y": 1210,
+   "y": 932,
    "cols": 16,
    "stacked": false,
    "cards": [
-    "boar",
-    "hippopotamus",
     "groundhog",
-    "wildebeest",
-    "mole",
-    "beaver",
-    "black_mamba",
-    "honey_badger",
+    "moose",
+    "eagle",
+    "hawk",
+    "lion",
     "wolverine"
    ],
    "tint": "none"
@@ -116,14 +109,21 @@
    "id": "pp4",
    "name": "Price 4",
    "x": 0,
-   "y": 1676,
+   "y": 1398,
    "cols": 16,
    "stacked": false,
    "cards": [
+    "boar",
+    "hippopotamus",
     "honey_badger_legend",
     "chipmunk_legend",
+    "wildebeest",
     "elephant",
-    "rhinoceros"
+    "rhinoceros",
+    "mole",
+    "beaver",
+    "black_mamba",
+    "honey_badger"
    ],
    "tint": "none"
   },
@@ -131,7 +131,7 @@
    "id": "pp5",
    "name": "Price 5",
    "x": 0,
-   "y": 2142,
+   "y": 1864,
    "cols": 16,
    "stacked": false,
    "cards": [
