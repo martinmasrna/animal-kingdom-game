@@ -1,5 +1,5 @@
 {
- "rev": 90,
+ "rev": 91,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -12,10 +12,6 @@
   },
   "mole_legend": {
    "x": 582,
-   "y": 0
-  },
-  "cockroach_legend": {
-   "x": 1164,
    "y": 0
   },
   "sardine_legend": {
@@ -839,7 +835,8 @@
    "cards": [
     "bee_legend_2",
     "locust_legend",
-    "wolf_legend_3"
+    "wolf_legend_3",
+    "cockroach_legend"
    ],
    "tint": "none"
   }
