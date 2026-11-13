@@ -676,6 +676,3 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 /* held in the grip (carry.js): its edge in shadow, and its shadow cast far and soft on the board below, as high as it is */
 .flight.carry .fcard > .card { filter: drop-shadow(0 0 1px rgba(30,18,6,.8)) drop-shadow(30px 46px 14px rgba(12,6,0,.85)); }
 .flight .fcard > .card { position: absolute; left: 0; top: 0; box-shadow: none; }
-/* the grip holding the token (carry.js ?held=token): the piece's own shadow, long while it is held up */
-.flight.carry.token .fcard > .game, .flight .fcard > .game.token { filter: drop-shadow(18px 30px 10px rgba(12,6,0,.6)); }
-.flight .fcard > .game.token .cr.unit { cursor: default; }

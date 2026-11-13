@@ -52,15 +52,15 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
   const stage = document.getElementById('stage'), k = stage.getBoundingClientRect().width / stage.offsetWidth;
   const C = start ? null : from.getBoundingClientRect(), t = target.getBoundingClientRect();
   const w = start ? start.w : from.offsetWidth, h = start ? start.h : from.offsetHeight;   // the card's own size (the full card has the same outline)
-  const x0 = start ? start.x : C.left + C.width / 2, y0 = start ? start.y : C.top + C.height / 2, s0 = start ? start.s : C.width / w, s1 = (start && start.token ? 134 : CARD_END) * k / w;
-  const x1 = t.left + t.width / 2, y1 = t.top + t.height / 2 - LIFT * k + (start && start.token ? 0 : PIC_UP * CARD_END * k);   // its painting over the piece's
+  const x0 = start ? start.x : C.left + C.width / 2, y0 = start ? start.y : C.top + C.height / 2, s0 = start ? start.s : C.width / w, s1 = CARD_END * k / w;
+  const x1 = t.left + t.width / 2, y1 = t.top + t.height / 2 - LIFT * k + PIC_UP * CARD_END * k;   // its painting over the piece's
 
   done();
   const el = document.createElement('div'); el.className = 'flight';
   const fc = document.createElement('div'); fc.className = 'fcard';
   fc.style.cssText = `width:${w}px;height:${h}px;left:${-w / 2}px;top:${-h / 2}px`;
   if (html) fc.innerHTML = html; else fc.appendChild(from.cloneNode(true));
-  const tok = !!(start && start.token), card = fc.firstElementChild; if (!tok) card.style.cssText += `;--w:${w}px;width:${w}px;height:${h}px;`;
+  const card = fc.firstElementChild; card.style.cssText += `;--w:${w}px;width:${w}px;height:${h}px;`;
   el.appendChild(fc); document.body.appendChild(el);
   if (html) fitNames(fc);
 
@@ -102,11 +102,11 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
   let cutAt;
   if (TURN === 'impact') {
     // rear up and throw down, after the travel: the travel's keyframes shrink into the first part of one longer animation
-    const T = dur + (REAR_MS + THROW_MS) / speed, rw = tok ? 150 : REAR_W, hw = tok ? 134 : HIT_W, up = tok ? 0 : PIC_UP, sr = rw * k / w, sh = hw * k / w;
+    const T = dur + (REAR_MS + THROW_MS) / speed, sr = REAR_W * k / w, sh = HIT_W * k / w;
     frames.forEach(f => { f.offset *= dur / T; });
     frames[frames.length - 1].easing = 'cubic-bezier(.3,.6,.4,1)';
-    frames.push({ ...pose(cx0, cy0 + up * rw * k - 10 * k, sr, tok ? 0 : 8, 0, 0), offset: (dur + REAR_MS / speed) / T, easing: 'cubic-bezier(.5,0,.85,.4)' });
-    frames.push({ ...pose(cx0, cy0 + up * hw * k, sh, 0, 0, 0), offset: 1 });
+    frames.push({ ...pose(cx0, cy0 + PIC_UP * REAR_W * k - 10 * k, sr, 8, 0, 0), offset: (dur + REAR_MS / speed) / T, easing: 'cubic-bezier(.5,0,.85,.4)' });
+    frames.push({ ...pose(cx0, cy0 + PIC_UP * HIT_W * k, sh, 0, 0, 0), offset: 1 });
     const sha = (x, y, b, a) => `drop-shadow(0 0 1px rgba(30,18,6,.5)) drop-shadow(${x}px ${y}px ${b}px rgba(20,12,4,${a}))`;
     card.animate([{ filter: sha(4, 10, 8, .4), offset: 0 }, { filter: sha(4, 10, 8, .4), offset: dur / T, easing: 'ease-out' },
       { filter: sha(22, 34, 14, .5), offset: (dur + REAR_MS / speed) / T, easing: 'cubic-bezier(.5,0,.85,.4)' },
