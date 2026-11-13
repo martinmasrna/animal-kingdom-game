@@ -1,5 +1,5 @@
 {
- "rev": 1,
+ "rev": 3,
  "name": "Prices",
  "only": [
   "squirrel",
@@ -68,17 +68,9 @@
    "x": 970,
    "y": 0
   },
-  "tiger_legend": {
-   "x": 1164,
-   "y": 0
-  },
   "rhinoceros_legend": {
    "x": 1358,
    "y": 0
-  },
-  "mole": {
-   "x": 0,
-   "y": 410
   },
   "honey_badger": {
    "x": 194,
@@ -241,7 +233,9 @@
    "y": -940,
    "cols": 14,
    "stacked": false,
-   "cards": [],
+   "cards": [
+    "mole"
+   ],
    "tint": "none"
   },
   {
@@ -251,7 +245,9 @@
    "y": -520,
    "cols": 14,
    "stacked": false,
-   "cards": [],
+   "cards": [
+    "tiger_legend"
+   ],
    "tint": "none"
   }
  ],
