@@ -1,5 +1,5 @@
 {
- "rev": 23,
+ "rev": 27,
  "name": "Strengths",
  "only": [
   "african_wild_dog",
@@ -460,7 +460,10 @@
   "whale_shark": 10,
   "crocodile": 7,
   "gorilla": 7,
-  "giraffe": 8
+  "giraffe": 8,
+  "termite_king": 3,
+  "queen_bee": 3,
+  "queen_ant": 3
  },
  "gone": [
   "python",
