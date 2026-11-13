@@ -1,5 +1,5 @@
 {
- "rev": 445,
+ "rev": 449,
  "name": "Prices",
  "cards": {
   "crocodile": {
@@ -65,14 +65,6 @@
   "baboon": {
    "x": 2598,
    "y": 87
-  },
-  "armadillo": {
-   "x": 3254,
-   "y": -163
-  },
-  "porcupine": {
-   "x": 3460,
-   "y": -159
   }
  },
  "piles": [
@@ -112,7 +104,9 @@
     "anaconda",
     "alley_cat",
     "dolphin",
-    "jellyfish"
+    "jellyfish",
+    "armadillo",
+    "porcupine"
    ],
    "tint": "none"
   },
@@ -397,7 +391,9 @@
   "viper": 2,
   "tortoise": 4,
   "hedgehog": 3,
-  "jellyfish": 3
+  "jellyfish": 3,
+  "armadillo": 4,
+  "porcupine": 4
  },
  "only": [
   "african_wild_dog",
