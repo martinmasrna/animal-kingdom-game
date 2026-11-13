@@ -1,5 +1,5 @@
 {
- "rev": 5,
+ "rev": 12,
  "name": "Strengths",
  "only": [
   "african_wild_dog",
@@ -163,7 +163,6 @@
    "stacked": false,
    "cards": [
     "bird_egg",
-    "egg_eater",
     "snake_egg"
    ],
    "tint": "none"
@@ -392,9 +391,7 @@
     "grizzly_bear",
     "hippopotamus",
     "moose",
-    "rhinoceros",
-    "sperm_whale",
-    "whale_shark"
+    "rhinoceros"
    ],
    "tint": "none"
   },
@@ -418,7 +415,9 @@
    "cols": 16,
    "stacked": false,
    "cards": [
-    "blue_whale"
+    "blue_whale",
+    "sperm_whale",
+    "whale_shark"
    ],
    "tint": "none"
   }
@@ -455,10 +454,14 @@
   "hare": 3,
   "street_dog": 3,
   "cheetah": 5,
-  "capybara": 3
+  "capybara": 3,
+  "blue_whale": 10,
+  "sperm_whale": 10,
+  "whale_shark": 10
  },
  "gone": [
-  "python"
+  "python",
+  "egg_eater"
  ],
  "marks": {}
 }
