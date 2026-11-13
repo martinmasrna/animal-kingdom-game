@@ -1,5 +1,5 @@
 {
- "rev": 87,
+ "rev": 90,
  "name": "Prices",
  "cards": {
   "butterfly_legend": {
@@ -40,10 +40,6 @@
   },
   "rodent_legend": {
    "x": 2716,
-   "y": 0
-  },
-  "wolf_legend_3": {
-   "x": 3104,
    "y": 0
   },
   "eagle_legend": {
@@ -842,7 +838,8 @@
    "stacked": false,
    "cards": [
     "bee_legend_2",
-    "locust_legend"
+    "locust_legend",
+    "wolf_legend_3"
    ],
    "tint": "none"
   }
@@ -864,7 +861,9 @@
  },
  "strs": {
   "locust_legend": 1,
-  "beaver": 3
+  "beaver": 3,
+  "mole": 2,
+  "wolf_legend_3": 5
  },
  "only": [
   "african_wild_dog",
