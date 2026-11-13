@@ -6895,9 +6895,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "forms with a progress count (Martin, 2026-10-27)",
+      "note": "Martin, 2026-11-13: breakpoints 5, 15, 30",
       "by": "claude",
-      "at": 1793127998
+      "at": 1794531017
     },
     "art": {
       "review": {
@@ -7068,7 +7068,8 @@
         "prev": "Roar: draw a card. Evolves when your Hungry animals have eaten 25 food."
       },
       "by": "claude",
-      "at": 1793127998
+      "at": 1794531017,
+      "note": "Martin, 2026-11-13: breakpoints 5, 15, 30"
     },
     "animal": {
       "review": {
@@ -7110,8 +7111,8 @@
         "prev": "Roar: draw a card and gain 10 food. Evolves when your Hungry animals have eaten 40 food."
       },
       "by": "claude",
-      "at": 1793295715,
-      "note": "Martin, 2026-10-29: the removal; 'your Hungry animals ate' so it fits three lines"
+      "at": 1794531018,
+      "note": "Martin, 2026-11-13: breakpoints 5, 15, 30"
     },
     "animal": {
       "review": {

@@ -670,15 +670,13 @@ def test_elephant_legend_is_hungry_6():
     assert s.food["A"] == 0 and effective_strength(s, e) == 7
 
 
-def test_dung_beetle_legend_evolves_at_10_food_eaten():
-    s = make_state(hands={"A": ["dung_beetle_legend"]}, food={"A": 9, "B": 0}, decks=DECKS)
+def test_dung_beetle_legend_evolves_at_5_food_eaten():
+    s = make_state(hands={"A": ["dung_beetle_legend"]}, food={"A": 4, "B": 0}, decks=DECKS)
     put(s, "1,2", "elephant", "A")
-    _dawn(s)                                                     # 5 eaten
-    assert hand_ids(s, "A") == ["dung_beetle_legend"]
-    _dawn(s)                                                     # 4 more: 9
+    _dawn(s)                                                     # 4 eaten
     assert hand_ids(s, "A") == ["dung_beetle_legend"]
     s.food["A"] = 1
-    _dawn(s)                                                     # 10
+    _dawn(s)                                                     # 5
     assert hand_ids(s, "A") == ["dung_beetle_legend_form2"]
 
 

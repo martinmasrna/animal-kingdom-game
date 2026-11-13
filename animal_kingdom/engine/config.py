@@ -168,9 +168,9 @@ class Config:
     black_mamba_max: int = 6                 # Black Mamba removes an adjacent enemy of at most this strength
     anaconda_legend_decay: int = 1                  # Eon's strength lost each time it shuffles itself back
     raven_legend_steals: int = 2                    # Grimm: animals taken from the opponent's Remove Pile
-    dung_beetle_legend_draw_at: int = 10            # the legendary Dung Beetle: food your Hungry animals ate this game
-    dung_beetle_legend_food_at: int = 25            #   for each tier: a card, then a removal, then another animal
-    dung_beetle_legend_play_at: int = 40
+    dung_beetle_legend_draw_at: int = 5            # the legendary Dung Beetle: food your Hungry animals ate this game
+    dung_beetle_legend_food_at: int = 15            #   for each tier: a card, then a removal, then another animal
+    dung_beetle_legend_play_at: int = 30
     oxpecker_legend_min: int = 8                    # the legendary Oxpecker: your covering animals this strong call an Oxpecker
     krill_legend_food: int = 10                     # the legendary Krill: a Titan's food, for one action instead of two
 

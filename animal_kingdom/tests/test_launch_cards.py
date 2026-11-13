@@ -95,13 +95,13 @@ def test_roach_king_bitten_below_0_comes_back_once_with_only_its_growth():
 
 
 def test_the_legendary_dung_beetle_evolves_by_the_food_its_hungry_animals_ate():
-    """"Evolves at 10 food eaten by your Hungry animals": in hand as they eat, in the deck as it's drawn."""
+    """"Evolves at 5 food eaten by your Hungry animals": in hand as they eat, in the deck as it's drawn."""
     s = make_state(hands={"A": ["dung_beetle_legend"]}, decks={"A": ["dung_beetle_legend"], "B": []}, food={"A": 30, "B": 0})
     rhino = put(s, "1,1", "rhinoceros", "A")
-    for _ in range(4):
+    for _ in range(2):
         assert hand_ids(s, "A") == ["dung_beetle_legend"]
-        effects._eat(s, rhino, "1,1")                           # 3 a meal: 3, 6, 9, then 12
-    assert s.hungry_eaten["A"] == 12 and hand_ids(s, "A") == ["dung_beetle_legend_form2"]
+        effects._eat(s, rhino, "1,1")                           # 3 a meal: 3, then 6
+    assert s.hungry_eaten["A"] == 6 and hand_ids(s, "A") == ["dung_beetle_legend_form2"]
     s.hungry_eaten["A"] = CFG.dung_beetle_legend_play_at
     s.draw("A", 1)
     assert sorted(hand_ids(s, "A")) == ["dung_beetle_legend_form2", "dung_beetle_legend_form4"]

@@ -2,7 +2,7 @@
 
 > He rolled farther than any of us, and came back.
 
-Legendary, Savanna, strength 4. Evolves at 10 food eaten by your Hungry animals; three later forms add, in turn, "Roar: draw a card", "remove an adjacent enemy" and "play another animal". Name: El'Rahhal (draft, Martin, 2026-11-09: "El'Rahhal is good"), Arabic for "the great wanderer", on all four forms. Stage words: El'Rahhal: Birth, Journey, Trial, Return (Martin, 2026-11-09; Return on 2026-11-13).
+Legendary, Savanna, strength 4. Evolves at 5, 15 and 30 food eaten by your Hungry animals; three later forms add, in turn, "Roar: draw a card", "remove an adjacent enemy" and "play another animal". Name: El'Rahhal (draft, Martin, 2026-11-09: "El'Rahhal is good"), Arabic for "the great wanderer", on all four forms. Stage words: El'Rahhal: Birth, Journey, Trial, Return (Martin, 2026-11-09; Return on 2026-11-13).
 
 Internal: a legend is the card's character for naming and art, told from the animals' point of view. No player ever sees this text.
 
