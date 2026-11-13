@@ -44,8 +44,12 @@ export function fitNames(root) {
     p.style.fontSize = '';
     const box = p.parentElement, cs = getComputedStyle(box);
     const room = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-    for (let i = 0; i < 8 && room > 0 && p.offsetHeight > room + 0.5; i++)   // rewrapping isn't linear: step down until it fits
-      p.style.fontSize = (parseFloat(getComputedStyle(p).fontSize) * Math.max(.9, Math.sqrt(room / p.offsetHeight))) + 'px';
+    if (room <= 0 || p.offsetHeight <= room + 0.5) continue;
+    // the largest size that fits, by halving the range: rewrapping isn't linear, so no formula lands on it
+    const fits = px => { p.style.fontSize = px + 'px'; return p.offsetHeight <= room + 0.5; };
+    let hi = parseFloat(getComputedStyle(p).fontSize), lo = hi / 2;
+    for (let i = 0; i < 7; i++) { const mid = (lo + hi) / 2; if (fits(mid)) lo = mid; else hi = mid; }
+    p.style.fontSize = lo + 'px';
   }
 }
 
