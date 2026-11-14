@@ -1,5 +1,5 @@
 {
- "rev": 51,
+ "rev": 76,
  "name": "provisions",
  "cards": {},
  "piles": [
@@ -217,8 +217,6 @@
     "chipmunk_legend",
     "manta_ray_legend",
     "wildebeest_legend",
-    "leopard_legend",
-    "lion_legend_4",
     "skunk_legend",
     "fox_legend",
     "boar_legend",
@@ -228,10 +226,8 @@
     "cuckoo_legend",
     "wolf_legend_2",
     "pheasant_legend",
-    "tiger_legend",
     "giraffe_legend",
     "sperm_whale_legend",
-    "lion_legend_3",
     "rhinoceros_legend",
     "elephant_legend",
     "anaconda_legend"
@@ -240,8 +236,8 @@
   {
    "id": "provleaders",
    "name": "Leaders",
-   "x": 7584,
-   "y": 65,
+   "x": 9506,
+   "y": -32,
    "cols": 10,
    "stacked": false,
    "cards": [
@@ -276,8 +272,6 @@
     "new34",
     "new35",
     "new37",
-    "new38",
-    "new39",
     "new40",
     "new41",
     "new42",
@@ -287,10 +281,8 @@
     "new46",
     "new47",
     "new48",
-    "new49",
     "new50",
     "new51",
-    "new52",
     "new53",
     "new54",
     "new55"
@@ -310,13 +302,11 @@
   {
    "id": "pmwh0omaa1",
    "name": "Leaders",
-   "x": 6456,
-   "y": 8,
+   "x": 6402,
+   "y": 15,
    "cols": 2,
    "stacked": false,
    "cards": [
-    "new2",
-    "bee_legend_2",
     "new21",
     "lion_legend",
     "new22",
@@ -327,6 +317,36 @@
     "cockroach_legend",
     "new36",
     "honey_badger_legend"
+   ]
+  },
+  {
+   "id": "pmwh1cmoy3",
+   "name": "Leaders -- Cats",
+   "x": 6845,
+   "y": 21,
+   "cols": 2,
+   "stacked": false,
+   "cards": [
+    "new39",
+    "lion_legend_4",
+    "new52",
+    "lion_legend_3",
+    "new49",
+    "tiger_legend",
+    "new38",
+    "leopard_legend"
+   ]
+  },
+  {
+   "id": "pmwh1d1914",
+   "name": "Leaders -- Colony",
+   "x": 7708,
+   "y": 29,
+   "cols": 2,
+   "stacked": false,
+   "cards": [
+    "new2",
+    "bee_legend_2"
    ]
   }
  ],

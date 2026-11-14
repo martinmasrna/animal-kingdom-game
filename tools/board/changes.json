@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 71,
+ "rev": 73,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -32,6 +32,12 @@
    "stars": {
     "was": 0,
     "now": -1
+   }
+  },
+  "tiger_legend": {
+   "stars": {
+    "was": 2,
+    "now": 3
    }
   }
  },
@@ -645,7 +651,7 @@
    "name": "Gorrak One-Eye",
    "rarity": "legendary",
    "strength": 7,
-   "stars": 2,
+   "stars": 3,
    "text": "Apex Predator. Roar: remove an adjacent enemy of strength 7 or less.",
    "tags": [
     "Cat"
