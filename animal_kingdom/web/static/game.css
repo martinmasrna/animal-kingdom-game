@@ -641,3 +641,5 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .pgrid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
 .game .pmodal .pc { position: relative; width: 156px; height: 229px; } .game .pmodal .pc .card { --w: 156px; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
+/* A card read in full in the hand keeps its level's wood piece on the painting's corner, above the rules (app.css, mk-br). */
+.game .hc:hover .card.mk-br .lvl, .game .hc.shown .card.mk-br .lvl { bottom: 8.6em; }

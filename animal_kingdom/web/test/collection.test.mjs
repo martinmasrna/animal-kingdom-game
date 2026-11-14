@@ -68,6 +68,19 @@ test('adding says where the card went, and a refused add says why', async () => 
   assert.ok(!(await has(card('street_dog'), 'max')), 'a full deck does not dim the cards it lacks: only used-up cards are dimmed');
 });
 
+test('the stars: each card shows its level, the foot counts the deck\'s, and an add past the budget is refused and says why', async () => {
+  assert.equal(await page.$$eval(`${card('lion')} .lvl .g`, g => g.length), 0, 'level 0: no mark');
+  assert.equal(await page.$$eval(`${card('vole')} .lvl .g`, g => g.length), 1, 'a rare: one star');
+  assert.equal(await page.$$eval(`${card('lion_legend_3')} .lvl .g`, g => g.length), 2, 'a legendary: two');
+  assert.match(await page.$eval('#fstars', e => e.textContent), /16\/16/, 'Cats spends the whole budget');
+  await page.click('.side .st[data-card="lion"]'); await wait(80);                    // 29 cards, still 16 stars
+  await page.click(card('vole')); await wait(30);
+  assert.ok(await has('#fstars', 'shake'), 'the star count shows why');
+  assert.match(await page.$eval('#toast', e => e.textContent), /Vole needs 1 star, and the deck has 0 left of its 16/);
+  await page.click(card('lion')); await wait(80);                                     // back to 30
+  assert.match(await page.$eval('.fcount', e => e.textContent), /30\/30/);
+});
+
 test('a chosen name and cover save with the deck', async () => {
   await page.click('.nm-edit'); await page.keyboard.down('Meta'); await page.keyboard.press('a'); await page.keyboard.up('Meta');
   await page.keyboard.type('Big Cats'); await page.keyboard.press('Enter'); await wait(80);

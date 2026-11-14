@@ -2,7 +2,7 @@
 // family, strength, rarity and search filters over it; the decks on the right, the open one unfolded under its tile.
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
-import { cardHTML, fitNames, readSide } from './card.js';
+import { cardHTML, fitNames, readSide, markGlyphs, LABEL } from './card.js';
 import { CROP, artUrl, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 import { dd, wireDd, onHold } from './menu.js';
@@ -13,7 +13,15 @@ const FAMILIES = [['Cat', 'lion'], ['Canine', 'wolf_legend_3'], ['Rodent', 'chin
   ['Snake', 'viper'], ['Bear', 'polar_bear'], ['Hoofed', 'rhinoceros'], ['Fish', 'sardine'], ['Primate', 'gorilla'], ['Arachnid', 'tarantula'],
   ['Beetle', 'stag_beetle']];
 const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX
-const RANK = { legendary: 0, rare: 1, common: 2 }, LIMIT = { legendary: 1, rare: 2, common: 3 }, CAP = { legendary: 4, rare: 8 };
+const RANK = { legendary: 0, rare: 1, common: 2 };
+// The deck rules come from the server (/api/pool's rules: decks.py and engine/cards.py hold the numbers): the deck size, the
+// copies a rarity allows, and the stars prototype's budget (a card's level, c.stars, counted per copy; -1 gives one back).
+let R = { deckSize: 30, copies: {}, starBudget: 0 };
+const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
+// The other labelling (Martin wants to feel which is easier): every card numbered 1 to 5, its level + 2, and the budget shifted
+// to match (16 + 2 per card). Display only: the rule underneath is the same.
+const shown5 = (stars, cards) => stars + 2 * cards;
+try { LABEL.five = localStorage.getItem('ak:five') === '1'; } catch { /* no storage */ }
 const sv = c => c.str === '*' ? -1 : c.str;
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const svg = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -37,8 +45,8 @@ const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${
 
 // The launch habitats, in the order the sets are presented.
 const HABITATS = ['Savanna', 'Forest', 'Meadow', 'Jungle', 'City', 'Open Ocean'];
-let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', q: '', sheet: false }, flash = null, wired = false;
-const limit = c => LIMIT[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
+let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', lvl: '', q: '', sheet: false }, flash = null, wired = false;
+const limit = c => R.copies[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
 // A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
 export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
 const listOf = cardsObj => Object.entries(cardsObj).flatMap(([id, n]) => Array(n).fill(id));
@@ -66,7 +74,7 @@ function save(all) {
 // Feedback beside Back (or Done) while the game is in testing: the side panel holds the screen's edge, where home has its tab.
 const FB = '<button class="backbtn fbx" data-tip="Feedback" aria-label="Feedback"><img class="tic" src="/static/kit2/top/feedback.webp" alt="" draggable="false"></button>';
 export function collectionScreen(app, ctx) {
-  X = ctx; C = ctx.cards;
+  X = ctx; C = ctx.cards; if (ctx.rules) R = ctx.rules;
   if (!saved) saved = Object.fromEntries(decks().map(d => [d.id, [...d.list]]));
   cards = Object.values(C).filter(c => c.status === 'collectible');   // the starters' cards and the bench (cleared cards in no starter)
   if (!wired) { wired = true; wireGlobal(); }
@@ -81,15 +89,15 @@ export function collectionScreen(app, ctx) {
 // Strips are slivers of the cards: strength on a driftwood plaque, the name, copies as dots (legendaries have one).
 // One strip: a sliver of the card; the number of copies at its end when there are two or more (the game's decklists: copies
 // left), as in Hearthstone. A strip with none left is marked gone.
-export const stripHTML = (id, cards, have) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span><span class="x">${have > 1 ? have : ''}</span></div>`;
+export const stripHTML = (id, cards, have) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span>${markGlyphs(cards[id], 'lvs')}<span class="x">${have > 1 ? have : ''}</span></div>`;
 // flat: one list in the same order (rarity, then strength) without the group labels (home's chooser); each strip keeps its rarity edge.
-export function deckBody(list, cards, caps = true, flat = false) {
-  const counts = countsOf(list), inR = r => list.filter(id => cards[id].rarity === r).length;
+export function deckBody(list, cards, caps = true, flat = false) {   // caps: unused since the stars prototype (the star count is in the foot)
+  const counts = countsOf(list);
   const strip = id => stripHTML(id, cards, counts[id]);
-  const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap && caps ? `<span>${inR(r)}/${cap}</span>` : ''}</h4>`;
+  const rhead = (label, r) => Object.keys(counts).some(id => cards[id].rarity === r) ? `<h4 class="rh" data-r="${r}"><span>${label}</span></h4>` : '';   // no empty group (no caps to count against)
   const byR = r => Object.keys(counts).filter(id => cards[id].rarity === r).sort((a, b) => sv(cards[a]) - sv(cards[b]) || cards[a].name.localeCompare(cards[b].name)).map(strip).join('');
   if (flat) return `<div class="dbody flat">${Object.keys(counts).sort((a, b) => RANK[cards[a].rarity] - RANK[cards[b].rarity] || sv(cards[a]) - sv(cards[b]) || cards[a].name.localeCompare(cards[b].name)).map(strip).join('')}</div>`;
-  return `<div class="dbody">${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}</div>`;
+  return `<div class="dbody">${rhead('Legendary', 'legendary')}${byR('legendary')}${rhead('Rare', 'rare')}${byR('rare')}${rhead('Common', 'common')}${byR('common')}</div>`;
 }
 
 function render(app, all) {
@@ -99,20 +107,24 @@ function render(app, all) {
   const q = st.q.toLowerCase();
   // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
   const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
-  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str))
+  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (st.lvl === '' || String(c.stars | 0) === st.lvl)
     && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ') + ' ' + made(c)).toLowerCase().includes(q)))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
     : '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0;
-      const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the 30 and the rarity caps show on their counters)
+      const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the 30 and the stars show on their counters)
       return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact', lazy: true })}${n && c.rarity !== 'legendary' ? `<span class="pips">${pips(n, limit(c))}</span>` : ''}</div>`; }).join('') + '</div>';
 
   const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
-  const strengths = [...Array(8).keys()].map(String).concat('8+');   // 0 to 7, then 8 and up together: few animals are 8 or more (Martin, 2026-10-30)
+  const strengths = [...Array(8).keys()].map(String).concat('8+');
+  // the levels the collection's cards have, highest first (no level is offered that no card has)
+  const levels = [...new Set(cards.map(c => c.stars | 0))].sort((a, b) => b - a);
+  const lvlName = v => LABEL.five ? `Number ${v + 2}` : v === 0 ? 'No stars' : v === 1 ? '1 star' : v === -1 ? '−1 star' : `${v} stars`;   // 0 to 7, then 8 and up together: few animals are 8 or more (Martin, 2026-10-30)
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
+    ${dd('lvl', st.lvl, [['', LABEL.five ? 'Any number' : 'Any stars'], ...levels.map(v => [String(v), lvlName(v)])])}
     ${dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
@@ -124,10 +136,15 @@ function render(app, all) {
     : `<div class="dtile${d.list.length < 30 ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < 30 ? `<span class="left">${d.list.length}/30</span>` : ''}</div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
+  // The deck's stars beside its cards, read the same way; over the budget, it turns red and Play says by how much.
+  const stars = open ? starsOf(open.list) : 0, over = Math.max(0, stars - R.starBudget);
+  // One sunken count holds both (the foot is 300 px): the cards, then the stars; a click on the stars switches the labelling.
+  const starCount = !open ? '' : `<span class="fc fstars${over ? ' over' : ''}" id="fstars" data-tip="${LABEL.five ? 'Count in stars' : 'Count 1 to 5 instead'}">`
+    + (LABEL.five ? `<b>${shown5(stars, open.list.length)}/${shown5(R.starBudget, R.deckSize)}</b><span>Points</span>` : `<b>${stars}/${R.starBudget}</b><span>Stars</span>`) + '</span>';
   const column = open
     ? `<div class="clist editing">${tile(open)}</div>
-      <div class="sfoot"><button class="play" id="play"${open.list.length === 30 ? '' : ' disabled'}>Play this deck</button>
-        <div class="frow"><div class="fcount"><b>${open.list.length}/30</b><span>Cards</span></div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
+      <div class="sfoot"><button class="play" id="play"${open.list.length === R.deckSize && !over ? '' : ' disabled'}>${!over ? 'Play this deck' : LABEL.five ? `${over} over the ${shown5(R.starBudget, R.deckSize)}` : `${over} star${over > 1 ? 's' : ''} over the ${R.starBudget}`}</button>
+        <div class="frow"><div class="fcount two"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span>${starCount}</div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
     : `<div class="clist">${all.map(tile).join('')}${all.length < DECKS_MAX ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div>${FB}<button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
@@ -182,7 +199,7 @@ function wire(app, all, open) {
   wireDd(app, (k, v) => { st[k] = k === 'rar' ? (v || null) : v; redo(); });
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t; st.families.has(f) ? st.families.delete(f) : st.families.add(f); redo(); });   // toggles; none chosen shows every family
-  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, hab: '', str: '', q: '' }); redo(); };
+  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, hab: '', str: '', lvl: '', q: '' }); redo(); };
   app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; if (!st.open) { st.open = e.dataset.d; st.sheet = false; redo(); } });
 
   const nm = app.querySelector('.nm-edit');
@@ -228,15 +245,16 @@ function wire(app, all, open) {
   const fc = app.querySelector('.fcount'); if (fc && portrait()) fc.onclick = sheet;
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play && !play.disabled) play.onclick = () => X.play(open);
+  const fs = $('fstars'); if (fs) fs.onclick = ev => { ev.stopPropagation(); LABEL.five = !LABEL.five; try { localStorage.setItem('ak:five', LABEL.five ? '1' : '0'); } catch { /* no storage */ } st.lvl = ''; redo(); };
 
   // Click a card to add a copy; a refused add says why. Right-click a card, or click its strip, to take one out.
   app.querySelectorAll('.cgrid [data-card]').forEach(e => {
     e.onclick = () => { const c = C[e.dataset.card];
       if (!open && matchMedia('(hover: none)').matches) { hidePop(); return zoom(app, c); }   // touch, browsing: a tap reads it
       if (!open) return X.toast(`Open a deck ${portrait() ? 'below' : 'on the right'} to build it`);
-      const n = open.list.filter(x => x === c.id).length, inR = open.list.filter(x => C[x].rarity === c.rarity).length;
-      const why = open.list.length >= 30 ? 'tot' : n >= limit(c) ? 'pips' : CAP[c.rarity] && inR >= CAP[c.rarity] ? c.rarity : null;
-      if (why) return refuse(app, e, why);
+      const n = open.list.filter(x => x === c.id).length, lv = c.stars | 0, left = R.starBudget - starsOf(open.list);
+      const why = open.list.length >= R.deckSize ? 'tot' : n >= limit(c) ? 'pips' : lv > 0 && lv > left ? 'stars' : null;
+      if (why) return refuse(app, e, why, c);
       open.list.push(c.id); hidePop(); flash = c.id; change(); };
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
     onHold(e, () => { hidePop(); zoom(app, C[e.dataset.card]); });   // touch: hold to read it large
@@ -266,13 +284,16 @@ function wire(app, all, open) {
 }
 
 // A refused add: the card shakes and the limit that stopped it flashes (the deck total, the copy dots or a rarity count).
-function refuse(app, el, why) {
+function refuse(app, el, why, c) {
   const again = (e, cls) => { if (!e) return; e.classList.remove(cls); void e.offsetWidth; e.classList.add(cls); };
   again(el, 'shake');
   if (why === 'tot') { again(app.querySelector('.fcount'), 'shake'); X.toast('The deck is full: take a card out first'); }
   else if (why === 'pips') again(el.querySelector('.pips'), 'flash');
-  else { const rh = app.querySelector(`.rh[data-r="${why}"] span:last-child`); again(rh, 'flash');
-    if (!rh || !rh.offsetParent) X.toast(`At most ${CAP[why]} ${why} cards`); }   // the sheet is shut: say it
+  else if (why === 'stars') { again(app.querySelector('#fstars'), 'shake');
+    const left = Math.max(0, R.starBudget - starsOf(st.open ? decks().find(d => d.id === st.open).list : []));
+    const n = v => LABEL.five ? `${v}` : `${v} star${v === 1 ? '' : 's'}`;
+    X.toast(LABEL.five ? `${c.name} is a ${(c.stars | 0) + 2}, and the deck has room for ${left} more: take a card out first`
+      : `${c.name} needs ${n(c.stars | 0)}, and the deck has ${left} left of its ${R.starBudget}: take a starred card out first`); }
 }
 
 // Dialogs: Cancel, Escape or a click outside close them.

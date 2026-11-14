@@ -164,3 +164,7 @@
   .coll .zside.row .kws { flex-direction: column; width: min(78vw, 340px); }
   .coll .zside.row .kws .kw { flex: none; }
 }
+/* The stars prototype's level filter is a fourth dropdown: the header gives it room with slightly smaller family medallions. */
+@media not (orientation: portrait) {
+  .coll .chead { gap: 8px; } .coll .tabs { gap: 4px; margin-right: 8px; } .coll .tab .med { width: 36px; height: 36px; } .coll .searchw { min-width: 92px; }
+}

@@ -18,6 +18,39 @@ const lift = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); retu
 const rules = t => (t || '').replace(KW, '<b>$&</b>');
 const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img src="/static/kit2/chalk/${d}.webp" alt="${d}" draggable="false">`).join('');
 
+// The stars prototype (branch `stars`, 2026-11-14, not settled): a card's level (c.stars, from the server: -1 small, 0 ordinary,
+// 1 strong, 2 legendary, 3 monster) is marked on the card, level 0 not at all, so a player counts only the exceptions.
+// MARK is the one switch: the symbol ('star', or 'claw': scratches as a tally, a leaf for -1) and the place ('tr': the name
+// bar's right end; 'tl': the bar's left end, the strength banner moved to the top right; 'br': a piece of the card's wood at
+// the painting's bottom right). LABEL.five is the collection's other labelling: every card numbered 1 to 5 (its level + 2).
+export const MARK = { symbol: 'star', place: 'tr' };
+export const LABEL = { five: false };
+const STAR = (() => { const p = []; for (let i = 0; i < 10; i++) { const a = Math.PI * (i / 5 - .5), r = i % 2 ? 4.9 : 11;
+  p.push(`${(12 + r * Math.cos(a)).toFixed(2)},${(12.9 + r * Math.sin(a)).toFixed(2)}`); } return p.join(' '); })();
+const CW = n => 15 + 6.5 * (n - 1);   // a tally of n scratches, in the glyph's 24-high units
+const GLYPH = {
+  star: n => n < 0 ? `<svg class="g" viewBox="0 0 24 24"><polygon points="${STAR}" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>`
+    : `<svg class="g" viewBox="0 0 24 24"><polygon points="${STAR}" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>`.repeat(n),
+  // claw marks: n scratches drawn as one tally, each a tapered stroke from top right to bottom left; a leaf for -1
+  claw: n => n < 0 ? `<svg class="g" viewBox="0 0 24 24"><path fill="#fff" d="M20.5 3.2C11 3.6 4.6 8.8 4.4 16.4c0 1.3.2 2.5.6 3.5L3 22.2l1.3 1L6.2 21c1 .5 2.3.8 3.7.8 7.6-.3 11.2-8 10.6-18.6zM7.6 19.4c2.6-4.6 6-8.4 10.1-11.6-3.5 3.7-6.4 7.6-8.6 12.2z"/></svg>`
+    : `<svg class="g claw" viewBox="0 0 ${CW(n)} 24" style="aspect-ratio:${CW(n)}/24">${Array.from({ length: n }, (_, i) => { const x = 1.5 + 6.5 * i;
+      return `<path fill="#fff" d="M${x + 9} 1C${x + 7.5} 8 ${x + 4.5} 15 ${x + .5} 23C${x + 7.5} 16 ${x + 11} 9 ${x + 12.5} 2Z"/>`; }).join('')}</svg>`,
+};
+// The mark's html and how many glyph widths it takes ('' and 0 for a card with none).
+function mark(c) {
+  const lv = c.stars | 0;
+  if (LABEL.five) return [`<span class="lvl five">${chalk(lv + 2)}</span>`, 1];
+  if (!lv) return ['', 0];
+  return [`<span class="lvl">${GLYPH[MARK.symbol](lv)}</span>`, MARK.symbol === 'claw' && lv > 0 ? CW(lv) / 24 : Math.abs(lv)];
+}
+
+// The mark alone, for a deck's strips (collection.js): the same glyphs in a span of class `cls`; '' for a card with none.
+export function markGlyphs(c, cls) {
+  const lv = c.stars | 0;
+  if (LABEL.five) return `<span class="${cls} five">${lv + 2}</span>`;
+  return lv ? `<span class="${cls}">${GLYPH[MARK.symbol](lv)}</span>` : '';
+}
+
 // `str`: the strength to show (hand strength can differ from the printed one); `cls`: extra classes ('compact'); `lazy`: the
 // art waits for lazyArt (art.js) to bring it near the screen.
 // The name is centred in the bar; a longer name sets smaller in proportion to its length (--n), one over 18 characters may wrap.
@@ -25,10 +58,11 @@ export function cardHTML(c, { str = c.str, cls = '', attrs = '', lazy = false } 
   const base = c.str === '*' ? null : c.str, delta = base !== null && str !== base ? (str > base ? ' up' : ' down') : '';
   const art = !hasArt(c.id) ? '' : lazy ? ` data-art="${artUrl(c.id)}" style="--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`
     : ` style="background-image:url(${artUrl(c.id)});--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`;
-  return `<div class="card ${c.rarity} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.label || c.name}</span>`}</div><div class="cframe"></div>` +
-    `<div class="nbar${c.name.length > 18 ? ' two' : ''}" style="--n:${c.name.length}"><span>${c.name}</span></div>` +
+  const [lvl, lw] = mark(c);
+  return `<div class="card ${c.rarity} mk-${MARK.place}${lvl ? ' lv' : ''} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.label || c.name}</span>`}</div><div class="cframe"></div>` +
+    `<div class="nbar${c.name.length > 18 ? ' two' : ''}" style="--n:${c.name.length}${lvl ? `;--lw:${lw}` : ''}"><span>${c.name}</span></div>` +
     `<div class="stab"><span class="n${String(str).length > 1 ? ' two' : ''}${delta}">${chalk(str)}</span></div>` +
-    `<div class="ctext">${c.text ? `<p>${rules(c.text)}</p>` : ''}<i>${c.tags.join(' · ')}</i></div></div>`;
+    `<div class="ctext">${c.text ? `<p>${rules(c.text)}</p>` : ''}<i>${c.tags.join(' · ')}</i></div>${lvl}</div>`;
 }
 
 // Names are set at their largest size and shrink only as much as their bar actually needs (measured, not guessed from length).

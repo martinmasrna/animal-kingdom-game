@@ -168,6 +168,26 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .card .stab .n img { display: block; height: 100%; filter: brightness(.16) sepia(.6); }
 .card .stab .n.up img { filter: brightness(.3) sepia(1) hue-rotate(60deg) saturate(4); } .card .stab .n.down img { filter: brightness(.35) sepia(1) hue-rotate(-30deg) saturate(5); }
 .card .stab .n b { font: 800 3.5em/.8 'Fira Sans Condensed', sans-serif; color: #1f1409; }
+/* A card's level (the stars prototype, card.js MARK): inked on the wood like the strength, never on the painting itself.
+   tr: at the name bar's right end, the name centring in what is left; tl: at its left end, the frame mirrored so the
+   strength banner hangs top right; br: on a piece of the card's own wood at the painting's bottom right. --lw: glyph widths. */
+.card .lvl { position: absolute; z-index: 3; display: flex; align-items: center; gap: .08em; pointer-events: none; }
+.card .lvl .g { display: block; width: 1.75em; height: 1.75em; flex: none; filter: brightness(.16) sepia(.6); }
+.card .lvl .g.claw { width: auto; }
+.card .lvl.five img { display: block; height: 2.2em; filter: brightness(.16) sepia(.6); }
+.card.mk-tr .lvl { top: .1em; height: 3em; right: .8em; }
+.card.mk-tr.lv .nbar { right: calc(1.05em + var(--lw) * 1.83em); }
+.card.mk-tl .cframe { transform: scaleX(-1); }
+.card.mk-tl .stab { left: auto; right: 0; }
+.card.mk-tl .nbar { left: .55em; right: 4.45em; }
+.card.mk-tl .nbar::before { flex-grow: 1.42; } .card.mk-tl .nbar::after { flex-grow: 1; }
+.card.mk-tl .lvl { top: .1em; height: 3em; left: .8em; }
+.card.mk-tl.lv .nbar { left: calc(1.05em + var(--lw) * 1.83em); }
+.card.mk-br .lvl { right: .5em; bottom: .5em; height: 2.9em; padding: 0 .5em; border-radius: .35em; isolation: isolate;
+  box-shadow: 0 .1em .35em rgba(0,0,0,.55), inset 0 0 0 .06em rgba(0,0,0,.35); }
+.card.mk-br .lvl::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--frf) 60% 2% / 420% auto; }
+.card.mk-br .lvl .g { width: 2.1em; height: 2.1em; }
+.card.mk-br:not(.compact) .lvl { bottom: 8.6em; }
 .card .ctext { position: absolute; z-index: 2; left: .7em; right: .7em; bottom: .35em; height: 7.6em; padding: 0 .3em 1.2em; display: flex; flex-direction: column; justify-content: center; }
 .card .ctext p { margin: 0; font: 500 1.3em/1.14 'Fira Sans Condensed', sans-serif; color: #1a1108; text-align: center; text-wrap: pretty; }
 .card .ctext p b { font-weight: 800; }
