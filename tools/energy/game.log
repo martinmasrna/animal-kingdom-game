@@ -681,3 +681,9 @@ Animal Kingdom at http://localhost:8010/
 2026-11-14 03:08:05,070 127.0.0.1 [14/Nov/2026:03:07:18 +0100] "GET /ws/6REYJA?token=- HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
 2026-11-14 03:08:05,071 127.0.0.1 [14/Nov/2026:03:06:26 +0100] "GET /ws/presence?key=- HTTP/1.1" 101 0 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
 2026-11-14 03:08:05,085 127.0.0.1 [14/Nov/2026:03:08:05 +0100] "POST /api/events HTTP/1.1" 200 158 "http://localhost:8010/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+2026-11-14 03:17:24,787 let go of 1 idle matches (4 in memory)
+2026-11-14 03:18:24,795 let go of 1 idle matches (3 in memory)
+Animal Kingdom at http://localhost:8010/
+2026-11-14 03:19:59,280 reloaded 5 saved matches, archived 0
+2026-11-14 03:20:00,016 127.0.0.1 [14/Nov/2026:03:20:00 +0100] "GET /api/pool HTTP/1.1" 200 74639 "-" "curl/8.7.1"
+2026-11-14 03:20:00,030 127.0.0.1 [14/Nov/2026:03:20:00 +0100] "GET /api/pool HTTP/1.1" 200 74639 "-" "curl/8.7.1"

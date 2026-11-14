@@ -13,7 +13,7 @@ His real constraints (the only ones): a card game about animals; fun, beautiful,
 ## The rules of the prototype
 
 - A turn is **5 energy** (his numbers). Unspent energy is lost. No growth, no free card.
-- Every animal has a **cost of 1 to 5**, paid on placement. Tokens cost 0. A Titan is simply a cost of 5 (the keyword's two-action rule goes).
+- Every animal has a **cost of 1 to 5**, paid on placement. A token played from the hand costs 1 (a Kitten 2, since it draws a card); one an effect puts on the board is free. A Titan is simply a high cost (the keyword is gone).
 - **Drawing a card costs 2 energy** and draws 1 card.
 - No limit on placements in a turn beyond energy.
 - Roam (moving an animal) costs energy: start at 2, tune.
@@ -63,3 +63,6 @@ The Lion (7, vanilla) costs 2. A drawn card is worth 2 energy. Body value by str
   - DEFAULT NOW: 6 energy a turn, first turn 3, a draw costs 2, at most 2 animals a turn, cost scale lion3 (table.SCALE; COST_LION2 kept as the alternative). Martin's own numbers (5 energy, no cap) are one change away on the Costs board.
   Next: rebuild board, restart lab, redeploy; a check with the stronger search; per-card outliers; then the morning page.
 - 03:09 Default rules deployed and verified: https://animal-kingdom-provisions.fly.dev/ serves 6 energy / cap 2 / lion3 costs; a whole game played by clicks through the browser on the local server (2 games) and online (1 game), no page errors (tools/energy/play_check.mjs, run from game/animal_kingdom/web/test for its puppeteer). Turn button shows the energy left as a number on a gem and a pip per animal still to place. Lab restarted (board 8006, game 8010). Stronger-search check running: results/energy/rr7_search.txt.
+- 03:20 Reviewer agent (Sonnet, cold read plus its own 1,680-game run) and what I did with it: Praying Mantis 1 (Mouse dominated it), Bobcat 2 (Dolphin dominated it), Octavia 2, Mole 3 / Ocelot 2 / Remora 2 (a free play can no longer fetch another Mole; chains stay bounded by 2 copies), Electric Eel leaves the opponent 4 energy (3 was half a turn once energy went to 6), Kitten token costs 2 (it draws a card, so at 1 it paid for itself), Bird Egg 1, Gorilla 3, Cape Buffalo 3, Black Bear 4, Okapi 4, Orangutan 3, Termite King 2. Not taken: Capybara/Juliette's small-deck line stays (it is a deckbuilding condition, and Deck 6 meets it); Raven stays 3 (at 2 it would dominate the Bat).
+- 03:20 Canine costs: easing Akana, the Black Wolf, the Orca and the Moose took Deck 3 from 52% to 65%; back at Akana 4, Black Wolf 5, Orca 5, Moose 4 it is 54%.
+- 03:20 FINAL numbers (results/energy/rr9_final.jsonl, 2,100 games, plain referee): median 10 player-turns, food 53% / den 47%, first player 50%, no deck-outs, 5.8 draws a player, decks 46/54/54/46/51/49/50. Bot levels under the rules: Expert (hand-tuned search) beats Normal 66%, Normal beats Easy 94%.

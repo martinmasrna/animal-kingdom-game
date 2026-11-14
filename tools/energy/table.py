@@ -26,13 +26,13 @@ T = {
     "earthworm": (1, 1),
     "cockroach": (1, 1),
     "cockroach_legend": (1, 3),
-    "mole": (2, 2, {"text": "Roar: play another animal that costs 2 or less next to this."}),
+    "mole": (2, 3, {"text": "Roar: play another animal that costs 2 or less next to this."}),
     "mole_legend": (2, 5, {"text": "Roar: draw a card, then play another animal."}),
     "dart_frog": (1, 3),
     "caterpillar": (1, 1),
     "bat_legend": (1, 4),
     "blue_whale": (10, 5, {"text": "", "kw": []}),
-    "praying_mantis": (1, 2),
+    "praying_mantis": (1, 1),
     "locust_legend": (1, 5),
     "chameleon": (1, 4),
     "mosquito": (1, 1),
@@ -43,11 +43,11 @@ T = {
     "tortoise_legend": (5, 4),
     "sloth": (3, 3),
     "honey_badger": (3, 4),
-    "electric_eel": (3, 2, {"text": "Roar: your opponent has only 3 energy next turn."}),
+    "electric_eel": (3, 2, {"text": "Roar: your opponent has only 4 energy next turn."}),
     "raccoon": (3, 3),
     "badger": (3, 2),
     "skunk": (2, 2),
-    "octopus_legend_2": (3, 3),
+    "octopus_legend_2": (3, 2),
     "octopus": (3, 2),
     "opossum": (2, 1),
     "sloth_legend": (3, 4),
@@ -61,7 +61,7 @@ T = {
     "jellyfish": (3, 3),
     "dolphin": (5, 3),
     "sea_turtle": (4, 3),
-    "orca": (7, 4),
+    "orca": (7, 5),
     "tortoise": (4, 1),
     "sperm_whale": (9, 5, {"text": "Hungry 4. Roar: remove all adjacent animals.", "kw": ["Hungry"], "hungry": 4}),
     "rhinoceros_legend": (8, 5),
@@ -76,7 +76,7 @@ T = {
     "golden_orb_weaver": (1, 1),
     "tarantula": (2, 2),
     # ---- Bear
-    "black_bear": (7, 5),
+    "black_bear": (7, 4),
     "grizzly_bear": (8, 4, {"text": ""}),
     # ---- Beetle
     "hercules_beetle": (1, 3),
@@ -116,10 +116,10 @@ T = {
     "african_wild_dog": (4, 2),
     "dhole": (4, 3),
     "fox_legend": (5, 4),
-    "wolf_legend_2": (6, 4),
+    "wolf_legend_2": (6, 5),
     "wolf": (5, 2),
     # ---- Cat
-    "ocelot": (1, 1, {"text": "Roar: if you control another Cat, play another Cat that costs 2 or less."}),
+    "ocelot": (1, 2, {"text": "Roar: if you control another Cat, play another Cat that costs 2 or less."}),
     "serval": (3, 3),
     "alley_cat": (2, 2),
     "lion_legend": (3, 3),
@@ -127,7 +127,7 @@ T = {
     "leopard_legend": (6, 5),
     "lion_legend_4": (5, 4),
     "lynx": (4, 4),
-    "bobcat": (5, 3),
+    "bobcat": (5, 2),
     "cheetah": (5, 2),
     "jaguar": (6, 4),
     "leopard": (6, 4),
@@ -142,7 +142,7 @@ T = {
     "hornet": (2, 3),
     "hornet_legend": (2, 2),
     "bumblebee_legend": (2, 3),
-    "termite_king": (3, 3),
+    "termite_king": (3, 2),
     "nurse_bee": (1, 2),
     "nurse_bumblebee": (1, 2),
     "termite_queen": (3, 2, {"text": "Roar: play a non-Queen Colony animal that costs 2 or less."}),
@@ -157,11 +157,11 @@ T = {
     "worker_wasp": (1, 2),
     "worker_bee": (1, 1),
     # ---- Egg
-    "bird_egg": (None, 2),
+    "bird_egg": (None, 1),
     "snake_egg": (None, 3),
     # ---- Fish
     "sardine": (1, 1),
-    "remora": (1, 1, {"text": "Roar: if this is next to an allied Fish, play another Fish that costs 2 or less."}),
+    "remora": (1, 2, {"text": "Roar: if this is next to an allied Fish, play another Fish that costs 2 or less."}),
     "sardine_legend": (1, 2),
     "piranha_legend": (2, 4),
     "piranha": (2, 3),
@@ -184,7 +184,7 @@ T = {
     "deer": (5, 2),
     "deer_legend": (5, 5),
     "zebra_legend": (6, 5),
-    "okapi": (6, 5),
+    "okapi": (6, 4),
     "warthog": (5, 3),
     "wildebeest_legend": (6, 5),
     "boar_legend": (6, 4),
@@ -193,9 +193,9 @@ T = {
     "giraffe": (8, 4, {"text": "Hungry 2. Reach.", "kw": ["Hungry", "Reach"], "hungry": 2}),
     "wildebeest": (6, 3),
     "giraffe_legend": (8, 4),
-    "cape_buffalo": (7, 4),
+    "cape_buffalo": (7, 3),
     "bison": (7, 4),
-    "moose": (8, 3),
+    "moose": (8, 4),
     # ---- Primate
     "macaque_legend": (2, 3),
     "macaque": (2, 2),
@@ -203,9 +203,9 @@ T = {
     "baboon_legend": (5, 3),
     "orangutan_legend": (6, 4),
     "chimpanzee": (5, 4),
-    "orangutan": (6, 4),
+    "orangutan": (6, 3),
     "baboon": (5, 2),
-    "gorilla": (7, 4),
+    "gorilla": (7, 3),
     # ---- Rodent
     "chipmunk": (1, 1),
     "capybara": (3, 3),
@@ -247,13 +247,13 @@ COST_LION2 = {
 }
 
 # Tokens played from the hand: what they cost (the rest cost 1; an effect that puts a token on the board is free).
-TOKEN_COST = {"eagle_legend_2": 4, "young_stag": 2, "great_stag": 4}
+TOKEN_COST = {"eagle_legend_2": 4, "young_stag": 2, "great_stag": 4, "kitten": 2}   # a Kitten draws a card: at 1 it paid for itself
 
 # Martin's hand-set strengths this table must match exactly (checked by build.py against the boards).
 # The rule numbers of the prototype (Config overrides).
 RULES = {
     "energy_mode": True, "actions_per_turn": 6, "first_turn_actions": 3, "draw_action_count": 1, "draw_cost": 2,
-    "roam_cost": 2, "extra_play_max_cost": 2, "max_places_per_turn": 2, "titan_discount": 2, "beaver_bonus_actions": 2, "eel_actions": 3,
+    "roam_cost": 2, "extra_play_max_cost": 2, "max_places_per_turn": 2, "titan_discount": 2, "beaver_bonus_actions": 2, "eel_actions": 4,
     "crocodile_penalty": 0, "giraffe_bonus": 0, "grizzly_opp_draw": 0, "mouse_draw_any": 2, "hummingbird_energy": 2,
     "mole_legend_discard": False, "mole_legend_play_max": 5,
 }

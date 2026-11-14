@@ -93,7 +93,7 @@ for cid, o in cards.items():
     if "text" in o and o["text"] != by_id[cid].get("text", ""):
         changed_text[cid] = (by_id[cid].get("text", ""), o["text"])
 for tid, c in table.TOKEN_COST.items():
-    c = c - 1 if table.SCALE == "lion2" else c
+    c = max(1, c - 1) if table.SCALE == "lion2" else c
     assert by_id[tid]["status"] == "token", tid
     cards[tid] = {"cost": c}
 

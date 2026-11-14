@@ -11,7 +11,7 @@
   "max_places_per_turn": 2,
   "titan_discount": 2,
   "beaver_bonus_actions": 2,
-  "eel_actions": 3,
+  "eel_actions": 4,
   "crocodile_penalty": 0,
   "giraffe_bonus": 0,
   "grizzly_opp_draw": 0,
@@ -41,7 +41,7 @@
    "strength": 1
   },
   "mole": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2,
    "text": "Roar: play another animal that costs 2 or less next to this."
   },
@@ -69,7 +69,7 @@
    "text": ""
   },
   "praying_mantis": {
-   "cost": 2,
+   "cost": 1,
    "strength": 1
   },
   "locust_legend": {
@@ -115,7 +115,7 @@
   "electric_eel": {
    "cost": 2,
    "strength": 3,
-   "text": "Roar: your opponent has only 3 energy next turn."
+   "text": "Roar: your opponent has only 4 energy next turn."
   },
   "raccoon": {
    "cost": 3,
@@ -130,7 +130,7 @@
    "strength": 2
   },
   "octopus_legend_2": {
-   "cost": 3,
+   "cost": 2,
    "strength": 3
   },
   "octopus": {
@@ -186,7 +186,7 @@
    "strength": 4
   },
   "orca": {
-   "cost": 4,
+   "cost": 5,
    "strength": 7
   },
   "tortoise": {
@@ -257,7 +257,7 @@
    "strength": 2
   },
   "black_bear": {
-   "cost": 5,
+   "cost": 4,
    "strength": 7
   },
   "grizzly_bear": {
@@ -407,7 +407,7 @@
    "strength": 5
   },
   "wolf_legend_2": {
-   "cost": 4,
+   "cost": 5,
    "strength": 6
   },
   "wolf": {
@@ -415,7 +415,7 @@
    "strength": 5
   },
   "ocelot": {
-   "cost": 1,
+   "cost": 2,
    "strength": 1,
    "text": "Roar: if you control another Cat, play another Cat that costs 2 or less."
   },
@@ -448,7 +448,7 @@
    "strength": 4
   },
   "bobcat": {
-   "cost": 3,
+   "cost": 2,
    "strength": 5
   },
   "cheetah": {
@@ -504,7 +504,7 @@
    "strength": 2
   },
   "termite_king": {
-   "cost": 3,
+   "cost": 2,
    "strength": 3
   },
   "nurse_bee": {
@@ -561,7 +561,7 @@
    "strength": 1
   },
   "bird_egg": {
-   "cost": 2
+   "cost": 1
   },
   "snake_egg": {
    "cost": 3
@@ -571,7 +571,7 @@
    "strength": 1
   },
   "remora": {
-   "cost": 1,
+   "cost": 2,
    "strength": 1,
    "text": "Roar: if this is next to an allied Fish, play another Fish that costs 2 or less."
   },
@@ -665,7 +665,7 @@
    "strength": 6
   },
   "okapi": {
-   "cost": 5,
+   "cost": 4,
    "strength": 6
   },
   "warthog": {
@@ -707,7 +707,7 @@
    "strength": 8
   },
   "cape_buffalo": {
-   "cost": 4,
+   "cost": 3,
    "strength": 7
   },
   "bison": {
@@ -715,7 +715,7 @@
    "strength": 7
   },
   "moose": {
-   "cost": 3,
+   "cost": 4,
    "strength": 8
   },
   "macaque_legend": {
@@ -743,7 +743,7 @@
    "strength": 5
   },
   "orangutan": {
-   "cost": 4,
+   "cost": 3,
    "strength": 6
   },
   "baboon": {
@@ -751,7 +751,7 @@
    "strength": 5
   },
   "gorilla": {
-   "cost": 4,
+   "cost": 3,
    "strength": 7,
    "text": "Roar: if this has 9 or more strength, draw a card."
   },
@@ -875,6 +875,9 @@
   },
   "great_stag": {
    "cost": 4
+  },
+  "kitten": {
+   "cost": 2
   }
  },
  "decks": [
