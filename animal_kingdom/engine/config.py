@@ -209,6 +209,11 @@ class Config:
     roam_cost: int = 1                   # what a paid roam costs
     extra_play_max_cost: int = 99        # "play another animal": the dearest animal it may play for free
     titan_discount: int = 1              # Krill: what the next Titan costs less (one action; energy: 2)
+    mouse_draw_any: int = 0              # Mouse: 0, "draw a Rodent"; N, "draw N cards" (Martin's note, 2026-11-14)
+    hummingbird_energy: int = 0          # Hummingbird: 0, "draw 2 cards"; N, "gain N energy" (this turn)
+    mole_legend_discard: bool = True     # the legendary Mole discards a card after its extra play (off: Martin's note)
+    mole_legend_play_max: int = 99       # the dearest animal the legendary Mole may play
+    grizzly_opp_draw: int = 1            # Grizzly Bear: cards its opponent draws (0: a plain body)
 
     # --- Engine safety / sim hygiene ---
     max_turns: int = 400                 # hard cap so fuzz games always terminate (M1)

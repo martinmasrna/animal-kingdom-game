@@ -463,8 +463,11 @@ fn chipmunk(st: &mut State, unit: &Unit) {
 
 fn mole_legend(st: &mut State, unit: &Unit) {
     let o = unit.owner;
-    st.effect_stack.push(vmap!("op" => Value::s("discard_choice"), "player" => pn(o)));
-    push_play_extra(st, o, None, false);
+    if st.cfg().flag("mole_legend_discard") {
+        st.effect_stack.push(vmap!("op" => Value::s("discard_choice"), "player" => pn(o)));
+    }
+    let filt = if st.cfg().energy_mode { Some(vmap!("max_cost" => Value::Int(st.cfg().int("mole_legend_play_max") as i64))) } else { None };
+    push_play_extra(st, o, filt, false);
     push_draw(st, o, 1);
 }
 
@@ -956,7 +959,14 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("bat", OnPlace) | ("dolphin", OnPlace) => draws(st, unit, 1),
-        ("mouse", OnPlace) => draws_filtered(st, unit, "tag:Rodent", 1),
+        ("mouse", OnPlace) => {
+            let n = cfg(st, "mouse_draw_any");
+            if n > 0 {
+                push_draw(st, owner, n);
+            } else {
+                draws_filtered(st, unit, "tag:Rodent", 1);
+            }
+        }
         // Egg Control
         ("anaconda_legend", OnEndOfTurn) => {
             let me = cid(st, "anaconda_legend");
@@ -1196,7 +1206,12 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let n = cfg(st, "black_bear_draw");
             schedule(st, unit, d, vmap!("op" => Value::s("draw"), "player" => pn(owner), "n" => Value::Int(n as i64)), false, None);
         }
-        ("grizzly_bear", OnPlace) => push_draw(st, other(owner), 1),
+        ("grizzly_bear", OnPlace) => {
+            let n = cfg(st, "grizzly_opp_draw");
+            if n > 0 {
+                push_draw(st, other(owner), n);
+            }
+        }
         ("stag_beetle", OnPlace) => {
             let n: i32 = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_ARMOR, Some(*c))).map(|(c, _)| statics::animal_worth(st, owner, c)).sum();
             let per = cfg(st, "stag_beetle_per_armor");
@@ -1294,8 +1309,13 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("butterfly_legend_butterfly", OnPlace) => butterfly_stage_place(st, unit, None, "butterfly_legend_stage4_grant"),
         ("butterfly_legend_monarch", OnPlace) => butterfly_stage_place(st, unit, Some("butterfly_legend_stage5_draw"), "butterfly_legend_stage5_grant"),
         ("hummingbird", OnPlace) => {
-            let n = cfg(st, "hummingbird_draw");
-            draws(st, unit, n);
+            let e = cfg(st, "hummingbird_energy");
+            if e > 0 {
+                st.effect_stack.push(vmap!("op" => Value::s("grant_action"), "player" => pn(owner), "n" => Value::Int(e as i64)));
+            } else {
+                let n = cfg(st, "hummingbird_draw");
+                draws(st, unit, n);
+            }
         }
         ("macaque", OnPlace) => {
             if conditional(st, card, unit) {

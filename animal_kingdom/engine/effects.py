@@ -2429,11 +2429,28 @@ def _scout_bee_eot(state, unit, cr):
 # --- Den Rush ---------------------------------------------------------------------------------------------------
 
 def _mole_legend_place(state, unit, cr):
-    """Roar: draw a card, play another animal, then discard a card."""
+    """Roar: draw a card, play another animal, then discard a card (no discard under the energy prototype's numbers)."""
     o = unit.owner
-    state.effect_stack.append({"op": "discard_choice", "player": o})
-    _push_play_extra(state, o)
+    if state.config.mole_legend_discard:
+        state.effect_stack.append({"op": "discard_choice", "player": o})
+    _push_play_extra(state, o, filter={"max_cost": state.config.mole_legend_play_max} if state.config.energy_mode else None)
     _push_draw(state, o, 1)
+
+
+def _mouse_place(state, unit, cr):
+    """Roar: draw a Rodent; under the energy prototype's numbers, draw N cards."""
+    if state.config.mouse_draw_any:
+        _push_draw(state, unit.owner, state.config.mouse_draw_any)
+    else:
+        state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "tag:Rodent"})
+
+
+def _hummingbird_place(state, unit, cr):
+    """Flight. Roar: draw 2 cards; under the energy prototype's numbers, gain N energy (this turn)."""
+    if state.config.hummingbird_energy:
+        state.effect_stack.append({"op": "grant_action", "player": unit.owner, "n": state.config.hummingbird_energy})
+    else:
+        _push_draw(state, unit.owner, state.config.hummingbird_draw)
 
 
 def _op_discard_choice(state, step):
@@ -3001,7 +3018,8 @@ def _stag_beetle_place(state, unit, cr):
 
 def _grizzly_place(state, unit, cr):
     """Roar: your opponent draws a card (the price of an 8)."""
-    _push_draw(state, other_player(unit.owner), 1)
+    if state.config.grizzly_opp_draw:
+        _push_draw(state, other_player(unit.owner), state.config.grizzly_opp_draw)
 
 
 def _black_bear_place(state, unit, cr):
@@ -3468,7 +3486,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "falcon": {"on_place": _hq_adjacent_draw},
     "bat": {"on_place": _draw1},
     "dolphin": {"on_place": _draw1},
-    "mouse": {"on_place": _draws_filtered("tag:Rodent")},
+    "mouse": {"on_place": _mouse_place},
     # Egg Control.
     "anaconda_legend": {"on_end_of_turn": _anaconda_legend_end_of_turn},
     "raven_legend": {"on_place": _raven_legend_place},
@@ -3549,7 +3567,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
                                     **_BUTTERFLY_GROWS},
     "butterfly_legend_monarch": {"on_place": _butterfly_stage_place("butterfly_legend_stage5_draw",
                                                                        "butterfly_legend_stage5_grant")},
-    "hummingbird": {"on_place": _draws("hummingbird_draw")},
+    "hummingbird": {"on_place": _hummingbird_place},
     "macaque": {"on_place": _macaque_place},
     "orangutan": {"on_place": _orangutan_place},
     "tarsier": {"on_place": _tarsier_place},
