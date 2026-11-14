@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 52,
+ "rev": 56,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -36,7 +36,7 @@
    "rarity": "legendary",
    "strength": 0,
    "stars": 2,
-   "text": "Dawn: Xanthe gains +1 strength.",
+   "text": "Dawn: Xanthe gains +1 strength (wherever it is).",
    "tags": [],
    "habitat": "Meadow",
    "species": "Butterfly"
