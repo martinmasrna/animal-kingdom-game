@@ -94,15 +94,15 @@ function unit(u, under, cards, fire = false) {
   const has = k => kws.includes(k);
   // Poison's two layers sandwich Stealth's mist: the green tint colours the animal under the mist, the fumes (thickest at
   // the edge) ring it from above, so an animal with both shows both.
-  // The mist and the fumes drift slowly, each piece on its own phase (from its iid) so the board never moves in unison;
+  // The mist drifts left to right and the vapour rises, slowly, each piece on its own phase (from its iid) so the board never moves in unison;
   // the phase runs on the clock, so a redraw (every view redraws the board) carries the drift on instead of restarting it.
   const hx = has('Armor') ? ' hexp' : '', ph = (i, dur) => `animation-delay:${(-((Date.now() / 1000 + (u.iid * 7919 + i * 433) % 997) % dur)).toFixed(2)}s`;
   const img = (f, cls = '', st = '') => `<img class="${cls}" src="${kit(f)}" alt="" draggable="false"${st ? ` style="${st}"` : ''}>`;
   const venom = k => !has('Poison') ? '' : k === 'tint' ? img('kwl_vapour_tint.webp', `kwl venom tint${hx}`)
-    : `<div class="kwl venom fumes${hx}">${img('kwl_vapour_fumes.webp', 'v1', ph(2, 60))}</div>`;
+    : `<div class="kwl venom fumes${hx}">${img('kwl_vapour_fumes.webp', 'base')}<div class="vmask"><div class="flow v1" style="${ph(2, 14)}"></div></div></div>`;
   return peek + (has('Spikes') ? `<img class="kwl thorns" src="${kit(has('Armor') ? 'kwl_thorns_hex.webp' : 'kwl_thorns.webp')}" alt="" draggable="false">` : '') +
     `<div class="ring${has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
-    venom('tint') + (has('Stealth') ? `<div class="kwl mist${hx}">${img('kwl_mist.webp', 'm1', ph(0, 80))}${img('kwl_mist2.webp', 'm2', ph(1, 110))}</div>` : '') + venom('fumes') +
+    venom('tint') + (has('Stealth') ? `<div class="kwl mist${hx}"><div class="flow m1" style="${ph(0, 45)}"></div><div class="flow m2" style="${ph(1, 70)}"></div></div>` : '') + venom('fumes') +
     `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
     `<div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
     (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +

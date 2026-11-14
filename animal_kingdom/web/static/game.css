@@ -179,14 +179,19 @@
 .game.kit .unit .kwl.mist { left: 18px; top: 18px; width: calc(100% - 36px); height: calc(100% - 36px); border-radius: 50%; overflow: hidden; }
 .game.kit .unit .kwl.venom { left: 18px; top: 18px; width: calc(100% - 36px); height: calc(100% - 36px); border-radius: 50%; }
 .game.kit .unit .kwl.venom.tint { mix-blend-mode: color; opacity: var(--venom-tint, .85); }   /* the vapour, blurred, turns the painting green under it */
-/* Slow drift, with restraint: two layers of mist turning against each other, the fumes swirling and faintly breathing. */
-.game.kit .unit .kwl.venom.fumes { overflow: hidden; }
-.game.kit .unit .kwl.mist img, .game.kit .unit .kwl.venom.fumes img { position: absolute; inset: 0; width: 100%; height: 100%; }
-.game.kit .unit .kwl.mist .m1 { opacity: .75; animation: kwdrift 80s linear infinite; }
-.game.kit .unit .kwl.mist .m2 { opacity: .3; animation: kwdrift 110s linear infinite reverse; }
-.game.kit .unit .kwl.venom.fumes .v1 { animation: kwdrift 60s linear infinite, kwbreathe 8s ease-in-out infinite alternate; }
-@keyframes kwdrift { to { rotate: 360deg; } }
-@keyframes kwbreathe { from { opacity: 1; } to { opacity: .72; } }
+/* Slow motion, with restraint, the way the real things move: two layers of mist drifting left to right at different
+   speeds, the vapour rising through the swirl's own shape and faintly breathing. Each texture wraps seamlessly (kwl_*_flow). */
+.game.kit .unit .kwl.venom.fumes { overflow: hidden; animation: kwbreathe 8s ease-in-out infinite alternate; }
+.game.kit .unit .kwl.venom.fumes .base { position: absolute; inset: 0; width: 100%; height: 100%; }   /* the approved swirl, still */
+.game.kit .unit .kwl.venom.fumes .vmask { position: absolute; inset: 0; opacity: .55; -webkit-mask: url(/static/kit2/kwl_vapour_mask.webp) center / 100% 100%; mask: url(/static/kit2/kwl_vapour_mask.webp) center / 100% 100%; }   /* fixed: the vapour rises through the swirl's shape */
+.game.kit .unit .kwl .flow { position: absolute; left: 0; top: 0; will-change: transform; }
+.game.kit .unit .kwl.mist .flow { width: 200%; height: 100%; background: url(/static/kit2/kwl_mist_flow.webp) 0 0 / 50% 100% repeat-x; animation: kwdrift 45s linear infinite; }
+.game.kit .unit .kwl.mist .m1 { opacity: .8; }
+.game.kit .unit .kwl.mist .m2 { opacity: .35; background-image: url(/static/kit2/kwl_mist_flow2.webp); animation-duration: 70s; }
+.game.kit .unit .kwl.venom .flow { width: 100%; height: 200%; background: url(/static/kit2/kwl_vapour_flow.webp) 0 0 / 100% 50% repeat-y; animation: kwrise 14s linear infinite; }
+@keyframes kwdrift { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@keyframes kwrise { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes kwbreathe { from { opacity: 1; } to { opacity: .75; } }
 .game.kit .unit .hexp { left: 5px; top: 5px; width: 124px; height: 124px; inset: auto; border-radius: 0; clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0 50%); }   /* the portrait cut to the armour's hexagonal hole */
 .game.kit .unit .kwl.mist.hexp, .game.kit .unit .kwl.venom.hexp { left: -11px; top: -11px; width: 156px; height: 156px; clip-path: polygon(30.1% 15.6%, 69.9% 15.6%, 89.7% 50%, 69.9% 84.4%, 30.1% 84.4%, 10.3% 50%); }   /* the round mist larger, cut to the same hexagon */
 .game.kit .unit .boss { width: 46px; height: 46px; margin-left: -23px; bottom: -16px; border: 0; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
