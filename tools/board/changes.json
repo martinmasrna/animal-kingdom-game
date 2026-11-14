@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 33,
+ "rev": 52,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -10,6 +10,12 @@
    "text": {
     "was": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
     "now": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +1 strength (wherever they are)."
+   }
+  },
+  "butterfly_legend": {
+   "text": {
+    "was": "Dawn: evolve. Whenever this gains strength, evolve.",
+    "now": "Whenever Xanthe gains strength, evolve."
    }
   },
   "mouse": {
@@ -30,7 +36,7 @@
    "rarity": "legendary",
    "strength": 0,
    "stars": 2,
-   "text": "Dawn: evolve. Whenever this gains strength, evolve.",
+   "text": "Dawn: Xanthe gains +1 strength.",
    "tags": [],
    "habitat": "Meadow",
    "species": "Butterfly"
