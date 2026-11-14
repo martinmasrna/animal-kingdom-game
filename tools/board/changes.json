@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 56,
+ "rev": 66,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -60,7 +60,7 @@
    "rarity": "legendary",
    "strength": 1,
    "stars": 2,
-   "text": "Fall: put Roach King back where it was with +1 strength and draw a card.",
+   "text": "Whenever Roach King is removed, shuffled a copy of it into your deck.",
    "tags": [],
    "habitat": "City",
    "species": "Cockroach"

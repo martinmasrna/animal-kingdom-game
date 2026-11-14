@@ -1,5 +1,5 @@
 {
- "rev": 49,
+ "rev": 51,
  "name": "provisions",
  "cards": {},
  "piles": [
@@ -216,7 +216,6 @@
     "oxpecker_legend",
     "chipmunk_legend",
     "manta_ray_legend",
-    "honey_badger_legend",
     "wildebeest_legend",
     "leopard_legend",
     "lion_legend_4",
@@ -276,7 +275,6 @@
     "new33",
     "new34",
     "new35",
-    "new36",
     "new37",
     "new38",
     "new39",
@@ -326,7 +324,9 @@
     "new1",
     "butterfly_legend",
     "new3",
-    "cockroach_legend"
+    "cockroach_legend",
+    "new36",
+    "honey_badger_legend"
    ]
   }
  ],
