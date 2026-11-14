@@ -437,7 +437,9 @@ def starter_cards() -> dict[str, dict]:
 
 
 
-COPY_LIMIT = {cid: COPY_LIMITS[c.rarity] for cid, c in CARDS.items()}   # any deck may hold the rarity's full count (decks.py)
+# The most copies a renamed card may carry into a player's saved deck (profiles.seed_decks): three, the old rule's, so the
+# stars prototype's two-copy limit never trims a saved deck quietly; a deck over it says so in the collection instead.
+COPY_LIMIT = {cid: 1 if c.rarity == "legendary" else 3 for cid, c in CARDS.items()}
 # The cards a player's deck can hold: the starter decks' and the bench's (not the reserve's, the tutorial's or tokens).
 COLLECTIBLE = {cid for cid, c in CARDS.items() if c.collectible}
 
