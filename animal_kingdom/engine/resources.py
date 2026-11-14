@@ -61,3 +61,5 @@ def _overlay_cards(data: dict) -> None:
         for k in ("text", "status", "keywords", "hungry"):
             if k in o:
                 rec[k] = o[k]
+        if rec.get("hungry") == 0:
+            del rec["hungry"]
