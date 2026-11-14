@@ -1,8 +1,12 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 7,
+ "rev": 17,
  "changed": {
   "bee_legend_2": {
+   "stars": {
+    "was": 2,
+    "now": 3
+   },
    "text": {
     "was": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
     "now": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +1 strength (wherever they are)."
@@ -36,8 +40,8 @@
    "name": "Juliette",
    "rarity": "legendary",
    "strength": 1,
-   "stars": 2,
-   "text": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
+   "stars": 3,
+   "text": "If your starting deck has no animals of strength 4 or more, your animals have +1 strength.",
    "tags": [
     "Colony"
    ],

@@ -1,5 +1,5 @@
 {
- "rev": 15,
+ "rev": 27,
  "name": "provisions",
  "cards": {},
  "piles": [
@@ -245,13 +245,12 @@
   {
    "id": "provleaders",
    "name": "Leaders",
-   "x": 9356,
-   "y": 45,
+   "x": 8829,
+   "y": 1578,
    "cols": 10,
    "stacked": false,
    "cards": [
     "new1",
-    "new2",
     "new3",
     "new4",
     "new5",
@@ -320,13 +319,14 @@
   },
   {
    "id": "pmwh0omaa1",
-   "name": "3",
+   "name": "Leaders - 3",
    "x": 6483,
    "y": 6,
-   "cols": 4,
+   "cols": 2,
    "stacked": false,
    "cards": [
-    "bee_legend_2"
+    "bee_legend_2",
+    "new2"
    ]
   }
  ],
