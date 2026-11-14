@@ -304,7 +304,7 @@ function homeScreen(mode = {}) {
           <button class="slab" id="addfriend">Add a friend</button><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : play.opp === 'gauntlet' ? levels + dd('side', play.side || 'mine', SIDES) + dd('gfield', play.gfield || 'mine', GFIELDS) + dd('ggames', play.ggames || '2', GGAMES)
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
-    : play.open === 'menu' ? `<div class="chooser gear">${!learned() ? '' : `<button class="slab" id="learn2">${TOPICON.learn}How to play</button>`}<a class="slab" href="#/news">${TOPICON.news}News${newsUnread() ? '<i class="ndot"></i>' : ''}</a><a class="slab" href="#/settings">${TOPICON.settings}Settings</a><button class="slab fbm" id="fbmenu">${TOPICON.feedback}Feedback</button></div>`
+    : play.open === 'menu' ? `<div class="chooser gear">${!learned() || ENERGY ? '' : `<button class="slab" id="learn2">${TOPICON.learn}How to play</button>`}<a class="slab" href="#/news">${TOPICON.news}News${newsUnread() ? '<i class="ndot"></i>' : ''}</a><a class="slab" href="#/settings">${TOPICON.settings}Settings</a><button class="slab fbm" id="fbmenu">${TOPICON.feedback}Feedback</button></div>`
     : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;

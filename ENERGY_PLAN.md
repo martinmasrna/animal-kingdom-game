@@ -32,15 +32,15 @@ The Lion (7, vanilla) costs 2. A drawn card is worth 2 energy. Body value by str
 
 ## Steps
 
-- [ ] 1. Python engine: energy rules behind a config switch; card costs; draw price; roam price; action-worded effects translated.
-- [ ] 2. Rust engine: the same, built into this worktree's venv, parity with Python checked by the fuzz tool.
-- [ ] 3. Data overlay: every collectible card's strength (1 to 10), cost, changed text; benched cards; shifted thresholds.
-- [ ] 4. Bots: hand-tuned evaluation (plain referee, or greedy) under the new turn; measure against greedy.
-- [ ] 5. Six sample decks, 30 cards, diverse.
-- [ ] 6. Simulations: first-turn energy for an even start; pace, deck-out rate, den vs food split, rush share; per-card outliers; iterate costs and texts.
-- [ ] 7. Frontend: cost on every card, energy pips, the draw price, deck builder for 30 cards with 2/1 copies sorted by cost.
-- [ ] 8. Costs board: cost +/- and strength +/- per card, the rule numbers, writing the overlay; a local game server that restarts on a change; a button to send it to the online test app.
-- [ ] 9. Deploy to the test app, verify by playing a bot game through the browser.
+- [x] 1. Python engine: energy rules behind a config switch; card costs; draw price; roam price; action-worded effects translated.
+- [x] 2. Rust engine: the same, built into this worktree's venv, parity with Python checked by the fuzz tool.
+- [x] 3. Data overlay: every collectible card's strength (1 to 10), cost, changed text; benched cards; shifted thresholds.
+- [x] 4. Bots: hand-tuned evaluation (plain referee, or greedy) under the new turn; measure against greedy.
+- [x] 5. Six sample decks, 30 cards, diverse.
+- [x] 6. Simulations: first-turn energy for an even start; pace, deck-out rate, den vs food split, rush share; per-card outliers; iterate costs and texts.
+- [x] 7. Frontend: cost on every card, energy pips, the draw price, deck builder for 30 cards with 2/1 copies sorted by cost.
+- [x] 8. Costs board: cost +/- and strength +/- per card, the rule numbers, writing the overlay; a local game server that restarts on a change; a button to send it to the online test app.
+- [x] 9. Deploy to the test app, verify by playing a bot game through the browser.
 - [ ] 10. Morning page for Martin (published artifact, opened): what was built, what changed and why, what the numbers show, the list of touched texts and benched cards, known weak spots.
 
 ## Log
