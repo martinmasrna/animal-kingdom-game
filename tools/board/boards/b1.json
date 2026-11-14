@@ -1,5 +1,5 @@
 {
- "rev": 121,
+ "rev": 122,
  "name": "provisions",
  "cards": {
   "queen_ant": {
@@ -368,8 +368,8 @@
   {
    "id": "pmwh261876",
    "name": "OP rares",
-   "x": 3774,
-   "y": 1921,
+   "x": 3436,
+   "y": 2082,
    "cols": 4,
    "stacked": false,
    "cards": [
