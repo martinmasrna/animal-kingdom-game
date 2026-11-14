@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 17,
+ "rev": 23,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -277,7 +277,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "Roar: play Princess Lea from your hand or deck.",
+   "text": "At the start",
    "tags": [
     "Cat"
    ],

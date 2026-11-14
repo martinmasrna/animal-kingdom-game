@@ -1,7 +1,16 @@
 {
- "rev": 27,
+ "rev": 35,
  "name": "provisions",
- "cards": {},
+ "cards": {
+  "lion_legend_2": {
+   "x": 7489,
+   "y": 571
+  },
+  "lion_legend": {
+   "x": 6545,
+   "y": 821
+  }
+ },
  "piles": [
   {
    "id": "provcommon",
@@ -205,8 +214,6 @@
     "chameleon_legend",
     "bumblebee_legend",
     "rat_legend_2",
-    "lion_legend",
-    "lion_legend_2",
     "army_ant_legend",
     "hornet_legend",
     "squirrel_legend",
@@ -319,9 +326,9 @@
   },
   {
    "id": "pmwh0omaa1",
-   "name": "Leaders - 3",
-   "x": 6483,
-   "y": 6,
+   "name": "Leaders",
+   "x": 6456,
+   "y": 8,
    "cols": 2,
    "stacked": false,
    "cards": [
