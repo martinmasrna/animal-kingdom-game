@@ -171,13 +171,13 @@
 .game.kit .cr.unit { width: 134px; height: 134px; margin: -67px 0 0 -67px; }
 .game.kit .unit .ring { inset: 18px; border: 0; background-color: #3a342c; }
 .game.kit .unit .rimimg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-/* Board keywords painted on the piece (board.js): hexagon rim for Armor, thorns behind the rim, mist over the portrait, a venom drop on the rim. */
+/* Board keywords painted on the piece (board.js): hexagon rim for Armor, thorns behind the rim, mist over the portrait, venom in the strength boss. */
 .game.kit .unit .rimimg.hex { inset: auto; left: calc(-1 * var(--hex-out, 14px)); top: calc(-1 * var(--hex-out, 14px)); width: calc(100% + 2 * var(--hex-out, 14px)); height: calc(100% + 2 * var(--hex-out, 14px)); }
 .game.kit .unit .kwl { position: absolute; pointer-events: none; }
 .game.kit .unit .kwl.thorns { left: calc(-1 * var(--thorn-out, 38px)); top: calc(-1 * var(--thorn-out, 38px)); width: calc(100% + 2 * var(--thorn-out, 38px)); height: calc(100% + 2 * var(--thorn-out, 38px)); }
 .game.kit .unit:has(.rimimg.hex) .kwl.thorns { --thorn-out: 58.25px; }   /* the same thorns, each pushed out to the hexagon's edge (kwl_thorns_hex) */
 .game.kit .unit .kwl.mist { left: 18px; top: 18px; width: calc(100% - 36px); height: calc(100% - 36px); border-radius: 50%; opacity: var(--mist-o, .8); }
-.game.kit .unit .kwl.drop { width: var(--drop-w, 40px); height: auto; z-index: 1; }
+.game.kit .unit .boss.venom { background-image: url(/static/kit2/kwl_vboss_a.webp); } .game.kit .unit.B .boss.venom { background-image: url(/static/kit2/kwl_vboss_b.webp); } .game.kit .unit.W .boss.venom { background-image: url(/static/kit2/kwl_vboss_n.webp); }
 .game.kit .unit .hexp { left: 5px; top: 5px; width: 124px; height: 124px; inset: auto; border-radius: 0; clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0 50%); }   /* the portrait cut to the armour's hexagonal hole */
 .game.kit .unit .kwl.mist.hexp { left: -11px; top: -11px; width: 156px; height: 156px; clip-path: polygon(30.1% 15.6%, 69.9% 15.6%, 89.7% 50%, 69.9% 84.4%, 30.1% 84.4%, 10.3% 50%); }   /* the round mist larger, cut to the same hexagon */
 .game.kit .unit .boss { width: 46px; height: 46px; margin-left: -23px; bottom: -16px; border: 0; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; text-shadow: 0 1px 2px rgba(0,0,0,.6); }

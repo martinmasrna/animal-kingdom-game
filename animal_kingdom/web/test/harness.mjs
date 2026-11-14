@@ -121,7 +121,7 @@ export function screenMismatches() {
     // trigger mark (Dawn, Dusk, eye) is a separate badge, not a keyword
     const kw = top.inked ? [] : [top.armor && 'Armor', top.hidden && 'Stealth', top.spikes && 'Spikes', top.poison && 'Poison'].filter(Boolean);
     const worn = [el.querySelector('.rimimg.hex') && 'Armor', el.querySelector('.kwl.mist') && 'Stealth', el.querySelector('.kwl.thorns') && 'Spikes',
-      el.querySelector('.kwl.drop') && 'Poison'].filter(Boolean);   // each painted on the piece (hexagon rim, mist, thorns, venom)
+      el.querySelector('.boss.venom') && 'Poison'].filter(Boolean);   // each painted on the piece (hexagon rim, mist, thorns, venom)
     if (worn.join(', ') !== kw.join(', ')) out.push(`${cr}: ${top.id} is ${kw.join(', ') || 'plain'} but wears ${worn.join(', ') || 'nothing'}`);
     const buried = el.querySelectorAll('.buried').length;
     if (buried !== Math.min(3, st.length - 1)) out.push(`${cr}: ${buried} buried discs for a stack of ${st.length}`);
