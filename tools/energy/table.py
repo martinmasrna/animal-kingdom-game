@@ -248,6 +248,7 @@ COST_LION2 = {
 
 # Tokens played from the hand: what they cost (the rest cost 1; an effect that puts a token on the board is free).
 TOKEN_COST = {"eagle_legend_2": 4, "young_stag": 2, "great_stag": 4, "kitten": 2}   # a Kitten draws a card: at 1 it paid for itself
+TOKEN_TEXT = {"kitten": "Roar: draw a non-legendary animal."}   # commons and rares are one kind here (resources._overlay_cards)
 
 # Martin's hand-set strengths this table must match exactly (checked by build.py against the boards).
 # The rule numbers of the prototype (Config overrides).

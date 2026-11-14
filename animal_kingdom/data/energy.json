@@ -877,7 +877,8 @@
    "cost": 4
   },
   "kitten": {
-   "cost": 2
+   "cost": 2,
+   "text": "Roar: draw a non-legendary animal."
   }
  },
  "decks": [

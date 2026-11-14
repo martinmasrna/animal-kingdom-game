@@ -560,7 +560,7 @@ function metaCards(cards, key) {
   const min = META.min, sort = META.acsort || 'd';
   const cmp = impCmp(sort, min, META.acsortUp);
   const rows = cards.filter(c => CARDS[c.card] && c.d.yes[0] && (!META.rar || CARDS[c.card].rarity === META.rar)).sort((a, b) => cmp(a, b) || b.d.yes[0] - a.d.yes[0]);
-  const rar = dd('mrar', META.rar, [['', 'Every rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']]);
+  const rar = dd('mrar', META.rar, ENERGY ? [['', 'All cards'], ['legendary', 'Legendary']] : [['', 'Every rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']]);
   return `<div class="mcardsh"><h4 class="msub mcards">Cards</h4>${rar}</div>${rows.length ? '' : '<p class="none">No cards of this rarity in the range.</p>'}<div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${impHead('k', sort === 'k', 'data-' + key, META.acsortUp)}${impHead('d', sort === 'd', 'data-' + key, META.acsortUp)}${impHead('p', sort === 'p', 'data-' + key, META.acsortUp)}${gHead(sort === 'g', 'data-' + key, META.acsortUp)}</tr></thead><tbody>
     ${rows.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, 1)}</div></th>${impCell(c.k, 'k', min)}${impCell(c.d, 'd', min)}${impCell(c.p, 'p', min)}<td class="num dim">${c.d.yes[0]}</td></tr>`).join('')}</tbody></table></div>`;
 }

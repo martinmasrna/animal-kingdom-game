@@ -46,9 +46,12 @@ def variant() -> dict:
 
 def _overlay_cards(data: dict) -> None:
     """Lay the prototype's values over the card records: `cost` (energy), `strength`, `text`, `status`, `keywords`,
-    `hungry`. A collectible card the overlay doesn't list is benched (reserve): it has no cost yet."""
+    `hungry`. A collectible card the overlay doesn't list is benched (reserve): it has no cost yet. The prototype has
+    two kinds of card, the legendary (one copy) and every other (two copies): a rare is recorded as a common."""
     over = variant().get("cards", {})
     for rec in data.get("cards", []):
+        if rec.get("rarity") == "rare":
+            rec["rarity"] = "common"
         o = over.get(rec.get("id"))
         if o is None:
             if rec.get("status") == "collectible":

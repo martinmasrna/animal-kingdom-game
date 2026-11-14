@@ -96,6 +96,8 @@ for tid, c in table.TOKEN_COST.items():
     c = max(1, c - 1) if table.SCALE == "lion2" else c
     assert by_id[tid]["status"] == "token", tid
     cards[tid] = {"cost": c}
+    if tid in table.TOKEN_TEXT:
+        cards[tid]["text"] = table.TOKEN_TEXT[tid]
 
 decks = []
 if (HERE / "decks.py").exists():

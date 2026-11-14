@@ -87,6 +87,8 @@ export const stripHTML = (id, cards, have, num = cards[id].str) => `<div class="
 // flat: one list in the same order (rarity, then strength) without the group labels (home's chooser); each strip keeps its rarity edge.
 export function deckBody(list, cards, caps = true, flat = false) {
   const counts = countsOf(list), inR = r => list.filter(id => cards[id].rarity === r).length;
+  // the energy prototype (its cards carry a cost): one list by cost, each strip showing its cost; no groups, there is one kind of card besides the legendary
+  if (list.length && cards[list[0]].price != null) return `<div class="dbody flat">${Object.keys(counts).sort((a, b) => cards[a].price - cards[b].price || cards[a].name.localeCompare(cards[b].name)).map(id => stripHTML(id, cards, counts[id], cards[id].price)).join('')}</div>`;
   const strip = id => stripHTML(id, cards, counts[id]);
   const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap && caps ? `<span>${inR(r)}/${cap}</span>` : ''}</h4>`;
   const byR = r => Object.keys(counts).filter(id => cards[id].rarity === r).sort((a, b) => sv(cards[a]) - sv(cards[b]) || cards[a].name.localeCompare(cards[b].name)).map(strip).join('');
@@ -114,13 +116,11 @@ function render(app, all) {
   const strengths = [...Array(8).keys()].map(String).concat('8+');   // 0 to 7, then 8 and up together: few animals are 8 or more (Martin, 2026-10-30)
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
-    ${dd('rar', st.rar || '', [['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
+    ${dd('rar', st.rar || '', EN ? [['', 'All cards'], ['legendary', 'Legendary']] : [['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
     ${EN ? dd('pr', st.pr, [['', 'Any cost'], ...['1', '2', '3', '4', '5'].map(v => [v, 'Cost ' + v])]) : dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
-  const body = d => { if (!EN) return deckBody(d.list, C);
-    const counts = countsOf(d.list);   // the energy prototype: one list by cost, each strip showing its cost
-    return `<div class="dbody flat">${Object.keys(counts).sort((a, b) => C[a].price - C[b].price || C[a].name.localeCompare(C[b].name)).map(id => stripHTML(id, C, counts[id], C[id].price)).join('')}</div>`; };
+  const body = d => deckBody(d.list, C);
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`
