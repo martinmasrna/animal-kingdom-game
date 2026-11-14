@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 86,
+ "rev": 97,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -34,6 +34,16 @@
     "now": 3
    }
   },
+  "mole": {
+   "strength": {
+    "was": 1,
+    "now": 2
+   },
+   "stars": {
+    "was": 1,
+    "now": 2
+   }
+  },
   "mouse": {
    "strength": {
     "was": 4,
@@ -42,6 +52,54 @@
    "stars": {
     "was": 0,
     "now": -1
+   }
+  },
+  "ocelot": {
+   "strength": {
+    "was": 1,
+    "now": 2
+   },
+   "stars": {
+    "was": 1,
+    "now": 2
+   }
+  },
+  "queen_ant": {
+   "strength": {
+    "was": 5,
+    "now": 3
+   }
+  },
+  "queen_bee": {
+   "strength": {
+    "was": 5,
+    "now": 3
+   }
+  },
+  "remora": {
+   "strength": {
+    "was": 1,
+    "now": 2
+   },
+   "stars": {
+    "was": 1,
+    "now": 2
+   }
+  },
+  "termite_king": {
+   "strength": {
+    "was": 5,
+    "now": 3
+   }
+  },
+  "termite_queen": {
+   "strength": {
+    "was": 1,
+    "now": 2
+   },
+   "stars": {
+    "was": 1,
+    "now": 2
    }
   },
   "tiger_legend": {

@@ -1,7 +1,20 @@
 {
- "rev": 111,
+ "rev": 121,
  "name": "provisions",
- "cards": {},
+ "cards": {
+  "queen_ant": {
+   "x": 2767,
+   "y": 2173
+  },
+  "queen_bee": {
+   "x": 2965,
+   "y": 2174
+  },
+  "termite_king": {
+   "x": 3163,
+   "y": 2177
+  }
+ },
  "piles": [
   {
    "id": "provcommon",
@@ -118,10 +131,6 @@
     "dart_frog",
     "earthworm",
     "hummingbird",
-    "mole",
-    "ocelot",
-    "remora",
-    "termite_queen",
     "chameleon",
     "coyote",
     "hornet",
@@ -158,11 +167,8 @@
     "lynx",
     "orangutan",
     "porcupine",
-    "queen_ant",
-    "queen_bee",
     "sea_turtle",
     "tarantula",
-    "termite_king",
     "eagle",
     "jaguar",
     "leopard",
@@ -357,6 +363,20 @@
     "orangutan_legend",
     "new15",
     "baboon_legend"
+   ]
+  },
+  {
+   "id": "pmwh261876",
+   "name": "OP rares",
+   "x": 3774,
+   "y": 1921,
+   "cols": 4,
+   "stacked": false,
+   "cards": [
+    "mole",
+    "ocelot",
+    "remora",
+    "termite_queen"
    ]
   }
  ],
