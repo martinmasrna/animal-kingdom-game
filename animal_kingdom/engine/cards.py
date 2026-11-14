@@ -47,12 +47,14 @@ PLANNED = "planned"
 # The decks the game ships (decklists.json), in menu order:
 # slug, name, cover (the card whose art faces it), starter (a new profile gets it), bot (the bots play it), cards
 # (id: copies). Starter slugs align to docs/cards/decks/ filenames.
-DECKLISTS: list[dict] = sorted(load_bundled_json("decklists.json")["decks"], key=lambda d: d.get("order", 0))
+from .resources import ENERGY, variant
+# The energy prototype plays its own sample decks; the shipped lists hold cards it benched or re-sized.
+DECKLISTS: list[dict] = sorted(variant()["decks"] if ENERGY else load_bundled_json("decklists.json")["decks"], key=lambda d: d.get("order", 0))
 STARTER_DECKS: list[dict] = [d for d in DECKLISTS if d.get("starter")]   # none while the cards change (Martin, 2026-10-29: back once they settle)
 DECK_SLUGS = {d["slug"] for d in DECKLISTS}               # every shipped deck: the sims' field and the gauntlet's
 
 # Copy limits per rarity for the locked 4-4-6 decklist shape (legendary 1 / rare 2 / common 3).
-COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}
+COPY_LIMITS = {"common": 2 if ENERGY else 3, "rare": 2, "legendary": 1}   # the energy prototype: 2 copies, 1 of a legendary
 
 
 class CardDataError(ValueError):

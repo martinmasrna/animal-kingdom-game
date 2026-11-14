@@ -36,6 +36,9 @@ PREMADE_DECKS: dict[str, list[str]] = {d["slug"]: _expand(d) for d in DECKLISTS}
 # the bots play them. Loadable like a shipped deck; `LADDER_DECK_NAMES` carries their builders' names.
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "ladder_decks.json"), encoding="utf-8") as _fh:
     LADDER_DECKS: list[dict] = json.load(_fh)["decks"]
+from .engine.resources import ENERGY
+if ENERGY:              # the energy prototype: the ladder's decks hold cards it benched and three copies of commons
+    LADDER_DECKS = []
 LADDER_DECK_NAMES: dict[str, str] = {d["slug"]: d["name"] for d in LADDER_DECKS}
 PREMADE_DECKS.update({d["slug"]: list(d["list"]) for d in LADDER_DECKS})
 
@@ -44,7 +47,7 @@ PREMADE_DECKS.update({d["slug"]: list(d["list"]) for d in LADDER_DECKS})
 # low on the ladder, which is the ladder's own information). Ranked matchmaking, the ladder seed, Practice's 'Random'
 # and the bot benchmark panel draw from these.
 BOT_DECKS: tuple[str, ...] = tuple(d["slug"] for d in DECKLISTS) + tuple(d["slug"] for d in LADDER_DECKS)
-PANEL_OPPONENTS: tuple[str, ...] = ("cats", "den_rush", "fish")   # the benchmark's standing opponents, from the pool
+PANEL_OPPONENTS: tuple[str, ...] = BOT_DECKS[:3] if ENERGY else ("cats", "den_rush", "fish")   # the benchmark's standing opponents, from the pool
 assert all(d in BOT_DECKS for d in PANEL_OPPONENTS), PANEL_OPPONENTS
 
 
@@ -78,7 +81,7 @@ def register_deck(slug: str, decklist: Sequence[str]) -> None:
 
 
 DECK_SIZE = 30
-RARITY_CAPS = {"rare": 8, "legendary": 4}   # rules §13: at most 8 rares and 4 legendaries in a deck
+RARITY_CAPS = {} if ENERGY else {"rare": 8, "legendary": 4}   # rules §13: at most 8 rares and 4 legendaries in a deck (the energy prototype: no caps)
 
 
 def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
