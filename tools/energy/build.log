@@ -1,0 +1,29 @@
+strengths that differ from Martin's boards: none
+thresholds (old, new, share before, share now): {'albatross_max': (3, 2, 0.48, 0.41), 'elephant_legend_max': (3, 2, 0.48, 0.41), 'jaguar_max': (4, 4, 0.65, 0.68), 'honey_badger_min': (6, 6, 0.19, 0.22), 'stoop_max': (4, 4, 0.65, 0.68), 'rhinoceros_max': (3, 2, 0.48, 0.41), 'hippopotamus_max': (4, 4, 0.65, 0.68), 'cuckoo_legend_max': (4, 4, 0.65, 0.68), 'tiger_legend_max': (7, 7, 0.93, 0.93), 'black_mamba_max': (6, 6, 0.89, 0.87), 'oxpecker_legend_min': (8, 8, 0.07, 0.07)}
+206 cards costed; 2 benched; 6 decks
+cost spread: {1: 62, 2: 57, 3: 46, 4: 24, 5: 12}
+strength spread: {0: 4, 1: 40, 2: 38, 3: 33, 4: 20, 5: 21, 6: 18, 7: 11, 8: 8, 9: 2, 10: 5}
+costs that differ from Martin's price piles (11 of 65): [('bat_legend', 3, 4), ('beaver', 3, 2), ('hummingbird', 3, 1), ('lion_legend_3', 4, 5), ('mole', 4, 1), ('ocelot', 4, 1), ('owl', 3, 2), ('raven', 3, 2), ('sardine', 3, 1), ('street_dog', 3, 2), ('wolf_legend_3', 5, 4)]
+texts changed: 22
+  albatross: 'Flight. Roar: remove all adjacent enemies of strength 3 or less.' -> 'Flight. Roar: remove all adjacent enemies of strength 2 or less.'
+  beaver: 'Roar: next turn, take 1 additional action.' -> 'Roar: next turn, you have 2 more energy.'
+  blue_whale: 'Titan.' -> ''
+  crocodile: "Apex Predator. Has -3 strength during your opponent's turn." -> 'Apex Predator. Armor.'
+  cuckoo_legend: 'Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.' -> 'Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal that costs 2 or less.'
+  electric_eel: 'Roar: your opponent takes only 1 action next turn.' -> 'Roar: your opponent has only 3 energy next turn.'
+  elephant: 'Hungry 5.' -> ''
+  elephant_legend: 'Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less.' -> 'Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 2 or less.'
+  giraffe: "Hungry 2. Has +3 strength during your opponent's turn." -> 'Reach.'
+  gorilla: 'Roar: if this has 8 or more strength, draw a card.' -> 'Roar: if this has 9 or more strength, draw a card.'
+  grizzly_bear: 'Roar: your opponent draws a card.' -> ''
+  hummingbird: 'Flight. Roar: draw 2 cards.' -> 'Flight. Roar: gain 2 energy.'
+  mole: 'Roar: play another animal next to this.' -> 'Roar: play another animal that costs 2 or less next to this.'
+  mole_legend: 'Roar: draw a card, play another animal, then discard a card.' -> 'Roar: draw a card, then play another animal.'
+  mouse: 'Roar: draw a Rodent.' -> 'Roar: draw 2 cards.'
+  ocelot: 'Roar: if you control another Cat, play another Cat.' -> 'Roar: if you control another Cat, play another Cat that costs 2 or less.'
+  remora: 'Roar: if this is next to an allied Fish, play another Fish.' -> 'Roar: if this is next to an allied Fish, play another Fish that costs 2 or less.'
+  rhinoceros: 'Hungry 3. Roar: remove all adjacent enemies of strength 3 or less.' -> 'Hungry 3. Roar: remove all adjacent enemies of strength 2 or less.'
+  sperm_whale: 'Titan. Roar: remove all adjacent animals.' -> 'Hungry 4. Roar: remove all adjacent animals.'
+  sperm_whale_legend: 'Titan. Dusk: remove the strongest adjacent enemy.' -> 'Dusk: remove the strongest adjacent enemy.'
+  termite_queen: 'Roar: play a non-Queen Colony animal.' -> 'Roar: play a non-Queen Colony animal that costs 2 or less.'
+  whale_shark: 'Titan. Hungry 4. Dusk: draw a card.' -> 'Hungry 4. Dusk: draw a card.'

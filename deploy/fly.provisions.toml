@@ -1,7 +1,9 @@
-# The provisions test (branch provisions): deck budgets and card prices in place of the rarity caps, on its own app beside
-# staging. Sleeps when idle. Deploy: deploy/deploy.sh provisions
+# The energy prototype (branch energy, ENERGY_PLAN.md) on the test app beside staging; AK_ENERGY switches its rules on. Sleeps when idle. Deploy: deploy/deploy.sh provisions
 app = "animal-kingdom-provisions"
 primary_region = "fra"
+
+[env]
+  AK_ENERGY = "1"
 
 [build]
   dockerfile = "Dockerfile"

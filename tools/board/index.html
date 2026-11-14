@@ -80,6 +80,13 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
   <button id="newpile">New pile</button>
   <input id="q" type="search" placeholder="Find a card" aria-label="Find a card">
   <button id="fit">Fit</button>
+  <span id="energybar" style="display:none;align-items:center;gap:8px">
+    <label>Energy a turn <input id="r_actions_per_turn" type="number" min="1" max="12" style="width:52px"></label>
+    <label>First turn <input id="r_first_turn_actions" type="number" min="1" max="12" style="width:52px"></label>
+    <label>A draw costs <input id="r_draw_cost" type="number" min="1" max="6" style="width:52px"></label>
+    <a id="localgame" href="http://localhost:8010/" target="_blank" style="font-weight:600">Play locally</a>
+    <button id="sendonline" title="Deploys the costs as they stand to the online test app (about four minutes)">Send online</button>
+  </span>
   <span class="sp"></span>
   <span class="msg" id="msg"></span>
 </div>
@@ -105,7 +112,10 @@ const view = $('#view'), world = $('#world');
 let CARDS = {}, B = { rev: 0, cards: {}, piles: [], strs: {} };
 // A board may try other strengths: B.strs holds this board's own number for a card (the +/- on a card), drawn in place of
 // the card's; the card data is never touched.
-const shown = c => B.strs && B.strs[c.id] !== undefined ? { ...c, str: B.strs[c.id] } : c;
+// An energy board (the energy prototype): a card's cost is the "Cost N" pile it lies in, shown on its gem.
+const costOf = id => { if (!B.energy) return undefined; const p = B.piles.find(p => /^cost\d+$/.test(p.id) && p.cards.includes(id)); return p ? Number(p.id.slice(4)) : undefined; };
+const shown = c => { const s = B.strs && B.strs[c.id], k = costOf(c.id);
+  return s === undefined && k === undefined ? c : { ...c, ...(s !== undefined ? { str: s } : {}), ...(k !== undefined ? { price: k } : {}) }; };
 // The board on the page: Main, or another from the list; the address keeps it (#b=<id>), so a reload stays on it.
 let BID = new URLSearchParams(location.hash.slice(1)).get('b') || 'main';
 const api = () => '/api/state?b=' + encodeURIComponent(BID);
@@ -201,6 +211,7 @@ function draw() {
 let saveT = null, saving = Promise.resolve();
 function changed(before) {
   undo.push(before); if (undo.length > 200) undo.shift(); redo = [];
+  if (B.energy) buildCards();   // a card moved between cost piles shows its new cost
   draw(); queueSave();
 }
 function queueSave() { clearTimeout(saveT); saveT = setTimeout(() => saving = saving.then(save), 300); }
@@ -211,8 +222,8 @@ async function save() {
   if (!r.ok) return msg('Not saved: ' + await r.text());
   B.rev = (await r.json()).rev; msg('');
 }
-const snap = () => JSON.stringify({ cards: B.cards, piles: B.piles, gone: B.gone, marks: B.marks, strs: B.strs });
-function restore(s) { const o = JSON.parse(s); B.cards = o.cards; B.piles = o.piles; B.gone = o.gone || []; B.marks = o.marks || {}; B.strs = o.strs || {}; buildCards(); sel.clear(); psel.clear(); draw(); queueSave(); }
+const snap = () => JSON.stringify({ cards: B.cards, piles: B.piles, gone: B.gone, marks: B.marks, strs: B.strs, rules: B.rules });
+function restore(s) { const o = JSON.parse(s); B.cards = o.cards; B.piles = o.piles; B.gone = o.gone || []; B.marks = o.marks || {}; B.strs = o.strs || {}; if (o.rules) B.rules = o.rules; buildCards(); showEnergyBar(); sel.clear(); psel.clear(); draw(); queueSave(); }
 function msg(t) { $('#msg').textContent = t; }
 
 // `cardsOnly`: card edits made elsewhere come in, the arrangement on the page stays as it is
@@ -225,7 +236,7 @@ async function load(cardsOnly = false) {
   if (!cardsOnly) { B = d.board; B.cards ||= {}; B.piles ||= []; B.gone ||= []; B.marks ||= {}; B.strs ||= {}; }
   buildCards();
   if (placeNew()) queueSave();
-  draw();
+  draw(); showEnergyBar();
 }
 
 // ---------- camera ----------
@@ -511,6 +522,16 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
 $('#fit').onclick = fit;
+// The energy board's rule numbers and its two ways to play what the board says.
+const RULE_KEYS = ['actions_per_turn', 'first_turn_actions', 'draw_cost'];
+function showEnergyBar() {
+  $('#energybar').style.display = B.energy ? 'inline-flex' : 'none';
+  if (!B.energy) return;
+  B.rules ||= {};
+  for (const k of RULE_KEYS) { const el = $('#r_' + k); el.value = B.rules[k] ?? ''; el.onchange = () => { const before = snap(); if (el.value === '') delete B.rules[k]; else B.rules[k] = Number(el.value); changed(before); }; }
+}
+$('#sendonline').onclick = async () => { await saving; const r = await fetch('/api/send-online', { method: 'POST' }).catch(() => null);
+  msg(r && r.ok ? 'Sending to the online test app: live in about four minutes.' : 'Could not start the deploy.'); };
 world.addEventListener('click', e => {
   const b = e.target.closest('[data-adj]'); if (!b) return;
   const id = b.closest('.it').dataset.id, c = CARDS[id], before = snap();

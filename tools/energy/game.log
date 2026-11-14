@@ -1,0 +1,6 @@
+2026-11-14 02:34:59,369 ladder: bots seeded from ladder_seed.json
+2026-11-14 02:35:00,102 127.0.0.1 [14/Nov/2026:02:35:00 +0100] "GET /api/pool HTTP/1.1" 200 74194 "-" "curl/8.7.1"
+Animal Kingdom at http://localhost:8010/
+2026-11-14 02:35:16,878 127.0.0.1 [14/Nov/2026:02:35:16 +0100] "GET /api/pool HTTP/1.1" 200 74213 "-" "Python-urllib/3.14"
+Animal Kingdom at http://localhost:8010/
+2026-11-14 02:35:25,893 127.0.0.1 [14/Nov/2026:02:35:25 +0100] "GET /api/pool HTTP/1.1" 200 74213 "-" "Python-urllib/3.14"
