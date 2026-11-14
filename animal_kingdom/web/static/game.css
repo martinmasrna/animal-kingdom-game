@@ -182,12 +182,12 @@
 /* Slow motion, with restraint, the way the real things move: two layers of mist drifting left to right at different
    speeds, the vapour rising through the swirl's own shape and faintly breathing. Each texture wraps seamlessly (kwl_*_flow). */
 .game.kit .unit .kwl.venom.fumes { overflow: hidden; animation: kwbreathe 8s ease-in-out infinite alternate; }
-.game.kit .unit .kwl.venom.fumes .base { position: absolute; inset: 0; width: 100%; height: 100%; }   /* the approved swirl, still */
-.game.kit .unit .kwl.venom.fumes .vmask { position: absolute; inset: 0; opacity: .55; -webkit-mask: url(/static/kit2/kwl_vapour_mask.webp) center / 100% 100%; mask: url(/static/kit2/kwl_vapour_mask.webp) center / 100% 100%; }   /* fixed: the vapour rises through the swirl's shape */
+.game.kit .unit .kwl.venom.fumes .base { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .45; }   /* the approved swirl, still */
+.game.kit .unit .kwl.venom.fumes .vmask { position: absolute; inset: 0; opacity: 1; -webkit-mask: url(/static/kit2/kwl_vapour_mask.webp) center / 100% 100%; mask: url(/static/kit2/kwl_vapour_mask.webp) center / 100% 100%; }   /* fixed: the vapour rises through the swirl's shape */
 .game.kit .unit .kwl .flow { position: absolute; left: 0; top: 0; will-change: transform; }
 .game.kit .unit .kwl.mist .flow { width: 200%; height: 100%; background: url(/static/kit2/kwl_mist_flow.webp) 0 0 / 50% 100% repeat-x; animation: kwdrift 45s linear infinite; }
-.game.kit .unit .kwl.mist .m1 { opacity: .8; }
-.game.kit .unit .kwl.mist .m2 { opacity: .35; background-image: url(/static/kit2/kwl_mist_flow2.webp); animation-duration: 70s; }
+.game.kit .unit .kwl.mist .m1 { opacity: .95; animation-duration: 25s; }   /* the wisps, in front: what the eye follows */
+.game.kit .unit .kwl.mist .m2 { opacity: .85; background-image: url(/static/kit2/kwl_mist_flow2.webp); animation-duration: 70s; }   /* the veil, behind */
 .game.kit .unit .kwl.venom .flow { width: 100%; height: 200%; background: url(/static/kit2/kwl_vapour_flow.webp) 0 0 / 100% 50% repeat-y; animation: kwrise 14s linear infinite; }
 @keyframes kwdrift { from { transform: translateX(-50%); } to { transform: translateX(0); } }
 @keyframes kwrise { from { transform: translateY(0); } to { transform: translateY(-50%); } }

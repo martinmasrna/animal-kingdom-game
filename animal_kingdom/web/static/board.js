@@ -102,7 +102,7 @@ function unit(u, under, cards, fire = false) {
     : `<div class="kwl venom fumes${hx}">${img('kwl_vapour_fumes.webp', 'base')}<div class="vmask"><div class="flow v1" style="${ph(2, 14)}"></div></div></div>`;
   return peek + (has('Spikes') ? `<img class="kwl thorns" src="${kit(has('Armor') ? 'kwl_thorns_hex.webp' : 'kwl_thorns.webp')}" alt="" draggable="false">` : '') +
     `<div class="ring${has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
-    venom('tint') + (has('Stealth') ? `<div class="kwl mist${hx}"><div class="flow m1" style="${ph(0, 45)}"></div><div class="flow m2" style="${ph(1, 70)}"></div></div>` : '') + venom('fumes') +
+    venom('tint') + (has('Stealth') ? `<div class="kwl mist${hx}"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
     `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
     `<div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
     (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +
