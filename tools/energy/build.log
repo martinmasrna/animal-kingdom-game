@@ -1,9 +1,9 @@
-strengths that differ from Martin's boards: none
+strengths that differ from Martin's boards: [('sperm_whale', 10, 9), ('whale_shark', 10, 9)]
 thresholds (old, new, share before, share now): {'albatross_max': (3, 2, 0.48, 0.41), 'elephant_legend_max': (3, 2, 0.48, 0.41), 'jaguar_max': (4, 4, 0.65, 0.68), 'honey_badger_min': (6, 6, 0.19, 0.22), 'stoop_max': (4, 4, 0.65, 0.68), 'rhinoceros_max': (3, 2, 0.48, 0.41), 'hippopotamus_max': (4, 4, 0.65, 0.68), 'cuckoo_legend_max': (4, 4, 0.65, 0.68), 'tiger_legend_max': (7, 7, 0.93, 0.93), 'black_mamba_max': (6, 6, 0.89, 0.87), 'oxpecker_legend_min': (8, 8, 0.07, 0.07)}
-206 cards costed; 2 benched; 6 decks
-cost spread: {1: 62, 2: 57, 3: 46, 4: 24, 5: 12}
-strength spread: {0: 4, 1: 40, 2: 38, 3: 33, 4: 20, 5: 21, 6: 18, 7: 11, 8: 8, 9: 2, 10: 5}
-costs that differ from Martin's price piles (11 of 65): [('bat_legend', 3, 4), ('beaver', 3, 2), ('hummingbird', 3, 1), ('lion_legend_3', 4, 5), ('mole', 4, 1), ('ocelot', 4, 1), ('owl', 3, 2), ('raven', 3, 2), ('sardine', 3, 1), ('street_dog', 3, 2), ('wolf_legend_3', 5, 4)]
+204 cards costed; 2 benched; 7 decks
+cost spread: {1: 35, 2: 44, 3: 54, 4: 43, 5: 25}
+strength spread: {0: 4, 1: 40, 2: 38, 3: 33, 4: 20, 5: 21, 6: 18, 7: 11, 8: 8, 9: 4, 10: 3}
+costs that differ from Martin's price piles (33 of 65): [('anaconda', 2, 3), ('bat', 1, 2), ('bat_legend', 3, 5), ('beaver', 3, 2), ('black_mamba', 3, 4), ('black_panther', 2, 3), ('boar', 3, 4), ('bobcat', 2, 3), ('capybara', 2, 3), ('cheetah', 1, 2), ('dolphin', 2, 3), ('eagle', 3, 4), ('great_white_shark', 3, 4), ('hawk', 3, 4), ('honey_badger', 3, 4), ('hornet', 2, 3), ('hummingbird', 3, 1), ('jaguar', 3, 4), ('jellyfish', 2, 3), ('leopard', 3, 4), ('lion', 2, 3), ('lion_legend_3', 4, 5), ('lynx', 3, 4), ('mole', 4, 2), ('ocelot', 4, 1), ('pheasant_legend', 3, 4), ('porcupine', 2, 3), ('queen_ant', 3, 4), ('sardine', 3, 1), ('sloth', 2, 3), ('tiger', 2, 3), ('wolf', 1, 2), ('wolf_legend_3', 5, 4)]
 texts changed: 22
   albatross: 'Flight. Roar: remove all adjacent enemies of strength 3 or less.' -> 'Flight. Roar: remove all adjacent enemies of strength 2 or less.'
   beaver: 'Roar: next turn, take 1 additional action.' -> 'Roar: next turn, you have 2 more energy.'
@@ -11,9 +11,9 @@ texts changed: 22
   crocodile: "Apex Predator. Has -3 strength during your opponent's turn." -> 'Apex Predator. Armor.'
   cuckoo_legend: 'Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.' -> 'Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal that costs 2 or less.'
   electric_eel: 'Roar: your opponent takes only 1 action next turn.' -> 'Roar: your opponent has only 3 energy next turn.'
-  elephant: 'Hungry 5.' -> ''
+  elephant: 'Hungry 5.' -> 'Hungry 3.'
   elephant_legend: 'Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less.' -> 'Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 2 or less.'
-  giraffe: "Hungry 2. Has +3 strength during your opponent's turn." -> 'Reach.'
+  giraffe: "Hungry 2. Has +3 strength during your opponent's turn." -> 'Hungry 2. Reach.'
   gorilla: 'Roar: if this has 8 or more strength, draw a card.' -> 'Roar: if this has 9 or more strength, draw a card.'
   grizzly_bear: 'Roar: your opponent draws a card.' -> ''
   hummingbird: 'Flight. Roar: draw 2 cards.' -> 'Flight. Roar: gain 2 energy.'

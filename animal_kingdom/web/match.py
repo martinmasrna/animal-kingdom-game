@@ -698,6 +698,10 @@ class Match:
             "first": st.first_player,
             "actionsLeft": rules.turn_actions(st) - st.actions_taken_this_turn,
             "actionsTotal": rules.turn_actions(st),
+            # the energy prototype: the animals the turn may still place from the hand (None: no limit)
+            "placesLeft": (max(0, st.config.max_places_per_turn - st.turn_flags.get(f"places_{st.current}", 0))
+                           if st.config.energy_mode and st.config.max_places_per_turn else None),
+            "placesTotal": st.config.max_places_per_turn if st.config.energy_mode else None,
             "canPass": rules.can_pass(st),
             "clock": {"on": False} if not self.clock else (self._mulligan_clock(s) if self.mulliganing() and self.clock.get("mull_until") else
                                      {**{k: self.clock[k] for k in ("bank", "holder", "free", "since")}, "now": time.time(),

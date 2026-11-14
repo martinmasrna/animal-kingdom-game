@@ -506,3 +506,5 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .card.priced .nbar { right: 3.1em; }
 /* energy on the turn button and the deck: the same gem, small */
 .egem { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe9a8, #e2a93a 62%, #a8741c); box-shadow: 0 0 0 .08em #4a3210; color: #2a1a06; font-weight: 800; font-size: .8em; margin-left: .3em; vertical-align: middle; }
+.egem.turn { width: 1.7em; height: 1.7em; font-size: 15px; margin: 0 4px 0 0; }
+.game .pips { align-items: center; }

@@ -1,14 +1,1 @@
 Costs board: http://localhost:8006/#b=costs   game: http://localhost:8010/
-02:35:09 rebuilt, game restarted
-02:35:18 rebuilt, game restarted
-Traceback (most recent call last):
-  File "/Users/martin/Work/fun/animal-kingdom/provisions-worktree/game/tools/energy/lab.py", line 62, in <module>
-    main()
-    ~~~~^^
-  File "/Users/martin/Work/fun/animal-kingdom/provisions-worktree/game/tools/energy/lab.py", line 43, in main
-    seen = EDITS.stat().st_mtime
-           ~~~~~~~~~~^^
-  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 654, in stat
-    return os.stat(self, follow_symlinks=follow_symlinks)
-           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: '/Users/martin/Work/fun/animal-kingdom/provisions-worktree/game/tools/energy/edits.json'

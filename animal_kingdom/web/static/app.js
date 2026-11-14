@@ -1362,8 +1362,10 @@ function drawGame() {
   $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = !canDraw ? '' : ENERGY ? `Draw<span class="egem">${ENERGY.draw}</span>` : 'Draw 2';
   const tb = $('tbtn');
   // the moves left in the turn, for either player; the next one to be spent pulses while the opponent is thinking
-  const pips = playing ? Array.from({ length: G.actionsTotal }, (_, i) => { const used = G.actionsTotal - G.actionsLeft;
-    return `<i class="${i < used ? 'used' : i === used ? 'next' : ''}"></i>`; }).join('') : '';
+  // the energy prototype: the energy left as a number on its gem, then a pip for each animal the turn may still place
+  const pips = !playing ? '' : ENERGY ? `<span class="egem turn" data-tip="Energy left this turn">${G.actionsLeft}</span>` + (G.placesTotal ? Array.from({ length: G.placesTotal }, (_, i) => `<i class="${i < G.placesTotal - G.placesLeft ? 'used' : ''}" data-tip="Animals you can still place this turn"></i>`).join('') : '')
+    : Array.from({ length: G.actionsTotal }, (_, i) => { const used = G.actionsTotal - G.actionsLeft;
+    return `<i class="${i < used ? 'used' : i === used ? 'next' : ''}"></i>`; }).join('');
   if (playing && G.current === you) {
     tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : '') + (Date.now() < (turnCue.until || 0) ? ' yours' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`; delete tb.dataset.tip;
   } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = `<span class="pips">${pips}<span class="clock" id="clock"></span></span>`; tb.dataset.tip = 'Your opponent\'s turn'; }

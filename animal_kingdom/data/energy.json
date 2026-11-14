@@ -162,7 +162,7 @@
    "strength": 2
   },
   "honey_badger_legend": {
-   "cost": 5,
+   "cost": 4,
    "strength": 5
   },
   "armadillo": {
@@ -186,7 +186,7 @@
    "strength": 4
   },
   "orca": {
-   "cost": 5,
+   "cost": 4,
    "strength": 7
   },
   "tortoise": {
@@ -379,7 +379,7 @@
    "strength": 3
   },
   "wolf_legend_3": {
-   "cost": 5,
+   "cost": 4,
    "strength": 4
   },
   "fox": {
@@ -407,7 +407,7 @@
    "strength": 5
   },
   "wolf_legend_2": {
-   "cost": 5,
+   "cost": 4,
    "strength": 6
   },
   "wolf": {
@@ -715,7 +715,7 @@
    "strength": 7
   },
   "moose": {
-   "cost": 4,
+   "cost": 3,
    "strength": 8
   },
   "macaque_legend": {
@@ -768,7 +768,7 @@
    "strength": 1
   },
   "rat_legend_2": {
-   "cost": 4,
+   "cost": 3,
    "strength": 1
   },
   "rat": {
@@ -849,7 +849,7 @@
    "cost": 1
   },
   "anaconda_legend": {
-   "cost": 5,
+   "cost": 4,
    "strength": 10
   },
   "viper": {
