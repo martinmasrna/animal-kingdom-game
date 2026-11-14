@@ -65,11 +65,15 @@ const reducedMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(pr
 
 const put = (cls, x, y, html = '', attrs = '', style = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px;${style}" ${attrs}>${html}</div>`;
 
-// A round crop of the card art, D stage pixels across.
-export function portrait(id, D) {
+// A round crop of the card art, D stage pixels across, in a box `box` pixels across (a larger box shows more of the
+// painting around the same crop, at the same zoom: the hexagonal portrait of an animal with Armor).
+// It never runs past the painting's edge: the crop slides inward first, and zooms in only when the painting is narrower
+// than the box (many crops already span its full width). The box's visible height is a flat-topped hexagon's (0.866).
+export function portrait(id, D, box = D) {
   if (!hasArt(id)) return '';
-  const [x, y, d] = CROP[id], w = D / d, h = w * 1.5;
-  return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${D / 2 - x * w}px ${D / 2 - y * h}px`;
+  const [x, y, d] = CROP[id], w = Math.max(D / d, box), h = w * 1.5, hy = box * 0.433, fit = box !== D;   // round crops stay exactly as set
+  const cx = fit ? Math.min(Math.max(x * w, box / 2), w - box / 2) : x * w, cy = fit ? Math.min(Math.max(y * h, hy), h - hy) : y * h;
+  return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${box / 2 - cx}px ${box / 2 - cy}px`;
 }
 
 // A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer, and its board keywords painted on.
@@ -89,7 +93,7 @@ function unit(u, under, cards, fire = false) {
   // portrait in mist, Poison runs green down the rim's lower half. The card on hover says what each one does.
   const has = k => kws.includes(k);
   return peek + (has('Spikes') ? `<img class="kwl thorns" src="${kit(has('Armor') ? 'kwl_thorns_hex.webp' : 'kwl_thorns.webp')}" alt="" draggable="false">` : '') +
-    `<div class="ring${has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
+    `<div class="ring${has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     (has('Stealth') ? `<img class="kwl mist${has('Armor') ? ' hexp' : ''}" src="${kit('kwl_mist.webp')}" alt="" draggable="false">` : '') +
     `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
     (has('Poison') ? `<img class="kwl drips${has('Armor') ? ' hexd' : ''}" src="${kit(has('Armor') ? 'kwl_dripsb.webp' : 'kwl_drips.webp')}" alt="" draggable="false">` : '') +
