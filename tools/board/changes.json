@@ -1,7 +1,13 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 6,
+ "rev": 7,
  "changed": {
+  "bee_legend_2": {
+   "text": {
+    "was": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
+    "now": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +1 strength (wherever they are)."
+   }
+  },
   "mouse": {
    "strength": {
     "was": 4,

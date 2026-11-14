@@ -1,5 +1,5 @@
 {
- "rev": 14,
+ "rev": 15,
  "name": "provisions",
  "cards": {},
  "piles": [
@@ -187,7 +187,6 @@
    "stacked": false,
    "cards": [
     "butterfly_legend",
-    "bee_legend_2",
     "cockroach_legend",
     "sardine_legend",
     "bat_legend",
@@ -326,7 +325,9 @@
    "y": 6,
    "cols": 4,
    "stacked": false,
-   "cards": []
+   "cards": [
+    "bee_legend_2"
+   ]
   }
  ],
  "gone": [
