@@ -17,7 +17,7 @@ sets fine or locked. Martin's edits have no limits.
 
 As a command, for Claude:
     .venv/bin/python tools/cards/hq.py show [ID...]                  the rows, as JSON
-    .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary)
+    .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary; stars: -1 to 3)
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
     .venv/bin/python tools/cards/hq.py move ID DECK                  into a starter deck (its slug), or `pool` for none
     .venv/bin/python tools/cards/hq.py shelve ID                     a card in no starter out of the collection (into the reserve)
@@ -50,7 +50,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from animal_kingdom.engine.cards import PLANNED, CardDataError, validate_card_record  # noqa: E402
+from animal_kingdom.engine.cards import PLANNED, STAR_DEFAULTS, STAR_LEVELS, CardDataError, validate_card_record  # noqa: E402
 
 CARDS = ROOT / "animal_kingdom" / "data" / "cards.json"
 DECKLISTS = ROOT / "animal_kingdom" / "data" / "decklists.json"
@@ -58,8 +58,8 @@ ART_JS = ROOT / "animal_kingdom" / "web" / "static" / "art.js"
 LEVELS = Path(__file__).parent / "levels.json"
 PY = Path(sys.executable)   # the venv this runs in (bin/ on Unix, Scripts/ on Windows)
 
-COLUMNS = ["habitat", "rarity", "animal", "tag", "strength", "effect", "art", "crop"]
-VALUE_COLS = ["habitat", "rarity", "animal", "tag", "strength", "effect"]
+COLUMNS = ["habitat", "rarity", "animal", "tag", "strength", "stars", "effect", "art", "crop"]
+VALUE_COLS = ["habitat", "rarity", "animal", "tag", "strength", "stars", "effect"]
 LEVELS_ORDER = ["empty", "draft", "problem", "fine", "locked"]
 HABITATS = ["Savanna", "Jungle", "Forest", "Meadow", "City", "Open Ocean",          # the launch six; the rest: docs/design/habitats.md
             "Deep Ocean", "Coral Reef", "Coast", "River and Lake", "Australia", "Islands", "Mountains", "Polar", "Desert",
@@ -171,6 +171,8 @@ def load() -> dict:
             "editable": not token, "habitat": c.get("habitat", ""), "rarity": LETTER.get(c["rarity"], ""),
             "name": "" if c.get("unnamed") else c["name"], "species": c.get("species", ""),
             "tag": ", ".join(c.get("tags", [])), "str": "*" if c["base_strength"] == "dynamic" else c["base_strength"],
+            # its level (the stars prototype): set, or its rarity's
+            "stars": c["stars"] if c.get("stars") is not None else STAR_DEFAULTS.get(c["rarity"]),
             "text": c.get("text", ""), "related": c.get("related", []), "evolves": bool(c.get("evolves")),
             "art": c["id"] in art["CROP"],
         })
@@ -191,7 +193,7 @@ def load() -> dict:
 
 def value_of(r: dict, col: str):
     return {"habitat": r["habitat"], "rarity": r["rarity"], "animal": {"name": r["name"], "species": r["species"]},
-            "tag": r["tag"], "strength": r["str"], "effect": r["text"], "art": r["art"], "crop": r["art"]}[col]
+            "tag": r["tag"], "strength": r["str"], "stars": r["stars"], "effect": r["text"], "art": r["art"], "crop": r["art"]}[col]
 
 
 def _blank(r: dict, col: str) -> bool:
@@ -300,6 +302,14 @@ def _apply_value(r: dict, col: str, value) -> None:
         if c["base_strength"] == "dynamic":
             raise Refused(f"{c['id']}'s strength is worked out by the engine ({c.get('dynamic_strength')})")
         c["base_strength"] = None if value in ("", None) else int(value)
+    elif col == "stars":
+        # stored only where it differs from the rarity's level, so a card left at its default follows a rarity change
+        if value not in STAR_LEVELS:
+            raise Refused(f"{c['id']}: stars must be one of {list(STAR_LEVELS)}, got {value!r}")
+        if c.get("rarity") and value == STAR_DEFAULTS[c["rarity"]]:
+            c.pop("stars", None)
+        else:
+            c["stars"] = value
     elif col == "effect":
         c["text"] = value.strip()
         for k in ("keywords", "hungry", "food_cost"):
@@ -319,8 +329,11 @@ def set_value(card_id: str, col: str, value, by: str = "martin", note: str | Non
         raise Refused(f"{r['id']} {col} isn't editable here")
     cur = _guard(r, col, by)
     prev = value_of(r, col)
-    if col == "strength" and value not in ("", None):
-        value = int(value)
+    if col in ("strength", "stars") and value not in ("", None):
+        try:
+            value = int(value)
+        except ValueError:
+            raise Refused(f"{r['id']} {col}: {value!r} is not a whole number") from None
     if value == prev:
         return ""
     _apply_value(r, col, value)

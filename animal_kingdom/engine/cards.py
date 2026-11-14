@@ -54,6 +54,12 @@ DECK_SLUGS = {d["slug"] for d in DECKLISTS}               # every shipped deck: 
 # Copy limits per rarity for the locked 4-4-6 decklist shape (legendary 1 / rare 2 / common 3).
 COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}
 
+# The stars prototype (branch `stars`, 2026-11-14; not settled design): every card has a level, -1 small, 0 ordinary (the
+# plain Lion's; most cards; unmarked), 1 strong, 2 legendary, 3 monster, and a deck holds at most decks.STAR_BUDGET of
+# them, counted per copy (a -1 card gives one back). A card's `stars` in cards.json sets it; without one, its rarity's.
+STAR_LEVELS = (-1, 0, 1, 2, 3)
+STAR_DEFAULTS = {"common": 0, "rare": 1, "legendary": 2}
+
 
 class CardDataError(ValueError):
     """Raised when card data fails validation."""
@@ -79,6 +85,7 @@ class Card:
     habitat: str = ""              # the habitat (set) the card belongs to; display only, no rule reads it
     related: tuple[str, ...] = ()  # the cards it makes, shown beside it when read large; display only
     evolves: bool = False          # its related cards are what it becomes, in order (display only)
+    stars: int = 0                 # its level (STAR_LEVELS): what one copy costs of a deck's star budget
 
     @property
     def is_dynamic(self) -> bool:
@@ -154,6 +161,10 @@ def validate_card_record(rec: dict) -> None:
     if ("Hungry" in rec.get("keywords", [])) != (hungry is not None):
         raise CardDataError(f"card {cid!r}: the Hungry keyword and its `hungry` number go together")
 
+    stars = rec.get("stars")
+    if stars is not None and (isinstance(stars, bool) or stars not in STAR_LEVELS):
+        raise CardDataError(f"card {cid!r}: stars must be one of {list(STAR_LEVELS)}, got {stars!r}")
+
     if "reach" in rec:
         raise CardDataError(f"card {cid!r}: Reach has no number (every Reach lands two crossroads out, config.reach)")
 
@@ -176,6 +187,7 @@ def _build_card(rec: dict) -> Card:
         habitat=rec.get("habitat", ""),
         related=tuple(rec.get("related", ())),
         evolves=bool(rec.get("evolves", False)),
+        stars=rec["stars"] if rec.get("stars") is not None else STAR_DEFAULTS.get(rec["rarity"], 0),
     )
 
 

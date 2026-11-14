@@ -24,7 +24,7 @@ from pathlib import Path
 
 from aiohttp import WSMsgType, web
 
-from ..decks import BOT_DECKS, PREMADE_DECKS, TEST_BOT_DECKS, load_premade_deck
+from ..decks import BOT_DECKS, DECK_SIZE, PREMADE_DECKS, STAR_BUDGET, TEST_BOT_DECKS, load_premade_deck
 from ..engine import rules
 from ..engine.state import EngineError
 from ..engine.cards import COPY_LIMITS, DECK_SLUGS, STARTER_DECKS, load_cards
@@ -1390,6 +1390,8 @@ async def pool(_req):
         "bot_only": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug), "cover": STARTER_COVERS.get(slug, "")}
                      for slug in (ladder.decks if ladder else BOT_DECKS) if slug not in {d["slug"] for d in STARTER_DECKS}],
         "build": BUILD,
+        # The deck rules the collection builds to (decks.py, engine/cards.py): the client holds none of these numbers itself.
+        "rules": {"deckSize": DECK_SIZE, "copies": COPY_LIMITS, "starBudget": STAR_BUDGET},
     })
 
 

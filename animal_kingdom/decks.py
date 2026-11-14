@@ -78,7 +78,14 @@ def register_deck(slug: str, decklist: Sequence[str]) -> None:
 
 
 DECK_SIZE = 30
-RARITY_CAPS = {"rare": 8, "legendary": 4}   # rules §13: at most 8 rares and 4 legendaries in a deck
+# The stars prototype (engine/cards.py STAR_LEVELS): a deck holds at most this many stars, counted per copy, in place of
+# the old caps of 8 rares and 4 legendaries (every deck legal under those stays legal: 4 x 2 + 8 x 1 = 16).
+STAR_BUDGET = 16
+
+
+def deck_stars(decklist: Sequence[str], cards: dict[str, Card]) -> int:
+    """The stars `decklist` spends: each copy's level, a -1 card giving one back."""
+    return sum(cards[cid].stars for cid in decklist if cid in cards)
 
 
 def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
@@ -91,7 +98,6 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
     counts: dict[str, int] = {}
     for cid in decklist:
         counts[cid] = counts.get(cid, 0) + 1
-    by_rarity: dict[str, int] = {}
     for cid, n in counts.items():
         card = cards.get(cid)
         if card is None or not card.collectible:
@@ -100,10 +106,9 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
         limit = COPY_LIMITS[card.rarity]
         if n > limit:
             problems.append(f"at most {limit} {card.name}")
-        by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + n
-    for rarity, cap in RARITY_CAPS.items():
-        if by_rarity.get(rarity, 0) > cap:
-            problems.append(f"at most {cap} {rarity} cards")
+    stars = deck_stars(decklist, cards)
+    if stars > STAR_BUDGET:
+        problems.append(f"{stars} stars, over the {STAR_BUDGET} a deck may hold")
     return problems
 
 
