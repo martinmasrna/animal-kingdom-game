@@ -1,5 +1,5 @@
 {
- "rev": 110,
+ "rev": 111,
  "name": "provisions",
  "cards": {},
  "piles": [
@@ -288,8 +288,8 @@
   {
    "id": "pmwh0omaa1",
    "name": "Leaders",
-   "x": 5868,
-   "y": 1638,
+   "x": 6335,
+   "y": 1171,
    "cols": 2,
    "stacked": false,
    "cards": [
