@@ -49,6 +49,7 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
 .it .ctext i { min-height: 1em; }
 .it [contenteditable] { user-select: text; -webkit-user-select: text; outline: none; }
 .it .ctext p[contenteditable] { min-height: 1.14em; min-width: 2em; }
+.card .ctext p strong { font-weight: 800; }   /* his own bold (**text**), as heavy as a keyword's */
 .it.editing .card { box-shadow: 0 0 0 3px rgba(47,125,225,.55), .2em .45em .9em rgba(0,0,0,.55); }
 /* what Martin changed: a blue pencil on the corner; what the game has reads under the card while the pointer is on it */
 .it .ed { position: absolute; left: -20px; top: -20px; width: 38px; height: 38px; z-index: 5; pointer-events: none; display: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
@@ -141,6 +142,7 @@ const view = $('#view'), world = $('#world');
 let BASE = {}, D = { rev: 0, edits: {}, new: {} }, CARDS = {}, B = { rev: 0, cards: {}, piles: [] };
 const FIELDS = ['name', 'strength', 'stars', 'text', 'tags'];
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const marks = h => h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');   // his own bold, **words** in the text
 const one = t => String(t ?? '').split(/\s+/).filter(Boolean).join(' ');
 const baseVal = (b, f) => f === 'strength' ? (b.str === '' ? null : b.str) : b[f];
 const same = (f, a, b) => f === 'tags' ? JSON.stringify(a || []) === JSON.stringify(b || []) : f === 'name' || f === 'text' ? one(a) === one(b) : a === b;
@@ -164,7 +166,7 @@ const starsLabel = n => n > 0 ? '★'.repeat(n) : n < 0 ? '−1' : '0';
 const STAR_NAME = { '-1': 'small', 0: 'ordinary', 1: 'strong', 2: 'legendary', 3: 'monster' };
 let GAME_STARS = false;   // the game's card draws the stars itself (then the board's own mark stays off)
 // the card as the game draws it; a copy borrows its original's painting
-const shown = c => ({ ...c, id: c.isNew ? c.copy_of || c.id : c.id, name: esc(c.name), text: B.notext ? '' : esc(c.text), tags: (c.tags || []).map(esc) });
+const shown = c => ({ ...c, id: c.isNew ? c.copy_of || c.id : c.id, name: esc(c.name), text: B.notext ? '' : marks(esc(c.text)), tags: (c.tags || []).map(esc) });
 // The board on the page: Main, or another from the list; the address keeps it (#b=<id>), so a reload stays on it.
 let BID = new URLSearchParams(location.hash.slice(1)).get('b') || 'main';
 const api = () => '/api/state?b=' + encodeURIComponent(BID);
@@ -543,7 +545,7 @@ world.addEventListener('click', e => {
 function search() {
   const q = $('#q').value.trim().toLowerCase(), mine = $('#chgonly').getAttribute('aria-pressed') === 'true';
   for (const c of Object.values(CARDS)) {
-    const hit = (!q || [c.name, c.species, c.habitat, c.text, ...c.tags].some(s => (s || '').toLowerCase().includes(q))) && (!mine || changes(c.id).length);
+    const hit = (!q || [c.name, c.species, c.habitat, (c.text || '').replace(/\*\*/g, ''), ...c.tags].some(s => (s || '').toLowerCase().includes(q))) && (!mine || changes(c.id).length);
     els[c.id]?.classList.toggle('dim', !hit);
   }
 }
@@ -642,7 +644,26 @@ let editing = null;
 // the table never scrolls (it pans): a caret near an edge must not slide the table or the card's own layers
 document.addEventListener('scroll', e => { const t = e.target; if (t !== document && t.closest?.('#view')) { t.scrollTop = 0; t.scrollLeft = 0; } }, true);
 const KW = new RegExp(`\\b(${Object.keys(KEYWORDS).join('|')})\\b( \\d+)?[:.]?`, 'g');
-const bold = t => esc(t).replace(KW, '<b>$&</b>');
+// His own bold is kept in the text as **words** (the game bolds only its keywords by itself); on the card it is <strong>.
+const bold = t => marks(esc(t)).replace(KW, '<b>$&</b>');
+// the text being written, char by char with whether he made it bold, and back into **marks**
+function runs(el) { const out = []; const walk = (n, b) => { for (const k of n.childNodes) { if (k.nodeType === 3) for (const ch of k.data) out.push([ch, b]); else walk(k, b || k.tagName === 'STRONG'); } }; walk(el, false); return out; }
+function marked(rs) { let t = '', on = false; for (const [ch, b] of rs) { if (b !== on) { t += '**'; on = b; } t += ch; } return on ? t + '**' : t; }
+const rawOf = (field, el) => field === 'text' ? marked(runs(el)) : el.textContent;
+function offsets(el) {
+  const s = getSelection(); if (!s.rangeCount) return [0, 0];
+  const r = s.getRangeAt(0), pre = document.createRange(); pre.selectNodeContents(el); pre.setEnd(r.startContainer, r.startOffset);
+  const a = pre.toString().length; return [a, a + r.toString().length];
+}
+function putRange(el, a, b) {
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), r = document.createRange(); let n, pos = 0, sa = false;
+  while ((n = w.nextNode())) {
+    if (!sa && a <= pos + n.length) { r.setStart(n, a - pos); sa = true; }
+    if (sa && b <= pos + n.length) { r.setEnd(n, b - pos); break; }
+    pos += n.length;
+  }
+  const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+}
 const parse = (f, t) => f === 'tags' ? t.split(/[·,]/).map(s => s.trim()).filter(Boolean) : one(t);
 function caretAt(el) {
   const s = getSelection(); if (!s.rangeCount || !el.contains(s.focusNode)) return el.textContent.length;
@@ -670,16 +691,23 @@ function startEdit(id, field, x, y) {
   el.addEventListener('input', onType); el.addEventListener('keydown', onEditKey); el.addEventListener('blur', onEditBlur);
 }
 function onType(e) {
-  const { id, field, el } = editing, raw = el.textContent;
+  const { id, field, el } = editing, raw = rawOf(field, el);
   if (field === 'text' && !e.isComposing && el.innerHTML !== bold(raw)) { const off = caretAt(el); el.innerHTML = bold(raw); putCaret(el, off); }
   if (field === 'name') { const bar = el.parentElement; bar.classList.toggle('two', raw.length > 18); bar.style.setProperty('--n', raw.length); }
-  setVal(id, field, parse(field, raw));
+  setVal(id, field, field === 'text' ? raw.replace(/\s+/g, ' ').trim() : parse(field, raw));
   fitNames(els[id]); chgButton(); queueSave();
 }
 function onEditKey(e) {
   e.stopPropagation();
   if (e.key === 'Enter') { e.preventDefault(); editing.el.blur(); }
   if (e.key === 'Escape') { e.preventDefault(); editing.cancel = true; editing.el.blur(); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b' && editing.field === 'text') {   // Cmd-B: the picked words bold, or back to plain
+    e.preventDefault(); const { el } = editing, [a, b] = offsets(el); if (a === b) return;
+    const rs = runs(el), all = rs.slice(a, b).filter(x => /\S/.test(x[0])).every(x => x[1]);
+    let i0 = a, i1 = b; if (!all) { while (i0 < i1 && /\s/.test(rs[i0][0])) i0++; while (i1 > i0 && /\s/.test(rs[i1 - 1][0])) i1--; }   // the spaces around a pick stay plain
+    for (let i = i0; i < i1; i++) rs[i][1] = !all;
+    el.innerHTML = bold(marked(rs)); putRange(el, a, b); onType({});
+  }
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {     // inside the text: back to how it was when he clicked in
     e.preventDefault(); const { el, field, orig } = editing;
     el.innerHTML = field === 'text' ? bold(orig) : esc(field === 'tags' ? orig.join(' · ') : orig); putCaret(el, el.textContent.length);
@@ -691,7 +719,7 @@ function onEditBlur() {
   editing = null;
   ed.el.removeEventListener('input', onType); ed.el.removeEventListener('keydown', onEditKey); ed.el.removeEventListener('blur', onEditBlur);
   ed.el.removeAttribute('contenteditable'); els[ed.id]?.classList.remove('editing');
-  const v = parse(ed.field, ed.el.textContent);
+  const v = parse(ed.field, rawOf(ed.field, ed.el));
   if (ed.cancel || (ed.field === 'name' && !v)) setVal(ed.id, ed.field, ed.orig);
   else setVal(ed.id, ed.field, v);
   if (snap() !== ed.before) changed(ed.before); else queueSave();

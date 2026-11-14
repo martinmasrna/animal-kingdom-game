@@ -21,7 +21,7 @@ Only the fields he changed are there. Each `now` is his value, to apply as is:
 - `name`: the card's display name. `hq.py set ID animal` takes `{"name", "species"}`: keep the species, change the name.
 - `strength`: `hq.py set ID strength N`. `was: null` is a planned card that had none.
 - `stars`: the card's level, -1 to 3 (-1 small, 0 ordinary, 1 strong, 2 legendary, 3 monster). `was` is the card's `stars` field, or its rarity's default (common 0, rare 1, legendary 2) when it has none. Apply it however hq.py sets stars.
-- `text`: the effect text, word for word: `hq.py set ID effect "TEXT"`.
+- `text`: the effect text, word for word: `hq.py set ID effect "TEXT"`. Words between `**` are ones Martin made bold. The game bolds only its own keywords (`KEYWORDS` in `animal_kingdom/web/static/card.js`), so apply the text without the asterisks, and tell him which bold words the game will not bold by itself: each is a keyword or rules term he means, which the game does not have yet.
 - `tags`: the family line, a list: `hq.py set ID tag "A, B"`.
 
 If `was` differs from what the game has when you apply it (someone changed the card since), stop and ask Martin about that card. If hq.py refuses a value as locked, report it; never force it.
