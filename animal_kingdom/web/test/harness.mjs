@@ -120,8 +120,9 @@ export function screenMismatches() {
     // the board keywords the view gives it (printed or lent by a neighbour; Spikes until used), none while inked; the
     // trigger mark (Dawn, Dusk, eye) is a separate badge, not a keyword
     const kw = top.inked ? [] : [top.armor && 'Armor', top.hidden && 'Stealth', top.spikes && 'Spikes', top.poison && 'Poison'].filter(Boolean);
-    const badges = [...el.querySelectorAll('.kws .kw img')].map(i => i.alt).join(', ');   // one painted badge per keyword
-    if (badges !== kw.join(', ')) out.push(`${cr}: ${top.id} is ${kw.join(', ') || 'unbadged'} but shows ${badges || 'no badge'}`);
+    const worn = [el.querySelector('.rimimg.hex') && 'Armor', el.querySelector('.kwl.mist') && 'Stealth', el.querySelector('.kwl.thorns') && 'Spikes',
+      el.querySelector('.kwl.drips') && 'Poison'].filter(Boolean);   // each painted on the piece (hexagon rim, mist, thorns, venom)
+    if (worn.join(', ') !== kw.join(', ')) out.push(`${cr}: ${top.id} is ${kw.join(', ') || 'plain'} but wears ${worn.join(', ') || 'nothing'}`);
     const buried = el.querySelectorAll('.buried').length;
     if (buried !== Math.min(3, st.length - 1)) out.push(`${cr}: ${buried} buried discs for a stack of ${st.length}`);
     delete want[cr];

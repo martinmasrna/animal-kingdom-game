@@ -171,6 +171,13 @@
 .game.kit .cr.unit { width: 134px; height: 134px; margin: -67px 0 0 -67px; }
 .game.kit .unit .ring { inset: 18px; border: 0; background-color: #3a342c; }
 .game.kit .unit .rimimg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* Board keywords painted on the piece (board.js): hexagon rim for Armor, thorns behind the rim, mist over the portrait, venom down the rim. */
+.game.kit .unit .rimimg.hex { inset: auto; left: calc(-1 * var(--hex-out, 14px)); top: calc(-1 * var(--hex-out, 14px)); width: calc(100% + 2 * var(--hex-out, 14px)); height: calc(100% + 2 * var(--hex-out, 14px)); }
+.game.kit .unit .kwl { position: absolute; pointer-events: none; }
+.game.kit .unit .kwl.thorns { left: calc(-1 * var(--thorn-out, 28px)); top: calc(-1 * var(--thorn-out, 28px)); width: calc(100% + 2 * var(--thorn-out, 28px)); height: calc(100% + 2 * var(--thorn-out, 28px)); rotate: 30deg; }
+.game.kit .unit:has(.rimimg.hex) .kwl.thorns { --thorn-out: 40px; }   /* round the hexagon shell, which reaches further out */
+.game.kit .unit .kwl.mist { left: 18px; top: 18px; width: calc(100% - 36px); height: calc(100% - 36px); border-radius: 50%; opacity: var(--mist-o, .8); }
+.game.kit .unit .kwl.drips { left: 0; top: var(--drip-t, 50%); width: 100%; height: auto; }
 .game.kit .unit .boss { width: 46px; height: 46px; margin-left: -23px; bottom: -16px; border: 0; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 .game.kit .unit.B .boss { background-image: url(/static/kit2/boss_b.webp); } .game.kit .unit.W .boss { background-image: url(/static/kit2/boss_n.webp); }
 .game.kit .unit .buried { border: 0; inset: 6px; }
