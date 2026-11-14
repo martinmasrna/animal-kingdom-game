@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 82,
+ "rev": 86,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -19,6 +19,16 @@
    }
   },
   "honey_badger_legend": {
+   "stars": {
+    "was": 2,
+    "now": 3
+   }
+  },
+  "leopard_legend": {
+   "strength": {
+    "was": 5,
+    "now": 6
+   },
    "stars": {
     "was": 2,
     "now": 3
@@ -509,8 +519,8 @@
    "copy_of": "leopard_legend",
    "name": "Ishar the Unseen",
    "rarity": "legendary",
-   "strength": 5,
-   "stars": 2,
+   "strength": 6,
+   "stars": 3,
    "text": "Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength.",
    "tags": [
     "Cat"
