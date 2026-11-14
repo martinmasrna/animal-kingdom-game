@@ -22,6 +22,10 @@ const TRIGGER = [[/\bDusk:/, 'dusk', 'Dusk: happens at the end of your turn.'], 
   [/(^|\. )When(ever)? |\bthe first enemy placed next to this\b/, 'when', 'Happens on its own when its condition is met.']];
 const triggerOf = c => TRIGGER.find(([re]) => re.test(c.text || ''));
 const TRG_AT = (() => { const a = -32 * Math.PI / 180; return `left:calc(${(50 + 47.8 * Math.cos(a)).toFixed(1)}% - 19px);top:calc(${(50 - 47.8 * Math.sin(a)).toFixed(1)}% - 19px)`; })();
+// Poison's venom drop hangs on the rim's lower left, mirroring the trigger mark on the lower right; further out on the
+// hexagon of an animal with Armor.
+const DROP_AT = hex => { const a = -148 * Math.PI / 180, r = hex ? 56 : 47.8;
+  return `left:calc(${(50 + r * Math.cos(a)).toFixed(1)}% - var(--drop-w, 40px) / 2);top:calc(${(50 - r * Math.sin(a)).toFixed(1)}% - var(--drop-w, 40px) * .62)`; };
 const kit = f => `/static/kit2/${f}`;
 const team = side => (side === 'A' ? 'a' : side === 'W' ? 'n' : 'b');   // n: the neutral paint of a Wild animal
 
@@ -90,13 +94,13 @@ function unit(u, under, cards, fire = false) {
     + `<div class="fill"></div><img class="rimimg" src="${kit(`rim_${team(b.owner)}.webp`)}" alt="" draggable="false"></div>`).join('');
   // Board keywords are painted onto the piece, each on its own layer so all four stack (design sandbox screen/keywords/):
   // Armor turns the piece into a hexagon shell scute (rim and portrait), Spikes stand out as acacia thorns behind the rim, Stealth veils the
-  // portrait in mist, Poison runs green down the rim's lower half. The card on hover says what each one does.
+  // portrait in mist, Poison hangs one drop of venom on the rim. The card on hover says what each one does.
   const has = k => kws.includes(k);
   return peek + (has('Spikes') ? `<img class="kwl thorns" src="${kit(has('Armor') ? 'kwl_thorns_hex.webp' : 'kwl_thorns.webp')}" alt="" draggable="false">` : '') +
     `<div class="ring${has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     (has('Stealth') ? `<img class="kwl mist${has('Armor') ? ' hexp' : ''}" src="${kit('kwl_mist.webp')}" alt="" draggable="false">` : '') +
     `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
-    (has('Poison') ? `<img class="kwl drips${has('Armor') ? ' hexd' : ''}" src="${kit(has('Armor') ? 'kwl_dripsb.webp' : 'kwl_drips.webp')}" alt="" draggable="false">` : '') +
+    (has('Poison') ? `<img class="kwl drop" style="${DROP_AT(has('Armor'))}" src="${kit('kwl_drop.webp')}" alt="" draggable="false">` : '') +
     `<div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
     (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +
     ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TRG_AT}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
