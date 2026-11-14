@@ -19,7 +19,6 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food and draw a card. |
 | **Beaver** | 2 | Rodent | 5 | Roar: next turn, take 1 additional action. |
 | **Dormouse** | 2 | Rodent | 3 | Dusk: draw a card for each 10 food you gained this turn. |
 | **Groundhog** | 2 | Rodent | 3 | Dawn: gain 10 food. |
@@ -29,10 +28,14 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Squirrel** | 3 | Rodent | 4 | Roar: gain 10 food. |
-| **Chipmunk** | 3 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
-| **Gopher** | 3 | Rodent | 3 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
-| **Hamster** | 3 | Rodent | 3 | Whenever you draw a card, gain 5 food. |
-| **Mara** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
+| **Squirrel** | 2 | Rodent | 4 | Roar: gain 10 food. |
+| **Chipmunk** | 2 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
+| **Gopher** | 2 | Rodent | 3 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
+| **Hamster** | 2 | Rodent | 3 | Whenever you draw a card, gain 5 food. |
+| **Mara** | 2 | Rodent | 4 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
+| **Hare** | 2 | Rodent | 4 | Flee. Roar: if your hand is empty, draw 2 cards. |
+| **Marmot** | 2 | Rodent | 3 | Has +1 strength for each 10 food you have. |
+| **Mouse** | 2 | Rodent | 4 | Roar: draw a Rodent. |
+| **Rat** | 2 | Rodent | 3 | Roar: if your hand is empty, remove an adjacent enemy. |
 
 <!-- cards:end -->

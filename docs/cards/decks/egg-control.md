@@ -28,11 +28,14 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Egg Eater** | 3 | Snake | dynamic | Has +2 strength for each removed Egg. |
-| **Mosquito** | 3 | — | 2 | Flight. Roar: give an adjacent enemy -2 strength. |
-| **Raven** | 3 | Bird | 1 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
-| **Bird Egg** | 3 | Egg | 0 | Roar: Scout a Bird. Next turn, remove this and draw a Bird. |
-| **Snake Egg** | 3 | Egg | 0 | Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes. |
-| **Viper** | 3 | Snake | 3 | Roar: give an adjacent enemy -3 strength. |
+| **Egg Eater** | 2 | Snake | dynamic | Has +2 strength for each removed Egg. |
+| **Mosquito** | 2 | — | 2 | Flight. Roar: give an adjacent enemy -2 strength. |
+| **Raven** | 2 | Bird | 1 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
+| **Bird Egg** | 2 | Egg | 0 | Roar: Scout a Bird. Next turn, remove this and draw a Bird. |
+| **Snake Egg** | 2 | Egg | 0 | Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes. |
+| **Viper** | 2 | Snake | 3 | Roar: give an adjacent enemy -3 strength. |
+| **Falcon** | 2 | Bird | 4 | Flight. Roar: if this is next to your opponent's den, draw a card. |
+| **Owl** | 2 | Bird | 2 | Flight. Roar: Scout a card. |
+| **Vulture** | 2 | Bird | 2 | Flight. Dusk: if 3 or more animals were removed this turn, fly in from your hand or deck. |
 
 <!-- cards:end -->

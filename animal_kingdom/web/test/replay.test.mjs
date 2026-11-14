@@ -78,8 +78,12 @@ test('a match opens its replay: every view drawn right, nothing to act on, the c
   await page.click('.ladder .hr:first-child'); await page.waitForSelector('#rbar.on');
   await page.keyboard.press('Space');   // pause the playback
   assert.equal(await page.$eval('#menubtn', e => getComputedStyle(e).display), 'none', 'no Concede in a replay');
-  for (let i = 0; i < Math.min(views.length, 60); i++) {
-    const s = await page.evaluate(() => { const { V } = window.__ak(); return { turn: V.game.round, can: document.querySelectorAll('#hand .hc.can, #deck.can, #tbtn.can, #board .tgt').length }; });
+  for (let i = 0, last = -1; i < Math.min(views.length, 60); i++) {
+    const s = await page.evaluate(() => { const { V } = window.__ak(); return { phase: V.phase, version: V.version, can: document.querySelectorAll('#hand .hc.can, #deck.can, #tbtn.can, #board .tgt').length }; });
+    // the end: the result covers the board (a short match reaches it before 60 steps; its last view can list a unit that
+    // roamed onto the den where it was, while the board shows it gone)
+    if (s.version === last || s.phase === 'match_over') break;
+    last = s.version;
     assert.equal(s.can, 0, `view ${i}: nothing is offered: ${await page.evaluate(() => [...document.querySelectorAll('#hand .hc.can, #deck.can, #tbtn.can, #board .tgt')].map(e => e.id || e.className.baseVal || e.className).join(' | '))}`);
     assert.deepEqual(await page.evaluate(screenMismatches), [], `view ${i}`);
     await page.keyboard.press('ArrowRight');

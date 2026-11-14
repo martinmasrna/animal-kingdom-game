@@ -22,17 +22,20 @@ The table below is generated from cards.json, where the cards live.
 | **Impala** | 2 | Hoofed | 2 | Flee. Roar: play a Baby Impala. |
 | **Okapi** | 2 | Hoofed | 4 | Dawn and Dusk: if this is grazing, draw a card. |
 | **Cape Buffalo** | 2 | Hoofed | 7 | Your other Hoofed animals have +1 strength during your opponent's turn. |
+| **Bison** | 2 | Hoofed | 7 | Can't be covered while grazing. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Zebra** | 3 | Hoofed | 5 | Flee. When this flees, return the enemy that covered it to its owner's hand. |
-| **Giraffe** | 3 | Hoofed | 6 | Hungry 2. Has +3 strength during your opponent's turn. |
-| **Gazelle** | 3 | Hoofed | 2 | Flee. Roar: draw a card and gain 5 food. |
-| **Wildebeest** | 3 | Hoofed | 6 | Dusk: if this is grazing, gain 6 food. |
-| **Deer** | 3 | Hoofed | 3 | Flee. Roar: place a Fawn on a random adjacent empty crossroad. |
+| **Zebra** | 2 | Hoofed | 5 | Flee. When this flees, return the enemy that covered it to its owner's hand. |
+| **Giraffe** | 2 | Hoofed | 6 | Hungry 2. Has +3 strength during your opponent's turn. |
+| **Gazelle** | 2 | Hoofed | 2 | Flee. Roar: draw a card and gain 5 food. |
+| **Wildebeest** | 2 | Hoofed | 6 | Dusk: if this is grazing, gain 6 food. |
+| **Deer** | 2 | Hoofed | 3 | Flee. Roar: place a Fawn on a random adjacent empty crossroad. |
 | **Boar** | 2 | Hoofed | 5 | Remove the first enemy placed next to this. |
-| **Warthog** | 3 | Hoofed | 4 | Roar: remove an adjacent enemy that has another of your Hoofed animals next to it. |
+| **Warthog** | 2 | Hoofed | 4 | Roar: remove an adjacent enemy that has another of your Hoofed animals next to it. |
+| **Moose** | 2 | Hoofed | 8 | Hungry 3. Roam. |
+| **Elephant** | 2 | — | 9 | Hungry 5. |
 
 <!-- cards:end -->

@@ -28,11 +28,14 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Hedgehog** | 3 | — | 5 | Spikes. |
-| **Black Bear** | 3 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
-| **Tortoise** | 3 | — | 6 | Armor. |
-| **Toad** | 3 | — | 5 | Poison. |
-| **Stag Beetle** | 3 | Beetle | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
-| **Stick Insect** | 3 | — | 6 | Stealth. |
+| **Hedgehog** | 2 | — | 5 | Spikes. |
+| **Black Bear** | 2 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
+| **Tortoise** | 2 | — | 6 | Armor. |
+| **Toad** | 2 | — | 5 | Poison. |
+| **Stag Beetle** | 2 | Beetle | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
+| **Stick Insect** | 2 | — | 6 | Stealth. |
+| **Squirrel** | 2 | Rodent | 4 | Roar: gain 10 food. |
+| **Capybara** | 2 | Rodent | 2 | If your starting deck has no animal of strength 4 or more, this has 8 strength. |
+| **Chipmunk** | 2 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
 
 <!-- cards:end -->

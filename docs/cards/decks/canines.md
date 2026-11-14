@@ -28,11 +28,14 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **African Wild Dog** | 3 | Canine | 4 | Roam. Whenever you play a Canine next to this, it roams. |
-| **Wolf** | 3 | Canine | 6 | Roam. |
-| **Street Dog** | 3 | Canine | 2 | Roar: give a connected ally with Roam +3 strength. It roams. |
-| **Badger** | 3 | — | 4 | Roar: draw an animal with Roam. |
-| **Fox** | 3 | Canine | 3 | Roar: if an ally roamed this turn, draw 2 cards. |
-| **Wolverine** | 3 | — | 4 | Roar: remove an adjacent enemy with no other enemy next to it. |
+| **African Wild Dog** | 2 | Canine | 4 | Roam. Whenever you play a Canine next to this, it roams. |
+| **Wolf** | 2 | Canine | 6 | Roam. |
+| **Street Dog** | 2 | Canine | 2 | Roar: give a connected ally with Roam +3 strength. It roams. |
+| **Badger** | 2 | — | 4 | Roar: draw an animal with Roam. |
+| **Fox** | 2 | Canine | 3 | Roar: if an ally roamed this turn, draw 2 cards. |
+| **Wolverine** | 2 | — | 4 | Roar: remove an adjacent enemy with no other enemy next to it. |
+| **Bush Dog** | 2 | Canine | 3 | Roam. Whenever this roams, place a Pup on the crossroad it left. |
+| **Bobcat** | 2 | Cat | 5 | Roar: if you control another Cat, draw a card. |
+| **Lion** | 2 | Cat | 7 | — |
 
 <!-- cards:end -->

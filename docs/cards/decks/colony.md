@@ -22,17 +22,20 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Termite King** | 2 | Colony | 5 | Roar: draw a card for each Colony Queen you control. |
 | **Termite Queen** | 2 | Colony, Queen | 1 | Roar: play a non-Queen Colony animal. |
 | **Queen Bee** | 2 | Colony, Queen | 5 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. |
+| **Queen Ant** | 2 | Colony, Queen | 5 | Dusk: place a Young Ant on an adjacent empty crossroad. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Nurse Bee** | 2 | Colony, Nurse | 2 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. |
-| **Nurse Bumblebee** | 3 | Colony, Nurse | 3 | Flight. Roar: draw a Colony animal. |
-| **Soldier Wasp** | 3 | Colony, Soldier | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. |
-| **Soldier Ant** | 3 | Colony, Soldier | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
-| **Worker Ant** | 3 | Colony, Worker | 2 | Roar: gain 3 food for each animal you control. |
-| **Worker Wasp** | 3 | Colony, Worker | 2 | Flight. Whenever you place an animal, gain 3 food. |
-| **Worker Bee** | 3 | Colony, Worker | 2 | Flight. Roar: gain 12 food. |
+| **Nurse Bumblebee** | 2 | Colony, Nurse | 3 | Flight. Roar: draw a Colony animal. |
+| **Soldier Wasp** | 2 | Colony, Soldier | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. |
+| **Soldier Ant** | 2 | Colony, Soldier | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
+| **Worker Ant** | 2 | Colony, Worker | 2 | Roar: gain 3 food for each animal you control. |
+| **Worker Wasp** | 2 | Colony, Worker | 2 | Flight. Whenever you place an animal, gain 3 food. |
+| **Worker Bee** | 2 | Colony, Worker | 2 | Flight. Roar: gain 12 food. |
+| **Soldier Bee** | 2 | Colony, Soldier | 3 | Flight. Spikes. |
+| **Toad** | 2 | — | 5 | Poison. |
 
 <!-- cards:end -->

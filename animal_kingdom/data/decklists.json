@@ -13,15 +13,18 @@
     "bee_legend": 1,
     "bumblebee_legend": 1,
     "nurse_bee": 2,
-    "nurse_bumblebee": 3,
+    "nurse_bumblebee": 2,
     "termite_king": 2,
     "termite_queen": 2,
     "queen_bee": 2,
-    "guard_wasp": 3,
-    "soldier_ant": 3,
-    "worker_ant": 3,
-    "worker_wasp": 3,
-    "worker_bee": 3
+    "guard_wasp": 2,
+    "soldier_ant": 2,
+    "worker_ant": 2,
+    "worker_wasp": 2,
+    "worker_bee": 2,
+    "queen_ant": 2,
+    "guard_bee": 2,
+    "toad": 2
    }
   },
   {
@@ -32,19 +35,22 @@
    "bot": false,
    "cards": {
     "pheasant_legend": 1,
-    "praying_mantis": 3,
+    "praying_mantis": 2,
     "raccoon": 2,
-    "vulture": 3,
-    "city_spider": 3,
+    "vulture": 2,
+    "city_spider": 2,
     "earthworm": 2,
-    "cockroach": 3,
+    "cockroach": 2,
     "sperm_whale": 2,
     "locust_legend": 1,
     "cockroach_legend": 1,
-    "python": 3,
+    "python": 2,
     "rat_legend_2": 1,
     "dart_frog": 2,
-    "hammerhead": 3
+    "hammerhead": 2,
+    "pigeon": 2,
+    "stork": 2,
+    "peacock": 2
    }
   },
   {
@@ -59,15 +65,18 @@
     "wolf_legend_2": 1,
     "elephant_legend": 1,
     "orca": 2,
-    "african_wild_dog": 3,
+    "african_wild_dog": 2,
     "coyote": 2,
     "dhole": 2,
-    "wolf": 3,
+    "wolf": 2,
     "jackal": 2,
-    "street_dog": 3,
-    "badger": 3,
-    "fox": 3,
-    "wolverine": 3
+    "street_dog": 2,
+    "badger": 2,
+    "fox": 2,
+    "wolverine": 2,
+    "bush_dog": 2,
+    "bobcat": 2,
+    "lion": 2
    }
   },
   {
@@ -82,15 +91,18 @@
     "hornet": 2,
     "chameleon": 2,
     "skunk": 2,
-    "hare": 3,
-    "cheetah": 3,
-    "rat": 3,
-    "falcon": 3,
-    "bat": 3,
-    "mouse": 3,
+    "hare": 2,
+    "cheetah": 2,
+    "rat": 2,
+    "falcon": 2,
+    "bat": 2,
+    "mouse": 2,
     "fox_legend": 1,
     "mole": 2,
-    "mole_legend": 1
+    "mole_legend": 1,
+    "squirrel": 2,
+    "chipmunk": 2,
+    "mara": 2
    }
   },
   {
@@ -105,15 +117,18 @@
     "lion_legend_3": 1,
     "lion_legend_4": 1,
     "jaguar": 2,
-    "serval": 3,
+    "serval": 2,
     "leopard": 2,
     "black_panther": 2,
-    "lion": 3,
+    "lion": 2,
     "lynx": 2,
-    "caracal": 3,
-    "tiger": 3,
-    "bobcat": 3,
-    "alley_cat": 3
+    "caracal": 2,
+    "tiger": 2,
+    "bobcat": 2,
+    "alley_cat": 2,
+    "cheetah": 2,
+    "elephant": 2,
+    "crocodile": 2
    }
   },
   {
@@ -126,15 +141,19 @@
     "tuna_legend": 1,
     "manta_ray_legend": 1,
     "swordfish": 2,
-    "barracuda": 3,
+    "barracuda": 2,
     "manta_ray": 2,
     "remora": 2,
-    "cod": 3,
-    "sardine": 3,
-    "mahi_mahi": 3,
-    "tuna": 3,
-    "sunfish": 3,
-    "great_white_shark": 2
+    "cod": 2,
+    "sardine": 2,
+    "mahi_mahi": 2,
+    "tuna": 2,
+    "sunfish": 2,
+    "great_white_shark": 2,
+    "hammerhead": 2,
+    "whale_shark": 2,
+    "piranha": 2,
+    "blue_whale": 2
    }
   },
   {
@@ -148,16 +167,19 @@
     "macaque_legend": 1,
     "rat_legend": 1,
     "chipmunk_legend": 1,
-    "flying_squirrel": 2,
     "beaver": 2,
     "dormouse": 2,
-    "squirrel": 3,
-    "chipmunk": 3,
-    "gopher": 3,
+    "squirrel": 2,
+    "chipmunk": 2,
+    "gopher": 2,
     "groundhog": 2,
-    "hamster": 3,
+    "hamster": 2,
     "woodpecker": 2,
-    "mara": 3
+    "mara": 2,
+    "hare": 2,
+    "marmot": 2,
+    "mouse": 2,
+    "rat": 2
    }
   },
   {
@@ -174,13 +196,16 @@
     "porcupine": 2,
     "golden_orb_weaver": 2,
     "armadillo": 2,
-    "hedgehog": 3,
-    "black_bear": 3,
-    "tortoise": 3,
-    "toad": 3,
-    "stag_beetle": 3,
+    "hedgehog": 2,
+    "black_bear": 2,
+    "tortoise": 2,
+    "toad": 2,
+    "stag_beetle": 2,
     "meerkat": 2,
-    "stick_insect": 3
+    "stick_insect": 2,
+    "squirrel": 2,
+    "capybara": 2,
+    "chipmunk": 2
    }
   },
   {
@@ -195,15 +220,18 @@
     "hawk": 2,
     "magpie": 2,
     "black_mamba": 2,
-    "egg_eater": 3,
-    "mosquito": 3,
-    "raven": 3,
-    "bird_egg": 3,
-    "snake_egg": 3,
-    "viper": 3,
+    "egg_eater": 2,
+    "mosquito": 2,
+    "raven": 2,
+    "bird_egg": 2,
+    "snake_egg": 2,
+    "viper": 2,
     "cuckoo_legend": 1,
     "cuckoo": 2,
-    "bat_legend": 1
+    "bat_legend": 1,
+    "falcon": 2,
+    "owl": 2,
+    "vulture": 2
    }
   },
   {
@@ -218,15 +246,18 @@
     "butterfly_legend": 1,
     "eagle_legend": 1,
     "hummingbird": 2,
-    "macaque": 3,
+    "macaque": 2,
     "orangutan": 2,
     "tarsier": 2,
     "chimpanzee": 2,
-    "baboon": 3,
-    "stork": 3,
-    "caterpillar": 3,
-    "gorilla": 3,
-    "peacock": 3
+    "baboon": 2,
+    "stork": 2,
+    "caterpillar": 2,
+    "gorilla": 2,
+    "peacock": 2,
+    "vulture": 2,
+    "oxpecker": 2,
+    "pigeon": 2
    }
   },
   {
@@ -243,13 +274,16 @@
     "rhinoceros": 2,
     "hippopotamus": 2,
     "whale_shark": 2,
-    "oxpecker": 3,
-    "dung_beetle": 3,
-    "blue_whale": 3,
-    "sloth": 3,
-    "elephant": 3,
+    "oxpecker": 2,
+    "dung_beetle": 2,
+    "blue_whale": 2,
+    "sloth": 2,
+    "elephant": 2,
     "moose": 2,
-    "krill": 3
+    "krill": 2,
+    "vulture": 2,
+    "albatross": 2,
+    "falcon": 2
    }
   },
   {
@@ -265,14 +299,17 @@
     "giraffe_legend": 1,
     "impala": 2,
     "okapi": 2,
-    "zebra": 3,
-    "giraffe": 3,
+    "zebra": 2,
+    "giraffe": 2,
     "cape_buffalo": 2,
-    "gazelle": 3,
-    "wildebeest": 3,
-    "deer": 3,
+    "gazelle": 2,
+    "wildebeest": 2,
+    "deer": 2,
     "boar": 2,
-    "warthog": 3
+    "warthog": 2,
+    "moose": 2,
+    "bison": 2,
+    "elephant": 2
    }
   },
   {
@@ -291,12 +328,15 @@
     "hippopotamus": 2,
     "moose": 2,
     "whale_shark": 2,
-    "blue_whale": 3,
-    "eagle": 3,
-    "elephant": 3,
-    "grizzly_bear": 3,
-    "lion": 3,
-    "wolf": 3
+    "blue_whale": 2,
+    "eagle": 2,
+    "elephant": 2,
+    "grizzly_bear": 2,
+    "lion": 2,
+    "wolf": 2,
+    "bobcat": 2,
+    "cheetah": 2,
+    "caracal": 2
    }
   },
   {
@@ -315,12 +355,15 @@
     "hornet": 2,
     "hummingbird": 2,
     "mole": 2,
-    "bat": 3,
-    "toad": 3,
-    "dolphin": 3,
-    "giraffe": 3,
-    "sardine": 3,
-    "sunfish": 3
+    "bat": 2,
+    "toad": 2,
+    "dolphin": 2,
+    "giraffe": 2,
+    "sardine": 2,
+    "sunfish": 2,
+    "barracuda": 2,
+    "cod": 2,
+    "hammerhead": 2
    }
   },
   {
@@ -339,12 +382,15 @@
     "great_white_shark": 2,
     "honey_badger": 2,
     "orca": 2,
-    "anaconda": 3,
-    "black_bear": 3,
-    "city_spider": 3,
-    "python": 3,
-    "snake_egg": 3,
-    "tiger": 3
+    "anaconda": 2,
+    "black_bear": 2,
+    "city_spider": 2,
+    "python": 2,
+    "snake_egg": 2,
+    "tiger": 2,
+    "egg_eater": 2,
+    "viper": 2,
+    "lion": 2
    }
   },
   {
@@ -363,12 +409,15 @@
     "honey_badger": 2,
     "porcupine": 2,
     "hornet": 2,
-    "tiger": 3,
-    "lion": 3,
-    "sardine": 3,
-    "owl": 3,
-    "badger": 3,
-    "black_bear": 3
+    "tiger": 2,
+    "lion": 2,
+    "sardine": 2,
+    "owl": 2,
+    "badger": 2,
+    "black_bear": 2,
+    "bobcat": 2,
+    "cheetah": 2,
+    "caracal": 2
    }
   },
   {
@@ -387,12 +436,15 @@
     "honey_badger": 2,
     "meerkat": 2,
     "queen_ant": 2,
-    "bobcat": 3,
-    "elephant": 3,
-    "giraffe": 3,
-    "owl": 3,
-    "sardine": 3,
-    "tiger": 3
+    "bobcat": 2,
+    "elephant": 2,
+    "giraffe": 2,
+    "owl": 2,
+    "sardine": 2,
+    "tiger": 2,
+    "lion": 2,
+    "cheetah": 2,
+    "caracal": 2
    }
   },
   {
@@ -411,12 +463,15 @@
     "porcupine": 2,
     "rhinoceros": 2,
     "queen_ant": 2,
-    "oxpecker": 3,
-    "badger": 3,
-    "deer": 3,
-    "dolphin": 3,
-    "elephant": 3,
-    "hedgehog": 3
+    "oxpecker": 2,
+    "badger": 2,
+    "deer": 2,
+    "dolphin": 2,
+    "elephant": 2,
+    "hedgehog": 2,
+    "falcon": 2,
+    "guard_wasp": 2,
+    "worker_ant": 2
    }
   },
   {
@@ -426,16 +481,21 @@
    "cover": "wolf",
    "bot": true,
    "cards": {
-    "action_1": 3,
-    "action_2": 3,
-    "action_3": 3,
-    "action_4": 3,
-    "action_5": 3,
-    "action_6": 3,
-    "action_7": 3,
-    "action_8": 3,
-    "wolf": 3,
-    "hedgehog": 3
+    "action_1": 2,
+    "action_2": 2,
+    "action_3": 2,
+    "action_4": 2,
+    "action_5": 2,
+    "action_6": 2,
+    "action_7": 2,
+    "action_8": 2,
+    "wolf": 2,
+    "hedgehog": 2,
+    "fox": 2,
+    "coyote": 2,
+    "african_wild_dog": 2,
+    "bush_dog": 2,
+    "street_dog": 2
    }
   }
  ]

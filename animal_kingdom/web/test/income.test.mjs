@@ -6,7 +6,10 @@ import assert from 'node:assert/strict';
 import { startServer, openBrowser, recordMatches, gamePage, feed } from './harness.mjs';
 
 let server, browser, matches;
-before(async () => { matches = recordMatches(1); server = await startServer(); browser = await openBrowser(); });
+// the longest of three recorded matches, as seen from seat A: a match long enough for regions to be held and pay (a quick
+// den rush holds none; the stars prototype's two-copy decks made the first pair's match one)
+before(async () => { matches = recordMatches(3).filter(m => m.name.endsWith('_A.json')).sort((a, b) => b.views.length - a.views.length);
+  server = await startServer(); browser = await openBrowser(); });
 after(async () => { await browser?.close(); server?.stop(); });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
