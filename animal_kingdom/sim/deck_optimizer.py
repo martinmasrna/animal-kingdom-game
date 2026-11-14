@@ -36,7 +36,11 @@ from typing import Optional, Sequence
 
 from ..decks import register_deck
 from ..decks import BOT_DECKS
-from ..engine.cards import COPY_LIMITS, DECK_SLUGS, load_cards
+from ..engine.cards import DECK_SLUGS, load_cards
+
+# The 4-4-6 recipe is the deck shape from before the stars prototype (engine/stars.py): it reads the cards' recorded
+# rarities and their old copy limits, so its decks hold three commons (illegal under the prototype's two-copy rule).
+COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}
 from ..engine.config import Config, load_config_overrides
 from .runner import run_pairs
 
@@ -50,7 +54,7 @@ def draftable_by_rarity(cards=None, exclude: frozenset[str] = frozenset()) -> di
 
     `exclude` drops specific card ids too - used to build a deck from the pool *minus* another
     deck's cards (the disjoint-roster constraint)."""
-    cards = cards or load_cards()
+    cards = cards or load_cards(as_played=False)
     pools: dict[str, list[str]] = {r: [] for r in RARITIES}
     for card in cards.values():
         if not card.collectible or card.id in exclude:
@@ -70,7 +74,7 @@ def _collectible_cards() -> dict:
     swap, and the pile had to be thrown away (18 October 2026)."""
     global _COLLECTIBLE
     if _COLLECTIBLE is None:
-        _COLLECTIBLE = {cid: c for cid, c in load_cards().items() if c.collectible}
+        _COLLECTIBLE = {cid: c for cid, c in load_cards(as_played=False).items() if c.collectible}
     return _COLLECTIBLE
 
 
@@ -283,7 +287,7 @@ _POOLS = draftable_by_rarity()
 # --------------------------------------------------------------------------- reporting
 
 def _card_names():
-    return {cid: c.name for cid, c in load_cards().items()}
+    return {cid: c.name for cid, c in load_cards(as_played=False).items()}
 
 
 def format_recipe(recipe: Recipe) -> str:

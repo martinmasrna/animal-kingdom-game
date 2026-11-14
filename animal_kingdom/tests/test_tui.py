@@ -341,7 +341,7 @@ def test_deck_trackers_are_responsive_and_ignore_opponent_hidden_zones(tmp_path)
             if expected_left == 0:
                 assert "[dim](x0)" in opponent_markup
             assert "[bold yellow]" in opponent_markup
-            assert "[bold blue]" in opponent_markup
+            # no "[bold blue]" rare: the stars prototype reads every rare as a common (engine/stars.py)
 
             own_legendary = next(
                 card_id

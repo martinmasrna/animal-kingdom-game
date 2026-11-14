@@ -26,9 +26,9 @@ def test_the_losing_card_is_found_and_a_lifting_card_replaces_it():
     lst = load_premade_deck("cats")
     bad = lst[0]
     cards = load_cards()
-    lifted = next(cid for cid, c in cards.items() if c.collectible and cid not in lst and c.rarity == "common")
+    lifted = next(cid for cid, c in cards.items() if c.collectible and cid not in lst and c.rarity == "common" and c.stars == 0)
     lid, opp = "bot:expert:cats", "bot:expert:fish"
-    games = _games(lid, opp, lst, bad, 240, rng, lifted=lifted)
+    games = _games(lid, opp, lst, bad, 240, rng, p_win_drawn=0.1, lifted=lifted)   # two copies a card: more distinct cards, each drawn less
     found = tinker.losing_card(lst, tinker.games_of(games, lid))
     assert found and found[0] == bad and found[1] < -tinker.Z
     pool = {"decks": [{"slug": "cats", "name": "Cats", "list": lst}, {"slug": "fish", "name": "Fish", "list": load_premade_deck("fish")}],

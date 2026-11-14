@@ -188,7 +188,7 @@ def test_staged_search_reduces_reply_rollouts_on_a_fixed_position():
     s = new_game(
         load_premade_deck("giants"),
         load_premade_deck("den_rush"),
-        seed=3,
+        seed=7,   # a position where staging saves rollouts (the stars prototype's two-copy decks moved seed 3's)
         map_id="map_b",
         config=Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False),
     )

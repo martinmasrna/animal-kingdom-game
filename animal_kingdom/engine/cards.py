@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from .resources import load_bundled_json
+from .stars import STAR_DEFAULTS, STAR_LEVELS, merge_rarities
 
 # Allowed value domains (validation). Reworked 98-design pool: README decisions B-E.
 RARITIES = {"common", "rare", "legendary"}
@@ -51,14 +52,9 @@ DECKLISTS: list[dict] = sorted(load_bundled_json("decklists.json")["decks"], key
 STARTER_DECKS: list[dict] = [d for d in DECKLISTS if d.get("starter")]   # none while the cards change (Martin, 2026-10-29: back once they settle)
 DECK_SLUGS = {d["slug"] for d in DECKLISTS}               # every shipped deck: the sims' field and the gauntlet's
 
-# Copy limits per rarity for the locked 4-4-6 decklist shape (legendary 1 / rare 2 / common 3).
-COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}
-
-# The stars prototype (branch `stars`, 2026-11-14; not settled design): every card has a level, -1 small, 0 ordinary (the
-# plain Lion's; most cards; unmarked), 1 strong, 2 legendary, 3 monster, and a deck holds at most decks.STAR_BUDGET of
-# them, counted per copy (a -1 card gives one back). A card's `stars` in cards.json sets it; without one, its rarity's.
-STAR_LEVELS = (-1, 0, 1, 2, 3)
-STAR_DEFAULTS = {"common": 0, "rare": 1, "legendary": 2}
+# Copy limits by rarity. The stars prototype (engine/stars.py): two kinds of card, a legendary (one copy) and every other
+# (two copies); a rare is read as a common, so "rare" here only covers data loaded without the merge.
+COPY_LIMITS = {"common": 2, "rare": 2, "legendary": 1}
 
 
 class CardDataError(ValueError):
@@ -191,7 +187,7 @@ def _build_card(rec: dict) -> Card:
     )
 
 
-def load_cards(raw: Optional[dict] = None, *, validate: bool = True) -> dict[str, Card]:
+def load_cards(raw: Optional[dict] = None, *, validate: bool = True, as_played: bool = True) -> dict[str, Card]:
     """Return a dict id -> Card. Loads bundled data/cards.json by default.
 
     Pass `raw` (an already-parsed dict shaped like cards.json) to load custom data,
@@ -199,11 +195,13 @@ def load_cards(raw: Optional[dict] = None, *, validate: bool = True) -> dict[str
     validate=False only for data already known to be well-formed.
     """
     if raw is None:
-        raw = load_bundled_json("cards.json")
+        raw = load_bundled_json("cards.json", as_played=as_played)
 
     records = raw.get("cards")
     if not isinstance(records, list) or not records:
         raise CardDataError("cards.json must contain a non-empty 'cards' list")
+    if as_played:   # the stars prototype (engine/stars.py): each card's level, and a rare read as a common
+        records = merge_rarities(records)
 
     registry: dict[str, Card] = {}
     for rec in records:

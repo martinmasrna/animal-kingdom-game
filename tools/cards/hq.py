@@ -66,7 +66,7 @@ HABITATS = ["Savanna", "Jungle", "Forest", "Meadow", "City", "Open Ocean",      
             "Prehistoric", "Ice Age"]
 RARITY = {"L": "legendary", "R": "rare", "C": "common"}
 LETTER = {v: k for k, v in RARITY.items()}
-COPIES = {"legendary": 1, "rare": 2, "common": 3}     # the 4-4-6 copy limits: a starter holds each card at its limit
+COPIES = {"legendary": 1, "rare": 2, "common": 2}     # the copy limits (the stars prototype: two of any non-legendary)
 POOL = "pool"                                         # the table's name for "in no starter deck"
 
 # Printed keywords, as the first sentences of a card's text ("Flight. Roar: ...", "Titan. Hungry 4. ...").

@@ -41,7 +41,8 @@ def test_ids_and_names_globally_unique():
 
 
 def test_copy_limits():
-    assert COPY_LIMITS == {"legendary": 1, "rare": 2, "common": 3}
+    # the stars prototype (engine/stars.py): two of any non-legendary; a rare is read as a common
+    assert COPY_LIMITS == {"legendary": 1, "rare": 2, "common": 2}
 
 
 # ------------------------------------------------------------------ field domains

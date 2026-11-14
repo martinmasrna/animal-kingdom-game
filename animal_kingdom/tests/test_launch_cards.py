@@ -427,13 +427,14 @@ def test_the_tiger_legend_eats_its_prey_then_removes_an_adjacent_enemy_of_7_but_
         assert (s.top_unit("2,2") is None) == removed
 
 
-def test_the_alley_cat_adds_two_kittens_and_a_kitten_draws_a_common_animal():
+def test_the_alley_cat_adds_two_kittens_and_a_kitten_draws_a_non_legendary_animal():
+    # the stars prototype: commons and rares are one kind, so the Kitten draws any non-legendary (engine/stars.py)
     s = make_state(hands={"A": ["alley_cat"]},
-                   decks={"A": ["jaguar", "mouse", "jaguar", "jaguar"], "B": ["lion"] * 5})
+                   decks={"A": ["lion_legend", "jaguar", "lion_legend_3", "lion_legend_4"], "B": ["lion"] * 5})
     rules.apply_action(s, PlaceAction("alley_cat", ("cr", "1,2")))
     assert hand_ids(s, "A") == ["kitten", "kitten"]
     rules.apply_action(s, PlaceAction("kitten", ("cr", "1,3")))
-    assert sorted(hand_ids(s, "A")) == ["kitten", "mouse"]        # a common animal, any family: past the rare Jaguar
+    assert sorted(hand_ids(s, "A")) == ["jaguar", "kitten"]       # any family, a former rare too, past the legendaries
 
 
 def test_sea_turtle_adds_a_baby_turtle_to_your_hand_at_dusk():

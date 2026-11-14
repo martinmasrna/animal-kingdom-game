@@ -5,9 +5,9 @@ def test_any_deck_may_hold_a_cards_full_count():
     2026-10-01); a card carries no count of its own, the decklists do."""
     from animal_kingdom.decks import PREMADE_DECKS, decklist_problems
     egg = PREMADE_DECKS["egg_control"]
-    deck = [c for c in egg if c != "python"][:27] + ["python"] * 3
+    deck = [c for c in egg if c != "python"][:28] + ["python"] * 2      # the stars prototype: two of any non-legendary
     assert len(deck) == 30 and not [p for p in decklist_problems(deck) if "Python" in p]
-    assert decklist_problems(deck[:26] + ["python"] * 4)   # a fourth is still too many
+    assert decklist_problems(deck[:27] + ["python"] * 3)   # a third is too many
 
 
 def test_a_deck_recipe_holds_collectible_cards_only():

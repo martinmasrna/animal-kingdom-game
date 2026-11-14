@@ -65,7 +65,7 @@ def family_block(ids: str, raw: dict | None = None) -> str:
     rarity, strength and full text, and its habitat. A reserve or planned design says so after its
     name. An empty id list renders no table (the role has no card yet). An id the data doesn't have
     is an error, so a renamed card can't silently drop off a page."""
-    records = (raw or load_bundled_json("cards.json"))["cards"]
+    records = (raw or load_bundled_json("cards.json", as_played=False))["cards"]
     wanted = [i for i in ids.split(",") if i]
     by_id = {r["id"]: r for r in records}
     missing = [i for i in wanted if i not in by_id]
@@ -98,7 +98,7 @@ def render_family(doc: str, raw: dict | None = None) -> str:
     dupes = sorted({i for i in ids if ids.count(i) > 1})
     if dupes:
         raise ValueError(f"society page lists a card in two roles: {', '.join(dupes)}")
-    raw = raw or load_bundled_json("cards.json")
+    raw = raw or load_bundled_json("cards.json", as_played=False)
     return _FAMILY_SPAN.sub(lambda m: family_block(m.group(1), raw), doc)
 
 
@@ -109,14 +109,14 @@ def society_pages() -> list[Path]:
 
 
 def main() -> None:
-    cards = load_cards()
+    cards = load_cards(as_played=False)   # the cards as recorded: rare stays rare in the design docs (engine/stars.py)
     for deck in sorted(DECK_SLUGS):
         path = doc_path(deck)
         if not path.is_file():      # a bot deck with no design doc
             continue
         path.write_text(render(path.read_text(encoding="utf-8"), cards_block(deck, cards)), encoding="utf-8")
         print(f"wrote {path}")
-    raw = load_bundled_json("cards.json")
+    raw = load_bundled_json("cards.json", as_played=False)
     for path in society_pages():
         path.write_text(render_family(path.read_text(encoding="utf-8"), raw), encoding="utf-8")
         print(f"wrote {path}")
