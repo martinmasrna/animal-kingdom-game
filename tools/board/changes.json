@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 97,
+ "rev": 107,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -10,6 +10,12 @@
    "text": {
     "was": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
     "now": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +1 strength (wherever they are)."
+   }
+  },
+  "bumblebee_legend": {
+   "text": {
+    "was": "Flight. Whenever you gain food, gain 3 additional food.",
+    "now": "??"
    }
   },
   "butterfly_legend": {
@@ -112,7 +118,7 @@
  "new": {
   "new1": {
    "copy_of": "butterfly_legend",
-   "name": "Xanthe: Egg",
+   "name": "evolution",
    "rarity": "legendary",
    "strength": 0,
    "stars": 2,
@@ -123,7 +129,7 @@
   },
   "new2": {
    "copy_of": "bee_legend_2",
-   "name": "Juliette",
+   "name": "small power",
    "rarity": "legendary",
    "strength": 1,
    "stars": 3,
@@ -259,7 +265,7 @@
   },
   "new13": {
    "copy_of": "eagle_legend",
-   "name": "Arne",
+   "name": "lovebird song",
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
@@ -337,7 +343,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "Flight. Whenever you gain food, gain 3 additional food.",
+   "text": "Flight. Whenever you gain food, gain 1 food.",
    "tags": [
     "Colony"
    ],
