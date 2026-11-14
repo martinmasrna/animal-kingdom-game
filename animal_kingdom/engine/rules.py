@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Optional
 
 from . import effects, statics
-from .actions import Action, DrawAction, PassAction, PlaceAction, RoamAction
+from .actions import Action, ActAction, DrawAction, PassAction, PlaceAction, RoamAction
 from .state import EngineError, GameState, Result, other_player
 from .strength import effective_strength  # re-exported (used by tests / future eval)
 
@@ -66,6 +66,7 @@ def _top_level_actions(state: GameState) -> list[Action]:
     titan_ok = left >= titan_cost(state, player) and state.food[player] >= titan_food(state, player)
     actions.extend(effects.legal_placements(state, player, titan_ok=titan_ok))
     actions.extend(effects.legal_roams(state, player))
+    actions.extend(effects.legal_acts(state, player))     # Action animals (the actions prototype): one action each
     return actions
 
 
@@ -189,6 +190,9 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
         stack = state.board.get(action.origin)
         effects.pay_for_roam(state, state.current, stack[-1] if stack else None)
         effects.do_roam(state, state.current, action.origin, action.target)
+    elif isinstance(action, ActAction):
+        state.actions_taken_this_turn += 1
+        effects.do_act(state, state.current, action.origin)
     else:
         raise EngineError(f"unexpected action {action!r}")
 

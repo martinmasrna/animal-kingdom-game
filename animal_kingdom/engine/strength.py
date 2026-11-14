@@ -94,7 +94,20 @@ def aura_sources(state: GameState) -> list:
     return [(u, aura) for stack in state.board.values() if stack and (aura := FAMILY_AURAS.get((u := stack[-1]).card_id)) is not None]
 
 
+def guard_bonus(state: GameState, owner: str) -> int:
+    """[ACTION 8] (the actions prototype): "your animals have +2 strength during your opponent's next turn". Live, on
+    every animal `owner` has, during the one opponent's turn it was used for (state.action_guard)."""
+    g = state.action_guard.get(owner) if state.action_guard else None
+    return g[1] if g and state.current != owner and g[0] == state.turn_counter else 0
+
+
 def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], sources: Optional[list] = None) -> int:
+    """The live "has +X" bonus for a unit of `card` controlled by `owner`: the cards' anthems and auras, plus
+    [ACTION 8]'s guard (guard_bonus)."""
+    return _anthem_bonus(state, card, owner, self_iid, sources) + (guard_bonus(state, owner) if state.action_guard else 0)
+
+
+def _anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], sources: Optional[list] = None) -> int:
     """The live "has +X" anthem bonus for a unit of `card` controlled by `owner`. `sources`: aura_sources(state), if the
     caller has them.
 
@@ -207,6 +220,8 @@ def strength_breakdown(state: GameState, unit: UnitInstance) -> dict:
     auras = sorted([u.card_id, getattr(state.config, aura[1])] for u, aura in aura_sources(state)
              if u.owner == unit.owner and u.iid != unit.iid and aura[0] in card.tags and not _inked(state, u.iid)
              and not (aura[2] and not their_turn))
+    if guard := guard_bonus(state, unit.owner):
+        auras.append(["action_8", guard])
     own = anthem_bonus(state, card, unit.owner, unit.iid) - sum(n for _, n in auras)
     if own:
         auras.insert(0, [card.id, own])

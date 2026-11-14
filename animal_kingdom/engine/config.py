@@ -174,6 +174,15 @@ class Config:
     oxpecker_legend_min: int = 8                    # the legendary Oxpecker: your covering animals this strong call an Oxpecker
     krill_legend_food: int = 10                     # the legendary Krill: a Titan's food, for one action instead of two
 
+    # --- The actions prototype: "Action: ..." animals (branch actions; [ACTION 1] to [ACTION 8]) ---
+    action_1_food: int = 10              # [ACTION 1]: Action: gain 10 food
+    action_2_food: int = 15              # [ACTION 2]: Action: discard a card to gain 15 food
+    action_3_food: int = 5               # [ACTION 3]: Action: gain 5 food and draw a card
+    action_3_draw: int = 1
+    action_4_grant: int = 2              # [ACTION 4]: Action: give an animal in your hand +2 strength
+    action_7_drain: int = 10             # [ACTION 7]: Action: your opponent loses 10 food
+    action_8_bonus: int = 2              # [ACTION 8]: your animals have +2 strength during your opponent's next turn
+
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---
     cap_queen_adira: bool = False

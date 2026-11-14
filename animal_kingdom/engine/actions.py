@@ -79,6 +79,18 @@ class RoamAction:
 
 
 @dataclass(frozen=True)
+class ActAction:
+    """Use the Action of the animal on top of `origin` ("Action: ..." on its card; the actions prototype): costs one of
+    the turn's actions, once per animal per turn, only from the top of its crossroad. Not a placement and not a Roar."""
+
+    origin: str
+    kind: ClassVar[str] = "act"
+
+    def to_dict(self) -> dict:
+        return {"kind": self.kind, "from": self.origin}
+
+
+@dataclass(frozen=True)
 class PassAction:
     """End the turn early, declining the remaining actions (overview.md §5). Legal only after the
     turn's first action and outside effect resolution; never offered by legal_actions (see rules.can_pass)."""
@@ -107,7 +119,7 @@ class ChoiceAction:
 
 SKIP = "__skip__"  # the ChoiceAction value that declines an optional effect
 
-Action = Union[DrawAction, PlaceAction, RoamAction, PassAction, ChoiceAction]
+Action = Union[DrawAction, PlaceAction, RoamAction, ActAction, PassAction, ChoiceAction]
 
 
 def action_from_dict(d: dict) -> Action:
@@ -118,6 +130,8 @@ def action_from_dict(d: dict) -> Action:
         return PlaceAction(card_id=d["card_id"], target=tuple(d["target"]), iid=d.get("iid"))
     if kind == "roam":
         return RoamAction(origin=d["from"], target=tuple(d["target"]))
+    if kind == "act":
+        return ActAction(origin=d["from"])
     if kind == "choice":
         return ChoiceAction(choice=d["choice"])
     if kind == "pass":

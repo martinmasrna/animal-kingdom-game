@@ -276,6 +276,7 @@ pub fn do_placement(st: &mut State, player: Player, card: CardId, target: &Targe
         crate::emit!(st, "pay", vmap!("player" => pn(player), "n" => Value::Int(cost as i64), "card" => card_v(st, card)));
     }
     st.units_placed_this_turn += 1;
+    st.turn_flags.flight_next[player.min(1) as usize] = false;   // [ACTION 5]: spent by this play
     match target {
         Target::Hq(den) => {
             crate::emit!(st, "capture", vmap!("player" => pn(player), "iid" => Value::Int(unit.iid), "card" => card_v(st, card),
@@ -928,7 +929,7 @@ pub fn legal_placements(st: &State, player: Player, allowed: Option<&[CardId]>, 
             continue;
         }
         let is_apex = c.has_kw(K_APEX);
-        let flight = statics::ignores_connection(st, card);
+        let flight = st.turn_flags.flight_next[player.min(1) as usize] || statics::ignores_connection(st, card);
         let mut extra = statics::extra_placement_crossroads(st, card, player);
         let reach = statics::reach_of(st, card);
         if reach > 0 {
@@ -1001,6 +1002,49 @@ pub fn legal_roams(st: &State, player: Player, free_only: bool) -> Vec<Action> {
         }
     }
     out
+}
+
+// ------------------------------------------------------------------ Action (the actions prototype; effects.py)
+
+/// Whether `unit`'s card carries an Action, its effects working.
+pub fn has_act(st: &State, unit: &Unit) -> bool {
+    st.g.has_hook(unit.card, crate::cards::Hook::OnAct) && statics::active(st, unit)
+}
+
+/// Every Action `player` may use now (the caller checks the turn has an action left), in crossroad order.
+pub fn legal_acts(st: &State, player: Player) -> Vec<Action> {
+    let mut out = Vec::new();
+    if !st.tops().any(|(_, u)| u.owner == player && has_act(st, u)) {
+        return out;
+    }
+    for cr in st.sorted_occupied() {
+        let unit = st.top(cr).unwrap();
+        if unit.owner != player || !has_act(st, unit) || st.turn_flags.acted.contains(&unit.iid) {
+            continue;
+        }
+        let p = player.min(1) as usize;
+        let ok = match st.cname(unit.card) {
+            "action_2" | "action_4" => !st.hands[p].is_empty(),
+            "action_6" => !st.decks[p].is_empty(),
+            _ => true,
+        };
+        if ok {
+            out.push(Action::Act { origin: cr });
+        }
+    }
+    out
+}
+
+/// The animal on top of `origin` uses its Action (the caller has paid the action).
+pub fn do_act(st: &mut State, player: Player, origin: Cr) -> Result<(), String> {
+    let unit = match st.top(origin) {
+        Some(u) if u.owner == player => u.clone(),
+        _ => return Err(format!("{} has no animal on {:?} to act", player_name(player), st.crname(origin))),
+    };
+    st.turn_flags.acted.push(unit.iid);
+    crate::emit!(st, "act", vmap!("player" => pn(player), "iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, origin)));
+    crate::cards::run(st, unit.card, None, crate::cards::Hook::OnAct, &unit, &crate::cards::Args::Place(origin));
+    Ok(())
 }
 
 pub fn roam_targets(st: &State, unit: &Unit, cr: Cr, occ: u32) -> Vec<Target> {

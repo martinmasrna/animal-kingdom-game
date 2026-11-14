@@ -240,6 +240,7 @@ pub fn action_vec_into(st: &State, me: Player, a: &Action, legal_index: usize, o
             }
         }
         Action::Draw => out[2] = 1.0,
+        Action::Act { .. } => out[2] = 1.0,   // the actions prototype: the network never saw one; read as a non-board move
         Action::Pass => out[5] = 1.0,
         Action::Choice(v) => match v {
             Value::Str(s) if *s == SKIP => out[5] = 1.0,

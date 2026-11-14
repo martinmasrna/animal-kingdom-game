@@ -58,6 +58,25 @@ pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64
 /// The anthem as it stands on a chosen turn (`their_turn`: the owner's opponent to move), for an evaluation that asks
 /// both (Giraffe, Crocodile and the Cape Buffalo's aura change with whose turn it is).
 pub fn anthem_bonus_turn(st: &State, card: &Card, owner: Player, self_iid: Option<i64>, sources: Option<&Sources>, their_turn: bool) -> i32 {
+    anthem_bonus_turn_cards(st, card, owner, self_iid, sources, their_turn) + guard_bonus(st, owner, their_turn)
+}
+
+/// [ACTION 8] (the actions prototype): +bonus to every animal of `owner` during the opponent's turn it was used for. On a
+/// chosen `their_turn` while `owner` is still to move, it is the turn after this one.
+pub fn guard_bonus(st: &State, owner: Player, their_turn: bool) -> i32 {
+    if owner > B || !their_turn {
+        return 0;
+    }
+    match st.action_guard[owner as usize] {
+        Some((t, n)) => {
+            let turn = if st.current == owner { st.turn_counter + 1 } else { st.turn_counter };
+            if t == turn { n } else { 0 }
+        }
+        None => 0,
+    }
+}
+
+fn anthem_bonus_turn_cards(st: &State, card: &Card, owner: Player, self_iid: Option<i64>, sources: Option<&Sources>, their_turn: bool) -> i32 {
     let cfg = st.cfg();
     const AURA_FAMILIES: u32 = T_FISH | T_HOOFED;
     if card.anthem_kind == 0 {
@@ -192,6 +211,10 @@ pub fn breakdown(st: &State, unit: &Unit) -> serde_json::Value {
         }
     }
     allies.sort();
+    let guard = guard_bonus(st, unit.owner, their_turn);   // [ACTION 8], last (strength.py strength_breakdown)
+    if guard != 0 {
+        allies.push(("action_8", guard));
+    }
     let own = anthem_bonus(st, card, unit.owner, Some(unit.iid), None) - allies.iter().map(|(_, b)| b).sum::<i32>();
     let mut auras: Vec<J> = Vec::new();
     if own != 0 {

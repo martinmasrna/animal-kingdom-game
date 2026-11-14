@@ -535,7 +535,8 @@ impl AtomicBot {
             keep[i] = true;
         }
         for (i, a) in legal.iter().enumerate() {
-            if !keep[i] && matches!(a, Action::Roam { target: Target::Hq(_), .. }) {   // a den capture is never cut
+            // a den capture is never cut; nor an Action (the actions prototype: the network never saw one)
+            if !keep[i] && matches!(a, Action::Roam { target: Target::Hq(_), .. } | Action::Act { .. }) {
                 keep[i] = true;
             }
         }

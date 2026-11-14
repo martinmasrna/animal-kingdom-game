@@ -314,6 +314,7 @@ class GameState:
         roar_twice: Optional[dict[str, int]] = None,
         hungry_eaten: Optional[dict[str, int]] = None,
         last_roar: Optional[dict[str, str]] = None,
+        action_guard: Optional[dict[str, list]] = None,
         jelly: Optional[dict[str, dict[str, Any]]] = None,
         strength_sources: Optional[dict[int, tuple]] = None,
     ):
@@ -338,6 +339,9 @@ class GameState:
         self.hungry_eaten = hungry_eaten if hungry_eaten is not None else {}
         # The Macaw: player -> the card whose Roar that player played last (public; a Macaw's copy counts as the copied card).
         self.last_roar = last_roar if last_roar is not None else {}
+        # [ACTION 8] (the actions prototype): player -> [the turn_counter of the opponent's turn it holds for, the bonus]:
+        # that player's animals have +bonus strength during that turn (strength.anthem_bonus).
+        self.action_guard = action_guard if action_guard is not None else {}
         # The legendary Bee's royal jelly: player -> card id -> [how many deck copies it reached, the counter that made them
         # strength 5 at the Roar]. Each comes out of the deck (drawn, played or placed from it) with that counter, so growth
         # since the Roar (the Python's) stays on it; copies shuffled in later are untouched (deck_instance).
@@ -602,6 +606,7 @@ class GameState:
         new.roar_twice = dict(self.roar_twice)
         new.hungry_eaten = dict(self.hungry_eaten)
         new.last_roar = dict(self.last_roar)
+        new.action_guard = {p: list(g) for p, g in self.action_guard.items()}
         new.jelly = {p: dict(j) for p, j in self.jelly.items()}
         new.strength_sources = dict(self.strength_sources)   # values are tuples: shared safely
         new.result = self.result  # Result is frozen/immutable - safe to share
@@ -670,6 +675,7 @@ class GameState:
             "roar_twice": dict(sorted(self.roar_twice.items())),
             "hungry_eaten": dict(sorted(self.hungry_eaten.items())),
             "last_roar": dict(sorted(self.last_roar.items())),
+            "action_guard": {p: list(g) for p, g in sorted(self.action_guard.items())},
             "jelly": {p: dict(sorted(j.items())) for p, j in sorted(self.jelly.items())},
             "strength_sources": self._live_strength_sources(),
         }
@@ -721,6 +727,7 @@ class GameState:
             roar_twice=dict(d.get("roar_twice") or {}),
             hungry_eaten=dict(d.get("hungry_eaten") or {}),
             last_roar=dict(d.get("last_roar") or {}),
+            action_guard={p: list(g) for p, g in (d.get("action_guard") or {}).items()},
             jelly={p: dict(j) for p, j in (d.get("jelly") or {}).items()},
             strength_sources={int(i): tuple((e[0], int(e[1]), bool(e[2])) for e in entries)
                               for i, entries in (d.get("strength_sources") or {}).items()},

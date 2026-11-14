@@ -92,6 +92,7 @@ fn decision(st: &State) -> (sj::Value, sj::Value) {
     let mut copies: Vec<(i64, Vec<sj::Value>)> = Vec::new();
     let mut roams = sj::Map::new();
     let mut draw = false;
+    let mut acts: Vec<sj::Value> = Vec::new();   // the actions prototype: animals that can use their Action
     for a in &legal {
         match a {
             Action::Place { card, target, iid } => {
@@ -113,6 +114,7 @@ fn decision(st: &State) -> (sj::Value, sj::Value) {
                 e.as_array_mut().unwrap().push(target_list(st, target));
             }
             Action::Draw => draw = true,
+            Action::Act { origin } => acts.push(sj::Value::String(st.crname(*origin).to_string())),
             _ => {}
         }
     }
@@ -133,7 +135,7 @@ fn decision(st: &State) -> (sj::Value, sj::Value) {
             }
         }
     }
-    let mut out = json!({"draw": draw, "place": places, "roam": roams});
+    let mut out = json!({"draw": draw, "place": places, "roam": roams, "act": acts});
     if !copies.is_empty() {
         let m: sj::Map<String, sj::Value> = copies.into_iter().map(|(k, v)| (k.to_string(), sj::Value::Array(v))).collect();
         out["copies"] = sj::Value::Object(m);

@@ -34,6 +34,7 @@ pub enum Hook {
     OnRoam,
     OnFriendlyRoam,
     OnFriendlyFlee,
+    OnAct,
 }
 
 impl Hook {
@@ -109,6 +110,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "butterfly_legend" => GROWS,
         "butterfly_legend_caterpillar" | "butterfly_legend_chrysalis" | "butterfly_legend_butterfly" => &[OnPlace, OnDawnInHand, OnStartOfTurn, OnGain],
         "caterpillar" => &[OnGainInHand],
+        "action_1" | "action_2" | "action_3" | "action_4" | "action_5" | "action_6" | "action_7" | "action_8" => &[OnAct],
         _ => &[],
     };
     hooks.iter().fold(0u32, |m, h| m | (1 << *h as u32))
@@ -562,6 +564,37 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         _ => 0,
     };
     match (card, hook) {
+        // The actions prototype: the eight Action animals (effects.py, _action_N_act)
+        ("action_1", OnAct) => gains(st, unit, "action_1_food"),
+        ("action_2", OnAct) => {
+            gains(st, unit, "action_2_food");
+            let opts = hand_iids(st, owner, 0).into_iter().map(Value::Int).collect();
+            push_choose(st, owner, opts, "discard", false, Map::default());
+        }
+        ("action_3", OnAct) => {
+            let n = cfg(st, "action_3_draw");
+            push_draw(st, owner, n);
+            gains(st, unit, "action_3_food");
+        }
+        ("action_4", OnAct) => {
+            let g = cfg(st, "action_4_grant");
+            let opts = hand_iids(st, owner, 0).into_iter().map(Value::Int).collect();
+            push_choose(st, owner, opts, "grant", false, vmap!("amount" => Value::Int(g as i64)));
+        }
+        ("action_5", OnAct) => st.turn_flags.flight_next[owner.min(1) as usize] = true,
+        ("action_6", OnAct) => st.effect_stack.push(vmap!("op" => Value::s("scout"), "player" => pn(owner), "spec" => Value::Null)),
+        ("action_7", OnAct) => {
+            let n = cfg(st, "action_7_drain");
+            lose_food(st, other(owner), n, Some(unit.card));
+        }
+        ("action_8", OnAct) => {
+            let (turn, n) = (st.turn_counter + 1, cfg(st, "action_8_bonus"));
+            let p = owner.min(1) as usize;
+            st.action_guard[p] = match st.action_guard[p] {
+                Some((t, g)) if t == turn => Some((turn, g + n)),
+                _ => Some((turn, n)),
+            };
+        }
         // Aristocrats
         ("cuckoo_legend", OnPlace) => {
             let cap = cfg(st, "cuckoo_legend_max");

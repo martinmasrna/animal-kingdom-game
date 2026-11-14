@@ -4129,6 +4129,102 @@
       "text": "Roar: return every adjacent enemy weaker than this to its owner's hand.",
       "keywords": [],
       "species": ""
+    },
+    {
+      "id": "action_1",
+      "name": "[ACTION 1]",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Action: gain 10 food.",
+      "species": "[ACTION 1]",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "action_2",
+      "name": "[ACTION 2]",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Action: discard a card to gain 15 food.",
+      "species": "[ACTION 2]",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "action_3",
+      "name": "[ACTION 3]",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "text": "Action: gain 5 food and draw a card.",
+      "species": "[ACTION 3]",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "action_4",
+      "name": "[ACTION 4]",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "text": "Action: give an animal in your hand +2 strength.",
+      "species": "[ACTION 4]",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "action_5",
+      "name": "[ACTION 5]",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "text": "Action: the next animal you play this turn has Flight.",
+      "species": "[ACTION 5]",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "action_6",
+      "name": "[ACTION 6]",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "text": "Action: Scout a card.",
+      "species": "[ACTION 6]",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "action_7",
+      "name": "[ACTION 7]",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Action: your opponent loses 10 food.",
+      "species": "[ACTION 7]",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "action_8",
+      "name": "[ACTION 8]",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "text": "Action: your animals have +2 strength during your opponent's next turn.",
+      "species": "[ACTION 8]",
+      "habitat": "Meadow",
+      "keywords": []
     }
   ]
 }

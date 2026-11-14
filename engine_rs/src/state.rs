@@ -290,6 +290,9 @@ pub struct TurnFlags {
     pub falstaff: [bool; 2],
     pub titan_discount: [bool; 2],
     pub caps: FastVec<[(&'static str, i64); 4]>,
+    /// The actions prototype: animals that used their Action this turn, and [ACTION 5]'s Flight for the next play.
+    pub acted: FastVec<[i64; 4]>,
+    pub flight_next: [bool; 2],
 }
 
 impl TurnFlags {
@@ -324,6 +327,9 @@ impl TurnFlags {
             if self.titan_discount[p] {
                 m.insert(format!("titan_discount_{pn}"), sj::Value::Bool(true));
             }
+            if self.flight_next[p] {
+                m.insert(format!("flight_next_{pn}"), sj::Value::Bool(true));
+            }
         }
         for p in 0..3 {
             if self.lost[p] != 0 {
@@ -341,6 +347,9 @@ impl TurnFlags {
         }
         for (iid, n) in &self.free_roam_iid {
             m.insert(format!("free_roam_iid_{iid}"), sj::Value::from(*n));
+        }
+        for iid in &self.acted {
+            m.insert(format!("acted_{iid}"), sj::Value::Bool(true));
         }
         for iid in &self.gain_str {
             m.insert(format!("gain_str_{iid}"), sj::Value::Bool(true));
@@ -393,6 +402,12 @@ impl TurnFlags {
                 }
             } else if let Some(rest) = k.strip_prefix("falstaff_") {
                 t.falstaff[p_of(rest).min(1)] = val.as_bool().unwrap_or(false);
+            } else if let Some(rest) = k.strip_prefix("flight_next_") {
+                t.flight_next[p_of(rest).min(1)] = val.as_bool().unwrap_or(false);
+            } else if let Some(rest) = k.strip_prefix("acted_") {
+                if let Ok(i) = rest.parse::<i64>() {
+                    t.acted.push(i);
+                }
             } else if let Some(rest) = k.strip_prefix("titan_discount_") {
                 t.titan_discount[p_of(rest).min(1)] = val.as_bool().unwrap_or(false);
             } else if k.starts_with("cap_") {
@@ -469,6 +484,8 @@ pub struct State {
     /// The legendary Dung Beetle: food each player's Hungry animals have eaten this game.
     pub hungry_eaten: [i32; 2],
     pub last_roar: [Option<CardId>; 2],
+    /// [ACTION 8] (the actions prototype): (the opponent's turn it holds for, the bonus) per player.
+    pub action_guard: [Option<(i32, i32)>; 2],
     pub jelly: [FxHashMap<CardId, (i32, i32)>; 2],
     /// Whether `jelly[p]` exists at all (Python keeps the player's dict once the legendary Bee roared, empty or not).
     pub jelly_set: [bool; 2],
@@ -528,6 +545,7 @@ impl Clone for State {
             roar_twice: self.roar_twice,
             hungry_eaten: self.hungry_eaten,
             last_roar: self.last_roar,
+            action_guard: self.action_guard,
             jelly: self.jelly.clone(),
             jelly_set: self.jelly_set,
             strength_sources: self.strength_sources.clone(),
@@ -978,6 +996,12 @@ impl State {
                 last_roar.insert(player_name(p as Player).to_string(), sj::Value::String(self.cname(c).to_string()));
             }
         }
+        let mut action_guard = sj::Map::default();
+        for p in 0..2 {
+            if let Some((t, n)) = self.action_guard[p] {
+                action_guard.insert(player_name(p as Player).to_string(), sj::json!([t, n]));
+            }
+        }
         let mut jelly_m = sj::Map::default();
         for p in 0..2 {
             if self.jelly_set[p] {
@@ -1012,6 +1036,7 @@ impl State {
             "roar_twice": roar_twice,
             "hungry_eaten": hungry_eaten,
             "last_roar": last_roar,
+            "action_guard": action_guard,
             "jelly": jelly_m,
             "strength_sources": self.sources_json(),
         })
@@ -1063,6 +1088,9 @@ impl State {
             }
             if let Some(c) = d.get("last_roar").and_then(|c| c.get(pn)).and_then(|c| c.as_str()) {
                 st.last_roar[p] = Some(cid(c));
+            }
+            if let Some(g) = d.get("action_guard").and_then(|c| c.get(pn)).and_then(|c| c.as_array()) {
+                st.action_guard[p] = Some((g[0].as_i64().unwrap_or(0) as i32, g[1].as_i64().unwrap_or(0) as i32));
             }
         }
         st.remove_pile = cards_of(&d["remove_pile"]);
@@ -1163,6 +1191,7 @@ impl State {
             roar_twice: [None, None],
             hungry_eaten: [0, 0],
             last_roar: [None, None],
+            action_guard: [None, None],
             jelly: [FxHashMap::default(), FxHashMap::default()],
             jelly_set: [false, false],
             strength_sources: CowVec::new(),

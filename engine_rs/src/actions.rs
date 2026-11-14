@@ -16,6 +16,8 @@ pub enum Action {
     Draw,
     Place { card: CardId, target: Target, iid: Option<i64> },
     Roam { origin: Cr, target: Target },
+    /// The actions prototype: the animal on top of `origin` uses its "Action:".
+    Act { origin: Cr },
     Pass,
     Choice(Value),
 }
@@ -49,6 +51,7 @@ impl Action {
                 m
             }
             Action::Roam { origin, target } => sj::json!({"kind": "roam", "from": st.crname(*origin), "target": Action::target_json(st, target)}),
+            Action::Act { origin } => sj::json!({"kind": "act", "from": st.crname(*origin)}),
             Action::Choice(v) => sj::json!({"kind": "choice", "choice": v.to_json()}),
         }
     }
@@ -77,6 +80,7 @@ impl Action {
                 origin: st.map().cr(d["from"].as_str().ok_or("roam without from")?).ok_or("unknown crossroad")?,
                 target: Action::target_from(st, &d["target"])?,
             }),
+            "act" => Ok(Action::Act { origin: st.map().cr(d["from"].as_str().ok_or("act without from")?).ok_or("unknown crossroad")? }),
             "choice" => Ok(Action::Choice(Value::from_json(&d["choice"]))),
             _ => Err(format!("unknown action kind {kind:?}")),
         }

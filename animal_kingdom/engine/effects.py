@@ -22,7 +22,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Callable, Optional
 
-from .actions import SKIP, ChoiceAction, PlaceAction, RoamAction
+from .actions import SKIP, ActAction, ChoiceAction, PlaceAction, RoamAction
 from .state import JELLY_SOURCE, WILD, EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
 from .strength import effective_strength, placement_strength, raw_strength, small_starting_deck
@@ -200,6 +200,7 @@ def do_placement(state: GameState, player: str, card_id: str, target, iid: Optio
         state.food[player] -= cost
         state.emit("pay", player=player, n=cost, card=card_id)
     state.units_placed_this_turn += 1
+    state.turn_flags.pop(f"flight_next_{player}", None)   # [ACTION 5]: the next animal you play has Flight, then it is spent
     kind, where = target
     if kind == "hq":
         state.emit("capture", player=player, iid=unit.iid, card=card_id, den=where, str=strength)
@@ -841,6 +842,7 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
     # once instead of calling is_connected per (card x crossroad); Flight/extra bypasses layer
     # on top per card below. (Byte-identical: `cr in connectable` == is_connected(player, cr).)
     sorted_crossroads = sorted(gm.crossroads)
+    flight_next = bool(state.turn_flags.get(f"flight_next_{player}"))   # [ACTION 5]: this play has Flight
     connectable = {cr for cr in sorted_crossroads if state.is_connected(player, cr, occ)}
 
     # One placement per distinct hand card id, using the copy that would actually be played; per strength when
@@ -860,7 +862,7 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
         if "Titan" in card.keywords and not titan_ok:
             continue                                  # Titan: two actions, never a free placement
         is_apex = "Apex Predator" in card.keywords
-        flight = statics.ignores_connection(state, card_id)
+        flight = flight_next or statics.ignores_connection(state, card_id)
         extra = statics.extra_placement_crossroads(state, card_id, player)
         reach = statics.reach_of(state, card_id)
         if reach:
@@ -1061,6 +1063,96 @@ def _op_grant_free_roam(state, step):
     key = f"free_roams_{step['player']}"
     state.turn_flags[key] = state.turn_flags.get(key, 0) + step["n"]
     return None
+
+
+# ===================================================================== Action
+#
+# The actions prototype (branch actions): "Action: <effect>." on a card. As one of the turn's actions, the top animal of a
+# crossroad uses it: once per animal per turn, the turn it is placed too. Not a placement and not a Roar, so nothing that
+# reacts to placing or to Roars sees it, and nothing that repeats a Roar repeats it. An inked animal (no effects) has no
+# Action. Each card's effect is its EFFECTS hook "on_act"; ACT_NEEDS says when it is offered at all.
+# turn_flags: "acted_<iid>" (this animal used its Action this turn), "flight_next_<player>" ([ACTION 5]).
+
+ACT_NEEDS = {
+    "action_2": lambda state, p: bool(state.hands[p]),     # discard a card: only with a card in hand
+    "action_4": lambda state, p: bool(state.hands[p]),     # give an animal in your hand +2: only with one there
+    "action_6": lambda state, p: bool(state.decks[p]),     # Scout: only with a deck to look at
+}
+
+
+def has_act(state: GameState, unit) -> bool:
+    """Whether `unit`'s card carries an Action (printed), its effects working."""
+    hooks = EFFECTS.get(unit.card_id)
+    return bool(hooks and "on_act" in hooks) and statics.active(state, unit)
+
+
+def legal_acts(state: GameState, player: str) -> list:
+    """Every Action `player` may use now (the caller checks the turn has an action left), in crossroad order."""
+    out = []
+    for cr in sorted(cr for cr, st in state.board.items() if st and st[-1].owner == player):
+        unit = state.board[cr][-1]
+        if not has_act(state, unit) or state.turn_flags.get(f"acted_{unit.iid}"):
+            continue
+        need = ACT_NEEDS.get(unit.card_id)
+        if need is None or need(state, player):
+            out.append(ActAction(cr))
+    return out
+
+
+def do_act(state: GameState, player: str, origin: str) -> None:
+    """The animal on top of `origin` uses its Action (the caller has paid the action)."""
+    stack = state.board.get(origin)
+    if not stack or stack[-1].owner != player:
+        raise EngineError(f"{player} has no animal on {origin!r} to act")
+    unit = stack[-1]
+    state.turn_flags[f"acted_{unit.iid}"] = True
+    state.emit("act", player=player, iid=unit.iid, card=unit.card_id, cr=origin)
+    _push_hook(state, unit, origin, "on_act")
+
+
+def _action_1_act(state, unit, cr):
+    """Action: gain 10 food."""
+    _push_gain(state, unit.owner, state.config.action_1_food)
+
+
+def _action_2_act(state, unit, cr):
+    """Action: discard a card to gain 15 food (the player picks the card)."""
+    o = unit.owner
+    _push_gain(state, o, state.config.action_2_food)
+    _push_choose(state, o, _hand_iids(state, o), "discard")
+
+
+def _action_3_act(state, unit, cr):
+    """Action: gain 5 food and draw a card (an empty deck: the food all the same)."""
+    _push_draw(state, unit.owner, state.config.action_3_draw)
+    _push_gain(state, unit.owner, state.config.action_3_food)
+
+
+def _action_4_act(state, unit, cr):
+    """Action: give an animal in your hand +2 strength (a counter it carries onto the board)."""
+    _push_choose(state, unit.owner, _hand_iids(state, unit.owner), "grant", amount=state.config.action_4_grant)
+
+
+def _action_5_act(state, unit, cr):
+    """Action: the next animal you play this turn has Flight (spent by that play; gone at the end of the turn)."""
+    state.turn_flags[f"flight_next_{unit.owner}"] = True
+
+
+def _action_6_act(state, unit, cr):
+    """Action: Scout a card."""
+    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": None})
+
+
+def _action_7_act(state, unit, cr):
+    """Action: your opponent loses 10 food (never below 0)."""
+    lose_food(state, other_player(unit.owner), state.config.action_7_drain, card=unit.card_id)
+
+
+def _action_8_act(state, unit, cr):
+    """Action: your animals have +2 strength during your opponent's next turn (live; two of them stack)."""
+    turn, n = state.turn_counter + 1, state.config.action_8_bonus
+    g = state.action_guard.get(unit.owner)
+    state.action_guard[unit.owner] = [turn, g[1] + n] if g and g[0] == turn else [turn, n]
 
 
 # ============================================================= delayed scheduler
@@ -3577,3 +3669,15 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "tutorial_lynx": {"on_place": _conditional("tutorial_lynx", _draw1)},
     "tutorial_chipmunk": {"on_place": _chipmunk_place},
 }
+
+# The actions prototype (branch actions): the eight Action animals, each its "on_act" hook (legal_acts, do_act).
+EFFECTS.update({
+    "action_1": {"on_act": _action_1_act},
+    "action_2": {"on_act": _action_2_act},
+    "action_3": {"on_act": _action_3_act},
+    "action_4": {"on_act": _action_4_act},
+    "action_5": {"on_act": _action_5_act},
+    "action_6": {"on_act": _action_6_act},
+    "action_7": {"on_act": _action_7_act},
+    "action_8": {"on_act": _action_8_act},
+})

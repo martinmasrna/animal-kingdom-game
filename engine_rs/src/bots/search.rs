@@ -615,7 +615,7 @@ impl Searcher {
         let score_of = |i: usize| scored.iter().find(|(_, j)| *j == i).map(|(s, _)| *s).unwrap_or(f64::NEG_INFINITY);
         let mut reserved: Vec<usize> = Vec::new();
         for (i, a) in legal.iter().enumerate() {
-            if matches!(a, Action::Draw) || matches!(a, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. }) {
+            if matches!(a, Action::Draw | Action::Act { .. }) || matches!(a, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. }) {
                 reserved.push(i);
             }
         }

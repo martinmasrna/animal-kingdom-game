@@ -89,6 +89,9 @@ EXCLUDED = {
     "free_roams_": "encoded", "free_roams_used_": "encoded", "free_roam_iid_": "never written by the engine",
     "titan_discount_": "encoded", "bonus_actions_": "encoded (actions_left)", "action_cap_": "encoded (actions_left)",
     "falstaff_": "dead unless config.cap_falstaff", "gain_str_": "no card reacts to it",
+    # the actions prototype (branch actions): the network was trained before Action animals existed
+    "action_guard": "not encoded (actions prototype; strength reads it live)",
+    "acted_": "not encoded (actions prototype)", "flight_next_": "not encoded (actions prototype)",
 }
 
 

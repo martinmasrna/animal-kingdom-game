@@ -37,6 +37,7 @@ fn top_level_actions(st: &State) -> Vec<Action> {
     let titan_ok = left >= titan_cost(st, player) && st.food[player.min(1) as usize] >= titan_food(st, player);
     actions.extend(effects::legal_placements(st, player, None, titan_ok));
     actions.extend(effects::legal_roams(st, player, false));
+    actions.extend(effects::legal_acts(st, player));
     actions
 }
 
@@ -175,6 +176,11 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
                 let top = st.top(*origin).cloned();
                 effects::pay_for_roam(st, cur, top.as_ref());
                 effects::do_roam(st, cur, *origin, target, false)?;
+            }
+            Action::Act { origin } => {
+                st.actions_taken_this_turn += 1;
+                let cur = st.current;
+                effects::do_act(st, cur, *origin)?;
             }
             _ => return Err("unexpected action".into()),
         }

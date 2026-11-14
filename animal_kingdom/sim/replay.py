@@ -126,6 +126,8 @@ def _action_desc(a: dict) -> str:
         if tgt[0] == "hq":
             return f"ROAM {a['from']} -> ENEMY HQ ({tgt[1]})  *** CAPTURE ***"
         return f"roam {a['from']} -> {tgt[1]}"
+    if kind == "act":
+        return f"act {a['from']}"
     if kind == "choice":
         return f"choose {a['choice']}"
     return str(a)

@@ -25,7 +25,7 @@ from typing import Collection
 
 from ..engine import rules
 from ..engine import strength as strength_mod
-from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction, RoamAction
+from ..engine.actions import SKIP, Action, ActAction, ChoiceAction, DrawAction, PlaceAction, RoamAction
 
 # Shared with cli.py so the interactive picker's prompts match the board's colors.
 SEAT_STYLE = {"A": "bold cyan", "B": "bold red"}
@@ -98,6 +98,9 @@ def describe_action(state, action: Action) -> str:
         if action.is_hq_capture:
             return f"roamed {name} from {action.origin} and captured HQ {action.target[1]}"
         return f"roamed {name} from {action.origin} to {action.crossroad}"
+    if isinstance(action, ActAction):
+        name = state.cards[state.top_unit(action.origin).card_id].name if state.top_unit(action.origin) else "an animal"
+        return f"used the Action of {name} on {action.origin}"
     if isinstance(action, ChoiceAction):
         return "declined an optional effect" if action.choice == SKIP else f"chose {action.choice}"
     return repr(action)

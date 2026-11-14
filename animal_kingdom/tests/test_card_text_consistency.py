@@ -39,6 +39,9 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "rat_legend": ["rat_king_per_rodent"],
     "flying_squirrel": ["flying_squirrel_food"],
     "squirrel": ["squirrel_food"],
+    "action_1": ["action_1_food"],     # the actions prototype
+    "action_2": ["action_2_food"],
+    "action_3": ["action_3_food"],
     "chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
     "tutorial_chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
     "groundhog": ["groundhog_food"],
@@ -326,6 +329,8 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "orangutan_legend": ["orangutan_legend_grant"],
     "tarsier": ["tarsier_grant"],
     "baboon": ["baboon_grant"],
+    "action_4": ["action_4_grant"],     # the actions prototype
+    "action_8": ["action_8_bonus"],
     "marmot": ["marmot_per_step"],
     "butterfly": ["butterfly_grant"],
     "butterfly_legend_chrysalis": ["butterfly_grant"],
