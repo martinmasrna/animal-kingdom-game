@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 73,
+ "rev": 82,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -321,7 +321,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "Dusk: gain 2 food for each animal you control.",
+   "text": "Activate: gain 2 food for each animal you control.",
    "tags": [
     "Colony",
     "Queen"
