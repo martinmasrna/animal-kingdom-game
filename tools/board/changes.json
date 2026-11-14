@@ -1,7 +1,18 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 3,
- "changed": {},
+ "rev": 6,
+ "changed": {
+  "mouse": {
+   "strength": {
+    "was": 4,
+    "now": 1
+   },
+   "stars": {
+    "was": 0,
+    "now": -1
+   }
+  }
+ },
  "new": {
   "new1": {
    "copy_of": "butterfly_legend",
