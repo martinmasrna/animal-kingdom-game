@@ -244,9 +244,10 @@ def _end_turn(state: GameState) -> None:
     effects.resolve(state)                  # choice-free by design, so it drains fully
     if _decided(state):
         return  # an end-of-turn food gain could already win
-    _produce_food(state, player)            # end-of-turn region income
-    if _decided(state):
-        return  # food win
+    if not state.config.food_at_turn_start:
+        _produce_food(state, player)            # end-of-turn region income
+        if _decided(state):
+            return  # food win
     # Both players ending a turn without acting, back to back, ends the game (more food wins;
     # on a tie, the player whose pass ended it loses). A player with no move passes too.
     acted = state.actions_taken_this_turn or state.turn_flags.get(f"roams_{player}")   # a free roam is acting too
@@ -260,6 +261,10 @@ def _end_turn(state: GameState) -> None:
     state.turn_flags = {}                    # reset once-per-turn trigger flags
     state.current = other_player(player)
     state.emit("turn_start", player=state.current, turn=state.turn_counter)
+    if state.config.food_at_turn_start:      # the regions that survived the opponent's turn pay now
+        _produce_food(state, state.current)
+        if _decided(state):
+            return  # food win
     # Start of the new player's turn: delayed effects + start-of-turn triggers, then resolve.
     effects.start_of_turn(state, state.current)
     effects.resolve(state)

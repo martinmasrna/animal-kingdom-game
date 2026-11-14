@@ -544,6 +544,32 @@ class GameState:
                     queue.append(nb)
         return seen
 
+    def settled_connected(self, player: str) -> set:
+        """connected_occupied over the crossroads `player` already held when this turn began (config
+        settle_before_extend): a crossroad counts when the player tops it and the topmost animal not placed this turn
+        is the player's too. An animal placed this turn holds its crossroad but carries no connection yet."""
+        gm, board, turn = self.game_map, self.board, self.turn_counter
+
+        def settled(cr) -> bool:
+            st = board.get(cr)
+            if not st or st[-1].owner != player:
+                return False
+            for u in reversed(st):
+                if u.placed_on_turn != turn:
+                    return u.owner == player
+            return False
+
+        seeds = [cr for cr in gm.hq_front(player) if settled(cr)]
+        seen, queue = set(seeds), deque(seeds)
+        adjacency = gm._sorted_adjacency
+        while queue:
+            cr = queue.popleft()
+            for nb in adjacency.get(cr, ()):
+                if nb not in seen and settled(nb):
+                    seen.add(nb)
+                    queue.append(nb)
+        return seen
+
     def is_connected(self, player: str, cr: str, occ: Optional[set] = None) -> bool:
         """Whether `cr` is a connection-legal placement for `player` (HQ graph only).
 

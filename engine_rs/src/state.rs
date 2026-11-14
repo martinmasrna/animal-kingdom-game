@@ -879,6 +879,43 @@ impl State {
         }
         self.cache.conn[player as usize]
     }
+    /// connected_occupied over the crossroads `player` already held when this turn began (config settle_before_extend):
+    /// the player tops it and the topmost animal not placed this turn is the player's too.
+    pub fn settled_connected(&self, player: Player) -> u32 {
+        if player > B {
+            return 0;
+        }
+        let gm = &self.g.map;
+        let turn = self.turn_counter as i16;
+        let mut settled = 0u32;
+        for &cr in &gm.sorted {
+            let stack = self.stack(cr);
+            if stack.last().map(|u| u.owner == player).unwrap_or(false) {
+                if let Some(a) = stack.iter().rev().find(|u| u.placed_on_turn != turn) {
+                    if a.owner == player {
+                        settled |= 1 << cr;
+                    }
+                }
+            }
+        }
+        let mut seen = 0u32;
+        let mut queue: Vec<Cr> = Vec::new();
+        for &c in gm.front(player).iter() {
+            if settled & (1 << c) != 0 && seen & (1 << c) == 0 {
+                seen |= 1 << c;
+                queue.push(c);
+            }
+        }
+        while let Some(cr) = queue.pop() {
+            for &nb in gm.neighbors(cr).iter() {
+                if settled & (1 << nb) != 0 && seen & (1 << nb) == 0 {
+                    seen |= 1 << nb;
+                    queue.push(nb);
+                }
+            }
+        }
+        seen
+    }
     /// The crossroads `player` tops, as a bitmask.
     pub fn owned_mask(&self, player: Player) -> u32 {
         if player > B {

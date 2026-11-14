@@ -214,6 +214,10 @@ class Config:
     energy_start: int = 0                # growing energy: a player's first turn has this much and each later turn one
                                          # more, up to `actions_per_turn` (0: every turn has `actions_per_turn`)
     energy_second_lead: int = 0          # growing energy: the second player runs this many steps ahead of the first
+    food_at_turn_start: bool = False     # a region pays at the start of its owner's turn (it has to survive the
+                                         # opponent's turn first), not at the end of the turn that completed it
+    settle_before_extend: bool = False   # an animal placed this turn doesn't carry connection until the next turn:
+                                         # placements connect only through crossroads held when the turn began
     mouse_draw_any: int = 0              # Mouse: 0, "draw a Rodent"; N, "draw N cards" (Martin's note, 2026-11-14)
     hummingbird_energy: int = 0          # Hummingbird: 0, "draw 2 cards"; N, "gain N energy" (this turn)
     mole_legend_discard: bool = True     # the legendary Mole discards a card after its extra play (off: Martin's note)

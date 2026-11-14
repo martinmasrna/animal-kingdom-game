@@ -909,7 +909,7 @@ pub fn placement_cost(st: &State, player: Player, card: CardId) -> i32 {
 
 pub fn legal_placements(st: &State, player: Player, allowed: Option<&[CardId]>, titan_ok: bool, budget: Option<i32>) -> Vec<Action> {
     let gm = st.map();
-    let occ = st.connected_occupied(player);
+    let occ = if st.cfg().settle_before_extend { st.settled_connected(player) } else { st.connected_occupied(player) };
     let enemy = other(player);
     let enemy_hq = gm.front(enemy).iter().any(|&c| occ & (1 << c) != 0);
     let mut connectable = 0u32;

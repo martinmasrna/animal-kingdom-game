@@ -116,6 +116,9 @@ edits = HERE / "edits.json"       # Martin's changes on the Costs board, laid ov
 if edits.exists():
     e = json.loads(edits.read_text())
     out["rules"].update(e.get("rules", {}))
+for k in ("food_at_turn_start", "settle_before_extend"):     # on/off rules: the board sends 1 or 0
+    if k in out["rules"]:
+        out["rules"][k] = bool(out["rules"][k])
     for cid, o in e.get("cards", {}).items():
         out["cards"].setdefault(cid, {}).update(o)
 (ROOT / "animal_kingdom/data/energy.json").write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n")

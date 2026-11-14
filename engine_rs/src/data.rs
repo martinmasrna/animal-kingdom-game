@@ -475,6 +475,8 @@ pub struct Config {
     pub max_places_per_turn: i32,
     pub energy_start: i32,
     pub energy_second_lead: i32,
+    pub food_at_turn_start: bool,
+    pub settle_before_extend: bool,
 }
 
 impl Config {
@@ -503,6 +505,8 @@ impl Config {
             max_places_per_turn: gi("max_places_per_turn", 0),
             energy_start: gi("energy_start", 0),
             energy_second_lead: gi("energy_second_lead", 0),
+            food_at_turn_start: raw.get("food_at_turn_start").and_then(|x| x.as_bool()).unwrap_or(false),
+            settle_before_extend: raw.get("settle_before_extend").and_then(|x| x.as_bool()).unwrap_or(false),
             raw,
         })
     }

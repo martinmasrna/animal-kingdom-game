@@ -845,7 +845,7 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
     Deterministic order (sorted) for reproducible replay.
     """
     gm = state.game_map
-    occ = state.connected_occupied(player)
+    occ = state.settled_connected(player) if state.config.settle_before_extend else state.connected_occupied(player)
     enemy = other_player(player)
     enemy_hq = any(cr in occ for cr in gm.hq_front(enemy))  # HQ capture: connection only (not Flight)
 

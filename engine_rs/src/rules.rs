@@ -229,9 +229,11 @@ fn end_turn(st: &mut State) {
     if st.decided() {
         return;
     }
-    produce_food(st, player);
-    if st.decided() {
-        return;
+    if !st.cfg().food_at_turn_start {
+        produce_food(st, player);
+        if st.decided() {
+            return;
+        }
     }
     let acted = st.actions_taken_this_turn != 0 || st.turn_flags.roams[player.min(1) as usize] != 0;
     st.idle_turns = if acted { 0 } else { st.idle_turns + 1 };
@@ -246,6 +248,12 @@ fn end_turn(st: &mut State) {
     st.current = other(player);
     let (cur, t) = (st.current, st.turn_counter);
     crate::emit!(st, "turn_start", crate::vmap!("player" => effects::pn(cur), "turn" => crate::value::Value::Int(t as i64)));
+    if st.cfg().food_at_turn_start {
+        produce_food(st, cur);
+        if st.decided() {
+            return;
+        }
+    }
     effects::start_of_turn(st, cur);
     effects::resolve(st);
     if st.result.is_none() && st.pending.is_none() && st.effect_stack.is_empty() && st.turn_counter < st.cfg().max_turns && !has_top_level_action(st) {
