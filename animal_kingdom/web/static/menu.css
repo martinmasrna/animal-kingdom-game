@@ -310,3 +310,6 @@ html { touch-action: manipulation; }
 .mscr .fcount.two b { font-size: 16px; min-width: 38px; text-align: right; } .mscr .fcount.two span span { font-size: 14px; }
 .mscr .fcount .fstars { cursor: pointer; }
 .mscr .fcount .fstars.over b, .mscr .fcount .fstars.over span { color: #ff8a78; }
+/* A card held past its copy limit (a deck saved under the old three-copy rule): its count in red, as the over star count. */
+:is(.mscr, .game) .st.over .x { color: #ff8a78; }
+.coll .pips.over i.on { background: #ff8a78; border-color: #ff8a78; }

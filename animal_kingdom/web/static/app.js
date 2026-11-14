@@ -6,7 +6,7 @@ import { SUCCESSOR } from './cardnums.js';
 import { plan } from './timeline.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait } from './board.js';
 import { decodeDeck } from './deckcode.js';
-import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
+import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
@@ -115,7 +115,11 @@ const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 // The decks you can play: your complete decks (a profile starts with the starters as its own); with none, the starters.
 // A deck under 30 cards is listed too, so it doesn't vanish from home while you build it: shown with its count, opened in
 // the collection to finish, never chosen to play (Martin, 2026-10-31: "affordance for decklist with less than 30 cards").
-const playable = () => { const mine = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: Math.max(0, 30 - deckSize(d.cards)), list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
+// A deck over the rules (copies or stars, the stars prototype) is treated like an unfinished one: listed, opened in the
+// collection to fix, never played. `fix` holds what is over.
+const playable = () => { const mine = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]);
+    const short = Math.max(0, 30 - deckSize(d.cards)), fix = short || !RULES ? '' : deckIssue(list, CARDS, RULES);
+    return { id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: short || (fix ? -1 : 0), fix, list }; });
   return mine.some(d => !d.short) ? mine : [...DECKS, ...mine]; };
 const chosenDeck = () => { const all = playable().filter(d => !d.short), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
@@ -293,7 +297,7 @@ function homeScreen(mode = {}) {
     : play.opp === 'ranked' ? ['Ranked', ME && ME.league ? leagueText(ME.league) : `your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : isTest ? label(TEST_BOTS, play.botDeck) : 'Random'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
-  const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.short ? `<span class="left">${30 - d.short}/30</span>` : ''}</div>`;
+  const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.fix ? '<span class="left">Too many</span>' : d.short ? `<span class="left">${30 - d.short}/30</span>` : ''}</div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
   const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
   const chooser = play.open === 'decks'
@@ -559,7 +563,7 @@ function metaCards(cards, key) {
   const min = META.min, sort = META.acsort || 'd';
   const cmp = impCmp(sort, min, META.acsortUp);
   const rows = cards.filter(c => CARDS[c.card] && c.d.yes[0] && (!META.rar || CARDS[c.card].rarity === META.rar)).sort((a, b) => cmp(a, b) || b.d.yes[0] - a.d.yes[0]);
-  const rar = dd('mrar', META.rar, [['', 'Every rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']]);
+  const rar = dd('mrar', META.rar, [['', 'All cards'], ['legendary', 'Legendary']]);   // the stars prototype: legendary and the rest
   return `<div class="mcardsh"><h4 class="msub mcards">Cards</h4>${rar}</div>${rows.length ? '' : '<p class="none">No cards of this rarity in the range.</p>'}<div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${impHead('k', sort === 'k', 'data-' + key, META.acsortUp)}${impHead('d', sort === 'd', 'data-' + key, META.acsortUp)}${impHead('p', sort === 'p', 'data-' + key, META.acsortUp)}${gHead(sort === 'g', 'data-' + key, META.acsortUp)}</tr></thead><tbody>
     ${rows.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, 1)}</div></th>${impCell(c.k, 'k', min)}${impCell(c.d, 'd', min)}${impCell(c.p, 'p', min)}<td class="num dim">${c.d.yes[0]}</td></tr>`).join('')}</tbody></table></div>`;
 }
