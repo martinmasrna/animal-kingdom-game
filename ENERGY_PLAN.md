@@ -41,7 +41,7 @@ The Lion (7, vanilla) costs 2. A drawn card is worth 2 energy. Body value by str
 - [x] 7. Frontend: cost on every card, energy pips, the draw price, deck builder for 30 cards with 2/1 copies sorted by cost.
 - [x] 8. Costs board: cost +/- and strength +/- per card, the rule numbers, writing the overlay; a local game server that restarts on a change; a button to send it to the online test app.
 - [x] 9. Deploy to the test app, verify by playing a bot game through the browser.
-- [ ] 10. Morning page for Martin (published artifact, opened): what was built, what changed and why, what the numbers show, the list of touched texts and benched cards, known weak spots.
+- [x] 10. Morning page for Martin (published artifact, opened): what was built, what changed and why, what the numbers show, the list of touched texts and benched cards, known weak spots.
 
 ## Log
 
@@ -66,3 +66,5 @@ The Lion (7, vanilla) costs 2. A drawn card is worth 2 energy. Body value by str
 - 03:20 Reviewer agent (Sonnet, cold read plus its own 1,680-game run) and what I did with it: Praying Mantis 1 (Mouse dominated it), Bobcat 2 (Dolphin dominated it), Octavia 2, Mole 3 / Ocelot 2 / Remora 2 (a free play can no longer fetch another Mole; chains stay bounded by 2 copies), Electric Eel leaves the opponent 4 energy (3 was half a turn once energy went to 6), Kitten token costs 2 (it draws a card, so at 1 it paid for itself), Bird Egg 1, Gorilla 3, Cape Buffalo 3, Black Bear 4, Okapi 4, Orangutan 3, Termite King 2. Not taken: Capybara/Juliette's small-deck line stays (it is a deckbuilding condition, and Deck 6 meets it); Raven stays 3 (at 2 it would dominate the Bat).
 - 03:20 Canine costs: easing Akana, the Black Wolf, the Orca and the Moose took Deck 3 from 52% to 65%; back at Akana 4, Black Wolf 5, Orca 5, Moose 4 it is 54%.
 - 03:20 FINAL numbers (results/energy/rr9_final.jsonl, 2,100 games, plain referee): median 10 player-turns, food 53% / den 47%, first player 50%, no deck-outs, 5.8 draws a player, decks 46/54/54/46/51/49/50. Bot levels under the rules: Expert (hand-tuned search) beats Normal 66%, Normal beats Easy 94%.
+- 03:27 Swarm finding re-checked with the stronger, den-aware search (results/energy/strong_check.txt, 504 games each): default rules -> decks 41-58%, Deck 7 49%; no limit on animals and 5 energy -> Deck 7 76%. It holds.
+- 03:27 Step 10 done: morning page published at https://claude.ai/artifact/QY9K7gY5fTTeMcWp5o4Y3o (source kept as tools/energy/report.html) and opened in the browser. Final version deployed and verified online (a full game by clicks, no errors) and locally. Lab running: board http://localhost:8006/#b=costs, game http://localhost:8010/. Branch pushed to origin/energy. ALL STEPS DONE. Waiting for Martin's verdict; nothing here is settled.

@@ -1,0 +1,193 @@
+<title>Energy Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column, the links to play first, then findings as short sections with tables; the cost gem and the
+   strength tab from the game's own cards are the only ornaments. */
+:root {
+  --bg: #f3f5f6; --panel: #ffffff; --ink: #17212b; --mute: #5a6773; --line: #d5dbe0;
+  --gem: #c98f1e; --gem-ink: #2a1a06; --blue: #245f9f; --good: #2f7a4b; --bad: #b3392f; --wash: #e9eef2;
+  --display: 'Fira Sans Condensed', 'Arial Narrow', sans-serif; --body: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11161b; --panel: #1a2128; --ink: #e7ecf0; --mute: #9aa7b3; --line: #2f3944;
+  --gem: #e0aa3e; --gem-ink: #2a1a06; --blue: #7fb4ea; --good: #6cc48c; --bad: #f08b80; --wash: #222b34; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11161b; --panel: #1a2128; --ink: #e7ecf0; --mute: #9aa7b3; --line: #2f3944;
+  --gem: #e0aa3e; --gem-ink: #2a1a06; --blue: #7fb4ea; --good: #6cc48c; --bad: #f08b80; --wash: #222b34; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body); padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 34px; }
+h1 { font: 700 34px/1.1 var(--display); margin: 0; text-wrap: balance; }
+h2 { font: 700 23px/1.2 var(--display); margin: 0 0 10px; text-wrap: balance; }
+h3 { font: 600 17px/1.3 var(--display); margin: 14px 0 4px; }
+p { margin: 0 0 10px; } p:last-child { margin-bottom: 0; }
+.lead { color: var(--mute); margin-top: 8px; }
+ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+a { color: var(--blue); }
+code { font: 13px/1.4 ui-monospace, Menlo, monospace; background: var(--wash); padding: 2px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.play { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.play a { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; text-decoration: none; color: var(--ink); min-width: 0; }
+.play a b { display: block; font: 600 18px/1.2 var(--display); color: var(--blue); }
+.play a span { color: var(--mute); font-size: 14px; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 13px/1.3 var(--body); color: var(--mute); }
+td.n, th.n { text-align: right; white-space: nowrap; }
+.gem { display: inline-flex; align-items: center; justify-content: center; width: 1.45em; height: 1.45em; border-radius: 50%; background: var(--gem); color: var(--gem-ink); font: 700 .85em/1 var(--display); vertical-align: -0.2em; }
+.bad { color: var(--bad); font-weight: 600; } .good { color: var(--good); font-weight: 600; }
+.note { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.small { color: var(--mute); font-size: 14px; }
+</style>
+<main>
+<header>
+  <h1>The energy prototype is playable</h1>
+  <p class="lead">Built overnight on your five-step plan, 14 November. One thing differs from the plan, because your own swarm worry turned out to be right. It is the third section.</p>
+</header>
+
+<section>
+  <h2>Play it</h2>
+  <div class="play">
+    <a href="https://animal-kingdom-provisions.fly.dev/"><b>Online game</b><span>Phone or PC. Seven sample decks, bots at three levels.</span></a>
+    <a href="http://localhost:8006/#b=costs"><b>Costs board</b><span>On the Mac. Change a cost, a strength or a rule number.</span></a>
+    <a href="http://localhost:8010/"><b>Local game</b><span>On the Mac. Follows the board about ten seconds after a change.</span></a>
+  </div>
+  <h3>How the board works</h3>
+  <ul>
+    <li>Drag a card into a <b>Cost</b> pile to set its cost. The gem on the card follows.</li>
+    <li>Use + and − on a card to change its strength.</li>
+    <li>The numbers in the top bar are the rules: energy a turn, the first turn's energy, the price of a draw, animals a turn.</li>
+    <li><b>Play locally</b> opens the local game, which restarts by itself after every change. <b>Send online</b> puts the board's state on the online game in about four minutes.</li>
+  </ul>
+  <p class="small" style="margin-top:10px">If the two local links don't open, the lab isn't running. Start it from <code>provisions-worktree/game</code> with <code>.venv/bin/python tools/energy/lab.py</code>.</p>
+</section>
+
+<section>
+  <h2>The rules it runs</h2>
+  <ul>
+    <li>A turn has <b>6 energy</b>. Unspent energy is lost. The first player's first turn has 3.</li>
+    <li>Every animal has a <b>cost from 1 to 5</b>, paid when you place it. The Lion costs 3.</li>
+    <li><b>Drawing a card costs 2.</b> Moving an animal with Roam costs 2.</li>
+    <li>You may place <b>at most two animals a turn</b> from your hand. An animal an effect puts into play is free and doesn't count.</li>
+    <li>Strength is the animal's size, from 1 (a mouse) to 10 (a blue whale).</li>
+    <li>Decks: 30 cards, 2 copies, 1 of a legendary, any number of legendaries.</li>
+    <li>Everything else is the game you know: covering, connection, regions, food, the den.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>What I changed in your plan: two animals a turn</h2>
+  <p>You predicted that with no limit, someone fills a deck with cheap animals and walks into the den. I built a seventh deck of nothing but 1-cost animals and played it against the other six, 360 to 600 games a row.</p>
+  <div class="scroll"><table>
+    <tr><th>Rules</th><th class="n">The all-cheap deck wins</th><th class="n">Den taken by its second turn</th></tr>
+    <tr><td>Your plan: 5 energy, no limit, Lion costs 2</td><td class="n bad">89%</td><td class="n">43% of its games</td></tr>
+    <tr><td>Same, re-costed so only small animals cost 1 (Lion 3)</td><td class="n bad">81%</td><td class="n">12%</td></tr>
+    <tr><td>At most three animals a turn</td><td class="n bad">79%</td><td class="n">not counted</td></tr>
+    <tr><td>At most two animals a turn, Lion costs 2</td><td class="n bad">70%</td><td class="n">9%</td></tr>
+    <tr><td>At most two animals a turn, Lion costs 3, 6 energy (the default now)</td><td class="n good">50%</td><td class="n">3%</td></tr>
+  </table></div>
+  <p style="margin-top:10px"><b>Why it happens.</b> The board rewards how many crossroads you hold, not how big the animals on them are. Five cheap bodies a turn take regions faster than anyone can break them, and re-costing can't fix that.</p>
+  <p><b>It isn't the bots defending badly.</b> With the stronger search, which watches its den, the all-cheap deck still wins 76% without the limit and 49% with it.</p>
+  <p><b>Why 6 energy.</b> With two animals a turn and the Lion at 3, 5 energy made games two turns longer than today. With 6 they run 10 turns, as today, and you can still play two Lions in one turn.</p>
+  <p><b>To feel your original version,</b> set "Animals a turn" to 0 and "Energy a turn" to 5 on the board.</p>
+</section>
+
+<section>
+  <h2>What the numbers say now</h2>
+  <p>2,100 bot games between the seven decks under the rules above.</p>
+  <div class="scroll"><table>
+    <tr><th>Measure</th><th class="n">Prototype</th><th>For comparison</th></tr>
+    <tr><td>Game length (median turns, both players counted)</td><td class="n">10</td><td>10 in your recorded human games</td></tr>
+    <tr><td>Games ending on food / on the den</td><td class="n">53% / 47%</td><td></td></tr>
+    <tr><td>First player wins</td><td class="n">50%</td><td>46% with 2 energy on turn one, 57% with 4</td></tr>
+    <tr><td>Each deck's win rate</td><td class="n">46% to 54%</td><td></td></tr>
+    <tr><td>Games where a deck ran out</td><td class="n">0%</td><td>30 cards is right: a player takes 12 cards in a median game, 23 in the longest 1%</td></tr>
+    <tr><td>Draws per player per game</td><td class="n">about 6</td><td></td></tr>
+    <tr><td>Animals placed from hand per turn</td><td class="n">1.7</td><td></td></tr>
+  </table></div>
+  <p class="small" style="margin-top:8px">Bots only show what's broken. Whether it's fun is yours to say. The three bot levels work under the new rules: Expert beats Normal 66%, Normal beats Easy 94%. They use the hand-tuned evaluation, so the Expert is weaker than the one on live.</p>
+</section>
+
+<section>
+  <h2>How the cards were sized and costed</h2>
+  <h3>Strength</h3>
+  <p>Where you set a strength on the boards, I kept yours. The rest follow your calibration: 1 for insects and mouse-sized animals, 2 for a bat or a squirrel, 3 for a hare or an owl, 4 for a hawk or a lynx, 5 for a wolf or an eagle, 6 for a leopard or a boar, 7 for a lion or a bear, 8 for a grizzly or a giraffe, 9 for an elephant, 10 for the blue whale. Two of yours I changed: the Sperm Whale and the Whale Shark are 9, so the Blue Whale is the only 10.</p>
+  <h3>Cost</h3>
+  <p>Plain bodies make a ladder: Lion (7) <span class="gem">3</span>, Grizzly Bear (8) <span class="gem">4</span>, Blue Whale (10) <span class="gem">5</span>. A wolf-sized body costs <span class="gem">2</span>, and small animals <span class="gem">1</span>. Effects add to that: a drawn card is worth 2 energy, 10 food about 1, a removal 3 to 4.</p>
+  <p>The spread: 35 cards at <span class="gem">1</span>, 47 at <span class="gem">2</span>, 54 at <span class="gem">3</span>, 42 at <span class="gem">4</span>, 23 at <span class="gem">5</span>.</p>
+  <p>Your price piles kept their order. Most cards sit one higher than your pile, because the Lion moved from 2 to 3. The real disagreements are few: the Mole (3) and the Ocelot (2) are cheaper than your pile because their extra play is limited to a 2-cost animal, the Sardine is 1 because two copies can only fetch one more, and the Beaver is 2 because 2 energy is less than the action it used to give.</p>
+</section>
+
+<section>
+  <h2>Cards whose text changed</h2>
+  <div class="scroll"><table id="texts">
+    <tr><th>Card</th><th>Now</th><th>Why</th></tr>
+    <tr><td>Mouse</td><td>Roar: draw 2 cards.</td><td>Your note</td></tr>
+    <tr><td>Hummingbird</td><td>Flight. Roar: gain 2 energy.</td><td>Your note asked for a new effect; this one is my proposal</td></tr>
+    <tr><td>The legendary Mole</td><td>Roar: draw a card, then play another animal.</td><td>Your note: no discard, cost 5</td></tr>
+    <tr><td>Mole, Ocelot, Termite Queen, Remora, Cuco</td><td>"…play another animal that costs 2 or less"</td><td>A free play of anything would put a 5-cost animal down for nothing</td></tr>
+    <tr><td>Kitten (the Alley Cat's token)</td><td>Costs 2.</td><td>It draws a card when played</td></tr>
+    <tr><td>Beaver</td><td>Roar: next turn, you have 2 more energy.</td><td>Was an extra action</td></tr>
+    <tr><td>Electric Eel</td><td>Roar: your opponent has only 4 energy next turn.</td><td>Was "takes only 1 action"</td></tr>
+    <tr><td>Blue Whale, Sperm Whale, Whale Shark, Borvald</td><td>No Titan. The two big whales are Hungry 4.</td><td>Titan is now simply a high cost</td></tr>
+    <tr><td>Grizzly Bear</td><td>No text.</td><td>Your note said it can be reworked; a plain 8 fits the ladder</td></tr>
+    <tr><td>Crocodile</td><td>Apex Predator. Armor.</td><td>Same note; at 7 the old text made it a worse Tiger</td></tr>
+    <tr><td>Giraffe</td><td>Hungry 2. Reach.</td><td>At 8 the old +3 made it uncoverable</td></tr>
+    <tr><td>Elephant</td><td>Hungry 3.</td><td>Was Hungry 5; the cost now carries most of its price</td></tr>
+    <tr><td>Gorilla</td><td>"…if this has 9 or more strength"</td><td>It's a 7 now, so the draw is still two buffs away</td></tr>
+    <tr><td>Albatross, Rhinoceros, the legendary Elephant</td><td>"…strength 2 or less"</td><td>Shifted so they hit about the same share of animals as before</td></tr>
+  </table></div>
+  <p style="margin-top:10px"><b>Benched for now:</b> the Krill (its whole text is a Titan discount) and the Stick Insect (a plain Stealth body does nothing at its true size of 1).</p>
+</section>
+
+<section id="weak">
+  <h2>What I'm least sure of</h2>
+  <ul>
+    <li><b>The costs are a first draft.</b> I expect you to move a good number of them. The board is there for that.</li>
+    <li><b>The two-animals limit is my call, not yours.</b> The numbers back it, but you said two limits can't work, so judge it by playing both versions.</li>
+    <li><b>Energy cards under the limit.</b> The Hummingbird's 2 energy can't buy a third animal, only a dearer second one or a draw. It may need a different effect.</li>
+    <li><b>Free extra plays get around the limit.</b> The Mole, Ocelot, Remora and Termite Queen put a third animal down. A Woodpecker doubling a Mole can chain to five or more bodies in a turn. It needs three or four exact cards, so I left it in for you to judge.</li>
+    <li><b>Conditions that may rarely come true:</b> the Rat and the Hare need an empty hand, and no card arrives for free any more; the Macaque needs five cards in hand.</li>
+    <li><b>The Hamster with draw cards.</b> It gains 5 food per card drawn, and the Mouse now draws 2.</li>
+    <li><b>Big animals with Hungry in decks that make no food.</b> The Moose shrinks quickly in my Deck 3. That is my deck's fault more than the card's.</li>
+    <li><b>Not done:</b> the old lessons are hidden, since they teach the old turn. Ranked play is untested. Practice in the browser's own engine (the <code>?local=1</code> mode) still runs the old build.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>A second agent attacked it</h2>
+  <p>Before the final build I had a separate agent read the prototype cold and try to break it. What I fixed from its list:</p>
+  <ul>
+    <li><b>Two cards were strictly worse than another at the same cost:</b> the Praying Mantis (now <span class="gem">1</span>) and the Bobcat (now <span class="gem">2</span>).</li>
+    <li><b>The Electric Eel took half a turn</b> once energy went to 6. It now leaves the opponent 4.</li>
+    <li><b>A Mole could fetch another Mole.</b> It costs <span class="gem">3</span> now, above what a free play can fetch.</li>
+    <li><b>Kittens paid for themselves.</b> A Kitten draws a card, so it costs <span class="gem">2</span>, not 1.</li>
+    <li><b>Six bodies were one too dear:</b> Gorilla, Cape Buffalo, Black Bear, Okapi, Orangutan and Termite King.</li>
+  </ul>
+  <p style="margin-top:10px">I also learned not to ease costs by the bot numbers alone: making four Canine cards cheaper took Deck 3 from 52% to 65%, so they went back.</p>
+</section>
+
+<section>
+  <h2>The seven decks</h2>
+  <div class="scroll"><table>
+    <tr><th>Deck</th><th>What it is</th><th class="n">Win rate</th></tr>
+    <tr><td>Deck 1</td><td>Cats: bodies that cover, removal on the small cats, the den</td><td class="n">46%</td></tr>
+    <tr><td>Deck 2</td><td>Rodents: food from the hand and the regions</td><td class="n">54%</td></tr>
+    <tr><td>Deck 3</td><td>Canines: the roaming pack, with birds of prey</td><td class="n">54%</td></tr>
+    <tr><td>Deck 4</td><td>Control: removal, bodies that punish a cover, card flow</td><td class="n">46%</td></tr>
+    <tr><td>Deck 5</td><td>Giants: the biggest bodies, with energy cards to pay for them</td><td class="n">51%</td></tr>
+    <tr><td>Deck 6</td><td>Colony: many small bodies, food through numbers</td><td class="n">49%</td></tr>
+    <tr><td>Deck 7</td><td>The swarm test: only 1-cost animals</td><td class="n">50%</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Where it lives</h2>
+  <ul>
+    <li>Branch <code>energy</code> in <code>provisions-worktree/game</code>, pushed to GitHub. Main, live and staging are untouched.</li>
+    <li>The new rules sit behind a switch. Without it the code is the game on main, and its 3,828 tests pass.</li>
+    <li><code>ENERGY_PLAN.md</code> in that folder has the brief, every finding and the log of the night.</li>
+  </ul>
+</section>
+</main>
