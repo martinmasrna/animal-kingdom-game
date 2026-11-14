@@ -54,7 +54,7 @@ def cards(only: list[str] | None = None) -> list[dict]:
         if r.get("status") not in ON_BOARD or (only is not None and r["id"] not in only):
             continue
         c = real.get(r["id"])
-        stars = r.get("stars", STARS.get(r.get("rarity") or "", 0))
+        stars = c.stars if c else r.get("stars", STARS.get(r.get("rarity") or "", 0))   # the engine's level; a planned card's by hand
         if c:
             out.append({"id": c.id, "name": c.name, "rarity": c.rarity, "str": "*" if c.is_dynamic else c.base_strength,
                         "text": r.get("text", ""), "tags": list(r.get("tags", [])), "species": r.get("species", ""), "habitat": c.habitat,
