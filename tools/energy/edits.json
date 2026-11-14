@@ -1,0 +1,621 @@
+{
+ "cards": {
+  "bird_egg": {
+   "cost": 1
+  },
+  "egg_eater": {
+   "cost": 1
+  },
+  "peacock": {
+   "cost": 1
+  },
+  "python": {
+   "cost": 1
+  },
+  "caterpillar": {
+   "cost": 1
+  },
+  "chipmunk": {
+   "cost": 1
+  },
+  "cockroach": {
+   "cost": 1
+  },
+  "dung_beetle": {
+   "cost": 1
+  },
+  "earthworm": {
+   "cost": 1
+  },
+  "golden_orb_weaver": {
+   "cost": 1
+  },
+  "hamster": {
+   "cost": 1
+  },
+  "hummingbird": {
+   "cost": 1
+  },
+  "mosquito": {
+   "cost": 1
+  },
+  "praying_mantis": {
+   "cost": 1
+  },
+  "rat": {
+   "cost": 1
+  },
+  "sardine": {
+   "cost": 1
+  },
+  "stag_beetle": {
+   "cost": 1
+  },
+  "vole": {
+   "cost": 1
+  },
+  "worker_ant": {
+   "cost": 1
+  },
+  "worker_bee": {
+   "cost": 1
+  },
+  "bush_dog": {
+   "cost": 1
+  },
+  "cuckoo": {
+   "cost": 1
+  },
+  "marmot": {
+   "cost": 1
+  },
+  "opossum": {
+   "cost": 1
+  },
+  "guard_bee": {
+   "cost": 1
+  },
+  "guard_wasp": {
+   "cost": 1
+  },
+  "squirrel": {
+   "cost": 1
+  },
+  "toad": {
+   "cost": 1
+  },
+  "viper": {
+   "cost": 1
+  },
+  "hare": {
+   "cost": 1
+  },
+  "hedgehog": {
+   "cost": 1
+  },
+  "mahi_mahi": {
+   "cost": 1
+  },
+  "pigeon": {
+   "cost": 1
+  },
+  "caracal": {
+   "cost": 1
+  },
+  "tortoise": {
+   "cost": 1
+  },
+  "butterfly": {
+   "cost": 2
+  },
+  "city_spider": {
+   "cost": 2
+  },
+  "gopher": {
+   "cost": 2
+  },
+  "mouse": {
+   "cost": 2
+  },
+  "nurse_bee": {
+   "cost": 2
+  },
+  "nurse_bumblebee": {
+   "cost": 2
+  },
+  "ocelot": {
+   "cost": 2
+  },
+  "oxpecker": {
+   "cost": 2
+  },
+  "oxpecker_legend": {
+   "cost": 2
+  },
+  "remora": {
+   "cost": 2
+  },
+  "sardine_legend": {
+   "cost": 2
+  },
+  "chipmunk_legend": {
+   "cost": 2
+  },
+  "tarsier": {
+   "cost": 2
+  },
+  "worker_wasp": {
+   "cost": 2
+  },
+  "alley_cat": {
+   "cost": 2
+  },
+  "bat": {
+   "cost": 2
+  },
+  "cod": {
+   "cost": 2
+  },
+  "groundhog": {
+   "cost": 2
+  },
+  "macaque": {
+   "cost": 2
+  },
+  "skunk": {
+   "cost": 2
+  },
+  "soldier_ant": {
+   "cost": 2
+  },
+  "tarantula": {
+   "cost": 2
+  },
+  "hornet_legend": {
+   "cost": 2
+  },
+  "woodpecker": {
+   "cost": 2
+  },
+  "badger": {
+   "cost": 2
+  },
+  "barracuda": {
+   "cost": 2
+  },
+  "coyote": {
+   "cost": 2
+  },
+  "electric_eel": {
+   "cost": 2
+  },
+  "octopus_legend_2": {
+   "cost": 2
+  },
+  "octopus": {
+   "cost": 2
+  },
+  "queen_bee": {
+   "cost": 2
+  },
+  "termite_king": {
+   "cost": 2
+  },
+  "termite_queen": {
+   "cost": 2
+  },
+  "tuna": {
+   "cost": 2
+  },
+  "african_wild_dog": {
+   "cost": 2
+  },
+  "armadillo": {
+   "cost": 2
+  },
+  "beaver": {
+   "cost": 2
+  },
+  "falcon": {
+   "cost": 2
+  },
+  "impala": {
+   "cost": 2
+  },
+  "vulture": {
+   "cost": 2
+  },
+  "baboon": {
+   "cost": 2
+  },
+  "bobcat": {
+   "cost": 2
+  },
+  "cheetah": {
+   "cost": 2
+  },
+  "deer": {
+   "cost": 2
+  },
+  "hyena": {
+   "cost": 2
+  },
+  "sunfish": {
+   "cost": 2
+  },
+  "wolf": {
+   "cost": 2
+  },
+  "snake_egg": {
+   "cost": 3
+  },
+  "butterfly_legend": {
+   "cost": 3
+  },
+  "dart_frog": {
+   "cost": 3
+  },
+  "dormouse": {
+   "cost": 3
+  },
+  "hercules_beetle": {
+   "cost": 3
+  },
+  "rat_legend_2": {
+   "cost": 3
+  },
+  "cockroach_legend": {
+   "cost": 3
+  },
+  "cuckoo_legend": {
+   "cost": 3
+  },
+  "macaque_legend": {
+   "cost": 3
+  },
+  "rat_legend": {
+   "cost": 3
+  },
+  "flying_squirrel": {
+   "cost": 3
+  },
+  "hornet": {
+   "cost": 3
+  },
+  "bumblebee_legend": {
+   "cost": 3
+  },
+  "macaw": {
+   "cost": 3
+  },
+  "magpie": {
+   "cost": 3
+  },
+  "meerkat": {
+   "cost": 3
+  },
+  "mole": {
+   "cost": 3
+  },
+  "piranha": {
+   "cost": 3
+  },
+  "raven": {
+   "cost": 3
+  },
+  "squirrel_legend": {
+   "cost": 3
+  },
+  "rodent_legend": {
+   "cost": 3
+  },
+  "capybara": {
+   "cost": 3
+  },
+  "fox": {
+   "cost": 3
+  },
+  "jackal": {
+   "cost": 3
+  },
+  "jellyfish": {
+   "cost": 3
+  },
+  "mara": {
+   "cost": 3
+  },
+  "owl": {
+   "cost": 3
+  },
+  "lion_legend": {
+   "cost": 3
+  },
+  "lion_legend_2": {
+   "cost": 3
+  },
+  "raccoon": {
+   "cost": 3
+  },
+  "serval": {
+   "cost": 3
+  },
+  "sloth": {
+   "cost": 3
+  },
+  "stork": {
+   "cost": 3
+  },
+  "street_dog": {
+   "cost": 3
+  },
+  "albatross": {
+   "cost": 3
+  },
+  "dhole": {
+   "cost": 3
+  },
+  "gazelle": {
+   "cost": 3
+  },
+  "porcupine": {
+   "cost": 3
+  },
+  "sea_turtle": {
+   "cost": 3
+  },
+  "wolverine": {
+   "cost": 3
+  },
+  "baboon_legend": {
+   "cost": 3
+  },
+  "dolphin": {
+   "cost": 3
+  },
+  "warthog": {
+   "cost": 3
+  },
+  "anaconda": {
+   "cost": 3
+  },
+  "black_panther": {
+   "cost": 3
+  },
+  "hammerhead": {
+   "cost": 3
+  },
+  "manta_ray": {
+   "cost": 3
+  },
+  "orangutan": {
+   "cost": 3
+  },
+  "wildebeest": {
+   "cost": 3
+  },
+  "zebra": {
+   "cost": 3
+  },
+  "cape_buffalo": {
+   "cost": 3
+  },
+  "gorilla": {
+   "cost": 3
+  },
+  "lion": {
+   "cost": 3
+  },
+  "tiger": {
+   "cost": 3
+  },
+  "dung_beetle_legend": {
+   "cost": 4
+  },
+  "chameleon": {
+   "cost": 4
+  },
+  "bat_legend": {
+   "cost": 4
+  },
+  "deer_legend_2": {
+   "cost": 4
+  },
+  "piranha_legend": {
+   "cost": 4
+  },
+  "skunk_legend": {
+   "cost": 4
+  },
+  "sloth_legend": {
+   "cost": 4
+  },
+  "raven_legend": {
+   "cost": 4
+  },
+  "honey_badger": {
+   "cost": 4
+  },
+  "queen_ant": {
+   "cost": 4
+  },
+  "army_ant_legend": {
+   "cost": 4
+  },
+  "wolf_legend_3": {
+   "cost": 4
+  },
+  "capybara_legend": {
+   "cost": 4
+  },
+  "black_mamba": {
+   "cost": 4
+  },
+  "hawk": {
+   "cost": 4
+  },
+  "lynx": {
+   "cost": 4
+  },
+  "eagle_legend": {
+   "cost": 4
+  },
+  "honey_badger_legend": {
+   "cost": 4
+  },
+  "tortoise_legend": {
+   "cost": 4
+  },
+  "chimpanzee": {
+   "cost": 4
+  },
+  "eagle": {
+   "cost": 4
+  },
+  "lion_legend_4": {
+   "cost": 4
+  },
+  "fox_legend": {
+   "cost": 4
+  },
+  "swordfish": {
+   "cost": 4
+  },
+  "falcon_legend": {
+   "cost": 4
+  },
+  "boar": {
+   "cost": 4
+  },
+  "jaguar": {
+   "cost": 4
+  },
+  "leopard": {
+   "cost": 4
+  },
+  "orangutan_legend": {
+   "cost": 4
+  },
+  "okapi": {
+   "cost": 4
+  },
+  "boar_legend": {
+   "cost": 4
+  },
+  "bison": {
+   "cost": 4
+  },
+  "black_bear": {
+   "cost": 4
+  },
+  "crocodile": {
+   "cost": 4
+  },
+  "pheasant_legend": {
+   "cost": 4
+  },
+  "great_white_shark": {
+   "cost": 4
+  },
+  "giraffe": {
+   "cost": 4
+  },
+  "grizzly_bear": {
+   "cost": 4
+  },
+  "giraffe_legend": {
+   "cost": 4
+  },
+  "moose": {
+   "cost": 4
+  },
+  "elephant": {
+   "cost": 4
+  },
+  "anaconda_legend": {
+   "cost": 4
+  },
+  "bee_legend_2": {
+   "cost": 5
+  },
+  "locust_legend": {
+   "cost": 5
+  },
+  "chameleon_legend": {
+   "cost": 5
+  },
+  "mole_legend": {
+   "cost": 5
+  },
+  "bee_legend": {
+   "cost": 5
+  },
+  "deer_legend": {
+   "cost": 5
+  },
+  "tuna_legend": {
+   "cost": 5
+  },
+  "zebra_legend": {
+   "cost": 5
+  },
+  "wildebeest_legend": {
+   "cost": 5
+  },
+  "leopard_legend": {
+   "cost": 5
+  },
+  "wolf_legend_2": {
+   "cost": 5
+  },
+  "manta_ray_legend": {
+   "cost": 5
+  },
+  "tiger_legend": {
+   "cost": 5
+  },
+  "orca": {
+   "cost": 5
+  },
+  "hippopotamus": {
+   "cost": 5
+  },
+  "lion_legend_3": {
+   "cost": 5
+  },
+  "rhinoceros": {
+   "cost": 5
+  },
+  "rhinoceros_legend": {
+   "cost": 5
+  },
+  "sperm_whale": {
+   "cost": 5
+  },
+  "whale_shark": {
+   "cost": 5
+  },
+  "elephant_legend": {
+   "cost": 5
+  },
+  "blue_whale": {
+   "cost": 5
+  },
+  "sperm_whale_legend": {
+   "cost": 5
+  },
+  "krill": {
+   "status": "reserve"
+  },
+  "stick_insect": {
+   "status": "reserve"
+  }
+ },
+ "rules": {
+  "actions_per_turn": 6,
+  "first_turn_actions": 3,
+  "draw_cost": 2,
+  "max_places_per_turn": 0,
+  "food_at_turn_start": 1,
+  "settle_before_extend": 1
+ }
+}

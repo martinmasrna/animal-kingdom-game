@@ -1,5 +1,5 @@
 {
- "rev": 0,
+ "rev": 2,
  "name": "Costs",
  "energy": true,
  "only": [
@@ -484,6 +484,10 @@
   "actions_per_turn": 6,
   "first_turn_actions": 3,
   "draw_cost": 2,
-  "max_places_per_turn": 2
- }
+  "max_places_per_turn": 0,
+  "food_at_turn_start": 1,
+  "settle_before_extend": 1
+ },
+ "gone": [],
+ "marks": {}
 }

@@ -8,7 +8,7 @@
   "draw_cost": 2,
   "roam_cost": 2,
   "extra_play_max_cost": 2,
-  "max_places_per_turn": 2,
+  "max_places_per_turn": 0,
   "titan_discount": 2,
   "beaver_bonus_actions": 2,
   "eel_actions": 4,
@@ -22,7 +22,9 @@
   "albatross_max": 2,
   "elephant_legend_max": 2,
   "rhinoceros_max": 2,
-  "gorilla_min": 9
+  "gorilla_min": 9,
+  "food_at_turn_start": true,
+  "settle_before_extend": true
  },
  "cards": {
   "butterfly_legend": {
@@ -879,6 +881,12 @@
   "kitten": {
    "cost": 2,
    "text": "Roar: draw a non-legendary animal."
+  },
+  "krill": {
+   "status": "reserve"
+  },
+  "stick_insect": {
+   "status": "reserve"
   }
  },
  "decks": [
