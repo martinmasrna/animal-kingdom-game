@@ -1,5 +1,5 @@
 """Refit the shipped and ladder decks to the stars prototype's rules (engine/stars.py, decks.py): two copies of any
-non-legendary card, at most 16 stars.
+non-legendary card, at most decks.STAR_BUDGET stars (16 when the decks were refitted, 2026-11-15).
 
 Each deck keeps its cards; a third copy goes, and the freed slots (and a short deck's missing ones) take further
 non-legendary animals that fit it: the most of its own families and tags, then its habitats, within the star budget.

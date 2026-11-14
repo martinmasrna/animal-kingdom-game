@@ -201,7 +201,7 @@ Each deck contains exactly **30 cards** and must satisfy all of the following:
 
 - no more than 2 copies of any non-legendary unit;
 - no more than 1 copy of any legendary unit;
-- no more than **16 stars** in total, counted per copy.
+- no more than **20 stars** in total, counted per copy (16 until Martin raised it, 2026-11-15).
 
 Stars (a prototype on the `stars` branch, 2026-11-14, not settled): every card has a level, shown on the card as stars: −1 small, 0 ordinary (the plain Lion's level; most cards; no mark), 1 strong, 2 legendary, 3 monster. A −1 card gives one star back per copy. Commons and rares are one kind of card there (Martin, 2026-11-15: "merging rare and commons together, and then bringing the limit for non-legendary cards to 2"): `cards.json` keeps a card's recorded rarity, which gives its starting level (common 0, rare 1, legendary 2), and the game reads every rare as a common. The budget lives in `decks.STAR_BUDGET`, the levels, defaults and the merge in `engine/stars.py`, the copy limits in `engine/cards.py`; `tools/stars/refit_decks.py` fitted the shipped and ladder decks to it.
 

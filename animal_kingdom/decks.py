@@ -79,8 +79,9 @@ def register_deck(slug: str, decklist: Sequence[str]) -> None:
 
 DECK_SIZE = 30
 # The stars prototype (engine/cards.py STAR_LEVELS): a deck holds at most this many stars, counted per copy, in place of
-# the old caps of 8 rares and 4 legendaries (every deck legal under those stays legal: 4 x 2 + 8 x 1 = 16).
-STAR_BUDGET = 16
+# the old caps of 8 rares and 4 legendaries (4 x 2 + 8 x 1 = 16, the first budget); Martin raised it to 20 on 2026-11-15
+# ("bump up the limit to 20 stars please").
+STAR_BUDGET = 20
 
 
 def deck_stars(decklist: Sequence[str], cards: dict[str, Card]) -> int:

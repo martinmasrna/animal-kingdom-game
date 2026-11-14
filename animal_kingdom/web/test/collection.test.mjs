@@ -72,12 +72,16 @@ test('the stars: each card shows its level, the foot counts the deck\'s, and an 
   assert.equal(await page.$$eval(`${card('lion')} .lvl .g`, g => g.length), 0, 'level 0: no mark');
   assert.equal(await page.$$eval(`${card('vole')} .lvl .g`, g => g.length), 1, 'a rare: one star');
   assert.equal(await page.$$eval(`${card('lion_legend_3')} .lvl .g`, g => g.length), 2, 'a legendary: two');
-  assert.match(await page.$eval('#fstars', e => e.textContent), /16\/16/, 'Cats spends the whole budget');
-  await page.click('.side .st[data-card="lion"]'); await wait(80);                    // 29 cards, still 16 stars
-  await page.click(card('vole')); await wait(30);
+  assert.match(await page.$eval('#fstars', e => e.textContent), /16\/20/, 'Cats spends 16 of the 20');
+  const out = id => page.click(`.side .st[data-card="${id}"]`), add = id => page.click(card(id));
+  for (const id of ['lion', 'lion', 'tiger', 'tiger', 'serval']) { await out(id); await wait(60); }   // 25 cards, 16 stars
+  for (const id of ['vole', 'vole', 'raccoon', 'raccoon']) { await add(id); await wait(60); }         // 29 cards, 20 stars
+  assert.match(await page.$eval('#fstars', e => e.textContent), /20\/20/);
+  await add('coyote'); await wait(30);
   assert.ok(await has('#fstars', 'shake'), 'the star count shows why');
-  assert.match(await page.$eval('#toast', e => e.textContent), /Vole needs 1 star, and the deck has 0 left of its 16/);
-  await page.click(card('lion')); await wait(80);                                     // back to 30
+  assert.match(await page.$eval('#toast', e => e.textContent), /Coyote needs 1 star, and the deck has 0 left of its 20/);
+  for (const id of ['vole', 'vole', 'raccoon', 'raccoon']) { await out(id); await wait(60); }
+  for (const id of ['lion', 'lion', 'tiger', 'tiger', 'serval']) { await add(id); await wait(60); }   // Cats as it was
   assert.match(await page.$eval('.fcount', e => e.textContent), /30\/30/);
 });
 

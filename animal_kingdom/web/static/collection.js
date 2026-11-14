@@ -32,7 +32,7 @@ export function deckIssue(list, cards = C, rules = R) {
   return '';
 }
 // The other labelling (Martin wants to feel which is easier): every card numbered 1 to 5, its level + 2, and the budget shifted
-// to match (16 + 2 per card). Display only: the rule underneath is the same.
+// to match (the budget + 2 per card). Display only: the rule underneath is the same.
 const shown5 = (stars, cards) => stars + 2 * cards;
 try { LABEL.five = localStorage.getItem('ak:five') === '1'; } catch { /* no storage */ }
 const sv = c => c.str === '*' ? -1 : c.str;

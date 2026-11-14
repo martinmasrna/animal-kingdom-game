@@ -41,7 +41,7 @@ def _deck(legendaries: int, rares: int) -> list[str]:
 
 
 def test_levels_default_from_rarity_and_the_budget_is_sixteen():
-    assert STAR_DEFAULTS == {"common": 0, "rare": 1, "legendary": 2} and STAR_BUDGET == 16
+    assert STAR_DEFAULTS == {"common": 0, "rare": 1, "legendary": 2} and STAR_BUDGET == 20   # Martin, 2026-11-15
     assert CARDS["lion"].stars == 0 and CARDS["lynx"].stars == 1 and CARDS["lion_legend_3"].stars == 2
 
 
@@ -66,36 +66,36 @@ def test_a_third_copy_is_illegal_for_any_non_legendary():
 
 
 def test_the_budget_counts_each_copy():
-    deck = _deck(4, 8)
-    assert deck_stars(deck, CARDS) == 4 * 2 + 8 * 1 == 16
+    deck = _deck(6, 8)
+    assert deck_stars(deck, CARDS) == 6 * 2 + 8 * 1 == STAR_BUDGET
     assert decklist_problems(deck) == []
 
 
 def test_one_star_over_is_illegal_and_says_so():
-    deck = _deck(4, 9)
-    assert deck_stars(deck, CARDS) == 17
-    assert decklist_problems(deck) == ["17 stars, over the 16 a deck may hold"]
+    deck = _deck(6, 9)
+    assert deck_stars(deck, CARDS) == 21
+    assert decklist_problems(deck) == ["21 stars, over the 20 a deck may hold"]
 
 
 def test_the_old_caps_are_gone_the_mix_is_a_choice():
-    six_legends = _deck(6, 4)            # six legendaries: over the old cap of 4
-    sixteen_rares = _deck(0, 16)         # sixteen rare cards: over the old cap of 8
-    assert decklist_problems(six_legends) == [] and decklist_problems(sixteen_rares) == []
+    six_legends = _deck(8, 4)            # eight legendaries: over the old cap of 4
+    twenty_one_star = _deck(0, 20)         # twenty one-star cards: over the old cap of 8 rares
+    assert decklist_problems(six_legends) == [] and decklist_problems(twenty_one_star) == []
 
 
 def test_a_minus_one_card_gives_a_star_back_per_copy():
-    deck = _deck(4, 9)                                           # 17 stars
+    deck = _deck(6, 9)                                           # 21 stars
     small = next(cid for cid in deck if CARDS[cid].stars == 0)
     cards = _with_stars({small: -1})
-    assert deck_stars(deck, cards) == 17 - 2                     # its two copies give two back
+    assert deck_stars(deck, cards) == 21 - 2                     # its two copies give two back
     assert decklist_problems(deck, cards=cards) == []
 
 
 def test_a_three_star_card_counts_three():
-    deck = _deck(4, 8)
+    deck = _deck(6, 8)
     big = next(cid for cid in deck if CARDS[cid].rarity == "legendary")
     cards = _with_stars({big: 3})
-    assert deck_stars(deck, cards) == 17 and decklist_problems(deck, cards=cards)
+    assert deck_stars(deck, cards) == 21 and decklist_problems(deck, cards=cards)
 
 
 def test_copy_limits_and_deck_size_still_hold():
@@ -106,7 +106,7 @@ def test_copy_limits_and_deck_size_still_hold():
 
 
 def test_every_shipped_and_ladder_deck_is_legal_but_those_holding_cards_out_of_the_collection():
-    """tools/stars/refit_decks.py fitted them (a third copy out, fills within 16 stars); a ladder deck holding a card
+    """tools/stars/refit_decks.py fitted them (a third copy out, fills within the budget); a ladder deck holding a card
     since benched was illegal before the prototype and stays so."""
     assert len(PREMADE_DECKS) > 40
     over = {slug: p for slug, d in PREMADE_DECKS.items() if (p := decklist_problems(d)) and not all("collectible" in x for x in p)}
