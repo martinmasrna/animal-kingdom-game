@@ -88,7 +88,7 @@ function unit(u, under, cards, fire = false) {
   // Armor turns the rim into a hexagon shell scute, Spikes stand out as acacia thorns behind the rim, Stealth veils the
   // portrait in mist, Poison runs green down the rim's lower half. The card on hover says what each one does.
   const has = k => kws.includes(k);
-  return peek + (has('Spikes') ? `<img class="kwl thorns" src="${kit('kwl_thorns.webp')}" alt="" draggable="false">` : '') +
+  return peek + (has('Spikes') ? `<img class="kwl thorns" src="${kit(has('Armor') ? 'kwl_thorns_hex.webp' : 'kwl_thorns.webp')}" alt="" draggable="false">` : '') +
     `<div class="ring${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     (has('Stealth') ? `<img class="kwl mist" src="${kit('kwl_mist.webp')}" alt="" draggable="false">` : '') +
     `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hex_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
