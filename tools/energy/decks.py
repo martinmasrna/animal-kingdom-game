@@ -26,3 +26,13 @@ DECKS = [
         "guard_wasp": 2, "soldier_ant": 2, "queen_bee": 2, "queen_ant": 2, "termite_queen": 2, "termite_king": 2, "hornet": 2,
         "bee_legend": 1, "army_ant_legend": 1, "bumblebee_legend": 1, "bee_legend_2": 1}),
 ]
+
+# The swarm test: nothing but 1-cost animals. One list per cost scale (table.SCALE), since what costs 1 differs.
+SWARM = {
+    "lion2": ("Deck 7", "wolf", {
+        "wolf": 2, "cheetah": 2, "caracal": 2, "hyena": 2, "african_wild_dog": 2, "sunfish": 2, "pigeon": 2, "bat": 2,
+        "mosquito": 2, "viper": 2, "hare": 2, "coyote": 2, "impala": 2, "vulture": 2, "tortoise": 2}),
+    "lion3": ("Deck 7", "caracal", {
+        "caracal": 2, "tortoise": 2, "pigeon": 2, "hedgehog": 2, "toad": 2, "hare": 2, "mosquito": 2, "viper": 2, "rat": 2,
+        "bush_dog": 2, "guard_bee": 2, "guard_wasp": 2, "squirrel": 2, "hummingbird": 2, "ocelot": 2}),
+}

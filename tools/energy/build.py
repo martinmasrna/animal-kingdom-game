@@ -60,7 +60,7 @@ print("thresholds (old, new, share before, share now):", shifted)
 cards = {}
 changed_text = {}
 for cid, entry in table.T.items():
-    s, c = entry[0], entry[1]
+    s, c = entry[0], (table.COST_LION2[cid] if table.SCALE == "lion2" else entry[1])
     opt = entry[2] if len(entry) > 2 else {}
     o = {"cost": c}
     if s is not None:
@@ -93,13 +93,14 @@ for cid, o in cards.items():
     if "text" in o and o["text"] != by_id[cid].get("text", ""):
         changed_text[cid] = (by_id[cid].get("text", ""), o["text"])
 for tid, c in table.TOKEN_COST.items():
+    c = c - 1 if table.SCALE == "lion2" else c
     assert by_id[tid]["status"] == "token", tid
     cards[tid] = {"cost": c}
 
 decks = []
 if (HERE / "decks.py").exists():
     import decks as D
-    for k, (name, cover, lst) in enumerate(D.DECKS):
+    for k, (name, cover, lst) in enumerate(D.DECKS + [D.SWARM[table.SCALE]]):
         n = sum(lst.values())
         assert n == 30, (name, n)
         for cid, q in lst.items():

@@ -472,6 +472,7 @@ pub struct Config {
     pub roam_cost: i32,
     pub extra_play_max_cost: i32,
     pub titan_discount: i32,
+    pub max_places_per_turn: i32,
 }
 
 impl Config {
@@ -497,6 +498,7 @@ impl Config {
             roam_cost: gi("roam_cost", 1),
             extra_play_max_cost: gi("extra_play_max_cost", 99),
             titan_discount: gi("titan_discount", 1),
+            max_places_per_turn: gi("max_places_per_turn", 0),
             raw,
         })
     }

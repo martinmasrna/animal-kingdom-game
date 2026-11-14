@@ -2,12 +2,13 @@
  "_comment": "The energy prototype (ENERGY_PLAN.md). Built by tools/energy/build.py from tools/energy/table.py; the Costs board edits table values through tools/energy/edits.json.",
  "rules": {
   "energy_mode": true,
-  "actions_per_turn": 5,
+  "actions_per_turn": 6,
   "first_turn_actions": 3,
   "draw_action_count": 1,
   "draw_cost": 2,
   "roam_cost": 2,
   "extra_play_max_cost": 2,
+  "max_places_per_turn": 2,
   "titan_discount": 2,
   "beaver_bonus_actions": 2,
   "eel_actions": 3,
@@ -40,7 +41,7 @@
    "strength": 1
   },
   "mole": {
-   "cost": 1,
+   "cost": 2,
    "strength": 2,
    "text": "Roar: play another animal that costs 2 or less next to this."
   },
@@ -50,7 +51,7 @@
    "text": "Roar: draw a card, then play another animal."
   },
   "dart_frog": {
-   "cost": 2,
+   "cost": 3,
    "strength": 1
   },
   "caterpillar": {
@@ -58,7 +59,7 @@
    "strength": 1
   },
   "bat_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 1
   },
   "blue_whale": {
@@ -68,7 +69,7 @@
    "text": ""
   },
   "praying_mantis": {
-   "cost": 1,
+   "cost": 2,
    "strength": 1
   },
   "locust_legend": {
@@ -76,7 +77,7 @@
    "strength": 1
   },
   "chameleon": {
-   "cost": 3,
+   "cost": 4,
    "strength": 1
   },
   "mosquito": {
@@ -84,31 +85,31 @@
    "strength": 1
   },
   "butterfly": {
-   "cost": 1,
+   "cost": 2,
    "strength": 1
   },
   "bat": {
-   "cost": 1,
+   "cost": 2,
    "strength": 2
   },
   "meerkat": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2
   },
   "chameleon_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 2
   },
   "tortoise_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 5
   },
   "sloth": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "honey_badger": {
-   "cost": 3,
+   "cost": 4,
    "strength": 3
   },
   "electric_eel": {
@@ -117,11 +118,11 @@
    "text": "Roar: your opponent has only 3 energy next turn."
   },
   "raccoon": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "badger": {
-   "cost": 1,
+   "cost": 2,
    "strength": 3
   },
   "skunk": {
@@ -129,11 +130,11 @@
    "strength": 2
   },
   "octopus_legend_2": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "octopus": {
-   "cost": 1,
+   "cost": 2,
    "strength": 3
   },
   "opossum": {
@@ -141,15 +142,15 @@
    "strength": 2
   },
   "sloth_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 3
   },
   "hyena": {
-   "cost": 1,
+   "cost": 2,
    "strength": 5
   },
   "wolverine": {
-   "cost": 2,
+   "cost": 3,
    "strength": 4
   },
   "toad": {
@@ -157,11 +158,11 @@
    "strength": 2
   },
   "skunk_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 2
   },
   "honey_badger_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 5
   },
   "armadillo": {
@@ -173,19 +174,19 @@
    "strength": 3
   },
   "jellyfish": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "dolphin": {
-   "cost": 2,
+   "cost": 3,
    "strength": 5
   },
   "sea_turtle": {
-   "cost": 2,
+   "cost": 3,
    "strength": 4
   },
   "orca": {
-   "cost": 4,
+   "cost": 5,
    "strength": 7
   },
   "tortoise": {
@@ -194,7 +195,7 @@
   },
   "sperm_whale": {
    "cost": 5,
-   "strength": 10,
+   "strength": 9,
    "keywords": [
     "Hungry"
    ],
@@ -212,16 +213,16 @@
    "text": "Dusk: remove the strongest adjacent enemy."
   },
   "rhinoceros": {
-   "cost": 4,
+   "cost": 5,
    "strength": 8,
    "text": "Hungry 3. Roar: remove all adjacent enemies of strength 2 or less."
   },
   "hippopotamus": {
-   "cost": 4,
+   "cost": 5,
    "strength": 8
   },
   "crocodile": {
-   "cost": 3,
+   "cost": 4,
    "strength": 7,
    "keywords": [
     "Apex Predator",
@@ -232,9 +233,11 @@
   "elephant": {
    "cost": 4,
    "strength": 9,
-   "keywords": [],
-   "hungry": 0,
-   "text": ""
+   "keywords": [
+    "Hungry"
+   ],
+   "hungry": 3,
+   "text": "Hungry 3."
   },
   "elephant_legend": {
    "cost": 5,
@@ -254,11 +257,11 @@
    "strength": 2
   },
   "black_bear": {
-   "cost": 4,
+   "cost": 5,
    "strength": 7
   },
   "grizzly_bear": {
-   "cost": 3,
+   "cost": 4,
    "strength": 8,
    "text": ""
   },
@@ -275,10 +278,10 @@
    "strength": 1
   },
   "dung_beetle_legend": {
-   "cost": 3
+   "cost": 4
   },
   "raven": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2
   },
   "hummingbird": {
@@ -290,31 +293,31 @@
    "cost": 1
   },
   "vulture": {
-   "cost": 1,
+   "cost": 2,
    "strength": 4
   },
   "owl": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "oxpecker": {
-   "cost": 1,
+   "cost": 2,
    "strength": 1
   },
   "raven_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 3
   },
   "magpie": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2
   },
   "eagle_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 5
   },
   "macaw": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2
   },
   "cuckoo": {
@@ -330,11 +333,11 @@
    "strength": 4
   },
   "hawk": {
-   "cost": 3,
+   "cost": 4,
    "strength": 4
   },
   "stork": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "oxpecker_legend": {
@@ -342,12 +345,12 @@
    "strength": 1
   },
   "albatross": {
-   "cost": 3,
+   "cost": 4,
    "strength": 4,
    "text": "Flight. Roar: remove all adjacent enemies of strength 2 or less."
   },
   "falcon_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 5
   },
   "pigeon": {
@@ -355,7 +358,7 @@
    "strength": 3
   },
   "eagle": {
-   "cost": 3,
+   "cost": 4,
    "strength": 5
   },
   "cuckoo_legend": {
@@ -364,27 +367,27 @@
    "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal that costs 2 or less."
   },
   "pheasant_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 7
   },
   "coyote": {
-   "cost": 1,
+   "cost": 2,
    "strength": 3
   },
   "street_dog": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "wolf_legend_3": {
-   "cost": 4,
+   "cost": 5,
    "strength": 4
   },
   "fox": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "jackal": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "bush_dog": {
@@ -392,11 +395,11 @@
    "strength": 2
   },
   "african_wild_dog": {
-   "cost": 1,
+   "cost": 2,
    "strength": 4
   },
   "dhole": {
-   "cost": 2,
+   "cost": 3,
    "strength": 4
   },
   "fox_legend": {
@@ -404,11 +407,11 @@
    "strength": 5
   },
   "wolf_legend_2": {
-   "cost": 4,
+   "cost": 5,
    "strength": 6
   },
   "wolf": {
-   "cost": 1,
+   "cost": 2,
    "strength": 5
   },
   "ocelot": {
@@ -441,23 +444,23 @@
    "strength": 5
   },
   "lynx": {
-   "cost": 3,
+   "cost": 4,
    "strength": 4
   },
   "bobcat": {
-   "cost": 2,
+   "cost": 3,
    "strength": 5
   },
   "cheetah": {
-   "cost": 1,
+   "cost": 2,
    "strength": 5
   },
   "jaguar": {
-   "cost": 3,
+   "cost": 4,
    "strength": 6
   },
   "leopard": {
-   "cost": 3,
+   "cost": 4,
    "strength": 6
   },
   "caracal": {
@@ -465,15 +468,15 @@
    "strength": 4
   },
   "black_panther": {
-   "cost": 2,
+   "cost": 3,
    "strength": 6
   },
   "lion": {
-   "cost": 2,
+   "cost": 3,
    "strength": 7
   },
   "tiger": {
-   "cost": 2,
+   "cost": 3,
    "strength": 7
   },
   "tiger_legend": {
@@ -489,7 +492,7 @@
    "strength": 1
   },
   "hornet": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2
   },
   "hornet_legend": {
@@ -501,24 +504,24 @@
    "strength": 2
   },
   "termite_king": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "nurse_bee": {
-   "cost": 1,
+   "cost": 2,
    "strength": 1
   },
   "nurse_bumblebee": {
-   "cost": 1,
+   "cost": 2,
    "strength": 1
   },
   "termite_queen": {
-   "cost": 1,
+   "cost": 2,
    "strength": 3,
    "text": "Roar: play a non-Queen Colony animal that costs 2 or less."
   },
   "bee_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 3
   },
   "army_ant_legend": {
@@ -526,15 +529,15 @@
    "strength": 3
   },
   "queen_bee": {
-   "cost": 1,
+   "cost": 2,
    "strength": 3
   },
   "queen_ant": {
-   "cost": 3,
+   "cost": 4,
    "strength": 3
   },
   "soldier_ant": {
-   "cost": 1,
+   "cost": 2,
    "strength": 2
   },
   "guard_wasp": {
@@ -558,10 +561,10 @@
    "strength": 1
   },
   "bird_egg": {
-   "cost": 1
+   "cost": 2
   },
   "snake_egg": {
-   "cost": 2
+   "cost": 3
   },
   "sardine": {
    "cost": 1,
@@ -577,15 +580,15 @@
    "strength": 1
   },
   "piranha_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 2
   },
   "piranha": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2
   },
   "swordfish": {
-   "cost": 3,
+   "cost": 4,
    "strength": 5
   },
   "mahi_mahi": {
@@ -593,44 +596,44 @@
    "strength": 3
   },
   "tuna": {
-   "cost": 1,
+   "cost": 2,
    "strength": 3
   },
   "manta_ray_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 6
   },
   "barracuda": {
-   "cost": 1,
+   "cost": 2,
    "strength": 3
   },
   "cod": {
-   "cost": 1,
+   "cost": 2,
    "strength": 2
   },
   "sunfish": {
-   "cost": 1,
+   "cost": 2,
    "strength": 5
   },
   "hammerhead": {
-   "cost": 2,
+   "cost": 3,
    "strength": 6
   },
   "tuna_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 5
   },
   "manta_ray": {
-   "cost": 2,
+   "cost": 3,
    "strength": 6
   },
   "great_white_shark": {
-   "cost": 3,
+   "cost": 4,
    "strength": 7
   },
   "whale_shark": {
    "cost": 5,
-   "strength": 10,
+   "strength": 9,
    "keywords": [
     "Hungry"
    ],
@@ -638,11 +641,11 @@
    "text": "Hungry 4. Dusk: draw a card."
   },
   "gazelle": {
-   "cost": 2,
+   "cost": 3,
    "strength": 4
   },
   "impala": {
-   "cost": 1,
+   "cost": 2,
    "strength": 4
   },
   "deer_legend_2": {
@@ -654,64 +657,65 @@
    "strength": 5
   },
   "deer_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 5
   },
   "zebra_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 6
   },
   "okapi": {
-   "cost": 4,
+   "cost": 5,
    "strength": 6
   },
   "warthog": {
-   "cost": 2,
+   "cost": 3,
    "strength": 5
   },
   "wildebeest_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 6
   },
   "boar_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 6
   },
   "zebra": {
-   "cost": 2,
+   "cost": 3,
    "strength": 6
   },
   "boar": {
-   "cost": 3,
+   "cost": 4,
    "strength": 6
   },
   "giraffe": {
    "cost": 4,
    "strength": 8,
    "keywords": [
+    "Hungry",
     "Reach"
    ],
-   "hungry": 0,
-   "text": "Reach."
+   "hungry": 2,
+   "text": "Hungry 2. Reach."
   },
   "wildebeest": {
-   "cost": 2,
+   "cost": 3,
    "strength": 6
   },
   "giraffe_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 8
   },
   "cape_buffalo": {
-   "cost": 3,
+   "cost": 4,
    "strength": 7
   },
   "bison": {
-   "cost": 3,
+   "cost": 4,
    "strength": 7
   },
   "moose": {
-   "cost": 3,
+   "cost": 4,
    "strength": 8
   },
   "macaque_legend": {
@@ -719,11 +723,11 @@
    "strength": 2
   },
   "macaque": {
-   "cost": 1,
+   "cost": 2,
    "strength": 2
   },
   "tarsier": {
-   "cost": 1,
+   "cost": 2,
    "strength": 1
   },
   "baboon_legend": {
@@ -731,15 +735,15 @@
    "strength": 5
   },
   "orangutan_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 6
   },
   "chimpanzee": {
-   "cost": 3,
+   "cost": 4,
    "strength": 5
   },
   "orangutan": {
-   "cost": 3,
+   "cost": 4,
    "strength": 6
   },
   "baboon": {
@@ -747,7 +751,7 @@
    "strength": 5
   },
   "gorilla": {
-   "cost": 3,
+   "cost": 4,
    "strength": 7,
    "text": "Roar: if this has 9 or more strength, draw a card."
   },
@@ -756,7 +760,7 @@
    "strength": 1
   },
   "capybara": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "vole": {
@@ -764,7 +768,7 @@
    "strength": 1
   },
   "rat_legend_2": {
-   "cost": 3,
+   "cost": 4,
    "strength": 1
   },
   "rat": {
@@ -772,7 +776,7 @@
    "strength": 1
   },
   "flying_squirrel": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2
   },
   "dormouse": {
@@ -780,7 +784,7 @@
    "strength": 1
   },
   "gopher": {
-   "cost": 1,
+   "cost": 2,
    "strength": 1
   },
   "groundhog": {
@@ -796,7 +800,7 @@
    "strength": 2
   },
   "rodent_legend": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2
   },
   "marmot": {
@@ -808,12 +812,12 @@
    "strength": 3
   },
   "mouse": {
-   "cost": 2,
+   "cost": 3,
    "strength": 1,
    "text": "Roar: draw 2 cards."
   },
   "rat_legend": {
-   "cost": 2,
+   "cost": 3,
    "strength": 2
   },
   "chipmunk_legend": {
@@ -825,7 +829,7 @@
    "strength": 2
   },
   "mara": {
-   "cost": 2,
+   "cost": 3,
    "strength": 3
   },
   "beaver": {
@@ -834,18 +838,18 @@
    "text": "Roar: next turn, you have 2 more energy."
   },
   "porcupine": {
-   "cost": 2,
+   "cost": 3,
    "strength": 4
   },
   "capybara_legend": {
-   "cost": 3,
+   "cost": 4,
    "strength": 4
   },
   "python": {
    "cost": 1
   },
   "anaconda_legend": {
-   "cost": 4,
+   "cost": 5,
    "strength": 10
   },
   "viper": {
@@ -853,24 +857,24 @@
    "strength": 2
   },
   "black_mamba": {
-   "cost": 3,
+   "cost": 4,
    "strength": 4
   },
   "anaconda": {
-   "cost": 2,
+   "cost": 3,
    "strength": 6
   },
   "egg_eater": {
    "cost": 1
   },
   "eagle_legend_2": {
-   "cost": 3
+   "cost": 4
   },
   "young_stag": {
    "cost": 2
   },
   "great_stag": {
-   "cost": 3
+   "cost": 4
   }
  },
  "decks": [
@@ -1033,6 +1037,31 @@
     "army_ant_legend": 1,
     "bumblebee_legend": 1,
     "bee_legend_2": 1
+   }
+  },
+  {
+   "slug": "energy_7",
+   "name": "Deck 7",
+   "cover": "caracal",
+   "order": 7,
+   "starter": true,
+   "bot": true,
+   "cards": {
+    "caracal": 2,
+    "tortoise": 2,
+    "pigeon": 2,
+    "hedgehog": 2,
+    "toad": 2,
+    "hare": 2,
+    "mosquito": 2,
+    "viper": 2,
+    "rat": 2,
+    "bush_dog": 2,
+    "guard_bee": 2,
+    "guard_wasp": 2,
+    "squirrel": 2,
+    "hummingbird": 2,
+    "ocelot": 2
    }
   }
  ],

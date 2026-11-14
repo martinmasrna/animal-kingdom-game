@@ -66,7 +66,8 @@ def _top_level_actions(state: GameState) -> list[Action]:
         actions.append(DrawAction())
     if cfg.energy_mode:                            # the energy rules: whatever the turn's energy still pays for
         titan_ok = state.food[player] >= titan_food(state, player)
-        actions.extend(effects.legal_placements(state, player, titan_ok=titan_ok, budget=left))
+        if not cfg.max_places_per_turn or state.turn_flags.get(f"places_{player}", 0) < cfg.max_places_per_turn:
+            actions.extend(effects.legal_placements(state, player, titan_ok=titan_ok, budget=left))
         if left >= cfg.roam_cost:
             actions.extend(effects.legal_roams(state, player))
         elif effects.free_roams_left(state, player):
@@ -189,6 +190,8 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     elif isinstance(action, PlaceAction):
         titan = "Titan" in state.cards[action.card_id].keywords
         state.actions_taken_this_turn += effects.placement_cost(state, state.current, action.card_id)
+        if state.config.max_places_per_turn:
+            state.turn_flags[f"places_{state.current}"] = state.turn_flags.get(f"places_{state.current}", 0) + 1
         if titan:
             if food := titan_food(state, state.current):
                 effects.lose_food(state, state.current, food, card="krill_legend")

@@ -285,6 +285,8 @@ pub struct TurnFlags {
     pub free_roams_used: [i32; 2],
     pub free_roam_iid: FastVec<[(i64, i64); 2]>,
     pub bonus_actions: [i32; 2],
+    /// The energy rules: animals placed from the hand this turn (Config.max_places_per_turn).
+    pub places: [i32; 2],
     pub action_cap: [Option<i32>; 2],
     pub gain_str: FastVec<[i64; 4]>,
     pub falstaff: [bool; 2],
@@ -314,6 +316,9 @@ impl TurnFlags {
             }
             if self.bonus_actions[p] != 0 {
                 m.insert(format!("bonus_actions_{pn}"), sj::Value::from(self.bonus_actions[p]));
+            }
+            if self.places[p] != 0 {
+                m.insert(format!("places_{pn}"), sj::Value::from(self.places[p]));
             }
             if let Some(c) = self.action_cap[p] {
                 m.insert(format!("action_cap_{pn}"), sj::Value::from(c));
@@ -385,6 +390,8 @@ impl TurnFlags {
                 t.free_roams[p_of(rest).min(1)] = val.as_i64().unwrap_or(0) as i32;
             } else if let Some(rest) = k.strip_prefix("bonus_actions_") {
                 t.bonus_actions[p_of(rest).min(1)] = val.as_i64().unwrap_or(0) as i32;
+            } else if let Some(rest) = k.strip_prefix("places_") {
+                t.places[p_of(rest).min(1)] = val.as_i64().unwrap_or(0) as i32;
             } else if let Some(rest) = k.strip_prefix("action_cap_") {
                 t.action_cap[p_of(rest).min(1)] = val.as_i64().map(|x| x as i32);
             } else if let Some(rest) = k.strip_prefix("gain_str_") {

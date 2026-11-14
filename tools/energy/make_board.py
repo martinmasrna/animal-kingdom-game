@@ -18,6 +18,6 @@ for c in range(1, 6):
     pile(f"cost{c}", f"Cost {c}", sorted((i for i in ids if ov["cards"][i]["cost"] == c), key=key))
 pile("bench", "Benched (out of the prototype)", sorted(table.BENCH), "grey")
 board = {"rev": 0, "name": "Costs", "energy": True, "only": ids + sorted(table.BENCH), "cards": {}, "piles": piles, "strs": {},
-         "rules": {k: ov["rules"][k] for k in ("actions_per_turn", "first_turn_actions", "draw_cost")}}
+         "rules": {k: ov["rules"][k] for k in ("actions_per_turn", "first_turn_actions", "draw_cost", "max_places_per_turn")}}
 (HERE.parent / "board/boards/costs.json").write_text(json.dumps(board, indent=1) + "\n")
 print({p["name"]: len(p["cards"]) for p in piles})

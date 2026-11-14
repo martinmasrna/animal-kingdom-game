@@ -84,6 +84,7 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
     <label>Energy a turn <input id="r_actions_per_turn" type="number" min="1" max="12" style="width:52px"></label>
     <label>First turn <input id="r_first_turn_actions" type="number" min="1" max="12" style="width:52px"></label>
     <label>A draw costs <input id="r_draw_cost" type="number" min="1" max="6" style="width:52px"></label>
+    <label title="How many animals a turn may place from the hand; 0 for no limit">Animals a turn <input id="r_max_places_per_turn" type="number" min="0" max="9" style="width:52px"></label>
     <a id="localgame" href="http://localhost:8010/" target="_blank" style="font-weight:600">Play locally</a>
     <button id="sendonline" title="Deploys the costs as they stand to the online test app (about four minutes)">Send online</button>
   </span>
@@ -523,7 +524,7 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
 $('#fit').onclick = fit;
 // The energy board's rule numbers and its two ways to play what the board says.
-const RULE_KEYS = ['actions_per_turn', 'first_turn_actions', 'draw_cost'];
+const RULE_KEYS = ['actions_per_turn', 'first_turn_actions', 'draw_cost', 'max_places_per_turn'];
 function showEnergyBar() {
   $('#energybar').style.display = B.energy ? 'inline-flex' : 'none';
   if (!B.energy) return;

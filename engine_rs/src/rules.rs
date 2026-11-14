@@ -38,7 +38,9 @@ fn top_level_actions(st: &State) -> Vec<Action> {
     if cfg.energy_mode {
         // the energy rules: whatever the turn's energy still pays for
         let titan_ok = st.food[player.min(1) as usize] >= titan_food(st, player);
-        actions.extend(effects::legal_placements(st, player, None, titan_ok, Some(left)));
+        if cfg.max_places_per_turn == 0 || st.turn_flags.places[player.min(1) as usize] < cfg.max_places_per_turn {
+            actions.extend(effects::legal_placements(st, player, None, titan_ok, Some(left)));
+        }
         if left >= cfg.roam_cost {
             actions.extend(effects::legal_roams(st, player, false));
         } else if effects::free_roams_left(st, player, None) > 0 {
@@ -172,6 +174,9 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
                 let titan = st.card(*card).has_kw(K_TITAN);
                 let cur = st.current;
                 st.actions_taken_this_turn += effects::placement_cost(st, cur, *card);
+                if st.cfg().max_places_per_turn > 0 {
+                    st.turn_flags.places[cur.min(1) as usize] += 1;
+                }
                 if titan {
                     let food = titan_food(st, cur);
                     if food > 0 {
