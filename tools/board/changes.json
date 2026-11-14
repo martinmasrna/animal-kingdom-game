@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 66,
+ "rev": 71,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -16,6 +16,12 @@
    "text": {
     "was": "Dawn: evolve. Whenever this gains strength, evolve.",
     "now": "Whenever Xanthe gains strength, evolve."
+   }
+  },
+  "honey_badger_legend": {
+   "stars": {
+    "was": 2,
+    "now": 3
    }
   },
   "mouse": {
@@ -474,8 +480,8 @@
    "name": "Ash",
    "rarity": "legendary",
    "strength": 5,
-   "stars": 2,
-   "text": "Armor. Stealth. Poison. Spikes.",
+   "stars": 3,
+   "text": "???",
    "tags": [],
    "habitat": "Savanna",
    "species": "Honey Badger"
