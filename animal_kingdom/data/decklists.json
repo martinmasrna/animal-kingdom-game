@@ -418,6 +418,25 @@
     "elephant": 3,
     "hedgehog": 3
    }
+  },
+  {
+   "slug": "actions",
+   "name": "Action Animals",
+   "order": 18,
+   "cover": "wolf",
+   "bot": true,
+   "cards": {
+    "action_1": 3,
+    "action_2": 3,
+    "action_3": 3,
+    "action_4": 3,
+    "action_5": 3,
+    "action_6": 3,
+    "action_7": 3,
+    "action_8": 3,
+    "wolf": 3,
+    "hedgehog": 3
+   }
   }
  ]
 }

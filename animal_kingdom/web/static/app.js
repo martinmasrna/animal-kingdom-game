@@ -1112,7 +1112,7 @@ const isTutorial = () => isLesson(V);
 
 // What the seat can do right now, in viewer space.
 function decision() {
-  const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you && !RP.views.length, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, roams: {}, pend: null };
+  const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you && !RP.views.length, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, roams: {}, acts: new Set(), pend: null };
   d.lesson = lessonNow();   // a lesson's step for this moment (coach.js), else null
   if (RP.views.length && V.phase === 'playing' && G.toAct === V.you) d.pend = G.pending;   // a replay shows what you were asked, read-only
   if (!d.mine) return d;
@@ -1137,8 +1137,10 @@ function decision() {
     if (ui.sel) for (const t of selPlaces(d)) { if (t[0] === 'cr') d.rings.push(dcr(t[1])); else d.hqRing = true; }
     // Roam: click one of your animals that can move (it wears a dashed ring), its destinations ring, click one
     if (!d.pend) for (const [from, ts] of Object.entries(G.legal.roam || {})) d.roams[dcr(from)] = ts;
-    if (ui.sel || !d.roams[ui.roam]) ui.roam = null;
-    if (ui.roam) for (const t of d.roams[ui.roam]) { if (t[0] === 'cr') d.rings.push(dcr(t[1])); else d.hqRing = true; }
+    // Action (the actions prototype): an animal that can use its Action is picked the same way; the bar offers it
+    if (!d.pend) for (const from of G.legal.act || []) d.acts.add(dcr(from));
+    if (ui.sel || (!d.roams[ui.roam] && !d.acts.has(ui.roam))) ui.roam = null;
+    if (ui.roam) for (const t of d.roams[ui.roam] || []) { if (t[0] === 'cr') d.rings.push(dcr(t[1])); else d.hqRing = true; }
   }
   return d;
 }
@@ -1402,6 +1404,12 @@ function drawGame() {
     }
     bar.querySelectorAll('[data-x]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.otherOpts[el.dataset.x].v }); });
     const sk = $('skip'); if (sk) sk.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
+  } else if (d.mine && ui.roam && d.acts.has(ui.roam)) {   // an Action animal picked: its card's rule and the button that uses it
+    const u = (viewerGame().board[ui.roam] || []).slice(-1)[0], c = u && CARDS[u.id];
+    bar.innerHTML = `<div class="line">${c ? `<b>${c.name}</b><p>${c.text}</p>` : '<b>Action</b>'}<span class="skip use" id="actuse">Use Action</span><span class="skip" id="actno">Cancel</span></div>`;
+    bar.classList.add('on');
+    $('actuse').onclick = e => { e.stopPropagation(); sfx('pick'); act({ kind: 'act', from: dcr(ui.roam) }); };
+    $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
   } else {
     bar.classList.remove('on');
     if (playing && G.decision === 'their_choice') waiting.textContent = 'Opponent is choosing';
@@ -1416,6 +1424,12 @@ function drawGame() {
   const st = ui.step;   // what this step shows (static/timeline.js); a view without events just shows what changed
   if (A) A.fx = st ? (st.kind === 'bounce' ? [{ k: 'bounce', card: st.card, owner: rel(st.owner) }] : [])
     : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
+  if (st && st.kind === 'act') {   // an Action used: the card shown large over the board, shrinking into the animal that used it
+    const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
+    rv.innerHTML = cardHTML(formOf(st.card, st.player)) + '<div class="actlbl">Action</div>'; fitNames(rv);
+    rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
+    rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
+  }
   if (st && st.kind === 'reveal') {   // the opponent's card, shown large and flown down onto its crossroad; the next step lands it
     const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
     rv.innerHTML = cardHTML(formOf(st.card, st.player)); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
@@ -1443,7 +1457,7 @@ function histItem(m, i) {
 function wireHist(root, G) {
   root.querySelectorAll('[data-h]').forEach(el => {
     const m = G.history[el.dataset.h];
-    el.onmouseenter = () => { if (m.kind === 'place' || m.kind === 'roam') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
+    el.onmouseenter = () => { if (m.kind === 'place' || m.kind === 'roam' || m.kind === 'act') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
     el.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
     if (RP.views.length) el.onclick = e => { e.stopPropagation(); pop.style.display = 'none'; replayPlay(false); replayStep(replayMoveEnd(Number(el.dataset.h))); };
   });
@@ -1523,10 +1537,11 @@ function moveLine(m) {
     if (f.k === 'placed') return `${f.owner === V.you ? 'you' : 'your opponent'} placed ${name(f.card)} on it`;
     if (f.k === 'bounce') return `returned ${name(f.card)}`;
     if (f.k === 'draw') return m.kind === 'draw' && f.seat === m.seat ? null : `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}drew ${f.n}`;
+    if (f.k === 'lose') return `${f.seat === V.you ? 'you' : 'your opponent'} lost ${f.n} food`;
     if (f.k === 'food') return `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}${f.n > 0 ? 'gained' : 'paid'} ${Math.abs(f.n)} food`;
     return null;
   }).filter(Boolean);
-  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? 'captured the HQ' : m.kind === 'roam' ? 'roamed' : '';
+  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? 'captured the HQ' : m.kind === 'roam' ? 'roamed' : m.kind === 'act' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'its'} Action` : '';
   return [`${who} · turn ${m.round}`, what, ...fx].filter(Boolean).join(' · ');
 }
 
@@ -1572,7 +1587,7 @@ function drawBoard(d) {
   const region = shownRegion(d);
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
   const fire = st && st.src ? st.src.map(dcr) : null;   // the animals whose own effect this is: their trigger marks brighten
-  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, roamable: Object.keys(d.roams || {}), roamFrom: ui.roam, preview, anim: A, ago, capture, strike, fire,
+  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, roamable: [...Object.keys(d.roams || {}), ...(d.acts || [])], acting: st && st.kind === 'act' ? [dcr(st.cr)] : [], roamFrom: ui.roam, preview, anim: A, ago, capture, strike, fire,
     beat: endBeat(), current: V.phase === 'playing' ? rel(V.game.current) : null });
   draw();
   if (startBeat(g, A, ago, capture)) draw();
@@ -1613,13 +1628,13 @@ function wireBoard() {
     const hq = e.target.closest('[data-hq]');
     if (hq && d.pend && d.pend.mode === 'choice' && d.hqRing) return act({ kind: 'choice', choice: 'den' });
     if (hq && ui.sel) { const t = selPlaces(d).find(t => t[0] === 'hq'); if (t) return act(placeAction(t)); }
-    if (hq && ui.roam) { const t = d.roams[ui.roam].find(t => t[0] === 'hq'); if (t) return act({ kind: 'roam', from: dcr(ui.roam), target: t }); }
+    if (hq && ui.roam && d.roams[ui.roam]) { const t = d.roams[ui.roam].find(t => t[0] === 'hq'); if (t) return act({ kind: 'roam', from: dcr(ui.roam), target: t }); }
     const g = e.target.closest('[data-cr]'); if (!g) return;
     const cr = g.dataset.cr;
     if (cr in d.crChoice) return act({ kind: 'choice', choice: d.crChoice[cr] });
     if (ui.sel && d.rings.includes(cr)) return act(placeAction(['cr', dcr(cr)]));
     if (ui.roam && d.rings.includes(cr)) return act({ kind: 'roam', from: dcr(ui.roam), target: ['cr', dcr(cr)] });
-    if (d.roams[cr]) { sfx('pick'); ui.roam = ui.roam === cr ? null : cr; ui.sel = null; return drawGame(); }   // pick (or drop) an animal to roam
+    if (d.roams[cr] || d.acts.has(cr)) { sfx('pick'); ui.roam = ui.roam === cr ? null : cr; ui.sel = null; return drawGame(); }   // pick (or drop) an animal to roam or act
     if (ui.roam) { ui.roam = null; return drawGame(); }
     if (touch() && !ui.sel) readStack(cr);
   });

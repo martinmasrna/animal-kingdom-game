@@ -103,7 +103,7 @@ function unit(u, under, cards, fire = false) {
 export function renderBoard(el, M, g, cards, ui) {
   const A = ui.anim, rings = new Set(ui.rings || []), roamable = new Set(ui.roamable || []), fire = new Set(ui.fire || []);   // fire: the animals whose own effect this step is   // your animals that can roam now
   // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)
-  const shown = new Set(ui.region || []), shownAt = ui.region && ui.region[0].split(',').map(Number);
+  const shown = new Set([...(ui.region || []), ...(ui.acting || [])]), shownAt = ui.region && ui.region[0].split(',').map(Number);
   const { landed, covered, leaving } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
   const strength = (A && A.strength) || new Map();   // the stored changes this step made (a grant, a poison), iid to up or down
   const held = heldRegions(M.regions, g.board);

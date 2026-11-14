@@ -67,6 +67,8 @@ def describe(a: dict) -> str:
         return f"roam {a['from']} → {'den' if a['target'][0] == 'hq' else a['target'][1]}"
     if k == "draw":
         return "draw"
+    if k == "act":
+        return f"Action from {a['from']}"
     if k == "pass":
         return "end turn"
     if k == "choice":
@@ -116,6 +118,9 @@ def named(state: GameState, seq: list[dict]) -> tuple[list[str], list[list[str]]
             name = _name(src.card_id) if src else "an animal"
             t = f"{name} roams into the enemy den" if tg[0] == "hq" else f"{name} roams onto {_unit(s, tg[1], me)}"
             touched = [d["from"]] + ([tg[1]] if tg[0] != "hq" else [])
+        elif k == "act":
+            src = s.top_unit(d["from"])
+            t, touched = f"{_name(src.card_id) if src else 'an animal'} uses its Action", [d["from"]]
         elif k == "choice":
             c = d.get("choice")
             if isinstance(c, str) and c in s.game_map.crossroads:

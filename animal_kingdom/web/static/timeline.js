@@ -25,7 +25,7 @@ function culprit(board, cause, cr, causeIid) {
   return best;
 }
 
-export const DUR = { strength: 0.6, to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5 };
+export const DUR = { act: 1.1, strength: 0.6, to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5 };
 // Food in flight: one fruit per food, 0.035 s apart, each flying 0.7 s, then the count settles.
 export const foodDur = n => Math.min(2.4, 0.7 + 0.035 * Math.max(0, n - 1) + 0.3);
 
@@ -120,6 +120,9 @@ export function plan(prev, next, cards = {}) {
         push({ kind: 'land', dur: DUR.land, cr: e.to, card: e.card, player: e.player, from: e.cr });
         break;
       }
+      case 'act':   // the actions prototype: an animal uses its Action (its card shown, the animal lit, then what it does)
+        push({ kind: 'act', dur: DUR.act, cr: e.cr, card: e.card, player: e.player, src: [e.cr] });
+        break;
       case 'remove': case 'bounce': case 'to_deck':
         if (e.cr) {
           take(e.cr, e.iid);

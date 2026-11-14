@@ -74,6 +74,7 @@ export const TERMS = { 'Grazing': 'An animal grazes while it\'s the top animal o
 export const hasKeyword = (c, k) => new RegExp(`(^|\\. |: )${k}[:. ]`).test(c.text || '');
 export const KEYWORDS = {
   'Roar': 'Happens when you place this animal.',
+  'Action': 'Costs one of your two actions. Each animal can do it once a turn.',   // the actions prototype
   'Flight': 'Can be placed on any crossroad, even one not connected to yours. It can\'t take a den that way.',
   'Armor': 'Can\'t be removed, returned to hand or eaten by any ability, not even your own. It can still be covered.',
   'Stealth': 'Enemy abilities can\'t choose it. Effects that hit many animals, or a random one, still do.',

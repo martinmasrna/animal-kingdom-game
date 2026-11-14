@@ -18,7 +18,7 @@ from typing import Optional
 
 from ..decks import LADDER_DECK_NAMES, load_premade_deck
 from ..engine import rules, statics
-from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
+from ..engine.actions import SKIP, ActAction, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine.cards import DECKLISTS, load_cards
 from ..engine.config import Config
 from ..engine.effects import roar_condition
@@ -189,6 +189,8 @@ def _effects(events: list, move: Move) -> list:
             fx.append({"k": "draw", "seat": e["player"], "n": len(e["cards"])})
         elif e["e"] == "food" and not e.get("income"):
             fx.append({"k": "food", "seat": e["player"], "n": e["n"]})
+        elif e["e"] == "pay" and e.get("card") == "action_7":     # the actions prototype: food taken from the opponent
+            fx.append({"k": "lose", "seat": e["player"], "n": e["n"]})
     merged = []   # several draws or food gains by one player in a row read as one
     for f in fx:
         if merged and f["k"] in ("draw", "food") and merged[-1]["k"] == f["k"] and merged[-1]["seat"] == f["seat"]:
@@ -439,17 +441,17 @@ class Match:
         # draws and sub-choices fold into the entry they belong to.
         starts_move = (state.pending is None and not isinstance(action, PassAction)) or isinstance(action, PlaceAction)
         pre = _snapshot(state) if starts_move else None
-        roamer = state.top_unit(action.origin).card_id if isinstance(action, RoamAction) and state.top_unit(action.origin) else None
+        roamer = state.top_unit(action.origin).card_id if isinstance(action, (RoamAction, ActAction)) and state.top_unit(action.origin) else None
         rules.apply_action(state, action)    # validates; raises EngineError if illegal
         new = self._take_events()
         self.actions.append(action.to_dict())
         self.action_times.append(round(time.time() - self.started_at, 1))
         if starts_move:
-            placed, roamed = isinstance(action, PlaceAction), isinstance(action, RoamAction)
+            placed, roamed, acted = isinstance(action, PlaceAction), isinstance(action, RoamAction), isinstance(action, ActAction)
             self.history.append(Move(
-                round=pre["turn"] // 2 + 1, seat=s, kind="place" if placed else "roam" if roamed else "draw", pre=pre,
-                card=action.card_id if placed else roamer,
-                target=list(action.target) if placed or roamed else None))
+                round=pre["turn"] // 2 + 1, seat=s, kind="place" if placed else "roam" if roamed else "act" if acted else "draw",
+                pre=pre, card=action.card_id if placed else roamer,
+                target=list(action.target) if placed or roamed else ["cr", action.origin] if acted else None))
         if self.history:
             self.history[-1].events += new
             self.history[-1].fx = _effects(self.history[-1].events, self.history[-1])
@@ -757,6 +759,7 @@ class Match:
         places: dict[str, list] = {}
         copies: dict[int, list] = {}      # a named copy's own places, when copies of a card differ in strength
         roams: dict[str, list] = {}       # crossroad of a roaming animal -> where it may go (Roam)
+        acts: list[str] = []              # crossroads of animals that can use their Action now (the actions prototype)
         for a in legal:
             if isinstance(a, PlaceAction):
                 ts = places.setdefault(a.card_id, [])
@@ -766,6 +769,8 @@ class Match:
                     copies.setdefault(a.iid, []).append(list(a.target))
             elif isinstance(a, RoamAction):
                 roams.setdefault(a.origin, []).append(list(a.target))
+            elif isinstance(a, ActAction):
+                acts.append(a.origin)
         if copies:                        # every copy in hand answers with the places of its strength's first copy
             hand = st.hands[st.pending["chooser"] if st.pending else st.current]
             for u in hand:
@@ -774,7 +779,7 @@ class Match:
                                 and v.strength_counter == u.strength_counter), None)
                     if rep is not None:
                         copies[u.iid] = copies[rep.iid]
-        out = {"draw": any(isinstance(a, DrawAction) for a in legal), "place": places, "roam": roams,
+        out = {"draw": any(isinstance(a, DrawAction) for a in legal), "place": places, "roam": roams, "act": acts,
                **({"copies": {str(k): v for k, v in copies.items()}} if copies else {})}
         if st.pending is None:
             return out, None
