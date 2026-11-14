@@ -30,11 +30,42 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
 .it.drag { z-index: 50; }
 .it.hidden { display: none; }
 .it.planned .card { opacity: .75; }
-/* trying another strength: +/- across the middle of the card while the pointer is on it */
-.it .adj { position: absolute; left: 50%; top: 104px; transform: translateX(-50%); z-index: 6; display: none; flex-direction: row; gap: 14px; }
+.it:hover, .it.editing { z-index: 8; }
+/* designing on the card: strength and stars as − value + across the painting while the pointer is on it */
+.it .adj { position: absolute; left: 0; right: 0; top: 50px; z-index: 6; display: none; flex-direction: column; align-items: center; gap: 12px; }
 .it:hover .adj { display: flex; }
-.it .adj button { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #8a857c; background: #fff; font: 700 30px/1 system-ui, sans-serif; color: var(--ink); cursor: pointer; padding: 0; }
-.it .adj button:hover { background: #f1f0ec; }
+.it.drag .adj, .it.editing .adj, .it.drag .wp { display: none; }
+.it .adj .row { display: flex; align-items: center; gap: 2px; background: #fff; border: 2px solid #8a857c; border-radius: 22px; padding: 2px; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.it .adj button { width: 36px; height: 36px; border-radius: 50%; border: 0; background: transparent; font: 700 28px/1 system-ui, sans-serif; color: var(--ink); cursor: pointer; padding: 0; }
+.it .adj button:hover { background: #ecebe6; }
+.it .adj b { min-width: 44px; text-align: center; font: 700 20px/1 system-ui, sans-serif; color: var(--ink); }
+.it .adj .st b { color: #b07d0c; letter-spacing: 1px; }
+/* a card's stars, until the game's own card shows them */
+.it .blv { position: absolute; left: 50%; top: 31px; transform: translateX(-50%); z-index: 4; pointer-events: none; padding: 3px 8px 4px; border-radius: 10px;
+  background: rgba(24,16,8,.72); color: #f3c34f; font: 700 15px/1 system-ui, sans-serif; letter-spacing: 1px; white-space: nowrap; }
+/* the text, name and family are written on the card itself */
+.it .ctext p, .it .ctext i, .it .nbar span { cursor: text; }
+.it.notext .ctext p, .it.notext .ctext { cursor: default; }
+.it .ctext i { min-height: 1em; }
+.it [contenteditable] { user-select: text; -webkit-user-select: text; outline: none; }
+.it .ctext p[contenteditable] { min-height: 1.14em; min-width: 2em; }
+.it.editing .card { box-shadow: 0 0 0 3px rgba(47,125,225,.55), .2em .45em .9em rgba(0,0,0,.55); }
+/* what Martin changed: a blue pencil on the corner; what the game has reads under the card while the pointer is on it */
+.it .ed { position: absolute; left: -20px; top: -20px; width: 38px; height: 38px; z-index: 5; pointer-events: none; display: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Ccircle cx='13' cy='13' r='11.5' fill='%232f7de1'/%3E%3Cpath d='M8 18l1-3.6 6.6-6.6 2.6 2.6-6.6 6.6zM14.6 8.8l2.6 2.6' stroke='%23fff' stroke-width='1.8' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") center / contain no-repeat; }
+.it.chg .ed { display: block; }
+.wp { position: absolute; left: -6px; right: -6px; top: calc(100% + 6px); z-index: 7; visibility: hidden; display: flex; flex-direction: column; gap: 5px;
+  padding: 7px 8px; background: #fff; border: 1px solid #cfccc5; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.18); font: 12px/1.3 system-ui, sans-serif; color: var(--ink); cursor: default; }
+.it:hover .wp, .it.editing .wp { visibility: visible; transition: visibility 0s .25s; }
+.wp::before { content: ''; position: absolute; left: 0; right: 0; top: -8px; height: 8px; }   /* the pointer crosses the gap without losing it */
+.wp .r { display: flex; gap: 6px; align-items: flex-start; }
+.wp .r span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.wp .r em { color: var(--muted); }
+.wp button { flex: none; border: 1px solid #cfccc5; background: #fff; border-radius: 5px; padding: 1px 6px; font: 600 12px/1.4 system-ui, sans-serif; color: var(--ink); cursor: pointer; }
+.wp button:hover { background: #f1f0ec; }
+.wp .all { align-self: flex-start; }
+#peek .wp { position: static; visibility: visible; margin-top: 10px; width: 300px; font-size: 14px; box-shadow: none; }
+.top button[aria-pressed="true"] { background: #2f7de1; border-color: #2f7de1; color: #fff; }
 /* marks on a card's corner: a red ! for a problem, a speech bubble for a note (the note reads under the card read large) */
 .it .fl { position: absolute; right: -22px; top: -22px; width: 52px; height: 52px; z-index: 5; pointer-events: none; display: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Ccircle cx='13' cy='13' r='11.5' fill='%23d93025'/%3E%3Cpath d='M13 6.5v8' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='13' cy='19' r='1.8' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat; }
@@ -78,17 +109,19 @@ body { background: var(--table); color: var(--ink); font: 14px/1.3 system-ui, -a
   <select id="boards" aria-label="Board"></select>
   <button id="newboard">New board</button>
   <button id="newpile">New pile</button>
+  <button id="newcard">New card</button>
   <input id="q" type="search" placeholder="Find a card" aria-label="Find a card">
   <button id="fit">Fit</button>
+  <button id="chgonly" aria-pressed="false" style="display:none" title="Show only the cards you changed or made"></button>
   <span class="sp"></span>
   <span class="msg" id="msg"></span>
 </div>
 <div id="view"><div id="world"><div class="ins" id="ins"></div></div></div>
 <div class="marq" id="marq"></div>
 <div id="peek"></div>
-<div id="menu"><button id="mflag" aria-pressed="false">Problem</button><textarea id="mnote" placeholder="Note"></textarea></div>
+<div id="menu"><div style="display:flex;gap:8px"><button id="mflag" aria-pressed="false">Problem</button><button id="mdup">Duplicate</button></div><textarea id="mnote" placeholder="Note"></textarea></div>
 <script type="module">
-import { cardHTML, fitNames } from '/static/card.js';
+import { cardHTML, fitNames, KEYWORDS } from '/static/card.js';
 
 const W = 180, H = Math.round(180 * 1.467), G = 14, PAD = 16, HEAD = 92, PER_ROW = 24;
 const $ = s => document.querySelector(s);
@@ -102,10 +135,36 @@ const ICON = {
 };
 const view = $('#view'), world = $('#world');
 
-let CARDS = {}, B = { rev: 0, cards: {}, piles: [], strs: {} };
-// A board may try other strengths: B.strs holds this board's own number for a card (the +/- on a card), drawn in place of
-// the card's; the card data is never touched.
-const shown = c => B.strs && B.strs[c.id] !== undefined ? { ...c, str: B.strs[c.id] } : c;
+// The cards as the game has them (BASE), Martin's design laid over them (D: his changes to a card, field by field, and the
+// cards he made), and what the board draws (CARDS: the game's card with his changes, and his new cards). D is shared by
+// every board and saved to tools/board/changes.json; the game's card data is never touched.
+let BASE = {}, D = { rev: 0, edits: {}, new: {} }, CARDS = {}, B = { rev: 0, cards: {}, piles: [] };
+const FIELDS = ['name', 'strength', 'stars', 'text', 'tags'];
+const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const one = t => String(t ?? '').split(/\s+/).filter(Boolean).join(' ');
+const baseVal = (b, f) => f === 'strength' ? (b.str === '' ? null : b.str) : b[f];
+const same = (f, a, b) => f === 'tags' ? JSON.stringify(a || []) === JSON.stringify(b || []) : f === 'name' || f === 'text' ? one(a) === one(b) : a === b;
+function cardView(id) {
+  const n = D.new[id];
+  if (n) return { id, name: n.name, rarity: n.rarity, str: n.strength, stars: n.stars, text: n.text, tags: n.tags, species: n.species, habitat: n.habitat, isNew: true, copy_of: n.copy_of };
+  const b = BASE[id], e = D.edits[id] || {};
+  return { ...b, name: e.name ?? b.name, str: e.strength ?? b.str, stars: e.stars ?? b.stars, text: e.text ?? b.text, tags: e.tags ?? b.tags, planned: b.planned && !D.edits[id] };
+}
+const changes = id => D.new[id] ? ['new'] : FIELDS.filter(f => D.edits[id] && f in D.edits[id]);
+function setVal(id, f, v) {        // one field of one card, as Martin has it now
+  if (D.new[id]) D.new[id][f] = v;
+  else {
+    const e = D.edits[id] || (D.edits[id] = {});
+    if (same(f, v, baseVal(BASE[id], f))) delete e[f]; else e[f] = v;
+    if (!Object.keys(e).length) delete D.edits[id];
+  }
+  CARDS[id] = cardView(id);
+}
+const starsLabel = n => n > 0 ? '★'.repeat(n) : n < 0 ? '−1' : '0';
+const STAR_NAME = { '-1': 'small', 0: 'ordinary', 1: 'strong', 2: 'legendary', 3: 'monster' };
+let GAME_STARS = false;   // the game's card draws the stars itself (then the board's own mark stays off)
+// the card as the game draws it; a copy borrows its original's painting
+const shown = c => ({ ...c, id: c.isNew ? c.copy_of || c.id : c.id, name: esc(c.name), text: B.notext ? '' : esc(c.text), tags: (c.tags || []).map(esc) });
 // The board on the page: Main, or another from the list; the address keeps it (#b=<id>), so a reload stays on it.
 let BID = new URLSearchParams(location.hash.slice(1)).get('b') || 'main';
 const api = () => '/api/state?b=' + encodeURIComponent(BID);
@@ -152,17 +211,38 @@ function placeNew() {
 // ---------- drawing ----------
 function setCam() { world.style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.z})`; world.style.setProperty('--z', cam.z); try { localStorage.setItem(camKey(), JSON.stringify(cam)); } catch (e) {} }
 
-function buildCards() {
-  for (const id of Object.keys(els)) if (!CARDS[id]) { els[id].remove(); delete els[id]; }
-  for (const c of Object.values(CARDS)) {
-    const html = cardHTML(shown(c)) + (typeof c.str === 'number' ? '<span class="adj"><button data-adj="-1" title="Strength −1">−</button><button data-adj="1" title="Strength +1">+</button></span>' : '');
-    if (els[c.id] && els[c.id].dataset.h === html) continue;
-    const el = els[c.id] || world.appendChild(document.createElement('div'));
-    el.className = 'it' + (c.planned ? ' planned' : '') + (B.strs[c.id] !== undefined && B.strs[c.id] !== c.str ? ' chg' : ''); el.dataset.id = c.id; el.dataset.h = html; el.innerHTML = html + '<i class="nt"></i><i class="fl"></i>';
-    el.title = B.strs[c.id] !== undefined && B.strs[c.id] !== c.str ? `Strength ${B.strs[c.id]} on this board (the card's is ${c.str})` : '';
-    els[c.id] = el;
-  }
-  fitNames(world);
+// What the game has, under a changed card: each change with a way back, and the whole card back when there are several.
+function wpHTML(id, live = true) {
+  const c = CARDS[id], b = BASE[id], btn = (f, t) => live ? `<button data-rv="${f}" title="${t}">↺</button>` : '';
+  if (c.isNew) return `<div class="wp"><div class="r"><span>New card${c.copy_of && BASE[c.copy_of] ? `, copied from <em>${esc(BASE[c.copy_of].name)}</em>` : ''}</span></div>` +
+    (live ? '<button class="all" data-rv="all">Delete this card</button>' : '') + '</div>';
+  const fs = changes(id); if (!fs.length) return '';
+  const was = { name: `Name was <em>${esc(b.name)}</em>`, strength: `Strength was <em>${b.str === '' ? 'not set' : b.str}</em>`,
+    stars: `Stars were <em>${starsLabel(b.stars)}</em>`, text: `Text was <em>${b.text ? esc(b.text) : 'empty'}</em>`,
+    tags: `Family was <em>${b.tags.length ? esc(b.tags.join(' · ')) : 'empty'}</em>` };
+  return '<div class="wp">' + fs.map(f => `<div class="r"><span>${was[f]}</span>${btn(f, 'Put back the game\'s ' + (f === 'tags' ? 'family' : f))}</div>`).join('') +
+    (live && fs.length > 1 ? '<button class="all" data-rv="all">Back to the game\'s card</button>' : '') + '</div>';
+}
+function cardEl(c) {
+  const lv = !GAME_STARS && c.stars ? `<span class="blv" title="${STAR_NAME[c.stars]}">${starsLabel(c.stars)}</span>` : '';
+  const str = typeof c.str === 'number' || c.str === null || c.str === '' ? `<span class="row"><button data-adj="strength" data-d="-1" title="Strength −1">−</button><b>${c.str ?? ''}</b><button data-adj="strength" data-d="1" title="Strength +1">+</button></span>` : '';
+  return cardHTML(shown(c)) + lv + `<span class="adj">${str}<span class="row st"><button data-adj="stars" data-d="-1" title="One star less">−</button><b title="${STAR_NAME[c.stars]}">${starsLabel(c.stars)}</b><button data-adj="stars" data-d="1" title="One star more">+</button></span></span>` + wpHTML(c.id);
+}
+function buildCard(c) {
+  if (editing && editing.id === c.id) return null;
+  const html = cardEl(c);
+  if (els[c.id] && els[c.id].dataset.h === html) return null;
+  const el = els[c.id] || world.appendChild(document.createElement('div'));
+  el.className = 'it' + (c.planned ? ' planned' : '') + (changes(c.id).length ? ' chg' : '') + (B.notext ? ' notext' : '');
+  el.dataset.id = c.id; el.dataset.h = html; el.innerHTML = html + '<i class="ed"></i><i class="nt"></i><i class="fl"></i>';
+  els[c.id] = el;
+  return el;
+}
+function buildCards(only) {
+  if (!only) for (const id of Object.keys(els)) if (!CARDS[id]) { els[id].remove(); delete els[id]; }
+  const made = (only ? only.map(id => CARDS[id]).filter(Boolean) : Object.values(CARDS)).map(buildCard).filter(Boolean);
+  for (const el of made) fitNames(el);
+  chgButton();
 }
 
 function draw() {
@@ -198,21 +278,33 @@ function draw() {
 }
 
 // ---------- saving ----------
-let saveT = null, saving = Promise.resolve();
+// Everything saves by itself a moment after it changes: the arrangement into this board's file, the design into changes.json.
+let saveT = null, saving = Promise.resolve(), savedB = '', savedD = '';
 function changed(before) {
   undo.push(before); if (undo.length > 200) undo.shift(); redo = [];
   draw(); queueSave();
 }
-function queueSave() { clearTimeout(saveT); saveT = setTimeout(() => saving = saving.then(save), 300); }
-async function save() {
-  const r = await fetch(api(), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(B) }).catch(() => null);
-  if (!r) return msg('Not saved: the board server is not running (./board).');
-  if (r.status === 409) { msg('The board changed in another tab; reloaded.'); return load(); }
-  if (!r.ok) return msg('Not saved: ' + await r.text());
-  B.rev = (await r.json()).rev; msg('');
+function queueSave() { clearTimeout(saveT); saveT = setTimeout(() => { saveT = null; saving = saving.then(save); }, 300); }
+const arrJSON = () => JSON.stringify({ ...B, rev: 0 }), desJSON = () => JSON.stringify({ edits: D.edits, new: D.new });
+async function put(url, body) {
+  const r = await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => null);
+  if (!r) { msg('Not saved: the board server is not running (./board).'); return null; }
+  if (r.status === 409) { msg('Changed in another tab; reloaded.'); await load(); return null; }
+  if (!r.ok) { msg('Not saved: ' + await r.text()); return null; }
+  msg(''); return (await r.json()).rev;
 }
-const snap = () => JSON.stringify({ cards: B.cards, piles: B.piles, gone: B.gone, marks: B.marks, strs: B.strs });
-function restore(s) { const o = JSON.parse(s); B.cards = o.cards; B.piles = o.piles; B.gone = o.gone || []; B.marks = o.marks || {}; B.strs = o.strs || {}; buildCards(); sel.clear(); psel.clear(); draw(); queueSave(); }
+async function save() {
+  const a = arrJSON(), d = desJSON();
+  if (a !== savedB) { const rev = await put(api(), B); if (rev === null) return; B.rev = rev; savedB = a; }
+  if (d !== savedD) { const rev = await put('/api/design', { rev: D.rev, edits: D.edits, new: D.new }); if (rev === null) return; D.rev = rev; savedD = d; }
+}
+const snap = () => JSON.stringify({ cards: B.cards, piles: B.piles, gone: B.gone, marks: B.marks, edits: D.edits, new: D.new });
+function restore(s) {
+  const o = JSON.parse(s); B.cards = o.cards; B.piles = o.piles; B.gone = o.gone || []; B.marks = o.marks || {};
+  if (o.edits) { D.edits = o.edits; D.new = o.new || {}; derive(); }
+  buildCards(); sel.clear(); psel.clear(); draw(); queueSave();
+}
+function derive() { CARDS = {}; for (const id of [...Object.keys(BASE), ...Object.keys(D.new)]) CARDS[id] = cardView(id); }
 function msg(t) { $('#msg').textContent = t; }
 
 // `cardsOnly`: card edits made elsewhere come in, the arrangement on the page stays as it is
@@ -220,9 +312,13 @@ async function load(cardsOnly = false) {
   const r = await fetch(api(), { cache: 'no-store' }).catch(() => null);
   if (!r) return msg('The board server is not running: ./board');
   const d = await r.json();
-  CARDS = Object.fromEntries(d.cards.map(c => [c.id, c]));
+  BASE = Object.fromEntries(d.cards.map(c => [c.id, c]));
+  D = d.design; savedD = desJSON();
+  const any = d.cards.find(c => !c.planned && c.rarity === 'common');
+  GAME_STARS = !!any && cardHTML({ ...any, stars: 0 }) !== cardHTML({ ...any, stars: 3 });
+  derive();
   $('#boards').innerHTML = d.boards.map(b => `<option value="${b.id}"${b.id === BID ? ' selected' : ''}>${b.name.replace(/</g, '&lt;')}</option>`).join('');
-  if (!cardsOnly) { B = d.board; B.cards ||= {}; B.piles ||= []; B.gone ||= []; B.marks ||= {}; B.strs ||= {}; }
+  if (!cardsOnly) { B = d.board; B.cards ||= {}; B.piles ||= []; B.gone ||= []; B.marks ||= {}; savedB = arrJSON(); }
   buildCards();
   if (placeNew()) queueSave();
   draw();
@@ -277,9 +373,12 @@ let act = null, spaceDown = false;
 view.addEventListener('pointerdown', e => {
   if (!e.target.closest('.ph.open')) document.querySelectorAll('.ph.open').forEach(h => h.classList.remove('open'));
   hidePeek();
-  const t = e.target, w = toWorld(e.clientX, e.clientY);
+  let t = e.target; const w = toWorld(e.clientX, e.clientY);
   const nm = t.closest('.nm');
   if (nm && nm.getAttribute('contenteditable') === 'true') return;
+  if (editing && editing.el.contains(t)) return;           // placing the caret in the text being written
+  if (editing) { editing.el.blur(); if (!t.isConnected) t = document.elementFromPoint(e.clientX, e.clientY) || view; }   // the card is redrawn as the writing ends
+  if (t.closest('.wp') && !t.closest('button')) return;
   // as on Miro: a drag on empty table selects; the right or middle button, or Space held, drags the table
   if (e.button === 1 || e.button === 2 || spaceDown) { act = { kind: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, menu: e.button === 2 && t.closest('.it')?.dataset.id }; view.classList.add('panning'); }
   else if (t.closest('button')) return;
@@ -302,7 +401,9 @@ view.addEventListener('pointerdown', e => {
     const ids = [...sel].filter(i => posOf(i) && !els[i].classList.contains('hidden') || i === id);
     // a stacked pile is lifted whole from its top card
     const p = pileOf(id); const lift = p && p.stacked ? p.cards.slice() : ids;
-    act = { kind: 'cards', id, ids: lift, w0: w, start: Object.fromEntries(lift.map(i => [i, { ...posOf(i) }])), before: snap(), moved: false, fresh };
+    // a click (not a drag) on the name, the text or the family writes on the card
+    const field = t.closest('.nbar') ? 'name' : t.closest('.ctext i') ? 'tags' : t.closest('.ctext') && !B.notext ? 'text' : null;
+    act = { kind: 'cards', id, ids: lift, w0: w, start: Object.fromEntries(lift.map(i => [i, { ...posOf(i) }])), before: snap(), moved: false, fresh, field };
   } else {
     if (!e.shiftKey) { sel.clear(); psel.clear(); draw(); }
     act = { kind: 'marq', sx: e.clientX, sy: e.clientY, base: new Set(sel), pbase: new Set(psel) };
@@ -355,7 +456,11 @@ view.addEventListener('pointerup', e => {
   else if (a.kind === 'cols' && a.p.cols !== a.c0) changed(a.before);
   else if (a.kind === 'cards') {
     a.ids.forEach(i => els[i].classList.remove('drag'));
-    if (!a.moved) { if (!a.fresh && !e.shiftKey) { sel = new Set([a.id]); draw(); } return; }
+    if (!a.moved) {
+      if (!a.fresh && !e.shiftKey) { sel = new Set([a.id]); draw(); }
+      if (a.field && !(pileOf(a.id)?.stacked && pileOf(a.id).cards[0] !== a.id)) startEdit(a.id, a.field, e.clientX, e.clientY);
+      return;
+    }
     const w = toWorld(e.clientX, e.clientY), dx = w.x - a.w0.x, dy = w.y - a.w0.y;
     const from = pileOf(a.id), moving = new Set(a.ids);
     const target = pileAt(w);
@@ -386,22 +491,29 @@ $('#newpile').onclick = () => {
   for (const q of B.piles) q.cards = q.cards.filter(id => !sel.has(id));
   for (const id of cards) delete B.cards[id];
   const p = { id: newId(), name: 'New pile', x: 0, y: 0, cols: 4, stacked: false, cards };
-  const s = pileSize(p), M = G * 2;
-  const boxes = [...Object.entries(B.cards).filter(([id]) => !gone(id)).map(([, q]) => [q.x, q.y, W, H]),
+  const s = pileSize(p);
+  [p.x, p.y] = freeSpot(ax, ay, s.w, s.h, G * 2);
+  B.piles.push(p); sel.clear(); psel.clear(); changed(before);
+  intoView(p.x, p.y, s.w, s.h);
+  rename(p);
+};
+// the nearest spot of free table to (ax, ay) for something w by h, keeping a margin m from everything else
+function freeSpot(ax, ay, w, h, m) {
+  const boxes = [...Object.entries(B.cards).filter(([id]) => !gone(id) && CARDS[id]).map(([, q]) => [q.x, q.y, W, H]),
     ...B.piles.map(q => { const z = pileSize(q); return [q.x, q.y, z.w, z.h]; })];
-  const free = (x, y) => boxes.every(([bx, by, bw, bh]) => x + s.w + M <= bx || bx + bw + M <= x || y + s.h + M <= by || by + bh + M <= y);
+  const free = (x, y) => boxes.every(([bx, by, bw, bh]) => x + w + m <= bx || bx + bw + m <= x || y + h + m <= by || by + bh + m <= y);
   const step = (W + G) / 2, spots = [];
   for (let i = -60; i <= 60; i++) for (let j = -60; j <= 60; j++) spots.push([ax + i * step, ay + j * step]);
   spots.sort((u, v) => Math.hypot(u[0] - ax, u[1] - ay) - Math.hypot(v[0] - ax, v[1] - ay));
   const [x, y] = spots.find(([x, y]) => free(x, y)) || [ax, ay];
-  p.x = Math.round(x); p.y = Math.round(y);
-  B.piles.push(p); sel.clear(); psel.clear(); changed(before);
-  // into view if it isn't, at the same zoom
-  const a = toWorld(r.left, r.top), b = toWorld(r.right, r.bottom);
-  if (s.w * cam.z > r.width || s.h * cam.z > r.height) fit();
-  else if (p.x < a.x || p.y < a.y || p.x + s.w > b.x || p.y + s.h > b.y) { cam.x = r.width / 2 - (p.x + s.w / 2) * cam.z; cam.y = r.height / 2 - (p.y + s.h / 2) * cam.z; setCam(); }
-  rename(p);
-};
+  return [Math.round(x), Math.round(y)];
+}
+// into view if it isn't, at the same zoom
+function intoView(x, y, w, h) {
+  const r = view.getBoundingClientRect(), a = toWorld(r.left, r.top), b = toWorld(r.right, r.bottom);
+  if (w * cam.z > r.width || h * cam.z > r.height) fit();
+  else if (x < a.x || y < a.y || x + w > b.x || y + h > b.y) { cam.x = r.width / 2 - (x + w / 2) * cam.z; cam.y = r.height / 2 - (y + h / 2) * cam.z; setCam(); }
+}
 function rename(p) {
   const nm = pileEls[p.id].querySelector('.nm');
   nm.setAttribute('contenteditable', 'true'); nm.focus();
@@ -429,9 +541,9 @@ world.addEventListener('click', e => {
 
 // ---------- find ----------
 function search() {
-  const q = $('#q').value.trim().toLowerCase();
+  const q = $('#q').value.trim().toLowerCase(), mine = $('#chgonly').getAttribute('aria-pressed') === 'true';
   for (const c of Object.values(CARDS)) {
-    const hit = !q || [c.name, c.species, c.habitat, c.text, ...c.tags].some(s => (s || '').toLowerCase().includes(q));
+    const hit = (!q || [c.name, c.species, c.habitat, c.text, ...c.tags].some(s => (s || '').toLowerCase().includes(q))) && (!mine || changes(c.id).length);
     els[c.id]?.classList.toggle('dim', !hit);
   }
 }
@@ -450,7 +562,7 @@ function peekMove(e) {
   if (id !== peekId) { hidePeek(); peekId = id; if (id) peekT = setTimeout(() => showPeek(id, e), 350); }
   else if (id && $('#peek').style.display === 'block') placePeek(e);
 }
-function showPeek(id, e) { const pk = $('#peek'); const n = B.marks[id]?.note; pk.innerHTML = cardHTML(shown(CARDS[id])) + (n ? `<div class="pn"></div>` : ''); if (n) pk.querySelector('.pn').textContent = n; pk.style.display = 'block'; fitNames(pk); placePeek(e); }
+function showPeek(id, e) { if (editing) return; const pk = $('#peek'); const n = B.marks[id]?.note; pk.innerHTML = cardHTML(shown(CARDS[id])) + (n ? `<div class="pn"></div>` : '') + wpHTML(id, false); if (n) pk.querySelector('.pn').textContent = n; pk.style.display = 'block'; fitNames(pk); placePeek(e); }
 function placePeek(e) {
   const pk = $('#peek'), w = 300, h = 300 * 1.467, gap = 24;
   const x = e.clientX + gap + w < innerWidth ? e.clientX + gap : e.clientX - gap - w;
@@ -492,7 +604,8 @@ addEventListener('pointerdown', e => { if (menuId && !e.target.closest('#menu'))
 
 // ---------- keys ----------
 addEventListener('keydown', e => {
-  if (e.target.closest?.('input, [contenteditable="true"]')) return;
+  if (e.target.closest?.('input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]')) return;
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') { e.preventDefault(); if (sel.size) duplicate([...sel]); return; }
   if (e.code === 'Space') { spaceDown = true; e.preventDefault(); }
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
     e.preventDefault();
@@ -505,19 +618,124 @@ addEventListener('keydown', e => {
     e.preventDefault();
     const before = snap();
     for (const p of B.piles) p.cards = p.cards.filter(id => !sel.has(id));
-    for (const id of sel) { delete B.cards[id]; B.gone.push(id); }
-    sel.clear(); changed(before);
+    for (const id of sel) { delete B.cards[id]; if (D.new[id]) { delete D.new[id]; delete CARDS[id]; } else B.gone.push(id); }   // a card he made is deleted; a game card only leaves the board
+    sel.clear(); buildCards(); changed(before);
   }
 });
 addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
 $('#fit').onclick = fit;
 world.addEventListener('click', e => {
-  const b = e.target.closest('[data-adj]'); if (!b) return;
+  const b = e.target.closest('[data-adj], [data-rv]'); if (!b) return;
   const id = b.closest('.it').dataset.id, c = CARDS[id], before = snap();
-  const v = Math.max(0, (B.strs[id] ?? c.str) + Number(b.dataset.adj));
-  if (v === c.str) delete B.strs[id]; else B.strs[id] = v;
-  buildCards(); changed(before);
+  if (b.dataset.adj === 'strength') setVal(id, 'strength', Math.max(0, Math.min(99, (typeof c.str === 'number' ? c.str : 0) + Number(b.dataset.d))));
+  else if (b.dataset.adj === 'stars') setVal(id, 'stars', Math.max(-1, Math.min(3, c.stars + Number(b.dataset.d))));
+  else if (b.dataset.rv === 'all' && D.new[id]) { delete D.new[id]; delete CARDS[id]; delete B.cards[id]; for (const p of B.piles) p.cards = p.cards.filter(i => i !== id); sel.delete(id); }
+  else if (b.dataset.rv === 'all') { delete D.edits[id]; CARDS[id] = cardView(id); }
+  else setVal(id, b.dataset.rv, baseVal(BASE[id], b.dataset.rv));
+  buildCards(CARDS[id] ? [id] : undefined); changed(before);
 });
+
+// ---------- writing on a card ----------
+// A click on the name, the text or the family makes it writable in place, in the card's own type; the keywords go bold and
+// the text fits the panel as he types, and every keystroke is kept. Enter or a click elsewhere ends it, Escape takes it back.
+let editing = null;
+// the table never scrolls (it pans): a caret near an edge must not slide the table or the card's own layers
+document.addEventListener('scroll', e => { const t = e.target; if (t !== document && t.closest?.('#view')) { t.scrollTop = 0; t.scrollLeft = 0; } }, true);
+const KW = new RegExp(`\\b(${Object.keys(KEYWORDS).join('|')})\\b( \\d+)?[:.]?`, 'g');
+const bold = t => esc(t).replace(KW, '<b>$&</b>');
+const parse = (f, t) => f === 'tags' ? t.split(/[·,]/).map(s => s.trim()).filter(Boolean) : one(t);
+function caretAt(el) {
+  const s = getSelection(); if (!s.rangeCount || !el.contains(s.focusNode)) return el.textContent.length;
+  const pre = document.createRange(); pre.selectNodeContents(el); pre.setEnd(s.focusNode, s.focusOffset); return pre.toString().length;
+}
+function putCaret(el, off) {
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), r = document.createRange(); let n;
+  while ((n = w.nextNode())) { if (off <= n.length) { r.setStart(n, off); break; } off -= n.length; }
+  if (!n) { r.selectNodeContents(el); r.collapse(false); } else r.collapse(true);
+  const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+}
+function startEdit(id, field, x, y) {
+  const it = els[id], c = CARDS[id]; if (!it) return;
+  let el = field === 'name' ? it.querySelector('.nbar span') : field === 'tags' ? it.querySelector('.ctext i') : it.querySelector('.ctext p');
+  if (!el && field === 'text') el = it.querySelector('.ctext').insertBefore(document.createElement('p'), it.querySelector('.ctext i'));
+  if (!el) return;
+  hidePeek();
+  if (field === 'tags') el.textContent = c.tags.join(' · ');
+  editing = { id, field, el, before: snap(), orig: field === 'tags' ? [...c.tags] : c[field] };
+  el.setAttribute('contenteditable', 'plaintext-only'); it.classList.add('editing');
+  el.focus({ preventScroll: true });
+  const r = x != null && document.caretRangeFromPoint ? document.caretRangeFromPoint(x, y) : null;
+  if (field !== 'name' && r && el.contains(r.startContainer)) { const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  else { const all = document.createRange(); all.selectNodeContents(el); getSelection().removeAllRanges(); getSelection().addRange(all); }
+  el.addEventListener('input', onType); el.addEventListener('keydown', onEditKey); el.addEventListener('blur', onEditBlur);
+}
+function onType(e) {
+  const { id, field, el } = editing, raw = el.textContent;
+  if (field === 'text' && !e.isComposing && el.innerHTML !== bold(raw)) { const off = caretAt(el); el.innerHTML = bold(raw); putCaret(el, off); }
+  if (field === 'name') { const bar = el.parentElement; bar.classList.toggle('two', raw.length > 18); bar.style.setProperty('--n', raw.length); }
+  setVal(id, field, parse(field, raw));
+  fitNames(els[id]); chgButton(); queueSave();
+}
+function onEditKey(e) {
+  e.stopPropagation();
+  if (e.key === 'Enter') { e.preventDefault(); editing.el.blur(); }
+  if (e.key === 'Escape') { e.preventDefault(); editing.cancel = true; editing.el.blur(); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {     // inside the text: back to how it was when he clicked in
+    e.preventDefault(); const { el, field, orig } = editing;
+    el.innerHTML = field === 'text' ? bold(orig) : esc(field === 'tags' ? orig.join(' · ') : orig); putCaret(el, el.textContent.length);
+    onType({});
+  }
+}
+function onEditBlur() {
+  const ed = editing; if (!ed) return;
+  editing = null;
+  ed.el.removeEventListener('input', onType); ed.el.removeEventListener('keydown', onEditKey); ed.el.removeEventListener('blur', onEditBlur);
+  ed.el.removeAttribute('contenteditable'); els[ed.id]?.classList.remove('editing');
+  const v = parse(ed.field, ed.el.textContent);
+  if (ed.cancel || (ed.field === 'name' && !v)) setVal(ed.id, ed.field, ed.orig);
+  else setVal(ed.id, ed.field, v);
+  if (snap() !== ed.before) changed(ed.before); else queueSave();
+  delete els[ed.id].dataset.h; buildCards([ed.id]); draw();
+  getSelection().removeAllRanges();
+}
+
+// ---------- new cards ----------
+// A blank card in the middle of the screen, or a copy of each picked card beside it (in its pile, right after it); the name
+// is ready to type over. A copy wears its original's painting on the board.
+function nextNew() { let n = 1; while (D.new['new' + n] || CARDS['new' + n]) n++; return 'new' + n; }
+function makeCard(src, before) {
+  const id = nextNew();
+  D.new[id] = src ? { copy_of: src.isNew ? src.copy_of : src.id, name: src.name, rarity: src.rarity || 'common', strength: typeof src.str === 'number' ? src.str : 0,
+    stars: src.stars, text: src.text, tags: [...src.tags], habitat: src.habitat || '', species: src.species || '' }
+    : { copy_of: null, name: 'New card', rarity: 'common', strength: 1, stars: 0, text: '', tags: [], habitat: '', species: '' };
+  CARDS[id] = cardView(id);
+  return id;
+}
+function duplicate(ids) {
+  const before = snap(), made = [];
+  for (const sid of ids.slice().sort((p, q) => { const A = posOf(p), Bq = posOf(q); return A.y - Bq.y || A.x - Bq.x; })) {
+    const id = makeCard(CARDS[sid]), p = pileOf(sid);
+    if (p) p.cards.splice(p.cards.indexOf(sid) + 1, 0, id);
+    else { const q = posOf(sid); const [x, y] = freeSpot(q.x + W + G, q.y, W, H, G); B.cards[id] = { x, y }; }
+    made.push(id);
+  }
+  sel = new Set(made); psel.clear(); buildCards(made); changed(before);
+  const q = posOf(made[made.length - 1]); intoView(q.x, q.y, W, H + 60);
+  if (made.length === 1) startEdit(made[0], 'name');
+}
+$('#newcard').onclick = () => {
+  const before = snap(), id = makeCard(null), r = view.getBoundingClientRect(), mid = toWorld(r.left + r.width / 2, r.top + r.height / 2);
+  const [x, y] = freeSpot(mid.x - W / 2, mid.y - H / 2, W, H, G); B.cards[id] = { x, y };
+  sel = new Set([id]); psel.clear(); buildCards([id]); changed(before); intoView(x, y, W, H + 60);
+  startEdit(id, 'name');
+};
+$('#mdup').onclick = () => { const id = menuId; closeMenu(); if (id) duplicate([id]); };
+// how many cards he changed or made, and a switch to see only those
+function chgButton() {
+  const n = Object.keys(D.edits).filter(id => BASE[id]).length + Object.keys(D.new).length, b = $('#chgonly'), on = b.getAttribute('aria-pressed') === 'true';
+  b.textContent = n === 1 ? '1 card changed' : `${n} cards changed`; b.style.display = n || on ? '' : 'none';
+}
+$('#chgonly').onclick = () => { const b = $('#chgonly'); b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'); search(); };
 // Switching boards: each keeps its own arrangement, undo history and camera.
 async function openBoard(id) {
   await saving; clearTimeout(saveT); saving = saving.then(save);
@@ -535,7 +753,7 @@ $('#newboard').onclick = async () => {
   if (!r || !r.ok) return msg('The board could not be made.');
   openBoard((await r.json()).id);
 };
-addEventListener('focus', () => { if (!act) load(true); });   // card edits made elsewhere show when he comes back
+addEventListener('focus', () => { if (!act && !editing && !saveT) saving.then(() => load(true)); });   // card edits made elsewhere show when he comes back
 
 try { const c = JSON.parse(localStorage.getItem(camKey())); if (c && c.z) cam = c; } catch (e) {}
 setCam();
