@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 125,
+ "rev": 134,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -289,7 +289,7 @@
   },
   "new15": {
    "copy_of": "baboon_legend",
-   "name": "Training",
+   "name": "Babaji",
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
