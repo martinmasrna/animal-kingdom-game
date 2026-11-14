@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 23,
+ "rev": 33,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -277,7 +277,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "At the start",
+   "text": "At the start of the game, add Princess Lea to your hand.",
    "tags": [
     "Cat"
    ],
@@ -290,7 +290,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "Roar: play Prince Leo from your hand or deck.",
+   "text": "At the start of the game, add Princess Lea to your hand.",
    "tags": [
     "Cat"
    ],

@@ -1,16 +1,7 @@
 {
- "rev": 35,
+ "rev": 44,
  "name": "provisions",
- "cards": {
-  "lion_legend_2": {
-   "x": 7489,
-   "y": 571
-  },
-  "lion_legend": {
-   "x": 6545,
-   "y": 821
-  }
- },
+ "cards": {},
  "piles": [
   {
    "id": "provcommon",
@@ -252,8 +243,8 @@
   {
    "id": "provleaders",
    "name": "Leaders",
-   "x": 8829,
-   "y": 1578,
+   "x": 7584,
+   "y": 65,
    "cols": 10,
    "stacked": false,
    "cards": [
@@ -276,8 +267,6 @@
     "new18",
     "new19",
     "new20",
-    "new21",
-    "new22",
     "new23",
     "new24",
     "new25",
@@ -332,8 +321,12 @@
    "cols": 2,
    "stacked": false,
    "cards": [
+    "new2",
     "bee_legend_2",
-    "new2"
+    "new21",
+    "lion_legend",
+    "new22",
+    "lion_legend_2"
    ]
   }
  ],
