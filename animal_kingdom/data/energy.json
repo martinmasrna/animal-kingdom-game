@@ -871,6 +871,12 @@
   },
   "great_stag": {
    "cost": 3
+  },
+  "krill": {
+   "status": "reserve"
+  },
+  "stick_insect": {
+   "status": "reserve"
   }
  },
  "decks": [
