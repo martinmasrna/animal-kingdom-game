@@ -473,6 +473,8 @@ pub struct Config {
     pub extra_play_max_cost: i32,
     pub titan_discount: i32,
     pub max_places_per_turn: i32,
+    pub energy_start: i32,
+    pub energy_second_lead: i32,
 }
 
 impl Config {
@@ -499,6 +501,8 @@ impl Config {
             extra_play_max_cost: gi("extra_play_max_cost", 99),
             titan_discount: gi("titan_discount", 1),
             max_places_per_turn: gi("max_places_per_turn", 0),
+            energy_start: gi("energy_start", 0),
+            energy_second_lead: gi("energy_second_lead", 0),
             raw,
         })
     }

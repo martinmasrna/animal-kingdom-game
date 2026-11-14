@@ -66,3 +66,7 @@ def _overlay_cards(data: dict) -> None:
                 rec[k] = o[k]
         if rec.get("hungry") == 0:
             del rec["hungry"]
+    floor = int(os.environ.get("AK_COST_FLOOR", "0"))   # an experiment for the simulations: no animal costs less than this
+    if floor:
+        for rec in data.get("cards", []):
+            rec["price"] = max(floor, rec.get("price", floor))

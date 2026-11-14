@@ -76,7 +76,14 @@ pub fn titan_food(st: &State, player: Player) -> i32 {
 }
 
 pub fn turn_actions(st: &State) -> i32 {
-    let base = if st.turn_counter == 0 { st.cfg().first_turn_actions } else { st.cfg().actions_per_turn };
+    let cfg = st.cfg();
+    let base = if cfg.energy_start > 0 {
+        cfg.actions_per_turn.min(cfg.energy_start + (st.turn_counter + cfg.energy_second_lead) / 2)
+    } else if st.turn_counter == 0 {
+        cfg.first_turn_actions
+    } else {
+        cfg.actions_per_turn
+    };
     let p = st.current.min(1) as usize;
     let total = base + st.turn_flags.bonus_actions[p];
     match st.turn_flags.action_cap[p] {
