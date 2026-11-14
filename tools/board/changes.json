@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 107,
+ "rev": 125,
  "changed": {
   "bee_legend_2": {
    "stars": {
@@ -289,11 +289,11 @@
   },
   "new15": {
    "copy_of": "baboon_legend",
-   "name": "Babaji",
+   "name": "Training",
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "Dawn: give 2 random animals in your hand +1 strength.",
+   "text": "Activate: give an animal in your hand +2 strength.",
    "tags": [
     "Primate"
    ],
