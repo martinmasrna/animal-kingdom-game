@@ -45,4 +45,10 @@ The Lion (7, vanilla) costs 2. A drawn card is worth 2 energy. Body value by str
 
 ## Log
 
-- 01:30 Branch `energy` created from `provisions` (62b8cd0a). caffeinate running for 12 h.
+- Branch `energy` created from `provisions` (62b8cd0a). caffeinate running for 12 h.
+- Steps 1 and 2 done: energy rules in Python and Rust behind AK_ENERGY=1, Rust built into the worktree venv (maturin from main's venv), fuzz parity 150/150 under energy and 60/60 under the old rules. Next: the data overlay (step 3).
+- Step 3 first draft done: tools/energy/table.py (203 cards: 201 costed, 2 benched), build.py writes data/energy.json and prints the checks. Card changes behind config numbers in both engines (Mouse draws 2, Hummingbird gains 2 energy, Mole legend without discard, Grizzly plain, Crocodile Apex+Armor, Giraffe Reach, Elephant plain, whales lose Titan). Parity 300/300 energy, 100/100 old. Next: decks (step 5), bots and simulations (4, 6).
+- Step 3 first draft done: tools/energy/table.py (203 cards: 201 costed, 2 benched), build.py writes data/energy.json and prints the checks. Card changes behind config numbers in both engines (Mouse draws 2, Hummingbird gains 2 energy, Mole legend without discard, Grizzly plain, Crocodile Apex+Armor, Giraffe Reach, Elephant plain, whales lose Titan). Parity under energy and old rules. Next: decks (step 5), bots and simulations (4, 6).
+- Steps 4 and 5 done: six decks (tools/energy/decks.py), sim harness (tools/energy/sim.py; AK_ENERGY=1 AK_RUST_BOTS=1). Plain 'referee' (hand-tuned) beats greedy 73% and equals 'turn'; use it for sims. First round robin (900 games, results/energy/rr1.jsonl): median 9 player-turns, food 54% / den 46%, first player 49% with 3 energy on turn one, no deck-outs, decks 43-61% (Deck 6 Colony 61, Deck 1 Cats 57). Next: frontend (7), Costs board (8), deploy (9), then cost iteration (6) and the morning page (10).
+
+(Log times were dropped: the first entries carried guessed clock times. From here each entry reads the clock.)

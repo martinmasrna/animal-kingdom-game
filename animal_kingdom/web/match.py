@@ -95,6 +95,11 @@ NORMAL = "turn:w.hq_threat_reach=0.5"
 EXPERT_TURN = (EXPERT.replace("referee_learned", "atomic_learned").replace("time_budget=8", "time_budget=20")
                + ",rounds=2,draws=1,inner=1,width2=6,beam=6,hands=20,cand=animal_kingdom/data/learned/cand_v4.json,threads=1,turn_budget=30,partial=1")
 BOT_LEVELS = {"easy": "easy", "normal": NORMAL, "expert": EXPERT_TURN}
+from ..engine.resources import ENERGY
+if ENERGY:   # the energy prototype: the hand-tuned evaluation (the learned ones were trained on the old cards and turns)
+    BOT_LEVELS = {"easy": "easy", "normal": "turn:w.hq_threat_reach=0.5",
+                  "expert": "referee:depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,w.buried_presence=0.25,"
+                            "quiesce=true,mulligan=true,decisive=500,den_open=true,reply_min=true,outs=20"}
 
 
 def conditional_reach(state: GameState, card_id: str) -> bool:
@@ -841,7 +846,7 @@ def card_pool() -> list[dict]:
     return [{"id": c.id, "name": c.name, "status": c.status, "rarity": c.rarity, "tags": sorted(c.tags),
              # A variable-strength card (Python) prints 0: its text says what it gains ("+1 for each removed animal").
              "str": 0 if c.is_dynamic else c.base_strength, "text": c.text,
-             "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat,
+             "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat, **({"price": c.price} if ENERGY else {}),
              "related": list(c.related or ahead.get(c.id, ())), "evolves": c.evolves or bool(ahead.get(c.id)),
              **({"evolvesAt": EVOLVES_AT[c.id]} if c.id in EVOLVES_AT else {})}
             for c in CARDS.values()]

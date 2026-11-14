@@ -152,7 +152,7 @@ if __name__ == "__main__":
         games = run(jobs, a.label or f"rr_{a.bot}_{int(time.time())}", a.workers)
         summary(games); deck_table(games); card_table(games)
     else:
-        b1, b2 = a.bots.split(",")
+        b1, b2 = a.bots.split(";") if ";" in a.bots else a.bots.split(",")
         for d in decks:
             for k in range(a.games):
                 s = a.seed + 1000 * len(jobs) + k

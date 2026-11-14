@@ -499,3 +499,10 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .lgpips { display: inline-flex; gap: 3px; margin-left: .5em; vertical-align: middle; position: relative; top: -.05em; }
 .lgpips s { width: 7px; height: 7px; border-radius: 50%; box-shadow: inset 0 0 0 1px currentColor; opacity: .55; }
 .lgpips s.on { background: currentColor; opacity: 1; }
+
+/* The energy prototype: a card's cost, a gem at the right end of its name bar (the bar ends before it). */
+.card .ecost { position: absolute; z-index: 4; right: .32em; top: .3em; width: 2.7em; height: 2.7em; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe9a8, #e2a93a 62%, #a8741c); box-shadow: 0 0 0 .14em #4a3210, 0 .12em .3em rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; }
+.card .ecost b { font: 800 1.9em/1 'Fira Sans Condensed', sans-serif; color: #2a1a06; }
+.card.priced .nbar { right: 3.1em; }
+/* energy on the turn button and the deck: the same gem, small */
+.egem { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe9a8, #e2a93a 62%, #a8741c); box-shadow: 0 0 0 .08em #4a3210; color: #2a1a06; font-weight: 800; font-size: .8em; margin-left: .3em; vertical-align: middle; }

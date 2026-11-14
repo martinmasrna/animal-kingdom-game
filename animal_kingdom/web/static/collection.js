@@ -13,7 +13,8 @@ const FAMILIES = [['Cat', 'lion'], ['Canine', 'wolf_legend_3'], ['Rodent', 'chin
   ['Snake', 'viper'], ['Bear', 'polar_bear'], ['Hoofed', 'rhinoceros'], ['Fish', 'sardine'], ['Primate', 'gorilla'], ['Arachnid', 'tarantula'],
   ['Beetle', 'stag_beetle']];
 const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX
-const RANK = { legendary: 0, rare: 1, common: 2 }, LIMIT = { legendary: 1, rare: 2, common: 3 }, CAP = { legendary: 4, rare: 8 };
+const RANK = { legendary: 0, rare: 1, common: 2 };
+let LIMIT = { legendary: 1, rare: 2, common: 3 }, CAP = { legendary: 4, rare: 8 }, EN = null;   // the energy prototype: 2 copies, no caps (EN: its rule numbers)
 const sv = c => c.str === '*' ? -1 : c.str;
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const svg = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -37,7 +38,7 @@ const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${
 
 // The launch habitats, in the order the sets are presented.
 const HABITATS = ['Savanna', 'Forest', 'Meadow', 'Jungle', 'City', 'Open Ocean'];
-let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', q: '', sheet: false }, flash = null, wired = false;
+let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', pr: '', q: '', sheet: false }, flash = null, wired = false;
 const limit = c => LIMIT[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
 // A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
 export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
@@ -66,7 +67,8 @@ function save(all) {
 // Feedback beside Back (or Done) while the game is in testing: the side panel holds the screen's edge, where home has its tab.
 const FB = '<button class="backbtn fbx" data-tip="Feedback" aria-label="Feedback"><img class="tic" src="/static/kit2/top/feedback.webp" alt="" draggable="false"></button>';
 export function collectionScreen(app, ctx) {
-  X = ctx; C = ctx.cards;
+  X = ctx; C = ctx.cards; EN = ctx.energy || null;
+  if (EN) { LIMIT = { legendary: 1, rare: 2, common: 2 }; CAP = {}; }
   if (!saved) saved = Object.fromEntries(decks().map(d => [d.id, [...d.list]]));
   cards = Object.values(C).filter(c => c.status === 'collectible');   // the starters' cards and the bench (cleared cards in no starter)
   if (!wired) { wired = true; wireGlobal(); }
@@ -81,7 +83,7 @@ export function collectionScreen(app, ctx) {
 // Strips are slivers of the cards: strength on a driftwood plaque, the name, copies as dots (legendaries have one).
 // One strip: a sliver of the card; the number of copies at its end when there are two or more (the game's decklists: copies
 // left), as in Hearthstone. A strip with none left is marked gone.
-export const stripHTML = (id, cards, have) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span><span class="x">${have > 1 ? have : ''}</span></div>`;
+export const stripHTML = (id, cards, have, num = cards[id].str) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(num).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span><span class="x">${have > 1 ? have : ''}</span></div>`;
 // flat: one list in the same order (rarity, then strength) without the group labels (home's chooser); each strip keeps its rarity edge.
 export function deckBody(list, cards, caps = true, flat = false) {
   const counts = countsOf(list), inR = r => list.filter(id => cards[id].rarity === r).length;
@@ -99,9 +101,9 @@ function render(app, all) {
   const q = st.q.toLowerCase();
   // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
   const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
-  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str))
+  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.pr === '' || String(c.price) === st.pr) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str))
     && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ') + ' ' + made(c)).toLowerCase().includes(q)))
-    .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
+    .sort((a, b) => (EN ? a.price - b.price : 0) || sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));   // the energy prototype: by cost first
 
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
     : '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0;
@@ -113,10 +115,12 @@ function render(app, all) {
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
-    ${dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
+    ${EN ? dd('pr', st.pr, [['', 'Any cost'], ...['1', '2', '3', '4', '5'].map(v => [v, 'Cost ' + v])]) : dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
-  const body = d => deckBody(d.list, C);
+  const body = d => { if (!EN) return deckBody(d.list, C);
+    const counts = countsOf(d.list);   // the energy prototype: one list by cost, each strip showing its cost
+    return `<div class="dbody flat">${Object.keys(counts).sort((a, b) => C[a].price - C[b].price || C[a].name.localeCompare(C[b].name)).map(id => stripHTML(id, C, counts[id], C[id].price)).join('')}</div>`; };
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`

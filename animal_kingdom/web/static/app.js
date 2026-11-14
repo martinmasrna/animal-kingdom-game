@@ -27,6 +27,7 @@ const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
+let ENERGY = null;   // the energy prototype's rule numbers ({perTurn, draw, roam}), null on main's rules
 let CARDS = {}, MAP, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null;   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
@@ -133,7 +134,7 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; ENERGY = p.energy || null; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
   COVER = Object.fromEntries([...DECKS, ...BOT_ONLY].map(d => [d.id, d.cover]));
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
@@ -657,7 +658,7 @@ async function metaArchetype(box, id, q) {
 // The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
 // Two lessons: the basics (won by taking the den), then the deeper mechanics (won on food). Learned after the second.
 const LESSON_NAMES = ['The basics', 'Special powers'];   // tutorial.py's lessons, in order
-const learned = () => !!store('ak:learned') || !!(ME && ME.history && ME.history.length);
+const learned = () => !!ENERGY || !!store('ak:learned') || !!(ME && ME.history && ME.history.length);
 async function startTutorial(lesson = 1) {
   const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ tutorial: lesson, name: 'You' }) });
   if (!r.ok) return toast(await r.text());
@@ -691,7 +692,7 @@ const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  renderCollection(app, { open, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
+  renderCollection(app, { open, energy: ENERGY, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
 }
 
@@ -1358,7 +1359,7 @@ function drawGame() {
 
   // The deck is Draw 2; the End turn button is also the turn indicator.
   const canDraw = d.mine && !d.pend && G.legal.draw && !d.noDraw;
-  $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = canDraw ? 'Draw 2' : '';
+  $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = !canDraw ? '' : ENERGY ? `Draw<span class="egem">${ENERGY.draw}</span>` : 'Draw 2';
   const tb = $('tbtn');
   // the moves left in the turn, for either player; the next one to be spent pulses while the opponent is thinking
   const pips = playing ? Array.from({ length: G.actionsTotal }, (_, i) => { const used = G.actionsTotal - G.actionsLeft;
