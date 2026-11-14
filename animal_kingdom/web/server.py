@@ -24,7 +24,7 @@ from pathlib import Path
 
 from aiohttp import WSMsgType, web
 
-from ..decks import _TEST, BOT_DECKS, BUDGET, PREMADE_DECKS, TEST_BOT_DECKS, load_premade_deck
+from ..decks import BOT_DECKS, PREMADE_DECKS, TEST_BOT_DECKS, load_premade_deck
 from ..engine import rules
 from ..engine.state import EngineError
 from ..engine.cards import COPY_LIMITS, DECK_SLUGS, STARTER_DECKS, load_cards
@@ -1384,13 +1384,12 @@ async def pool(_req):
                   for d in STARTER_DECKS],
         "map": map_info(),
         "levels": list(BOT_LEVELS),
-        "bot_decks": list(BOT_DECKS if _TEST else (ladder.decks if ladder else BOT_DECKS)),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS plus the league's)
+        "bot_decks": list(ladder.decks if ladder else BOT_DECKS),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS plus the league's)
         # The bot decks that are not starters: shown by name and list wherever a bot's deck is (Practice's chooser,
         # the versus moment, the match history), never in a player's collection.
         "bot_only": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug), "cover": STARTER_COVERS.get(slug, "")}
-                     for slug in (BOT_DECKS if _TEST else (ladder.decks if ladder else BOT_DECKS)) if slug not in {d["slug"] for d in STARTER_DECKS}],
+                     for slug in (ladder.decks if ladder else BOT_DECKS) if slug not in {d["slug"] for d in STARTER_DECKS}],
         "build": BUILD,
-        "budget": BUDGET,
     })
 
 

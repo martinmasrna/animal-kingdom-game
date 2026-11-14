@@ -47,13 +47,12 @@ PLANNED = "planned"
 # The decks the game ships (decklists.json), in menu order:
 # slug, name, cover (the card whose art faces it), starter (a new profile gets it), bot (the bots play it), cards
 # (id: copies). Starter slugs align to docs/cards/decks/ filenames.
-from .resources import provisions as _provisions
-DECKLISTS: list[dict] = sorted(load_bundled_json("decklists.json")["decks"] + _provisions().get("decks", []), key=lambda d: d.get("order", 0))   # plus the provisions test's decks
+DECKLISTS: list[dict] = sorted(load_bundled_json("decklists.json")["decks"], key=lambda d: d.get("order", 0))
 STARTER_DECKS: list[dict] = [d for d in DECKLISTS if d.get("starter")]   # none while the cards change (Martin, 2026-10-29: back once they settle)
 DECK_SLUGS = {d["slug"] for d in DECKLISTS}               # every shipped deck: the sims' field and the gauntlet's
 
 # Copy limits per rarity for the locked 4-4-6 decklist shape (legendary 1 / rare 2 / common 3).
-COPY_LIMITS = {"common": 2, "rare": 2, "legendary": 1}   # the provisions test: 2 copies, 1 of a legendary
+COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}
 
 
 class CardDataError(ValueError):
@@ -80,7 +79,7 @@ class Card:
     habitat: str = ""              # the habitat (set) the card belongs to; display only, no rule reads it
     related: tuple[str, ...] = ()  # the cards it makes, shown beside it when read large; display only
     evolves: bool = False          # its related cards are what it becomes, in order (display only)
-    price: int = 2                 # the provisions test: what the card costs from the deck's budget (data/provisions.json)
+    price: int = 1                 # the energy prototype: what the card costs of the turn's energy (data/energy.json)
 
     @property
     def is_dynamic(self) -> bool:
@@ -178,7 +177,7 @@ def _build_card(rec: dict) -> Card:
         habitat=rec.get("habitat", ""),
         related=tuple(rec.get("related", ())),
         evolves=bool(rec.get("evolves", False)),
-        price=rec.get("price", 2),
+        price=rec.get("price", 1),
     )
 
 

@@ -8,7 +8,13 @@ package is run from source or installed.
 from __future__ import annotations
 
 import json
+import os
 from importlib import resources
+
+# The energy prototype (branch `energy`, never merged; ENERGY_PLAN.md): with AK_ENERGY=1 the game runs the energy rules
+# on the overlaid card data (data/energy.json: each card's cost, its strength by the animal's size, changed texts, benched
+# cards, the rule numbers, the sample decks). Without it this is the game as on main, and the tests run that way.
+ENERGY = os.environ.get("AK_ENERGY") == "1"
 
 
 def load_bundled_json(filename: str) -> dict:
@@ -17,30 +23,41 @@ def load_bundled_json(filename: str) -> dict:
     with resources.as_file(resource) as path:
         with open(path, "r", encoding="utf-8") as fh:
             data = json.load(fh)
-    if filename == "cards." + "json":
-        _apply_provisions(data)
+    if ENERGY and filename == "cards." + "json":
+        _overlay_cards(data)
     return data
 
 
-# The provisions test (branch `provisions`, never merged): data/provisions.json prices cards and may change a card's
-# strength, laid over the card data at load, so the engine, the Rust bots and the client all see the same cards.
-DEFAULT_PRICE = {"common": 2, "rare": 3, "legendary": 4}
+_variant: dict | None = None
 
 
-def provisions() -> dict:
-    resource = resources.files("animal_kingdom") / "data" / "provisions.json"
-    with resources.as_file(resource) as path:
-        with open(path, "r", encoding="utf-8") as fh:
-            return json.load(fh)
+def variant() -> dict:
+    """The energy prototype's data (rules, cards, decks); empty when the switch is off."""
+    global _variant
+    if not ENERGY:
+        return {}
+    if _variant is None:
+        resource = resources.files("animal_kingdom") / "data" / "energy.json"
+        with resources.as_file(resource) as path:
+            with open(path, "r", encoding="utf-8") as fh:
+                _variant = json.load(fh)
+    return _variant
 
 
-def _apply_provisions(data: dict) -> None:
-    prov = provisions()
-    over = prov.get("cards", {})
+def _overlay_cards(data: dict) -> None:
+    """Lay the prototype's values over the card records: `cost` (energy), `strength`, `text`, `status`, `keywords`,
+    `hungry`. A collectible card the overlay doesn't list is benched (reserve): it has no cost yet."""
+    over = variant().get("cards", {})
     for rec in data.get("cards", []):
-        if prov.get("only_pool") and rec.get("status") == "collectible" and rec.get("id") not in over:
-            rec["status"] = "reserve"   # out of the test pool
-        o = over.get(rec.get("id"), {})
-        rec["price"] = o.get("price", DEFAULT_PRICE.get(rec.get("rarity"), 2))
+        o = over.get(rec.get("id"))
+        if o is None:
+            if rec.get("status") == "collectible":
+                rec["status"] = "reserve"
+            rec["price"] = 1 if rec.get("status") == "token" else 2
+            continue
+        rec["price"] = o.get("cost", 2)
         if "strength" in o:
             rec["base_strength"] = o["strength"]
+        for k in ("text", "status", "keywords", "hungry"):
+            if k in o:
+                rec[k] = o[k]

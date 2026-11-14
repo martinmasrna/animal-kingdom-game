@@ -153,6 +153,8 @@ pub struct Card {
     pub dynamic: Option<String>,
     pub keywords: u32,
     pub food_cost: i32,
+    /// The energy prototype: what the card costs of the turn's energy.
+    pub price: i32,
     pub text: String,
     pub hungry: i32,
     pub mate: Option<CardId>,
@@ -326,6 +328,7 @@ impl Cards {
                 dynamic: rec.get("dynamic_strength").and_then(|t| t.as_str()).map(String::from),
                 keywords,
                 food_cost: rec.get("food_cost").and_then(|t| t.as_i64()).unwrap_or(0) as i32,
+                price: rec.get("price").and_then(|t| t.as_i64()).unwrap_or(1) as i32,
                 text,
                 hungry: rec.get("hungry").and_then(|t| t.as_i64()).unwrap_or(0) as i32,
                 mate: None,
@@ -463,6 +466,12 @@ pub struct Config {
     pub jelly_grant: i32,
     pub egg_eater_growth: i32,
     pub capybara_small_max: i32,
+    /// The energy prototype (Config.energy_mode and its numbers).
+    pub energy_mode: bool,
+    pub draw_cost: i32,
+    pub roam_cost: i32,
+    pub extra_play_max_cost: i32,
+    pub titan_discount: i32,
 }
 
 impl Config {
@@ -483,6 +492,11 @@ impl Config {
             jelly_grant: gi("jelly_grant", 2),
             egg_eater_growth: gi("egg_eater_growth", 2),
             capybara_small_max: gi("capybara_small_max", 3),
+            energy_mode: raw.get("energy_mode").and_then(|x| x.as_bool()).unwrap_or(false),
+            draw_cost: gi("draw_cost", 1),
+            roam_cost: gi("roam_cost", 1),
+            extra_play_max_cost: gi("extra_play_max_cost", 99),
+            titan_discount: gi("titan_discount", 1),
             raw,
         })
     }

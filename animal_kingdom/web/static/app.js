@@ -27,7 +27,7 @@ const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
-let BUDGET = 0, CARDS = {}, MAP, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null;   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
+let CARDS = {}, MAP, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null;   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
 
@@ -115,7 +115,7 @@ const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 // The decks you can play: your complete decks (a profile starts with the starters as its own); with none, the starters.
 // A deck under 30 cards is listed too, so it doesn't vanish from home while you build it: shown with its count, opened in
 // the collection to finish, never chosen to play (Martin, 2026-10-31: "affordance for decklist with less than 30 cards").
-const playable = () => { const mine = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: Math.max(0, 25 - deckSize(d.cards)), list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
+const playable = () => { const mine = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: Math.max(0, 30 - deckSize(d.cards)), list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
   return mine.some(d => !d.short) ? mine : [...DECKS, ...mine]; };
 const chosenDeck = () => { const all = playable().filter(d => !d.short), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
@@ -133,7 +133,7 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; BUDGET = p.budget; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
   COVER = Object.fromEntries([...DECKS, ...BOT_ONLY].map(d => [d.id, d.cover]));
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
@@ -691,7 +691,7 @@ const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  renderCollection(app, { open, budget: BUDGET, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
+  renderCollection(app, { open, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
 }
 

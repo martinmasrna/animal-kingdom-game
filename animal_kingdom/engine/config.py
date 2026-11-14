@@ -203,13 +203,23 @@ class Config:
     first_turn_actions: int = 1          # the first player's first turn only: the tempo the second player
                                          # lacks (Martin, 2026-10-11, from his gauntlets: 82% first vs 67% second)
 
+    # --- The energy prototype (ENERGY_PLAN.md): off on main's rules ---
+    energy_mode: bool = False            # a turn is `actions_per_turn` energy; a card costs its `price`; a draw `draw_cost`
+    draw_cost: int = 1                   # what the Draw action costs of the turn's actions (energy)
+    roam_cost: int = 1                   # what a paid roam costs
+    extra_play_max_cost: int = 99        # "play another animal": the dearest animal it may play for free
+    titan_discount: int = 1              # Krill: what the next Titan costs less (one action; energy: 2)
+
     # --- Engine safety / sim hygiene ---
     max_turns: int = 400                 # hard cap so fuzz games always terminate (M1)
 
     @staticmethod
     def default() -> "Config":
-        """The v0 placeholder constants for the reworked pool (untuned; see docs/balance/backlog.md G/H)."""
-        return Config()
+        """The v0 placeholder constants for the reworked pool (untuned; see docs/balance/backlog.md G/H). With the energy
+        prototype switched on (resources.ENERGY), its rule numbers from data/energy.json."""
+        from .resources import variant
+        rules = variant().get("rules")
+        return replace(Config(), **rules) if rules else Config()
 
     def sweep(self, **overrides) -> "Config":
         """Return a copy with the given fields overridden (for balance sweeps)."""

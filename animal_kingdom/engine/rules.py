@@ -61,8 +61,17 @@ def _top_level_actions(state: GameState) -> list[Action]:
     if left <= 0:                                  # the turn stays open only for a free roam (Roam)
         return list(effects.legal_roams(state, player, free_only=True)) if effects.free_roams_left(state, player) else []
     actions: list[Action] = []
-    if state.decks[player]:
+    cfg = state.config
+    if state.decks[player] and left >= cfg.draw_cost:
         actions.append(DrawAction())
+    if cfg.energy_mode:                            # the energy rules: whatever the turn's energy still pays for
+        titan_ok = state.food[player] >= titan_food(state, player)
+        actions.extend(effects.legal_placements(state, player, titan_ok=titan_ok, budget=left))
+        if left >= cfg.roam_cost:
+            actions.extend(effects.legal_roams(state, player))
+        elif effects.free_roams_left(state, player):
+            actions.extend(effects.legal_roams(state, player, free_only=True))
+        return actions
     titan_ok = left >= titan_cost(state, player) and state.food[player] >= titan_food(state, player)
     actions.extend(effects.legal_placements(state, player, titan_ok=titan_ok))
     actions.extend(effects.legal_roams(state, player))
@@ -87,7 +96,7 @@ def _has_top_level_action(state: GameState) -> bool:
     """Whether the current player can do anything at all: `_top_level_actions` without building the list. A Draw
     settles it at once; only an empty deck needs the placements looked at. (Asked at every turn start, also in every
     line a bot searches, where building the full list was nearly half of a bot's time.)"""
-    if _actions_left(state) > 0 and state.decks[state.current]:
+    if _actions_left(state) >= state.config.draw_cost and state.decks[state.current]:
         return True
     return bool(_top_level_actions(state))
 
@@ -175,11 +184,11 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     if state.pending is not None:
         effects.apply_pending(state, action)
     elif isinstance(action, DrawAction):
-        state.actions_taken_this_turn += 1
+        state.actions_taken_this_turn += state.config.draw_cost
         _do_draw(state, state.current)
     elif isinstance(action, PlaceAction):
         titan = "Titan" in state.cards[action.card_id].keywords
-        state.actions_taken_this_turn += titan_cost(state, state.current) if titan else 1
+        state.actions_taken_this_turn += effects.placement_cost(state, state.current, action.card_id)
         if titan:
             if food := titan_food(state, state.current):
                 effects.lose_food(state, state.current, food, card="krill_legend")

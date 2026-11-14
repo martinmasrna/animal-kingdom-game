@@ -441,7 +441,7 @@ pub fn enabled_roar_ids(st: &State, player: Player) -> Vec<CardId> {
     if roars.is_empty() {
         return Vec::new();
     }
-    let placements: Vec<Action> = effects::legal_placements(st, player, Some(&roars), false).into_iter().filter(|a| matches!(a, Action::Place { target: Target::Cr(_), .. })).collect();
+    let placements: Vec<Action> = effects::legal_placements(st, player, Some(&roars), false, None).into_iter().filter(|a| matches!(a, Action::Place { target: Target::Cr(_), .. })).collect();
     let mut by_card: Vec<(CardId, Vec<Action>)> = Vec::new();
     for a in placements {
         let Action::Place { card, .. } = &a else { continue };

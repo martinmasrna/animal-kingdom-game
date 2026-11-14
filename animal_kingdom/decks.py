@@ -44,12 +44,8 @@ PREMADE_DECKS.update({d["slug"]: list(d["list"]) for d in LADDER_DECKS})
 # low on the ladder, which is the ladder's own information). Ranked matchmaking, the ladder seed, Practice's 'Random'
 # and the bot benchmark panel draw from these.
 BOT_DECKS: tuple[str, ...] = tuple(d["slug"] for d in DECKLISTS) + tuple(d["slug"] for d in LADDER_DECKS)
-from .engine.resources import provisions as _prov
-_TEST = tuple(d["slug"] for d in _prov().get("decks", []))
 PANEL_OPPONENTS: tuple[str, ...] = ("cats", "den_rush", "fish")   # the benchmark's standing opponents, from the pool
 assert all(d in BOT_DECKS for d in PANEL_OPPONENTS), PANEL_OPPONENTS
-if _TEST:   # the provisions test: the bots play only the test decks
-    BOT_DECKS = _TEST
 
 
 # The goodstuff pile: the greedy optimizer's best cross-deck list over the old seven-deck pool
@@ -81,9 +77,8 @@ def register_deck(slug: str, decklist: Sequence[str]) -> None:
         {s: d for s, d in EXTRA_DECKS.items() if s != "baseline"})
 
 
-DECK_SIZE = 25   # the provisions test
-from .engine.resources import provisions as _provisions
-BUDGET = _provisions()["budget"]   # the provisions test: the cards' prices add up to at most this (replaces the rarity caps)
+DECK_SIZE = 30
+RARITY_CAPS = {"rare": 8, "legendary": 4}   # rules §13: at most 8 rares and 4 legendaries in a deck
 
 
 def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
@@ -106,9 +101,9 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
         if n > limit:
             problems.append(f"at most {limit} {card.name}")
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + n
-    spent = sum(cards[cid].price * n for cid, n in counts.items() if cid in cards)
-    if spent > BUDGET:
-        problems.append(f"the cards cost {spent}, over the budget of {BUDGET}")
+    for rarity, cap in RARITY_CAPS.items():
+        if by_rarity.get(rarity, 0) > cap:
+            problems.append(f"at most {cap} {rarity} cards")
     return problems
 
 

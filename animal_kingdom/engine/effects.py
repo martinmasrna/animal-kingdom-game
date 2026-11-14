@@ -823,8 +823,21 @@ def _capped(state, flag_name: str, unit: UnitInstance) -> bool:
 
 # ========================================================== legal placement helper
 
+def placement_cost(state: GameState, player: str, card_id: str) -> int:
+    """What playing `card_id` takes of the turn: one action, two for a Titan (one after a Krill, or with the legendary
+    Krill). Under the energy rules its price in energy, a Titan's less the Krill's discount."""
+    card = state.cards[card_id]
+    titan = "Titan" in card.keywords
+    cheap = titan and bool(state.turn_flags.get(f"titan_discount_{player}") or statics._controls(state, player, "krill_legend"))
+    if state.config.energy_mode:
+        return max(1, card.price - state.config.titan_discount) if cheap else card.price
+    if titan:
+        return 1 if cheap else 2
+    return 1
+
+
 def legal_placements(state: GameState, player: str, allowed_cards: Optional[set] = None, *,
-                     titan_ok: bool = False) -> list:
+                     titan_ok: bool = False, budget: Optional[int] = None) -> list:
     """All legal placements for `player` (used by rules.legal_actions and play_extra).
 
     `allowed_cards` (a set of card ids) restricts which hand cards may be played.
@@ -859,6 +872,8 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
             continue                                  # "Costs X food": only if affordable (dec. F)
         if "Titan" in card.keywords and not titan_ok:
             continue                                  # Titan: two actions, never a free placement
+        if budget is not None and placement_cost(state, player, card_id) > budget:
+            continue                                  # the energy rules: only what the energy left pays for
         is_apex = "Apex Predator" in card.keywords
         flight = statics.ignores_connection(state, card_id)
         extra = statics.extra_placement_crossroads(state, card_id, player)
@@ -1005,7 +1020,7 @@ def pay_for_roam(state: GameState, player: str, unit=None) -> None:
     elif free_roams_left(state, player, unit) - _own_free_roams(state, player, unit):
         state.turn_flags[f"free_roams_used_{player}"] = state.turn_flags.get(f"free_roams_used_{player}", 0) + 1
     else:
-        state.actions_taken_this_turn += 1
+        state.actions_taken_this_turn += state.config.roam_cost
 
 
 def do_roam(state: GameState, player: str, origin: str, target, *, by_effect: bool = False) -> None:
@@ -1355,7 +1370,9 @@ def _op_play_extra(state, step):
         step["played"] = True
         return None
     allowed = _hand_allowed(state, step["chooser"], step["filter"])   # {} means any card, and is said so
-    placements = legal_placements(state, step["chooser"], allowed)
+    # the energy rules: a free extra play is an animal up to a cost (the card's own, else the rule's)
+    cap = step["filter"].get("max_cost", state.config.extra_play_max_cost) if state.config.energy_mode else None
+    placements = legal_placements(state, step["chooser"], allowed, budget=cap)
     near = step["filter"].get("adjacent_to")       # Naked Mole-Rat: "play another animal adjacent to this"
     if near is not None:
         enemy_den = state.game_map.hq_front(other_player(step["chooser"]))

@@ -31,17 +31,29 @@ fn top_level_actions(st: &State) -> Vec<Action> {
         return if effects::free_roams_left(st, player, None) > 0 { effects::legal_roams(st, player, true) } else { Vec::new() };
     }
     let mut actions = Vec::new();
-    if !st.decks[player as usize].is_empty() {
+    let cfg = st.cfg();
+    if !st.decks[player as usize].is_empty() && left >= cfg.draw_cost {
         actions.push(Action::Draw);
     }
+    if cfg.energy_mode {
+        // the energy rules: whatever the turn's energy still pays for
+        let titan_ok = st.food[player.min(1) as usize] >= titan_food(st, player);
+        actions.extend(effects::legal_placements(st, player, None, titan_ok, Some(left)));
+        if left >= cfg.roam_cost {
+            actions.extend(effects::legal_roams(st, player, false));
+        } else if effects::free_roams_left(st, player, None) > 0 {
+            actions.extend(effects::legal_roams(st, player, true));
+        }
+        return actions;
+    }
     let titan_ok = left >= titan_cost(st, player) && st.food[player.min(1) as usize] >= titan_food(st, player);
-    actions.extend(effects::legal_placements(st, player, None, titan_ok));
+    actions.extend(effects::legal_placements(st, player, None, titan_ok, None));
     actions.extend(effects::legal_roams(st, player, false));
     actions
 }
 
 fn has_top_level_action(st: &State) -> bool {
-    if actions_left(st) > 0 && !st.decks[st.current as usize].is_empty() {
+    if actions_left(st) >= st.cfg().draw_cost && !st.decks[st.current as usize].is_empty() {
         return true;
     }
     !top_level_actions(st).is_empty()
@@ -151,7 +163,7 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
     } else {
         match &action {
             Action::Draw => {
-                st.actions_taken_this_turn += 1;
+                st.actions_taken_this_turn += st.cfg().draw_cost;
                 let n = st.cfg().draw_action_count;
                 let cur = st.current;
                 effects::draw_cards(st, cur, n);
@@ -159,7 +171,7 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
             Action::Place { card, target, iid } => {
                 let titan = st.card(*card).has_kw(K_TITAN);
                 let cur = st.current;
-                st.actions_taken_this_turn += if titan { titan_cost(st, cur) } else { 1 };
+                st.actions_taken_this_turn += effects::placement_cost(st, cur, *card);
                 if titan {
                     let food = titan_food(st, cur);
                     if food > 0 {

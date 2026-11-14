@@ -892,7 +892,22 @@ pub fn capped(st: &mut State, flag_name: &'static str, unit: &Unit) -> bool {
 
 // ========================================================== legal placement helper
 
-pub fn legal_placements(st: &State, player: Player, allowed: Option<&[CardId]>, titan_ok: bool) -> Vec<Action> {
+/// What playing `card` takes of the turn: one action, two for a Titan (one after a Krill, or with the legendary Krill);
+/// under the energy rules its price, a Titan's less the Krill's discount. As in Python.
+pub fn placement_cost(st: &State, player: Player, card: CardId) -> i32 {
+    let c = st.card(card);
+    let titan = c.has_kw(K_TITAN);
+    let cheap = titan && (st.turn_flags.titan_discount[player.min(1) as usize] || statics::controls(st, player, st.card_id("krill_legend")));
+    if st.cfg().energy_mode {
+        return if cheap { (c.price - st.cfg().titan_discount).max(1) } else { c.price };
+    }
+    if titan {
+        return if cheap { 1 } else { 2 };
+    }
+    1
+}
+
+pub fn legal_placements(st: &State, player: Player, allowed: Option<&[CardId]>, titan_ok: bool, budget: Option<i32>) -> Vec<Action> {
     let gm = st.map();
     let occ = st.connected_occupied(player);
     let enemy = other(player);
@@ -926,6 +941,11 @@ pub fn legal_placements(st: &State, player: Player, allowed: Option<&[CardId]>, 
         }
         if c.has_kw(K_TITAN) && !titan_ok {
             continue;
+        }
+        if let Some(b) = budget {
+            if placement_cost(st, player, card) > b {
+                continue;
+            }
         }
         let is_apex = c.has_kw(K_APEX);
         let flight = statics::ignores_connection(st, card);
@@ -1086,7 +1106,7 @@ pub fn pay_for_roam(st: &mut State, player: Player, unit: Option<&Unit>) {
     if free_roams_left(st, player, unit) - own_free_roams(st, player, unit) != 0 {
         st.turn_flags.free_roams_used[player.min(1) as usize] += 1;
     } else {
-        st.actions_taken_this_turn += 1;
+        st.actions_taken_this_turn += st.cfg().roam_cost;
     }
 }
 
@@ -1542,7 +1562,13 @@ fn op_play_extra(st: &mut State, step: &mut Map) -> Option<Pending> {
     }
     let filt = step.get("filter").and_then(|f| f.as_map()).cloned().unwrap_or_default();
     let allowed = hand_allowed(st, chooser, &filt);
-    let mut placements = legal_placements(st, chooser, Some(&allowed), false);
+    // the energy rules: a free extra play is an animal up to a cost (the card's own, else the rule's)
+    let cap = if st.cfg().energy_mode {
+        Some(filt.get("max_cost").and_then(|v| v.as_i64()).map(|v| v as i32).unwrap_or(st.cfg().extra_play_max_cost))
+    } else {
+        None
+    };
+    let mut placements = legal_placements(st, chooser, Some(&allowed), false, cap);
     if let Some(near) = m_get_s(&filt, "adjacent_to").and_then(|n| st.map().cr(n)) {
         let enemy_den_near = st.map().in_front(other(chooser), near);
         placements.retain(|p| match p {
@@ -1604,7 +1630,7 @@ fn op_play_named(st: &mut State, step: &mut Map) -> Option<Pending> {
         return None;
     }
     let allowed: Vec<CardId> = if st.hands[p].iter().any(|u| u.card == cid) { vec![cid] } else { vec![] };
-    let mut placements = legal_placements(st, player, Some(&allowed), false);
+    let mut placements = legal_placements(st, player, Some(&allowed), false, None);
     if let Some(near) = m_get_s(step, "adjacent_to").and_then(|n| st.map().cr(n)) {
         // Rabbit: "play a Bunny next to this": a neighbouring crossroad, or the den it fronts (Martin, 2026-10-30)
         placements.retain(|p| match p {
