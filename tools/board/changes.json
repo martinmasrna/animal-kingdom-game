@@ -1,6 +1,696 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 2,
+ "rev": 3,
  "changed": {},
- "new": {}
+ "new": {
+  "new1": {
+   "copy_of": "butterfly_legend",
+   "name": "Xanthe: Egg",
+   "rarity": "legendary",
+   "strength": 0,
+   "stars": 2,
+   "text": "Dawn: evolve. Whenever this gains strength, evolve.",
+   "tags": [],
+   "habitat": "Meadow",
+   "species": "Butterfly"
+  },
+  "new2": {
+   "copy_of": "bee_legend_2",
+   "name": "Juliette",
+   "rarity": "legendary",
+   "strength": 1,
+   "stars": 2,
+   "text": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
+   "tags": [
+    "Colony"
+   ],
+   "habitat": "Meadow",
+   "species": "Bee"
+  },
+  "new3": {
+   "copy_of": "cockroach_legend",
+   "name": "Roach King",
+   "rarity": "legendary",
+   "strength": 1,
+   "stars": 2,
+   "text": "Fall: put Roach King back where it was with +1 strength and draw a card.",
+   "tags": [],
+   "habitat": "City",
+   "species": "Cockroach"
+  },
+  "new4": {
+   "copy_of": "sardine_legend",
+   "name": "Santa Sardinia",
+   "rarity": "legendary",
+   "strength": 1,
+   "stars": 2,
+   "text": "Santa Sardinia and your adjacent Fish count as 2 Fish.",
+   "tags": [
+    "Fish"
+   ],
+   "habitat": "Open Ocean",
+   "species": "Sardine"
+  },
+  "new5": {
+   "copy_of": "bat_legend",
+   "name": "[BAT]",
+   "rarity": "legendary",
+   "strength": 1,
+   "stars": 2,
+   "text": "Flight. Dawn: draw a card.",
+   "tags": [],
+   "habitat": "City",
+   "species": "Bat"
+  },
+  "new6": {
+   "copy_of": "mole_legend",
+   "name": "[MOLE]",
+   "rarity": "legendary",
+   "strength": 1,
+   "stars": 2,
+   "text": "Roar: draw a card, play another animal, then discard a card.",
+   "tags": [],
+   "habitat": "Meadow",
+   "species": "Mole"
+  },
+  "new7": {
+   "copy_of": "macaque_legend",
+   "name": "Don Santo",
+   "rarity": "legendary",
+   "strength": 2,
+   "stars": 2,
+   "text": "Roar: draw cards until you have as many as your opponent.",
+   "tags": [
+    "Primate"
+   ],
+   "habitat": "City",
+   "species": "Macaque"
+  },
+  "new8": {
+   "copy_of": "deer_legend_2",
+   "name": "Elari",
+   "rarity": "legendary",
+   "strength": 2,
+   "stars": 2,
+   "text": "Flee. Roar: add Elaren to your hand.",
+   "tags": [
+    "Hoofed"
+   ],
+   "habitat": "Forest",
+   "species": "Deer"
+  },
+  "new9": {
+   "copy_of": "piranha_legend",
+   "name": "Picardinha",
+   "rarity": "legendary",
+   "strength": 2,
+   "stars": 2,
+   "text": "Roar: remove each enemy next to 2 or more of your Fish.",
+   "tags": [
+    "Fish"
+   ],
+   "habitat": "Jungle",
+   "species": "Piranha"
+  },
+  "new10": {
+   "copy_of": "bee_legend",
+   "name": "Queen Melissia",
+   "rarity": "legendary",
+   "strength": 2,
+   "stars": 2,
+   "text": "Roar: draw a Worker, a Soldier and a Nurse Colony animal.",
+   "tags": [
+    "Colony",
+    "Queen"
+   ],
+   "habitat": "Meadow",
+   "species": "Bee"
+  },
+  "new11": {
+   "copy_of": "locust_legend",
+   "name": "The First of Many",
+   "rarity": "legendary",
+   "strength": 2,
+   "stars": 2,
+   "text": "Roar: cover the board with Locusts.",
+   "tags": [],
+   "habitat": "Meadow",
+   "species": "Locust"
+  },
+  "new12": {
+   "copy_of": "wolf_legend_3",
+   "name": "Akana",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Once each turn, an ally with Roam can roam for free.",
+   "tags": [
+    "Canine"
+   ],
+   "habitat": "Forest",
+   "species": "Wolf"
+  },
+  "new13": {
+   "copy_of": "eagle_legend",
+   "name": "Arne",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Flight. Apex Predator. When this enters your hand, add Skya to your hand.",
+   "tags": [
+    "Bird"
+   ],
+   "habitat": "Forest",
+   "species": "Eagle"
+  },
+  "new14": {
+   "copy_of": "tortoise_legend",
+   "name": "Azamandulai",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food.",
+   "tags": [],
+   "habitat": "Savanna",
+   "species": "Tortoise"
+  },
+  "new15": {
+   "copy_of": "baboon_legend",
+   "name": "Babaji",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Dawn: give 2 random animals in your hand +1 strength.",
+   "tags": [
+    "Primate"
+   ],
+   "habitat": "Savanna",
+   "species": "Baboon"
+  },
+  "new16": {
+   "copy_of": "deer_legend",
+   "name": "Denae Swiftfoot",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Flee. Roar: draw 2 animals with Flee. Whenever one of your animals flees, give it +2 strength.",
+   "tags": [
+    "Hoofed"
+   ],
+   "habitat": "Forest",
+   "species": "Deer"
+  },
+  "new17": {
+   "copy_of": "raven_legend",
+   "name": "Grimm",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Flight. Roar: put 2 animals from your opponent's Remove Pile into your hand.",
+   "tags": [
+    "Bird"
+   ],
+   "habitat": "Forest",
+   "species": "Raven"
+  },
+  "new18": {
+   "copy_of": "chameleon_legend",
+   "name": "Iris",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Roar: choose an adjacent animal. Become a copy of it, and add another copy to your hand.",
+   "tags": [],
+   "habitat": "Jungle",
+   "species": "Chameleon"
+  },
+  "new19": {
+   "copy_of": "bumblebee_legend",
+   "name": "Lord Bumbleton",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Flight. Whenever you gain food, gain 3 additional food.",
+   "tags": [
+    "Colony"
+   ],
+   "habitat": "Meadow",
+   "species": "Bumblebee"
+  },
+  "new20": {
+   "copy_of": "rat_legend_2",
+   "name": "Pestis",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Roar: remove an adjacent animal and every animal under it.",
+   "tags": [
+    "Rodent"
+   ],
+   "habitat": "City",
+   "species": "Rat"
+  },
+  "new21": {
+   "copy_of": "lion_legend",
+   "name": "Prince Leo",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Roar: play Princess Lea from your hand or deck.",
+   "tags": [
+    "Cat"
+   ],
+   "habitat": "Savanna",
+   "species": "Lion"
+  },
+  "new22": {
+   "copy_of": "lion_legend_2",
+   "name": "Princess Lea",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Roar: play Prince Leo from your hand or deck.",
+   "tags": [
+    "Cat"
+   ],
+   "habitat": "Savanna",
+   "species": "Lion"
+  },
+  "new23": {
+   "copy_of": "army_ant_legend",
+   "name": "Queen Solenia",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Dusk: gain 2 food for each animal you control.",
+   "tags": [
+    "Colony",
+    "Queen"
+   ],
+   "habitat": "Jungle",
+   "species": "Army Ant"
+  },
+  "new24": {
+   "copy_of": "hornet_legend",
+   "name": "Vesper",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Flight. When an enemy covers a Colony ally, place Vesper on top of it from your hand or deck.",
+   "tags": [
+    "Colony"
+   ],
+   "habitat": "Forest",
+   "species": "Hornet"
+  },
+  "new25": {
+   "copy_of": "squirrel_legend",
+   "name": "Yuki",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Roar: lose all your food. In 2 turns, gain three times as much.",
+   "tags": [
+    "Rodent"
+   ],
+   "habitat": "Forest",
+   "species": "Squirrel"
+  },
+  "new26": {
+   "copy_of": "rodent_legend",
+   "name": "[RODENT]",
+   "rarity": "legendary",
+   "strength": 3,
+   "stars": 2,
+   "text": "Roar: gain as much food as you gained this turn.",
+   "tags": [
+    "Rodent"
+   ],
+   "habitat": "Forest",
+   "species": "Rodent"
+  },
+  "new27": {
+   "copy_of": "sloth_legend",
+   "name": "Aya",
+   "rarity": "legendary",
+   "strength": 4,
+   "stars": 2,
+   "text": "Your Dusk effects happen twice.",
+   "tags": [],
+   "habitat": "Jungle",
+   "species": "Sloth"
+  },
+  "new28": {
+   "copy_of": "dung_beetle_legend",
+   "name": "El'Rahhal: Birth",
+   "rarity": "legendary",
+   "strength": 4,
+   "stars": 2,
+   "text": "Evolves at 5 food eaten by your Hungry animals.",
+   "tags": [
+    "Beetle"
+   ],
+   "habitat": "Savanna",
+   "species": "Dung Beetle"
+  },
+  "new29": {
+   "copy_of": "rat_legend",
+   "name": "Fat Moe",
+   "rarity": "legendary",
+   "strength": 4,
+   "stars": 2,
+   "text": "Roar: gain 4 food for each other Rodent you control. Draw a card.",
+   "tags": [
+    "Rodent"
+   ],
+   "habitat": "City",
+   "species": "Rat"
+  },
+  "new30": {
+   "copy_of": "zebra_legend",
+   "name": "Galwen [X]",
+   "rarity": "legendary",
+   "strength": 4,
+   "stars": 2,
+   "text": "Roar: draw a card for each of your grazing Hoofed animals.",
+   "tags": [
+    "Hoofed"
+   ],
+   "habitat": "Savanna",
+   "species": "Zebra"
+  },
+  "new31": {
+   "copy_of": "octopus_legend_2",
+   "name": "Madame Octavia",
+   "rarity": "legendary",
+   "strength": 4,
+   "stars": 2,
+   "text": "Roar: Scout a legendary animal.",
+   "tags": [],
+   "habitat": "Open Ocean",
+   "species": "Octopus"
+  },
+  "new32": {
+   "copy_of": "orangutan_legend",
+   "name": "Nani",
+   "rarity": "legendary",
+   "strength": 4,
+   "stars": 2,
+   "text": "Roar: give all animals in your hand +1 strength.",
+   "tags": [
+    "Primate"
+   ],
+   "habitat": "Jungle",
+   "species": "Orangutan"
+  },
+  "new33": {
+   "copy_of": "oxpecker_legend",
+   "name": "Redbeak",
+   "rarity": "legendary",
+   "strength": 4,
+   "stars": 2,
+   "text": "Flight. Whenever your animal of strength 8 or more covers an enemy, play an Oxpecker.",
+   "tags": [
+    "Bird"
+   ],
+   "habitat": "Savanna",
+   "species": "Oxpecker"
+  },
+  "new34": {
+   "copy_of": "chipmunk_legend",
+   "name": "Tally",
+   "rarity": "legendary",
+   "strength": 4,
+   "stars": 2,
+   "text": "Roar: gain 1 food for each 3 food you have.",
+   "tags": [
+    "Rodent"
+   ],
+   "habitat": "Forest",
+   "species": "Chipmunk"
+  },
+  "new35": {
+   "copy_of": "manta_ray_legend",
+   "name": "[MANTA RAY]",
+   "rarity": "legendary",
+   "strength": 4,
+   "stars": 2,
+   "text": "Dusk: if you control 2 or more regions, draw 2 cards.",
+   "tags": [
+    "Fish"
+   ],
+   "habitat": "Open Ocean",
+   "species": "Manta Ray"
+  },
+  "new36": {
+   "copy_of": "honey_badger_legend",
+   "name": "Ash",
+   "rarity": "legendary",
+   "strength": 5,
+   "stars": 2,
+   "text": "Armor. Stealth. Poison. Spikes.",
+   "tags": [],
+   "habitat": "Savanna",
+   "species": "Honey Badger"
+  },
+  "new37": {
+   "copy_of": "wildebeest_legend",
+   "name": "Haldaran Dusthoof",
+   "rarity": "legendary",
+   "strength": 5,
+   "stars": 2,
+   "text": "Your regions produce 5 more food.",
+   "tags": [
+    "Hoofed"
+   ],
+   "habitat": "Savanna",
+   "species": "Wildebeest"
+  },
+  "new38": {
+   "copy_of": "leopard_legend",
+   "name": "Ishar the Unseen",
+   "rarity": "legendary",
+   "strength": 5,
+   "stars": 2,
+   "text": "Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength.",
+   "tags": [
+    "Cat"
+   ],
+   "habitat": "Savanna",
+   "species": "Leopard"
+  },
+  "new39": {
+   "copy_of": "lion_legend_4",
+   "name": "Queen Adira",
+   "rarity": "legendary",
+   "strength": 5,
+   "stars": 2,
+   "text": "When an allied Cat removes an enemy, draw a card.",
+   "tags": [
+    "Cat"
+   ],
+   "habitat": "Savanna",
+   "species": "Lion"
+  },
+  "new40": {
+   "copy_of": "skunk_legend",
+   "name": "Rue",
+   "rarity": "legendary",
+   "strength": 5,
+   "stars": 2,
+   "text": "Roar: return all adjacent enemies to your opponent's hand.",
+   "tags": [],
+   "habitat": "Forest",
+   "species": "Skunk"
+  },
+  "new41": {
+   "copy_of": "fox_legend",
+   "name": "Scarlett",
+   "rarity": "legendary",
+   "strength": 5,
+   "stars": 2,
+   "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads.",
+   "tags": [
+    "Canine"
+   ],
+   "habitat": "Forest",
+   "species": "Fox"
+  },
+  "new42": {
+   "copy_of": "boar_legend",
+   "name": "Stonetusk",
+   "rarity": "legendary",
+   "strength": 5,
+   "stars": 2,
+   "text": "Your opponent's regions produce 5 less food.",
+   "tags": [
+    "Hoofed"
+   ],
+   "habitat": "Forest",
+   "species": "Boar"
+  },
+  "new43": {
+   "copy_of": "falcon_legend",
+   "name": "[FALCON]",
+   "rarity": "legendary",
+   "strength": 5,
+   "stars": 2,
+   "text": "Flight. Roar: draw a card for each ally next to your opponent's den.",
+   "tags": [
+    "Bird"
+   ],
+   "habitat": "Forest",
+   "species": "Falcon"
+  },
+  "new44": {
+   "copy_of": "tuna_legend",
+   "name": "[TUNA]",
+   "rarity": "legendary",
+   "strength": 5,
+   "stars": 2,
+   "text": "Roar: for each region you control, draw a card and gain 5 food.",
+   "tags": [
+    "Fish"
+   ],
+   "habitat": "Open Ocean",
+   "species": "Tuna"
+  },
+  "new45": {
+   "copy_of": "capybara_legend",
+   "name": "Big Gus",
+   "rarity": "legendary",
+   "strength": 6,
+   "stars": 2,
+   "text": "Roar: repeat the Roar of each of your adjacent Rodents.",
+   "tags": [
+    "Rodent"
+   ],
+   "habitat": "Jungle",
+   "species": "Capybara"
+  },
+  "new46": {
+   "copy_of": "cuckoo_legend",
+   "name": "Cuco",
+   "rarity": "legendary",
+   "strength": 6,
+   "stars": 2,
+   "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.",
+   "tags": [
+    "Bird"
+   ],
+   "habitat": "Meadow",
+   "species": "Cuckoo"
+  },
+  "new47": {
+   "copy_of": "wolf_legend_2",
+   "name": "Karakhan",
+   "rarity": "legendary",
+   "strength": 6,
+   "stars": 2,
+   "text": "Roam. Whenever one of your Canines roams, give it +1 strength and draw a card.",
+   "tags": [
+    "Canine"
+   ],
+   "habitat": "Forest",
+   "species": "Wolf"
+  },
+  "new48": {
+   "copy_of": "pheasant_legend",
+   "name": "Ember",
+   "rarity": "legendary",
+   "strength": 7,
+   "stars": 2,
+   "text": "Flight. Fall: shuffle Ember into your deck.",
+   "tags": [
+    "Bird"
+   ],
+   "habitat": "Forest",
+   "species": "Pheasant"
+  },
+  "new49": {
+   "copy_of": "tiger_legend",
+   "name": "Gorrak One-Eye",
+   "rarity": "legendary",
+   "strength": 7,
+   "stars": 2,
+   "text": "Apex Predator. Roar: remove an adjacent enemy of strength 7 or less.",
+   "tags": [
+    "Cat"
+   ],
+   "habitat": "Jungle",
+   "species": "Tiger"
+  },
+  "new50": {
+   "copy_of": "giraffe_legend",
+   "name": "Miradel Longwatch",
+   "rarity": "legendary",
+   "strength": 7,
+   "stars": 2,
+   "text": "Your opponent's hand is revealed.",
+   "tags": [
+    "Hoofed"
+   ],
+   "habitat": "Savanna",
+   "species": "Giraffe"
+  },
+  "new51": {
+   "copy_of": "sperm_whale_legend",
+   "name": "Borvald",
+   "rarity": "legendary",
+   "strength": 8,
+   "stars": 2,
+   "text": "Titan. Dusk: remove the strongest adjacent enemy.",
+   "tags": [],
+   "habitat": "Open Ocean",
+   "species": "Sperm Whale"
+  },
+  "new52": {
+   "copy_of": "lion_legend_3",
+   "name": "King Theron",
+   "rarity": "legendary",
+   "strength": 8,
+   "stars": 2,
+   "text": "When an allied Cat covers an enemy, remove that enemy.",
+   "tags": [
+    "Cat"
+   ],
+   "habitat": "Savanna",
+   "species": "Lion"
+  },
+  "new53": {
+   "copy_of": "rhinoceros_legend",
+   "name": "Thorn",
+   "rarity": "legendary",
+   "strength": 8,
+   "stars": 2,
+   "text": "Hungry 4. Roar: remove an adjacent enemy.",
+   "tags": [],
+   "habitat": "Savanna",
+   "species": "Rhinoceros"
+  },
+  "new54": {
+   "copy_of": "elephant_legend",
+   "name": "[ELEPHANT]",
+   "rarity": "legendary",
+   "strength": 9,
+   "stars": 2,
+   "text": "Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less.",
+   "tags": [],
+   "habitat": "Savanna",
+   "species": "Elephant"
+  },
+  "new55": {
+   "copy_of": "anaconda_legend",
+   "name": "Eon",
+   "rarity": "legendary",
+   "strength": 10,
+   "stars": 2,
+   "text": "Apex Predator. Dusk: shuffle Eon into your deck with -1 strength and draw a card.",
+   "tags": [
+    "Snake"
+   ],
+   "habitat": "Jungle",
+   "species": "Anaconda"
+  }
+ }
 }

@@ -1,104 +1,7 @@
 {
- "rev": 2,
+ "rev": 3,
  "name": "provisions",
- "cards": {
-  "basilisk": {
-   "x": 0,
-   "y": 3236
-  },
-  "black_widow": {
-   "x": 194,
-   "y": 3236
-  },
-  "centipede": {
-   "x": 388,
-   "y": 3236
-  },
-  "coral_snake": {
-   "x": 582,
-   "y": 3236
-  },
-  "dragonfly": {
-   "x": 776,
-   "y": 3236
-  },
-  "duck": {
-   "x": 970,
-   "y": 3236
-  },
-  "firefly": {
-   "x": 1164,
-   "y": 3236
-  },
-  "frog": {
-   "x": 1358,
-   "y": 3236
-  },
-  "gecko": {
-   "x": 1552,
-   "y": 3236
-  },
-  "grasshopper": {
-   "x": 1746,
-   "y": 3236
-  },
-  "iguana": {
-   "x": 1940,
-   "y": 3236
-  },
-  "ladybird": {
-   "x": 2134,
-   "y": 3236
-  },
-  "leech": {
-   "x": 2328,
-   "y": 3236
-  },
-  "ostrich": {
-   "x": 2522,
-   "y": 3236
-  },
-  "pond_skater": {
-   "x": 2716,
-   "y": 3236
-  },
-  "salamander": {
-   "x": 2910,
-   "y": 3236
-  },
-  "snail": {
-   "x": 3104,
-   "y": 3236
-  },
-  "sparrow": {
-   "x": 3298,
-   "y": 3236
-  },
-  "squid": {
-   "x": 3492,
-   "y": 3236
-  },
-  "strawberry_leopard": {
-   "x": 3686,
-   "y": 3236
-  },
-  "swallow": {
-   "x": 3880,
-   "y": 3236
-  },
-  "tapir": {
-   "x": 4074,
-   "y": 3236
-  },
-  "tick": {
-   "x": 4268,
-   "y": 3236
-  },
-  "weasel": {
-   "x": 4462,
-   "y": 3236
-  }
- },
+ "cards": {},
  "piles": [
   {
    "id": "provcommon",
@@ -110,16 +13,13 @@
    "cards": [
     "bird_egg",
     "python",
-    "rattlesnake",
     "sardine",
     "snake_egg",
     "caterpillar",
     "chipmunk",
     "cockroach",
     "dung_beetle",
-    "forager_ant",
     "krill",
-    "lemming",
     "peacock",
     "raven",
     "alley_cat",
@@ -149,9 +49,7 @@
     "hamster",
     "mahi_mahi",
     "marmot",
-    "muskrat",
     "nurse_bumblebee",
-    "rabbit",
     "rat",
     "sloth",
     "guard_bee",
@@ -160,7 +58,6 @@
     "tuna",
     "viper",
     "african_wild_dog",
-    "anteater",
     "badger",
     "barracuda",
     "action_2",
@@ -185,7 +82,6 @@
     "black_bear",
     "boar",
     "bobcat",
-    "dingo",
     "dolphin",
     "hedgehog",
     "action_6",
@@ -195,7 +91,6 @@
     "zebra",
     "caracal",
     "cheetah",
-    "cougar",
     "giraffe",
     "gorilla",
     "stick_insect",
@@ -232,8 +127,6 @@
     "coyote",
     "hornet",
     "impala",
-    "jerboa",
-    "naked_mole_rat",
     "tarsier",
     "vole",
     "cuckoo",
@@ -252,17 +145,14 @@
     "albatross",
     "black_mamba",
     "chimpanzee",
-    "chinchilla",
     "hawk",
     "octopus",
     "okapi",
     "opossum",
     "raccoon",
     "skunk",
-    "andean_condor",
     "armadillo",
     "beaver",
-    "cottonmouth",
     "dhole",
     "golden_orb_weaver",
     "jellyfish",
@@ -274,19 +164,16 @@
     "sea_turtle",
     "tarantula",
     "termite_king",
-    "outrider",
     "eagle",
     "jaguar",
     "leopard",
     "manta_ray",
     "orca",
-    "snow_leopard",
     "bison",
     "black_panther",
     "cape_buffalo",
     "great_white_shark",
     "hippopotamus",
-    "polar_bear",
     "rhinoceros",
     "sperm_whale",
     "whale_shark"
@@ -301,12 +188,10 @@
    "stacked": false,
    "cards": [
     "butterfly_legend",
-    "goose_legend",
     "bee_legend_2",
     "cockroach_legend",
     "sardine_legend",
     "bat_legend",
-    "krill_legend",
     "mole_legend",
     "macaque_legend",
     "deer_legend_2",
@@ -317,7 +202,6 @@
     "eagle_legend",
     "tortoise_legend",
     "baboon_legend",
-    "swan_legend",
     "deer_legend",
     "raven_legend",
     "chameleon_legend",
@@ -328,9 +212,7 @@
     "army_ant_legend",
     "hornet_legend",
     "squirrel_legend",
-    "jellyfish_legend",
     "rodent_legend",
-    "scout_bee",
     "sloth_legend",
     "dung_beetle_legend",
     "rat_legend",
@@ -340,7 +222,6 @@
     "oxpecker_legend",
     "chipmunk_legend",
     "manta_ray_legend",
-    "wolf_legend",
     "honey_badger_legend",
     "wildebeest_legend",
     "leopard_legend",
@@ -360,12 +241,124 @@
     "lion_legend_3",
     "rhinoceros_legend",
     "elephant_legend",
-    "borealis",
-    "anaconda_legend",
-    "cairn"
+    "anaconda_legend"
+   ]
+  },
+  {
+   "id": "provleaders",
+   "name": "Leaders",
+   "x": 6594,
+   "y": 0,
+   "cols": 10,
+   "stacked": false,
+   "cards": [
+    "new1",
+    "new2",
+    "new3",
+    "new4",
+    "new5",
+    "new6",
+    "new7",
+    "new8",
+    "new9",
+    "new10",
+    "new11",
+    "new12",
+    "new13",
+    "new14",
+    "new15",
+    "new16",
+    "new17",
+    "new18",
+    "new19",
+    "new20",
+    "new21",
+    "new22",
+    "new23",
+    "new24",
+    "new25",
+    "new26",
+    "new27",
+    "new28",
+    "new29",
+    "new30",
+    "new31",
+    "new32",
+    "new33",
+    "new34",
+    "new35",
+    "new36",
+    "new37",
+    "new38",
+    "new39",
+    "new40",
+    "new41",
+    "new42",
+    "new43",
+    "new44",
+    "new45",
+    "new46",
+    "new47",
+    "new48",
+    "new49",
+    "new50",
+    "new51",
+    "new52",
+    "new53",
+    "new54",
+    "new55"
    ]
   }
  ],
- "gone": [],
+ "gone": [
+  "wolf_legend",
+  "jellyfish_legend",
+  "muskrat",
+  "swan_legend",
+  "cottonmouth",
+  "goose_legend",
+  "anteater",
+  "polar_bear",
+  "borealis",
+  "lemming",
+  "snow_leopard",
+  "rattlesnake",
+  "outrider",
+  "jerboa",
+  "andean_condor",
+  "cougar",
+  "chinchilla",
+  "dingo",
+  "cairn",
+  "naked_mole_rat",
+  "forager_ant",
+  "scout_bee",
+  "ostrich",
+  "firefly",
+  "salamander",
+  "weasel",
+  "dragonfly",
+  "ladybird",
+  "grasshopper",
+  "pond_skater",
+  "frog",
+  "snail",
+  "tick",
+  "centipede",
+  "duck",
+  "swallow",
+  "gecko",
+  "sparrow",
+  "coral_snake",
+  "tapir",
+  "basilisk",
+  "iguana",
+  "leech",
+  "squid",
+  "strawberry_leopard",
+  "black_widow",
+  "krill_legend",
+  "rabbit"
+ ],
  "marks": {}
 }
