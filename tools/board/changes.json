@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 346,
+ "rev": 347,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -71,6 +71,12 @@
   "sloth_legend": {
    "text": {
     "was": "Your Dusk effects happen twice.",
+    "now": "??"
+   }
+  },
+  "wildebeest_legend": {
+   "text": {
+    "was": "Your regions produce 5 more food.",
     "now": "??"
    }
   }
