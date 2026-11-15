@@ -69,7 +69,7 @@ test('adding says where the card went, and a refused add says why', async () => 
 });
 
 test('the stars: each card shows its level, the foot counts the deck\'s, and an add past the budget is refused and says why', async () => {
-  const level = id => page.$$eval(`${card(id)} .ltag img`, t => t.map(x => x.alt).join(''));   // the open face's level banner, in chalk numerals
+  const level = id => page.$$eval(`${card(id)} .lstar img`, t => t.map(x => x.alt).join(''));   // the open face's level, in its star
   assert.equal(await level('lion'), '', 'level 0: no mark');
   assert.equal(await level('vole'), '1', 'a former rare: one star');
   assert.equal(await level('lion_legend_3'), '2', 'a legendary: two');

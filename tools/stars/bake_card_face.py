@@ -1,6 +1,6 @@
 """The painted pieces of the stars prototype's open card face (Martin, 2026-11-15: "we can try D", Gwent's hand face):
 in the hand and collection the painting fills the card, the strength banner hangs from its top-left corner and the level
-rises on a smaller banner from its bottom-right; read in full, the name sits on a plank where the painting ends, the rules
+sits in a painted star on its bottom-right; read in full, the name sits on a plank where the painting ends, the rules
 on the panel below it. Every piece is cut from the frame painting the game's cards already use (design/card3,
 card_frame[_compact]_thin.png) and tinted per rarity exactly as design/card3/bake.mjs tints today's frames; where a piece
 meets the card's edge it runs straight off it, as there. Writes kit2/card_face_<piece>_<rarity>.webp at the frames' scale
@@ -95,9 +95,6 @@ def pieces(rarity):
     banner[:, :E] = 0
     banner[dy:, :E] = banner[:-dy, E:2 * E]
     banner[:dy, :E] = banner[:dy, E:2 * E]
-    # The level's banner: the strength banner turned end over end at 72%, so it rises from the bottom-right corner.
-    b = Image.fromarray(banner).rotate(180)
-    tag = np.asarray(b.resize((round(b.width * .72), round(b.height * .72)), Image.LANCZOS))
     # The name plank: the band right of the banner's cast shadow (source x 226 on), drawn out along its grain to the
     # card's width; its top and bottom bevels are the band's own.
     band = comp[:px(151), px(226):]
@@ -116,7 +113,29 @@ def pieces(rarity):
     rim[tr:px(400)] = rim[px(400):px(400) + gap]
     e = round(W * 6 / 720)
     rim[:, :e] = rim[:, e:2 * e]; rim[:, -e:] = rim[:, -2 * e:-e]; rim[:e] = rim[e:2 * e]; rim[-e:] = rim[-2 * e:-e]
-    return {"banner": banner, "tag": tag, "plank": plank, "panel": pan, "rim": rim}
+    return {"banner": banner, "plank": plank, "panel": pan, "rim": rim}
+
+
+STAR = Path(__file__).parent / "star_master.png"     # the level's star, painted on magenta (Codex, 2026-11-15)
+
+
+def star(rarity):
+    """The level's star badge: the painted driftwood star keyed off its magenta, cropped, at 4em wide, tinted as the frame."""
+    im = np.asarray(Image.open(STAR).convert("RGB")).astype(int)
+    spill = (np.minimum(im[..., 0], im[..., 2]) - im[..., 1]).clip(0, 255)
+    a = np.dstack([im.clip(0, 255), np.clip(255 - spill * 1.6, 0, 255)]).astype(np.uint8)
+    m = a[..., 3] < 250                                   # despill the soft edge, as design/card3/key.py
+    a[..., 0][m] = np.minimum(a[..., 0][m], a[..., 1][m] + 30); a[..., 2][m] = np.minimum(a[..., 2][m], a[..., 1][m])
+    ys, xs = np.nonzero(a[..., 3] > 16)
+    a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    w = round(4 * 36)
+    a = np.asarray(Image.fromarray(a).resize((w, round(a.shape[0] * w / a.shape[1])), Image.LANCZOS))
+    # The painting came out paler and warmer than the banner's wood: each channel scaled so its mean matches the banner's.
+    comp, _ = load("card_frame_compact_thin.png")
+    wood = comp[px(30):px(200), px(30):px(190), :3].reshape(-1, 3).mean(0)
+    face = a[..., 3] > 250
+    a = a.copy(); a[..., :3] = (a[..., :3] * (wood / a[face][:, :3].mean(0))).clip(0, 255).round().astype(np.uint8)
+    return tint(a, TINTS[rarity][0])
 
 
 def check():
@@ -158,10 +177,10 @@ if __name__ == "__main__":
         p = pieces(r)
         banner_only = canvas((p["rim"], (0, 0)), (p["banner"], (0, 0)))
         full = canvas((p["rim"], (0, 0)), (p["panel"], (0, PANEL_Y)), (p["plank"], (0, PLANK_Y)), (p["banner"], (0, 0)))
-        out = {f"card_frame_{r}_open_compact": shadow_under(banner_only),
+        out = {f"card_face_star_{r}": shadow_under(np.pad(star(r), ((PAD, PAD), (PAD, PAD), (0, 0)))),
+               f"card_frame_{r}_open_compact": shadow_under(banner_only),
                f"card_frame_{r}_open": shadow_under(full),
-               f"card_face_plank_{r}": shadow_under(np.pad(p["plank"], ((0, PAD), (0, 0), (0, 0)))),
-               f"card_face_tag_{r}": shadow_under(np.pad(p["tag"], ((PAD, 0), (PAD, 0), (0, 0))))}
+               f"card_face_plank_{r}": shadow_under(np.pad(p["plank"], ((0, PAD), (0, 0), (0, 0))))}
         for name, a in out.items():
             Image.fromarray(a).save(KIT / f"{name}.webp", quality=90, method=6)
             print(f"{name}.webp {a.shape[1]}x{a.shape[0]} = {a.shape[1] / 36:.2f}em x {a.shape[0] / 36:.2f}em")
