@@ -8883,6 +8883,19 @@
       "note": "leaders prototype (brief 2026-11-15): the new Gorilla legendary, in Nani's place in Handlock",
       "by": "claude",
       "at": 1794772139
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1794778083
     }
   }
 }
