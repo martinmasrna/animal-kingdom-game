@@ -34,8 +34,6 @@ The table below is generated from cards.json, where the cards live.
 | **Cockroach** | 2 | — | 1 | Fall: replace this with a Cockroach and place a Roach on an adjacent empty crossroad. |
 | **Python** | 2 | Snake | 0 | Whenever an enemy is removed, gain 1 strength (wherever this is). |
 | **Hammerhead** | 2 | Fish | 4 | Roar: if an ally was removed this turn, remove an adjacent animal. |
-| **Pigeon** | 2 | Bird | 5 | Flight. |
-| **Stork** | 2 | Bird | 4 | Flight. Roar: add two random younglings to your hand. |
-| **Peacock** | 2 | Bird | 1 | Has +1 strength for each card in your hand. |
+| **Pigeon** | 1 | Bird | 5 | Flight. |
 
 <!-- cards:end -->

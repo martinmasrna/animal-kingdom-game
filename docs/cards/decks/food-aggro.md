@@ -34,8 +34,6 @@ The table below is generated from cards.json, where the cards live.
 | **Hamster** | 2 | Rodent | 3 | Whenever you draw a card, gain 5 food. |
 | **Mara** | 2 | Rodent | 4 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
 | **Hare** | 2 | Rodent | 4 | Flee. Roar: if your hand is empty, draw 2 cards. |
-| **Marmot** | 2 | Rodent | 3 | Has +1 strength for each 10 food you have. |
-| **Mouse** | 2 | Rodent | 4 | Roar: draw a Rodent. |
-| **Rat** | 2 | Rodent | 3 | Roar: if your hand is empty, remove an adjacent enemy. |
+| **Marmot** | 1 | Rodent | 3 | Has +1 strength for each 10 food you have. |
 
 <!-- cards:end -->

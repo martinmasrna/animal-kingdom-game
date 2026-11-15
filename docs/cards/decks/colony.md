@@ -22,7 +22,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Termite King** | 2 | Colony | 3 | Roar: draw a card for each Colony Queen you control. |
 | **Termite Queen** | 2 | Colony, Queen | 2 | Roar: play a non-Queen Colony animal. |
 | **Queen Bee** | 2 | Colony, Queen | 3 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. |
-| **Queen Ant** | 2 | Colony, Queen | 3 | Dusk: place a Young Ant on an adjacent empty crossroad. |
+| **Queen Ant** | 1 | Colony, Queen | 3 | Dusk: place a Young Ant on an adjacent empty crossroad. |
 
 ### Common
 
@@ -35,7 +35,5 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Worker Ant** | 2 | Colony, Worker | 2 | Roar: gain 3 food for each animal you control. |
 | **Worker Wasp** | 2 | Colony, Worker | 2 | Flight. Whenever you place an animal, gain 3 food. |
 | **Worker Bee** | 2 | Colony, Worker | 2 | Flight. Roar: gain 12 food. |
-| **Soldier Bee** | 2 | Colony, Soldier | 3 | Flight. Spikes. |
-| **Toad** | 2 | — | 5 | Poison. |
 
 <!-- cards:end -->

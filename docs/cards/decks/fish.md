@@ -21,8 +21,7 @@ The table below is generated from cards.json, where the cards live.
 | **Manta Ray** | 2 | Fish | 6 | Whenever your opponent covers an adjacent allied Fish, draw a card. |
 | **Remora** | 2 | Fish | 2 | Roar: if this is next to an allied Fish, play another Fish. |
 | **Shark** | 2 | Fish | 7 | Apex Predator. Has Reach if an animal was removed this turn. |
-| **Whale Shark** | 2 | Fish | 8 | Titan. Hungry 4. Dusk: draw a card. |
-| **Piranha** | 2 | Fish | 3 | Your Fish can cover enemies of strength up to the number of your Fish. |
+| **Whale Shark** | 1 | Fish | 8 | Titan. Hungry 4. Dusk: draw a card. |
 
 ### Common
 
@@ -35,6 +34,5 @@ The table below is generated from cards.json, where the cards live.
 | **Tuna** | 2 | Fish | 3 | Has +1 strength for each other Fish you control. |
 | **Sunfish** | 2 | Fish | 4 | Roar: place a Baby Fish on a random adjacent empty crossroad. |
 | **Hammerhead** | 2 | Fish | 4 | Roar: if an ally was removed this turn, remove an adjacent animal. |
-| **Blue Whale** | 2 | — | 12 | Titan. |
 
 <!-- cards:end -->

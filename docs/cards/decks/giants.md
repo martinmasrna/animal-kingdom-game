@@ -22,7 +22,6 @@ The table below is generated from cards.json, where the cards live.
 | **Rhinoceros** | 2 | — | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 3 or less. |
 | **Hippopotamus** | 2 | — | 8 | Hungry 3. When an enemy of strength 4 or less is placed next to this, remove it. |
 | **Whale Shark** | 2 | Fish | 8 | Titan. Hungry 4. Dusk: draw a card. |
-| **Albatross** | 2 | Bird | 4 | Flight. Roar: remove all adjacent enemies of strength 3 or less. |
 
 ### Common
 
@@ -35,7 +34,6 @@ The table below is generated from cards.json, where the cards live.
 | **Elephant** | 2 | — | 9 | Hungry 5. |
 | **Moose** | 2 | Hoofed | 8 | Hungry 3. Roam. |
 | **Krill** | 2 | — | 1 | Roar: draw a card. The next Titan you play this turn costs one action. |
-| **Vulture** | 2 | Bird | 2 | Flight. Dusk: if 3 or more animals were removed this turn, fly in from your hand or deck. |
-| **Falcon** | 2 | Bird | 4 | Flight. Roar: if this is next to your opponent's den, draw a card. |
+| **Vulture** | 1 | Bird | 2 | Flight. Dusk: if 3 or more animals were removed this turn, fly in from your hand or deck. |
 
 <!-- cards:end -->

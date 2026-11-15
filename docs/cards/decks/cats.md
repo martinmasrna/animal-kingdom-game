@@ -34,8 +34,6 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Tiger** | 2 | Cat | 7 | Apex Predator. |
 | **Bobcat** | 2 | Cat | 5 | Roar: if you control another Cat, draw a card. |
 | **Alley Cat** | 2 | Cat | 2 | Roar: add 2 Kittens to your hand. |
-| **Cheetah** | 2 | Cat | 6 | Roar: if this is next to your opponent's den, draw 2 cards. |
-| **Elephant** | 2 | — | 9 | Hungry 5. |
-| **Crocodile** | 2 | — | 8 | Apex Predator. Has -3 strength during your opponent's turn. |
+| **Cheetah** | 1 | Cat | 6 | Roar: if this is next to your opponent's den, draw 2 cards. |
 
 <!-- cards:end -->

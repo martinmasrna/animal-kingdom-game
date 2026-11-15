@@ -34,8 +34,6 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Falcon** | 2 | Bird | 4 | Flight. Roar: if this is next to your opponent's den, draw a card. |
 | **Bat** | 2 | — | 3 | Flight. Roar: draw a card. |
 | **Mouse** | 2 | Rodent | 4 | Roar: draw a Rodent. |
-| **Squirrel** | 2 | Rodent | 4 | Roar: gain 10 food. |
-| **Chipmunk** | 2 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
-| **Mara** | 2 | Rodent | 4 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
+| **Squirrel** | 1 | Rodent | 4 | Roar: gain 10 food. |
 
 <!-- cards:end -->

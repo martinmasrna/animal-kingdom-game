@@ -22,7 +22,6 @@ The table below is generated from cards.json, where the cards live.
 | **Impala** | 2 | Hoofed | 2 | Flee. Roar: play a Baby Impala. |
 | **Okapi** | 2 | Hoofed | 4 | Dawn and Dusk: if this is grazing, draw a card. |
 | **Cape Buffalo** | 2 | Hoofed | 7 | Your other Hoofed animals have +1 strength during your opponent's turn. |
-| **Bison** | 2 | Hoofed | 7 | Can't be covered while grazing. |
 
 ### Common
 
@@ -35,7 +34,6 @@ The table below is generated from cards.json, where the cards live.
 | **Deer** | 2 | Hoofed | 3 | Flee. Roar: place a Fawn on a random adjacent empty crossroad. |
 | **Boar** | 2 | Hoofed | 5 | Remove the first enemy placed next to this. |
 | **Warthog** | 2 | Hoofed | 4 | Roar: remove an adjacent enemy that has another of your Hoofed animals next to it. |
-| **Moose** | 2 | Hoofed | 8 | Hungry 3. Roam. |
-| **Elephant** | 2 | — | 9 | Hungry 5. |
+| **Moose** | 1 | Hoofed | 8 | Hungry 3. Roam. |
 
 <!-- cards:end -->

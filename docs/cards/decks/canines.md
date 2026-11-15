@@ -34,8 +34,6 @@ The table below is generated from cards.json, where the cards live.
 | **Badger** | 2 | — | 4 | Roar: draw an animal with Roam. |
 | **Fox** | 2 | Canine | 3 | Roar: if an ally roamed this turn, draw 2 cards. |
 | **Wolverine** | 2 | — | 4 | Roar: remove an adjacent enemy with no other enemy next to it. |
-| **Bush Dog** | 2 | Canine | 3 | Roam. Whenever this roams, place a Pup on the crossroad it left. |
-| **Bobcat** | 2 | Cat | 5 | Roar: if you control another Cat, draw a card. |
-| **Lion** | 2 | Cat | 7 | — |
+| **Bush Dog** | 1 | Canine | 3 | Roam. Whenever this roams, place a Pup on the crossroad it left. |
 
 <!-- cards:end -->

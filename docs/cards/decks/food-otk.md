@@ -34,8 +34,6 @@ The table below is generated from cards.json, where the cards live.
 | **Toad** | 2 | — | 5 | Poison. |
 | **Stag Beetle** | 2 | Beetle | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
 | **Stick Insect** | 2 | — | 6 | Stealth. |
-| **Squirrel** | 2 | Rodent | 4 | Roar: gain 10 food. |
-| **Capybara** | 2 | Rodent | 2 | If your starting deck has no animal of strength 4 or more, this has 8 strength. |
-| **Chipmunk** | 2 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
+| **Squirrel** | 1 | Rodent | 4 | Roar: gain 10 food. |
 
 <!-- cards:end -->
