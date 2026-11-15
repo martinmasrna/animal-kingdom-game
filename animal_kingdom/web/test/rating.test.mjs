@@ -70,8 +70,8 @@ test('the versus moment: one object per player, the card with their name (no #ta
   assert.deepEqual(await page.$$eval('#intro .nbar span', e => e.map(x => x.textContent)), ['Martin', 'Kalista'], 'each card carries its player\'s name, yours too, without the tag');
   assert.deepEqual(await page.$$eval('#intro .iring .jewel', e => e.map(j => [...j.querySelectorAll('img')].map(i => i.alt).join('') + (j.querySelector('.q') ? '?' : ''))), ['1500?', '1724']);
   const fit = await page.$$eval('#intro .iobj', os => os.map(o => { const c = o.querySelector('.card').getBoundingClientRect(), g = o.querySelector('.iring').getBoundingClientRect();
-    return [Math.abs((g.top + g.bottom) / 2 - c.bottom), Math.abs((g.left + g.right) / 2 - (c.left + c.right) / 2), getComputedStyle(o.querySelector('.iring'), '::before').backgroundImage === getComputedStyle(o.querySelector('.card')).getPropertyValue('--frf').trim().replace(/^url\((.*)\)$/, (m, u) => `url("${new URL(u, location.href).href}")`)]; }));
-  for (const [dy, dx, same] of fit) { assert.ok(dy < 1.5 && dx < 1.5, `the gem sits centred on the card's bottom edge (${dy}, ${dx})`); assert.ok(same, 'its ring is the card\'s own frame, tinted as the card'); }
+    return [Math.abs((g.top + g.bottom) / 2 - c.bottom), Math.abs((g.left + g.right) / 2 - (c.left + c.right) / 2), getComputedStyle(o.querySelector('.iring'), '::before').backgroundImage.includes(`/kit2/card_frame_${['legendary', 'rare'].find(r => o.querySelector('.card').classList.contains(r)) || 'common'}.webp`)]; }));   // the open face's frame has no band to sample: the ring takes the same wood, tinted as the card, from the banded frame
+  for (const [dy, dx, same] of fit) { assert.ok(dy < 1.5 && dx < 1.5, `the gem sits centred on the card's bottom edge (${dy}, ${dx})`); assert.ok(same, 'its ring is the card\'s own wood, tinted as the card'); }
   assert.equal(await page.$$eval('#intro .iname, #intro .irating', e => e.length), 0, 'nothing floats under the cards');
   await page.reload({ waitUntil: 'networkidle0' });
   await intro(false, 'VS2'); await wait(400);

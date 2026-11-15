@@ -69,9 +69,10 @@ test('adding says where the card went, and a refused add says why', async () => 
 });
 
 test('the stars: each card shows its level, the foot counts the deck\'s, and an add past the budget is refused and says why', async () => {
-  assert.equal(await page.$$eval(`${card('lion')} .lvl .g`, g => g.length), 0, 'level 0: no mark');
-  assert.equal(await page.$$eval(`${card('vole')} .lvl .g`, g => g.length), 1, 'a rare: one star');
-  assert.equal(await page.$$eval(`${card('lion_legend_3')} .lvl .g`, g => g.length), 2, 'a legendary: two');
+  const level = id => page.$$eval(`${card(id)} .ltag text`, t => t.map(x => x.textContent).join(''));   // the open face's level banner
+  assert.equal(await level('lion'), '', 'level 0: no mark');
+  assert.equal(await level('vole'), '1', 'a former rare: one star');
+  assert.equal(await level('lion_legend_3'), '2', 'a legendary: two');
   assert.match(await page.$eval('#fstars', e => e.textContent), /16\/20/, 'Cats spends 16 of the 20');
   const out = id => page.click(`.side .st[data-card="${id}"]`), add = id => page.click(card(id));
   for (const id of ['lion', 'lion', 'tiger', 'tiger', 'serval']) { await out(id); await wait(60); }   // 20 cards, 16 stars

@@ -7,11 +7,19 @@ import { hasArt, artUrl, CROP, FULL } from './art.js';
 // The full card shows the painting between the name bar and the rules panel: about 61% of its height, so it centres on
 // the animal (its FULL height, set per card, else the portrait crop's centre) instead of the painting's top; the compact card centres on
 // the same height as far as its painting can move (lift).
-const VIS = 0.61;
+// FACE (the stars prototype, Martin 2026-11-15: "we can try D"): 'open' is Gwent's way, the painting filling the card in
+// the hand and the collection with only the strength banner hanging from its top-left corner and the level rising on a
+// smaller banner from its bottom-right, no name; read in full, the painting runs from the card's top edge down to a plank
+// with the name, the rules panel under it (tools/stars/bake_card_face.py cut the pieces from the frame painting).
+// 'band' is the card as it was: the name bar across the top.
+export const FACE = 'open';
+const VIS = FACE === 'open' ? 0.596 : 0.61;   // open: 17.89em of the painting's 30em show above the plank
 const focus = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); return Math.max(0, Math.min(1, (y - VIS / 2) / (1 - VIS))) * 100; };
 // The compact card shows the painting (20em wide, so 30em tall) from under the band (3.05em) to the bottom (29.34em): it moves up
 // to centre on the same height, never further than its top below the band or its bottom at the card's edge.
-const lift = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); return Math.max(-3.71, Math.min(0, 13.15 - 30 * y)); };
+// The open compact card shows the whole painting but its bottom 0.66em, so it barely moves.
+const lift = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35);
+  return FACE === 'open' ? Math.max(-0.66, Math.min(0, 14.67 - 30 * y)) : Math.max(-3.71, Math.min(0, 13.15 - 30 * y)); };
 
 // Every keyword is bold wherever it stands, with its number and the colon or full stop after it ("Hungry 3." is bold whole,
 // and so is Scout in "Roar: Scout a Bird."). The keywords are those KEYWORDS explains, below.
@@ -40,6 +48,11 @@ const GLYPH = {
   claw: n => `<svg class="g claw" viewBox="0 0 ${CW(n)} 24" style="aspect-ratio:${CW(n)}/24">${Array.from({ length: n }, (_, i) => { const x = 1.5 + 6.5 * i;
       return `<path fill="#fff" d="M${x + 9} 1C${x + 7.5} 8 ${x + 4.5} 15 ${x + .5} 23C${x + 7.5} 16 ${x + 11} 9 ${x + 12.5} 2Z"/>`; }).join('')}</svg>`,
 };
+// The open face's level: a star inked on the level's banner, its number left bare wood (a mask, the same for every card of
+// a level, so repeated ids agree).
+const tagHTML = lv => `<span class="ltag"><svg viewBox="0 0 24 24"><defs><mask id="akl${lv}"><rect width="24" height="24" fill="#fff"/>`
+  + `<text x="12" y="13.7" text-anchor="middle" dominant-baseline="central" fill="#000">${lv}</text></mask></defs>`
+  + `<polygon points="${FAT}" mask="url(#akl${lv})" stroke-width="2.2" stroke-linejoin="round"/></svg></span>`;
 // The mark's html and how many glyph widths it takes ('' and 0 for a card with none).
 function mark(c) {
   const lv = c.stars | 0;
@@ -63,8 +76,8 @@ export function cardHTML(c, { str = c.str, cls = '', attrs = '', lazy = false } 
   const base = c.str === '*' ? null : c.str, delta = base !== null && str !== base ? (str > base ? ' up' : ' down') : '';
   const art = !hasArt(c.id) ? '' : lazy ? ` data-art="${artUrl(c.id)}" style="--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`
     : ` style="background-image:url(${artUrl(c.id)});--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`;
-  const [lvl, lw] = mark(c);
-  return `<div class="card ${c.rarity} mk-${MARK.place}${lvl ? ' lv' : ''} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.label || c.name}</span>`}</div><div class="cframe"></div>` +
+  const open = FACE === 'open', [lvl, lw] = open ? [(c.stars | 0) > 0 ? tagHTML(c.stars | 0) : '', 0] : mark(c);
+  return `<div class="card ${c.rarity} ${open ? 'fo' : `mk-${MARK.place}${lvl ? ' lv' : ''}`} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.label || c.name}</span>`}</div><div class="cframe"></div>` +
     `<div class="nbar${c.name.length > 18 ? ' two' : ''}" style="--n:${c.name.length}${lvl ? `;--lw:${lw}` : ''}"><span>${c.name}</span></div>` +
     `<div class="stab"><span class="n${String(str).length > 1 ? ' two' : ''}${delta}">${chalk(str)}</span></div>` +
     `<div class="ctext">${c.text ? `<p>${rules(c.text)}</p>` : ''}<i>${c.tags.join(' · ')}</i></div>${lvl}</div>`;

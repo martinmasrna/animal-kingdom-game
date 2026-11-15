@@ -197,7 +197,33 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .card .ctext p b { font-weight: 800; }
 .card .ctext i { position: absolute; left: 0; right: 0; bottom: .15em; text-align: center; font: 700 1em/1 'Fira Sans Condensed', sans-serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #3a2a18; }
 .card.compact .ctext { display: none; }
-.card:not(.compact) .pic { bottom: 8.15em; background-position: 50% var(--fy, 30%); }
+.card:not(.compact) .pic { bottom: var(--rp, 8.15em); background-position: 50% var(--fy, 30%); }
+/* The open face (card.js FACE, the stars prototype, not settled): the painting from the card's top edge; in the hand and
+   the collection (compact, --rd 0) it runs to the bottom with only the strength banner on it and the level's banner rising
+   from the bottom-right; read in full (--rd 1, also set where game.css reads a hand card) it stops at the name plank, the
+   rules panel below. The pieces carry their own shadow (baked: a live filter on every card overran graphics memory). */
+.card.fo { --rp: 11.45em; --frf: url(/static/kit2/card_frame_common_open.webp); --frc: url(/static/kit2/card_frame_common_open_compact.webp);
+  --ftag: url(/static/kit2/card_face_tag_common.webp); --fplank: url(/static/kit2/card_face_plank_common.webp); }
+.card.fo.rare { --frf: url(/static/kit2/card_frame_rare_open.webp); --frc: url(/static/kit2/card_frame_rare_open_compact.webp);
+  --ftag: url(/static/kit2/card_face_tag_rare.webp); --fplank: url(/static/kit2/card_face_plank_rare.webp); }
+.card.fo.legendary { --frf: url(/static/kit2/card_frame_legendary_open.webp); --frc: url(/static/kit2/card_frame_legendary_open_compact.webp);
+  --ftag: url(/static/kit2/card_face_tag_legendary.webp); --fplank: url(/static/kit2/card_face_plank_legendary.webp); }
+.card.fo.compact { --rd: 0; }
+.card.fo .pic { top: 0; }
+.card.fo .pic::after { display: none; }
+.card.fo .nbar { top: auto; bottom: 8.4em; height: 3em; left: .55em; right: .55em; opacity: var(--rd, 1); }
+.card.fo .nbar::after { flex-grow: 1; }
+.card.fo .ctext { bottom: .4em; height: 7.75em; }
+/* The level's banner: 3.5 x 4.36em with its shadow's margin (.33em) at the left and top; read in full its foot tucks .5em
+   under the plank. The star is inked on it, the number left bare. */
+.card.fo .ltag { position: absolute; z-index: 0; right: 0; bottom: calc(var(--rd, 1) * 10.95em); width: 3.5em; height: 4.36em;
+  background: var(--ftag) 0 0 / 100% 100% no-repeat; pointer-events: none; }
+.card.fo .ltag svg { position: absolute; left: .69em; top: 1.3em; width: 2.45em; height: 2.45em; overflow: visible; }
+.card.fo .ltag polygon { fill: #2a2118; stroke: #2a2118; }
+.card.fo .ltag text { font: 700 14px 'Fira Sans Condensed', sans-serif; }
+/* A compact card that names a deck (the versus moment) keeps its name, on the plank across its foot; a cover has no level. */
+.card.fo.compact.named .nbar { opacity: 1; bottom: 0; left: 0; right: 0; height: 3.14em; padding: 0 .8em; background: var(--fplank) 50% 0 / 100% auto no-repeat; }
+.card.fo.named .ltag { display: none; }
 /* Legendary: a slow sheen crosses the card. */
 .card.legendary::after { content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 35%; z-index: 4; pointer-events: none;
   background: linear-gradient(90deg, rgba(255,240,200,0), rgba(255,240,200,.16), rgba(255,240,200,0)); animation: cardsheen 5.5s ease-in-out infinite; }
