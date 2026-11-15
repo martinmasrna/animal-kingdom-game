@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 347,
+ "rev": 352,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -538,7 +538,7 @@
    "rarity": "legendary",
    "strength": 5,
    "stars": 2,
-   "text": "Your regions produce 5 more food.",
+   "text": "Your regions produce 1 more food. Dusk: Upgrade.",
    "tags": [
     "Hoofed"
    ],
