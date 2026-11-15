@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 428,
+ "rev": 429,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -313,7 +313,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "Flight. Whenever you gain food, gain 1 food.",
+   "text": "Whenever you gain food, gain 1 food.",
    "tags": [
     "Colony"
    ],
