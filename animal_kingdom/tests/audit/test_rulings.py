@@ -916,7 +916,7 @@ def test_launch_kw__king_theron_the_legendary_leopard_grows_for_its_eat_first():
     put(s, "1,2", "v3", "B")
     play(s, "leopard_legend", "1,2")
     leo = s.top_unit("1,2")
-    assert leo.card_id == "leopard_legend" and strength(s, leo) == 6   # it ate the v3: +1
+    assert leo.card_id == "leopard_legend" and strength(s, leo) == 7   # it ate the v3: +1 on his 6 (stars prototype)
     assert ids(s, "1,2") == ["v1", "leopard_legend"]                    # Theron: the eaten v3 already gone
 
 

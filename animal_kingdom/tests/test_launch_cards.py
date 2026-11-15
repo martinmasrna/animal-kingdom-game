@@ -1869,8 +1869,9 @@ def test_the_termite_king_draws_a_card_for_each_colony_queen():
 
 def test_the_legendary_leopard_is_five_and_grows():
     # 8 until 2026-10-20; then 6 with "gain 1 strength" on every kill (Martin: a leopard is no lion, and the Lion is the vanilla 7);
-    # 5 from 2026-10-21, so he lands within the Black Mamba's reach and the opponent has a window before he grows.
-    assert load_cards()["leopard_legend"].base_strength == 5
+    # 5 from 2026-10-21, so he lands within the Black Mamba's reach and the opponent has a window before he grows;
+    # 6 on the stars prototype, where he is a three-star card (Martin's card board, 2026-11-15).
+    assert load_cards()["leopard_legend"].base_strength == 6
 
 
 def test_the_lemming_is_a_plain_one_now():
