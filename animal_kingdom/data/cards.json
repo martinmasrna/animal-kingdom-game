@@ -105,7 +105,7 @@
       "tags": [
         "Colony"
       ],
-      "base_strength": 5,
+      "base_strength": 3,
       "text": "Roar: draw a card for each Colony Queen you control.",
       "species": "Termite",
       "habitat": "Savanna",
@@ -120,11 +120,12 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: play a non-Queen Colony animal.",
       "species": "Termite",
       "habitat": "Savanna",
-      "keywords": []
+      "keywords": [],
+      "stars": 2
     },
     {
       "id": "queen_bee",
@@ -135,7 +136,7 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 5,
+      "base_strength": 3,
       "text": "Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand.",
       "species": "Bee",
       "habitat": "Meadow",
@@ -432,7 +433,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 5,
+      "base_strength": 6,
       "text": "Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength.",
       "keywords": [
         "Apex Predator",
@@ -440,7 +441,8 @@
         "Reach"
       ],
       "species": "Leopard",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "stars": 3
     },
     {
       "id": "wolf_legend_3",
@@ -820,11 +822,12 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: play another animal next to this.",
       "keywords": [],
       "species": "Mole",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "stars": 2
     },
     {
       "id": "mole_legend",
@@ -1154,11 +1157,12 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: if this is next to an allied Fish, play another Fish.",
       "species": "Remora",
       "habitat": "Open Ocean",
-      "keywords": []
+      "keywords": [],
+      "stars": 2
     },
     {
       "id": "cod",
@@ -1470,7 +1474,8 @@
         "Spikes"
       ],
       "species": "Honey Badger",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "stars": 3
     },
     {
       "id": "chameleon_legend",
@@ -3008,7 +3013,7 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 5,
+      "base_strength": 3,
       "text": "Dusk: place a Young Ant on an adjacent empty crossroad.",
       "species": "Ant",
       "habitat": "Forest",
@@ -3682,7 +3687,8 @@
       "text": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
       "species": "Bee",
       "habitat": "Meadow",
-      "keywords": []
+      "keywords": [],
+      "stars": 3
     },
     {
       "id": "fawn",
@@ -3722,7 +3728,8 @@
       "habitat": "Jungle",
       "keywords": [
         "Apex Predator"
-      ]
+      ],
+      "stars": 3
     },
     {
       "id": "ocelot",
@@ -3732,11 +3739,12 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: if you control another Cat, play another Cat.",
       "species": "Ocelot",
       "habitat": "Jungle",
-      "keywords": []
+      "keywords": [],
+      "stars": 2
     },
     {
       "id": "stick_insect",

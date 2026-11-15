@@ -2487,6 +2487,16 @@
       "note": "Martin, 2026-10-19: draft; a week on the card before a lock",
       "by": "claude",
       "at": 1792404556
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "by": "claude",
+      "at": 1794700890
     }
   },
   "hornet": {
@@ -2820,14 +2830,29 @@
       }
     },
     "strength": {
-      "note": "Martin, 2026-10-21: starts in reach of the Black Mamba; grows from there",
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
-      "at": 1792608627
+      "at": 1794700890,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: starts in reach of the Black Mamba; grows from there",
+        "prev": 5
+      }
     },
     "effect": {
       "note": "Reach has no number (Martin, 2026-10-21)",
       "by": "claude",
       "at": 1792604717
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "by": "claude",
+      "at": 1794700890
     }
   },
   "lion": {
@@ -3930,9 +3955,9 @@
         "prev_note": "",
         "prev": 2
       },
-      "note": "A clear step over the Nurse Bumblebee common (3, Flight, draws a random Colony animal) (Martin, 2026-10-27)",
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
-      "at": 1793096733
+      "at": 1794700888
     },
     "rarity": {
       "review": {
@@ -4112,9 +4137,19 @@
         "prev_note": "",
         "prev": 3
       },
-      "note": "Martin, 2026-11-12, after the round robin of his 12 decks: the extra-play rares down to 1",
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
-      "at": 1794488295
+      "at": 1794700889
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "by": "claude",
+      "at": 1794700889
     }
   },
   "rhinoceros": {
@@ -4614,9 +4649,9 @@
         "prev_note": "",
         "prev": 6
       },
-      "note": "Martin's sheet, 2026-10-24",
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
-      "at": 1792861463
+      "at": 1794700888
     },
     "effect": {
       "review": {
@@ -4649,9 +4684,9 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin, 2026-11-12, after the round robin of his 12 decks: the extra-play rares down to 1",
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
-      "at": 1794488295,
+      "at": 1794700889,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
@@ -4677,6 +4712,16 @@
       "note": "Martin's sheet, 2026-10-24; forced, like the Alley Cat and the Mole",
       "by": "claude",
       "at": 1792863194
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "by": "claude",
+      "at": 1794700890
     }
   },
   "tiger": {
@@ -5598,14 +5643,24 @@
     },
     "strength": {
       "lv": "draft",
-      "note": "Martin, 2026-11-12, after the round robin of his 12 decks: the extra-play rares down to 1",
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
-      "at": 1794488294,
+      "at": 1794700889,
       "review": {
         "prev_lv": "draft",
         "prev_note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
         "prev": 2
       }
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "by": "claude",
+      "at": 1794700889
     }
   },
   "mole_legend": {
@@ -6192,9 +6247,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-24: an ant queen flies once, sheds her wings and lays where she stands, so no Flight; 5, the Sea Turtle's strength, and the Turtle gets a new effect",
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
-      "at": 1792867920
+      "at": 1794700888
     },
     "animal": {
       "review": {
@@ -6357,6 +6412,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1794318377
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "by": "claude",
+      "at": 1794700890
     }
   },
   "locust_swarm": {
@@ -6562,6 +6627,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1794412809
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "by": "claude",
+      "at": 1794700890
     }
   },
   "ocelot": {
@@ -6592,9 +6667,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin, 2026-11-12, after the round robin of his 12 decks: the extra-play rares down to 1",
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
-      "at": 1794488295
+      "at": 1794700889
     },
     "effect": {
       "review": {
@@ -6633,6 +6708,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793632735
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "by": "claude",
+      "at": 1794700889
     }
   },
   "stick_insect": {

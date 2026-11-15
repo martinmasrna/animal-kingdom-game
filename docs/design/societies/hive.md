@@ -45,9 +45,9 @@ The one the colony is for. She lays, and everyone else exists to feed her brood.
 |---|---|---:|---|---|
 | **Queen Melissia** | legendary | 2 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. | Meadow |
 | **Queen Solenia** | legendary | 3 | Dusk: gain 2 food for each animal you control. | Jungle |
-| **Queen Ant** | rare | 5 | Dusk: place a Young Ant on an adjacent empty crossroad. | Forest |
-| **Queen Bee** | rare | 5 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. | Meadow |
-| **Termite Queen** | rare | 1 | Roar: play a non-Queen Colony animal. | Savanna |
+| **Queen Ant** | rare | 3 | Dusk: place a Young Ant on an adjacent empty crossroad. | Forest |
+| **Queen Bee** | rare | 3 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. | Meadow |
+| **Termite Queen** | rare | 2 | Roar: play a non-Queen Colony animal. | Savanna |
 
 <!-- cards:end -->
 
@@ -103,7 +103,7 @@ The termite king, the one insect king: he stays beside his queen for life and is
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Termite King** | rare | 5 | Roar: draw a card for each Colony Queen you control. | Savanna |
+| **Termite King** | rare | 3 | Roar: draw a card for each Colony Queen you control. | Savanna |
 
 <!-- cards:end -->
 
