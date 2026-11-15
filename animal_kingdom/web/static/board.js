@@ -14,12 +14,7 @@ export const LAND = { w: 1512, h: 800 }, PORT = { w: 720, h: 1440 };
 export const VIEW = { port: false };
 export function setView(port) { Object.assign(STAGE, port ? PORT : LAND); VIEW.port = port; }
 const key = (c, r) => `${c},${r}`;
-const BOARD_KW = ['Armor', 'Stealth', 'Spikes', 'Poison'];   // the keywords a unit wears as a badge on the board
-// Where a unit's n badges sit: on its rim, fanned evenly around the top-left corner (degrees, 90 = top), one where one always
-// sat; four (the Honey Badger, the most any animal can wear) reach from the top to the left side (Martin, 2026-10-15).
-const KW_FAN = { 1: [135], 2: [117, 153], 3: [99, 135, 171], 4: [81, 117, 153, 189] };
-const kwAt = (i, n) => { const a = KW_FAN[n][i] * Math.PI / 180;   // the badge's centre 47.8% of the unit out (on the rim)
-  return `left:calc(${(50 + 47.8 * Math.cos(a)).toFixed(1)}% - 19px);top:calc(${(50 - 47.8 * Math.sin(a)).toFixed(1)}% - 19px)`; };
+const BOARD_KW = ['Armor', 'Stealth', 'Spikes', 'Poison'];   // the keywords a unit wears painted on its piece
 // An animal whose effect fires on its own wears one mark on its rim, bottom right, clear of its number (Martin, 2026-10-15,
 // after Hearthstone's trigger bolt): a moon for Dusk, a sun for Dawn, an eye for "when/whenever". When it fires, the mark
 // brightens and the effect plays out of the animal. A Roar wears none: you see it played.
@@ -70,14 +65,18 @@ const reducedMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(pr
 
 const put = (cls, x, y, html = '', attrs = '', style = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px;${style}" ${attrs}>${html}</div>`;
 
-// A round crop of the card art, D stage pixels across.
-export function portrait(id, D) {
+// A round crop of the card art, D stage pixels across, in a box `box` pixels across (a larger box shows more of the
+// painting around the same crop, at the same zoom: the hexagonal portrait of an animal with Armor).
+// It never runs past the painting's edge: the crop slides inward first, and zooms in only when the painting is narrower
+// than the box (many crops already span its full width). The box's visible height is a flat-topped hexagon's (0.866).
+export function portrait(id, D, box = D) {
   if (!hasArt(id)) return '';
-  const [x, y, d] = CROP[id], w = D / d, h = w * 1.5;
-  return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${D / 2 - x * w}px ${D / 2 - y * h}px`;
+  const [x, y, d] = CROP[id], w = Math.max(D / d, box), h = w * 1.5, hy = box * 0.433, fit = box !== D;   // round crops stay exactly as set
+  const cx = fit ? Math.min(Math.max(x * w, box / 2), w - box / 2) : x * w, cy = fit ? Math.min(Math.max(y * h, hy), h - hy) : y * h;
+  return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${box / 2 - cx}px ${box / 2 - cy}px`;
 }
 
-// A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer and board keywords as badges.
+// A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer, and its board keywords painted on.
 function unit(u, under, cards, fire = false) {
   // Board keywords: the card's own, plus Stealth whenever the enemy can't choose it (an adjacent Armadillo gives it).
   // Spikes only until they've removed a coverer (the view says so): after that it's an ordinary animal.
@@ -89,11 +88,25 @@ function unit(u, under, cards, fire = false) {
   // offset a portrait showed only as a sliver, which read as a gap)
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen" style="transform:translate(${22 + i * 7}px,${20 + i * 6}px) scale(.82);z-index:${-i - 1}">`
     + `<div class="fill"></div><img class="rimimg" src="${kit(`rim_${team(b.owner)}.webp`)}" alt="" draggable="false"></div>`).join('');
-  return peek + `<div class="ring${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
-    `<img class="rimimg" src="${kit(`rim_${team(u.owner)}.webp`)}" alt="" draggable="false"><div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
+  // Board keywords are painted onto the piece, each on its own layer so all four stack (design sandbox screen/keywords/):
+  // Armor turns the piece into a hexagon shell scute (rim and portrait), Spikes stand out as acacia thorns behind the rim, Stealth veils the
+  // portrait in mist, Poison takes the portrait over with toxic green vapour (after Hearthstone's Enrage). The card on hover says what each one does.
+  const has = k => kws.includes(k);
+  // Poison's two layers sandwich Stealth's mist: the green tint colours the animal under the mist, the fumes (thickest at
+  // the edge) ring it from above, so an animal with both shows both.
+  // The mist drifts left to right and the vapour rises, slowly, each piece on its own phase (from its iid) so the board never moves in unison;
+  // the phase runs on the clock, so a redraw (every view redraws the board) carries the drift on instead of restarting it.
+  const hx = has('Armor') ? ' hexp' : '', ph = (i, dur) => `animation-delay:${(-((Date.now() / 1000 + (u.iid * 7919 + i * 433) % 997) % dur)).toFixed(2)}s`;
+  const img = (f, cls = '', st = '') => `<img class="${cls}" src="${kit(f)}" alt="" draggable="false"${st ? ` style="${st}"` : ''}>`;
+  const venom = k => !has('Poison') ? '' : k === 'tint' ? img('kwl_vapour_tint.webp', `kwl venom tint${hx}`)
+    : `<div class="kwl venom fumes${hx}">${img('kwl_vapour_fumes.webp', 'base')}<div class="vmask"><div class="flow v1" style="${ph(2, 14)}"></div></div></div>`;
+  return peek + (has('Spikes') ? `<img class="kwl thorns" src="${kit(has('Armor') ? 'kwl_thorns_hex.webp' : 'kwl_thorns.webp')}" alt="" draggable="false">` : '') +
+    `<div class="ring${has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
+    venom('tint') + (has('Stealth') ? `<div class="kwl mist${hx}"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
+    `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
+    `<div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
     (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +
-    ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TRG_AT}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c))) +
-    (kws.length ? `<div class="kws">${kws.map((k, i) => `<div class="kw" style="${kwAt(i, kws.length)}" data-tip="${k}: ${KEYWORDS[k]}"><img src="${kit(`kw_${k.toLowerCase()}.webp`)}" alt="${k}" draggable="false"></div>`).join('')}</div>` : '');
+    ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TRG_AT}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
 }
 
 // `g` is a viewer-space game { board, food, income, winFood }. `ui`: { rings: [cr] legal targets, hqRing (the enemy den can
