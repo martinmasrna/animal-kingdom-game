@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 177,
+ "rev": 187,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -739,7 +739,7 @@
    "rarity": "common",
    "strength": 1,
    "stars": 0,
-   "text": "if he's \"Ishar the Unseen\", he should have fucking stealth, no? :D",
+   "text": "if he's \"Ishar the Unseen\", he should have fucking stealth, no? :D maybe change the name to \"the Nightmare\" then?",
    "tags": [],
    "habitat": "",
    "species": ""
