@@ -86,7 +86,7 @@ STAR_BUDGET = 20
 
 
 def deck_stars(decklist: Sequence[str], cards: dict[str, Card]) -> int:
-    """The stars `decklist` spends: each copy's level, a -1 card giving one back."""
+    """The stars `decklist` spends: each copy's level."""
     return sum(cards[cid].stars for cid in decklist if cid in cards)
 
 

@@ -15,7 +15,7 @@ const FAMILIES = [['Cat', 'lion'], ['Canine', 'wolf_legend_3'], ['Rodent', 'chin
 const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX
 const RANK = { legendary: 0, rare: 1, common: 2 };
 // The deck rules come from the server (/api/pool's rules: decks.py and engine/cards.py hold the numbers): the deck size, the
-// copies a rarity allows, and the stars prototype's budget (a card's level, c.stars, counted per copy; -1 gives one back).
+// copies a rarity allows, and the stars prototype's budget (a card's level, c.stars, counted per copy).
 let R = { deckSize: 25, copies: {}, starBudget: 0 };   // until the server's arrive
 const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
 // What keeps a deck from play under the rules, in plain words: copies over a card's limit, more cards than a deck holds (a
@@ -133,7 +133,7 @@ function render(app, all) {
   const strengths = [...Array(8).keys()].map(String).concat('8+');
   // the levels the collection's cards have, highest first (no level is offered that no card has)
   const levels = [...new Set(cards.map(c => c.stars | 0))].sort((a, b) => b - a);
-  const lvlName = v => LABEL.five ? `Number ${v + 2}` : v === 0 ? 'No stars' : v === 1 ? '1 star' : v === -1 ? '−1 star' : `${v} stars`;   // 0 to 7, then 8 and up together: few animals are 8 or more (Martin, 2026-10-30)
+  const lvlName = v => LABEL.five ? `Number ${v + 2}` : v === 0 ? 'No stars' : v === 1 ? '1 star' : `${v} stars`;   // 0 to 7, then 8 and up together: few animals are 8 or more (Martin, 2026-10-30)
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'All cards'], ['legendary', 'Legendary']])}

@@ -1,5 +1,5 @@
 """The stars prototype (branch `stars`, 2026-11-14): a deck holds at most decks.STAR_BUDGET stars, counted per copy, a
-card's level (-1 to 3) set in cards.json or its recorded rarity's; the old caps (8 rare cards, 4 legendaries) are gone.
+card's level (0 to 3; none below ordinary, Martin 2026-11-15) set in cards.json or its recorded rarity's; the old caps (8 rare cards, 4 legendaries) are gone.
 Commons and rares are one kind of card (Martin, 2026-11-15): two copies of any non-legendary, one of a legendary."""
 
 from __future__ import annotations
@@ -83,14 +83,6 @@ def test_the_old_caps_are_gone_the_mix_is_a_choice():
     assert decklist_problems(six_legends) == [] and decklist_problems(twenty_one_star) == []
 
 
-def test_a_minus_one_card_gives_a_star_back_per_copy():
-    deck = _deck(6, 9)                                           # 21 stars
-    small = next(cid for cid in deck if CARDS[cid].stars == 0)
-    cards = _with_stars({small: -1})
-    assert deck_stars(deck, cards) == 21 - 2                     # its two copies give two back
-    assert decklist_problems(deck, cards=cards) == []
-
-
 def test_a_three_star_card_counts_three():
     deck = _deck(6, 8)
     big = next(cid for cid in deck if CARDS[cid].rarity == "legendary")
@@ -115,9 +107,9 @@ def test_every_shipped_and_ladder_deck_is_legal_but_those_holding_cards_out_of_t
 
 def test_card_data_checks_the_range():
     rec = {"id": "x", "name": "X", "status": "reserve", "rarity": "common", "tags": [], "base_strength": 1}
-    for ok in (-1, 0, 1, 2, 3):
+    for ok in (0, 1, 2, 3):
         validate_card_record({**rec, "stars": ok})
-    for bad in (-2, 4, "2", True, 1.5):
+    for bad in (-1, 4, "2", True, 1.5):
         with pytest.raises(CardDataError):
             validate_card_record({**rec, "stars": bad})
 
@@ -150,13 +142,13 @@ def _rec(hq, cid):
 
 
 def test_hq_sets_stars_in_range_and_stores_only_a_change(hq):
-    hq.set_value("mouse", "stars", "-1", by="claude")
-    assert _rec(hq, "mouse")["stars"] == -1
-    assert next(r for r in hq.load()["rows"] if r["id"] == "mouse")["stars"] == -1
+    hq.set_value("mouse", "stars", "1", by="claude")
+    assert _rec(hq, "mouse")["stars"] == 1
+    assert next(r for r in hq.load()["rows"] if r["id"] == "mouse")["stars"] == 1
     hq.set_value("mouse", "stars", 0, by="claude")
     assert "stars" not in _rec(hq, "mouse")                       # back at its rarity's: nothing stored
     hq.set_value("tiger_legend", "stars", 3, by="claude")
     assert _rec(hq, "tiger_legend")["stars"] == 3
-    for bad in ("4", "-2", "two"):
+    for bad in ("4", "-1", "two"):
         with pytest.raises(hq.Refused):
             hq.set_value("mouse", "stars", bad, by="claude")

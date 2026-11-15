@@ -18,10 +18,10 @@ const lift = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); retu
 const rules = t => (t || '').replace(KW, '<b>$&</b>');
 const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img src="/static/kit2/chalk/${d}.webp" alt="${d}" draggable="false">`).join('');
 
-// The stars prototype (branch `stars`, 2026-11-14, not settled): a card's level (c.stars, from the server: -1 small, 0 ordinary,
+// The stars prototype (branch `stars`, 2026-11-14, not settled): a card's level (c.stars, from the server: 0 ordinary,
 // 1 strong, 2 legendary, 3 monster) is marked on the card, level 0 not at all, so a player counts only the exceptions.
-// MARK is the one switch: the symbol ('gem': the level's number inside one plump star, as a cost sits in a mana gem; a hollow
-// star for -1; 'count': one star with the level's number before it from 2 up; 'star': a star per level; 'claw': scratches as a tally, a leaf for -1) and the place ('tr': the name
+// MARK is the one switch: the symbol ('gem': the level's number inside one plump star, as a cost sits in a mana gem;
+// 'count': one star with the level's number before it from 2 up; 'star': a star per level; 'claw': scratches as a tally) and the place ('tr': the name
 // bar's right end; 'tl': the bar's left end, the strength banner moved to the top right; 'br': a piece of the card's wood at
 // the painting's bottom right). LABEL.five is the collection's other labelling: every card numbered 1 to 5 (its level + 2).
 export const MARK = { symbol: 'gem', place: 'tr' };
@@ -32,14 +32,12 @@ const FAT = (() => { const p = []; for (let i = 0; i < 10; i++) { const a = Math
   p.push(`${(12 + r * Math.cos(a)).toFixed(2)},${(12.6 + r * Math.sin(a)).toFixed(2)}`); } return p.join(' '); })();
 const CW = n => 15 + 6.5 * (n - 1);   // a tally of n scratches, in the glyph's 24-high units
 const GLYPH = {
-  gem: n => `<svg class="gem" viewBox="0 0 24 24"><polygon points="${FAT}" class="${n < 0 ? 'hol' : 'sol'}" stroke-width="2.2" stroke-linejoin="round"/>`
-    + `<text x="12" y="13.6" text-anchor="middle" dominant-baseline="central">${n < 0 ? '−1' : n}</text></svg>`,
-  count: n => (n > 1 ? `<i class="num">${n}</i>` : '') + GLYPH.star(n < 0 ? -1 : 1),
-  star: n => n < 0 ? `<svg class="g" viewBox="0 0 24 24"><polygon points="${STAR}" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>`
-    : `<svg class="g" viewBox="0 0 24 24"><polygon points="${STAR}" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>`.repeat(n),
-  // claw marks: n scratches drawn as one tally, each a tapered stroke from top right to bottom left; a leaf for -1
-  claw: n => n < 0 ? `<svg class="g" viewBox="0 0 24 24"><path fill="#fff" d="M20.5 3.2C11 3.6 4.6 8.8 4.4 16.4c0 1.3.2 2.5.6 3.5L3 22.2l1.3 1L6.2 21c1 .5 2.3.8 3.7.8 7.6-.3 11.2-8 10.6-18.6zM7.6 19.4c2.6-4.6 6-8.4 10.1-11.6-3.5 3.7-6.4 7.6-8.6 12.2z"/></svg>`
-    : `<svg class="g claw" viewBox="0 0 ${CW(n)} 24" style="aspect-ratio:${CW(n)}/24">${Array.from({ length: n }, (_, i) => { const x = 1.5 + 6.5 * i;
+  gem: n => `<svg class="gem" viewBox="0 0 24 24"><polygon points="${FAT}" class="sol" stroke-width="2.2" stroke-linejoin="round"/>`
+    + `<text x="12" y="13.6" text-anchor="middle" dominant-baseline="central">${n}</text></svg>`,
+  count: n => (n > 1 ? `<i class="num">${n}</i>` : '') + GLYPH.star(1),
+  star: n => `<svg class="g" viewBox="0 0 24 24"><polygon points="${STAR}" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>`.repeat(n),
+  // claw marks: n scratches drawn as one tally, each a tapered stroke from top right to bottom left
+  claw: n => `<svg class="g claw" viewBox="0 0 ${CW(n)} 24" style="aspect-ratio:${CW(n)}/24">${Array.from({ length: n }, (_, i) => { const x = 1.5 + 6.5 * i;
       return `<path fill="#fff" d="M${x + 9} 1C${x + 7.5} 8 ${x + 4.5} 15 ${x + .5} 23C${x + 7.5} 16 ${x + 11} 9 ${x + 12.5} 2Z"/>`; }).join('')}</svg>`,
 };
 // The mark's html and how many glyph widths it takes ('' and 0 for a card with none).

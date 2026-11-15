@@ -162,8 +162,8 @@ function setVal(id, f, v) {        // one field of one card, as Martin has it no
   }
   CARDS[id] = cardView(id);
 }
-const starsLabel = n => n > 0 ? '★'.repeat(n) : n < 0 ? '−1' : '0';
-const STAR_NAME = { '-1': 'small', 0: 'ordinary', 1: 'strong', 2: 'legendary', 3: 'monster' };
+const starsLabel = n => n > 0 ? '★'.repeat(n) : '0';
+const STAR_NAME = { 0: 'ordinary', 1: 'strong', 2: 'legendary', 3: 'monster' };
 let GAME_STARS = false;   // the game's card draws the stars itself (then the board's own mark stays off)
 // the card as the game draws it; a copy borrows its original's painting
 const shown = c => ({ ...c, id: c.isNew ? c.copy_of || c.id : c.id, name: esc(c.name), text: B.notext ? '' : marks(esc(c.text)), tags: (c.tags || []).map(esc) });
@@ -630,7 +630,7 @@ world.addEventListener('click', e => {
   const b = e.target.closest('[data-adj], [data-rv]'); if (!b) return;
   const id = b.closest('.it').dataset.id, c = CARDS[id], before = snap();
   if (b.dataset.adj === 'strength') setVal(id, 'strength', Math.max(0, Math.min(99, (typeof c.str === 'number' ? c.str : 0) + Number(b.dataset.d))));
-  else if (b.dataset.adj === 'stars') setVal(id, 'stars', Math.max(-1, Math.min(3, c.stars + Number(b.dataset.d))));
+  else if (b.dataset.adj === 'stars') setVal(id, 'stars', Math.max(0, Math.min(3, c.stars + Number(b.dataset.d))));
   else if (b.dataset.rv === 'all' && D.new[id]) { delete D.new[id]; delete CARDS[id]; delete B.cards[id]; for (const p of B.piles) p.cards = p.cards.filter(i => i !== id); sel.delete(id); }
   else if (b.dataset.rv === 'all') { delete D.edits[id]; CARDS[id] = cardView(id); }
   else setVal(id, b.dataset.rv, baseVal(BASE[id], b.dataset.rv));

@@ -1,7 +1,7 @@
 """The stars prototype (branch `stars`, 2026-11-14; not settled design).
 
-Every card has a level, -1 small, 0 ordinary (the plain Lion's; most cards; unmarked), 1 strong, 2 legendary, 3 monster,
-and a deck holds at most decks.STAR_BUDGET of them, counted per copy (a -1 card gives one back). A card's `stars` in
+Every card has a level, 0 ordinary (the plain Lion's; most cards; unmarked), 1 strong, 2 legendary, 3 monster,
+and a deck holds at most decks.STAR_BUDGET of them, counted per copy. A card's `stars` in
 cards.json sets it; without one, its rarity's as the data records it.
 
 Commons and rares are one kind of card here (Martin, 2026-11-15: "merging rare and commons together, and then bringing the
@@ -11,7 +11,7 @@ game reads every rare as a common, so the engines, the client and the deck rules
 
 from __future__ import annotations
 
-STAR_LEVELS = (-1, 0, 1, 2, 3)
+STAR_LEVELS = (0, 1, 2, 3)   # no level below ordinary: too confusing for players (Martin, 2026-11-15)
 STAR_DEFAULTS = {"common": 0, "rare": 1, "legendary": 2}
 
 

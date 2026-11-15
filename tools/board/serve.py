@@ -76,7 +76,7 @@ def _clean_new(n: dict) -> dict:
     out = {"copy_of": n.get("copy_of") or None, "name": str(n.get("name") or "").strip()[:60] or "New card",
            "rarity": n.get("rarity") if n.get("rarity") in STARS else "common"}
     out["strength"] = max(0, min(99, int(n.get("strength") or 0)))
-    out["stars"] = max(-1, min(3, int(n.get("stars") if n.get("stars") is not None else STARS[out["rarity"]])))
+    out["stars"] = max(0, min(3, int(n.get("stars") if n.get("stars") is not None else STARS[out["rarity"]])))
     out["text"] = " ".join(str(n.get("text") or "").split())
     out["tags"] = [str(t).strip() for t in n.get("tags") or [] if str(t).strip()]
     out["habitat"], out["species"] = str(n.get("habitat") or ""), str(n.get("species") or "")
@@ -87,7 +87,7 @@ def _clean_edit(field: str, v):
     if field == "strength":
         return max(0, min(99, int(v)))
     if field == "stars":
-        return max(-1, min(3, int(v)))
+        return max(0, min(3, int(v)))
     if field == "tags":
         return [str(t).strip() for t in v if str(t).strip()]
     return " ".join(str(v).split())   # name, text: one line, single spaces
