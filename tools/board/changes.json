@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 429,
+ "rev": 430,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -17,7 +17,7 @@
   "bumblebee_legend": {
    "text": {
     "was": "Flight. Whenever you gain food, gain 3 additional food.",
-    "now": "??"
+    "now": ""
    }
   },
   "butterfly_legend": {
