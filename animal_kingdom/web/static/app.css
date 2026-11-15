@@ -174,7 +174,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .card .lvl { position: absolute; z-index: 3; display: flex; align-items: center; gap: .08em; pointer-events: none; }
 .card .lvl .g { display: block; width: 1.75em; height: 1.75em; flex: none; filter: brightness(.16) sepia(.6); }
 .card .lvl .g.claw { width: auto; }
-.card .lvl .gem { display: block; width: 3.1em; height: 3.1em; margin-right: -.35em; flex: none; overflow: visible; }
+.card .lvl .gem { display: block; width: 2.85em; height: 2.85em; margin-right: -.3em; margin-top: .15em; flex: none; overflow: visible; }
 .card .lvl .gem .sol { fill: #2b1f12; stroke: #2b1f12; }
 .card .lvl .gem text { font: 700 12.5px 'Fira Sans Condensed', sans-serif; fill: #f6e7c4; }
 .card .lvl .num { font: 700 1.55em/1 'Fira Sans Condensed', sans-serif; font-style: normal; color: #1d140a; margin-right: .02em; position: relative; top: .08em; }
