@@ -48,11 +48,9 @@ const GLYPH = {
   claw: n => `<svg class="g claw" viewBox="0 0 ${CW(n)} 24" style="aspect-ratio:${CW(n)}/24">${Array.from({ length: n }, (_, i) => { const x = 1.5 + 6.5 * i;
       return `<path fill="#fff" d="M${x + 9} 1C${x + 7.5} 8 ${x + 4.5} 15 ${x + .5} 23C${x + 7.5} 16 ${x + 11} 9 ${x + 12.5} 2Z"/>`; }).join('')}</svg>`,
 };
-// The open face's level: a star inked on the level's banner, its number left bare wood (a mask, the same for every card of
-// a level, so repeated ids agree).
-const tagHTML = lv => `<span class="ltag"><svg viewBox="0 0 24 24"><defs><mask id="akl${lv}"><rect width="24" height="24" fill="#fff"/>`
-  + `<text x="12" y="13.7" text-anchor="middle" dominant-baseline="central" fill="#000">${lv}</text></mask></defs>`
-  + `<polygon points="${FAT}" mask="url(#akl${lv})" stroke-width="2.2" stroke-linejoin="round"/></svg></span>`;
+// The open face's level, inked on its banner as the strength is on its own: a small star over the number, nothing round
+// either (Martin, 2026-11-15: a number in a star on a tag was one container too many).
+const tagHTML = lv => `<span class="ltag"><span class="lv"><svg viewBox="0 0 24 24"><polygon points="${STAR}"/></svg>${chalk(lv)}</span></span>`;
 // The mark's html and how many glyph widths it takes ('' and 0 for a card with none).
 function mark(c) {
   const lv = c.stars | 0;

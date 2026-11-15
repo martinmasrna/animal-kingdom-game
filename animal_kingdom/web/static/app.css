@@ -214,13 +214,15 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .card.fo .nbar { top: auto; bottom: 8.4em; height: 3em; left: .55em; right: .55em; opacity: var(--rd, 1); }
 .card.fo .nbar::after { flex-grow: 1; }
 .card.fo .ctext { bottom: .4em; height: 7.75em; }
-/* The level's banner: 3.5 x 4.36em with its shadow's margin (.33em) at the left and top; read in full its foot tucks .5em
-   under the plank. The star is inked on it, the number left bare. */
-.card.fo .ltag { position: absolute; z-index: 0; right: 0; bottom: calc(var(--rd, 1) * 10.95em); width: 3.5em; height: 4.36em;
+/* The level's banner: 3.5 x 4.36em with its shadow's margin (.33em) at the left and top, set on the rim's bottom-right
+   corner as Gwent sets its provisions; read in full it stands on the name plank. */
+.card.fo .ltag { position: absolute; z-index: 2; right: 0; bottom: calc(var(--rd, 1) * 11.45em); width: 3.5em; height: 4.36em;
   background: var(--ftag) 0 0 / 100% 100% no-repeat; pointer-events: none; }
-.card.fo .ltag svg { position: absolute; left: .69em; top: 1.3em; width: 2.45em; height: 2.45em; overflow: visible; }
-.card.fo .ltag polygon { fill: #2a2118; stroke: #2a2118; }
-.card.fo .ltag text { font: 700 14px 'Fira Sans Condensed', sans-serif; }
+.card.fo .ltag .lv { position: absolute; left: .33em; right: 0; top: .98em; display: flex; flex-direction: column; align-items: center; gap: .02em; }
+.card.fo .ltag .lv svg { width: 1.05em; height: 1.05em; display: block; }
+.card.fo .ltag .lv polygon { fill: #fff; stroke: #fff; stroke-width: 1.2; stroke-linejoin: round; }
+.card.fo .ltag .lv svg, .card.fo .ltag .lv img { filter: brightness(.16) sepia(.6); }
+.card.fo .ltag .lv img { display: block; height: 1.95em; }
 /* A compact card that names a deck (the versus moment) keeps its name, on the plank across its foot; a cover has no level. */
 .card.fo.compact.named .nbar { opacity: 1; bottom: 0; left: 0; right: 0; height: 3.14em; padding: 0 .8em; background: var(--fplank) 50% 0 / 100% auto no-repeat; }
 .card.fo.named .ltag { display: none; }

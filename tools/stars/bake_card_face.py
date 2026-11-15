@@ -105,7 +105,18 @@ def pieces(rarity):
     plank = run_off(tint(plank, frame), "lr")
     # The rules panel, as on today's full card.
     pan = run_off(tint(full[px(1007):], panel), "lrb")
-    return {"banner": banner, "tag": tag, "plank": plank, "panel": pan}
+    # The rim (Martin, 2026-11-15: "less is more, look how Gwent does it"): today's frame with its thin side and bottom
+    # rails kept, and in place of the thick top band a top rail cut from the band's own lower edge (source rows 124-151,
+    # its downward bevel), the rails running on beneath it. Its outer edges run off the card over a narrower strip (the
+    # rails are 24 source px wide, so the usual strip would eat them).
+    rim = tint(comp, frame).copy()
+    tr = px(151) - px(124)
+    rim[:tr] = rim[px(124):px(151)]
+    gap = px(400) - tr
+    rim[tr:px(400)] = rim[px(400):px(400) + gap]
+    e = round(W * 6 / 720)
+    rim[:, :e] = rim[:, e:2 * e]; rim[:, -e:] = rim[:, -2 * e:-e]; rim[:e] = rim[e:2 * e]; rim[-e:] = rim[-2 * e:-e]
+    return {"banner": banner, "tag": tag, "plank": plank, "panel": pan, "rim": rim}
 
 
 def check():
@@ -145,8 +156,8 @@ if __name__ == "__main__":
         check(); sys.exit()
     for r in TINTS:
         p = pieces(r)
-        banner_only = canvas((p["banner"], (0, 0)))
-        full = canvas((p["panel"], (0, PANEL_Y)), (p["plank"], (0, PLANK_Y)), (p["banner"], (0, 0)))
+        banner_only = canvas((p["rim"], (0, 0)), (p["banner"], (0, 0)))
+        full = canvas((p["rim"], (0, 0)), (p["panel"], (0, PANEL_Y)), (p["plank"], (0, PLANK_Y)), (p["banner"], (0, 0)))
         out = {f"card_frame_{r}_open_compact": shadow_under(banner_only),
                f"card_frame_{r}_open": shadow_under(full),
                f"card_face_plank_{r}": shadow_under(np.pad(p["plank"], ((0, PAD), (0, 0), (0, 0)))),
