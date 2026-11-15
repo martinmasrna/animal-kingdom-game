@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 352,
+ "rev": 361,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -501,7 +501,7 @@
    "rarity": "legendary",
    "strength": 4,
    "stars": 2,
-   "text": "Roar: gain 1 food for each 3 food you have.",
+   "text": "You start the game with 20 food.",
    "tags": [
     "Rodent"
    ],
