@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 361,
+ "rev": 363,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -88,7 +88,7 @@
    "rarity": "legendary",
    "strength": 0,
    "stars": 2,
-   "text": "Dawn: Xanthe gains +1 strength (wherever it is).",
+   "text": "Dawn: Give Xanthe +1 strength (wherever it is).",
    "tags": [],
    "habitat": "Meadow",
    "species": "Butterfly"
