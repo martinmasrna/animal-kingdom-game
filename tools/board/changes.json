@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 140,
+ "rev": 141,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -24,6 +24,12 @@
    "text": {
     "was": "Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength.",
     "now": "Apex Predator. Roam. Reach. Whenever Ishar removes an animal, gain 1 strength."
+   }
+  },
+  "lion_legend_3": {
+   "text": {
+    "was": "When an allied Cat covers an enemy, remove that enemy.",
+    "now": "??"
    }
   },
   "mouse": {
