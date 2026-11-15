@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 166,
+ "rev": 167,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -513,7 +513,7 @@
    "rarity": "legendary",
    "strength": 6,
    "stars": 3,
-   "text": "Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength.",
+   "text": "??",
    "tags": [
     "Cat"
    ],
