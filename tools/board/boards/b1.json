@@ -1,5 +1,5 @@
 {
- "rev": 124,
+ "rev": 127,
  "name": "provisions",
  "cards": {
   "queen_ant": {
@@ -179,13 +179,13 @@
     "manta_ray",
     "orca",
     "bison",
-    "black_panther",
     "cape_buffalo",
     "great_white_shark",
     "hippopotamus",
     "rhinoceros",
     "sperm_whale",
-    "whale_shark"
+    "whale_shark",
+    "black_panther"
    ]
   },
   {
