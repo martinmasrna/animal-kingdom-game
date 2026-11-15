@@ -51,9 +51,9 @@ test('a new profile has the twelve starter decks as its own, none open', async (
   assert.equal(await page.$$eval('.clist .dtile', t => t.length), 1, 'editing shows only that deck');
   await page.click('.side .st[data-card="lion"]'); await wait(100);
   const cats = (await myDecks()).find(d => d.id === 'cats');
-  assert.equal(cats.name, 'Cats'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 29, 'a starter is edited in place: it is yours');
+  assert.equal(cats.name, 'Cats'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 24, 'a starter is edited in place: it is yours');
   assert.equal((await myDecks()).length, 12, 'no copy');
-  assert.match(await page.$eval('.fcount', e => e.textContent), /29\/30/); assert.ok(await page.$('#play[disabled]'), 'Play waits for 30 cards');
+  assert.match(await page.$eval('.fcount', e => e.textContent), /24\/25/); assert.ok(await page.$('#play[disabled]'), 'Play waits for 25 cards');
 });
 
 test('adding says where the card went, and a refused add says why', async () => {
@@ -74,15 +74,15 @@ test('the stars: each card shows its level, the foot counts the deck\'s, and an 
   assert.equal(await page.$$eval(`${card('lion_legend_3')} .lvl .g`, g => g.length), 2, 'a legendary: two');
   assert.match(await page.$eval('#fstars', e => e.textContent), /16\/20/, 'Cats spends 16 of the 20');
   const out = id => page.click(`.side .st[data-card="${id}"]`), add = id => page.click(card(id));
-  for (const id of ['lion', 'lion', 'tiger', 'tiger', 'serval']) { await out(id); await wait(60); }   // 25 cards, 16 stars
-  for (const id of ['vole', 'vole', 'raccoon', 'raccoon']) { await add(id); await wait(60); }         // 29 cards, 20 stars
+  for (const id of ['lion', 'lion', 'tiger', 'tiger', 'serval']) { await out(id); await wait(60); }   // 20 cards, 16 stars
+  for (const id of ['vole', 'vole', 'raccoon', 'raccoon']) { await add(id); await wait(60); }         // 24 cards, 20 stars
   assert.match(await page.$eval('#fstars', e => e.textContent), /20\/20/);
   await add('coyote'); await wait(30);
   assert.ok(await has('#fstars', 'shake'), 'the star count shows why');
   assert.match(await page.$eval('#toast', e => e.textContent), /Coyote needs 1 star, and the deck has 0 left of its 20/);
   for (const id of ['vole', 'vole', 'raccoon', 'raccoon']) { await out(id); await wait(60); }
   for (const id of ['lion', 'lion', 'tiger', 'tiger', 'serval']) { await add(id); await wait(60); }   // Cats as it was
-  assert.match(await page.$eval('.fcount', e => e.textContent), /30\/30/);
+  assert.match(await page.$eval('.fcount', e => e.textContent), /25\/25/);
 });
 
 test('a chosen name and cover save with the deck', async () => {
@@ -127,7 +127,7 @@ test('New deck starts an empty deck, open, with its name ready to type', async (
   await page.keyboard.type('Scratch'); await page.keyboard.press('Enter'); await wait(120);
   const decks = await myDecks(); assert.equal(decks.length, n + 1);
   assert.deepEqual([decks[n].name, decks[n].cards], ['Scratch', {}]);
-  assert.match(await page.$eval('.fcount', e => e.textContent), /0\/30/);
+  assert.match(await page.$eval('.fcount', e => e.textContent), /0\/25/);
   await page.click(card('lion')); await wait(80);
   assert.deepEqual((await myDecks())[n].cards, { lion: 1 }, 'cards go into the new deck');
 });

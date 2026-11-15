@@ -16,10 +16,11 @@ const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX
 const RANK = { legendary: 0, rare: 1, common: 2 };
 // The deck rules come from the server (/api/pool's rules: decks.py and engine/cards.py hold the numbers): the deck size, the
 // copies a rarity allows, and the stars prototype's budget (a card's level, c.stars, counted per copy; -1 gives one back).
-let R = { deckSize: 30, copies: {}, starBudget: 0 };
+let R = { deckSize: 25, copies: {}, starBudget: 0 };   // until the server's arrive
 const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
-// What keeps a deck from play under the rules, in plain words, most pressing first: too few cards, copies over a card's
-// limit (a deck saved under the old three-copy rule keeps its list: it shows what is over and is fixed here), too many stars.
+// What keeps a deck from play under the rules, in plain words: copies over a card's limit, more cards than a deck holds (a
+// deck saved under the old rules, three copies and 30 cards, keeps its list: it shows what is over and is fixed here), too
+// many stars. Too few cards is the caller's (the count shows it).
 // '' for a playable deck. Home uses it too (app.js), to send such a deck here instead of into a match.
 export function deckIssue(list, cards = C, rules = R) {
   const counts = countsOf(list);
@@ -28,6 +29,7 @@ export function deckIssue(list, cards = C, rules = R) {
   if (over.length === 1) { const c = cards[over[0]], k = counts[over[0]] - rules.copies[c.rarity];
     return `${counts[over[0]]} ${c.name}: take out ${k === 1 ? 'one' : k}, ${rules.copies[c.rarity] === 1 ? 'one' : 'two'} at most`; }
   if (over.length) return `${over.length} cards have a copy too many`;
+  if (list.length > rules.deckSize) return `${list.length} cards: take ${list.length - rules.deckSize} out, ${rules.deckSize} at most`;
   if (stars > 0) return LABEL.five ? `${stars} over the ${shown5(rules.starBudget, rules.deckSize)}` : `${stars} star${stars > 1 ? 's' : ''} over the ${rules.starBudget}`;
   return '';
 }
@@ -124,7 +126,7 @@ function render(app, all) {
 
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
     : '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0;
-      const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the 30 and the stars show on their counters)
+      const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the card count and the stars show on their counters)
       return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact', lazy: true })}${n && c.rarity !== 'legendary' ? `<span class="pips${n > limit(c) ? ' over' : ''}">${pips(n, Math.max(n, limit(c)))}</span>` : ''}</div>`; }).join('') + '</div>';
 
   const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
@@ -143,9 +145,9 @@ function render(app, all) {
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`
-    // a deck still under 30 cards is marked with its count, as on home's chooser (Martin, 2026-10-31)
+    // a deck still short of its cards is marked with its count, as on home's chooser (Martin, 2026-10-31)
     // a deck over the rules (copies, stars) says so on its tile: open it to see what (the stars prototype)
-    : `<div class="dtile${d.list.length < 30 || deckIssue(d.list) ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < 30 ? `<span class="left">${d.list.length}/30</span>` : deckIssue(d.list) ? '<span class="left">Too many</span>' : ''}</div>`;
+    : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list) ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : deckIssue(d.list) ? '<span class="left">Too many</span>' : ''}</div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
   // The deck's stars beside its cards, read the same way; over the budget, it turns red and Play says by how much.

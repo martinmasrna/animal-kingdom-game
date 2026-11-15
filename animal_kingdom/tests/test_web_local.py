@@ -17,7 +17,7 @@ def _seats():
     return Seat("ta", "You", deck="cats"), Seat("tb", "Easy Bot", bot="easy", deck="egg_control")
 
 
-def _browser_game(seed=7, rng_seed=3, stop=None):
+def _browser_game(seed=4, rng_seed=3, stop=None):   # 4: a game with the host's mulligan beside the bot's on the stars prototype's 25-card decks
     """A game as the browser plays it (both seats moving at random, the host's mulligan beside the bot's): its log."""
     rng = random.Random(rng_seed)
     m = Match("B", Seat("ta", "You", deck="cats"))

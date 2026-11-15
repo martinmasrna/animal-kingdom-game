@@ -197,7 +197,7 @@ Decklists are **open**: both players see each other's full list at the start of 
 
 # 13. Deck Rules
 
-Each deck contains exactly **30 cards** and must satisfy all of the following:
+Each deck contains exactly **25 cards** (30 until the stars prototype; Martin, 2026-11-15: "let's change it to 25 cards a deck, shall we? with 20 stars still") and must satisfy all of the following:
 
 - no more than 2 copies of any non-legendary unit;
 - no more than 1 copy of any legendary unit;
@@ -209,7 +209,7 @@ Any deck within these rules is legal, the starters included: a starter runs as m
 
 # 14. Match Structure
 
-A competitive match is played as a best-of-3 series. Both players use the **same 30-card deck** for the whole match — there is no per-map reconfiguration. Decklists are **open**, revealed to both players at the start of the match.
+A competitive match is played as a best-of-3 series. Each player uses the **same deck** for the whole match — there is no per-map reconfiguration. Decklists are **open**, revealed to both players at the start of the match.
 
 Before the match begins, three maps are revealed — the maps for the 3 possible games of the series. The sequence is known in advance. For example:
 

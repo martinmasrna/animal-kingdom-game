@@ -215,7 +215,7 @@ def test_mulligan_first_player_first_then_second_then_turn_one():
     assert len(s.hands[first]) == len(kept) and s.hands[first][-1].card_id != returned.card_id
     rules.apply_action(s, ChoiceAction(SKIP))
     # the returned card shuffled back, deck size unchanged
-    assert len(s.hands[first]) == len(kept) and len(s.decks[first]) == 30 - len(kept)
+    assert len(s.hands[first]) == len(kept) and len(s.decks[first]) == len(load_premade_deck("cats")) - len(kept)
     assert s.pending["chooser"] == second
     rules.apply_action(s, ChoiceAction(SKIP))
     assert s.pending is None and s.turn_counter == 0 and s.current == first
@@ -237,7 +237,7 @@ def test_mulligan_blacklists_every_returned_card_and_stops_at_four():   # the ca
         new = [u for u in s.hands[first] if u.iid not in before]
         assert len(new) == 1 and new[0].card_id not in gone
     assert s.pending["chooser"] != first                 # the cap ends this player's mulligan
-    assert len(s.decks[first]) + len(s.hands[first]) == 30
+    assert len(s.decks[first]) + len(s.hands[first]) == len(load_premade_deck("cats"))
 
 
 def test_mulligan_cap_is_the_opening_hand_for_the_second_player_too():
