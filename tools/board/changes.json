@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 399,
+ "rev": 408,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -33,9 +33,13 @@
    }
   },
   "leopard_legend": {
+   "name": {
+    "was": "Ishar the Unseen",
+    "now": "Ishar the Nightmare"
+   },
    "text": {
     "was": "Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength.",
-    "now": "Stealth. Apex Predator. Reach. Whenever Ishar removes an animal, gain 1 strength."
+    "now": "Apex Predator. Roam. Reach. Whenever Ishar removes an animal, gain 1 strength."
    }
   },
   "lion_legend_3": {
@@ -348,7 +352,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "At the start of the game, add Princess Leo to your hand.",
+   "text": "At the start of the game, add Princess Lea to your hand.",
    "tags": [
     "Cat"
    ],
@@ -547,11 +551,11 @@
   },
   "new38": {
    "copy_of": "leopard_legend",
-   "name": "Ishar the Unseen",
+   "name": "Ishar the Nightmare",
    "rarity": "legendary",
    "strength": 6,
    "stars": 3,
-   "text": "Your Apex Predator animals have Roam.",
+   "text": "??",
    "tags": [
     "Cat"
    ],
@@ -770,6 +774,17 @@
    ],
    "habitat": "Jungle",
    "species": "Anaconda"
+  },
+  "new56": {
+   "copy_of": null,
+   "name": "New card",
+   "rarity": "common",
+   "strength": 1,
+   "stars": 0,
+   "text": "if he's \"Ishar the Unseen\", he should have fucking stealth, no? :D maybe change the name to \"the Nightmare\" then?",
+   "tags": [],
+   "habitat": "",
+   "species": ""
   },
   "new57": {
    "copy_of": null,
