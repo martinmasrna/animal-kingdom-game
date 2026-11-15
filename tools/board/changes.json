@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 141,
+ "rev": 166,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -526,7 +526,7 @@
    "rarity": "legendary",
    "strength": 5,
    "stars": 2,
-   "text": "??",
+   "text": "Activate: Draw a card. After your cats remove 3 enemies, upgrade.",
    "tags": [
     "Cat"
    ],
