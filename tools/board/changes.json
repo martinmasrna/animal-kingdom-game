@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 187,
+ "rev": 188,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -159,7 +159,7 @@
    "rarity": "legendary",
    "strength": 2,
    "stars": 2,
-   "text": "Roar: draw a Worker, a Soldier and a Nurse Colony animal.",
+   "text": "??",
    "tags": [
     "Colony",
     "Queen"
