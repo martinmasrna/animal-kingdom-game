@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 293,
+ "rev": 295,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -713,7 +713,7 @@
   },
   "new52": {
    "copy_of": "lion_legend_3",
-   "name": "King Theron",
+   "name": "on the hunt",
    "rarity": "legendary",
    "strength": 8,
    "stars": 2,
