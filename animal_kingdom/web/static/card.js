@@ -20,15 +20,17 @@ const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img s
 
 // The stars prototype (branch `stars`, 2026-11-14, not settled): a card's level (c.stars, from the server: -1 small, 0 ordinary,
 // 1 strong, 2 legendary, 3 monster) is marked on the card, level 0 not at all, so a player counts only the exceptions.
-// MARK is the one switch: the symbol ('star', or 'claw': scratches as a tally, a leaf for -1) and the place ('tr': the name
+// MARK is the one switch: the symbol ('count': one star with the level's number before it from 2 up, a hollow star for -1;
+// 'star': a star per level; 'claw': scratches as a tally, a leaf for -1) and the place ('tr': the name
 // bar's right end; 'tl': the bar's left end, the strength banner moved to the top right; 'br': a piece of the card's wood at
 // the painting's bottom right). LABEL.five is the collection's other labelling: every card numbered 1 to 5 (its level + 2).
-export const MARK = { symbol: 'star', place: 'tr' };
+export const MARK = { symbol: 'count', place: 'tr' };
 export const LABEL = { five: false };
 const STAR = (() => { const p = []; for (let i = 0; i < 10; i++) { const a = Math.PI * (i / 5 - .5), r = i % 2 ? 4.9 : 11;
   p.push(`${(12 + r * Math.cos(a)).toFixed(2)},${(12.9 + r * Math.sin(a)).toFixed(2)}`); } return p.join(' '); })();
 const CW = n => 15 + 6.5 * (n - 1);   // a tally of n scratches, in the glyph's 24-high units
 const GLYPH = {
+  count: n => (n > 1 ? `<i class="num">${n}</i>` : '') + GLYPH.star(n < 0 ? -1 : 1),
   star: n => n < 0 ? `<svg class="g" viewBox="0 0 24 24"><polygon points="${STAR}" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>`
     : `<svg class="g" viewBox="0 0 24 24"><polygon points="${STAR}" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>`.repeat(n),
   // claw marks: n scratches drawn as one tally, each a tapered stroke from top right to bottom left; a leaf for -1
@@ -41,7 +43,8 @@ function mark(c) {
   const lv = c.stars | 0;
   if (LABEL.five) return [`<span class="lvl five">${chalk(lv + 2)}</span>`, 1];
   if (!lv) return ['', 0];
-  return [`<span class="lvl">${GLYPH[MARK.symbol](lv)}</span>`, MARK.symbol === 'claw' && lv > 0 ? CW(lv) / 24 : Math.abs(lv)];
+  const w = MARK.symbol === 'count' ? (lv > 1 ? 1.45 : 1) : MARK.symbol === 'claw' && lv > 0 ? CW(lv) / 24 : Math.abs(lv);
+  return [`<span class="lvl">${GLYPH[MARK.symbol](lv)}</span>`, w];
 }
 
 // The mark alone, for a deck's strips (collection.js): the same glyphs in a span of class `cls`; '' for a card with none.
