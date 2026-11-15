@@ -302,6 +302,10 @@ html { touch-action: manipulation; }
 :is(.mscr, .game) .st .lvs { position: relative; display: flex; align-items: center; gap: 1px; padding-left: 6px; filter: drop-shadow(0 1px 1px #000); }
 :is(.mscr, .game) .st .lvs .g { display: block; width: 13px; height: 13px; opacity: .92; }
 :is(.mscr, .game) .st .lvs .g.claw { width: auto; }
+:is(.mscr, .game) .st .lvs .gem { display: block; width: 17px; height: 17px; overflow: visible; }
+:is(.mscr, .game) .st .lvs .gem .sol { fill: #fff; stroke: #fff; } :is(.mscr, .game) .st .lvs .gem .hol { fill: none; stroke: #fff; }
+:is(.mscr, .game) .st .lvs .gem text { font: 700 10.5px 'Fira Sans Condensed', sans-serif; fill: #2b1f12; }
+:is(.mscr, .game) .st .lvs .gem .hol + text { fill: #fff; font-size: 8px; }
 :is(.mscr, .game) .st .lvs .num { font: 700 13px/1 'Fira Sans Condensed', sans-serif; font-style: normal; color: #fff; opacity: .92; }
 :is(.mscr, .game) .st .lvs.five { box-sizing: border-box; width: 19px; height: 19px; margin-left: 6px; padding: 0; justify-content: center; border-radius: 50%;
   border: 1.5px solid #e9e4da; font: 700 12px/1 'Fira Sans Condensed', sans-serif; color: #e9e4da; }

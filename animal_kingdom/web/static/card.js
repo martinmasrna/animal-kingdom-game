@@ -20,16 +20,20 @@ const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img s
 
 // The stars prototype (branch `stars`, 2026-11-14, not settled): a card's level (c.stars, from the server: -1 small, 0 ordinary,
 // 1 strong, 2 legendary, 3 monster) is marked on the card, level 0 not at all, so a player counts only the exceptions.
-// MARK is the one switch: the symbol ('count': one star with the level's number before it from 2 up, a hollow star for -1;
-// 'star': a star per level; 'claw': scratches as a tally, a leaf for -1) and the place ('tr': the name
+// MARK is the one switch: the symbol ('gem': the level's number inside one plump star, as a cost sits in a mana gem; a hollow
+// star for -1; 'count': one star with the level's number before it from 2 up; 'star': a star per level; 'claw': scratches as a tally, a leaf for -1) and the place ('tr': the name
 // bar's right end; 'tl': the bar's left end, the strength banner moved to the top right; 'br': a piece of the card's wood at
 // the painting's bottom right). LABEL.five is the collection's other labelling: every card numbered 1 to 5 (its level + 2).
-export const MARK = { symbol: 'count', place: 'tr' };
+export const MARK = { symbol: 'gem', place: 'tr' };
 export const LABEL = { five: false };
 const STAR = (() => { const p = []; for (let i = 0; i < 10; i++) { const a = Math.PI * (i / 5 - .5), r = i % 2 ? 4.9 : 11;
   p.push(`${(12 + r * Math.cos(a)).toFixed(2)},${(12.9 + r * Math.sin(a)).toFixed(2)}`); } return p.join(' '); })();
+const FAT = (() => { const p = []; for (let i = 0; i < 10; i++) { const a = Math.PI * (i / 5 - .5), r = i % 2 ? 7.4 : 11.6;
+  p.push(`${(12 + r * Math.cos(a)).toFixed(2)},${(12.6 + r * Math.sin(a)).toFixed(2)}`); } return p.join(' '); })();
 const CW = n => 15 + 6.5 * (n - 1);   // a tally of n scratches, in the glyph's 24-high units
 const GLYPH = {
+  gem: n => `<svg class="gem" viewBox="0 0 24 24"><polygon points="${FAT}" class="${n < 0 ? 'hol' : 'sol'}" stroke-width="2.2" stroke-linejoin="round"/>`
+    + `<text x="12" y="13.6" text-anchor="middle" dominant-baseline="central">${n < 0 ? '−1' : n}</text></svg>`,
   count: n => (n > 1 ? `<i class="num">${n}</i>` : '') + GLYPH.star(n < 0 ? -1 : 1),
   star: n => n < 0 ? `<svg class="g" viewBox="0 0 24 24"><polygon points="${STAR}" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>`
     : `<svg class="g" viewBox="0 0 24 24"><polygon points="${STAR}" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg>`.repeat(n),
@@ -43,7 +47,7 @@ function mark(c) {
   const lv = c.stars | 0;
   if (LABEL.five) return [`<span class="lvl five">${chalk(lv + 2)}</span>`, 1];
   if (!lv) return ['', 0];
-  const w = MARK.symbol === 'count' ? (lv > 1 ? 1.45 : 1) : MARK.symbol === 'claw' && lv > 0 ? CW(lv) / 24 : Math.abs(lv);
+  const w = MARK.symbol === 'gem' ? 1.45 : MARK.symbol === 'count' ? (lv > 1 ? 1.45 : 1) : MARK.symbol === 'claw' && lv > 0 ? CW(lv) / 24 : Math.abs(lv);
   return [`<span class="lvl">${GLYPH[MARK.symbol](lv)}</span>`, w];
 }
 
