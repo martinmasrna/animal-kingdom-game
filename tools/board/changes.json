@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 239,
+ "rev": 247,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -52,6 +52,16 @@
    "stars": {
     "was": 0,
     "now": -1
+   }
+  },
+  "orangutan_legend": {
+   "strength": {
+    "was": 4,
+    "now": 3
+   },
+   "text": {
+    "was": "Roar: give all animals in your hand +1 strength.",
+    "now": "??"
    }
   }
  },
@@ -447,9 +457,9 @@
    "copy_of": "orangutan_legend",
    "name": "Nani",
    "rarity": "legendary",
-   "strength": 4,
-   "stars": 2,
-   "text": "Roar: give all animals in your hand +1 strength.",
+   "strength": 3,
+   "stars": 3,
+   "text": "Once per game: give all animals in your hand +1 strength.",
    "tags": [
     "Primate"
    ],
