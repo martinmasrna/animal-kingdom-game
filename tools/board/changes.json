@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 189,
+ "rev": 196,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -337,7 +337,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "When an enemy covers a Colony ally, place Vesper on top of it from your hand or deck.",
+   "text": "something actually exciting to build deck around...",
    "tags": [
     "Colony"
    ],
