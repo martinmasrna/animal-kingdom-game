@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 167,
+ "rev": 177,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -732,6 +732,17 @@
    ],
    "habitat": "Jungle",
    "species": "Anaconda"
+  },
+  "new56": {
+   "copy_of": null,
+   "name": "New card",
+   "rarity": "common",
+   "strength": 1,
+   "stars": 0,
+   "text": "if he's \"Ishar the Unseen\", he should have fucking stealth, no? :D",
+   "tags": [],
+   "habitat": "",
+   "species": ""
   }
  }
 }

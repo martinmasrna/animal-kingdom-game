@@ -1,5 +1,5 @@
 {
- "rev": 122,
+ "rev": 124,
  "name": "provisions",
  "cards": {
   "queen_ant": {
@@ -13,6 +13,10 @@
   "termite_king": {
    "x": 3163,
    "y": 2177
+  },
+  "new56": {
+   "x": 7130,
+   "y": 1247
   }
  },
  "piles": [
