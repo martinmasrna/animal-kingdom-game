@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 196,
+ "rev": 197,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -18,6 +18,12 @@
    "text": {
     "was": "Dawn: evolve. Whenever this gains strength, evolve.",
     "now": "Whenever Xanthe gains strength, evolve."
+   }
+  },
+  "eagle_legend": {
+   "text": {
+    "was": "Flight. Apex Predator. When this enters your hand, add Skya to your hand.",
+    "now": "Flight. Apex Predator. When Arne enters your hand, add Skya to your hand."
    }
   },
   "leopard_legend": {
