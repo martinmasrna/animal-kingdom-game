@@ -170,7 +170,7 @@ export function renderBoard(el, M, g, cards, ui) {
 // state, never a hint: Queen Adira's number on the boss with her progress to the next as pips, Xanthe as the stage she has
 // reached (its own painting), a power that can't be used now greyed, one you can press now ringed as an animal you can act
 // with is. Where it stands on the stage: LEADER_AT.
-export const LEADER_AT = { A: [178, 650], B: [1150, 80] }, LEADER_PORT = { A: [70, 1300], B: [650, 140] };
+export const LEADER_AT = { A: [178, 650], B: [1110, 78] }, LEADER_PORT = { A: [70, 1300], B: [650, 140] };
 export const leaderAt = side => (VIEW.port ? LEADER_PORT : LEADER_AT)[side];
 const XANTHE_FORMS = ['butterfly_legend', 'butterfly_legend_caterpillar', 'butterfly_legend_chrysalis', 'butterfly_legend_butterfly', 'butterfly_legend_monarch'];
 function leaderPiece(side, L, cards, ui) {

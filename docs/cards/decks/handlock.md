@@ -11,7 +11,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Babaji** | 1 | Primate | 3 | Echo. Roar: return an adjacent ally to your hand, give it +2 strength, and play it. |
-| **Nani** | 1 | Primate | 4 | Roar: give all animals in your hand +1 strength. |
+| **[GORILLA]** | 1 | Primate | 7 | Roar: the next animal you play has this animal's strength. |
 | **Xanthe: Egg** | 1 | — | 0 | Whenever this gains strength, evolve. |
 | **Arne** | 1 | Bird | 3 | Flight. Apex Predator. When this enters your hand, add Skya to your hand. |
 

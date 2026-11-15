@@ -1580,7 +1580,7 @@ async def create_match(req):
             if not all(d in PREMADE_DECKS or d in TEST_BOT_DECKS or d in custom_decks._saved for d in wanted):
                 raise web.HTTPBadRequest(text="bad gauntlet field")
         mirror = bool(gauntlet.get("mirror"))   # both seats on each named deck in turn: the pilot is the only variable
-        field = [d for d in (wanted if wanted is not None else sorted(DECK_SLUGS))
+        field = [d for d in (wanted if wanted is not None else sorted(s for s in DECK_SLUGS if s not in DECK_LEADERS))   # a leader variant is its base deck again
                  if mirror or (d != deck and d not in skip and sorted(load_premade_deck(d)) != mine)]
         if not field:
             raise web.HTTPBadRequest(text="empty gauntlet")
