@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 247,
+ "rev": 269,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -762,6 +762,17 @@
    "strength": 1,
    "stars": 0,
    "text": "if he's \"Ishar the Unseen\", he should have fucking stealth, no? :D maybe change the name to \"the Nightmare\" then?",
+   "tags": [],
+   "habitat": "",
+   "species": ""
+  },
+  "new57": {
+   "copy_of": null,
+   "name": "New card",
+   "rarity": "common",
+   "strength": 1,
+   "stars": 0,
+   "text": "this belongs to some aggro rush card anyway ... can even make it non-legendary 2-star unit that you have to play 2 copies of now.",
    "tags": [],
    "habitat": "",
    "species": ""
