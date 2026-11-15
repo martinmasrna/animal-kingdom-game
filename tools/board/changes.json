@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 380,
+ "rev": 381,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -348,7 +348,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "At the start of the game, add Princess Lea to your hand.",
+   "text": "At the start of the game, add Princess Leo to your hand.",
    "tags": [
     "Cat"
    ],
