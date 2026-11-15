@@ -1,7 +1,13 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 238,
+ "rev": 239,
  "changed": {
+  "baboon_legend": {
+   "text": {
+    "was": "Dawn: give 2 random animals in your hand +1 strength.",
+    "now": "??"
+   }
+  },
   "bee_legend_2": {
    "text": {
     "was": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
