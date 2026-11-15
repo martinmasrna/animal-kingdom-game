@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 269,
+ "rev": 282,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -448,7 +448,7 @@
    "rarity": "legendary",
    "strength": 4,
    "stars": 2,
-   "text": "Roar: Scout a legendary animal.",
+   "text": "something per each legendary animal in your starting deck, or maybe buffing legendary animals?",
    "tags": [],
    "habitat": "Open Ocean",
    "species": "Octopus"

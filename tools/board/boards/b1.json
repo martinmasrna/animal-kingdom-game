@@ -1,5 +1,5 @@
 {
- "rev": 129,
+ "rev": 131,
  "name": "provisions",
  "cards": {
   "queen_ant": {
@@ -219,7 +219,6 @@
     "dung_beetle_legend",
     "rat_legend",
     "zebra_legend",
-    "octopus_legend_2",
     "oxpecker_legend",
     "chipmunk_legend",
     "manta_ray_legend",
@@ -267,7 +266,6 @@
     "new28",
     "new29",
     "new30",
-    "new31",
     "new33",
     "new34",
     "new35",
@@ -314,7 +312,9 @@
     "new3",
     "cockroach_legend",
     "new36",
-    "honey_badger_legend"
+    "honey_badger_legend",
+    "new31",
+    "octopus_legend_2"
    ]
   },
   {
