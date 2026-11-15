@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 216,
+ "rev": 232,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -165,7 +165,7 @@
    "rarity": "legendary",
    "strength": 2,
    "stars": 2,
-   "text": "Activate:",
+   "text": "Activate: Scout a Worker, Soldier or Nurse Colony animal.",
    "tags": [
     "Colony",
     "Queen"
