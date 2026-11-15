@@ -1,11 +1,11 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 409,
+ "rev": 428,
  "changed": {
   "baboon_legend": {
    "text": {
     "was": "Dawn: give 2 random animals in your hand +1 strength.",
-    "now": "??"
+    "now": "Dusk: give 2 random animals in your hand +1 strength."
    }
   },
   "bee_legend_2": {
