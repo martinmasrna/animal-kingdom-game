@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 363,
+ "rev": 380,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -49,9 +49,9 @@
     "was": 4,
     "now": 1
    },
-   "stars": {
-    "was": 0,
-    "now": -1
+   "text": {
+    "was": "Roar: draw a Rodent.",
+    "now": "Roar: draw 2 cards."
    }
   },
   "orangutan_legend": {
@@ -800,6 +800,17 @@
    "strength": 1,
    "stars": 0,
    "text": "meeeh, this is too weak but there's something there...",
+   "tags": [],
+   "habitat": "",
+   "species": ""
+  },
+  "new59": {
+   "copy_of": null,
+   "name": "New card",
+   "rarity": "common",
+   "strength": 1,
+   "stars": 0,
+   "text": "allow Mouse to exist like this?? the key to allowing cards to just be 0 star?",
    "tags": [],
    "habitat": "",
    "species": ""

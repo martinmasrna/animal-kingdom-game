@@ -1,5 +1,5 @@
 {
- "rev": 151,
+ "rev": 154,
  "name": "provisions",
  "cards": {
   "queen_ant": {
@@ -25,6 +25,14 @@
   "new58": {
    "x": 6138,
    "y": 2661
+  },
+  "new59": {
+   "x": -1036,
+   "y": 388
+  },
+  "mouse": {
+   "x": -827,
+   "y": 388
   }
  },
  "piles": [
@@ -289,9 +297,7 @@
    "y": -2,
    "cols": 4,
    "stacked": false,
-   "cards": [
-    "mouse"
-   ]
+   "cards": []
   },
   {
    "id": "pmwh0omaa1",
