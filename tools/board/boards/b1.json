@@ -1,5 +1,5 @@
 {
- "rev": 156,
+ "rev": 157,
  "name": "provisions",
  "cards": {
   "queen_ant": {
@@ -335,8 +335,8 @@
    "cols": 2,
    "stacked": false,
    "cards": [
-    "new39",
     "lion_legend_4",
+    "new39",
     "new52",
     "lion_legend_3",
     "new49",

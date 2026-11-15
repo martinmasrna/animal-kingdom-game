@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 435,
+ "rev": 459,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -46,6 +46,12 @@
    "text": {
     "was": "When an allied Cat covers an enemy, remove that enemy.",
     "now": "??"
+   }
+  },
+  "lion_legend_4": {
+   "text": {
+    "was": "When an allied Cat removes an enemy, draw a card.",
+    "now": "Active: Draw 2 cards. After your Cats remove 5 enemies, upgrade."
    }
   },
   "mouse": {
@@ -568,7 +574,7 @@
    "rarity": "legendary",
    "strength": 5,
    "stars": 2,
-   "text": "Activate: Draw a card. After your cats remove 3 enemies, upgrade.",
+   "text": "After your Cats remove 5 enemies, upgrade your \"Draw\" action.",
    "tags": [
     "Cat"
    ],
