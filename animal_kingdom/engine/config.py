@@ -183,6 +183,22 @@ class Config:
     action_7_drain: int = 10             # [ACTION 7]: Action: your opponent loses 10 food
     action_8_bonus: int = 2              # [ACTION 8]: your animals have +2 strength during your opponent's next turn
 
+    # --- The leaders prototype (branch leaders; engine/leaders.py) ---
+    adira_leader_draw: int = 2           # Queen Adira's leader: "Draw 2 cards."...
+    adira_leader_per: int = 3            # ...one more for every 3 enemies her Cats have removed this match
+    juliette_leader_bonus: int = 1       # Lady Juliette's leader: your animals have +1 strength (small starting deck)
+    bumbleton_leader_food: int = 1       # Lord Bumbleton's leader: whenever you gain food, gain 1 food
+    bumbleton_card_per: int = 2          # Lord Bumbleton's card: Roar: gain 2 food for each time you have gained food
+    solenia_leader_per: int = 1          # Queen Solenia's leader: Dusk: gain 1 food for each animal you control
+    solenia_card_per: int = 3            # Queen Solenia's card: Roar: gain 3 food for each animal you control...
+    babaji_leader_grant: int = 1         # Babaji's leader: Scout an animal and give it +1 strength
+    babaji_card_grant: int = 2           # Babaji's card: return an adjacent ally, give it +2 strength, and play it
+    xanthe_leader_grant: int = 1         # Xanthe's leader at Butterfly and Monarch: +1 strength
+    monarch_grant: int = 2               # Xanthe's card, the Monarch: draw 2 cards, then give 2 animals in your hand +2
+    monarch_count: int = 2
+    gorilla_leader_bonus: int = 1        # [GORILLA]'s leader: the first animal you play each turn has +1 strength
+    juliette_wish_shown: int = 3         # Lady Juliette's card: choose one of three small animals
+
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---
     cap_queen_adira: bool = False

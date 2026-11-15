@@ -10,9 +10,9 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Babaji** | 1 | Primate | 3 | Dawn: give 2 random animals in your hand +1 strength. |
+| **Babaji** | 1 | Primate | 3 | Echo. Roar: return an adjacent ally to your hand, give it +2 strength, and play it. |
 | **Nani** | 1 | Primate | 4 | Roar: give all animals in your hand +1 strength. |
-| **Xanthe: Egg** | 1 | — | 0 | Dawn: evolve. Whenever this gains strength, evolve. |
+| **Xanthe: Egg** | 1 | — | 0 | Whenever this gains strength, evolve. |
 | **Arne** | 1 | Bird | 3 | Flight. Apex Predator. When this enters your hand, add Skya to your hand. |
 
 ### Rare
@@ -31,7 +31,7 @@ The table below is generated from cards.json, where the cards live.
 | **Macaque** | 2 | Primate | 2 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
 | **Baboon** | 2 | Primate | 5 | Roar: give 2 animals in your hand +1 strength. |
 | **Stork** | 2 | Bird | 4 | Flight. Roar: add two random younglings to your hand. |
-| **Caterpillar** | 2 | — | 1 | When this gains strength in your hand, draw a card and turn into a Butterfly. |
+| **Caterpillar** | 2 | — | 1 | When this gains strength, draw a card and turn into a Butterfly. |
 | **Gorilla** | 2 | Primate | 6 | Roar: if this has 8 or more strength, draw a card. |
 | **Peacock** | 2 | Bird | 1 | Has +1 strength for each card in your hand. |
 | **Vulture** | 1 | Bird | 2 | Flight. Dusk: if 3 or more animals were removed this turn, fly in from your hand or deck. |

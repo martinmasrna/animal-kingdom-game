@@ -92,6 +92,9 @@ EXCLUDED = {
     # the actions prototype (branch actions): the network was trained before Action animals existed
     "action_guard": "not encoded (actions prototype; strength reads it live)",
     "acted_": "not encoded (actions prototype)", "flight_next_": "not encoded (actions prototype)",
+    # the leaders prototype (branch leaders): the network was trained before leaders existed
+    "leaders": "not encoded (leaders prototype; strength reads it live)",
+    "food_gains": "not encoded (leaders prototype)", "next_strength": "not encoded (leaders prototype; strength reads it live)",
 }
 
 

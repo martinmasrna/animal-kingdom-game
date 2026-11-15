@@ -486,6 +486,12 @@ pub struct State {
     pub last_roar: [Option<CardId>; 2],
     /// [ACTION 8] (the actions prototype): (the opponent's turn it holds for, the bonus) per player.
     pub action_guard: [Option<(i32, i32)>; 2],
+    /// The leaders prototype (engine/leaders.py): each player's leader and its state, if they have one.
+    pub leaders: [Option<Leader>; 2],
+    /// Lord Bumbleton's card: how many times each player has gained food this game.
+    pub food_gains: [i32; 2],
+    /// [GORILLA]'s card: the strength the next animal each player plays has.
+    pub next_strength: [Option<i32>; 2],
     pub jelly: [FxHashMap<CardId, (i32, i32)>; 2],
     /// Whether `jelly[p]` exists at all (Python keeps the player's dict once the legendary Bee roared, empty or not).
     pub jelly_set: [bool; 2],
@@ -495,6 +501,15 @@ pub struct State {
     pub cause: Option<CardId>,
     pub cause_iid: Option<i64>,
     pub record_events: bool,
+}
+
+/// A leader on its player's den (engine/leaders.py `leader_state`).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Leader {
+    pub id: CardId,
+    pub kills: i32,
+    pub stage: i32,
+    pub spent: bool,
 }
 
 /// One entry of where a unit's stored strength came from (engine/state.py `strength_sources`): `n` of instance `iid`'s
@@ -546,6 +561,9 @@ impl Clone for State {
             hungry_eaten: self.hungry_eaten,
             last_roar: self.last_roar,
             action_guard: self.action_guard,
+            leaders: self.leaders,
+            food_gains: self.food_gains,
+            next_strength: self.next_strength,
             jelly: self.jelly.clone(),
             jelly_set: self.jelly_set,
             strength_sources: self.strength_sources.clone(),
@@ -1002,6 +1020,21 @@ impl State {
                 action_guard.insert(player_name(p as Player).to_string(), sj::json!([t, n]));
             }
         }
+        let mut leaders = sj::Map::default();
+        let mut food_gains = sj::Map::default();
+        let mut next_strength = sj::Map::default();
+        for p in 0..2 {
+            let pn = player_name(p as Player).to_string();
+            if let Some(l) = self.leaders[p] {
+                leaders.insert(pn.clone(), sj::json!({"id": self.cname(l.id), "kills": l.kills, "stage": l.stage, "spent": l.spent}));
+            }
+            if self.food_gains[p] != 0 {
+                food_gains.insert(pn.clone(), sj::Value::from(self.food_gains[p]));
+            }
+            if let Some(n) = self.next_strength[p] {
+                next_strength.insert(pn, sj::Value::from(n));
+            }
+        }
         let mut jelly_m = sj::Map::default();
         for p in 0..2 {
             if self.jelly_set[p] {
@@ -1037,6 +1070,9 @@ impl State {
             "hungry_eaten": hungry_eaten,
             "last_roar": last_roar,
             "action_guard": action_guard,
+            "leaders": leaders,
+            "food_gains": food_gains,
+            "next_strength": next_strength,
             "jelly": jelly_m,
             "strength_sources": self.sources_json(),
         })
@@ -1091,6 +1127,20 @@ impl State {
             }
             if let Some(g) = d.get("action_guard").and_then(|c| c.get(pn)).and_then(|c| c.as_array()) {
                 st.action_guard[p] = Some((g[0].as_i64().unwrap_or(0) as i32, g[1].as_i64().unwrap_or(0) as i32));
+            }
+            if let Some(l) = d.get("leaders").and_then(|c| c.get(pn)).filter(|l| l.is_object()) {
+                st.leaders[p] = Some(Leader {
+                    id: cid(l["id"].as_str().unwrap()),
+                    kills: l.get("kills").and_then(|x| x.as_i64()).unwrap_or(0) as i32,
+                    stage: l.get("stage").and_then(|x| x.as_i64()).unwrap_or(0) as i32,
+                    spent: l.get("spent").and_then(|x| x.as_bool()).unwrap_or(false),
+                });
+            }
+            if let Some(n) = d.get("food_gains").and_then(|c| c.get(pn)).and_then(|c| c.as_i64()) {
+                st.food_gains[p] = n as i32;
+            }
+            if let Some(n) = d.get("next_strength").and_then(|c| c.get(pn)).and_then(|c| c.as_i64()) {
+                st.next_strength[p] = Some(n as i32);
             }
         }
         st.remove_pile = cards_of(&d["remove_pile"]);
@@ -1192,6 +1242,9 @@ impl State {
             hungry_eaten: [0, 0],
             last_roar: [None, None],
             action_guard: [None, None],
+            leaders: [None, None],
+            food_gains: [0, 0],
+            next_strength: [None, None],
             jelly: [FxHashMap::default(), FxHashMap::default()],
             jelly_set: [false, false],
             strength_sources: CowVec::new(),

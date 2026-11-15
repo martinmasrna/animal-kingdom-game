@@ -17,7 +17,7 @@ from .stars import STAR_DEFAULTS, STAR_LEVELS, merge_rarities
 # Allowed value domains (validation). Reworked 98-design pool: README decisions B-E.
 RARITIES = {"common", "rare", "legendary"}
 KEYWORDS = {"Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "Roam", "Reach", "Hungry", "Titan",
-            "Flee", "Wild"}  # static keywords only;
+            "Flee", "Wild", "Echo"}  # static keywords only (Echo: the leaders prototype);
 # Roar/Dawn/Dusk/Deathrattle are trigger prefixes printed in `text`, not stored keywords. A numbered keyword carries its
 # number in its own field: Hungry 3 is {"keywords": ["Hungry"], "hungry": 3}. Reach has none (its distance is config.reach).
 # Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
@@ -32,6 +32,8 @@ TAGS = {
 # trained networks take one column per tag in BOT_TAGS, so a tag added here stays out of the features until a retrain.
 CASTE_TAGS = frozenset({"Soldier", "Nurse"})
 BOT_TAGS = frozenset(TAGS - CASTE_TAGS - {"Beetle"})
+# The keywords the bots' trained networks take a column for: Echo (the leaders prototype) came after them.
+BOT_KEYWORDS = frozenset(KEYWORDS - {"Echo"})
 DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg Eater
 
 # A card's status. Cards are cards and decks are decks (Martin, 2026-10-19): a card belongs to no deck, and the

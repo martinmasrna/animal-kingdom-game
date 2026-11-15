@@ -25,7 +25,8 @@ from typing import Callable, Optional
 from .actions import SKIP, ActAction, ChoiceAction, PlaceAction, RoamAction
 from .state import JELLY_SOURCE, WILD, EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
-from .strength import effective_strength, placement_strength, raw_strength, small_starting_deck
+from .strength import effective_strength, hand_counter, placement_strength, play_adjustment, raw_strength, small_starting_deck
+from . import leaders as L
 
 
 # ============================================================== pending / requests
@@ -194,6 +195,8 @@ def do_placement(state: GameState, player: str, card_id: str, target, iid: Optio
     if unit is None:
         raise EngineError(f"{player} has no playable {card_id!r} in hand")
     strength = placement_strength(state, unit)   # as it is played (a den capture shows it)
+    if state.leaders or state.next_strength:
+        _settle_play_strength(state, player, unit)   # Arne's shared strength, the Gorilla's: carried onto the board
     state.hands[player].remove(unit)
     cost = state.cards[card_id].food_cost          # "Costs X food" (decision F): paid on placement
     if cost:
@@ -209,6 +212,23 @@ def do_placement(state: GameState, player: str, card_id: str, target, iid: Optio
     _land_unit(state, player, unit, where, from_hand=True)
 
 
+def _settle_play_strength(state: GameState, player: str, unit: UnitInstance) -> None:
+    """The leaders prototype: the strength an animal is played with beyond its own counter becomes its counter, so it
+    keeps it on the board: Arne's "copies of the same animal in your hand share their strength" (it leaves the hand at
+    the strongest copy's strength), [GORILLA]'s Roar "the next animal you play has this animal's strength" (spent by this
+    play) and his leader's "the first animal you play each turn has +1 strength"."""
+    shared = hand_counter(state, unit)
+    if shared != unit.strength_counter:
+        state.note_strength(unit.iid, shared - unit.strength_counter, L.ARNE)
+        unit.strength_counter = shared
+    adj = play_adjustment(state, unit)
+    for src, n in adj:
+        if n:
+            unit.strength_counter += n
+            state.note_strength(unit.iid, n, src)
+    state.next_strength.pop(player, None)
+
+
 def playable_copies(state: GameState, player: str, card_id: str) -> list:
     """The copies of `card_id` in hand that can be played now (not Skunk-locked), in hand order."""
     return [u for u in state.hands[player] if u.card_id == card_id and u.locked_until_turn <= state.turn_counter]
@@ -221,7 +241,7 @@ def copy_choices(state: GameState, player: str, card_id: str) -> list:
     firsts: dict = {}
     for u in copies:
         firsts.setdefault(u.strength_counter, u)
-    if len(firsts) <= 1:
+    if len(firsts) <= 1 or _leads(state, player, L.ARNE):   # Arne's leader: the copies share their strength, so they are alike
         best = playable_copy(state, player, card_id)
         return [(None, best)] if best is not None else []
     return [(u.iid, u) for u in firsts.values()]
@@ -668,21 +688,18 @@ def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True,
     state.food[player] += amount
     state.emit("food", player=player, n=amount, **({"income": True} if income else {}))
     state.turn_flags[f"food_gained_{player}"] = _food_gained_this_turn(state, player) + amount
+    if rider:   # Lord Bumbleton's card counts each time you gain food; his leader's extra 1 is part of the same gain
+        state.food_gains[player] = state.food_gains.get(player, 0) + 1
     if state.food[player] >= state.game_map.win_food:
         state.result = Result(player, "food")
         return
-    # Falstaff: whenever you gain food, gain N more (once per gain event; never recursively).
-    if rider:
-        tops = statics.active_tops(state, player, "bumblebee_legend")
-        falstaffs = len(tops)
-        if falstaffs and not (state.config.cap_falstaff and state.turn_flags.get(f"falstaff_{player}")):
-            if state.config.cap_falstaff:
-                state.turn_flags[f"falstaff_{player}"] = True
-            was, (state.cause, state.cause_iid) = (state.cause, state.cause_iid), ("bumblebee_legend", tops[0].iid)   # the extra is Falstaff's doing: its food flies from it
-            try:
-                gain_food(state, player, falstaffs * state.config.bumblebee_legend_food_rider, rider=False)
-            finally:
-                state.cause, state.cause_iid = was
+    # Lord Bumbleton's leader: "Whenever you gain food, gain 1 food." (The extra 1 does not trigger itself.)
+    if rider and _leads(state, player, L.BUMBLETON):
+        was, (state.cause, state.cause_iid) = (state.cause, state.cause_iid), (L.BUMBLETON, None)
+        try:
+            gain_food(state, player, state.config.bumbleton_leader_food, rider=False)
+        finally:
+            state.cause, state.cause_iid = was
 
 
 # ============================================ draw / shuffle / remove event engine
@@ -708,6 +725,11 @@ def _fire_event(state, hook_name: str, event: dict, skip=None) -> None:
 
 
 def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_card=None, uncovered=None) -> None:
+    if state.leaders and by_player is not None and by_player != owner and by_card and "Cat" in state.cards[by_card].tags:
+        lead = state.leaders.get(by_player)
+        if lead is not None and lead["id"] == L.ADIRA:    # the same event her card counts: an allied Cat removes an enemy
+            lead["kills"] += 1
+            state.emit("leader", player=by_player, kills=lead["kills"])
     event = {"card_id": card_id, "owner": owner, "cr": cr, "tags": state.cards[card_id].tags,
              "by_player": by_player, "by_card": by_card}
     _fire_event(state, "on_remove_event", event, skip=uncovered)
@@ -798,6 +820,8 @@ def remove_from_hand(state: GameState, player: str, inst: UnitInstance) -> None:
 def _matches(card, spec: str) -> bool:
     """A serializable filter for filtered draws: 'tag:Bird', 'rarity:legendary',
     """
+    if "|" in spec:                       # Queen Melissia's leader: a Worker, Soldier or Nurse Colony animal
+        return any(_matches(card, part) for part in spec.split("|"))
     if "&" in spec:                       # Ocelot: "draw 2 common Cats" is 'tag:Cat&rarity:common'
         return all(_matches(card, part) for part in spec.split("&"))
     kind, _, val = spec.partition(":")
@@ -1074,16 +1098,22 @@ def _op_grant_free_roam(state, step):
 # turn_flags: "acted_<iid>" (this animal used its Action this turn), "flight_next_<player>" ([ACTION 5]).
 
 ACT_NEEDS = {
-    "action_2": lambda state, p: bool(state.hands[p]),     # discard a card: only with a card in hand
-    "action_4": lambda state, p: bool(state.hands[p]),     # give an animal in your hand +2: only with one there
-    "action_6": lambda state, p: bool(state.decks[p]),     # Scout: only with a deck to look at
+    "baboon_legend": lambda state, p, cr: bool(_babaji_allies(state, p, cr)),   # Echo: his Roar needs an ally to return
+    "action_2": lambda state, p, cr: bool(state.hands[p]),     # discard a card: only with a card in hand
+    "action_4": lambda state, p, cr: bool(state.hands[p]),     # give an animal in your hand +2: only with one there
+    "action_6": lambda state, p, cr: bool(state.decks[p]),     # Scout: only with a deck to look at
 }
 
 
 def has_act(state: GameState, unit) -> bool:
-    """Whether `unit`'s card carries an Action (printed), its effects working."""
+    """Whether `unit`'s card carries an Action (printed) or Echo (the leaders prototype: "spend one action to repeat its
+    Roar"), its effects working."""
     hooks = EFFECTS.get(unit.card_id)
-    return bool(hooks and "on_act" in hooks) and statics.active(state, unit)
+    if not hooks:
+        return False
+    if "on_act" in hooks or ("on_place" in hooks and "Echo" in state.cards[unit.card_id].keywords):
+        return statics.active(state, unit)
+    return False
 
 
 def legal_acts(state: GameState, player: str) -> list:
@@ -1094,7 +1124,7 @@ def legal_acts(state: GameState, player: str) -> list:
         if not has_act(state, unit) or state.turn_flags.get(f"acted_{unit.iid}"):
             continue
         need = ACT_NEEDS.get(unit.card_id)
-        if need is None or need(state, player):
+        if need is None or need(state, player, cr):
             out.append(ActAction(cr))
     return out
 
@@ -1107,7 +1137,10 @@ def do_act(state: GameState, player: str, origin: str) -> None:
     unit = stack[-1]
     state.turn_flags[f"acted_{unit.iid}"] = True
     state.emit("act", player=player, iid=unit.iid, card=unit.card_id, cr=origin)
-    _push_hook(state, unit, origin, "on_act")
+    if "on_act" in EFFECTS.get(unit.card_id, {}):
+        _push_hook(state, unit, origin, "on_act")
+    else:                                  # Echo: its Roar happens again, from where it stands
+        _push_hook(state, unit, origin, "on_place")
 
 
 def _action_1_act(state, unit, cr):
@@ -1196,6 +1229,10 @@ def start_of_turn(state: GameState, player: str) -> None:
             s["remaining"] -= 1
             (fired if s["remaining"] <= 0 else keep).append(s)
     state.scheduled = keep
+    lead = state.leaders.get(player) if state.leaders else None
+    if lead is not None and lead["id"] == L.XANTHE and lead["stage"] < len(L.XANTHE_STAGES) - 1:
+        lead["stage"] += 1                    # Xanthe's leader evolves on the den, one stage at each of your Dawns
+        state.emit("leader", player=player, stage=lead["stage"])
     for inst in list(state.hands[player]):     # a Dawn that works from the hand too (the legendary Butterfly's)
         hook = _hook(state, inst.card_id, "on_dawn_in_hand")
         if hook:
@@ -1212,6 +1249,9 @@ def end_of_turn(state: GameState, player: str) -> None:
     End-of-turn effects are choice-free (auto/deterministic) so the turn can still advance
     without a pending decision - see rules._end_turn.
     """
+    if _leads(state, player, L.SOLENIA):      # Queen Solenia's leader: "Dusk: gain 1 food for each animal you control."
+        state.effect_stack.append({"op": "gain_food", "player": player, "by_card": L.SOLENIA,
+                                   "amount": state.config.solenia_leader_per * _control_tag_count(state, player)})
     _vultures_dusk(state, player)
     _push_timed_hooks(state, player, "on_end_of_turn")
 
@@ -1364,6 +1404,8 @@ def _op_scout(state, step):
     pulled.remove(step["choice"])
     inst = state.deck_instance(player, step["choice"])
     state.hands[player].append(inst)
+    if step.get("grant"):                 # Babaji's leader: "Scout an animal and give it +1 strength."
+        _grant(state, [inst.iid], step["grant"])
     _fire_draw(state, [inst])
     shuffle_back(state, player, pulled)
     return None
@@ -3236,7 +3278,7 @@ def _butterfly_stage_place(draw_attr, grant_attr):
 
 
 def _macaque_place(state, unit, cr):
-    if roar_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, "macaque", unit):     # its own condition, also when a Macaw repeats it
         _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(state, unit, cr))
 
 
@@ -3680,4 +3722,204 @@ EFFECTS.update({
     "action_6": {"on_act": _action_6_act},
     "action_7": {"on_act": _action_7_act},
     "action_8": {"on_act": _action_8_act},
+})
+
+
+# ===================================================================== Leaders
+#
+# The leaders prototype (branch leaders; engine/leaders.py): a deck's leader sits on its den all match. A hero power or a
+# once-per-game power is a LeaderAction (rules._top_level_actions) costing one action; the passives hook in where they
+# act: gain_food (Lord Bumbleton), _fire_remove_event (Queen Adira's count), start_of_turn (Xanthe's stage),
+# end_of_turn (Queen Solenia), strength.py (Lady Juliette, Arne, [GORILLA]) and do_placement (what a play carries).
+
+def _leads(state: GameState, player: str, leader_id: str) -> bool:
+    lead = state.leaders.get(player) if state.leaders else None
+    return lead is not None and lead["id"] == leader_id
+
+
+def adira_draw(state: GameState, lead: dict) -> int:
+    """Queen Adira's power: 2 cards, one more for every 3 enemies her Cats have removed this match."""
+    return state.config.adira_leader_draw + lead["kills"] // state.config.adira_leader_per
+
+
+def leader_usable(state: GameState, player: str) -> bool:
+    """Whether `player` may press their den now (the caller checks the turn has an action left): a power, not spent,
+    that would do something."""
+    lead = state.leaders.get(player)
+    if lead is None:
+        return False
+    lid, kind = lead["id"], L.kind_of(lead["id"])
+    if kind == "passive" or (kind == "once" and lead["spent"]):
+        return False
+    deck = state.decks[player]
+    if lid in (L.ADIRA, L.BABAJI):
+        return bool(deck)
+    if lid == L.MELISSIA:
+        return any(_matches(state.cards[cid], L.MELISSIA_SPEC) for cid in deck)
+    if lid == L.XANTHE:
+        stage = lead["stage"]
+        if stage == 1:
+            return bool(deck)
+        if stage in (3, 4):
+            return bool(deck) or bool(state.hands[player])
+        return False
+    return False
+
+
+def do_leader(state: GameState, player: str) -> None:
+    """`player` presses their den: the leader's power (the caller has paid the action). Its steps name the leader as
+    their source, so every choice inside it says who asks."""
+    lead = state.leaders.get(player)
+    if lead is None:
+        raise EngineError(f"{player} has no leader")
+    lid, cfg = lead["id"], state.config
+    state.emit("leader_power", player=player, card=lid)
+    src = {"by_card": lid}
+    if lid == L.ADIRA:
+        state.effect_stack.append({"op": "draw", "player": player, "n": adira_draw(state, lead), **src})
+    elif lid == L.MELISSIA:
+        state.effect_stack.append({"op": "scout", "player": player, "spec": L.MELISSIA_SPEC, **src})
+    elif lid == L.BABAJI:
+        state.effect_stack.append({"op": "scout", "player": player, "spec": None, "grant": cfg.babaji_leader_grant, **src})
+    elif lid == L.XANTHE:
+        lead["spent"] = True
+        stage = lead["stage"]
+        if stage == 3:      # "Draw a card, then give an animal in your hand +1 strength."
+            state.effect_stack.append({"op": "hand_grant_one", "player": player, "amount": cfg.xanthe_leader_grant, **src})
+        elif stage == 4:    # "Draw a card and give all animals in your hand +1 strength."
+            state.effect_stack.append({"op": "hand_grant_all", "player": player, "amount": cfg.xanthe_leader_grant, **src})
+        state.effect_stack.append({"op": "draw", "player": player, "n": 1, **src})
+    else:
+        raise EngineError(f"{lid!r} has no power to use")
+
+
+# --- the leaders' own cards, as they change with this prototype -------------------------------------------------
+
+def _juliette_place(state, unit, cr):
+    """Lady Juliette: "Roar: if your starting deck has no animals of strength 4 or more, choose one of three small animals
+    and play it." Three of the twelve at random, made for the occasion (none taken from the deck)."""
+    p = unit.owner
+    if not small_starting_deck(state, p, unit.card_id):
+        return
+    shown = state.rng.sample(list(L.JULIETTE_WISHES), state.config.juliette_wish_shown)
+    _push_choose(state, p, shown, "wish")
+
+
+def _then_wish(state, step, card_id):
+    """The wished animal is made and played: a free placement on a legal crossroad of the player's choice, its Roar
+    and all. One with nowhere to go is gone."""
+    state.effect_stack.append({"op": "play_named", "chooser": step["chooser"], "card_id": card_id, "make": True})
+
+
+def _bumbleton_place(state, unit, cr):
+    """Lord Bumbleton: "Roar: gain 2 food for each time you have gained food this game." """
+    _push_gain(state, unit.owner, state.config.bumbleton_card_per * state.food_gains.get(unit.owner, 0))
+
+
+def _solenia_place(state, unit, cr):
+    """Queen Solenia: "Roar: gain 3 food for each animal you control. Your opponent loses the same amount." (Never below
+    0: an opponent with less loses what they have.)"""
+    n = state.config.solenia_card_per * _control_tag_count(state, unit.owner)
+    if n:
+        gain_food(state, unit.owner, n)
+        lose_food(state, other_player(unit.owner), n, card=unit.card_id)
+
+
+def _babaji_allies(state, player, cr) -> list:
+    """The allies next to `cr` Babaji's Roar may return (Armor resists a return, its owner's too)."""
+    return [nb for nb in sorted(state.game_map.neighbors(cr))
+            if (top := state.top_unit(nb)) and top.owner == player and statics.can_be_removed(state, top, nb)]
+
+
+def _babaji_place(state, unit, cr):
+    """Babaji: "Roar: return an adjacent ally to your hand, give it +2 strength, and play it." (Echo repeats it.)"""
+    _push_choose(state, unit.owner, _babaji_allies(state, unit.owner, cr), "babaji", amount=state.config.babaji_card_grant)
+
+
+def _then_babaji(state, step, cr):
+    top = state.top_unit(cr)
+    if top is None or top.owner != step["chooser"] or not statics.can_be_removed(state, top, cr):
+        return
+    inst = _bounce(state, cr, top)
+    if inst is None:
+        return
+    state.effect_stack.append({"op": "play_iid", "chooser": step["chooser"], "iid": inst.iid})   # then it is played...
+    _grant(state, [inst.iid], step["amount"])                                                    # ...after the +2
+
+
+def _op_play_iid(state, step):
+    """Play this very card from hand, free, on a legal crossroad of the player's choice (its Roar happens): Babaji's
+    replay. Mandatory when it has a legal place; one with none stays in hand."""
+    if "place_action" in step:
+        pa = step["place_action"]
+        if pa != SKIP:
+            do_placement(state, step["chooser"], pa["card_id"], tuple(pa["target"]), pa.get("iid"))
+        return None
+    player = step["chooser"]
+    inst = next((u for u in state.hands[player] if u.iid == step["iid"]), None)
+    if inst is None:
+        return None
+    placements = []
+    for pl in legal_placements(state, player, {inst.card_id}):
+        rep = _find_instance(state, pl.iid) if pl.iid is not None else None
+        if rep is None or rep.strength_counter == inst.strength_counter:    # a copy of the same strength is the same card
+            placements.append(pl)
+    if not placements:
+        return None
+    return PendingRequest("place", player, optional=False, placements=[_place_dict(p) for p in placements])
+
+
+OPS["play_iid"] = _op_play_iid
+
+
+def _xanthe_evolve(state, inst, _):
+    """Xanthe's card: "Whenever this gains strength, evolve." (No Dawn any more.)"""
+    i = BUTTERFLY_STAGES.index(inst.card_id)
+    if i + 1 < len(BUTTERFLY_STAGES):
+        _transform(state, inst, BUTTERFLY_STAGES[i + 1])
+
+
+def _monarch_place(state, unit, cr):
+    """Xanthe, the Monarch: "Roar: draw 2 cards, then give 2 animals in your hand +2 strength." (Two different ones, the
+    player's pick; all of them when there are two or fewer.)"""
+    cfg = state.config
+    state.effect_stack.append({"op": "hand_grant_count", "player": unit.owner, "amount": cfg.monarch_grant,
+                               "count": cfg.monarch_count})
+    _push_draw(state, unit.owner, cfg.butterfly_legend_stage5_draw)
+
+
+def _op_hand_grant_count(state, step):
+    hand = _hand_iids(state, step["player"])
+    if len(hand) <= step["count"]:
+        _grant(state, hand, step["amount"])
+    else:
+        _push_choose(state, step["player"], hand, "hand_grant", amount=step["amount"], count=step["count"],
+                     by_card=step.get("by_card"))
+    return None
+
+
+OPS["hand_grant_count"] = _op_hand_grant_count
+
+
+def _gorilla_legend_2_place(state, unit, cr):
+    """[GORILLA]: "Roar: the next animal you play has this animal's strength." The strength he has now, waiting across
+    turns for your next play, which it sets to exactly that number (strength.play_adjustment)."""
+    state.next_strength[unit.owner] = effective_strength(state, unit)
+
+
+THEN["wish"] = _then_wish
+THEN["babaji"] = _then_babaji
+
+EFFECTS.update({
+    "bee_legend_2": {"on_place": _juliette_place},
+    "bumblebee_legend": {"on_place": _bumbleton_place},
+    "army_ant_legend": {"on_place": _solenia_place},
+    "baboon_legend": {"on_place": _babaji_place},
+    "butterfly_legend": {"on_gain": _xanthe_evolve},
+    "butterfly_legend_caterpillar": {"on_place": _draw1, "on_gain": _xanthe_evolve},
+    "butterfly_legend_chrysalis": {"on_gain": _xanthe_evolve},
+    "butterfly_legend_butterfly": {"on_place": _draw_then_give_one, "on_gain": _xanthe_evolve},
+    "butterfly_legend_monarch": {"on_place": _monarch_place},
+    "caterpillar": {"on_gain": _caterpillar_grows},     # "When this gains strength, ...": in hand or on the board
+    "gorilla_legend_2": {"on_place": _gorilla_legend_2_place},
 })

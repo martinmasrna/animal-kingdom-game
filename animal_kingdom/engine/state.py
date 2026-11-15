@@ -315,6 +315,9 @@ class GameState:
         hungry_eaten: Optional[dict[str, int]] = None,
         last_roar: Optional[dict[str, str]] = None,
         action_guard: Optional[dict[str, list]] = None,
+        leaders: Optional[dict[str, dict]] = None,
+        food_gains: Optional[dict[str, int]] = None,
+        next_strength: Optional[dict[str, int]] = None,
         jelly: Optional[dict[str, dict[str, Any]]] = None,
         strength_sources: Optional[dict[int, tuple]] = None,
     ):
@@ -342,6 +345,13 @@ class GameState:
         # [ACTION 8] (the actions prototype): player -> [the turn_counter of the opponent's turn it holds for, the bonus]:
         # that player's animals have +bonus strength during that turn (strength.anthem_bonus).
         self.action_guard = action_guard if action_guard is not None else {}
+        # The leaders prototype (engine/leaders.py): player -> their leader and its state ({"id", "kills", "stage",
+        # "spent"}); a player with no leader has no entry. Public.
+        self.leaders = leaders if leaders is not None else {}
+        # Lord Bumbleton's card: player -> how many times that player has gained food this game.
+        self.food_gains = food_gains if food_gains is not None else {}
+        # [GORILLA]'s card: player -> the strength the next animal that player plays has (set by the Roar, spent by the play).
+        self.next_strength = next_strength if next_strength is not None else {}
         # The legendary Bee's royal jelly: player -> card id -> [how many deck copies it reached, the counter that made them
         # strength 5 at the Roar]. Each comes out of the deck (drawn, played or placed from it) with that counter, so growth
         # since the Roar (the Python's) stays on it; copies shuffled in later are untouched (deck_instance).
@@ -607,6 +617,9 @@ class GameState:
         new.hungry_eaten = dict(self.hungry_eaten)
         new.last_roar = dict(self.last_roar)
         new.action_guard = {p: list(g) for p, g in self.action_guard.items()}
+        new.leaders = {p: dict(l) for p, l in self.leaders.items()} if self.leaders else {}
+        new.food_gains = dict(self.food_gains)
+        new.next_strength = dict(self.next_strength)
         new.jelly = {p: dict(j) for p, j in self.jelly.items()}
         new.strength_sources = dict(self.strength_sources)   # values are tuples: shared safely
         new.result = self.result  # Result is frozen/immutable - safe to share
@@ -676,6 +689,9 @@ class GameState:
             "hungry_eaten": dict(sorted(self.hungry_eaten.items())),
             "last_roar": dict(sorted(self.last_roar.items())),
             "action_guard": {p: list(g) for p, g in sorted(self.action_guard.items())},
+            "leaders": {p: dict(l) for p, l in sorted(self.leaders.items())},
+            "food_gains": dict(sorted(self.food_gains.items())),
+            "next_strength": dict(sorted(self.next_strength.items())),
             "jelly": {p: dict(sorted(j.items())) for p, j in sorted(self.jelly.items())},
             "strength_sources": self._live_strength_sources(),
         }
@@ -728,6 +744,9 @@ class GameState:
             hungry_eaten=dict(d.get("hungry_eaten") or {}),
             last_roar=dict(d.get("last_roar") or {}),
             action_guard={p: list(g) for p, g in (d.get("action_guard") or {}).items()},
+            leaders={p: dict(l) for p, l in (d.get("leaders") or {}).items()},
+            food_gains=dict(d.get("food_gains") or {}),
+            next_strength=dict(d.get("next_strength") or {}),
             jelly={p: dict(j) for p, j in (d.get("jelly") or {}).items()},
             strength_sources={int(i): tuple((e[0], int(e[1]), bool(e[2])) for e in entries)
                               for i, entries in (d.get("strength_sources") or {}).items()},
@@ -744,6 +763,7 @@ def new_game(
     config: Optional[Config] = None,
     first_player: Optional[str] = None,
     stacked: bool = False,
+    leaders: Optional[dict] = None,
 ) -> GameState:
     """Set up a fresh game: shuffle decks, pick first player, deal opening hands.
 
@@ -753,6 +773,8 @@ def new_game(
     the RNG is still drawn from so the rest of the stream (shuffles already happened, later
     chance effects) is identical either way.
     `stacked` keeps both decks in the given order, first card drawn first (the tutorial's fixed deal).
+    `leaders`: player -> the card id of that deck's leader (the leaders prototype, engine/leaders.py); none by default.
+    Setting them draws nothing from the RNG, so a game's stream is the same with or without.
     """
     rng = random.Random(seed)
     cards = cards or load_cards()
@@ -788,6 +810,14 @@ def new_game(
         rng=rng,
         starting_decks=starting_decks,
     )
+    from .leaders import leader_problem, leader_state
+    for p, lid in sorted((leaders or {}).items()):
+        if lid is None:
+            continue
+        bad = leader_problem(lid, decks[p])
+        if bad:
+            raise EngineError(bad)
+        state.leaders[p] = leader_state(lid)
     state.draw(first, config.first_player_opening_draw)
     state.draw(second, config.second_player_opening_draw)
     if config.mulligan:

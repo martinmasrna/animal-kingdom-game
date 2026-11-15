@@ -29,7 +29,8 @@ COSTS_RE = re.compile(r"costs (\d+) food", re.IGNORECASE)
 
 # card_id -> config attrs, one per "gain N food/more" number in text, in order.
 FOOD_CONSTANTS: dict[str, list[str]] = {
-    "army_ant_legend": ["army_ant_legend_per"],
+    "army_ant_legend": ["solenia_card_per"],     # the leaders prototype: "Roar: gain 3 food for each animal you control"
+    "bumblebee_legend": ["bumbleton_card_per"],  # "Roar: gain 2 food for each time you have gained food this game"
     "forager_ant": ["forager_ant_food"],
     "worker_ant": ["worker_ant_per"],
     "worker_wasp": ["worker_wasp_per_place"],
@@ -177,12 +178,14 @@ def test_no_strength_limit_card_escapes_the_check():
     # "strength 8 or more" is the coverer's size, none a removal limit (test_capybara_numbers_match_config, and below).
     printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
     assert printed - {"capybara", "bee_legend_2", "oxpecker_legend"} == set(STRENGTH_LIMITS)
+    assert int(STRENGTH_LIMIT_RE.search(_cards()["bee_legend_2"].text).group(1)) == Config.default().capybara_small_max + 1
     (n,) = re.findall(r"strength (\d+) or more", _cards()["oxpecker_legend"].text)
     assert int(n) == Config.default().oxpecker_legend_min
 
 
-def test_royal_jelly_number_matches_config():
-    assert int(re.search(r"\+(\d+) strength", _cards()["bee_legend_2"].text).group(1)) == Config.default().jelly_grant
+def test_lady_juliettes_card_shows_three():
+    """The leaders prototype: her card is a wish now ("choose one of three small animals")."""
+    assert "one of three" in _cards()["bee_legend_2"].text and Config.default().juliette_wish_shown == 3
 
 
 def test_capybara_numbers_match_config():
@@ -313,7 +316,6 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 # card_id -> config attrs, one per printed "+N strength" (a "give" counter or a "has/have" anthem), in order. Every card
 # printing one must be listed (checked below): the launch decks brought a dozen of them at once.
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
-    "bee_legend_2": ["jelly_grant"],
     "deer_legend": ["deer_legend_grant"],      # "give it +2 strength" (the active-text pass, 2026-10-31)
     "guard_wasp": ["guard_hornet_bonus"],
     "python": ["python_growth"],
@@ -325,7 +327,7 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "street_dog": ["street_dog_grant"],
     "mahi_mahi": ["mahi_mahi_anthem"],
     "tuna": ["tuna_per_fish"],
-    "baboon_legend": ["baboon_legend_grant"],
+    "baboon_legend": ["babaji_card_grant"],    # the leaders prototype: "give it +2 strength, and play it"
     "orangutan_legend": ["orangutan_legend_grant"],
     "tarsier": ["tarsier_grant"],
     "baboon": ["baboon_grant"],
@@ -333,9 +335,8 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "action_8": ["action_8_bonus"],
     "marmot": ["marmot_per_step"],
     "butterfly": ["butterfly_grant"],
-    "butterfly_legend_chrysalis": ["butterfly_grant"],
-    "butterfly_legend_butterfly": ["butterfly_legend_stage4_grant"],
-    "butterfly_legend_monarch": ["butterfly_legend_stage5_grant"],
+    "butterfly_legend_butterfly": ["butterfly_grant"],     # the leaders prototype: Xanthe's stages
+    "butterfly_legend_monarch": ["monarch_grant"],
     "cape_buffalo": ["buffalo_anthem"],
     "peacock": ["hand_per_card"],
     "giraffe": ["giraffe_bonus"],
@@ -402,7 +403,7 @@ def test_the_launch_decks_other_numbers_match_config():
     assert words[re.search(r"shuffle (\w+) Golden Eggs", c["goose_legend"].text).group(1)] == cfg.aurum_eggs
     assert words[re.search(r"place (\w+) Worms", c["earthworm"].text).group(1)] == cfg.earthworm_worms
     assert words[re.search(r"gain (\w+) times as much", c["squirrel_legend"].text).group(1)] == cfg.otk_squirrel_multiplier
-    assert int(re.search(r"give (\d+) random animals", c["baboon_legend"].text).group(1)) == cfg.baboon_legend_count
+    assert int(re.search(r"give (\d+) animals in your hand", c["butterfly_legend_monarch"].text).group(1)) == cfg.monarch_count
     assert int(re.search(r"give (\d+) animals", c["baboon"].text).group(1)) == cfg.baboon_count
     assert int(re.search(r"produce (\d+) more food", c["wildebeest_legend"].text).group(1)) == cfg.migration_bonus
     assert int(re.search(r"produce (\d+) less food", c["boar_legend"].text).group(1)) == cfg.boar_penalty

@@ -10,10 +10,10 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Queen Solenia** | 1 | Colony, Queen | 3 | Dusk: gain 2 food for each animal you control. |
+| **Queen Solenia** | 1 | Colony, Queen | 3 | Roar: gain 3 food for each animal you control. Your opponent loses the same amount. |
 | **Vesper** | 1 | Colony | 3 | Flight. When an enemy covers a Colony ally, place Vesper on top of it from your hand or deck. |
 | **Queen Melissia** | 1 | Colony, Queen | 2 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. |
-| **Lord Bumbleton** | 1 | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. |
+| **Lord Bumbleton** | 1 | Colony | 3 | Roar: gain 2 food for each time you have gained food this game. (Current: X) |
 
 ### Rare
 

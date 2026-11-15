@@ -49,7 +49,7 @@ def strength(card_id):
 
 def test_jungle_cards_are_the_audited_set():
     ids = sorted(c.id for c in CARDS.values() if c.status == "collectible" and str(c.habitat).lower().endswith("jungle"))
-    assert len(ids) == 37
+    assert len(ids) == 38   # 37, and the leaders prototype's [GORILLA]
 
 
 # ------------------------------------------------------------------ army_ant_legend: Dusk: gain 2 food per animal

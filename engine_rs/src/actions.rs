@@ -18,6 +18,8 @@ pub enum Action {
     Roam { origin: Cr, target: Target },
     /// The actions prototype: the animal on top of `origin` uses its "Action:".
     Act { origin: Cr },
+    /// The leaders prototype: press your den, your leader's power.
+    Leader,
     Pass,
     Choice(Value),
 }
@@ -52,6 +54,7 @@ impl Action {
             }
             Action::Roam { origin, target } => sj::json!({"kind": "roam", "from": st.crname(*origin), "target": Action::target_json(st, target)}),
             Action::Act { origin } => sj::json!({"kind": "act", "from": st.crname(*origin)}),
+            Action::Leader => sj::json!({"kind": "leader"}),
             Action::Choice(v) => sj::json!({"kind": "choice", "choice": v.to_json()}),
         }
     }
@@ -80,6 +83,7 @@ impl Action {
                 origin: st.map().cr(d["from"].as_str().ok_or("roam without from")?).ok_or("unknown crossroad")?,
                 target: Action::target_from(st, &d["target"])?,
             }),
+            "leader" => Ok(Action::Leader),
             "act" => Ok(Action::Act { origin: st.map().cr(d["from"].as_str().ok_or("act without from")?).ok_or("unknown crossroad")? }),
             "choice" => Ok(Action::Choice(Value::from_json(&d["choice"]))),
             _ => Err(format!("unknown action kind {kind:?}")),

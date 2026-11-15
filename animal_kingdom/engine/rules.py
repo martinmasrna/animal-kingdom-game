@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Optional
 
 from . import effects, statics
-from .actions import Action, ActAction, DrawAction, PassAction, PlaceAction, RoamAction
+from .actions import Action, ActAction, DrawAction, LeaderAction, PassAction, PlaceAction, RoamAction
 from .state import EngineError, GameState, Result, other_player
 from .strength import effective_strength  # re-exported (used by tests / future eval)
 
@@ -67,6 +67,8 @@ def _top_level_actions(state: GameState) -> list[Action]:
     actions.extend(effects.legal_placements(state, player, titan_ok=titan_ok))
     actions.extend(effects.legal_roams(state, player))
     actions.extend(effects.legal_acts(state, player))     # Action animals (the actions prototype): one action each
+    if state.leaders and effects.leader_usable(state, player):
+        actions.append(LeaderAction())                    # your den's power (the leaders prototype): one action
     return actions
 
 
@@ -193,6 +195,9 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     elif isinstance(action, ActAction):
         state.actions_taken_this_turn += 1
         effects.do_act(state, state.current, action.origin)
+    elif isinstance(action, LeaderAction):
+        state.actions_taken_this_turn += 1
+        effects.do_leader(state, state.current)
     else:
         raise EngineError(f"unexpected action {action!r}")
 
