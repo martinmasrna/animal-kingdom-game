@@ -90,8 +90,12 @@ pub struct Row {
     pub per_hand: Vec<Option<Vec<f64>>>,
 }
 
+/// How many decisions deep one line of a turn is searched (AtomicBot::tree).
+pub const TREE_DEPTH: usize = 64;
+
 #[derive(Clone)]
 pub struct AtomicBot {
+    pub depth: usize,
     pub base: Searcher,
     pub rounds: usize,
     pub widths: Vec<usize>,
@@ -206,7 +210,7 @@ fn key_hiding(s: &State, hide: Option<usize>) -> Vec<i64> {
 
 impl AtomicBot {
     pub fn new(base: Searcher, rounds: usize, widths: Vec<usize>, inner: usize, cap: usize, threads: usize, hands: usize, temperature: f64, draws: usize) -> AtomicBot {
-        AtomicBot { base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, beam: 0, cand: None, deadline: None, cut: None, roomy: None, kinds_seen: FxHashMap::default(), memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new(), turn_budget: 0.0, partial: false, turn_started: None, bank: 0.0, bank_turn: 0.0, by_hand: 0, narrow: Vec::new(), bank_left: 0.0, turn_banked: 0.0 }
+        AtomicBot { depth: 0, base, rounds, widths, inner, cap, threads, hands, temperature, draws, by_card: true, beam: 0, cand: None, deadline: None, cut: None, roomy: None, kinds_seen: FxHashMap::default(), memo: FxHashMap::default(), passes: FxHashMap::default(), plan: Vec::new(), plan_key: None, last_ranking: Vec::new(), turn_budget: 0.0, partial: false, turn_started: None, bank: 0.0, bank_turn: 0.0, by_hand: 0, narrow: Vec::new(), bank_left: 0.0, turn_banked: 0.0 }
     }
 
     // ------------------------------------------------------------------ evaluation
@@ -567,7 +571,26 @@ impl AtomicBot {
         order.iter().filter(|&&i| keep[i]).map(|&i| legal[i].clone()).collect()
     }
 
-    fn tree(&mut self, mut s: State, actor: Player, me: Player, ctx: &mut Leaf, hist: &mut Vec<i64>,
+    /// `tree_line`, with the line's length held: a turn whose free effects can go on for ever (the leaders prototype: two
+    /// Babajis returning and replaying each other, a Macaw copying Babaji's Roar) is judged where it stands once it is
+    /// TREE_DEPTH decisions deep (atomic_bot.TREE_DEPTH), instead of searching on until the stack runs out.
+    fn tree(&mut self, s: State, actor: Player, me: Player, ctx: &mut Leaf, hist: &mut Vec<i64>,
+            memo: &mut FxHashMap<(Vec<i64>, Vec<i64>), Option<(f64, Vec<Action>)>>, prob: f64, alpha: f64, beta: f64) -> Option<(f64, Vec<Action>)> {
+        if self.depth >= TREE_DEPTH {
+            if std::env::var_os("AK_DEBUG_DEPTH").is_some() {
+                eprintln!("deep line: stack {:?} pending {:?}", s.effect_stack.iter().map(|m| crate::value::m_get_s(m, "op").unwrap_or("").to_string()).collect::<Vec<_>>(),
+                          s.effect_stack.last().and_then(|m| crate::value::m_get_s(m, "by_card")).unwrap_or(""));
+            }
+            return self.leaf(ctx, &s, hist, prob, me).map(|v| (v, Vec::new()));
+        }
+        self.depth += 1;
+        let r = self.tree_line(s, actor, me, ctx, hist, memo, prob, alpha, beta);
+        self.depth -= 1;
+        r
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn tree_line(&mut self, mut s: State, actor: Player, me: Player, ctx: &mut Leaf, hist: &mut Vec<i64>,
             memo: &mut FxHashMap<(Vec<i64>, Vec<i64>), Option<(f64, Vec<Action>)>>, prob: f64, alpha: f64, beta: f64) -> Option<(f64, Vec<Action>)> {
         if let Some(d) = self.deadline {
             if crate::clock::Instant::now() >= d {

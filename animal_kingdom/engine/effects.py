@@ -3826,9 +3826,12 @@ def _solenia_place(state, unit, cr):
 
 
 def _babaji_allies(state, player, cr) -> list:
-    """The allies next to `cr` Babaji's Roar may return (Armor resists a return, its owner's too)."""
+    """The allies next to `cr` Babaji's Roar may return (Armor resists a return, its owner's too). Never another Babaji (a
+    copy the Orangutan made): two would return and replay each other for ever, as two Voles would (REPEATERS). A rule the
+    card doesn't print: one of the readings for Martin."""
     return [nb for nb in sorted(state.game_map.neighbors(cr))
-            if (top := state.top_unit(nb)) and top.owner == player and statics.can_be_removed(state, top, nb)]
+            if (top := state.top_unit(nb)) and top.owner == player and top.card_id != "baboon_legend"
+            and statics.can_be_removed(state, top, nb)]
 
 
 def _babaji_place(state, unit, cr):

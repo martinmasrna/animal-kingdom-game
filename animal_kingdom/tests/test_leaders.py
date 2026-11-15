@@ -365,3 +365,11 @@ def test_a_web_match_shows_both_leaders_offers_the_den_and_logs_them_for_its_rep
     assert any(h["kind"] == "leader" for h in m.view("A")["game"]["history"])
     views = game_views(logs[0], "A", {})                      # the match's replay, view by view, leaders and all
     assert views[-1]["game"]["leaders"]["B"]["id"] == "butterfly_legend"
+
+
+def test_babaji_never_returns_another_babaji():
+    """Two Babajis (an Orangutan's copy) would return and replay each other for ever: his Roar passes over a Babaji."""
+    s = state(hands={"A": ["baboon_legend"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
+    put(s, "1,2", "baboon_legend", "A")
+    rules.apply_action(s, PlaceAction("baboon_legend", ("cr", "1,1")))
+    assert s.pending is None

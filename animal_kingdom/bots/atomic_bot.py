@@ -57,6 +57,9 @@ def _key(s: GameState) -> tuple:
     return key
 
 
+TREE_DEPTH = 64   # decisions one line of a turn is searched to (atomic.rs TREE_DEPTH)
+
+
 class AtomicBot(Bot):
     def __init__(self, base, rounds: int = 1, widths: tuple = (60, 20), inner: int = 4,
                  cap: int = 3000, workers: int = 5, hands: int = 30, temperature: float = 2.3, draws: int = 8):
@@ -319,6 +322,21 @@ class AtomicBot(Bot):
 
     def _tree(self, s: GameState, actor: str, me: str, leaf, hist: tuple, memo: dict, prob: float = 1.0,
               alpha: float = -math.inf, beta: float = math.inf, last: bool = False) -> Optional[tuple[float, list]]:
+        """`_tree_line`, with the line's length held: a turn whose free effects could go on for ever (the leaders prototype:
+        two Babajis returning and replaying each other) is judged where it stands at TREE_DEPTH decisions (atomic.rs)."""
+        if self._depth >= TREE_DEPTH:
+            v = leaf(s, hist, prob)
+            return None if v is None else (v, [])
+        self._depth += 1
+        try:
+            return self._tree_line(s, actor, me, leaf, hist, memo, prob, alpha, beta, last)
+        finally:
+            self._depth -= 1
+
+    _depth = 0
+
+    def _tree_line(self, s: GameState, actor: str, me: str, leaf, hist: tuple, memo: dict, prob: float = 1.0,
+                   alpha: float = -math.inf, beta: float = math.inf, last: bool = False) -> Optional[tuple[float, list]]:
         """The value of `actor`'s best whole turn from `s` and its actions up to the first draw: a decision is the best
         of its actions for the actor, a draw (anything taken from the actor's deck) the average over what it may bring,
         a finished turn `leaf(end, hist, prob)` (None: not followed, so never chosen). `hist` is the cards drawn so far,
