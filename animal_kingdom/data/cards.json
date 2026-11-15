@@ -57,10 +57,12 @@
         "Colony"
       ],
       "base_strength": 3,
-      "text": "Roar: gain 2 food for each time you have gained food this game. (Current: X)",
+      "text": "Flight. Roar: gain 2 food for each time you have gained food this game. (Current: X)",
       "species": "Bumblebee",
       "habitat": "Meadow",
-      "keywords": []
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "nurse_bee",

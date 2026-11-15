@@ -115,7 +115,7 @@ The honey, the granary, the fungus garden: a summer's work kept against the wint
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Lord Bumbleton** | legendary | 3 | Roar: gain 2 food for each time you have gained food this game. (Current: X) | Meadow |
+| **Lord Bumbleton** | legendary | 3 | Flight. Roar: gain 2 food for each time you have gained food this game. (Current: X) | Meadow |
 
 <!-- cards:end -->
 
