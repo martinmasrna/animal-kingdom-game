@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 206,
+ "rev": 211,
  "changed": {
   "bee_legend_2": {
    "text": {
@@ -165,7 +165,7 @@
    "rarity": "legendary",
    "strength": 2,
    "stars": 2,
-   "text": "??",
+   "text": "Activate: draw a card",
    "tags": [
     "Colony",
     "Queen"
