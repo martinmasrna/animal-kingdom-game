@@ -117,18 +117,19 @@ def pieces(rarity):
 
 
 STAR = Path(__file__).parent / "star_master.png"     # the level's star, painted on magenta (Codex, 2026-11-15)
+DISC = Path(__file__).parent / "disc_master.png"     # the strength's disc, its sibling (Codex, 2026-11-15)
 
 
-def star(rarity):
-    """The level's star badge: the painted driftwood star keyed off its magenta, cropped, at 4em wide, tinted as the frame."""
-    im = np.asarray(Image.open(STAR).convert("RGB")).astype(int)
+def badge(src, rarity, em):
+    """A badge: the painted driftwood piece keyed off its magenta, cropped, `em` wide, toned and tinted as the frame."""
+    im = np.asarray(Image.open(src).convert("RGB")).astype(int)
     spill = (np.minimum(im[..., 0], im[..., 2]) - im[..., 1]).clip(0, 255)
     a = np.dstack([im.clip(0, 255), np.clip(255 - spill * 1.6, 0, 255)]).astype(np.uint8)
     m = a[..., 3] < 250                                   # despill the soft edge, as design/card3/key.py
     a[..., 0][m] = np.minimum(a[..., 0][m], a[..., 1][m] + 30); a[..., 2][m] = np.minimum(a[..., 2][m], a[..., 1][m])
     ys, xs = np.nonzero(a[..., 3] > 16)
     a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
-    w = round(4 * 36)
+    w = round(em * 36)
     a = np.asarray(Image.fromarray(a).resize((w, round(a.shape[0] * w / a.shape[1])), Image.LANCZOS))
     # The painting came out paler and warmer than the banner's wood: each channel scaled so its mean matches the banner's.
     comp, _ = load("card_frame_compact_thin.png")
@@ -175,10 +176,10 @@ if __name__ == "__main__":
         check(); sys.exit()
     for r in TINTS:
         p = pieces(r)
-        banner_only = canvas((p["rim"], (0, 0)), (p["banner"], (0, 0)))
-        full = canvas((p["rim"], (0, 0)), (p["panel"], (0, PANEL_Y)), (p["plank"], (0, PLANK_Y)), (p["banner"], (0, 0)))
-        out = {f"card_face_star_{r}": shadow_under(np.pad(star(r), ((PAD, PAD), (PAD, PAD), (0, 0)))),
-               f"card_frame_{r}_open_compact": shadow_under(banner_only),
+        # No border (Martin, 2026-11-15): the full card's frame is only the plank and the panel; the compact card has none.
+        full = canvas((p["panel"], (0, PANEL_Y)), (p["plank"], (0, PLANK_Y)))
+        out = {f"card_face_star_{r}": shadow_under(np.pad(badge(STAR, r, 4), ((PAD, PAD), (PAD, PAD), (0, 0)))),
+               f"card_face_disc_{r}": shadow_under(np.pad(badge(DISC, r, 5.33), ((PAD, PAD), (PAD, PAD), (0, 0)))),
                f"card_frame_{r}_open": shadow_under(full),
                f"card_face_plank_{r}": shadow_under(np.pad(p["plank"], ((0, PAD), (0, 0), (0, 0))))}
         for name, a in out.items():

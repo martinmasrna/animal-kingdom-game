@@ -202,25 +202,36 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
    the collection (compact, --rd 0) it runs to the bottom with only the strength banner on it and the level's banner rising
    from the bottom-right; read in full (--rd 1, also set where game.css reads a hand card) it stops at the name plank, the
    rules panel below. The pieces carry their own shadow (baked: a live filter on every card overran graphics memory). */
-.card.fo { --rp: 11.45em; --frf: url(/static/kit2/card_frame_common_open.webp); --frc: url(/static/kit2/card_frame_common_open_compact.webp);
-  --fstar: url(/static/kit2/card_face_star_common.webp); --fplank: url(/static/kit2/card_face_plank_common.webp); }
-.card.fo.rare { --frf: url(/static/kit2/card_frame_rare_open.webp); --frc: url(/static/kit2/card_frame_rare_open_compact.webp);
-  --fstar: url(/static/kit2/card_face_star_rare.webp); --fplank: url(/static/kit2/card_face_plank_rare.webp); }
-.card.fo.legendary { --frf: url(/static/kit2/card_frame_legendary_open.webp); --frc: url(/static/kit2/card_frame_legendary_open_compact.webp);
-  --fstar: url(/static/kit2/card_face_star_legendary.webp); --fplank: url(/static/kit2/card_face_plank_legendary.webp); }
+.card.fo { --rp: 11.45em; --frf: url(/static/kit2/card_frame_common_open.webp); --frc: none;
+  --fstar: url(/static/kit2/card_face_star_common.webp); --fdisc: url(/static/kit2/card_face_disc_common.webp); --fplank: url(/static/kit2/card_face_plank_common.webp); }
+.card.fo.rare { --frf: url(/static/kit2/card_frame_rare_open.webp);
+  --fstar: url(/static/kit2/card_face_star_rare.webp); --fdisc: url(/static/kit2/card_face_disc_rare.webp); --fplank: url(/static/kit2/card_face_plank_rare.webp); }
+.card.fo.legendary { --frf: url(/static/kit2/card_frame_legendary_open.webp);
+  --fstar: url(/static/kit2/card_face_star_legendary.webp); --fdisc: url(/static/kit2/card_face_disc_legendary.webp); --fplank: url(/static/kit2/card_face_plank_legendary.webp); }
+/* No border: the painting is the card, its own corners rounded, and the two numbers sit on wooden badges straddling the
+   card's corners as Hearthstone's gems do (Martin, 2026-11-15: the rim "takes away so much from the painting and gives so
+   little"; a badge inside the picture floats). The card no longer clips, so the badges can break its outline. */
+.card.fo { overflow: visible; }
+.card.fo .pic, .card.fo .cframe { border-radius: inherit; overflow: hidden; }
 .card.fo.compact { --rd: 0; }
 .card.fo .pic { top: 0; }
 .card.fo .pic::after { display: none; }
+.card.fo.legendary::after { display: none; }
+.card.fo.legendary .pic::after { display: block; content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 35%; height: auto;
+  background: linear-gradient(90deg, rgba(255,240,200,0), rgba(255,240,200,.16), rgba(255,240,200,0)); animation: cardsheen 5.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .card.fo.legendary .pic::after { display: none; } }
 .card.fo .nbar { top: auto; bottom: 8.4em; height: 3em; left: .55em; right: .55em; opacity: var(--rd, 1); }
 .card.fo .nbar::after { flex-grow: 1; }
 .card.fo .ctext { bottom: .4em; height: 7.75em; }
-/* The level's star (the painted star with its shadow's margin, .33em each side): on the rim's bottom-right corner; read
-   in full it sits on the name plank's top edge at the painting's corner. The number is inked in its middle. */
-.card.fo .lstar { position: absolute; z-index: 3; right: -.12em; bottom: calc(var(--rd, 1) * 9.32em - .12em); width: 4.66em; height: 4.55em;
+/* The badges: each painted piece (with its shadow's margin of .33em) centred near its corner so a third of it overhangs. */
+.card.fo .stab { left: -1.25em; top: -1.25em; width: 6em; height: 6em; background: var(--fdisc) 0 0 / 100% 100% no-repeat; }
+.card.fo .stab .n { top: 1.55em; height: 2.6em; left: .2em; right: 0; }
+.card.fo .stab .n.two { top: 1.8em; height: 2.1em; }
+.card.fo .lstar { position: absolute; z-index: 3; right: -1.1em; bottom: -1.1em; width: 4.66em; height: 4.55em;
   background: var(--fstar) 0 0 / 100% 100% no-repeat; display: flex; align-items: center; justify-content: center; padding: .55em .33em .1em; pointer-events: none; }
 .card.fo .lstar img { display: block; height: 1.7em; filter: brightness(.16) sepia(.6); }
 /* A compact card that names a deck (the versus moment) keeps its name, on the plank across its foot; a cover has no level. */
-.card.fo.compact.named .nbar { opacity: 1; bottom: 0; left: 0; right: 0; height: 3.14em; padding: 0 .8em; background: var(--fplank) 50% 0 / 100% auto no-repeat; }
+.card.fo.compact.named .nbar { opacity: 1; bottom: 0; left: 0; right: 0; height: 3.14em; padding: 0 .8em; background: var(--fplank) 50% 0 / 100% auto no-repeat; border-radius: 0 0 .45em .45em; }
 .card.fo.named .lstar { display: none; }
 /* Legendary: a slow sheen crosses the card. */
 .card.legendary::after { content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 35%; z-index: 4; pointer-events: none;
