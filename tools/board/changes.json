@@ -1,12 +1,8 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 134,
+ "rev": 135,
  "changed": {
   "bee_legend_2": {
-   "stars": {
-    "was": 2,
-    "now": 3
-   },
    "text": {
     "was": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
     "now": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +1 strength (wherever they are)."
@@ -24,32 +20,6 @@
     "now": "Whenever Xanthe gains strength, evolve."
    }
   },
-  "honey_badger_legend": {
-   "stars": {
-    "was": 2,
-    "now": 3
-   }
-  },
-  "leopard_legend": {
-   "strength": {
-    "was": 5,
-    "now": 6
-   },
-   "stars": {
-    "was": 2,
-    "now": 3
-   }
-  },
-  "mole": {
-   "strength": {
-    "was": 1,
-    "now": 2
-   },
-   "stars": {
-    "was": 1,
-    "now": 2
-   }
-  },
   "mouse": {
    "strength": {
     "was": 4,
@@ -58,60 +28,6 @@
    "stars": {
     "was": 0,
     "now": -1
-   }
-  },
-  "ocelot": {
-   "strength": {
-    "was": 1,
-    "now": 2
-   },
-   "stars": {
-    "was": 1,
-    "now": 2
-   }
-  },
-  "queen_ant": {
-   "strength": {
-    "was": 5,
-    "now": 3
-   }
-  },
-  "queen_bee": {
-   "strength": {
-    "was": 5,
-    "now": 3
-   }
-  },
-  "remora": {
-   "strength": {
-    "was": 1,
-    "now": 2
-   },
-   "stars": {
-    "was": 1,
-    "now": 2
-   }
-  },
-  "termite_king": {
-   "strength": {
-    "was": 5,
-    "now": 3
-   }
-  },
-  "termite_queen": {
-   "strength": {
-    "was": 1,
-    "now": 2
-   },
-   "stars": {
-    "was": 1,
-    "now": 2
-   }
-  },
-  "tiger_legend": {
-   "stars": {
-    "was": 2,
-    "now": 3
    }
   }
  },
@@ -269,7 +185,7 @@
    "rarity": "legendary",
    "strength": 3,
    "stars": 2,
-   "text": "Flight. Apex Predator. When this enters your hand, add Skya to your hand.",
+   "text": "??",
    "tags": [
     "Bird"
    ],
