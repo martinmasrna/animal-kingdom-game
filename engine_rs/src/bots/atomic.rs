@@ -190,6 +190,17 @@ fn key_hiding(s: &State, hide: Option<usize>) -> Vec<i64> {
         Some(r) => r.winner.map(|w| w as i64).unwrap_or(9),
         None => -9,
     });
+    if crate::leaders::any(s) || s.next_strength.iter().any(|n| n.is_some()) {
+        // the leaders prototype: a spent power, a stage, a count and the Gorilla's waiting strength are the position too
+        k.push(-4);
+        for p in 0..2 {
+            match s.leaders[p] {
+                Some(l) => k.extend([l.kills as i64, l.stage as i64, l.spent as i64]),
+                None => k.push(-5),
+            }
+            k.push(s.next_strength[p].map(|n| n as i64).unwrap_or(-6));
+        }
+    }
     k
 }
 
@@ -536,7 +547,7 @@ impl AtomicBot {
         }
         for (i, a) in legal.iter().enumerate() {
             // a den capture is never cut; nor an Action (the actions prototype: the network never saw one)
-            if !keep[i] && matches!(a, Action::Roam { target: Target::Hq(_), .. } | Action::Act { .. }) {
+            if !keep[i] && matches!(a, Action::Roam { target: Target::Hq(_), .. } | Action::Act { .. } | Action::Leader) {   // nor a den power (leaders)
                 keep[i] = true;
             }
         }
@@ -1273,8 +1284,8 @@ impl AtomicBot {
         self.last_ranking = ranking;
         let a = best[0].clone();
         self.plan = best[1..].to_vec();
-        if matches!(a, Action::Draw) {
-            self.plan.clear();     // what follows a draw is planned once the cards are seen
+        if matches!(a, Action::Draw | Action::Leader) {
+            self.plan.clear();     // what follows a draw is planned once the cards are seen (a den power draws or scouts)
         }
         self.plan_key = if self.plan.is_empty() { None } else { Some(self.next_key(st, &a, me)) };
         a

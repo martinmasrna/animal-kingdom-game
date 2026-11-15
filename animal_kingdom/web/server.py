@@ -1420,7 +1420,7 @@ def position_at(rec: dict, rnd: int, seat: str):
     if not lists:
         return None
     state = new_game(list(lists[0]), list(lists[1]), rec["seed"], map_id=rec.get("map_id", MAP_ID),
-                     config=Config.default().for_log(rec), first_player=rec["first_player"])
+                     config=Config.default().for_log(rec), first_player=rec["first_player"], leaders=rec.get("leaders"))
     for adict in rec["actions"]:
         while state.pending is not None and state.effect_stack[-1].get("op") == "mulligan" and adict["kind"] != "choice":
             rules.apply_action(state, ChoiceAction(SKIP))     # a log from before the mulligan rule

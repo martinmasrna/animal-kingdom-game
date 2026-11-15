@@ -32,6 +32,20 @@ def _expand(deck: dict) -> list[str]:
 # decklists.json, so it can never drift from it.
 PREMADE_DECKS: dict[str, list[str]] = {d["slug"]: _expand(d) for d in DECKLISTS}
 
+# The leaders prototype (engine/leaders.py): deck slug -> its leader's card id, for the decks that name one (the bot
+# decks' variants in decklists.json, and players' decks registered with one). A deck missing here has no leader.
+DECK_LEADERS: dict[str, str] = {d["slug"]: d["leader"] for d in DECKLISTS if d.get("leader")}
+
+
+def deck_leader(slug: Optional[str]) -> Optional[str]:
+    """The leader `slug`'s deck plays under, or None."""
+    return DECK_LEADERS.get(slug) if slug else None
+
+
+def leaders_for(slug_a: Optional[str], slug_b: Optional[str]) -> dict:
+    """new_game's `leaders` for two decks by slug."""
+    return {"A": deck_leader(slug_a), "B": deck_leader(slug_b)}
+
 # The ladder's wider pool (data/ladder_decks.json, built by sim/ladder_decks.py): the decks people built and played, as
 # the bots play them. Loadable like a shipped deck; `LADDER_DECK_NAMES` carries their builders' names.
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "ladder_decks.json"), encoding="utf-8") as _fh:
@@ -66,13 +80,18 @@ GOODSTUFF_DECK: list[str] = (
 TEST_BOT_DECKS = {"lions30": ["lion"] * 30}
 EXTRA_DECKS: dict[str, list[str]] = {"goodstuff": GOODSTUFF_DECK, **TEST_BOT_DECKS}
 EXTRA_DECKS.update(json.loads(os.environ.get("AK_EXTRA_DECKS", "{}")))
+DECK_LEADERS.update(json.loads(os.environ.get("AK_EXTRA_LEADERS", "{}")))
 
 
-def register_deck(slug: str, decklist: Sequence[str]) -> None:
-    """Make `decklist` loadable as `slug` in this process and in any worker it spawns later."""
+def register_deck(slug: str, decklist: Sequence[str], leader: Optional[str] = None) -> None:
+    """Make `decklist` loadable as `slug` in this process and in any worker it spawns later (`leader`: the card it is
+    led by, the leaders prototype)."""
     if slug in PREMADE_DECKS:
         raise ValueError(f"{slug!r} collides with a shipped deck's slug")
     EXTRA_DECKS[slug] = list(decklist)
+    if leader:
+        DECK_LEADERS[slug] = leader
+        os.environ["AK_EXTRA_LEADERS"] = json.dumps({s: l for s, l in DECK_LEADERS.items() if s in EXTRA_DECKS})
     os.environ["AK_EXTRA_DECKS"] = json.dumps(
         {s: d for s, d in EXTRA_DECKS.items() if s != "baseline"})
 

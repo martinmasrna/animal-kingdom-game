@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from ..decks import LADDER_DECK_NAMES, load_premade_deck
+from ..decks import LADDER_DECK_NAMES, leaders_for, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ActAction, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine.cards import DECKLISTS, load_cards
@@ -328,7 +328,8 @@ class Match:
         else:
             self.state = new_game(load_premade_deck(self.seats["A"].deck),
                                   load_premade_deck(self.seats["B"].deck), seed,
-                                  map_id=MAP_ID, first_player=first)
+                                  map_id=MAP_ID, first_player=first,
+                                  leaders=leaders_for(self.seats["A"].deck, self.seats["B"].deck))
         self.bots = {s: bot_for(seat.bot, seed + i) for i, (s, seat) in enumerate(self.seats.items())
                      if seat.is_bot}
         self.history = []
@@ -569,7 +570,8 @@ class Match:
                 "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
                 "actions": list(self.actions), "action_times": list(self.action_times),
                 "match_id": self.id, "game_no": len(self.results), "series": self.rematches,
-                "lists": [list(self.state.starting_decks[p]) for p in "AB"]}
+                "lists": [list(self.state.starting_decks[p]) for p in "AB"],
+                **({"leaders": {p: l["id"] for p, l in self.state.leaders.items()}} if self.state.leaders else {})}
 
     def bot_move(self):
         """The action the bot to act would take (pure: call off the event loop, apply after)."""

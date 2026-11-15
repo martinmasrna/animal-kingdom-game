@@ -98,7 +98,7 @@ def game_views(g: dict, seat: str, names: dict) -> list[dict]:
         lists = g.get("lists") or [load_premade_deck(g["deck_a"]), load_premade_deck(g["deck_b"])]
         m.seed, m.phase = g["seed"], "playing"
         m.state = new_game(lists[0], lists[1], g["seed"], map_id=g["map_id"], first_player=g["first_player"],
-                           config=Config.default().for_log(g))
+                           config=Config.default().for_log(g), leaders=g.get("leaders"))
         opp = other_player(seat)
         # the opponent's hand as they saw it, one per view (their placement strengths)
         their = lambda: [{"iid": u.iid, "id": u.card_id, "str": placement_strength(m.state, u)} for u in m.state.hands[opp]]

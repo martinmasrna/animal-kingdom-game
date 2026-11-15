@@ -65,7 +65,7 @@ def rebuild(g: dict) -> dict:
     m.seats["B"] = Seat("", "B", deck=g["deck_b"])
     m.phase, m.seed = "playing", g["seed"]
     m.state = new_game(lists[0], lists[1], g["seed"], map_id=g["map_id"], first_player=g["first_player"],
-                       config=Config.default().for_log(g))
+                       config=Config.default().for_log(g), leaders=g.get("leaders"))
     st, human = m.state, {p: b == "human" for p, b in zip("AB", g["bots"])}
     times = g.get("action_times") or []
     steps = []

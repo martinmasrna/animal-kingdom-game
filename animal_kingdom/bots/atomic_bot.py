@@ -35,7 +35,7 @@ from math import comb
 from typing import Optional, Sequence
 
 from ..engine import rules
-from ..engine.actions import Action, DrawAction
+from ..engine.actions import Action, DrawAction, LeaderAction
 from ..engine.state import GameState, Rng, StateView, UnitInstance, other_player
 from ..engine.strength import effective_strength
 from .base import Bot
@@ -49,8 +49,12 @@ def _key(s: GameState) -> tuple:
                          for cr, st in s.board.items() if st))
     hands = tuple(tuple(sorted((u.card_id, u.strength_counter, u.locked_until_turn) for u in s.hands[p])) for p in ("A", "B"))
     result = rules.is_terminal(s)
-    return (board, hands, tuple(sorted(s.food.items())), tuple(len(s.decks[p]) for p in ("A", "B")),
-            s.current, result.winner if result else None)
+    key = (board, hands, tuple(sorted(s.food.items())), tuple(len(s.decks[p]) for p in ("A", "B")),
+           s.current, result.winner if result else None)
+    if s.leaders or s.next_strength:     # the leaders prototype: a spent power, a stage, a count, the Gorilla's strength
+        key += (tuple(tuple(sorted(s.leaders[p].items())) if p in s.leaders else None for p in ("A", "B")),
+                tuple(sorted(s.next_strength.items())))
+    return key
 
 
 class AtomicBot(Bot):
@@ -530,7 +534,7 @@ class AtomicBot(Bot):
         ranking = self.rank(st, me)
         best = ranking[0]["turn"]
         a, self._plan = best[0], list(best[1:])
-        if isinstance(a, DrawAction):      # what follows a draw is planned once the cards are seen
+        if isinstance(a, (DrawAction, LeaderAction)):   # what follows a draw is planned once the cards are seen (a den power draws or scouts)
             self._plan = []
         self._plan_key = self._next_key(st, a, me) if self._plan else None
         return a

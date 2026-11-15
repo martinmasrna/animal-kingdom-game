@@ -59,9 +59,10 @@ def replay(g, verbose=False):
         return "skip", "cards not in today's set"
     config = Config.default().for_log(g)
     map_id = g.get("map_id", "map_b")
-    py = new_game(list(lists[0]), list(lists[1]), g["seed"], map_id=map_id, config=config, first_player=g["first_player"])
+    lead = g.get("leaders") or {}
+    py = new_game(list(lists[0]), list(lists[1]), g["seed"], map_id=map_id, config=config, first_player=g["first_player"], leaders=lead)
     eng = engine_for(config, map_id)
-    rs = eng.new_game(list(lists[0]), list(lists[1]), g["seed"], g["first_player"], False)
+    rs = eng.new_game(list(lists[0]), list(lists[1]), g["seed"], g["first_player"], False, lead.get("A"), lead.get("B"))
     rs.set_record_events(False)
 
     def check(i, label):
