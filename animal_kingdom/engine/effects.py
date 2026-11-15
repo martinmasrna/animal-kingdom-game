@@ -1099,9 +1099,9 @@ def _op_grant_free_roam(state, step):
 
 ACT_NEEDS = {
     "baboon_legend": lambda state, p, cr: bool(_babaji_allies(state, p, cr)),   # Echo: his Roar needs an ally to return
-    "action_2": lambda state, p, cr: bool(state.hands[p]),     # discard a card: only with a card in hand
-    "action_4": lambda state, p, cr: bool(state.hands[p]),     # give an animal in your hand +2: only with one there
-    "action_6": lambda state, p, cr: bool(state.decks[p]),     # Scout: only with a deck to look at
+    "card_burner": lambda state, p, cr: bool(state.hands[p]),     # discard a card: only with a card in hand
+    "trainer": lambda state, p, cr: bool(state.hands[p]),     # give an animal in your hand +2: only with one there
+    "lookout": lambda state, p, cr: bool(state.decks[p]),     # Scout: only with a deck to look at
 }
 
 
@@ -1143,47 +1143,47 @@ def do_act(state: GameState, player: str, origin: str) -> None:
         _push_hook(state, unit, origin, "on_place")
 
 
-def _action_1_act(state, unit, cr):
+def _food_maker_act(state, unit, cr):
     """Action: gain 10 food."""
-    _push_gain(state, unit.owner, state.config.action_1_food)
+    _push_gain(state, unit.owner, state.config.food_maker_food)
 
 
-def _action_2_act(state, unit, cr):
+def _card_burner_act(state, unit, cr):
     """Action: discard a card to gain 15 food (the player picks the card)."""
     o = unit.owner
-    _push_gain(state, o, state.config.action_2_food)
+    _push_gain(state, o, state.config.card_burner_food)
     _push_choose(state, o, _hand_iids(state, o), "discard")
 
 
-def _action_3_act(state, unit, cr):
+def _refueler_act(state, unit, cr):
     """Action: gain 5 food and draw a card (an empty deck: the food all the same)."""
-    _push_draw(state, unit.owner, state.config.action_3_draw)
-    _push_gain(state, unit.owner, state.config.action_3_food)
+    _push_draw(state, unit.owner, state.config.refueler_draw)
+    _push_gain(state, unit.owner, state.config.refueler_food)
 
 
-def _action_4_act(state, unit, cr):
+def _trainer_act(state, unit, cr):
     """Action: give an animal in your hand +2 strength (a counter it carries onto the board)."""
-    _push_choose(state, unit.owner, _hand_iids(state, unit.owner), "grant", amount=state.config.action_4_grant)
+    _push_choose(state, unit.owner, _hand_iids(state, unit.owner), "grant", amount=state.config.trainer_grant)
 
 
-def _action_5_act(state, unit, cr):
+def _flight_giver_act(state, unit, cr):
     """Action: the next animal you play this turn has Flight (spent by that play; gone at the end of the turn)."""
     state.turn_flags[f"flight_next_{unit.owner}"] = True
 
 
-def _action_6_act(state, unit, cr):
+def _lookout_act(state, unit, cr):
     """Action: Scout a card."""
     state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": None})
 
 
-def _action_7_act(state, unit, cr):
+def _food_thief_act(state, unit, cr):
     """Action: your opponent loses 10 food (never below 0)."""
-    lose_food(state, other_player(unit.owner), state.config.action_7_drain, card=unit.card_id)
+    lose_food(state, other_player(unit.owner), state.config.food_thief_drain, card=unit.card_id)
 
 
-def _action_8_act(state, unit, cr):
+def _protector_act(state, unit, cr):
     """Action: your animals have +2 strength during your opponent's next turn (live; two of them stack)."""
-    turn, n = state.turn_counter + 1, state.config.action_8_bonus
+    turn, n = state.turn_counter + 1, state.config.protector_bonus
     g = state.action_guard.get(unit.owner)
     state.action_guard[unit.owner] = [turn, g[1] + n] if g and g[0] == turn else [turn, n]
 
@@ -3714,14 +3714,14 @@ EFFECTS: dict[str, dict[str, Callable]] = {
 
 # The actions prototype (branch actions): the eight Action animals, each its "on_act" hook (legal_acts, do_act).
 EFFECTS.update({
-    "action_1": {"on_act": _action_1_act},
-    "action_2": {"on_act": _action_2_act},
-    "action_3": {"on_act": _action_3_act},
-    "action_4": {"on_act": _action_4_act},
-    "action_5": {"on_act": _action_5_act},
-    "action_6": {"on_act": _action_6_act},
-    "action_7": {"on_act": _action_7_act},
-    "action_8": {"on_act": _action_8_act},
+    "food_maker": {"on_act": _food_maker_act},
+    "card_burner": {"on_act": _card_burner_act},
+    "refueler": {"on_act": _refueler_act},
+    "trainer": {"on_act": _trainer_act},
+    "flight_giver": {"on_act": _flight_giver_act},
+    "lookout": {"on_act": _lookout_act},
+    "food_thief": {"on_act": _food_thief_act},
+    "protector": {"on_act": _protector_act},
 })
 
 

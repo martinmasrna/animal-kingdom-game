@@ -110,7 +110,7 @@ pub fn hook_mask(card: &str) -> u32 {
         // the leaders prototype: Xanthe's card evolves only when it gains strength; the Caterpillar turns anywhere
         "butterfly_legend" | "butterfly_legend_chrysalis" | "caterpillar" => &[OnGain],
         "butterfly_legend_caterpillar" | "butterfly_legend_butterfly" => &[OnPlace, OnGain],
-        "action_1" | "action_2" | "action_3" | "action_4" | "action_5" | "action_6" | "action_7" | "action_8" => &[OnAct],
+        "food_maker" | "card_burner" | "refueler" | "trainer" | "flight_giver" | "lookout" | "food_thief" | "protector" => &[OnAct],
         _ => &[],
     };
     hooks.iter().fold(0u32, |m, h| m | (1 << *h as u32))
@@ -558,30 +558,30 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
     };
     match (card, hook) {
         // The actions prototype: the eight Action animals (effects.py, _action_N_act)
-        ("action_1", OnAct) => gains(st, unit, "action_1_food"),
-        ("action_2", OnAct) => {
-            gains(st, unit, "action_2_food");
+        ("food_maker", OnAct) => gains(st, unit, "food_maker_food"),
+        ("card_burner", OnAct) => {
+            gains(st, unit, "card_burner_food");
             let opts = hand_iids(st, owner, 0).into_iter().map(Value::Int).collect();
             push_choose(st, owner, opts, "discard", false, Map::default());
         }
-        ("action_3", OnAct) => {
-            let n = cfg(st, "action_3_draw");
+        ("refueler", OnAct) => {
+            let n = cfg(st, "refueler_draw");
             push_draw(st, owner, n);
-            gains(st, unit, "action_3_food");
+            gains(st, unit, "refueler_food");
         }
-        ("action_4", OnAct) => {
-            let g = cfg(st, "action_4_grant");
+        ("trainer", OnAct) => {
+            let g = cfg(st, "trainer_grant");
             let opts = hand_iids(st, owner, 0).into_iter().map(Value::Int).collect();
             push_choose(st, owner, opts, "grant", false, vmap!("amount" => Value::Int(g as i64)));
         }
-        ("action_5", OnAct) => st.turn_flags.flight_next[owner.min(1) as usize] = true,
-        ("action_6", OnAct) => st.effect_stack.push(vmap!("op" => Value::s("scout"), "player" => pn(owner), "spec" => Value::Null)),
-        ("action_7", OnAct) => {
-            let n = cfg(st, "action_7_drain");
+        ("flight_giver", OnAct) => st.turn_flags.flight_next[owner.min(1) as usize] = true,
+        ("lookout", OnAct) => st.effect_stack.push(vmap!("op" => Value::s("scout"), "player" => pn(owner), "spec" => Value::Null)),
+        ("food_thief", OnAct) => {
+            let n = cfg(st, "food_thief_drain");
             lose_food(st, other(owner), n, Some(unit.card));
         }
-        ("action_8", OnAct) => {
-            let (turn, n) = (st.turn_counter + 1, cfg(st, "action_8_bonus"));
+        ("protector", OnAct) => {
+            let (turn, n) = (st.turn_counter + 1, cfg(st, "protector_bonus"));
             let p = owner.min(1) as usize;
             st.action_guard[p] = match st.action_guard[p] {
                 Some((t, g)) if t == turn => Some((turn, g + n)),

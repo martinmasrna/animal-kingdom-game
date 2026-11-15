@@ -8498,7 +8498,7 @@
       "at": 1793632735
     }
   },
-  "action_1": {
+  "food_maker": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8539,7 +8539,7 @@
       "at": 1794680631
     }
   },
-  "action_2": {
+  "card_burner": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8580,7 +8580,7 @@
       "at": 1794680632
     }
   },
-  "action_3": {
+  "refueler": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8621,7 +8621,7 @@
       "at": 1794680632
     }
   },
-  "action_4": {
+  "trainer": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8662,7 +8662,7 @@
       "at": 1794680632
     }
   },
-  "action_5": {
+  "flight_giver": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8703,7 +8703,7 @@
       "at": 1794680632
     }
   },
-  "action_6": {
+  "lookout": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8744,7 +8744,7 @@
       "at": 1794680632
     }
   },
-  "action_7": {
+  "food_thief": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8785,7 +8785,7 @@
       "at": 1794680632
     }
   },
-  "action_8": {
+  "protector": {
     "strength": {
       "review": {
         "prev_lv": "empty",

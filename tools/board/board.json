@@ -5,35 +5,35 @@
    "x": 1204,
    "y": 1293
   },
-  "action_8": {
+  "protector": {
    "x": 0,
    "y": 3119
   },
-  "action_5": {
+  "flight_giver": {
    "x": 194,
    "y": 3119
   },
-  "action_4": {
+  "trainer": {
    "x": 388,
    "y": 3119
   },
-  "action_2": {
+  "card_burner": {
    "x": 582,
    "y": 3119
   },
-  "action_1": {
+  "food_maker": {
    "x": 776,
    "y": 3119
   },
-  "action_7": {
+  "food_thief": {
    "x": 970,
    "y": 3119
   },
-  "action_6": {
+  "lookout": {
    "x": 1164,
    "y": 3119
   },
-  "action_3": {
+  "refueler": {
    "x": 1358,
    "y": 3119
   },

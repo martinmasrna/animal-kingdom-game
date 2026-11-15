@@ -264,7 +264,7 @@ def strength_breakdown(state: GameState, unit: UnitInstance) -> dict:
              if u.owner == unit.owner and u.iid != unit.iid and aura[0] in card.tags and not _inked(state, u.iid)
              and not (aura[2] and not their_turn))
     if guard := guard_bonus(state, unit.owner):
-        auras.append(["action_8", guard])
+        auras.append(["protector", guard])
     if state.leaders and (lb := leader_bonus(state, unit.owner)):
         auras.append(["bee_legend_2", lb])
     own = anthem_bonus(state, card, unit.owner, unit.iid) - sum(n for _, n in auras)

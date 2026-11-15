@@ -1040,8 +1040,8 @@ pub fn legal_acts(st: &State, player: Player) -> Vec<Action> {
         }
         let p = player.min(1) as usize;
         let ok = match st.cname(unit.card) {
-            "action_2" | "action_4" => !st.hands[p].is_empty(),
-            "action_6" => !st.decks[p].is_empty(),
+            "card_burner" | "trainer" => !st.hands[p].is_empty(),
+            "lookout" => !st.decks[p].is_empty(),
             "baboon_legend" => !babaji_allies(st, player, cr).is_empty(),
             _ => true,
         };

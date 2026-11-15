@@ -213,7 +213,7 @@ def _effects(events: list, move: Move) -> list:
             fx.append({"k": "draw", "seat": e["player"], "n": len(e["cards"])})
         elif e["e"] == "food" and not e.get("income"):
             fx.append({"k": "food", "seat": e["player"], "n": e["n"]})
-        elif e["e"] == "pay" and e.get("card") == "action_7":     # the actions prototype: food taken from the opponent
+        elif e["e"] == "pay" and e.get("card") == "food_thief":     # the actions prototype: food taken from the opponent
             fx.append({"k": "lose", "seat": e["player"], "n": e["n"]})
     merged = []   # several draws or food gains by one player in a row read as one
     for f in fx:

@@ -218,7 +218,7 @@ pub fn breakdown(st: &State, unit: &Unit) -> serde_json::Value {
     allies.sort();
     let guard = guard_bonus(st, unit.owner, their_turn);   // [ACTION 8], last (strength.py strength_breakdown)
     if guard != 0 {
-        allies.push(("action_8", guard));
+        allies.push(("protector", guard));
     }
     let lead = if unit.owner <= B { crate::leaders::leader_bonus(st, unit.owner) } else { 0 };   // Lady Juliette's leader
     if lead != 0 {

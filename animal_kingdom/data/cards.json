@@ -4142,7 +4142,7 @@
       "species": ""
     },
     {
-      "id": "action_1",
+      "id": "food_maker",
       "name": "Food Maker",
       "status": "collectible",
       "rarity": "common",
@@ -4154,7 +4154,7 @@
       "keywords": []
     },
     {
-      "id": "action_2",
+      "id": "card_burner",
       "name": "Card Burner",
       "status": "collectible",
       "rarity": "common",
@@ -4166,7 +4166,7 @@
       "keywords": []
     },
     {
-      "id": "action_3",
+      "id": "refueler",
       "name": "Refueler",
       "status": "collectible",
       "rarity": "common",
@@ -4178,7 +4178,7 @@
       "keywords": []
     },
     {
-      "id": "action_4",
+      "id": "trainer",
       "name": "Trainer",
       "status": "collectible",
       "rarity": "common",
@@ -4190,7 +4190,7 @@
       "keywords": []
     },
     {
-      "id": "action_5",
+      "id": "flight_giver",
       "name": "Flight Giver",
       "status": "collectible",
       "rarity": "common",
@@ -4202,7 +4202,7 @@
       "keywords": []
     },
     {
-      "id": "action_6",
+      "id": "lookout",
       "name": "Lookout",
       "status": "collectible",
       "rarity": "common",
@@ -4214,7 +4214,7 @@
       "keywords": []
     },
     {
-      "id": "action_7",
+      "id": "food_thief",
       "name": "Food Thief",
       "status": "collectible",
       "rarity": "common",
@@ -4226,7 +4226,7 @@
       "keywords": []
     },
     {
-      "id": "action_8",
+      "id": "protector",
       "name": "Protector",
       "status": "collectible",
       "rarity": "common",
