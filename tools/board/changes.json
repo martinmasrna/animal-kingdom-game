@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 345,
+ "rev": 346,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -66,6 +66,12 @@
    "text": {
     "was": "Roar: give all animals in your hand +1 strength.",
     "now": "Roar: give all animals in your hand +2 srength."
+   }
+  },
+  "sloth_legend": {
+   "text": {
+    "was": "Your Dusk effects happen twice.",
+    "now": "??"
    }
   }
  },
