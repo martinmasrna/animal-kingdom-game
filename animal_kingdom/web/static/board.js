@@ -147,6 +147,7 @@ export function renderBoard(el, M, g, cards, ui) {
   // a region's income flies from its stone; a card's food comes from no stone
   const stonesOf = side => A && A.fromStones === false ? flowAt(side, 'food') : held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: pays(r, r) }; });
   for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui, flowAt(side, 'pay'));
+  for (const side of ['A', 'B']) if (ui.leaders && ui.leaders[side]) s += leaderPiece(side, ui.leaders[side], cards, ui);
   // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
   if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = VIEW.port ? my + (ui.capture.side === 'A' ? 22 : -22) : my;   // seated in the mouth, clear of the crossroad beside it
     s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' : ''}`, x, y, unit(ui.capture, [], cards)); }
@@ -162,6 +163,27 @@ export function renderBoard(el, M, g, cards, ui) {
       gem.innerHTML = gemDigits(n); if (n !== to && gem.isConnected) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   });
+}
+
+// The leaders prototype: each player's leader beside their den, a portrait under the team rim, a size up from an animal's
+// (yours at the foot of your den, your opponent's at the head of theirs, as Hearthstone's two heroes). What it says is its
+// state, never a hint: Queen Adira's number on the boss with her progress to the next as pips, Xanthe as the stage she has
+// reached (its own painting), a power that can't be used now greyed, one you can press now ringed as an animal you can act
+// with is. Where it stands on the stage: LEADER_AT.
+export const LEADER_AT = { A: [178, 650], B: [1150, 80] }, LEADER_PORT = { A: [70, 1300], B: [650, 140] };
+export const leaderAt = side => (VIEW.port ? LEADER_PORT : LEADER_AT)[side];
+const XANTHE_FORMS = ['butterfly_legend', 'butterfly_legend_caterpillar', 'butterfly_legend_chrysalis', 'butterfly_legend_butterfly', 'butterfly_legend_monarch'];
+function leaderPiece(side, L, cards, ui) {
+  const [x, y] = leaderAt(side), id = L.id === 'butterfly_legend' ? XANTHE_FORMS[L.stage || 0] : L.id, c = cards[id] || cards[L.id];
+  const power = L.kind !== 'passive', mine = side === 'A';
+  // greyed: a power that can't be used now (yours, on your turn), or one spent for the match (anyone's)
+  const dim = L.spent || (power && mine && ui.current === 'A' && !L.usable) || (L.id === 'butterfly_legend' && !L.spent && [0, 2].includes(L.stage));
+  const cls = `leader unit ${side}${dim ? ' dim' : ''}${mine && L.usable ? ' roamable' : ''}`;
+  const boss = L.draws != null ? `<div class="boss num">${chalk(L.draws)}</div>` : '';
+  const pips = L.per ? `<div class="lpips">${Array.from({ length: L.per }, (_, i) => `<i class="${i < L.toward ? 'on' : ''}"></i>`).join('')}</div>` : '';
+  const plaque = L.stageName ? `<div class="lname">${L.stageName}</div>` : '';
+  return put(`cr ${cls}`, x, y, `<div class="ring${hasArt(id) ? '' : ' noart'}" style="${portrait(id, 100)}">${hasArt(id) ? '' : `<span>${c ? c.name : ''}</span>`}</div>`
+    + `<img class="rimimg" src="${kit(`rim_${team(side)}.webp`)}" alt="" draggable="false">${boss}${pips}${plaque}`, `data-lead="${side}" data-card="${id}"`);
 }
 
 // A den: ten pits of fruit (one fruit per food, ghosts for next turn's income), the gem with the count, the cave mouth.

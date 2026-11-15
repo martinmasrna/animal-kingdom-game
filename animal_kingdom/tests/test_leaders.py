@@ -334,3 +334,34 @@ def test_gorilla_card_sets_the_next_play_to_his_strength_across_turns_and_lower_
     assert effective_strength(s, s.board["1,2"][-1]) == 7 and s.next_strength == {}
     rules.apply_action(s, PlaceAction("t_small", ("cr", "2,2")))
     assert effective_strength(s, s.board["2,2"][-1]) == 2
+
+
+# ===================================================================== the web match
+
+def test_a_web_match_shows_both_leaders_offers_the_den_and_logs_them_for_its_replay():
+    import json, random
+    from animal_kingdom.sim.replay import replay
+    from animal_kingdom.web.match import Match, Seat
+    from animal_kingdom.web.replay import game_views
+    m = Match("T", Seat("ta", "A", deck="cats_lion_legend_4"))
+    logs = []
+    m.on_game_end = lambda match, rec: logs.append(json.loads(json.dumps(rec)))
+    m.join(Seat("tb", "B", deck="handlock_butterfly_legend"))
+    v = m.view("A")["game"]
+    assert v["leaders"]["A"]["id"] == "lion_legend_4" and v["leaders"]["A"]["draws"] == 2
+    assert v["leaders"]["B"]["stageName"] == "Egg" and v["leaders"]["B"]["kind"] == "once"
+    rng, pressed = random.Random(3), 0
+    while m.phase == "playing":
+        s = m.to_act()
+        legal = rules.legal_actions(m.state)
+        a = LeaderAction() if LeaderAction() in legal and rng.random() < .5 else rng.choice(legal)
+        if isinstance(a, LeaderAction):
+            assert m.view(s)["game"]["legal"]["leader"]
+            pressed += 1
+        m.act(s, a.to_dict())
+    assert pressed and logs[0]["leaders"] == {"A": "lion_legend_4", "B": "butterfly_legend"}
+    _, result, _ = replay(logs[0])
+    assert (result.winner, result.reason) == (logs[0]["winner"], logs[0]["reason"])
+    assert any(h["kind"] == "leader" for h in m.view("A")["game"]["history"])
+    views = game_views(logs[0], "A", {})                      # the match's replay, view by view, leaders and all
+    assert views[-1]["game"]["leaders"]["B"]["id"] == "butterfly_legend"

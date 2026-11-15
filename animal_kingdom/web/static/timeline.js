@@ -120,6 +120,9 @@ export function plan(prev, next, cards = {}) {
         push({ kind: 'land', dur: DUR.land, cr: e.to, card: e.card, player: e.player, from: e.cr });
         break;
       }
+      case 'leader_power':   // the leaders prototype: a leader's power used (its card shown, shrinking into its place by the den)
+        push({ kind: 'leader', dur: DUR.act, card: e.card, player: e.player });
+        break;
       case 'act':   // the actions prototype: an animal uses its Action (its card shown, the animal lit, then what it does)
         push({ kind: 'act', dur: DUR.act, cr: e.cr, card: e.card, player: e.player, src: [e.cr] });
         break;

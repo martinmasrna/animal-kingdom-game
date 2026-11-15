@@ -643,3 +643,14 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
 /* A card read in full in the hand keeps its level's wood piece on the painting's corner, above the rules (app.css, mk-br). */
 .game .hc:hover .card.mk-br .lvl, .game .hc.shown .card.mk-br .lvl { bottom: 8.6em; }
+/* The leaders prototype: a leader beside its den (board.js leaderPiece), a size up from an animal */
+.game .cr.leader { width: 140px; height: 140px; margin: -70px 0 0 -70px; z-index: 3; cursor: default; }
+.game .cr.leader.roamable { cursor: pointer; }
+.game .cr.leader.dim .ring { filter: grayscale(1) brightness(.62); }
+.game .cr.leader.dim .rimimg { filter: grayscale(.7) brightness(.8); }
+.game .cr.leader .lpips { position: absolute; left: 50%; bottom: -40px; transform: translateX(-50%); display: flex; gap: 5px; }
+.game .cr.leader .lpips i { width: 12px; height: 12px; border-radius: 50%; background: rgba(20,14,8,.75); border: 2px solid #f3e6c8; }
+.game .cr.leader .lpips i.on { background: #f3e6c8; }
+.game .cr.leader .lname { position: absolute; left: 50%; bottom: -26px; transform: translateX(-50%); white-space: nowrap; padding: 1px 10px;
+  font: 600 16px/1.3 'Fira Sans Condensed', sans-serif; color: #fff6e0; background: rgba(40,28,16,.88); border-radius: 6px; }
+.pop .ev.lead { display: block; max-width: 300px; } .pop .ev.lead p { margin: 4px 0 0; } .pop .ev.lead .lk { opacity: .8; font-size: .92em; }

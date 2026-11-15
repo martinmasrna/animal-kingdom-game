@@ -24,7 +24,8 @@ from pathlib import Path
 
 from aiohttp import WSMsgType, web
 
-from ..decks import BOT_DECKS, DECK_SIZE, PREMADE_DECKS, STAR_BUDGET, TEST_BOT_DECKS, load_premade_deck
+from ..decks import BOT_DECKS, DECK_LEADERS, DECK_SIZE, PREMADE_DECKS, STAR_BUDGET, TEST_BOT_DECKS, load_premade_deck
+from ..engine.leaders import LEADERS
 from ..engine import rules
 from ..engine.state import EngineError
 from ..engine.cards import COPY_LIMITS, DECK_SLUGS, STARTER_DECKS, load_cards
@@ -1389,11 +1390,14 @@ async def pool(_req):
         "bot_decks": list(ladder.decks if ladder else BOT_DECKS),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS plus the league's)
         # The bot decks that are not starters: shown by name and list wherever a bot's deck is (Practice's chooser,
         # the versus moment, the match history), never in a player's collection.
-        "bot_only": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug), "cover": STARTER_COVERS.get(slug, "")}
+        "bot_only": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug), "cover": STARTER_COVERS.get(slug, ""),
+                      **({"leader": DECK_LEADERS[slug]} if slug in DECK_LEADERS else {})}
                      for slug in (ladder.decks if ladder else BOT_DECKS) if slug not in {d["slug"] for d in STARTER_DECKS}],
         "build": BUILD,
         # The deck rules the collection builds to (decks.py, engine/cards.py): the client holds none of these numbers itself.
         "rules": {"deckSize": DECK_SIZE, "copies": COPY_LIMITS, "starBudget": STAR_BUDGET},
+        # the leaders prototype (engine/leaders.py): the cards that can lead a deck, each with its kind and its ability
+        "leaders": {lid: {"kind": kind, "text": text} for lid, (kind, text) in LEADERS.items()},
     })
 
 

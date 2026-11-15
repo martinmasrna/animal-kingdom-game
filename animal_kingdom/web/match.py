@@ -18,7 +18,9 @@ from typing import Optional
 
 from ..decks import LADDER_DECK_NAMES, leaders_for, load_premade_deck
 from ..engine import rules, statics
-from ..engine.actions import SKIP, ActAction, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
+from ..engine.actions import SKIP, ActAction, ChoiceAction, DrawAction, LeaderAction, PassAction, PlaceAction, RoamAction, action_from_dict
+from ..engine import leaders as L
+from ..engine.effects import adira_draw, leader_usable
 from ..engine.cards import DECKLISTS, load_cards
 from ..engine.config import Config
 from ..engine.effects import roar_condition
@@ -101,6 +103,28 @@ def conditional_reach(state: GameState, card_id: str) -> bool:
     """A card in hand whose Reach isn't printed but holds now (the Great White Shark after a removal) glows, as a Roar
     whose condition holds does."""
     return "Reach" not in state.cards[card_id].keywords and statics.reach_of(state, card_id) > 0
+
+
+def leader_view(st: GameState, p: str) -> Optional[dict]:
+    """A player's leader as both players see it (public, the leaders prototype): which card, the kind of ability, the
+    ability as it reads now, and its live state (Queen Adira's number and progress, Xanthe's stage, a spent power)."""
+    lead = st.leaders.get(p)
+    if lead is None:
+        return None
+    lid = lead["id"]
+    kind, text = L.LEADERS[lid]
+    out = {"id": lid, "kind": kind, "text": text, "usable": st.current == p and st.pending is None and st.result is None
+           and rules.turn_actions(st) - st.actions_taken_this_turn > 0 and leader_usable(st, p)}
+    if lid == L.ADIRA:
+        n = adira_draw(st, lead)
+        out.update(draws=n, kills=lead["kills"], per=st.config.adira_leader_per, toward=lead["kills"] % st.config.adira_leader_per,
+                   text=f"Draw {n} cards. Draws one more card for every {st.config.adira_leader_per} enemies your Cats remove.")
+    elif lid == L.XANTHE:
+        name, does = L.XANTHE_STAGES[lead["stage"]]
+        out.update(stage=lead["stage"], stageName=name, spent=lead["spent"],
+                   text=("Used." if lead["spent"] else f"{name}: {does}" if does else f"{name}: nothing to use yet.")
+                   + " Evolves at each of your Dawns: Egg, Caterpillar, Chrysalis, Butterfly, Monarch.")
+    return out
 
 
 def bot_for(level: str, seed: int):
@@ -449,9 +473,10 @@ class Match:
         self.action_times.append(round(time.time() - self.started_at, 1))
         if starts_move:
             placed, roamed, acted = isinstance(action, PlaceAction), isinstance(action, RoamAction), isinstance(action, ActAction)
+            led = isinstance(action, LeaderAction)
             self.history.append(Move(
-                round=pre["turn"] // 2 + 1, seat=s, kind="place" if placed else "roam" if roamed else "act" if acted else "draw",
-                pre=pre, card=action.card_id if placed else roamer,
+                round=pre["turn"] // 2 + 1, seat=s, kind="place" if placed else "roam" if roamed else "act" if acted else "leader" if led else "draw",
+                pre=pre, card=action.card_id if placed else roamer if not led else (state.leaders[s]["id"] if s in state.leaders else None),
                 target=list(action.target) if placed or roamed else ["cr", action.origin] if acted else None))
         if self.history:
             self.history[-1].events += new
@@ -716,6 +741,9 @@ class Match:
             **({"revealedHand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u)} for u in st.hands[opp]]}
                if statics.hand_revealed(st, opp) else {}),
             "handLimit": st.config.hand_limit,
+            # the leaders prototype: each player's leader on their den, public; Lord Bumbleton's card's live number
+            "leaders": {p: v for p in "AB" if (v := leader_view(st, p))},
+            "foodGains": {p: st.food_gains.get(p, 0) * st.config.bumbleton_card_per for p in "AB"},
             "deckCount": {p: len(st.decks[p]) for p in "AB"},
             "deckLeft": dict(Counter(st.decks[s])),
             # what the opponent may still hold: their deck, their hand, and the cards a choice of theirs holds in between
@@ -782,6 +810,7 @@ class Match:
                     if rep is not None:
                         copies[u.iid] = copies[rep.iid]
         out = {"draw": any(isinstance(a, DrawAction) for a in legal), "place": places, "roam": roams, "act": acts,
+               "leader": any(isinstance(a, LeaderAction) for a in legal),
                **({"copies": {str(k): v for k, v in copies.items()}} if copies else {})}
         if st.pending is None:
             return out, None
@@ -792,6 +821,10 @@ class Match:
                    "returned": len(step.get("returned", ())) if step.get("op") == "mulligan" else 0,
                    "cap": st.config.mulligan_cap(step.get("player"), st.first_player) if step.get("op") == "mulligan" else 0,
                    "options": []}
+        # a choice inside a leader's power: its steps name the leader and no animal (a card's steps name the very animal)
+        lead = st.leaders.get(p["chooser"])
+        if lead and step.get("by_card") == lead["id"] and "by_iid" not in step:
+            pending["leader"] = True
         if p["mode"] == "choice":
             owner = step.get("from_owner") or p["chooser"]   # whose cards a card choice offers: their strength is theirs
             pending["options"] = [self._describe_option(o, owner) for o in p["options"]]

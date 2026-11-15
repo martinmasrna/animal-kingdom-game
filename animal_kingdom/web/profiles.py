@@ -93,6 +93,8 @@ class Profiles:
             self.db.execute("ALTER TABLE history ADD COLUMN mode TEXT NOT NULL DEFAULT ''")
         with self.db:   # bots were named "Bot · Normal" once
             self.db.execute("UPDATE history SET opp = 'Bot (' || substr(opp, 7) || ')' WHERE opp LIKE 'Bot · %'")
+        if "leader" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # the leaders prototype: a deck's leader
+            self.db.execute("ALTER TABLE decks ADD COLUMN leader TEXT NOT NULL DEFAULT ''")
         if "seeded" not in [r[1] for r in self.db.execute("PRAGMA table_info(profiles)")]:   # profiles from before starter decks were theirs
             self.db.execute("ALTER TABLE profiles ADD COLUMN seeded INTEGER NOT NULL DEFAULT 0")
         if "starter" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # decks saved before a copy could follow its starter
@@ -208,10 +210,10 @@ class Profiles:
         so it shows the starter's current list; everything else shows what was saved."""
         starters = starters or {}
         out = []
-        for r in self.db.execute("SELECT id, name, cards, cover, starter, edited FROM decks WHERE profile = ? ORDER BY pos", (pid,)):
+        for r in self.db.execute("SELECT id, name, cards, cover, starter, edited, leader FROM decks WHERE profile = ? ORDER BY pos", (pid,)):
             live = starters.get(r["starter"]) if r["starter"] and not r["edited"] else None
             out.append({"id": r["id"], "name": r["name"], "cards": live if live is not None else json.loads(r["cards"]),
-                        **({"cover": r["cover"]} if r["cover"] else {})})
+                        **({"cover": r["cover"]} if r["cover"] else {}), **({"leader": r["leader"]} if r["leader"] else {})})
         return out
 
     def seed_decks(self, pid: str, starters: list[dict], pool: Optional[set] = None, renamed: Optional[dict] = None,
@@ -280,11 +282,11 @@ class Profiles:
             starter = prev_starter or (did if did in starters else "")
             edited = 1 if prev_edited else int(bool(starter) and starters.get(starter) is not None and cards_norm != starters[starter])
             rows.append((pid, did, (str(d.get("name") or "").strip() or "New deck")[:40], json.dumps(cards_norm),
-                         pos, str(d.get("cover") or "")[:40], starter, edited))
+                         pos, str(d.get("cover") or "")[:40], starter, edited, str(d.get("leader") or "")[:40]))
         with self.db:
             self.db.execute("DELETE FROM decks WHERE profile = ?", (pid,))
-            self.db.executemany("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover, starter, edited) "
-                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)", rows)
+            self.db.executemany("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover, starter, edited, leader) "
+                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", rows)
         return self.decks(pid, starters)
 
     def link_starters(self, starters: dict[str, dict]) -> tuple[int, int]:

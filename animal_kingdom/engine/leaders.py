@@ -37,7 +37,7 @@ LEADERS: dict[str, tuple[str, str]] = {
     MELISSIA: ("power", "Scout a Worker, Soldier or Nurse Colony animal."),
     SOLENIA: ("passive", "Dusk: gain 1 food for each animal you control."),
     BABAJI: ("power", "Scout an animal and give it +1 strength."),
-    XANTHE: ("once", "Once per game: evolves at each of your Dawns, and does what its stage offers."),
+    XANTHE: ("once", "Evolves at each of your Dawns: Egg, Caterpillar, Chrysalis, Butterfly, Monarch. Use it once, for what its stage offers then."),
     ARNE: ("passive", "Copies of the same animal in your hand share their strength."),
     GORILLA: ("passive", "The first animal you play each turn has +1 strength."),
 }

@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 
 from ..decks import PREMADE_DECKS, decklist_problems, register_deck
+from ..engine.leaders import leader_problem
 from ..engine.state import EngineError
 from .match import DECK_NAMES
 from .renamed import renamed
@@ -17,11 +18,11 @@ DECKS_FILE = Path(__file__).resolve().parents[2] / "results" / "web_decks.json"
 _saved: dict[str, dict] = {}
 
 
-def _register(slug: str, name: str, decklist: list[str]) -> None:
+def _register(slug: str, name: str, decklist: list[str], leader: str | None = None) -> None:
     if slug not in PREMADE_DECKS:      # a deck the ladder pool already holds under this slug (data/ladder_decks.json) is loadable as it is
-        register_deck(slug, decklist)
+        register_deck(slug, decklist, leader)
     DECK_NAMES.setdefault(slug, name)  # the pool's name for it stands; a new deck takes its builder's
-    _saved[slug] = {"name": name, "list": decklist}
+    _saved[slug] = {"name": name, "list": decklist, **({"leader": leader} if leader else {})}
 
 
 def load() -> None:
@@ -29,7 +30,7 @@ def load() -> None:
     # the match view hands its list to the client, which knows only today's ids (Martin's study of 2026-10-22, blank).
     if DECKS_FILE.is_file():
         for slug, d in json.loads(DECKS_FILE.read_text(encoding="utf-8")).items():
-            _register(slug, d["name"], renamed(d["list"]))
+            _register(slug, d["name"], renamed(d["list"]), d.get("leader"))
 
 
 def resolve(spec) -> str:
@@ -45,9 +46,13 @@ def resolve(spec) -> str:
     if problems:
         raise EngineError("illegal deck: " + "; ".join(problems))
     name = (str(spec.get("name") or "").strip() or "My deck")[:40]
-    slug = "custom_" + hashlib.sha1((name + "|" + ",".join(decklist)).encode()).hexdigest()[:10]
+    leader = str(spec.get("leader") or "") or None          # the leaders prototype: the deck's leader, one of its legendaries
+    bad = leader_problem(leader, decklist)
+    if bad:
+        raise EngineError(bad)
+    slug = "custom_" + hashlib.sha1((name + "|" + ",".join(decklist) + (f"|{leader}" if leader else "")).encode()).hexdigest()[:10]
     if slug not in _saved:
-        _register(slug, name, decklist)
+        _register(slug, name, decklist, leader)
         try:
             DECKS_FILE.parent.mkdir(parents=True, exist_ok=True)
             tmp = DECKS_FILE.with_suffix(".tmp")
