@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 295,
+ "rev": 340,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -693,7 +693,7 @@
    "rarity": "legendary",
    "strength": 7,
    "stars": 2,
-   "text": "Your opponent's hand is revealed.",
+   "text": "Activate: Guess which of 3 cards is in your opponents hand. If you're correct, gain a copy of it.",
    "tags": [
     "Hoofed"
    ],
