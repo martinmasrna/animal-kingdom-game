@@ -1,6 +1,6 @@
 {
  "how_to_read": "tools/board/CHANGES.md",
- "rev": 408,
+ "rev": 409,
  "changed": {
   "baboon_legend": {
    "text": {
@@ -69,7 +69,7 @@
    },
    "text": {
     "was": "Roar: give all animals in your hand +1 strength.",
-    "now": "Roar: give all animals in your hand +2 srength."
+    "now": "Roar: give all animals in your hand +1 srength."
    }
   },
   "sloth_legend": {
