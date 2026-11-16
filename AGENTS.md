@@ -29,7 +29,7 @@ Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip i
 - Deckbuilding by bots: `sim.deck_optimizer`, `sim.metagame_search`, `sim.measure_deck`.
 - After changing `cards.json`, regenerate the deck docs' card tables: `.venv/bin/python -m animal_kingdom.render.deck_docs`.
 
-The ruleset (map_b, two actions per turn, Draw draws 2) is the default everywhere; no flags needed. `results/` is untracked except `results/human_games/`: human recordings are irreplaceable, so commit them.
+The ruleset (map_b, two actions per turn, a free card at the start of each turn, Draw draws 1; `engine/config.py`) is the default everywhere; no flags needed. `results/` is untracked except `results/human_games/`: human recordings are irreplaceable, so commit them.
 
 ## Invariants
 

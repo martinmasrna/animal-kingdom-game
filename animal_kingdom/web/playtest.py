@@ -134,23 +134,23 @@ def describe(step: dict, me: str) -> str:
     who = "YOU" if step["seat"] == me else "OPP" if step["human"] else "BOT"
     whose = lambda owner: "your" if owner == me else "their"
     t = f"{step['t']:>6.1f}s" if step["t"] is not None else "      "
+    # what the move did, and apart from it what the turn's change set off (start-of-turn food, a hatching egg): read as one,
+    # the second looked caused by the move (a Luna read took the opponent's income for a bug in yours)
+    ev = step["events"]
+    cut = next((j for j, e in enumerate(ev) if e["e"] in ("turn_end", "turn_start")), len(ev))
     if a["kind"] == "place":
         what = f"places {name(a['card_id'])} on {a['target'][1] if a['target'][0] == 'cr' else 'a den'}"
         top = b["top"].get(a["target"][1]) if a["target"][0] == "cr" else None
         if top:
             what += f" (covering {whose(top[1])} {name(top[0])})"
     elif a["kind"] == "draw":
-        what = "draws 2"
+        what = f"draws {sum(len(e['cards']) for e in ev[:cut] if e['e'] == 'draw' and e['player'] == step['seat'])}"   # what it drew (the rule's count, or what a hand or an Egg made of it)
     elif a["kind"] == "pass":
         what = f"ends the turn ({b['left']} move{'s' if b['left'] != 1 else ''} unused)" if b["left"] else "ends the turn"
     else:
         c = a.get("choice")
         what = ("skips / keeps" if c == "__skip__" else f"chooses {name(b['chosen'])}" if b.get("chosen")
                 else f"chooses {name(c)}" if isinstance(c, str) and c in CARDS else f"chooses {c}")
-    # what the move did, and apart from it what the turn's change set off (start-of-turn food, a hatching egg): read as one,
-    # the second looked caused by the move (a Luna read took the opponent's income for a bug in yours)
-    ev = step["events"]
-    cut = next((j for j, e in enumerate(ev) if e["e"] in ("turn_end", "turn_start")), len(ev))
     line = f"{t} R{b['round']:<2} {who} {what}" + effects(ev[:cut], me, step) + (f"  [thought {step['dt']:.0f}s]" if step["seat"] == me and step["dt"] and step["dt"] >= LONG_THINK else "")
     after = effects(ev[cut:], me, step)
     return line + (f"\n{'':>7} R{b['round']:<2} the turn passes{after}" if after else "")
