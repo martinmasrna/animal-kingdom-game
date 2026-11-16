@@ -7,9 +7,6 @@
 import init, { Engine, Bot, sourceHash } from '../wasm/ak_engine.js';
 
 const EVENTS_KEPT = 200;                                   // match.py EVENTS_KEPT
-const BOT_PAUSE = { open: 0.6, move: 0.4, choice: 0.3 };   // server.py: the bot's beat once its last move has been watched
-const BOT_WAIT_MAX = 6.0;                                  // server.py: at most this long for the screen to play it out
-const BOT_THINK_MAX = 45;                                  // server.py: then the Easy bot's move is played for it
 const OUTBOX = 'ak:local:outbox';
 const other = p => (p === 'A' ? 'B' : 'A');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -52,6 +49,7 @@ function effects(events, move) {
     else if (e.e === 'to_deck') fx.push({ k: 'to_deck', card: e.card, owner: e.owner });
     else if (e.e === 'draw') fx.push({ k: 'draw', seat: e.player, n: e.cards.length });
     else if (e.e === 'food' && !e.income) fx.push({ k: 'food', seat: e.player, n: e.n });
+    else if (e.e === 'pay' && e.card === 'food_thief') fx.push({ k: 'lose', seat: e.player, n: e.n });   // the actions prototype: food taken from the opponent
   }
   const merged = [];
   for (const f of fx) {
@@ -157,15 +155,17 @@ export class LocalMatch {
     const pending = JSON.parse(st.pending());
     const startsMove = (pending === null && a.kind !== 'pass') || a.kind === 'place';
     const round = Math.floor(st.turnCounter / 2) + 1;
-    let roamer = null;
-    if (a.kind === 'roam') { const stack = JSON.parse(st.toJson()).board[a.from] || []; roamer = stack.length ? stack[stack.length - 1].card_id : null; }
+    let roamer = null;   // the animal that roams or uses its Action
+    if (a.kind === 'roam' || a.kind === 'act') { const stack = JSON.parse(st.toJson()).board[a.from] || []; roamer = stack.length ? stack[stack.length - 1].card_id : null; }
     st.applyAction(JSON.stringify(a), true);
     const fresh = this.takeEvents();
     this.log(a);
     if (startsMove) {
-      const placed = a.kind === 'place', roamed = a.kind === 'roam';
-      this.history.push({ round, seat: s, kind: placed ? 'place' : roamed ? 'roam' : 'draw', card: placed ? a.card_id : roamer,
-        target: placed || roamed ? a.target : null, fx: [], events: [] });
+      const placed = a.kind === 'place', roamed = a.kind === 'roam', acted = a.kind === 'act', led = a.kind === 'leader';
+      const leader = led ? (JSON.parse(st.toJson()).leaders || {})[s] : null;
+      this.history.push({ round, seat: s, kind: placed ? 'place' : roamed ? 'roam' : acted ? 'act' : led ? 'leader' : 'draw',
+        card: placed ? a.card_id : led ? (leader ? leader.id : null) : roamer,
+        target: placed || roamed ? a.target : acted ? ['cr', a.from] : null, fx: [], events: [] });
     }
     if (this.history.length) {
       const m = this.history[this.history.length - 1];
@@ -225,6 +225,7 @@ export class LocalMatch {
     for (const r of this.results) if (r.winner) S[r.winner]++;
     const g = JSON.parse(this.state.view(s));
     g.clock = { on: false };
+    g.drawCount = this.lib.doc.config.draw_action_count;   // what the Draw action draws (match.py view)
     g.history = this.history.map(({ round, seat, kind, card, target, fx }) => ({ round, seat, kind, card, target, fx }));
     g.events = this.events.filter(e => !(e.e === 'mulligan' && e.player !== s)).map(e => publicEvent(e, s));
     return { id: this.id, you: s, phase: this.phase, version: this.version, takeover: false, seats: this.setup.seats,
@@ -257,11 +258,11 @@ export class LocalMatch {
     const choice = new Promise((resolve, reject) => { this.waiting.set(id, { resolve, reject }); });
     this.ready.then(() => this.worker.postMessage({ t: 'choose', id, state: st.toJson() }));
     const t0 = performance.now();
-    while (performance.now() - t0 < BOT_WAIT_MAX * 1000 && this.played < this.seq && !this.closed) await sleep(50);
-    await sleep(1000 * (this.setup.pause || BOT_PAUSE)[pending ? 'choice' : opening ? 'open' : 'move'] * (window.AK_BOT_PAUSE ?? 1));
+    while (performance.now() - t0 < this.setup.waitMax * 1000 && this.played < this.seq && !this.closed) await sleep(50);
+    await sleep(1000 * this.setup.pause[pending ? 'choice' : opening ? 'open' : 'move'] * (window.AK_BOT_PAUSE ?? 1));
     let action;
     try {
-      action = await Promise.race([choice, sleep(BOT_THINK_MAX * 1000).then(() => { throw new Error('timeout'); })]);
+      action = await Promise.race([choice, sleep(this.setup.thinkMax * 1000).then(() => { throw new Error('timeout'); })]);
     } catch (e) {
       console.warn('local bot:', e.message, '- playing the Easy bot\'s move');
       if (e.message === 'timeout') this.startWorker(this.botSeed);   // a bot still thinking is stopped
