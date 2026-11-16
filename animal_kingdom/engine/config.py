@@ -25,7 +25,7 @@ class Config:
     chipmunk_food_later: int = 10         # ...and 10 more at the start of the owner's next turn
     flying_squirrel_food: int = 10       # synced to card text "gain 10 food" (was 8; text/const desync broke groundhog fed-threshold combo, 2026-07-09)
     rat_king_per_rodent: int = 4         # Roar: gain N food per OTHER Rodent you control
-    worker_bee_food: int = 12            # Worker Bee: Roar: gain 12 food
+    worker_bee_food: int = 6            # Worker Bee: Roar: gain 12 food
     worker_ant_per: int = 3              # Worker Ant: Roar: gain 3 food for each animal you control
     worker_wasp_per_place: int = 3       # Worker Wasp: whenever you place an animal, gain 3 food (any animal since 2026-11-12; 2 on Martin's sheet; 3 after his first games, 2026-10-24)
     tortoise_legend_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
@@ -45,7 +45,7 @@ class Config:
     fed_threshold: int = 10              # food gained this turn to arm Gopher/Muskrat/Groundhog
     mara_draw: int = 2                  # Mara: draw N if fed this turn
     piranha_legend_fish: int = 2        # the legendary Piranha: removes each enemy next to N or more of your Fish
-    groundhog_food: int = 10            # Groundhog: Dawn: gain N food
+    groundhog_food: int = 5            # Groundhog: Dawn: gain N food
     chipmunk_legend_food_per: int = 1           # Tally: Roar: gain 1 food for each 3 food you have
     chipmunk_legend_food_step: int = 3
     beaver_bonus_actions: int = 1       # Beaver: extra top-level actions on your NEXT turn
@@ -58,14 +58,14 @@ class Config:
     gazelle_food: int = 5                # Gazelle: Roar: draw a card and gain 5 food (its Flee brings the Roar back)
     sloth_food: int = 30                 # Sloth: gain food when its timer comes due
     locust_delay: int = 2                # Locust (The First of Many's): turns until it eats, every turn counting (Wild)
-    sloth_delay: int = 2                 # owner-turns until Sloth pays out (ticks only while it is
+    sloth_delay: int = 3                 # owner-turns until Sloth pays out (ticks only while it is
                                           # top of its crossroad - see rules overview.md 9.1)
 
     # --- Strength anthems ("has +X", live; decision E) ---
     guard_hornet_bonus: int = 3          # while >= threshold Colony units (4 until Martin's round robin of 2026-11-12)
     guard_hornet_colony_threshold: int = 4
     mahi_mahi_anthem: int = 1            # Mahi-mahi: your other Fish have +1 (the Mackerel's aura, Martin 2026-10-30)
-    tuna_per_fish: int = 1               # Tuna: +1 for each other Fish you control
+    tuna_per_fish: int = 1               # Tuna: +1 for each other animal you control (2026-11-16; each other Fish before)
     giraffe_bonus: int = 3               # Giraffe: +3 during your opponent's turn (5 on a 4 until 2026-10-26)
     crocodile_penalty: int = 3           # Crocodile: -3 during your opponent's turn
     buffalo_anthem: int = 1              # Cape Buffalo: your other Hoofed animals have +1 during your opponent's turn
@@ -118,11 +118,16 @@ class Config:
     vulture_removals: int = 3            # Vulture: lands at your Dusk if this many animals were removed this turn
 
     # --- Removal-strength caps on Roar removals ---
-    jaguar_max: int = 4
-    honey_badger_min: int = 6            # Honey Badger removes an enemy of strength >= this
-    stoop_max: int = 4                   # Hawk
+    jaguar_max: int = 5
+    gopher_max: int = 7                  # Gopher: ...remove an adjacent enemy of strength 7 or less (2026-11-16)
+    serval_min: int = 8                  # Serval: ...remove an adjacent enemy of strength 8 or more (2026-11-16)
+    hornet_max: int = 7                  # Hornet: ...to remove an adjacent enemy of strength 7 or less (2026-11-16)
+    cottonmouth_max: int = 3             # "some snake?": Roar: remove an adjacent enemy of strength 3 or less (2026-11-16)
+    bat_draw: int = 2                    # "??" (the 3-star): Echo. Roar: draw 2 cards (2026-11-16)
+    honey_badger_min: int = 8            # Honey Badger removes an enemy of strength >= this
+    stoop_max: int = 5                   # Hawk ("Viper?" since 2026-11-16: remove an adjacent enemy of strength 5 or less)
     rhinoceros_max: int = 3
-    hippopotamus_max: int = 4
+    hippopotamus_max: int = 5
     cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this
 
     # --- Draws, food and other magnitudes of the launch decks ---
@@ -165,7 +170,7 @@ class Config:
     raven_shuffle: int = 2              # ...then shuffled back from the hand
     nurse_bee_draw: int = 2             # Nurse Bee: drawn with 4 or more Colony animals (Martin's sheet, 2026-10-24)
     viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
-    black_mamba_max: int = 6                 # Black Mamba removes an adjacent enemy of at most this strength
+    black_mamba_max: int = 7                 # Black Mamba removes an adjacent enemy of at most this strength
     anaconda_legend_decay: int = 1                  # Eon's strength lost each time it shuffles itself back
     raven_legend_steals: int = 2                    # Grimm: animals taken from the opponent's Remove Pile
     dung_beetle_legend_draw_at: int = 5            # the legendary Dung Beetle: food your Hungry animals ate this game
@@ -220,10 +225,9 @@ class Config:
         if self.mulligan_max is not None:
             return self.mulligan_max
         return self.first_player_opening_draw if player == first_player else self.second_player_opening_draw
-    draw_action_count: int = 2           # cards drawn by one Draw action (overview.md §5); 1→2
-                                          # 2026-07-12 after a 42-game human draw-2 cohort — plays
-                                          # better and de-fangs free "draw 1" riders (they no longer
-                                          # strictly beat the default action)
+    draw_action_count: int = 1           # cards drawn by one Draw action (overview.md §5)
+    turn_draw_count: int = 1             # cards a player draws free at the start of each turn, the first player's first
+                                          # turn excepted (Martin, 2026-11-16: "Gain 1 card per turn, pay 1 action to draw 1.")
     actions_per_turn: int = 2            # top-level actions (place/draw) per turn (overview.md §5)
     first_turn_actions: int = 1          # the first player's first turn only: the tempo the second player
                                          # lacks (Martin, 2026-10-11, from his gauntlets: 82% first vs 67% second)

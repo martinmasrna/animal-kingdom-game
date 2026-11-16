@@ -90,7 +90,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "hamster" => &[OnDrawEvent],
         "deer_legend" => &[OnPlace, OnFriendlyFlee, OnFlee],
         "okapi" => &[OnStartOfTurn, OnEndOfTurn],
-        "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
+        "meerkat" => &[OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "army_ant_legend" | "baboon_legend" => &[OnPlace],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "queen_ant" | "scout_bee"
@@ -196,7 +196,7 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
     };
     Some(match card {
         "gopher" | "mara" => fed_this_turn(st, player),
-        "bobcat" | "tutorial_lynx" | "ocelot" => others(T_CAT) >= 1,
+        "tutorial_lynx" | "ocelot" => others(T_CAT) >= 1,
         "serval" => played_this_turn(st, player, T_CAT, unit) >= 1,
         "soldier_ant" | "nurse_bee" => others(T_COLONY) + 1 >= colony_min,
         "hammerhead" => lost_this_turn(st, player) >= 1,
@@ -820,7 +820,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("jaguar", OnPlace) => removes(st, unit, cr, Some("jaguar_max"), None),
         ("serval", OnPlace) => {
             if conditional(st, card, unit) {
-                let t = adjacent_enemy_targets(st, unit, cr, None, None, true);
+                let m = cfg(st, "serval_min");
+                let t = adjacent_enemy_targets(st, unit, cr, None, Some(m), true);
                 push_remove_choice(st, owner, unit.card, t, false);
             }
         }
@@ -828,7 +829,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let n = cfg(st, "lynx_draw");
             draws(st, unit, n);
         }
-        ("bobcat", OnPlace) | ("tutorial_lynx", OnPlace) => {
+        ("bobcat", OnPlace) => draws(st, unit, 1),
+        ("tutorial_lynx", OnPlace) => {
             if conditional(st, card, unit) {
                 draws(st, unit, 1);
             }
@@ -884,9 +886,14 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let options = ["worker_bee", "guard_bee", "nurse_bee"].into_iter().map(Value::s).collect();
             push_choose(st, owner, options, "make_in_hand", false, Map::new());
         }
-        ("soldier_ant", OnPlace) | ("gopher", OnPlace) => {
+        ("soldier_ant", OnPlace) => {
             if conditional(st, card, unit) {
                 removes(st, unit, cr, None, None);
+            }
+        }
+        ("gopher", OnPlace) => {
+            if conditional(st, card, unit) {
+                removes(st, unit, cr, Some("gopher_max"), None);
             }
         }
         ("worker_ant", OnPlace) => {
@@ -942,7 +949,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("mole", OnPlace) | ("naked_mole_rat", OnPlace) => mole(st, unit, cr),
         ("hornet", OnPlace) => {
-            let targets = adjacent_enemy_targets(st, unit, cr, None, None, true);
+            let m = cfg(st, "hornet_max");
+            let targets = adjacent_enemy_targets(st, unit, cr, Some(m), None, true);
             let hornet = cid(st, "hornet");
             if !targets.is_empty() && has_spare_copy(st, owner, hornet) {
                 let o = crs(st, targets);
@@ -968,10 +976,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 gain_to_hand(st, owner, c, 0);
             }
         }
-        ("kitten", OnPlace) => {
-            let n = cfg(st, "kitten_draw");
-            draws_filtered(st, unit, "rarity:common", n);
-        }
+        ("kitten", OnPlace) => draws(st, unit, 1),
         ("falcon", OnPlace) => hq_adjacent_draw(st, unit, cr, 1),
         ("cheetah", OnPlace) => { let n = cfg(st, "cheetah_draw"); hq_adjacent_draw(st, unit, cr, n) }
         ("rat", OnPlace) => {
@@ -981,7 +986,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 push_remove_choice(st, owner, rat, t, false);
             }
         }
-        ("bat", OnPlace) | ("dolphin", OnPlace) => draws(st, unit, 1),
+        ("dolphin", OnPlace) => draws(st, unit, 1),
+        ("bat", OnPlace) => { let n = cfg(st, "bat_draw"); draws(st, unit, n) }
         ("mouse", OnPlace) => draws_filtered(st, unit, "tag:Rodent", 1),
         // Egg Control
         ("anaconda_legend", OnEndOfTurn) => {
@@ -1018,13 +1024,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("hawk", OnPlace) => removes(st, unit, cr, Some("stoop_max"), None),
-        ("cottonmouth", OnPlace) => {
-            let targets = adjacent_enemy_targets(st, unit, cr, None, None, true);
-            if !targets.is_empty() {
-                let o = crs(st, targets);
-                st.effect_stack.push(vmap!("op" => Value::s("venom"), "chooser" => pn(owner), "options" => Value::List(o)));
-            }
-        }
+        ("cottonmouth", OnPlace) => removes(st, unit, cr, Some("cottonmouth_max"), None),
         ("magpie", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("magpie_steal"), "player" => pn(owner))),
         ("black_mamba", OnPlace) => removes(st, unit, cr, Some("black_mamba_max"), None),
         ("mosquito", OnPlace) => {
@@ -1155,7 +1155,6 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_draw(st, owner, 1);
             gains(st, unit, "flying_squirrel_food");
         }
-        ("meerkat", OnPlace) => draws(st, unit, 1),
         ("meerkat", OnEnemyPlacedAdjacent) => push_draw(st, owner, 1),
         ("beaver", OnPlace) => {
             let n = cfg(st, "beaver_bonus_actions");
@@ -1177,7 +1176,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("squirrel", OnPlace) => gains(st, unit, "squirrel_food"),
-        ("chipmunk", OnPlace) | ("tutorial_chipmunk", OnPlace) => chipmunk(st, unit),
+        ("chipmunk", OnPlace) => { let n = cfg(st, "chipmunk_food_now"); push_gain(st, owner, n) }
+        ("tutorial_chipmunk", OnPlace) => chipmunk(st, unit),
         ("mara", OnPlace) => {
             if conditional(st, card, unit) {
                 let n = cfg(st, "mara_draw");
@@ -1339,8 +1339,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("tarsier", OnPlace) => {
             let g = cfg(st, "tarsier_grant");
-            st.effect_stack.push(vmap!("op" => Value::s("hand_grant_one"), "player" => pn(owner), "amount" => Value::Int(g as i64), "tag" => Value::s("Primate")));
-            st.effect_stack.push(vmap!("op" => Value::s("draw_filtered"), "player" => pn(owner), "n" => Value::Int(1), "spec" => Value::s("tag:Primate")));
+            st.effect_stack.push(vmap!("op" => Value::s("hand_grant_one"), "player" => pn(owner), "amount" => Value::Int(g as i64)));
         }
         ("chimpanzee", OnPlace) => {
             let s = effective_strength(st, unit, None);

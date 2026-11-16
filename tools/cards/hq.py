@@ -17,7 +17,7 @@ sets fine or locked. Martin's edits have no limits.
 
 As a command, for Claude:
     .venv/bin/python tools/cards/hq.py show [ID...]                  the rows, as JSON
-    .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary; stars: 0 to 3)
+    .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary; stars: 0 to 4)
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
     .venv/bin/python tools/cards/hq.py move ID DECK                  into a starter deck (its slug), or `pool` for none
     .venv/bin/python tools/cards/hq.py shelve ID                     a card in no starter out of the collection (into the reserve)
@@ -574,8 +574,9 @@ def shelve(card_id: str, by: str = "martin") -> str:
 
 
 def collect(card_id: str, by: str = "martin") -> str:
-    """Put a reserve card into the collection. The reverse of shelve."""
-    return _set_status(card_id, "reserve", "collectible", "into the collection", by)
+    """Put a reserve card, or a token a card makes (the Kitten, 2026-11-16), into the collection. The reverse of shelve."""
+    return (_set_status(card_id, "reserve", "collectible", "into the collection", by)
+            or _set_status(card_id, "token", "collectible", "into the collection", by))
 
 
 # ---------- ids ----------

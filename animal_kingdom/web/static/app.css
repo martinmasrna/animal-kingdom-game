@@ -235,9 +235,9 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
    on the rim's banner top-left and the level's stars inked in its seat bottom-right (baked into the rim, none for level 0).
    Read in full (--rd 1) the card is the open face above. Pieces from the design scratchpad's r6/build_today_wood.py. */
 .card.fo { --frc: url(/static/kit2/card_rim_common_0.webp); }
-.card.fo.l1 { --frc: url(/static/kit2/card_rim_common_1.webp); } .card.fo.l2 { --frc: url(/static/kit2/card_rim_common_2.webp); } .card.fo.l3 { --frc: url(/static/kit2/card_rim_common_3.webp); }
+.card.fo.l1 { --frc: url(/static/kit2/card_rim_common_1.webp); } .card.fo.l2 { --frc: url(/static/kit2/card_rim_common_2.webp); } .card.fo.l3 { --frc: url(/static/kit2/card_rim_common_3.webp); } .card.fo.l4 { --frc: url(/static/kit2/card_rim_common_4.webp); }
 .card.fo.legendary { --frc: url(/static/kit2/card_rim_legendary_0.webp); }
-.card.fo.legendary.l1 { --frc: url(/static/kit2/card_rim_legendary_1.webp); } .card.fo.legendary.l2 { --frc: url(/static/kit2/card_rim_legendary_2.webp); } .card.fo.legendary.l3 { --frc: url(/static/kit2/card_rim_legendary_3.webp); }
+.card.fo.legendary.l1 { --frc: url(/static/kit2/card_rim_legendary_1.webp); } .card.fo.legendary.l2 { --frc: url(/static/kit2/card_rim_legendary_2.webp); } .card.fo.legendary.l3 { --frc: url(/static/kit2/card_rim_legendary_3.webp); } .card.fo.legendary.l4 { --frc: url(/static/kit2/card_rim_legendary_4.webp); }
 .card.fo.compact .pic { -webkit-mask: url(/static/kit2/card_rim_mask.png) 0 0 / 100% 100%; mask: url(/static/kit2/card_rim_mask.png) 0 0 / 100% 100%; }
 .card.fo .stab { background: none; transform: translate(calc((1 - var(--rd, 1)) * .49em), calc((1 - var(--rd, 1)) * 1.24em)); }
 .card.fo .stab::before { content: ''; position: absolute; inset: 0; background: var(--fdisc) 0 0 / 100% 100% no-repeat; opacity: var(--rd, 1); }

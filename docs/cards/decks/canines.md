@@ -19,7 +19,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Orca** | 2 | — | 6 | Apex Predator. Roam. |
+| **Orca** | 2 | — | 7 | Apex Predator. Roam. |
 | **Coyote** | 2 | Canine | 2 | Roar: give a connected ally Roam. It roams. |
 | **Dhole** | 2 | Canine | 5 | Roam. Whenever this covers an enemy with no other enemy next to it, draw 2 cards. |
 | **Jackal** | 2 | Canine | 3 | Roam. Whenever this roams, remove an adjacent enemy weaker than this. |

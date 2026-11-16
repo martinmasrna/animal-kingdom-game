@@ -253,6 +253,8 @@ def _end_turn(state: GameState) -> None:
     state.turn_flags = {}                    # reset once-per-turn trigger flags
     state.current = other_player(player)
     state.emit("turn_start", player=state.current, turn=state.turn_counter)
+    if state.config.turn_draw_count:          # the turn's free card (Martin, 2026-11-16)
+        effects.draw_cards(state, state.current, state.config.turn_draw_count)
     # Start of the new player's turn: delayed effects + start-of-turn triggers, then resolve.
     effects.start_of_turn(state, state.current)
     effects.resolve(state)

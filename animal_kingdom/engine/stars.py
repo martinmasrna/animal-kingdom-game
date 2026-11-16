@@ -11,7 +11,7 @@ game reads every rare as a common, so the engines, the client and the deck rules
 
 from __future__ import annotations
 
-STAR_LEVELS = (0, 1, 2, 3)   # no level below ordinary: too confusing for players (Martin, 2026-11-15)
+STAR_LEVELS = (0, 1, 2, 3, 4)   # no level below ordinary: too confusing for players (Martin, 2026-11-15); 4 for Ash (2026-11-16)
 STAR_DEFAULTS = {"common": 0, "rare": 1, "legendary": 2}
 
 

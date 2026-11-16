@@ -114,7 +114,7 @@ fn anthem_bonus_turn_cards(st: &State, card: &Card, owner: Player, self_iid: Opt
                 }
             }
             2 => {
-                bonus += cfg.int("tuna_per_fish") * crate::statics::fish_count(st, owner, None, self_iid);
+                bonus += cfg.int("tuna_per_fish") * tops.iter().filter(|u| Some(u.iid) != self_iid).count() as i32;   // each other animal you control
             }
             3 => bonus += cfg.int("marmot_per_step") * (st.food[owner.min(1) as usize] / cfg.int("marmot_food_step")),
             4 => bonus += cfg.int("hand_per_card") * st.hands[owner.min(1) as usize].len() as i32,

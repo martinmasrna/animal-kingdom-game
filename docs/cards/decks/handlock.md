@@ -19,9 +19,9 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Hummingbird** | 2 | Bird | 1 | Flight. Roar: draw 2 cards. |
+| **??** | 2 | Bird | 2 | Roar: draw 2 cards. |
 | **Orangutan** | 2 | Primate | 5 | Roar: duplicate a Primate in your hand. |
-| **Tarsier** | 2 | Primate | 2 | Roar: draw a Primate, then give a Primate in your hand +2 strength. |
+| **Tarsier** | 2 | Primate | 2 | Echo. Roar: give an animal in your hand +2 strength. |
 | **Chimpanzee** | 2 | Primate | 4 | Roar: remove an adjacent enemy of equal or lower strength. |
 
 ### Common
@@ -29,7 +29,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Macaque** | 2 | Primate | 2 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
-| **Baboon** | 2 | Primate | 5 | Roar: give 2 animals in your hand +1 strength. |
+| **Baboon** | 2 | Primate | 4 | Roar: give 2 animals in your hand +1 strength. |
 | **Stork** | 2 | Bird | 4 | Flight. Roar: add two random younglings to your hand. |
 | **Caterpillar** | 2 | — | 1 | When this gains strength, draw a card and turn into a Butterfly. |
 | **Gorilla** | 2 | Primate | 6 | Roar: if this has 8 or more strength, draw a card. |

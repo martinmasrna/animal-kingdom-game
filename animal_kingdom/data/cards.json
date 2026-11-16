@@ -4,7 +4,7 @@
     {
       "id": "army_ant_legend",
       "name": "Queen Solenia",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Colony",
@@ -20,7 +20,7 @@
     {
       "id": "hornet_legend",
       "name": "Vesper",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Colony"
@@ -36,7 +36,7 @@
     {
       "id": "bee_legend",
       "name": "Queen Melissia",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Colony",
@@ -51,7 +51,7 @@
     {
       "id": "bumblebee_legend",
       "name": "Lord Bumbleton",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Colony"
@@ -67,7 +67,7 @@
     {
       "id": "nurse_bee",
       "name": "Nurse Bee",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -84,7 +84,7 @@
     {
       "id": "nurse_bumblebee",
       "name": "Nurse Bumblebee",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -101,7 +101,7 @@
     {
       "id": "termite_king",
       "name": "Termite King",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Colony"
@@ -115,7 +115,7 @@
     {
       "id": "termite_queen",
       "name": "Termite Queen",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Colony",
@@ -131,7 +131,7 @@
     {
       "id": "queen_bee",
       "name": "Queen Bee",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Colony",
@@ -151,7 +151,7 @@
     {
       "id": "guard_wasp",
       "name": "Soldier Wasp",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -168,7 +168,7 @@
     {
       "id": "soldier_ant",
       "name": "Soldier Ant",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -183,7 +183,7 @@
     {
       "id": "worker_ant",
       "name": "Worker Ant",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -198,7 +198,7 @@
     {
       "id": "worker_wasp",
       "name": "Worker Wasp",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -221,18 +221,19 @@
         "Colony",
         "Worker"
       ],
-      "base_strength": 2,
-      "text": "Flight. Roar: gain 12 food.",
+      "base_strength": 1,
+      "text": "Flight. Echo. Roar: gain 6 food.",
       "species": "Bee",
       "habitat": "Meadow",
       "keywords": [
-        "Flight"
+        "Flight",
+        "Echo"
       ]
     },
     {
       "id": "pheasant_legend",
       "name": "Ember",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -248,7 +249,7 @@
     {
       "id": "praying_mantis",
       "name": "Praying Mantis",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
@@ -260,7 +261,7 @@
     {
       "id": "raccoon",
       "name": "Raccoon",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 4,
@@ -272,7 +273,7 @@
     {
       "id": "piranha",
       "name": "Piranha",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -286,7 +287,7 @@
     {
       "id": "vulture",
       "name": "Vulture",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -302,7 +303,7 @@
     {
       "id": "city_spider",
       "name": "City Spider",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Arachnid"
@@ -316,7 +317,7 @@
     {
       "id": "earthworm",
       "name": "Earthworm",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 1,
@@ -331,7 +332,7 @@
     {
       "id": "cockroach",
       "name": "Cockroach",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -346,7 +347,7 @@
     {
       "id": "sperm_whale",
       "name": "Sperm Whale",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 8,
@@ -363,7 +364,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 5,
+      "base_strength": 3,
       "text": "Poison.",
       "species": "Toad",
       "habitat": "Meadow",
@@ -374,7 +375,7 @@
     {
       "id": "locust_legend",
       "name": "The First of Many",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 2,
@@ -389,7 +390,7 @@
     {
       "id": "cockroach_legend",
       "name": "Roach King",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
@@ -401,7 +402,7 @@
     {
       "id": "python",
       "name": "Python",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -415,7 +416,7 @@
     {
       "id": "rat_legend_2",
       "name": "Pestis",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -429,7 +430,7 @@
     {
       "id": "leopard_legend",
       "name": "Ishar the Unseen",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -448,7 +449,7 @@
     {
       "id": "wolf_legend_3",
       "name": "Akana",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Canine"
@@ -462,7 +463,7 @@
     {
       "id": "wolf_legend_2",
       "name": "Karakhan",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Canine"
@@ -497,19 +498,20 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 6,
+      "base_strength": 7,
       "text": "Apex Predator. Roam.",
       "keywords": [
         "Apex Predator",
         "Roam"
       ],
       "species": "Orca",
-      "habitat": "Open Ocean"
+      "habitat": "Open Ocean",
+      "stars": 3
     },
     {
       "id": "fox",
       "name": "Fox",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -523,7 +525,7 @@
     {
       "id": "jackal",
       "name": "Jackal",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Canine"
@@ -539,7 +541,7 @@
     {
       "id": "dhole",
       "name": "Dhole",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Canine"
@@ -571,7 +573,7 @@
     {
       "id": "bush_dog",
       "name": "Bush Dog",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -590,7 +592,7 @@
     {
       "id": "coyote",
       "name": "Coyote",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Canine"
@@ -604,7 +606,7 @@
     {
       "id": "african_wild_dog",
       "name": "African Wild Dog",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -620,7 +622,7 @@
     {
       "id": "badger",
       "name": "Badger",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -632,7 +634,7 @@
     {
       "id": "street_dog",
       "name": "Street Dog",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -646,7 +648,7 @@
     {
       "id": "skunk_legend",
       "name": "Rue",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 5,
@@ -658,7 +660,7 @@
     {
       "id": "falcon_legend",
       "name": "[FALCON]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -680,7 +682,7 @@
         "Colony"
       ],
       "base_strength": 2,
-      "text": "Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy.",
+      "text": "Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy of strength 7 or less.",
       "species": "Hornet",
       "habitat": "Forest",
       "keywords": [
@@ -702,7 +704,7 @@
     {
       "id": "skunk",
       "name": "Skunk",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 4,
@@ -714,7 +716,7 @@
     {
       "id": "hare",
       "name": "Hare",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -735,7 +737,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 6,
+      "base_strength": 5,
       "text": "Roar: if this is next to your opponent's den, draw 2 cards.",
       "species": "Cheetah",
       "habitat": "Savanna",
@@ -744,7 +746,7 @@
     {
       "id": "rat",
       "name": "Rat",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -763,7 +765,7 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 4,
+      "base_strength": 3,
       "text": "Flight. Roar: if this is next to your opponent's den, draw a card.",
       "species": "Falcon",
       "habitat": "Forest",
@@ -773,22 +775,23 @@
     },
     {
       "id": "bat",
-      "name": "Bat",
+      "name": "??",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 3,
-      "text": "Flight. Roar: draw a card.",
-      "keywords": [
-        "Flight"
-      ],
+      "base_strength": 2,
+      "text": "Echo. Roar: draw 2 cards.",
       "species": "Bat",
-      "habitat": "City"
+      "habitat": "City",
+      "stars": 3,
+      "keywords": [
+        "Echo"
+      ]
     },
     {
       "id": "mouse",
       "name": "Mouse",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -802,7 +805,7 @@
     {
       "id": "fox_legend",
       "name": "Scarlett",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Canine"
@@ -828,12 +831,12 @@
       "keywords": [],
       "species": "Mole",
       "habitat": "Meadow",
-      "stars": 2
+      "stars": 3
     },
     {
       "id": "mole_legend",
       "name": "[MOLE]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
@@ -845,7 +848,7 @@
     {
       "id": "lion_legend",
       "name": "Prince Leo",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -862,7 +865,7 @@
     {
       "id": "lion_legend_2",
       "name": "Princess Lea",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -879,7 +882,7 @@
     {
       "id": "lion_legend_3",
       "name": "King Theron",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -912,11 +915,11 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 6,
-      "text": "Roar: remove an adjacent enemy of strength 4 or less.",
-      "keywords": [],
+      "base_strength": 5,
+      "text": "Roar: remove an adjacent enemy of strength 5 or less.",
       "species": "Jaguar",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "serval",
@@ -926,16 +929,17 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 2,
-      "text": "Roar: if you played another Cat this turn, remove an adjacent enemy.",
-      "keywords": [],
+      "base_strength": 1,
+      "text": "Roar: if you played another Cat this turn, remove an adjacent enemy of strength 8 or more.",
       "species": "Serval",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "stars": 1,
+      "keywords": []
     },
     {
       "id": "leopard",
       "name": "Leopard",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Cat"
@@ -954,12 +958,12 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 7,
-      "text": "Apex Predator. Stealth.",
+      "base_strength": 6,
+      "text": "Stealth.",
       "species": "Black Panther",
       "habitat": "Jungle",
+      "stars": 0,
       "keywords": [
-        "Apex Predator",
         "Stealth"
       ]
     },
@@ -975,12 +979,13 @@
       "text": "",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "stars": 1
     },
     {
       "id": "lynx",
       "name": "Lynx",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Cat"
@@ -999,7 +1004,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 6,
+      "base_strength": 5,
       "text": "Reach.",
       "keywords": [
         "Reach"
@@ -1021,21 +1026,23 @@
         "Apex Predator"
       ],
       "species": "Tiger",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "stars": 1
     },
     {
       "id": "bobcat",
-      "name": "Bobcat",
+      "name": "bobcat/lynx?",
       "status": "collectible",
       "rarity": "common",
       "tags": [
         "Cat"
       ],
       "base_strength": 5,
-      "text": "Roar: if you control another Cat, draw a card.",
-      "keywords": [],
+      "text": "Roar: draw a card.",
       "species": "Bobcat",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "stars": 1,
+      "keywords": []
     },
     {
       "id": "alley_cat",
@@ -1069,7 +1076,7 @@
     {
       "id": "tuna_legend",
       "name": "[TUNA]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Fish"
@@ -1083,7 +1090,7 @@
     {
       "id": "manta_ray_legend",
       "name": "[MANTA RAY]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Fish"
@@ -1097,7 +1104,7 @@
     {
       "id": "piranha_legend",
       "name": "Picardinha",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Fish"
@@ -1111,7 +1118,7 @@
     {
       "id": "swordfish",
       "name": "Swordfish",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -1125,7 +1132,7 @@
     {
       "id": "barracuda",
       "name": "Barracuda",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1139,7 +1146,7 @@
     {
       "id": "manta_ray",
       "name": "Manta Ray",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -1153,7 +1160,7 @@
     {
       "id": "remora",
       "name": "Remora",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -1168,7 +1175,7 @@
     {
       "id": "cod",
       "name": "Cod",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1187,7 +1194,7 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 0,
+      "base_strength": 1,
       "text": "Roar: fill adjacent empty crossroads with Sardines from your hand and deck.",
       "keywords": [],
       "species": "Sardine",
@@ -1196,7 +1203,7 @@
     {
       "id": "mahi_mahi",
       "name": "Mahi-mahi",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1215,16 +1222,16 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 3,
-      "text": "Has +1 strength for each other Fish you control.",
-      "keywords": [],
+      "base_strength": 2,
+      "text": "Has +1 strength for each other animal you control.",
       "species": "Tuna",
-      "habitat": "Open Ocean"
+      "habitat": "Open Ocean",
+      "keywords": []
     },
     {
       "id": "sunfish",
       "name": "Sunfish",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1241,7 +1248,7 @@
     {
       "id": "capybara_legend",
       "name": "Big Gus",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -1255,7 +1262,7 @@
     {
       "id": "macaque_legend",
       "name": "Don Santo",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Primate"
@@ -1269,7 +1276,7 @@
     {
       "id": "rat_legend",
       "name": "Fat Moe",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -1283,7 +1290,7 @@
     {
       "id": "chipmunk_legend",
       "name": "Tally",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -1297,7 +1304,7 @@
     {
       "id": "flying_squirrel",
       "name": "Flying Squirrel",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -1316,11 +1323,12 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 3,
-      "text": "Roar: draw a card. When an enemy is placed next to this, draw a card.",
-      "keywords": [],
+      "base_strength": 2,
+      "text": "When an enemy is placed next to this, draw a card.",
       "species": "Meerkat",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "stars": 0,
+      "keywords": []
     },
     {
       "id": "beaver",
@@ -1330,16 +1338,19 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 5,
-      "text": "Roar: next turn, take 1 additional action.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Echo. Roar: next turn, take 1 additional action.",
       "species": "Beaver",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "stars": 3,
+      "keywords": [
+        "Echo"
+      ]
     },
     {
       "id": "dormouse",
       "name": "Dormouse",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -1358,7 +1369,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 4,
+      "base_strength": 2,
       "text": "Roar: gain 10 food.",
       "keywords": [],
       "species": "Squirrel",
@@ -1373,10 +1384,13 @@
         "Rodent"
       ],
       "base_strength": 1,
-      "text": "Roar: gain 10 food. At the start of your next turn, gain 10 more.",
-      "keywords": [],
+      "text": "Echo. Roar: gain 10 food.",
       "species": "Chipmunk",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "stars": 1,
+      "keywords": [
+        "Echo"
+      ]
     },
     {
       "id": "gopher",
@@ -1387,9 +1401,10 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy.",
+      "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy of strength 7 or less.",
       "species": "Gopher",
       "habitat": "Meadow",
+      "stars": 1,
       "keywords": []
     },
     {
@@ -1414,8 +1429,8 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 3,
-      "text": "Dawn: gain 10 food.",
+      "base_strength": 2,
+      "text": "Dawn: gain 5 food.",
       "species": "Groundhog",
       "habitat": "Meadow",
       "keywords": []
@@ -1423,7 +1438,7 @@
     {
       "id": "hamster",
       "name": "Hamster",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -1437,7 +1452,7 @@
     {
       "id": "octopus_legend_2",
       "name": "Madame Octavia",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 4,
@@ -1449,7 +1464,7 @@
     {
       "id": "squirrel_legend",
       "name": "Yuki",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -1466,7 +1481,7 @@
       "status": "collectible",
       "rarity": "legendary",
       "tags": [],
-      "base_strength": 5,
+      "base_strength": 4,
       "text": "Armor. Stealth. Poison. Spikes.",
       "keywords": [
         "Armor",
@@ -1476,12 +1491,12 @@
       ],
       "species": "Honey Badger",
       "habitat": "Savanna",
-      "stars": 3
+      "stars": 4
     },
     {
       "id": "chameleon_legend",
       "name": "Iris",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
@@ -1493,7 +1508,7 @@
     {
       "id": "capybara",
       "name": "Capybara",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -1512,18 +1527,19 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 5,
+      "base_strength": 4,
       "text": "Spikes. Your adjacent animals have Spikes.",
       "species": "Porcupine",
       "habitat": "Forest",
       "keywords": [
         "Spikes"
-      ]
+      ],
+      "stars": 2
     },
     {
       "id": "golden_orb_weaver",
       "name": "Golden Orb-Weaver",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Arachnid"
@@ -1540,13 +1556,14 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 5,
+      "base_strength": 4,
       "text": "Armor. Your adjacent animals have Armor.",
       "species": "Armadillo",
       "habitat": "Jungle",
       "keywords": [
         "Armor"
-      ]
+      ],
+      "stars": 2
     },
     {
       "id": "hedgehog",
@@ -1554,7 +1571,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 5,
+      "base_strength": 3,
       "text": "Spikes.",
       "species": "Hedgehog",
       "habitat": "Meadow",
@@ -1565,7 +1582,7 @@
     {
       "id": "dart_frog",
       "name": "Dart Frog",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 1,
@@ -1583,18 +1600,19 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 5,
+      "base_strength": 4,
       "text": "Poison. Your adjacent animals have Poison.",
       "species": "Jellyfish",
       "habitat": "Open Ocean",
       "keywords": [
         "Poison"
-      ]
+      ],
+      "stars": 2
     },
     {
       "id": "black_bear",
       "name": "Black Bear",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Bear"
@@ -1611,7 +1629,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 6,
+      "base_strength": 4,
       "text": "Armor.",
       "species": "Tortoise",
       "habitat": "Savanna",
@@ -1622,7 +1640,7 @@
     {
       "id": "owl",
       "name": "Owl",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -1638,7 +1656,7 @@
     {
       "id": "anaconda_legend",
       "name": "Eon",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Snake"
@@ -1654,7 +1672,7 @@
     {
       "id": "raven_legend",
       "name": "Grimm",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -1685,38 +1703,38 @@
     },
     {
       "id": "hawk",
-      "name": "Hawk",
+      "name": "Viper?",
       "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
       ],
-      "base_strength": 4,
-      "text": "Flight. Roar: remove an adjacent enemy of strength 4 or less.",
+      "base_strength": 1,
+      "text": "Roar: remove an adjacent enemy of strength 5 or less.",
       "species": "Hawk",
       "habitat": "Forest",
-      "keywords": [
-        "Flight"
-      ]
+      "stars": 0,
+      "keywords": []
     },
     {
       "id": "cottonmouth",
-      "name": "Cottonmouth",
-      "status": "reserve",
+      "name": "some snake?",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Snake"
       ],
-      "base_strength": 5,
-      "text": "Roar: choose an adjacent enemy. At the start of your next turn, remove it.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
       "species": "Cottonmouth",
-      "habitat": "River and Lake"
+      "habitat": "River and Lake",
+      "stars": 0,
+      "keywords": []
     },
     {
       "id": "magpie",
       "name": "Magpie",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -1737,8 +1755,8 @@
       "tags": [
         "Snake"
       ],
-      "base_strength": 4,
-      "text": "Roar: remove an adjacent enemy of strength 6 or less.",
+      "base_strength": 3,
+      "text": "Roar: remove an adjacent enemy of strength 7 or less.",
       "species": "Black Mamba",
       "habitat": "Savanna",
       "keywords": []
@@ -1746,7 +1764,7 @@
     {
       "id": "egg_eater",
       "name": "Egg Eater",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -1775,7 +1793,7 @@
     {
       "id": "raven",
       "name": "Raven",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -1791,7 +1809,7 @@
     {
       "id": "bird_egg",
       "name": "Bird Egg",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Egg"
@@ -1805,7 +1823,7 @@
     {
       "id": "snake_egg",
       "name": "Snake Egg",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Egg"
@@ -1866,7 +1884,7 @@
     {
       "id": "orangutan_legend",
       "name": "Nani",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Primate"
@@ -1899,7 +1917,7 @@
     {
       "id": "eagle_legend",
       "name": "Arne",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -1919,24 +1937,23 @@
     },
     {
       "id": "hummingbird",
-      "name": "Hummingbird",
+      "name": "??",
       "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
       ],
-      "base_strength": 1,
-      "text": "Flight. Roar: draw 2 cards.",
-      "keywords": [
-        "Flight"
-      ],
+      "base_strength": 2,
+      "text": "Roar: draw 2 cards.",
       "species": "Hummingbird",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "stars": 2,
+      "keywords": []
     },
     {
       "id": "macaque",
       "name": "Macaque",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Primate"
@@ -1950,7 +1967,7 @@
     {
       "id": "orangutan",
       "name": "Orangutan",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Primate"
@@ -1970,15 +1987,17 @@
         "Primate"
       ],
       "base_strength": 2,
-      "text": "Roar: draw a Primate, then give a Primate in your hand +2 strength.",
+      "text": "Echo. Roar: give an animal in your hand +2 strength.",
       "species": "Tarsier",
       "habitat": "Jungle",
-      "keywords": []
+      "keywords": [
+        "Echo"
+      ]
     },
     {
       "id": "chimpanzee",
       "name": "Chimpanzee",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Primate"
@@ -1997,7 +2016,7 @@
       "tags": [
         "Primate"
       ],
-      "base_strength": 5,
+      "base_strength": 4,
       "text": "Roar: give 2 animals in your hand +1 strength.",
       "keywords": [],
       "species": "Baboon",
@@ -2006,7 +2025,7 @@
     {
       "id": "stork",
       "name": "Stork",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -2032,7 +2051,7 @@
     {
       "id": "caterpillar",
       "name": "Caterpillar",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -2048,7 +2067,7 @@
     {
       "id": "gorilla",
       "name": "Gorilla",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Primate"
@@ -2076,7 +2095,7 @@
     {
       "id": "rhinoceros_legend",
       "name": "Thorn",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 8,
@@ -2091,7 +2110,7 @@
     {
       "id": "tortoise_legend",
       "name": "Azamandulai",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
@@ -2105,7 +2124,7 @@
     {
       "id": "sperm_whale_legend",
       "name": "Borvald",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 8,
@@ -2119,7 +2138,7 @@
     {
       "id": "oxpecker_legend",
       "name": "Redbeak",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -2142,13 +2161,11 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 8,
-      "text": "Hungry 3. Roar: remove all adjacent enemies of strength 3 or less.",
+      "text": "Roar: remove all adjacent enemies of strength 3 or less.",
       "species": "Rhinoceros",
       "habitat": "Savanna",
-      "keywords": [
-        "Hungry"
-      ],
-      "hungry": 3
+      "stars": 2,
+      "keywords": []
     },
     {
       "id": "hippopotamus",
@@ -2157,18 +2174,16 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 8,
-      "text": "Hungry 3. When an enemy of strength 4 or less is placed next to this, remove it.",
+      "text": "When an enemy of strength 5 or less is placed next to this, remove it.",
       "species": "Hippopotamus",
       "habitat": "Savanna",
-      "keywords": [
-        "Hungry"
-      ],
-      "hungry": 3
+      "stars": 2,
+      "keywords": []
     },
     {
       "id": "whale_shark",
       "name": "Whale Shark",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -2186,7 +2201,7 @@
     {
       "id": "oxpecker",
       "name": "Oxpecker",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -2214,7 +2229,7 @@
     {
       "id": "dung_beetle",
       "name": "Dung Beetle",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Beetle"
@@ -2232,12 +2247,11 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 12,
-      "text": "Titan.",
-      "keywords": [
-        "Titan"
-      ],
+      "text": "",
       "species": "Blue Whale",
-      "habitat": "Open Ocean"
+      "habitat": "Open Ocean",
+      "stars": 3,
+      "keywords": []
     },
     {
       "id": "sloth",
@@ -2246,10 +2260,10 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
-      "text": "Roar: in 2 turns, gain 30 food.",
-      "keywords": [],
+      "text": "Roar: in 3 turns, gain 30 food.",
       "species": "Sloth",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "elephant",
@@ -2258,18 +2272,16 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 9,
-      "text": "Hungry 5.",
-      "keywords": [
-        "Hungry"
-      ],
-      "hungry": 5,
+      "text": "",
       "species": "Elephant",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "stars": 2,
+      "keywords": []
     },
     {
       "id": "moose",
       "name": "Moose",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2287,7 +2299,7 @@
     {
       "id": "wildebeest_legend",
       "name": "Haldaran Dusthoof",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -2301,7 +2313,7 @@
     {
       "id": "boar_legend",
       "name": "Stonetusk",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -2315,7 +2327,7 @@
     {
       "id": "zebra_legend",
       "name": "Galwen [X]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -2329,7 +2341,7 @@
     {
       "id": "giraffe_legend",
       "name": "Miradel Longwatch",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -2346,16 +2358,16 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 3,
-      "text": "Roar: remove an adjacent enemy of strength 6 or more.",
-      "keywords": [],
+      "base_strength": 2,
+      "text": "Roar: remove an adjacent enemy of strength 8 or more.",
       "species": "Honey Badger",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "okapi",
       "name": "Okapi",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -2369,7 +2381,7 @@
     {
       "id": "zebra",
       "name": "Zebra",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2385,7 +2397,7 @@
     {
       "id": "giraffe",
       "name": "Giraffe",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2402,7 +2414,7 @@
     {
       "id": "cape_buffalo",
       "name": "Cape Buffalo",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -2416,7 +2428,7 @@
     {
       "id": "gazelle",
       "name": "Gazelle",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2432,7 +2444,7 @@
     {
       "id": "wildebeest",
       "name": "Wildebeest",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2446,7 +2458,7 @@
     {
       "id": "deer",
       "name": "Deer",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2465,7 +2477,7 @@
     {
       "id": "boar",
       "name": "Boar",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2479,7 +2491,7 @@
     {
       "id": "warthog",
       "name": "Warthog",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2493,7 +2505,7 @@
     {
       "id": "octopus",
       "name": "Octopus",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 4,
@@ -2516,7 +2528,8 @@
       "habitat": "Open Ocean",
       "keywords": [
         "Apex Predator"
-      ]
+      ],
+      "stars": 2
     },
     {
       "id": "butterfly",
@@ -2530,12 +2543,13 @@
         "Flight"
       ],
       "species": "Butterfly",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "stars": 1
     },
     {
       "id": "macaw",
       "name": "Macaw",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -2556,7 +2570,7 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 6,
+      "base_strength": 5,
       "text": "Flight. Apex Predator.",
       "species": "Eagle",
       "habitat": "Forest",
@@ -2568,7 +2582,7 @@
     {
       "id": "cuckoo",
       "name": "Cuckoo",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -2587,7 +2601,7 @@
     {
       "id": "opossum",
       "name": "Opossum",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 4,
@@ -2599,7 +2613,7 @@
     {
       "id": "anaconda",
       "name": "Anaconda",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -2791,7 +2805,7 @@
     {
       "id": "woodpecker",
       "name": "Woodpecker",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -2807,7 +2821,7 @@
     {
       "id": "stag_beetle",
       "name": "Stag Beetle",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Beetle"
@@ -2823,7 +2837,7 @@
     {
       "id": "dolphin",
       "name": "Dolphin",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
@@ -2840,7 +2854,7 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 4,
+      "base_strength": 5,
       "text": "Flight. Roar: remove all adjacent enemies of strength 3 or less.",
       "species": "Albatross",
       "habitat": "Open Ocean",
@@ -2851,7 +2865,7 @@
     {
       "id": "cuckoo_legend",
       "name": "Cuco",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -2865,7 +2879,7 @@
     {
       "id": "sloth_legend",
       "name": "Aya",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 4,
@@ -2877,7 +2891,7 @@
     {
       "id": "tarantula",
       "name": "Tarantula",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Arachnid"
@@ -2891,7 +2905,7 @@
     {
       "id": "sea_turtle",
       "name": "Sea Turtle",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 5,
@@ -2908,7 +2922,7 @@
     {
       "id": "hyena",
       "name": "Hyena",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -2934,7 +2948,7 @@
     {
       "id": "bat_legend",
       "name": "[BAT]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
@@ -2949,7 +2963,7 @@
     {
       "id": "crocodile",
       "name": "Crocodile",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
@@ -2963,7 +2977,7 @@
     {
       "id": "grizzly_bear",
       "name": "Grizzly Bear",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Bear"
@@ -2983,7 +2997,7 @@
         "Colony",
         "Soldier"
       ],
-      "base_strength": 3,
+      "base_strength": 1,
       "text": "Flight. Spikes.",
       "keywords": [
         "Flight",
@@ -3010,7 +3024,7 @@
     {
       "id": "queen_ant",
       "name": "Queen Ant",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Colony",
@@ -3548,7 +3562,7 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 5,
+      "base_strength": 3,
       "text": "Flight.",
       "species": "Pigeon",
       "habitat": "City",
@@ -3619,7 +3633,7 @@
     {
       "id": "electric_eel",
       "name": "Electric Eel",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 3,
@@ -3643,7 +3657,7 @@
     {
       "id": "hammerhead",
       "name": "Hammerhead",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -3681,7 +3695,7 @@
     {
       "id": "bee_legend_2",
       "name": "Lady Juliette",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Colony"
@@ -3752,7 +3766,7 @@
     {
       "id": "stick_insect",
       "name": "Stick Insect",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
@@ -3783,7 +3797,7 @@
       "tags": [
         "Beetle"
       ],
-      "base_strength": 0,
+      "base_strength": 1,
       "text": "Can cover animals of any strength.",
       "species": "Hercules Beetle",
       "habitat": "Jungle",
@@ -3792,7 +3806,7 @@
     {
       "id": "krill",
       "name": "Krill",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -3804,7 +3818,7 @@
     {
       "id": "dung_beetle_legend",
       "name": "El'Rahhal: Birth",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Beetle"
@@ -3891,7 +3905,7 @@
     {
       "id": "mara",
       "name": "Mara",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -3905,7 +3919,7 @@
     {
       "id": "wolverine",
       "name": "Wolverine",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -3917,7 +3931,7 @@
     {
       "id": "elephant_legend",
       "name": "[ELEPHANT]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 9,
@@ -3933,7 +3947,7 @@
     {
       "id": "rodent_legend",
       "name": "[RODENT]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -3947,7 +3961,7 @@
     {
       "id": "sardine_legend",
       "name": "Santa Sardinia",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Fish"
@@ -3961,7 +3975,7 @@
     {
       "id": "deer_legend",
       "name": "Denae Swiftfoot",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -3977,19 +3991,19 @@
     {
       "id": "kitten",
       "name": "Kitten",
-      "status": "token",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Cat"
       ],
       "base_strength": 1,
-      "text": "Roar: draw a non-legendary animal.",
+      "text": "Roar: draw a card.",
       "keywords": []
     },
     {
       "id": "impala",
       "name": "Impala",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -4051,7 +4065,7 @@
     {
       "id": "vole",
       "name": "Vole",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -4070,7 +4084,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Has +1 strength for each 10 food you have.",
       "species": "Marmot",
       "habitat": "Meadow",
@@ -4079,7 +4093,7 @@
     {
       "id": "bison",
       "name": "Bison",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -4093,7 +4107,7 @@
     {
       "id": "deer_legend_2",
       "name": "Elari",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -4144,7 +4158,7 @@
     {
       "id": "food_maker",
       "name": "Food Maker",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -4156,7 +4170,7 @@
     {
       "id": "card_burner",
       "name": "Card Burner",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -4168,7 +4182,7 @@
     {
       "id": "refueler",
       "name": "Refueler",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
@@ -4180,7 +4194,7 @@
     {
       "id": "trainer",
       "name": "Trainer",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
@@ -4192,7 +4206,7 @@
     {
       "id": "flight_giver",
       "name": "Flight Giver",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
@@ -4204,7 +4218,7 @@
     {
       "id": "lookout",
       "name": "Lookout",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
@@ -4216,7 +4230,7 @@
     {
       "id": "food_thief",
       "name": "Food Thief",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -4228,7 +4242,7 @@
     {
       "id": "protector",
       "name": "Protector",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,

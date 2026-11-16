@@ -29,9 +29,9 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Barracuda** | 2 | Fish | 4 | Roar: remove an adjacent enemy with strength up to the number of your Fish. |
 | **Cod** | 2 | Fish | 4 | Roar: draw a card for each adjacent allied Fish. |
-| **Sardine** | 2 | Fish | 0 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
+| **Sardine** | 2 | Fish | 1 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
 | **Mahi-mahi** | 2 | Fish | 3 | Your other Fish have +1 strength. |
-| **Tuna** | 2 | Fish | 3 | Has +1 strength for each other Fish you control. |
+| **Tuna** | 2 | Fish | 2 | Has +1 strength for each other animal you control. |
 | **Sunfish** | 2 | Fish | 4 | Roar: place a Baby Fish on a random adjacent empty crossroad. |
 | **Hammerhead** | 2 | Fish | 4 | Roar: if an ally was removed this turn, remove an adjacent animal. |
 

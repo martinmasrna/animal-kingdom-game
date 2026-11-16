@@ -236,6 +236,10 @@ fn end_turn(st: &mut State) {
     st.current = other(player);
     let (cur, t) = (st.current, st.turn_counter);
     crate::emit!(st, "turn_start", crate::vmap!("player" => effects::pn(cur), "turn" => crate::value::Value::Int(t as i64)));
+    let n = st.cfg().turn_draw_count;
+    if n > 0 {
+        effects::draw_cards(st, cur, n);   // the turn's free card (Martin, 2026-11-16)
+    }
     effects::start_of_turn(st, cur);
     effects::resolve(st);
     if st.result.is_none() && st.pending.is_none() && st.effect_stack.is_empty() && st.turn_counter < st.cfg().max_turns && !has_top_level_action(st) {

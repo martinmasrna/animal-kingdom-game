@@ -37,6 +37,15 @@
       "note": "Martin, 2026-10-28: played, from the hand; a roam is never a play, so it can't loop",
       "by": "claude",
       "at": 1793224759
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "alley_cat": {
@@ -84,6 +93,15 @@
       "at": 1792248229,
       "lv": "draft",
       "note": "Martin 2026-10-16: his wording"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849344
     }
   },
   "anteater": {
@@ -122,9 +140,24 @@
       "at": 1792611263
     },
     "strength": {
-      "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1792611263
+      "at": 1794849331,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
+        "prev": 5
+      }
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849331
     }
   },
   "eagle_legend_2": {
@@ -167,8 +200,8 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-11-12: \"Arne\"",
-      "at": 1794497598,
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849342,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -241,9 +274,14 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin, 2026-10-16: 4 -> 5 is the biggest step in the field (covers 47% -> 65% of cards); 5 body + 2 hand points = a Lion's 7, and in Handlock hand strength triggers Caterpillar, Gorilla and Chimpanzee. 6 would be a Lion that also buffs.",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1792150022
+      "at": 1794849333,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-16: 4 -> 5 is the biggest step in the field (covers 47% -> 65% of cards); 5 body + 2 hand points = a Lion's 7, and in Handlock hand strength triggers Caterpillar, Gorilla and Chimpanzee. 6 would be a Lion that also buffs.",
+        "prev": 5
+      }
     }
   },
   "baboon_legend": {
@@ -360,6 +398,15 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792148298
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "rat_legend": {
@@ -383,8 +430,8 @@
           "species": "Mouse"
         }
       },
-      "note": "Martin, 2026-11-11: 'yeah, let's do it' (draft; Fat Moe reads gangster to him, Fat Bob read like Big Gus, not a mobster)",
-      "at": 1794399435
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849340
     },
     "art": {
       "review": {
@@ -410,12 +457,82 @@
       "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
       "by": "claude",
       "at": 1792661449
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849339
     }
   },
   "bat": {
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "CROP": [
+            0.52,
+            0.4,
+            0.75
+          ],
+          "STRIP": [
+            0.6,
+            0.42,
+            1.4
+          ],
+          "FULL": 0.349
+        }
+      },
+      "at": 1794849335
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Bat",
+          "species": "Bat"
+        }
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849332
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849332
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849332
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: draw a card."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849332
     }
   },
   "beaver": {
@@ -432,9 +549,29 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "5: the action comes back next turn, so the Beaver is a free body (Martin, 2026-10-12)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1792670323
+      "at": 1794849335
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849335
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: next turn, take 1 additional action."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849335
     }
   },
   "capybara_legend": {
@@ -450,7 +587,13 @@
     },
     "animal": {
       "lv": "fine",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849340
     }
   },
   "bird_egg": {
@@ -464,7 +607,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849341
     },
     "tag": {
       "lv": "draft",
@@ -495,6 +644,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849341
     }
   },
   "black_mamba": {
@@ -512,9 +670,19 @@
         "prev_note": "",
         "prev": "Roar: remove an adjacent enemy of strength 5 or less."
       },
-      "note": "Removal rares pass with Martin, 2026-10-26: the big-reach end (4, up to 6)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793012648
+      "at": 1794849334
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849334
     }
   },
   "black_panther": {
@@ -546,8 +714,8 @@
     "strength": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792781132,
-      "note": "7 (Martin, 2026-10-23): a Tiger with Stealth, the rare above the common Tiger",
+      "at": 1794849318,
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-21: Stealth is about -1 against the Lion",
@@ -557,12 +725,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792781132,
+      "at": 1794849318,
       "review": {
         "prev_lv": "fine",
         "prev_note": "",
         "prev": "Stealth."
-      }
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     },
     "art": {
       "lv": "fine",
@@ -571,6 +740,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849318
     }
   },
   "swan_legend": {
@@ -636,6 +815,26 @@
       "note": "Martin, 2026-10-26",
       "by": "claude",
       "at": 1793016535
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849318
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Titan."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849318
     }
   },
   "boar": {
@@ -677,6 +876,15 @@
       "note": "Martin, 2026-10-30: the boar charges whoever comes close, once",
       "by": "claude",
       "at": 1793383616
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849343
     }
   },
   "boar_legend": {
@@ -691,8 +899,8 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794305305,
-      "note": "Martin 2026-11-10: back on the card as a draft (settled 2026-10-16, bracketed in the 10-17 sweep)",
+      "at": 1794849343,
+      "note": "out of the collection (in the reserve)",
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -709,13 +917,37 @@
       "by": "martin"
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "CROP": [
+            0.285,
+            0.392,
+            0.572
+          ],
+          "STRIP": [
+            0.45,
+            0.33,
+            1.2
+          ],
+          "FULL": 0.4
+        }
+      },
+      "at": 1794849335
     },
     "effect": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792247915
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794849332,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": "Roar: if you control another Cat, draw a card."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     },
     "strength": {
       "lv": "fine",
@@ -723,9 +955,18 @@
       "at": 1792247916
     },
     "animal": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792247918
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794849331,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "name": "Bobcat",
+          "species": "Bobcat"
+        }
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     },
     "rarity": {
       "lv": "fine",
@@ -736,6 +977,16 @@
       "lv": "fine",
       "by": "martin",
       "at": 1792247921
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849331
     }
   },
   "borealis": {
@@ -756,8 +1007,8 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-11-06: \"Thorn is really really good for the Rhino\"; draft to live with",
-      "at": 1793968365,
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849342,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -817,6 +1068,15 @@
       "note": "Martin, 2026-10-28: its ability is common-worthy; swapped with the Coyote",
       "by": "claude",
       "at": 1793215284
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "butterfly": {
@@ -827,6 +1087,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849333
     }
   },
   "butterfly_legend": {
@@ -1016,6 +1286,15 @@
     "effect": {
       "by": "claude",
       "at": 1792262682
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849343
     }
   },
   "capybara": {
@@ -1047,6 +1326,15 @@
       "note": "Martin, 2026-10-22: the small-deck common, its one big body",
       "by": "claude",
       "at": 1792622195
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849341
     }
   },
   "caracal": {
@@ -1065,14 +1353,14 @@
       "note": "Reach has no number: every Reach is 2 (Martin, 2026-10-21)"
     },
     "strength": {
-      "lv": "fine",
+      "lv": "draft",
       "by": "claude",
-      "at": 1792670323,
+      "at": 1794849318,
       "review": {
         "prev_lv": "fine",
         "prev_note": ""
       },
-      "note": "6: at 5 or less the Eagle (5, Flight) practically dominates it"
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     },
     "animal": {
       "lv": "fine",
@@ -1108,6 +1396,15 @@
       "note": "leaders prototype (brief 2026-11-15)",
       "by": "claude",
       "at": 1794772133
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849342
     }
   },
   "chameleon": {
@@ -1200,8 +1497,8 @@
         "prev_note": "",
         "prev": 6
       },
-      "note": "Martin 2026-10-30",
-      "at": 1793396365
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "at": 1794849332
     },
     "effect": {
       "lv": "draft",
@@ -1241,6 +1538,15 @@
       "note": "Martin, 2026-10-22: an answer any deck can run (removal gated by the target), priced at 4: a hair under Jaguar at base, above it once Handlock buffs it",
       "by": "claude",
       "at": 1792664788
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849342
     }
   },
   "chinchilla": {
@@ -1257,6 +1563,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849333
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: gain 10 food. At the start of your next turn, gain 10 more."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849333
     }
   },
   "wolf_legend_3": {
@@ -1271,8 +1597,8 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-11-12: \"okay then, you win\" (Akana, 'white mother', the mirror of Karakhan: a steppe colour plus a role)",
-      "at": 1794505471,
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849337,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -1307,6 +1633,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849340
     }
   },
   "coyote": {
@@ -1323,9 +1658,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793215129
+      "at": 1794849338
     },
     "habitat": {
       "review": {
@@ -1384,8 +1719,12 @@
     "animal": {
       "lv": "fine",
       "by": "claude",
-      "at": 1792262682,
-      "note": "moved from giants to pool"
+      "at": 1794849345,
+      "note": "out of the collection (in the reserve)",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "moved from giants to pool"
+      }
     },
     "strength": {
       "lv": "fine",
@@ -1426,9 +1765,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from pool to egg_control",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793188969
+      "at": 1794849344
     }
   },
   "cuckoo_egg": {
@@ -1481,9 +1820,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from food_otk to aristocrats",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792676407
+      "at": 1794849341
     }
   },
   "deer": {
@@ -1514,6 +1853,15 @@
       "note": "Martin, 2026-10-22: a point under Sunfish's 4 for Flee",
       "by": "claude",
       "at": 1792668601
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849343
     }
   },
   "dhole": {
@@ -1544,6 +1892,15 @@
       "note": "Martin, 2026-10-28: Canines and Roam redesign: one below the Wolf, so it doesn't dominate it",
       "by": "claude",
       "at": 1793210648
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "dingo": {
@@ -1570,6 +1927,15 @@
       "note": "Martin, 2026-10-29: a card per 10 food gained this turn, replacing the single draw at 10 or more. Dusk comes before region income, so only the turn's own food counts",
       "by": "claude",
       "at": 1793274726
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849340
     }
   },
   "dung_beetle": {
@@ -1601,6 +1967,15 @@
       "note": "Martin, 2026-10-26: the Beetle family",
       "by": "claude",
       "at": 1793028836
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849343
     }
   },
   "eagle": {
@@ -1635,8 +2010,8 @@
         "prev_note": "",
         "prev": 5
       },
-      "note": "Martin, 2026-10-28",
-      "at": 1793210661
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "at": 1794849330
     },
     "effect": {
       "lv": "draft",
@@ -1680,6 +2055,15 @@
         "prev": "When this is removed, draw a card and place two Worms on its crossroad."
       },
       "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849337
     }
   },
   "egg_eater": {
@@ -1693,7 +2077,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849341
     },
     "tag": {
       "lv": "draft",
@@ -1739,6 +2129,26 @@
       "lv": "locked",
       "by": "martin",
       "at": 1792193257
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849317
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Hungry 5."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849317
     }
   },
   "pheasant_legend": {
@@ -1752,7 +2162,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849336
     },
     "tag": {
       "lv": "draft",
@@ -1793,7 +2209,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849341
     },
     "effect": {
       "review": {
@@ -1825,7 +2247,14 @@
     },
     "strength": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "at": 1794849332
     },
     "effect": {
       "lv": "draft",
@@ -1859,8 +2288,12 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-10-14, applied 2026-10-16",
-      "at": 1792157857
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849336,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-14, applied 2026-10-16"
+      }
     },
     "effect": {
       "review": {
@@ -1885,8 +2318,8 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-11-12: \"Madame Octavia I think works better, no?\" (the fixer who knows where every legend sleeps; French, a Madame)",
-      "at": 1794507176,
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849340,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -1920,6 +2353,15 @@
       "note": "Martin, 2026-10-30 (card board review)",
       "by": "claude",
       "at": 1793371330
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849340
     }
   },
   "fox": {
@@ -1960,6 +2402,15 @@
       "note": "Martin, 2026-10-28: any ally's roam, not only a Canine's",
       "by": "claude",
       "at": 1793220060
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "cottonmouth": {
@@ -1971,12 +2422,29 @@
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792139107
+      "at": 1794849335,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "CROP": [
+            0.46,
+            0.43,
+            0.78
+          ],
+          "STRIP": [
+            0.5,
+            0.38,
+            1.2
+          ],
+          "FULL": 0.42
+        }
+      }
     },
     "animal": {
-      "note": "out of the collection (in the reserve)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793188503,
+      "at": 1794849333,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: two Vipers read as a mistake; the Coral Snake's small head lost the bite close-up. The cottonmouth's white gape and slow venom fit both."
@@ -1999,9 +2467,29 @@
         "prev_note": "",
         "prev": 4
       },
-      "note": "Removal rares pass with Martin, 2026-10-26: a real body pays for the turn the bite takes",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793012643
+      "at": 1794849333
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849333
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: choose an adjacent enemy. At the start of your next turn, remove it."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849333
     }
   },
   "falcon_legend": {
@@ -2026,8 +2514,12 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191060
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849338,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      }
     },
     "effect": {
       "review": {
@@ -2068,6 +2560,15 @@
       "note": "Martin, 2026-10-22",
       "by": "claude",
       "at": 1792668601
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849343
     }
   },
   "giraffe": {
@@ -2098,6 +2599,15 @@
       "note": "Martin, 2026-10-26: Hungry 2 pays for a 9 wall that covers 5s; a giraffe eats all day",
       "by": "claude",
       "at": 1793050234
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849343
     }
   },
   "giraffe_legend": {
@@ -2111,9 +2621,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-11-12: \"'Longwatch' is good\" (the longest night, when she stood watch until dawn)",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794523758,
+      "at": 1794849343,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -2147,6 +2657,15 @@
       "note": "Strength buffs with Martin, 2026-10-26",
       "by": "claude",
       "at": 1793015429
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849341
     }
   },
   "gopher": {
@@ -2174,9 +2693,19 @@
         "prev_note": "",
         "prev": "Roar: if you gained 10 or more food this turn, draw 2 cards."
       },
-      "note": "Martin, 2026-10-28: the digger with the big teeth looks capable of removing; the Muskrat's effect, moved",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793188526
+      "at": 1794849334
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849334
     }
   },
   "gorilla": {
@@ -2187,6 +2716,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849342
     }
   },
   "grizzly_bear": {
@@ -2209,9 +2747,13 @@
       "at": 1792257358
     },
     "animal": {
-      "note": "moved from handlock to pool",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792262683
+      "at": 1794849345,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from handlock to pool"
+      }
     }
   },
   "groundhog": {
@@ -2229,9 +2771,9 @@
         "prev_note": "",
         "prev": 4
       },
-      "note": "Martin, 2026-10-29: Groundhog turns from payoff into setup: every turn starts fed while it lives (the fed payoffs outnumbered the cards that feed them, and a food payoff on a food deck gave no tempo); a rare for it",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793278278
+      "at": 1794849333
     },
     "effect": {
       "review": {
@@ -2239,9 +2781,9 @@
         "prev_note": "",
         "prev": "Roar: if you gained 10 or more food this turn, gain 10 food."
       },
-      "note": "Martin, 2026-10-29: Groundhog turns from payoff into setup: every turn starts fed while it lives (the fed payoffs outnumbered the cards that feed them, and a food payoff on a food deck gave no tempo); a rare for it",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793278277
+      "at": 1794849333
     },
     "rarity": {
       "review": {
@@ -2287,9 +2829,9 @@
           "species": "Wasp"
         }
       },
-      "note": "Martin's sheet, 2026-10-24: one word for the fighters, Soldier",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792858802
+      "at": 1794849336
     },
     "tag": {
       "review": {
@@ -2326,6 +2868,15 @@
       "note": "Martin, 2026-10-29: 'we can try the engine'; every card drawn goes in the cheeks; its strength effect went to the Marmot",
       "by": "claude",
       "at": 1793300648
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849340
     }
   },
   "hare": {
@@ -2367,6 +2918,15 @@
       "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
       "by": "claude",
       "at": 1792663942
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "hawk": {
@@ -2375,8 +2935,26 @@
       "by": "martin"
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "CROP": [
+            0.55,
+            0.45,
+            0.7
+          ],
+          "STRIP": [
+            0.58,
+            0.47,
+            1.8
+          ],
+          "FULL": null
+        }
+      },
+      "at": 1794849335
     },
     "strength": {
       "review": {
@@ -2384,9 +2962,9 @@
         "prev_note": "",
         "prev": 3
       },
-      "note": "Removal rares pass with Martin, 2026-10-26: real body + removal with Flight (4, up to 4)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793012645
+      "at": 1794849334
     },
     "effect": {
       "review": {
@@ -2394,9 +2972,32 @@
         "prev_note": "",
         "prev": "Flight. Roar: remove an adjacent enemy of strength 3 or less."
       },
-      "note": "Removal rares pass with Martin, 2026-10-26: one target bigger than the Albatross can take",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793012647
+      "at": 1794849334
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Hawk",
+          "species": "Hawk"
+        }
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849334
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849334
     }
   },
   "hedgehog": {
@@ -2423,6 +3024,16 @@
       "note": "Martin, 2026-10-21: the Spikes common (a one-keyword card is a common); the food Roar is gone",
       "by": "claude",
       "at": 1792610184
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849318
     }
   },
   "hippopotamus": {
@@ -2440,9 +3051,9 @@
         "prev_note": "",
         "prev": "Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it."
       },
-      "note": "Martin, 2026-10-26: 4, so the zone is worth more than the Rhino's one-off sweep at 3",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793045909
+      "at": 1794849335
     },
     "tag": {
       "review": {
@@ -2453,6 +3064,16 @@
       "note": "Martin, 2026-10-26: a rhino or hippo isn't hoofed to a normal person; not of the herd",
       "by": "claude",
       "at": 1793047929
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849335
     }
   },
   "honey_badger": {
@@ -2482,18 +3103,19 @@
     "effect": {
       "lv": "locked",
       "by": "martin",
-      "at": 1792193240
+      "at": 1794849358,
+      "note": "Martin's new pool sheet, 2026-11-16 (applied for him from the sheet)"
     },
     "strength": {
       "lv": "draft",
       "by": "claude",
-      "at": 1793012641,
+      "at": 1794849334,
       "review": {
         "prev_lv": "fine",
         "prev_note": "",
         "prev": 2
       },
-      "note": "Removal rares pass with Martin, 2026-10-26: the generic anti-big removal, +1 for its narrow target"
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     }
   },
   "honey_badger_legend": {
@@ -2519,9 +3141,19 @@
         "prev_note": "",
         "prev": 2
       },
-      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1794700890
+      "at": 1794849331
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849330
     }
   },
   "hornet": {
@@ -2562,9 +3194,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy."
       },
-      "note": "Martin, 2026-10-26: a rare isn't a Soldier; Soldiers, Workers and Nurses are commons",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793015755
+      "at": 1794849334
     }
   },
   "hummingbird": {
@@ -2573,8 +3205,26 @@
       "by": "martin"
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "CROP": [
+            0.56,
+            0.42,
+            0.62
+          ],
+          "STRIP": [
+            0.56,
+            0.42,
+            1
+          ],
+          "FULL": 0.455
+        }
+      },
+      "at": 1794849335
     },
     "rarity": {
       "lv": "locked",
@@ -2582,24 +3232,55 @@
       "at": 1792193287
     },
     "effect": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792193290
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794849332,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": "Flight. Roar: draw 2 cards."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     },
     "strength": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792193292
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794849332,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     },
     "animal": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792193294
+      "lv": "draft",
+      "by": "claude",
+      "at": 1794849332,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "name": "Hummingbird",
+          "species": "Hummingbird"
+        }
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     },
     "habitat": {
       "lv": "fine",
       "by": "martin",
       "at": 1792193297
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849332
     }
   },
   "hyena": {
@@ -2612,9 +3293,9 @@
       "by": "martin"
     },
     "animal": {
-      "note": "moved from pool to canines",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793188970,
+      "at": 1794849344,
       "review": {
         "prev_lv": "draft",
         "prev_note": "moved from aristocrats to pool"
@@ -2665,6 +3346,15 @@
       "note": "Martin 2026-10-29: the flank went to the Warthog; the Jackal picks off what it can as the pack moves",
       "by": "claude",
       "at": 1793308250
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "jaguar": {
@@ -2682,9 +3372,19 @@
         "prev_note": "",
         "prev": 5
       },
-      "note": "Removal rares pass with Martin, 2026-10-26: real body + removal; the big-body end (6, up to 4)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793012644
+      "at": 1794849334
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: remove an adjacent enemy of strength 4 or less."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849334
     }
   },
   "jellyfish": {
@@ -2731,9 +3431,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "Martin, 2026-10-30 (card board review)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793369440
+      "at": 1794849331
     },
     "art": {
       "review": {
@@ -2743,6 +3443,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793448162
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849331
     }
   },
   "jellyfish_legend": {
@@ -2788,7 +3498,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849339
     },
     "tag": {
       "lv": "draft",
@@ -2829,6 +3545,15 @@
         "prev_note": "Martin's 30 Sep wording back; the workbench conversion of 8 Oct had resurrected the old text",
         "prev": "Your Cats can be placed on enemies of equal strength."
       }
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849339
     }
   },
   "leopard_legend": {
@@ -2842,9 +3567,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-11-12: \"let's put it there\" (7/10, to live with for a week; Ishar alone was 5/10)",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794521018,
+      "at": 1794849337,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -2917,6 +3642,16 @@
       "lv": "locked",
       "by": "martin",
       "at": 1792193106
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849317
     }
   },
   "wolf_legend_2": {
@@ -2931,8 +3666,8 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-11-12: \"Karakhan sounds very good, nice. It also sounds male and like a fighter, which is exactly how I imaged the wolf.\"",
-      "at": 1794504297,
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849337,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -2976,8 +3711,13 @@
     },
     "animal": {
       "lv": "fine",
-      "by": "martin",
-      "at": 1792247930
+      "by": "claude",
+      "at": 1794849339,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)"
     },
     "rarity": {
       "lv": "draft",
@@ -3015,6 +3755,15 @@
       "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
       "by": "claude",
       "at": 1792661449
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849342
     }
   },
   "macaque_legend": {
@@ -3038,9 +3787,9 @@
         }
       },
       "lv": "draft",
-      "note": "Martin, 2026-11-11: 'Don Santo is good' (draft; Don makes him unique among the legendaries, names starting with S sounded best)",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794401228
+      "at": 1794849340
     }
   },
   "macaw": {
@@ -3057,6 +3806,15 @@
       "by": "claude",
       "at": 1792250451,
       "note": "Martin 2026-10-17: the parrot repeats (no 'may'); 'your next Roar this turn happens twice' moves to another animal"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849344
     }
   },
   "magpie": {
@@ -3067,6 +3825,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849341
     }
   },
   "mahi_mahi": {
@@ -3083,12 +3850,30 @@
       "note": "Martin, 2026-10-30 (card board review): the Mackerel's aura, the Mackerel removed",
       "by": "claude",
       "at": 1793370875
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849340
     }
   },
   "manta_ray": {
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849339
     }
   },
   "manta_ray_legend": {
@@ -3098,9 +3883,13 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792191063
+      "at": 1794849339,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      }
     }
   },
   "meerkat": {
@@ -3137,9 +3926,29 @@
         "prev_note": "",
         "prev": 2
       },
-      "note": "Strength buffs with Martin, 2026-10-26",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793015427
+      "at": 1794849332
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849332
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: draw a card. When an enemy is placed next to this, draw a card."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849332
     }
   },
   "tortoise_legend": {
@@ -3154,8 +3963,12 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-10-21: replaces Mogologolo the same day (the doubled syllable wore off). The a-z front, the weight on -man-, the Maa-shaped tail falling away. Draft, a week on the card before a lock",
-      "at": 1792593633
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849342,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: replaces Mogologolo the same day (the doubled syllable wore off). The a-z front, the weight on -man-, the Maa-shaped tail falling away. Draft, a week on the card before a lock"
+      }
     }
   },
   "sperm_whale_legend": {
@@ -3188,9 +4001,9 @@
       "at": 1793452272
     },
     "animal": {
-      "note": "Martin 2026-11-05: \"Borvald is the best of these\"; draft to live with, may iterate later",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793883670,
+      "at": 1794849342,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -3236,9 +4049,13 @@
       }
     },
     "animal": {
-      "note": "moved from hoofed to giants",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792262682
+      "at": 1794849343,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from hoofed to giants"
+      }
     },
     "rarity": {
       "review": {
@@ -3261,6 +4078,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "muskrat": {
@@ -3376,6 +4202,15 @@
       "note": "Martin, 2026-10-29: down to 2",
       "by": "claude",
       "at": 1793286725
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "nurse_bumblebee": {
@@ -3426,6 +4261,15 @@
       "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
       "at": 1792861464
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "chameleon_legend": {
@@ -3462,9 +4306,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-10-26: the legendary Chameleon, the same animal as the rare",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793028833,
+      "at": 1794849340,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-14, applied 2026-10-16",
@@ -3513,6 +4357,15 @@
       "note": "Martin, 2026-10-29: draws at both ends of the turn while grazing",
       "by": "claude",
       "at": 1793291976
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849343
     }
   },
   "orangutan": {
@@ -3523,6 +4376,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849342
     }
   },
   "orca": {
@@ -3537,9 +4399,24 @@
       "at": 1792276047
     },
     "strength": {
-      "note": "Martin, 2026-10-21: 7 was too hard to answer for a repeat eater",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1792608627
+      "at": 1794849330,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: 7 was too hard to answer for a repeat eater",
+        "prev": 6
+      }
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849330
     }
   },
   "owl": {
@@ -3556,9 +4433,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from food_otk to pool",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792747911
+      "at": 1794849341
     }
   },
   "oxpecker": {
@@ -3589,6 +4466,15 @@
       "note": "Martin, 2026-10-27",
       "by": "claude",
       "at": 1793103780
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849342
     }
   },
   "oxpecker_legend": {
@@ -3603,8 +4489,8 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794305304,
-      "note": "Martin 2026-11-10: back on the card as a draft (settled 2026-10-16, bracketed in the 10-17 sweep)",
+      "at": 1794849342,
+      "note": "out of the collection (in the reserve)",
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -3637,8 +4523,12 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "moved from den-rush to aristocrats",
-      "at": 1792086811
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849337,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from den-rush to aristocrats"
+      }
     }
   },
   "piranha": {
@@ -3675,9 +4565,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from aristocrats to pool",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793114054
+      "at": 1794849337
     },
     "rarity": {
       "review": {
@@ -3701,9 +4591,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-11-12: \"Picardinha?\" (a giggling little maniac, Li'l Zé from City of God; built on picadinho, minced meat)",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794509678,
+      "at": 1794849339,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
@@ -3766,9 +4656,24 @@
       "at": 1792611263
     },
     "strength": {
-      "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1792611263
+      "at": 1794849331,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
+        "prev": 5
+      }
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849331
     }
   },
   "praying_mantis": {
@@ -3796,6 +4701,15 @@
       "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
       "by": "claude",
       "at": 1792663941
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "lion_legend": {
@@ -3811,8 +4725,13 @@
     },
     "animal": {
       "lv": "locked",
-      "by": "martin",
-      "at": 1792193191
+      "by": "claude",
+      "at": 1794849339,
+      "review": {
+        "prev_lv": "locked",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)"
     },
     "tag": {
       "lv": "draft",
@@ -3850,8 +4769,13 @@
     },
     "animal": {
       "lv": "locked",
-      "by": "martin",
-      "at": 1792193193
+      "by": "claude",
+      "at": 1794849339,
+      "review": {
+        "prev_lv": "locked",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)"
     },
     "tag": {
       "lv": "draft",
@@ -3906,9 +4830,13 @@
       "by": "martin"
     },
     "animal": {
-      "note": "moved from egg-control to aristocrats",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792086365
+      "at": 1794849337,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from egg-control to aristocrats"
+      }
     },
     "effect": {
       "by": "claude",
@@ -3993,6 +4921,15 @@
       "note": "All queens are rare or legendary, workers, soldiers and nurses common (Martin, 2026-10-27)",
       "by": "claude",
       "at": 1793096474
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "bee_legend": {
@@ -4007,8 +4944,12 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin's own, 2026-10-21. Draft, a week on the card before a lock",
-      "at": 1792581990
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849335,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin's own, 2026-10-21. Draft, a week on the card before a lock"
+      }
     },
     "effect": {
       "note": "Martin's sheet, 2026-10-24",
@@ -4043,8 +4984,12 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-10-21: from Solenopsis, the fire ants, the ant-word notched into a queen's name like Melissia. Draft, a week on the card before a lock",
-      "at": 1792587741
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849335,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: from Solenopsis, the fire ants, the ant-word notched into a queen's name like Melissia. Draft, a week on the card before a lock"
+      }
     },
     "effect": {
       "review": {
@@ -4101,6 +5046,15 @@
       "note": "Martin, 2026-10-22: 1 below its draw twin, the Hare's 4",
       "by": "claude",
       "at": 1792669374
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "raven": {
@@ -4111,6 +5065,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849341
     }
   },
   "raven_legend": {
@@ -4126,9 +5089,13 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-10-20: his own name, a draft; a week on the card before a lock",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792486463
+      "at": 1794849341,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-20: his own name, a draft; a week on the card before a lock"
+      }
     },
     "effect": {
       "review": {
@@ -4185,6 +5152,15 @@
       "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
       "at": 1794700889
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849339
     }
   },
   "rhinoceros": {
@@ -4202,9 +5178,9 @@
         "prev_note": "",
         "prev": "Hungry 3. Roar: remove all adjacent enemies of strength 2 or less."
       },
-      "note": "Removal rares pass with Martin, 2026-10-26: 3 or less catches the small decks' engines, not only tokens",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793012650
+      "at": 1794849335
     },
     "tag": {
       "review": {
@@ -4215,6 +5191,16 @@
       "note": "Martin, 2026-10-26: a rhino or hippo isn't hoofed to a normal person; not of the herd",
       "by": "claude",
       "at": 1793047929
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849335
     }
   },
   "baby_fox_2": {
@@ -4243,9 +5229,14 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin, 2026-10-15, mid-gauntlet.",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1792096533
+      "at": 1794849333,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15, mid-gauntlet.",
+        "prev": 0
+      }
     }
   },
   "fox_legend": {
@@ -4264,8 +5255,12 @@
     "animal": {
       "lv": "fine",
       "by": "claude",
-      "note": "moved from pool to den-rush",
-      "at": 1792086810
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849339,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "moved from pool to den-rush"
+      }
     }
   },
   "chipmunk_legend": {
@@ -4280,8 +5275,12 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-10-20: his pick from the list; a draft, a week on the card before a lock",
-      "at": 1792493790
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849340,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-20: his pick from the list; a draft, a week on the card before a lock"
+      }
     },
     "effect": {
       "review": {
@@ -4304,14 +5303,19 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-16: 'if you control another Cat' was always met, making it the one unconditional any-size removal at 2; the condition now costs the turn (or an Alley Cat / twin chain). Likely unplayable outside Cats, which is fine.",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1792148718
+      "at": 1794849334,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-16: 'if you control another Cat' was always met, making it the one unconditional any-size removal at 2; the condition now costs the turn (or an Alley Cat / twin chain). Likely unplayable outside Cats, which is fine.",
+        "prev": "Roar: if you played another Cat this turn, remove an adjacent enemy."
+      }
     },
     "strength": {
-      "note": "Martin, 2026-10-30 (card board review)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793372076,
+      "at": 1794849334,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: at 4 it outclassed the Jaguar; any-size removal pays with a small body.",
@@ -4327,6 +5331,16 @@
       "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
       "by": "claude",
       "at": 1792661449
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849334
     }
   },
   "orangutan_legend": {
@@ -4355,8 +5369,8 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-11-12: \"how about 'Nani' for the orangutan?\" ... \"okay then\" (the grandmother everyone was raised by; Primates sound Indian, beside Babaji)",
-      "at": 1794515864,
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849341,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -4379,8 +5393,12 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin, 2026-10-14, applied 2026-10-16",
-      "at": 1792157857
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849338,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-14, applied 2026-10-16"
+      }
     }
   },
   "skunk": {
@@ -4391,6 +5409,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "sloth": {
@@ -4401,6 +5428,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: in 2 turns, gain 30 food."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849333
     }
   },
   "sloth_legend": {
@@ -4414,9 +5451,9 @@
       "at": 1792229409
     },
     "animal": {
-      "note": "Martin 2026-11-10: \"for Sloth we had Aya ... I think it was quite fine\"; back on the card as a draft",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794305020,
+      "at": 1794849344,
       "lv": "draft",
       "review": {
         "prev_lv": "draft",
@@ -4439,7 +5476,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849341
     },
     "tag": {
       "lv": "draft",
@@ -4496,6 +5539,15 @@
       "note": "Martin 2026-10-31: Colony conditions back at 4",
       "by": "claude",
       "at": 1793454475
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "squirrel": {
@@ -4513,9 +5565,9 @@
         "prev_note": "",
         "prev": 3
       },
-      "note": "Martin, 2026-10-30 (card board review)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793372200
+      "at": 1794849333
     }
   },
   "squirrel_legend": {
@@ -4529,9 +5581,13 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-10-14, applied 2026-10-16",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792157857
+      "at": 1794849340,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-14, applied 2026-10-16"
+      }
     },
     "effect": {
       "review": {
@@ -4554,7 +5610,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849342
     },
     "tag": {
       "lv": "draft",
@@ -4625,18 +5687,45 @@
       "note": "Martin, 2026-10-29",
       "by": "claude",
       "at": 1793292718
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849338
     }
   },
   "sunfish": {
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849340
     }
   },
   "swordfish": {
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849339
     }
   },
   "tarsier": {
@@ -4649,9 +5738,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-22: the player picks where the buff lands; stays rare",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1792661448,
+      "at": 1794849333,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Scouting a Primate was too strong and too consistent; a random Primate keeps the tutor, drops the choice.",
@@ -4707,6 +5796,15 @@
       "note": "Martin, 2026-10-24: Vesper guards Queens only, so no King tag",
       "by": "claude",
       "at": 1792863086
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "termite_queen": {
@@ -4757,6 +5855,15 @@
       "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
       "at": 1794700890
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "tiger": {
@@ -4798,6 +5905,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792155290
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849330
     }
   },
   "tortoise": {
@@ -4825,15 +5942,35 @@
         "prev_note": "",
         "prev": 4
       },
-      "note": "draft, the Armor body's number; to be settled (Martin, 2026-10-28)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793190853
+      "at": 1794849318
     }
   },
   "tuna": {
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849331
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Has +1 strength for each other Fish you control."
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849331
     }
   },
   "tuna_legend": {
@@ -4843,9 +5980,13 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792191063
+      "at": 1794849339,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      }
     }
   },
   "hornet_legend": {
@@ -4859,7 +6000,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1794849335
     },
     "effect": {
       "review": {
@@ -4920,12 +6067,30 @@
         "prev_note": "weird wording",
         "prev": "Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck."
       }
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849337
     }
   },
   "whale_shark": {
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849342
     }
   },
   "wildebeest": {
@@ -4946,6 +6111,15 @@
       "note": "Martin 2026-10-29: buff to 6",
       "by": "claude",
       "at": 1793271435
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849343
     }
   },
   "wildebeest_legend": {
@@ -4959,9 +6133,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-11-12: \"dusthoof is fine\" (he led the starving herd on the long dry march to the grass)",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794524398,
+      "at": 1794849343,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -5024,6 +6198,15 @@
       "note": "Martin, 2026-10-26: the Workers swap, the Ant's food counts every animal like Queen Solenia's",
       "by": "claude",
       "at": 1793017113
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "worker_bee": {
@@ -5036,9 +6219,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-26: the Workers swap, the Ant's food counts every animal like Queen Solenia's",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793017115,
+      "at": 1794849333,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
@@ -5051,9 +6234,9 @@
         "prev_note": "",
         "prev": 1
       },
-      "note": "Martin, 2026-10-30 (card board review)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793372200
+      "at": 1794849332
     }
   },
   "worker_wasp": {
@@ -5085,6 +6268,15 @@
       "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
       "at": 1792861463
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "worm": {
@@ -5152,6 +6344,15 @@
       "note": "Martin, 2026-10-22: the herd's food on its own deck's condition",
       "by": "claude",
       "at": 1792666803
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849343
     }
   },
   "zebra_legend": {
@@ -5165,9 +6366,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-11-13: \"Let's keep it 'Galwen [X]' and for now, we need to come back to it later\" (her epithet open; 'the Wise' was the herd's odd one out)",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794525006,
+      "at": 1794849343,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -5190,9 +6391,9 @@
   },
   "cuckoo_legend": {
     "animal": {
-      "note": "Martin, 2026-11-12: \"let's go for Cuco\"",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794495502,
+      "at": 1794849344,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
@@ -5221,9 +6422,13 @@
   },
   "tarantula": {
     "animal": {
-      "note": "moved from aristocrats to pool",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792085439
+      "at": 1794849344,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from aristocrats to pool"
+      }
     },
     "effect": {
       "lv": "draft",
@@ -5249,9 +6454,13 @@
   },
   "sea_turtle": {
     "animal": {
-      "note": "moved from aristocrats to pool",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792085440
+      "at": 1794849344,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from aristocrats to pool"
+      }
     },
     "art": {
       "lv": "draft",
@@ -5284,9 +6493,13 @@
   },
   "sperm_whale": {
     "animal": {
-      "note": "moved from pool to aristocrats",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792085440
+      "at": 1794849337,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from pool to aristocrats"
+      }
     },
     "art": {
       "review": {
@@ -5327,6 +6540,15 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792104163
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849337
     }
   },
   "city_spider": {
@@ -5352,6 +6574,15 @@
       "note": "4, so breaking the engine takes a real animal, not any 3 (Martin, 2026-10-11)",
       "by": "claude",
       "at": 1792670323
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849337
     }
   },
   "toad": {
@@ -5398,8 +6629,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1793369440,
-      "note": "Martin, 2026-10-30 (card board review)"
+      "at": 1794849318,
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     }
   },
   "locust_legend": {
@@ -5419,9 +6650,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "Martin, 2026-10-20: his own name (first said 2026-10-16); a draft, a week on the card before a lock",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792497992
+      "at": 1794849337
     },
     "art": {
       "lv": "draft",
@@ -5467,9 +6698,13 @@
       "note": "Active text pass (Martin, 2026-10-31): the card's name instead of \"this\""
     },
     "animal": {
-      "note": "moved from pool to aristocrats",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792085443
+      "at": 1794849337,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from pool to aristocrats"
+      }
     },
     "art": {
       "lv": "draft",
@@ -5545,6 +6780,15 @@
       "note": "Strength buffs with Martin, 2026-10-26",
       "by": "claude",
       "at": 1793015423
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849336
     }
   },
   "roach": {
@@ -5579,6 +6823,15 @@
       "note": "Strength buffs with Martin, 2026-10-26",
       "by": "claude",
       "at": 1793015425
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849344
     }
   },
   "great_white_shark": {
@@ -5611,6 +6864,16 @@
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-21: plain everyday name; the id names the species and stays"
       }
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "by": "claude",
+      "at": 1794849330
     }
   },
   "octopus": {
@@ -5635,9 +6898,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from food_otk to pool",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792747911
+      "at": 1794849344
     }
   },
   "mole": {
@@ -5693,9 +6956,9 @@
         "prev_note": "",
         "prev": 1
       },
-      "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1794700889
+      "at": 1794849335
     }
   },
   "mole_legend": {
@@ -5711,10 +6974,14 @@
       }
     },
     "animal": {
-      "note": "moved from pool to den-rush",
-      "by": "martin",
-      "at": 1792192092,
-      "lv": "draft"
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1794849339,
+      "lv": "draft",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from pool to den-rush"
+      }
     },
     "art": {
       "review": {
@@ -5756,9 +7023,9 @@
       "at": 1792192619
     },
     "animal": {
-      "note": "moved from pool to egg_control",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793188969,
+      "at": 1794849345,
       "review": {
         "prev_lv": "empty",
         "prev_note": "into the collection (status proposed)"
@@ -5827,9 +7094,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from pool to food_aggro",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792747912
+      "at": 1794849344
     },
     "art": {
       "review": {
@@ -5885,9 +7152,13 @@
       "note": "Martin 2026-10-29: the old cover condition was dead once six Hoofed carry Flee; the herd mobs the intruder"
     },
     "animal": {
-      "note": "moved from pool to hoofed",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792262680
+      "at": 1794849344,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from pool to hoofed"
+      }
     },
     "art": {
       "lv": "draft",
@@ -5975,7 +7246,13 @@
     "strength": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792262681
+      "at": 1794849335,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin's new pool, 2026-11-16 (his sheet)"
     }
   },
   "peacock": {
@@ -6031,9 +7308,13 @@
       "at": 1792270569
     },
     "animal": {
-      "note": "into the collection (status proposed)",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792270570
+      "at": 1794849344,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "into the collection (status proposed)"
+      }
     },
     "art": {
       "lv": "draft",
@@ -6071,9 +7352,9 @@
       }
     },
     "animal": {
-      "note": "moved from pool to food_otk",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792747912,
+      "at": 1794849344,
       "review": {
         "prev_lv": "draft",
         "prev_note": "into the collection (status proposed)"
@@ -6159,9 +7440,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin's sheet, 2026-10-24",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1792861464
+      "at": 1794849330
     },
     "animal": {
       "review": {
@@ -6291,9 +7572,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "Martin, 2026-10-24: an ant queen flies once, sheds her wings and lays where she stands, so no Flight; 5, the Sea Turtle's strength, and the Turtle gets a new effect",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792867920
+      "at": 1794849345
     },
     "art": {
       "review": {
@@ -6425,9 +7706,9 @@
           "species": "Bee"
         }
       },
-      "note": "name he brought, as a draft (Martin, 2026-11-15: \"I think we should change her name to Lady Juliet. I think it just sounds much better than just Juliet.\")",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794758695,
+      "at": 1794849345,
       "lv": "draft"
     },
     "art": {
@@ -6566,9 +7847,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792682852
+      "at": 1794849345
     },
     "art": {
       "review": {
@@ -6791,9 +8072,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from pool to food_otk",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793190634
+      "at": 1794849345
     },
     "art": {
       "review": {
@@ -6833,9 +8114,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-26: the Chameleon's old ability, on the beetle that lifts 850 times its weight",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793028811
+      "at": 1794849335
     },
     "tag": {
       "review": {
@@ -6937,9 +8218,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from pool to giants",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793104279
+      "at": 1794849345
     },
     "art": {
       "review": {
@@ -6981,9 +8262,9 @@
           "species": "Dung Beetle"
         }
       },
-      "note": "Martin 2026-11-09: stage words Birth, Journey, Trial, Ascension",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794231379,
+      "at": 1794849345,
       "lv": "draft"
     },
     "tag": {
@@ -7099,9 +8380,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from pool to aristocrats",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793114063
+      "at": 1794849345
     },
     "art": {
       "review": {
@@ -7376,9 +8657,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "moved from pool to food_aggro",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793188544
+      "at": 1794849345
     },
     "art": {
       "review": {
@@ -7409,9 +8690,9 @@
           "species": "Elephant"
         }
       },
-      "note": "Martin 2026-11-09: Hollow is an adjective and too on the nose for the legend; back to a bracket",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794219665
+      "at": 1794849345
     },
     "rarity": {
       "review": {
@@ -7504,9 +8785,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793210604
+      "at": 1794849345
     },
     "art": {
       "review": {
@@ -7557,9 +8838,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "the plain Flight body, the Eagle's old number",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793210597
+      "at": 1794849318
     },
     "effect": {
       "review": {
@@ -7647,9 +8928,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793229967
+      "at": 1794849345
     }
   },
   "sardine_legend": {
@@ -7673,8 +8954,8 @@
         }
       },
       "by": "claude",
-      "at": 1794508540,
-      "note": "Martin, 2026-11-12: \"how about 'Santa Sardinia'? too on the nose?\" (the fish's own saint, a figure from their mythology, not one sardine)",
+      "at": 1794849346,
+      "note": "out of the collection (in the reserve)",
       "lv": "draft"
     },
     "tag": {
@@ -7721,8 +9002,8 @@
         }
       },
       "by": "claude",
-      "at": 1794525055,
-      "note": "Martin, 2026-11-13: \"swiftfoot yes yes\""
+      "at": 1794849346,
+      "note": "out of the collection (in the reserve)"
     },
     "rarity": {
       "review": {
@@ -7792,9 +9073,9 @@
         "prev_note": "",
         "prev": ""
       },
-      "note": "stars prototype: commons and rares are one kind (Martin, 2026-11-15)",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1794697738
+      "at": 1794849331
     },
     "strength": {
       "review": {
@@ -7823,6 +9104,15 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793452272
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1794849331
     }
   },
   "impala": {
@@ -7873,9 +9163,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793293892
+      "at": 1794849346
     },
     "art": {
       "review": {
@@ -8098,9 +9388,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793300216
+      "at": 1794849346
     },
     "art": {
       "review": {
@@ -8149,9 +9439,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-29: the Hamster's old number",
+      "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
-      "at": 1793300648
+      "at": 1794849331
     },
     "effect": {
       "review": {
@@ -8242,9 +9532,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793382545
+      "at": 1794849346
     },
     "art": {
       "review": {
@@ -8275,9 +9565,9 @@
           "species": "Deer"
         }
       },
-      "note": "Martin 2026-11-06: \"very very good already 8/10 at least, maybe 8.5/10\"; draft to live with",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1793963237
+      "at": 1794849346
     },
     "rarity": {
       "review": {
@@ -8534,9 +9824,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "placeholder name for the prototype",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794680631
+      "at": 1794849346
     }
   },
   "card_burner": {
@@ -8575,9 +9865,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "placeholder name for the prototype",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794680632
+      "at": 1794849346
     }
   },
   "refueler": {
@@ -8616,9 +9906,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "placeholder name for the prototype",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794680632
+      "at": 1794849346
     }
   },
   "trainer": {
@@ -8657,9 +9947,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "placeholder name for the prototype",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794680632
+      "at": 1794849346
     }
   },
   "flight_giver": {
@@ -8698,9 +9988,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "placeholder name for the prototype",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794680632
+      "at": 1794849346
     }
   },
   "lookout": {
@@ -8739,9 +10029,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "placeholder name for the prototype",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794680632
+      "at": 1794849346
     }
   },
   "food_thief": {
@@ -8780,9 +10070,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "placeholder name for the prototype",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794680632
+      "at": 1794849346
     }
   },
   "protector": {
@@ -8821,9 +10111,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "placeholder name for the prototype",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1794680632
+      "at": 1794849347
     }
   },
   "gorilla_legend_2": {

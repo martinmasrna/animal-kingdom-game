@@ -1101,6 +1101,7 @@ ACT_NEEDS = {
     "baboon_legend": lambda state, p, cr: bool(_babaji_allies(state, p, cr)),   # Echo: his Roar needs an ally to return
     "card_burner": lambda state, p, cr: bool(state.hands[p]),     # discard a card: only with a card in hand
     "trainer": lambda state, p, cr: bool(state.hands[p]),     # give an animal in your hand +2: only with one there
+    "tarsier": lambda state, p, cr: bool(state.hands[p]),     # Echo: give an animal in your hand +2: only with one there
     "lookout": lambda state, p, cr: bool(state.decks[p]),     # Scout: only with a deck to look at
 }
 
@@ -2071,7 +2072,6 @@ def roar_condition(state, player, card_id, unit=None):
     check = {
         "gopher": lambda: _fed_this_turn(state, player),
         "mara": lambda: _fed_this_turn(state, player),
-        "bobcat": lambda: others("Cat") >= 1,
         "serval": lambda: _played_this_turn(state, player, "Cat", unit) >= 1,
         "tutorial_lynx": lambda: others("Cat") >= 1,
         "ocelot": lambda: others("Cat") >= 1,
@@ -2461,9 +2461,10 @@ def _alpha_place(state, unit, cr):
 # --- Cats -------------------------------------------------------------------------------------------------------
 
 def _serval_place(state, unit, cr):
-    """Roar: if you played another Cat this turn, remove an adjacent enemy."""
+    """Roar: if you played another Cat this turn, remove an adjacent enemy of strength 8 or more."""
     if roar_condition(state, unit.owner, unit.card_id, unit):
-        _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(state, unit, cr))
+        _push_remove_choice(state, unit.owner, unit.card_id,
+                            _adjacent_enemy_targets(state, unit, cr, min_strength=state.config.serval_min))
 
 
 def _ocelot_place(state, unit, cr):
@@ -2619,7 +2620,7 @@ def _remove_another_copy(state, player, card_id) -> None:
 
 
 def _hornet_place(state, unit, cr):
-    targets = _adjacent_enemy_targets(state, unit, cr)
+    targets = _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.hornet_max)
     if targets and _has_spare_copy(state, unit.owner, "hornet"):
         state.effect_stack.append({"op": "hornet_kill", "chooser": unit.owner, "options": targets})
 
@@ -3066,7 +3067,13 @@ def _dormouse_eot(state, unit, cr):
 
 
 def _chipmunk_place(state, unit, cr):
-    """Roar: gain 10 food. At the start of your next turn, gain 10 more."""
+    """Echo. Roar: gain 10 food."""
+    _push_gain(state, unit.owner, state.config.chipmunk_food_now)
+
+
+def _tutorial_chipmunk_place(state, unit, cr):
+    """The tutorial's Chipmunk keeps the card it was written with ("Roar: gain 10 food. At the start of your next turn,
+    gain 10 more.")."""
     _push_gain(state, unit.owner, state.config.chipmunk_food_now)
     schedule(state, unit, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.chipmunk_food_later},
              while_buried=False)
@@ -3192,7 +3199,7 @@ def _dung_beetle_eot(state, unit, cr):
 
 
 def _sloth_place(state, unit, cr):
-    """"In 2 turns, gain 30 food." Its counterplay is the timed-effect rule (overview.md 9.1): cover the Sloth and the
+    """"In 3 turns, gain 30 food." Its counterplay is the timed-effect rule (overview.md 9.1): cover the Sloth and the
     timer suspends for as long as the cover holds."""
     schedule(state, unit, state.config.sloth_delay,
              {"op": "gain_food", "player": unit.owner, "amount": state.config.sloth_food}, while_buried=False)
@@ -3288,10 +3295,8 @@ def _orangutan_place(state, unit, cr):
 
 
 def _tarsier_place(state, unit, cr):
-    """Roar: draw a Primate, then give a Primate in your hand +2 strength (tarsier_grant)."""
-    state.effect_stack.append({"op": "hand_grant_one", "player": unit.owner, "amount": state.config.tarsier_grant,
-                               "tag": "Primate"})
-    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "tag:Primate"})
+    """Echo. Roar: give an animal in your hand +2 strength (tarsier_grant)."""
+    state.effect_stack.append({"op": "hand_grant_one", "player": unit.owner, "amount": state.config.tarsier_grant})
 
 
 def _chimpanzee_place(state, unit, cr):
@@ -3547,9 +3552,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "jaguar": {"on_place": _removes("jaguar_max")},
     "serval": {"on_place": _serval_place},
     "lynx": {"on_place_onto_enemy": _draws("lynx_draw")},
-    "bobcat": {"on_place": _conditional("bobcat", _draw1)},
+    "bobcat": {"on_place": _draw1},
     "alley_cat": {"on_place": _alley_cat_place},
-    "kitten": {"on_place": lambda state, unit, cr: _draws_filtered("rarity:common", state.config.kitten_draw)(state, unit, cr)},
+    "kitten": {"on_place": _draw1},
     # Colony.
     "army_ant_legend": {"on_end_of_turn": _army_ant_legend_eot},
     "bee_legend": {"on_place": _bee_legend_place},
@@ -3583,7 +3588,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cheetah": {"on_place": _cheetah_place},
     "rat": {"on_place": _conditional("rat", _rat_place)},
     "falcon": {"on_place": _hq_adjacent_draw},
-    "bat": {"on_place": _draw1},
+    "bat": {"on_place": _draws("bat_draw")},
     "dolphin": {"on_place": _draw1},
     "mouse": {"on_place": _draws_filtered("tag:Rodent")},
     # Egg Control.
@@ -3593,7 +3598,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "bat_legend": {"on_start_of_turn": _bat_legend_start},
     "swan_legend": {"on_draw": _omen_drawn},
     "hawk": {"on_place": _removes("stoop_max")},
-    "cottonmouth": {"on_place": _king_cobra_place},
+    "cottonmouth": {"on_place": _removes("cottonmouth_max")},
     "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _removes("black_mamba_max")},
     "mosquito": {"on_place": _mosquito_place},
@@ -3619,14 +3624,14 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "rat_legend": {"on_place": _rat_king_place},
     "chipmunk_legend": {"on_place": _chipmunk_legend_place},
     "flying_squirrel": {"on_place": _flying_squirrel_place},
-    "meerkat": {"on_place": _draw1, "on_enemy_placed_adjacent": _meerkat_enemy_placed},
+    "meerkat": {"on_enemy_placed_adjacent": _meerkat_enemy_placed},
     "beaver": {"on_place": _beaver_place},
     "electric_eel": {"on_place": _electric_eel_place},
     "krill": {"on_place": _krill_place},
     "dormouse": {"on_end_of_turn": _dormouse_eot},
     "squirrel": {"on_place": _gains("squirrel_food")},
     "chipmunk": {"on_place": _chipmunk_place},
-    "gopher": {"on_place": _conditional("gopher", _removes())},
+    "gopher": {"on_place": _conditional("gopher", _removes("gopher_max"))},
     "mara": {"on_place": _conditional("mara", _draws("mara_draw"))},
     "groundhog": {"on_start_of_turn": _gains("groundhog_food")},
     "rodent_legend": {"on_place": _rodent_legend_place},
@@ -3709,7 +3714,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "dingo": {"on_end_of_turn": _dingo_eot},
     # The tutorial's own cards, as they were when it was written.
     "tutorial_lynx": {"on_place": _conditional("tutorial_lynx", _draw1)},
-    "tutorial_chipmunk": {"on_place": _chipmunk_place},
+    "tutorial_chipmunk": {"on_place": _tutorial_chipmunk_place},
 }
 
 # The actions prototype (branch actions): the eight Action animals, each its "on_act" hook (legal_acts, do_act).

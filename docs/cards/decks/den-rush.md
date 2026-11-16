@@ -19,7 +19,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Hornet** | 2 | Colony | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. |
+| **Hornet** | 2 | Colony | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy of strength 7 or less. |
 | **Chameleon** | 2 | — | 2 | Roar: become a copy of an animal in your hand. |
 | **Skunk** | 2 | — | 4 | Roar: return an adjacent enemy to its owner's hand. It can't be played next turn. |
 | **Mole** | 2 | — | 2 | Roar: play another animal next to this. |
@@ -29,11 +29,11 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hare** | 2 | Rodent | 4 | Flee. Roar: if your hand is empty, draw 2 cards. |
-| **Cheetah** | 2 | Cat | 6 | Roar: if this is next to your opponent's den, draw 2 cards. |
+| **Cheetah** | 2 | Cat | 5 | Roar: if this is next to your opponent's den, draw 2 cards. |
 | **Rat** | 2 | Rodent | 3 | Roar: if your hand is empty, remove an adjacent enemy. |
-| **Falcon** | 2 | Bird | 4 | Flight. Roar: if this is next to your opponent's den, draw a card. |
-| **Bat** | 2 | — | 3 | Flight. Roar: draw a card. |
+| **Falcon** | 2 | Bird | 3 | Flight. Roar: if this is next to your opponent's den, draw a card. |
+| **??** | 2 | — | 2 | Echo. Roar: draw 2 cards. |
 | **Mouse** | 2 | Rodent | 4 | Roar: draw a Rodent. |
-| **Squirrel** | 1 | Rodent | 4 | Roar: gain 10 food. |
+| **Squirrel** | 1 | Rodent | 2 | Roar: gain 10 food. |
 
 <!-- cards:end -->
