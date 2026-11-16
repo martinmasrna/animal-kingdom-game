@@ -31,9 +31,9 @@ def test_random_games_raise_nothing(seed):
 
 def test_long_game_ends_at_the_turn_cap():
     """A random game in which both decks and hands run dry and roaming keeps a player acting, so the two-idle-turns end
-    never fires; the turn cap ends it. Seed 516 on the 2026-11-16 card pool (a card change can move it: find the first
+    never fires; the turn cap ends it. Seed 358 on the 2026-11-16 card pool (a card change can move it: find the first
     seed whose game ends at the cap with both decks and hands empty)."""
-    rec, n, state = fuzz.play(516, max_actions=100_000)    # 516 on the 2026-11-16 pool (a free card each turn, the new cards)
+    rec, n, state = fuzz.play(358, max_actions=100_000)    # 358 on the 2026-11-16 pool (after the Hawk, Macaw and Caterpillar joined)
     assert rec is None
     result = rules.is_terminal(state)
     assert result is not None and result.reason == "max_turns"
@@ -47,7 +47,7 @@ def test_the_fuzzer_sees_a_crash(monkeypatch):
 
     def flaky(state, action, **kw):
         calls["n"] += 1
-        if calls["n"] == 40:   # past both mulligans (the leaders branch's cards moved the deal)
+        if calls["n"] == 20:   # past both mulligans, well inside a game (seed 0 runs 39 calls on the 2026-11-16 pool)
             raise KeyError("planted")
         return real(state, action, **kw)
 

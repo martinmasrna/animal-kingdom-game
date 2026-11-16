@@ -109,7 +109,7 @@ def replacement(lst: list[str], bad: str, lifts: dict[str, tuple[float, int]], c
             continue
         if lift <= 0:
             return None
-        if not decklist_problems(trial + [cid], cards=cards):
+        if not decklist_problems(trial + [cid], cards=cards):   # (the leader is checked when the child joins: it keeps its parent's)
             return cid
     return None
 
@@ -144,7 +144,7 @@ def propose(games: list[dict], pool: dict, births_today: int, births: int, log=p
         if slug not in decks:
             continue
         found = losing_card(decks[slug]["list"], games_of(games, lid))
-        if found:
+        if found and found[0] != decks[slug].get("leader"):   # the leader's card stays: every deck has a leader
             candidates.append((found[1], lid, slug, found))
     out = []
     for z, lid, slug, (bad, _, n_drawn) in sorted(candidates)[: births - births_today]:
@@ -158,7 +158,7 @@ def propose(games: list[dict], pool: dict, births_today: int, births: int, log=p
             continue
         name = child_name(decks[slug]["name"], names); names.add(name)
         out.append({"slug": "tinker_" + hashlib.sha1(",".join(child).encode()).hexdigest()[:10], "name": name, "list": child,
-                    "source": "tinker", "parent": slug, "start": players[lid],
+                    "source": "tinker", "parent": slug, "start": players[lid], "leader": decks[slug].get("leader"),
                     "why": f"{cards[bad].name} loses when drawn (z {z:.1f}, {n_drawn} games); {cards[new].name} lifts the band by {lifts[new][0]:+.2f}"})
         log(f"{slug} -> {name}: {out[-1]['why']}")
     return out

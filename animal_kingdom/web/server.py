@@ -946,7 +946,7 @@ def league_auth(req) -> None:
 async def league_pool(req):
     """The runner's view: every bot deck's list and name, every bot pairing's rating, the pilots' specs."""
     league_auth(req)
-    decks = [{"slug": s, "name": DECK_NAMES.get(s, s), "list": load_premade_deck(s)} for s in ladder.decks]
+    decks = [{"slug": s, "name": DECK_NAMES.get(s, s), "list": load_premade_deck(s), "leader": DECK_LEADERS.get(s)} for s in ladder.decks]
     players = [{"id": lid, "rating": r.rating, "rd": r.rd, "games": r.games} for lid, r in ladder.bots().items()
                if ranking.parse_bot(lid)[1] in ladder.decks]
     return web.json_response({"decks": decks, "players": players, "pilots": dict(BOT_LEVELS)})
@@ -1103,7 +1103,8 @@ async def league_decks(req):
         slug, name, lst = str(d.get("slug") or ""), str(d.get("name") or "").strip()[:40] or "Deck", d.get("list")
         if not isinstance(lst, list):
             rejected[slug] = ["list: 30 card ids"]; continue
-        problems = league.add(slug, name, [str(c) for c in lst], str(d.get("source") or "league")[:20], d.get("parent"), set(ladder.decks))
+        problems = league.add(slug, name, [str(c) for c in lst], str(d.get("source") or "league")[:20], d.get("parent"), set(ladder.decks),
+                              str(d.get("leader") or "") or None)
         if problems:
             rejected[slug] = problems; continue
         ladder.decks.append(slug)

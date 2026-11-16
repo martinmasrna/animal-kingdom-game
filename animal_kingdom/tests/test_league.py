@@ -72,11 +72,14 @@ def test_a_new_list_joins_as_three_placing_players_kept_from_people(monkeypatch,
         child = sorted(lst[1:] + [pool_ids[0]])
         assert not decklist_problems(child)
         r = await c.post("/api/league/decks", json={"decks": [
-            {"slug": "league_cats_1", "name": "Savanna Cats III", "list": child, "source": "tinker", "parent": "pool_2", "start": 2050},
-            {"slug": "league_dup", "name": "Twin", "list": lst, "source": "test"},               # identical to Cats: refused
-            {"slug": "bad slug!", "name": "X", "list": child[:24], "source": "test"}]}, headers=h)
+            {"slug": "league_cats_1", "name": "Savanna Cats III", "list": child, "source": "tinker", "parent": "pool_2", "start": 2050,
+             "leader": "butterfly_legend"},
+            {"slug": "league_dup", "name": "Twin", "list": lst, "source": "test", "leader": "butterfly_legend"},   # identical to pool_2, same leader: refused
+            {"slug": "bad slug!", "name": "X", "list": child[:24], "source": "test"},
+            {"slug": "league_nolead", "name": "Y", "list": child, "source": "test"}]}, headers=h)   # every deck has a leader
         j = await r.json()
-        assert j["added"] == ["league_cats_1"] and set(j["rejected"]) == {"league_dup", "bad slug!"}
+        assert j["added"] == ["league_cats_1"] and set(j["rejected"]) == {"league_dup", "bad slug!", "league_nolead"}
+        assert "a deck needs a leader" in j["rejected"]["league_nolead"]
         assert "an identical list is already a player" in j["rejected"]["league_dup"][0]
         # three placing players, loadable, named, listed, and never handed to a person until placed
         for level in ranking.LEVELS:   # born at its parent's rating, the best prior, with a newcomer's wide uncertainty
@@ -129,7 +132,7 @@ def test_a_retired_list_leaves_the_pool_and_stays_out_after_a_restart(monkeypatc
 def test_a_retired_lists_twin_comes_back_fresh_and_only_at_the_levels_asked(monkeypatch, tmp_path):   # a legal list: a design change can leave one illegal
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
-        twin = {"slug": "cats_again", "name": "Cats", "list": load_premade_deck("pool_2"), "levels": ["expert"]}
+        twin = {"slug": "cats_again", "name": "Cats", "list": load_premade_deck("pool_2"), "levels": ["expert"], "leader": "butterfly_legend"}
         j = await (await c.post("/api/league/decks", json={"decks": [twin]}, headers=h)).json()
         assert j["added"] == [] and "cats_again" in j["rejected"]               # the original still plays: no twin
         await c.post("/api/league/retire", json={"slugs": ["pool_2"]}, headers=h)

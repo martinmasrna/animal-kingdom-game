@@ -16,7 +16,7 @@ import os
 import time
 from typing import Optional
 
-from ..decks import PREMADE_DECKS, decklist_problems, register_deck, DECK_LEADERS
+from ..decks import PREMADE_DECKS, deck_problems, register_deck, DECK_LEADERS
 from .oauth import LOCAL_CREDENTIALS
 
 SCHEMA = """
@@ -44,15 +44,19 @@ class Pool:
     def __init__(self, db, names: dict[str, str]):
         self.db, self.names = db, names
         db.executescript(SCHEMA)
+        if "leader" not in {r[1] for r in db.execute("PRAGMA table_info(pool_decks)")}:   # every deck has a leader (2026-11-16)
+            with db:
+                db.execute("ALTER TABLE pool_decks ADD COLUMN leader TEXT NOT NULL DEFAULT ''")
         self.rows: dict[str, dict] = {}
-        for slug, name, lst, source, parent, born in db.execute("SELECT slug, name, list, source, parent, born FROM pool_decks ORDER BY born"):
-            self._register(slug, name, json.loads(lst), source, parent, born)
+        for slug, name, lst, source, parent, born, leader in db.execute(
+                "SELECT slug, name, list, source, parent, born, leader FROM pool_decks ORDER BY born"):
+            self._register(slug, name, json.loads(lst), source, parent, born, leader or None)
 
-    def _register(self, slug, name, lst, source, parent, born) -> None:
+    def _register(self, slug, name, lst, source, parent, born, leader=None) -> None:
         if slug not in PREMADE_DECKS:
-            register_deck(slug, lst)
+            register_deck(slug, lst, leader)
         self.names.setdefault(slug, name)
-        self.rows[slug] = {"slug": slug, "name": name, "list": lst, "source": source, "parent": parent, "born": born}
+        self.rows[slug] = {"slug": slug, "name": name, "list": lst, "source": source, "parent": parent, "born": born, "leader": leader}
 
     def slugs(self) -> list[str]:
         return list(self.rows)
@@ -65,21 +69,24 @@ class Pool:
         with self.db:
             self.db.executemany("INSERT OR REPLACE INTO pool_levels VALUES (?, ?)", [(s, json.dumps(levels)) for s in slugs])
 
-    def add(self, slug: str, name: str, lst: list[str], source: str, parent: Optional[str], known: set[str]) -> list[str]:
-        """Add a list to the pool; the problems that stop it, else empty. `known` holds every pool slug outside this table."""
-        problems = decklist_problems(lst)
+    def add(self, slug: str, name: str, lst: list[str], source: str, parent: Optional[str], known: set[str],
+            leader: Optional[str] = None) -> list[str]:
+        """Add a list, led by `leader`, to the pool; the problems that stop it, else empty. `known` holds every pool slug
+        outside this table. A twin is the same cards under the same leader: one list under two leaders is two players."""
+        problems = deck_problems(lst, leader)
         if not slug or not slug.replace("_", "").isalnum() or slug in known or slug in self.rows:
             problems.append(f"slug {slug!r} is taken or malformed")
-        key_, gone = tuple(sorted(lst)), self.retired()   # a retired list's twin may come back as a new player, rated afresh
-        if any(tuple(sorted(r["list"])) == key_ for r in self.rows.values() if r["slug"] not in gone) or \
-                any(tuple(sorted(PREMADE_DECKS[s])) == key_ for s in known if s in PREMADE_DECKS and s not in DECK_LEADERS):   # a leader variant is another player
+        key_, gone = (tuple(sorted(lst)), leader), self.retired()   # a retired list's twin may come back as a new player, rated afresh
+        if any((tuple(sorted(r["list"])), r.get("leader")) == key_ for r in self.rows.values() if r["slug"] not in gone) or \
+                any((tuple(sorted(PREMADE_DECKS[s])), DECK_LEADERS.get(s)) == key_ for s in known if s in PREMADE_DECKS):
             problems.append("an identical list is already a player")
         if problems:
             return problems
         born = time.time()
         with self.db:
-            self.db.execute("INSERT INTO pool_decks VALUES (?, ?, ?, ?, ?, ?)", (slug, name, json.dumps(lst), source, parent, born))
-        self._register(slug, name, list(lst), source, parent, born)
+            self.db.execute("INSERT INTO pool_decks (slug, name, list, source, parent, born, leader) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                            (slug, name, json.dumps(lst), source, parent, born, leader or ""))
+        self._register(slug, name, list(lst), source, parent, born, leader)
         return []
 
     def retired(self) -> set[str]:
