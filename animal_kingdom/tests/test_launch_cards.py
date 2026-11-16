@@ -845,13 +845,10 @@ def test_a_serval_played_alone_does_not_count_itself():
     assert s.top_unit("2,2").card_id == "elephant"
 
 
-def test_lynx_draws_only_when_placed_on_an_enemy():
-    s = make_state(hands={"A": ["lynx", "lynx"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+def test_lynx_draws_a_card():
+    s = make_state(hands={"A": ["lynx"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     rules.apply_action(s, PlaceAction("lynx", ("cr", "1,2")))
-    assert hand_ids(s, "A") == ["lynx"]
-    put(s, "2,2", "squirrel", "B")
-    rules.apply_action(s, PlaceAction("lynx", ("cr", "2,2")))
-    assert hand_ids(s, "A") == ["lion"] * CFG.lynx_draw          # the rare draws 2 (2026-10-21)
+    assert hand_ids(s, "A") == ["lion"]          # "Roar: draw a card." (Martin, 2026-11-16)
 
 
 # ================================================================================ Den Rush

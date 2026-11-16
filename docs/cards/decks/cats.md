@@ -22,7 +22,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Jaguar** | 2 | Cat | 5 | Roar: remove an adjacent enemy of strength 5 or less. |
 | **Leopard** | 2 | Cat | 6 | Your Cats can cover enemies of equal strength. |
 | **Black Panther** | 2 | Cat | 6 | Stealth. |
-| **Lynx** | 2 | Cat | 5 | Roar: if you place this on top of an enemy, draw 2 cards. |
+| **Lynx** | 2 | Cat | 5 | Roar: draw a card. |
 
 ### Common
 
@@ -32,7 +32,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Lion** | 2 | Cat | 7 | — |
 | **Caracal** | 2 | Cat | 5 | Reach. |
 | **Tiger** | 2 | Cat | 7 | Apex Predator. |
-| **bobcat/lynx?** | 2 | Cat | 5 | Roar: draw a card. |
+| **Bobcat** | 2 | Cat | 5 | Roar: draw a card. |
 | **Alley Cat** | 2 | Cat | 2 | Roar: add 2 Kittens to your hand. |
 | **Cheetah** | 1 | Cat | 5 | Roar: if this is next to your opponent's den, draw 2 cards. |
 

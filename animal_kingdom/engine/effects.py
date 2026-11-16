@@ -3551,7 +3551,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "lion_legend_4": {"on_remove_event": _lion_legend_4_remove_event},
     "jaguar": {"on_place": _removes("jaguar_max")},
     "serval": {"on_place": _serval_place},
-    "lynx": {"on_place_onto_enemy": _draws("lynx_draw")},
+    "lynx": {"on_place": _draw1},   # Roar: draw a card (Martin, 2026-11-16)
     "bobcat": {"on_place": _draw1},
     "alley_cat": {"on_place": _alley_cat_place},
     "kitten": {"on_place": _draw1},

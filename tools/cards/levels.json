@@ -957,7 +957,7 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794849331,
+      "at": 1794855127,
       "review": {
         "prev_lv": "fine",
         "prev_note": "",
@@ -966,7 +966,7 @@
           "species": "Bobcat"
         }
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)"
+      "note": "back to its own name in the reserve"
     },
     "rarity": {
       "lv": "fine",
@@ -3700,8 +3700,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792614225,
-      "note": "Martin, 2026-10-21: Cats' fourth rare, the slot the Black Panther left"
+      "at": 1794855127,
+      "note": "Martin, 2026-11-16: the Lynx takes the 'bobcat/lynx?' slot ('agree with Lynx')",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: Cats' fourth rare, the slot the Black Panther left",
+        "prev": "Roar: if you place this on top of an enemy, draw 2 cards."
+      }
     },
     "strength": {
       "lv": "draft",
@@ -3712,12 +3717,12 @@
     "animal": {
       "lv": "fine",
       "by": "claude",
-      "at": 1794849339,
+      "at": 1794855127,
       "review": {
         "prev_lv": "fine",
         "prev_note": ""
       },
-      "note": "out of the collection (in the reserve)"
+      "note": "into the collection"
     },
     "rarity": {
       "lv": "draft",

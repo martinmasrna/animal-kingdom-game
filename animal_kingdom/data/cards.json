@@ -985,13 +985,13 @@
     {
       "id": "lynx",
       "name": "Lynx",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Cat"
       ],
       "base_strength": 5,
-      "text": "Roar: if you place this on top of an enemy, draw 2 cards.",
+      "text": "Roar: draw a card.",
       "species": "Lynx",
       "habitat": "Forest",
       "keywords": []
@@ -1031,8 +1031,8 @@
     },
     {
       "id": "bobcat",
-      "name": "bobcat/lynx?",
-      "status": "collectible",
+      "name": "Bobcat",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Cat"

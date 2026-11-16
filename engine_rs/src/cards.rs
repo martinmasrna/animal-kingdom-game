@@ -102,7 +102,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "elephant_legend" => &[OnPlace, OnRoam],
         "dhole" => &[OnCoverEnemy],
         "lion_legend_4" => &[OnRemoveEvent],
-        "lynx" => &[OnPlaceOntoEnemy],
+        "lynx" => &[OnPlace],
         "worker_wasp" | "african_wild_dog" => &[OnFriendlyPlace],
         "swan_legend" | "cuckoo_egg" | "golden_egg" => &[OnDraw],
         "manta_ray" => &[OnAllyCovered],
@@ -825,11 +825,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 push_remove_choice(st, owner, unit.card, t, false);
             }
         }
-        ("lynx", OnPlaceOntoEnemy) => {
-            let n = cfg(st, "lynx_draw");
-            draws(st, unit, n);
-        }
-        ("bobcat", OnPlace) => draws(st, unit, 1),
+        ("lynx", OnPlace) | ("bobcat", OnPlace) => draws(st, unit, 1),
         ("tutorial_lynx", OnPlace) => {
             if conditional(st, card, unit) {
                 draws(st, unit, 1);

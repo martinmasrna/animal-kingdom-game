@@ -134,7 +134,6 @@ class Config:
     mantis_draw: int = 2                 # Praying Mantis: remove an adjacent ally to draw 2
     hyena_food_per: int = 3              # Hyena: Dusk: 3 food for each animal removed this turn
     hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
-    lynx_draw: int = 2                   # Lynx (rare): Roar: draw 2 if placed on top of an enemy
     alley_cat_kittens: int = 2           # Alley Cat: Roar: add 2 Kittens to your hand
     kitten_draw: int = 1                 # Kitten: Roar: draw a common animal (no printed number)
     tiger_legend_max: int = 7            # [TIGER] (legendary): Roar: remove an adjacent enemy of strength 7 or less
