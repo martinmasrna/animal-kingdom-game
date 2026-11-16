@@ -3069,7 +3069,7 @@ def _dormouse_eot(state, unit, cr):
 
 
 def _chipmunk_place(state, unit, cr):
-    """Echo. Roar: gain 10 food."""
+    """Roar: gain 10 food. Echo."""
     _push_gain(state, unit.owner, state.config.chipmunk_food_now)
 
 
@@ -3297,7 +3297,7 @@ def _orangutan_place(state, unit, cr):
 
 
 def _tarsier_place(state, unit, cr):
-    """Echo. Roar: give an animal in your hand +2 strength (tarsier_grant)."""
+    """Roar: give an animal in your hand +2 strength (tarsier_grant). Echo."""
     state.effect_stack.append({"op": "hand_grant_one", "player": unit.owner, "amount": state.config.tarsier_grant})
 
 

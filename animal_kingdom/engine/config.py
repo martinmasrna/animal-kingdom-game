@@ -123,7 +123,7 @@ class Config:
     serval_min: int = 8                  # Serval: ...remove an adjacent enemy of strength 8 or more (2026-11-16)
     hornet_max: int = 7                  # Hornet: ...to remove an adjacent enemy of strength 7 or less (2026-11-16)
     weasel_max: int = 3                  # Weasel: Roar: remove an adjacent enemy of strength 3 or less (Martin, 2026-11-16)
-    bat_draw: int = 2                    # "??" (the 3-star): Echo. Roar: draw 2 cards (2026-11-16)
+    bat_draw: int = 2                    # Bat: Flight. Roar: draw 2 cards. Echo. (2026-11-16)
     honey_badger_min: int = 8            # Honey Badger removes an enemy of strength >= this
     stoop_max: int = 4                   # Hawk
     capuchin_draw: int = 2               # Capuchin: Roar: draw 2 cards (Martin, 2026-11-16)
