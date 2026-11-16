@@ -1937,18 +1937,19 @@
     },
     {
       "id": "hummingbird",
-      "name": "??",
-      "status": "collectible",
+      "name": "Hummingbird",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Bird"
       ],
-      "base_strength": 2,
-      "text": "Roar: draw 2 cards.",
+      "base_strength": 1,
+      "text": "Flight. Roar: draw 2 cards.",
       "species": "Hummingbird",
       "habitat": "Jungle",
-      "stars": 2,
-      "keywords": []
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "macaque",
@@ -4276,6 +4277,21 @@
       "text": "Roar: remove an adjacent enemy of strength 5 or less.",
       "species": "Mongoose",
       "habitat": "Savanna",
+      "keywords": []
+    },
+    {
+      "id": "capuchin",
+      "name": "Capuchin",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Primate"
+      ],
+      "base_strength": 2,
+      "text": "Roar: draw 2 cards.",
+      "species": "Capuchin",
+      "habitat": "Jungle",
+      "stars": 2,
       "keywords": []
     }
   ]

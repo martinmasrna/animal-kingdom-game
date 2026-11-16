@@ -49,7 +49,7 @@ def strength(card_id):
 
 def test_jungle_cards_are_the_audited_set():
     ids = sorted(c.id for c in CARDS.values() if c.status == "collectible" and str(c.habitat).lower().endswith("jungle"))
-    assert ids == ["armadillo", "black_panther", "chameleon", "gorilla_legend_2", "hercules_beetle", "hummingbird",
+    assert ids == ["armadillo", "black_panther", "capuchin", "chameleon", "gorilla_legend_2", "hercules_beetle",
                    "jaguar", "ocelot", "peacock", "sloth", "tarsier", "tiger", "tiger_legend"]
 
 
@@ -559,11 +559,17 @@ def test_gorilla_legend_gives_every_card_in_your_hand_plus_one_for_good():
 
 # --------------------------------------------------------------- hummingbird: Flight. Roar: draw 2 cards.
 
-def test_hummingbird_has_no_flight_and_draws_two():
+def test_hummingbird_flies_anywhere_and_draws_two():
     s = make_state(hands={"A": ["hummingbird"]}, decks=decks())
-    assert not places(s, "hummingbird", "3,3")                         # not connected: no Flight
-    rules.apply_action(s, PlaceAction("hummingbird", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("hummingbird", ("cr", "3,3")))   # not connected: Flight
     assert hand_ids(s, "A") == ["lion", "lion"]
+
+
+def test_capuchin_draws_two_and_has_no_flight():
+    s = make_state(hands={"A": ["capuchin"]}, decks=decks())
+    assert not places(s, "capuchin", "3,3")                            # not connected: no Flight
+    rules.apply_action(s, PlaceAction("capuchin", ("cr", "1,2")))
+    assert hand_ids(s, "A") == ["lion", "lion"]           # "Roar: draw 2 cards." (Martin, 2026-11-16)
 
 
 def test_hummingbird_with_one_card_left_draws_it_and_does_not_break():

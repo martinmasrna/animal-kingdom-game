@@ -126,6 +126,7 @@ class Config:
     bat_draw: int = 2                    # "??" (the 3-star): Echo. Roar: draw 2 cards (2026-11-16)
     honey_badger_min: int = 8            # Honey Badger removes an enemy of strength >= this
     stoop_max: int = 4                   # Hawk
+    capuchin_draw: int = 2               # Capuchin: Roar: draw 2 cards (Martin, 2026-11-16)
     mongoose_max: int = 5                # Mongoose: Roar: remove an adjacent enemy of strength 5 or less (Martin, 2026-11-16)
     rhinoceros_max: int = 3
     hippopotamus_max: int = 5

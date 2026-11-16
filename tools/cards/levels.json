@@ -3224,7 +3224,7 @@
           "FULL": 0.455
         }
       },
-      "at": 1794849335
+      "at": 1794859532
     },
     "rarity": {
       "lv": "locked",
@@ -3234,29 +3234,29 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794849332,
+      "at": 1794859532,
       "review": {
         "prev_lv": "fine",
         "prev_note": "",
         "prev": "Flight. Roar: draw 2 cards."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)"
+      "note": "back to the reserve as it was before 2026-11-16"
     },
     "strength": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794849332,
+      "at": 1794859532,
       "review": {
         "prev_lv": "fine",
         "prev_note": "",
         "prev": 1
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)"
+      "note": "back to the reserve as it was before 2026-11-16"
     },
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794849332,
+      "at": 1794859532,
       "review": {
         "prev_lv": "fine",
         "prev_note": "",
@@ -3265,7 +3265,7 @@
           "species": "Hummingbird"
         }
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)"
+      "note": "back to the reserve as it was before 2026-11-16"
     },
     "habitat": {
       "lv": "fine",
@@ -3278,9 +3278,9 @@
         "prev_note": "",
         "prev": 1
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
-      "at": 1794849332
+      "at": 1794859532
     }
   },
   "hyena": {
@@ -10279,6 +10279,71 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1794858753
+    }
+  },
+  "capuchin": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Capuchin takes the 2-star '??' slot (\"Let's do it, at strength 2, and name the card just 'Capuchin'\")",
+      "by": "claude",
+      "at": 1794859531
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Capuchin takes the 2-star '??' slot (\"Let's do it, at strength 2, and name the card just 'Capuchin'\")",
+      "by": "claude",
+      "at": 1794859531
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Capuchin takes the 2-star '??' slot (\"Let's do it, at strength 2, and name the card just 'Capuchin'\")",
+      "by": "claude",
+      "at": 1794859531
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin, 2026-11-16: the Capuchin takes the 2-star '??' slot (\"Let's do it, at strength 2, and name the card just 'Capuchin'\")",
+      "by": "claude",
+      "at": 1794859531
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Capuchin takes the 2-star '??' slot (\"Let's do it, at strength 2, and name the card just 'Capuchin'\")",
+      "by": "claude",
+      "at": 1794859531
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1794859531
     }
   }
 }

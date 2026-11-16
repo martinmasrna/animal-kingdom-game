@@ -277,6 +277,7 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "mara": ["mara_draw"],
     "praying_mantis": ["mantis_draw"],
     "hummingbird": ["hummingbird_draw"],
+    "capuchin": ["capuchin_draw"],
     "bat": ["bat_draw"],
     "fox": ["fox_draw"],
     "dhole": ["dhole_draw"],

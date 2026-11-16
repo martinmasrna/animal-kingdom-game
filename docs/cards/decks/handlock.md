@@ -19,7 +19,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **??** | 2 | Bird | 2 | Roar: draw 2 cards. |
+| **Hummingbird** | 2 | Bird | 1 | Flight. Roar: draw 2 cards. |
 | **Orangutan** | 2 | Primate | 5 | Roar: duplicate a Primate in your hand. |
 | **Tarsier** | 2 | Primate | 2 | Echo. Roar: give an animal in your hand +2 strength. |
 | **Chimpanzee** | 2 | Primate | 4 | Roar: remove an adjacent enemy of equal or lower strength. |

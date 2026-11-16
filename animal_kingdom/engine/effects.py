@@ -3674,6 +3674,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "butterfly_legend_monarch": {"on_place": _butterfly_stage_place("butterfly_legend_stage5_draw",
                                                                        "butterfly_legend_stage5_grant")},
     "hummingbird": {"on_place": _draws("hummingbird_draw")},
+    "capuchin": {"on_place": _draws("capuchin_draw")},   # Roar: draw 2 cards (Martin, 2026-11-16)
     "macaque": {"on_place": _macaque_place},
     "orangutan": {"on_place": _orangutan_place},
     "tarsier": {"on_place": _tarsier_place},
