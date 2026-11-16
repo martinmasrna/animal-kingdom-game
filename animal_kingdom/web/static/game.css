@@ -612,27 +612,28 @@
 .readov .kw { align-self: stretch; padding: 10px 12px; border-radius: 10px; background: #25221f url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.18), 0 4px 10px rgba(0,0,0,.5); }
 .readov .kw b { display: block; font: 700 17px 'Fira Sans Condensed', sans-serif; color: #fff; margin-bottom: 2px; }
 .readov .kw p { margin: 0; font: 500 14px/1.35 'Fira Sans Condensed', sans-serif; color: #e4dccd; }
-/* A hand card read large: the card, then (readSide) the cards it makes and its keywords; under it on a narrow screen, right of
-   it on a wide one when it makes cards, as in the collection's zoom. */
+/* A card read large: the card, then (readSide) the cards it makes and its keywords; under it on a narrow screen, right of
+   it on a wide one, as in the collection's zoom (Martin, 2026-11-16: "keywords should always go beside card"). */
 .readov .rcard { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
 .readov .zside { display: flex; flex-direction: column; gap: 10px; align-self: stretch; }
 .readov .rel { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .readov .rel .card { --w: calc((min(78vw, 340px) - 8px) / 2); }
 .readov .rel .arr { display: none; }
 @media (min-width: 900px) {
-  .readov .rbox:has(.rcard.wide) { width: auto; }
-  .readov .rcard.wide { flex-direction: row; gap: 22px; width: auto; }
-  .readov .rcard.wide > .card { --w: 340px; flex: none; }
-  .readov .rcard.wide .zside { align-self: center; gap: 16px; }
-  .readov .rcard.wide .rel { flex-wrap: nowrap; justify-content: flex-start; gap: 6px; align-items: center; }
-  .readov .rcard.wide .rel .card { --w: 200px; }
-  .readov .rcard.wide .rel .arr { display: block; flex: none; width: 0; height: 0; border-style: solid; border-width: 9px 0 9px 12px; border-color: transparent transparent transparent #e4dccd; opacity: .8; }
-  .readov .rcard.wide .rel.many { flex-wrap: wrap; gap: 10px; width: calc(4 * 140px + 3 * 10px); }
-  .readov .rcard.wide .rel.many .card { --w: 140px; }
-  .readov .rcard.wide .zside.few { flex-direction: row; align-items: center; gap: 22px; }
-  .readov .rcard.wide .zside.few .kws { display: flex; flex-direction: column; gap: 10px; width: 280px; }
-  .readov .rcard.wide .zside.row .kws { display: flex; flex-wrap: wrap; gap: 10px; width: 0; min-width: 100%; }
-  .readov .rcard.wide .zside.row .kws .kw { flex: 1 1 200px; }
+  .readov .rbox:has(.zside) { width: auto; }
+  .readov .rcard:has(.zside) { flex-direction: row; gap: 22px; width: auto; }
+  .readov .rcard:has(.zside) > .card { --w: 340px; flex: none; }
+  .readov .rcard:has(.zside) .zside { align-self: center; gap: 16px; }
+  .readov .rcard:has(.zside) .rel { flex-wrap: nowrap; justify-content: flex-start; gap: 6px; align-items: center; }
+  .readov .rcard:has(.zside) .rel .card { --w: 200px; }
+  .readov .rcard:has(.zside) .rel .arr { display: block; flex: none; width: 0; height: 0; border-style: solid; border-width: 9px 0 9px 12px; border-color: transparent transparent transparent #e4dccd; opacity: .8; }
+  .readov .rcard:has(.zside) .rel.many { flex-wrap: wrap; gap: 10px; width: calc(4 * 140px + 3 * 10px); }
+  .readov .rcard:has(.zside) .rel.many .card { --w: 140px; }
+  .readov .rcard:has(.zside) .kws { display: flex; flex-direction: column; gap: 10px; width: 280px; }   /* keywords beside the card, as in the collection */
+  .readov .rcard:has(.zside) .zside.few { flex-direction: row; align-items: center; gap: 22px; }
+  .readov .rcard:has(.zside) .zside.few .kws { display: flex; flex-direction: column; gap: 10px; width: 280px; }
+  .readov .rcard:has(.zside) .zside.row .kws { display: flex; flex-wrap: wrap; gap: 10px; width: 0; min-width: 100%; }
+  .readov .rcard:has(.zside) .zside.row .kws .kw { flex: 1 1 200px; }
 }
 .readov .sc { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .readov .under { display: flex; justify-content: center; gap: 8px; width: 100%; }
