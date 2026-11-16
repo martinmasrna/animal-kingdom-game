@@ -231,7 +231,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   background: var(--fstar) 0 0 / 100% 100% no-repeat; display: flex; align-items: center; justify-content: center; padding: .55em .33em .1em; pointer-events: none; }
 .card.fo .lstar img { display: block; height: 1.7em; filter: brightness(.16) sepia(.6); }
 /* The rim (collection mock option 7, Martin 2026-11-16: "wire version 7 ... so I can see it for real"; not settled): in the hand
-   and the collection (--rd 0) the painting sits in a thin flat rim of today's driftwood (a legendary's banner ends in a lion's head in profile, Martin 2026-11-16: "communicate legendary with shape"), the strength
+   and the collection (--rd 0) the painting sits in a thin flat rim of today's driftwood, gold for legendaries (for now: the legendary's mark by shape is open, Martin 2026-11-16), the strength
    on the rim's banner top-left and the level's stars inked in its seat bottom-right (baked into the rim, none for level 0).
    Read in full (--rd 1) the card is the open face above. Pieces from the design scratchpad's r6/build_today_wood.py. */
 .card.fo { --frc: url(/static/kit2/card_rim_common_0.webp); }
