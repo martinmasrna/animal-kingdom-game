@@ -2053,7 +2053,7 @@
     {
       "id": "caterpillar",
       "name": "Caterpillar",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
