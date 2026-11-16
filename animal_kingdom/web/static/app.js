@@ -86,10 +86,14 @@ function formOf(id, seat) {
   if (!at || !V || !V.game || !V.game.eaten) return c;
   return { ...c, text: `${c.text} (${Math.min(V.game.eaten[seat] || 0, at)}/${at})` };
 }
+// A card read large, the one way everywhere (the hand, a board piece): the card, and beside it the cards it makes and its
+// keywords explained (under it on a narrow screen). `extra`: what goes under the card itself (a board piece's timer).
+function cardRead(id, str, seat = V && V.you, extra = '') {
+  const c = formOf(id, seat); if (!c) return '';
+  return `<div class="rcard${(c.related || []).length ? ' wide' : ''}">${cardHTML(c, str == null ? {} : { str })}${extra}${readSide(c, CARDS)}</div>`;
+}
 function readCard(id, str, seat = V && V.you) {
-  const c = formOf(id, seat); if (!c) return;
-  const side = readSide(c, CARDS);   // the cards it makes and its keywords, right of the card (under it on a narrow screen)
-  readOverlay(`<div class="rcard${(c.related || []).length ? ' wide' : ''}">${cardHTML(c, str == null ? {} : { str })}${side}</div>`);
+  const html = cardRead(id, str, seat); if (html) readOverlay(html);
 }
 function wirePops(root) {
   root.querySelectorAll('[data-card]').forEach(el => {
@@ -1793,10 +1797,11 @@ function showStack(g, cr) {
 }
 function readStack(cr) {
   const st = V && V.game && viewerGame().board[cr]; if (!st || !st.length) return;
-  const card = u => `<div class="sc ${u.owner}">${cardHTML(formOf(u.id, u.owner === 'A' ? V.you : opp()), { str: u.str })}` +
-    (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`;
+  const seat = u => u.owner === 'A' ? V.you : opp();
+  const timer = u => u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '';
+  const card = u => `<div class="sc ${u.owner}">${cardHTML(formOf(u.id, seat(u)), { str: u.str })}${timer(u)}</div>`;
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
-  readOverlay(card(top) + (buried.length ? `<div class="under">${buried.map(card).join('')}</div>` : ''));
+  readOverlay(cardRead(top.id, top.str, seat(top), timer(top)) + (buried.length ? `<div class="under">${buried.map(card).join('')}</div>` : ''));
 }
 function stackAt(cr) {
   const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];
