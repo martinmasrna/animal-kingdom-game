@@ -39,7 +39,7 @@ def test_the_league_calls_need_the_key(monkeypatch, tmp_path):
 def test_a_posted_bot_game_moves_both_pairings_like_any_game(monkeypatch, tmp_path):
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
-        a, b = ranking.bot_id("expert", "cats"), ranking.bot_id("expert", "fish")
+        a, b = ranking.bot_id("expert", "pool_2"), ranking.bot_id("expert", "pool_6")
         before = (server.ladder.get(a), server.ladder.get(b))
         r = await c.post("/api/league/games", json={"games": [
             {"a": a, "b": b, "winner": "A", "seed": 1, "turns": 9, "reason": "hq_capture"},
@@ -62,19 +62,19 @@ def test_a_new_list_joins_as_three_placing_players_kept_from_people(monkeypatch,
 
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
-        lst = load_premade_deck("cats")
+        lst = load_premade_deck("pool_2")
         lst2 = [c_ if c_ != lst[0] else "lion" for c_ in lst]   # one card changed, still legal? the test picks a plain swap
         # a legal distinct list: swap one Cats card for a common that the deck does not hold twice already
         from animal_kingdom.decks import decklist_problems
         from animal_kingdom.engine.cards import load_cards
         cards = load_cards()
-        pool_ids = [cid for cid, card in cards.items() if card.collectible and cid not in lst and card.rarity == "common"]
+        pool_ids = [cid for cid, card in sorted(cards.items()) if card.collectible and cid not in lst and card.rarity == "common" and card.stars == 0]
         child = sorted(lst[1:] + [pool_ids[0]])
         assert not decklist_problems(child)
         r = await c.post("/api/league/decks", json={"decks": [
-            {"slug": "league_cats_1", "name": "Savanna Cats III", "list": child, "source": "tinker", "parent": "cats", "start": 2050},
+            {"slug": "league_cats_1", "name": "Savanna Cats III", "list": child, "source": "tinker", "parent": "pool_2", "start": 2050},
             {"slug": "league_dup", "name": "Twin", "list": lst, "source": "test"},               # identical to Cats: refused
-            {"slug": "bad slug!", "name": "X", "list": child[:29], "source": "test"}]}, headers=h)
+            {"slug": "bad slug!", "name": "X", "list": child[:24], "source": "test"}]}, headers=h)
         j = await r.json()
         assert j["added"] == ["league_cats_1"] and set(j["rejected"]) == {"league_dup", "bad slug!"}
         assert "an identical list is already a player" in j["rejected"]["league_dup"][0]
@@ -90,13 +90,13 @@ def test_a_new_list_joins_as_three_placing_players_kept_from_people(monkeypatch,
         assert row["rating"].endswith("?") and row["name"].startswith("Savanna Cats III")
         # placed after ten bot games, it is offered like any other bot
         a = ranking.bot_id("expert", "league_cats_1")
-        games = [{"a": a, "b": ranking.bot_id("expert", "fish"), "winner": "A" if i % 2 else "B", "seed": 100 + i} for i in range(10)]
+        games = [{"a": a, "b": ranking.bot_id("expert", "pool_6"), "winner": "A" if i % 2 else "B", "seed": 100 + i} for i in range(10)]
         assert (await (await c.post("/api/league/games", json={"games": games}, headers=h)).json())["rated"] == 10
         assert not server.ladder.get(a).provisional
         pool = await (await c.get("/api/league/pool", headers=h)).json()
         assert "league_cats_1" in {d["slug"] for d in pool["decks"]}
         # the pool survives a restart: the row is in the database
-        assert tuple(server.profiles.db.execute("SELECT name, source, parent FROM pool_decks WHERE slug = 'league_cats_1'").fetchone()) == ("Savanna Cats III", "tinker", "cats")
+        assert tuple(server.profiles.db.execute("SELECT name, source, parent FROM pool_decks WHERE slug = 'league_cats_1'").fetchone()) == ("Savanna Cats III", "tinker", "pool_2")
     _run(monkeypatch, tmp_path, body)
 
 
@@ -107,7 +107,7 @@ def test_the_meta_report_is_posted_by_the_runner_and_served_with_the_people(monk
         assert (await c.post("/api/league/report", json={"report": {"generated": "x"}})).status == 403
         r = await c.post("/api/league/report", json={"report": {"generated": "2026-10-25 06:00", "top": [], "meta": {}}}, headers=h)
         assert r.status == 200
-        server.ladder.result(server.ladder.get("someone") and "someone", ranking.bot_id("expert", "cats"))
+        server.ladder.result(server.ladder.get("someone") and "someone", ranking.bot_id("expert", "pool_2"))
         j = await (await c.get("/api/league/report")).json()
         assert j["generated"] == "2026-10-25 06:00" and j["people"] and j["people"][0]["games"] == 1
     _run(monkeypatch, tmp_path, body)
@@ -116,23 +116,23 @@ def test_the_meta_report_is_posted_by_the_runner_and_served_with_the_people(monk
 def test_a_retired_list_leaves_the_pool_and_stays_out_after_a_restart(monkeypatch, tmp_path):
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
-        assert "fish" in server.ladder.decks
-        j = await (await c.post("/api/league/retire", json={"slugs": ["fish", "no_such_deck"]}, headers=h)).json()
-        assert j["retired"] == ["fish"] and "fish" not in server.ladder.decks
+        assert "pool_6" in server.ladder.decks
+        j = await (await c.post("/api/league/retire", json={"slugs": ["pool_6", "no_such_deck"]}, headers=h)).json()
+        assert j["retired"] == ["pool_6"] and "pool_6" not in server.ladder.decks
         pool = await (await c.get("/api/league/pool", headers=h)).json()
-        assert "fish" not in {d["slug"] for d in pool["decks"]} and not any(p["id"].endswith(":fish") for p in pool["players"])
-        assert server.league.retired() == {"fish"}
-        assert (await c.post("/api/league/retire", json={"slugs": ["cats"]})).status == 403
+        assert "pool_6" not in {d["slug"] for d in pool["decks"]} and not any(p["id"].endswith(":pool_6") for p in pool["players"])
+        assert server.league.retired() == {"pool_6"}
+        assert (await c.post("/api/league/retire", json={"slugs": ["pool_2"]})).status == 403
     _run(monkeypatch, tmp_path, body)
 
 
 def test_a_retired_lists_twin_comes_back_fresh_and_only_at_the_levels_asked(monkeypatch, tmp_path):   # a legal list: a design change can leave one illegal
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
-        twin = {"slug": "cats_again", "name": "Cats", "list": load_premade_deck("cats"), "levels": ["expert"]}
+        twin = {"slug": "cats_again", "name": "Cats", "list": load_premade_deck("pool_2"), "levels": ["expert"]}
         j = await (await c.post("/api/league/decks", json={"decks": [twin]}, headers=h)).json()
         assert j["added"] == [] and "cats_again" in j["rejected"]               # the original still plays: no twin
-        await c.post("/api/league/retire", json={"slugs": ["cats"]}, headers=h)
+        await c.post("/api/league/retire", json={"slugs": ["pool_2"]}, headers=h)
         j = await (await c.post("/api/league/decks", json={"decks": [twin]}, headers=h)).json()
         assert j["added"] == ["cats_again"]
         pool = await (await c.get("/api/league/pool", headers=h)).json()
@@ -143,9 +143,9 @@ def test_a_retired_lists_twin_comes_back_fresh_and_only_at_the_levels_asked(monk
 def test_a_person_can_be_reset_but_not_a_bot(monkeypatch, tmp_path):
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
-        server.ladder.result("p1", "bot:expert:cats"); bot = server.ladder.get("bot:expert:cats").games
-        j = await (await c.post("/api/league/reset_people", json={"ids": ["p1", "bot:expert:cats"]}, headers=h)).json()
-        assert j["reset"] == ["p1"] and server.ladder.get("p1").games == 0 and server.ladder.get("bot:expert:cats").games == bot
+        server.ladder.result("p1", "bot:expert:pool_2"); bot = server.ladder.get("bot:expert:pool_2").games
+        j = await (await c.post("/api/league/reset_people", json={"ids": ["p1", "bot:expert:pool_2"]}, headers=h)).json()
+        assert j["reset"] == ["p1"] and server.ladder.get("p1").games == 0 and server.ladder.get("bot:expert:pool_2").games == bot
     _run(monkeypatch, tmp_path, body)
 
 
@@ -159,36 +159,36 @@ def test_a_list_kept_to_expert_loses_its_other_pilots_and_a_restart_keeps_it_so(
     async def body(c, server):
         from animal_kingdom.web import ladder as ranking
         h = {"X-AK-League-Key": "k-test"}
-        j = await (await c.post("/api/league/levels", json={"slugs": ["cats"], "levels": ["expert"]}, headers=h)).json()
-        assert j["slugs"] == ["cats"]
-        assert {lid for lid in server.ladder.bots() if lid.endswith(":cats")} == {"bot:expert:cats"}
-        g = {"gid": "x-1", "a": "bot:easy:cats", "b": "bot:expert:fish", "winner": "A", "seed": 1, "turns": 9, "reason": "food"}
+        j = await (await c.post("/api/league/levels", json={"slugs": ["pool_2"], "levels": ["expert"]}, headers=h)).json()
+        assert j["slugs"] == ["pool_2"]
+        assert {lid for lid in server.ladder.bots() if lid.endswith(":pool_2")} == {"bot:expert:pool_2"}
+        g = {"gid": "x-1", "a": "bot:easy:pool_2", "b": "bot:expert:pool_6", "winner": "A", "seed": 1, "turns": 9, "reason": "food"}
         j = await (await c.post("/api/league/games", json={"games": [g]}, headers=h)).json()
-        assert j["rated"] == 0 and "bot:easy:cats" not in server.ladder.bots()   # a late result can't bring the pilot back
+        assert j["rated"] == 0 and "bot:easy:pool_2" not in server.ladder.bots()   # a late result can't bring the pilot back
         again = ranking.Ladder(server.ladder.db, server.ladder.decks, server.league.levels())   # what a restart builds
-        assert {lid for lid in again.bots() if lid.endswith(":cats")} == {"bot:expert:cats"}
+        assert {lid for lid in again.bots() if lid.endswith(":pool_2")} == {"bot:expert:pool_2"}
     _run(monkeypatch, tmp_path, body)
 
 
 def test_a_game_posted_twice_is_rated_once(monkeypatch, tmp_path):
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
-        before = server.ladder.get("bot:expert:cats").games
-        g = {"gid": "123-0", "a": "bot:expert:cats", "b": "bot:expert:fish", "winner": "A", "seed": 1, "turns": 9, "reason": "hq_capture"}
+        before = server.ladder.get("bot:expert:pool_2").games
+        g = {"gid": "123-0", "a": "bot:expert:pool_2", "b": "bot:expert:pool_6", "winner": "A", "seed": 1, "turns": 9, "reason": "hq_capture"}
         j1 = await (await c.post("/api/league/games", json={"games": [g]}, headers=h)).json()
         j2 = await (await c.post("/api/league/games", json={"games": [g, {**g, "gid": "123-1"}]}, headers=h)).json()
         assert (j1["rated"], j1["seen"]) == (1, 0) and (j2["rated"], j2["seen"]) == (1, 1)
-        assert server.ladder.get("bot:expert:cats").games == before + 2
+        assert server.ladder.get("bot:expert:pool_2").games == before + 2
     _run(monkeypatch, tmp_path, body)
 
 
 def test_card_facts_feed_the_meta_tab_by_martins_archetypes(monkeypatch, tmp_path):
     from animal_kingdom.web import meta
-    (tmp_path / "a.json").write_text(json.dumps({"archetypes": [{"name": "Cats", "lists": ["cats"]}, {"name": "Fish Token", "lists": ["fish"]}]}))
+    (tmp_path / "a.json").write_text(json.dumps({"archetypes": [{"name": "Cats", "lists": ["pool_2"]}, {"name": "Fish Token", "lists": ["pool_6"]}]}))
     monkeypatch.setattr(meta, "ARCHETYPES", tmp_path / "a.json")
-    cats, fish = load_premade_deck("cats"), load_premade_deck("fish")
+    cats, fish = load_premade_deck("pool_2"), load_premade_deck("pool_6")
     side = lambda l: {"seen": l[:4], "back": [], "cards": [[l[0], 0, 1], [l[5], 2, None]]}
-    g = {"a": "bot:expert:cats", "b": "bot:expert:fish", "winner": "A", "seed": 1, "turns": 9, "reason": "hq_capture"}
+    g = {"a": "bot:expert:pool_2", "b": "bot:expert:pool_6", "winner": "A", "seed": 1, "turns": 9, "reason": "hq_capture"}
 
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
@@ -201,5 +201,5 @@ def test_card_facts_feed_the_meta_tab_by_martins_archetypes(monkeypatch, tmp_pat
         a = await (await c.get("/api/meta/archetype?id=cats&vs=fish_token")).json()
         assert a["name"] == "Cats" and a["vs_name"] == "Fish Token" and {x["card"]: x["p"]["yes"] for x in a["cards"]}[cats[0]] == [2, 1]
         assert (await c.get("/api/meta/archetype?id=nope")).status == 404
-        assert server.ladder_name("bot:expert:fish").startswith("Fish Token (")   # the ladder names a bot by its archetype
+        assert server.ladder_name("bot:expert:pool_6").startswith("Fish Token (")   # the ladder names a bot by its archetype
     _run(monkeypatch, tmp_path, body)

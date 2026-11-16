@@ -167,12 +167,12 @@ def test_queen_bee_adds_the_chosen_bee_to_hand(pick):
 
 # ------------------------------------------------------------------------------------------------ Worker Bee
 
-def test_worker_bee_gains_twelve_food():
-    # "Flight. Roar: gain 12 food."
+def test_worker_bee_gains_six_food():
+    # "Flight. Echo. Roar: gain 6 food."
     s = make_state(hands={"A": ["worker_bee"]}, food={"A": 3, "B": 0}, decks=decks())
     rules.apply_action(s, PlaceAction("worker_bee", ("cr", "3,2")))
-    assert s.food == {"A": 3 + 12, "B": 0}
-    assert CFG.worker_bee_food == 12
+    assert s.food == {"A": 3 + 6, "B": 0}
+    assert CFG.worker_bee_food == 6
 
 
 def test_worker_bee_has_flight():
@@ -352,21 +352,21 @@ def test_mole_legend_draws_plays_then_discards():
 
 def test_mole_legend_with_nothing_to_play_still_discards():
     # A Titan can't be paid for by a free play, so nothing can be played; the discard still happens.
-    s = make_state(hands={"A": ["mole_legend", "blue_whale"]}, decks={"A": [], "B": []})
+    s = make_state(hands={"A": ["mole_legend", "sperm_whale"]}, decks={"A": [], "B": []})
     rules.apply_action(s, PlaceAction("mole_legend", ("cr", "1,2")))
     if s.pending and s.pending["mode"] == "choice":
-        choose(s, hand_inst(s, "A", "blue_whale").iid)
+        choose(s, hand_inst(s, "A", "sperm_whale").iid)
     assert s.pending is None
-    assert hand_ids(s, "A") == [] and "blue_whale" in s.remove_pile
+    assert hand_ids(s, "A") == [] and "sperm_whale" in s.remove_pile
 
 
 # ------------------------------------------------------------------------------------------------ Gopher
 
 def test_gopher_removes_an_adjacent_enemy_after_ten_food_this_turn():
-    # "Roar: if you gained 10 or more food this turn, remove an adjacent enemy." Any strength.
-    s = make_state(hands={"A": ["worker_bee", "gopher"]}, decks=decks())
+    # "Roar: if you gained 10 or more food this turn, remove an adjacent enemy of strength 7 or less."
+    s = make_state(hands={"A": ["squirrel", "gopher"]}, decks=decks())
     put(s, "2,2", "lion", "B")
-    rules.apply_action(s, PlaceAction("worker_bee", ("cr", "3,1")))
+    rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,1")))
     apply_click(s, PlaceAction("gopher", ("cr", "1,2")))
     assert "2,2" not in s.board and "lion" in s.remove_pile
 
@@ -398,14 +398,14 @@ def test_gopher_cannot_remove_armor_or_choose_stealth():
 # ------------------------------------------------------------------------------------------------ Groundhog
 
 def test_groundhog_gains_ten_at_the_start_of_your_turn_only():
-    # "Dawn: gain 10 food."
+    # "Dawn: gain 5 food."
     s = make_state(hands={"A": ["groundhog"]}, decks=decks())
     rules.apply_action(s, PlaceAction("groundhog", ("cr", "1,2")))
     assert s.food["A"] == 0
     end_turn(s)                                               # B's Dawn: nothing for A
     assert s.current == "B" and s.food["A"] == 0
     end_turn(s)
-    assert s.current == "A" and s.food["A"] == CFG.groundhog_food == 10
+    assert s.current == "A" and s.food["A"] == CFG.groundhog_food == 5
 
 
 # ------------------------------------------------------------------------------------------------ Hamster
@@ -560,7 +560,7 @@ def test_cuckoo_shuffles_two_eggs_into_the_opponents_deck():
 def test_cuckoo_into_an_empty_deck():
     s = make_state(hands={"A": ["cuckoo"]}, decks={"A": [], "B": []})
     rules.apply_action(s, PlaceAction("cuckoo", ("cr", "1,2")))
-    assert s.decks["B"] == ["cuckoo_egg", "cuckoo_egg"]
+    assert s.decks["B"] + [u.card_id for u in s.hands["B"]] == ["cuckoo_egg", "cuckoo_egg"]   # one is B's free card
 
 
 def test_cuckoo_has_flight():
@@ -593,10 +593,10 @@ def test_cuckoo_legend_removing_an_ally_plays_another_animal_for_free():
 
 def test_cuckoo_legend_nothing_of_four_or_less_adjacent():
     s = make_state(hands={"A": ["cuckoo_legend", "fox"]}, decks=decks())
-    put(s, "2,2", "hedgehog", "B")                            # a 5
+    put(s, "2,2", "bobcat", "B")                              # a 5
     put(s, "1,3", "stick_insect", "B")                        # Stealth: can't be chosen (and a 6)
     rules.apply_action(s, PlaceAction("cuckoo_legend", ("cr", "1,2")))
-    assert s.pending is None and s.top_unit("2,2").card_id == "hedgehog"
+    assert s.pending is None and s.top_unit("2,2").card_id == "bobcat"
 
 
 # ------------------------------------------------------------------------------------------------ Soldier Bee
@@ -649,8 +649,8 @@ def test_bee_legend_2_does_nothing_with_a_four_in_the_starting_deck():
 
 def test_mara_draws_two_after_ten_food_this_turn():
     # "Roar: if you gained 10 or more food this turn, draw 2 cards."
-    s = make_state(hands={"A": ["worker_bee", "mara"]}, decks=decks())
-    rules.apply_action(s, PlaceAction("worker_bee", ("cr", "3,1")))
+    s = make_state(hands={"A": ["squirrel", "mara"]}, decks=decks())
+    rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,1")))
     rules.apply_action(s, PlaceAction("mara", ("cr", "1,2")))
     assert hand_ids(s, "A") == ["lion"] * CFG.mara_draw
 

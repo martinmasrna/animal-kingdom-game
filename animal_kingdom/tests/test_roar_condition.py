@@ -22,10 +22,10 @@ def test_fed_cards_light_up_once_ten_food_came_in_this_turn():
 
 def test_another_cat_means_a_cat_other_than_the_one_being_played():
     s = make_state()
-    assert roar_condition(s, "A", "bobcat") is False
-    bobcat = put(s, "1,2", "bobcat", "A")
-    assert roar_condition(s, "A", "bobcat", bobcat) is False   # placed alone: itself doesn't count
-    assert roar_condition(s, "A", "bobcat") is True          # a second Bobcat in hand now has one
+    assert roar_condition(s, "A", "ocelot") is False
+    ocelot = put(s, "1,2", "ocelot", "A")
+    assert roar_condition(s, "A", "ocelot", ocelot) is False   # placed alone: itself doesn't count
+    assert roar_condition(s, "A", "ocelot") is True          # a second Ocelot in hand now has one
 
 
 def test_colony_threshold_counts_the_card_itself():
@@ -49,11 +49,10 @@ def test_nurse_bee_from_hand_counts_itself_toward_four_colony():
 
 
 def test_the_hand_prediction_matches_what_the_roar_does():
-    s = make_state(hands={"A": ["bobcat", "bobcat"]}, decks={"A": ["lion"] * 5, "B": []})
+    s = make_state(hands={"A": ["ocelot", "lion"]}, decks={"A": ["lion"] * 5, "B": []})
     put(s, "1,1", "lion", "A")                                  # a Cat already on the board
-    assert roar_condition(s, "A", "bobcat") is True
-    place = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "bobcat"
+    assert roar_condition(s, "A", "ocelot") is True
+    place = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "ocelot"
                  and a.target[1] not in s.board)                # beside the Lion, not on top of it
-    before = len(s.hands["A"])
     rules.apply_action(s, place)
-    assert len(s.hands["A"]) == before                          # played one, drew one
+    assert s.pending is not None and s.pending["mode"] == "place"   # the Roar fired: it offers the Cat in hand

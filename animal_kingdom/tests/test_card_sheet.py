@@ -34,5 +34,5 @@ def test_proposed_card_sheet_reads_terms_and_counts_neighbours():
                 "--text", "Has +2 strength for each adjacent allied Rodent.")
     assert "Strength modifiers" in out            # "has +" is read from the registry
     assert "at most 11" in out and "at most 7" in out   # centre 4 neighbours, corner 2
-    assert "rat (collectible)" in out             # the animal is already in the pool
+    assert "rat (reserve)" in out             # the animal is already in the pool
     assert "not in the engine" in out             # a proposal can't be played

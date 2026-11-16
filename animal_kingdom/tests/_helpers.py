@@ -17,7 +17,8 @@ from animal_kingdom.engine.state import GameState, UnitInstance
 def make_state(*, current="A", hands=None, decks=None, food=None, config=None, cards=None) -> GameState:
     state = GameState(
         load_map("map_a"), cards or load_cards(), config or Config.default(),
-        board={}, hands={"A": [], "B": []}, decks=decks or {"A": [], "B": []},
+        board={}, hands={"A": [], "B": []},
+        decks={p: list(v) for p, v in decks.items()} if decks else {"A": [], "B": []},   # copied: draws must not eat a shared list
         remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A",
         turn_counter=2,                  # a position past the first player's one-action first turn
     )

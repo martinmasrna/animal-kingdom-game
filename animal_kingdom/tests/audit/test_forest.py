@@ -290,7 +290,7 @@ def test_fox_a_roam_last_turn_doesnt_count():
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
     end_turn(s); end_turn(s)
     play(s, "fox", "1,1")
-    assert s.hands["A"] == []
+    assert hand_ids(s, "A") == ["v1"]                                      # only the turn's free card
 
 
 # ============================================================ wolf
@@ -405,7 +405,7 @@ def test_falcon_legend_with_none_draws_nothing():
 
 def test_hornet_discards_a_hornet_from_hand_to_remove_an_adjacent_enemy():
     s = st(hands={"A": ["hornet", "hornet"]})
-    put(s, "2,1", "v9", "B")
+    put(s, "2,1", "v7", "B")
     play(s, "hornet", "1,1")
     click_through(s)
     assert s.top_unit("2,1") is None
@@ -414,7 +414,7 @@ def test_hornet_discards_a_hornet_from_hand_to_remove_an_adjacent_enemy():
 
 def test_hornet_discards_from_the_deck():
     s = st(hands={"A": ["hornet"]}, decks={"A": ["v1", "hornet"], "B": []})
-    put(s, "2,1", "v9", "B")
+    put(s, "2,1", "v7", "B")
     play(s, "hornet", "1,1")
     click_through(s)
     assert s.top_unit("2,1") is None and s.decks["A"] == ["v1"]
@@ -538,11 +538,11 @@ def test_bobcat_with_another_cat_draws():
     assert len(s.hands["A"]) == 1
 
 
-def test_bobcat_alone_or_with_an_enemy_cat_draws_nothing():
+def test_bobcat_draws_a_card_even_alone_or_with_an_enemy_cat():
     s = st(hands={"A": ["bobcat"]})
     put(s, "3,3", "lion", "B")
     play(s, "bobcat", "1,2")
-    assert s.hands["A"] == []
+    assert hand_ids(s, "A") == ["v1"]
 
 
 # ============================================================ chipmunk_legend (Tally)
@@ -618,7 +618,7 @@ def test_dormouse_does_nothing_at_the_opponents_dusk():
     s = st(current="B", hands={"B": ["squirrel", "squirrel"]})
     put(s, "1,1", "dormouse", "A")
     play(s, "squirrel", "4,1"); play(s, "squirrel", "4,3")
-    assert s.hands["A"] == []
+    assert hand_ids(s, "A") == ["v1"]                                      # only A's free card, not the Dormouse's
 
 
 # ============================================================ squirrel
@@ -633,16 +633,12 @@ def test_squirrel_gains_10_food():
 # ============================================================ chipmunk
 # "Roar: gain 10 food. At the start of your next turn, gain 10 more."
 
-def test_chipmunk_gains_10_now_and_10_at_the_start_of_your_next_turn():
+def test_chipmunk_gains_10_now_and_nothing_later():
     s = st(hands={"A": ["chipmunk"]})
     play(s, "chipmunk", "1,2")
     assert s.food["A"] == 10
-    end_turn(s)
-    assert s.food["A"] == 10                                               # not on the opponent's turn
-    end_turn(s)
-    assert s.current == "A" and s.food["A"] == 20
     end_turn(s); end_turn(s)
-    assert s.food["A"] == 20                                               # once
+    assert s.current == "A" and s.food["A"] == 10                          # no delayed 10 (Echo is a keyword)
 
 
 # ============================================================ squirrel_legend (Yuki)
@@ -698,9 +694,9 @@ def test_black_bear_draws_2_in_2_turns():
     s = st(hands={"A": ["black_bear"]})
     play(s, "black_bear", "1,2")
     end_turn(s); end_turn(s)
-    assert s.hands["A"] == []
+    assert hand_ids(s, "A") == ["v1"]                                      # only the free cards so far
     end_turn(s); end_turn(s)
-    assert s.current == "A" and len(s.hands["A"]) == 2
+    assert s.current == "A" and len(s.hands["A"]) == 2 + 2                 # the Bear's two and two free cards
 
 
 # ============================================================ owl
@@ -747,30 +743,31 @@ def test_raven_legend_with_one_takes_one_and_never_your_own():
 
 
 # ============================================================ hawk
-# "Flight. Roar: remove an adjacent enemy of strength 4 or less."
+# "Roar: remove an adjacent enemy of strength 5 or less."
 
-def test_hawk_removes_an_adjacent_enemy_of_4_or_less():
+def test_hawk_removes_an_adjacent_enemy_of_5_or_less():
     s = st(hands={"A": ["hawk"]})
-    put(s, "2,1", "v4", "B")
+    put(s, "2,1", "v5", "B")
     play(s, "hawk", "1,1")
     click_through(s)
     assert s.top_unit("2,1") is None
 
 
-def test_hawk_leaves_a_5():
+def test_hawk_leaves_a_6():
     s = st(hands={"A": ["hawk"]})
-    put(s, "2,1", "v5", "B")
+    put(s, "2,1", "v6", "B")
     play(s, "hawk", "1,1")
     click_through(s)
-    assert s.top_unit("2,1").card_id == "v5"
+    assert s.top_unit("2,1").card_id == "v6"
 
 
-def test_hawk_has_flight_and_spares_allies():
+def test_hawk_has_no_flight_and_spares_allies():
     s = st(hands={"A": ["hawk"]})
-    put(s, "3,2", "v1", "A")
-    play(s, "hawk", "3,3")
+    put(s, "2,1", "v1", "A")
+    assert "3,3" not in place_targets(s)
+    play(s, "hawk", "1,1")
     click_through(s)
-    assert s.top_unit("3,2").card_id == "v1"
+    assert s.top_unit("2,1").card_id == "v1"
 
 
 # ============================================================ magpie
@@ -813,7 +810,7 @@ def test_bird_egg_scouts_a_bird_then_next_turn_is_removed_and_draws_a_bird():
     assert s.top_unit("1,2").card_id == "bird_egg"                        # not on the opponent's turn
     end_turn(s)
     assert s.top_unit("1,2") is None and "bird_egg" in s.remove_pile
-    assert len(s.hands["A"]) == 2 and all(c in birds for c in hand_ids(s, "A"))
+    assert len(s.hands["A"]) == 3 and sum(c in birds for c in hand_ids(s, "A")) >= 2   # the hatch's Bird; the free card is a Bird or not (the deck is shuffled)
 
 
 # ============================================================ viper
@@ -954,12 +951,12 @@ def test_boar_ignores_allies_placed_next_to_it():
 
 def test_eagle_lands_on_prey_anywhere_and_eats_it():
     s = st(hands={"A": ["eagle"]})
-    put(s, "3,3", "v5", "B")
+    put(s, "3,3", "v4", "B")
     put(s, "3,1", "v6", "B")
     targets = place_targets(s)
     assert "3,3" in targets and "3,1" not in targets and "2,2" not in targets
     play(s, "eagle", "3,3")
-    assert [u.card_id for u in s.board["3,3"]] == ["eagle"] and "v5" in s.remove_pile
+    assert [u.card_id for u in s.board["3,3"]] == ["eagle"] and "v4" in s.remove_pile
 
 
 def test_eagle_eats_an_ally():
@@ -1191,7 +1188,7 @@ def test_worker_wasp_sees_a_colony_animal_an_effect_places():
 def test_pheasant_legend_eaten_by_an_apex_falls_into_the_deck():
     s = st(current="B", hands={"B": ["eagle"]}, decks={"A": ["v1"] * 2, "B": ["v1"] * 2})
     e = put(s, "2,2", "pheasant_legend", "A")
-    e.strength_counter = -2                                                # a 5: the Eagle (6) covers it
+    e.strength_counter = -3                                                # a 4: the Eagle (5) covers it
     play(s, "eagle", "2,2")
     assert "pheasant_legend" in s.decks["A"] and "pheasant_legend" not in s.remove_pile
 

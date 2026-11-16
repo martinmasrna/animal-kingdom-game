@@ -328,11 +328,10 @@ def test_vanilla_card_is_never_fizzled():
     assert not _roar_fizzled(s, nxt, "A", action)
 
 
-def test_choose_does_not_waste_a_roar_when_drawing_has_more_value():
-    # Mouse is live and Rat is not, but the standard draw produces more immediate card
-    # economy than spending Mouse to replace itself. The readiness term must not force a
-    # live Roar over a strictly better non-placement action.
+def test_choose_spends_the_live_roar_not_the_dead_one_now_that_draw_draws_one():
+    # Mouse is live and Rat is not. Draw draws one card since 2026-11-16, no more than the Mouse's Roar draws, so
+    # placing the Mouse (a card and a body) beats drawing; the dead Rat must not be the one spent.
     s = make_state(hands={"A": ["rat", "mouse"]}, decks={"A": ["mouse"] * 3, "B": []})
     legal = rules.legal_actions(s)
     chosen = GreedyBot(seed=0).choose(s.view_for("A"), legal, s)
-    assert isinstance(chosen, DrawAction)
+    assert isinstance(chosen, PlaceAction) and chosen.card_id == "mouse"

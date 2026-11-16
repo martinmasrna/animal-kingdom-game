@@ -53,11 +53,7 @@ def board_ids(s, owner=None):
 
 def test_open_ocean_card_list_is_the_audited_one():
     ocean = {c.id for c in CARDS.values() if c.status == "collectible" and c.habitat == "Open Ocean"}
-    assert ocean == {
-        "sperm_whale", "orca", "tuna_legend", "manta_ray_legend", "swordfish", "barracuda", "manta_ray", "remora",
-        "cod", "sardine", "mahi_mahi", "tuna", "sunfish", "octopus_legend_2", "jellyfish", "sperm_whale_legend",
-        "whale_shark", "blue_whale", "octopus", "great_white_shark", "dolphin", "albatross", "sea_turtle",
-        "hammerhead", "krill", "sardine_legend"}
+    assert ocean == {"albatross", "blue_whale", "great_white_shark", "jellyfish", "orca", "sardine", "tuna"}
 
 
 # ------------------------------------------------------------------ Sperm Whale: Titan. Roar: remove all adjacent animals.
@@ -182,8 +178,8 @@ def test_manta_ray_legend_draws_nothing_with_one_region():
 def test_manta_ray_legend_does_nothing_at_the_opponents_dusk():
     s = _manta_legend_board(True)
     s.current = "B"
-    end_turn(s)                                      # B's turn ends: not A's Dusk
-    assert len(s.hands["A"]) == 0
+    end_turn(s)                                      # B's turn ends: not A's Dusk (A only gets its free card)
+    assert len(s.hands["A"]) == 1
 
 
 # ------------------------------------------------------------------ Swordfish: Roar: remove a random adjacent enemy for each adjacent allied Fish.
@@ -381,17 +377,17 @@ def test_mahi_mahi_gives_other_allied_fish_plus_one_live():
     assert effective_strength(s, sar) == CARDS["sardine"].base_strength
 
 
-# ------------------------------------------------------------------ Tuna: Has +1 strength for each other Fish you control.
+# ------------------------------------------------------------------ Tuna: Has +1 strength for each other animal you control.
 
-def test_tuna_grows_per_other_allied_fish():
+def test_tuna_grows_per_other_allied_animal():
     s = make_state()
     tuna = put(s, "1,2", "tuna", "A")
-    assert effective_strength(s, tuna) == 3
-    put(s, "3,3", "sardine", "A"); put(s, "4,1", "baby_fish", "A")
-    put(s, "2,2", "sardine", "B")                    # enemy Fish: not yours
-    assert effective_strength(s, tuna) == 5
-    put(s, "3,3", "lion", "B")                       # a covered Fish isn't controlled
+    assert effective_strength(s, tuna) == 2
+    put(s, "3,3", "sardine", "A"); put(s, "4,1", "lion", "A")
+    put(s, "2,2", "sardine", "B")                    # an enemy: not yours
     assert effective_strength(s, tuna) == 4
+    put(s, "3,3", "lion", "B")                       # a covered animal isn't controlled
+    assert effective_strength(s, tuna) == 3
 
 
 # ------------------------------------------------------------------ Sunfish: Roar: place a Baby Fish on a random adjacent empty crossroad.
@@ -552,28 +548,29 @@ def test_whale_shark_is_a_titan():
     assert s.current == "B"
 
 
-# ------------------------------------------------------------------ Blue Whale: Titan.
+# ------------------------------------------------------------------ Titan (the Sperm Whale stands in: Blue Whale is a plain 12 now)
 
-def test_blue_whale_costs_two_actions():
-    s = make_state(hands={"A": ["blue_whale", "blue_whale"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    rules.apply_action(s, PlaceAction("blue_whale", ("cr", "1,2")))
+
+def test_sperm_whale_costs_two_actions():
+    s = make_state(hands={"A": ["sperm_whale", "sperm_whale"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("sperm_whale", ("cr", "1,2")))
     assert s.current == "B"
-    assert effective_strength(s, s.top_unit("1,2")) == 12
+    assert effective_strength(s, s.top_unit("1,2")) == 8
 
 
-def test_blue_whale_not_offered_with_one_action_left():
-    s = make_state(hands={"A": ["blue_whale"]}, decks={"A": ["lion"] * 3, "B": []})
+def test_sperm_whale_not_offered_with_one_action_left():
+    s = make_state(hands={"A": ["sperm_whale"]}, decks={"A": ["lion"] * 3, "B": []})
     rules.apply_action(s, DrawAction())
-    assert not places(s, "blue_whale")
+    assert not places(s, "sperm_whale")
 
 
-def test_blue_whale_first_players_one_action_first_turn():
-    s = make_state(hands={"A": ["blue_whale"]}, decks={"A": ["lion"] * 3, "B": []})
+def test_sperm_whale_first_players_one_action_first_turn():
+    s = make_state(hands={"A": ["sperm_whale"]}, decks={"A": ["lion"] * 3, "B": []})
     s.turn_counter = 0                               # the first player's first turn has one action
     acts = rules.legal_actions(s)
     if s.config.actions_per_turn and not any(isinstance(a, DrawAction) for a in acts):
         pytest.skip("fixture can't express the first turn")
-    assert not places(s, "blue_whale")
+    assert not places(s, "sperm_whale")
 
 
 # ------------------------------------------------------------------ Octopus: Roar: adjacent enemies lose all their effects.
@@ -688,8 +685,8 @@ def test_sea_turtle_adds_a_baby_turtle_at_dusk_only():
     put(s, "1,2", "sea_turtle", "A")
     end_turn(s)
     assert hand_ids(s, "A") == ["baby_turtle"]
-    end_turn(s)                                      # B's Dusk: nothing for A
-    assert hand_ids(s, "A") == ["baby_turtle"]
+    end_turn(s)                                      # B's Dusk: nothing for A, only its free card
+    assert hand_ids(s, "A") == ["baby_turtle", "lion"]
 
 
 def test_sea_turtle_armor_resists_removal_but_not_covering():
@@ -755,30 +752,30 @@ def test_hammerhead_ally_removed_last_turn_does_not_count():
 # ------------------------------------------------------------------ Krill: Roar: draw a card. The next Titan you play this turn costs one action.
 
 def test_krill_draws_and_the_next_titan_costs_one_action():
-    s = make_state(hands={"A": ["krill", "blue_whale", "blue_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    s = make_state(hands={"A": ["krill", "sperm_whale", "sperm_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     rules.apply_action(s, PlaceAction("krill", ("cr", "1,2")))
-    assert sorted(hand_ids(s, "A")) == ["blue_whale", "blue_whale", "lion"]
-    assert ("cr", "1,1") in places(s, "blue_whale")
-    rules.apply_action(s, PlaceAction("blue_whale", ("cr", "1,1")))
+    assert sorted(hand_ids(s, "A")) == ["lion", "sperm_whale", "sperm_whale"]
+    assert ("cr", "1,1") in places(s, "sperm_whale")
+    rules.apply_action(s, PlaceAction("sperm_whale", ("cr", "1,1")))
     assert s.current == "B"
 
 
 def test_krill_discount_ends_with_the_turn():
-    s = make_state(hands={"A": ["krill", "blue_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    s = make_state(hands={"A": ["krill", "sperm_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     rules.apply_action(s, PlaceAction("krill", ("cr", "1,2")))
     rules.apply_action(s, DrawAction())                      # the turn ends unused
     end_turn(s)                                              # B
     rules.apply_action(s, DrawAction())                      # one action left on A's next turn
-    assert not places(s, "blue_whale")
+    assert not places(s, "sperm_whale")
 
 
 def test_krill_discount_is_for_one_titan_only():
-    s = make_state(hands={"A": ["krill", "blue_whale", "blue_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    s = make_state(hands={"A": ["krill", "sperm_whale", "sperm_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     s.actions_taken_this_turn = -1                           # three actions this turn (a Chipmunk-style extra)
     rules.apply_action(s, PlaceAction("krill", ("cr", "1,2")))
-    rules.apply_action(s, PlaceAction("blue_whale", ("cr", "1,1")))   # one action: one left
+    rules.apply_action(s, PlaceAction("sperm_whale", ("cr", "1,1")))   # one action: one left
     assert s.current == "A"
-    assert not places(s, "blue_whale")                       # the second costs two again
+    assert not places(s, "sperm_whale")                       # the second costs two again
 
 
 # ------------------------------------------------------------------ [SARDINE]: [SARDINE] and your adjacent Fish count as 2 Fish.
@@ -786,28 +783,27 @@ def test_krill_discount_is_for_one_titan_only():
 def test_sardine_legend_and_adjacent_fish_count_twice():
     s = make_state()
     put(s, "1,1", "sardine_legend", "A")
-    tuna = put(s, "2,1", "tuna", "A")
-    assert effective_strength(s, tuna) == 3 + 2
+    assert statics.fish_count(s, "A") == 2
+    put(s, "2,1", "sardine", "A")                            # beside the legend: 2
+    assert statics.fish_count(s, "A") == 2 + 2
     put(s, "4,3", "sardine", "A")
-    assert effective_strength(s, tuna) == 3 + 2 + 1
-    put(s, "1,2", "sardine", "A")                            # beside the legend: 2
-    assert effective_strength(s, tuna) == 3 + 2 + 1 + 2
+    assert statics.fish_count(s, "A") == 2 + 2 + 1
 
 
 def test_sardine_legend_does_not_double_enemy_fish():
     s = make_state()
     put(s, "1,1", "sardine_legend", "A")
-    tuna = put(s, "3,3", "tuna", "B")
+    put(s, "3,3", "tuna", "B")
     put(s, "2,1", "sardine", "B")                            # an enemy Fish beside the legend
-    assert effective_strength(s, tuna) == 3 + 1
+    assert statics.fish_count(s, "B") == 2
 
 
 def test_sardine_legend_covered_stops_counting():
     s = make_state()
     put(s, "1,1", "sardine_legend", "A")
-    tuna = put(s, "2,1", "tuna", "A")
+    put(s, "2,1", "sardine", "A")
     put(s, "1,1", "lion", "B")
-    assert effective_strength(s, tuna) == 3
+    assert statics.fish_count(s, "A") == 1
 
 
 def test_sardine_legend_doubles_for_barracuda():
@@ -938,3 +934,7 @@ def test_great_white_shark_reach_jumps_from_any_connected_ally():
     put(s, "3,3", "mouse", "A")
     effects.remove_top(s, "3,3", by_player="B")
     assert ("cr", "4,2") in places(s, "great_white_shark")
+
+
+def test_blue_whale_is_a_plain_twelve_with_no_titan():
+    assert CARDS["blue_whale"].base_strength == 12 and "Titan" not in CARDS["blue_whale"].keywords

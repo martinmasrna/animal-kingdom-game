@@ -114,7 +114,7 @@ def test_both_stuck_on_equal_food_the_last_to_pass_loses():
 
 # ------------------------------------------------- actions per turn (2 per turn, the default)
 
-TWO_ACTIONS = Config.default()  # the shipped ruleset is 2 actions/turn, draw 2
+TWO_ACTIONS = Config.default()  # the shipped ruleset is 2 actions/turn, Draw draws 1, a free card each turn
 
 
 def test_two_actions_play_play_then_turn_ends():
@@ -127,23 +127,23 @@ def test_two_actions_play_play_then_turn_ends():
     assert s.actions_taken_this_turn == 0
 
 
-def test_two_actions_draw_draws_two_and_keeps_turn_open():
+def test_two_actions_draw_draws_one_and_keeps_turn_open():
     s = make_state(hands={"A": ["lion"], "B": ["lion"]},
                    decks={"A": ["caracal", "cheetah"], "B": []}, config=TWO_ACTIONS)
     rules.apply_action(s, DrawAction())
-    assert len(s.hands["A"]) == 3                # draw_action_count=2: lion + both drawn
+    assert len(s.hands["A"]) == 2                # draw_action_count=1: lion + the one drawn
     assert s.current == "A"
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
     assert s.current == "B"
 
 
 def test_draw_at_the_hand_limit_burns_the_overflow():
-    full = ["alley_cat"] * (TWO_ACTIONS.hand_limit - 1)
+    full = ["alley_cat"] * TWO_ACTIONS.hand_limit
     s = make_state(hands={"A": full, "B": ["lion"]},
                    decks={"A": ["lion", "caracal", "cheetah"], "B": []}, config=TWO_ACTIONS)
-    rules.apply_action(s, DrawAction())          # one card fits, the newest burns
+    rules.apply_action(s, DrawAction())          # the hand is full: the drawn card burns
     assert len(s.hands["A"]) == TWO_ACTIONS.hand_limit
-    assert s.remove_pile == ["caracal"]          # the deck's top is its end: cheetah came first
+    assert s.remove_pile == ["cheetah"]          # the deck's top is its end
     assert DrawAction() in rules.legal_actions(s)  # a full hand may still draw (and burn)
 
 

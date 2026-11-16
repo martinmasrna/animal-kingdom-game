@@ -57,7 +57,7 @@ def test_known_cards_present_with_expected_data():
     # Only the Egg Eater is dynamic; the Python grows by a counter (wherever it is).
     assert cards["egg_eater"].is_dynamic and not cards["python"].is_dynamic
     assert cards["egg_eater"].dynamic_strength == "removed_eggs_count"
-    assert cards["hercules_beetle"].base_strength == 0
+    assert cards["hercules_beetle"].base_strength == 1
     assert cards["tiger"].has_keyword("Apex Predator")
     assert cards["eagle"].has_keyword("Flight")
     assert cards["lion"].has_tag("Cat")
@@ -65,7 +65,7 @@ def test_known_cards_present_with_expected_data():
     assert cards["worker_ant"].tags == frozenset({"Colony", "Worker"})
     assert cards["octopus_legend_2"].tags == frozenset()  # tagless ('-')
     assert cards["cairn"].food_cost == 15       # "Costs 15 food" body
-    assert cards["elephant"].hungry == 5 and cards["blue_whale"].has_keyword("Titan")
+    assert cards["moose"].hungry == 3 and cards["sperm_whale"].has_keyword("Titan")
     assert cards["nurse_bee"].has_roar
     assert not cards["guard_wasp"].has_roar
 

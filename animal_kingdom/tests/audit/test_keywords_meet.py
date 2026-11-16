@@ -373,10 +373,10 @@ def test_stealth_meets_the_octopus_ink_reaches_it_and_it_loses_stealth():
 
 
 def test_stealth_meets_spikes_a_stealth_coverer_is_removed():
-    s = st(hands={"A": ["black_panther"]})                      # 7, Stealth, Apex Predator
+    s = st(hands={"A": ["black_panther"]})                      # 6, Stealth (no Apex Predator any more)
     put(s, "1,2", "hedgehog", "B")
     play(s, "black_panther", "1,2")
-    assert removed(s, "black_panther") and removed(s, "hedgehog")   # both die (Apex on Spikes)
+    assert removed(s, "black_panther") and not removed(s, "hedgehog")   # the Spikes take the coverer
 
 
 def test_stealth_meets_poison_a_stealth_coverer_is_removed():
@@ -397,13 +397,13 @@ def test_stealth_meets_a_removal_on_the_stealth_animal_the_enemy_cover_still_wor
 # "Can be placed ignoring connection, except onto a den. All other placement rules still apply."
 
 def test_flight_meets_a_trap_hippopotamus_far_from_home():
-    s = st(hands={"A": ["pigeon"]})                             # 5 > 4: the Hippo lets it be
+    s = st(hands={"A": ["pheasant_legend"]})                    # 7 > 5: the Hippo lets it be
     put(s, "3,2", "hippopotamus", "B")
-    s2 = st(hands={"A": ["falcon"]})                            # 4: removed
+    s2 = st(hands={"A": ["pigeon"]})                            # 3... a 5: removed
     put(s2, "3,2", "hippopotamus", "B")
-    play(s, "pigeon", "3,3")
-    play(s2, "falcon", "3,3")
-    assert top(s, "3,3") == ("pigeon", "A") and s2.top_unit("3,3") is None
+    play(s, "pheasant_legend", "3,3")
+    play(s2, "pigeon", "3,3")
+    assert top(s, "3,3") == ("pheasant_legend", "A") and s2.top_unit("3,3") is None
 
 
 def test_flight_meets_a_trap_boar():
@@ -432,9 +432,9 @@ def test_flight_meets_a_den_it_lands_next_to_it_but_never_captures():
 
 
 def test_flight_meets_armor_it_covers_a_weaker_armor_enemy_not_a_stronger_one():
-    s = st(hands={"A": ["pigeon"]})                             # 5
+    s = st(hands={"A": ["pheasant_legend"]})                    # 7
     put(s, "3,2", "stag_beetle", "B")                           # 4, Armor
-    put(s, "3,3", "tortoise", "B")                              # 6, Armor
+    put(s, "3,3", "cairn", "B")                                 # 10, Armor
     t = place_targets(s)
     assert "3,2" in t and "3,3" not in t
 
@@ -499,10 +499,10 @@ def test_reach_meets_a_den_it_never_captures():
 
 
 def test_reach_meets_armor_covering_still_needs_greater_strength():
-    s = st(hands={"A": ["caracal"]})                            # 6
+    s = st(hands={"A": ["caracal"]})                            # 5
     put(s, "1,2", "muskrat", "A")
     put(s, "3,2", "stag_beetle", "B")                           # 4: coverable
-    put(s, "2,1", "tortoise", "B")                              # 6: not
+    put(s, "2,1", "cairn", "B")                                 # 10: not
     t = place_targets(s)
     assert "3,2" in t and "2,1" not in t
 
@@ -592,7 +592,7 @@ def test_roam_meets_armor_it_covers_a_weaker_armor_enemy():
     s = st()
     put(s, "1,2", "wolf", "A")
     put(s, "2,2", "stag_beetle", "B")
-    put(s, "1,1", "tortoise", "B")
+    put(s, "1,1", "cairn", "B")                                 # 10
     assert legal(s, RoamAction("1,2", ("cr", "2,2")))
     assert not legal(s, RoamAction("1,2", ("cr", "1,1")))
 
@@ -701,7 +701,7 @@ def test_flee_meets_a_titan_cover():
 
 def test_flee_meets_an_armor_coverer_zebra_cannot_return_it():
     s = st(hands={"A": ["tortoise"]})
-    put(s, "1,2", "zebra", "B")                                 # 5 < 6
+    put(s, "1,2", "zebra", "B").strength_counter = -2           # 3 < 4
     play(s, "tortoise", "1,2")
     assert "zebra" in hand_ids(s, "B") and top(s, "1,2") == ("tortoise", "A")
 
@@ -792,11 +792,11 @@ def test_apex_predator_meets_armor_aura_armadillo_buries_the_ally():
     assert stack(s, "2,2") == ["muskrat", "tiger"]
 
 
-def test_apex_predator_meets_stealth_and_apex_black_panther_eats_a_stealth():
-    s = st(hands={"A": ["black_panther"]})
+def test_apex_predator_meets_stealth_and_apex_tiger_eats_a_stealth():
+    s = st(hands={"A": ["tiger"]})
     put(s, "1,2", "stick_insect", "B")                          # 6 < 7
-    play(s, "black_panther", "1,2")
-    assert stack(s, "1,2") == ["black_panther"] and removed(s, "stick_insect")
+    play(s, "tiger", "1,2")
+    assert stack(s, "1,2") == ["tiger"] and removed(s, "stick_insect")
 
 
 # ====================================================================================================== Spikes
@@ -931,14 +931,14 @@ def test_poison_meets_the_octopus_an_inked_toad_has_none():
 # "Playing it costs two actions instead of one. A free placement can't pay for it; an extra action can."
 
 def test_titan_meets_one_action_left():
-    s = st(hands={"A": ["blue_whale", "muskrat"]})
-    assert "1,2" in {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "blue_whale"}
+    s = st(hands={"A": ["sperm_whale", "muskrat"]})
+    assert "1,2" in {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "sperm_whale"}
     play(s, "muskrat", "1,1")
-    assert not any(isinstance(a, PlaceAction) and a.card_id == "blue_whale" for a in rules.legal_actions(s))
+    assert not any(isinstance(a, PlaceAction) and a.card_id == "sperm_whale" for a in rules.legal_actions(s))
 
 
 def test_titan_meets_a_free_placement_mole():
-    s = st(hands={"A": ["mole", "blue_whale", "muskrat"]})      # Roar: play another animal next to this
+    s = st(hands={"A": ["mole", "sperm_whale", "muskrat"]})      # Roar: play another animal next to this
     play(s, "mole", "1,2")
     offered = {p["card_id"] for p in s.pending["placements"]}
     assert offered == {"muskrat"}                                # the Muskrat can be played free; the Whale can't
@@ -964,18 +964,18 @@ def test_titan_meets_covering_it_needs_greater_strength_like_any_animal():
 
 def test_hungry_meets_enough_food():
     s = st(food={"A": 7, "B": 0})
-    el = put(s, "1,2", "elephant", "A")                         # Hungry 5
+    el = put(s, "1,2", "moose", "A")                            # Hungry 3
     end_turn(s); end_turn(s)
-    assert s.food["A"] == 2 and effective_strength(s, el) == 9
+    assert s.food["A"] == 4 and effective_strength(s, el) == 8
 
 
 def test_hungry_meets_too_little_food():
     s = st(food={"A": 2, "B": 0})
-    el = put(s, "1,2", "elephant", "A")
+    el = put(s, "1,2", "moose", "A")
     end_turn(s); end_turn(s)
-    assert s.food["A"] == 0 and effective_strength(s, el) == 6
+    assert s.food["A"] == 0 and effective_strength(s, el) == 7
     end_turn(s); end_turn(s)
-    assert effective_strength(s, el) == 1                       # for good
+    assert effective_strength(s, el) == 4                       # for good
 
 
 def test_hungry_meets_the_opponents_dawn():
@@ -995,24 +995,24 @@ def test_hungry_meets_being_buried():
 
 def test_hungry_meets_dying_below_zero_armor_does_not_save_it():
     s = st(food={"A": 0, "B": 0})
-    el = put(s, "1,2", "elephant", "A")
-    el.strength_counter = -8                                    # a 1: five short takes it to -4
+    el = put(s, "1,2", "moose", "A")
+    el.strength_counter = -7                                    # a 1: three short takes it to -2
     put(s, "1,1", "armadillo", "A")                             # gives it Armor
     end_turn(s); end_turn(s)
-    assert removed(s, "elephant") and top(s, "1,2") is None
+    assert removed(s, "moose") and top(s, "1,2") is None
 
 
 def test_hungry_meets_a_delayed_food_payout_sloth_feeds_it_that_dawn():
-    s = st(hands={"A": ["sloth"]}, food={"A": 0, "B": 0})       # Roar: in 2 turns, gain 30 food
-    el = put(s, "1,2", "elephant", "A")
+    s = st(hands={"A": ["sloth"]}, food={"A": 0, "B": 0})       # Roar: in 3 turns, gain 30 food
+    el = put(s, "1,2", "moose", "A")
     play(s, "sloth", "1,1")
-    strengths = [9]
+    strengths = [8]
     for _ in range(3):
         end_turn(s); end_turn(s)
         strengths.append(effective_strength(s, el))
         if s.food["A"]:
             break
-    assert s.food["A"] == 25 and strengths[-1] == strengths[-2]     # fed the Dawn the food came
+    assert s.food["A"] == 27 and strengths[-1] == strengths[-2]     # fed the Dawn the food came
 
 
 def test_hungry_meets_the_octopus_an_inked_animal_isnt_hungry():
@@ -1047,11 +1047,11 @@ def test_wild_meets_connection_it_connects_no_one():
 
 
 def test_wild_meets_strength_any_animal_of_1_or_more_covers_it_and_0_does_not():
-    s = st(hands={"A": ["locust_legend", "lemming", "sardine"]})
+    s = st(hands={"A": ["locust_legend", "lemming", "snake_egg"]})
     play(s, "locust_legend", "1,3")
     lemming = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "lemming"}
-    sardine = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "sardine"}
-    assert "1,1" in lemming and "1,1" not in sardine
+    egg = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "snake_egg"}   # a 0
+    assert "1,1" in lemming and "1,1" not in egg
 
 
 def test_wild_meets_the_opponent_they_cover_it_too():
@@ -1116,7 +1116,7 @@ def test_dawn_meets_both_players_turns():
     end_turn(s)
     assert s.food["A"] == 0                                     # B's Dawn
     end_turn(s)
-    assert s.food["A"] == 10                                    # A's
+    assert s.food["A"] == 5                                     # A's
 
 
 def test_dusk_meets_both_players_turns():
@@ -1124,8 +1124,8 @@ def test_dusk_meets_both_players_turns():
     put(s, "1,2", "sea_turtle", "A")                            # Dusk: add a Baby Turtle to your hand
     end_turn(s)
     assert hand_ids(s, "A") == ["baby_turtle"]
-    end_turn(s)                                                 # B's Dusk
-    assert hand_ids(s, "A") == ["baby_turtle"]
+    end_turn(s)                                                 # B's Dusk: A gets only its free card
+    assert hand_ids(s, "A") == ["baby_turtle", "lion"]
 
 
 def test_dawn_meets_burial():
@@ -1147,12 +1147,12 @@ def test_dusk_meets_burial():
 def test_dawn_meets_resurfacing():
     s = st(hands={"A": ["praying_mantis"]})                     # Roar: remove an adjacent ally to draw 2 cards
     put(s, "1,2", "lemming", "A")
-    put(s, "3,2", "groundhog", "B")                             # Dawn: gain 10 food
+    put(s, "3,2", "groundhog", "B")                             # Dawn: gain 5 food
     put(s, "3,2", "muskrat", "A")                               # buried under A's Muskrat
     play(s, "praying_mantis", "2,2")
     choose(s, "3,2")                                            # the cover leaves: the Groundhog resurfaces
     end_turn(s)
-    assert s.food["B"] == 10
+    assert s.food["B"] == 5
 
 
 def test_dusk_meets_the_legendary_sloth_twice():
@@ -1260,10 +1260,11 @@ def test_fall_meets_a_chain_dart_frog_falls_next_to_a_cockroach():
 def test_fall_meets_the_octopus_an_inked_earthworm_does_not_fall():
     s = st(hands={"A": ["octopus", "hawk"]}, decks={"A": FILLER[:], "B": ["lion"] * 3})
     put(s, "2,2", "earthworm", "B")
+    put(s, "1,1", "lion", "A")                                  # connects the Hawk, which has no Flight
     play(s, "octopus", "1,2")
     play(s, "hawk", "2,1")
     choose(s, "2,2")
-    assert hand_ids(s, "B") == [] and s.top_unit("2,2") is None
+    assert hand_ids(s, "B") == ["lion"] and s.top_unit("2,2") is None   # B's free card only
 
 
 # ================================================================================================ Roar doubled
@@ -1479,12 +1480,12 @@ def test_fall_meets_a_dawn_removal_city_spider():
 
 def test_hungry_meets_a_hungry_death_it_counts_as_removed_hyena():
     s = st(food={"A": 0, "B": 0})
-    el = put(s, "1,2", "elephant", "A")
-    el.strength_counter = -8
+    el = put(s, "1,2", "moose", "A")
+    el.strength_counter = -7
     put(s, "1,1", "hyena", "A")                                 # Dusk: gain 3 food for each animal removed this turn
     end_turn(s); end_turn(s)                                    # A's Dawn: the Elephant dies
     end_turn(s)                                                 # A's Dusk
-    assert removed(s, "elephant") and s.food["A"] == 3
+    assert removed(s, "moose") and s.food["A"] == 3
 
 
 # Martin, 2026-11-05: the swarm lands all at once, and the Hippopotamus takes every Locust around it.

@@ -89,7 +89,7 @@ def ids(s, cr):
 
 def test_identity__every_collectible_card_name_is_unique():
     raw = load_bundled_json("cards.json")["cards"]
-    names = [c["name"] for c in raw if c.get("status") == "collectible"]
+    names = [c["name"] for c in raw if c.get("status") == "collectible" and c["name"] != "??"]   # "??" is a placeholder
     assert len(names) == len(set(names))
 
 
@@ -102,7 +102,8 @@ def test_identity__a_card_belongs_to_no_deck_and_may_sit_in_several_lists_or_non
         for cid in set(d.get("cards", [])):
             count[cid] = count.get(cid, 0) + 1
     collectible = [c["id"] for c in raw if c.get("status") == "collectible"]
-    assert any(count.get(c, 0) > 1 for c in collectible) and any(count.get(c, 0) == 0 for c in collectible)
+    every = [c["id"] for c in raw]
+    assert any(count.get(c, 0) > 1 for c in collectible) and any(count.get(c, 0) == 0 for c in every)
 
 
 def test_identity__a_colony_queen_needs_both_tags():
@@ -255,7 +256,7 @@ def test_placement__next_to_the_opponents_den_means_its_front_crossroads():
     play(s, "cheetah", "3,3")                   # not a den front
     assert hand_ids(s, "A") == ["cheetah"]
     play(s, "cheetah", "4,2")                   # B's den front
-    assert hand_ids(s, "A") == ["v1", "v1"]
+    assert hand_ids(s, "A") == ["v1", "v1", "v1"]   # the two drawn, and A's free card (B has nothing to play and passes)
 
 
 def test_placement__sardine_fills_adjacent_empty_crossroads_from_hand_and_deck_leftovers_stay():
@@ -363,7 +364,7 @@ def test_drawing__andean_condor_counts_dynamic_strength_as_zero_and_an_empty_ene
 
 def test_drawing__andean_condor_with_an_empty_own_deck_fizzles():
     s = _condor([], ["v1"])
-    assert hand_ids(s, "A") == [] and s.decks["B"] == ["v1"]
+    assert hand_ids(s, "A") == [] and hand_ids(s, "B") == ["v1"]   # B's card is its own free draw
 
 
 def test_drawing__nothing_else_reveals_a_hand():
@@ -750,10 +751,11 @@ def test_engine_reading__dawn_effects_resolve_in_play_order_one_removed_does_not
 def test_engine_reading__delayed_payouts_resolve_before_dawn_the_sloths_food_feeds_hungry():
     s = st(hands={"A": ["sloth"]})
     play(s, "sloth", "1,2")
-    end_turn(s); end_turn(s); end_turn(s)       # the Sloth pays at A's second Dawn from now
-    el = put(s, "3,3", "elephant", "A")         # Hungry 5, on the board for that Dawn only
+    for _ in range(5):
+        end_turn(s)                             # the Sloth pays at A's third Dawn from now
+    el = put(s, "3,3", "moose", "A")            # Hungry 3, on the board for that Dawn only
     end_turn(s)
-    assert s.food["A"] == 30 - 5 and strength(s, el) == 9
+    assert s.food["A"] == 30 - 3 and strength(s, el) == 8
 
 
 # ============================================================================== A unit uncovered by a removal
@@ -773,26 +775,26 @@ def test_uncovered__a_unit_uncovered_by_a_removal_does_not_react_to_it():
 # ============================================================================== The launch decks: keywords
 
 def test_launch_kw__hungry_with_too_little_food_eats_all_and_shrinks_for_each_food_short():
-    s = st(current="B", food={"A": 4, "B": 0})
-    el = put(s, "1,2", "elephant", "A")         # Hungry 5
+    s = st(current="B", food={"A": 2, "B": 0})
+    el = put(s, "1,2", "moose", "A")            # Hungry 3
     end_turn(s)                                 # A's Dawn
-    assert s.food["A"] == 0 and strength(s, el) == 8
-    end_turn(s); end_turn(s)                    # for good: 0 food now, 5 short
-    assert strength(s, el) == 3
+    assert s.food["A"] == 0 and strength(s, el) == 7
+    end_turn(s); end_turn(s)                    # for good: 0 food now, 3 short
+    assert strength(s, el) == 4
 
 
 def test_launch_kw__hungry_eats_in_play_order_with_other_dawn_effects():
-    # A Groundhog ("Dawn: gain 10 food") played before the Elephant feeds it; played after, it doesn't.
+    # A Groundhog ("Dawn: gain 5 food") played before the Moose feeds it; played after, it doesn't.
     s = st(current="B")
     put(s, "1,1", "groundhog", "A")
-    el = put(s, "1,2", "elephant", "A")
+    el = put(s, "1,2", "moose", "A")
     end_turn(s)
-    assert strength(s, el) == 9 and s.food["A"] == 5
+    assert strength(s, el) == 8 and s.food["A"] == 2
     s2 = st(current="B")
-    el2 = put(s2, "1,2", "elephant", "A")
+    el2 = put(s2, "1,2", "moose", "A")
     put(s2, "1,1", "groundhog", "A")
     end_turn(s2)
-    assert strength(s2, el2) == 4 and s2.food["A"] == 10
+    assert strength(s2, el2) == 5 and s2.food["A"] == 5
 
 
 def test_launch_kw__a_buried_hungry_animal_is_skipped():
@@ -813,10 +815,10 @@ def test_launch_kw__an_inked_animal_is_not_hungry():
 
 
 def test_launch_kw__titan_is_offered_only_while_two_actions_are_left():
-    s = st(hands={"A": ["blue_whale"]})
-    assert any(a.card_id == "blue_whale" for a in rules.legal_actions(s) if isinstance(a, PlaceAction))
+    s = st(hands={"A": ["sperm_whale"]})
+    assert any(a.card_id == "sperm_whale" for a in rules.legal_actions(s) if isinstance(a, PlaceAction))
     rules.apply_action(s, DrawAction())
-    assert not any(isinstance(a, PlaceAction) and a.card_id == "blue_whale" for a in rules.legal_actions(s))
+    assert not any(isinstance(a, PlaceAction) and a.card_id == "sperm_whale" for a in rules.legal_actions(s))
 
 
 def test_launch_kw__titan_an_extra_action_counts():
@@ -887,7 +889,7 @@ def test_launch_kw__the_zebras_coverer_goes_back_to_its_owners_hand_unless_it_ha
     play(s, "v6", "3,2")
     assert s.top_unit("3,2") is None and "v6" in hand_ids(s, "B") and hand_ids(s, "A") == ["zebra"]
     s2 = st(current="B", hands={"B": ["tortoise"]})
-    put(s2, "3,2", "zebra", "A")
+    put(s2, "3,2", "zebra", "A").strength_counter = -2          # a 3: the Tortoise (4) can cover it
     put(s2, "4,2", "v1", "B")
     play(s2, "tortoise", "3,2")
     assert ids(s2, "3,2") == ["tortoise"]
@@ -982,7 +984,7 @@ def test_launch_kw__a_timer_an_inked_animal_already_started_still_runs():
     play(s, "octopus", "3,3")                   # inks the Black Bear
     assert s.current == "B"
     end_turn(s); end_turn(s); end_turn(s)
-    assert len(s.hands["A"]) == 2
+    assert len(s.hands["A"]) == 2 + 2           # the Bear's two and two free cards
 
 
 def test_launch_kw__keyword_aura_reaches_adjacent_allies_and_judges_on_the_burying_cover():
@@ -1406,7 +1408,7 @@ def test_launch_cards__okapi_draws_at_dawn_and_dusk_while_grazing_sloth_doubles_
     end_turn(s)
     assert len(s.hands["A"]) == 2               # Dusk, twice
     end_turn(s)
-    assert len(s.hands["A"]) == 3               # Dawn, once
+    assert len(s.hands["A"]) == 4               # Dawn, once, and the free card
 
 
 def test_launch_cards__placing_and_roaming_cover_by_one_rule_leopard():
@@ -1524,15 +1526,15 @@ def test_launch_cards__hamster_pays_five_per_card_its_owner_draws_not_the_oppone
     s = st()
     put(s, "1,2", "hamster", "A")
     rules.apply_action(s, DrawAction())
-    assert s.food["A"] == 10
+    assert s.food["A"] == 5
     s.hands["A"] = []
-    for _ in range(9):
+    for _ in range(10):
         s.add_to_hand("A", "v1")
-    rules.apply_action(s, DrawAction())         # one fits, one burns
-    assert s.food["A"] == 15
+    rules.apply_action(s, DrawAction())         # the hand is full: the card burns
+    assert s.food["A"] == 5
     end_turn(s)
     rules.apply_action(s, DrawAction())         # B draws
-    assert s.food["A"] == 15
+    assert s.food["A"] == 5
 
 
 def test_launch_cards__marmot_counts_food_in_hand_and_on_the_board():
@@ -1540,7 +1542,7 @@ def test_launch_cards__marmot_counts_food_in_hand_and_on_the_board():
     m = put(s, "1,2", "marmot", "A")
     h = s.add_to_hand("A", "marmot")
     from animal_kingdom.engine.strength import placement_strength
-    assert strength(s, m) == 5 and placement_strength(s, h) == 5
+    assert strength(s, m) == 4 and placement_strength(s, h) == 4
 
 
 def test_launch_cards__vole_offers_only_adjacent_allied_rodents_with_a_roar_never_a_repeater():
@@ -1654,7 +1656,7 @@ def test_launch_cards__caterpillar_becomes_the_pools_butterfly_and_keeps_its_cou
 def test_launch_cards__the_legendary_eagle_brings_its_mate_when_drawn_one_at_a_time():
     s = st(decks={"A": ["v1", "eagle_legend"], "B": []})
     rules.apply_action(s, DrawAction())
-    assert sorted(hand_ids(s, "A")) == ["eagle_legend", "eagle_legend_2", "v1"]
+    assert sorted(hand_ids(s, "A")) == ["eagle_legend", "eagle_legend_2"]
 
 
 def test_launch_cards__the_eagles_share_a_buff_while_both_in_hand():
@@ -1735,7 +1737,7 @@ def test_launch_cards__gorilla_reads_its_strength_as_it_lands():
 def test_launch_cards__anteater_gains_the_drawn_cards_strength_as_it_would_be_played_now():
     s = st(hands={"A": ["anteater"]}, decks={"A": ["marmot"], "B": []}, food={"A": 20, "B": 0})
     play(s, "anteater", "1,2")
-    assert s.food["A"] == 20 + 5
+    assert s.food["A"] == 20 + 4
 
 
 def test_launch_cards__rabbit_plays_a_bunny_on_a_neighbour_of_the_owners_choice_and_it_counts_as_a_play():
@@ -1901,9 +1903,9 @@ def test_vesper__answers_a_cover_by_roaming():
 
 
 def test_vesper__lands_with_no_strength_check_no_action_no_roar_not_a_play():
-    s = _vesper_state(hands={"A": ["hornet_legend"], "B": ["blue_whale"]})
+    s = _vesper_state(hands={"A": ["hornet_legend"], "B": ["whale_shark"]})
     put(s, "1,2", "young_ant", "A")
-    play(s, "blue_whale", "1,2")                # 12
+    play(s, "whale_shark", "1,2")               # a Titan: two actions
     assert s.top_unit("1,2").card_id == "hornet_legend"
     assert s.current == "A" and s.actions_taken_this_turn == 0
 

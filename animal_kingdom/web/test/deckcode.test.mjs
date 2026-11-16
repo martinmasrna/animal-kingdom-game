@@ -7,8 +7,7 @@ import { CARD_NUMS } from '../static/cardnums.js';
 
 const pool = JSON.parse(readFileSync(new URL('../../data/cards.json', import.meta.url))).cards.filter(c => c.status !== 'planned');   // a planned animal is no card yet
 const C = Object.fromEntries(pool.map(c => [c.id, { ...c, str: c.base_strength === 'dynamic' ? '*' : c.base_strength }]));
-const colony = ['hornet_legend', 'bumblebee_legend', 'army_ant_legend', 'bee_legend', ...['nurse_bee', 'nurse_bumblebee', 'termite_queen', 'termite_king'].flatMap(id => [id, id]),
-  ...['worker_ant', 'worker_bee', 'queen_bee', 'soldier_ant', 'guard_wasp', 'worker_wasp'].flatMap(id => [id, id, id])];
+const colony = ['lion_legend_4', 'tiger_legend', 'meerkat', ...['lion', 'tiger', 'black_panther', 'caracal', 'cheetah', 'alley_cat', 'kitten', 'bobcat', 'serval', 'jaguar', 'ocelot'].flatMap(id => [id, id])];   // the first pool deck
 const sorted = l => [...l].sort();
 
 test('every card has a permanent number, once', () => {
@@ -25,8 +24,8 @@ test('a deck survives its code, and the code is short', () => {
 });
 
 test('a readable list works without the code line (typed by hand or by an agent)', () => {
-  const d = decodeDeck('### Agent cats\n3x Lion\n2x (1) Alley Cat\n1x King Theron\nnonsense line', C);
-  assert.equal(d.name, 'Agent cats'); assert.deepEqual(sorted(d.list), sorted(['lion', 'lion', 'lion', 'alley_cat', 'alley_cat', 'lion_legend_3']));
+  const d = decodeDeck('### Agent cats\n3x Lion\n2x (1) Alley Cat\n1x Gorrak One-Eye\nnonsense line', C);
+  assert.equal(d.name, 'Agent cats'); assert.deepEqual(sorted(d.list), sorted(['lion', 'lion', 'lion', 'alley_cat', 'alley_cat', 'tiger_legend']));
 });
 
 test('text without a deck is not a deck', () => {

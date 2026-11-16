@@ -243,7 +243,7 @@ def test_serial_and_parallel_simulations_match():
 
 def test_beam_prunes_a_wide_flight_fixture():
     # A single Flight unit is legal on many crossroads; the beam must not keep them all.
-    s = make_state(current="A", hands={"A": ["bat"]}, decks={"A": ["mouse"] * 3})
+    s = make_state(current="A", hands={"A": ["pigeon"]}, decks={"A": ["mouse"] * 3})
     put(s, "1,1", "lion", "A")   # give A a connected anchor so plenty of tiles are legal
     bot = small_turn()
     legal = rules.legal_actions(s)

@@ -10,7 +10,7 @@ from animal_kingdom.sim.runner import make_bot
 
 def _game(seed: int, send_back: bool):
     """A greedy game; with `send_back` the first player to mulligan returns their first card, then keeps."""
-    a, b = load_premade_deck("cats"), load_premade_deck("canines")
+    a, b = load_premade_deck("pool_2"), load_premade_deck("pool_6")
     state = new_game(list(a), list(b), seed)
     bots = {"A": make_bot("greedy", seed=1), "B": make_bot("greedy", seed=2)}
     actions, returned = [], []

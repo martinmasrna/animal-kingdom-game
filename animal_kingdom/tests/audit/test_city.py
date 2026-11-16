@@ -57,32 +57,36 @@ def test_alley_cat_with_an_empty_deck_still_adds_its_kittens():
 
 # ==================================================================================== Bat
 
-def test_bat_flies_and_draws_a_card():
-    s = make_state(hands={"A": ["bat"]}, decks={"A": ["tiger"], "B": []})
-    assert "3,2" in place_targets(s)                            # Flight: no connection needed
-    rules.apply_action(s, PlaceAction("bat", ("cr", "3,2")))
-    assert hand_ids(s, "A") == ["tiger"] and s.decks["A"] == []
+def test_bat_draws_two_cards():
+    s = make_state(hands={"A": ["bat"]}, decks={"A": ["tiger", "lion", "wolf"], "B": []})
+    rules.apply_action(s, PlaceAction("bat", ("cr", "1,2")))
+    assert hand_ids(s, "A") == ["wolf", "lion"] and s.decks["A"] == ["tiger"]
+
+
+def test_bat_has_no_flight():
+    s = make_state(hands={"A": ["bat"]})
+    assert "3,2" not in place_targets(s) and "1,2" in place_targets(s)
 
 
 def test_bat_with_an_empty_deck_just_lands():
     s = make_state(hands={"A": ["bat"]})
-    rules.apply_action(s, PlaceAction("bat", ("cr", "3,2")))
-    assert s.top_unit("3,2").card_id == "bat" and hand_ids(s, "A") == []
+    rules.apply_action(s, PlaceAction("bat", ("cr", "1,2")))
+    assert s.top_unit("1,2").card_id == "bat" and hand_ids(s, "A") == []
 
 
-def test_bat_flight_cannot_capture_a_disconnected_den():
-    s = make_state(hands={"A": ["bat"]})
+def test_flight_cannot_capture_a_disconnected_den():
+    s = make_state(hands={"A": ["pigeon"]})
     put(s, "4,2", "lion", "A")                                  # stranded on B's den front, no chain home
     assert not any(isinstance(a, PlaceAction) and a.target[0] == "hq" for a in rules.legal_actions(s))
 
 
 def test_bat_cannot_cover_an_enemy_of_equal_strength():
     s = make_state(hands={"A": ["bat"]})
-    put(s, "3,2", "beaver", "B")                                # 5 > 3
-    put(s, "3,3", "rat", "B")                                   # 3 == 3
-    put(s, "3,1", "cockroach", "B")                             # 1 < 3
+    put(s, "1,2", "beaver", "B")                                # 3 > 2
+    put(s, "1,3", "squirrel", "B")                              # 2 == 2
+    put(s, "1,1", "cockroach", "B")                             # 1 < 2
     t = place_targets(s)
-    assert "3,2" not in t and "3,3" not in t and "3,1" in t
+    assert "1,2" not in t and "1,3" not in t and "1,1" in t
 
 
 # ====================================================================== [BAT] (legendary)
@@ -92,8 +96,8 @@ def test_bat_legend_draws_at_its_owners_dawn_only():
     put(s, "3,2", "bat_legend", "A")
     end_turn(s)                                                 # A's turn ends: B's Dawn, not A's
     assert hand_ids(s, "A") == []
-    end_turn(s)                                                 # A's Dawn
-    assert hand_ids(s, "A") == ["lion"]
+    end_turn(s)                                                 # A's Dawn: the Bat draws, then the free draw
+    assert hand_ids(s, "A") == ["lion", "tiger"]
 
 
 def test_bat_legend_buried_draws_nothing():
@@ -101,7 +105,7 @@ def test_bat_legend_buried_draws_nothing():
     put(s, "3,2", "bat_legend", "A")
     put(s, "3,2", "lion", "B")                                  # covered
     end_turn(s); end_turn(s)
-    assert hand_ids(s, "A") == []
+    assert hand_ids(s, "A") == ["lion"]                         # only the free draw, not the Bat's
 
 
 def test_bat_legend_flies():
@@ -231,7 +235,8 @@ def test_cockroach_legend_covered_does_not_fall():
     put(s, "4,2", "lion", "B")
     put(s, "3,2", "cockroach_legend", "A")
     rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))
-    assert hand_ids(s, "A") == [] and s.board["3,2"][0].strength_counter == 0
+    assert hand_ids(s, "A") == ["tiger"]                        # A's free draw for its turn, not a Fall draw
+    assert s.board["3,2"][0].strength_counter == 0
 
 
 # ================================================================================= Macaque

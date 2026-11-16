@@ -42,7 +42,7 @@ def _deck(legendaries: int, rares: int) -> list[str]:
 
 def test_levels_default_from_rarity_and_the_budget_is_sixteen():
     assert STAR_DEFAULTS == {"common": 0, "rare": 1, "legendary": 2} and STAR_BUDGET == 20   # Martin, 2026-11-15
-    assert CARDS["lion"].stars == 0 and CARDS["lynx"].stars == 1 and CARDS["lion_legend_3"].stars == 2
+    assert CARDS["toad"].stars == 0 and CARDS["lynx"].stars == 1 and CARDS["lion_legend_3"].stars == 2
 
 
 def test_commons_and_rares_are_one_kind_two_copies_each():
@@ -66,25 +66,26 @@ def test_a_third_copy_is_illegal_for_any_non_legendary():
 
 
 def test_the_budget_counts_each_copy():
-    deck = _deck(6, 8)
-    assert deck_stars(deck, CARDS) == 6 * 2 + 8 * 1 == STAR_BUDGET
+    deck = _deck(4, 12)
+    assert deck_stars(deck, CARDS) == 4 * 2 + 12 * 1 == STAR_BUDGET
     assert decklist_problems(deck) == []
 
 
 def test_one_star_over_is_illegal_and_says_so():
-    deck = _deck(6, 9)
+    deck = _deck(4, 13)
     assert deck_stars(deck, CARDS) == 21
     assert decklist_problems(deck) == ["21 stars, over the 20 a deck may hold"]
 
 
 def test_the_old_caps_are_gone_the_mix_is_a_choice():
-    six_legends = _deck(8, 4)            # eight legendaries: over the old cap of 4
+    legends = [cid for cid, c in sorted(CARDS.items()) if c.collectible and c.rarity == "legendary"]
+    six_legends = legends + [cid for cid in _pick(0, False, 10) for _ in range(2)][:DECK_SIZE - len(legends)]   # six legendaries: over the old cap of 4
     twenty_one_star = _deck(0, 20)         # twenty one-star cards: over the old cap of 8 rares
     assert decklist_problems(six_legends) == [] and decklist_problems(twenty_one_star) == []
 
 
 def test_a_three_star_card_counts_three():
-    deck = _deck(6, 8)
+    deck = _deck(4, 12)
     big = next(cid for cid in deck if CARDS[cid].rarity == "legendary")
     cards = _with_stars({big: 3})
     assert deck_stars(deck, cards) == 21 and decklist_problems(deck, cards=cards)
@@ -93,23 +94,25 @@ def test_a_three_star_card_counts_three():
 def test_copy_limits_and_deck_size_still_hold():
     deck = _deck(0, 0)
     assert decklist_problems(deck[:-1])
-    lynx3 = deck[:-3] + ["lynx"] * 3
-    assert any("Lynx" in p for p in decklist_problems(lynx3))
+    jaguar3 = deck[:-3] + ["jaguar"] * 3
+    assert any("Jaguar" in p for p in decklist_problems(jaguar3))
 
 
 def test_every_shipped_and_ladder_deck_is_legal_but_those_holding_cards_out_of_the_collection():
-    """tools/stars/refit_decks.py fitted them (a third copy out, fills within the budget); a ladder deck holding a card
-    since benched was illegal before the prototype and stays so."""
-    assert len(PREMADE_DECKS) > 40
-    over = {slug: p for slug, d in PREMADE_DECKS.items() if (p := decklist_problems(d)) and not all("collectible" in x for x in p)}
+    """A deck holding a card since benched (a reserve card) was illegal before the prototype and stays so; every other
+    deck, and the six pool decks (the bots' lists since 2026-11-16), fit the rules."""
+    from animal_kingdom.decks import BOT_DECKS
+    assert len(PREMADE_DECKS) > 30
+    over = {slug: p for slug, d in PREMADE_DECKS.items() if (p := decklist_problems(d)) and not any("collectible" in x for x in p)}
     assert over == {}
+    assert BOT_DECKS and all(not decklist_problems(PREMADE_DECKS[slug]) for slug in BOT_DECKS)
 
 
 def test_card_data_checks_the_range():
     rec = {"id": "x", "name": "X", "status": "reserve", "rarity": "common", "tags": [], "base_strength": 1}
-    for ok in (0, 1, 2, 3):
+    for ok in (0, 1, 2, 3, 4):
         validate_card_record({**rec, "stars": ok})
-    for bad in (-1, 4, "2", True, 1.5):
+    for bad in (-1, 5, "2", True, 1.5):
         with pytest.raises(CardDataError):
             validate_card_record({**rec, "stars": bad})
 
@@ -117,7 +120,7 @@ def test_card_data_checks_the_range():
 def test_the_server_hands_the_client_the_rules_and_each_cards_level():
     from animal_kingdom.web.match import card_pool
     pool = {c["id"]: c for c in card_pool()}
-    assert pool["lion"]["stars"] == 0 and pool["lynx"]["stars"] == 1 and pool["lion_legend_3"]["stars"] == 2
+    assert pool["toad"]["stars"] == 0 and pool["lynx"]["stars"] == 1 and pool["lion_legend_3"]["stars"] == 2
     assert pool["lynx"]["rarity"] == "common"
     assert all(c["stars"] == 0 for c in pool.values() if c["status"] == "token")   # a token is in no deck
 
@@ -149,6 +152,6 @@ def test_hq_sets_stars_in_range_and_stores_only_a_change(hq):
     assert "stars" not in _rec(hq, "mouse")                       # back at its rarity's: nothing stored
     hq.set_value("tiger_legend", "stars", 3, by="claude")
     assert _rec(hq, "tiger_legend")["stars"] == 3
-    for bad in ("4", "-1", "two"):
+    for bad in ("5", "-1", "two"):
         with pytest.raises(hq.Refused):
             hq.set_value("mouse", "stars", bad, by="claude")

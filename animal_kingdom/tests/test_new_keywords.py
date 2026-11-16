@@ -466,7 +466,7 @@ def test_dawn_effects_resolve_in_play_order_each_in_full_before_the_next(monkeyp
     put(s, "3,3", "t_dusk", "A")
     put(s, "1,1", "t_dusk2", "A")
     end_turn(s)
-    assert order == ["first", ("second", 1)]
+    assert order == ["first", ("second", 2)]       # the turn's free card, and the one "first" drew
 
 
 def test_a_dusk_animal_removed_by_an_earlier_dusk_effect_does_nothing(monkeypatch):

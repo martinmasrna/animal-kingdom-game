@@ -149,7 +149,7 @@ def test_diagonal_crossroad_shows_card_name_and_strength_without_seat_label() ->
     plain = _assert_valid_markup(board.markup)
 
     assert "Falcon" in plain
-    assert "STR 4" in plain
+    assert "STR 3" in plain
     assert "1,1" not in plain
     assert "A4" not in plain
     assert board.hitboxes[("cr", "1,1")].width == 12
@@ -197,7 +197,7 @@ def test_standard_board_hides_coordinates_and_prioritizes_unit_identity() -> Non
     plain = _assert_valid_markup(board.markup)
 
     assert "Falcon" in plain
-    assert "STR 4" in plain
+    assert "STR 3" in plain
     assert "1,1" not in plain
     assert "A4" not in plain
     assert "10·" not in plain

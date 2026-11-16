@@ -36,7 +36,7 @@ def test_ids_and_names_globally_unique():
     # species meanwhile (the Wolf beside the common Wolf), and tokens and the tutorial's cards share their animals' names.
     ids = [c.id for c in cards.values()]
     assert len(set(ids)) == len(ids) == len(cards)
-    names = [c.name for c in cards.values() if not c.unnamed and c.status not in ("token", "tutorial")]
+    names = [c.name for c in cards.values() if not c.unnamed and c.status not in ("token", "tutorial") and c.name != "??"]   # "??" is Martin's placeholder name
     assert len(set(names)) == len(names)
 
 

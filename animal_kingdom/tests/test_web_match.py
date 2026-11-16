@@ -181,15 +181,17 @@ def test_a_saved_match_resumes_mid_game_after_a_restart():
 
 def test_decklist_problems_follow_the_deck_rules():
     from animal_kingdom.decks import PREMADE_DECKS, decklist_problems
-    cats = PREMADE_DECKS["cats"]
-    assert decklist_problems(cats) == []
-    assert decklist_problems(cats[:-1])                                   # 29 cards
-    two_kings = [c for c in cats if c != "lion_legend"] + ["lion_legend_3"]
-    assert any("King Theron" in p for p in decklist_problems(two_kings))
-    reserve = [c for c in cats if c != "lion_legend"] + ["polar_bear"]
+    deck = PREMADE_DECKS["pool_1"]
+    assert decklist_problems(deck) == []
+    assert decklist_problems(deck[:-1])                                   # 24 cards
+    two_kings = [c for c in deck if c != "tiger_legend"] + ["lion_legend_4"]
+    assert any("at most 1" in p for p in decklist_problems(two_kings))    # a legendary once
+    reserve = [c for c in deck if c != "meerkat"] + ["polar_bear"]
     assert any("collectible" in p for p in decklist_problems(reserve))
-    bench = list(cats)
-    bench[bench.index("lion")] = "pigeon"                                 # a common for a common
+    third = [c for c in deck if c != "meerkat"] + ["lion"]
+    assert any("at most 2" in p for p in decklist_problems(third))
+    bench = list(deck)
+    bench[bench.index("lion")] = "toad"                                   # a card for a card
     assert decklist_problems(bench) == []                                 # the bench is collectible
 
 
@@ -199,7 +201,7 @@ def test_custom_deck_resolves_to_a_playable_slug(tmp_path, monkeypatch):
     from animal_kingdom.web import custom_decks
     from animal_kingdom.web.match import DECK_NAMES
     monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "decks.json")
-    cats = PREMADE_DECKS["cats"]
+    cats = PREMADE_DECKS["pool_1"]
     slug = custom_decks.resolve({"name": "My cats", "list": cats})
     assert slug.startswith("custom_") and DECK_NAMES[slug] == "My cats"
     assert sorted(load_premade_deck(slug)) == sorted(cats)
@@ -322,7 +324,9 @@ def test_the_bots_play_the_bot_pool_only():
     from animal_kingdom.decks import BOT_DECKS, LADDER_DECKS, PANEL_OPPONENTS, PREMADE_DECKS
     from animal_kingdom.sim.ladder_seed import bots
     from animal_kingdom.web import ladder as ranking
-    assert set(BOT_DECKS) == set(PREMADE_DECKS) and set(PANEL_OPPONENTS) <= set(BOT_DECKS)
+    from animal_kingdom.decks import decklist_problems
+    legal = {slug for slug, d in PREMADE_DECKS.items() if not decklist_problems(d)}
+    assert set(BOT_DECKS) == legal and set(PANEL_OPPONENTS) <= set(BOT_DECKS)   # the bots play the legal decks only (2026-11-16)
     assert len(LADDER_DECKS) >= 20   # legality waits for the decks' pass before shipping (decks.shipped_problems)
     assert len({d["name"] for d in LADDER_DECKS}) == len(LADDER_DECKS) and len({d["slug"] for d in LADDER_DECKS}) == len(LADDER_DECKS)
     assert {deck for _, deck in bots()} == set(BOT_DECKS)
@@ -533,12 +537,12 @@ def test_a_gauntlet_leaves_out_the_premade_your_custom_deck_copies(monkeypatch, 
     async def run():
         async with TestClient(TestServer(server.make_app())) as c:
             a = await (await c.post("/api/profile", json={})).json()
-            deck = {"name": "My Cats", "list": list(PREMADE_DECKS["cats"])}
+            deck = {"name": "My Pool", "list": list(PREMADE_DECKS["pool_1"])}
             m = await (await c.post("/api/match", json={"deck": deck, "gauntlet": {"level": "easy", "games": 2}},
                                     headers={"X-AK-Key": a["code"]})).json()
             field = {g["deck"] for g in server.hub.matches[m["id"]].schedule}
             from animal_kingdom.decks import DECK_LEADERS    # the leaders prototype: a leader variant is no gauntlet opponent
-            assert "cats" not in field and field == set(DECK_SLUGS) - {"cats"} - set(DECK_LEADERS)
+            assert "pool_1" not in field and field == set(DECK_SLUGS) - {"pool_1"} - set(DECK_LEADERS)
     asyncio.run(run())
 
 
@@ -587,7 +591,8 @@ def test_play_from_here_seats_you_in_the_other_chair_at_that_round(monkeypatch, 
             assert match.takeover and match.on_game_end is None and match.phase == "playing"
             assert st.turn_counter // 2 + 1 == 4 and st.player_to_act() == "B" and st.pending is None
             assert not match.seats["B"].is_bot and match.seats["A"].bot == "expert" and "A" in match.bots
-            assert {c.card_id for c in st.hands["B"]} == {"leopard_legend", "orca", "honey_badger", "locust_legend"}
+            # his four cards of 2026-10-21, and the two free cards the new rule gives B on the way (the old log replays on today's engine)
+            assert {c.card_id for c in st.hands["B"]} == {"leopard_legend", "orca", "honey_badger", "locust_legend", "badger", "black_bear"}
             view = match.view("B")
             assert view["you"] == "B" and view["phase"] == "playing"
             # a round with no turn of that seat is refused; a stranger's match is not found

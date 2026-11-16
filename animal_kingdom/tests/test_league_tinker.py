@@ -23,20 +23,20 @@ def _games(lid, opp, lst, bad, n, rng, p_win_drawn=0.25, p_win_not=0.6, lifted=N
 
 def test_the_losing_card_is_found_and_a_lifting_card_replaces_it():
     rng = random.Random(5)
-    lst = load_premade_deck("cats")
+    lst = load_premade_deck("pool_2")
     bad = lst[0]
     cards = load_cards()
     lifted = next(cid for cid, c in cards.items() if c.collectible and cid not in lst and c.rarity == "common" and c.stars == 0)
-    lid, opp = "bot:expert:cats", "bot:expert:fish"
+    lid, opp = "bot:expert:pool_2", "bot:expert:pool_6"
     games = _games(lid, opp, lst, bad, 240, rng, p_win_drawn=0.1, lifted=lifted)   # two copies a card: more distinct cards, each drawn less
     found = tinker.losing_card(lst, tinker.games_of(games, lid))
     assert found and found[0] == bad and found[1] < -tinker.Z
-    pool = {"decks": [{"slug": "cats", "name": "Cats", "list": lst}, {"slug": "fish", "name": "Fish", "list": load_premade_deck("fish")}],
+    pool = {"decks": [{"slug": "pool_2", "name": "Pool 2", "list": lst}, {"slug": "pool_6", "name": "Fish", "list": load_premade_deck("pool_6")}],
             "players": [{"id": lid, "rating": 2000}, {"id": opp, "rating": 1990}]}
     children = tinker.propose(games, pool, 0, 3, log=lambda m: None)
     assert len(children) == 1
     c = children[0]
-    assert c["parent"] == "cats" and c["start"] == 2000 and c["name"] == "Cats II" and c["source"] == "tinker"
+    assert c["parent"] == "pool_2" and c["start"] == 2000 and c["name"] == "Pool 2 II" and c["source"] == "tinker"
     assert sorted(c["list"]) != sorted(lst) and c["list"].count(bad) == lst.count(bad) - 1 and lifted in c["list"]
     assert not decklist_problems(c["list"])
     assert tinker.propose(games, pool, 3, 3) == [], "the day's births are spent"
@@ -44,8 +44,8 @@ def test_the_losing_card_is_found_and_a_lifting_card_replaces_it():
 
 def test_too_few_games_or_no_clear_loser_means_no_child():
     rng = random.Random(6)
-    lst = load_premade_deck("cats")
-    lid, opp = "bot:expert:cats", "bot:expert:fish"
+    lst = load_premade_deck("pool_2")
+    lid, opp = "bot:expert:pool_2", "bot:expert:pool_6"
     few = _games(lid, opp, lst, lst[0], 40, rng)
     assert tinker.losing_card(lst, tinker.games_of(few, lid)) is None
     even = _games(lid, opp, lst, lst[0], 240, rng, p_win_drawn=0.5, p_win_not=0.5)

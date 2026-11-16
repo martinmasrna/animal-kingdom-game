@@ -354,7 +354,8 @@ def test_bird_egg_scouts_now_and_draws_a_bird_when_it_hatches_next_turn():
     rules.apply_action(s, DrawAction())
     assert s.current == "A" and s.owner_of("1,2") is None   # hatched at the start of A's turn
     assert s.pending is None                            # no choice at the start of a turn: it draws a Bird
-    assert sum("Bird" in CARDS[c].tags for c in hand_ids(s, "A")) == birds_in_hand + 1
+    # the hatch's Bird, plus the turn's free card, which the reshuffled deck may also make a Bird
+    assert birds_in_hand + 1 <= sum("Bird" in CARDS[c].tags for c in hand_ids(s, "A")) <= birds_in_hand + 2
 
 
 def test_scout_with_a_filter_only_shows_matching_cards():
@@ -650,16 +651,16 @@ def test_legendary_bat_draws_at_the_start_of_its_owners_turn():
 
 # ============================================ Stage 2.4: removal roars / reactive
 
-def test_jaguar_removes_a_4_but_not_a_5():
+def test_jaguar_removes_a_5_but_not_a_6():
     four = make_state(hands={"A": ["jaguar"]})
     put(four, "1,2", "lion", "A")
-    put(four, "3,2", "deer", "B")                               # str 4: in reach
+    put(four, "3,2", "jaguar", "B")                             # str 5: in reach
     apply_click(four, PlaceAction("jaguar", ("cr", "2,2")))
     assert four.owner_of("3,2") is None
 
     five = make_state(hands={"A": ["jaguar"]})
     put(five, "1,2", "lion", "A")
-    put(five, "3,2", "jaguar", "B")                             # str 5: out of reach
+    put(five, "3,2", "wolf", "B")                               # str 6: out of reach
     apply_click(five, PlaceAction("jaguar", ("cr", "2,2")))
     assert five.owner_of("3,2") == "B"
 
@@ -667,20 +668,20 @@ def test_jaguar_removes_a_4_but_not_a_5():
 def test_jaguar_and_honey_badger_respect_strength_bounds():
     jag = make_state(hands={"A": ["jaguar"]})
     put(jag, "1,2", "lion", "A")
-    put(jag, "3,2", "tuna", "B")                      # str 3 <= 4
+    put(jag, "3,2", "tuna", "B")                      # str 2 <= 5
     apply_click(jag, PlaceAction("jaguar", ("cr", "2,2")))
     assert jag.owner_of("3,2") is None
 
     big = make_state(hands={"A": ["jaguar"]})
     put(big, "1,2", "lion", "A")
-    put(big, "3,2", "wolf", "B")                   # str 6 > 4: out of reach
+    put(big, "3,2", "wolf", "B")                   # str 6 > 5: out of reach
     apply_click(big, PlaceAction("jaguar", ("cr", "2,2")))
     assert big.owner_of("3,2") == "B"
 
     srv = make_state(hands={"A": ["honey_badger"]})
     put(srv, "1,2", "lion", "A")
-    put(srv, "3,2", "lion", "B")                        # str 7 >= 6 (the Honey Badger's only legal target)
-    put(srv, "2,3", "tuna", "B")                      # str 3 < 6: survives
+    put(srv, "3,2", "lion_legend_3", "B")               # str 8 >= 8 (the Honey Badger's only legal target)
+    put(srv, "2,3", "lion", "B")                      # str 7 < 8: survives
     apply_click(srv, PlaceAction("honey_badger", ("cr", "2,2")))
     assert srv.owner_of("3,2") is None and srv.owner_of("2,3") == "B"
 
@@ -704,7 +705,7 @@ def test_soldier_ant_removal_gated_on_four_colony():
 def test_rhinoceros_sweeps_only_small_adjacent_enemies():
     s = make_state(hands={"A": ["rhinoceros"]})
     put(s, "1,2", "lion", "A")
-    put(s, "3,2", "tuna", "B")                          # 3 - removed (<= 3)
+    put(s, "3,2", "fox", "B")                           # 3 - removed (<= 3)
     put(s, "2,3", "warthog", "B")                       # 4 - survives
     put(s, "2,1", "lion", "B")                          # 7 - survives
     rules.apply_action(s, PlaceAction("rhinoceros", ("cr", "2,2")))
@@ -847,7 +848,7 @@ def test_queen_melissia_draws_one_of_each_caste():
     assert sorted(hand_ids(s, "A")) == ["guard_wasp", "nurse_bee", "worker_bee"]
 
 
-def test_chipmunk_pays_now_and_next_turn():
+def test_chipmunk_pays_now_and_nothing_next_turn():
     s = make_state(current="A", hands={"A": ["chipmunk"]},
                    decks={"A": ["lion"], "B": ["lynx", "lynx"]})
     s.actions_taken_this_turn = s.config.actions_per_turn - 1  # Place ends A's turn
@@ -855,7 +856,7 @@ def test_chipmunk_pays_now_and_next_turn():
     assert s.food["A"] == CFG.chipmunk_food_now
     s.actions_taken_this_turn = s.config.actions_per_turn - 1  # Draw ends B's turn -> start of A's next
     rules.apply_action(s, DrawAction())                 # B's turn -> start of A's next turn
-    assert s.food["A"] == CFG.chipmunk_food_now + CFG.chipmunk_food_later
+    assert s.food["A"] == CFG.chipmunk_food_now                 # Echo. Roar: gain 10 food: no delayed gain
 
 
 def test_methuselah_gains_food_at_end_of_turn():
@@ -920,6 +921,7 @@ def test_viper_permanently_shrinks_an_adjacent_enemy_so_a_bird_can_cover_it():
     assert s.owner_of("2,1") == "A"
 
 
+@pytest.mark.skip(reason="no card carries venom now: Cottonmouth is a plain 'remove an adjacent enemy of strength 3 or less'")
 def test_king_cobra_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_the_cobra_is_gone():
     s = make_state(hands={"A": ["cottonmouth"], "B": ["tiger"]},
                    decks={"A": ["eagle"] * 8, "B": ["eagle"] * 8})
@@ -968,7 +970,7 @@ def test_eon_eats_then_shuffles_itself_back_one_smaller_each_cycle_and_draws():
     assert "lion_legend_3" in s.remove_pile and s.top_unit("2,1").card_id == "anaconda_legend"
     rules.apply_action(s, DrawAction())                   # A's turn ends: Eon leaves, and A draws a card
     assert s.top_unit("2,1") is None and "anaconda_legend" not in s.remove_pile
-    assert len(s.hands["A"]) == 3                         # the Draw action's 2 and Eon's 1
+    assert len(s.hands["A"]) == 2                         # the Draw action's 1 and Eon's 1
     assert "anaconda_legend" in s.decks["A"] + hand_ids(s, "A")
     assert card_strength(s, "anaconda_legend", "A") == 10 - CFG.anaconda_legend_decay
 
@@ -992,16 +994,16 @@ def test_magpie_takes_a_random_enemy_card_then_discards_one_of_yours():
     assert all(u.owner == "A" for u in s.hands["A"])
 
 
-def test_black_mamba_removes_an_adjacent_enemy_of_strength_6_or_less():
+def test_black_mamba_removes_an_adjacent_enemy_of_strength_7_or_less():
     s = make_state(hands={"A": ["black_mamba"]})
-    put(s, "2,1", "jaguar", "B")                          # a 6: in reach
+    put(s, "2,1", "lion", "B")                            # a 7: in reach
     apply_click(s, PlaceAction("black_mamba", ("cr", "1,1")))
-    assert "jaguar" in s.remove_pile
+    assert "lion" in s.remove_pile
 
     s2 = make_state(hands={"A": ["black_mamba"]})
-    put(s2, "2,1", "lion", "B")                           # a 7: out of reach
+    put(s2, "2,1", "lion_legend_3", "B")                  # an 8: out of reach
     apply_click(s2, PlaceAction("black_mamba", ("cr", "1,1")))
-    assert s2.top_unit("2,1").card_id == "lion"
+    assert s2.top_unit("2,1").card_id == "lion_legend_3"
 
 
 def test_guard_wasp_in_hand_does_not_count_itself_toward_four_colony():

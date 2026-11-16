@@ -41,11 +41,11 @@ def test_the_opponent_sees_how_many_cards_were_drawn_not_which():
         m.act(m.to_act(), ChoiceAction(SKIP))
     p = m.to_act()
     m.act(p, {"kind": "draw"})
-    draw = next(e for e in reversed(m.events) if e["e"] == "draw")
-    assert len(draw["cards"]) == 2 and draw["seq"] > 0
+    draw = next(e for e in reversed(m.events) if e["e"] == "draw" and e["player"] == p)   # not the next player's free card
+    assert len(draw["cards"]) == 1 and draw["seq"] > 0
     other = "B" if p == "A" else "A"
     assert public_event(draw, p)["cards"] == draw["cards"]
-    assert "cards" not in public_event(draw, other) and public_event(draw, other)["n"] == 2
+    assert "cards" not in public_event(draw, other) and public_event(draw, other)["n"] == 1
     assert draw["seq"] in [e["seq"] for e in m.view(other)["game"]["events"]]
 
 

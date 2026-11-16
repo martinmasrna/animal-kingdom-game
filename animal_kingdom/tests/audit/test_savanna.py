@@ -118,7 +118,7 @@ def test_vulture_does_not_fly_in_at_the_opponents_dusk():
     s = make_state(current="B", hands={"A": ["vulture"]}, decks={"A": ["lion"] * 3, "B": ["mouse"] * 4})
     _three_removals(s)
     end_turn(s)                                                  # B's Dusk, not A's
-    assert tops(s, "vulture") == [] and hand_ids(s, "A") == ["vulture"]
+    assert tops(s, "vulture") == [] and hand_ids(s, "A") == ["vulture", "lion"]   # and A's free card
 
 
 def test_vulture_has_flight():
@@ -322,10 +322,10 @@ def test_caracal_reach_never_captures_the_den():
 
 # ===================================================================== Meerkat, the badgers, the armored
 
-def test_meerkat_roar_draws_a_card():
+def test_meerkat_has_no_roar_so_placing_it_draws_nothing():
     s = make_state(hands={"A": ["meerkat"]}, decks=deck("lion", "fox"))
     rules.apply_action(s, PlaceAction("meerkat", ("cr", "1,2")))
-    assert len(s.hands["A"]) == 1
+    assert len(s.hands["A"]) == 0
 
 
 def test_meerkat_draws_when_an_enemy_is_placed_next_to_it():
@@ -386,21 +386,22 @@ def test_tortoise_has_armor_but_can_be_covered():
     assert [u.card_id for u in s.board["3,2"]] == ["tortoise", "lion"]
 
 
-def test_black_mamba_removes_an_adjacent_enemy_of_6_or_less():
+def test_black_mamba_removes_an_adjacent_enemy_of_7_or_less():
     s = make_state(hands={"A": ["black_mamba"]}, decks=DECKS)
     put(s, "1,1", "mouse", "A")
-    put(s, "2,2", "caracal", "B")                                # a 6
-    put(s, "1,3", "lion", "B")                                   # a 7
+    put(s, "2,2", "lion", "B")                                   # a 7
+    put(s, "1,3", "elephant", "B")                               # a 9
     apply_click(s, PlaceAction("black_mamba", ("cr", "1,2")))
-    assert s.top_unit("2,2") is None and s.top_unit("1,3").card_id == "lion"
+    assert s.top_unit("2,2") is None and s.top_unit("1,3").card_id == "elephant"
 
 
-def test_black_mamba_spares_a_seven_and_your_own():
+def test_black_mamba_spares_an_eight_and_your_own():
     s = make_state(hands={"A": ["black_mamba"]}, decks=DECKS)
     put(s, "1,1", "mouse", "A")
-    put(s, "2,2", "lion", "B")
+    put(s, "2,2", "elephant", "B")
+    s.top_unit("2,2").strength_counter = -1                      # an 8
     apply_click(s, PlaceAction("black_mamba", ("cr", "1,2")))
-    assert s.pending is None and s.top_unit("2,2").card_id == "lion" and s.top_unit("1,1").card_id == "mouse"
+    assert s.pending is None and s.top_unit("2,2").card_id == "elephant" and s.top_unit("1,1").card_id == "mouse"
 
 
 def test_egg_eater_has_two_strength_per_removed_egg():
@@ -560,25 +561,25 @@ def test_rhinoceros_removes_all_adjacent_enemies_of_3_or_less():
     assert s.top_unit("3,2").card_id == "mouse" and s.top_unit("1,2").card_id == "baby_impala"
 
 
-def test_rhinoceros_is_hungry_3():
+def test_rhinoceros_is_not_hungry():
     s = make_state(food={"A": 2, "B": 0}, decks=DECKS)
     r = put(s, "1,2", "rhinoceros", "A")
     _dawn(s)
-    assert s.food["A"] == 0 and effective_strength(s, r) == 7
+    assert s.food["A"] == 2 and effective_strength(s, r) == 8
 
 
-def test_hippopotamus_removes_an_enemy_of_4_or_less_placed_next_to_it():
-    s = make_state(current="B", hands={"B": ["mouse"]}, decks=DECKS)
+def test_hippopotamus_removes_an_enemy_of_5_or_less_placed_next_to_it():
+    s = make_state(current="B", hands={"B": ["zebra"]}, decks=DECKS)
     put(s, "3,2", "hippopotamus", "A")
-    rules.apply_action(s, PlaceAction("mouse", ("cr", "4,2")))
-    assert s.top_unit("4,2") is None and removed(s, "mouse")
+    rules.apply_action(s, PlaceAction("zebra", ("cr", "4,2")))   # a 5
+    assert s.top_unit("4,2") is None and removed(s, "zebra")
 
 
-def test_hippopotamus_spares_a_five_an_ally_and_a_far_enemy():
-    s = make_state(current="B", hands={"B": ["zebra", "mouse"]}, decks=DECKS)
+def test_hippopotamus_spares_a_six_an_ally_and_a_far_enemy():
+    s = make_state(current="B", hands={"B": ["gorilla", "mouse"]}, decks=DECKS)
     put(s, "3,2", "hippopotamus", "A")
-    rules.apply_action(s, PlaceAction("zebra", ("cr", "4,2")))  # a 5
-    assert s.top_unit("4,2").card_id == "zebra"
+    rules.apply_action(s, PlaceAction("gorilla", ("cr", "4,2")))  # a 6
+    assert s.top_unit("4,2").card_id == "gorilla"
     rules.apply_action(s, PlaceAction("mouse", ("cr", "4,3")))  # not next to it
     assert s.top_unit("4,3").card_id == "mouse"
     s2 = make_state(hands={"A": ["mouse"]}, decks=DECKS)
@@ -587,11 +588,11 @@ def test_hippopotamus_spares_a_five_an_ally_and_a_far_enemy():
     assert s2.top_unit("1,2").card_id == "mouse"
 
 
-def test_hippopotamus_is_hungry_3():
+def test_hippopotamus_is_not_hungry():
     s = make_state(food={"A": 3, "B": 0}, decks=DECKS)
     h = put(s, "1,2", "hippopotamus", "A")
     _dawn(s)
-    assert s.food["A"] == 0 and effective_strength(s, h) == 8
+    assert s.food["A"] == 3 and effective_strength(s, h) == 8
 
 
 def test_oxpecker_draws_then_gains_the_strongest_in_hand():
@@ -617,10 +618,10 @@ def test_oxpecker_has_flight():
 def test_dung_beetle_gains_four_per_hungry_animal_you_control_at_dusk():
     s = make_state(decks=DECKS)
     put(s, "1,1", "dung_beetle", "A")
-    put(s, "1,3", "elephant", "A")
+    put(s, "1,3", "moose", "A")
     put(s, "2,3", "giraffe", "A")
-    put(s, "3,2", "elephant", "B")                               # the opponent's: not yours
-    put(s, "2,1", "elephant", "A")
+    put(s, "3,2", "moose", "B")                                  # the opponent's: not yours
+    put(s, "2,1", "moose", "A")
     put(s, "2,1", "lion", "B")                                   # buried: not controlled
     end_turn(s)
     assert s.food["A"] == 8
@@ -633,14 +634,22 @@ def test_dung_beetle_without_hungry_animals_gains_nothing():
     assert s.food["A"] == 0
 
 
-def test_elephant_is_a_nine_hungry_5():
+def test_elephant_is_a_plain_nine():
     s = make_state(food={"A": 6, "B": 0}, decks=DECKS)
     e = put(s, "1,2", "elephant", "A")
     assert effective_strength(s, e) == 9
+    _dawn(s); _dawn(s)
+    assert s.food["A"] == 6 and effective_strength(s, e) == 9
+
+
+def test_moose_is_an_eight_hungry_3():
+    s = make_state(food={"A": 4, "B": 0}, decks=DECKS)
+    m = put(s, "1,2", "moose", "A")
+    assert effective_strength(s, m) == 8
     _dawn(s)
-    assert s.food["A"] == 1 and effective_strength(s, e) == 9
+    assert s.food["A"] == 1 and effective_strength(s, m) == 8
     _dawn(s)
-    assert s.food["A"] == 0 and effective_strength(s, e) == 5
+    assert s.food["A"] == 0 and effective_strength(s, m) == 6
 
 
 def test_elephant_legend_removes_adjacent_enemies_of_3_or_less_when_placed():
@@ -672,19 +681,20 @@ def test_elephant_legend_is_hungry_6():
 
 def test_dung_beetle_legend_evolves_at_5_food_eaten():
     s = make_state(hands={"A": ["dung_beetle_legend"]}, food={"A": 4, "B": 0}, decks=DECKS)
-    put(s, "1,2", "elephant", "A")
-    _dawn(s)                                                     # 4 eaten
-    assert hand_ids(s, "A") == ["dung_beetle_legend"]
-    s.food["A"] = 1
+    put(s, "1,2", "moose", "A")
+    s.food["A"] = 3
+    _dawn(s)                                                     # 3 eaten
+    assert [c for c in hand_ids(s, "A") if c != "mouse"] == ["dung_beetle_legend"]
+    s.food["A"] = 2
     _dawn(s)                                                     # 5
-    assert hand_ids(s, "A") == ["dung_beetle_legend_form2"]
+    assert [c for c in hand_ids(s, "A") if c != "mouse"] == ["dung_beetle_legend_form2"]
 
 
 def test_dung_beetle_legend_ignores_the_opponents_hungry_animals():
     s = make_state(hands={"A": ["dung_beetle_legend"]}, food={"A": 0, "B": 20}, decks=DECKS)
-    put(s, "4,2", "elephant", "B")
-    end_turn(s); end_turn(s); end_turn(s)                        # B's Dawn, twice: 10 eaten by the opponent's
-    assert hand_ids(s, "A") == ["dung_beetle_legend"]
+    put(s, "4,2", "moose", "B")
+    end_turn(s); end_turn(s); end_turn(s)                        # B's Dawn, twice: 6 eaten by the opponent's
+    assert [c for c in hand_ids(s, "A") if c != "mouse"] == ["dung_beetle_legend"]
 
 
 # ===================================================================== Hoofed
@@ -730,20 +740,20 @@ def test_giraffe_legend_reveals_the_opponents_hand():
     assert not statics.hand_revealed(s, "B")
 
 
-def test_honey_badger_removes_an_adjacent_enemy_of_6_or_more():
+def test_honey_badger_removes_an_adjacent_enemy_of_8_or_more():
     s = make_state(hands={"A": ["honey_badger"]}, decks=DECKS)
     put(s, "1,1", "mouse", "A")
-    put(s, "2,2", "caracal", "B")                                # a 6
-    put(s, "1,3", "zebra", "B")                                  # a 5
+    put(s, "2,2", "elephant", "B")                               # a 9
+    put(s, "1,3", "lion", "B")                                   # a 7
     apply_click(s, PlaceAction("honey_badger", ("cr", "1,2")))
-    assert s.top_unit("2,2") is None and s.top_unit("1,3").card_id == "zebra"
+    assert s.top_unit("2,2") is None and s.top_unit("1,3").card_id == "lion"
 
 
-def test_honey_badger_spares_a_five():
+def test_honey_badger_spares_a_seven():
     s = make_state(hands={"A": ["honey_badger"]}, decks=DECKS)
-    put(s, "2,2", "zebra", "B")
+    put(s, "2,2", "lion", "B")
     apply_click(s, PlaceAction("honey_badger", ("cr", "1,2")))
-    assert s.pending is None and s.top_unit("2,2").card_id == "zebra"
+    assert s.pending is None and s.top_unit("2,2").card_id == "lion"
 
 
 def test_zebra_flees_and_returns_its_coverer():
@@ -765,7 +775,7 @@ def test_zebra_covered_by_its_own_player_does_not_flee():
 def test_zebra_cannot_return_an_armored_coverer():
     s = make_state(current="B", hands={"B": ["tortoise"]}, decks=DECKS)
     put(s, "4,2", "mouse", "B")
-    put(s, "3,2", "zebra", "A")
+    put(s, "3,2", "zebra", "A").strength_counter = -2            # a 3: the Tortoise (4) can cover it
     rules.apply_action(s, PlaceAction("tortoise", ("cr", "3,2")))
     assert "zebra" in hand_ids(s, "A") and s.top_unit("3,2").card_id == "tortoise"
 
@@ -946,7 +956,7 @@ def test_hippopotamus_removes_a_small_enemy_that_roams_next_to_it():
 def test_meerkat_draws_when_an_enemy_roams_next_to_it():
     s = make_state(current="B", decks=deck("lion", "fox"))
     put(s, "3,1", "meerkat", "A")
-    put(s, "4,2", "jackal", "B")
+    put(s, "4,2", "wolf", "B")
     rules.apply_action(s, RoamAction("4,2", ("cr", "3,2")))
     assert len(s.hands["A"]) == 1
 

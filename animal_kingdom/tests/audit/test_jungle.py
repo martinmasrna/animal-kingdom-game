@@ -49,7 +49,8 @@ def strength(card_id):
 
 def test_jungle_cards_are_the_audited_set():
     ids = sorted(c.id for c in CARDS.values() if c.status == "collectible" and str(c.habitat).lower().endswith("jungle"))
-    assert len(ids) == 38   # 37, and the leaders prototype's [GORILLA]
+    assert ids == ["armadillo", "black_panther", "chameleon", "gorilla_legend_2", "hercules_beetle", "hummingbird",
+                   "jaguar", "ocelot", "peacock", "sloth", "tarsier", "tiger", "tiger_legend"]
 
 
 # ------------------------------------------------------------------ army_ant_legend: Dusk: gain 2 food per animal
@@ -217,10 +218,10 @@ def test_chameleon_with_an_empty_hand_stays_a_chameleon():
     assert s.pending is None and s.top_unit("1,2").card_id == "chameleon"
 
 
-# ------------------------------------------------- jaguar: Roar: remove an adjacent enemy of strength 4 or less
+# ------------------------------------------------- jaguar: Roar: remove an adjacent enemy of strength 5 or less
 
-def test_jaguar_removes_an_adjacent_enemy_of_4_not_5_and_never_an_ally():
-    for enemy, gone in (("mouse", True), ("lynx", False)):       # a 4 and a 5
+def test_jaguar_removes_an_adjacent_enemy_of_5_not_6_and_never_an_ally():
+    for enemy, gone in (("lynx", True), ("leopard", False)):     # a 5 and a 6
         s = make_state(hands={"A": ["jaguar"]})
         put(s, "2,2", enemy, "B")
         put(s, "1,1", "gazelle", "A")                            # an adjacent ally of 2
@@ -238,13 +239,20 @@ def test_jaguar_not_adjacent_removes_nothing():
 
 # ----------------------------------------------------------------- black_panther: Apex Predator. Stealth.
 
-def test_black_panther_cannot_be_placed_on_an_empty_crossroad_and_eats_what_it_lands_on():
+def test_black_panther_has_stealth_only_so_it_lands_on_an_empty_crossroad_and_eats_nothing():
     s = make_state(hands={"A": ["black_panther"]})
-    assert not places(s, "black_panther", "1,2")
+    assert places(s, "black_panther", "1,2")                     # no Apex Predator: no prey needed
+    rules.apply_action(s, PlaceAction("black_panther", ("cr", "1,2")))
+    assert [u.card_id for u in s.board["1,2"]] == ["black_panther"]
+
+
+def test_apex_predator_needs_prey_so_the_tiger_cannot_land_on_an_empty_crossroad_and_eats_what_it_lands_on():
+    s = make_state(hands={"A": ["tiger"]})
+    assert not places(s, "tiger", "1,2")
     put(s, "1,2", "lion", "B")
     s.top_unit("1,2").strength_counter = -1                      # a 6
-    rules.apply_action(s, PlaceAction("black_panther", ("cr", "1,2")))
-    assert [u.card_id for u in s.board["1,2"]] == ["black_panther"] and "lion" in s.remove_pile
+    rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
+    assert [u.card_id for u in s.board["1,2"]] == ["tiger"] and "lion" in s.remove_pile
 
 
 def test_black_panther_cannot_be_chosen_by_an_enemy_removal():
@@ -502,7 +510,7 @@ def test_eon_does_nothing_at_the_opponents_dusk():
     s = make_state(current="B", decks=decks())
     put(s, "1,2", "anaconda_legend", "A")
     end_turn(s)                                                  # B's Dusk
-    assert s.top_unit("1,2").card_id == "anaconda_legend" and hand_ids(s, "A") == []
+    assert s.top_unit("1,2").card_id == "anaconda_legend" and hand_ids(s, "A") == ["lion"]   # A's free card only
 
 
 # ------------------------------------- snake_egg: Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes.
@@ -529,7 +537,7 @@ def test_snake_egg_hatches_removing_itself_and_drawing_two_snakes():
             break
         end_turn(s)
     assert s.top_unit("1,2") is None and "snake_egg" in s.remove_pile
-    assert sorted(hand_ids(s, "A")) == ["anaconda", "python", "viper"]
+    assert sorted(c for c in hand_ids(s, "A") if c != "lion") == ["anaconda", "python", "viper"]   # plus free cards
 
 
 def test_snake_egg_with_no_snake_in_the_deck_draws_nothing():
@@ -546,14 +554,15 @@ def test_gorilla_legend_gives_every_card_in_your_hand_plus_one_for_good():
     assert [u.strength_counter for u in s.hands["A"]] == [1, 1]
     assert s.hands["B"][0].strength_counter == 0
     rules.apply_action(s, DrawAction())                          # drawn after: not buffed
-    assert [u.strength_counter for u in s.hands["A"]][2:] == [0, 0]
+    assert [u.strength_counter for u in s.hands["A"]][2:] == [0]
 
 
 # --------------------------------------------------------------- hummingbird: Flight. Roar: draw 2 cards.
 
-def test_hummingbird_flies_anywhere_and_draws_two():
+def test_hummingbird_has_no_flight_and_draws_two():
     s = make_state(hands={"A": ["hummingbird"]}, decks=decks())
-    rules.apply_action(s, PlaceAction("hummingbird", ("cr", "3,3")))   # not connected: Flight
+    assert not places(s, "hummingbird", "3,3")                         # not connected: no Flight
+    rules.apply_action(s, PlaceAction("hummingbird", ("cr", "1,2")))
     assert hand_ids(s, "A") == ["lion", "lion"]
 
 
@@ -579,10 +588,10 @@ def test_orangutan_with_no_primate_in_hand_does_nothing():
     assert s.pending is None and hand_ids(s, "A") == ["lion"]
 
 
-# ----------------------------- tarsier: Roar: draw a Primate, then give a Primate in your hand +2 strength
+# tarsier: Echo. Roar: give an animal in your hand +2 strength
 
-def test_tarsier_draws_a_primate_then_gives_a_primate_in_hand_two():
-    s = make_state(hands={"A": ["tarsier"]}, decks={"A": ["lion", "gorilla", "lion"], "B": []})
+def test_tarsier_gives_an_animal_in_hand_two_and_draws_nothing():
+    s = make_state(hands={"A": ["tarsier", "gorilla"]}, decks={"A": ["lion", "lion"], "B": []})
     apply_click(s, PlaceAction("tarsier", ("cr", "1,2")))
     assert hand_ids(s, "A") == ["gorilla"] and hand_inst(s, "A", "gorilla").strength_counter == 2
 
@@ -593,10 +602,10 @@ def test_tarsier_with_no_primate_in_the_deck_still_trains_one_in_hand():
     assert hand_ids(s, "A") == ["chimpanzee"] and hand_inst(s, "A", "chimpanzee").strength_counter == 2
 
 
-def test_tarsier_with_no_primate_anywhere_does_nothing():
-    s = make_state(hands={"A": ["tarsier", "lion"]}, decks={"A": ["lion"], "B": []})
+def test_tarsier_with_an_empty_hand_does_nothing():
+    s = make_state(hands={"A": ["tarsier"]}, decks={"A": ["lion"], "B": []})
     apply_click(s, PlaceAction("tarsier", ("cr", "1,2")))
-    assert s.pending is None and hand_ids(s, "A") == ["lion"] and hand_inst(s, "A", "lion").strength_counter == 0
+    assert s.pending is None and hand_ids(s, "A") == []
 
 
 # ------------------------------------------- chimpanzee: Roar: remove an adjacent enemy of equal or lower strength
@@ -666,8 +675,8 @@ def test_okapi_grazing_draws_at_dusk_and_at_dawn():
         put(s, cr, "mouse", "A")                                 # R1 is yours: the Okapi grazes
     end_turn(s)
     assert len(s.hands["A"]) == 1
-    end_turn(s)                                                  # A's Dawn
-    assert len(s.hands["A"]) == 2
+    end_turn(s)                                                  # A's Dawn: the Okapi's card and the free card
+    assert len(s.hands["A"]) == 3
 
 
 def test_okapi_not_grazing_draws_nothing():
@@ -677,7 +686,7 @@ def test_okapi_not_grazing_draws_nothing():
         put(s, cr, "mouse", "A")
     put(s, "2,2", "mouse", "B")                                  # R1 is not yours
     end_turn(s); end_turn(s)
-    assert len(s.hands["A"]) == 0
+    assert len(s.hands["A"]) == 1                                # only the free card
 
 
 # ------------------------------------------------- macaw: Flight. Roar: repeat the last Roar your opponent played

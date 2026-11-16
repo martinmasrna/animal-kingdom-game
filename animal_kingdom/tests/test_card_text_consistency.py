@@ -43,7 +43,7 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "food_maker": ["food_maker_food"],     # the actions prototype
     "card_burner": ["card_burner_food"],
     "refueler": ["refueler_food"],
-    "chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
+    "chipmunk": ["chipmunk_food_now"],
     "tutorial_chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
     "groundhog": ["groundhog_food"],
     "gazelle": ["gazelle_food"],
@@ -162,6 +162,10 @@ STRENGTH_LIMITS = {
     "black_mamba": "black_mamba_max",
     "hippopotamus": "hippopotamus_max",
     "elephant_legend": "elephant_legend_max",
+    "gopher": "gopher_max",
+    "serval": "serval_min",
+    "hornet": "hornet_max",
+    "cottonmouth": "cottonmouth_max",
 }
 
 
@@ -272,6 +276,7 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "mara": ["mara_draw"],
     "praying_mantis": ["mantis_draw"],
     "hummingbird": ["hummingbird_draw"],
+    "bat": ["bat_draw"],
     "lynx": ["lynx_draw"],
     "fox": ["fox_draw"],
     "dhole": ["dhole_draw"],

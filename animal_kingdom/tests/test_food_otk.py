@@ -61,18 +61,20 @@ def test_gopher_removes_adjacent_enemy_only_when_fed():
 
 
 def test_fed_gopher_and_the_hippo_it_removes_go_together():
-    """A fed Gopher placed next to an enemy Hippo removes it first (roar before reactions), and the Hippo's
-    removal, already set off by the placement, still takes the Gopher (Martin, 2026-10-27). An UNfed
-    Gopher (str 4 <= Hippo's max) is removed by the Hippo, which survives."""
+    """A fed Gopher placed next to an enemy Hippo removes its other target first (roar before reactions; the Hippo
+    itself, an 8, is out of the Gopher's reach of 7), and the Hippo's removal, already set off by the placement, still
+    takes the Gopher (Martin, 2026-10-27). An UNfed Gopher (str 3 <= Hippo's max) is removed by the Hippo, which
+    survives."""
     fed = make_state(current="A", hands={"A": ["gopher"]})
     fed.turn_flags["food_gained_A"] = CFG.fed_threshold
     put(fed, "1,2", "lion", "A")                                      # connects 2,2
     put(fed, "2,1", "hippopotamus", "B")                             # enemy Hippo adjacent
+    put(fed, "2,3", "lion", "B")                                     # a 7: the Gopher's target
     rules.apply_action(fed, PlaceAction("gopher", ("cr", "2,2")))
     if fed.pending is not None:
-        rules.apply_action(fed, ChoiceAction("2,1"))                  # Gopher removes the Hippo
-    assert fed.owner_of("2,2") is None and fed.owner_of("2,1") is None
-    assert "hippopotamus" in fed.remove_pile and "gopher" in fed.remove_pile
+        rules.apply_action(fed, ChoiceAction("2,3"))                  # Gopher removes the Lion
+    assert fed.owner_of("2,2") is None and fed.owner_of("2,3") is None and fed.owner_of("2,1") == "B"
+    assert "lion" in fed.remove_pile and "gopher" in fed.remove_pile
 
     unfed = make_state(current="A", hands={"A": ["gopher"]})
     put(unfed, "1,2", "lion", "A")

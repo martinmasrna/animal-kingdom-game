@@ -101,13 +101,13 @@ def test_recognizes_black_bear_delayed_draw_as_better_than_a_vanilla_body():
 
 @pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
 def test_last_action_spends_an_extra_play_roar(bot_cls):
-    # The turn's last action. Jerboa ("Roar: play another unit") lands two units for one
-    # action; Lion alone lands one and keeps Jerboa in hand. Nothing threatens either line,
+    # The turn's last action. Mole ("Roar: play another animal next to this") lands two units for one
+    # action; Lion alone lands one and keeps the Mole in hand. Nothing threatens either line,
     # so the two-unit play is simply better. From Martin's reverse gauntlet, where RefereeBot
     # piloting the Roar-heavy decks (Egg, Colony, Cats) kept its effect cards in hand while
     # he played them.
     deck = ["lion"] * 10
-    s = make_state(hands={"A": ["jerboa", "lion", "tiger", "lynx", "caracal", "cheetah"],
+    s = make_state(hands={"A": ["mole", "lion", "tiger", "lynx", "caracal", "cheetah"],
                           "B": ["lion"] * 3},
                    decks={"A": list(deck), "B": list(deck)})
     s.actions_taken_this_turn = 1
@@ -115,7 +115,7 @@ def test_last_action_spends_an_extra_play_roar(bot_cls):
     put(s, "3,2", "lion", "B")
 
     chosen = bot_cls(seed=0).choose(s.view_for("A"), rules.legal_actions(s), s)
-    assert chosen.card_id == "jerboa"
+    assert chosen.card_id == "mole"
 
 
 @pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
@@ -153,6 +153,7 @@ def test_cats_plays_lynx_in_the_middle(bot_cls):
 
 
 @pytest.mark.parametrize("bot_cls", [TurnBot, pytest.param(RefereeBot, marks=pytest.mark.xfail(strict=False, reason="recorded against the old goodstuff pile, whose cards changed with the launch decks (Brutus, the Rhinoceros and the Elephant are Hungry, the Wolf roams): the search reads a different opponent now; re-record (2026-10-08)"))])
+@pytest.mark.skip(reason="recorded when Draw drew 2; now Draw draws 1 and a free card comes each turn, and the Falcon draws, so the opening is no longer a clear Draw: re-record (2026-11-16)")
 def test_aggro_draws_on_its_opening(bot_cls):
     # Aggro vs the pile, its first turn, second action, empty board, hand Falcon, Falcon, Rat,
     # Rat, Skunk. Martin draws here too. A guard: the fix for drawing too much must not stop
@@ -163,6 +164,7 @@ def test_aggro_draws_on_its_opening(bot_cls):
         assert isinstance(chosen, DrawAction), chosen
 
 
+@pytest.mark.skip(reason="the Cottonmouth no longer marks (venom is gone from every card; it removes an adjacent enemy of strength 3 or less): the position has no card left to mark with (2026-11-16)")
 def test_taipan_marks_the_python():
     # Goodstuff vs Martin's Egg Control, his game of 2026-09-30, the bot's turn with 0 food: hand
     # Elephant, Tiger, Brutus, Wolf, Taipan; his Python (8) in the middle, his Raven beside it.

@@ -92,7 +92,7 @@ def test_the_searched_mulligan_sends_a_python_at_zero_back():
 
 
 def test_the_searched_mulligan_keeps_a_strong_hand_over_a_weak_deck():
-    sent, hand = _searched(["lion", "tiger", "orca", "lion"], ["mouse"] * 26)
+    sent, hand = _searched(["lion", "tiger", "orca", "lion"], ["lemming"] * 26)   # vanilla 1s: the Mouse's draw Roar made the deck look better than a Lion
     assert sent == []
 
 
