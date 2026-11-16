@@ -695,6 +695,7 @@ class Match:
                                         for d, (w, l) in record.items()]}
         if self.state is not None:
             v["game"] = self._game_view(s, opp)
+            v["game"]["drawCount"] = self.state.config.draw_action_count   # what the Draw action draws (the deck says it)
         return v
 
     def _game_view(self, s: str, opp: str) -> dict:

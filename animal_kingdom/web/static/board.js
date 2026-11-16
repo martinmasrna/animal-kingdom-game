@@ -15,11 +15,11 @@ export const LAND = { w: 1512, h: 800 }, PORT = { w: 720, h: 1440 };
 export const VIEW = { port: false };
 export function setView(port) { Object.assign(STAGE, port ? PORT : LAND); VIEW.port = port; }
 const key = (c, r) => `${c},${r}`;
-const BOARD_KW = ['Armor', 'Stealth', 'Spikes', 'Poison'];   // the keywords a unit wears painted on its piece
 // An animal whose effect fires on its own wears one mark on its rim, bottom right, clear of its number (Martin, 2026-10-15,
 // after Hearthstone's trigger bolt): a moon for Dusk, a sun for Dawn, an eye for "when/whenever". When it fires, the mark
 // brightens and the effect plays out of the animal. A Roar wears none: you see it played.
-const TRIGGER = [[/\bDusk:/, 'dusk', 'Dusk: happens at the end of your turn.'], [/\bDawn:/, 'dawn', 'Dawn: happens at the start of your turn.'],
+const lower = t => t[0].toLowerCase() + t.slice(1);   // the keyword's explanation (card.js KEYWORDS) after its name
+const TRIGGER = [[/\bDusk:/, 'dusk', `Dusk: ${lower(KEYWORDS.Dusk)}`], [/\bDawn:/, 'dawn', `Dawn: ${lower(KEYWORDS.Dawn)}`],
   [/(^|\. )When(ever)? |\bthe first enemy placed next to this\b/, 'when', 'Happens on its own when its condition is met.']];
 const triggerOf = c => TRIGGER.find(([re]) => re.test(c.text || ''));
 const TRG_AT = (() => { const a = -32 * Math.PI / 180; return `left:calc(${(50 + 47.8 * Math.cos(a)).toFixed(1)}% - 19px);top:calc(${(50 - 47.8 * Math.sin(a)).toFixed(1)}% - 19px)`; })();
@@ -55,6 +55,8 @@ const FLY = 0.7, GAP = 0.035;   // seconds a fruit takes from its stone to its p
 // Numbers are painted digits: chalk on a boss (strength, payouts), bold numerals in the den's gem. Every count animates
 // through all digits, so they load up front (a digit fetched mid-count shows as a gap).
 const digits = (dir, n) => String(n).split('').map(d => `<img src="${kit(`${dir}/${d === '+' ? 'p' : d}.webp`)}" alt="${d}" draggable="false">`).join('');
+// A timer's words: its badge's tip on the board, under the card when a stack is read.
+export const resolvesIn = n => `Resolves in ${n} turn${n > 1 ? 's' : ''}`;
 export const chalk = n => `<span class="chalk">${digits('chalk', n)}</span>`;
 export const gemDigits = n => `<span class="gemnum">${digits('gemnum', n)}</span>`;
 if (typeof Image !== 'undefined') for (let d = 0; d < 10; d++) { new Image().src = kit(`gemnum/${d}.webp`); new Image().src = kit(`chalk/${d}.webp`); }
@@ -79,12 +81,11 @@ export function portrait(id, D, box = D) {
 
 // A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer, and its board keywords painted on.
 function unit(u, under, cards, fire = false) {
-  // Board keywords: the card's own, plus Stealth whenever the enemy can't choose it (an adjacent Armadillo gives it).
-  // Spikes only until they've removed a coverer (the view says so): after that it's an ordinary animal.
-  // Armor likewise when a neighbour gives it (Capybara), Poison when a neighbour's legendary Jellyfish does; an inked animal
-  // (the Octopus) wears none.
-  const c = cards[u.id], kws = u.inked ? [] : (c.kw || []).filter(k => BOARD_KW.includes(k) && k !== 'Stealth' && k !== 'Spikes' && k !== 'Armor' && k !== 'Poison')
-    .concat(u.armor ? ['Armor'] : [], u.hidden ? ['Stealth'] : [], u.spikes ? ['Spikes'] : [], u.poison ? ['Poison'] : []);
+  // Board keywords, as the view states them (match.py): printed or lent alike. Stealth whenever the enemy can't choose it (an
+  // adjacent Armadillo gives it); Spikes only until they've removed a coverer, after that it's an ordinary animal; Armor
+  // when it can't be removed (a neighbour's Capybara too), Poison when a neighbour's legendary Jellyfish lends it; an inked
+  // animal (the Octopus) wears none.
+  const c = cards[u.id], kws = u.inked ? [] : [u.armor && 'Armor', u.hidden && 'Stealth', u.spikes && 'Spikes', u.poison && 'Poison'].filter(Boolean);
   // the animals underneath peek out behind, down and right: each a solid disc under its team rim, a step darker (at this
   // offset a portrait showed only as a sliver, which read as a gap)
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen" style="transform:translate(${22 + i * 7}px,${20 + i * 6}px) scale(.82);z-index:${-i - 1}">`
@@ -106,7 +107,7 @@ function unit(u, under, cards, fire = false) {
     venom('tint') + (has('Stealth') ? `<div class="kwl mist${hx}"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
     `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
     `<div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
-    (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +
+    (u.timer ? `<div class="timer" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
     ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TRG_AT}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
 }
 

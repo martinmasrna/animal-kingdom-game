@@ -4,7 +4,7 @@
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
 import { cardHTML, fitNames, readSide, markGlyphs, LABEL } from './card.js';
 import { CROP, artUrl, stripArt, fitStrips, lazyArt } from './art.js';
-import { encodeDeck, decodeDeck } from './deckcode.js';
+import { encodeDeck, decodeDeck, deckOrder } from './deckcode.js';
 import { dd, wireDd, onHold } from './menu.js';
 import { track } from './log.js';
 
@@ -12,10 +12,10 @@ import { track } from './log.js';
 const FAMILIES = [['Cat', 'lion'], ['Canine', 'wolf_legend_3'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
   ['Snake', 'viper'], ['Bear', 'polar_bear'], ['Hoofed', 'rhinoceros'], ['Fish', 'sardine'], ['Primate', 'gorilla'], ['Arachnid', 'tarantula'],
   ['Beetle', 'stag_beetle']];
-const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX
 const RANK = { legendary: 0, rare: 1, common: 2 };
-// The deck rules come from the server (/api/pool's rules: decks.py and engine/cards.py hold the numbers): the deck size, the
-// copies a rarity allows, and the stars prototype's budget (a card's level, c.stars, counted per copy).
+// The deck rules come from the server (/api/pool's rules: decks.py, engine/cards.py and web/profiles.py hold the numbers): the
+// deck size, the copies a rarity allows, the stars prototype's budget (a card's level, c.stars, counted per copy), and the
+// most decks a profile keeps.
 let R = { deckSize: 25, copies: {}, starBudget: 0 };   // until the server's arrive
 const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
 // What keeps a deck from play under the rules, in plain words: copies over a card's limit, more cards than a deck holds (a
@@ -106,12 +106,12 @@ export function collectionScreen(app, ctx) {
 // One strip: a sliver of the card; the number of copies at its end when there are two or more (the game's decklists: copies
 // left), as in Hearthstone. A strip with none left is marked gone.
 export const stripHTML = (id, cards, have) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}${have > (R.copies[cards[id].rarity] ?? 9) ? ' over' : ''}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span>${markGlyphs(cards[id], 'lvs')}<span class="x">${have > 1 ? have : ''}</span></div>`;
-// A deck's strips, one list: the legendaries first (their gold edge says so), then every other card, each by strength. The
-// stars prototype has one kind of card besides the legendary, so there are no groups (as the energy prototype's lists);
-// `caps` and `flat` stay for the callers' sake.
-export function deckBody(list, cards, caps = true, flat = false) {
+// A deck's strips, one list, in deckOrder (the legendaries first, their gold edge says so, then every other card by strength).
+// `have(id)`: the copies a strip shows (a match's decklists: the copies left).
+export const stripsHTML = (ids, cards, have) => `<div class="dbody flat">${[...ids].sort(deckOrder(cards)).map(id => stripHTML(id, cards, have(id))).join('')}</div>`;
+export function deckBody(list, cards) {
   const counts = countsOf(list);
-  return `<div class="dbody flat">${Object.keys(counts).sort((a, b) => RANK[cards[a].rarity] - RANK[cards[b].rarity] || sv(cards[a]) - sv(cards[b]) || cards[a].name.localeCompare(cards[b].name)).map(id => stripHTML(id, cards, counts[id])).join('')}</div>`;
+  return stripsHTML(Object.keys(counts), cards, id => counts[id]);
 }
 
 function render(app, all) {
@@ -160,8 +160,8 @@ function render(app, all) {
     ? `<div class="clist editing">${tile(open)}</div>
       <div class="sfoot"><button class="play" id="play"${open.list.length === R.deckSize && !issue ? '' : ' disabled'}>${issue || 'Play this deck'}</button>
         <div class="frow"><div class="fcount two"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span>${starCount}</div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
-    : `<div class="clist">${all.map(tile).join('')}${all.length < DECKS_MAX ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
-      <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div>${FB}<button class="backbtn" id="back"><span>Back</span></button></div></div>`;
+    : `<div class="clist">${all.map(tile).join('')}${all.length < R.decksMax ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
+      <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${R.decksMax}</b><span>Decks</span></div>${FB}<button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
   app.innerHTML = `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side${st.sheet ? ' up' : ''}"><button class="grip" id="grip" aria-label="Decks"></button>${column}</div><div class="modal" id="cmodal"></div></div>`;
   lazyArt(app.querySelector('.cgrid'));
@@ -361,7 +361,7 @@ function pickLeader(app, d, done) {
 }
 
 function pickCover(app, d, done) {
-  const ids = [...new Set(d.list)].filter(id => CROP[id]).sort((a, b) => RANK[C[a].rarity] - RANK[C[b].rarity] || sv(C[a]) - sv(C[b]));
+  const ids = [...new Set(d.list)].filter(id => CROP[id]).sort(deckOrder(C));
   const { m, close } = dialog(app, `<div class="dlg cov"><h3>Choose a cover</h3><div class="covs">${ids.map(id => `<div class="cv${id === d.cover ? ' on' : ''}" data-id="${id}">${cardHTML(C[id], { cls: 'compact' })}</div>`).join('')}</div>
     <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitNames(m);
   m.querySelectorAll('.cv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
@@ -380,7 +380,7 @@ function wireGlobal() {
     if (!here() || typing(e)) return;
     const d = decodeDeck(e.clipboardData.getData('text'), C);
     if (!d) return X.toast('That is not a deck code');
-    if (decks().length >= DECKS_MAX) return X.toast(`${DECKS_MAX} decks is the most you can keep: delete one first`);
+    if (decks().length >= R.decksMax) return X.toast(`${R.decksMax} decks is the most you can keep: delete one first`);
     const all = decks(), nd = { id: Date.now().toString(36), name: d.name, list: d.list, cover: coverOf(d.list) };
     all.push(nd); st.open = nd.id; save(all);
     render(here().parentElement, all); X.toast(`Imported ${nd.name}`, true);

@@ -6,9 +6,9 @@ import { SUCCESSOR } from './cardnums.js';
 import { plan, DUR } from './timeline.js';
 import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt, resolvesIn } from './board.js';
 import { decodeDeck } from './deckcode.js';
-import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripHTML, ICON } from './collection.js';
+import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripHTML, stripsHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
@@ -21,9 +21,7 @@ import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, h
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 let COVER = {};   // starter deck id -> the card covering it (the server's pool says, from cards.json)
-const RANK = { legendary: 0, rare: 1, common: 2 };
 const SKIP = '__skip__';
-const sv = c => c.str === '*' ? -1 : c.str;
 const store = (k, v) => { try { v === undefined ? null : localStorage.setItem(k, v); return localStorage.getItem(k); } catch { return null; } };
 const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
@@ -48,12 +46,9 @@ function toast(msg, ok) {
   const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; t.classList.toggle('ok', !!ok);
   clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = 'none', 3500);
 }
-function sortIds(ids) {
-  return ids.sort((a, b) => RANK[CARDS[a].rarity] - RANK[CARDS[b].rarity] || sv(CARDS[a]) - sv(CARDS[b]) || CARDS[a].name.localeCompare(CARDS[b].name));
-}
 // A decklist in the game's panels: the collection's strips, each with the copies left.
 function rows(list, counts) {
-  return `<div class="dbody flat">${sortIds(Object.keys(list)).map(id => stripHTML(id, CARDS, counts ? (counts[id] || 0) : list[id])).join('')}</div>`;
+  return stripsHTML(Object.keys(list), CARDS, id => counts ? (counts[id] || 0) : list[id]);
 }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 function cardPop(el, id, extra, place) {
@@ -307,7 +302,7 @@ function homeScreen(mode = {}) {
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.fix ? '<span class="left">Too many</span>' : d.short ? `<span class="left">${RULES.deckSize - d.short}/${RULES.deckSize}</span>` : ''}</div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
-  const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
+  const deckList = d => deckBody(d.list, CARDS) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
   const chooser = play.open === 'decks'
     ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, chosen && d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${peek ? deckList(peek) : ''}</div></div>`
     : play.open === 'opp' ? `<div class="chooser opps">${`<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend'], ['gauntlet', 'Gauntlet']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
@@ -718,10 +713,10 @@ function deckLinkScreen(arg) {
   const d = decodeDeck(`${name ? '### ' + name + '\n' : ''}AK1:${code}`, CARDS);
   if (!d) { history.replaceState(null, '', '#/'); homeScreen(); return toast('That deck link holds no cards'); }
   app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="#/" aria-label="Back"></a><span class="ptab on">${esc(d.name)}</span></div></div>
-    <div class="hbody"><div class="dlink">${deckBody(d.list, CARDS, false)}</div><p><button class="slab" id="dimport">Add to my collection</button> <a class="slab" href="#/">Home</a></p></div></div></div>`;
+    <div class="hbody"><div class="dlink">${deckBody(d.list, CARDS)}</div><p><button class="slab" id="dimport">Add to my collection</button> <a class="slab" href="#/">Home</a></p></div></div></div>`;
   document.getElementById('dimport').onclick = () => {
     const mine = myDecks();
-    if (mine.length >= 20) return toast('20 decks is the most you can keep: delete one first');
+    if (mine.length >= RULES.decksMax) return toast(`${RULES.decksMax} decks is the most you can keep: delete one first`);
     const cards = {}; d.list.forEach(id => cards[id] = (cards[id] || 0) + 1);
     const nd = { id: Date.now().toString(36), name: d.name, cards, cover: coverOf(d.list, CARDS) };
     saveDecks([...mine, nd]); toast(`Imported ${d.name}`, true); location.hash = '#/collection/' + nd.id;
@@ -819,7 +814,7 @@ function wireDeckPeek(root) {
     const list = lists && lists[el.dataset.side];
     if (list) adoptRetired(Object.keys(list));
     if (!list) { box.innerHTML = `<h4>${esc(el.dataset.name)}</h4><p class="none">This match's decklists weren't kept.</p>`; }
-    else box.innerHTML = `<h4>${esc(el.dataset.name)}</h4>${deckBody(Object.entries(list).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]), CARDS, false)}`;
+    else box.innerHTML = `<h4>${esc(el.dataset.name)}</h4>${deckBody(Object.entries(list).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]), CARDS)}`;
     box.style.display = 'block'; fitStrips(box);
     const r = el.closest('.hr').getBoundingClientRect(), w = box.offsetWidth, h = box.offsetHeight;
     box.style.left = (r.right + 12 + w <= innerWidth - 8 ? r.right + 12 : Math.max(8, r.left - 12 - w)) + 'px';
@@ -1117,7 +1112,7 @@ function prematchScreen() {
   const you = V.you, opp = you === 'A' ? 'B' : 'A', me = V.seats[you];
   const side = (p, cls) => { const counts = V.lists[p], list = Object.entries(counts).flatMap(([id, n]) => Array(n).fill(id));
     return `<div class="piece side ${cls}"><div class="who">${seatLabel(p)}</div>
-      <div class="dl">${deckBody(list, CARDS, false, true)}</div></div>`; };
+      <div class="dl">${deckBody(list, CARDS)}</div></div>`; };
   app.innerHTML = `<div class="mscr pre"><div class="face">${side(you, 'mine')}
       <div class="mid">${me.ready ? '<p class="wait">Waiting for your opponent</p>' : '<button class="play" id="ready">Ready</button>'}</div>
       ${side(opp, 'theirs')}</div><a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
@@ -1250,8 +1245,8 @@ function gameScreen() {
     // touch reads your deck as it reads a card: hold it, or tap it when a tap would draw nothing
     const myList = () => { ui.panel = 'mine'; showPanel(); };
     onHold($('deck'), myList);
-    $('deck').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.legal.draw && !d.noDraw) act({ kind: 'draw' }); else if (touch()) myList(); };
-    $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.canPass && !d.noPass) { sfx('endturn'); act({ kind: 'pass' }); } };
+    $('deck').onclick = e => { e.stopPropagation(); if (canDraw(lastDecision)) act({ kind: 'draw' }); else if (touch()) myList(); };
+    $('tbtn').onclick = e => { e.stopPropagation(); if (canEnd(lastDecision)) { sfx('endturn'); act({ kind: 'pass' }); } };
     $('sndbtn').dataset.tip = 'Settings';
     $('sndbtn').innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
     $('sndbtn').onclick = e => { e.stopPropagation(); if (ui.panel !== 'set') { const p = $('setp'); p.innerHTML = `<h4>Settings</h4>${settingsBody()}`; wireSettings(p); }
@@ -1410,15 +1405,16 @@ function drawGame() {
   }));
   ungrip();
 
-  // The deck is the Draw action (it draws 1, Martin 2026-11-16; 2 in the lessons, written for the earlier rule); the End turn button is also the turn indicator.
-  const canDraw = d.mine && !d.pend && G.legal.draw && !d.noDraw;
-  $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = canDraw ? (isTutorial() ? 'Draw 2' : 'Draw 1') : '';
+  // The deck is the Draw action, saying how many it draws (the game's rule: 1 since Martin's of 2026-11-16, 2 in the lessons,
+  // written for the earlier one); the End turn button is also the turn indicator.
+  const draws = canDraw(d);
+  $('deck').className = 'abs deck num' + (draws ? ' can' : ''); $('deck').innerHTML = draws ? `Draw ${G.drawCount}` : '';
   const tb = $('tbtn');
   // the moves left in the turn, for either player; the next one to be spent pulses while the opponent is thinking
   const pips = playing ? Array.from({ length: G.actionsTotal }, (_, i) => { const used = G.actionsTotal - G.actionsLeft;
     return `<i class="${i < used ? 'used' : i === used ? 'next' : ''}"></i>`; }).join('') : '';
   if (playing && G.current === you) {
-    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : '') + (Date.now() < (turnCue.until || 0) ? ' yours' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`; delete tb.dataset.tip;
+    tb.className = 'abs tbtn A num' + (canEnd(d) ? ' can' : '') + (Date.now() < (turnCue.until || 0) ? ' yours' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`; delete tb.dataset.tip;
   } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = `<span class="pips">${pips}<span class="clock" id="clock"></span></span>`; tb.dataset.tip = 'Your opponent\'s turn'; }
   else { tb.className = 'abs tbtn'; tb.innerHTML = ''; delete tb.dataset.tip; }
 
@@ -1634,6 +1630,9 @@ function viewerMap() {
 }
 
 let lastDecision = null;
+// Whether the deck (the Draw action) and the End turn button act now: one test lights them and lets their click through.
+const canDraw = d => !!(d && d.mine && !d.pend && V.game.legal.draw && !d.noDraw);
+const canEnd = d => !!(d && d.mine && !d.pend && V.game.canPass && !d.noPass);
 const ANIM_MAX = 3500;   // ms: longer than any board animation a step starts (fruit, pits, gem, landings)
 function drawBoard(d) {
   d = d || lastDecision; lastDecision = d;
@@ -1795,23 +1794,22 @@ function showStack(g, cr) {
   if (!st || !st.length || ui.sel || (lastDecision && lastDecision.rings.length)) return;
   stackTimer = setTimeout(() => stackAt(cr), 350);
 }
+// A board piece's stack, as the hover popup (stackAt) and the read (readStack) both show it: each animal's card in its
+// owner's form (viewer space: A is you), at its strength now, with its timer under it.
+const stackSeat = u => u.owner === 'A' ? V.you : opp();
+const timerLine = u => u.timer ? `<div class="tm">${resolvesIn(u.timer)}</div>` : '';
+const stackCard = (u, attrs = '') => `<div class="sc ${u.owner}">${cardHTML(formOf(u.id, stackSeat(u)), { str: u.str, attrs })}${timerLine(u)}</div>`;
 function readStack(cr) {
   const st = V && V.game && viewerGame().board[cr]; if (!st || !st.length) return;
-  const seat = u => u.owner === 'A' ? V.you : opp();
-  const timer = u => u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '';
-  const card = u => `<div class="sc ${u.owner}">${cardHTML(formOf(u.id, seat(u)), { str: u.str })}${timer(u)}</div>`;
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
-  readOverlay(cardRead(top.id, top.str, seat(top), timer(top)) + (buried.length ? `<div class="under">${buried.map(card).join('')}</div>` : ''));
+  readOverlay(cardRead(top.id, top.str, stackSeat(top), timerLine(top)) + (buried.length ? `<div class="under">${buried.map(u => stackCard(u)).join('')}</div>` : ''));
 }
 function stackAt(cr) {
   const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];
   if (!g || !st) return;
-  const card = (u, w, top) => { const c = formOf(u.id, u.owner === 'A' ? V.you : opp());
-    return `<div class="sc ${u.owner}">${cardHTML(c, { str: u.str, attrs: `style="--w:${w}px"` })}` +
-      (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`; };
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
-  stackpop.innerHTML = `<div class="stk">${card(top, 190, true)}</div>` +
-    buried.map((u, i) => `<div class="stk">${card(u, 150)}</div>`).join('');
+  stackpop.innerHTML = `<div class="stk">${stackCard(top, 'style="--w:190px"')}</div>` +
+    buried.map(u => `<div class="stk">${stackCard(u, 'style="--w:150px"')}</div>`).join('');
   stackpop.style.display = 'flex'; fitNames(stackpop);
   const r = g.getBoundingClientRect(), w = stackpop.offsetWidth, h = stackpop.offsetHeight;
   stackpop.style.left = (r.right + 8 + w > innerWidth ? r.left - 8 - w : r.right + 8) + 'px';

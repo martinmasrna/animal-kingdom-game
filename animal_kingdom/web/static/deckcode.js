@@ -11,14 +11,17 @@ import { CARD_NUMS, SUCCESSOR } from './cardnums.js';
 const collectible = (cards, id) => cards[id] && cards[id].status === 'collectible';
 
 const NUM = Object.fromEntries(CARD_NUMS.map((id, i) => [id, i + 1]));
+// The order a deck's cards are listed in, everywhere (a deck code, the collection's open deck, a match's decklists, the
+// cover chooser): legendaries first, then rares, then commons, each by strength, then by name.
 const RANK = { legendary: 0, rare: 1, common: 2 }, sv = c => c.str === '*' ? -1 : c.str;
+export const deckOrder = cards => (a, b) => RANK[cards[a].rarity] - RANK[cards[b].rarity] || sv(cards[a]) - sv(cards[b]) || cards[a].name.localeCompare(cards[b].name);
 const b64 = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const unb64 = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), ch => ch.charCodeAt(0));
 
 // cards: {id: card}; list: card ids, one per copy.
 export function encodeDeck(name, list, cards) {
   const n = {}; list.forEach(id => n[id] = (n[id] || 0) + 1);
-  const ids = Object.keys(n).sort((a, b) => RANK[cards[a].rarity] - RANK[cards[b].rarity] || sv(cards[a]) - sv(cards[b]) || cards[a].name.localeCompare(cards[b].name));
+  const ids = Object.keys(n).sort(deckOrder(cards));
   const bytes = [];
   for (const id of ids) { let v = NUM[id] * 4 + n[id]; do { bytes.push((v & 127) | (v > 127 ? 128 : 0)); v >>= 7; } while (v); }
   return [`### ${name}`, ...ids.map(id => `# ${n[id]}x (${cards[id].str}) ${cards[id].name}`), '#', 'AK1:' + b64(bytes)].join('\n');

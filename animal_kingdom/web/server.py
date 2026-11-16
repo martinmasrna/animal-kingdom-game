@@ -45,7 +45,7 @@ from . import tiers as tiers_mod
 from . import league as league_mod
 from . import meta as meta_mod
 from . import oauth
-from .profiles import ProfileError, Profiles, clean_name
+from .profiles import DECKS_MAX, ProfileError, Profiles, clean_name
 from . import local
 from . import replay
 from . import tutorial
@@ -1400,8 +1400,8 @@ async def pool(_req):
                       **({"leader": DECK_LEADERS[slug]} if slug in DECK_LEADERS else {})}
                      for slug in (ladder.decks if ladder else BOT_DECKS) if slug not in {d["slug"] for d in STARTER_DECKS}],
         "build": BUILD,
-        # The deck rules the collection builds to (decks.py, engine/cards.py): the client holds none of these numbers itself.
-        "rules": {"deckSize": DECK_SIZE, "copies": COPY_LIMITS, "starBudget": STAR_BUDGET},
+        # The deck rules the collection builds to (decks.py, engine/cards.py, profiles.py): the client holds none of these numbers itself.
+        "rules": {"deckSize": DECK_SIZE, "copies": COPY_LIMITS, "starBudget": STAR_BUDGET, "decksMax": DECKS_MAX},
         # the leaders prototype (engine/leaders.py): the cards that can lead a deck, each with its kind and its ability
         "leaders": {lid: {"kind": kind, "text": text} for lid, (kind, text) in LEADERS.items()},
     })
@@ -1653,6 +1653,7 @@ async def local_setup(req):
     return web.json_response({"lists": {"A": load_premade_deck(host.deck), "B": load_premade_deck(bot.deck)},
                               "seats": local.seats_view(host, bot), "level": bot.bot, **local.bot_spec(bot.bot),
                               "pause": BOT_PAUSE,   # the bot's beat, as the server keeps it (a test server's is 0)
+                              "waitMax": BOT_WAIT_MAX, "thinkMax": BOT_THINK_MAX,   # and its limits, as the server's bots have them
                               "source_hash": local.source_hash()})
 
 
