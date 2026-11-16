@@ -3,7 +3,9 @@
 import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
 import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
-import { plan } from './timeline.js';
+import { plan, DUR } from './timeline.js';
+import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
+import { carry, carrying, release, drop as carryDrop } from './carry.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt } from './board.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripHTML, ICON } from './collection.js';
@@ -885,7 +887,7 @@ async function startLocal(body) {
 }
 function localScreen() {
   if (!LOCAL) { history.replaceState(null, '', '#/'); return homeScreen(); }   // a reload: the match lived in the page
-  screen = null; V = null; ui.sel = null; ui.peek = false;
+  screen = null; V = null; ui.sel = null; release(); ui.carry = null; ui.back = null; ui.peek = false;
   LOCAL.show();
 }
 function disconnect() { if (LOCAL) { LOCAL.close(); LOCAL = null; if (wsId === 'LOCAL') wsId = null; } if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; }   // a step still timed would redraw the game over the next screen
@@ -894,7 +896,7 @@ async function matchScreen(id) {
   if (!getToken(id) && !(await rejoin(id))) { location.hash = '#/join/' + id; return; }   // a new tab: the server knows your seat
   const token = getToken(id);
   if (wsId === id && ws) return;
-  screen = null; V = null; ui.sel = null; ui.peek = false;
+  screen = null; V = null; ui.sel = null; release(); ui.carry = null; ui.back = null; ui.peek = false;
   // the screen before stays until the game arrives (a bare "Connecting…" page flashed between them); shown only when slow
   clearTimeout(matchScreen.slow); matchScreen.slow = setTimeout(() => { if (!V && wsId === id) app.innerHTML = `<div class="mscr pre"><p class="wait">Connecting…</p></div>`; }, 600);
   const connect = () => {
@@ -942,11 +944,32 @@ const selCopy = () => {
 const copyPlaces = () => ((V.game.legal || {}).copies || {})[ui.selIid];
 const selPlaces = d => (ui.selIid != null && copyPlaces()) || d.places[ui.sel] || [];
 const placeAction = target => ({ kind: 'place', card_id: ui.sel, target, ...(ui.selIid != null && copyPlaces() ? { iid: ui.selIid } : {}) });
-const act = action => { ui.sel = null; ui.roam = null; ui.hover = null; send({ t: 'act', action }); };
+const act = action => { if (action.kind === 'place' && ui.carry != null) { release(); ui.carry = null; }   // a held card placed is played, not put back
+  ui.sel = null; ui.roam = null; ui.hover = null; send({ t: 'act', action }); };
+// The hand's grip (carry.js): with a mouse, a card picked (clicked, or dragged out) leaves the hand and hangs over the pointer
+// until it is placed or put back (Martin, 2026-11-13: drag and drop, or click to pick up and click to place, as Hearthstone).
+const canGrip = id => FLIGHT && !touch() && hasArt(id) && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+function grip(el, id, iid) {
+  const h = (V.game.hand || []).find(h => h.iid === iid);
+  carry(el.querySelector('.card'), cardHTML(formOf(id, V.you), { str: h ? h.str : undefined })); ui.carry = iid;
+}
+// A card let go of without being placed goes back to its place in the hand, which opens for it as it comes.
+function ungrip() {
+  if (ui.carry == null || (ui.sel && ui.selIid === ui.carry)) return;
+  const iid = ui.carry; ui.carry = null;
+  if (!carrying()) return;
+  ui.back = iid; drawGame();
+  carryDrop(document.querySelector(`#hand .hc[data-iid="${iid}"] .card`), () => { if (ui.back === iid) { ui.back = null; if (screen === 'game') drawGame(); } });
+}
 
 // A new view: its events (static/timeline.js) play as steps, each view drawn for its step's length, the new view last.
 // Views arriving meanwhile wait their turn: the next playback starts from the last step shown, so nothing is cut short.
 const PB = { busy: false, queue: [], t: null };
+const DUR_REVEAL_HOLD = DUR.reveal * 0.62;   // s: the opponent's card held at the centre before it flies (game.css @keyframes reveal)
+// A flown card touches down (flight.js): the board draws the piece landing, with the landing's sound (the step that put it
+// there drew the crossroad as it was, so it made none).
+const landNow = covered => { if (screen !== 'game') return; drawBoard(); sfx(covered ? 'cover' : 'land', LAND_HIT); };
+const LAND_HIT = HIT_DELAY;   // s from the cut to the piece's impact (flight.js: none for Impact, game.css landf for the glow)
 function onView(prev) {
   if (PB.busy) { PB.queue.push(V); V = PB.shown; return; }   // keep showing the step in play
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once
@@ -958,7 +981,8 @@ function onView(prev) {
     V = PB.shown = view; ui.step = step; V.rx = Date.now() / 1000;
     showView(before);
     if (!step) return finish(view);
-    clearTimeout(PB.t); PB.t = setTimeout(() => run(i + 1, view), step.dur * 1000 / (window.AK_SPEED || 1));   // AK_SPEED: tests only
+    const fe = step.kind === 'land' && step.cr ? flightEnd(dcr(step.cr)) : null;   // a landing waits for its card's flight (flight.js)
+    clearTimeout(PB.t); PB.t = setTimeout(() => run(i + 1, view), step.dur * 1000 / (window.AK_SPEED || 1) + (fe ? Math.max(0, fe - Date.now()) : 0));   // AK_SPEED: tests only
   };
   const finish = shown => {
     PB.busy = false; ui.step = null; played();
@@ -1031,6 +1055,7 @@ addEventListener('click', e => { if (e.isTrusted && Date.now() < noClickUntil) {
 function showView(prev) {
   // Lord Bumbleton's card (the leaders prototype): "(Current: X)" reads your number now
   const bb = CARDS.bumblebee_legend; if (bb && bb.base && V && V.game && V.game.foodGains) bb.text = bb.base.replace('X', V.game.foodGains[V.you]);
+  ui.flyIid = null;   // the card in flight (flight.js) is in the hand again, or gone from it, as this view says
   // While an animation the player started must play out (the tutorial's fruit on Next), new views wait: a redraw would cut
   // it short. The first held view's predecessor is kept, so what changed meanwhile still animates when they apply.
   const hold = (ui.animUntil || 0) - Date.now();
@@ -1327,11 +1352,13 @@ function drawGame() {
     el.onmouseenter = () => cardPop(el, el.dataset.card, null, 'below'); el.onmouseleave = () => pop.style.display = 'none'; }); }
 
   // Your hand, centred under the board.
-  const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0, x0 = PL().handC - (n * cw + (n - 1) * gap) / 2;
+  const held = G.hand.filter(h => h.iid !== ui.flyIid && h.iid !== ui.carry);   // the card in flight or in the grip has left it (flight.js, carry.js)
+  const n = held.length, cw = 143, gap = n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0, x0 = PL().handC - (n * cw + (n - 1) * gap) / 2;
   const hand = $('hand');
   let drawnK = 0;
-  const lit = handLights(d, G.hand);   // a lesson's hints (coach.js)
-  hand.innerHTML = G.hand.map((h, i) => {
+  const lit = handLights(d, held);   // a lesson's hints (coach.js)
+  const was = new Map([...hand.querySelectorAll('.hc')].map(el => [el.dataset.iid, el.offsetLeft]));   // where each card stood
+  hand.innerHTML = held.map((h, i) => {
     const c = formOf(h.id, V.you), can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = lit.hint(can), shown = lit.shown(h.id);
     const talking = lit.talking || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
@@ -1342,10 +1369,15 @@ function drawGame() {
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = drawn && ui.step && ui.step.kind === 'to_hand';
     const from = drawn ? `${made ? '' : `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
     const r = rise(h), html = cardHTML(c, { str: r ? r.now : h.str, cls: 'compact' });
-    return `<div class="hc ${r ? cls.replace(' dim', '') + ' rise' : cls}${drawn ? (made ? ' made' : ' drawn') : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}${r ? `--ago:${-r.ago}ms` : ''}">${r
+    return `<div class="hc ${r ? cls.replace(' dim', '') + ' rise' : cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}${r ? `--ago:${-r.ago}ms` : ''}">${r
       ? html.replace('<div class="stab">', `<div class="stab">${cardHTML(c, { str: r.was, cls: 'compact' }).match(/<span class="n[^"]*">.*?<\/span>/)[0].replace('class="n', 'class="n was')}`) : html}</div>`;
   }).join('');
   fitNames(hand);
+  // a card that left (played, discarded) or came: the others slide to their new places rather than jump
+  if (FLIGHT && !matchMedia('(prefers-reduced-motion: reduce)').matches) hand.querySelectorAll('.hc:not(.drawn):not(.made)').forEach(el => {
+    const dx = was.get(el.dataset.iid) - el.offsetLeft;
+    if (dx) el.animate([{ translate: `${dx}px 0` }, { translate: '0 0' }], { duration: 260 / (window.AK_SPEED || 1), easing: 'cubic-bezier(.3,.7,.4,1)' });
+  });
   // touch: press and hold a card to read it (a tap picks it): it opens large in the middle, clear of the finger, and stays
   // after the finger lifts until the next tap (feedback 2026-10-01); the click that ends a hold does nothing
   hand.querySelectorAll('.hc').forEach(el => {
@@ -1357,14 +1389,22 @@ function drawGame() {
   });
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();
+    if (Date.now() - (ui.dragEnd || 0) < 300) return;   // the click a drag's release makes
     if (el.dataset.held) { delete el.dataset.held; clog('card: ignored (it was held to read)'); return; }   // it was held to read, not tapped
     const iid = Number(el.dataset.iid), id = el.dataset.id;
     if (d.handPick.has(iid)) { clog('card: picked for the choice'); return act({ kind: 'choice', choice: iid }); }
     if (!d.mine || !d.places[id] || !el.classList.contains('can')) { clog(`card: refused (mine=${d.mine} places=${!!d.places[id]} can=${el.classList.contains('can')} pend=${d.pend ? d.pend.kind : '-'} picks=${d.handPick.size})`); return; }   // a dimmed copy (the tutorial lights one) does nothing
     const again = ui.sel === id && selCopy().iid === iid;   // the same copy again drops it; another copy of it picks that one
     if (!again) sfx('pick');
+    if (!again && canGrip(id)) { if (ui.carry != null) { release(); ui.carry = null; } grip(el, id, iid); }
     ui.sel = again ? null : id; ui.selIid = again ? null : iid; ui.roam = null; ui.hover = null; drawGame();
   });
+  // a press dragged out of the hand picks the card up; its release over a crossroad places it, anywhere else puts it back
+  hand.querySelectorAll('.hc.can').forEach(el => el.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || !canGrip(el.dataset.id)) return;
+    ui.press = { x: e.clientX, y: e.clientY, el, id: el.dataset.id, iid: Number(el.dataset.iid) };
+  }));
+  ungrip();
 
   // The deck is Draw 2; the End turn button is also the turn indicator.
   const canDraw = d.mine && !d.pend && G.legal.draw && !d.noDraw;
@@ -1453,7 +1493,11 @@ function drawGame() {
   if (st && st.kind === 'reveal') {   // the opponent's card, shown large and flown down onto its crossroad; the next step lands it
     const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
     rv.innerHTML = cardHTML(formOf(st.card, st.player)); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
+    rv.style.setProperty('--hx', `${VIEW.port ? 184 - STAGE.w / 2 : 0}px`); rv.style.setProperty('--hy', `${5 - (VIEW.port ? 560 : 300)}px`);   // their hand's centre
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
+    // after its hold the card flies down and lands as the piece (flight.js); without art it shrinks away as before
+    clearTimeout(drawGame.rvfly); drawGame.rvfly = setTimeout(() => { if (ui.step === st && fly(rv.querySelector('.card'), $('board').querySelector(`[data-cr="${dcr(st.cr)}"]`), st.card, dcr(st.cr), viewerGame().board[dcr(st.cr)], landNow)) rv.classList.remove('on'); },
+      DUR_REVEAL_HOLD * 1000 / (window.AK_SPEED || 1));
   }
   drawCoach($('coach'), d.lesson, d.rings);   // a lesson's coach (coach.js); none while steps play
   drawBoard(d);
@@ -1612,6 +1656,7 @@ function drawBoard(d) {
     beat: endBeat(), current: V.phase === 'playing' ? rel(V.game.current) : null });
   draw();
   if (startBeat(g, A, ago, capture)) draw();
+  const fc = flying(); if (fc && document.querySelector(`#board .cr.flown[data-cr="${fc}"]`)) flightLanded(fc);   // the piece is landing: the card's flight is over
 }
 
 // The end's beat (board.js): the game's last move shown rather than told. A den taken falls apart once the animal that took it
@@ -1646,9 +1691,42 @@ function leaderPanel(side) {
   const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader";
   return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${LEADER_KIND[L.kind] || ''}</p><p>${L.text}</p>`;
 }
+// Place the picked card on crossroad `cr` (its element `g`): it flies there from the hand, or settles from the grip, and turns
+// into the piece (flight.js); the hand closes up behind it.
+function placeAt(g, cr) {
+  const iid = selCopy().iid, start = ui.carry === iid ? release() : null; ui.carry = null;
+  const flew = fly(start ? null : document.querySelector(`#hand .hc[data-iid="${iid}"] .card`), g, ui.sel, cr, viewerGame().board[cr], landNow,
+    cardHTML(formOf(ui.sel, V.you), { str: selCopy().str }), start);   // in full, text and all, as the opponent's
+  act(placeAction(['cr', dcr(cr)]));
+  if (flew) { ui.flyIid = iid; drawGame();
+    setTimeout(() => { if (ui.flyIid === iid && screen === 'game') { ui.flyIid = null; drawGame(); } }, 5000); }   // a refused play: the card is back
+}
+
+// The drag (carry.js): a press on a playable card that moves picks it up; its release places it or puts it back.
+addEventListener('pointermove', e => {
+  const p = ui.press; if (!p || ui.dragging) return;
+  if (!(e.buttons & 1)) { ui.press = null; return; }
+  if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < 6 || screen !== 'game') return;
+  ui.press = null; ui.dragging = true; sfx('pick');
+  if (ui.carry != null) { release(); ui.carry = null; }
+  if (!(ui.sel === p.id && ui.selIid === p.iid && carrying())) grip(p.el, p.id, p.iid);
+  ui.sel = p.id; ui.selIid = p.iid; ui.roam = null; ui.hover = null; drawGame();
+});
+addEventListener('pointerup', e => {
+  ui.press = null;
+  if (!ui.dragging) return;
+  ui.dragging = false; ui.dragEnd = Date.now();
+  const at = document.elementFromPoint(e.clientX, e.clientY), d = lastDecision;
+  const g = at && at.closest('#board [data-cr]'), hq = at && at.closest('#board [data-hq]');
+  if (g && d && d.mine && d.rings.includes(g.dataset.cr)) return placeAt(g, g.dataset.cr);
+  if (hq && d && d.mine && ui.sel) { const t = selPlaces(d).find(t => t[0] === 'hq'); if (t) return act(placeAction(t)); }
+  ui.sel = null; drawGame();   // let go anywhere else: back into the hand
+});
+
 function wireBoard() {
   const board = document.getElementById('board');
   board.addEventListener('click', e => {
+    if (Date.now() - (ui.dragEnd || 0) < 300) return;   // the click a drag's release makes
     const den = e.target.closest('[data-den]');   // a den opens that player's list
     if (den) { e.stopPropagation(); ui.panel = ui.panel === den.dataset.den ? null : den.dataset.den; showPanel(); return; }
     const lead = e.target.closest('[data-lead]');   // the leaders prototype: your leader's power, pressed (a tap reads it first)
@@ -1667,7 +1745,7 @@ function wireBoard() {
     const g = e.target.closest('[data-cr]'); if (!g) return;
     const cr = g.dataset.cr;
     if (cr in d.crChoice) return act({ kind: 'choice', choice: d.crChoice[cr] });
-    if (ui.sel && d.rings.includes(cr)) return act(placeAction(['cr', dcr(cr)]));
+    if (ui.sel && d.rings.includes(cr)) return placeAt(g, cr);
     if (ui.roam && d.rings.includes(cr)) return act({ kind: 'roam', from: dcr(ui.roam), target: ['cr', dcr(cr)] });
     if (d.roams[cr] || d.acts.has(cr)) { sfx('pick'); ui.roam = ui.roam === cr ? null : cr; ui.sel = null; return drawGame(); }   // pick (or drop) an animal to roam or act
     if (ui.roam) { ui.roam = null; return drawGame(); }

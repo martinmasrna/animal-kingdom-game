@@ -88,6 +88,7 @@
 .game .hc.dim { opacity: .45; filter: none; }
 .game .hc:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; }
 .game .hc:hover .card .ctext { display: flex; }   /* the hand shows paintings; the hovered card is read in full */
+.game .hc.away { visibility: hidden; }   /* a card put back from the grip, on its way to this place (carry.js) */
 .game .hc.sel { transform: translateY(-18px); z-index: 3; } .game .hc.sel:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; }
 .game .hc.ready .card { filter: drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 6px var(--ready)) drop-shadow(0 0 12px var(--ready)); }   /* its "if ..." holds right now */
 .game .hc.sel .card, .game .hc.pick .card { filter: drop-shadow(0 0 0 var(--act)) drop-shadow(0 0 3px var(--act)) drop-shadow(0 0 2px var(--act)); }
@@ -229,6 +230,21 @@
   78% { transform: translate(0, 1px) scale(.98); filter: drop-shadow(2px 4px 3px rgba(20,12,4,.55)); }
   100% { transform: none; filter: drop-shadow(0 0 0 rgba(20,12,4,0)); } }
 .game .cr.unit.cover .buried:first-child { animation: sink .34s ease-in both; }
+/* a card flown in from a hand, or set down from the grip (flight.js, carry.js), turns into the piece right over its crossroad
+   under a burst, before it comes down (as Hearthstone turns a minion): the piece hangs a beat, near the eye, as the burst
+   thins, then falls toward the board, seen from above: it shrinks onto its place as its shadow draws in under it, faster and
+   faster, is squashed by the impact and springs back; the dust kicks up as it hits (--fd: when the cut came, from the step's
+   start; app.js LAND_HIT) */
+.game .cr.unit.flown { z-index: 5; animation: landf .6s var(--fd, 0ms) both; }
+.game .cr.unit.flown::after, .game .cr.unit.land.flown::after { content: ''; position: absolute; left: 50%; top: 50%; width: 180px; height: 180px; margin: -90px 0 0 -90px; z-index: -2;
+  background: url(/static/kit2/dust.webp) center / contain no-repeat; pointer-events: none; opacity: 0; animation: dust .7s ease-out calc(var(--fd, 0ms) + .41s) both; }
+.game .cr.unit.cover.flown .buried:first-child { animation-delay: calc(var(--fd, 0ms) + .41s); }
+@keyframes landf {
+  0% { transform: scale(1.12); filter: drop-shadow(10px 18px 9px rgba(12,6,0,.5)); animation-timing-function: linear; }
+  40% { transform: scale(1.12); filter: drop-shadow(10px 18px 9px rgba(12,6,0,.5)); animation-timing-function: cubic-bezier(.5,0,1,.55); }
+  68% { transform: scale(1.04, .93); filter: drop-shadow(1px 2px 2px rgba(20,12,4,.55)); animation-timing-function: cubic-bezier(.3,.6,.4,1); }
+  84% { transform: scale(.985, 1.02); }
+  100% { transform: none; filter: drop-shadow(0 0 0 rgba(20,12,4,0)); } }
 @keyframes sink { 0% { transform: translate(0, 0) scale(1.06); filter: brightness(1.2); } 100% { } }
 /* the dust kicked up where a piece lands: one painted puff that spreads and fades, under the piece */
 .game .cr.unit.land::after { content: ''; position: absolute; left: 50%; top: 50%; width: 180px; height: 180px; margin: -90px 0 0 -90px; z-index: -2;
@@ -256,7 +272,8 @@
 .game .reveal .card { --w: 220px; position: absolute; left: -110px; top: -161px; }
 .game .reveal.on { animation: reveal 1.05s cubic-bezier(.4,0,.3,1) both; }
 .game .reveal .actlbl { position: absolute; left: -60px; width: 120px; top: 168px; text-align: center; font: 700 22px/1.3 var(--serif, Georgia, serif); color: #fff6e0; background: rgba(40,28,16,.85); border-radius: 8px; padding: 2px 0; }   /* the actions prototype */
-@keyframes reveal { 0% { opacity: 0; transform: scale(.6); } 14% { opacity: 1; transform: scale(1); } 62% { opacity: 1; transform: scale(1); }
+/* it comes from their hand (--hx, --hy), as a Hearthstone opponent's card does, not out of the air */
+@keyframes reveal { 0% { opacity: 0; transform: translate(var(--hx, 0px), var(--hy, -295px)) scale(.38); } 5% { opacity: 1; } 22% { opacity: 1; transform: scale(1); } 62% { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(.35); } }
 /* a removed unit: drains, sinks, fades, leaving dust; a returned unit lifts and flies to its owner's side */
 .game .leave { width: 134px; height: 134px; margin: -67px 0 0 -67px; z-index: 4; pointer-events: none; }
@@ -677,3 +694,22 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .cr.leader .lname { position: absolute; left: 50%; bottom: -26px; transform: translateX(-50%); white-space: nowrap; padding: 1px 10px;
   font: 600 16px/1.3 'Fira Sans Condensed', sans-serif; color: #fff6e0; background: rgba(40,28,16,.88); border-radius: 6px; }
 .pop .ev.lead { display: block; max-width: 300px; } .pop .ev.lead p { margin: 4px 0 0; } .pop .ev.lead .lk { opacity: .8; font-size: .92em; }
+
+/* the flight layer (flight.js): over everything, clicks pass through; the card moves on the compositor */
+:root[data-turn="impact"] .game .cr.unit.flown { animation: landi .28s var(--fd, 0ms) both; }
+:root[data-turn="impact"] .game .cr.unit.flown::after { background-image: url(/static/kit2/dust_ring.webp); width: 220px; height: 220px; margin: -110px 0 0 -110px; animation-delay: calc(var(--fd, 0ms) - 10ms); }
+:root[data-turn="impact"] .game .cr.unit.cover.flown .buried:first-child { animation-delay: var(--fd, 0ms); }
+/* Impact's landing: the piece arrives on the frame the thrown card hits, squashed by the hit, and springs back */
+@keyframes landi {
+  0% { transform: scale(1.06); filter: brightness(1.25); animation-timing-function: cubic-bezier(.3,.6,.4,1); }
+  28% { transform: scale(1.05, .9); filter: brightness(1.12); animation-timing-function: cubic-bezier(.3,.6,.4,1.4); }
+  100% { transform: none; filter: none; } }
+.fflash { position: fixed; z-index: 901; pointer-events: none; mix-blend-mode: plus-lighter; background: url(/static/kit2/flash.webp) center / contain no-repeat; }
+.fglow { position: fixed; z-index: 901; pointer-events: none; will-change: transform, opacity; background: url(/static/kit2/glow_plate.webp) center / 100% 100% no-repeat; }
+.flight { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
+/* the shadow is the card's own, inside its tilting holder: Chrome drops a filter set on the 3D-transformed holder itself */
+.flight .fcard { position: absolute; will-change: transform; outline: 80px solid transparent; }   /* the outline widens its layer: Chrome crops the layer to the box, and the card's soft shadow with it */
+.flight .fcard > .card { filter: drop-shadow(0 0 1px rgba(30,18,6,.4)) drop-shadow(4px 10px 8px rgba(20,12,4,.4)); }
+/* held in the grip (carry.js): its edge in shadow, and its shadow cast far and soft on the board below, as high as it is */
+.flight.carry .fcard > .card { filter: drop-shadow(0 0 1px rgba(30,18,6,.8)) drop-shadow(30px 46px 14px rgba(12,6,0,.85)); }
+.flight .fcard > .card { position: absolute; left: 0; top: 0; box-shadow: none; }

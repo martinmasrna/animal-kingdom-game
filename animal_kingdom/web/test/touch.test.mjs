@@ -90,5 +90,5 @@ test('a laptop with a touchscreen or pen (a Surface): a pen hold reads a hand ca
   await page.mouse.click(30, 30); await wait(300);
   assert.equal(await page.$('.readov'), null);
   await page.mouse.click(x, y); await wait(300);
-  assert.equal(await page.$$eval('.hc.sel', e => e.length), 1, 'and a plain click still picks it');
+  assert.equal(await page.$$eval('.hc.sel, .flight.carry', e => e.length), 1, 'and a plain click still picks it (into the grip, carry.js)');
 });
