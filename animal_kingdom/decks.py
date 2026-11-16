@@ -58,8 +58,6 @@ PREMADE_DECKS.update({d["slug"]: list(d["list"]) for d in LADDER_DECKS})
 # low on the ladder, which is the ladder's own information). Ranked matchmaking, the ladder seed, Practice's 'Random'
 # and the bot benchmark panel draw from these.
 BOT_DECKS: tuple[str, ...] = tuple(d["slug"] for d in DECKLISTS) + tuple(d["slug"] for d in LADDER_DECKS)
-PANEL_OPPONENTS: tuple[str, ...] = ("cats", "den_rush", "fish")   # the benchmark's standing opponents, from the pool
-assert all(d in BOT_DECKS for d in PANEL_OPPONENTS), PANEL_OPPONENTS
 
 
 # The goodstuff pile: the greedy optimizer's best cross-deck list over the old seven-deck pool
@@ -182,3 +180,9 @@ def _check_shipped() -> None:
 
 
 _check_shipped()
+
+# The bots play only the decks that are legal now: an illegal deck is not meant to be played (Martin, 2026-10-29), and
+# after Martin's new pool of 2026-11-16 most shipped and ladder decks hold reserve cards.
+BOT_DECKS = tuple(s for s in BOT_DECKS if s not in shipped_problems())
+PANEL_OPPONENTS: tuple[str, ...] = ("pool_1", "pool_3", "pool_5")   # the benchmark's standing opponents, from the pool
+assert all(d in BOT_DECKS for d in PANEL_OPPONENTS), PANEL_OPPONENTS

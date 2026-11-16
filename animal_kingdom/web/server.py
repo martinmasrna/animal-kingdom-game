@@ -25,6 +25,12 @@ from pathlib import Path
 from aiohttp import WSMsgType, web
 
 from ..decks import BOT_DECKS, DECK_LEADERS, DECK_SIZE, PREMADE_DECKS, STAR_BUDGET, TEST_BOT_DECKS, load_premade_deck
+from ..decks import decklist_problems
+
+
+def _league_deck_illegal(slug: str) -> bool:
+    """A league list a card change made illegal stays out of ranked, as the shipped and ladder ones do (decks.BOT_DECKS)."""
+    return bool(decklist_problems(PREMADE_DECKS.get(slug, [])))
 from ..engine.leaders import LEADERS
 from ..engine import rules
 from ..engine.state import EngineError
@@ -1872,7 +1878,7 @@ def make_app() -> web.Application:
         friends = Friends(profiles.db)
         chat = Chat(profiles.db)
         league = league_mod.Pool(profiles.db, DECK_NAMES)      # the lists the league added (web/league.py)
-        ladder = ranking.Ladder(profiles.db, [s for s in sorted(BOT_DECKS) + league.slugs() if s not in league.retired()], league.levels())   # ranked offers the bot pool: shipped, ladder and league decks, less the retired
+        ladder = ranking.Ladder(profiles.db, [s for s in sorted(BOT_DECKS) + [x for x in league.slugs() if not _league_deck_illegal(x)] if s not in league.retired()], league.levels())   # ranked offers the bot pool: shipped, ladder and league decks, less the retired
         meta = meta_mod.Meta(profiles.db, _list_of)
         with open(Path(__file__).resolve().parents[1] / "data" / ("cards" + ".json"), encoding="utf-8") as fh:
             stale = meta.track(meta_mod.card_prints(json.load(fh)["cards"]))
