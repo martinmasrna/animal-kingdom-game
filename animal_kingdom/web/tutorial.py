@@ -74,7 +74,9 @@ def config(lesson: int = 1) -> Config:
     """The tutorial skips the mulligan: the deal is already the one the lessons need. Lesson 1 opens with four cards, so
     its first two turns build a whole region before any draw (one new idea a turn)."""
     return replace(Config.default(), mulligan=False, first_turn_actions=2,   # the lessons teach two actions from the start
-                   first_player_opening_draw=4 if lesson == 1 else 1)   # lesson 2: the Lynx
+                   first_player_opening_draw=4 if lesson == 1 else 1,   # lesson 2: the Lynx
+                   draw_action_count=2, turn_draw_count=0)   # the draw rule the lessons were written for, until they are rewritten
+                                                              # for Martin's of 2026-11-16 (a free card a turn, Draw draws 1)
 
 
 class TutorialBot(Bot):

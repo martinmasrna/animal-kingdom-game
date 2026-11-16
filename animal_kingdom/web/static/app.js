@@ -1406,9 +1406,9 @@ function drawGame() {
   }));
   ungrip();
 
-  // The deck is Draw 2; the End turn button is also the turn indicator.
+  // The deck is the Draw action (it draws 1, Martin 2026-11-16; 2 in the lessons, written for the earlier rule); the End turn button is also the turn indicator.
   const canDraw = d.mine && !d.pend && G.legal.draw && !d.noDraw;
-  $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = canDraw ? 'Draw 2' : '';
+  $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = canDraw ? (isTutorial() ? 'Draw 2' : 'Draw 1') : '';
   const tb = $('tbtn');
   // the moves left in the turn, for either player; the next one to be spent pulses while the opponent is thinking
   const pips = playing ? Array.from({ length: G.actionsTotal }, (_, i) => { const used = G.actionsTotal - G.actionsLeft;
@@ -1769,7 +1769,15 @@ function wireBoard() {
     holdT = setTimeout(() => { held = true; readStack(g.dataset.cr); }, 350); }, () => clearTimeout(holdT), () => clearTimeout(holdT));
   board.addEventListener('click', e => { if (held) { held = false; e.stopImmediatePropagation(); } }, true);   // a hold's lift does nothing else
   board.addEventListener('mouseleave', () => { showStack(null, null); if (ui.hover) { ui.hover = null; if (ui.sel) drawBoard(); } });
-  board.addEventListener('contextmenu', e => { if (ui.sel || ui.roam) { e.preventDefault(); ui.sel = null; ui.roam = null; drawGame(); } });
+  // Right-click: with a card or an animal picked, puts it down; else reads the piece under it large, as in the hand (Martin,
+  // 2026-11-16: "right-click card on board to show its detail, like when you right-click card in hand")
+  board.addEventListener('contextmenu', e => {
+    if (ui.sel || ui.roam) { e.preventDefault(); ui.sel = null; ui.roam = null; return drawGame(); }
+    const lead = e.target.closest('[data-lead]');
+    if (lead) { e.preventDefault(); return readOverlay(leaderPanel(lead.dataset.lead)); }
+    const g = e.target.closest('[data-cr]'), st = g && V && V.game && viewerGame().board[g.dataset.cr];
+    if (st && st.length && !document.querySelector('.readov')) { e.preventDefault(); showStack(null, null); readStack(g.dataset.cr); }
+  });
 }
 
 // Hover a piece: the whole stack as cards, the top unit first, then each buried card top to bottom.
