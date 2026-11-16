@@ -230,6 +230,18 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .card.fo .lstar { position: absolute; z-index: 3; right: -1.1em; bottom: -1.1em; width: 4.66em; height: 4.55em;
   background: var(--fstar) 0 0 / 100% 100% no-repeat; display: flex; align-items: center; justify-content: center; padding: .55em .33em .1em; pointer-events: none; }
 .card.fo .lstar img { display: block; height: 1.7em; filter: brightness(.16) sepia(.6); }
+/* The rim (collection mock option 7, Martin 2026-11-16: "wire version 7 ... so I can see it for real"; not settled): in the hand
+   and the collection (--rd 0) the painting sits in a thin flat rim of today's driftwood, gold for legendaries, the strength
+   on the rim's banner top-left and the level's stars inked in its seat bottom-right (baked into the rim, none for level 0).
+   Read in full (--rd 1) the card is the open face above. Pieces from the design scratchpad's r6/build_today_wood.py. */
+.card.fo { --frc: url(/static/kit2/card_rim_common_0.webp); }
+.card.fo.l1 { --frc: url(/static/kit2/card_rim_common_1.webp); } .card.fo.l2 { --frc: url(/static/kit2/card_rim_common_2.webp); } .card.fo.l3 { --frc: url(/static/kit2/card_rim_common_3.webp); }
+.card.fo.legendary { --frc: url(/static/kit2/card_rim_legendary_0.webp); }
+.card.fo.legendary.l1 { --frc: url(/static/kit2/card_rim_legendary_1.webp); } .card.fo.legendary.l2 { --frc: url(/static/kit2/card_rim_legendary_2.webp); } .card.fo.legendary.l3 { --frc: url(/static/kit2/card_rim_legendary_3.webp); }
+.card.fo.compact .pic { -webkit-mask: url(/static/kit2/card_rim_mask.png) 0 0 / 100% 100%; mask: url(/static/kit2/card_rim_mask.png) 0 0 / 100% 100%; }
+.card.fo .stab { background: none; transform: translate(calc((1 - var(--rd, 1)) * .49em), calc((1 - var(--rd, 1)) * 1.24em)); }
+.card.fo .stab::before { content: ''; position: absolute; inset: 0; background: var(--fdisc) 0 0 / 100% 100% no-repeat; opacity: var(--rd, 1); }
+.card.fo .lstar { opacity: var(--rd, 1); }
 /* A compact card that names a deck (the versus moment) keeps its name, on the plank across its foot; a cover has no level. */
 .card.fo.compact.named .nbar { opacity: 1; bottom: 0; left: 0; right: 0; height: 3.14em; padding: 0 .8em; background: var(--fplank) 50% 0 / 100% auto no-repeat; border-radius: 0 0 .45em .45em; }
 .card.fo.named .lstar { display: none; }
