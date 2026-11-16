@@ -8,8 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from ..decks import PREMADE_DECKS, decklist_problems, register_deck
-from ..engine.leaders import leader_problem
+from ..decks import PREMADE_DECKS, deck_problems, register_deck
 from ..engine.state import EngineError
 from .match import DECK_NAMES
 from .renamed import renamed
@@ -42,14 +41,11 @@ def resolve(spec) -> str:
     if not isinstance(spec, dict) or not isinstance(spec.get("list"), list):
         raise EngineError("unknown deck")
     decklist = sorted(str(c) for c in spec["list"])
-    problems = decklist_problems(decklist)
+    name = (str(spec.get("name") or "").strip() or "My deck")[:40]
+    leader = str(spec.get("leader") or "") or None          # the deck's leader, one of its legendaries: every deck has one
+    problems = deck_problems(decklist, leader)
     if problems:
         raise EngineError("illegal deck: " + "; ".join(problems))
-    name = (str(spec.get("name") or "").strip() or "My deck")[:40]
-    leader = str(spec.get("leader") or "") or None          # the leaders prototype: the deck's leader, one of its legendaries
-    bad = leader_problem(leader, decklist)
-    if bad:
-        raise EngineError(bad)
     slug = "custom_" + hashlib.sha1((name + "|" + ",".join(decklist) + (f"|{leader}" if leader else "")).encode()).hexdigest()[:10]
     if slug not in _saved:
         _register(slug, name, decklist, leader)

@@ -22,7 +22,9 @@ const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
 // deck saved under the old rules, three copies and 30 cards, keeps its list: it shows what is over and is fixed here), too
 // many stars. Too few cards is the caller's (the count shows it).
 // '' for a playable deck. Home uses it too (app.js), to send such a deck here instead of into a match.
-export function deckIssue(list, cards = C, rules = R) {
+// Every deck has a leader (Martin, 2026-11-16): one of its own legendaries that can lead (`leaders`: the server's map).
+export const NO_LEADER = 'Choose a leader', NO_LEADER_CARD = 'Add a legendary that can lead';
+export function deckIssue(list, cards = C, rules = R, leader = null, leaders = (X && X.leaders) || {}) {
   const counts = countsOf(list);
   const over = Object.keys(counts).filter(id => cards[id] && counts[id] > rules.copies[cards[id].rarity]);
   const stars = list.reduce((n, id) => n + ((cards[id] || {}).stars | 0), 0) - rules.starBudget;
@@ -31,6 +33,7 @@ export function deckIssue(list, cards = C, rules = R) {
   if (over.length) return `${over.length} cards have a copy too many`;
   if (list.length > rules.deckSize) return `${list.length} cards: take ${list.length - rules.deckSize} out, ${rules.deckSize} at most`;
   if (stars > 0) return LABEL.five ? `${stars} over the ${shown5(rules.starBudget, rules.deckSize)}` : `${stars} star${stars > 1 ? 's' : ''} over the ${rules.starBudget}`;
+  if (!(leader && list.includes(leader) && leaders[leader])) return list.some(id => leaders[id]) ? NO_LEADER : NO_LEADER_CARD;
   return '';
 }
 // The other labelling (Martin wants to feel which is easier): every card numbered 1 to 5, its level + 2, and the budget shifted
@@ -148,11 +151,11 @@ function render(app, all) {
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${leaderRow(d)}${body(d)}`
     // a deck still short of its cards is marked with its count, as on home's chooser (Martin, 2026-10-31)
     // a deck over the rules (copies, stars) says so on its tile: open it to see what (the stars prototype)
-    : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list) ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : deckIssue(d.list) ? '<span class="left">Too many</span>' : ''}</div>`;
+    : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list, C, R, d.leader) ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : (iss => !iss ? '' : `<span class="left">${iss === NO_LEADER || iss === NO_LEADER_CARD ? 'No leader' : 'Too many'}</span>`)(deckIssue(d.list, C, R, d.leader))}</div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
   // The deck's stars beside its cards, read the same way; over the budget, it turns red and Play says by how much.
-  const stars = open ? starsOf(open.list) : 0, over = Math.max(0, stars - R.starBudget), issue = open && open.list.length >= R.deckSize ? deckIssue(open.list) : '';
+  const stars = open ? starsOf(open.list) : 0, over = Math.max(0, stars - R.starBudget), issue = open && open.list.length >= R.deckSize ? deckIssue(open.list, C, R, open.leader) : '';
   // One sunken count holds both (the foot is 300 px): the cards, then the stars; a click on the stars switches the labelling.
   const starCount = !open ? '' : `<span class="fc fstars${over ? ' over' : ''}" id="fstars" data-tip="${LABEL.five ? 'Count in stars' : 'Count 1 to 5 instead'}">`
     + (LABEL.five ? `<b>${shown5(stars, open.list.length)}/${shown5(R.starBudget, R.deckSize)}</b><span>Points</span>` : `<b>${stars}/${R.starBudget}</b><span>Stars</span>`) + '</span>';
@@ -342,12 +345,14 @@ function confirmDelete(app, d, done) {
   m.querySelector('.cancel').focus();
   m.querySelector('.danger').onclick = () => { close(); done(); };
 }
-// The leaders prototype: a deck may name one of its legendaries that can lead as its leader. The row shows it (or that it
-// has none) with its ability; a click picks among the deck's eligible legendaries. A deck with none to pick shows no row.
+// A deck's leader: one of its legendaries that can lead, which every deck must have (Martin, 2026-11-16). The row shows it
+// with its ability, or that the deck has none yet; a click picks among the deck's eligible legendaries.
 const eligible = d => [...new Set(d.list)].filter(id => (X.leaders || {})[id]);
 const KIND = { power: 'Hero power', once: 'Once per game', passive: 'Always on' };
 function leaderRow(d) {
-  const ids = eligible(d); if (!ids.length) return '';
+  const ids = eligible(d);
+  if (!ids.length) return `<div class="lrow none"><div class="lmed empty"></div><div class="ltx"><b>No leader</b><span>Add one of `
+    + `${Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible').map(id => esc(C[id].name.split(':')[0])).join(', ')} to lead this deck</span></div></div>`;
   const id = d.leader && ids.includes(d.leader) ? d.leader : null, L = id && X.leaders[id];
   return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? `<div class="lmed" style="${med(id, 52)}"></div>` : `<div class="lmed empty"></div>`}`
     + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${KIND[L.kind]}. ${esc(L.text)}</span>` : `<b>No leader</b><span>Choose one of this deck's legendaries to lead it</span>`}</div></div>`;
@@ -355,9 +360,8 @@ function leaderRow(d) {
 function pickLeader(app, d, done) {
   const ids = eligible(d);
   const { m, close } = dialog(app, `<div class="dlg cov lead"><h3>Choose a leader</h3><div class="leads">${ids.map(id => `<div class="lv${id === d.leader ? ' on' : ''}" data-id="${id}"><div class="cv">${cardHTML(C[id], { cls: 'compact' })}</div><p><b>${KIND[X.leaders[id].kind]}.</b> ${esc(X.leaders[id].text)}</p></div>`).join('')}</div>
-    <div class="dbtns">${d.leader ? '<button class="cancel" id="nolead">No leader</button>' : ''}<button class="cancel">Cancel</button></div></div>`); fitNames(m);
+    <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitNames(m);
   m.querySelectorAll('.lv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
-  const nl = m.querySelector('#nolead'); if (nl) nl.onclick = () => { close(); done(null); };
 }
 
 function pickCover(app, d, done) {

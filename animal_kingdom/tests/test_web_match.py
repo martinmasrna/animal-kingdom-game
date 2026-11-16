@@ -202,13 +202,15 @@ def test_custom_deck_resolves_to_a_playable_slug(tmp_path, monkeypatch):
     from animal_kingdom.web.match import DECK_NAMES
     monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "decks.json")
     cats = PREMADE_DECKS["pool_1"]
-    slug = custom_decks.resolve({"name": "My cats", "list": cats})
+    slug = custom_decks.resolve({"name": "My cats", "list": cats, "leader": "lion_legend_4"})
     assert slug.startswith("custom_") and DECK_NAMES[slug] == "My cats"
     assert sorted(load_premade_deck(slug)) == sorted(cats)
     assert custom_decks.resolve("giants") == "giants"
     import pytest
     with pytest.raises(EngineError):
-        custom_decks.resolve({"name": "bad", "list": cats[:-1]})
+        custom_decks.resolve({"name": "bad", "list": cats[:-1], "leader": "lion_legend_4"})
+    with pytest.raises(EngineError, match="needs a leader"):   # every deck has a leader (Martin, 2026-11-16)
+        custom_decks.resolve({"name": "no leader", "list": cats})
 
 
 def test_reverse_gauntlet_rotates_the_players_deck_against_the_bots_fixed_one():
@@ -537,7 +539,7 @@ def test_a_gauntlet_leaves_out_the_premade_your_custom_deck_copies(monkeypatch, 
     async def run():
         async with TestClient(TestServer(server.make_app())) as c:
             a = await (await c.post("/api/profile", json={})).json()
-            deck = {"name": "My Pool", "list": list(PREMADE_DECKS["pool_1"])}
+            deck = {"name": "My Pool", "list": list(PREMADE_DECKS["pool_1"]), "leader": "lion_legend_4"}
             m = await (await c.post("/api/match", json={"deck": deck, "gauntlet": {"level": "easy", "games": 2}},
                                     headers={"X-AK-Key": a["code"]})).json()
             field = {g["deck"] for g in server.hub.matches[m["id"]].schedule}

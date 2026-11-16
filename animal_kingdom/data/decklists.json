@@ -726,11 +726,13 @@
     "beaver": 1,
     "guard_bee": 2,
     "tortoise": 2,
-    "hedgehog": 2,
+    "hedgehog": 1,
     "toad": 2,
     "armadillo": 1,
-    "porcupine": 1
-   }
+    "porcupine": 1,
+    "butterfly_legend": 1
+   },
+   "leader": "butterfly_legend"
   },
   {
    "slug": "pool_3",
@@ -828,10 +830,12 @@
     "black_panther": 2,
     "caracal": 2,
     "wolf": 2,
-    "meerkat": 2,
+    "meerkat": 1,
     "tuna": 2,
-    "orca": 1
-   }
+    "orca": 1,
+    "gorilla_legend_2": 1
+   },
+   "leader": "gorilla_legend_2"
   }
  ]
 }

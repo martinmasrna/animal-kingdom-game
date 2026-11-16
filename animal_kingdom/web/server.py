@@ -25,12 +25,13 @@ from pathlib import Path
 from aiohttp import WSMsgType, web
 
 from ..decks import BOT_DECKS, DECK_LEADERS, DECK_SIZE, PREMADE_DECKS, STAR_BUDGET, TEST_BOT_DECKS, load_premade_deck
-from ..decks import decklist_problems
+from ..decks import deck_problems
 
 
 def _league_deck_illegal(slug: str) -> bool:
-    """A league list a card change made illegal stays out of ranked, as the shipped and ladder ones do (decks.BOT_DECKS)."""
-    return bool(decklist_problems(PREMADE_DECKS.get(slug, [])))
+    """A league list a card change made illegal, or one with no leader, stays out of ranked, as the shipped and ladder ones
+    do (decks.BOT_DECKS)."""
+    return bool(deck_problems(PREMADE_DECKS.get(slug, []), DECK_LEADERS.get(slug)))
 from ..engine.leaders import LEADERS
 from ..engine import rules
 from ..engine.state import EngineError

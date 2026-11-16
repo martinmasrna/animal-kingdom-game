@@ -165,10 +165,24 @@ def make_vanilla_deck(
     return pool[:n]
 
 
+def deck_problems(decklist: Sequence[str], leader: Optional[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
+    """What makes a deck illegal for play: the list's problems (decklist_problems), and its leader's. Every deck has a
+    leader, one of its own legendaries that can lead (Martin, 2026-11-16: "how is it not illegal to have decks without
+    leader? ... same way you can't have deck with too many/too little cards, and too many stars"). The engine plays any
+    deck; this is the deck rule, checked where a deck is put into play (a player's, the bots' pool, the league)."""
+    from .engine.leaders import leader_problem
+    problems = decklist_problems(decklist, cards=cards)
+    if not leader:
+        problems.append("a deck needs a leader")
+    elif (bad := leader_problem(leader, decklist)):
+        problems.append(bad)
+    return problems
+
+
 def shipped_problems() -> dict[str, list[str]]:
-    """Each shipped or ladder deck a card change has made illegal, with what's wrong with it."""
+    """Each shipped or ladder deck a card change has made illegal, with what's wrong with it (a missing leader too)."""
     cards = load_cards()
-    return {slug: p for slug, decklist in PREMADE_DECKS.items() if (p := decklist_problems(decklist, cards=cards))}
+    return {slug: p for slug, decklist in PREMADE_DECKS.items() if (p := deck_problems(decklist, DECK_LEADERS.get(slug), cards=cards))}
 
 
 def _check_shipped() -> None:

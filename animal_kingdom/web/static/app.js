@@ -119,8 +119,8 @@ const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 // A deck over the rules (copies or stars, the stars prototype) is treated like an unfinished one: listed, opened in the
 // collection to fix, never played. `fix` holds what is over.
 const playable = () => { const mine = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]);
-    const size = RULES ? RULES.deckSize : 30, short = Math.max(0, size - deckSize(d.cards)), fix = short || !RULES ? '' : deckIssue(list, CARDS, RULES);
-    const leader = d.leader && list.includes(d.leader) && LEADERS[d.leader] ? d.leader : null;   // the leaders prototype
+    const leader = d.leader && list.includes(d.leader) && LEADERS[d.leader] ? d.leader : null;   // every deck has one (deckIssue)
+    const size = RULES ? RULES.deckSize : 30, short = Math.max(0, size - deckSize(d.cards)), fix = short || !RULES ? '' : deckIssue(list, CARDS, RULES, leader, LEADERS);
     return { id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: short || (fix ? -1 : 0), fix, list, leader }; });
   return mine.some(d => !d.short) ? mine : [...DECKS, ...mine]; };
 const chosenDeck = () => { const all = playable().filter(d => !d.short), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
