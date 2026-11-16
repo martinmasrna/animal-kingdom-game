@@ -3809,17 +3809,42 @@
     "effect": {
       "lv": "problem",
       "by": "claude",
-      "at": 1792250451,
-      "note": "Martin 2026-10-17: the parrot repeats (no 'may'); 'your next Roar this turn happens twice' moves to another animal"
+      "at": 1794860084,
+      "note": "Martin, 2026-11-16: the Macaw back, 2 strength, 2 stars, with Echo (\"let's do your opponent's last\")",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "Martin 2026-10-17: the parrot repeats (no 'may'); 'your next Roar this turn happens twice' moves to another animal",
+        "prev": "Flight. Roar: repeat the last Roar your opponent played."
+      }
     },
     "animal": {
       "review": {
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "out of the collection (in the reserve)",
+      "note": "into the collection",
       "by": "claude",
-      "at": 1794849344
+      "at": 1794860084
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-11-16: the Macaw back, 2 strength, 2 stars, with Echo (\"let's do your opponent's last\")",
+      "by": "claude",
+      "at": 1794860084
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin, 2026-11-16: the Macaw back, 2 strength, 2 stars, with Echo (\"let's do your opponent's last\")",
+      "by": "claude",
+      "at": 1794860084
     }
   },
   "magpie": {

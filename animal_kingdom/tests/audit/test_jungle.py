@@ -50,7 +50,7 @@ def strength(card_id):
 def test_jungle_cards_are_the_audited_set():
     ids = sorted(c.id for c in CARDS.values() if c.status == "collectible" and str(c.habitat).lower().endswith("jungle"))
     assert ids == ["armadillo", "black_panther", "capuchin", "chameleon", "gorilla_legend_2", "hercules_beetle",
-                   "jaguar", "ocelot", "peacock", "sloth", "tarsier", "tiger", "tiger_legend"]
+                   "jaguar", "macaw", "ocelot", "peacock", "sloth", "tarsier", "tiger", "tiger_legend"]
 
 
 # ------------------------------------------------------------------ army_ant_legend: Dusk: gain 2 food per animal

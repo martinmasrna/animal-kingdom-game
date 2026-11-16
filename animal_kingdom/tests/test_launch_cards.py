@@ -1744,6 +1744,22 @@ def test_the_macaw_repeats_the_last_roar_its_opponent_played():
     assert s.last_roar["A"] == "squirrel"                       # a Macaw repeating this Macaw repeats the Squirrel
 
 
+def test_the_macaw_echoes_its_opponents_roar_again_for_an_action():
+    """Martin, 2026-11-16: "Flight. Echo. Roar: repeat the last Roar your opponent played." Echo is offered only while the
+    opponent has a Roar to repeat."""
+    from animal_kingdom.engine.actions import ActAction
+    s = make_state(hands={"A": ["macaw", "macaw"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("macaw", ("cr", "1,2")))
+    assert ActAction("1,2") not in rules.legal_actions(s)      # nothing of the opponent's to repeat yet
+    s.last_roar["B"] = "squirrel"
+    s.actions_taken_this_turn = 0
+    rules.apply_action(s, PlaceAction("macaw", ("cr", "1,1")))
+    assert s.food["A"] == s.config.squirrel_food
+    assert ActAction("1,1") in rules.legal_actions(s)
+    rules.apply_action(s, ActAction("1,1"))
+    assert s.food["A"] == 2 * s.config.squirrel_food
+
+
 def test_the_macaw_repeats_a_removal_next_to_itself():
     s = make_state(hands={"A": ["macaw"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "caracal", "A")

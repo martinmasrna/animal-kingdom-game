@@ -2551,18 +2551,20 @@
     {
       "id": "macaw",
       "name": "Macaw",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
       ],
-      "base_strength": 3,
-      "text": "Flight. Roar: repeat the last Roar your opponent played.",
-      "keywords": [
-        "Flight"
-      ],
+      "base_strength": 2,
+      "text": "Flight. Echo. Roar: repeat the last Roar your opponent played.",
       "species": "Macaw",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "stars": 2,
+      "keywords": [
+        "Flight",
+        "Echo"
+      ]
     },
     {
       "id": "eagle",

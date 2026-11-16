@@ -1102,6 +1102,7 @@ ACT_NEEDS = {
     "card_burner": lambda state, p, cr: bool(state.hands[p]),     # discard a card: only with a card in hand
     "trainer": lambda state, p, cr: bool(state.hands[p]),     # give an animal in your hand +2: only with one there
     "tarsier": lambda state, p, cr: bool(state.hands[p]),     # Echo: give an animal in your hand +2: only with one there
+    "macaw": lambda state, p, cr: bool(state.last_roar.get(other_player(p))),   # Echo: only with an opponent's Roar to repeat
     "lookout": lambda state, p, cr: bool(state.decks[p]),     # Scout: only with a deck to look at
 }
 
@@ -2374,7 +2375,7 @@ def _wolf_legend_eot(state, unit, cr):
 
 def _fox_place(state, unit, cr):
     """Roar: if an ally roamed this turn, draw 2 cards."""
-    if roar_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, "fox", unit):
         _push_draw(state, unit.owner, state.config.fox_draw)
 
 
@@ -2462,13 +2463,14 @@ def _alpha_place(state, unit, cr):
 
 def _serval_place(state, unit, cr):
     """Roar: if you played another Cat this turn, remove an adjacent enemy of strength 8 or more."""
-    if roar_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, "serval", unit):
         _push_remove_choice(state, unit.owner, unit.card_id,
                             _adjacent_enemy_targets(state, unit, cr, min_strength=state.config.serval_min))
 
 
 def _ocelot_place(state, unit, cr):
-    if roar_condition(state, unit.owner, unit.card_id, unit):
+    # The condition is read for the card's own text even when a Macaw or Big Gus repeats it on another unit (as the Rust twin)
+    if roar_condition(state, unit.owner, "ocelot", unit):
         _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"]})
 
 
@@ -3332,7 +3334,7 @@ def _caterpillar_grows(state, inst, amount):
 
 
 def _gorilla_place(state, unit, cr):
-    if roar_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, "gorilla", unit):
         _push_draw(state, unit.owner, 1)
 
 

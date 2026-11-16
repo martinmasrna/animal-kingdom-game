@@ -1043,6 +1043,7 @@ pub fn legal_acts(st: &State, player: Player) -> Vec<Action> {
             "card_burner" | "trainer" | "tarsier" => !st.hands[p].is_empty(),
             "lookout" => !st.decks[p].is_empty(),
             "baboon_legend" => !babaji_allies(st, player, cr).is_empty(),
+            "macaw" => st.last_roar[other(player) as usize].is_some(),   // Echo: only with an opponent's Roar to repeat
             _ => true,
         };
         if ok {
