@@ -70,7 +70,7 @@ COPIES = {"legendary": 1, "rare": 2, "common": 2}     # the copy limits (the sta
 POOL = "pool"                                         # the table's name for "in no starter deck"
 
 # Printed keywords, as the first sentences of a card's text ("Flight. Roar: ...", "Titan. Hungry 4. ...").
-KEYWORD = re.compile(r"(Flight|Armor|Stealth|Spikes|Poison|Roam|Reach|Apex Predator|Titan|Flee|Wild|Hungry (\d+))\.(?: |$)")
+KEYWORD = re.compile(r"(Flight|Armor|Stealth|Spikes|Poison|Roam|Reach|Apex Predator|Titan|Flee|Wild|Echo|Hungry (\d+))\.(?: |$)")
 COSTS = re.compile(r"Costs (\d+) food")
 
 

@@ -44,7 +44,7 @@ The one the colony is for. She lays, and everyone else exists to feed her brood.
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **Queen Melissia** | legendary | 2 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. | Meadow |
-| **Queen Solenia** | legendary | 3 | Dusk: gain 2 food for each animal you control. | Jungle |
+| **Queen Solenia** | legendary | 3 | Roar: gain 3 food for each animal you control. Your opponent loses the same amount. | Jungle |
 | **Queen Ant** | rare | 3 | Dusk: place a Young Ant on an adjacent empty crossroad. | Forest |
 | **Queen Bee** | rare | 3 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. | Meadow |
 | **Termite Queen** | rare | 2 | Roar: play a non-Queen Colony animal. | Savanna |
@@ -115,7 +115,7 @@ The honey, the granary, the fungus garden: a summer's work kept against the wint
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Lord Bumbleton** | legendary | 3 | Flight. Whenever you gain food, gain 3 additional food. | Meadow |
+| **Lord Bumbleton** | legendary | 3 | Flight. Roar: gain 2 food for each time you have gained food this game. (Current: X) | Meadow |
 
 <!-- cards:end -->
 
@@ -160,7 +160,7 @@ Cards of the hive whose job the page can't yet name.
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Lady Juliette** | legendary | 1 | Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are). | Meadow |
+| **Lady Juliette** | legendary | 1 | Roar: if your starting deck has no animals of strength 4 or more, choose one of three small animals and play it. | Meadow |
 
 <!-- cards:end -->
 

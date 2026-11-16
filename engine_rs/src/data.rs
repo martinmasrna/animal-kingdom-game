@@ -51,6 +51,9 @@ pub fn tag_bit(name: &str) -> u32 {
     TAGS.iter().position(|t| *t == name).map(|i| 1u32 << i).unwrap_or(0)
 }
 pub fn kw_bit(name: &str) -> u32 {
+    if name == "Echo" {
+        return K_ECHO;
+    }
     KEYWORDS.iter().position(|t| *t == name).map(|i| 1u32 << i).unwrap_or(0)
 }
 
@@ -78,6 +81,8 @@ pub const K_REACH: u32 = 1 << 7;
 pub const K_HUNGRY: u32 = 1 << 8;
 pub const K_TITAN: u32 = 1 << 9;
 pub const K_FLEE: u32 = 1 << 10;
+/// Echo (the leaders prototype): outside KEYWORDS, which the bots' trained networks take one column each of.
+pub const K_ECHO: u32 = 1 << 12;
 
 /// A sentence after a Roar that starts one of these is an ability of its own (features.py `_LASTING_STARTS`).
 const LASTING_STARTS: [&str; 7] = ["When ", "Whenever ", "While ", "Dawn:", "Dusk:", "Deathrattle", "Evolves "];

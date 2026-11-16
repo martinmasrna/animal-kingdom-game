@@ -32,7 +32,7 @@ from collections import defaultdict
 from typing import Callable, Optional, Sequence
 
 from ..engine import rules
-from ..engine.actions import SKIP, Action, ActAction, ChoiceAction, DrawAction, PlaceAction, RoamAction
+from ..engine.actions import SKIP, Action, ActAction, ChoiceAction, DrawAction, LeaderAction, PlaceAction, RoamAction
 from ..engine.state import GameState, StateView, other_player
 from .base import Bot, keep_hand
 from .determinize import determinize
@@ -560,7 +560,7 @@ class TurnSearcher(Bot):
         score_of = {action: score for score, _, action in scored}
         reserved: set[Action] = {
             a for a in legal
-            if isinstance(a, (DrawAction, ActAction))     # an Action (the actions prototype) is kept like a draw
+            if isinstance(a, (DrawAction, ActAction, LeaderAction))   # an Action (actions prototype), a den power (leaders): kept like a draw
             or (isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture)
         }
 
@@ -835,4 +835,5 @@ class TurnSearcher(Bot):
             freeze(state.card_strength_counters),
             freeze(state.turn_flags),
             freeze(state.result.to_dict()) if state.result else None,
+            freeze(state.leaders), freeze(state.next_strength),   # the leaders prototype: public
         )

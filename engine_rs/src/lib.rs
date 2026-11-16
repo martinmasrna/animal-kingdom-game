@@ -7,6 +7,7 @@ pub mod cards;
 pub mod clock;
 pub mod data;
 pub mod effects;
+pub mod leaders;
 pub mod rng;
 pub mod rules;
 pub mod state;

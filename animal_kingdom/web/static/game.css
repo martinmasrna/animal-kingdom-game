@@ -171,6 +171,29 @@
 .game.kit .cr.unit { width: 134px; height: 134px; margin: -67px 0 0 -67px; }
 .game.kit .unit .ring { inset: 18px; border: 0; background-color: #3a342c; }
 .game.kit .unit .rimimg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* Board keywords painted on the piece (board.js): hexagon rim for Armor, thorns behind the rim, mist over the portrait, toxic vapour in it. */
+.game.kit .unit .rimimg.hex { inset: auto; left: calc(-1 * var(--hex-out, 14px)); top: calc(-1 * var(--hex-out, 14px)); width: calc(100% + 2 * var(--hex-out, 14px)); height: calc(100% + 2 * var(--hex-out, 14px)); }
+.game.kit .unit .kwl { position: absolute; pointer-events: none; }
+.game.kit .unit .kwl.thorns { left: calc(-1 * var(--thorn-out, 38px)); top: calc(-1 * var(--thorn-out, 38px)); width: calc(100% + 2 * var(--thorn-out, 38px)); height: calc(100% + 2 * var(--thorn-out, 38px)); }
+.game.kit .unit:has(.rimimg.hex) .kwl.thorns { --thorn-out: 58.25px; }   /* the same thorns, each pushed out to the hexagon's edge (kwl_thorns_hex) */
+.game.kit .unit .kwl.mist { left: 18px; top: 18px; width: calc(100% - 36px); height: calc(100% - 36px); border-radius: 50%; overflow: hidden; }
+.game.kit .unit .kwl.venom { left: 18px; top: 18px; width: calc(100% - 36px); height: calc(100% - 36px); border-radius: 50%; }
+.game.kit .unit .kwl.venom.tint { mix-blend-mode: color; opacity: var(--venom-tint, .85); }   /* the vapour, blurred, turns the painting green under it */
+/* Slow motion, with restraint, the way the real things move: two layers of mist drifting left to right at different
+   speeds, the vapour rising through the swirl's own shape and faintly breathing. Each texture wraps seamlessly (kwl_*_flow). */
+.game.kit .unit .kwl.venom.fumes { overflow: hidden; animation: kwbreathe 8s ease-in-out infinite alternate; }
+.game.kit .unit .kwl.venom.fumes .base { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .45; }   /* the approved swirl, still */
+.game.kit .unit .kwl.venom.fumes .vmask { position: absolute; inset: 0; opacity: 1; -webkit-mask: url(/static/kit2/kwl_vapour_mask.webp) center / 100% 100%; mask: url(/static/kit2/kwl_vapour_mask.webp) center / 100% 100%; }   /* fixed: the vapour rises through the swirl's shape */
+.game.kit .unit .kwl .flow { position: absolute; left: 0; top: 0; will-change: transform; }
+.game.kit .unit .kwl.mist .flow { width: 200%; height: 100%; background: url(/static/kit2/kwl_mist_flow.webp) 0 0 / 50% 100% repeat-x; animation: kwdrift 45s linear infinite; }
+.game.kit .unit .kwl.mist .m1 { opacity: .95; animation-duration: 25s; }   /* the wisps, in front: what the eye follows */
+.game.kit .unit .kwl.mist .m2 { opacity: .85; background-image: url(/static/kit2/kwl_mist_flow2.webp); animation-duration: 70s; }   /* the veil, behind */
+.game.kit .unit .kwl.venom .flow { width: 100%; height: 200%; background: url(/static/kit2/kwl_vapour_flow.webp) 0 0 / 100% 50% repeat-y; animation: kwrise 14s linear infinite; }
+@keyframes kwdrift { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@keyframes kwrise { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes kwbreathe { from { opacity: 1; } to { opacity: .75; } }
+.game.kit .unit .hexp { left: 5px; top: 5px; width: 124px; height: 124px; inset: auto; border-radius: 0; clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0 50%); }   /* the portrait cut to the armour's hexagonal hole */
+.game.kit .unit .kwl.mist.hexp, .game.kit .unit .kwl.venom.hexp { left: -11px; top: -11px; width: 156px; height: 156px; clip-path: polygon(30.1% 15.6%, 69.9% 15.6%, 89.7% 50%, 69.9% 84.4%, 30.1% 84.4%, 10.3% 50%); }   /* the round mist larger, cut to the same hexagon */
 .game.kit .unit .boss { width: 46px; height: 46px; margin-left: -23px; bottom: -16px; border: 0; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 .game.kit .unit.B .boss { background-image: url(/static/kit2/boss_b.webp); } .game.kit .unit.W .boss { background-image: url(/static/kit2/boss_n.webp); }
 .game.kit .unit .buried { border: 0; inset: 6px; }
@@ -643,3 +666,14 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
 /* A card read in full in the hand keeps its level's wood piece on the painting's corner, above the rules (app.css, mk-br). */
 .game .hc:hover .card.mk-br .lvl, .game .hc.shown .card.mk-br .lvl { bottom: 8.6em; }
+/* The leaders prototype: a leader beside its den (board.js leaderPiece), a size up from an animal */
+.game .cr.leader { width: 140px; height: 140px; margin: -70px 0 0 -70px; z-index: 3; cursor: default; }
+.game .cr.leader.roamable { cursor: pointer; }
+.game .cr.leader.dim .ring { filter: grayscale(1) brightness(.62); }
+.game .cr.leader.dim .rimimg { filter: grayscale(.7) brightness(.8); }
+.game .cr.leader .lpips { position: absolute; left: 50%; bottom: -40px; transform: translateX(-50%); display: flex; gap: 5px; }
+.game .cr.leader .lpips i { width: 12px; height: 12px; border-radius: 50%; background: rgba(20,14,8,.75); border: 2px solid #f3e6c8; }
+.game .cr.leader .lpips i.on { background: #f3e6c8; }
+.game .cr.leader .lname { position: absolute; left: 50%; bottom: -26px; transform: translateX(-50%); white-space: nowrap; padding: 1px 10px;
+  font: 600 16px/1.3 'Fira Sans Condensed', sans-serif; color: #fff6e0; background: rgba(40,28,16,.88); border-radius: 6px; }
+.pop .ev.lead { display: block; max-width: 300px; } .pop .ev.lead p { margin: 4px 0 0; } .pop .ev.lead .lk { opacity: .8; font-size: .92em; }

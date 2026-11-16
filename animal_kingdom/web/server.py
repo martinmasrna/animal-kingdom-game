@@ -24,7 +24,8 @@ from pathlib import Path
 
 from aiohttp import WSMsgType, web
 
-from ..decks import BOT_DECKS, DECK_SIZE, PREMADE_DECKS, STAR_BUDGET, TEST_BOT_DECKS, load_premade_deck
+from ..decks import BOT_DECKS, DECK_LEADERS, DECK_SIZE, PREMADE_DECKS, STAR_BUDGET, TEST_BOT_DECKS, load_premade_deck
+from ..engine.leaders import LEADERS
 from ..engine import rules
 from ..engine.state import EngineError
 from ..engine.cards import COPY_LIMITS, DECK_SLUGS, STARTER_DECKS, load_cards
@@ -1389,11 +1390,14 @@ async def pool(_req):
         "bot_decks": list(ladder.decks if ladder else BOT_DECKS),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS plus the league's)
         # The bot decks that are not starters: shown by name and list wherever a bot's deck is (Practice's chooser,
         # the versus moment, the match history), never in a player's collection.
-        "bot_only": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug), "cover": STARTER_COVERS.get(slug, "")}
+        "bot_only": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug), "cover": STARTER_COVERS.get(slug, ""),
+                      **({"leader": DECK_LEADERS[slug]} if slug in DECK_LEADERS else {})}
                      for slug in (ladder.decks if ladder else BOT_DECKS) if slug not in {d["slug"] for d in STARTER_DECKS}],
         "build": BUILD,
         # The deck rules the collection builds to (decks.py, engine/cards.py): the client holds none of these numbers itself.
         "rules": {"deckSize": DECK_SIZE, "copies": COPY_LIMITS, "starBudget": STAR_BUDGET},
+        # the leaders prototype (engine/leaders.py): the cards that can lead a deck, each with its kind and its ability
+        "leaders": {lid: {"kind": kind, "text": text} for lid, (kind, text) in LEADERS.items()},
     })
 
 
@@ -1420,7 +1424,7 @@ def position_at(rec: dict, rnd: int, seat: str):
     if not lists:
         return None
     state = new_game(list(lists[0]), list(lists[1]), rec["seed"], map_id=rec.get("map_id", MAP_ID),
-                     config=Config.default().for_log(rec), first_player=rec["first_player"])
+                     config=Config.default().for_log(rec), first_player=rec["first_player"], leaders=rec.get("leaders"))
     for adict in rec["actions"]:
         while state.pending is not None and state.effect_stack[-1].get("op") == "mulligan" and adict["kind"] != "choice":
             rules.apply_action(state, ChoiceAction(SKIP))     # a log from before the mulligan rule
@@ -1576,7 +1580,7 @@ async def create_match(req):
             if not all(d in PREMADE_DECKS or d in TEST_BOT_DECKS or d in custom_decks._saved for d in wanted):
                 raise web.HTTPBadRequest(text="bad gauntlet field")
         mirror = bool(gauntlet.get("mirror"))   # both seats on each named deck in turn: the pilot is the only variable
-        field = [d for d in (wanted if wanted is not None else sorted(DECK_SLUGS))
+        field = [d for d in (wanted if wanted is not None else sorted(s for s in DECK_SLUGS if s not in DECK_LEADERS))   # a leader variant is its base deck again
                  if mirror or (d != deck and d not in skip and sorted(load_premade_deck(d)) != mine)]
         if not field:
             raise web.HTTPBadRequest(text="empty gauntlet")

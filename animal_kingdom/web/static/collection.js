@@ -69,13 +69,14 @@ const countsOf = list => list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {
 
 // Your decks, saved on your profile (which starts with the starter decks as its own), as {id, name, list, cover}.
 function decks() {
-  const mine = X.getDecks().map(d => ({ id: d.id, name: d.name, list: listOf(d.cards), cover: d.cover && C[d.cover] ? d.cover : null }));
+  const mine = X.getDecks().map(d => ({ id: d.id, name: d.name, list: listOf(d.cards), cover: d.cover && C[d.cover] ? d.cover : null, leader: d.leader || null }));
   mine.forEach(d => d.cover = d.cover || (d.list.length ? coverOf(d.list) : null));
   return mine;
 }
 let saved = null;   // each deck's list as last saved: a save logs what changed (log.js)
 function save(all) {
-  X.saveDecks(all.map(d => ({ id: d.id, name: d.name, cards: countsOf(d.list), cover: d.cover })));
+  // a leader goes with its card: one taken out of the deck takes the leader with it (the leaders prototype)
+  X.saveDecks(all.map(d => ({ id: d.id, name: d.name, cards: countsOf(d.list), cover: d.cover, ...(d.leader && d.list.includes(d.leader) ? { leader: d.leader } : {}) })));
   const now = Object.fromEntries(all.map(d => [d.id, [...d.list]]));
   if (saved) for (const d of all) {
     const was = saved[d.id] || [], rest = [...was], added = [];
@@ -144,7 +145,7 @@ function render(app, all) {
   const body = d => deckBody(d.list, C);
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
-        <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`
+        <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${leaderRow(d)}${body(d)}`
     // a deck still short of its cards is marked with its count, as on home's chooser (Martin, 2026-10-31)
     // a deck over the rules (copies, stars) says so on its tile: open it to see what (the stars prototype)
     : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list) ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : deckIssue(d.list) ? '<span class="left">Too many</span>' : ''}</div>`;
@@ -225,6 +226,7 @@ function wire(app, all, open) {
   const cp = $('dcopy'); if (cp) cp.onclick = () => navigator.clipboard.writeText(encodeDeck(open.name, open.list, C)).then(() => X.toast('Deck code copied', true), () => X.toast('Could not copy'));
   const shr = $('dshare'); if (shr) shr.onclick = () => X.share(encodeDeck(open.name, open.list, C), open.name);
   const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, id => { open.cover = id; change(); });
+  const ld = $('dlead'); if (ld) ld.onclick = () => pickLeader(app, open, id => { open.leader = id; change(); });
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
   // A new deck starts empty, open, with its name ready to type.
   const dn = $('dnew'); if (dn) dn.onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null };
@@ -340,6 +342,24 @@ function confirmDelete(app, d, done) {
   m.querySelector('.cancel').focus();
   m.querySelector('.danger').onclick = () => { close(); done(); };
 }
+// The leaders prototype: a deck may name one of its legendaries that can lead as its leader. The row shows it (or that it
+// has none) with its ability; a click picks among the deck's eligible legendaries. A deck with none to pick shows no row.
+const eligible = d => [...new Set(d.list)].filter(id => (X.leaders || {})[id]);
+const KIND = { power: 'Hero power', once: 'Once per game', passive: 'Always on' };
+function leaderRow(d) {
+  const ids = eligible(d); if (!ids.length) return '';
+  const id = d.leader && ids.includes(d.leader) ? d.leader : null, L = id && X.leaders[id];
+  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? `<div class="lmed" style="${med(id, 52)}"></div>` : `<div class="lmed empty"></div>`}`
+    + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${KIND[L.kind]}. ${esc(L.text)}</span>` : `<b>No leader</b><span>Choose one of this deck's legendaries to lead it</span>`}</div></div>`;
+}
+function pickLeader(app, d, done) {
+  const ids = eligible(d);
+  const { m, close } = dialog(app, `<div class="dlg cov lead"><h3>Choose a leader</h3><div class="leads">${ids.map(id => `<div class="lv${id === d.leader ? ' on' : ''}" data-id="${id}"><div class="cv">${cardHTML(C[id], { cls: 'compact' })}</div><p><b>${KIND[X.leaders[id].kind]}.</b> ${esc(X.leaders[id].text)}</p></div>`).join('')}</div>
+    <div class="dbtns">${d.leader ? '<button class="cancel" id="nolead">No leader</button>' : ''}<button class="cancel">Cancel</button></div></div>`); fitNames(m);
+  m.querySelectorAll('.lv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
+  const nl = m.querySelector('#nolead'); if (nl) nl.onclick = () => { close(); done(null); };
+}
+
 function pickCover(app, d, done) {
   const ids = [...new Set(d.list)].filter(id => CROP[id]).sort((a, b) => RANK[C[a].rarity] - RANK[C[b].rarity] || sv(C[a]) - sv(C[b]));
   const { m, close } = dialog(app, `<div class="dlg cov"><h3>Choose a cover</h3><div class="covs">${ids.map(id => `<div class="cv${id === d.cover ? ' on' : ''}" data-id="${id}">${cardHTML(C[id], { cls: 'compact' })}</div>`).join('')}</div>

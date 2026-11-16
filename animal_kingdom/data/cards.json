@@ -11,10 +11,11 @@
         "Queen"
       ],
       "base_strength": 3,
-      "text": "Dusk: gain 2 food for each animal you control.",
+      "text": "Roar: gain 3 food for each animal you control. Your opponent loses the same amount.",
       "species": "Army Ant",
       "habitat": "Jungle",
-      "keywords": []
+      "keywords": [],
+      "stars": 3
     },
     {
       "id": "hornet_legend",
@@ -56,12 +57,12 @@
         "Colony"
       ],
       "base_strength": 3,
-      "text": "Flight. Whenever you gain food, gain 3 additional food.",
+      "text": "Flight. Roar: gain 2 food for each time you have gained food this game. (Current: X)",
+      "species": "Bumblebee",
+      "habitat": "Meadow",
       "keywords": [
         "Flight"
-      ],
-      "species": "Bumblebee",
-      "habitat": "Meadow"
+      ]
     },
     {
       "id": "nurse_bee",
@@ -1855,10 +1856,12 @@
         "Primate"
       ],
       "base_strength": 3,
-      "text": "Dawn: give 2 random animals in your hand +1 strength.",
-      "keywords": [],
+      "text": "Echo. Roar: return an adjacent ally to your hand, give it +2 strength, and play it.",
       "species": "Baboon",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": [
+        "Echo"
+      ]
     },
     {
       "id": "orangutan_legend",
@@ -1881,7 +1884,7 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
-      "text": "Dawn: evolve. Whenever this gains strength, evolve.",
+      "text": "Whenever this gains strength, evolve.",
       "related": [
         "butterfly_legend_caterpillar",
         "butterfly_legend_chrysalis",
@@ -2033,7 +2036,7 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "When this gains strength in your hand, draw a card and turn into a Butterfly.",
+      "text": "When this gains strength, draw a card and turn into a Butterfly.",
       "related": [
         "butterfly"
       ],
@@ -3243,10 +3246,10 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
-      "text": "Roar: draw a card. Dawn: evolve. Whenever this gains strength, evolve.",
+      "text": "Roar: draw a card. Whenever this gains strength, evolve.",
       "stage": 2,
-      "keywords": [],
-      "species": "Butterfly"
+      "species": "Butterfly",
+      "keywords": []
     },
     {
       "id": "butterfly_legend_chrysalis",
@@ -3255,12 +3258,12 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
-      "text": "Stealth. Roar: draw a card, then give an animal in your hand +1 strength. Dawn: evolve. Whenever this gains strength, evolve.",
+      "text": "Stealth. Whenever this gains strength, evolve.",
       "stage": 3,
+      "species": "Butterfly",
       "keywords": [
         "Stealth"
-      ],
-      "species": "Butterfly"
+      ]
     },
     {
       "id": "butterfly_legend_butterfly",
@@ -3269,13 +3272,13 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
-      "text": "Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength. Dawn: evolve. Whenever this gains strength, evolve.",
+      "text": "Stealth. Flight. Roar: draw a card, then give an animal in your hand +1 strength. Whenever this gains strength, evolve.",
       "stage": 4,
+      "species": "Butterfly",
       "keywords": [
         "Stealth",
         "Flight"
-      ],
-      "species": "Butterfly"
+      ]
     },
     {
       "id": "butterfly_legend_monarch",
@@ -3284,13 +3287,13 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
+      "text": "Stealth. Flight. Roar: draw 2 cards, then give 2 animals in your hand +2 strength.",
+      "stage": 5,
+      "species": "Butterfly",
       "keywords": [
         "Stealth",
         "Flight"
-      ],
-      "text": "Stealth. Flight. Roar: draw 2 cards, then give all animals in your hand +2 strength.",
-      "stage": 5,
-      "species": "Butterfly"
+      ]
     },
     {
       "id": "eagle_legend_2",
@@ -3684,11 +3687,11 @@
         "Colony"
       ],
       "base_strength": 1,
-      "text": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
+      "text": "Roar: if your starting deck has no animals of strength 4 or more, choose one of three small animals and play it.",
       "species": "Bee",
       "habitat": "Meadow",
-      "keywords": [],
-      "stars": 3
+      "stars": 3,
+      "keywords": []
     },
     {
       "id": "fawn",
@@ -4139,7 +4142,7 @@
       "species": ""
     },
     {
-      "id": "action_1",
+      "id": "food_maker",
       "name": "Food Maker",
       "status": "collectible",
       "rarity": "common",
@@ -4151,7 +4154,7 @@
       "keywords": []
     },
     {
-      "id": "action_2",
+      "id": "card_burner",
       "name": "Card Burner",
       "status": "collectible",
       "rarity": "common",
@@ -4163,7 +4166,7 @@
       "keywords": []
     },
     {
-      "id": "action_3",
+      "id": "refueler",
       "name": "Refueler",
       "status": "collectible",
       "rarity": "common",
@@ -4175,7 +4178,7 @@
       "keywords": []
     },
     {
-      "id": "action_4",
+      "id": "trainer",
       "name": "Trainer",
       "status": "collectible",
       "rarity": "common",
@@ -4187,7 +4190,7 @@
       "keywords": []
     },
     {
-      "id": "action_5",
+      "id": "flight_giver",
       "name": "Flight Giver",
       "status": "collectible",
       "rarity": "common",
@@ -4199,7 +4202,7 @@
       "keywords": []
     },
     {
-      "id": "action_6",
+      "id": "lookout",
       "name": "Lookout",
       "status": "collectible",
       "rarity": "common",
@@ -4211,7 +4214,7 @@
       "keywords": []
     },
     {
-      "id": "action_7",
+      "id": "food_thief",
       "name": "Food Thief",
       "status": "collectible",
       "rarity": "common",
@@ -4223,7 +4226,7 @@
       "keywords": []
     },
     {
-      "id": "action_8",
+      "id": "protector",
       "name": "Protector",
       "status": "collectible",
       "rarity": "common",
@@ -4233,6 +4236,21 @@
       "species": "Protector",
       "habitat": "Meadow",
       "keywords": []
+    },
+    {
+      "id": "gorilla_legend_2",
+      "name": "[GORILLA]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Primate"
+      ],
+      "base_strength": 7,
+      "text": "Roar: the next animal you play has this animal's strength.",
+      "species": "Gorilla",
+      "habitat": "Jungle",
+      "keywords": [],
+      "unnamed": true
     }
   ]
 }

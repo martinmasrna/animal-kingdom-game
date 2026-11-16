@@ -101,10 +101,20 @@ def guard_bonus(state: GameState, owner: str) -> int:
     return g[1] if g and state.current != owner and g[0] == state.turn_counter else 0
 
 
+def leader_bonus(state: GameState, owner: str) -> int:
+    """Lady Juliette's leader (the leaders prototype): "If your starting deck has no animals of strength 4 or more, your
+    animals have +1 strength." Live, on every animal `owner` has, on the board and as it would be played from hand."""
+    lead = state.leaders.get(owner)
+    if lead is None or lead["id"] != "bee_legend_2" or not state.starting_decks.get(owner):
+        return 0
+    return state.config.juliette_leader_bonus if small_starting_deck(state, owner, "") else 0
+
+
 def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], sources: Optional[list] = None) -> int:
     """The live "has +X" bonus for a unit of `card` controlled by `owner`: the cards' anthems and auras, plus
-    [ACTION 8]'s guard (guard_bonus)."""
-    return _anthem_bonus(state, card, owner, self_iid, sources) + (guard_bonus(state, owner) if state.action_guard else 0)
+    [ACTION 8]'s guard (guard_bonus) and Lady Juliette's leader (leader_bonus)."""
+    return (_anthem_bonus(state, card, owner, self_iid, sources) + (guard_bonus(state, owner) if state.action_guard else 0)
+            + (leader_bonus(state, owner) if state.leaders else 0))
 
 
 def _anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], sources: Optional[list] = None) -> int:
@@ -195,9 +205,42 @@ def card_strength(state: GameState, card_id: str, owner: str) -> int:
     return max(0, val)
 
 
+def hand_counter(state: GameState, inst: UnitInstance) -> int:
+    """A hand instance's stored strength as it stands in hand: its own, or under Arne's leader ("Copies of the same animal
+    in your hand share their strength") the strongest copy's (copies of one card differ only by their counters)."""
+    if not state.leaders:
+        return inst.strength_counter
+    lead = state.leaders.get(inst.owner)
+    if lead is None or lead["id"] != "eagle_legend":
+        return inst.strength_counter
+    best = inst.strength_counter
+    for u in state.hands.get(inst.owner, ()):
+        if u.card_id == inst.card_id and u.strength_counter > best:
+            best = u.strength_counter
+    return best
+
+
+def play_adjustment(state: GameState, inst: UnitInstance) -> list:
+    """What playing `inst` now adds to its strength beyond its card and its counter, as (source card, amount): [GORILLA]'s
+    Roar ("the next animal you play has this animal's strength": exactly that number, so the difference, either way) and
+    his leader ("the first animal you play each turn has +1 strength", after it)."""
+    out = []
+    owner = inst.owner
+    n = state.next_strength.get(owner)
+    if n is not None:
+        out.append(("gorilla_legend_2", n - (card_strength(state, inst.card_id, owner) + hand_counter(state, inst))))
+    lead = state.leaders.get(owner) if state.leaders else None
+    if lead is not None and lead["id"] == "gorilla_legend_2" and not state.turn_flags.get(f"played_{owner}"):
+        out.append(("gorilla_legend_2", state.config.gorilla_leader_bonus))
+    return out
+
+
 def placement_strength(state: GameState, inst: UnitInstance) -> int:
     """Effective strength of a hand instance if it were placed now (for covering legality)."""
-    return max(0, card_strength(state, inst.card_id, inst.owner) + inst.strength_counter)
+    if not (state.leaders or state.next_strength):
+        return max(0, card_strength(state, inst.card_id, inst.owner) + inst.strength_counter)
+    return max(0, card_strength(state, inst.card_id, inst.owner) + hand_counter(state, inst)
+               + sum(n for _, n in play_adjustment(state, inst)))
 
 
 def strength_breakdown(state: GameState, unit: UnitInstance) -> dict:
@@ -221,7 +264,9 @@ def strength_breakdown(state: GameState, unit: UnitInstance) -> dict:
              if u.owner == unit.owner and u.iid != unit.iid and aura[0] in card.tags and not _inked(state, u.iid)
              and not (aura[2] and not their_turn))
     if guard := guard_bonus(state, unit.owner):
-        auras.append(["action_8", guard])
+        auras.append(["protector", guard])
+    if state.leaders and (lb := leader_bonus(state, unit.owner)):
+        auras.append(["bee_legend_2", lb])
     own = anthem_bonus(state, card, unit.owner, unit.iid) - sum(n for _, n in auras)
     if own:
         auras.insert(0, [card.id, own])

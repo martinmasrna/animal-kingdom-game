@@ -615,7 +615,7 @@ impl Searcher {
         let score_of = |i: usize| scored.iter().find(|(_, j)| *j == i).map(|(s, _)| *s).unwrap_or(f64::NEG_INFINITY);
         let mut reserved: Vec<usize> = Vec::new();
         for (i, a) in legal.iter().enumerate() {
-            if matches!(a, Action::Draw | Action::Act { .. }) || matches!(a, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. }) {
+            if matches!(a, Action::Draw | Action::Act { .. } | Action::Leader) || matches!(a, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. }) {
                 reserved.push(i);
             }
         }
@@ -1320,6 +1320,7 @@ pub fn observation_key(st: &State, me: Player) -> String {
         Some(r) => out.push_str(&format!("{:?}/{}", r.winner.map(player_name), r.reason)),
         None => out.push('N'),
     }
+    out.push_str(&format!("|{:?}|{:?}", st.leaders, st.next_strength));   // the leaders prototype: public
     out
 }
 

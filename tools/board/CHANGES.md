@@ -7,7 +7,7 @@ The board server keeps the file current: a change the game already has drops out
 ## `changed`: existing cards, by card id
 
 ```json
-"action_4": {
+"trainer": {
   "name":     {"was": "Trainer", "now": "Drill Sergeant"},
   "strength": {"was": 3, "now": 5},
   "stars":    {"was": 0, "now": 1},
@@ -29,7 +29,7 @@ If `was` differs from what the game has when you apply it (someone changed the c
 ## `new`: cards he made, by a board id (`new1`, `new2`, ...)
 
 ```json
-"new1": {"copy_of": "action_4", "name": "Drill Sergeant II", "rarity": "common", "strength": 5, "stars": 0,
+"new1": {"copy_of": "trainer", "name": "Drill Sergeant II", "rarity": "common", "strength": 5, "stars": 0,
          "text": "...", "tags": [], "habitat": "Meadow", "species": "Trainer"}
 ```
 

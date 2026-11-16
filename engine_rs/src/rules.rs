@@ -38,6 +38,9 @@ fn top_level_actions(st: &State) -> Vec<Action> {
     actions.extend(effects::legal_placements(st, player, None, titan_ok));
     actions.extend(effects::legal_roams(st, player, false));
     actions.extend(effects::legal_acts(st, player));
+    if crate::leaders::any(st) && crate::leaders::usable(st, player) {
+        actions.push(Action::Leader);
+    }
     actions
 }
 
@@ -181,6 +184,11 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
                 st.actions_taken_this_turn += 1;
                 let cur = st.current;
                 effects::do_act(st, cur, *origin)?;
+            }
+            Action::Leader => {
+                st.actions_taken_this_turn += 1;
+                let cur = st.current;
+                crate::leaders::do_leader(st, cur)?;
             }
             _ => return Err("unexpected action".into()),
         }

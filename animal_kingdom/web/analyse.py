@@ -185,21 +185,22 @@ def _source(src: str, gid: str, n: int):
         g = json.loads((LOG_DIR / f"{Path(gid).name}.jsonl").read_text().splitlines()[n])
         def start():
             return new_game(list(g["lists"][0]), list(g["lists"][1]), g["seed"], map_id=g.get("map_id", "map_b"),
-                            config=Config.default().for_log(g), first_player=g["first_player"])
+                            config=Config.default().for_log(g), first_player=g["first_player"], leaders=g.get("leaders"))
         return start, g["seed"], g["actions"]
     from .match import MAP_ID, Match
     m = Match.from_dict(json.loads((MATCH_DIR / f"{Path(gid).name}.json").read_text()))
     decks = [list(m.state.starting_decks[p]) for p in "AB"]
+    leaders = {p: l["id"] for p, l in m.state.leaders.items()}
     target = json.dumps(m.state.to_dict()["board"], sort_keys=True)
     for first in "AB":           # the match file keeps the seed and the actions, not who went first: the one that replays
-        st = new_game(*decks, m.seed, map_id=MAP_ID, first_player=first)
+        st = new_game(*decks, m.seed, map_id=MAP_ID, first_player=first, leaders=leaders)
         try:
             for a in m.actions:
                 rules.apply_logged(st, a)
         except Exception:
             continue
         if json.dumps(st.to_dict()["board"], sort_keys=True) == target:
-            return (lambda first=first: new_game(*decks, m.seed, map_id=MAP_ID, first_player=first)), m.seed, list(m.actions)
+            return (lambda first=first: new_game(*decks, m.seed, map_id=MAP_ID, first_player=first, leaders=leaders)), m.seed, list(m.actions)
     raise ValueError("this match doesn't replay from its log")
 
 

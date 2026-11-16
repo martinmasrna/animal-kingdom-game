@@ -93,13 +93,17 @@ impl Engine {
         Ok(Engine { g: Arc::new(Game::new(cards, map, cfg)) })
     }
 
-    #[pyo3(signature = (deck_a, deck_b, seed, first_player=None, stacked=false))]
-    fn new_game(&self, deck_a: Vec<String>, deck_b: Vec<String>, seed: i64, first_player: Option<String>, stacked: bool) -> PyResult<PyState> {
+    #[pyo3(signature = (deck_a, deck_b, seed, first_player=None, stacked=false, leader_a=None, leader_b=None))]
+    #[allow(clippy::too_many_arguments)]
+    fn new_game(&self, deck_a: Vec<String>, deck_b: Vec<String>, seed: i64, first_player: Option<String>, stacked: bool,
+                leader_a: Option<String>, leader_b: Option<String>) -> PyResult<PyState> {
         let ids = |d: &Vec<String>| -> PyResult<Vec<CardId>> { d.iter().map(|n| self.g.cards.id_of(n).ok_or_else(|| err(format!("unknown card {n:?}")))).collect() };
         let a = ids(&deck_a)?;
         let b = ids(&deck_b)?;
         let fp = first_player.map(|s| player_from(&s));
-        Ok(PyState { st: State::new_game(self.g.clone(), &a, &b, seed, fp, stacked) })
+        let mut st = State::new_game(self.g.clone(), &a, &b, seed, fp, stacked);
+        crate::leaders::set_leaders(&mut st, [leader_a.as_deref(), leader_b.as_deref()]).map_err(err)?;
+        Ok(PyState { st })
     }
 
     fn from_dict(&self, d: &Bound<'_, PyAny>) -> PyResult<PyState> {

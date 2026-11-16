@@ -68,7 +68,6 @@ pub enum Args {
     FriendlyFlee(Unit),
 }
 
-const GROWS: &[Hook] = &[Hook::OnDawnInHand, Hook::OnStartOfTurn, Hook::OnGain];
 
 /// The hooks each card has, as a bitmask over `Hook`.
 pub fn hook_mask(card: &str) -> u32 {
@@ -83,7 +82,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
         | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
-        | "orangutan_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
+        | "orangutan_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "bumblebee_legend" | "gorilla_legend_2" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "gazelle" | "deer" | "impala" | "baby_impala" | "rabbit" | "vole"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
@@ -93,10 +92,11 @@ pub fn hook_mask(card: &str) -> u32 {
         "okapi" => &[OnStartOfTurn, OnEndOfTurn],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
-        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "queen_ant" | "scout_bee" | "army_ant_legend"
+        "army_ant_legend" | "baboon_legend" => &[OnPlace],
+        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "queen_ant" | "scout_bee"
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "wildebeest"
         | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
-        "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" | "groundhog" => &[OnStartOfTurn],
+        "city_spider" | "goose_legend" | "bat_legend" | "groundhog" => &[OnStartOfTurn],
         "wolf_legend_2" => &[OnFriendlyRoam, OnRoam],
         "bush_dog" | "jackal" => &[OnRoam],
         "elephant_legend" => &[OnPlace, OnRoam],
@@ -107,10 +107,10 @@ pub fn hook_mask(card: &str) -> u32 {
         "swan_legend" | "cuckoo_egg" | "golden_egg" => &[OnDraw],
         "manta_ray" => &[OnAllyCovered],
         "golden_orb_weaver" | "hippopotamus" | "boar" => &[OnEnemyPlacedAdjacent],
-        "butterfly_legend" => GROWS,
-        "butterfly_legend_caterpillar" | "butterfly_legend_chrysalis" | "butterfly_legend_butterfly" => &[OnPlace, OnDawnInHand, OnStartOfTurn, OnGain],
-        "caterpillar" => &[OnGainInHand],
-        "action_1" | "action_2" | "action_3" | "action_4" | "action_5" | "action_6" | "action_7" | "action_8" => &[OnAct],
+        // the leaders prototype: Xanthe's card evolves only when it gains strength; the Caterpillar turns anywhere
+        "butterfly_legend" | "butterfly_legend_chrysalis" | "caterpillar" => &[OnGain],
+        "butterfly_legend_caterpillar" | "butterfly_legend_butterfly" => &[OnPlace, OnGain],
+        "food_maker" | "card_burner" | "refueler" | "trainer" | "flight_giver" | "lookout" | "food_thief" | "protector" => &[OnAct],
         _ => &[],
     };
     hooks.iter().fold(0u32, |m, h| m | (1 << *h as u32))
@@ -491,13 +491,6 @@ fn draw_then_give_one(st: &mut State, unit: &Unit) {
     push_draw(st, unit.owner, 1);
 }
 
-fn butterfly_stage_place(st: &mut State, unit: &Unit, draw_attr: Option<&str>, grant_attr: &str) {
-    let g = cfg(st, grant_attr);
-    st.effect_stack.push(vmap!("op" => Value::s("hand_grant_all"), "player" => pn(unit.owner), "amount" => Value::Int(g as i64)));
-    let n = draw_attr.map(|a| cfg(st, a)).unwrap_or(1);
-    push_draw(st, unit.owner, n);
-}
-
 fn spawns_beside(st: &mut State, unit: &Unit, cr: Cr, token: &str) {
     let empty = empty_neighbors(st, cr);
     if !empty.is_empty() {
@@ -565,30 +558,30 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
     };
     match (card, hook) {
         // The actions prototype: the eight Action animals (effects.py, _action_N_act)
-        ("action_1", OnAct) => gains(st, unit, "action_1_food"),
-        ("action_2", OnAct) => {
-            gains(st, unit, "action_2_food");
+        ("food_maker", OnAct) => gains(st, unit, "food_maker_food"),
+        ("card_burner", OnAct) => {
+            gains(st, unit, "card_burner_food");
             let opts = hand_iids(st, owner, 0).into_iter().map(Value::Int).collect();
             push_choose(st, owner, opts, "discard", false, Map::default());
         }
-        ("action_3", OnAct) => {
-            let n = cfg(st, "action_3_draw");
+        ("refueler", OnAct) => {
+            let n = cfg(st, "refueler_draw");
             push_draw(st, owner, n);
-            gains(st, unit, "action_3_food");
+            gains(st, unit, "refueler_food");
         }
-        ("action_4", OnAct) => {
-            let g = cfg(st, "action_4_grant");
+        ("trainer", OnAct) => {
+            let g = cfg(st, "trainer_grant");
             let opts = hand_iids(st, owner, 0).into_iter().map(Value::Int).collect();
             push_choose(st, owner, opts, "grant", false, vmap!("amount" => Value::Int(g as i64)));
         }
-        ("action_5", OnAct) => st.turn_flags.flight_next[owner.min(1) as usize] = true,
-        ("action_6", OnAct) => st.effect_stack.push(vmap!("op" => Value::s("scout"), "player" => pn(owner), "spec" => Value::Null)),
-        ("action_7", OnAct) => {
-            let n = cfg(st, "action_7_drain");
+        ("flight_giver", OnAct) => st.turn_flags.flight_next[owner.min(1) as usize] = true,
+        ("lookout", OnAct) => st.effect_stack.push(vmap!("op" => Value::s("scout"), "player" => pn(owner), "spec" => Value::Null)),
+        ("food_thief", OnAct) => {
+            let n = cfg(st, "food_thief_drain");
             lose_food(st, other(owner), n, Some(unit.card));
         }
-        ("action_8", OnAct) => {
-            let (turn, n) = (st.turn_counter + 1, cfg(st, "action_8_bonus"));
+        ("protector", OnAct) => {
+            let (turn, n) = (st.turn_counter + 1, cfg(st, "protector_bonus"));
             let p = owner.min(1) as usize;
             st.action_guard[p] = match st.action_guard[p] {
                 Some((t, g)) if t == turn => Some((turn, g + n)),
@@ -1281,12 +1274,26 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             schedule(st, unit, d, vmap!("op" => Value::s("gain_food"), "player" => pn(owner), "amount" => Value::Int(f as i64)), false, None);
         }
         // Handlock
-        ("baboon_legend", OnStartOfTurn) => {
-            let hand = hand_iids(st, owner, 0);
-            let k = hand.len().min(cfg(st, "baboon_legend_count") as usize);
-            let picks: Vec<i64> = st.rng.sample_indexes(hand.len(), k).into_iter().map(|i| hand[i]).collect();
-            let g = cfg(st, "baboon_legend_grant");
-            grant(st, picks, g);
+        ("baboon_legend", OnPlace) => {
+            // Babaji: "Roar: return an adjacent ally to your hand, give it +2 strength, and play it." (Echo repeats it.)
+            let o = crs(st, babaji_allies(st, owner, cr));
+            let g = cfg(st, "babaji_card_grant");
+            push_choose(st, owner, o, "babaji", false, vmap!("amount" => Value::Int(g as i64)));
+        }
+        ("bumblebee_legend", OnPlace) => {
+            let n = cfg(st, "bumbleton_card_per") * st.food_gains[owner.min(1) as usize];
+            push_gain(st, owner, n);
+        }
+        ("army_ant_legend", OnPlace) => {
+            let n = cfg(st, "solenia_card_per") * control_tag_count(st, owner, 0);
+            if n != 0 {
+                gain_food(st, owner, n, true, false);
+                lose_food(st, other(owner), n, Some(unit.card));
+            }
+        }
+        ("gorilla_legend_2", OnPlace) => {
+            let s = effective_strength(st, unit, None);
+            st.next_strength[owner.min(1) as usize] = Some(s);
         }
         ("orangutan_legend", OnPlace) => {
             let iids = hand_iids(st, owner, 0);
@@ -1294,38 +1301,28 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             grant(st, iids, g);
         }
         ("bee_legend_2", OnPlace) => {
-            // "Roar: if your starting deck has no animal of strength 4 or more, give your animals on the board, in your
-            // hand and in your deck +2 strength." As in Python.
+            // Lady Juliette: "Roar: if your starting deck has no animals of strength 4 or more, choose one of three
+            // small animals and play it." As in Python.
             if !crate::strength::small_starting_deck(st, owner, unit.card) {
                 return;
             }
-            let p = owner as usize;
-            let mut distinct: Vec<CardId> = Vec::new();
-            for c in &st.decks[p] {
-                if !distinct.contains(c) {
-                    distinct.push(*c);
-                }
-            }
-            st.jelly[p].clear();
-            st.jelly_set[p] = true;
-            for c in distinct {
-                let n = st.decks[p].iter().filter(|x| **x == c).count() as i32;
-                let counter = st.jelly_counter(owner, c);
-                st.jelly[p].insert(c, (n, counter));
-            }
-            let mut mine: Vec<Unit> = st.order.iter().flat_map(|&c| st.stacks[c as usize].iter().filter(|u| u.owner == owner).cloned()).collect();
-            mine.extend(st.hands[p].iter().cloned());
-            let g = st.cfg().jelly_grant;
-            grant(st, mine.iter().map(|u| u.iid).collect(), g);
+            const WISHES: [&str; 12] = ["honey_badger", "hercules_beetle", "electric_eel", "capybara", "dart_frog", "impala",
+                "hummingbird", "meerkat", "magpie", "flying_squirrel", "macaw", "cuckoo"];
+            let k = cfg(st, "juliette_wish_shown") as usize;
+            let shown: Vec<Value> = st.rng.sample_indexes(WISHES.len(), k).into_iter().map(|i| Value::s(WISHES[i])).collect();
+            push_choose(st, owner, shown, "wish", false, Map::default());
         }
-        ("butterfly_legend", OnDawnInHand) | ("butterfly_legend", OnStartOfTurn) | ("butterfly_legend", OnGain)
-        | ("butterfly_legend_caterpillar", OnDawnInHand) | ("butterfly_legend_caterpillar", OnStartOfTurn) | ("butterfly_legend_caterpillar", OnGain)
-        | ("butterfly_legend_chrysalis", OnDawnInHand) | ("butterfly_legend_chrysalis", OnStartOfTurn) | ("butterfly_legend_chrysalis", OnGain)
-        | ("butterfly_legend_butterfly", OnDawnInHand) | ("butterfly_legend_butterfly", OnStartOfTurn) | ("butterfly_legend_butterfly", OnGain) => butterfly_evolve(st, unit),
+        ("butterfly_legend", OnGain) | ("butterfly_legend_caterpillar", OnGain) | ("butterfly_legend_chrysalis", OnGain)
+        | ("butterfly_legend_butterfly", OnGain) => butterfly_evolve(st, unit),
         ("butterfly_legend_caterpillar", OnPlace) => draws(st, unit, 1),
-        ("butterfly_legend_chrysalis", OnPlace) | ("butterfly", OnPlace) => draw_then_give_one(st, unit),
-        ("butterfly_legend_butterfly", OnPlace) => butterfly_stage_place(st, unit, None, "butterfly_legend_stage4_grant"),
-        ("butterfly_legend_monarch", OnPlace) => butterfly_stage_place(st, unit, Some("butterfly_legend_stage5_draw"), "butterfly_legend_stage5_grant"),
+        ("butterfly_legend_butterfly", OnPlace) | ("butterfly", OnPlace) => draw_then_give_one(st, unit),
+        ("butterfly_legend_monarch", OnPlace) => {
+            // "Roar: draw 2 cards, then give 2 animals in your hand +2 strength."
+            let (g, c) = (cfg(st, "monarch_grant"), cfg(st, "monarch_count"));
+            st.effect_stack.push(vmap!("op" => Value::s("hand_grant_count"), "player" => pn(owner), "amount" => Value::Int(g as i64), "count" => Value::Int(c as i64)));
+            let n = cfg(st, "butterfly_legend_stage5_draw");
+            push_draw(st, owner, n);
+        }
         ("hummingbird", OnPlace) => {
             let n = cfg(st, "hummingbird_draw");
             draws(st, unit, n);
@@ -1368,7 +1365,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 gain_to_hand(st, owner, c, 0);
             }
         }
-        ("caterpillar", OnGainInHand) => {
+        ("caterpillar", OnGain) => {
             let b = cid(st, "butterfly");
             transform(st, unit.iid, b);
             draw_cards(st, owner, 1);
@@ -1660,6 +1657,21 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                 crate::emit!(st, "unremove", vmap!("card" => card_v(st, card), "owner" => from_owner.map(pn).unwrap_or(Value::Null), "to" => pn(chooser)));
                 gain_to_hand(st, chooser, card, 0);
             }
+        }
+        "wish" => {
+            // Lady Juliette: the wished animal, made and played (a free placement; nowhere to go: gone)
+            let Some(card) = choice.as_str() else { return };
+            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(chooser), "card_id" => Value::s(st.cname(st.card_id(card).unwrap())), "make" => Value::Bool(true)));
+        }
+        "babaji" => {
+            let Some(cr) = cr_of(st) else { return };
+            let Some(top) = st.top(cr).cloned() else { return };
+            if top.owner != chooser || !statics::can_be_removed(st, &top, Some(cr), false) {
+                return;
+            }
+            let Some(inst) = bounce(st, cr, &top, 0) else { return };
+            st.effect_stack.push(vmap!("op" => Value::s("play_iid"), "chooser" => pn(chooser), "iid" => Value::Int(inst.iid)));
+            grant(st, vec![inst.iid], m_get_i(step, "amount").unwrap_or(0) as i32);
         }
         "make_in_hand" => {
             let Some(card) = choice.as_str().and_then(|s| st.card_id(s)) else { return };

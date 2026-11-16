@@ -266,8 +266,11 @@ pub fn do_placement(st: &mut State, player: Player, card: CardId, target: &Targe
         None => playable_copy(st, player, card),
         Some(i) => playable_copies(st, player, card).into_iter().find(|u| u.iid == i),
     };
-    let unit = unit.ok_or_else(|| format!("{} has no playable {:?} in hand", player_name(player), st.cname(card)))?;
+    let mut unit = unit.ok_or_else(|| format!("{} has no playable {:?} in hand", player_name(player), st.cname(card)))?;
     let strength = placement_strength(st, &unit);
+    if crate::leaders::any(st) || st.next_strength[0].is_some() || st.next_strength[1].is_some() {
+        crate::leaders::settle_play_strength(st, player, &mut unit);   // Arne's shared strength, the Gorilla's
+    }
     let pos = st.hands[p].iter().position(|u| u.iid == unit.iid).unwrap();
     st.hands[p].remove(pos);
     let cost = st.card(card).food_cost;
@@ -301,7 +304,7 @@ pub fn copy_choices(st: &State, player: Player, card: CardId) -> Vec<(Option<i64
             firsts.push(u.clone());
         }
     }
-    if firsts.len() <= 1 {
+    if firsts.len() <= 1 || crate::leaders::leads(st, player, crate::leaders::ARNE) {
         return playable_copy(st, player, card).map(|b| vec![(None, b)]).unwrap_or_default();
     }
     firsts.into_iter().map(|u| (Some(u.iid), u)).collect()
@@ -708,25 +711,21 @@ pub fn gain_food(st: &mut State, player: Player, amount: i32, rider: bool, incom
     }
     crate::emit!(st, "food", f);
     st.turn_flags.food_gained[player.min(1) as usize] += amount;
+    if rider && player <= B {   // Lord Bumbleton's card counts each gain; his leader's extra 1 is part of it
+        st.food_gains[player as usize] += 1;
+    }
     if st.food[player as usize] >= st.map().win_food {
         st.result = Some(GameResult { winner: Some(player), reason: "food".into() });
         return;
     }
-    if rider {
-        let tops = statics::active_tops(st, player, st.g.known.bumblebee_legend);
-        let falstaffs = tops.len() as i32;
-        if falstaffs > 0 && !(st.cfg().flag("cap_falstaff") && st.turn_flags.falstaff[player.min(1) as usize]) {
-            if st.cfg().flag("cap_falstaff") {
-                st.turn_flags.falstaff[player.min(1) as usize] = true;
-            }
-            let was = (st.cause, st.cause_iid);
-            st.cause = st.g.known.bumblebee_legend;
-            st.cause_iid = Some(tops[0].1);
-            let extra = falstaffs * st.cfg().int("bumblebee_legend_food_rider");
-            gain_food(st, player, extra, false, false);
-            st.cause = was.0;
-            st.cause_iid = was.1;
-        }
+    if rider && crate::leaders::leads(st, player, crate::leaders::BUMBLETON) {
+        let was = (st.cause, st.cause_iid);
+        st.cause = st.g.known.bumblebee_legend;
+        st.cause_iid = None;
+        let extra = st.cfg().int("bumbleton_leader_food");
+        gain_food(st, player, extra, false, false);
+        st.cause = was.0;
+        st.cause_iid = was.1;
     }
 }
 
@@ -741,6 +740,9 @@ pub struct RemoveEvent {
 }
 
 fn fire_remove_event(st: &mut State, card: CardId, owner: Player, cr: Option<Cr>, by_player: Option<Player>, by_card: Option<CardId>, skip: Option<i64>) {
+    if crate::leaders::any(st) {
+        crate::leaders::count_kill(st, owner, by_player, by_card);
+    }
     let ev = RemoveEvent { card, owner, cr, by_player, by_card };
     for c in st.sorted_occupied() {
         let top = st.top(c).cloned().unwrap();
@@ -867,6 +869,9 @@ pub fn remove_from_hand(st: &mut State, player: Player, iid: i64) {
 }
 
 pub fn matches(st: &State, card: CardId, spec: &str) -> bool {
+    if spec.contains('|') {
+        return spec.split('|').any(|part| matches(st, card, part));
+    }
     if spec.contains('&') {
         return spec.split('&').all(|part| matches(st, card, part));
     }
@@ -1008,7 +1013,18 @@ pub fn legal_roams(st: &State, player: Player, free_only: bool) -> Vec<Action> {
 
 /// Whether `unit`'s card carries an Action, its effects working.
 pub fn has_act(st: &State, unit: &Unit) -> bool {
-    st.g.has_hook(unit.card, crate::cards::Hook::OnAct) && statics::active(st, unit)
+    (st.g.has_hook(unit.card, crate::cards::Hook::OnAct)
+        || (st.g.has_hook(unit.card, crate::cards::Hook::OnPlace) && st.card(unit.card).has_kw(K_ECHO)))
+        && statics::active(st, unit)
+}
+
+/// Babaji's Roar: the allies next to `cr` it may return (effects.py _babaji_allies).
+pub fn babaji_allies(st: &State, player: Player, cr: Cr) -> Vec<Cr> {
+    let mut out: Vec<Cr> = st.map().neighbors(cr).iter().copied()
+        .filter(|&nb| st.top(nb).map(|t| t.owner == player && st.cname(t.card) != "baboon_legend" && statics::can_be_removed(st, t, Some(nb), false)).unwrap_or(false))
+        .collect();
+    out.sort_by(|a, b| st.crname(*a).cmp(st.crname(*b)));
+    out
 }
 
 /// Every Action `player` may use now (the caller checks the turn has an action left), in crossroad order.
@@ -1024,8 +1040,9 @@ pub fn legal_acts(st: &State, player: Player) -> Vec<Action> {
         }
         let p = player.min(1) as usize;
         let ok = match st.cname(unit.card) {
-            "action_2" | "action_4" => !st.hands[p].is_empty(),
-            "action_6" => !st.decks[p].is_empty(),
+            "card_burner" | "trainer" => !st.hands[p].is_empty(),
+            "lookout" => !st.decks[p].is_empty(),
+            "baboon_legend" => !babaji_allies(st, player, cr).is_empty(),
             _ => true,
         };
         if ok {
@@ -1043,7 +1060,8 @@ pub fn do_act(st: &mut State, player: Player, origin: Cr) -> Result<(), String> 
     };
     st.turn_flags.acted.push(unit.iid);
     crate::emit!(st, "act", vmap!("player" => pn(player), "iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, origin)));
-    crate::cards::run(st, unit.card, None, crate::cards::Hook::OnAct, &unit, &crate::cards::Args::Place(origin));
+    let hook = if st.g.has_hook(unit.card, crate::cards::Hook::OnAct) { crate::cards::Hook::OnAct } else { crate::cards::Hook::OnPlace };   // Echo: its Roar again
+    crate::cards::run(st, unit.card, None, hook, &unit, &crate::cards::Args::Place(origin));
     Ok(())
 }
 
@@ -1268,6 +1286,7 @@ pub fn start_of_turn(st: &mut State, player: Player) {
         }
     }
     st.scheduled = keep.into();
+    crate::leaders::dawn(st, player);   // Xanthe's leader evolves
     let hand: Vec<Unit> = st.hands[player as usize].to_vec();
     for inst in hand {
         if st.g.has_hook(inst.card, Hook::OnDawnInHand) {
@@ -1281,6 +1300,7 @@ pub fn start_of_turn(st: &mut State, player: Player) {
 }
 
 pub fn end_of_turn(st: &mut State, player: Player) {
+    crate::leaders::dusk(st, player);   // Queen Solenia's leader
     cards::vultures_dusk(st, player);
     push_timed_hooks(st, player, Hook::OnEndOfTurn);
 }
@@ -1486,6 +1506,9 @@ fn op_scout(st: &mut State, step: &mut Map) -> Option<Pending> {
     }
     let inst = st.deck_instance(player, choice);
     st.hands[p].push(inst.clone());
+    if let Some(g) = m_get_i(step, "grant").filter(|g| *g != 0) {
+        grant(st, vec![inst.iid], g as i32);   // Babaji's leader
+    }
     fire_draw(st, vec![inst]);
     shuffle_back(st, player, &pulled, None);
     None
@@ -2089,6 +2112,55 @@ fn op_hand_grant_all(st: &mut State, step: &mut Map) -> Option<Pending> {
     None
 }
 
+/// Babaji's replay: this very card from hand, free, on a legal crossroad (effects.py _op_play_iid).
+fn op_play_iid(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let player = step_player(st, step, "chooser");
+    if let Some(pa) = step.get("place_action").cloned() {
+        if pa.as_str() != Some(SKIP) {
+            if let Action::Place { card, target, iid } = place_from_map(st, pa.as_map().unwrap()) {
+                let _ = do_placement(st, player, card, &target, iid);
+            }
+        }
+        return None;
+    }
+    let want = m_get_i(step, "iid").unwrap_or(-1);
+    let inst = st.hands[player as usize].iter().find(|u| u.iid == want).cloned()?;
+    let mut dicts: Vec<Map> = Vec::new();
+    for pl in legal_placements(st, player, Some(&[inst.card]), false) {
+        if let Action::Place { card, target, iid } = &pl {
+            let same = match iid {
+                None => true,
+                Some(i) => st.find_instance(*i).map(|u| u.strength_counter == inst.strength_counter).unwrap_or(true),
+            };
+            if same {
+                dicts.push(place_dict(st, *card, target, *iid));
+            }
+        }
+    }
+    if dicts.is_empty() {
+        return None;
+    }
+    Some(Pending::place(player, false, dicts))
+}
+
+/// Xanthe's Monarch: give `count` animals in your hand +`amount` (all of them, with that many or fewer).
+fn op_hand_grant_count(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let player = step_player(st, step, "player");
+    let hand = hand_iids(st, player, 0);
+    let count = m_get_i(step, "count").unwrap_or(0);
+    let amount = m_get_i(step, "amount").unwrap_or(0);
+    if hand.len() as i64 <= count {
+        grant(st, hand, amount as i32);
+    } else {
+        let mut args = vmap!("amount" => Value::Int(amount), "count" => Value::Int(count));
+        if let Some(bc) = step.get("by_card") {
+            args.insert("by_card".into(), bc.clone());
+        }
+        push_choose(st, player, hand.into_iter().map(Value::Int).collect(), "hand_grant", false, args);
+    }
+    None
+}
+
 fn run_op(st: &mut State, op: &str, step: &mut Map) -> Option<Pending> {
     match op {
         "mulligan" => op_mulligan(st, step),
@@ -2129,6 +2201,8 @@ fn run_op(st: &mut State, op: &str, step: &mut Map) -> Option<Pending> {
         "magpie_steal" => op_magpie_steal(st, step),
         "hand_grant_one" => op_hand_grant_one(st, step),
         "hand_grant_all" => op_hand_grant_all(st, step),
+        "play_iid" => op_play_iid(st, step),
+        "hand_grant_count" => op_hand_grant_count(st, step),
         _ => panic!("unknown op {op:?}"),
     }
 }

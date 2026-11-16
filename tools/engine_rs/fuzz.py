@@ -12,6 +12,7 @@ from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PassAction
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
+from animal_kingdom.engine.leaders import LEADERS
 from animal_kingdom.engine.state import new_game
 from animal_kingdom.engine.strength import strength_breakdown
 import ak_engine
@@ -33,11 +34,28 @@ def random_deck(rng, pool, cards):
     return deck
 
 
-def play(seed, pool, cards, config, eng, pass_rate):
+def with_leader(rng, deck, cards):
+    """The leaders prototype: half the decks get a leader, its card swapped in for one of the deck's."""
+    if rng.random() < 0.5:
+        return deck, None
+    lid = rng.choice(sorted(LEADERS))
+    if lid not in deck:
+        deck = deck[:-1] + [lid]
+    return deck, lid
+
+
+def play(seed, pool, cards, config, eng, pass_rate, leaders=False, leader_decks=False):
     rng = random.Random(seed)
     deck_a, deck_b = random_deck(rng, pool, cards), random_deck(rng, pool, cards)
-    py = new_game(list(deck_a), list(deck_b), seed, map_id="map_b", config=config)
-    rs = eng.new_game(list(deck_a), list(deck_b), seed, None, False)
+    lead_a = lead_b = None
+    if leader_decks:   # the bot decks' leader variants (decklists.json), each under its leader
+        from animal_kingdom.decks import DECK_LEADERS, load_premade_deck
+        sa, sb = rng.choice(sorted(DECK_LEADERS)), rng.choice(sorted(DECK_LEADERS))
+        deck_a, deck_b, lead_a, lead_b = load_premade_deck(sa), load_premade_deck(sb), DECK_LEADERS[sa], DECK_LEADERS[sb]
+    elif leaders:
+        (deck_a, lead_a), (deck_b, lead_b) = with_leader(rng, deck_a, cards), with_leader(rng, deck_b, cards)
+    py = new_game(list(deck_a), list(deck_b), seed, map_id="map_b", config=config, leaders={"A": lead_a, "B": lead_b})
+    rs = eng.new_game(list(deck_a), list(deck_b), seed, None, False, lead_a, lead_b)
     rs.set_record_events(False)
     steps = 0
 
@@ -97,6 +115,8 @@ if __name__ == "__main__":
     ap.add_argument("--pass-rate", type=float, default=0.03)
     ap.add_argument("--all-cards", action="store_true", help="draw from every card, reserve and tokens included")
     ap.add_argument("--stop", action="store_true")
+    ap.add_argument("--leaders", action="store_true", help="give about half the decks a leader (the leaders prototype)")
+    ap.add_argument("--leader-decks", action="store_true", help="play the bot decks' leader variants under their leaders")
     a = ap.parse_args()
     cards = load_cards()
     pool = sorted(c for c, card in cards.items() if a.all_cards or card.collectible)
@@ -108,7 +128,7 @@ if __name__ == "__main__":
     for k in range(a.games):
         seed = a.seed * 100000 + k
         try:
-            bad, steps, da, db = play(seed, pool, cards, config, eng, a.pass_rate)
+            bad, steps, da, db = play(seed, pool, cards, config, eng, a.pass_rate, a.leaders, a.leader_decks)
         except Exception as e:
             bad, steps, da, db = f"exception {type(e).__name__}: {e}", 0, [], []
         total_steps += steps

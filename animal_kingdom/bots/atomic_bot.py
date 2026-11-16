@@ -35,7 +35,7 @@ from math import comb
 from typing import Optional, Sequence
 
 from ..engine import rules
-from ..engine.actions import Action, DrawAction
+from ..engine.actions import Action, DrawAction, LeaderAction
 from ..engine.state import GameState, Rng, StateView, UnitInstance, other_player
 from ..engine.strength import effective_strength
 from .base import Bot
@@ -49,8 +49,15 @@ def _key(s: GameState) -> tuple:
                          for cr, st in s.board.items() if st))
     hands = tuple(tuple(sorted((u.card_id, u.strength_counter, u.locked_until_turn) for u in s.hands[p])) for p in ("A", "B"))
     result = rules.is_terminal(s)
-    return (board, hands, tuple(sorted(s.food.items())), tuple(len(s.decks[p]) for p in ("A", "B")),
-            s.current, result.winner if result else None)
+    key = (board, hands, tuple(sorted(s.food.items())), tuple(len(s.decks[p]) for p in ("A", "B")),
+           s.current, result.winner if result else None)
+    if s.leaders or s.next_strength:     # the leaders prototype: a spent power, a stage, a count, the Gorilla's strength
+        key += (tuple(tuple(sorted(s.leaders[p].items())) if p in s.leaders else None for p in ("A", "B")),
+                tuple(sorted(s.next_strength.items())))
+    return key
+
+
+TREE_DEPTH = 64   # decisions one line of a turn is searched to (atomic.rs TREE_DEPTH)
 
 
 class AtomicBot(Bot):
@@ -315,6 +322,21 @@ class AtomicBot(Bot):
 
     def _tree(self, s: GameState, actor: str, me: str, leaf, hist: tuple, memo: dict, prob: float = 1.0,
               alpha: float = -math.inf, beta: float = math.inf, last: bool = False) -> Optional[tuple[float, list]]:
+        """`_tree_line`, with the line's length held: a turn whose free effects could go on for ever (the leaders prototype:
+        two Babajis returning and replaying each other) is judged where it stands at TREE_DEPTH decisions (atomic.rs)."""
+        if self._depth >= TREE_DEPTH:
+            v = leaf(s, hist, prob)
+            return None if v is None else (v, [])
+        self._depth += 1
+        try:
+            return self._tree_line(s, actor, me, leaf, hist, memo, prob, alpha, beta, last)
+        finally:
+            self._depth -= 1
+
+    _depth = 0
+
+    def _tree_line(self, s: GameState, actor: str, me: str, leaf, hist: tuple, memo: dict, prob: float = 1.0,
+                   alpha: float = -math.inf, beta: float = math.inf, last: bool = False) -> Optional[tuple[float, list]]:
         """The value of `actor`'s best whole turn from `s` and its actions up to the first draw: a decision is the best
         of its actions for the actor, a draw (anything taken from the actor's deck) the average over what it may bring,
         a finished turn `leaf(end, hist, prob)` (None: not followed, so never chosen). `hist` is the cards drawn so far,
@@ -530,7 +552,7 @@ class AtomicBot(Bot):
         ranking = self.rank(st, me)
         best = ranking[0]["turn"]
         a, self._plan = best[0], list(best[1:])
-        if isinstance(a, DrawAction):      # what follows a draw is planned once the cards are seen
+        if isinstance(a, (DrawAction, LeaderAction)):   # what follows a draw is planned once the cards are seen (a den power draws or scouts)
             self._plan = []
         self._plan_key = self._next_key(st, a, me) if self._plan else None
         return a

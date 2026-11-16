@@ -33,7 +33,7 @@ def end_turn(s):
 
 def test_an_action_costs_one_of_the_turns_actions_and_comes_once_a_turn():
     s = state(decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
-    put(s, "1,1", "action_1", "A")
+    put(s, "1,1", "food_maker", "A")
     assert acts(s) == {"1,1"}
     rules.apply_action(s, ActAction("1,1"))
     assert s.food["A"] == 10 and s.actions_taken_this_turn == 1 and s.current == "A"
@@ -47,8 +47,8 @@ def test_an_action_costs_one_of_the_turns_actions_and_comes_once_a_turn():
 
 def test_with_no_action_left_it_is_not_offered():
     s = state(decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
-    put(s, "1,1", "action_1", "A")
-    put(s, "1,2", "action_1", "A")
+    put(s, "1,1", "food_maker", "A")
+    put(s, "1,2", "food_maker", "A")
     rules.apply_action(s, ActAction("1,1"))
     rules.apply_action(s, ActAction("1,2"))                  # two animals, one action each
     assert s.food["A"] == 20 and s.current == "B"            # the turn's two actions are spent: it ends
@@ -56,8 +56,8 @@ def test_with_no_action_left_it_is_not_offered():
 
 
 def test_usable_the_turn_it_is_placed():
-    s = state(hands={"A": ["action_1"]})
-    rules.apply_action(s, PlaceAction("action_1", ("cr", "1,1")))
+    s = state(hands={"A": ["food_maker"]})
+    rules.apply_action(s, PlaceAction("food_maker", ("cr", "1,1")))
     assert acts(s) == {"1,1"}
     rules.apply_action(s, ActAction("1,1"))
     assert s.food["A"] == 10
@@ -65,13 +65,13 @@ def test_usable_the_turn_it_is_placed():
 
 def test_a_covered_animal_cannot_act_and_an_inked_one_has_no_action():
     s = state()
-    put(s, "2,2", "action_1", "A")
+    put(s, "2,2", "food_maker", "A")
     put(s, "2,2", "t_big", "B")                              # covered by an enemy
-    u = put(s, "1,1", "action_1", "A")
+    u = put(s, "1,1", "food_maker", "A")
     assert acts(s) == {"1,1"}
     s.inked.add(u.iid)                                       # lost all its effects
     assert acts(s) == set()
-    put(s, "1,3", "action_7", "B")                           # the opponent's never offered to you
+    put(s, "1,3", "food_thief", "B")                           # the opponent's never offered to you
     assert acts(s) == set()
 
 
@@ -79,7 +79,7 @@ def test_an_action_is_not_a_placement_nor_a_roar():
     # the Worker Wasp gains food whenever you place an animal; the Macaw repeats the last Roar your opponent played
     s = state(hands={"B": ["macaw"]})
     put(s, "1,1", "worker_wasp", "A")
-    put(s, "1,2", "action_1", "A")
+    put(s, "1,2", "food_maker", "A")
     rules.apply_action(s, ActAction("1,2"))
     assert s.food["A"] == 10                                 # the Action's food only, no Worker Wasp food
     assert "A" not in s.last_roar                            # nothing for a Macaw to repeat
@@ -89,7 +89,7 @@ def test_an_action_is_not_a_placement_nor_a_roar():
 def test_food_from_an_action_counts_as_food_gained_and_meets_the_riders():
     s = state(decks={"A": ["t_body"] * 3, "B": []})
     put(s, "1,1", "bumblebee_legend", "A")                   # Lord Bumbleton: gain 3 more whenever you gain food
-    put(s, "1,2", "action_1", "A")
+    put(s, "1,2", "food_maker", "A")
     rules.apply_action(s, ActAction("1,2"))
     assert s.food["A"] == 13
     assert s.turn_flags["food_gained_A"] == 13               # "if you gained 10 or more food this turn" sees it
@@ -97,7 +97,7 @@ def test_food_from_an_action_counts_as_food_gained_and_meets_the_riders():
 
 def test_an_action_survives_a_save_and_a_reload():
     s = state(decks={"A": ["t_body"] * 3, "B": []})
-    u = put(s, "1,1", "action_8", "A")
+    u = put(s, "1,1", "protector", "A")
     rules.apply_action(s, ActAction("1,1"))
     d = s.to_dict()
     back = GameState.from_dict(d, cards=CARDS, config=s.config)
@@ -108,7 +108,7 @@ def test_an_action_survives_a_save_and_a_reload():
 
 def test_action_2_discards_the_card_you_choose_then_gains_15():
     s = state(hands={"A": ["t_body", "t_big"]})
-    put(s, "1,1", "action_2", "A")
+    put(s, "1,1", "card_burner", "A")
     rules.apply_action(s, ActAction("1,1"))
     big = next(u for u in s.hands["A"] if u.card_id == "t_big")
     assert s.pending and set(s.pending["options"]) == {u.iid for u in s.hands["A"]}
@@ -119,25 +119,25 @@ def test_action_2_discards_the_card_you_choose_then_gains_15():
 
 def test_action_2_is_not_offered_with_an_empty_hand():
     s = state()
-    put(s, "1,1", "action_2", "A")
+    put(s, "1,1", "card_burner", "A")
     assert acts(s) == set()
 
 
 def test_action_3_gains_5_and_draws_a_card_and_with_an_empty_deck_still_gains():
     s = state(decks={"A": ["t_body"], "B": []})
-    put(s, "1,1", "action_3", "A")
+    put(s, "1,1", "refueler", "A")
     put(s, "1,2", "hamster", "A")                            # whenever you draw a card, gain 5 food: a normal draw
     rules.apply_action(s, ActAction("1,1"))
     assert s.food["A"] == 10 and [u.card_id for u in s.hands["A"]] == ["t_body"]
     s = state()                                              # an empty deck: the food all the same
-    put(s, "1,1", "action_3", "A")
+    put(s, "1,1", "refueler", "A")
     rules.apply_action(s, ActAction("1,1"))
     assert s.food["A"] == 5 and s.hands["A"] == []
 
 
 def test_action_4_gives_the_hand_animal_you_choose_plus_2_and_it_carries_onto_the_board():
     s = state(hands={"A": ["t_body", "t_big"]})
-    put(s, "1,1", "action_4", "A")
+    put(s, "1,1", "trainer", "A")
     rules.apply_action(s, ActAction("1,1"))
     body = next(u for u in s.hands["A"] if u.card_id == "t_body")
     rules.apply_action(s, ChoiceAction(body.iid))
@@ -148,7 +148,7 @@ def test_action_4_gives_the_hand_animal_you_choose_plus_2_and_it_carries_onto_th
 
 def test_action_4_is_not_offered_without_an_animal_in_hand():
     s = state()
-    put(s, "1,1", "action_4", "A")
+    put(s, "1,1", "trainer", "A")
     assert acts(s) == set()
 
 
@@ -156,7 +156,7 @@ def test_action_5_lets_the_next_animal_you_play_land_anywhere_then_is_spent():
     s = state(hands={"A": ["t_body", "t_body"]}, decks={"A": ["t_body"] * 3, "B": ["t_body"] * 3})
     s.turn_counter = 4
     s.turn_flags["bonus_actions_A"] = 1                      # three actions, to see the second play
-    put(s, "1,1", "action_5", "A")
+    put(s, "1,1", "flight_giver", "A")
 
     def places(s):
         return {a.target for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
@@ -171,7 +171,7 @@ def test_action_5_lets_the_next_animal_you_play_land_anywhere_then_is_spent():
 
 def test_action_5_unused_is_gone_at_the_end_of_the_turn():
     s = state(hands={"A": ["t_body"]}, decks={"A": ["t_body"] * 3, "B": ["t_body"] * 3})
-    put(s, "1,1", "action_5", "A")
+    put(s, "1,1", "flight_giver", "A")
     rules.apply_action(s, ActAction("1,1"))
     rules.apply_action(s, DrawAction())
     assert s.current == "B"
@@ -181,7 +181,7 @@ def test_action_5_unused_is_gone_at_the_end_of_the_turn():
 
 def test_action_6_scouts_a_card():
     s = state(decks={"A": ["t_body", "t_big", "hamster", "macaw"], "B": []})
-    put(s, "1,1", "action_6", "A")
+    put(s, "1,1", "lookout", "A")
     rules.apply_action(s, ActAction("1,1"))
     assert s.pending and set(s.pending["options"]) == {"t_big", "hamster", "macaw"}   # the top three
     rules.apply_action(s, ChoiceAction("t_big"))
@@ -190,14 +190,14 @@ def test_action_6_scouts_a_card():
 
 def test_action_6_is_not_offered_with_an_empty_deck():
     s = state()
-    put(s, "1,1", "action_6", "A")
+    put(s, "1,1", "lookout", "A")
     assert acts(s) == set()
 
 
 def test_action_7_takes_10_food_never_below_0():
     s = state(food={"A": 0, "B": 25})
-    put(s, "1,1", "action_7", "A")
-    put(s, "1,2", "action_7", "A")
+    put(s, "1,1", "food_thief", "A")
+    put(s, "1,2", "food_thief", "A")
     rules.apply_action(s, ActAction("1,1"))
     assert s.food["B"] == 15
     s.food["B"] = 4
@@ -207,14 +207,14 @@ def test_action_7_takes_10_food_never_below_0():
 
 def test_action_8_gives_your_animals_plus_2_through_the_opponents_next_turn_only():
     s = state(hands={"B": ["t_body"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
-    me = put(s, "1,1", "action_8", "A")
+    me = put(s, "1,1", "protector", "A")
     ally = put(s, "1,2", "t_body", "A")
     rules.apply_action(s, ActAction("1,1"))
     assert effective_strength(s, ally) == 4                  # not during your own turn
     rules.apply_action(s, DrawAction())
     assert s.current == "B"
     assert effective_strength(s, ally) == 6 and effective_strength(s, me) == 4   # itself included
-    assert ["action_8", 2] in strength_breakdown(s, ally)["auras"]
+    assert ["protector", 2] in strength_breakdown(s, ally)["auras"]
     s.board.pop("1,1")                                       # it holds even if the animal that gave it is gone
     assert effective_strength(s, ally) == 6
     late = put(s, "1,3", "t_body", "A")                      # one arriving during that turn has it too
@@ -225,8 +225,8 @@ def test_action_8_gives_your_animals_plus_2_through_the_opponents_next_turn_only
 
 def test_action_8_used_twice_stacks():
     s = state(decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
-    put(s, "1,1", "action_8", "A")
-    put(s, "1,2", "action_8", "A")
+    put(s, "1,1", "protector", "A")
+    put(s, "1,2", "protector", "A")
     ally = put(s, "1,3", "t_body", "A")
     rules.apply_action(s, ActAction("1,1"))
     rules.apply_action(s, ActAction("1,2"))
@@ -235,7 +235,7 @@ def test_action_8_used_twice_stacks():
 
 def test_action_8_stops_a_cover_it_would_have_allowed():
     s = state(hands={"B": ["t_body"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
-    put(s, "3,2", "action_8", "A")                           # strength 2: a 4 covers it, a 2+2 it can't
+    put(s, "3,2", "protector", "A")                           # strength 2: a 4 covers it, a 2+2 it can't
     put(s, "4,2", "t_body", "B")
     put(s, "1,2", "t_body", "A"); put(s, "2,2", "t_body", "A")
     rules.apply_action(s, ActAction("3,2"))

@@ -21,7 +21,7 @@ from ..bots.learned_eval import load_eval
 from ..bots.random_bot import RandomBot
 from ..bots.referee_bot import RefereeBot
 from ..bots.turn_bot import TurnBot
-from ..decks import load_premade_deck
+from ..decks import leaders_for, load_premade_deck
 from ..engine import rules
 from ..engine.config import Config
 from ..engine.state import new_game
@@ -310,7 +310,7 @@ def play_game(
     rather than leaving it to chance.
     """
     state = new_game(load_premade_deck(deck_a), load_premade_deck(deck_b), seed,
-                     map_id=map_id, config=config, first_player=first_player)
+                     map_id=map_id, config=config, first_player=first_player, leaders=leaders_for(deck_a, deck_b))
     bots = {"A": bot_a, "B": bot_b}
 
     drawn: dict[str, set[str]] = {"A": set(), "B": set()}

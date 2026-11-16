@@ -537,7 +537,8 @@ def test_a_gauntlet_leaves_out_the_premade_your_custom_deck_copies(monkeypatch, 
             m = await (await c.post("/api/match", json={"deck": deck, "gauntlet": {"level": "easy", "games": 2}},
                                     headers={"X-AK-Key": a["code"]})).json()
             field = {g["deck"] for g in server.hub.matches[m["id"]].schedule}
-            assert "cats" not in field and field == set(DECK_SLUGS) - {"cats"}
+            from animal_kingdom.decks import DECK_LEADERS    # the leaders prototype: a leader variant is no gauntlet opponent
+            assert "cats" not in field and field == set(DECK_SLUGS) - {"cats"} - set(DECK_LEADERS)
     asyncio.run(run())
 
 

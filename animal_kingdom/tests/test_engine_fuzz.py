@@ -33,7 +33,7 @@ def test_long_game_ends_at_the_turn_cap():
     """A random game in which both decks and hands run dry and roaming keeps a player acting, so the two-idle-turns end
     never fires; the turn cap ends it. Seed 2077 on the 2026-11-12 card pool (a card change can move it: find the first
     seed whose game ends at the cap with both decks and hands empty)."""
-    rec, n, state = fuzz.play(168, max_actions=100_000)   # 168 on the stars branch (Martin's card changes of 2026-11-15 moved 385)
+    rec, n, state = fuzz.play(50, max_actions=100_000)    # 50 since the Action cards took their names (2026-11-16)
     assert rec is None
     result = rules.is_terminal(state)
     assert result is not None and result.reason == "max_turns"
@@ -47,7 +47,7 @@ def test_the_fuzzer_sees_a_crash(monkeypatch):
 
     def flaky(state, action, **kw):
         calls["n"] += 1
-        if calls["n"] == 5:
+        if calls["n"] == 40:   # past both mulligans (the leaders branch's cards moved the deal)
             raise KeyError("planted")
         return real(state, action, **kw)
 

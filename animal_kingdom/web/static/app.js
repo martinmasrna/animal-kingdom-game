@@ -4,7 +4,7 @@ import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
 import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan } from './timeline.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt } from './board.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
@@ -27,7 +27,7 @@ const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
-let RULES = null, CARDS = {}, MAP, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null;   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
+let RULES = null, CARDS = {}, MAP, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null, LEADERS = {};   // LEADERS: the leaders prototype, card id -> {kind, text}   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
 
@@ -119,10 +119,11 @@ const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 // collection to fix, never played. `fix` holds what is over.
 const playable = () => { const mine = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]);
     const size = RULES ? RULES.deckSize : 30, short = Math.max(0, size - deckSize(d.cards)), fix = short || !RULES ? '' : deckIssue(list, CARDS, RULES);
-    return { id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: short || (fix ? -1 : 0), fix, list }; });
+    const leader = d.leader && list.includes(d.leader) && LEADERS[d.leader] ? d.leader : null;   // the leaders prototype
+    return { id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: short || (fix ? -1 : 0), fix, list, leader }; });
   return mine.some(d => !d.short) ? mine : [...DECKS, ...mine]; };
 const chosenDeck = () => { const all = playable().filter(d => !d.short), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
-const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
+const deckSpec = d => d.mine ? { name: d.name, list: d.list, ...(d.leader ? { leader: d.leader } : {}) } : d.id;
 
 // ------------------------------------------------------------------ routing
 // The client's build, from the server that served it. A socket (presence, or a match) names the server's build each time
@@ -137,7 +138,8 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; RULES = p.rules; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; RULES = p.rules; LEADERS = p.leaders || {};
+  if (CARDS.bumblebee_legend) CARDS.bumblebee_legend.base = CARDS.bumblebee_legend.text; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
   COVER = Object.fromEntries([...DECKS, ...BOT_ONLY].map(d => [d.id, d.cover]));
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
@@ -695,7 +697,7 @@ const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  renderCollection(app, { open, rules: RULES, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
+  renderCollection(app, { open, rules: RULES, cards: CARDS, leaders: LEADERS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
 }
 
@@ -1027,6 +1029,8 @@ addEventListener('pointerup', e => {
 addEventListener('click', e => { if (e.isTrusted && Date.now() < noClickUntil) { noClickUntil = 0; e.stopPropagation(); e.preventDefault(); } }, true);
 
 function showView(prev) {
+  // Lord Bumbleton's card (the leaders prototype): "(Current: X)" reads your number now
+  const bb = CARDS.bumblebee_legend; if (bb && bb.base && V && V.game && V.game.foodGains) bb.text = bb.base.replace('X', V.game.foodGains[V.you]);
   // While an animation the player started must play out (the tutorial's fruit on Next), new views wait: a redraw would cut
   // it short. The first held view's predecessor is kept, so what changed meanwhile still animates when they apply.
   const hold = (ui.animUntil || 0) - Date.now();
@@ -1388,7 +1392,8 @@ function drawGame() {
     bar.classList.add('on');
     if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); store('ak:mullseen', '1'); act({ kind: 'choice', choice: SKIP }); };
   } else if (d.pend) {   // a choice only ever reaches the screen after the steps that led to it have played
-    const src = d.pend.source && CARDS[d.pend.source];
+    // a choice inside your leader's power names the leader and reads its power, not its card (the leaders prototype)
+    const src = d.pend.leader && G.leaders && G.leaders[V.you] ? { name: (CARDS[d.pend.source] || {}).name, text: G.leaders[V.you].text } : d.pend.source && CARDS[d.pend.source];
     // One line at the top centre, where the eyes are: the card that asks and its rule, then Skip when it may be declined;
     // named options as slabs under it.
     const other = d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('');
@@ -1408,9 +1413,14 @@ function drawGame() {
     }
     bar.querySelectorAll('[data-x]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.otherOpts[el.dataset.x].v }); });
     const sk = $('skip'); if (sk) sk.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
+  } else if (d.mine && ui.roam === 'den' && G.legal && G.legal.leader) {   // your leader picked on a touch screen: its power and Use
+    bar.innerHTML = `<div class="line">${leaderPanel('A')}<span class="skip use" id="actuse">Use</span><span class="skip" id="actno">Cancel</span></div>`;
+    bar.classList.add('on');
+    $('actuse').onclick = e => { e.stopPropagation(); sfx('pick'); ui.roam = null; act({ kind: 'leader' }); };
+    $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
   } else if (d.mine && ui.roam && d.acts.has(ui.roam)) {   // an Action animal picked: its card's rule and the button that uses it
-    const u = (viewerGame().board[ui.roam] || []).slice(-1)[0], c = u && CARDS[u.id];
-    bar.innerHTML = `<div class="line">${c ? `<b>${c.name}</b><p>${c.text}</p>` : '<b>Action</b>'}<span class="skip use" id="actuse">Use Action</span><span class="skip" id="actno">Cancel</span></div>`;
+    const u = (viewerGame().board[ui.roam] || []).slice(-1)[0], c = u && CARDS[u.id], echo = c && /^Echo\./.test(c.text);
+    bar.innerHTML = `<div class="line">${c ? `<b>${c.name}</b><p>${c.text}</p>` : '<b>Action</b>'}<span class="skip use" id="actuse">${echo ? 'Echo' : 'Use Action'}</span><span class="skip" id="actno">Cancel</span></div>`;
     bar.classList.add('on');
     $('actuse').onclick = e => { e.stopPropagation(); sfx('pick'); act({ kind: 'act', from: dcr(ui.roam) }); };
     $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
@@ -1430,7 +1440,13 @@ function drawGame() {
     : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
   if (st && st.kind === 'act') {   // an Action used: the card shown large over the board, shrinking into the animal that used it
     const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
-    rv.innerHTML = cardHTML(formOf(st.card, st.player)) + '<div class="actlbl">Action</div>'; fitNames(rv);
+    rv.innerHTML = cardHTML(formOf(st.card, st.player)) + `<div class="actlbl">${/^Echo\./.test((CARDS[st.card] || {}).text || '') ? 'Echo' : 'Action'}</div>`; fitNames(rv);
+    rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
+    rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
+  }
+  if (st && st.kind === 'leader') {   // a leader's power used: the leader's card shown large, shrinking into its place by the den
+    const [tx, ty] = leaderAt(rel(st.player)), rv = $('reveal');
+    rv.innerHTML = cardHTML(CARDS[st.card]) + '<div class="actlbl">Leader</div>'; fitNames(rv);
     rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
   }
@@ -1461,7 +1477,7 @@ function histItem(m, i) {
 function wireHist(root, G) {
   root.querySelectorAll('[data-h]').forEach(el => {
     const m = G.history[el.dataset.h];
-    el.onmouseenter = () => { if (m.kind === 'place' || m.kind === 'roam' || m.kind === 'act') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
+    el.onmouseenter = () => { if (m.kind === 'place' || m.kind === 'roam' || m.kind === 'act' || m.kind === 'leader') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
     el.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
     if (RP.views.length) el.onclick = e => { e.stopPropagation(); pop.style.display = 'none'; replayPlay(false); replayStep(replayMoveEnd(Number(el.dataset.h))); };
   });
@@ -1545,7 +1561,8 @@ function moveLine(m) {
     if (f.k === 'food') return `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}${f.n > 0 ? 'gained' : 'paid'} ${Math.abs(f.n)} food`;
     return null;
   }).filter(Boolean);
-  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? 'captured the HQ' : m.kind === 'roam' ? 'roamed' : m.kind === 'act' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'its'} Action` : '';
+  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? 'captured the HQ' : m.kind === 'roam' ? 'roamed' : m.kind === 'act' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'its'} ${CARDS[m.card] && /^Echo\./.test(CARDS[m.card].text) ? 'Echo' : 'Action'}`
+    : m.kind === 'leader' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'the leader'}'s power` : '';
   return [`${who} · turn ${m.round}`, what, ...fx].filter(Boolean).join(' · ');
 }
 
@@ -1560,7 +1577,7 @@ function viewerBoard(v) {
 function viewerGame() {
   const G = V.game, you = V.you, them = opp(), board = {};
   for (const [cr, st] of Object.entries(G.board)) board[dcr(cr)] = st.map(u => ({ ...u, owner: rel(u.owner) }));
-  return { board, food: { A: G.food[you], B: G.food[them] }, income: { A: G.income[you], B: G.income[them] },
+  return { board, leaders: G.leaders ? { A: G.leaders[you], B: G.leaders[them] } : {}, food: { A: G.food[you], B: G.food[them] }, income: { A: G.income[you], B: G.income[them] },
     regionFood: G.regionFood && { A: G.regionFood[you], B: G.regionFood[them] }, winFood: G.winFood };
 }
 function viewerMap() {
@@ -1591,7 +1608,7 @@ function drawBoard(d) {
   const region = shownRegion(d);
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
   const fire = st && st.src ? st.src.map(dcr) : null;   // the animals whose own effect this is: their trigger marks brighten
-  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, roamable: [...Object.keys(d.roams || {}), ...(d.acts || [])], acting: st && st.kind === 'act' ? [dcr(st.cr)] : [], roamFrom: ui.roam, preview, anim: A, ago, capture, strike, fire,
+  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, roamable: [...Object.keys(d.roams || {}), ...(d.acts || [])], acting: st && st.kind === 'act' ? [dcr(st.cr)] : [], roamFrom: ui.roam, preview, anim: A, ago, capture, strike, fire, leaders: g.leaders,
     beat: endBeat(), current: V.phase === 'playing' ? rel(V.game.current) : null });
   draw();
   if (startBeat(g, A, ago, capture)) draw();
@@ -1622,11 +1639,25 @@ function startBeat(g, A, ago, capture) {
 const endBeat = () => { const key = V && `${V.id}-${V.results.length}`;
   return ui.beat && ui.beat.key === key ? { kind: ui.beat.kind, side: ui.beat.side, ago: Date.now() - ui.beat.t0 } : null; };
 
+// The leaders prototype: a leader as the player reads it (its name, what kind of ability, the ability as it stands now).
+const LEADER_KIND = { power: 'Hero power: costs one of your actions.', once: 'Once per game: costs one of your actions.', passive: 'Always on.' };
+function leaderPanel(side) {
+  const L = viewerGame().leaders[side]; if (!L) return '';
+  const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader";
+  return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${LEADER_KIND[L.kind] || ''}</p><p>${L.text}</p>`;
+}
 function wireBoard() {
   const board = document.getElementById('board');
   board.addEventListener('click', e => {
     const den = e.target.closest('[data-den]');   // a den opens that player's list
     if (den) { e.stopPropagation(); ui.panel = ui.panel === den.dataset.den ? null : den.dataset.den; showPanel(); return; }
+    const lead = e.target.closest('[data-lead]');   // the leaders prototype: your leader's power, pressed (a tap reads it first)
+    if (lead) { e.stopPropagation(); const L = viewerGame().leaders[lead.dataset.lead], d0 = lastDecision;
+      if (lead.dataset.lead === 'A' && L && L.usable && d0 && d0.mine && !d0.pend) {
+        if (touch() && ui.roam !== 'den') { ui.roam = 'den'; ui.sel = null; sfx('pick'); return drawGame(); }
+        ui.roam = null; sfx('pick'); return act({ kind: 'leader' }); }
+      if (touch()) readOverlay(leaderPanel(lead.dataset.lead));
+      return; }
     const d = lastDecision;
     if (!d || !d.mine) { const g = touch() && e.target.closest('[data-cr]'); if (g) readStack(g.dataset.cr); return; }   // off your turn a tap only reads
     const hq = e.target.closest('[data-hq]');
@@ -1643,6 +1674,11 @@ function wireBoard() {
     if (touch() && !ui.sel) readStack(cr);
   });
   board.addEventListener('mouseover', e => {
+    const lead = e.target.closest('[data-lead]');   // a leader reads on hover: its ability as it stands
+    if (lead && !touch()) { showStack(null, null); pop.className = 'pop'; pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
+      const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+      pop.style.left = Math.min(r.right + 10, innerWidth - w - 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
+    if (!lead && pop.querySelector('.ev.lead')) { pop.style.display = 'none'; pop.style.minHeight = ''; }
     const g = e.target.closest('[data-cr]'), cr = g ? g.dataset.cr : null;
     showStack(g, cr);
     if (cr === ui.hover) return;

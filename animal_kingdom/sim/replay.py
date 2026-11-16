@@ -18,7 +18,7 @@ import json
 import sys
 from typing import Iterable, Optional, Sequence
 
-from ..decks import load_premade_deck
+from ..decks import leaders_for, load_premade_deck
 from ..engine import rules
 from ..engine.actions import SKIP, ChoiceAction
 from ..engine.config import Config
@@ -36,6 +36,7 @@ def game_log_record(rec, *, map_id: str, bots: tuple[str, str], config: Optional
         "first_player_opening_draw": config.first_player_opening_draw,
         "winner": rec.winner, "reason": rec.reason, "turns": rec.turns,
         "actions": list(rec.actions),
+        **({"leaders": lead} if any((lead := leaders_for(rec.deck_a, rec.deck_b)).values()) else {}),
     }
 
 
@@ -84,7 +85,7 @@ def replay(log: dict, *, config: Optional[Config] = None) -> list[dict]:
     deck_a, deck_b = log.get("lists") or (load_premade_deck(log["deck_a"]), load_premade_deck(log["deck_b"]))
     state = new_game(list(deck_a), list(deck_b),
                      log["seed"], map_id=log.get("map_id", "map_b"), config=(config or Config.default()).for_log(log),
-                     first_player=log["first_player"])
+                     first_player=log["first_player"], leaders=log.get("leaders"))
     steps: list[dict] = []
     for adict in log["actions"]:
         # A log recorded before the mulligan rule opens with a turn action: both players keep.

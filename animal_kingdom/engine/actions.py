@@ -91,6 +91,18 @@ class ActAction:
 
 
 @dataclass(frozen=True)
+class LeaderAction:
+    """Press your den: your leader's power (the leaders prototype, engine/leaders.py). Costs one of the turn's actions; a
+    hero power may be pressed again the same turn, a once-per-game power once a match. Any choice inside it (the card a
+    Scout keeps, the animal a buff lands on) comes after, as a pending choice."""
+
+    kind: ClassVar[str] = "leader"
+
+    def to_dict(self) -> dict:
+        return {"kind": self.kind}
+
+
+@dataclass(frozen=True)
 class PassAction:
     """End the turn early, declining the remaining actions (overview.md §5). Legal only after the
     turn's first action and outside effect resolution; never offered by legal_actions (see rules.can_pass)."""
@@ -119,7 +131,7 @@ class ChoiceAction:
 
 SKIP = "__skip__"  # the ChoiceAction value that declines an optional effect
 
-Action = Union[DrawAction, PlaceAction, RoamAction, ActAction, PassAction, ChoiceAction]
+Action = Union[DrawAction, PlaceAction, RoamAction, ActAction, LeaderAction, PassAction, ChoiceAction]
 
 
 def action_from_dict(d: dict) -> Action:
@@ -132,6 +144,8 @@ def action_from_dict(d: dict) -> Action:
         return RoamAction(origin=d["from"], target=tuple(d["target"]))
     if kind == "act":
         return ActAction(origin=d["from"])
+    if kind == "leader":
+        return LeaderAction()
     if kind == "choice":
         return ChoiceAction(choice=d["choice"])
     if kind == "pass":

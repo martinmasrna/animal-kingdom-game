@@ -256,9 +256,14 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-15: Dusk to Dawn.",
+      "note": "leaders prototype (brief 2026-11-15); Echo first, as every keyword stands",
       "by": "claude",
-      "at": 1792064539
+      "at": 1794772132,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15: Dusk to Dawn.",
+        "prev": "Dawn: give 2 random animals in your hand +1 strength."
+      }
     },
     "animal": {
       "lv": "draft",
@@ -826,14 +831,14 @@
   },
   "butterfly_legend": {
     "effect": {
-      "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
+      "note": "leaders prototype (brief 2026-11-15)",
       "by": "claude",
       "review": {
         "prev_lv": "draft",
         "prev_note": "Watch in play: the five stages and their power ladder.; Watch in play: the five stages and their power ladder.",
         "prev": "When this gains strength in your hand, evolve."
       },
-      "at": 1792660241
+      "at": 1794772132
     },
     "crop": {
       "lv": "fine",
@@ -865,9 +870,9 @@
         "prev_note": "",
         "prev": "Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength. When this gains strength in your hand, evolve."
       },
-      "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
+      "note": "leaders prototype (brief 2026-11-15)",
       "by": "claude",
-      "at": 1792660242
+      "at": 1794772133
     },
     "animal": {
       "review": {
@@ -894,9 +899,9 @@
         "prev_note": "",
         "prev": "Roar: draw a card. When this gains strength in your hand, evolve."
       },
-      "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
+      "note": "leaders prototype (brief 2026-11-15)",
       "by": "claude",
-      "at": 1792660241
+      "at": 1794772132
     },
     "animal": {
       "review": {
@@ -923,9 +928,9 @@
         "prev_note": "",
         "prev": "Stealth. Roar: draw a card, then give an animal in your hand +1 strength. When this gains strength in your hand, evolve."
       },
-      "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
+      "note": "leaders prototype (brief 2026-11-15)",
       "by": "claude",
-      "at": 1792660242
+      "at": 1794772133
     },
     "animal": {
       "review": {
@@ -962,6 +967,16 @@
       "note": "Martin 2026-11-10: \"let's do Xanthe\"; draft to live with; the stage after the colon",
       "by": "claude",
       "at": 1794302638
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Stealth. Flight. Roar: draw 2 cards, then give all animals in your hand +2 strength."
+      },
+      "note": "leaders prototype (brief 2026-11-15)",
+      "by": "claude",
+      "at": 1794772133
     }
   },
   "cairn": {
@@ -1090,9 +1105,9 @@
         "prev_note": "",
         "prev": "When this gains strength in your hand, draw a card and turn this into a Butterfly."
       },
-      "note": "Martin 2026-10-30: the animal acts in its own voice",
+      "note": "leaders prototype (brief 2026-11-15)",
       "by": "claude",
-      "at": 1793395835
+      "at": 1794772133
     }
   },
   "chameleon": {
@@ -1846,6 +1861,16 @@
       "by": "claude",
       "note": "Martin, 2026-10-14, applied 2026-10-16",
       "at": 1792157857
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Whenever you gain food, gain 3 additional food."
+      },
+      "note": "Flight restored: the leader build dropped it by accident, nobody asked for it to go (2026-11-15)",
+      "by": "claude",
+      "at": 1794777931
     }
   },
   "octopus_legend_2": {
@@ -4027,9 +4052,9 @@
         "prev_note": "",
         "prev": "Roar: gain 4 food for each other Colony animal you control."
       },
-      "note": "Martin's sheet, 2026-10-24",
+      "note": "leaders prototype (brief 2026-11-15)",
       "by": "claude",
-      "at": 1792858794
+      "at": 1794772132
     },
     "strength": {
       "review": {
@@ -4040,6 +4065,16 @@
       "note": "Martin's sheet, 2026-10-24: 3 to try",
       "by": "claude",
       "at": 1792858794
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "leaders prototype (brief 2026-11-15)",
+      "by": "claude",
+      "at": 1794772132
     }
   },
   "rat": {
@@ -6366,9 +6401,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-30: his wording",
+      "note": "leaders prototype (brief 2026-11-15)",
       "by": "claude",
-      "at": 1793389893
+      "at": 1794772132
     },
     "strength": {
       "review": {
@@ -8463,7 +8498,7 @@
       "at": 1793632735
     }
   },
-  "action_1": {
+  "food_maker": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8504,7 +8539,7 @@
       "at": 1794680631
     }
   },
-  "action_2": {
+  "card_burner": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8545,7 +8580,7 @@
       "at": 1794680632
     }
   },
-  "action_3": {
+  "refueler": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8586,7 +8621,7 @@
       "at": 1794680632
     }
   },
-  "action_4": {
+  "trainer": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8627,7 +8662,7 @@
       "at": 1794680632
     }
   },
-  "action_5": {
+  "flight_giver": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8668,7 +8703,7 @@
       "at": 1794680632
     }
   },
-  "action_6": {
+  "lookout": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8709,7 +8744,7 @@
       "at": 1794680632
     }
   },
-  "action_7": {
+  "food_thief": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8750,7 +8785,7 @@
       "at": 1794680632
     }
   },
-  "action_8": {
+  "protector": {
     "strength": {
       "review": {
         "prev_lv": "empty",
@@ -8789,6 +8824,78 @@
       "note": "placeholder name for the prototype",
       "by": "claude",
       "at": 1794680632
+    }
+  },
+  "gorilla_legend_2": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "leaders prototype (brief 2026-11-15): the new Gorilla legendary, in Nani's place in Handlock",
+      "by": "claude",
+      "at": 1794772138
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "leaders prototype (brief 2026-11-15): the new Gorilla legendary, in Nani's place in Handlock",
+      "by": "claude",
+      "at": 1794772139
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "leaders prototype (brief 2026-11-15): the new Gorilla legendary, in Nani's place in Handlock",
+      "by": "claude",
+      "at": 1794772139
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Silverback",
+          "species": "Gorilla"
+        }
+      },
+      "note": "leaders prototype: a placeholder name",
+      "by": "claude",
+      "at": 1794772147
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "leaders prototype (brief 2026-11-15): the new Gorilla legendary, in Nani's place in Handlock",
+      "by": "claude",
+      "at": 1794772139
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1794778083
     }
   }
 }

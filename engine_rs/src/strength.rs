@@ -58,7 +58,8 @@ pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64
 /// The anthem as it stands on a chosen turn (`their_turn`: the owner's opponent to move), for an evaluation that asks
 /// both (Giraffe, Crocodile and the Cape Buffalo's aura change with whose turn it is).
 pub fn anthem_bonus_turn(st: &State, card: &Card, owner: Player, self_iid: Option<i64>, sources: Option<&Sources>, their_turn: bool) -> i32 {
-    anthem_bonus_turn_cards(st, card, owner, self_iid, sources, their_turn) + guard_bonus(st, owner, their_turn)
+    let lead = if owner <= B && st.leaders[owner as usize].is_some() { crate::leaders::leader_bonus(st, owner) } else { 0 };
+    anthem_bonus_turn_cards(st, card, owner, self_iid, sources, their_turn) + guard_bonus(st, owner, their_turn) + lead
 }
 
 /// [ACTION 8] (the actions prototype): +bonus to every animal of `owner` during the opponent's turn it was used for. On a
@@ -177,7 +178,11 @@ pub fn card_strength(st: &State, card: CardId, owner: Player) -> i32 {
 
 /// Effective strength of a hand instance if it were placed now.
 pub fn placement_strength(st: &State, inst: &Unit) -> i32 {
-    (card_strength(st, inst.card, inst.owner) + inst.strength_counter as i32).max(0)
+    if !(crate::leaders::any(st) || st.next_strength[0].is_some() || st.next_strength[1].is_some()) {
+        return (card_strength(st, inst.card, inst.owner) + inst.strength_counter as i32).max(0);
+    }
+    let adj: i32 = crate::leaders::play_adjustment(st, inst).iter().sum();
+    (card_strength(st, inst.card, inst.owner) + crate::leaders::hand_counter(st, inst) + adj).max(0)
 }
 
 /// Where a unit's strength comes from, for the player to see (engine/strength.py `strength_breakdown`, the same JSON):
@@ -213,7 +218,11 @@ pub fn breakdown(st: &State, unit: &Unit) -> serde_json::Value {
     allies.sort();
     let guard = guard_bonus(st, unit.owner, their_turn);   // [ACTION 8], last (strength.py strength_breakdown)
     if guard != 0 {
-        allies.push(("action_8", guard));
+        allies.push(("protector", guard));
+    }
+    let lead = if unit.owner <= B { crate::leaders::leader_bonus(st, unit.owner) } else { 0 };   // Lady Juliette's leader
+    if lead != 0 {
+        allies.push(("bee_legend_2", lead));
     }
     let own = anthem_bonus(st, card, unit.owner, Some(unit.iid), None) - allies.iter().map(|(_, b)| b).sum::<i32>();
     let mut auras: Vec<J> = Vec::new();
