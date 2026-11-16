@@ -1704,7 +1704,7 @@
     {
       "id": "hawk",
       "name": "Hawk",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
