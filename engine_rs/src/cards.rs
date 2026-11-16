@@ -77,7 +77,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "kitten" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
         | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "mole_legend"
         | "rat_legend_2" | "skunk_legend" | "deer_legend_2" | "young_stag" | "great_stag" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
-        | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
+        | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "weasel" | "magpie" | "black_mamba" | "mosquito" | "raven"
         | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "piranha_legend" | "remora" | "cod" | "sardine" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
         | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
@@ -1020,7 +1020,14 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("hawk", OnPlace) => removes(st, unit, cr, Some("stoop_max"), None),
-        ("cottonmouth", OnPlace) => removes(st, unit, cr, Some("cottonmouth_max"), None),
+        ("cottonmouth", OnPlace) => {
+            let targets = adjacent_enemy_targets(st, unit, cr, None, None, true);
+            if !targets.is_empty() {
+                let o = crs(st, targets);
+                st.effect_stack.push(vmap!("op" => Value::s("venom"), "chooser" => pn(owner), "options" => Value::List(o)));
+            }
+        }
+        ("weasel", OnPlace) => removes(st, unit, cr, Some("weasel_max"), None),
         ("magpie", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("magpie_steal"), "player" => pn(owner))),
         ("black_mamba", OnPlace) => removes(st, unit, cr, Some("black_mamba_max"), None),
         ("mosquito", OnPlace) => {

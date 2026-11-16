@@ -165,7 +165,7 @@ STRENGTH_LIMITS = {
     "gopher": "gopher_max",
     "serval": "serval_min",
     "hornet": "hornet_max",
-    "cottonmouth": "cottonmouth_max",
+    "weasel": "weasel_max",
 }
 
 

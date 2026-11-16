@@ -142,7 +142,7 @@ def test_egg_plays_owl_before_drawing(bot_cls):
 
 
 @pytest.mark.slow
-@pytest.mark.xfail(strict=True, reason="the search draws with five Cats in hand (2026-09-30)")
+@pytest.mark.skip(reason="the Lynx draws wherever it lands since 2026-11-16 ('Roar: draw a card.'), so where it goes no longer decides its draw")
 @pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
 def test_cats_plays_lynx_in_the_middle(bot_cls):
     # Cats vs the pile, round 2, first action: Lion on the den front, their Wolf on theirs;
@@ -164,7 +164,6 @@ def test_aggro_draws_on_its_opening(bot_cls):
         assert isinstance(chosen, DrawAction), chosen
 
 
-@pytest.mark.skip(reason="the Cottonmouth no longer marks (venom is gone from every card; it removes an adjacent enemy of strength 3 or less): the position has no card left to mark with (2026-11-16)")
 def test_taipan_marks_the_python():
     # Goodstuff vs Martin's Egg Control, his game of 2026-09-30, the bot's turn with 0 food: hand
     # Elephant, Tiger, Brutus, Wolf, Taipan; his Python (8) in the middle, his Raven beside it.

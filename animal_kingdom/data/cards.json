@@ -1718,17 +1718,16 @@
     },
     {
       "id": "cottonmouth",
-      "name": "some snake?",
-      "status": "collectible",
+      "name": "Cottonmouth",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Snake"
       ],
-      "base_strength": 3,
-      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
+      "base_strength": 5,
+      "text": "Roar: choose an adjacent enemy. At the start of your next turn, remove it.",
       "species": "Cottonmouth",
       "habitat": "River and Lake",
-      "stars": 0,
       "keywords": []
     },
     {
@@ -3413,14 +3412,14 @@
     {
       "id": "weasel",
       "name": "Weasel",
-      "status": "planned",
-      "rarity": "",
+      "status": "collectible",
+      "rarity": "common",
       "tags": [],
-      "base_strength": null,
-      "text": "",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
       "species": "Weasel",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "dragonfly",

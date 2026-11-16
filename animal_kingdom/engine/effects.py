@@ -3598,7 +3598,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "bat_legend": {"on_start_of_turn": _bat_legend_start},
     "swan_legend": {"on_draw": _omen_drawn},
     "hawk": {"on_place": _removes("stoop_max")},
-    "cottonmouth": {"on_place": _removes("cottonmouth_max")},
+    "cottonmouth": {"on_place": _king_cobra_place},
+    "weasel": {"on_place": _removes("weasel_max")},   # Roar: remove an adjacent enemy of strength 3 or less (Martin, 2026-11-16)
     "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _removes("black_mamba_max")},
     "mosquito": {"on_place": _mosquito_place},

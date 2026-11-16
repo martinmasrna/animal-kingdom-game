@@ -2422,7 +2422,7 @@
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794849335,
+      "at": 1794857296,
       "review": {
         "prev_lv": "draft",
         "prev_note": "",
@@ -2442,9 +2442,9 @@
       }
     },
     "animal": {
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
-      "at": 1794849333,
+      "at": 1794857287,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: two Vipers read as a mistake; the Coral Snake's small head lost the bite close-up. The cottonmouth's white gape and slow venom fit both."
@@ -2467,9 +2467,9 @@
         "prev_note": "",
         "prev": 4
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
-      "at": 1794849333
+      "at": 1794857287
     },
     "stars": {
       "review": {
@@ -2477,9 +2477,9 @@
         "prev_note": "",
         "prev": 1
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
-      "at": 1794849333
+      "at": 1794857287
     },
     "effect": {
       "review": {
@@ -2487,9 +2487,9 @@
         "prev_note": "",
         "prev": "Roar: choose an adjacent enemy. At the start of your next turn, remove it."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
-      "at": 1794849333
+      "at": 1794857287
     }
   },
   "falcon_legend": {
@@ -10191,6 +10191,50 @@
       },
       "by": "claude",
       "at": 1794778083
+    }
+  },
+  "weasel": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Weasel takes the 'some snake?' slot (\"Weasel is a good one for the 'remove 3 or less', I like it\")",
+      "by": "claude",
+      "at": 1794857287
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Weasel takes the 'some snake?' slot (\"Weasel is a good one for the 'remove 3 or less', I like it\")",
+      "by": "claude",
+      "at": 1794857287
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Weasel takes the 'some snake?' slot (\"Weasel is a good one for the 'remove 3 or less', I like it\")",
+      "by": "claude",
+      "at": 1794857287
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1794857287
     }
   }
 }

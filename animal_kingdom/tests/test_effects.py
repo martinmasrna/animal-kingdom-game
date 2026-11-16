@@ -921,7 +921,6 @@ def test_viper_permanently_shrinks_an_adjacent_enemy_so_a_bird_can_cover_it():
     assert s.owner_of("2,1") == "A"
 
 
-@pytest.mark.skip(reason="no card carries venom now: Cottonmouth is a plain 'remove an adjacent enemy of strength 3 or less'")
 def test_king_cobra_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_the_cobra_is_gone():
     s = make_state(hands={"A": ["cottonmouth"], "B": ["tiger"]},
                    decks={"A": ["eagle"] * 8, "B": ["eagle"] * 8})

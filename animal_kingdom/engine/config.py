@@ -122,7 +122,7 @@ class Config:
     gopher_max: int = 7                  # Gopher: ...remove an adjacent enemy of strength 7 or less (2026-11-16)
     serval_min: int = 8                  # Serval: ...remove an adjacent enemy of strength 8 or more (2026-11-16)
     hornet_max: int = 7                  # Hornet: ...to remove an adjacent enemy of strength 7 or less (2026-11-16)
-    cottonmouth_max: int = 3             # "some snake?": Roar: remove an adjacent enemy of strength 3 or less (2026-11-16)
+    weasel_max: int = 3                  # Weasel: Roar: remove an adjacent enemy of strength 3 or less (Martin, 2026-11-16)
     bat_draw: int = 2                    # "??" (the 3-star): Echo. Roar: draw 2 cards (2026-11-16)
     honey_badger_min: int = 8            # Honey Badger removes an enemy of strength >= this
     stoop_max: int = 5                   # Hawk ("Viper?" since 2026-11-16: remove an adjacent enemy of strength 5 or less)
