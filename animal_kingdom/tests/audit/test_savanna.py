@@ -905,13 +905,14 @@ def test_impala_flees():
     assert "impala" in hand_ids(s, "A")
 
 
-def test_jackal_removes_an_adjacent_weaker_enemy_when_it_roams():
+def test_jackal_bites_up_to_its_own_strength_when_it_roams():
     s = make_state(decks=DECKS)
     put(s, "1,1", "jackal", "A")
     put(s, "2,2", "gazelle", "B")                                # a 2
-    put(s, "1,3", "fox", "B")                                    # a 3: not weaker
+    put(s, "1,3", "fox", "B")                                    # a 3: equal to the Jackal, so in reach (2026-11-16)
+    put(s, "3,2", "lion", "B")                                   # a 7: out of reach, and not adjacent anyway
     rules.apply_action(s, RoamAction("1,1", ("cr", "1,2")))
-    assert s.pending is not None and s.pending["options"] == ["2,2"]
+    assert s.pending is not None and s.pending["options"] == ["1,3", "2,2"]
     choose(s, "2,2")
     assert s.top_unit("2,2") is None and s.top_unit("1,3").card_id == "fox"
 

@@ -27,7 +27,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Barracuda** | 2 | Fish | 4 | Roar: remove an adjacent enemy with strength up to the number of your Fish. |
+| **Barracuda** | 2 | Fish | 4 | Roar: Bite X, where X is the number of your Fish. |
 | **Cod** | 2 | Fish | 4 | Roar: draw a card for each adjacent allied Fish. |
 | **Sardine** | 2 | Fish | 1 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
 | **Mahi-mahi** | 2 | Fish | 3 | Your other Fish have +1 strength. |

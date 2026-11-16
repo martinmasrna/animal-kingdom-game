@@ -466,6 +466,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849339
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: remove an adjacent enemy with strength up to the number of your Fish."
+      },
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
+      "by": "claude",
+      "at": 1794863007
     }
   },
   "bat": {
@@ -670,9 +680,9 @@
         "prev_note": "",
         "prev": "Roar: remove an adjacent enemy of strength 5 or less."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
-      "at": 1794849334
+      "at": 1794863007
     },
     "strength": {
       "review": {
@@ -1547,6 +1557,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849342
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: remove an adjacent enemy of equal or lower strength."
+      },
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
+      "by": "claude",
+      "at": 1794863007
     }
   },
   "chinchilla": {
@@ -2693,9 +2713,9 @@
         "prev_note": "",
         "prev": "Roar: if you gained 10 or more food this turn, draw 2 cards."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
-      "at": 1794849334
+      "at": 1794863007
     },
     "stars": {
       "review": {
@@ -2972,9 +2992,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: remove an adjacent enemy of strength 3 or less."
       },
-      "note": "back to the reserve as it was before 2026-11-16",
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
-      "at": 1794858753
+      "at": 1794863006
     },
     "animal": {
       "review": {
@@ -3194,9 +3214,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
-      "at": 1794849334
+      "at": 1794863007
     }
   },
   "hummingbird": {
@@ -3343,9 +3363,9 @@
         "prev_note": "",
         "prev": "Roar: remove an adjacent enemy that has another of your Canines next to it."
       },
-      "note": "Martin 2026-10-29: the flank went to the Warthog; the Jackal picks off what it can as the pack moves",
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
-      "at": 1793308250
+      "at": 1794863007
     },
     "animal": {
       "review": {
@@ -3382,9 +3402,9 @@
         "prev_note": "",
         "prev": "Roar: remove an adjacent enemy of strength 4 or less."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
-      "at": 1794849334
+      "at": 1794863007
     }
   },
   "jellyfish": {
@@ -7954,7 +7974,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792783031
+      "at": 1794863007,
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")"
     },
     "art": {
       "review": {
@@ -10248,9 +10269,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-11-16: the Weasel takes the 'some snake?' slot (\"Weasel is a good one for the 'remove 3 or less', I like it\")",
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
-      "at": 1794857287
+      "at": 1794863006
     },
     "animal": {
       "review": {
@@ -10292,9 +10313,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-11-16: the Mongoose takes the 'Viper?' slot (\"okay then, good\"; the little guy who kills cobras)",
+      "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
-      "at": 1794858753
+      "at": 1794863007
     },
     "animal": {
       "review": {

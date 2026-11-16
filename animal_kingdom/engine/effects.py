@@ -2398,10 +2398,10 @@ def _dhole_cover(state, unit, covered):
 
 
 def _jackal_roam(state, unit, cr, event):
-    """Roam. Whenever this roams, remove an adjacent enemy weaker than this (judged where it lands, by strength as it
-    stands then: the pack's buffs lengthen its reach; Martin, 2026-10-29)."""
+    """Roam. Whenever this roams, Bite X, where X is this animal's strength (judged where it lands, by strength as it
+    stands then: the pack's buffs lengthen its reach; Martin, 2026-10-29; equal counts since 2026-11-16, as the Chimpanzee)."""
     _push_remove_choice(state, unit.owner, unit.card_id,
-                        _adjacent_enemy_targets(state, unit, cr, max_strength=effective_strength(state, unit) - 1))
+                        _adjacent_enemy_targets(state, unit, cr, max_strength=effective_strength(state, unit)))
 
 
 def _bush_dog_roam(state, unit, cr, event):

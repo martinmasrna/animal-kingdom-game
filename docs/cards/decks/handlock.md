@@ -22,7 +22,7 @@ The table below is generated from cards.json, where the cards live.
 | **Hummingbird** | 2 | Bird | 1 | Flight. Roar: draw 2 cards. |
 | **Orangutan** | 2 | Primate | 5 | Roar: duplicate a Primate in your hand. |
 | **Tarsier** | 2 | Primate | 2 | Roar: give an animal in your hand +2 strength. Echo. |
-| **Chimpanzee** | 2 | Primate | 4 | Roar: remove an adjacent enemy of equal or lower strength. |
+| **Chimpanzee** | 2 | Primate | 4 | Roar: Bite X, where X is this animal's strength. |
 
 ### Common
 

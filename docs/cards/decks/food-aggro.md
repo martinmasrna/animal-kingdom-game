@@ -30,7 +30,7 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Squirrel** | 2 | Rodent | 2 | Roar: gain 10 food. |
 | **Chipmunk** | 2 | Rodent | 1 | Roar: gain 10 food. Echo. |
-| **Gopher** | 2 | Rodent | 3 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy of strength 7 or less. |
+| **Gopher** | 2 | Rodent | 3 | Roar: if you gained 10 or more food this turn, Bite 7. |
 | **Hamster** | 2 | Rodent | 3 | Whenever you draw a card, gain 5 food. |
 | **Mara** | 2 | Rodent | 4 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
 | **Hare** | 2 | Rodent | 4 | Flee. Roar: if your hand is empty, draw 2 cards. |

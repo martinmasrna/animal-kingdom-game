@@ -148,7 +148,7 @@ def test_no_food_card_escapes_the_check():
     )
 
 
-STRENGTH_LIMIT_RE = re.compile(r"strength (\d+) or (?:less|more)", re.IGNORECASE)
+STRENGTH_LIMIT_RE = re.compile(r"strength (\d+) or (?:less|more)|\bBite (\d+)", re.IGNORECASE)
 
 # card_id -> the config attr holding its "strength N or less/more" removal limit.
 STRENGTH_LIMITS = {
@@ -174,7 +174,7 @@ def test_strength_limit_text_matches_config():
     """Every printed "strength N or less/more" removal limit equals the constant its effect uses."""
     cfg = Config.default()
     for cid, attr in STRENGTH_LIMITS.items():
-        (text_n,) = (int(n) for n in STRENGTH_LIMIT_RE.findall(_cards()[cid].text))
+        (text_n,) = (int(a or b) for a, b in STRENGTH_LIMIT_RE.findall(_cards()[cid].text))
         assert getattr(cfg, attr) == text_n, f"{cid}: text says {text_n}, {attr} is {getattr(cfg, attr)}"
 
 
@@ -183,7 +183,7 @@ def test_no_strength_limit_card_escapes_the_check():
     # "strength 8 or more" is the coverer's size, none a removal limit (test_capybara_numbers_match_config, and below).
     printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
     assert printed - {"capybara", "bee_legend_2", "oxpecker_legend"} == set(STRENGTH_LIMITS)
-    assert int(STRENGTH_LIMIT_RE.search(_cards()["bee_legend_2"].text).group(1)) == Config.default().capybara_small_max + 1
+    assert int(STRENGTH_LIMIT_RE.search(_cards()["bee_legend_2"].text).group(1)) == Config.default().capybara_small_max + 1   # (its "strength N or more")
     (n,) = re.findall(r"strength (\d+) or more", _cards()["oxpecker_legend"].text)
     assert int(n) == Config.default().oxpecker_legend_min
 

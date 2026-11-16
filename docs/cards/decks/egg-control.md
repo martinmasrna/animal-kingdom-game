@@ -19,9 +19,9 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Hawk** | 2 | Bird | 4 | Flight. Roar: remove an adjacent enemy of strength 4 or less. |
+| **Hawk** | 2 | Bird | 4 | Flight. Roar: Bite 4. |
 | **Magpie** | 2 | Bird | 3 | Flight. Roar: steal a card from your opponent's hand, then discard a card. |
-| **Black Mamba** | 2 | Snake | 3 | Roar: remove an adjacent enemy of strength 7 or less. |
+| **Black Mamba** | 2 | Snake | 3 | Roar: Bite 7. |
 | **Cuckoo** | 2 | Bird | 3 | Flight. Roar: shuffle two Cuckoo Eggs into your opponent's deck. |
 
 ### Common

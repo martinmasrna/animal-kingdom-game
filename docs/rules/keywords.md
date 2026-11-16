@@ -99,6 +99,9 @@ Card text grants strength two ways, **distinguished by the verb** — this readi
 ### Discard  *(card-text term, not a keyword)*
 **Discard a card** means a card leaves a hand (or a deck, when the text says so, as on Hornet). "Your opponent discards a random card" (Black Swan) is a discard too. A discard is never a remove: "removed" on a card means an animal leaving the board, so a discard doesn't grow the Python or count as "an ally was removed" (Martin, 2026-10-17).
 
+### Bite  *(card-text term, not a keyword)*
+**Bite N** means remove an adjacent enemy of strength N or less; the player chooses which (Stealth hides it from the choice, Armor holds, as for any removal). It is a verb inside a Roar or a trigger ("Roar: Bite 3.", "Roar: if you gained 10 or more food this turn, Bite 7."), so Echo and the Macaw repeat it like any Roar. **Bite X, where X is …** names a limit that isn't a printed number ("this animal's strength", "the number of your Fish"). Martin, 2026-11-16, for every "remove an adjacent enemy of strength N or less"; removals of many animals, of the strongest or weakest, a lower limit ("8 or more") and the Hippopotamus's trigger keep their sentences. Cards: Weasel, Hawk, Jaguar, Mongoose, Black Mamba, Gorrak, Gopher, Hornet; in the reserve Chimpanzee, Barracuda, Jackal.
+
 ### Scout  *(card-text term, not a keyword)*
 **Scout a card** means look at three different cards from the top of your deck, draw one and shuffle the other two back (copies of a card already seen are passed over and stay where they are). **Scout a Bird** (or a legendary unit, or any other kind) looks at three different random cards of that kind in your deck instead, all of them if there are fewer kinds. It draws from the deck and never creates a card; the shuffle counts as shuffling (Rattlesnake grows). The count is `scout_count`. Cards: Owl, the legendary Octopus, Bird Egg.
 

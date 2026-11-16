@@ -650,16 +650,16 @@ def test_wolverine_removes_an_adjacent_enemy_only_if_no_other_enemy_is_next_to_i
     assert s.pending is None and s.top_unit("2,2") is not None
 
 
-def test_jackal_roams_then_removes_an_adjacent_enemy_weaker_than_itself():
+def test_jackal_roams_then_bites_up_to_its_own_strength():
     s = make_state(hands={"A": []})
     put(s, "1,1", "jackal", "A")
-    put(s, "2,2", "gazelle", "B")                              # a 2: weaker than the Jackal's 3
-    put(s, "1,3", "fox", "B")                                  # a 3: equal, so safe
+    put(s, "2,2", "gazelle", "B")                              # a 2: under the Jackal's 3
+    put(s, "1,3", "fox", "B")                                  # a 3: equal, so in reach (Bite X, X its strength; 2026-11-16)
     put(s, "2,1", "lion", "B")                                 # a 7, next to where it starts, never offered
     rules.apply_action(s, RoamAction("1,1", ("cr", "1,2")))
-    assert s.pending["options"] == ["2,2"]                     # judged where it lands, strictly weaker
-    choose(s, "2,2")
-    assert s.pending is None and s.top_unit("2,2") is None and s.top_unit("1,3").card_id == "fox"
+    assert s.pending["options"] == ["1,3", "2,2"]              # judged where it lands
+    choose(s, "1,3")
+    assert s.pending is None and s.top_unit("1,3") is None and s.top_unit("2,2").card_id == "gazelle"
 
 
 def test_jackal_reach_grows_with_its_strength_and_a_placed_jackal_removes_nothing():

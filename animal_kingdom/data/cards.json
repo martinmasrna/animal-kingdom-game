@@ -531,7 +531,7 @@
         "Canine"
       ],
       "base_strength": 3,
-      "text": "Roam. Whenever this roams, remove an adjacent enemy weaker than this.",
+      "text": "Roam. Whenever this roams, Bite X, where X is this animal's strength.",
       "species": "Jackal",
       "habitat": "Savanna",
       "keywords": [
@@ -682,7 +682,7 @@
         "Colony"
       ],
       "base_strength": 2,
-      "text": "Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy of strength 7 or less.",
+      "text": "Flight. Roar: discard a Hornet from your hand or deck to Bite 7.",
       "species": "Hornet",
       "habitat": "Forest",
       "keywords": [
@@ -917,7 +917,7 @@
         "Cat"
       ],
       "base_strength": 5,
-      "text": "Roar: remove an adjacent enemy of strength 5 or less.",
+      "text": "Roar: Bite 5.",
       "species": "Jaguar",
       "habitat": "Jungle",
       "keywords": []
@@ -1139,10 +1139,10 @@
         "Fish"
       ],
       "base_strength": 4,
-      "text": "Roar: remove an adjacent enemy with strength up to the number of your Fish.",
-      "keywords": [],
+      "text": "Roar: Bite X, where X is the number of your Fish.",
       "species": "Barracuda",
-      "habitat": "Open Ocean"
+      "habitat": "Open Ocean",
+      "keywords": []
     },
     {
       "id": "manta_ray",
@@ -1402,7 +1402,7 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy of strength 7 or less.",
+      "text": "Roar: if you gained 10 or more food this turn, Bite 7.",
       "species": "Gopher",
       "habitat": "Meadow",
       "stars": 1,
@@ -1711,7 +1711,7 @@
         "Bird"
       ],
       "base_strength": 4,
-      "text": "Flight. Roar: remove an adjacent enemy of strength 4 or less.",
+      "text": "Flight. Roar: Bite 4.",
       "species": "Hawk",
       "habitat": "Forest",
       "keywords": [
@@ -1757,7 +1757,7 @@
         "Snake"
       ],
       "base_strength": 3,
-      "text": "Roar: remove an adjacent enemy of strength 7 or less.",
+      "text": "Roar: Bite 7.",
       "species": "Black Mamba",
       "habitat": "Savanna",
       "keywords": []
@@ -2005,10 +2005,10 @@
         "Primate"
       ],
       "base_strength": 4,
-      "text": "Roar: remove an adjacent enemy of equal or lower strength.",
-      "keywords": [],
+      "text": "Roar: Bite X, where X is this animal's strength.",
       "species": "Chimpanzee",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "baboon",
@@ -3421,7 +3421,7 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
-      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
+      "text": "Roar: Bite 3.",
       "species": "Weasel",
       "habitat": "Meadow",
       "keywords": []
@@ -3744,13 +3744,13 @@
         "Cat"
       ],
       "base_strength": 7,
-      "text": "Apex Predator. Roar: remove an adjacent enemy of strength 7 or less.",
+      "text": "Apex Predator. Roar: Bite 7.",
       "species": "Tiger",
       "habitat": "Jungle",
+      "stars": 3,
       "keywords": [
         "Apex Predator"
-      ],
-      "stars": 3
+      ]
     },
     {
       "id": "ocelot",
@@ -4277,7 +4277,7 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "Roar: remove an adjacent enemy of strength 5 or less.",
+      "text": "Roar: Bite 5.",
       "species": "Mongoose",
       "habitat": "Savanna",
       "keywords": []

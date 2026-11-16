@@ -766,9 +766,9 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_remove_choice(st, owner, unit.card, targets, false);
         }
         ("jackal", OnRoam) => {
-            // "Roam. Whenever this roams, remove an adjacent enemy weaker than this.": judged where it lands, by its strength then
+            // "Roam. Whenever this roams, Bite X, where X is this animal's strength.": judged where it lands, by its strength then
             if let Args::Roam(to, _) = args {
-                let cap = effective_strength(st, unit, None) - 1;
+                let cap = effective_strength(st, unit, None);
                 let targets = adjacent_enemy_targets(st, unit, *to, Some(cap), None, true);
                 push_remove_choice(st, owner, unit.card, targets, false);
             }

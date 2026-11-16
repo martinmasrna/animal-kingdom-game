@@ -19,7 +19,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Jaguar** | 2 | Cat | 5 | Roar: remove an adjacent enemy of strength 5 or less. |
+| **Jaguar** | 2 | Cat | 5 | Roar: Bite 5. |
 | **Leopard** | 2 | Cat | 6 | Your Cats can cover enemies of equal strength. |
 | **Black Panther** | 2 | Cat | 6 | Stealth. |
 | **Lynx** | 2 | Cat | 5 | Roar: draw a card. |
