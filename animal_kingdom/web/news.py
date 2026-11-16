@@ -31,7 +31,7 @@ def parse(path: Path, cards: dict) -> dict:
     """One release file: its date and groups of changes, each with its why, the cards it touches and how they were."""
     # a change names its cards by id (stable) or by the name they carry today
     # a name the tutorial, a token or the reserve shares (the tutorial's Cape Buffalo) means the collection's card
-    by_name = {c.name.lower(): cid for cid, c in sorted(cards.items(), key=lambda kv: kv[1].collectible)}
+    by_name = {c.name.lower(): cid for cid, c in sorted(cards.items(), key=lambda kv: {"collectible": 2, "reserve": 1}.get(kv[1].status, 0))}   # a game card over a tutorial or token of that name
     by_name.update({cid.lower(): cid for cid in cards})
     by_name.update({old: new for old, new in RENAMED_IDS.items() if new in cards and old not in by_name})   # a release written before an id changed
     rid = path.stem

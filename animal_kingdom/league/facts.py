@@ -48,7 +48,7 @@ def game_facts(list_a: Sequence[str], list_b: Sequence[str], seed: int, first_pl
                 entry[e["drawn"][0]] = [e["drawn"][1], 0, None]; out[p]["cards"].append(entry[e["drawn"][0]])
                 out[p]["seen"].append(e["drawn"][1])
             elif e["e"] == "turn_start":
-                hands(); turn[p] += 1      # whatever came to hand before this turn began belongs to the turn before
+                turn[p] += 1; hands()      # what came to hand as the turn began (its free card, a Dawn's) is the new turn's
             elif e["e"] == "place" and e.get("from_hand") and e["iid"] in entry and entry[e["iid"]][2] is None:
                 entry[e["iid"]][2] = turn[p]
         state.events.clear()
