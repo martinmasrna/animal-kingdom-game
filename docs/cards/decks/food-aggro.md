@@ -19,7 +19,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Beaver** | 2 | Rodent | 3 | Echo. Roar: next turn, take 1 additional action. |
+| **Beaver** | 2 | Rodent | 3 | Roar: next turn, take 1 additional action. Echo. |
 | **Dormouse** | 2 | Rodent | 3 | Dusk: draw a card for each 10 food you gained this turn. |
 | **Groundhog** | 2 | Rodent | 2 | Dawn: gain 5 food. |
 | **Woodpecker** | 2 | Bird | 3 | Flight. Roar: your next Roar this turn happens twice. |
@@ -29,7 +29,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Squirrel** | 2 | Rodent | 2 | Roar: gain 10 food. |
-| **Chipmunk** | 2 | Rodent | 1 | Echo. Roar: gain 10 food. |
+| **Chipmunk** | 2 | Rodent | 1 | Roar: gain 10 food. Echo. |
 | **Gopher** | 2 | Rodent | 3 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy of strength 7 or less. |
 | **Hamster** | 2 | Rodent | 3 | Whenever you draw a card, gain 5 food. |
 | **Mara** | 2 | Rodent | 4 | Roar: if you gained 10 or more food this turn, draw 2 cards. |

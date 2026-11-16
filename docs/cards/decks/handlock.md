@@ -10,7 +10,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Babaji** | 1 | Primate | 3 | Echo. Roar: return an adjacent ally to your hand, give it +2 strength, and play it. |
+| **Babaji** | 1 | Primate | 3 | Roar: return an adjacent ally to your hand, give it +2 strength, and play it. Echo. |
 | **[GORILLA]** | 1 | Primate | 7 | Roar: the next animal you play has this animal's strength. |
 | **Xanthe: Egg** | 1 | — | 0 | Whenever this gains strength, evolve. |
 | **Arne** | 1 | Bird | 3 | Flight. Apex Predator. When this enters your hand, add Skya to your hand. |
@@ -21,7 +21,7 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Hummingbird** | 2 | Bird | 1 | Flight. Roar: draw 2 cards. |
 | **Orangutan** | 2 | Primate | 5 | Roar: duplicate a Primate in your hand. |
-| **Tarsier** | 2 | Primate | 2 | Echo. Roar: give an animal in your hand +2 strength. |
+| **Tarsier** | 2 | Primate | 2 | Roar: give an animal in your hand +2 strength. Echo. |
 | **Chimpanzee** | 2 | Primate | 4 | Roar: remove an adjacent enemy of equal or lower strength. |
 
 ### Common

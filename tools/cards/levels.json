@@ -294,9 +294,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "leaders prototype (brief 2026-11-15); Echo first, as every keyword stands",
+      "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
       "by": "claude",
-      "at": 1794772132,
+      "at": 1794860300,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Dusk to Dawn.",
@@ -530,9 +530,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: draw a card."
       },
-      "note": "Martin, 2026-11-16: the Bat takes the 3-star '??' slot (\"Let's make it Bat. 2 strength, flight.\")",
+      "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
       "by": "claude",
-      "at": 1794859863
+      "at": 1794860300
     }
   },
   "beaver": {
@@ -569,9 +569,9 @@
         "prev_note": "",
         "prev": "Roar: next turn, take 1 additional action."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
       "by": "claude",
-      "at": 1794849335
+      "at": 1794860299
     }
   },
   "capybara_legend": {
@@ -1580,9 +1580,9 @@
         "prev_note": "",
         "prev": "Roar: gain 10 food. At the start of your next turn, gain 10 more."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
       "by": "claude",
-      "at": 1794849333
+      "at": 1794860299
     }
   },
   "wolf_legend_3": {
@@ -3809,8 +3809,8 @@
     "effect": {
       "lv": "problem",
       "by": "claude",
-      "at": 1794860084,
-      "note": "Martin, 2026-11-16: the Macaw back, 2 strength, 2 stars, with Echo (\"let's do your opponent's last\")",
+      "at": 1794860300,
+      "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
       "review": {
         "prev_lv": "problem",
         "prev_note": "Martin 2026-10-17: the parrot repeats (no 'may'); 'your next Roar this turn happens twice' moves to another animal",
@@ -5768,9 +5768,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
       "by": "claude",
-      "at": 1794849333,
+      "at": 1794860299,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Scouting a Primate was too strong and too consistent; a random Primate keeps the tutor, drops the choice.",
@@ -6249,9 +6249,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
       "by": "claude",
-      "at": 1794849333,
+      "at": 1794860299,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",

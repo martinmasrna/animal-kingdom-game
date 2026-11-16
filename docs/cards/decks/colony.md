@@ -34,6 +34,6 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Soldier Ant** | 2 | Colony, Soldier | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
 | **Worker Ant** | 2 | Colony, Worker | 2 | Roar: gain 3 food for each animal you control. |
 | **Worker Wasp** | 2 | Colony, Worker | 2 | Flight. Whenever you place an animal, gain 3 food. |
-| **Worker Bee** | 2 | Colony, Worker | 1 | Flight. Echo. Roar: gain 6 food. |
+| **Worker Bee** | 2 | Colony, Worker | 1 | Flight. Roar: gain 6 food. Echo. |
 
 <!-- cards:end -->

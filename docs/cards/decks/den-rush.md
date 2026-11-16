@@ -32,7 +32,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Cheetah** | 2 | Cat | 5 | Roar: if this is next to your opponent's den, draw 2 cards. |
 | **Rat** | 2 | Rodent | 3 | Roar: if your hand is empty, remove an adjacent enemy. |
 | **Falcon** | 2 | Bird | 3 | Flight. Roar: if this is next to your opponent's den, draw a card. |
-| **Bat** | 2 | — | 2 | Flight. Echo. Roar: draw 2 cards. |
+| **Bat** | 2 | — | 2 | Flight. Roar: draw 2 cards. Echo. |
 | **Mouse** | 2 | Rodent | 4 | Roar: draw a Rodent. |
 | **Squirrel** | 1 | Rodent | 2 | Roar: gain 10 food. |
 

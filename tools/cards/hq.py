@@ -89,7 +89,8 @@ def _write(p: Path, data) -> None:
 
 
 def parse_text(text: str) -> dict:
-    """The keywords a card's text opens with, Hungry's number, and a printed food cost."""
+    """The keywords a card's text opens with, Echo where it closes the text (it describes the Roar before it: "Roar: draw 2
+    cards. Echo.", Martin, 2026-11-16), Hungry's number, and a printed food cost."""
     out: dict = {"keywords": []}
     pos = 0
     while (m := KEYWORD.match(text, pos)):
@@ -98,6 +99,8 @@ def parse_text(text: str) -> dict:
         else:
             out["keywords"].append(m.group(1))
         pos = m.end()
+    if re.search(r"(^|\. )Echo\.$", text) and "Echo" not in out["keywords"]:
+        out["keywords"].append("Echo")
     if (m := COSTS.search(text)):
         out["food_cost"] = int(m.group(1))
     return out

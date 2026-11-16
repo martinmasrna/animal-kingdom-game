@@ -222,7 +222,7 @@
         "Worker"
       ],
       "base_strength": 1,
-      "text": "Flight. Echo. Roar: gain 6 food.",
+      "text": "Flight. Roar: gain 6 food. Echo.",
       "species": "Bee",
       "habitat": "Meadow",
       "keywords": [
@@ -780,7 +780,7 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
-      "text": "Flight. Echo. Roar: draw 2 cards.",
+      "text": "Flight. Roar: draw 2 cards. Echo.",
       "species": "Bat",
       "habitat": "City",
       "stars": 3,
@@ -1340,7 +1340,7 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Echo. Roar: next turn, take 1 additional action.",
+      "text": "Roar: next turn, take 1 additional action. Echo.",
       "species": "Beaver",
       "habitat": "Forest",
       "stars": 3,
@@ -1385,7 +1385,7 @@
         "Rodent"
       ],
       "base_strength": 1,
-      "text": "Echo. Roar: gain 10 food.",
+      "text": "Roar: gain 10 food. Echo.",
       "species": "Chipmunk",
       "habitat": "Forest",
       "stars": 1,
@@ -1875,7 +1875,7 @@
         "Primate"
       ],
       "base_strength": 3,
-      "text": "Echo. Roar: return an adjacent ally to your hand, give it +2 strength, and play it.",
+      "text": "Roar: return an adjacent ally to your hand, give it +2 strength, and play it. Echo.",
       "species": "Baboon",
       "habitat": "Savanna",
       "keywords": [
@@ -1989,7 +1989,7 @@
         "Primate"
       ],
       "base_strength": 2,
-      "text": "Echo. Roar: give an animal in your hand +2 strength.",
+      "text": "Roar: give an animal in your hand +2 strength. Echo.",
       "species": "Tarsier",
       "habitat": "Jungle",
       "keywords": [
@@ -2557,7 +2557,7 @@
         "Bird"
       ],
       "base_strength": 2,
-      "text": "Flight. Echo. Roar: repeat the last Roar your opponent played.",
+      "text": "Flight. Roar: repeat the last Roar your opponent played. Echo.",
       "species": "Macaw",
       "habitat": "Jungle",
       "stars": 2,
