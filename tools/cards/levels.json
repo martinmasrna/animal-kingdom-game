@@ -489,7 +489,7 @@
           "FULL": 0.349
         }
       },
-      "at": 1794849335
+      "at": 1794859863
     },
     "animal": {
       "review": {
@@ -500,9 +500,9 @@
           "species": "Bat"
         }
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: the Bat takes the 3-star '??' slot (\"Let's make it Bat. 2 strength, flight.\")",
       "by": "claude",
-      "at": 1794849332
+      "at": 1794859862
     },
     "strength": {
       "review": {
@@ -530,9 +530,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: draw a card."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-16: the Bat takes the 3-star '??' slot (\"Let's make it Bat. 2 strength, flight.\")",
       "by": "claude",
-      "at": 1794849332
+      "at": 1794859863
     }
   },
   "beaver": {

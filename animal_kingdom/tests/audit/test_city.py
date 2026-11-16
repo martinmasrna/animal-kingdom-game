@@ -63,9 +63,9 @@ def test_bat_draws_two_cards():
     assert hand_ids(s, "A") == ["wolf", "lion"] and s.decks["A"] == ["tiger"]
 
 
-def test_bat_has_no_flight():
+def test_bat_flies():
     s = make_state(hands={"A": ["bat"]})
-    assert "3,2" not in place_targets(s) and "1,2" in place_targets(s)
+    assert "3,2" in place_targets(s) and "1,2" in place_targets(s)   # "Flight. Echo. Roar: draw 2 cards." (Martin, 2026-11-16)
 
 
 def test_bat_with_an_empty_deck_just_lands():

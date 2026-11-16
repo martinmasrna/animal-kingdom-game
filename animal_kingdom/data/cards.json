@@ -775,16 +775,17 @@
     },
     {
       "id": "bat",
-      "name": "??",
+      "name": "Bat",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
-      "text": "Echo. Roar: draw 2 cards.",
+      "text": "Flight. Echo. Roar: draw 2 cards.",
       "species": "Bat",
       "habitat": "City",
       "stars": 3,
       "keywords": [
+        "Flight",
         "Echo"
       ]
     },
