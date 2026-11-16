@@ -1,5 +1,5 @@
 {
- "rev": 157,
+ "rev": 158,
  "name": "provisions",
  "cards": {
   "queen_ant": {
@@ -33,6 +33,10 @@
   "mouse": {
    "x": -827,
    "y": 388
+  },
+  "gorilla_legend_2": {
+   "x": 0,
+   "y": 3851
   }
  },
  "piles": [

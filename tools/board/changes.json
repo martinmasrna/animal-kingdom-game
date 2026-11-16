@@ -4,25 +4,25 @@
  "changed": {
   "baboon_legend": {
    "text": {
-    "was": "Dawn: give 2 random animals in your hand +1 strength.",
+    "was": "Echo. Roar: return an adjacent ally to your hand, give it +2 strength, and play it.",
     "now": "Dusk: give 2 random animals in your hand +1 strength."
    }
   },
   "bee_legend_2": {
    "text": {
-    "was": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +2 strength (wherever they are).",
+    "was": "Roar: if your starting deck has no animals of strength 4 or more, choose one of three small animals and play it.",
     "now": "Roar: if your starting deck has no animals of strength 4 or more, give your animals +1 strength (wherever they are)."
    }
   },
   "bumblebee_legend": {
    "text": {
-    "was": "Flight. Whenever you gain food, gain 3 additional food.",
+    "was": "Flight. Roar: gain 2 food for each time you have gained food this game. (Current: X)",
     "now": "Whenever you gain food, gain 3 food."
    }
   },
   "butterfly_legend": {
    "text": {
-    "was": "Dawn: evolve. Whenever this gains strength, evolve.",
+    "was": "Whenever this gains strength, evolve.",
     "now": "Whenever Xanthe gains strength, evolve."
    }
   },
