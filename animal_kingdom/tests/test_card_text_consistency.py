@@ -166,6 +166,7 @@ STRENGTH_LIMITS = {
     "serval": "serval_min",
     "hornet": "hornet_max",
     "weasel": "weasel_max",
+    "mongoose": "mongoose_max",
 }
 
 

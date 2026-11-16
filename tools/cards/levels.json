@@ -2954,7 +2954,7 @@
           "FULL": null
         }
       },
-      "at": 1794849335
+      "at": 1794858753
     },
     "strength": {
       "review": {
@@ -2962,9 +2962,9 @@
         "prev_note": "",
         "prev": 3
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
-      "at": 1794849334
+      "at": 1794858753
     },
     "effect": {
       "review": {
@@ -2972,9 +2972,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: remove an adjacent enemy of strength 3 or less."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
-      "at": 1794849334
+      "at": 1794858753
     },
     "animal": {
       "review": {
@@ -2985,9 +2985,9 @@
           "species": "Hawk"
         }
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
-      "at": 1794849334
+      "at": 1794858753
     },
     "stars": {
       "review": {
@@ -2995,9 +2995,9 @@
         "prev_note": "",
         "prev": 1
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
-      "at": 1794849334
+      "at": 1794858753
     }
   },
   "hedgehog": {
@@ -10235,6 +10235,50 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1794857287
+    }
+  },
+  "mongoose": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Mongoose takes the 'Viper?' slot (\"okay then, good\"; the little guy who kills cobras)",
+      "by": "claude",
+      "at": 1794858753
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Mongoose takes the 'Viper?' slot (\"okay then, good\"; the little guy who kills cobras)",
+      "by": "claude",
+      "at": 1794858753
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-11-16: the Mongoose takes the 'Viper?' slot (\"okay then, good\"; the little guy who kills cobras)",
+      "by": "claude",
+      "at": 1794858753
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1794858753
     }
   }
 }

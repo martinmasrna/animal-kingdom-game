@@ -125,7 +125,8 @@ class Config:
     weasel_max: int = 3                  # Weasel: Roar: remove an adjacent enemy of strength 3 or less (Martin, 2026-11-16)
     bat_draw: int = 2                    # "??" (the 3-star): Echo. Roar: draw 2 cards (2026-11-16)
     honey_badger_min: int = 8            # Honey Badger removes an enemy of strength >= this
-    stoop_max: int = 5                   # Hawk ("Viper?" since 2026-11-16: remove an adjacent enemy of strength 5 or less)
+    stoop_max: int = 4                   # Hawk
+    mongoose_max: int = 5                # Mongoose: Roar: remove an adjacent enemy of strength 5 or less (Martin, 2026-11-16)
     rhinoceros_max: int = 3
     hippopotamus_max: int = 5
     cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this

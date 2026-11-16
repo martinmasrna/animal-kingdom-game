@@ -510,22 +510,12 @@ def test_fox_legend_with_no_room_places_none():
 
 
 # ============================================================ lynx
-# "Roar: if you place this on top of an enemy, draw 2 cards."
+# "Roar: draw a card."
 
-def test_lynx_on_an_enemy_draws_2():
+def test_lynx_draws_a_card():
     s = st(hands={"A": ["lynx"]})
-    put(s, "1,1", "v4", "B")
     play(s, "lynx", "1,1")
-    assert len(s.hands["A"]) == 2
-
-
-def test_lynx_on_empty_or_an_ally_draws_nothing():
-    s = st(hands={"A": ["lynx", "lynx"]})
-    put(s, "1,2", "v4", "A")
-    play(s, "lynx", "1,1")
-    assert len(s.hands["A"]) == 1
-    play(s, "lynx", "1,2")
-    assert s.hands["A"] == []
+    assert len(s.hands["A"]) == 1          # "Roar: draw a card." (Martin, 2026-11-16)
 
 
 # ============================================================ bobcat
@@ -745,29 +735,28 @@ def test_raven_legend_with_one_takes_one_and_never_your_own():
 # ============================================================ hawk
 # "Roar: remove an adjacent enemy of strength 5 or less."
 
-def test_hawk_removes_an_adjacent_enemy_of_5_or_less():
+def test_hawk_removes_an_adjacent_enemy_of_4_or_less():
     s = st(hands={"A": ["hawk"]})
-    put(s, "2,1", "v5", "B")
+    put(s, "2,1", "v4", "B")
     play(s, "hawk", "1,1")
     click_through(s)
     assert s.top_unit("2,1") is None
 
 
-def test_hawk_leaves_a_6():
+def test_hawk_leaves_a_5():
     s = st(hands={"A": ["hawk"]})
-    put(s, "2,1", "v6", "B")
+    put(s, "2,1", "v5", "B")
     play(s, "hawk", "1,1")
     click_through(s)
-    assert s.top_unit("2,1").card_id == "v6"
+    assert s.top_unit("2,1").card_id == "v5"
 
 
-def test_hawk_has_no_flight_and_spares_allies():
+def test_hawk_has_flight_and_spares_allies():
     s = st(hands={"A": ["hawk"]})
-    put(s, "2,1", "v1", "A")
-    assert "3,3" not in place_targets(s)
-    play(s, "hawk", "1,1")
+    put(s, "3,2", "v1", "A")
+    play(s, "hawk", "3,3")
     click_through(s)
-    assert s.top_unit("2,1").card_id == "v1"
+    assert s.top_unit("3,2").card_id == "v1"
 
 
 # ============================================================ magpie

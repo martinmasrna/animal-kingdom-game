@@ -20,6 +20,6 @@ def test_a_deck_recipe_holds_collectible_cards_only():
     cards = load_cards()
     assert all(cards[cid].collectible for cid in SEED_RECIPE.all_ids())
     with pytest.raises(ValueError, match="polar_bear"):
-        make_recipe(SEED_RECIPE.legendary, ("jaguar", "hawk", "polar_bear", "rhinoceros"), SEED_RECIPE.common)
+        make_recipe(SEED_RECIPE.legendary, ("jaguar", "black_mamba", "polar_bear", "rhinoceros"), SEED_RECIPE.common)
     with pytest.raises(ValueError, match="listed under"):
         make_recipe(SEED_RECIPE.legendary, SEED_RECIPE.rare, ("lion", "tiger", "mouse", "wolf", "eagle", "jaguar"))

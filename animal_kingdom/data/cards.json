@@ -1703,18 +1703,19 @@
     },
     {
       "id": "hawk",
-      "name": "Viper?",
-      "status": "collectible",
+      "name": "Hawk",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Bird"
       ],
-      "base_strength": 1,
-      "text": "Roar: remove an adjacent enemy of strength 5 or less.",
+      "base_strength": 4,
+      "text": "Flight. Roar: remove an adjacent enemy of strength 4 or less.",
       "species": "Hawk",
       "habitat": "Forest",
-      "stars": 0,
-      "keywords": []
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "cottonmouth",
@@ -4264,6 +4265,18 @@
       "habitat": "Jungle",
       "keywords": [],
       "unnamed": true
+    },
+    {
+      "id": "mongoose",
+      "name": "Mongoose",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Roar: remove an adjacent enemy of strength 5 or less.",
+      "species": "Mongoose",
+      "habitat": "Savanna",
+      "keywords": []
     }
   ]
 }

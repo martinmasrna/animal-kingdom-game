@@ -19,7 +19,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Viper?** | 2 | Bird | 1 | Roar: remove an adjacent enemy of strength 5 or less. |
+| **Hawk** | 2 | Bird | 4 | Flight. Roar: remove an adjacent enemy of strength 4 or less. |
 | **Magpie** | 2 | Bird | 3 | Flight. Roar: steal a card from your opponent's hand, then discard a card. |
 | **Black Mamba** | 2 | Snake | 3 | Roar: remove an adjacent enemy of strength 7 or less. |
 | **Cuckoo** | 2 | Bird | 3 | Flight. Roar: shuffle two Cuckoo Eggs into your opponent's deck. |
