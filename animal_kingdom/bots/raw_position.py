@@ -94,7 +94,7 @@ EXCLUDED = {
     "acted_": "not encoded (actions prototype)", "flight_next_": "not encoded (actions prototype)",
     # the leaders prototype (branch leaders): the network was trained before leaders existed
     "leaders": "not encoded (leaders prototype; strength reads it live)",
-    "food_gains": "not encoded (leaders prototype)", "next_strength": "not encoded (leaders prototype; strength reads it live)",
+    "food_gains": "not encoded (leaders prototype)", "trios": "not encoded (leaders prototype: the sets Iris has already paid for)", "next_strength": "not encoded (leaders prototype; strength reads it live)",
 }
 
 

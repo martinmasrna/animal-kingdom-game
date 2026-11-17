@@ -835,5 +835,5 @@ class TurnSearcher(Bot):
             freeze(state.card_strength_counters),
             freeze(state.turn_flags),
             freeze(state.result.to_dict()) if state.result else None,
-            freeze(state.leaders), freeze(state.next_strength),   # the leaders prototype: public
+            freeze(state.leaders), freeze(state.next_strength), freeze(state.trios),   # the leaders prototype: public
         )
