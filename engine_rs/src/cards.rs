@@ -1204,13 +1204,13 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("chameleon_legend", OnPlace) => {
-            let options: Vec<Cr> = adjacent_tops(st, cr, None).into_iter().filter(|(nb, top)| statics::can_be_chosen(st, top, owner, Some(*nb))).map(|(nb, _)| nb).collect();
-            let o = crs(st, options);
-            push_choose(st, owner, o, "copy_and_add", false, vmap!("self" => Value::Int(unit.iid)));
+            let o: Vec<Value> = hand_iids(st, owner, 0).into_iter().map(Value::Int).collect();
+            push_choose(st, owner, o, "copy_from_hand", false, vmap!("self" => Value::Int(unit.iid), "more" => Value::Bool(true)));
         }
         ("chameleon", OnPlace) => {
-            let o: Vec<Value> = hand_iids(st, owner, 0).into_iter().map(Value::Int).collect();
-            push_choose(st, owner, o, "copy_from_hand", false, vmap!("self" => Value::Int(unit.iid)));
+            let options: Vec<Cr> = adjacent_tops(st, cr, None).into_iter().filter(|(nb, top)| statics::can_be_chosen(st, top, owner, Some(*nb))).map(|(nb, _)| nb).collect();
+            let o = crs(st, options);
+            push_choose(st, owner, o, "copy_adjacent", false, vmap!("self" => Value::Int(unit.iid)));
         }
         ("golden_orb_weaver", OnEnemyPlacedAdjacent) => {
             if let Args::PlacedAdjacent(placed, pcr) = args {
@@ -1603,7 +1603,7 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                 grant(st, vec![top.iid], m_get_i(step, "amount").unwrap_or(0) as i32);
             }
         }
-        "copy_and_add" => {
+        "copy_adjacent" => {
             let me_iid = m_get_i(step, "self").unwrap_or(-1);
             let Some(cr) = cr_of(st) else { return };
             let Some(target) = st.top(cr).cloned() else { return };
@@ -1611,13 +1611,16 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             if st.find_unit(me_iid).is_some() {
                 copy_timers(st, &target, me_iid, chooser);
             }
-            gain_to_hand(st, chooser, target.card, 0);
         }
         "copy_from_hand" => {
             let me_iid = m_get_i(step, "self").unwrap_or(-1);
             let iid = choice.as_i64().unwrap_or(-1);
             if let Some(inst) = st.hands[chooser as usize].iter().find(|u| u.iid == iid).cloned() {
                 become_copy(st, me_iid, inst.card, inst.strength_counter, inst.iid);
+                if step.get("more").map(|v| v.as_bool()).unwrap_or(false) {
+                    gain_to_hand(st, chooser, inst.card, 0);
+                    shuffle_back(st, chooser, &[inst.card], None);
+                }
             }
         }
         "return_ally" => {

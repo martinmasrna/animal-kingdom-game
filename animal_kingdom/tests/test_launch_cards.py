@@ -1172,29 +1172,27 @@ def test_covering_the_legendary_squirrel_pauses_its_timer():
     assert s.food["A"] == 0
 
 
-def test_iris_becomes_a_copy_of_an_adjacent_animal_but_not_its_roar_and_adds_another_to_your_hand():
-    s = make_state(hands={"A": ["chameleon_legend"]})
+def test_chameleon_becomes_a_copy_of_an_adjacent_animal_but_not_its_roar():
+    s = make_state(hands={"A": ["chameleon"]})
     por = put(s, "2,2", "porcupine", "B")
     por.strength_counter = 1
-    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,2")))
     choose(s, "2,2")
     me = s.top_unit("1,2")
     base = s.cards["porcupine"].base_strength
     assert me.card_id == "porcupine" and effective_strength(s, me) == base + 1 and "Spikes" in statics.unit_keywords(s, me)
-    assert [(u.card_id, u.owner, u.strength_counter) for u in s.hands["A"]] == [("porcupine", "A", 0)]   # a plain card
-    s2 = make_state(hands={"A": ["chameleon_legend"]})
+    assert s.hands["A"] == []                                  # the common Chameleon adds no copy
+    s2 = make_state(hands={"A": ["chameleon"]})
     put(s2, "2,2", "squirrel", "A")
-    rules.apply_action(s2, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    rules.apply_action(s2, PlaceAction("chameleon", ("cr", "1,2")))
     choose(s2, "2,2")
-    assert s2.food["A"] == 0                                   # copying the Squirrel doesn't gain its Roar's food...
-    rules.apply_action(s2, PlaceAction("squirrel", ("cr", "1,1")))
-    assert s2.food["A"] == CFG.squirrel_food                   # ...the copy in hand does, when it is played
+    assert s2.food["A"] == 0                                   # copying the Squirrel doesn't gain its Roar's food
 
 
 def test_a_copy_on_the_board_keeps_the_copied_cards_dawn_and_dusk():
-    s = make_state(hands={"A": ["chameleon_legend"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    s = make_state(hands={"A": ["chameleon"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     put(s, "2,2", "whale_shark", "A")                          # Dusk: draw a card
-    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,2")))
     choose(s, "2,2")
     hand = len(s.hands["A"])                                   # the Whale Shark Iris added
     end_turn(s)
@@ -1232,34 +1230,34 @@ def test_the_krill_makes_the_next_titan_cost_one_action():
     assert not any(isinstance(a, PlaceAction) and a.card_id == "sperm_whale" for a in rules.legal_actions(s))
 
 
-def test_iris_copies_an_enemy_timer_for_herself_as_far_along_as_it_is():
-    s = make_state(hands={"A": ["chameleon_legend"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
+def test_chameleon_copies_an_enemy_timer_for_herself_as_far_along_as_it_is():
+    s = make_state(hands={"A": ["chameleon"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
     sloth = put(s, "2,2", "sloth", "B")
     effects._sloth_place(s, sloth, "2,2")                      # B's Sloth: its food three of B's turns away
-    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,2")))
     choose(s, "2,2")
     for _ in range(6):
         end_turn(s)
     assert s.food["A"] == CFG.sloth_food and s.food["B"] == CFG.sloth_food
 
 
-def test_iris_copying_a_poisoned_animal_is_poisoned_too():
-    s = make_state(hands={"A": ["chameleon_legend"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+def test_chameleon_copying_a_poisoned_animal_is_poisoned_too():
+    s = make_state(hands={"A": ["chameleon"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     put(s, "2,2", "lion", "A")
     effects._op_venom(s, {"chooser": "B", "options": ["2,2"], "choice": "2,2"})   # B's Cottonmouth bit it
-    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,2")))
     choose(s, "2,2")
     end_turn(s)
     assert s.top_unit("2,2") is None and s.top_unit("1,2") is None
 
 
-def test_the_chameleon_becomes_a_copy_of_an_animal_in_your_hand_which_stays_there():
-    s = make_state(hands={"A": ["chameleon", "lion", "squirrel"]})
-    rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,2")))
+def test_iris_becomes_a_copy_of_an_animal_in_your_hand_adds_one_to_hand_and_one_to_deck():
+    s = make_state(hands={"A": ["chameleon_legend", "lion", "squirrel"]})
+    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
     choose(s, hand_inst(s, "A", "lion").iid)
     me = s.top_unit("1,2")
     assert me.card_id == "lion" and effective_strength(s, me) == 7
-    assert sorted(hand_ids(s, "A")) == ["lion", "squirrel"] and s.food["A"] == 0
+    assert sorted(hand_ids(s, "A")) == ["lion", "lion", "squirrel"] and s.decks["A"] == ["lion"] and s.food["A"] == 0
 
 
 def test_golden_orb_weaver_catches_a_flyer_landing_beside_it():

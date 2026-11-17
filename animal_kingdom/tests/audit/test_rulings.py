@@ -1488,38 +1488,37 @@ def test_launch_cards__the_legendary_squirrel_removed_loses_the_stake():
     assert s.food["A"] == 0
 
 
-def test_launch_cards__chameleon_becomes_the_copy_for_good_without_its_roar_and_the_card_stays_in_hand():
-    s = st(hands={"A": ["chameleon", "dolphin"]})
-    play(s, "chameleon", "1,2")
+def test_launch_cards__iris_becomes_the_copy_for_good_without_its_roar_and_adds_two_more():
+    s = st(hands={"A": ["chameleon_legend", "dolphin"]})
+    play(s, "chameleon_legend", "1,2")
     if s.pending:
         choose(s, s.pending["options"][0])
     c = s.top_unit("1,2")
     assert c.card_id == "dolphin" and strength(s, c) == 5
-    assert hand_ids(s, "A") == ["dolphin"]      # no draw: the Roar never made
+    assert hand_ids(s, "A") == ["dolphin", "dolphin"] and s.decks["A"].count("dolphin") == 1      # no draw: the Roar never made
     effects.remove_top(s, "1,2", by_player="B"); effects.resolve(s)
     assert s.pile_cards_of("A") == ["dolphin"]
 
 
-def test_launch_cards__chameleon_copy_keeps_the_copied_cards_counter():
-    s = st(hands={"A": ["chameleon"]})
+def test_launch_cards__iris_copy_keeps_the_copied_cards_counter():
+    s = st(hands={"A": ["chameleon_legend"]})
     d = s.add_to_hand("A", "dolphin"); d.strength_counter = 2
-    play(s, "chameleon", "1,2")
+    play(s, "chameleon_legend", "1,2")
     if s.pending:
         choose(s, s.pending["options"][0])
     assert strength(s, s.top_unit("1,2")) == 7
 
 
-def test_launch_cards__iris_copies_an_ally_or_a_choosable_enemy_and_adds_a_plain_copy():
-    s = st(hands={"A": ["chameleon_legend"]})
+def test_launch_cards__chameleon_copies_an_ally_or_a_choosable_enemy():
+    s = st(hands={"A": ["chameleon"]})
     put(s, "1,1", "stick_insect", "B")          # Stealth: not choosable
     d = put(s, "1,3", "dolphin", "A"); d.strength_counter = 2
     put(s, "2,2", "v4", "B")
-    play(s, "chameleon_legend", "1,2")
+    play(s, "chameleon", "1,2")
     assert options(s) == {"1,3", "2,2"}
     choose(s, "1,3")
     assert s.top_unit("1,2").card_id == "dolphin"
-    added = [u for u in s.hands["A"] if u.card_id == "dolphin"]
-    assert len(added) == 1 and added[0].strength_counter == 0
+    assert s.hands["A"] == []
 
 
 def test_launch_cards__hamster_pays_five_per_card_its_owner_draws_not_the_opponents_not_a_burned_one():

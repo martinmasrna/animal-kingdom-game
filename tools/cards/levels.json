@@ -1505,8 +1505,8 @@
         "prev_note": "",
         "prev": "Can cover animals of any strength."
       },
-      "note": "Martin, 2026-10-26",
-      "at": 1793028832
+      "note": "Martin, 2026-11-17: the Chameleon copies on the board, Iris from the hand",
+      "at": 1794914463
     },
     "art": {
       "lv": "draft",
@@ -4486,9 +4486,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "out of the collection (in the reserve)",
+      "note": "into the collection",
       "by": "claude",
-      "at": 1794849340,
+      "at": 1794914463,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-14, applied 2026-10-16",
@@ -4504,9 +4504,9 @@
         "prev_note": "",
         "prev": "Roar: this becomes a copy of an adjacent animal."
       },
-      "note": "Martin, 2026-10-26",
+      "note": "Martin, 2026-11-17: Iris copies from the hand, one more to hand and a third to the deck",
       "by": "claude",
-      "at": 1793028834
+      "at": 1794914463
     },
     "habitat": {
       "review": {

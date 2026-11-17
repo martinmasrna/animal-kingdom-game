@@ -1921,9 +1921,8 @@ def _become(state, step, card_id, counter, from_iid) -> None:
     _transform(state, me, card_id)
 
 
-def _then_copy_and_add(state, step, cr):
-    """Iris: "Choose an adjacent animal. Become a copy of it, and add another copy to your hand": on the board its counter
-    included, in hand a plain card, its Roar to come when it is played (Martin, 2026-10-26)."""
+def _then_copy_adjacent(state, step, cr):
+    """The Chameleon: "become a copy of an adjacent animal", its counter and its ticking timers included."""
     target = state.top_unit(cr)
     if target is None:
         return
@@ -1931,7 +1930,6 @@ def _then_copy_and_add(state, step, cr):
     me = _find_instance(state, step["self"])
     if me is not None and _crossroad_of(state, me.iid) is not None:
         _copy_timers(state, target, me)
-    gain_to_hand(state, step["chooser"], target.card_id)
 
 
 def _copy_timers(state, source, copy) -> None:
@@ -1951,10 +1949,14 @@ def _copy_timers(state, source, copy) -> None:
 
 
 def _then_copy_from_hand(state, step, iid):
-    """The Chameleon: "become a copy of an animal in your hand" (its counter included); the card stays in your hand."""
+    """Iris: "become a copy of an animal in your hand" (its counter included); the card stays in your hand. Then (`more`)
+    "add a copy to your hand and shuffle a copy into your deck": plain cards both."""
     inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
     if inst is not None:
         _become(state, step, inst.card_id, inst.strength_counter, inst.iid)
+        if step.get("more"):
+            gain_to_hand(state, step["chooser"], inst.card_id)
+            shuffle_back(state, step["chooser"], [inst.card_id])
 
 
 def _then_return_ally(state, step, cr):
@@ -2025,7 +2027,7 @@ def _then_roam_to(state, step, cr):
 
 THEN = {
     "remove": _then_remove, "set_strength": _then_set_strength, "drain": _then_drain, "grant": _then_grant,
-    "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "copy_and_add": _then_copy_and_add,
+    "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "copy_adjacent": _then_copy_adjacent,
     "copy_from_hand": _then_copy_from_hand, "return_ally": _then_return_ally,
     "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
     "repeat_roar": _then_repeat_roar,
@@ -3120,15 +3122,14 @@ def _otk_squirrel_place(state, unit, cr):
 
 
 def _chameleon_legend_place(state, unit, cr):
-    """Iris: Roar: choose an adjacent animal (an enemy only if it may be chosen). Become a copy of it, and add another
-    copy to your hand."""
-    _push_choose(state, unit.owner, [nb for nb, top in _adjacent_tops(state, cr)
-                                     if statics.can_be_chosen(state, top, unit.owner, nb)], "copy_and_add", self=unit.iid)
+    """Iris: Roar: become a copy of an animal in your hand. Add a copy to your hand and shuffle a copy into your deck."""
+    _push_choose(state, unit.owner, _hand_iids(state, unit.owner), "copy_from_hand", self=unit.iid, more=True)
 
 
 def _chameleon_place(state, unit, cr):
-    """Roar: become a copy of an animal in your hand."""
-    _push_choose(state, unit.owner, _hand_iids(state, unit.owner), "copy_from_hand", self=unit.iid)
+    """Roar: become a copy of an adjacent animal (an enemy only if it may be chosen)."""
+    _push_choose(state, unit.owner, [nb for nb, top in _adjacent_tops(state, cr)
+                                     if statics.can_be_chosen(state, top, unit.owner, nb)], "copy_adjacent", self=unit.iid)
 
 
 def _orb_weaver_enemy_placed(state, spider, placed, cr):

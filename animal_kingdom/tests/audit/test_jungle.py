@@ -203,19 +203,20 @@ def test_bush_dog_placed_is_not_a_roam_and_leaves_no_pup():
 
 # --------------------------------------------------- chameleon: Roar: become a copy of an animal in your hand
 
-def test_chameleon_becomes_a_copy_of_a_card_in_hand_and_the_card_stays():
-    s = make_state(hands={"A": ["chameleon", "lion"]})
-    rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,2")))
+def test_iris_becomes_a_copy_of_a_card_in_hand_adds_one_to_hand_and_one_to_deck():
+    s = make_state(hands={"A": ["chameleon_legend", "lion"]})
+    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
     if s.pending:
         choose(s, hand_inst(s, "A", "lion").iid)
     me = s.top_unit("1,2")
-    assert me.card_id == "lion" and effective_strength(s, me) == strength("lion") and hand_ids(s, "A") == ["lion"]
+    assert me.card_id == "lion" and effective_strength(s, me) == strength("lion")
+    assert hand_ids(s, "A") == ["lion", "lion"] and s.decks["A"] == ["lion"]     # one more to hand, a third to the deck
 
 
-def test_chameleon_with_an_empty_hand_stays_a_chameleon():
-    s = make_state(hands={"A": ["chameleon"]})
-    rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,2")))
-    assert s.pending is None and s.top_unit("1,2").card_id == "chameleon"
+def test_iris_with_an_empty_hand_stays_a_chameleon():
+    s = make_state(hands={"A": ["chameleon_legend"]})
+    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    assert s.pending is None and s.top_unit("1,2").card_id == "chameleon_legend"
 
 
 # ------------------------------------------------- jaguar: Roar: remove an adjacent enemy of strength 5 or less
@@ -332,27 +333,27 @@ def test_capybara_legend_with_no_adjacent_rodent_does_nothing():
 
 # ------------------------- chameleon_legend: Roar: choose an adjacent animal; become a copy, add another to your hand
 
-def test_iris_copies_an_adjacent_enemy_and_adds_a_copy_to_hand():
-    s = make_state(hands={"A": ["chameleon_legend"]})
+def test_chameleon_copies_an_adjacent_enemy():
+    s = make_state(hands={"A": ["chameleon"]})
     put(s, "2,2", "lion", "B")
-    apply_click(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    apply_click(s, PlaceAction("chameleon", ("cr", "1,2")))
     me = s.top_unit("1,2")
-    assert me.card_id == "lion" and me.owner == "A" and hand_ids(s, "A") == ["lion"]
+    assert me.card_id == "lion" and me.owner == "A" and hand_ids(s, "A") == []
     assert s.top_unit("2,2").card_id == "lion" and s.top_unit("2,2").owner == "B"
 
 
-def test_iris_with_no_adjacent_animal_stays_herself_and_adds_nothing():
-    s = make_state(hands={"A": ["chameleon_legend"]})
+def test_chameleon_with_no_adjacent_animal_stays_herself_and_adds_nothing():
+    s = make_state(hands={"A": ["chameleon"]})
     put(s, "3,3", "lion", "B")
-    apply_click(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
-    assert s.top_unit("1,2").card_id == "chameleon_legend" and hand_ids(s, "A") == []
+    apply_click(s, PlaceAction("chameleon", ("cr", "1,2")))
+    assert s.top_unit("1,2").card_id == "chameleon" and hand_ids(s, "A") == []
 
 
-def test_iris_cannot_choose_a_stealth_enemy():
-    s = make_state(hands={"A": ["chameleon_legend"]})
+def test_chameleon_cannot_choose_a_stealth_enemy():
+    s = make_state(hands={"A": ["chameleon"]})
     put(s, "2,2", "stick_insect", "B")
-    apply_click(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
-    assert s.top_unit("1,2").card_id == "chameleon_legend" and hand_ids(s, "A") == []
+    apply_click(s, PlaceAction("chameleon", ("cr", "1,2")))
+    assert s.top_unit("1,2").card_id == "chameleon" and hand_ids(s, "A") == []
 
 
 # ----------------- capybara: if your starting deck has no animal of strength 4 or more, this has 8 strength

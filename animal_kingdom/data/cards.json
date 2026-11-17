@@ -696,7 +696,7 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 2,
-      "text": "Roar: become a copy of an animal in your hand.",
+      "text": "Roar: become a copy of an adjacent animal.",
       "species": "Chameleon",
       "habitat": "Jungle",
       "keywords": []
@@ -1498,11 +1498,11 @@
     {
       "id": "chameleon_legend",
       "name": "Iris",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
-      "text": "Roar: choose an adjacent animal. Become a copy of it, and add another copy to your hand.",
+      "text": "Roar: become a copy of an animal in your hand. Add a copy to your hand and shuffle a copy into your deck.",
       "species": "Chameleon",
       "habitat": "Jungle",
       "keywords": []
