@@ -109,6 +109,21 @@ def test_adira_needs_a_deck():
     assert not can_press(state("lion_legend_4", decks={"A": [], "B": []}, hands={"A": ["t_body"]}))
 
 
+# ===================================================================== Grimm
+
+def test_grimm_counts_every_enemy_removed_whatever_removed_it_and_draws_one_more_for_every_five():
+    from animal_kingdom.engine.effects import remove_top
+    s = state("raven_legend", decks={"A": ["t_body"] * 10, "B": []})
+    for i in range(5):
+        put(s, "1,1", "t_small", "B")
+        remove_top(s, "1,1", by_player="A" if i % 2 else None, by_card="t_body" if i % 2 else None)
+    put(s, "1,2", "t_small", "A")
+    remove_top(s, "1,2", by_player="B", by_card="t_body")          # his own animal: no count
+    assert s.leaders["A"]["kills"] == 5
+    press(s)
+    assert len(s.hands["A"]) == 3
+
+
 # ===================================================================== Lady Juliette
 
 def test_juliette_leader_gives_your_animals_plus_one_with_a_small_starting_deck():

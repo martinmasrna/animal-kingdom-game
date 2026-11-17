@@ -12,7 +12,8 @@ The data lives here (no engine imports); the behaviour is in effects.py (`legal_
 hooks), strength.py (the strength passives) and the Rust twin (engine_rs/src/leaders.rs). A deck with no leader plays as
 it always has.
 
-State (GameState.leaders): player -> {"id": the leader's card id, "kills": enemies her Cats removed (Queen Adira),
+State (GameState.leaders): player -> {"id": the leader's card id, "kills": the enemies its power counts (Queen Adira: those
+her Cats removed; Grimm: every enemy removed),
 "stage": how many Dawns Xanthe's leader has evolved (0 Egg .. 4 Monarch), "spent": whether a once-per-game power was
 used}. Every key is there for every leader, so the two engines serialise it alike.
 """
@@ -28,6 +29,7 @@ BABAJI = "baboon_legend"
 XANTHE = "butterfly_legend"
 ARNE = "eagle_legend"
 GORILLA = "gorilla_legend_2"
+GRIMM = "raven_legend"
 
 # card id -> (kind, the ability as the player reads it)
 LEADERS: dict[str, tuple[str, str]] = {
@@ -40,6 +42,7 @@ LEADERS: dict[str, tuple[str, str]] = {
     XANTHE: ("once", "Evolves at each of your Dawns: Egg, Caterpillar, Chrysalis, Butterfly, Monarch. Use it once, for what its stage offers then."),
     ARNE: ("passive", "Copies of the same animal in your hand share their strength."),
     GORILLA: ("passive", "The first animal you play each turn has +1 strength."),
+    GRIMM: ("power", "Draw 2 cards. Draws one more card for every 5 enemies removed this match."),   # Adira's, without the Cats (Martin, 2026-11-17)
 }
 
 # Xanthe's leader, stage by stage: (name, what her once-per-game power does then, or None: nothing to use).

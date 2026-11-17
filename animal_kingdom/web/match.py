@@ -20,7 +20,7 @@ from ..decks import LADDER_DECK_NAMES, leaders_for, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ActAction, ChoiceAction, DrawAction, LeaderAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine import leaders as L
-from ..engine.effects import adira_draw, leader_usable
+from ..engine.effects import leader_draws, leader_per, leader_usable
 from ..engine.cards import DECKLISTS, load_cards
 from ..engine.config import Config
 from ..engine.effects import roar_condition
@@ -115,10 +115,11 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     kind, text = L.LEADERS[lid]
     out = {"id": lid, "kind": kind, "text": text, "usable": st.current == p and st.pending is None and st.result is None
            and rules.turn_actions(st) - st.actions_taken_this_turn > 0 and leader_usable(st, p)}
-    if lid == L.ADIRA:
-        n = adira_draw(st, lead)
-        out.update(draws=n, kills=lead["kills"], per=st.config.adira_leader_per, toward=lead["kills"] % st.config.adira_leader_per,
-                   text=f"Draw {n} cards. Draws one more card for every {st.config.adira_leader_per} enemies your Cats remove.")
+    if lid in (L.ADIRA, L.GRIMM):
+        n, per = leader_draws(st, lead), leader_per(st, lid)
+        out.update(draws=n, kills=lead["kills"], per=per, toward=lead["kills"] % per,
+                   text=f"Draw {n} cards. Draws one more card for every {per} enemies "
+                   + ("your Cats remove." if lid == L.ADIRA else "removed."))
     elif lid == L.XANTHE:
         name, does = L.XANTHE_STAGES[lead["stage"]]
         out.update(stage=lead["stage"], stageName=name, spent=lead["spent"],

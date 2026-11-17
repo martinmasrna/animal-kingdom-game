@@ -883,7 +883,7 @@
     {
       "id": "lion_legend_3",
       "name": "King Theron",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -1673,7 +1673,7 @@
     {
       "id": "raven_legend",
       "name": "Grimm",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Bird"

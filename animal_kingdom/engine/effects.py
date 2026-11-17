@@ -730,6 +730,11 @@ def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_c
         if lead is not None and lead["id"] == L.ADIRA:    # the same event her card counts: an allied Cat removes an enemy
             lead["kills"] += 1
             state.emit("leader", player=by_player, kills=lead["kills"])
+    if state.leaders and cr is not None:    # an enemy is an animal on the board: a card discarded from a hand or deck is none
+        for p, lead in state.leaders.items():
+            if p != owner and lead["id"] == L.GRIMM:    # every enemy removed, whatever removed it
+                lead["kills"] += 1
+                state.emit("leader", player=p, kills=lead["kills"])
     event = {"card_id": card_id, "owner": owner, "cr": cr, "tags": state.cards[card_id].tags,
              "by_player": by_player, "by_card": by_card}
     _fire_event(state, "on_remove_event", event, skip=uncovered)
@@ -3747,9 +3752,16 @@ def _leads(state: GameState, player: str, leader_id: str) -> bool:
     return lead is not None and lead["id"] == leader_id
 
 
-def adira_draw(state: GameState, lead: dict) -> int:
-    """Queen Adira's power: 2 cards, one more for every 3 enemies her Cats have removed this match."""
-    return state.config.adira_leader_draw + lead["kills"] // state.config.adira_leader_per
+def leader_per(state: GameState, leader_id: str) -> int:
+    """Queen Adira's and Grimm's powers: how many counted enemies make one more card."""
+    return state.config.grimm_leader_per if leader_id == L.GRIMM else state.config.adira_leader_per
+
+
+def leader_draws(state: GameState, lead: dict) -> int:
+    """Queen Adira's power: 2 cards, one more for every 3 enemies her Cats have removed this match; Grimm's: 2, one more
+    for every 5 enemies removed."""
+    base = state.config.grimm_leader_draw if lead["id"] == L.GRIMM else state.config.adira_leader_draw
+    return base + lead["kills"] // leader_per(state, lead["id"])
 
 
 def leader_usable(state: GameState, player: str) -> bool:
@@ -3762,7 +3774,7 @@ def leader_usable(state: GameState, player: str) -> bool:
     if kind == "passive" or (kind == "once" and lead["spent"]):
         return False
     deck = state.decks[player]
-    if lid in (L.ADIRA, L.BABAJI):
+    if lid in (L.ADIRA, L.GRIMM, L.BABAJI):
         return bool(deck)
     if lid == L.MELISSIA:
         return any(_matches(state.cards[cid], L.MELISSIA_SPEC) for cid in deck)
@@ -3785,8 +3797,8 @@ def do_leader(state: GameState, player: str) -> None:
     lid, cfg = lead["id"], state.config
     state.emit("leader_power", player=player, card=lid)
     src = {"by_card": lid}
-    if lid == L.ADIRA:
-        state.effect_stack.append({"op": "draw", "player": player, "n": adira_draw(state, lead), **src})
+    if lid in (L.ADIRA, L.GRIMM):
+        state.effect_stack.append({"op": "draw", "player": player, "n": leader_draws(state, lead), **src})
     elif lid == L.MELISSIA:
         state.effect_stack.append({"op": "scout", "player": player, "spec": L.MELISSIA_SPEC, **src})
     elif lid == L.BABAJI:

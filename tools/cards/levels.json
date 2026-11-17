@@ -3523,8 +3523,8 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "out of the collection (in the reserve)",
-      "at": 1794849339
+      "note": "into the collection",
+      "at": 1794892189
     },
     "tag": {
       "lv": "draft",
@@ -5139,9 +5139,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "out of the collection (in the reserve)",
+      "note": "into the collection",
       "by": "claude",
-      "at": 1794849341,
+      "at": 1794892189,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-20: his own name, a draft; a week on the card before a lock"

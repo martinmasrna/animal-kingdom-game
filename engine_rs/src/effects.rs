@@ -741,7 +741,7 @@ pub struct RemoveEvent {
 
 fn fire_remove_event(st: &mut State, card: CardId, owner: Player, cr: Option<Cr>, by_player: Option<Player>, by_card: Option<CardId>, skip: Option<i64>) {
     if crate::leaders::any(st) {
-        crate::leaders::count_kill(st, owner, by_player, by_card);
+        crate::leaders::count_kill(st, owner, cr.is_some(), by_player, by_card);
     }
     let ev = RemoveEvent { card, owner, cr, by_player, by_card };
     for c in st.sorted_occupied() {
