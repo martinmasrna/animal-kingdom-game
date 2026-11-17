@@ -278,10 +278,14 @@ pub fn dawn(st: &mut State, player: Player) {
 /// effects.py end_of_turn: Queen Solenia's leader, Dusk: gain 1 food for each animal you control.
 pub fn dusk(st: &mut State, player: Player) {
     if leads(st, player, ASH) {
-        // effects.py ash_keywords: Poison, Spikes (unspent), Armor and Stealth on the player's top animals
+        // effects.py ash_keywords: Poison, Spikes (unspent), Armor and Stealth on the player's top animals next to an enemy
         let tops: Vec<(Cr, Unit)> = st.tops().filter(|(_, u)| u.owner == player).map(|(c, u)| (c, *u)).collect();
+        let enemy = Some(1 - player);
         let mut n = 0;
         for (c, u) in tops {
+            if !st.map().neighbors(c).iter().any(|&nb| st.owner_of(nb) == enemy) {
+                continue;
+            }
             for kw in [K_POISON, K_SPIKES, K_ARMOR, K_STEALTH] {
                 if crate::statics::has_keyword(st, &u, kw, Some(c)) && !(kw == K_SPIKES && u.retaliation_used) {
                     n += 1;

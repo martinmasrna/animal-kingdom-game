@@ -3791,12 +3791,12 @@ def _then_guard(state, step, cr):
 
 
 def ash_keywords(state: GameState, player: str) -> int:
-    """How many Poison, Spikes, Armor and Stealth `player`'s top animals carry now: printed or given by a neighbour, and
-    Spikes only while unspent (Ash's leader)."""
-    n = 0
+    """How many Poison, Spikes, Armor and Stealth `player`'s top animals next to an enemy carry now: printed or given by
+    a neighbour, and Spikes only while unspent (Ash's leader)."""
+    n, enemy = 0, other_player(player)
     for cr in sorted(state.board):
         top = state.board[cr][-1]
-        if top.owner != player:
+        if top.owner != player or not any(state.owner_of(nb) == enemy for nb in state.game_map.neighbors(cr)):
             continue
         for kw in ("Poison", "Spikes", "Armor", "Stealth"):
             if statics.has_keyword(state, top, kw, cr) and not (kw == "Spikes" and top.retaliation_used):
