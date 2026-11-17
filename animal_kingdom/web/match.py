@@ -122,7 +122,7 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     elif lid == L.YUKI:
         uses = st.config.yuki_leader_uses
         left = uses - lead["stage"]
-        out.update(per=uses, toward=left, spent=left <= 0, text=f"{text} (Uses remaining: {left}/{uses})")
+        out.update(per=uses, toward=left, spent=left <= 0, text=f"{text} (Left: {left}/{uses})")
     elif lid == L.XANTHE:
         name, does = L.XANTHE_STAGES[lead["stage"]]
         out.update(stage=lead["stage"], stageName=name, spent=lead["spent"],

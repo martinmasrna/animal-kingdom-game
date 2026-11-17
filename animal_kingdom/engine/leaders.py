@@ -52,7 +52,7 @@ LEADERS: dict[str, tuple[str, str]] = {
     MOLE: ("passive", "When you play your third animal in a turn, draw an animal."),
     # the empty-hand berserker, den rush led the other way (Martin, 2026-11-17: "You last animal in hand has +3 strength")
     SANTO: ("passive", "Your last animal in hand has +3 strength."),
-    # the one big turn (Martin, 2026-11-17): three uses a match, shown as "Uses remaining: 3/3"
+    # the one big turn (Martin, 2026-11-17): three uses a match, shown as "Left: 3/3"
     YUKI: ("power", "Choose a connected ally. It can't be covered until your next turn."),
     GRIMM: ("power", "Draw 2 animals. Draws one more animal for every 5 enemies removed this match."),   # Adira's first power, without the Cats (Martin, 2026-11-17)
 }
