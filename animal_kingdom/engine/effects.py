@@ -1274,6 +1274,9 @@ def end_of_turn(state: GameState, player: str) -> None:
     if _leads(state, player, L.SOLENIA):      # Queen Solenia's leader: "Dusk: gain 1 food for each animal you control."
         state.effect_stack.append({"op": "gain_food", "player": player, "by_card": L.SOLENIA,
                                    "amount": state.config.solenia_leader_per * _control_tag_count(state, player)})
+    if _leads(state, player, L.ASH):          # Ash's leader: each of the four keywords on each of her top animals, as the board shows them
+        state.effect_stack.append({"op": "gain_food", "player": player, "by_card": L.ASH,
+                                   "amount": state.config.ash_leader_food * ash_keywords(state, player)})
     _vultures_dusk(state, player)
     _push_timed_hooks(state, player, "on_end_of_turn")
 
@@ -3785,6 +3788,20 @@ def _then_guard(state, step, cr):
     if top is not None and top.owner == step["chooser"]:
         top.locked_until_turn = state.turn_counter + 2
         state.emit("guard", cr=cr, iid=top.iid, card=top.card_id, owner=top.owner)
+
+
+def ash_keywords(state: GameState, player: str) -> int:
+    """How many Poison, Spikes, Armor and Stealth `player`'s top animals carry now: printed or given by a neighbour, and
+    Spikes only while unspent (Ash's leader)."""
+    n = 0
+    for cr in sorted(state.board):
+        top = state.board[cr][-1]
+        if top.owner != player:
+            continue
+        for kw in ("Poison", "Spikes", "Armor", "Stealth"):
+            if statics.has_keyword(state, top, kw, cr) and not (kw == "Spikes" and top.retaliation_used):
+                n += 1
+    return n
 
 
 def grimm_draws(state: GameState, lead: dict) -> int:

@@ -22,6 +22,7 @@ pub const GRIMM: &str = "raven_legend";
 pub const MOLE: &str = "mole_legend";
 pub const SANTO: &str = "macaque_legend";
 pub const YUKI: &str = "squirrel_legend";
+pub const ASH: &str = "honey_badger_legend";
 pub const MELISSIA_SPEC: &str = "tag:Colony&tag:Worker|tag:Colony&tag:Soldier|tag:Colony&tag:Nurse";
 pub const XANTHE_LAST_STAGE: i32 = 4;
 
@@ -30,7 +31,7 @@ pub fn kind_of(id: &str) -> Option<&'static str> {
     match id {
         GRIMM | MELISSIA | BABAJI | YUKI => Some("power"),
         XANTHE => Some("once"),
-        ADIRA | THERON | MOLE | SANTO | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
+        ADIRA | THERON | MOLE | SANTO | ASH | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
         _ => None,
     }
 }
@@ -276,6 +277,22 @@ pub fn dawn(st: &mut State, player: Player) {
 
 /// effects.py end_of_turn: Queen Solenia's leader, Dusk: gain 1 food for each animal you control.
 pub fn dusk(st: &mut State, player: Player) {
+    if leads(st, player, ASH) {
+        // effects.py ash_keywords: Poison, Spikes (unspent), Armor and Stealth on the player's top animals
+        let tops: Vec<(Cr, Unit)> = st.tops().filter(|(_, u)| u.owner == player).map(|(c, u)| (c, *u)).collect();
+        let mut n = 0;
+        for (c, u) in tops {
+            for kw in [K_POISON, K_SPIKES, K_ARMOR, K_STEALTH] {
+                if crate::statics::has_keyword(st, &u, kw, Some(c)) && !(kw == K_SPIKES && u.retaliation_used) {
+                    n += 1;
+                }
+            }
+        }
+        let amount = st.cfg().int("ash_leader_food") * n;
+        let src = st.card_id(ASH).map(|c| card_v(st, c)).unwrap_or(Value::Null);
+        st.effect_stack.push(vmap!("op" => Value::s("gain_food"), "player" => pn(player), "by_card" => src, "amount" => Value::Int(amount as i64)));
+        return;
+    }
     if !leads(st, player, SOLENIA) {
         return;
     }

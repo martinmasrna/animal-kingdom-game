@@ -196,6 +196,7 @@ class Config:
     mole_leader_draw: int = 1            # ...draw a card." (1, not 2: he has to run empty for the Rat and Hare; Martin, 2026-11-17)
     santo_leader_bonus: int = 3          # Don Santo's leader: "Your last animal in hand has +3 strength."
     yuki_leader_uses: int = 3            # Yuki's leader: the uses a match has of "Choose a connected ally. It can't be covered..."
+    ash_leader_food: int = 1             # Ash's leader: "Dusk: gain 1 food for each Poison, Spikes, Armor and Stealth on your animals."
     grimm_leader_draw: int = 2           # Grimm's leader: "Draw 2 cards."...
     grimm_leader_per: int = 5            # ...one more for every 5 enemies removed this match
     juliette_leader_bonus: int = 1       # Lady Juliette's leader: your animals have +1 strength (small starting deck)

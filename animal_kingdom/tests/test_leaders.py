@@ -186,6 +186,18 @@ def test_yukis_leader_keeps_a_connected_ally_from_being_covered_until_her_next_t
     assert not can_press(s)                                          # three uses a match
 
 
+# ===================================================================== Ash
+
+def test_ashs_leader_gains_a_food_at_dusk_for_each_of_the_four_keywords_on_her_animals():
+    s = state("honey_badger_legend", hands={"A": ["t_small"], "B": ["t_small"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
+    put(s, "1,1", "honey_badger_legend", "A")       # Armor, Stealth, Poison, Spikes: 4
+    put(s, "1,3", "tortoise", "A")                  # Armor: 1
+    put(s, "3,3", "hedgehog", "A").retaliation_used = True     # spent Spikes: 0
+    put(s, "4,1", "toad", "B")                      # hers, not Ash's
+    rules.apply_action(s, PassAction()) if PassAction() in rules.legal_actions(s) else end_turn(s)
+    assert s.food["A"] == 5
+
+
 # ===================================================================== Grimm
 
 def test_grimm_draws_two_and_may_press_twice_a_turn():
