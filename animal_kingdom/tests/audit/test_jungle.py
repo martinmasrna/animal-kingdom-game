@@ -49,7 +49,7 @@ def strength(card_id):
 
 def test_jungle_cards_are_the_audited_set():
     ids = sorted(c.id for c in CARDS.values() if c.status == "collectible" and str(c.habitat).lower().endswith("jungle"))
-    assert ids == ["armadillo", "black_panther", "capuchin", "chameleon", "gorilla_legend_2", "hercules_beetle",
+    assert ids == ["armadillo", "black_panther", "capuchin", "chameleon", "chameleon_legend", "gorilla_legend_2", "hercules_beetle",
                    "jaguar", "macaw", "ocelot", "peacock", "sloth", "tarsier", "tiger", "tiger_legend"]
 
 
@@ -827,10 +827,10 @@ def test_stick_insect_cannot_be_chosen_by_an_enemy_but_its_owner_may_choose_it()
     put(s, "3,2", "stick_insect", "A")                           # a 6 beside the Tiger
     apply_click(s, PlaceAction("tiger_legend", ("cr", "4,2")))
     assert s.top_unit("3,2").card_id == "stick_insect"
-    s2 = make_state(hands={"A": ["chameleon_legend"]})
+    s2 = make_state(hands={"A": ["chameleon"]})
     put(s2, "2,2", "stick_insect", "A")
-    apply_click(s2, PlaceAction("chameleon_legend", ("cr", "1,2")))
-    assert s2.top_unit("1,2").card_id == "stick_insect"           # Iris may copy her own
+    apply_click(s2, PlaceAction("chameleon", ("cr", "1,2")))
+    assert s2.top_unit("1,2").card_id == "stick_insect"           # the Chameleon may copy its owner's
 
 
 def test_stick_insect_can_be_covered():
