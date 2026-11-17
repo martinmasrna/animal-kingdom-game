@@ -181,7 +181,7 @@ pub fn placement_strength(st: &State, inst: &Unit) -> i32 {
     if !(crate::leaders::any(st) || st.next_strength[0].is_some() || st.next_strength[1].is_some()) {
         return (card_strength(st, inst.card, inst.owner) + inst.strength_counter as i32).max(0);
     }
-    let adj: i32 = crate::leaders::play_adjustment(st, inst).iter().sum();
+    let adj: i32 = crate::leaders::play_adjustment(st, inst).iter().map(|a| a.1).sum();
     (card_strength(st, inst.card, inst.owner) + crate::leaders::hand_counter(st, inst) + adj).max(0)
 }
 

@@ -32,6 +32,7 @@ ARNE = "eagle_legend"
 GORILLA = "gorilla_legend_2"
 GRIMM = "raven_legend"
 MOLE = "mole_legend"
+SANTO = "macaque_legend"
 
 # card id -> (kind, the ability as the player reads it)
 LEADERS: dict[str, tuple[str, str]] = {
@@ -48,6 +49,8 @@ LEADERS: dict[str, tuple[str, str]] = {
     GORILLA: ("passive", "The first animal you play each turn has +1 strength."),
     # the den-rush leader (Martin, 2026-11-17): it pays only through the cards that give an extra play
     MOLE: ("passive", "When you play your third animal in a turn, draw a card."),
+    # the empty-hand berserker, den rush led the other way (Martin, 2026-11-17: "You last animal in hand has +3 strength")
+    SANTO: ("passive", "Your last animal in hand has +3 strength."),
     GRIMM: ("power", "Draw 2 cards. Draws one more card for every 5 enemies removed this match."),   # Adira's first power, without the Cats (Martin, 2026-11-17)
 }
 

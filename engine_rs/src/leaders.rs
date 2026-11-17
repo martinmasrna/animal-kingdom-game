@@ -20,6 +20,7 @@ pub const ARNE: &str = "eagle_legend";
 pub const GORILLA: &str = "gorilla_legend_2";
 pub const GRIMM: &str = "raven_legend";
 pub const MOLE: &str = "mole_legend";
+pub const SANTO: &str = "macaque_legend";
 pub const MELISSIA_SPEC: &str = "tag:Colony&tag:Worker|tag:Colony&tag:Soldier|tag:Colony&tag:Nurse";
 pub const XANTHE_LAST_STAGE: i32 = 4;
 
@@ -28,7 +29,7 @@ pub fn kind_of(id: &str) -> Option<&'static str> {
     match id {
         GRIMM | MELISSIA | BABAJI => Some("power"),
         XANTHE => Some("once"),
-        ADIRA | THERON | MOLE | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
+        ADIRA | THERON | MOLE | SANTO | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
         _ => None,
     }
 }
@@ -87,18 +88,23 @@ pub fn hand_counter(st: &State, inst: &Unit) -> i32 {
     st.hands[inst.owner as usize].iter().filter(|u| u.card == inst.card).map(|u| u.strength_counter as i32).fold(own, i32::max)
 }
 
-/// strength.py play_adjustment: [GORILLA]'s Roar (exactly his strength) and his leader (+1 on the turn's first play).
-pub fn play_adjustment(st: &State, inst: &Unit) -> smallvec::SmallVec<[i32; 2]> {
+/// strength.py play_adjustment, as (source, amount): [GORILLA]'s Roar (exactly his strength), his leader (+1 on the turn's
+/// first play) and Don Santo's leader (+3 on the last animal in hand).
+pub fn play_adjustment(st: &State, inst: &Unit) -> smallvec::SmallVec<[(Option<CardId>, i32); 3]> {
     let mut out = smallvec::SmallVec::new();
     let owner = inst.owner;
     if owner > B {
         return out;
     }
     if let Some(n) = st.next_strength[owner as usize] {
-        out.push(n - (crate::strength::card_strength(st, inst.card, owner) + hand_counter(st, inst)));
+        out.push((st.card_id(GORILLA), n - (crate::strength::card_strength(st, inst.card, owner) + hand_counter(st, inst))));
     }
     if leads(st, owner, GORILLA) && st.turn_flags.played[owner as usize].is_empty() {
-        out.push(st.cfg().int("gorilla_leader_bonus"));
+        out.push((st.card_id(GORILLA), st.cfg().int("gorilla_leader_bonus")));
+    }
+    let hand = &st.hands[owner as usize];
+    if leads(st, owner, SANTO) && hand.len() == 1 && hand[0].iid == inst.iid {
+        out.push((st.card_id(SANTO), st.cfg().int("santo_leader_bonus")));
     }
     out
 }
@@ -111,11 +117,10 @@ pub fn settle_play_strength(st: &mut State, player: Player, unit: &mut Unit) {
         st.note_strength(unit.iid, shared - unit.strength_counter as i32, arne, false);
         unit.strength_counter = shared as i16;
     }
-    let gorilla = st.card_id(GORILLA);
-    for n in play_adjustment(st, unit) {
+    for (src, n) in play_adjustment(st, unit) {
         if n != 0 {
             unit.strength_counter += n as i16;
-            st.note_strength(unit.iid, n, gorilla, false);
+            st.note_strength(unit.iid, n, src, false);
         }
     }
     st.next_strength[player as usize] = None;

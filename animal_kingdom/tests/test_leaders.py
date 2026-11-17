@@ -153,6 +153,17 @@ def test_the_mole_leader_gives_nothing_for_two_animals():
     assert not s.hands["A"] and s.current == "B"
 
 
+# ===================================================================== Don Santo
+
+def test_don_santos_last_animal_in_hand_has_three_more_strength_and_keeps_it():
+    s = state("macaque_legend", hands={"A": ["t_small", "t_small"], "B": ["t_small"]}, decks={"A": [], "B": ["t_body"] * 5})
+    assert [placement_strength(s, u) for u in s.hands["A"]] == [2, 2]        # two in hand: neither is the last
+    rules.apply_action(s, PlaceAction("t_small", ("cr", "1,1")))
+    assert placement_strength(s, s.hands["A"][0]) == 5
+    rules.apply_action(s, PlaceAction("t_small", ("cr", "1,2")))
+    assert effective_strength(s, s.board["1,1"][-1]) == 2 and effective_strength(s, s.board["1,2"][-1]) == 5
+
+
 # ===================================================================== Grimm
 
 def test_grimm_draws_two_and_may_press_twice_a_turn():

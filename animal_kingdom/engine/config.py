@@ -194,6 +194,7 @@ class Config:
     theron_leader_grant: int = 1         # King Theron's leader: "When one of your Cats covers an enemy, give it +1 strength."
     mole_leader_count: int = 3           # the legendary Mole's leader: "When you play your third animal in a turn,...
     mole_leader_draw: int = 1            # ...draw a card." (1, not 2: he has to run empty for the Rat and Hare; Martin, 2026-11-17)
+    santo_leader_bonus: int = 3          # Don Santo's leader: "Your last animal in hand has +3 strength."
     grimm_leader_draw: int = 2           # Grimm's leader: "Draw 2 cards."...
     grimm_leader_per: int = 5            # ...one more for every 5 enemies removed this match
     juliette_leader_bonus: int = 1       # Lady Juliette's leader: your animals have +1 strength (small starting deck)

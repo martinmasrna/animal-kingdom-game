@@ -222,7 +222,7 @@ def hand_counter(state: GameState, inst: UnitInstance) -> int:
 def play_adjustment(state: GameState, inst: UnitInstance) -> list:
     """What playing `inst` now adds to its strength beyond its card and its counter, as (source card, amount): [GORILLA]'s
     Roar ("the next animal you play has this animal's strength": exactly that number, so the difference, either way) and
-    his leader ("the first animal you play each turn has +1 strength", after it)."""
+    his leader ("the first animal you play each turn has +1 strength", after it), and Don Santo's leader."""
     out = []
     owner = inst.owner
     n = state.next_strength.get(owner)
@@ -231,6 +231,11 @@ def play_adjustment(state: GameState, inst: UnitInstance) -> list:
     lead = state.leaders.get(owner) if state.leaders else None
     if lead is not None and lead["id"] == "gorilla_legend_2" and not state.turn_flags.get(f"played_{owner}"):
         out.append(("gorilla_legend_2", state.config.gorilla_leader_bonus))
+    # Don Santo's leader: "Your last animal in hand has +3 strength." (the only card left there, and it keeps it when played)
+    if lead is not None and lead["id"] == "macaque_legend":
+        hand = state.hands[owner]
+        if len(hand) == 1 and hand[0].iid == inst.iid:
+            out.append(("macaque_legend", state.config.santo_leader_bonus))
     return out
 
 
