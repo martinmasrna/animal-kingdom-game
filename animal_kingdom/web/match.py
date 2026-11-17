@@ -20,7 +20,7 @@ from ..decks import LADDER_DECK_NAMES, leaders_for, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ActAction, ChoiceAction, DrawAction, LeaderAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine import leaders as L
-from ..engine.effects import leader_draws, leader_per, leader_usable
+from ..engine.effects import grimm_draws, leader_usable
 from ..engine.cards import DECKLISTS, load_cards
 from ..engine.config import Config
 from ..engine.effects import roar_condition
@@ -107,7 +107,7 @@ def conditional_reach(state: GameState, card_id: str) -> bool:
 
 def leader_view(st: GameState, p: str) -> Optional[dict]:
     """A player's leader as both players see it (public, the leaders prototype): which card, the kind of ability, the
-    ability as it reads now, and its live state (Queen Adira's number and progress, Xanthe's stage, a spent power)."""
+    ability as it reads now, and its live state (Grimm's number and progress, Xanthe's stage, a spent power)."""
     lead = st.leaders.get(p)
     if lead is None:
         return None
@@ -115,11 +115,10 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     kind, text = L.LEADERS[lid]
     out = {"id": lid, "kind": kind, "text": text, "usable": st.current == p and st.pending is None and st.result is None
            and rules.turn_actions(st) - st.actions_taken_this_turn > 0 and leader_usable(st, p)}
-    if lid in (L.ADIRA, L.GRIMM):
-        n, per = leader_draws(st, lead), leader_per(st, lid)
+    if lid == L.GRIMM:
+        n, per = grimm_draws(st, lead), st.config.grimm_leader_per
         out.update(draws=n, kills=lead["kills"], per=per, toward=lead["kills"] % per,
-                   text=f"Draw {n} cards. Draws one more card for every {per} enemies "
-                   + ("your Cats remove." if lid == L.ADIRA else "removed."))
+                   text=f"Draw {n} cards. Draws one more card for every {per} enemies removed.")
     elif lid == L.XANTHE:
         name, does = L.XANTHE_STAGES[lead["stage"]]
         out.update(stage=lead["stage"], stageName=name, spent=lead["spent"],

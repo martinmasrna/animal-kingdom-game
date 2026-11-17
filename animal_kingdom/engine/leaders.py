@@ -12,8 +12,8 @@ The data lives here (no engine imports); the behaviour is in effects.py (`legal_
 hooks), strength.py (the strength passives) and the Rust twin (engine_rs/src/leaders.rs). A deck with no leader plays as
 it always has.
 
-State (GameState.leaders): player -> {"id": the leader's card id, "kills": the enemies its power counts (Queen Adira: those
-her Cats removed; Grimm: every enemy removed),
+State (GameState.leaders): player -> {"id": the leader's card id, "kills": the enemies its power counts (Grimm: every
+enemy removed from the board),
 "stage": how many Dawns Xanthe's leader has evolved (0 Egg .. 4 Monarch), "spent": whether a once-per-game power was
 used}. Every key is there for every leader, so the two engines serialise it alike.
 """
@@ -21,6 +21,7 @@ used}. Every key is there for every leader, so the two engines serialise it alik
 from __future__ import annotations
 
 ADIRA = "lion_legend_4"
+THERON = "lion_legend_3"
 JULIETTE = "bee_legend_2"
 BUMBLETON = "bumblebee_legend"
 MELISSIA = "bee_legend"
@@ -33,7 +34,9 @@ GRIMM = "raven_legend"
 
 # card id -> (kind, the ability as the player reads it)
 LEADERS: dict[str, tuple[str, str]] = {
-    ADIRA: ("power", "Draw 2 cards. Draws one more card for every 3 enemies your Cats have removed this match."),
+    # The two Cat leaders (Martin, 2026-11-17): the same deck, Adira slowly to food, Theron fast and on the attack.
+    ADIRA: ("passive", "When one of your Cats covers an enemy, gain 5 food."),
+    THERON: ("passive", "When one of your Cats covers an enemy, give it +1 strength."),
     JULIETTE: ("passive", "If your starting deck has no animals of strength 4 or more, your animals have +1 strength."),
     BUMBLETON: ("passive", "Whenever you gain food, gain 1 food."),
     MELISSIA: ("power", "Scout a Worker, Soldier or Nurse Colony animal."),
@@ -42,7 +45,7 @@ LEADERS: dict[str, tuple[str, str]] = {
     XANTHE: ("once", "Evolves at each of your Dawns: Egg, Caterpillar, Chrysalis, Butterfly, Monarch. Use it once, for what its stage offers then."),
     ARNE: ("passive", "Copies of the same animal in your hand share their strength."),
     GORILLA: ("passive", "The first animal you play each turn has +1 strength."),
-    GRIMM: ("power", "Draw 2 cards. Draws one more card for every 5 enemies removed this match."),   # Adira's, without the Cats (Martin, 2026-11-17)
+    GRIMM: ("power", "Draw 2 cards. Draws one more card for every 5 enemies removed this match."),   # Adira's first power, without the Cats (Martin, 2026-11-17)
 }
 
 # Xanthe's leader, stage by stage: (name, what her once-per-game power does then, or None: nothing to use).

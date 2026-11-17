@@ -378,6 +378,7 @@ pub fn land_unit_seeing(st: &mut State, player: Player, mut unit: Unit, cr: Cr, 
     }
     if let Some(c) = &covered {
         push_theron(st, &unit, c);
+        crate::leaders::cat_cover(st, &unit, c);
     }
     if is_apex {
         if let Some(c) = &covered {
@@ -741,7 +742,7 @@ pub struct RemoveEvent {
 
 fn fire_remove_event(st: &mut State, card: CardId, owner: Player, cr: Option<Cr>, by_player: Option<Player>, by_card: Option<CardId>, skip: Option<i64>) {
     if crate::leaders::any(st) {
-        crate::leaders::count_kill(st, owner, cr.is_some(), by_player, by_card);
+        crate::leaders::count_kill(st, owner, cr.is_some());
     }
     let ev = RemoveEvent { card, owner, cr, by_player, by_card };
     for c in st.sorted_occupied() {
@@ -1184,6 +1185,7 @@ pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target, by_e
             }
             if let Some(c) = &covered {
                 push_theron(st, &unit, c);
+                crate::leaders::cat_cover(st, &unit, c);
             }
             if statics::has_keyword(st, &unit, K_APEX, Some(where_)) {
                 if let Some(c) = &covered {

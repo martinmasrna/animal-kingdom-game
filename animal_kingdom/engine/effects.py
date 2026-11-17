@@ -308,6 +308,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     # (Martin, 2026-09-29): the roar, then every reaction to the cover (Spikes, Poison,
     # King Theron), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
     _push_theron(state, unit, covered)
+    _push_cat_leader(state, unit, covered)
     if is_apex and covered is not None:
         state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id,
                                    "cr": cr, "owner": unit.owner})
@@ -377,6 +378,21 @@ def _push_theron(state, coverer, covered) -> None:
             state.effect_stack.append(
                 remove_iid_step(covered.iid, by_player=coverer.owner, by_effect=True, source_iid=None, by_card=coverer.card_id))
         return
+
+
+def _push_cat_leader(state, coverer, covered) -> None:
+    """The two Cat leaders, on the event King Theron's card reads: one of your Cats covers an enemy. Queen Adira: "gain 5
+    food." King Theron: "give it +1 strength." (the Cat that covered, as a stored gain). Pushed straight after his card's
+    step, so it resolves after the Cat's Roar and every reaction to the cover: a Cat that Spikes removed gains nothing,
+    and Adira's food comes all the same (the cover happened)."""
+    if covered is None or covered.owner == coverer.owner or "Cat" not in state.cards[coverer.card_id].tags:
+        return
+    if _leads(state, coverer.owner, L.ADIRA):
+        state.effect_stack.append({"op": "gain_food", "player": coverer.owner, "amount": state.config.adira_leader_food,
+                                   "by_card": L.ADIRA})
+    elif _leads(state, coverer.owner, L.THERON):
+        state.effect_stack.append({"op": "grant_strength", "iids": [coverer.iid], "amount": state.config.theron_leader_grant,
+                                   "by_card": L.THERON})
 
 
 def _push_flee(state, covered, coverer, cr) -> None:
@@ -725,11 +741,6 @@ def _fire_event(state, hook_name: str, event: dict, skip=None) -> None:
 
 
 def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_card=None, uncovered=None) -> None:
-    if state.leaders and by_player is not None and by_player != owner and by_card and "Cat" in state.cards[by_card].tags:
-        lead = state.leaders.get(by_player)
-        if lead is not None and lead["id"] == L.ADIRA:    # the same event her card counts: an allied Cat removes an enemy
-            lead["kills"] += 1
-            state.emit("leader", player=by_player, kills=lead["kills"])
     if state.leaders and cr is not None:    # an enemy is an animal on the board: a card discarded from a hand or deck is none
         for p, lead in state.leaders.items():
             if p != owner and lead["id"] == L.GRIMM:    # every enemy removed, whatever removed it
@@ -1067,6 +1078,7 @@ def do_roam(state: GameState, player: str, origin: str, target, *, by_effect: bo
     if covered is not None:
         state.emit("cover", cr=where, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
     _push_theron(state, unit, covered)
+    _push_cat_leader(state, unit, covered)
     if statics.has_keyword(state, unit, "Apex Predator", where) and covered is not None:
         state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id,
                                    "cr": where, "owner": unit.owner})
@@ -3744,24 +3756,18 @@ EFFECTS.update({
 #
 # The leaders prototype (branch leaders; engine/leaders.py): a deck's leader sits on its den all match. A hero power or a
 # once-per-game power is a LeaderAction (rules._top_level_actions) costing one action; the passives hook in where they
-# act: gain_food (Lord Bumbleton), _fire_remove_event (Queen Adira's count), start_of_turn (Xanthe's stage),
-# end_of_turn (Queen Solenia), strength.py (Lady Juliette, Arne, [GORILLA]) and do_placement (what a play carries).
+# act: gain_food (Lord Bumbleton), _fire_remove_event (Grimm's count), _push_cat_leader (Queen Adira and King Theron, on a
+# Cat's cover), start_of_turn (Xanthe's stage), end_of_turn (Queen Solenia), strength.py (Lady Juliette, Arne, [GORILLA])
+# and do_placement (what a play carries).
 
 def _leads(state: GameState, player: str, leader_id: str) -> bool:
     lead = state.leaders.get(player) if state.leaders else None
     return lead is not None and lead["id"] == leader_id
 
 
-def leader_per(state: GameState, leader_id: str) -> int:
-    """Queen Adira's and Grimm's powers: how many counted enemies make one more card."""
-    return state.config.grimm_leader_per if leader_id == L.GRIMM else state.config.adira_leader_per
-
-
-def leader_draws(state: GameState, lead: dict) -> int:
-    """Queen Adira's power: 2 cards, one more for every 3 enemies her Cats have removed this match; Grimm's: 2, one more
-    for every 5 enemies removed."""
-    base = state.config.grimm_leader_draw if lead["id"] == L.GRIMM else state.config.adira_leader_draw
-    return base + lead["kills"] // leader_per(state, lead["id"])
+def grimm_draws(state: GameState, lead: dict) -> int:
+    """Grimm's power: 2 cards, one more for every 5 enemies removed from the board this match."""
+    return state.config.grimm_leader_draw + lead["kills"] // state.config.grimm_leader_per
 
 
 def leader_usable(state: GameState, player: str) -> bool:
@@ -3774,7 +3780,7 @@ def leader_usable(state: GameState, player: str) -> bool:
     if kind == "passive" or (kind == "once" and lead["spent"]):
         return False
     deck = state.decks[player]
-    if lid in (L.ADIRA, L.GRIMM, L.BABAJI):
+    if lid in (L.GRIMM, L.BABAJI):
         return bool(deck)
     if lid == L.MELISSIA:
         return any(_matches(state.cards[cid], L.MELISSIA_SPEC) for cid in deck)
@@ -3797,8 +3803,8 @@ def do_leader(state: GameState, player: str) -> None:
     lid, cfg = lead["id"], state.config
     state.emit("leader_power", player=player, card=lid)
     src = {"by_card": lid}
-    if lid in (L.ADIRA, L.GRIMM):
-        state.effect_stack.append({"op": "draw", "player": player, "n": leader_draws(state, lead), **src})
+    if lid == L.GRIMM:
+        state.effect_stack.append({"op": "draw", "player": player, "n": grimm_draws(state, lead), **src})
     elif lid == L.MELISSIA:
         state.effect_stack.append({"op": "scout", "player": player, "spec": L.MELISSIA_SPEC, **src})
     elif lid == L.BABAJI:

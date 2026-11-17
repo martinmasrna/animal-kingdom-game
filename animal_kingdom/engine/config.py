@@ -190,8 +190,8 @@ class Config:
     protector_bonus: int = 2              # [ACTION 8]: your animals have +2 strength during your opponent's next turn
 
     # --- The leaders prototype (branch leaders; engine/leaders.py) ---
-    adira_leader_draw: int = 2           # Queen Adira's leader: "Draw 2 cards."...
-    adira_leader_per: int = 3            # ...one more for every 3 enemies her Cats have removed this match
+    adira_leader_food: int = 5           # Queen Adira's leader: "When one of your Cats covers an enemy, gain 5 food."
+    theron_leader_grant: int = 1         # King Theron's leader: "When one of your Cats covers an enemy, give it +1 strength."
     grimm_leader_draw: int = 2           # Grimm's leader: "Draw 2 cards."...
     grimm_leader_per: int = 5            # ...one more for every 5 enemies removed this match
     juliette_leader_bonus: int = 1       # Lady Juliette's leader: your animals have +1 strength (small starting deck)

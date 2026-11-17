@@ -76,10 +76,61 @@ def test_leader_state_round_trips_and_the_action_too():
     assert s.leaders["A"]["stage"] == 3
 
 
-# ===================================================================== Queen Adira
+# ===================================================================== the two Cat leaders
 
-def test_adira_draws_two_and_may_press_twice_a_turn():
-    s = state("lion_legend_4", decks={"A": ["t_body"] * 10, "B": ["t_body"] * 5})
+def test_adira_gains_five_food_when_one_of_her_cats_covers_an_enemy():
+    s = state("lion_legend_4", hands={"A": ["t_cat", "t_body"]})
+    put(s, "1,1", "t_small", "B")
+    put(s, "1,2", "t_small", "B")
+    rules.apply_action(s, PlaceAction("t_cat", ("cr", "1,1")))
+    assert s.food["A"] == 5
+    rules.apply_action(s, PlaceAction("t_body", ("cr", "1,2")))          # not a Cat: nothing
+    assert s.food["A"] == 5
+
+
+def test_adira_gains_nothing_for_a_cat_on_an_empty_crossroad_or_on_her_own_animal():
+    s = state("lion_legend_4", hands={"A": ["t_cat", "t_cat"]})
+    put(s, "1,2", "t_small", "A")
+    rules.apply_action(s, PlaceAction("t_cat", ("cr", "1,1")))
+    rules.apply_action(s, PlaceAction("t_cat", ("cr", "1,2")))
+    assert s.food["A"] == 0
+
+
+def test_theron_gives_the_cat_that_covered_one_strength():
+    s = state("lion_legend_3", hands={"A": ["t_cat", "t_body"]})
+    put(s, "1,1", "t_small", "B")
+    put(s, "1,2", "t_small", "B")
+    rules.apply_action(s, PlaceAction("t_cat", ("cr", "1,1")))
+    assert effective_strength(s, s.board["1,1"][-1]) == 7
+    rules.apply_action(s, PlaceAction("t_body", ("cr", "1,2")))          # not a Cat: nothing
+    assert effective_strength(s, s.board["1,2"][-1]) == 4
+
+
+def test_theron_gives_nothing_on_an_empty_crossroad_and_the_strength_comes_after_the_cover():
+    s = state("lion_legend_3", hands={"A": ["t_cat", "t_cat"]})
+    put(s, "1,2", "t_cat", "B")
+    assert PlaceAction("t_cat", ("cr", "1,2")) not in rules.legal_actions(s)    # a 6 still can't cover a 6
+    rules.apply_action(s, PlaceAction("t_cat", ("cr", "1,1")))
+    assert effective_strength(s, s.board["1,1"][-1]) == 6
+
+
+def test_the_cat_leaders_texts_print_their_config_numbers():
+    from animal_kingdom.engine.config import Config
+    from animal_kingdom.engine.leaders import LEADERS
+    cfg = Config.default()
+    assert f"gain {cfg.adira_leader_food} food" in LEADERS["lion_legend_4"][1]
+    assert f"+{cfg.theron_leader_grant} strength" in LEADERS["lion_legend_3"][1]
+
+
+def test_neither_cat_leader_has_a_den_to_press():
+    for leader in ("lion_legend_4", "lion_legend_3"):
+        assert not can_press(state(leader, decks={"A": ["t_body"] * 5, "B": []}, hands={"A": ["t_cat"]}))
+
+
+# ===================================================================== Grimm
+
+def test_grimm_draws_two_and_may_press_twice_a_turn():
+    s = state("raven_legend", decks={"A": ["t_body"] * 10, "B": ["t_body"] * 5})
     press(s)
     assert len(s.hands["A"]) == 2 and s.actions_taken_this_turn == 1 and s.current == "A"
     assert can_press(s)
@@ -87,29 +138,9 @@ def test_adira_draws_two_and_may_press_twice_a_turn():
     assert len(s.hands["A"]) == 4 and s.current == "B"
 
 
-def test_adira_draws_one_more_for_every_three_kills_by_her_cats():
-    s = state("lion_legend_4", decks={"A": ["t_body"] * 10, "B": []}, hands={"A": ["t_cat"] * 3})
-    for i, cr in enumerate(("1,1", "1,2", "1,3")):
-        put(s, cr, "t_small", "B")
-    # a Cat covers an enemy and King Theron is not here: a cover alone is no removal
-    from animal_kingdom.engine.effects import remove_top
-    for cr in ("1,1", "1,2"):
-        remove_top(s, cr, by_player="A", by_card="t_cat")
-    remove_top(s, "1,3", by_player="A", by_card="t_body")          # not a Cat: no count
-    assert s.leaders["A"]["kills"] == 2
-    put(s, "1,3", "t_small", "B")
-    remove_top(s, "1,3", by_player="A", by_card="t_cat")
-    assert s.leaders["A"]["kills"] == 3
-    before = len(s.hands["A"])
-    press(s)
-    assert len(s.hands["A"]) == before + 3
+def test_grimm_needs_a_deck():
+    assert not can_press(state("raven_legend", decks={"A": [], "B": []}, hands={"A": ["t_body"]}))
 
-
-def test_adira_needs_a_deck():
-    assert not can_press(state("lion_legend_4", decks={"A": [], "B": []}, hands={"A": ["t_body"]}))
-
-
-# ===================================================================== Grimm
 
 def test_grimm_counts_every_enemy_removed_whatever_removed_it_and_draws_one_more_for_every_five():
     from animal_kingdom.engine.effects import remove_top
@@ -363,7 +394,7 @@ def test_a_web_match_shows_both_leaders_offers_the_den_and_logs_them_for_its_rep
     m.on_game_end = lambda match, rec: logs.append(json.loads(json.dumps(rec)))
     m.join(Seat("tb", "B", deck="handlock_butterfly_legend"))
     v = m.view("A")["game"]
-    assert v["leaders"]["A"]["id"] == "lion_legend_4" and v["leaders"]["A"]["draws"] == 2
+    assert v["leaders"]["A"]["id"] == "lion_legend_4" and v["leaders"]["A"]["kind"] == "passive"
     assert v["leaders"]["B"]["stageName"] == "Egg" and v["leaders"]["B"]["kind"] == "once"
     rng, pressed = random.Random(3), 0
     while m.phase == "playing":

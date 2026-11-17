@@ -9,6 +9,7 @@ use crate::value::Value;
 use crate::vmap;
 
 pub const ADIRA: &str = "lion_legend_4";
+pub const THERON: &str = "lion_legend_3";
 pub const JULIETTE: &str = "bee_legend_2";
 pub const BUMBLETON: &str = "bumblebee_legend";
 pub const MELISSIA: &str = "bee_legend";
@@ -24,9 +25,9 @@ pub const XANTHE_LAST_STAGE: i32 = 4;
 /// "power", "once" or "passive"; None: not a leader.
 pub fn kind_of(id: &str) -> Option<&'static str> {
     match id {
-        ADIRA | GRIMM | MELISSIA | BABAJI => Some("power"),
+        GRIMM | MELISSIA | BABAJI => Some("power"),
         XANTHE => Some("once"),
-        JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
+        ADIRA | THERON | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
         _ => None,
     }
 }
@@ -119,10 +120,27 @@ pub fn settle_play_strength(st: &mut State, player: Player, unit: &mut Unit) {
     st.next_strength[player as usize] = None;
 }
 
-/// effects.py leader_draws: Queen Adira's and Grimm's powers.
-pub fn leader_draws(st: &State, l: &Leader) -> i32 {
-    let (base, per) = if st.cname(l.id) == GRIMM { ("grimm_leader_draw", "grimm_leader_per") } else { ("adira_leader_draw", "adira_leader_per") };
-    st.cfg().int(base) + l.kills / st.cfg().int(per)
+/// effects.py grimm_draws: Grimm's power.
+pub fn grimm_draws(st: &State, l: &Leader) -> i32 {
+    st.cfg().int("grimm_leader_draw") + l.kills / st.cfg().int("grimm_leader_per")
+}
+
+/// effects.py _push_cat_leader: the two Cat leaders, when one of their Cats covers an enemy. Queen Adira gains food; King
+/// Theron gives the Cat that covered +1 strength.
+pub fn cat_cover(st: &mut State, coverer: &Unit, covered: &Unit) {
+    if covered.owner == coverer.owner || !st.card(coverer.card).has_tag(T_CAT) {
+        return;
+    }
+    let p = coverer.owner;
+    if leads(st, p, ADIRA) {
+        let n = st.cfg().int("adira_leader_food");
+        let src = st.card_id(ADIRA).map(|c| card_v(st, c)).unwrap_or(Value::Null);
+        st.effect_stack.push(vmap!("op" => Value::s("gain_food"), "player" => pn(p), "amount" => Value::Int(n as i64), "by_card" => src));
+    } else if leads(st, p, THERON) {
+        let n = st.cfg().int("theron_leader_grant");
+        let src = st.card_id(THERON).map(|c| card_v(st, c)).unwrap_or(Value::Null);
+        st.effect_stack.push(vmap!("op" => Value::s("grant_strength"), "iids" => Value::List(vec![Value::Int(coverer.iid)]), "amount" => Value::Int(n as i64), "by_card" => src));
+    }
 }
 
 /// effects.py leader_usable.
@@ -133,7 +151,7 @@ pub fn usable(st: &State, player: Player) -> bool {
     let Some(l) = st.leaders[player as usize] else { return false };
     let p = player as usize;
     match st.cname(l.id) {
-        ADIRA | GRIMM | BABAJI => !st.decks[p].is_empty(),
+        GRIMM | BABAJI => !st.decks[p].is_empty(),
         MELISSIA => st.decks[p].iter().any(|&c| matches(st, c, MELISSIA_SPEC)),
         XANTHE => {
             if l.spent {
@@ -157,8 +175,8 @@ pub fn do_leader(st: &mut State, player: Player) -> Result<(), String> {
     crate::emit!(st, "leader_power", vmap!("player" => pn(player), "card" => card_v(st, l.id)));
     let src = card_v(st, l.id);
     match lid {
-        ADIRA | GRIMM => {
-            let n = leader_draws(st, &l);
+        GRIMM => {
+            let n = grimm_draws(st, &l);
             st.effect_stack.push(vmap!("op" => Value::s("draw"), "player" => pn(player), "n" => Value::Int(n as i64), "by_card" => src));
         }
         MELISSIA => {
@@ -183,26 +201,17 @@ pub fn do_leader(st: &mut State, player: Player) -> Result<(), String> {
     Ok(())
 }
 
-/// effects.py _fire_remove_event: Queen Adira's leader counts an enemy her Cats removed, Grimm's every enemy removed.
-/// `on_board`: the removed card was an animal on the board (Grimm counts no card discarded from a hand or deck).
-pub fn count_kill(st: &mut State, owner: Player, on_board: bool, by_player: Option<Player>, by_card: Option<CardId>) {
-    if let (Some(bp), Some(bc)) = (by_player, by_card) {
-        if bp != owner && bp <= B && st.card(bc).has_tag(T_CAT) && leads(st, bp, ADIRA) {
-            bump(st, bp);
-        }
-    }
+/// effects.py _fire_remove_event: Grimm's leader counts every enemy removed from the board (`on_board`: no card discarded
+/// from a hand or deck).
+pub fn count_kill(st: &mut State, owner: Player, on_board: bool) {
     for p in [A, B] {
         if on_board && p != owner && leads(st, p, GRIMM) {
-            bump(st, p);
+            let l = st.leaders[p as usize].as_mut().unwrap();
+            l.kills += 1;
+            let k = l.kills;
+            crate::emit!(st, "leader", vmap!("player" => pn(p), "kills" => Value::Int(k as i64)));
         }
     }
-}
-
-fn bump(st: &mut State, p: Player) {
-    let l = st.leaders[p as usize].as_mut().unwrap();
-    l.kills += 1;
-    let k = l.kills;
-    crate::emit!(st, "leader", vmap!("player" => pn(p), "kills" => Value::Int(k as i64)));
 }
 
 /// effects.py start_of_turn: Xanthe's leader evolves at each of her owner's Dawns.
