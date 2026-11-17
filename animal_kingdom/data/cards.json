@@ -122,11 +122,11 @@
         "Queen"
       ],
       "base_strength": 2,
-      "text": "Roar: play a non-Queen Colony animal.",
+      "text": "Roar: play a non-Queen Colony animal next to this.",
       "species": "Termite",
       "habitat": "Savanna",
-      "keywords": [],
-      "stars": 2
+      "stars": 2,
+      "keywords": []
     },
     {
       "id": "queen_bee",
@@ -837,14 +837,15 @@
     {
       "id": "mole_legend",
       "name": "[MOLE]",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
-      "text": "Roar: draw a card, play another animal, then discard a card.",
+      "text": "Roar: draw a card, then play another animal next to this.",
       "species": "Mole",
       "habitat": "Meadow",
-      "keywords": []
+      "keywords": [],
+      "stars": 4
     },
     {
       "id": "lion_legend",
@@ -3761,11 +3762,11 @@
         "Cat"
       ],
       "base_strength": 2,
-      "text": "Roar: if you control another Cat, play another Cat.",
+      "text": "Roar: if you control another Cat, play another Cat next to this.",
       "species": "Ocelot",
       "habitat": "Jungle",
-      "keywords": [],
-      "stars": 2
+      "stars": 2,
+      "keywords": []
     },
     {
       "id": "stick_insect",

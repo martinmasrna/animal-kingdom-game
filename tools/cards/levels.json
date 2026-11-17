@@ -5892,9 +5892,9 @@
         "prev_note": "",
         "prev": "Roar: you may play another non-Queen Colony animal."
       },
-      "note": "Martin's sheet, 2026-10-24; forced, like the Alley Cat and the Mole",
+      "note": "Martin, 2026-11-17: every extra placement lands next to its card",
       "by": "claude",
-      "at": 1792863194
+      "at": 1794901127
     },
     "stars": {
       "review": {
@@ -7014,9 +7014,9 @@
   "mole_legend": {
     "effect": {
       "lv": "draft",
-      "note": "Martin, 2026-10-30 (card board review): the 1 food was a leftover",
+      "note": "Martin, 2026-11-17: the legendary Mole, den-rush leader",
       "by": "claude",
-      "at": 1793369441,
+      "at": 1794901127,
       "review": {
         "prev_lv": "draft",
         "prev_note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
@@ -7024,9 +7024,9 @@
       }
     },
     "animal": {
-      "note": "out of the collection (in the reserve)",
+      "note": "into the collection",
       "by": "claude",
-      "at": 1794849339,
+      "at": 1794901127,
       "lv": "draft",
       "review": {
         "prev_lv": "draft",
@@ -7063,6 +7063,16 @@
       "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792191573
+    },
+    "stars": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Martin, 2026-11-17",
+      "by": "claude",
+      "at": 1794901127
     }
   },
   "bat_legend": {
@@ -8046,8 +8056,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1793094118,
-      "note": "The Alley Cat's extra play, moved up: no common plays another card (Martin, 2026-10-27)"
+      "at": 1794901127,
+      "note": "Martin, 2026-11-17: every extra placement lands next to its card"
     },
     "animal": {
       "review": {

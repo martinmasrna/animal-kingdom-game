@@ -463,10 +463,9 @@ fn chipmunk(st: &mut State, unit: &Unit) {
     schedule(st, unit, 1, vmap!("op" => Value::s("gain_food"), "player" => pn(unit.owner), "amount" => Value::Int(later as i64)), false, None);
 }
 
-fn mole_legend(st: &mut State, unit: &Unit) {
+fn mole_legend(st: &mut State, unit: &Unit, cr: Cr) {
     let o = unit.owner;
-    st.effect_stack.push(vmap!("op" => Value::s("discard_choice"), "player" => pn(o)));
-    push_play_extra(st, o, None, false);
+    push_play_extra(st, o, Some(vmap!("adjacent_to" => cr_v(st, cr))), false);
     push_draw(st, o, 1);
 }
 
@@ -833,7 +832,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("ocelot", OnPlace) => {
             if conditional(st, card, unit) {
-                push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Cat")]))), false);
+                push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Cat")]), "adjacent_to" => cr_v(st, cr))), false);
             }
         }
         // Colony
@@ -876,7 +875,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 push_draw(st, owner, n);
             }
         }
-        ("termite_queen", OnPlace) => push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Colony")]), "tags_none" => Value::List(vec![Value::s("Queen")]))), false),
+        ("termite_queen", OnPlace) => push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Colony")]), "tags_none" => Value::List(vec![Value::s("Queen")]), "adjacent_to" => cr_v(st, cr))), false),
         ("queen_bee", OnPlace) => {
             // Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand, made out of thin air; the owner picks
             let options = ["worker_bee", "guard_bee", "nurse_bee"].into_iter().map(Value::s).collect();
@@ -905,7 +904,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("worker_bee", OnPlace) => gains(st, unit, "worker_bee_food"),
         // Den Rush
-        ("mole_legend", OnPlace) => mole_legend(st, unit),
+        ("mole_legend", OnPlace) => mole_legend(st, unit, cr),
         ("rat_legend_2", OnPlace) => {
             let mut options = adjacent_enemy_unit_crossroads(st, unit, cr, true);
             options.extend(adjacent_friendly_units(st, unit, cr));

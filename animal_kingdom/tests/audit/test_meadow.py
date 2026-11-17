@@ -337,27 +337,23 @@ def test_mole_free_play_still_needs_strength_to_cover():
 
 # ------------------------------------------------------------------------------------------------ [MOLE]
 
-def test_mole_legend_draws_plays_then_discards():
-    # "Roar: draw a card, play another animal, then discard a card."
+def test_mole_legend_draws_then_plays_another_animal_next_to_it():
+    # "Roar: draw a card, then play another animal next to this."
     s = make_state(hands={"A": ["mole_legend", "fox", "tiger"]}, decks=decks(["squirrel"]))
     rules.apply_action(s, PlaceAction("mole_legend", ("cr", "1,2")))
     assert "squirrel" in hand_ids(s, "A")
     assert s.pending["mode"] == "place"
+    assert all(q["target"][0] == "cr" and s.game_map.adjacent("1,2", q["target"][1]) for q in s.pending["placements"])
     rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,1")))     # the drawn card may be the one played
     assert s.food["A"] == CFG.squirrel_food                           # a play: its Roar happens
-    assert s.pending["mode"] == "choice"
-    choose(s, hand_inst(s, "A", "tiger").iid)
-    assert hand_ids(s, "A") == ["fox"] and s.actions_taken_this_turn == 1
+    assert s.pending is None and sorted(hand_ids(s, "A")) == ["fox", "tiger"] and s.actions_taken_this_turn == 1
 
 
-def test_mole_legend_with_nothing_to_play_still_discards():
-    # A Titan can't be paid for by a free play, so nothing can be played; the discard still happens.
+def test_mole_legend_with_nothing_to_play_only_draws():
+    # A Titan can't be paid for by a free play, so nothing can be played.
     s = make_state(hands={"A": ["mole_legend", "sperm_whale"]}, decks={"A": [], "B": []})
     rules.apply_action(s, PlaceAction("mole_legend", ("cr", "1,2")))
-    if s.pending and s.pending["mode"] == "choice":
-        choose(s, hand_inst(s, "A", "sperm_whale").iid)
-    assert s.pending is None
-    assert hand_ids(s, "A") == [] and "sperm_whale" in s.remove_pile
+    assert s.pending is None and hand_ids(s, "A") == ["sperm_whale"]
 
 
 # ------------------------------------------------------------------------------------------------ Gopher

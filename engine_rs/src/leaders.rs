@@ -19,6 +19,7 @@ pub const XANTHE: &str = "butterfly_legend";
 pub const ARNE: &str = "eagle_legend";
 pub const GORILLA: &str = "gorilla_legend_2";
 pub const GRIMM: &str = "raven_legend";
+pub const MOLE: &str = "mole_legend";
 pub const MELISSIA_SPEC: &str = "tag:Colony&tag:Worker|tag:Colony&tag:Soldier|tag:Colony&tag:Nurse";
 pub const XANTHE_LAST_STAGE: i32 = 4;
 
@@ -27,7 +28,7 @@ pub fn kind_of(id: &str) -> Option<&'static str> {
     match id {
         GRIMM | MELISSIA | BABAJI => Some("power"),
         XANTHE => Some("once"),
-        ADIRA | THERON | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
+        ADIRA | THERON | MOLE | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
         _ => None,
     }
 }
@@ -118,6 +119,15 @@ pub fn settle_play_strength(st: &mut State, player: Player, unit: &mut Unit) {
         }
     }
     st.next_strength[player as usize] = None;
+}
+
+/// effects.py do_placement: the legendary Mole's leader, when its player has just played their third animal this turn.
+pub fn third_play(st: &mut State, player: Player) {
+    if st.turn_flags.played[player as usize].len() as i32 == st.cfg().int("mole_leader_count") && leads(st, player, MOLE) {
+        let n = st.cfg().int("mole_leader_draw");
+        let src = st.card_id(MOLE).map(|c| card_v(st, c)).unwrap_or(Value::Null);
+        st.effect_stack.push(vmap!("op" => Value::s("draw"), "player" => pn(player), "n" => Value::Int(n as i64), "by_card" => src));
+    }
 }
 
 /// effects.py grimm_draws: Grimm's power.

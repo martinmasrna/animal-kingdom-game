@@ -31,6 +31,7 @@ XANTHE = "butterfly_legend"
 ARNE = "eagle_legend"
 GORILLA = "gorilla_legend_2"
 GRIMM = "raven_legend"
+MOLE = "mole_legend"
 
 # card id -> (kind, the ability as the player reads it)
 LEADERS: dict[str, tuple[str, str]] = {
@@ -45,6 +46,8 @@ LEADERS: dict[str, tuple[str, str]] = {
     XANTHE: ("once", "Evolves at each of your Dawns: Egg, Caterpillar, Chrysalis, Butterfly, Monarch. Use it once, for what its stage offers then."),
     ARNE: ("passive", "Copies of the same animal in your hand share their strength."),
     GORILLA: ("passive", "The first animal you play each turn has +1 strength."),
+    # the den-rush leader (Martin, 2026-11-17): it pays only through the cards that give an extra play
+    MOLE: ("passive", "When you play your third animal in a turn, draw 2 cards."),
     GRIMM: ("power", "Draw 2 cards. Draws one more card for every 5 enemies removed this match."),   # Adira's first power, without the Cats (Martin, 2026-11-17)
 }
 

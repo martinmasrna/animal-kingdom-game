@@ -127,6 +127,32 @@ def test_neither_cat_leader_has_a_den_to_press():
         assert not can_press(state(leader, decks={"A": ["t_body"] * 5, "B": []}, hands={"A": ["t_cat"]}))
 
 
+# ===================================================================== the legendary Mole
+
+def rules_adjacent(s, cr, target) -> bool:
+    return target[0] == "cr" and s.game_map.adjacent(cr, target[1])
+
+
+def test_the_mole_leader_draws_two_when_the_third_animal_of_a_turn_is_played():
+    s = state("mole_legend", hands={"A": ["mole", "t_small", "t_small"], "B": ["t_small"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
+    rules.apply_action(s, PlaceAction("mole", ("cr", "1,1")))            # the Mole, and its extra animal next to it
+    t = s.pending["placements"][0]
+    assert all(rules_adjacent(s, "1,1", tuple(q["target"])) for q in s.pending["placements"])   # next to the Mole
+    rules.apply_action(s, PlaceAction(t["card_id"], tuple(t["target"])))
+    assert len(s.hands["A"]) == 1                                        # two animals played: nothing yet
+    spot = next(q for q in rules.legal_actions(s) if isinstance(q, PlaceAction))
+    rules.apply_action(s, spot)
+    assert len(s.hands["A"]) == 2 or s.current == "B"                    # the third: two cards
+    assert sum(1 for u in s.hands["A"] if u.card_id == "t_body") >= 2
+
+
+def test_the_mole_leader_gives_nothing_for_two_animals():
+    s = state("mole_legend", hands={"A": ["t_small", "t_small"], "B": ["t_small"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
+    rules.apply_action(s, PlaceAction("t_small", ("cr", "1,1")))
+    rules.apply_action(s, PlaceAction("t_small", ("cr", "1,2")))
+    assert not s.hands["A"] and s.current == "B"
+
+
 # ===================================================================== Grimm
 
 def test_grimm_draws_two_and_may_press_twice_a_turn():

@@ -20,7 +20,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Termite King** | 2 | Colony | 3 | Roar: draw a card for each Colony Queen you control. |
-| **Termite Queen** | 2 | Colony, Queen | 2 | Roar: play a non-Queen Colony animal. |
+| **Termite Queen** | 2 | Colony, Queen | 2 | Roar: play a non-Queen Colony animal next to this. |
 | **Queen Bee** | 2 | Colony, Queen | 3 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. |
 | **Queen Ant** | 1 | Colony, Queen | 3 | Dusk: place a Young Ant on an adjacent empty crossroad. |
 

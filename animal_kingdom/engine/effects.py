@@ -322,6 +322,9 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     if play:
         key = f"played_{player}"         # what each player played this turn, for "if you played another Cat" (Serval)
         state.turn_flags[key] = [*state.turn_flags.get(key, []), [unit.iid, unit.card_id]]
+        # the legendary Mole's leader: "When you play your third animal in a turn, draw 2 cards." (after that animal's Roar)
+        if len(state.turn_flags[key]) == state.config.mole_leader_count and _leads(state, player, L.MOLE):
+            state.effect_stack.append({"op": "draw", "player": player, "n": state.config.mole_leader_draw, "by_card": L.MOLE})
     _fire_place_event(state, unit)       # the Worker Wasp: gain food whenever you place an animal, played or not
     if roar:
         if unit.card_id != "macaw" and _hook(state, unit.card_id, "on_place"):
@@ -2488,7 +2491,7 @@ def _serval_place(state, unit, cr):
 def _ocelot_place(state, unit, cr):
     # The condition is read for the card's own text even when a Macaw or Big Gus repeats it on another unit (as the Rust twin)
     if roar_condition(state, unit.owner, "ocelot", unit):
-        _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"]})
+        _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"], "adjacent_to": cr})
 
 
 def _twin_place(twin_id):
@@ -2566,10 +2569,9 @@ def _scout_bee_eot(state, unit, cr):
 # --- Den Rush ---------------------------------------------------------------------------------------------------
 
 def _mole_legend_place(state, unit, cr):
-    """Roar: draw a card, play another animal, then discard a card."""
+    """Roar: draw a card, then play another animal next to this."""
     o = unit.owner
-    state.effect_stack.append({"op": "discard_choice", "player": o})
-    _push_play_extra(state, o)
+    _push_play_extra(state, o, filter={"adjacent_to": cr})
     _push_draw(state, o, 1)
 
 
@@ -3584,7 +3586,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "nurse_bumblebee": {"on_place": _draws_filtered("tag:Colony")},
     "termite_king": {"on_place": _termite_king_place},
     "termite_queen": {"on_place": lambda state, unit, cr: _push_play_extra(
-        state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"]})},
+        state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"], "adjacent_to": cr})},
     "queen_bee": {"on_place": _queen_bee_place},
     "soldier_ant": {"on_place": _conditional("soldier_ant", _removes())},
     "worker_ant": {"on_place": _worker_ant_place},

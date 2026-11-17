@@ -393,6 +393,7 @@ pub fn land_unit_seeing(st: &mut State, player: Player, mut unit: Unit, cr: Cr, 
     }
     if play && player <= B {
         st.turn_flags.played[player as usize].push((unit.iid, unit.card));
+        crate::leaders::third_play(st, player);
     }
     fire_place_event(st, &unit);
     if roar {

@@ -853,14 +853,12 @@ def test_lynx_draws_a_card():
 
 # ================================================================================ Den Rush
 
-def test_legendary_mole_draws_plays_then_discards():
+def test_legendary_mole_draws_then_plays_another_animal_next_to_it():
     s = make_state(hands={"A": ["mole_legend", "lion", "tiger"]}, decks={"A": ["squirrel"], "B": []})
     rules.apply_action(s, PlaceAction("mole_legend", ("cr", "1,2")))
     assert s.food["A"] == 0 and "squirrel" in hand_ids(s, "A")
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))      # play another animal
-    assert s.pending["mode"] == "choice"                           # then discard a card of your choice
-    choose(s, hand_inst(s, "A", "tiger").iid)
-    assert hand_ids(s, "A") == ["squirrel"] and removed(s, "tiger")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))      # another animal, next to the Mole
+    assert s.pending is None and sorted(hand_ids(s, "A")) == ["squirrel", "tiger"]
 
 
 def test_hare_draws_after_three_animals_this_turn():
