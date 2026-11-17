@@ -1180,6 +1180,9 @@ function decision() {
     if (ui.sel && !d.places[ui.sel]) ui.sel = null;
     const ids = Object.keys(d.places);
     if (!ui.sel && ids.length === 1 && d.pend) ui.sel = ids[0];   // a "play this card" prompt: preselect it
+    // ...and when the prompt names the very copy (Babaji plays the animal he returned, not its twin in hand), that copy is the one selected and the only one that can be played
+    d.named = d.pend && G.legal.copies ? Object.keys(G.legal.copies).map(Number) : null;
+    if (d.named && ui.sel && !d.named.includes(ui.selIid)) ui.selIid = d.named[0];
     if (ui.sel) for (const t of selPlaces(d)) { if (t[0] === 'cr') d.rings.push(dcr(t[1])); else d.hqRing = true; }
     // Roam: click one of your animals that can move (it wears a dashed ring), its destinations ring, click one
     if (!d.pend) for (const [from, ts] of Object.entries(G.legal.roam || {})) d.roams[dcr(from)] = ts;
@@ -1372,7 +1375,7 @@ function drawGame() {
   const lit = handLights(d, held);   // a lesson's hints (coach.js)
   const was = new Map([...hand.querySelectorAll('.hc')].map(el => [el.dataset.iid, el.offsetLeft]));   // where each card stood
   hand.innerHTML = held.map((h, i) => {
-    const c = formOf(h.id, V.you), can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
+    const c = formOf(h.id, V.you), can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!d.named || d.named.includes(h.iid)) && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = lit.hint(can), shown = lit.shown(h.id);
     const talking = lit.talking || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
     const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || selCopy()).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises

@@ -814,7 +814,7 @@ class Match:
                 roams.setdefault(a.origin, []).append(list(a.target))
             elif isinstance(a, ActAction):
                 acts.append(a.origin)
-        if copies:                        # every copy in hand answers with the places of its strength's first copy
+        if copies and st.pending is None:   # every copy in hand answers with the places of its strength's first copy (a pending placement names its very copies)
             hand = st.hands[st.pending["chooser"] if st.pending else st.current]
             for u in hand:
                 if u.iid not in copies:
