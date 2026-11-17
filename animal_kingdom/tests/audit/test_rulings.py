@@ -208,14 +208,14 @@ def test_placement__a_placed_animal_does_not_roar():
 
 
 def test_placement__extra_placement_is_a_full_placement_that_costs_no_action():
-    # Ocelot: "if you control another Cat, play another Cat". Connection and covering strength still hold.
+    # Ocelot: "if you control another Cat, play another Cat next to this". Covering strength still holds.
     s = st(hands={"A": ["ocelot", "lion", "lion"]})
     put(s, "1,1", "v_cat_roam", "A")
     put(s, "2,2", "lion", "B")                  # 7: a Lion can't cover it
     play(s, "ocelot", "1,2")
     offered = {cr for c, cr in placements(s)}
-    assert "2,2" not in offered and "3,3" not in offered and "2,1" in offered
-    rules.apply_action(s, PlaceAction("lion", ("cr", "2,1")))
+    assert "2,2" not in offered and "2,1" not in offered and offered == {"1,1", "1,3"}   # next to the Ocelot only
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,3")))
     assert s.actions_taken_this_turn == 1
 
 
@@ -1585,13 +1585,12 @@ def test_launch_cards__macaw_does_nothing_before_the_opponent_has_roared():
     assert s.pending is None and s.food["A"] == 0 and hand_ids(s, "A") == []
 
 
-def test_launch_cards__greywhisker_must_play_another_and_the_discard_is_the_players_choice():
+def test_launch_cards__the_legendary_mole_must_play_another_and_discards_nothing():
     s = st(hands={"A": ["mole_legend", "v1", "v2"]})
     play(s, "mole_legend", "1,2")
     assert s.pending["mode"] == "place" and not s.pending["optional"]
     rules.apply_action(s, PlaceAction("v1", ("cr", "1,1")))
-    assert s.pending and s.pending["mode"] == "choice" and s.pending["chooser"] == "A"
-    assert len(s.pending["options"]) == len(s.hands["A"])
+    assert s.pending is None and "v2" in [u.card_id for u in s.hands["A"]]
 
 
 def test_launch_cards__hare_draws_when_it_was_the_last_card_in_hand():

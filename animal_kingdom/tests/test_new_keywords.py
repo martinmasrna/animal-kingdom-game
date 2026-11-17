@@ -328,11 +328,13 @@ def test_reach_covering_still_needs_greater_strength():
     assert "2,1" in targets and "2,3" not in targets and "2,2" in targets
 
 
-def test_reach_works_for_an_extra_placement_too():
+def test_reach_does_not_stretch_an_extra_placement_next_to_its_card():
+    # every extra play lands next to the card that gave it (Martin, 2026-11-17): Reach reaches no further there
     s = state(hands={"A": ["mole_legend", "t_reach"]})
     rules.apply_action(s, PlaceAction("mole_legend", ("cr", "1,2")))
     assert s.pending and s.pending["mode"] == "place"
-    assert {"card_id": "t_reach", "target": ["cr", "3,2"]} in s.pending["placements"]
+    assert {"card_id": "t_reach", "target": ["cr", "2,2"]} in s.pending["placements"]
+    assert {"card_id": "t_reach", "target": ["cr", "3,2"]} not in s.pending["placements"]
 
 
 def test_reach_has_no_number():

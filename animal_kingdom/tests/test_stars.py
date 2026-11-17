@@ -79,6 +79,8 @@ def test_one_star_over_is_illegal_and_says_so():
 
 def test_the_old_caps_are_gone_the_mix_is_a_choice():
     legends = [cid for cid, c in sorted(CARDS.items()) if c.collectible and c.rarity == "legendary"]
+    while deck_stars(legends, CARDS) > 20:        # as many legendaries as the stars allow: drop the dearest
+        legends.remove(max(legends, key=lambda cid: deck_stars([cid], CARDS)))
     six_legends = legends + [cid for cid in _pick(0, False, 10) for _ in range(2)][:DECK_SIZE - len(legends)]   # six legendaries: over the old cap of 4
     twenty_one_star = _deck(0, 20)         # twenty one-star cards: over the old cap of 8 rares
     assert decklist_problems(six_legends) == [] and decklist_problems(twenty_one_star) == []
