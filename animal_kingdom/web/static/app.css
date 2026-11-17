@@ -5,7 +5,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .btn { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 28px; border-radius: 10px; font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border: 1px solid var(--line-strong); color: var(--text); }
 .btn[disabled] { opacity: 0.4; cursor: default; }
 #app { position: fixed; inset: 0; display: flex; flex-direction: column; }
-.toast { position: fixed; left: 50%; top: 60px; transform: translateX(-50%); z-index: 90; padding: 8px 14px; border-radius: 8px; background: #3a1f1b; border: 1px solid #c65a4a; font-size: 13px; display: none; }
+.toast { position: fixed; left: 50%; top: 60px; transform: translateX(-50%); z-index: 90; padding: 8px 14px; border-radius: 8px; background: #3a1f1b; border: 1px solid #c65a4a; font-size: 13px; display: none; pointer-events: none; }   /* text only: it never takes a click meant for what lies under it */
 
 /* ---------- menu screens ---------- */
 

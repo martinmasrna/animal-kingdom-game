@@ -229,11 +229,12 @@ function wire(app, all, open) {
   const cp = $('dcopy'); if (cp) cp.onclick = () => navigator.clipboard.writeText(encodeDeck(open.name, open.list, C)).then(() => X.toast('Deck code copied', true), () => X.toast('Could not copy'));
   const shr = $('dshare'); if (shr) shr.onclick = () => X.share(encodeDeck(open.name, open.list, C), open.name);
   const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, id => { open.cover = id; change(); });
-  const ld = $('dlead'); if (ld) ld.onclick = () => pickLeader(app, open, id => { open.leader = id; change(); });
+  const ld = $('dlead'); if (ld) ld.onclick = () => pickLeader(app, open, id => { setLeader(open, id); change(); });
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
-  // A new deck starts empty, open, with its name ready to type.
-  const dn = $('dnew'); if (dn) dn.onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null };
-    all.push(d); st.open = d.id; st.sheet = false; st.rename = true; change(); };
+  // A new deck starts with its leader, as in Gwent (Martin, 2026-11-17): the leader is chosen first, its card is the deck's
+  // first, and the deck opens with its name ready to type. Cancelled, no deck is made.
+  const dn = $('dnew'); if (dn) dn.onclick = () => pickLeader(app, null, id => { const d = { id: Date.now().toString(36), name: 'New deck', list: [id], cover: null, leader: id };
+    all.push(d); st.open = d.id; st.sheet = false; st.rename = true; change(); });
   const dn2 = $('done'); if (dn2) dn2.onclick = () => { st.open = null; st.sheet = true; redo(); };
   if (!open) reorder(app, all, change);
   // Upright the deck column is a sheet along the bottom: shut, the cards take the screen. Its grip drags it with the finger
@@ -278,7 +279,9 @@ function wire(app, all, open) {
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
     onHold(e, () => { hidePop(); zoom(app, C[e.dataset.card]); });   // touch: hold to read it large
   });
-  app.querySelectorAll('.side [data-card]').forEach(e => { e.onclick = () => { open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); };
+  app.querySelectorAll('.side [data-card]').forEach(e => { e.onclick = () => {
+      if (e.dataset.card === open.leader) return X.toast(`${C[open.leader].name.split(':')[0]} leads this deck: choose another leader to take the card out`);
+      open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); };
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
     onHold(e, () => { hidePop(); zoom(app, C[e.dataset.card]); }); });
   const fl = flash && app.querySelector(`.side .st[data-card="${flash}"]`); flash = null;
@@ -290,7 +293,8 @@ function wire(app, all, open) {
   const side = app.querySelector('.side').getBoundingClientRect().left;
   let on = null;
   const show = e => { on = e; const r = e.getBoundingClientRect(), inSide = !!e.closest('.side');
-    pop.className = 'pop'; pop.innerHTML = cardHTML(C[e.dataset.card]); pop.style.display = 'flex';
+    const lk = leadKw(C[e.dataset.card]);
+    pop.className = 'pop' + (lk.length ? ' ldr' : ''); pop.innerHTML = cardHTML(C[e.dataset.card]) + (lk.length ? readSide({}, C, lk) : ''); pop.style.display = 'flex';
     const w = pop.offsetWidth, h = pop.offsetHeight;
     pop.style.left = (inSide || r.right + 10 + w > side ? r.left - w - 10 : r.right + 10) + 'px';
     pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
@@ -330,7 +334,7 @@ function dialog(app, html) {
 // (as in Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
 function zoom(app, c) {
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
-  const side = readSide(c, C);
+  const side = readSide(c, C, leadKw(c));
   m.innerHTML = `<div class="zbox">${cardHTML(c)}${side}</div>`;
   fitNames(m);
   const close = () => { m.classList.remove('on', 'zoom'); m.innerHTML = ''; removeEventListener('keydown', key, true); };
@@ -345,21 +349,28 @@ function confirmDelete(app, d, done) {
   m.querySelector('.cancel').focus();
   m.querySelector('.danger').onclick = () => { close(); done(); };
 }
-// A deck's leader: one of its legendaries that can lead, which every deck must have (Martin, 2026-11-16). The row shows it
-// with its ability, or that the deck has none yet; a click picks among the deck's eligible legendaries.
-const eligible = d => [...new Set(d.list)].filter(id => (X.leaders || {})[id]);
+// A deck's leader: a legendary that can lead, which every deck has (Martin, 2026-11-16), chosen when the deck is made
+// (2026-11-17). Its card is in the deck while it leads: choosing another leader swaps the cards, and the leader's own strip
+// stays put. The row shows the leader with its ability; a click picks another.
 const KIND = { power: 'Hero power', once: 'Once per game', passive: 'Always on' };
-function leaderRow(d) {
-  const ids = eligible(d);
-  if (!ids.length) return `<div class="lrow none"><div class="lmed empty"></div><div class="ltx"><b>No leader</b><span>Add one of `
-    + `${Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible').map(id => esc(C[id].name.split(':')[0])).join(', ')} to lead this deck</span></div></div>`;
-  const id = d.leader && ids.includes(d.leader) ? d.leader : null, L = id && X.leaders[id];
-  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? `<div class="lmed" style="${med(id, 52)}"></div>` : `<div class="lmed empty"></div>`}`
-    + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${KIND[L.kind]}. ${esc(L.text)}</span>` : `<b>No leader</b><span>Choose one of this deck's legendaries to lead it</span>`}</div></div>`;
+const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible');
+// A legendary's ability as a leader, as a panel beside the card (collection only: in a match the card is just a card).
+const leadKw = c => { const L = (X.leaders || {})[c.id]; return L && c.status === 'collectible' ? [['Leader', `${KIND[L.kind]}. ${esc(L.text)}`]] : []; };
+function setLeader(d, id) {
+  if (d.leader === id) return;
+  if (d.leader) { const i = d.list.indexOf(d.leader); if (i >= 0) d.list.splice(i, 1); }
+  if (!d.list.includes(id)) d.list.push(id);
+  d.leader = id;
 }
+function leaderRow(d) {
+  const id = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null, L = id && X.leaders[id];
+  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? `<div class="lmed" style="${med(id, 52)}"></div>` : `<div class="lmed empty"></div>`}`
+    + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${KIND[L.kind]}. ${esc(L.text)}</span>` : `<b>No leader</b><span>Choose a leader for this deck</span>`}</div></div>`;
+}
+// `d`: the deck whose leader changes, or null for a new deck.
 function pickLeader(app, d, done) {
-  const ids = eligible(d);
-  const { m, close } = dialog(app, `<div class="dlg cov lead"><h3>Choose a leader</h3><div class="leads">${ids.map(id => `<div class="lv${id === d.leader ? ' on' : ''}" data-id="${id}"><div class="cv">${cardHTML(C[id], { cls: 'compact' })}</div><p><b>${KIND[X.leaders[id].kind]}.</b> ${esc(X.leaders[id].text)}</p></div>`).join('')}</div>
+  const cur = d && d.leader;
+  const { m, close } = dialog(app, `<div class="dlg cov ldr"><h3>Choose a leader</h3><div class="leads">${leaderIds().map(id => `<div class="lv${id === cur ? ' on' : ''}" data-id="${id}"><div class="cv">${cardHTML(C[id], { cls: 'compact' })}</div><p><b>${KIND[X.leaders[id].kind]}.</b> ${esc(X.leaders[id].text)}</p></div>`).join('')}</div>
     <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitNames(m);
   m.querySelectorAll('.lv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
 }
@@ -386,6 +397,7 @@ function wireGlobal() {
     if (!d) return X.toast('That is not a deck code');
     if (decks().length >= R.decksMax) return X.toast(`${R.decksMax} decks is the most you can keep: delete one first`);
     const all = decks(), nd = { id: Date.now().toString(36), name: d.name, list: d.list, cover: coverOf(d.list) };
+    const can = [...new Set(d.list)].filter(id => (X.leaders || {})[id]); if (can.length === 1) nd.leader = can[0];   // the one leader it can have
     all.push(nd); st.open = nd.id; save(all);
     render(here().parentElement, all); X.toast(`Imported ${nd.name}`, true);
   });

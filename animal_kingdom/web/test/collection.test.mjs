@@ -121,16 +121,24 @@ test('delete asks first', async () => {
   assert.equal((await myDecks()).length, n - 1);
 });
 
-test('New deck starts an empty deck, open, with its name ready to type', async () => {
+test('New deck asks for its leader first, then opens with the leader in it and its name ready to type', async () => {
   await toList(); const n = (await myDecks()).length;
   await page.click('#dnew'); await wait(80);
+  assert.ok(await page.$('.ldr .lv[data-id="lion_legend_4"]'), 'the leaders to choose from');
+  await page.keyboard.press('Escape'); await wait(80);
+  assert.equal((await myDecks()).length, n, 'cancelled, no deck is made');
+  await page.click('#dnew'); await wait(80); await page.click('.lv[data-id="lion_legend_4"]'); await wait(120);
   assert.ok(await page.$('.nm-in'), 'the name is being edited');
   await page.keyboard.type('Scratch'); await page.keyboard.press('Enter'); await wait(120);
-  const decks = await myDecks(); assert.equal(decks.length, n + 1);
-  assert.deepEqual([decks[n].name, decks[n].cards], ['Scratch', {}]);
-  assert.match(await page.$eval('.fcount', e => e.textContent), /0\/25/);
+  let decks = await myDecks(); assert.equal(decks.length, n + 1);
+  assert.deepEqual([decks[n].name, decks[n].cards, decks[n].leader], ['Scratch', { lion_legend_4: 1 }, 'lion_legend_4']);
+  assert.match(await page.$eval('.fcount', e => e.textContent), /1\/25/);
   await page.click(card('lion')); await wait(80);
-  assert.deepEqual((await myDecks())[n].cards, { lion: 1 }, 'cards go into the new deck');
+  await page.click('.side .st[data-card="lion_legend_4"]'); await wait(80);
+  assert.deepEqual((await myDecks())[n].cards, { lion_legend_4: 1, lion: 1 }, 'cards go into the new deck; the leader\'s card stays');
+  await page.click('#dlead'); await wait(80); await page.click('.lv[data-id="baboon_legend"]'); await wait(120);
+  decks = await myDecks();
+  assert.deepEqual([decks[n].cards, decks[n].leader], [{ lion: 1, baboon_legend: 1 }, 'baboon_legend'], 'another leader swaps the cards');
 });
 
 test('an opened deck is the column alone, starting at its top; Done returns to the list; a former starter is yours to rename and delete', async () => {
