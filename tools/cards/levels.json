@@ -5798,9 +5798,9 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "out of the collection (in the reserve)",
+      "note": "into the collection",
       "by": "claude",
-      "at": 1794849340,
+      "at": 1794909582,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-14, applied 2026-10-16"
