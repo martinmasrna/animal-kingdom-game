@@ -278,21 +278,21 @@ pub fn dawn(st: &mut State, player: Player) {
 /// effects.py end_of_turn: Queen Solenia's leader, Dusk: gain 1 food for each animal you control.
 pub fn dusk(st: &mut State, player: Player) {
     if leads(st, player, ASH) {
-        // effects.py ash_keywords: Poison, Spikes (unspent), Armor and Stealth on the player's top animals next to an enemy
+        // effects.py ash_food: Poison, Spikes (unspent), Armor and Stealth on the player's top animals, double next to an enemy
         let tops: Vec<(Cr, Unit)> = st.tops().filter(|(_, u)| u.owner == player).map(|(c, u)| (c, *u)).collect();
         let enemy = Some(1 - player);
-        let mut n = 0;
+        let (per, twice) = (st.cfg().int("ash_leader_food"), st.cfg().int("ash_leader_contact"));
+        let mut amount = 0;
         for (c, u) in tops {
-            if !st.map().neighbors(c).iter().any(|&nb| st.owner_of(nb) == enemy) {
-                continue;
-            }
+            let mut k = 0;
             for kw in [K_POISON, K_SPIKES, K_ARMOR, K_STEALTH] {
                 if crate::statics::has_keyword(st, &u, kw, Some(c)) && !(kw == K_SPIKES && u.retaliation_used) {
-                    n += 1;
+                    k += 1;
                 }
             }
+            let contact = st.map().neighbors(c).iter().any(|&nb| st.owner_of(nb) == enemy);
+            amount += k * per * if contact { twice } else { 1 };
         }
-        let amount = st.cfg().int("ash_leader_food") * n;
         let src = st.card_id(ASH).map(|c| card_v(st, c)).unwrap_or(Value::Null);
         st.effect_stack.push(vmap!("op" => Value::s("gain_food"), "player" => pn(player), "by_card" => src, "amount" => Value::Int(amount as i64)));
         return;

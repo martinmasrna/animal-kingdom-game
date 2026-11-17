@@ -56,7 +56,7 @@ LEADERS: dict[str, tuple[str, str]] = {
     # the one big turn (Martin, 2026-11-17): three uses a match, shown as "Left: 3/3"
     YUKI: ("power", "Choose a connected ally. It can't be covered until your next turn."),
     # the wall that pays for standing (Martin, 2026-11-17: his wording)
-    ASH: ("passive", "Dusk: gain 1 food for each Poison, Spikes, Armor and Stealth on your animals next to an enemy."),
+    ASH: ("passive", "Dusk: gain 1 food for each Poison, Spikes, Armor and Stealth on your animals. Animals adjacent to enemies earn double."),
     GRIMM: ("power", "Draw 2 animals. Draws one more animal for every 5 enemies removed this match."),   # Adira's first power, without the Cats (Martin, 2026-11-17)
 }
 

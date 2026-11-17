@@ -1275,8 +1275,7 @@ def end_of_turn(state: GameState, player: str) -> None:
         state.effect_stack.append({"op": "gain_food", "player": player, "by_card": L.SOLENIA,
                                    "amount": state.config.solenia_leader_per * _control_tag_count(state, player)})
     if _leads(state, player, L.ASH):          # Ash's leader: each of the four keywords on each of her top animals, as the board shows them
-        state.effect_stack.append({"op": "gain_food", "player": player, "by_card": L.ASH,
-                                   "amount": state.config.ash_leader_food * ash_keywords(state, player)})
+        state.effect_stack.append({"op": "gain_food", "player": player, "by_card": L.ASH, "amount": ash_food(state, player)})
     _vultures_dusk(state, player)
     _push_timed_hooks(state, player, "on_end_of_turn")
 
@@ -3790,17 +3789,18 @@ def _then_guard(state, step, cr):
         state.emit("guard", cr=cr, iid=top.iid, card=top.card_id, owner=top.owner)
 
 
-def ash_keywords(state: GameState, player: str) -> int:
-    """How many Poison, Spikes, Armor and Stealth `player`'s top animals next to an enemy carry now: printed or given by
-    a neighbour, and Spikes only while unspent (Ash's leader)."""
-    n, enemy = 0, other_player(player)
+def ash_food(state: GameState, player: str) -> int:
+    """Ash's leader at Dusk: 1 food for each Poison, Spikes, Armor and Stealth `player`'s top animals carry now (printed or
+    given by a neighbour; Spikes only while unspent), double for an animal adjacent to an enemy."""
+    n, enemy, cfg = 0, other_player(player), state.config
     for cr in sorted(state.board):
         top = state.board[cr][-1]
-        if top.owner != player or not any(state.owner_of(nb) == enemy for nb in state.game_map.neighbors(cr)):
+        if top.owner != player:
             continue
-        for kw in ("Poison", "Spikes", "Armor", "Stealth"):
-            if statics.has_keyword(state, top, kw, cr) and not (kw == "Spikes" and top.retaliation_used):
-                n += 1
+        kws = sum(1 for kw in ("Poison", "Spikes", "Armor", "Stealth")
+                  if statics.has_keyword(state, top, kw, cr) and not (kw == "Spikes" and top.retaliation_used))
+        contact = any(state.owner_of(nb) == enemy for nb in state.game_map.neighbors(cr))
+        n += kws * cfg.ash_leader_food * (cfg.ash_leader_contact if contact else 1)
     return n
 
 

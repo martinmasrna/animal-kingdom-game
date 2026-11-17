@@ -188,15 +188,15 @@ def test_yukis_leader_keeps_a_connected_ally_from_being_covered_until_her_next_t
 
 # ===================================================================== Ash
 
-def test_ashs_leader_gains_a_food_at_dusk_for_each_of_the_four_keywords_on_her_animals_next_to_an_enemy():
+def test_ashs_leader_gains_a_food_at_dusk_for_each_keyword_on_her_animals_double_next_to_an_enemy():
     s = state("honey_badger_legend", hands={"A": ["t_small"], "B": ["t_small"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
-    put(s, "3,1", "honey_badger_legend", "A")       # next to the Toad: Armor, Stealth, Poison, Spikes: 4
-    put(s, "4,2", "tortoise", "A")                  # next to the Toad: Armor: 1
-    put(s, "1,3", "tortoise", "A")                  # no enemy next to it: 0
+    put(s, "3,1", "honey_badger_legend", "A")       # next to the Toad: Armor, Stealth, Poison, Spikes, doubled: 8
+    put(s, "4,2", "tortoise", "A")                  # next to the Toad: Armor, doubled: 2
+    put(s, "1,3", "tortoise", "A")                  # no enemy next to it: 1
     put(s, "3,3", "hedgehog", "A").retaliation_used = True     # spent Spikes: 0
     put(s, "4,1", "toad", "B")                      # hers, not Ash's
     rules.apply_action(s, PassAction()) if PassAction() in rules.legal_actions(s) else end_turn(s)
-    assert s.food["A"] == 5
+    assert s.food["A"] == 11
 
 
 # ===================================================================== Grimm
