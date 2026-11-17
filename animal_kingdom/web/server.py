@@ -50,7 +50,7 @@ from .profiles import DECKS_MAX, ProfileError, Profiles, clean_name
 from . import local
 from . import replay
 from . import tutorial
-from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, STARTER_COVERS, Match, Seat, card_pool, map_info
+from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, MAPS, STARTER_COVERS, Match, Seat, card_pool, map_info
 from . import discord
 
 CARDS = load_cards()
@@ -1394,6 +1394,7 @@ async def pool(_req):
         "decks": [{"id": d["slug"], "name": d["name"], "list": load_premade_deck(d["slug"]), "cover": d.get("cover", "")}
                   for d in STARTER_DECKS],
         "map": map_info(),
+        "maps": {m: map_info(m) for m in MAPS},
         "levels": list(BOT_LEVELS),
         "bot_decks": list(ladder.decks if ladder else BOT_DECKS),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS plus the league's)
         # The bot decks that are not starters: shown by name and list wherever a bot's deck is (Practice's chooser,
@@ -1557,6 +1558,10 @@ async def create_match(req):
     player = profile_of(req)
     match = Match(mid, Seat(token, display(player) if player else guest_name(body, "You"), deck=deck,
                             profile=player and player["id"]))
+    if body.get("map") is not None:          # the board: today's, or the hex prototype (not on the ladder: ranked joins elsewhere)
+        if body["map"] not in MAPS:
+            raise web.HTTPBadRequest(text="no such board")
+        match.map_id = body["map"]
     bot = body.get("bot")
     gauntlet = body.get("gauntlet")
     if (bot is not None and not isinstance(bot, dict)) or (gauntlet is not None and not isinstance(gauntlet, dict)):

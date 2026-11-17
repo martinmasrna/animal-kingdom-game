@@ -6,7 +6,7 @@ import { SUCCESSOR } from './cardnums.js';
 import { plan, DUR } from './timeline.js';
 import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt, resolvesIn } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt, resolvesIn, setBoardMap } from './board.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripHTML, stripsHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
@@ -27,7 +27,7 @@ const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
-let RULES = null, CARDS = {}, MAP, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null, LEADERS = {};   // LEADERS: the leaders prototype, card id -> {kind, text}   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
+let RULES = null, CARDS = {}, MAP, MAPS = {}, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null, LEADERS = {};   // LEADERS: the leaders prototype, card id -> {kind, text}   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
 
@@ -139,7 +139,7 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; RULES = p.rules; LEADERS = p.leaders || {};
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; MAPS = p.maps || { [p.map.id]: p.map }; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; RULES = p.rules; LEADERS = p.leaders || {};
   if (CARDS.bumblebee_legend) CARDS.bumblebee_legend.base = CARDS.bumblebee_legend.text; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
   COVER = Object.fromEntries([...DECKS, ...BOT_ONLY].map(d => [d.id, d.cover]));
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
@@ -383,7 +383,8 @@ function homeScreen(mode = {}) {
       if (q.get('mirror')) body.gauntlet.mirror = true;                          // both seats on each named deck: the pilot is the only variable
       if (q.get('games')) body.gauntlet.games = Math.max(1, Math.round(+q.get('games')));   // games per deck, who goes first alternating
     }
-    if (body.bot && LOCAL_PLAY && await startLocal(body)) return;
+    if (BOARD !== 'map_b' && play.opp !== 'friend') body.map = BOARD;
+    if (body.bot && !body.map && LOCAL_PLAY && await startLocal(body)) return;
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); play.open = null;
@@ -871,6 +872,9 @@ function wireAccount(root, redraw) {
 // move; the server takes the finished match (Martin, 2026-11-05: the default). Without the wasm, or with one built from
 // other engine sources than the server's, the match plays on the server. ?local=0 plays it on the server anyway.
 const LOCAL_PLAY = new URLSearchParams(location.search).get('local') !== '0';
+// The hex board prototype (Martin's diamond, 2026-11-16): ?board=hex on the address plays your next matches on it, ?board=classic switches back.
+const BOARD = (() => { const q = new URLSearchParams(location.search).get('board');
+  try { if (q) localStorage.setItem('ak:board', q === 'hex' ? 'map_hex' : 'map_b'); return localStorage.getItem('ak:board') || 'map_hex'; } catch { return q === 'classic' ? 'map_b' : 'map_hex'; } })();
 let LOCAL = null;
 async function startLocal(body) {
   const lib = await prepareLocal(api);
@@ -969,7 +973,17 @@ const DUR_REVEAL_HOLD = DUR.reveal * 0.62;   // s: the opponent's card held at t
 // there drew the crossroad as it was, so it made none).
 const landNow = covered => { if (screen !== 'game') return; drawBoard(); sfx(covered ? 'cover' : 'land', LAND_HIT); };
 const LAND_HIT = HIT_DELAY;   // s from the cut to the piece's impact (flight.js: none for Impact, game.css landf for the glow)
+// The board a match is played on (match.py MAPS): its view names it, and the screen draws that board (the hex prototype on its own ground).
+function useMap(v) {
+  const id = (v && v.map) || 'map_b';
+  if (MAPS[id] && MAP.id !== id) MAP = MAPS[id];
+  setBoardMap(MAP);
+  const img = document.querySelector('#world img'), scr = document.getElementById('scr');
+  if (img) { const src = `/static/kit2/${MAP.hex ? 'plate_hex' : 'plate_wide'}.webp`; if (!img.src.endsWith(src)) img.src = src; }
+  if (scr) scr.classList.toggle('hexb', !!MAP.hex);
+}
 function onView(prev) {
+  useMap(V);
   if (PB.busy) { PB.queue.push(V); V = PB.shown; return; }   // keep showing the step in play
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once
   const steps = motion && (screen === 'game' || screen === null) ? plan(prev, V, CARDS) : [{ view: V, step: null }];
@@ -1195,7 +1209,7 @@ function wireTips(root) {
 function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="game kit" id="scr"><div id="world"><img src="/static/kit2/plate_wide.webp" alt="" draggable="false"></div><div id="stage">
+    app.innerHTML = `<div class="game kit${MAP.hex ? ' hexb' : ''}" id="scr"><div id="world"><img src="/static/kit2/${MAP.hex ? 'plate_hex' : 'plate_wide'}.webp" alt="" draggable="false"></div><div id="stage">
       <div class="abs ledge"></div>
       <div id="board"></div>
       <div class="abs menu snd" id="sndbtn"></div><div class="panel setp" id="setp"></div>
@@ -1583,7 +1597,7 @@ function fitStage(redraw = true) {
   st.style.transform = t; document.getElementById('world').style.transform = t;
   st.style.top = document.getElementById('world').style.top = rp ? `calc(50% - ${rp / 2}px)` : '';
   st.style.setProperty('--rp', `${rp / k}px`);
-  const plate = document.querySelector('#world img'), src = `/static/kit2/plate_${port ? 'port' : 'wide'}.webp`;   // upright, its own painting
+  const plate = document.querySelector('#world img'), src = `/static/kit2/plate_${port ? 'port' : MAP.hex ? 'hex' : 'wide'}.webp`;   // upright, its own painting; the hex prototype its ground without trails
   if (!plate.src.endsWith(src)) plate.src = src;
   // the savanna around the stage, in stage px: the pieces at the screen's edges (hands, corners, deck, End turn) sit at the
   // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating
@@ -1626,7 +1640,8 @@ function viewerGame() {
 }
 function viewerMap() {
   if (V.you === 'A') return MAP;
-  return { ...MAP, regions: MAP.regions.map(r => ({ ...r, c: [MAP.cols - r.c[0], r.c[1]] })) };
+  const flip = cr => `${MAP.cols + 1 - Number(cr.split(',')[0])},${cr.split(',')[1]}`;
+  return { ...MAP, regions: MAP.regions.map(r => ({ ...r, c: [MAP.cols - r.c[0], r.c[1]], ...(r.corners ? { corners: r.corners.map(flip) } : {}) })) };
 }
 
 let lastDecision = null;

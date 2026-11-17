@@ -37,12 +37,23 @@ const CLEARINGS = [[282.3, 225.4], [558.4, 224.0], [831.6, 223.5], [1112.7, 222.
 const PORT_AT = { cols: [150, 352, 550], rows: [1037, 853, 660, 469, 271],
   pits: { A: { x: [172, 544], y: 1208 }, B: { x: [172, 544], y: 98 } },
   crown: { A: [600, 1208], B: [600, 98] }, mouth: { A: [386, 1177], B: [356, 124] } };
-const at = (c, r) => { if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
+// The hex prototype (Martin's diamond, 2026-11-16; data/maps.json map_hex): flat-top hexagons in columns 1-2-3-4-3-2-1,
+// the two tips the dens, the 14 between them the crossroads ("column,row", column 1..5 from your den, row from the top),
+// a region the corner three of them share. Drawn from this geometry on a ground without trails (kit2/plate_hex.webp).
+// s: a hexagon's circumradius on the stage. setBoardMap switches it on for a match on that board (app.js).
+const HEX = { on: false, s: 75, top: 68, cols: [2, 3, 4, 3, 2] };   // between the opponent's hand (to y 66) and yours (from y 590)
+export function setBoardMap(M) { HEX.on = !!(M && M.hex); }
+export const hexBoard = () => HEX.on;
+const hexAt = (c, r) => { const s = HEX.s, h = s * Math.sqrt(3), n = HEX.cols[c - 1];
+  return [STAGE.w / 2 + 1.5 * s * (c - 3), HEX.top + h * ((4 - n) / 2 + r - 1) + h / 2]; };
+const hexTip = side => { const s = HEX.s, h = s * Math.sqrt(3); return [STAGE.w / 2 + 4.5 * s * (side === 'A' ? -1 : 1), HEX.top + 2 * h]; };
+const at = (c, r) => { if (HEX.on) return hexAt(c, r);
+  if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
   const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
 // A crossroad's centre on the stage, for anything that travels to it.
 export const crossroadAt = cr => at(...cr.split(',').map(Number));
 // A den's cave mouth (its HQ) on the stage, and the gem on its crown.
-export const denMouthAt = side => VIEW.port ? PORT_AT.mouth[side] : MOUTH[side];
+export const denMouthAt = side => HEX.on ? hexTip(side) : VIEW.port ? PORT_AT.mouth[side] : MOUTH[side];
 export const gemAt = side => VIEW.port ? PORT_AT.crown[side] : CROWN[side];
 // Each den's ten pits from the bottom of its ridge up, the gem on its crown boulder, its cave mouth (the HQ).
 const PIT_Y = [690, 637, 584, 531, 478, 425, 372, 319, 266, 213], RIDGE = { A: 110, B: 1565 };
@@ -89,7 +100,7 @@ function unit(u, under, cards, fire = false) {
   // the animals underneath peek out behind, down and right: each a solid disc under its team rim, a step darker (at this
   // offset a portrait showed only as a sliver, which read as a gap)
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen" style="transform:translate(${22 + i * 7}px,${20 + i * 6}px) scale(.82);z-index:${-i - 1}">`
-    + `<div class="fill"></div><img class="rimimg" src="${kit(`rim_${team(b.owner)}.webp`)}" alt="" draggable="false"></div>`).join('');
+    + `<div class="fill"></div><img class="rimimg" src="${kit(HEX.on ? `hex_rim_${team(b.owner)}.webp` : `rim_${team(b.owner)}.webp`)}" alt="" draggable="false"></div>`).join('');
   // Board keywords are painted onto the piece, each on its own layer so all four stack (design sandbox screen/keywords/):
   // Armor turns the piece into a hexagon shell scute (rim and portrait), Spikes stand out as acacia thorns behind the rim, Stealth veils the
   // portrait in mist, Poison takes the portrait over with toxic green vapour (after Hearthstone's Enrage). The card on hover says what each one does.
@@ -103,9 +114,10 @@ function unit(u, under, cards, fire = false) {
   const venom = k => !has('Poison') ? '' : k === 'tint' ? img('kwl_vapour_tint.webp', `kwl venom tint${hx}`)
     : `<div class="kwl venom fumes${hx}">${img('kwl_vapour_fumes.webp', 'base')}<div class="vmask"><div class="flow v1" style="${ph(2, 14)}"></div></div></div>`;
   return peek + (has('Spikes') ? `<img class="kwl thorns" src="${kit(has('Armor') ? 'kwl_thorns_hex.webp' : 'kwl_thorns.webp')}" alt="" draggable="false">` : '') +
-    `<div class="ring${has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
+    `<div class="ring${HEX.on ? ' hexu' : has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${HEX.on ? portrait(u.id, 116, 140) : portrait(u.id, 98, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     venom('tint') + (has('Stealth') ? `<div class="kwl mist${hx}"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
-    `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
+    (HEX.on ? `<img class="rimimg${has('Armor') ? ' armor' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `hex_rim_${team(u.owner)}.webp`)}" alt="" draggable="false">`
+      : `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">`) +
     `<div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
     (u.timer ? `<div class="timer" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
     (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '') +   // Yuki's leader (a plain plaque until it has a painted mark)
@@ -129,7 +141,9 @@ export function renderBoard(el, M, g, cards, ui) {
   const eating = new Set(A && A.flow && A.flow.kind === 'pay' ? A.flow.at.map(f => f.cr) : []);
   // what a stone pays: its holder's yield (the legendary Wildebeest and Boar move it), the printed food while no one holds it
   const pays = (reg, h) => (h && g.regionFood && g.regionFood[h.owner] || {})[reg.id] ?? reg.food;
-  const stoneAt = reg => { const [c, r] = reg.c, [x1, y1] = at(c, r), [x2, y2] = at(c + 1, r + 1); return [(x1 + x2) / 2, (y1 + y2) / 2]; };
+  const stoneAt = reg => { if (reg.corners && HEX.on) {   // the corner three hexagons share: the centre of their three centres
+      const ps = reg.corners.map(cr => at(...cr.split(',').map(Number))); return [ps.reduce((a, p) => a + p[0], 0) / ps.length, ps.reduce((a, p) => a + p[1], 0) / ps.length]; }
+    const [c, r] = reg.c, [x1, y1] = at(c, r), [x2, y2] = at(c + 1, r + 1); return [(x1 + x2) / 2, (y1 + y2) / 2]; };
   let s = '';   // the painted ground is the game screen's (kit2/plate_wide.webp, under the stage), wider than any window
 
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
@@ -138,7 +152,10 @@ export function renderBoard(el, M, g, cards, ui) {
     s += put(`stone pboss ${h ? h.owner : ''}${reg.c.every((v, i) => shownAt && v === shownAt[i]) ? ' shown' : ''}`, x, y, chalk('+' + pays(reg, h)));
   }
 
-  for (let c = 1; c <= M.cols; c++) for (let r = 1; r <= M.rows; r++) {
+  // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
+  if (HEX.on) for (const side of ['A', 'B']) { const [x, y] = hexTip(side); s += put(`dentile ${side}`, x, y, `<img src="${kit(`hex_rim_${team(side)}.webp`)}" alt="" draggable="false">`); }
+  const CRS = HEX.on && M.crossroads ? M.crossroads.map(cr => cr.split(',').map(Number)) : Array.from({ length: M.cols * M.rows }, (_, i) => [i % M.cols + 1, Math.floor(i / M.cols) + 1]);
+  for (const [c, r] of CRS) {
     // an animal that roamed into the den stands only in its mouth, not also where it came from
     const cr = key(c, r), st = (g.board[cr] || []).filter(u => !ui.capture || u.iid !== ui.capture.iid), [x, y] = at(c, r);
     const cls = (rings.has(cr) ? ' tgt' : '') + (roamable.has(cr) ? (ui.roamFrom === cr ? ' roamsel' : ' roamable') : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');

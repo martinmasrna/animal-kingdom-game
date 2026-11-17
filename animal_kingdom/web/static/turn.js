@@ -18,7 +18,7 @@ export function pitStates(food, income, winFood, pits = 10) {
 // The regions a player holds: every corner's top unit is theirs.
 export function heldRegions(regions, board) {
   return regions.flatMap(reg => {
-    const [c, r] = reg.c, owners = [key(c, r), key(c + 1, r), key(c, r + 1), key(c + 1, r + 1)].map(cr => (top(board, cr) || {}).owner);
+    const [c, r] = reg.c, owners = (reg.corners || [key(c, r), key(c + 1, r), key(c, r + 1), key(c + 1, r + 1)]).map(cr => (top(board, cr) || {}).owner);
     return owners.every(o => o && o === owners[0]) ? [{ ...reg, owner: owners[0] }] : [];
   });
 }

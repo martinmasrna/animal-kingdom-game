@@ -34,6 +34,8 @@ CARDS = load_cards()
 # What a pending choice asks, by the effect step asking it: a choice from your own hand names its verb (the client heads it).
 ASKS = {"mulligan": "mulligan", "magpie_steal": "discard", "raven_dig": "shuffle", "discard": "discard"}
 MAP_ID = "map_b"
+# The boards a match may be played on: today's, and the hex prototype (Martin's diamond, 2026-11-16; data/maps.json map_hex).
+MAPS = ("map_b", "map_hex")
 # One game per match while there is one map: the best-of-3 is part of the game, but its point is the three-map
 # reveal (rules §14), so it comes back with the maps (Martin, 2026-09-30). Rematch carries the loser-first rule.
 GAMES_TO_WIN = 1
@@ -131,9 +133,12 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     return out
 
 
-def bot_for(level: str, seed: int):
+def bot_for(level: str, seed: int, map_id: str = MAP_ID):
     if level in tutorial.BOTS.values():
         return tutorial.TutorialBot(seed=seed, lesson=next(n for n, b in tutorial.BOTS.items() if b == level))
+    # The Expert's network reads today's 15 crossroads by place; on another board it is the Normal search until it is retrained.
+    if map_id != MAP_ID and level == "expert":
+        level = "normal"
     return make_bot(BOT_LEVELS[level], seed)
 
 
@@ -264,6 +269,7 @@ class Match:
         self.rematch_offer: Optional[str] = None     # a friend match: the seat that offered a rematch, until the other answers
         self.rematch_declined: Optional[str] = None  # ...and the seat that declined it
         self.takeover = False            # a game played on from a logged position (start_from): neither logged nor rated
+        self.map_id = MAP_ID             # the board this match is played on (MAPS)
         self.last_log: Optional[dict] = None   # the last finished game (game_log), for its replay
         self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
         self.rng = random.Random(secrets.randbits(32))
@@ -356,9 +362,9 @@ class Match:
         else:
             self.state = new_game(load_premade_deck(self.seats["A"].deck),
                                   load_premade_deck(self.seats["B"].deck), seed,
-                                  map_id=MAP_ID, first_player=first,
+                                  map_id=self.map_id, first_player=first,
                                   leaders=leaders_for(self.seats["A"].deck, self.seats["B"].deck))
-        self.bots = {s: bot_for(seat.bot, seed + i) for i, (s, seat) in enumerate(self.seats.items())
+        self.bots = {s: bot_for(seat.bot, seed + i, self.map_id) for i, (s, seat) in enumerate(self.seats.items())
                      if seat.is_bot}
         self.history = []
         self.events, self.seq = [], 0
@@ -593,7 +599,7 @@ class Match:
         """The finished game in the sim.replay log format (replayable with no bot compute)."""
         r = self.results[-1]
         return {"deck_a": self.seats["A"].deck, "deck_b": self.seats["B"].deck, "seed": self.seed,
-                "map_id": MAP_ID, "first_player": r["first"], "first_turn_actions": self.state.config.first_turn_actions,
+                "map_id": self.state.game_map.id, "first_player": r["first"], "first_turn_actions": self.state.config.first_turn_actions,
                 "first_player_opening_draw": self.state.config.first_player_opening_draw,
                 "bots": [self.seats[p].bot or "human" for p in "AB"],
                 "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
@@ -631,7 +637,7 @@ class Match:
                 "actions": self.actions, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
                 "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
-                "takeover": self.takeover, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
+                "takeover": self.takeover, "map_id": self.map_id, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history],
                 "events": self.events, "seq": self.seq}
@@ -649,6 +655,7 @@ class Match:
         m.last_game = d.get("last_game")
         m.last_log = d.get("last_log")
         m.takeover = d.get("takeover", False)
+        m.map_id = d.get("map_id", MAP_ID)
         m.clock = d.get("clock")
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's
@@ -657,7 +664,7 @@ class Match:
         m.history = [Move(**h) for h in d["history"]]
         m.events, m.seq = d.get("events", []), d.get("seq", 0)
         if m.state is not None and m.seed is not None:
-            m.bots = {s: bot_for(seat.bot, m.seed + i) for i, (s, seat) in enumerate(m.seats.items())
+            m.bots = {s: bot_for(seat.bot, m.seed + i, m.map_id) for i, (s, seat) in enumerate(m.seats.items())
                       if seat.is_bot}
         return m
 
@@ -665,7 +672,7 @@ class Match:
     def view(self, s: str) -> dict:
         opp = other_player(s)
         v = {
-            "id": self.id, "you": s, "phase": self.phase, "version": self.version, "takeover": self.takeover,
+            "id": self.id, "you": s, "phase": self.phase, "version": self.version, "takeover": self.takeover, "map": self.map_id,
             # a seat's deck by name only for you or a bot: a person's deck name is theirs (their list is open, by rule)
             "seats": {p: {"name": seat.name, "bot": seat.bot, "ready": seat.ready, **({"rating": seat.rating} if seat.rating else {}),
                           **({"league": seat.league} if seat.league else {}),
@@ -868,16 +875,17 @@ class Match:
         return {"v": o, "kind": "other", "label": str(o)}
 
 
-def map_info() -> dict:
-    gm = load_map(MAP_ID)
+def map_info(map_id: str = MAP_ID) -> dict:
+    gm = load_map(map_id)
     cols = max(int(c.split(",")[0]) for c in gm.crossroads)
     rows = max(int(c.split(",")[1]) for c in gm.crossroads)
     regions = []
     for r in gm.regions.values():
         cs = [tuple(map(int, c.split(","))) for c in r.corners]
-        regions.append({"id": r.id, "c": list(min(cs)), "food": r.food})
-    return {"id": gm.id, "name": gm.name, "cols": cols, "rows": rows, "regions": regions,
-            "winFood": gm.win_food}
+        regions.append({"id": r.id, "c": list(min(cs)), "corners": list(r.corners), "food": r.food})
+    # the hex prototype draws its board from its own geometry (board.js), so it names its crossroads and its dens' fronts
+    return {"id": gm.id, "name": gm.name, "cols": cols, "rows": rows, "regions": regions, "winFood": gm.win_food,
+            "crossroads": sorted(gm.crossroads), "hex": gm.id == "map_hex"}
 
 
 def card_pool() -> list[dict]:
