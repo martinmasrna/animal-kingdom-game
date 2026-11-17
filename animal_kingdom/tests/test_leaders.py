@@ -8,6 +8,7 @@ import pytest
 
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import ActAction, ChoiceAction, DrawAction, LeaderAction, PassAction, PlaceAction, action_from_dict
+from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.leaders import JULIETTE_WISHES, MELISSIA_SPEC, leader_state
 from animal_kingdom.engine.state import EngineError, GameState, new_game
 from animal_kingdom.engine.strength import effective_strength, placement_strength, strength_breakdown
@@ -133,7 +134,7 @@ def rules_adjacent(s, cr, target) -> bool:
     return target[0] == "cr" and s.game_map.adjacent(cr, target[1])
 
 
-def test_the_mole_leader_draws_two_when_the_third_animal_of_a_turn_is_played():
+def test_the_mole_leader_draws_a_card_when_the_third_animal_of_a_turn_is_played():
     s = state("mole_legend", hands={"A": ["mole", "t_small", "t_small"], "B": ["t_small"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
     rules.apply_action(s, PlaceAction("mole", ("cr", "1,1")))            # the Mole, and its extra animal next to it
     t = s.pending["placements"][0]
@@ -142,8 +143,7 @@ def test_the_mole_leader_draws_two_when_the_third_animal_of_a_turn_is_played():
     assert len(s.hands["A"]) == 1                                        # two animals played: nothing yet
     spot = next(q for q in rules.legal_actions(s) if isinstance(q, PlaceAction))
     rules.apply_action(s, spot)
-    assert len(s.hands["A"]) == 2 or s.current == "B"                    # the third: two cards
-    assert sum(1 for u in s.hands["A"] if u.card_id == "t_body") >= 2
+    assert [u.card_id for u in s.hands["A"]] == ["t_body"] * Config.default().mole_leader_draw   # the third: a card
 
 
 def test_the_mole_leader_gives_nothing_for_two_animals():
