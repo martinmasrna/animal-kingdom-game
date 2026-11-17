@@ -408,7 +408,7 @@ def test_the_launch_decks_other_numbers_match_config():
     assert tiers == [cfg.dung_beetle_legend_draw_at, cfg.dung_beetle_legend_food_at, cfg.dung_beetle_legend_play_at]
     assert words[re.search(r"shuffle (\w+) Cuckoo Eggs", c["cuckoo"].text).group(1)] == cfg.cuckoo_eggs
     assert words[re.search(r"shuffle (\w+) Golden Eggs", c["goose_legend"].text).group(1)] == cfg.aurum_eggs
-    assert words[re.search(r"place (\w+) Worms", c["earthworm"].text).group(1)] == cfg.earthworm_worms
+    assert words[re.search(r"with (\w+) Worms", c["earthworm"].text).group(1)] == cfg.earthworm_worms
     assert words[re.search(r"gain (\w+) times as much", c["squirrel_legend"].text).group(1)] == cfg.otk_squirrel_multiplier
     assert int(re.search(r"give (\d+) animals in your hand", c["butterfly_legend_monarch"].text).group(1)) == cfg.monarch_count
     assert int(re.search(r"give (\d+) animals", c["baboon"].text).group(1)) == cfg.baboon_count

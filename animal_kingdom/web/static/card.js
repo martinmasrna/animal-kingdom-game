@@ -141,7 +141,7 @@ export const KEYWORDS = {
   'Dawn': 'Happens at the start of your turn.',
   'Dusk': 'Happens at the end of your turn.',
   'Fall': 'Happens when it is removed from the board.',
-  'Scout': 'Look at three different cards of your deck, draw one and shuffle the others back.',
+  'Scout': 'Look at three different animals of your deck, draw one and shuffle the others back.',
   'Bite': 'Remove an adjacent enemy of that strength or less.',   // "Roar: Bite 3." (Martin, 2026-11-16)
 };
 const KW = new RegExp(`\\b(${Object.keys(KEYWORDS).join('|')})\\b( \\d+)?[:.]?`, 'g');

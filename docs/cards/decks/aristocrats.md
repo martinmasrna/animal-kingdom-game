@@ -20,7 +20,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Raccoon** | 2 | — | 4 | Roar: return an animal from your Remove Pile to your hand. |
-| **Earthworm** | 2 | — | 1 | Fall: place two Worms on its crossroad and draw an animal. |
+| **Earthworm** | 2 | — | 1 | Fall: draw an animal and replace Earthworm with two Worms. |
 | **Sperm Whale** | 2 | — | 8 | Titan. Roar: remove all adjacent animals. |
 | **Dart Frog** | 2 | — | 1 | Reach. Poison. Fall: remove all animals next to this. |
 

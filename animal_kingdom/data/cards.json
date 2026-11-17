@@ -321,7 +321,7 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 1,
-      "text": "Fall: place two Worms on its crossroad and draw an animal.",
+      "text": "Fall: draw an animal and replace Earthworm with two Worms.",
       "related": [
         "worm"
       ],
