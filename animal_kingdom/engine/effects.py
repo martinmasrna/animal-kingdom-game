@@ -110,8 +110,31 @@ def resolve(state: GameState) -> None:
         _drain(state)
         if state.pending is not None or state.result is not None or state.effect_stack:
             return
-        if not _remove_below_zero(state):
+        if _remove_below_zero(state):
+            continue
+        if not _iris_trios(state):
             return
+
+
+def _iris_trios(state: GameState) -> bool:
+    """Iris's leader: "The first time you control 3 copies of an animal, play a fourth copy." Read off the board once
+    everything has settled, so a copy counts however it got there (played, made, or a Chameleon that became one). The
+    fourth is made and played free. Returns whether any was set off."""
+    if not state.leaders:
+        return False
+    fired = False
+    for player in sorted(state.leaders):
+        if state.leaders[player]["id"] != L.IRIS:
+            continue
+        counts: dict[str, int] = {}
+        for stack in state.board.values():
+            if stack and stack[-1].owner == player:
+                counts[stack[-1].card_id] = counts.get(stack[-1].card_id, 0) + 1
+        for cid in sorted(c for c, n in counts.items() if n >= state.config.iris_leader_copies and c not in state.trios[player]):
+            state.trios[player][cid] = 1
+            state.effect_stack.append({"op": "play_named", "chooser": player, "card_id": cid, "make": True, "by_card": L.IRIS})
+            fired = True
+    return fired
 
 
 def _remove_below_zero(state: GameState) -> bool:

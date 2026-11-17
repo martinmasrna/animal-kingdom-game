@@ -148,7 +148,10 @@ pub fn resolve(st: &mut State) {
         if st.pending.is_some() || st.result.is_some() || !st.effect_stack.is_empty() {
             return;
         }
-        if !remove_below_zero(st) {
+        if remove_below_zero(st) {
+            continue;
+        }
+        if !crate::leaders::iris_trios(st) {
             return;
         }
     }

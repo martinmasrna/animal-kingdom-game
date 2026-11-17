@@ -255,7 +255,7 @@ pub struct Unit {
     /// The Coyote's gift: Roam for as long as this instance stays on the board.
     pub granted_roam: bool,
     pub iid: i64,
-    // 16-bit counters: a game's turns, plays and strength changes stay far below 32k, and the unit is what the board,
+    // 16-bit counters: a game's turns, trios and strength changes stay far below 32k, and the unit is what the board,
     // the hands and every clone of them are made of (24 bytes instead of 32)
     pub placed_on_turn: i16,
     pub strength_counter: i16,
@@ -478,6 +478,8 @@ pub struct State {
     pub scheduled: CowVec<Map>,
     pub turn_flags: TurnFlags,
     pub card_strength_counters: [FxHashMap<CardId, i32>; 2],
+    /// The animals each player has already controlled three copies of (Iris's leader pays once for each).
+    pub trios: [FxHashMap<CardId, i32>; 2],
     pub result: Option<GameResult>,
     pub inked: BTreeSet<i64>,
     pub roar_twice: [Option<i32>; 2],
@@ -490,7 +492,7 @@ pub struct State {
     pub leaders: [Option<Leader>; 2],
     /// Lord Bumbleton's card: how many times each player has gained food this game.
     pub food_gains: [i32; 2],
-    /// [GORILLA]'s card: the strength the next animal each player plays has.
+    /// [GORILLA]'s card: the strength the next animal each player trios has.
     pub next_strength: [Option<i32>; 2],
     pub jelly: [FxHashMap<CardId, (i32, i32)>; 2],
     /// Whether `jelly[p]` exists at all (Python keeps the player's dict once the legendary Bee roared, empty or not).
@@ -555,6 +557,7 @@ impl Clone for State {
             scheduled: self.scheduled.clone(),
             turn_flags: self.turn_flags.clone(),
             card_strength_counters: self.card_strength_counters.clone(),
+            trios: self.trios.clone(),
             result: self.result.clone(),
             inked: self.inked.clone(),
             roar_twice: self.roar_twice,
@@ -986,6 +989,11 @@ impl State {
         }
         let hands = |p: usize| sj::Value::Array(self.hands[p].iter().map(|u| self.unit_json(u)).collect());
         let deck = |d: &[CardId]| sj::Value::Array(d.iter().map(|c| sj::Value::String(self.cname(*c).to_string())).collect());
+        let trios = |p: usize| {
+            let mut m: Vec<(String, i32)> = self.trios[p].iter().map(|(c, n)| (self.cname(*c).to_string(), *n)).collect();
+            m.sort();
+            sj::Value::Object(m.into_iter().map(|(k, v)| (k, sj::Value::from(v))).collect())
+        };
         let counters = |p: usize| {
             let mut m: Vec<(String, i32)> = self.card_strength_counters[p].iter().map(|(c, n)| (self.cname(*c).to_string(), *n)).collect();
             m.sort();
@@ -1063,6 +1071,7 @@ impl State {
             "scheduled": self.scheduled.iter().map(|m| Value::Map(m.clone()).to_json()).collect::<Vec<_>>(),
             "turn_flags": self.turn_flags.to_json(self),
             "card_strength_counters": {"A": counters(0), "B": counters(1)},
+            "trios": {"A": trios(0), "B": trios(1)},
             "result": self.result.as_ref().map(|r| sj::json!({"winner": r.winner.map(player_name), "reason": r.reason})).unwrap_or(sj::Value::Null),
             "pile_owners": self.pile_owners.iter().map(|o| o.map(|p| sj::Value::String(player_name(p).to_string())).unwrap_or(sj::Value::Null)).collect::<Vec<_>>(),
             "inked": self.inked.iter().copied().collect::<Vec<i64>>(),
@@ -1100,6 +1109,11 @@ impl State {
             if let Some(c) = d.get("card_strength_counters").and_then(|c| c.get(pn)).and_then(|c| c.as_object()) {
                 for (k, v) in c {
                     st.card_strength_counters[p].insert(cid(k), v.as_i64().unwrap() as i32);
+                }
+            }
+            if let Some(c) = d.get("trios").and_then(|c| c.get(pn)).and_then(|c| c.as_object()) {
+                for (k, v) in c {
+                    st.trios[p].insert(cid(k), v.as_i64().unwrap() as i32);
                 }
             }
             if let Some(j) = d.get("jelly").and_then(|c| c.get(pn)).and_then(|c| c.as_object()) {
@@ -1236,6 +1250,7 @@ impl State {
             scheduled: CowVec::new(),
             turn_flags: TurnFlags::default(),
             card_strength_counters: [FxHashMap::default(), FxHashMap::default()],
+            trios: [FxHashMap::default(), FxHashMap::default()],
             result: None,
             inked: BTreeSet::new(),
             roar_twice: [None, None],

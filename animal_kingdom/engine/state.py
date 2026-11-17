@@ -308,6 +308,7 @@ class GameState:
         scheduled: Optional[list[dict]] = None,
         turn_flags: Optional[dict] = None,
         card_strength_counters: Optional[dict[str, dict[str, int]]] = None,
+        trios: Optional[dict[str, dict[str, int]]] = None,
         result: Optional[Result] = None,
         pile_owners: Optional[list] = None,
         inked: Optional[set[int]] = None,
@@ -350,7 +351,7 @@ class GameState:
         self.leaders = leaders if leaders is not None else {}
         # Lord Bumbleton's card: player -> how many times that player has gained food this game.
         self.food_gains = food_gains if food_gains is not None else {}
-        # [GORILLA]'s card: player -> the strength the next animal that player plays has (set by the Roar, spent by the play).
+        # [GORILLA]'s card: player -> the strength the next animal that player trios has (set by the Roar, spent by the play).
         self.next_strength = next_strength if next_strength is not None else {}
         # The legendary Bee's royal jelly: player -> card id -> [how many deck copies it reached, the counter that made them
         # strength 5 at the Roar]. Each comes out of the deck (drawn, played or placed from it) with that counter, so growth
@@ -380,6 +381,9 @@ class GameState:
         self.card_strength_counters = (
             card_strength_counters if card_strength_counters is not None else {"A": {}, "B": {}}
         )
+        # The animals each player has already controlled three copies of (Iris's leader plays a fourth copy the first
+        # time; kept only under her).
+        self.trios = trios if trios is not None else {"A": {}, "B": {}}
         self.result = result
         # What happened, in order, as it happened (placed, covered, removed, bounced, drawn, food, turns): the server
         # hands these to the players instead of anyone diffing positions. Not part of the position: never saved, and a
@@ -611,6 +615,7 @@ class GameState:
         new.scheduled = _plain_copy(self.scheduled)
         new.turn_flags = _plain_copy(self.turn_flags)
         new.card_strength_counters = _plain_copy(self.card_strength_counters)
+        new.trios = _plain_copy(self.trios)
         new.pile_owners = list(self.pile_owners)
         new.inked = set(self.inked)
         new.roar_twice = dict(self.roar_twice)
@@ -654,7 +659,7 @@ class GameState:
         )
 
     def hand_revealed(self, player: str) -> bool:
-        """Whether `player` plays with their hand revealed (their opponent controls the legendary Giraffe)."""
+        """Whether `player` trios with their hand revealed (their opponent controls the legendary Giraffe)."""
         from .statics import hand_revealed   # statics reads the board (ink included); it imports this module
         return hand_revealed(self, player)
 
@@ -682,6 +687,7 @@ class GameState:
             "scheduled": copy.deepcopy(self.scheduled),
             "turn_flags": copy.deepcopy(self.turn_flags),
             "card_strength_counters": copy.deepcopy(self.card_strength_counters),
+            "trios": {p: dict(sorted(v.items())) for p, v in self.trios.items()},
             "result": self.result.to_dict() if self.result else None,
             "pile_owners": list(self.pile_owners),
             "inked": sorted(self.inked),
@@ -737,6 +743,7 @@ class GameState:
             card_strength_counters=copy.deepcopy(
                 d.get("card_strength_counters") or {"A": {}, "B": {}}
             ),
+            trios=copy.deepcopy(d.get("trios") or {"A": {}, "B": {}}),
             result=Result.from_dict(d["result"]) if d["result"] else None,
             pile_owners=list(d["pile_owners"]) if "pile_owners" in d else None,
             inked={int(i[0] if isinstance(i, list) else i) for i in (d.get("inked") or [])},   # [iid, until]: saved while ink wore off

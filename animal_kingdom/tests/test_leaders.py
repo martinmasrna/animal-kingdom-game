@@ -199,6 +199,22 @@ def test_ashs_leader_gains_a_food_at_dusk_for_each_keyword_on_her_animals_double
     assert s.food["A"] == 11
 
 
+# ===================================================================== Iris
+
+def test_iris_plays_a_fourth_copy_the_first_time_she_controls_three_copies_of_an_animal():
+    s = state("chameleon_legend", hands={"A": ["t_small", "chameleon"], "B": ["t_small"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
+    put(s, "1,1", "t_small", "A")
+    rules.apply_action(s, PlaceAction("t_small", ("cr", "1,2")))
+    assert s.pending is None                                          # two copies: nothing
+    rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,3")))
+    choose(s, "1,2")                                                  # the Chameleon becomes the third copy
+    assert s.pending["mode"] == "place" and {q["card_id"] for q in s.pending["placements"]} == {"t_small"}
+    t = next(q for q in s.pending["placements"] if q["target"][1] not in s.board)      # an empty crossroad
+    rules.apply_action(s, PlaceAction(t["card_id"], tuple(t["target"])))
+    assert sum(1 for stack in s.board.values() if stack[-1].card_id == "t_small" and stack[-1].owner == "A") == 4
+    assert s.trios["A"] == {"t_small": 1} and s.pending is None      # once for each animal
+
+
 # ===================================================================== Grimm
 
 def test_grimm_draws_two_and_may_press_twice_a_turn():

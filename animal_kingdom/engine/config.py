@@ -198,6 +198,7 @@ class Config:
     yuki_leader_uses: int = 3            # Yuki's leader: the uses a match has of "Choose a connected ally. It can't be covered..."
     ash_leader_food: int = 1             # Ash's leader: "Dusk: gain 1 food for each Poison, Spikes, Armor and Stealth on your animals...
     ash_leader_contact: int = 2          # ...Animals adjacent to enemies earn double."
+    iris_leader_copies: int = 3          # Iris's leader: "The first time you control 3 copies of an animal, play a fourth copy."
     grimm_leader_draw: int = 2           # Grimm's leader: "Draw 2 cards."...
     grimm_leader_per: int = 5            # ...one more for every 5 enemies removed this match
     juliette_leader_bonus: int = 1       # Lady Juliette's leader: your animals have +1 strength (small starting deck)

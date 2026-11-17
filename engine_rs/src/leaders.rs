@@ -23,6 +23,7 @@ pub const MOLE: &str = "mole_legend";
 pub const SANTO: &str = "macaque_legend";
 pub const YUKI: &str = "squirrel_legend";
 pub const ASH: &str = "honey_badger_legend";
+pub const IRIS: &str = "chameleon_legend";
 pub const MELISSIA_SPEC: &str = "tag:Colony&tag:Worker|tag:Colony&tag:Soldier|tag:Colony&tag:Nurse";
 pub const XANTHE_LAST_STAGE: i32 = 4;
 
@@ -31,7 +32,7 @@ pub fn kind_of(id: &str) -> Option<&'static str> {
     match id {
         GRIMM | MELISSIA | BABAJI | YUKI => Some("power"),
         XANTHE => Some("once"),
-        ADIRA | THERON | MOLE | SANTO | ASH | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
+        ADIRA | THERON | MOLE | SANTO | ASH | IRIS | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
         _ => None,
     }
 }
@@ -160,6 +161,36 @@ pub fn den_connected_allies(st: &State, player: Player) -> Vec<Cr> {
         }
     }
     gm.sorted.iter().copied().filter(|&c| seen[c as usize]).collect()
+}
+
+/// effects.py _iris_trios: the first time a player led by Iris controls 3 copies of an animal, a fourth is made and played.
+pub fn iris_trios(st: &mut State) -> bool {
+    if !any(st) {
+        return false;
+    }
+    let need = st.cfg().int("iris_leader_copies");
+    let mut fired = false;
+    for player in [A, B] {
+        if !leads(st, player, IRIS) {
+            continue;
+        }
+        let mut counts: Vec<(CardId, i32)> = Vec::new();
+        for (_, u) in st.tops().filter(|(_, u)| u.owner == player) {
+            match counts.iter_mut().find(|(c, _)| *c == u.card) {
+                Some(e) => e.1 += 1,
+                None => counts.push((u.card, 1)),
+            }
+        }
+        let mut due: Vec<(String, CardId)> = counts.into_iter().filter(|(c, n)| *n >= need && !st.trios[player as usize].contains_key(c)).map(|(c, _)| (st.cname(c).to_string(), c)).collect();
+        due.sort();
+        for (_, card) in due {
+            st.trios[player as usize].insert(card, 1);
+            let src = st.card_id(IRIS).map(|c| card_v(st, c)).unwrap_or(Value::Null);
+            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(player), "card_id" => card_v(st, card), "make" => Value::Bool(true), "by_card" => src));
+            fired = true;
+        }
+    }
+    fired
 }
 
 /// effects.py grimm_draws: Grimm's power.
