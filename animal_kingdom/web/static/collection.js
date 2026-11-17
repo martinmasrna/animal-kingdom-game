@@ -3,8 +3,9 @@
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
 import { cardHTML, fitNames, readSide, markGlyphs, LABEL } from './card.js';
-import { CROP, artUrl, stripArt, fitStrips, lazyArt } from './art.js';
+import { CROP, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck, deckOrder } from './deckcode.js';
+import { portrait as headCrop } from './board.js';   // the board's round head crop (the local portrait() is the screen's orientation)
 import { dd, wireDd, onHold } from './menu.js';
 import { track } from './log.js';
 
@@ -54,10 +55,6 @@ export const ICON = {
   trash: svg('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
 };
 
-// A round head crop of the card art, M px across (CROP: centre x, centre y, diameter as fractions of width, height, width).
-const med = (id, M) => { if (!CROP[id]) return '';   // not painted yet: a plain medallion
-  const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
-  return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${M / 2 - cx * w}px ${M / 2 - cy * h}px`; };
 // Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 
@@ -133,7 +130,7 @@ function render(app, all) {
       const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the card count and the stars show on their counters)
       return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact', lazy: true })}${n && c.rarity !== 'legendary' ? `<span class="pips${n > limit(c) ? ' over' : ''}">${pips(n, Math.max(n, limit(c)))}</span>` : ''}</div>`; }).join('') + '</div>';
 
-  const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
+  const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${headCrop(id, 36)}"></div></div>`).join('');
   const strengths = [...Array(8).keys()].map(String).concat('8+');
   // the levels the collection's cards have, highest first (no level is offered that no card has)
   const levels = [...new Set(cards.map(c => c.stars | 0))].sort((a, b) => b - a);
@@ -293,8 +290,8 @@ function wire(app, all, open) {
   const side = app.querySelector('.side').getBoundingClientRect().left;
   let on = null;
   const show = e => { on = e; const r = e.getBoundingClientRect(), inSide = !!e.closest('.side');
-    const lk = leadKw(C[e.dataset.card]);
-    pop.className = 'pop' + (lk.length ? ' ldr' : ''); pop.innerHTML = cardHTML(C[e.dataset.card]) + (lk.length ? readSide({}, C, lk) : ''); pop.style.display = 'flex';
+    const pw = powerOf(C[e.dataset.card]);
+    pop.className = 'pop' + (pw ? ' ldr' : ''); pop.innerHTML = cardHTML(C[e.dataset.card]) + pw; pop.style.display = 'flex';
     const w = pop.offsetWidth, h = pop.offsetHeight;
     pop.style.left = (inSide || r.right + 10 + w > side ? r.left - w - 10 : r.right + 10) + 'px';
     pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
@@ -334,8 +331,8 @@ function dialog(app, html) {
 // (as in Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
 function zoom(app, c) {
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
-  const side = readSide(c, C, leadKw(c));
-  m.innerHTML = `<div class="zbox">${cardHTML(c)}${side}</div>`;
+  const side = readSide(c, C);
+  m.innerHTML = `<div class="zbox">${cardHTML(c)}${powerOf(c)}${side}</div>`;
   fitNames(m);
   const close = () => { m.classList.remove('on', 'zoom'); m.innerHTML = ''; removeEventListener('keydown', key, true); };
   const key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
@@ -354,8 +351,14 @@ function confirmDelete(app, d, done) {
 // stays put. The row shows the leader with its ability; a click picks another.
 const KIND = { power: 'Hero power', once: 'Once per game', passive: 'Always on' };
 const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible');
-// A legendary's ability as a leader, as a panel beside the card (collection only: in a match the card is just a card).
-const leadKw = c => { const L = (X.leaders || {})[c.id]; return L && c.status === 'collectible' ? [['Leader', `${KIND[L.kind]}. ${esc(L.text)}`]] : []; };
+// A leader's ability as a hero power, as in Hearthstone Battlegrounds: a round token, the card's head under the board's painted
+// rim, the ability on a plate beneath (Martin, 2026-11-17; the card's head stands in until the powers have art of their own).
+// `D`: the token's width; `plate`: false for the token alone.
+const orb = (id, D) => `<div class="orb" style="--d:${D}px"><div class="face" style="${headCrop(id, Math.round(D * .732))}"></div><img src="/static/kit2/rim_n.webp" alt="" draggable="false"></div>`;
+const powerHTML = (id, D = 150) => { const L = X.leaders[id];
+  return `<div class="hpow">${orb(id, D)}<div class="plate"><b>${KIND[L.kind]}</b><p>${esc(L.text)}</p></div></div>`; };
+// beside a legendary in the collection (in a match the card is just a card)
+const powerOf = c => (X.leaders || {})[c.id] && c.status === 'collectible' ? powerHTML(c.id) : '';
 function setLeader(d, id) {
   if (d.leader === id) return;
   if (d.leader) { const i = d.list.indexOf(d.leader); if (i >= 0) d.list.splice(i, 1); }
@@ -364,13 +367,13 @@ function setLeader(d, id) {
 }
 function leaderRow(d) {
   const id = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null, L = id && X.leaders[id];
-  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? `<div class="lmed" style="${med(id, 52)}"></div>` : `<div class="lmed empty"></div>`}`
+  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? orb(id, 60) : `<div class="lmed empty"></div>`}`
     + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${KIND[L.kind]}. ${esc(L.text)}</span>` : `<b>No leader</b><span>Choose a leader for this deck</span>`}</div></div>`;
 }
 // `d`: the deck whose leader changes, or null for a new deck.
 function pickLeader(app, d, done) {
   const cur = d && d.leader;
-  const { m, close } = dialog(app, `<div class="dlg cov ldr"><h3>Choose a leader</h3><div class="leads">${leaderIds().map(id => `<div class="lv${id === cur ? ' on' : ''}" data-id="${id}"><div class="cv">${cardHTML(C[id], { cls: 'compact' })}</div><p><b>${KIND[X.leaders[id].kind]}.</b> ${esc(X.leaders[id].text)}</p></div>`).join('')}</div>
+  const { m, close } = dialog(app, `<div class="dlg cov ldr"><h3>Choose a leader</h3><div class="leads">${leaderIds().map(id => `<div class="lv${id === cur ? ' on' : ''}" data-id="${id}"><div class="cv">${cardHTML(C[id], { cls: 'compact' })}</div>${powerHTML(id, 96)}</div>`).join('')}</div>
     <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitNames(m);
   m.querySelectorAll('.lv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
 }
