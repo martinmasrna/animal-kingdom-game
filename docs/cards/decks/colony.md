@@ -19,7 +19,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Termite King** | 2 | Colony | 3 | Roar: draw a card for each Colony Queen you control. |
+| **Termite King** | 2 | Colony | 3 | Roar: draw an animal for each Colony Queen you control. |
 | **Termite Queen** | 2 | Colony, Queen | 2 | Roar: play a non-Queen Colony animal next to this. |
 | **Queen Bee** | 2 | Colony, Queen | 3 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. |
 | **Queen Ant** | 1 | Colony, Queen | 3 | Dusk: place a Young Ant on an adjacent empty crossroad. |
@@ -28,7 +28,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Nurse Bee** | 2 | Colony, Nurse | 2 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. |
+| **Nurse Bee** | 2 | Colony, Nurse | 2 | Flight. Roar: if you control 4 or more Colony animals, draw 2 animals. |
 | **Nurse Bumblebee** | 2 | Colony, Nurse | 3 | Flight. Roar: draw a Colony animal. |
 | **Soldier Wasp** | 2 | Colony, Soldier | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. |
 | **Soldier Ant** | 2 | Colony, Soldier | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |

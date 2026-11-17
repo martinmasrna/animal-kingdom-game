@@ -11,9 +11,9 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Rue** | 1 | — | 5 | Roar: return all adjacent enemies to your opponent's hand. |
-| **[FALCON]** | 1 | Bird | 5 | Flight. Roar: draw a card for each ally next to your opponent's den. |
+| **[FALCON]** | 1 | Bird | 5 | Flight. Roar: draw an animal for each ally next to your opponent's den. |
 | **Scarlett** | 1 | Canine | 5 | Roar: place Poppy and Rusty on random adjacent empty crossroads. |
-| **[MOLE]** | 1 | — | 1 | Roar: draw a card, then play another animal next to this. |
+| **[MOLE]** | 1 | — | 1 | Roar: draw an animal, then play another animal next to this. |
 
 ### Rare
 
@@ -28,11 +28,11 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Hare** | 2 | Rodent | 4 | Flee. Roar: if your hand is empty, draw 2 cards. |
-| **Cheetah** | 2 | Cat | 5 | Roar: if this is next to your opponent's den, draw 2 cards. |
+| **Hare** | 2 | Rodent | 4 | Flee. Roar: if your hand is empty, draw 2 animals. |
+| **Cheetah** | 2 | Cat | 5 | Roar: if this is next to your opponent's den, draw 2 animals. |
 | **Rat** | 2 | Rodent | 3 | Roar: if your hand is empty, remove an adjacent enemy. |
-| **Falcon** | 2 | Bird | 3 | Flight. Roar: if this is next to your opponent's den, draw a card. |
-| **Bat** | 2 | — | 2 | Flight. Roar: draw 2 cards. Echo. |
+| **Falcon** | 2 | Bird | 3 | Flight. Roar: if this is next to your opponent's den, draw an animal. |
+| **Bat** | 2 | — | 2 | Flight. Roar: draw 2 animals. Echo. |
 | **Mouse** | 2 | Rodent | 4 | Roar: draw a Rodent. |
 | **Squirrel** | 1 | Rodent | 2 | Roar: gain 10 food. |
 

@@ -19,7 +19,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Hummingbird** | 2 | Bird | 1 | Flight. Roar: draw 2 cards. |
+| **Hummingbird** | 2 | Bird | 1 | Flight. Roar: draw 2 animals. |
 | **Orangutan** | 2 | Primate | 5 | Roar: duplicate a Primate in your hand. |
 | **Tarsier** | 2 | Primate | 2 | Roar: give an animal in your hand +2 strength. Echo. |
 | **Chimpanzee** | 2 | Primate | 4 | Roar: Bite X, where X is this animal's strength. |
@@ -28,12 +28,12 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Macaque** | 2 | Primate | 2 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
+| **Macaque** | 2 | Primate | 2 | Roar: if you have 5 or more animals in your hand, remove an adjacent enemy. |
 | **Baboon** | 2 | Primate | 4 | Roar: give 2 animals in your hand +1 strength. |
 | **Stork** | 2 | Bird | 4 | Flight. Roar: add two random younglings to your hand. |
-| **Caterpillar** | 2 | — | 1 | When this gains strength, draw a card and turn into a Butterfly. |
-| **Gorilla** | 2 | Primate | 6 | Roar: if this has 8 or more strength, draw a card. |
-| **Peacock** | 2 | Bird | 1 | Has +1 strength for each card in your hand. |
+| **Caterpillar** | 2 | — | 1 | When this gains strength, draw an animal and turn into a Butterfly. |
+| **Gorilla** | 2 | Primate | 6 | Roar: if this has 8 or more strength, draw an animal. |
+| **Peacock** | 2 | Bird | 1 | Has +1 strength for each animal in your hand. |
 | **Vulture** | 1 | Bird | 2 | Flight. Dusk: if 3 or more animals were removed this turn, fly in from your hand or deck. |
 
 <!-- cards:end -->

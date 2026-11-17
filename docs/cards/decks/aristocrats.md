@@ -12,7 +12,7 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Ember** | 1 | Bird | 7 | Flight. Fall: shuffle Ember into your deck. |
 | **The First of Many** | 1 | — | 2 | Roar: cover the board with Locusts. |
-| **Roach King** | 1 | — | 1 | Fall: put Roach King back where it was with +1 strength and draw a card. |
+| **Roach King** | 1 | — | 1 | Fall: put Roach King back where it was with +1 strength and draw an animal. |
 | **Pestis** | 1 | Rodent | 3 | Roar: remove an adjacent animal and every animal under it. |
 
 ### Rare
@@ -20,7 +20,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Raccoon** | 2 | — | 4 | Roar: return an animal from your Remove Pile to your hand. |
-| **Earthworm** | 2 | — | 1 | Fall: draw a card and place two Worms on its crossroad. |
+| **Earthworm** | 2 | — | 1 | Fall: place two Worms on its crossroad and draw an animal. |
 | **Sperm Whale** | 2 | — | 8 | Titan. Roar: remove all adjacent animals. |
 | **Dart Frog** | 2 | — | 1 | Reach. Poison. Fall: remove all animals next to this. |
 
@@ -28,7 +28,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Praying Mantis** | 2 | — | 2 | Roar: remove an adjacent ally to draw 2 cards. |
+| **Praying Mantis** | 2 | — | 2 | Roar: remove an adjacent ally to draw 2 animals. |
 | **Vulture** | 2 | Bird | 2 | Flight. Dusk: if 3 or more animals were removed this turn, fly in from your hand or deck. |
 | **City Spider** | 2 | Arachnid | 4 | Dawn: remove the weakest animal next to this. |
 | **Cockroach** | 2 | — | 1 | Fall: replace this with a Cockroach and place a Roach on an adjacent empty crossroad. |

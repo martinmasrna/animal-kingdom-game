@@ -13,7 +13,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Prince Leo** | 1 | Cat | 3 | Roar: play Princess Lea from your hand or deck. |
 | **Princess Lea** | 1 | Cat | 3 | Roar: play Prince Leo from your hand or deck. |
 | **King Theron** | 1 | Cat | 8 | When an allied Cat covers an enemy, remove that enemy. |
-| **Queen Adira** | 1 | Cat | 5 | When an allied Cat removes an enemy, draw a card. |
+| **Queen Adira** | 1 | Cat | 5 | When an allied Cat removes an enemy, draw an animal. |
 
 ### Rare
 
@@ -22,7 +22,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Jaguar** | 2 | Cat | 5 | Roar: Bite 5. |
 | **Leopard** | 2 | Cat | 6 | Your Cats can cover enemies of equal strength. |
 | **Black Panther** | 2 | Cat | 6 | Stealth. |
-| **Lynx** | 2 | Cat | 5 | Roar: draw a card. |
+| **Lynx** | 2 | Cat | 5 | Roar: draw an animal. |
 
 ### Common
 
@@ -32,8 +32,8 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Lion** | 2 | Cat | 7 | — |
 | **Caracal** | 2 | Cat | 5 | Reach. |
 | **Tiger** | 2 | Cat | 7 | Apex Predator. |
-| **Bobcat** | 2 | Cat | 5 | Roar: draw a card. |
+| **Bobcat** | 2 | Cat | 5 | Roar: draw an animal. |
 | **Alley Cat** | 2 | Cat | 2 | Roar: add 2 Kittens to your hand. |
-| **Cheetah** | 1 | Cat | 5 | Roar: if this is next to your opponent's den, draw 2 cards. |
+| **Cheetah** | 1 | Cat | 5 | Roar: if this is next to your opponent's den, draw 2 animals. |
 
 <!-- cards:end -->

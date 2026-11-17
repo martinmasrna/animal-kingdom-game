@@ -48,19 +48,19 @@ LEADERS: dict[str, tuple[str, str]] = {
     ARNE: ("passive", "Copies of the same animal in your hand share their strength."),
     GORILLA: ("passive", "The first animal you play each turn has +1 strength."),
     # the den-rush leader (Martin, 2026-11-17): it pays only through the cards that give an extra play
-    MOLE: ("passive", "When you play your third animal in a turn, draw a card."),
+    MOLE: ("passive", "When you play your third animal in a turn, draw an animal."),
     # the empty-hand berserker, den rush led the other way (Martin, 2026-11-17: "You last animal in hand has +3 strength")
     SANTO: ("passive", "Your last animal in hand has +3 strength."),
-    GRIMM: ("power", "Draw 2 cards. Draws one more card for every 5 enemies removed this match."),   # Adira's first power, without the Cats (Martin, 2026-11-17)
+    GRIMM: ("power", "Draw 2 animals. Draws one more animal for every 5 enemies removed this match."),   # Adira's first power, without the Cats (Martin, 2026-11-17)
 }
 
 # Xanthe's leader, stage by stage: (name, what her once-per-game power does then, or None: nothing to use).
 XANTHE_STAGES: tuple[tuple[str, str | None], ...] = (
     ("Egg", None),
-    ("Caterpillar", "Draw a card."),
+    ("Caterpillar", "Draw an animal."),
     ("Chrysalis", None),
-    ("Butterfly", "Draw a card, then give an animal in your hand +1 strength."),
-    ("Monarch", "Draw a card and give all animals in your hand +1 strength."),
+    ("Butterfly", "Draw an animal, then give an animal in your hand +1 strength."),
+    ("Monarch", "Draw an animal and give all animals in your hand +1 strength."),
 )
 
 # Melissia's power: a Colony animal that is a Worker, a Soldier or a Nurse (effects._matches: "|" is "or").

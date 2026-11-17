@@ -12,7 +12,7 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Ishar the Unseen** | 1 | Cat | 6 | Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength. |
 | **Akana** | 1 | Canine | 3 | Once each turn, an ally with Roam can roam for free. |
-| **Karakhan** | 1 | Canine | 6 | Roam. Whenever one of your Canines roams, give it +1 strength and draw a card. |
+| **Karakhan** | 1 | Canine | 6 | Roam. Whenever one of your Canines roams, give it +1 strength and draw an animal. |
 | **[ELEPHANT]** | 1 | — | 9 | Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less. |
 
 ### Rare
@@ -21,7 +21,7 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Orca** | 2 | — | 7 | Apex Predator. Roam. |
 | **Coyote** | 2 | Canine | 2 | Roar: give a connected ally Roam. It roams. |
-| **Dhole** | 2 | Canine | 5 | Roam. Whenever this covers an enemy with no other enemy next to it, draw 2 cards. |
+| **Dhole** | 2 | Canine | 5 | Roam. Whenever this covers an enemy with no other enemy next to it, draw 2 animals. |
 | **Jackal** | 2 | Canine | 3 | Roam. Whenever this roams, Bite X, where X is this animal's strength. |
 
 ### Common
@@ -32,7 +32,7 @@ The table below is generated from cards.json, where the cards live.
 | **Wolf** | 2 | Canine | 6 | Roam. |
 | **Street Dog** | 2 | Canine | 2 | Roar: give a connected ally with Roam +3 strength. It roams. |
 | **Badger** | 2 | — | 4 | Roar: draw an animal with Roam. |
-| **Fox** | 2 | Canine | 3 | Roar: if an ally roamed this turn, draw 2 cards. |
+| **Fox** | 2 | Canine | 3 | Roar: if an ally roamed this turn, draw 2 animals. |
 | **Wolverine** | 2 | — | 4 | Roar: remove an adjacent enemy with no other enemy next to it. |
 | **Bush Dog** | 1 | Canine | 3 | Roam. Whenever this roams, place a Pup on the crossroad it left. |
 

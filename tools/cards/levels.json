@@ -121,6 +121,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1793104278
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: draw a card. Gain food equal to its strength."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906767
     }
   },
   "armadillo": {
@@ -441,6 +451,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792496652
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: gain 4 food for each other Rodent you control. Draw a card."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906764
     }
   },
   "barracuda": {
@@ -540,9 +560,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: draw a card."
       },
-      "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794860300
+      "at": 1794906763
     }
   },
   "beaver": {
@@ -663,6 +683,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849341
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: in 2 turns, draw 2 cards."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906765
     }
   },
   "black_mamba": {
@@ -799,8 +829,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: Flight added (swans fly)",
-      "at": 1792247608
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "at": 1794906765,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: Flight added (swans fly)",
+        "prev": "Flight. Whenever you draw Black Swan, your opponent discards a random card."
+      }
     },
     "art": {
       "lv": "draft",
@@ -951,13 +986,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794849332,
+      "at": 1794906763,
       "review": {
         "prev_lv": "fine",
         "prev_note": "",
         "prev": "Roar: if you control another Cat, draw a card."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)"
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text"
     },
     "strength": {
       "lv": "fine",
@@ -1107,6 +1142,16 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849333
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: draw a card, then give an animal in your hand +1 strength."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906767
     }
   },
   "butterfly_legend": {
@@ -1150,9 +1195,9 @@
         "prev_note": "",
         "prev": "Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength. When this gains strength in your hand, evolve."
       },
-      "note": "leaders prototype (brief 2026-11-15)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794772133
+      "at": 1794906769
     },
     "animal": {
       "review": {
@@ -1179,9 +1224,9 @@
         "prev_note": "",
         "prev": "Roar: draw a card. When this gains strength in your hand, evolve."
       },
-      "note": "leaders prototype (brief 2026-11-15)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794772132
+      "at": 1794906769
     },
     "animal": {
       "review": {
@@ -1254,9 +1299,9 @@
         "prev_note": "",
         "prev": "Stealth. Flight. Roar: draw 2 cards, then give all animals in your hand +2 strength."
       },
-      "note": "leaders prototype (brief 2026-11-15)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794772133
+      "at": 1794906769
     }
   },
   "cairn": {
@@ -1403,9 +1448,9 @@
         "prev_note": "",
         "prev": "When this gains strength in your hand, draw a card and turn this into a Butterfly."
       },
-      "note": "leaders prototype (brief 2026-11-15)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794772133
+      "at": 1794906766
     },
     "animal": {
       "review": {
@@ -1518,8 +1563,8 @@
         "prev_note": "",
         "prev": "Roar: if placed next to the opponent's den, draw a card."
       },
-      "note": "Martin, 2026-10-30 (card board review)",
-      "at": 1793369441
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "at": 1794906763
     },
     "art": {
       "lv": "fine",
@@ -1662,6 +1707,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849340
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: draw a card for each adjacent allied Fish."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906764
     }
   },
   "coyote": {
@@ -1804,6 +1859,16 @@
       "note": "Martin, 2026-11-05: a rare card's token wears the rare border, as Baby Impala",
       "by": "claude",
       "at": 1793877576
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When you draw this, your opponent draws a card."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906769
     }
   },
   "dart_frog": {
@@ -1899,9 +1964,9 @@
         "prev_note": "",
         "prev": "Roam. Your animals can roam onto enemies of equal strength."
       },
-      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793210650
+      "at": 1794906762
     },
     "strength": {
       "review": {
@@ -1944,9 +2009,9 @@
         "prev_note": "",
         "prev": "Dusk: gain 5 food."
       },
-      "note": "Martin, 2026-10-29: a card per 10 food gained this turn, replacing the single draw at 10 or more. Dusk comes before region income, so only the turn's own food counts",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793274726
+      "at": 1794906765
     },
     "animal": {
       "review": {
@@ -2068,13 +2133,13 @@
     },
     "effect": {
       "by": "claude",
-      "at": 1793023432,
+      "at": 1794906762,
       "review": {
         "prev_lv": "draft",
         "prev_note": "",
         "prev": "When this is removed, draw a card and place two Worms on its crossroad."
       },
-      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board"
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text"
     },
     "animal": {
       "review": {
@@ -2243,9 +2308,9 @@
         "prev_note": "",
         "prev": "Apex Predator. Dusk: shuffle this into your deck with -1 strength."
       },
-      "note": "Active text pass (Martin, 2026-10-31): the card's name instead of \"this\"",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793412477
+      "at": 1794906765
     }
   },
   "falcon": {
@@ -2284,8 +2349,8 @@
         "prev_note": "",
         "prev": "Flight. Roar: if placed next to the opponent's den, draw a card."
       },
-      "note": "Martin, 2026-10-26: \"your opponent's den\"",
-      "at": 1793031759
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "at": 1794906763
     },
     "art": {
       "lv": "draft",
@@ -2370,9 +2435,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: gain 10 food."
       },
-      "note": "Martin, 2026-10-30 (card board review)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793371330
+      "at": 1794906764
     },
     "animal": {
       "review": {
@@ -2419,9 +2484,9 @@
         "prev_note": "",
         "prev": "Roam. Whenever this covers an enemy, draw a card."
       },
-      "note": "Martin, 2026-10-28: any ally's roam, not only a Canine's",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793220060
+      "at": 1794906762
     },
     "animal": {
       "review": {
@@ -2547,9 +2612,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: draw a card for each ally next to the opponent's den."
       },
-      "note": "Martin, 2026-10-26: \"your opponent's den\"",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793031760
+      "at": 1794906762
     }
   },
   "gazelle": {
@@ -2567,9 +2632,9 @@
         "prev_note": "",
         "prev": "Flee. Roar: gain 5 food."
       },
-      "note": "Martin, 2026-10-22: card and food flow on the smaller body",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1792668601
+      "at": 1794906767
     },
     "strength": {
       "review": {
@@ -2745,6 +2810,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849342
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if this has 8 or more strength, draw a card."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906766
     }
   },
   "grizzly_bear": {
@@ -2762,9 +2837,14 @@
       "at": 1792257358
     },
     "effect": {
-      "note": "Martin 2026-10-17: the price of the body; its old '+1 for each card in your hand' needs a new animal",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1792257358
+      "at": 1794906768,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: the price of the body; its old '+1 for each card in your hand' needs a new animal",
+        "prev": "Roar: your opponent draws a card."
+      }
     },
     "animal": {
       "note": "out of the collection (in the reserve)",
@@ -2885,9 +2965,9 @@
         "prev_note": "",
         "prev": "Has +1 strength for each 10 food you have."
       },
-      "note": "Martin, 2026-10-29: 'we can try the engine'; every card drawn goes in the cheeks; its strength effect went to the Marmot",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793300648
+      "at": 1794906765
     },
     "animal": {
       "review": {
@@ -2909,9 +2989,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-11-09: Rat and Hare condition is now 'if your hand is empty'",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794257711,
+      "at": 1794906762,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15, after his Canines gauntlet: buff to 2 cards.",
@@ -3254,13 +3334,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794859532,
+      "at": 1794906766,
       "review": {
         "prev_lv": "fine",
         "prev_note": "",
         "prev": "Flight. Roar: draw 2 cards."
       },
-      "note": "back to the reserve as it was before 2026-11-16"
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text"
     },
     "strength": {
       "lv": "draft",
@@ -3703,9 +3783,9 @@
         "prev_note": "",
         "prev": "Whenever an ally roams onto an enemy, draw a card."
       },
-      "note": "card audit 2026-11-04: the ruling (your Canines only, itself included) written on the card; the engine already does this",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793820582
+      "at": 1794906762
     }
   },
   "lynx": {
@@ -3720,8 +3800,8 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1794855127,
-      "note": "Martin, 2026-11-16: the Lynx takes the 'bobcat/lynx?' slot ('agree with Lynx')",
+      "at": 1794906763,
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-21: Cats' fourth rare, the slot the Black Panther left",
@@ -3789,6 +3869,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849342
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if you have 5 or more cards in your hand, remove an adjacent enemy."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906766
     }
   },
   "macaque_legend": {
@@ -3815,6 +3905,16 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1794906293
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: draw cards until you have as many as your opponent."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906764
     }
   },
   "macaw": {
@@ -3884,6 +3984,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849341
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: steal a card from your opponent's hand, then discard a card."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906765
     }
   },
   "mahi_mahi": {
@@ -3924,6 +4034,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849339
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Whenever your opponent covers an adjacent allied Fish, draw a card."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906764
     }
   },
   "manta_ray_legend": {
@@ -3940,6 +4060,16 @@
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
       }
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Dusk: if you control 2 or more regions, draw 2 cards."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906764
     }
   },
   "meerkat": {
@@ -3996,9 +4126,9 @@
         "prev_note": "",
         "prev": "Roar: draw a card. When an enemy is placed next to this, draw a card."
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794849332
+      "at": 1794906764
     }
   },
   "tortoise_legend": {
@@ -4229,9 +4359,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: if you control two of the same Colony animal, draw 3 cards."
       },
-      "note": "Martin 2026-10-31: Colony conditions back at 4",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793454475
+      "at": 1794906761
     },
     "rarity": {
       "review": {
@@ -4404,9 +4534,9 @@
         "prev_note": "",
         "prev": "Dusk: if this is grazing, draw a card."
       },
-      "note": "Martin, 2026-10-29: draws at both ends of the turn while grazing",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793291976
+      "at": 1794906767
     },
     "animal": {
       "review": {
@@ -4486,6 +4616,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849341
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: Scout a card."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906765
     }
   },
   "oxpecker": {
@@ -4503,9 +4643,9 @@
         "prev_note": "",
         "prev": "Flight. Roar: gain 1 food for each animal of strength 8 or more in your starting deck."
       },
-      "note": "Martin, 2026-10-27: the bird that lives off the biggest animal around; fuel from the giant you hold, not a gamble on a draw",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793103779
+      "at": 1794906766
     },
     "strength": {
       "review": {
@@ -4760,6 +4900,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849336
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: remove an adjacent ally to draw 2 cards."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906761
     }
   },
   "lion_legend": {
@@ -4922,7 +5072,14 @@
     },
     "effect": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When an allied Cat removes an enemy, draw a card."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "at": 1794906763
     },
     "art": {
       "lv": "fine",
@@ -5124,6 +5281,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849341
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: draw 3 cards, then shuffle 2 cards back."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906766
     }
   },
   "raven_legend": {
@@ -5833,9 +6000,9 @@
         "prev_note": "",
         "prev": "Roar: if you control a Colony Queen, draw 2 cards."
       },
-      "note": "Martin's sheet, 2026-10-24: a card per turn at Dusk was the strongest rare; one-time draw per Queen to try",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1792861463
+      "at": 1794906761
     },
     "tag": {
       "review": {
@@ -6037,6 +6204,16 @@
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
       }
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: for each region you control, draw a card and gain 5 food."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906763
     }
   },
   "hornet_legend": {
@@ -6141,6 +6318,16 @@
       "note": "out of the collection (in the reserve)",
       "by": "claude",
       "at": 1794849342
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Titan. Hungry 4. Dusk: draw a card."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906766
     }
   },
   "wildebeest": {
@@ -6340,9 +6527,9 @@
         "prev_note": "",
         "prev": "When this is removed, draw a card."
       },
-      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793023438
+      "at": 1794906768
     },
     "rarity": {
       "review": {
@@ -6434,9 +6621,9 @@
         "prev_note": "",
         "prev": "Roar: draw a card for each different Hoofed animal you control."
       },
-      "note": "Martin, 2026-10-30: a payoff for held regions",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793387288
+      "at": 1794906767
     }
   },
   "cuckoo_legend": {
@@ -6739,13 +6926,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1793412476,
+      "at": 1794906762,
       "review": {
         "prev_lv": "draft",
         "prev_note": "",
         "prev": "When this is removed, put it back where it was with +1 strength and draw a card."
       },
-      "note": "Active text pass (Martin, 2026-10-31): the card's name instead of \"this\""
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text"
     },
     "animal": {
       "note": "out of the collection (in the reserve)",
@@ -7014,9 +7201,9 @@
   "mole_legend": {
     "effect": {
       "lv": "draft",
-      "note": "Martin, 2026-11-17: the legendary Mole, den-rush leader",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794901127,
+      "at": 1794906763,
       "review": {
         "prev_lv": "draft",
         "prev_note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
@@ -7078,9 +7265,14 @@
   "bat_legend": {
     "effect": {
       "lv": "draft",
-      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1792192619
+      "at": 1794906768,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+        "prev": "Flight. Dawn: draw a card."
+      }
     },
     "animal": {
       "note": "out of the collection (in the reserve)",
@@ -7125,6 +7317,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792198558
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When you draw this, remove it and draw 2 cards."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906769
     }
   },
   "woodpecker": {
@@ -7340,8 +7542,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792611140,
-      "note": "Martin 2026-10-21: the text taken literally: in hand it counts itself (covers with what it shows), on the board one less; base stays 1"
+      "at": 1794906766,
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-21: the text taken literally: in hand it counts itself (covers with what it shows), on the board one less; base stays 1",
+        "prev": "Has +1 strength for each card in your hand."
+      }
     },
     "animal": {
       "note": "the display: the fan grows with the hand; a ground bird, so no Flight (Martin 2026-10-17)",
@@ -7363,9 +7570,14 @@
   "dolphin": {
     "effect": {
       "lv": "draft",
-      "note": "clever animals draw cards; untagged: a mammal, and neutral",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1792270569
+      "at": 1794906768,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "clever animals draw cards; untagged: a mammal, and neutral",
+        "prev": "Roar: draw a card."
+      }
     },
     "animal": {
       "note": "out of the collection (in the reserve)",
@@ -7555,9 +7767,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1792585144
+      "at": 1794906768
     },
     "rarity": {
       "review": {
@@ -7674,9 +7886,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1792585157
+      "at": 1794906768
     },
     "rarity": {
       "review": {
@@ -8270,9 +8482,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-30 (card board review)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793371330
+      "at": 1794906769
     },
     "animal": {
       "review": {
@@ -8530,8 +8742,8 @@
         "prev": "Roar: draw a card. Evolves when your Hungry animals have eaten 25 food."
       },
       "by": "claude",
-      "at": 1794531017,
-      "note": "Martin, 2026-11-13: breakpoints 5, 15, 30"
+      "at": 1794906769,
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text"
     },
     "animal": {
       "review": {
@@ -8573,8 +8785,8 @@
         "prev": "Roar: draw a card and gain 10 food. Evolves when your Hungry animals have eaten 40 food."
       },
       "by": "claude",
-      "at": 1794531018,
-      "note": "Martin, 2026-11-13: breakpoints 5, 15, 30"
+      "at": 1794906770,
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text"
     },
     "animal": {
       "review": {
@@ -8709,9 +8921,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-28: the Gopher's draw, moved",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793188532
+      "at": 1794906770
     },
     "animal": {
       "review": {
@@ -9134,9 +9346,9 @@
         "prev_note": "",
         "prev": ""
       },
-      "note": "Martin's new pool, 2026-11-16 (his sheet)",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794849331
+      "at": 1794906770
     },
     "strength": {
       "review": {
@@ -9254,9 +9466,9 @@
         "prev_note": "",
         "prev": ""
       },
-      "note": "Martin, 2026-10-29: the Impala's token",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793293867
+      "at": 1794906770
     },
     "art": {
       "review": {
@@ -9294,9 +9506,9 @@
         "prev_note": "",
         "prev": "Roar: draw a card, gain 10 food and play another animal."
       },
-      "note": "Martin, 2026-10-29: the forms build on each other, so the removal carries into the last",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1793295478
+      "at": 1794906770
     },
     "animal": {
       "review": {
@@ -9909,7 +10121,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1794679161
+      "at": 1794906770,
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text"
     },
     "rarity": {
       "review": {
@@ -9950,7 +10163,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1794679162
+      "at": 1794906770,
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text"
     },
     "rarity": {
       "review": {
@@ -10073,7 +10287,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1794679163
+      "at": 1794906770,
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text"
     },
     "rarity": {
       "review": {
@@ -10388,9 +10603,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-11-16: the Capuchin takes the 2-star '??' slot (\"Let's do it, at strength 2, and name the card just 'Capuchin'\")",
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
-      "at": 1794859531
+      "at": 1794906771
     },
     "animal": {
       "review": {
@@ -10400,6 +10615,30 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1794859531
+    }
+  },
+  "rattlesnake": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Whenever you shuffle a card, gain 1 strength (wherever this is)."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906767
+    }
+  },
+  "andean_condor": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: reveal the top card of each deck. If yours has higher strength, draw it."
+      },
+      "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
+      "by": "claude",
+      "at": 1794906768
     }
   }
 }

@@ -262,13 +262,14 @@ def test_roar_label_matches_placement_effect():
     assert mismatched == []
 
 
-DRAW_RE = re.compile(r"\bdraw (\d+) (?:cards|snakes)", re.IGNORECASE)
-SHUFFLE_RE = re.compile(r"\bshuffle (\d+) cards back", re.IGNORECASE)
+DRAW_RE = re.compile(r"\bdraw (\d+) (?:animals|snakes)", re.IGNORECASE)
+SHUFFLE_RE = re.compile(r"\bshuffle (\d+) animals back", re.IGNORECASE)
 
 # card_id -> config attrs, one per printed "draw N cards/Snakes" number in text, in order. Every card printing such a
 # number must be listed (checked below), so a new draw card can't print a number its effect doesn't use.
 DRAW_CONSTANTS: dict[str, list[str]] = {
     "raven": ["raven_draw"],
+    "deer_legend": ["deer_legend_draw"],
     "golden_egg": ["golden_egg_draw"],
     "hare": ["hare_draw"],
     "cheetah": ["cheetah_draw"],

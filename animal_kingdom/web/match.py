@@ -118,7 +118,7 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     if lid == L.GRIMM:
         n, per = grimm_draws(st, lead), st.config.grimm_leader_per
         out.update(draws=n, kills=lead["kills"], per=per, toward=lead["kills"] % per,
-                   text=f"Draw {n} cards. Draws one more card for every {per} enemies removed.")
+                   text=f"Draw {n} animals. Draws one more animal for every {per} enemies removed.")
     elif lid == L.XANTHE:
         name, does = L.XANTHE_STAGES[lead["stage"]]
         out.update(stage=lead["stage"], stageName=name, spent=lead["spent"],

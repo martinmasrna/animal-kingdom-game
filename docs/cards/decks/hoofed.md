@@ -12,7 +12,7 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Haldaran Dusthoof** | 1 | Hoofed | 5 | Your regions produce 5 more food. |
 | **Denae Swiftfoot** | 1 | Hoofed | 3 | Flee. Roar: draw 2 animals with Flee. Whenever one of your animals flees, give it +2 strength. |
-| **Galwen [X]** | 1 | Hoofed | 4 | Roar: draw a card for each of your grazing Hoofed animals. |
+| **Galwen [X]** | 1 | Hoofed | 4 | Roar: draw an animal for each of your grazing Hoofed animals. |
 | **Miradel Longwatch** | 1 | Hoofed | 7 | Your opponent's hand is revealed. |
 
 ### Rare
@@ -20,7 +20,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Impala** | 2 | Hoofed | 2 | Flee. Roar: play a Baby Impala. |
-| **Okapi** | 2 | Hoofed | 4 | Dawn and Dusk: if this is grazing, draw a card. |
+| **Okapi** | 2 | Hoofed | 4 | Dawn and Dusk: if this is grazing, draw an animal. |
 | **Cape Buffalo** | 2 | Hoofed | 7 | Your other Hoofed animals have +1 strength during your opponent's turn. |
 
 ### Common
@@ -29,7 +29,7 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Zebra** | 2 | Hoofed | 5 | Flee. When this flees, return the enemy that covered it to its owner's hand. |
 | **Giraffe** | 2 | Hoofed | 6 | Hungry 2. Has +3 strength during your opponent's turn. |
-| **Gazelle** | 2 | Hoofed | 2 | Flee. Roar: draw a card and gain 5 food. |
+| **Gazelle** | 2 | Hoofed | 2 | Flee. Roar: draw an animal and gain 5 food. |
 | **Wildebeest** | 2 | Hoofed | 6 | Dusk: if this is grazing, gain 6 food. |
 | **Deer** | 2 | Hoofed | 3 | Flee. Roar: place a Fawn on a random adjacent empty crossroad. |
 | **Boar** | 2 | Hoofed | 5 | Remove the first enemy placed next to this. |

@@ -10,25 +10,25 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **[TUNA]** | 1 | Fish | 5 | Roar: for each region you control, draw a card and gain 5 food. |
-| **[MANTA RAY]** | 1 | Fish | 4 | Dusk: if you control 2 or more regions, draw 2 cards. |
+| **[TUNA]** | 1 | Fish | 5 | Roar: for each region you control, draw an animal and gain 5 food. |
+| **[MANTA RAY]** | 1 | Fish | 4 | Dusk: if you control 2 or more regions, draw 2 animals. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Swordfish** | 2 | Fish | 3 | Roar: remove a random adjacent enemy for each adjacent allied Fish. |
-| **Manta Ray** | 2 | Fish | 6 | Whenever your opponent covers an adjacent allied Fish, draw a card. |
+| **Manta Ray** | 2 | Fish | 6 | Whenever your opponent covers an adjacent allied Fish, draw an animal. |
 | **Remora** | 2 | Fish | 2 | Roar: if this is next to an allied Fish, play another Fish. |
 | **Shark** | 2 | Fish | 7 | Apex Predator. Has Reach if an animal was removed this turn. |
-| **Whale Shark** | 1 | Fish | 8 | Titan. Hungry 4. Dusk: draw a card. |
+| **Whale Shark** | 1 | Fish | 8 | Titan. Hungry 4. Dusk: draw an animal. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Barracuda** | 2 | Fish | 4 | Roar: Bite X, where X is the number of your Fish. |
-| **Cod** | 2 | Fish | 4 | Roar: draw a card for each adjacent allied Fish. |
+| **Cod** | 2 | Fish | 4 | Roar: draw an animal for each adjacent allied Fish. |
 | **Sardine** | 2 | Fish | 1 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
 | **Mahi-mahi** | 2 | Fish | 3 | Your other Fish have +1 strength. |
 | **Tuna** | 2 | Fish | 2 | Has +1 strength for each other animal you control. |

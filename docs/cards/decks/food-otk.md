@@ -22,14 +22,14 @@ The table below is generated from cards.json, where the cards live.
 | **Porcupine** | 2 | Rodent | 4 | Spikes. Your adjacent animals have Spikes. |
 | **Golden Orb-Weaver** | 2 | Arachnid | 5 | When an enemy with Flight or Roam is placed next to this, remove it. |
 | **Armadillo** | 2 | — | 4 | Armor. Your adjacent animals have Armor. |
-| **Meerkat** | 2 | — | 2 | When an enemy is placed next to this, draw a card. |
+| **Meerkat** | 2 | — | 2 | When an enemy is placed next to this, draw an animal. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hedgehog** | 2 | — | 3 | Spikes. |
-| **Black Bear** | 2 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
+| **Black Bear** | 2 | Bear | 5 | Roar: in 2 turns, draw 2 animals. |
 | **Tortoise** | 2 | — | 4 | Armor. |
 | **Toad** | 2 | — | 3 | Poison. |
 | **Stag Beetle** | 2 | Beetle | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
