@@ -147,7 +147,7 @@ class Config:
     wildebeest_food: int = 6             # Wildebeest: at the end of your turn, if grazing, gain 6 (Martin, 2026-10-29)
     dung_beetle_per: int = 4             # Dung Beetle: 4 food for each Hungry animal you control (Martin, 2026-10-30)
     otk_squirrel_multiplier: int = 3     # the legendary Squirrel: in 2 turns, gain three times the food it lost...
-    otk_squirrel_delay: int = 2          # ...after this many of your turns (covering pauses it)
+    otk_squirrel_delay: int = 3          # ...after this many of your turns (covering pauses it)
     migration_bonus: int = 5             # the legendary Wildebeest: your regions produce 5 more food
     boar_penalty: int = 5                # the legendary Boar: your opponent's regions produce 5 less food
     reach: int = 2                       # Reach: lands up to this many crossroads from a connected unit
@@ -195,6 +195,7 @@ class Config:
     mole_leader_count: int = 3           # the legendary Mole's leader: "When you play your third animal in a turn,...
     mole_leader_draw: int = 1            # ...draw a card." (1, not 2: he has to run empty for the Rat and Hare; Martin, 2026-11-17)
     santo_leader_bonus: int = 3          # Don Santo's leader: "Your last animal in hand has +3 strength."
+    yuki_leader_uses: int = 3            # Yuki's leader: the uses a match has of "Choose a connected ally. It can't be covered..."
     grimm_leader_draw: int = 2           # Grimm's leader: "Draw 2 cards."...
     grimm_leader_per: int = 5            # ...one more for every 5 enemies removed this match
     juliette_leader_bonus: int = 1       # Lady Juliette's leader: your animals have +1 strength (small starting deck)

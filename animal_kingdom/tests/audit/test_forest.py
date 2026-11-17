@@ -634,12 +634,12 @@ def test_chipmunk_gains_10_now_and_nothing_later():
 # ============================================================ squirrel_legend (Yuki)
 # "Roar: lose all your food. In 2 turns, gain three times as much."
 
-def test_squirrel_legend_loses_all_food_and_pays_three_times_in_2_turns():
+def test_squirrel_legend_loses_all_food_and_pays_three_times_in_3_turns():
     s = st(hands={"A": ["squirrel_legend"]}, food={"A": 7, "B": 3})
     play(s, "squirrel_legend", "1,2")
     assert s.food == {"A": 0, "B": 3}
-    end_turn(s); end_turn(s)
-    assert s.food["A"] == 0                                                # one of your turns on: not yet
+    end_turn(s); end_turn(s); end_turn(s); end_turn(s)
+    assert s.food["A"] == 0                                                # two of your turns on: not yet
     end_turn(s); end_turn(s)
     assert s.current == "A" and s.food["A"] == 21
 

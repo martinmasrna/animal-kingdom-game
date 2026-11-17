@@ -164,6 +164,28 @@ def test_don_santos_last_animal_in_hand_has_three_more_strength_and_keeps_it():
     assert effective_strength(s, s.board["1,1"][-1]) == 2 and effective_strength(s, s.board["1,2"][-1]) == 5
 
 
+# ===================================================================== Yuki
+
+def test_yukis_leader_keeps_a_connected_ally_from_being_covered_until_her_next_turn_three_times_a_match():
+    s = state("squirrel_legend", hands={"A": ["t_small"] * 4, "B": ["t_big"] * 4}, decks={"A": ["t_body"] * 9, "B": ["t_body"] * 9})
+    for cr in ("1,1", "1,2", "2,1"):
+        put(s, cr, "t_small", "A")
+    put(s, "3,3", "t_small", "A")                                    # cut off from her den: no choice
+    for cr in ("4,2", "3,2", "2,2"):
+        put(s, cr, "t_small", "B")
+    press(s)
+    assert s.pending["options"] == ["1,1", "1,2", "2,1"]
+    choose(s, "1,2")
+    assert s.leaders["A"]["stage"] == 1
+    rules.apply_action(s, PassAction())
+    legal = rules.legal_actions(s)
+    assert s.current == "B" and PlaceAction("t_big", ("cr", "1,2")) not in legal and PlaceAction("t_big", ("cr", "2,1")) in legal
+    s.current, s.turn_counter = "B", s.turn_counter + 2              # her next turn has come and gone
+    assert PlaceAction("t_big", ("cr", "1,2")) in rules.legal_actions(s)
+    s.leaders["A"]["stage"], s.current = 3, "A"
+    assert not can_press(s)                                          # three uses a match
+
+
 # ===================================================================== Grimm
 
 def test_grimm_draws_two_and_may_press_twice_a_turn():

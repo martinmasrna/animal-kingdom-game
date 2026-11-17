@@ -108,6 +108,7 @@ function unit(u, under, cards, fire = false) {
     `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
     `<div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
     (u.timer ? `<div class="timer" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
+    (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '') +   // Yuki's leader (a plain plaque until it has a painted mark)
     ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TRG_AT}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
 }
 

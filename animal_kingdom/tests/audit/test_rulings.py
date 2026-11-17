@@ -1456,11 +1456,11 @@ def test_launch_cards__the_repeat_legend_repeats_each_adjacent_allied_rodents_ro
     assert s.food["A"] == 20 and len(s.hands["A"]) == 1
 
 
-def test_launch_cards__the_legendary_squirrel_pays_three_times_in_two_turns():
+def test_launch_cards__the_legendary_squirrel_pays_three_times_in_three_turns():
     s = st(hands={"A": ["squirrel_legend"]}, food={"A": 10, "B": 0})
     play(s, "squirrel_legend", "1,2")
     assert s.food["A"] == 0
-    for _ in range(4):
+    for _ in range(6):
         end_turn(s)
     assert s.food["A"] == 30
 
@@ -1474,7 +1474,7 @@ def test_launch_cards__the_legendary_squirrels_timer_pauses_while_covered():
         end_turn(s)
     assert s.food["A"] == 0
     effects.remove_top(s, "1,2", by_player="A"); effects.resolve(s)
-    for _ in range(4):
+    for _ in range(6):
         end_turn(s)
     assert s.food["A"] == 30
 

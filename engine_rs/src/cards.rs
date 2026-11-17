@@ -1669,6 +1669,16 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             let Some(card) = choice.as_str() else { return };
             st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(chooser), "card_id" => Value::s(st.cname(st.card_id(card).unwrap())), "make" => Value::Bool(true)));
         }
+        "guard" => {
+            // Yuki's leader: the chosen animal can't be covered until its player's next turn (statics::can_cover)
+            let Some(cr) = cr_of(st) else { return };
+            let until = (st.turn_counter + 2) as i16;
+            if let Some(top) = st.top_mut(cr) {
+                if top.owner == chooser {
+                    top.locked_until_turn = until;
+                }
+            }
+        }
         "babaji" => {
             let Some(cr) = cr_of(st) else { return };
             let Some(top) = st.top(cr).cloned() else { return };

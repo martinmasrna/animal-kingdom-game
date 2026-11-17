@@ -119,6 +119,10 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
         n, per = grimm_draws(st, lead), st.config.grimm_leader_per
         out.update(draws=n, kills=lead["kills"], per=per, toward=lead["kills"] % per,
                    text=f"Draw {n} animals. Draws one more animal for every {per} enemies removed.")
+    elif lid == L.YUKI:
+        uses = st.config.yuki_leader_uses
+        left = uses - lead["stage"]
+        out.update(per=uses, toward=left, spent=left <= 0, text=f"{text} (Uses remaining: {left}/{uses})")
     elif lid == L.XANTHE:
         name, does = L.XANTHE_STAGES[lead["stage"]]
         out.update(stage=lead["stage"], stageName=name, spent=lead["spent"],
@@ -715,6 +719,7 @@ class Match:
                           **({"poison": True} if statics.has_keyword(st, u, "Poison", cr) else {}),   # printed, or a neighbour's legendary Jellyfish
                           # "armor": it can't be removed (printed, or a neighbour's Capybara); "inked": the Octopus's ink is on it
                           **({"armor": True} if not statics.can_be_removed(st, u, cr) else {}),
+                          **({"guarded": True} if u.locked_until_turn > st.turn_counter else {}),   # Yuki's leader: it can't be covered now
                           **({"inked": True} if statics.inked(st, u) else {})} for u in stack]
         g = {
             "round": st.turn_counter // 2 + 1,

@@ -1151,14 +1151,14 @@ def test_the_hamster_turns_every_card_you_draw_into_food():
 
 # ================================================================================ Food OTK
 
-def test_the_legendary_squirrel_stakes_your_food_and_triples_it_in_two_turns():
+def test_the_legendary_squirrel_stakes_your_food_and_triples_it_in_three_turns():
     s = make_state(hands={"A": ["squirrel_legend"]}, food={"A": 20, "B": 0},
                    decks={"A": ["lion"] * 8, "B": ["lion"] * 8})
     rules.apply_action(s, PlaceAction("squirrel_legend", ("cr", "1,2")))
     assert s.food["A"] == 0
-    end_turn(s); end_turn(s); end_turn(s)
+    end_turn(s); end_turn(s); end_turn(s); end_turn(s); end_turn(s)
     assert s.food["A"] == 0
-    end_turn(s)                                                 # the second of A's turns
+    end_turn(s)                                                 # the third of A's turns
     assert s.food["A"] == 20 * CFG.otk_squirrel_multiplier
 
 

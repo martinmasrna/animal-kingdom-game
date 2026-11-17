@@ -102,6 +102,10 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
     let k = &st.g.known;
     let placer_card = st.card(placer.card);
     let owner = placer.owner;
+    // Yuki's leader: "It can't be covered until your next turn." (a board animal's locked_until_turn)
+    if target.locked_until_turn as i32 > st.turn_counter as i32 {
+        return false;
+    }
     // The Bison: "Can't be covered while this is grazing." Nothing overrides it, the Hercules Beetle included.
     if Some(target.card) == k.bison && active(st, target) && grazing(st, target, None) {
         return false;

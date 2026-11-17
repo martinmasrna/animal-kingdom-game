@@ -1472,10 +1472,10 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Roar: lose all your food. In 2 turns, gain three times as much.",
-      "keywords": [],
+      "text": "Roar: lose all your food. In 3 turns, gain three times as much.",
       "species": "Squirrel",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "honey_badger_legend",

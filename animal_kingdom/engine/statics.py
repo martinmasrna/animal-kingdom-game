@@ -132,6 +132,10 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     placer_card = state.cards[placer.card_id]
     owner = placer.owner
 
+    # Yuki's leader: "It can't be covered until your next turn." (a board animal's `locked_until_turn`; nothing overrides it)
+    if target.locked_until_turn > state.turn_counter:
+        return False
+
     # The Bison: "Can't be covered while grazing." Nothing overrides it, the Hercules Beetle included.
     if target.card_id == "bison" and active(state, target) and grazing(state, target):
         return False

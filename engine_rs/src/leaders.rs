@@ -21,13 +21,14 @@ pub const GORILLA: &str = "gorilla_legend_2";
 pub const GRIMM: &str = "raven_legend";
 pub const MOLE: &str = "mole_legend";
 pub const SANTO: &str = "macaque_legend";
+pub const YUKI: &str = "squirrel_legend";
 pub const MELISSIA_SPEC: &str = "tag:Colony&tag:Worker|tag:Colony&tag:Soldier|tag:Colony&tag:Nurse";
 pub const XANTHE_LAST_STAGE: i32 = 4;
 
 /// "power", "once" or "passive"; None: not a leader.
 pub fn kind_of(id: &str) -> Option<&'static str> {
     match id {
-        GRIMM | MELISSIA | BABAJI => Some("power"),
+        GRIMM | MELISSIA | BABAJI | YUKI => Some("power"),
         XANTHE => Some("once"),
         ADIRA | THERON | MOLE | SANTO | JULIETTE | BUMBLETON | SOLENIA | ARNE | GORILLA => Some("passive"),
         _ => None,
@@ -135,6 +136,31 @@ pub fn third_play(st: &mut State, player: Player) {
     }
 }
 
+/// effects.py den_connected_allies: the crossroads of the player's top animals connected to their den through their own.
+pub fn den_connected_allies(st: &State, player: Player) -> Vec<Cr> {
+    let gm = st.map();
+    let mut seen: Vec<bool> = vec![false; gm.n()];
+    let mut queue: Vec<Cr> = Vec::new();
+    for &c in gm.hq_front[player as usize].iter() {
+        if st.owner_of(c) == Some(player) && !seen[c as usize] {
+            seen[c as usize] = true;
+            queue.push(c);
+        }
+    }
+    let mut qi = 0;
+    while qi < queue.len() {
+        let c = queue[qi];
+        qi += 1;
+        for &nb in gm.neighbors(c) {
+            if !seen[nb as usize] && st.owner_of(nb) == Some(player) {
+                seen[nb as usize] = true;
+                queue.push(nb);
+            }
+        }
+    }
+    gm.sorted.iter().copied().filter(|&c| seen[c as usize]).collect()
+}
+
 /// effects.py grimm_draws: Grimm's power.
 pub fn grimm_draws(st: &State, l: &Leader) -> i32 {
     st.cfg().int("grimm_leader_draw") + l.kills / st.cfg().int("grimm_leader_per")
@@ -167,6 +193,7 @@ pub fn usable(st: &State, player: Player) -> bool {
     let p = player as usize;
     match st.cname(l.id) {
         GRIMM | BABAJI => !st.decks[p].is_empty(),
+        YUKI => l.stage < st.cfg().int("yuki_leader_uses") && !den_connected_allies(st, player).is_empty(),
         MELISSIA => st.decks[p].iter().any(|&c| matches(st, c, MELISSIA_SPEC)),
         XANTHE => {
             if l.spent {
@@ -200,6 +227,11 @@ pub fn do_leader(st: &mut State, player: Player) -> Result<(), String> {
         BABAJI => {
             let g = st.cfg().int("babaji_leader_grant");
             st.effect_stack.push(vmap!("op" => Value::s("scout"), "player" => pn(player), "spec" => Value::Null, "grant" => Value::Int(g as i64), "by_card" => src));
+        }
+        YUKI => {
+            st.leaders[p].as_mut().unwrap().stage += 1;
+            let options = den_connected_allies(st, player).into_iter().map(|c| crate::effects::cr_v(st, c)).collect();
+            crate::effects::push_choose(st, player, options, "guard", false, vmap!("by_card" => src));
         }
         XANTHE => {
             st.leaders[p].as_mut().unwrap().spent = true;

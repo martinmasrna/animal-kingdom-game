@@ -3107,7 +3107,7 @@ def _chameleon_legend_2_place(state, unit, cr):
 
 
 def _otk_squirrel_place(state, unit, cr):
-    """Roar: lose all your food. In 2 turns, gain three times as much. (A timer on this animal: covering it pauses it,
+    """Roar: lose all your food. In 3 turns, gain three times as much. (A timer on this animal: covering it pauses it,
     removing it loses the stake.)"""
     stake = state.food[unit.owner]
     lose_food(state, unit.owner, stake, card=unit.card_id)
@@ -3767,6 +3767,26 @@ def _leads(state: GameState, player: str, leader_id: str) -> bool:
     return lead is not None and lead["id"] == leader_id
 
 
+def den_connected_allies(state: GameState, player: str) -> list:
+    """The crossroads of `player`'s top animals connected to their den through their own animals (Yuki's leader)."""
+    seen = {c for c in state.game_map.hq_front(player) if state.owner_of(c) == player}
+    queue = deque(sorted(seen))
+    while queue:
+        for nb in state.game_map.neighbors(queue.popleft()):
+            if nb not in seen and state.owner_of(nb) == player:
+                seen.add(nb)
+                queue.append(nb)
+    return sorted(seen)
+
+
+def _then_guard(state, step, cr):
+    """Yuki's leader: the chosen animal can't be covered until its player's next turn (statics.can_cover)."""
+    top = state.top_unit(cr)
+    if top is not None and top.owner == step["chooser"]:
+        top.locked_until_turn = state.turn_counter + 2
+        state.emit("guard", cr=cr, iid=top.iid, card=top.card_id, owner=top.owner)
+
+
 def grimm_draws(state: GameState, lead: dict) -> int:
     """Grimm's power: 2 cards, one more for every 5 enemies removed from the board this match."""
     return state.config.grimm_leader_draw + lead["kills"] // state.config.grimm_leader_per
@@ -3784,6 +3804,8 @@ def leader_usable(state: GameState, player: str) -> bool:
     deck = state.decks[player]
     if lid in (L.GRIMM, L.BABAJI):
         return bool(deck)
+    if lid == L.YUKI:
+        return lead["stage"] < state.config.yuki_leader_uses and bool(den_connected_allies(state, player))
     if lid == L.MELISSIA:
         return any(_matches(state.cards[cid], L.MELISSIA_SPEC) for cid in deck)
     if lid == L.XANTHE:
@@ -3811,6 +3833,9 @@ def do_leader(state: GameState, player: str) -> None:
         state.effect_stack.append({"op": "scout", "player": player, "spec": L.MELISSIA_SPEC, **src})
     elif lid == L.BABAJI:
         state.effect_stack.append({"op": "scout", "player": player, "spec": None, "grant": cfg.babaji_leader_grant, **src})
+    elif lid == L.YUKI:
+        lead["stage"] += 1
+        _push_choose(state, player, den_connected_allies(state, player), "guard", **src)
     elif lid == L.XANTHE:
         lead["spent"] = True
         stage = lead["stage"]
@@ -3942,6 +3967,7 @@ def _gorilla_legend_2_place(state, unit, cr):
 
 THEN["wish"] = _then_wish
 THEN["babaji"] = _then_babaji
+THEN["guard"] = _then_guard
 
 EFFECTS.update({
     "bee_legend_2": {"on_place": _juliette_place},

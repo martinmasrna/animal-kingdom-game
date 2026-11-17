@@ -11,7 +11,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Madame Octavia** | 1 | — | 4 | Roar: Scout a legendary animal. |
-| **Yuki** | 1 | Rodent | 3 | Roar: lose all your food. In 2 turns, gain three times as much. |
+| **Yuki** | 1 | Rodent | 3 | Roar: lose all your food. In 3 turns, gain three times as much. |
 | **Ash** | 1 | — | 4 | Armor. Stealth. Poison. Spikes. |
 | **Iris** | 1 | — | 3 | Roar: choose an adjacent animal. Become a copy of it, and add another copy to your hand. |
 
