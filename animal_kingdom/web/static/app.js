@@ -951,7 +951,8 @@ const act = action => { if (action.kind === 'place' && ui.carry != null) { relea
   ui.sel = null; ui.roam = null; ui.hover = null; send({ t: 'act', action }); };
 // The hand's grip (carry.js): with a mouse, a card picked (clicked, or dragged out) leaves the hand and hangs over the pointer
 // until it is placed or put back (Martin, 2026-11-13: drag and drop, or click to pick up and click to place, as Hearthstone).
-const canGrip = id => FLIGHT && !touch() && hasArt(id) && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+// A card with no painting yet is carried like any other; let go over a crossroad, it lands there without the flight (flight.js turns the painting into the piece).
+const canGrip = id => FLIGHT && !touch() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
 function grip(el, id, iid) {
   const h = (V.game.hand || []).find(h => h.iid === iid);
   carry(el.querySelector('.card'), cardHTML(formOf(id, V.you), { str: h ? h.str : undefined })); ui.carry = iid;
