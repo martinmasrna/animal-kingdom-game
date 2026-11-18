@@ -261,14 +261,14 @@ def test_the_rabbit_plays_a_bunny_next_to_it_and_that_is_the_hares_third_play():
     assert len(s.hands["A"]) == before - 1 + 2
 
 
-def test_the_vole_repeats_a_chosen_rodent_neighbours_roar_and_never_a_repeater():
+def test_the_vole_repeats_a_chosen_rodent_neighbours_roar():
     # Martin, 2026-10-29: "Roar: repeat the Roar of an adjacent Rodent."
     s = make_state(current="A", hands={"A": ["vole"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     put(s, "1,1", "squirrel", "A"); put(s, "2,2", "chipmunk", "A"); put(s, "1,3", "capybara_legend", "A"); put(s, "2,1", "hamster", "A")
     before = s.food["A"]
     rules.apply_action(s, PlaceAction("vole", ("cr", "1,2")))
     assert s.pending is not None and s.pending["mode"] == "choice"
-    assert set(s.pending["options"]) == {"1,1", "2,2"}          # Roars only (no Hamster), never the repeat legend
+    assert set(s.pending["options"]) == {"1,1", "2,2", "1,3"}   # Roars only (no Hamster); the repeat legend is a Rodent with a Roar too
     rules.apply_action(s, ChoiceAction("1,1"))
     assert s.food["A"] - before == CFG.squirrel_food and s.pending is None
 

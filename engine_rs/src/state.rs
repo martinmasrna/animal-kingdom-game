@@ -454,6 +454,15 @@ impl Game {
     }
 }
 
+/// One turn a cap ended (`turn_capped`).
+#[derive(Clone, Debug)]
+pub struct CapRecord {
+    pub cap: &'static str,
+    pub player: Player,
+    pub turn: i32,
+    pub cards: Vec<&'static str>,
+}
+
 pub struct State {
     pub g: Arc<Game>,
     pub stacks: Stacks,                // by crossroad index
@@ -471,6 +480,9 @@ pub struct State {
     pub units_placed_this_turn: i32,
     pub actions_taken_this_turn: i32,
     pub applied_this_turn: i32,
+    pub effect_steps_this_turn: i32,
+    /// Every turn a cap ended (effects.py record_cap): the `turn_capped` events, kept whether or not events are recorded.
+    pub caps: Vec<CapRecord>,
     pub idle_turns: i32,
     pub next_iid: i64,
     pub play_seq: i32,
@@ -551,6 +563,8 @@ impl Clone for State {
             units_placed_this_turn: self.units_placed_this_turn,
             actions_taken_this_turn: self.actions_taken_this_turn,
             applied_this_turn: self.applied_this_turn,
+            effect_steps_this_turn: self.effect_steps_this_turn,
+            caps: self.caps.clone(),
             idle_turns: self.idle_turns,
             next_iid: self.next_iid,
             play_seq: self.play_seq,
@@ -1066,6 +1080,8 @@ impl State {
             "units_placed_this_turn": self.units_placed_this_turn,
             "actions_taken_this_turn": self.actions_taken_this_turn,
             "applied_this_turn": self.applied_this_turn,
+            "effect_steps_this_turn": self.effect_steps_this_turn,
+            "caps": self.caps.iter().map(|c| sj::json!({"cap": c.cap, "player": player_name(c.player), "turn": c.turn, "cards": c.cards})).collect::<Vec<_>>(),
             "idle_turns": self.idle_turns,
             "next_iid": self.next_iid,
             "play_seq": self.play_seq,
@@ -1189,6 +1205,13 @@ impl State {
         st.units_placed_this_turn = d["units_placed_this_turn"].as_i64().unwrap() as i32;
         st.actions_taken_this_turn = d.get("actions_taken_this_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
         st.applied_this_turn = d.get("applied_this_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
+        st.effect_steps_this_turn = d.get("effect_steps_this_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
+        st.caps = d.get("caps").and_then(|x| x.as_array()).map(|a| a.iter().map(|c| CapRecord {
+            cap: if c["cap"].as_str() == Some("actions") { "actions" } else { "effect_steps" },
+            player: if c["player"].as_str() == Some("B") { B } else { A },
+            turn: c["turn"].as_i64().unwrap_or(0) as i32,
+            cards: c["cards"].as_array().map(|l| l.iter().filter_map(|x| x.as_str().and_then(|n| st.card_id(n)).map(|c| st.cname(c))).collect()).unwrap_or_default(),
+        }).collect()).unwrap_or_default();
         st.idle_turns = d.get("idle_turns").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
         st.next_iid = d["next_iid"].as_i64().unwrap();
         st.play_seq = d.get("play_seq").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
@@ -1247,6 +1270,8 @@ impl State {
             units_placed_this_turn: 0,
             actions_taken_this_turn: 0,
             applied_this_turn: 0,
+            effect_steps_this_turn: 0,
+            caps: Vec::new(),
             idle_turns: 0,
             next_iid: 0,
             play_seq: 0,

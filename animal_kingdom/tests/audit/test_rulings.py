@@ -1544,15 +1544,14 @@ def test_launch_cards__marmot_counts_food_in_hand_and_on_the_board():
     assert strength(s, m) == 4 and placement_strength(s, h) == 4
 
 
-def test_launch_cards__vole_offers_only_adjacent_allied_rodents_with_a_roar_never_a_repeater():
+def test_launch_cards__vole_offers_only_adjacent_allied_rodents_with_a_roar():
     s = st(hands={"A": ["vole"]})
     put(s, "1,1", "squirrel", "A")              # a Roar
     put(s, "1,3", "chinchilla", "A")            # a Rodent with no Roar
-    put(s, "2,2", "capybara_legend", "A")       # a repeater
+    put(s, "2,2", "capybara_legend", "A")       # a Rodent with a Roar like any other
     play(s, "vole", "1,2")
-    if s.pending:
-        assert options(s) == {"1,1"}
-        choose(s, "1,1")
+    assert options(s) == {"1,1", "2,2"}
+    choose(s, "1,1")
     assert s.food["A"] == 10
 
 
@@ -1560,7 +1559,7 @@ def test_launch_cards__the_repeat_legend_skips_a_vole():
     s = st(hands={"A": ["capybara_legend"]})
     put(s, "1,1", "vole", "A")
     put(s, "1,3", "squirrel", "A")
-    play(s, "capybara_legend", "1,2")
+    play(s, "capybara_legend", "1,2")                  # it calls Roars directly: a repeater would recurse without end
     assert s.food["A"] == 10 and s.pending is None
 
 

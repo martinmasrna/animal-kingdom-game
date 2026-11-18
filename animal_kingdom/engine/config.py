@@ -244,6 +244,7 @@ class Config:
 
     # --- Engine safety / sim hygiene ---
     max_actions_per_turn: int = 30       # a turn ends after this many applied actions, choices included, even mid-effect (Martin, 2026-11-18)
+    max_effect_steps_per_turn: int = 1000  # a turn ends after this many effect steps resolve in it, with no player input needed (Martin, 2026-11-18)
     max_turns: int = 400                 # hard cap so fuzz games always terminate (M1)
 
     @staticmethod

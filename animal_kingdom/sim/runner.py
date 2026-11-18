@@ -47,6 +47,8 @@ class GameRecord:
     # with log_actions=True. Lets a game be replayed move-by-move with no bot compute (the bots'
     # search is bypassed - the stored actions are applied straight through the rules engine).
     actions: tuple = ()
+    # The turns a cap ended (engine `turn_capped`: {cap, player, turn, cards}); a looping combination shows here.
+    capped: tuple = ()
 
     def credit(self, seat: str = "A") -> float:
         """Outcome credit for `seat`: 1.0 win, 0.5 draw, 0.0 loss."""
@@ -61,7 +63,8 @@ class GameRecord:
                 "cards_drawn_a": sorted(self.cards_drawn_a),
                 "cards_drawn_b": sorted(self.cards_drawn_b),
                 "final_food_a": self.final_food_a,
-                "final_food_b": self.final_food_b}
+                "final_food_b": self.final_food_b,
+                **({"capped": list(self.capped)} if self.capped else {})}
 
 
 def crossed_progress_decile(done: int, total: int) -> bool:
@@ -332,10 +335,13 @@ def play_game(
         _snapshot_hands()  # catches draws, bounces, tutors - anything that touches hands
         result = rules.is_terminal(state)
 
+    for c in state.caps:
+        print(f"TURN CAPPED ({c['cap']}) {deck_a} vs {deck_b} seed {seed}, turn {c['turn']}, {c['player']}: "
+              f"cards {', '.join(c['cards']) or '?'}", file=sys.stderr, flush=True)
     return GameRecord(deck_a, deck_b, seed, state.first_player,
                       result.winner, result.reason, state.turn_counter,
                       frozenset(drawn["A"]), frozenset(drawn["B"]),
-                      state.food["A"], state.food["B"], tuple(trace))
+                      state.food["A"], state.food["B"], tuple(trace), tuple(dict(c) for c in state.caps))
 
 
 # --------------------------------------------------------------- match specs

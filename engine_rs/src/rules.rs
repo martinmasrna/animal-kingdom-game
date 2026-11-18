@@ -196,7 +196,11 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
     }
     resolve_and_maybe_end_turn(st);
     // The turn's action cap (rules.py apply_action): a turn that ended on its own has reset the count.
-    if st.applied_this_turn >= st.cfg().max_actions_per_turn && !st.decided() {
+    let over_effects = st.effect_steps_this_turn > st.cfg().max_effect_steps_per_turn;
+    if (over_effects || st.applied_this_turn >= st.cfg().max_actions_per_turn) && !st.decided() {
+        if !over_effects {
+            effects::record_cap(st, "actions", None);
+        }
         st.pending = None;
         st.effect_stack.clear();
         end_turn(st);
@@ -240,6 +244,7 @@ fn end_turn(st: &mut State) {
     st.units_placed_this_turn = 0;
     st.actions_taken_this_turn = 0;
     st.applied_this_turn = 0;
+    st.effect_steps_this_turn = 0;
     st.turn_flags = crate::state::TurnFlags::default();
     st.current = other(player);
     let (cur, t) = (st.current, st.turn_counter);

@@ -519,6 +519,8 @@ def test_two_babajis_return_each_other_and_the_turn_cap_ends_the_loop():
         steps += 1
         assert steps <= s.config.max_actions_per_turn
     assert s.current == "B" and s.pending is None and not s.effect_stack
+    assert [(c["cap"], c["cards"]) for c in s.caps] == [("actions", ["baboon_legend"])]
+    assert any(e["e"] == "turn_capped" and e["cap"] == "actions" for e in s.events)
 
 
 def test_the_turn_cap_ends_the_turn_mid_effect_and_resets():

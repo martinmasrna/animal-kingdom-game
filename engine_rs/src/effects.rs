@@ -170,9 +170,32 @@ fn remove_below_zero(st: &mut State) -> bool {
     !dying.is_empty()
 }
 
+/// A turn cap fired: the `turn_capped` event, and the same record kept on the state (rules.py record_cap).
+pub fn record_cap(st: &mut State, cap: &'static str, extra: Option<CardId>) {
+    let mut cards: Vec<&'static str> = st.effect_stack.iter().filter_map(|s| step_card(st, s, "by_card")).chain(extra).map(|c| st.cname(c)).collect();
+    cards.sort();
+    cards.dedup();
+    let (player, turn) = (st.current, st.turn_counter);
+    let cv: Vec<Value> = cards.iter().map(|c| Value::s(c)).collect();
+    st.emit("turn_capped", vmap!("cap" => Value::s(cap), "player" => pn(player), "turn" => Value::Int(turn as i64), "cards" => Value::List(cv)));
+    st.caps.push(crate::state::CapRecord { cap, player, turn, cards });
+}
+
 fn drain(st: &mut State) {
     while st.pending.is_none() && st.result.is_none() && !st.effect_stack.is_empty() {
         let mut step = st.effect_stack.pop().unwrap();
+        st.effect_steps_this_turn += 1;
+        let cap = st.cfg().max_effect_steps_per_turn;
+        if st.effect_steps_this_turn > cap {
+            // The turn's effect cap (effects.py _drain): the rest is dropped, the turn ends in rules::apply_action.
+            if st.effect_steps_this_turn == cap + 1 {
+                let extra = step_card(st, &step, "by_card");
+                record_cap(st, "effect_steps", extra);
+            }
+            st.effect_stack.clear();
+            st.pending = None;
+            return;
+        }
         let n = st.effect_stack.len();
         let was = (st.cause, st.cause_iid);
         st.cause = step_card(st, &step, "by_card");

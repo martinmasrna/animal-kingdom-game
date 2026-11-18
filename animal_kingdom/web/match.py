@@ -585,6 +585,9 @@ class Match:
                              "series_deck": self.seats[self.schedule[len(self.results)].get("seat", "B")].deck
                              if self.schedule else None})
         self.last_log = self.game_log()
+        for c in self.state.caps:      # a turn a cap ended: a looping combination of cards, to read in the log
+            log.warning("turn capped (%s) in match %s game %s, turn %s, %s: cards %s", c["cap"], self.id, len(self.results),
+                        c["turn"], c["player"], ", ".join(c["cards"]) or "?")
         if self.on_game_end:
             self.on_game_end(self, self.last_log)
         score = self.score()
@@ -606,7 +609,8 @@ class Match:
                 "actions": list(self.actions), "action_times": list(self.action_times),
                 "match_id": self.id, "game_no": len(self.results), "series": self.rematches,
                 "lists": [list(self.state.starting_decks[p]) for p in "AB"],
-                **({"leaders": {p: l["id"] for p, l in self.state.leaders.items()}} if self.state.leaders else {})}
+                **({"leaders": {p: l["id"] for p, l in self.state.leaders.items()}} if self.state.leaders else {}),
+                **({"capped": [dict(c) for c in self.state.caps]} if self.state.caps else {})}
 
     def bot_move(self):
         """The action the bot to act would take (pure: call off the event loop, apply after)."""

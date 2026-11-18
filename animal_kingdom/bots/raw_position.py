@@ -73,6 +73,7 @@ EXCLUDED = {
     "result": "a decided game is scored by the search, not the network",
     "units_placed_this_turn": "encoded (placed_this_turn)", "actions_taken_this_turn": "encoded (actions_left)",
     "applied_this_turn": "a safety cap of 30 applied actions, never reached in play",
+    "effect_steps_this_turn": "a safety cap on one turn's effect steps, never reached in play", "caps": "a record of turns a cap ended",
     "card_strength_counters": "folded into every strength", "jelly": "folded into deck and pool strengths",
     "roar_twice": "encoded (woodpecker_*, live this turn only)", "hungry_eaten": "encoded", "last_roar": "encoded (macaw_* bags)",
     "inked": "encoded per piece", "pile_owners": "encoded (pile bags by owner)", "remove_pile": "encoded",

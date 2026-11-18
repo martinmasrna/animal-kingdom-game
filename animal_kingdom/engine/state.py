@@ -301,6 +301,8 @@ class GameState:
         units_placed_this_turn: int = 0,
         actions_taken_this_turn: int = 0,
         applied_this_turn: int = 0,
+        effect_steps_this_turn: int = 0,
+        caps: list | None = None,
         idle_turns: int = 0,
         next_iid: int = 0,
         play_seq: int = 0,
@@ -371,6 +373,8 @@ class GameState:
         self.units_placed_this_turn = units_placed_this_turn
         self.actions_taken_this_turn = actions_taken_this_turn
         self.applied_this_turn = applied_this_turn   # every apply_action of the turn, choices included (Config.max_actions_per_turn)
+        self.effect_steps_this_turn = effect_steps_this_turn   # effect-stack steps resolved this turn (Config.max_effect_steps_per_turn)
+        self.caps: list = caps if caps is not None else []     # every turn a cap ended: {cap, player, turn, cards} (the `turn_capped` event, kept)
         self.idle_turns = idle_turns       # consecutive turns ended with no action (two end the game)
         self._next_iid = next_iid
         self.play_seq = play_seq           # board entries so far: stamps each unit's play order (UnitInstance.play_seq)
@@ -609,6 +613,8 @@ class GameState:
         new.units_placed_this_turn = self.units_placed_this_turn
         new.actions_taken_this_turn = self.actions_taken_this_turn
         new.applied_this_turn = self.applied_this_turn
+        new.effect_steps_this_turn = self.effect_steps_this_turn
+        new.caps = list(self.caps)
         new.idle_turns = self.idle_turns
         new._next_iid = self._next_iid
         new.play_seq = self.play_seq
@@ -683,6 +689,8 @@ class GameState:
             "units_placed_this_turn": self.units_placed_this_turn,
             "actions_taken_this_turn": self.actions_taken_this_turn,
             "applied_this_turn": self.applied_this_turn,
+            "effect_steps_this_turn": self.effect_steps_this_turn,
+            "caps": [dict(c) for c in self.caps],
             "idle_turns": self.idle_turns,
             "next_iid": self._next_iid,
             "play_seq": self.play_seq,
@@ -737,6 +745,8 @@ class GameState:
             units_placed_this_turn=d["units_placed_this_turn"],
             actions_taken_this_turn=d.get("actions_taken_this_turn", 0),
             applied_this_turn=d.get("applied_this_turn", 0),
+            effect_steps_this_turn=d.get("effect_steps_this_turn", 0),
+            caps=[dict(c) for c in d.get("caps", [])],
             idle_turns=d.get("idle_turns", 0),
             next_iid=d["next_iid"],
             play_seq=d.get("play_seq", 0),

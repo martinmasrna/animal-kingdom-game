@@ -21,6 +21,9 @@ sys.path.insert(0, __file__.rsplit("/", 1)[0])
 from oracle import canon, diff_keys, CARDS_JSON, MAPS_JSON
 
 
+CAPPED: list = []     # every turn a cap ended over the run, with its seed, reported at the end
+
+
 def random_deck(rng, pool, cards):
     """30 cards within the copy limits (legendary 1 / rare 2 / common 3)."""
     limits = {"common": 3, "rare": 2, "legendary": 1}
@@ -101,6 +104,8 @@ def play(seed, pool, cards, config, eng, pass_rate, leaders=False, leader_decks=
         bad = check(f"step {steps} {adict}")
         if bad:
             return bad, steps, deck_a, deck_b
+    for c in py.caps:      # a turn a cap ended (both engines agreed on it above): a looping combination of cards
+        CAPPED.append({**c, "seed": seed, "decks": (deck_a, deck_b)})
     ta, tb = rules.is_terminal(py), rs.is_terminal()
     ta = ta.to_dict() if ta else None
     if canon(ta) != canon(tb):
@@ -137,4 +142,6 @@ if __name__ == "__main__":
             print(f"FAIL seed {seed} after {steps} steps: {bad}"[:900], flush=True)
             if a.stop:
                 break
-    print(f"=== {a.games - fails}/{a.games} games agree, {total_steps} actions, {time.time() - t0:.0f}s", flush=True)
+    for c in CAPPED:
+        print(f"TURN CAPPED ({c['cap']}) seed {c['seed']}, turn {c['turn']}, {c['player']}: cards {', '.join(c['cards']) or '?'}", flush=True)
+    print(f"=== {len(CAPPED)} capped turns; {a.games - fails}/{a.games} games agree, {total_steps} actions, {time.time() - t0:.0f}s", flush=True)

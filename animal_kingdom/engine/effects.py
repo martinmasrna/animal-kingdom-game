@@ -146,9 +146,31 @@ def _remove_below_zero(state: GameState) -> bool:
     return bool(dying)
 
 
+def record_cap(state: GameState, cap: str, cards) -> None:
+    """A turn cap fired (Config.max_actions_per_turn, max_effect_steps_per_turn): the `turn_capped` event, and the same
+    record kept on the state (`caps`) for whoever reads a finished game. `cards` are the cards the dropped steps came
+    from: a looping combination shows up in them."""
+    rec = {"cap": cap, "player": state.current, "turn": state.turn_counter, "cards": sorted({c for c in cards if c})}
+    state.caps.append(rec)
+    state.emit("turn_capped", **rec)
+
+
+def stack_cards(state: GameState, *extra) -> list:
+    return [s.get("by_card") for s in state.effect_stack] + list(extra)
+
+
 def _drain(state: GameState) -> None:
     while state.pending is None and state.result is None and state.effect_stack:
         step = state.effect_stack.pop()
+        state.effect_steps_this_turn += 1
+        if state.effect_steps_this_turn > state.config.max_effect_steps_per_turn:
+            # The turn's effect cap: a loop that needs no player input would never reach the action cap. What is left is
+            # dropped, and the turn ends (rules.apply_action) once this resolve returns.
+            if state.effect_steps_this_turn == state.config.max_effect_steps_per_turn + 1:
+                record_cap(state, "effect_steps", stack_cards(state, step.get("by_card")))
+            state.effect_stack.clear()
+            state.pending = None
+            return
         n, was = len(state.effect_stack), (state.cause, state.cause_iid)
         state.cause, state.cause_iid = step.get("by_card"), step.get("by_iid")
         try:
@@ -3030,8 +3052,8 @@ def _spawns_beside(token):
 def _repeat_legend_place(state, unit, cr):
     """Roar: repeat the Roar of each of your adjacent Rodents. Big Gus absorbs them: each repeat is Big Gus's own, here,
     as the Macaw's copy is the Macaw's (Martin, 2026-10-29: the instinctive reading), so its food, removals and timers
-    come from Big Gus. Another of these (a mimic Octopus's copy) isn't repeated: two side by side would repeat each
-    other for ever."""
+    come from Big Gus. It repeats by calling the other Roar straight away, with no effect step in between to count, so it never
+    repeats a repeater (another of these, a Vole): that would recurse without end, which no cap can stop."""
     for _nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
         if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id and top.card_id not in REPEATERS:
             hook = _hook(state, top.card_id, "on_place", as_card=unit.card_id)
@@ -3039,7 +3061,7 @@ def _repeat_legend_place(state, unit, cr):
                 hook(state, unit, cr)
 
 
-REPEATERS = {"vole", "capybara_legend"}      # Roars that repeat Roars never repeat each other: two side by side would go for ever
+REPEATERS = {"vole", "capybara_legend"}      # what the repeat legend never repeats: it calls Roars directly (see _repeat_legend_place)
 
 
 def _hamster_draw_event(state, unit, cr, event):
@@ -3050,9 +3072,10 @@ def _hamster_draw_event(state, unit, cr, event):
 
 def _vole_place(state, unit, cr):
     """Roar: repeat the Roar of an adjacent Rodent (Martin, 2026-10-29). The Vole picks one of its Rodent neighbours with
-    a Roar and repeats it as its own, here, as Big Gus does; it never picks a repeater."""
+    a Roar and repeats it as its own, here, as Big Gus does. Another Vole is a Rodent with a Roar like any other: two replay each
+    other, one choice at a time, until the turn's action cap ends the turn."""
     options = [nb for nb, top in _adjacent_tops(state, cr, unit.owner)
-               if "Rodent" in state.cards[top.card_id].tags and top.card_id not in REPEATERS
+               if "Rodent" in state.cards[top.card_id].tags
                and _hook(state, top.card_id, "on_place")]
     _push_choose(state, unit.owner, options, "repeat_roar", optional=False, vole=unit.iid)
 

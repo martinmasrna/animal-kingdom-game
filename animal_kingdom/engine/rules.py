@@ -205,7 +205,11 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     _resolve_and_maybe_end_turn(state)
     # The turn's action cap: past it the turn ends at once, whatever is still resolving (a loop of cards, say). A turn
     # that ended on its own has reset the count.
-    if state.applied_this_turn >= state.config.max_actions_per_turn and not _decided(state):
+    # The effect cap (effects._drain) has already dropped the stack and recorded itself.
+    over_effects = state.effect_steps_this_turn > state.config.max_effect_steps_per_turn
+    if (over_effects or state.applied_this_turn >= state.config.max_actions_per_turn) and not _decided(state):
+        if not over_effects:
+            effects.record_cap(state, "actions", effects.stack_cards(state))
         state.pending = None
         state.effect_stack.clear()
         _end_turn(state)
@@ -258,6 +262,7 @@ def _end_turn(state: GameState) -> None:
     state.units_placed_this_turn = 0
     state.actions_taken_this_turn = 0
     state.applied_this_turn = 0
+    state.effect_steps_this_turn = 0
     state.turn_flags = {}                    # reset once-per-turn trigger flags
     state.current = other_player(player)
     state.emit("turn_start", player=state.current, turn=state.turn_counter)

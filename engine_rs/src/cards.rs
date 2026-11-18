@@ -1122,21 +1122,20 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("vole", OnPlace) => {
             // "Roar: repeat the Roar of an adjacent Rodent." (Martin, 2026-10-29): one Rodent neighbour with a Roar, the
-            // owner's choice, repeated as the Vole's own; never a repeater (the legend, another Vole), or two would go for ever.
-            let (gus, vole) = (st.card_id("capybara_legend"), st.card_id("vole"));
+            // owner's choice, repeated as the Vole's own; another Vole or Big Gus is a Rodent like any other (a loop of Voles is ended by the turn's caps).
             let o: Vec<Cr> = adjacent_tops(st, cr, Some(owner))
                 .into_iter()
-                .filter(|(_, top)| st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && Some(top.card) != gus && Some(top.card) != vole && st.g.has_hook(top.card, OnPlace))
+                .filter(|(_, top)| st.card(top.card).has_tag(T_RODENT) && st.g.has_hook(top.card, OnPlace))
                 .map(|(nb, _)| nb)
                 .collect();
             push_choose(st, owner, crs(st, o), "repeat_roar", false, vmap!("vole" => Value::Int(unit.iid)));
         }
         ("capybara_legend", OnPlace) => {
-            // each repeat is Big Gus's own, at its crossroad (as the Macaw's copy is the Macaw's); repeaters (the Vole, another
-            // of these) are never repeated, or two side by side would go for ever
-            let vole = st.card_id("vole");
+            // each repeat is Big Gus's own, at its crossroad (as the Macaw's copy is the Macaw's); it calls the
+            // Roars directly, with no step between to count, so it never repeats a repeater (another of these, a Vole): endless recursion
+            let (vole, gus) = (st.card_id("vole"), st.card_id("capybara_legend"));
             for (_nb, top) in adjacent_tops(st, cr, Some(owner)).into_iter().rev() {
-                if st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && Some(top.card) != vole && st.g.has_hook(top.card, OnPlace) {
+                if st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && Some(top.card) != vole && Some(top.card) != gus && st.g.has_hook(top.card, OnPlace) {
                     run(st, top.card, Some(unit.card), OnPlace, unit, &Args::Place(cr));
                 }
             }

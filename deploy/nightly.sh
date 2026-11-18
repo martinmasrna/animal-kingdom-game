@@ -14,3 +14,7 @@ n="$(git -C "$repo" diff --cached --name-only -- results/human_games | wc -l | t
 git -C "$repo" commit -q -m "Human games pulled from live and staging, $(date +%F) (deploy/nightly.sh): $n files" -- results/human_games \
   && git -C "$repo" push -q || echo "commit or push failed: the games stay in results/human_games for the next session"
 echo "committed $n files"
+# A turn a cap ended (engine `turn_capped`, logged as "capped" on the game): a looping combination of cards to look at.
+for f in $(git -C "$repo" diff --name-only HEAD~1 HEAD -- results/human_games); do
+  grep -q '"capped"' "$repo/$f" 2>/dev/null && echo "TURN CAPPED in $f"
+done

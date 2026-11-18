@@ -71,7 +71,7 @@ Players alternate turns. On a turn, the active player performs **two actions**, 
 1. **Draw 2 cards**
 2. **Place one unit**
 
-The turn ends after two actions, or earlier if no legal action remains. A turn also ends after 30 actions, even mid-effect (choices and placements an effect asks for count too). A player may also end their turn early, declining the rest, even before taking any action. If both players end a turn without taking an action, one right after the other, the game ends (§11.3). Some troop effects can allow additional placements or draws during the same turn (these are free — they do not consume an action). When taking the place action:
+The turn ends after two actions, or earlier if no legal action remains. A turn also ends after 30 actions, or after 1000 effects resolving in a row, even mid-effect (choices and placements an effect asks for count as actions). Only a looping combination of cards ever reaches either limit. A player may also end their turn early, declining the rest, even before taking any action. If both players end a turn without taking an action, one right after the other, the game ends (§11.3). Some troop effects can allow additional placements or draws during the same turn (these are free — they do not consume an action). When taking the place action:
 
 1. Choose one unit from the rack.
 2. Choose a legal placement.
