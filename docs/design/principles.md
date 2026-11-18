@@ -33,19 +33,14 @@ The references are the live cards, never a table: the Lion (7, vanilla) and the 
 - A conditional effect is priced by what meeting its condition costs on the turn you play it. Board state already there, or a body the deck wants gone, costs nothing; a condition that takes the turn's other action, or extra plays, costs the card strength.
 - Flight is worth what the flier can cover when it lands, so on a 1 or 2 it is little more than reach.
 
-## Rarity
+## Legendary or not
 
-The rarity question is what goes wrong if the opponent faces this card three times a game, never which slot its deck has free (Martin, 2026-10-22). His calls so far: [`log_rarity.md`](log_rarity.md).
+A card is legendary or not: at most 2 copies of a non-legendary, 1 of a legendary (Martin, 2026-11-15: "merging rare and commons together, and then bringing the limit for non-legendary cards to 2"). Power is priced in stars under the deck's budget ([`rules/overview.md`](../rules/overview.md)), not in rarity. The copy question is what goes wrong if the opponent faces this card twice a game.
 
-- **Rarity sets a card's role in its deck, like Gwent's bronze, silver and gold.** Commons (3 copies) are the consistent engine that makes the deck work. Rares (2 copies) are flexible, situational cards for specific use cases. Legendaries (1 copy) are unique, potentially deck-defining cards.
-- **Rares** are the deck's stronger, more situational cards (conditional or unconditional removal, the reactive answers) with more complicated effects, or upgrades that would be too much at three copies: with two, drawing one is a real risk and you play it carefully (the Leopard). A rare advances the plan significantly but doesn't win on its own.
-- **Legendaries** come in three kinds:
-  1. The build-around (a deck's whole plan, like Black Swan; few of these).
-  2. The amplifier, which takes the plan the commons and rares already have and pushes it over the edge, without changing it (King Theron, Queen Adira: Cats play the same with or without them).
-  3. The generally excellent card, far stronger than a common and good in many decks (Prince Leo and Princess Lea, Aurum, Scarlett).
-- **No extra placements on commons.** Playing another card is a rare's or a legendary's effect. A common may still place a token on a random empty crossroad (Martin, 2026-10-27).
-- **A card that is one keyword and nothing else is a common** (Martin, 2026-10-21). A rare or legendary with a keyword earns its rarity with something more: a second keyword or an effect.
-- **A higher rarity gets a better rate.** A rare must be stronger than a common, and a legendary stronger than a rare, if they were to have the same effect. Ideally they shouldn't, so this is only an anchor (Martin, 2026-10-26).
+Legendaries come in three kinds:
+1. The build-around (a deck's whole plan, like Black Swan; few of these).
+2. The amplifier, which takes the plan the rest of the deck already has and pushes it over the edge, without changing it (King Theron, Queen Adira: Cats play the same with or without them).
+3. The generally excellent card, good in many decks (Prince Leo and Princess Lea, Aurum, Scarlett).
 
 ## Guardrails
 

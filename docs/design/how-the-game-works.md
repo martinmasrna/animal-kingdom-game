@@ -11,11 +11,11 @@ Everything is a placement, and you get two a turn. Drawing is not a resource you
 There is no mana, so a card's price is its action, and every card costs the same one. What differs is what a card gives back in actions and what it does to the board.
 
 - "Draw 2 cards" on a Roar is +1 action, not +2 cards: it skips the draw you would otherwise have spent half a turn on. Martin, 2026-10-08: "It's a tempo card. It's not a value card. Like, you spend one card to draw another while playing a body. ... if you wanted to draw cards, you might as well just press the button that draws you two cards." 2026-10-04: "units that are drawing cards are tempo units in general."
-- "Play another animal" is +1 action and −1 card. Mole, the Prince and Princess: three bodies in one action is the strongest thing the economy allows, which is why extra placements never sit on commons (Martin, 2026-10-27) and why a free placement that needs an empty crossroad is worth little after round 3.
+- "Play another animal" is +1 action and −1 card. Mole, the Prince and Princess: three bodies in one action is the strongest thing the economy allows, which is why a free placement that needs an empty crossroad is worth little after round 3.
 - A card that comes back to hand costs an action to replay: "if something comes back to your hand or even to your deck, that's much worse. Then you need to spend one action to play it and another action to consume it ... you get 50% less actions than your opponent" (2026-10-12). Flee is therefore an advantage only on an animal whose Roar is worth playing again; a vanilla Flee body is "worse than a 4 strength vanilla" (2026-10-21).
 - An extra action (Beaver) is the ceiling of the economy; an effect that costs the other action (Titan, "if you played another Cat this turn") is priced as half a turn.
 - The hand is not value. It is the guarantee that each coming action converts into a placement. Four cards is enough; an empty hand means the next action is a draw, which is a turn half lost. The four-card median hides the archetypes: an aggro deck with extra placements empties its hand by design and lives on refuel ("you're going to have empty hand for most of the time", 2026-10-12), so "if your hand is empty" is a real aggro condition (Ocelot, the Dormouse's first version); a control deck holds cards, so a hand-size payoff (Peacock, Macaque at 5 cards) is a real condition only there.
-- Fetching a specific card from the deck is a tempo rider, not value, and a weak one when the target is a common at three copies: "you have mulligan, and you can draw 2 cards per turn to draw it" (2026-10-14). A tutor earns its line when the target is a one-copy card the plan needs on time (Scout a legendary; the Eggs drawing their Snakes and Birds).
+- Fetching a specific card from the deck is a tempo rider, not value, and a weak one when the target has two copies: "you have mulligan, and you can draw 2 cards per turn to draw it" (2026-10-14). A tutor earns its line when the target is a one-copy card the plan needs on time (Scout a legendary; the Eggs drawing their Snakes and Birds).
 
 ## 2. Value is cashed at the moment of placement
 
@@ -68,9 +68,9 @@ A deck is a way to win on one clock and a way to play that feels different from 
 
 A plan that needs three or four of its own uncovered bodies at once is solitaire: "the opponent either covers one piece and breaks it, or ignores it and watches" (2026-10-13). A payoff that is good only when you are already winning is a bad card ("win more, lose more", 2026-10-22). Explicit synergy ("if you have a Megafauna in hand") is clunky; implicit synergy (the Condor compares strengths, the Oxpecker reads the strongest card in hand) is the shape to want (2026-10-04).
 
-## 8. Rarity and legendaries
+## 8. Legendaries and copies
 
-Rarity asks what goes wrong if the opponent faces the card three times a game (2026-10-22). Commons are the deck's engine; rares are the situational or tech cards and the effects that would be too consistent at three copies ("the naked mole rat, which gives you free extra placement, could not possibly be a common", 2026-10-12); a rare with a common's effect must beat the common. A keyword alone is a common; the rare with the keyword earns it with something more, never with +1 strength ("then suddenly it becomes the best card in the game", 2026-10-21).
+A card is legendary or not: 2 copies of a non-legendary, 1 of a legendary (2026-11-15), and stars price its power. The copy question is what goes wrong if the opponent faces the card twice a game.
 
 A legendary changes a rule or bends the game's own verb for you; it does not add a number. Theron turns a Cat's cover into a removal; Krill makes a Titan cost one action; the Locusts cover the board; Eon shuffles itself back smaller. It amplifies what the deck already does ("the deck gameplay doesn't change, it just gets amplified", 2026-10-08) and is readable as the animal's own myth. "Just another card draw", a common's effect doubled with a keyword, or a reprint of a rare in gold is "lazy" (2026-10-08, four times). A board wipe from nowhere "is a card from Hearthstone or Magic, not from our game" (2026-10-22); the same function as the Locust plague, which the opponent sees and plays around, is the game's own version.
 
@@ -92,7 +92,7 @@ Hearthstone and Gwent carry real principles, and the agent's failure is copying 
 | Divine Favor, Hellbent | the aggro refuel that pays for being behind on cards | Divine Favor on the Macaque legendary; the Ocelot's empty-hand draw |
 | Kazakus / Reno | a deckbuilding condition any deck can meet its own way | "your starting deck has no animal of strength 4 or more" (the Capybara) |
 | Face Hunter | early bodies, a few answers, refuel, finishers | the decomposition Martin ran on Food Aggro (2026-10-08): which slot is missing here |
-| Gwent bronze/silver/gold | copy limits that make rarity a role | the three-copies question (§8) |
+| Gwent bronze/silver/gold | copy limits that make rarity a role | the two-copies question (§8) |
 
 Gwent (beta) is the closest economy: one card a turn, no mana, a unit is a number, copy limits by rarity. It is the wrong model for the board, because it is nearly solitaire; Hearthstone is the right model for interaction and counterplay and the wrong one for cost. Magic is for method only. A reference without its translation is a Hearthstone card with an animal painted on it.
 

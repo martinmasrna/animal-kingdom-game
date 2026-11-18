@@ -37,8 +37,7 @@ The initial 14-design packages are premade-deck foundations, not intended final 
 ## 3. Module construction
 
 - [ ] Treat rarity primarily as a **copy-count and gameplay-pattern lever**, not a reward for wordiness:
-  - Common designs must be safe at three copies.
-  - Rare designs must remain healthy when both copies are drawn or active.
+  - Non-legendary designs must remain healthy when both copies are drawn or active.
   - Legendary designs should create a distinctive story or engine at one copy; they may be mechanically simple.
 - [ ] Design synergy modules in packages of roughly **4–8 designs**:
   - 1 payoff;
