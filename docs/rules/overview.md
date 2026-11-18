@@ -197,13 +197,13 @@ Decklists are **open**: both players see each other's full list at the start of 
 
 # 13. Deck Rules
 
-Each deck contains exactly **25 cards** (30 until the stars prototype; Martin, 2026-11-15: "let's change it to 25 cards a deck, shall we? with 20 stars still") and must satisfy all of the following:
+Each deck contains exactly **25 cards** (Martin, 2026-11-15: "let's change it to 25 cards a deck, shall we? with 20 stars still") and must satisfy all of the following:
 
 - no more than 2 copies of any non-legendary unit;
 - no more than 1 copy of any legendary unit;
-- no more than **20 stars** in total, counted per copy (16 until Martin raised it, 2026-11-15).
+- no more than **20 stars** in total, counted per copy.
 
-Stars (a prototype on the `stars` branch, 2026-11-14, not settled): every card has a level, shown on the card as a number in a star: 0 ordinary (the plain Lion's level; most cards; no mark), 1 strong, 2 legendary, 3 monster. No level is below ordinary (Martin, 2026-11-15: "we won't do any cards like that it's too confusing for the players"). Commons and rares are one kind of card there (Martin, 2026-11-15: "merging rare and commons together, and then bringing the limit for non-legendary cards to 2"): `cards.json` keeps a card's recorded rarity, which gives its starting level (common 0, rare 1, legendary 2), and the game reads every rare as a common. The budget lives in `decks.STAR_BUDGET`, the levels, defaults and the merge in `engine/stars.py`, the copy limits in `engine/cards.py`; `tools/stars/refit_decks.py` fitted the shipped and ladder decks to it.
+Stars (on main since 2026-11-16, Martin: "can we start unifying them all into main branch and localhost server?"): every card has a level, shown on the card as stars: 0 ordinary (the plain Lion's level; most cards; no mark), 1 strong, 2 legendary, 3 monster, and one card at 4 (Ash). No level is below ordinary (Martin, 2026-11-15: "we won't do any cards like that it's too confusing for the players"). Commons and rares are one kind of card there (Martin, 2026-11-15: "merging rare and commons together, and then bringing the limit for non-legendary cards to 2"): `cards.json` keeps a card's recorded rarity, which gives its starting level (common 0, rare 1, legendary 2), and the game reads every rare as a common. The budget lives in `decks.STAR_BUDGET`, the levels, defaults and the merge in `engine/stars.py`, the copy limits in `engine/cards.py`; `tools/stars/refit_decks.py` fits the shipped and ladder decks to it.
 
 Any deck within these rules is legal, the starters included: a starter runs as many rare and common designs as its cards' rarities give it, with no fixed split (Martin, 2026-10-22; his calls are logged in `design/log_rarity.md`).
 
