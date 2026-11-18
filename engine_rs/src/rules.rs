@@ -150,6 +150,7 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
     if validate && !legal_actions(st).contains(&action) {
         return Err(format!("illegal action {}", action.to_json(st)));
     }
+    st.applied_this_turn += 1;
     if st.pending.is_some() {
         effects::apply_pending(st, &action);
     } else {
@@ -194,6 +195,12 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
         }
     }
     resolve_and_maybe_end_turn(st);
+    // The turn's action cap (rules.py apply_action): a turn that ended on its own has reset the count.
+    if st.applied_this_turn >= st.cfg().max_actions_per_turn && !st.decided() {
+        st.pending = None;
+        st.effect_stack.clear();
+        end_turn(st);
+    }
     Ok(())
 }
 
@@ -232,6 +239,7 @@ fn end_turn(st: &mut State) {
     st.turn_counter += 1;
     st.units_placed_this_turn = 0;
     st.actions_taken_this_turn = 0;
+    st.applied_this_turn = 0;
     st.turn_flags = crate::state::TurnFlags::default();
     st.current = other(player);
     let (cur, t) = (st.current, st.turn_counter);

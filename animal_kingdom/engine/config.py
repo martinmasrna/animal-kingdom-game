@@ -243,6 +243,7 @@ class Config:
                                          # lacks (Martin, 2026-10-11, from his gauntlets: 82% first vs 67% second)
 
     # --- Engine safety / sim hygiene ---
+    max_actions_per_turn: int = 30       # a turn ends after this many applied actions, choices included, even mid-effect (Martin, 2026-11-18)
     max_turns: int = 400                 # hard cap so fuzz games always terminate (M1)
 
     @staticmethod

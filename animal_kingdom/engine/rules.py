@@ -174,6 +174,7 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
         action = effects.canonical_place(state, state.pending["chooser"] if state.pending else state.current, action)
     if validate and action not in legal_actions(state):
         raise EngineError(f"illegal action {action!r}")
+    state.applied_this_turn += 1
 
     if state.pending is not None:
         effects.apply_pending(state, action)
@@ -202,6 +203,12 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
         raise EngineError(f"unexpected action {action!r}")
 
     _resolve_and_maybe_end_turn(state)
+    # The turn's action cap: past it the turn ends at once, whatever is still resolving (a loop of cards, say). A turn
+    # that ended on its own has reset the count.
+    if state.applied_this_turn >= state.config.max_actions_per_turn and not _decided(state):
+        state.pending = None
+        state.effect_stack.clear()
+        _end_turn(state)
     return state
 
 
@@ -250,6 +257,7 @@ def _end_turn(state: GameState) -> None:
     state.turn_counter += 1
     state.units_placed_this_turn = 0
     state.actions_taken_this_turn = 0
+    state.applied_this_turn = 0
     state.turn_flags = {}                    # reset once-per-turn trigger flags
     state.current = other_player(player)
     state.emit("turn_start", player=state.current, turn=state.turn_counter)

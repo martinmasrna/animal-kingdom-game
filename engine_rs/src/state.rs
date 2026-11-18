@@ -470,6 +470,7 @@ pub struct State {
     pub turn_counter: i32,
     pub units_placed_this_turn: i32,
     pub actions_taken_this_turn: i32,
+    pub applied_this_turn: i32,
     pub idle_turns: i32,
     pub next_iid: i64,
     pub play_seq: i32,
@@ -549,6 +550,7 @@ impl Clone for State {
             turn_counter: self.turn_counter,
             units_placed_this_turn: self.units_placed_this_turn,
             actions_taken_this_turn: self.actions_taken_this_turn,
+            applied_this_turn: self.applied_this_turn,
             idle_turns: self.idle_turns,
             next_iid: self.next_iid,
             play_seq: self.play_seq,
@@ -1063,6 +1065,7 @@ impl State {
             "turn_counter": self.turn_counter,
             "units_placed_this_turn": self.units_placed_this_turn,
             "actions_taken_this_turn": self.actions_taken_this_turn,
+            "applied_this_turn": self.applied_this_turn,
             "idle_turns": self.idle_turns,
             "next_iid": self.next_iid,
             "play_seq": self.play_seq,
@@ -1185,6 +1188,7 @@ impl State {
         st.turn_counter = d["turn_counter"].as_i64().unwrap() as i32;
         st.units_placed_this_turn = d["units_placed_this_turn"].as_i64().unwrap() as i32;
         st.actions_taken_this_turn = d.get("actions_taken_this_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
+        st.applied_this_turn = d.get("applied_this_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
         st.idle_turns = d.get("idle_turns").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
         st.next_iid = d["next_iid"].as_i64().unwrap();
         st.play_seq = d.get("play_seq").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
@@ -1242,6 +1246,7 @@ impl State {
             turn_counter: 0,
             units_placed_this_turn: 0,
             actions_taken_this_turn: 0,
+            applied_this_turn: 0,
             idle_turns: 0,
             next_iid: 0,
             play_seq: 0,

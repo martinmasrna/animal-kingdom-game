@@ -1026,7 +1026,7 @@ pub fn has_act(st: &State, unit: &Unit) -> bool {
 /// Babaji's Roar: the allies next to `cr` it may return (effects.py _babaji_allies).
 pub fn babaji_allies(st: &State, player: Player, cr: Cr) -> Vec<Cr> {
     let mut out: Vec<Cr> = st.map().neighbors(cr).iter().copied()
-        .filter(|&nb| st.top(nb).map(|t| t.owner == player && st.cname(t.card) != "baboon_legend" && statics::can_be_removed(st, t, Some(nb), false)).unwrap_or(false))
+        .filter(|&nb| st.top(nb).map(|t| t.owner == player && statics::can_be_removed(st, t, Some(nb), false)).unwrap_or(false))
         .collect();
     out.sort_by(|a, b| st.crname(*a).cmp(st.crname(*b)));
     out

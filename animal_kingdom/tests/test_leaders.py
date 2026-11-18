@@ -4,6 +4,8 @@ fronts column 1, B's column 4."""
 
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 
 from animal_kingdom.engine import rules
@@ -501,9 +503,29 @@ def test_a_web_match_shows_both_leaders_offers_the_den_and_logs_them_for_its_rep
     assert views[-1]["game"]["leaders"]["B"]["id"] == "butterfly_legend"
 
 
-def test_babaji_never_returns_another_babaji():
-    """Two Babajis (an Orangutan's copy) would return and replay each other for ever: his Roar passes over a Babaji."""
+def test_two_babajis_return_each_other_and_the_turn_cap_ends_the_loop():
+    """The card prints no exception: a second Babaji (an Orangutan's copy) is an ally his Roar may return, and two replay
+    each other until the turn's action cap (Config.max_actions_per_turn) ends the turn (Martin, 2026-11-18)."""
+    from animal_kingdom.bots.greedy_bot import GreedyBot
     s = state(hands={"A": ["baboon_legend"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5})
     put(s, "1,2", "baboon_legend", "A")
     rules.apply_action(s, PlaceAction("baboon_legend", ("cr", "1,1")))
-    assert s.pending is None
+    assert s.pending is not None and s.pending["options"] == ["1,2"]          # the other Babaji is returnable now
+    bot = GreedyBot(seed=1)
+    steps = 0
+    while s.current == "A" and s.result is None:
+        a = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
+        rules.apply_action(s, a)
+        steps += 1
+        assert steps <= s.config.max_actions_per_turn
+    assert s.current == "B" and s.pending is None and not s.effect_stack
+
+
+def test_the_turn_cap_ends_the_turn_mid_effect_and_resets():
+    s = state(hands={"A": ["baboon_legend"]}, decks={"A": ["t_body"] * 5, "B": ["t_body"] * 5},
+              config=dataclasses.replace(Config.default(), max_actions_per_turn=2))
+    put(s, "1,2", "t_small", "A")
+    rules.apply_action(s, PlaceAction("baboon_legend", ("cr", "1,1")))      # 1: the Roar asks which ally to return
+    assert s.pending is not None and s.current == "A"
+    choose(s, "1,2")                                                          # 2: the cap; the placement it asked for is dropped
+    assert s.current == "B" and s.pending is None and not s.effect_stack and s.applied_this_turn == 0
