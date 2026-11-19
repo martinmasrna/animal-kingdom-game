@@ -714,28 +714,56 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 /* held in the grip (carry.js): its edge in shadow, and its shadow cast far and soft on the board below, as high as it is */
 .flight.carry .fcard > .card { filter: drop-shadow(0 0 1px rgba(30,18,6,.8)) drop-shadow(30px 46px 14px rgba(12,6,0,.85)); }
 .flight .fcard > .card { position: absolute; left: 0; top: 0; box-shadow: none; }
-/* The hex board prototype (Martin's diamond, 2026-11-16; board.js HEX, data/maps.json map_hex): every crossroad a flat-top
-   hexagon 156 x 135 on the stage (the hexagons 160 across, so neighbours stand a hair apart), an empty one a sunk hexagon of
-   the clearings' sand, an animal its portrait cut to the hexagon under its team's stone bent to it, its strength on the boss
-   inside the bottom edge; the region stones on the corners three crossroads share, above the pieces; each den's tip its own
-   tile, where it is entered. Painted placeholders (design sandbox screen/hex/build_hex.py). */
-.game.hexb .cr, .game.kit.hexb .cr.unit { width: 156px; height: 135px; margin: -67.5px 0 0 -78px; }
-.game.hexb #board .cr:not(.capture), .game.hexb .dentile { scale: .9375; }   /* drawn for a circumradius of 80, the board's is 75 (board.js HEX.s) */
-.game.kit.hexb .cr.clear { background: url(/static/kit2/hex_slot.webp) center / 100% 100% no-repeat; }
-.game.kit.hexb .unit .ring.hexu { inset: auto; left: 12px; top: 1.5px; width: 132px; height: 132px; border-radius: 0;
-  clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0 50%); }
-.game.kit.hexb .unit .rimimg { inset: 0; width: 100%; height: 100%; }
-.game.kit.hexb .unit .rimimg.armor { inset: auto; left: -2px; top: -12.5px; width: 160px; height: 160px; }
-.game.kit.hexb .unit .boss { bottom: 0; }
-.game.kit.hexb .unit .buried.seen .fill { inset: 8px; border-radius: 0; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
-.game.kit.hexb .unit .kwl.mist, .game.kit.hexb .unit .kwl.venom { left: 22px; top: 8px; width: 112px; height: 119px; }
-.game.kit.hexb .stone.pboss { width: 36px; height: 36px; margin: -18px 0 0 -18px; z-index: 4; }
-.game.kit.hexb .stone.pboss { width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+/* The hex board (Martin's diamond, 2026-11-16; board.js HEX, data/maps.json map_hex): pointy-top tokens touching, your
+   den the bottom tip (2026-11-17). A piece is the token of the rim tool (static/token.js): its box --tw x --th on the stage
+   (board.js sets both), every layer inside it placed in percentages of the token, so it draws at any size. An empty
+   crossroad is a sunk hexagon of the clearings' sand, a den its team's frame over a dark hollow; the region stones sit on
+   the corners three crossroads share, above the pieces. */
+.game.hexb #board .cr:not(.leader), .game.kit.hexb #board .cr.unit:not(.leader), .game.hexb .dentile, .game.hexb .leave.unit { width: var(--tw); height: var(--th); margin: calc(var(--th) / -2) 0 0 calc(var(--tw) / -2); }
+.game.kit.hexb .cr.clear { background: url(/static/hex/slot.webp) center / 94% 94% no-repeat; filter: brightness(.86) saturate(.85); }   /* a place: a sunk hexagon a little inside its token's outline, quieter than the pieces */
+.game.hexb .unit .tkbase, .game.hexb .unit .tkarmor { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.game.hexb .unit .tkbase { filter: drop-shadow(0 1px 2px rgba(20, 12, 4, .35)); }
+.game.hexb .unit img.wild { filter: saturate(0) brightness(1.1); }   /* a Wild animal: no team's colour */
+.game.hexb .unit .tkanimal { position: absolute; inset: 0; pointer-events: none; }
+.game.hexb .unit .tkanimal.inked { filter: grayscale(.85) brightness(.6); pointer-events: auto; }
+.game.hexb .unit .tkfig { position: absolute; inset: 0; }
+/* the figure's own shadow on the window (the rim tool: 45% black, blur 12, 5 down, in token px) */
+.game.hexb .unit .tkfig img { position: absolute; max-width: none; filter: drop-shadow(0 calc(var(--tw) * .0093) calc(var(--tw) * .011) rgba(0, 0, 0, .45)); }
+.game.hexb .unit .tkwin, .game.hexb .unit .kwl.tkw { position: absolute; inset: 0; clip-path: var(--tkwin); border-radius: 0; }
+.game.hexb .unit .tkwin .ring { inset: auto; border: 0; border-radius: 0; }
+.game.hexb .unit .kwl.tkw > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.game.kit.hexb .unit .kwl.mist.tkw, .game.kit.hexb .unit .kwl.venom.tkw { left: 0; top: 0; width: 100%; height: 100%; }
+.game.kit.hexb .unit .kwl.thorns { left: -6%; top: calc(50% - var(--tw) * .56); width: 112%; height: auto; aspect-ratio: 1; }   /* on its own rim, the tips just past its edge: they read in the board's middle and stay clear of a neighbour's number */
+.game.kit.hexb .unit .rimimg.hex.tkarmor { inset: auto; left: 0; top: 0; width: 100%; height: 100%; }
+/* the strength on the drawer: Martin's numerals (static/hex/num), cream, drawn by the SVG itself */
+.game.kit.hexb .unit .boss.tknum { position: absolute; margin: 0; bottom: auto; border: 0; border-radius: 0; background: none; display: block; text-shadow: none; }
+.game.kit.hexb .unit .boss.tknum img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.game.kit.hexb .unit .buried.seen.tkpeek { inset: 0; filter: brightness(.6) saturate(.8); }
+.game.kit.hexb .unit .buried.seen.tkpeek img { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the pieces share the stage's stacking, drawn top row first, so a lower row lies over the row above (a head rising over its
+   rim too) */
+.game.hexb #board .cr.unit { z-index: auto; }
+/* a stack's lower tokens show past its neighbours' edges: they lie over the neighbours, its own token over them, its thorns still under all */
+.game.hexb #board .cr.unit .tkpeek { z-index: 1; }
+.game.hexb #board .cr.unit:has(.tkpeek) > :not(.tkpeek):not(.kw):not(.timer):not(.tknum) { z-index: 2; }
+.game.hexb #board .cr.unit .boss.tknum { z-index: 3; }
+.game.hexb #board .cr.unit.strike, .game.hexb #board .cr.unit.capture { z-index: 6; }
+/* a landing (or a bite) keeps no transform once it has played, so the piece stops being a layer of its own and its number
+   goes back over its neighbours' thorns */
+.game.hexb #board .cr.unit.land, .game.hexb #board .cr.unit.flown, .game.hexb #board .cr.unit.eat { animation-fill-mode: backwards; }   /* a landing stays in the row's order: its dust and thorns on the ground under the tokens */
+.game.hexb .unit .kw.trg, .game.hexb .unit .timer { position: absolute; width: calc(var(--tw) * .27); height: calc(var(--tw) * .27); margin: calc(var(--tw) * -.135) 0 0 calc(var(--tw) * -.135); right: auto; z-index: 3; }
+.game.hexb .unit .kw.trg img { width: 68%; height: 68%; }
+.game.hexb .unit .timer .chalk { height: 45%; }
+.game.kit.hexb .stone.pboss { width: calc(var(--tw) * .17); height: calc(var(--tw) * .17); margin: calc(var(--tw) * -.085) 0 0 calc(var(--tw) * -.085); z-index: 4; }
 .game.kit.hexb .stone.pboss .chalk { display: none; }   /* every region pays the same 5: the stone alone (Martin, 2026-11-16: remove the number from the food stones) */
-.game.hexb .cr.tgt::after, .game.hexb .cr.roamable::after, .game.hexb .cr.roamsel::after { inset: -6px; border: 0; border-radius: 0; background: var(--act);
-  clip-path: path(evenodd, 'M42 0 L126 0 L168 73.5 L126 147 L42 147 L0 73.5 Z M44.3 4.8 L123.7 4.8 L163.4 73.5 L123.7 142.2 L44.3 142.2 L4.6 73.5 Z'); }
+.game.hexb .cr.tgt::after, .game.hexb .cr.roamable::after, .game.hexb .cr.roamsel::after { inset: 0; border: 0; border-radius: 0; background: var(--act); z-index: 4;
+  clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 6%, 5.5% 28%, 5.5% 72%, 50% 94%, 94.5% 72%, 94.5% 28%, 50% 6%); }
 .game.hexb .cr.roamable::after { opacity: .7; }
 .game.hexb .cr.roamsel::after { background: var(--ready); }
-.game .dentile { width: 156px; height: 135px; margin: -67.5px 0 0 -78px; pointer-events: none; filter: drop-shadow(1px 3px 3px rgba(20, 12, 4, .5)); }
-.game .dentile::before { content: ''; position: absolute; inset: 0; background: url(/static/kit2/hex_slot.webp) center / 100% 100% no-repeat; filter: brightness(.32) saturate(.7); }
+.game .dentile { pointer-events: none; filter: drop-shadow(0 1px 2px rgba(20, 12, 4, .35)); }
 .game .dentile img { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the hex board's den: its whole tip is the mouth, ringed as a crossroad is when it can be taken */
+.game.hexb .mouth { width: var(--tw); height: var(--th); margin: calc(var(--th) / -2) 0 0 calc(var(--tw) / -2); border-radius: 0; z-index: 2; }
+.game.hexb .mouth.tgt::after { inset: 0; border: 0; border-radius: 0; background: var(--act);
+  clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 6%, 5.5% 28%, 5.5% 72%, 50% 94%, 94.5% 72%, 94.5% 28%, 50% 6%); }
+.game.port.hexb #world img { object-fit: cover; }   /* upright, the hex board's ground is the middle of its wide painting */

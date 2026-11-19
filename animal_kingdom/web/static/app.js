@@ -6,7 +6,7 @@ import { SUCCESSOR } from './cardnums.js';
 import { plan, DUR } from './timeline.js';
 import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt, resolvesIn, setBoardMap } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt, resolvesIn, setBoardMap, hexBoard } from './board.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripHTML, stripsHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
@@ -975,12 +975,14 @@ const DUR_REVEAL_HOLD = DUR.reveal * 0.62;   // s: the opponent's card held at t
 const landNow = covered => { if (screen !== 'game') return; drawBoard(); sfx(covered ? 'cover' : 'land', LAND_HIT); };
 const LAND_HIT = HIT_DELAY;   // s from the cut to the piece's impact (flight.js: none for Impact, game.css landf for the glow)
 // The board a match is played on (match.py MAPS): its view names it, and the screen draws that board (the hex prototype on its own ground).
+// the painted ground: the hex board's own (no trails), upright too; the square board's wide one, or its upright painting
+const plateSrc = () => `/static/kit2/plate_${MAP.hex ? 'hex' : VIEW.port ? 'port' : 'wide'}.webp`;
 function useMap(v) {
   const id = (v && v.map) || 'map_b';
   if (MAPS[id] && MAP.id !== id) MAP = MAPS[id];
   setBoardMap(MAP);
   const img = document.querySelector('#world img'), scr = document.getElementById('scr');
-  if (img) { const src = `/static/kit2/${MAP.hex ? 'plate_hex' : 'plate_wide'}.webp`; if (!img.src.endsWith(src)) img.src = src; }
+  if (img) { const src = plateSrc(); if (!img.src.endsWith(src)) img.src = src; }
   if (scr) scr.classList.toggle('hexb', !!MAP.hex);
 }
 function onView(prev) {
@@ -1213,7 +1215,7 @@ function wireTips(root) {
 function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="game kit${MAP.hex ? ' hexb' : ''}" id="scr"><div id="world"><img src="/static/kit2/${MAP.hex ? 'plate_hex' : 'plate_wide'}.webp" alt="" draggable="false"></div><div id="stage">
+    app.innerHTML = `<div class="game kit${MAP.hex ? ' hexb' : ''}" id="scr"><div id="world"><img src="${plateSrc()}" alt="" draggable="false"></div><div id="stage">
       <div class="abs ledge"></div>
       <div id="board"></div>
       <div class="abs menu snd" id="sndbtn"></div><div class="panel setp" id="setp"></div>
@@ -1526,6 +1528,7 @@ function drawGame() {
 // Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
 // deck's and End turn's centre tops.
 const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 360 : 300, handW: RP.views.length ? 680 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row; a replay's hand takes the whole row, its controls under the stage
+  : hexBoard() ? { hand: 590, handC: 532, handW: 560, deck: [1299, 606], end: [1439, 664] }   // the hex board fills the stage's height: your hand beside its foot, left of your den's tip
   : { hand: 590, handC: STAGE.w / 2, deck: [1299, 606], end: [1439, 664], handW: 940 };
 
 // The history strip and both decklists, shared by both game screens.
@@ -1601,7 +1604,7 @@ function fitStage(redraw = true) {
   st.style.transform = t; document.getElementById('world').style.transform = t;
   st.style.top = document.getElementById('world').style.top = rp ? `calc(50% - ${rp / 2}px)` : '';
   st.style.setProperty('--rp', `${rp / k}px`);
-  const plate = document.querySelector('#world img'), src = `/static/kit2/plate_${port ? 'port' : MAP.hex ? 'hex' : 'wide'}.webp`;   // upright, its own painting; the hex prototype its ground without trails
+  const plate = document.querySelector('#world img'), src = plateSrc();
   if (!plate.src.endsWith(src)) plate.src = src;
   // the savanna around the stage, in stage px: the pieces at the screen's edges (hands, corners, deck, End turn) sit at the
   // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating

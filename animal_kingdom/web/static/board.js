@@ -6,6 +6,7 @@ import { CROP, hasArt, artUrl } from './art.js';
 import { KEYWORDS } from './card.js';
 import { flightEnd, inFlight } from './flight.js';
 import { pitStates, heldRegions, boardChanges, incomeFlights, eatFlights } from './turn.js';
+import { TW, TH, WINDOW, hasFigure, figure, numeral, tokenBase, denBase, armorShell } from './token.js';
 
 export const STAGE = { w: 1512, h: 800 };
 // A window taller than wide (a phone held upright) gets its own board: a painting made upright (kit2/plate_port.webp,
@@ -37,16 +38,22 @@ const CLEARINGS = [[282.3, 225.4], [558.4, 224.0], [831.6, 223.5], [1112.7, 222.
 const PORT_AT = { cols: [150, 352, 550], rows: [1037, 853, 660, 469, 271],
   pits: { A: { x: [172, 544], y: 1208 }, B: { x: [172, 544], y: 98 } },
   crown: { A: [600, 1208], B: [600, 98] }, mouth: { A: [386, 1177], B: [356, 124] } };
-// The hex prototype (Martin's diamond, 2026-11-16; data/maps.json map_hex): flat-top hexagons in columns 1-2-3-4-3-2-1,
-// the two tips the dens, the 14 between them the crossroads ("column,row", column 1..5 from your den, row from the top),
-// a region the corner three of them share. Drawn from this geometry on a ground without trails (kit2/plate_hex.webp).
-// s: a hexagon's circumradius on the stage. setBoardMap switches it on for a match on that board (app.js).
-const HEX = { on: false, s: 75, top: 68, cols: [2, 3, 4, 3, 2] };   // between the opponent's hand (to y 66) and yours (from y 590)
+// The hex board (Martin's diamond, 2026-11-16; data/maps.json map_hex): pointy-top tokens touching in rows 1-2-3-4-3-2-1
+// from the top, your den the bottom tip and your opponent's the top tip on every device (Martin, 2026-11-17: "bottom to
+// top 100%"), the 14 between them the crossroads. The map names a crossroad "column,row", column 1..5 from your den and
+// row 1..n across it: column c is the c-th row of tokens up from your den's tip, its row 1 on the left. This is the map's
+// own geometry turned a quarter (its flat-top hexagons become pointy-top ones), so neighbours on the map are neighbours
+// here. A region is the corner three of them share. Drawn on a ground without trails (kit2/plate_hex.webp).
+// w: a token's width on the stage (static/token.js draws it at any size), x: the board's middle, top: the top tip's top.
+const HEX = { on: false, cols: [2, 3, 4, 3, 2] };
 export function setBoardMap(M) { HEX.on = !!(M && M.hex); }
 export const hexBoard = () => HEX.on;
-const hexAt = (c, r) => { const s = HEX.s, h = s * Math.sqrt(3), n = HEX.cols[c - 1];
-  return [STAGE.w / 2 + 1.5 * s * (c - 3), HEX.top + h * ((4 - n) / 2 + r - 1) + h / 2]; };
-const hexTip = side => { const s = HEX.s, h = s * Math.sqrt(3); return [STAGE.w / 2 + 4.5 * s * (side === 'A' ? -1 : 1), HEX.top + 2 * h]; };
+// landscape: the board the stage's full height under the opponent's hand (to y 66), right of the middle so your hand has
+// the ground beside its foot (app.js PL); upright: between the dens' ridges
+const hexGeo = () => { const g = VIEW.port ? { w: 162, x: STAGE.w / 2, top: 150 } : { w: 114, x: 940, top: 70 }; g.h = g.w * TH / TW; return g; };
+const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
+  return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (6 - c) * .75 * g.h]; };
+const hexTip = side => { const g = hexGeo(); return [g.x, g.top + g.h / 2 + (side === 'A' ? 6 * .75 * g.h : 0)]; };
 const at = (c, r) => { if (HEX.on) return hexAt(c, r);
   if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
   const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
@@ -92,6 +99,7 @@ export function portrait(id, D, box = D) {
 
 // A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer, and its board keywords painted on.
 function unit(u, under, cards, fire = false) {
+  if (HEX.on) return hexUnit(u, under, cards, fire);
   // Board keywords, as the view states them (match.py): printed or lent alike. Stealth whenever the enemy can't choose it (an
   // adjacent Armadillo gives it); Spikes only until they've removed a coverer, after that it's an ordinary animal; Armor
   // when it can't be removed (a neighbour's Capybara too), Poison when a neighbour's legendary Jellyfish lends it; an inked
@@ -100,7 +108,7 @@ function unit(u, under, cards, fire = false) {
   // the animals underneath peek out behind, down and right: each a solid disc under its team rim, a step darker (at this
   // offset a portrait showed only as a sliver, which read as a gap)
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen" style="transform:translate(${22 + i * 7}px,${20 + i * 6}px) scale(.82);z-index:${-i - 1}">`
-    + `<div class="fill"></div><img class="rimimg" src="${kit(HEX.on ? `hex_rim_${team(b.owner)}.webp` : `rim_${team(b.owner)}.webp`)}" alt="" draggable="false"></div>`).join('');
+    + `<div class="fill"></div><img class="rimimg" src="${kit(`rim_${team(b.owner)}.webp`)}" alt="" draggable="false"></div>`).join('');
   // Board keywords are painted onto the piece, each on its own layer so all four stack (design sandbox screen/keywords/):
   // Armor turns the piece into a hexagon shell scute (rim and portrait), Spikes stand out as acacia thorns behind the rim, Stealth veils the
   // portrait in mist, Poison takes the portrait over with toxic green vapour (after Hearthstone's Enrage). The card on hover says what each one does.
@@ -114,14 +122,40 @@ function unit(u, under, cards, fire = false) {
   const venom = k => !has('Poison') ? '' : k === 'tint' ? img('kwl_vapour_tint.webp', `kwl venom tint${hx}`)
     : `<div class="kwl venom fumes${hx}">${img('kwl_vapour_fumes.webp', 'base')}<div class="vmask"><div class="flow v1" style="${ph(2, 14)}"></div></div></div>`;
   return peek + (has('Spikes') ? `<img class="kwl thorns" src="${kit(has('Armor') ? 'kwl_thorns_hex.webp' : 'kwl_thorns.webp')}" alt="" draggable="false">` : '') +
-    `<div class="ring${HEX.on ? ' hexu' : has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${HEX.on ? portrait(u.id, 116, 140) : portrait(u.id, 98, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
+    `<div class="ring${has('Armor') ? ' hexp' : ''}${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98, has('Armor') ? 124 : 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     venom('tint') + (has('Stealth') ? `<div class="kwl mist${hx}"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
-    (HEX.on ? `<img class="rimimg${has('Armor') ? ' armor' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `hex_rim_${team(u.owner)}.webp`)}" alt="" draggable="false">`
-      : `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">`) +
+    `<img class="rimimg${has('Armor') ? ' hex' : ''}" src="${kit(has('Armor') ? `kwl_hexb_${team(u.owner)}.webp` : `rim_${team(u.owner)}.webp`)}" alt="" draggable="false">` +
     `<div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
     (u.timer ? `<div class="timer" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
     (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '') +   // Yuki's leader (a plain plaque until it has a painted mark)
     ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TRG_AT}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
+}
+
+// A unit on the hex board: the token (static/token.js) in its owner's frame, the animals under it peeking out behind, down
+// and right, as the same token a shade darker; its board keywords as on the round piece, fitted to the token: Armor its
+// stone shell over the frame, Spikes the thorns on its rim, just past its edge, Stealth's mist and Poison's vapour in the window; the trigger
+// mark on the rim's upper right, a timer on its upper left.
+const TK_TRG = 'left:86.9%;top:31.6%', TK_TIMER = 'left:13.1%;top:31.6%';
+function hexUnit(u, under, cards, fire = false) {
+  const c = cards[u.id], kws = u.inked ? [] : [u.armor && 'Armor', u.hidden && 'Stealth', u.spikes && 'Spikes', u.poison && 'Poison'].filter(Boolean);
+  const has = k => kws.includes(k), g = hexGeo();
+  const ph = (i, dur) => `animation-delay:${(-((Date.now() / 1000 + (u.iid * 7919 + i * 433) % 997) % dur)).toFixed(2)}s`;
+  const img = (src, cls = '', st = '') => `<img class="${cls}" src="${src}" alt="" draggable="false"${st ? ` style="${st}"` : ''}>`;
+  const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen tkpeek" style="transform:translate(${4 + i * 3}%,${3.5 + i * 2.5}%)">${img(tokenBase(b.owner), b.owner === 'W' ? 'wild' : '')}</div>`).reverse().join('');   // the deepest first, under the others
+  // a card with no stand-in figure (a token, a reserve card) shows its painting's crop in the window
+  const win = hasFigure(u.id) ? figure(u.id) : (() => { const D = g.w * 380 / TW;
+    return `<div class="tkwin"><div class="ring${hasArt(u.id) ? '' : ' noart'}" style="left:${(80 / TW * 100).toFixed(2)}%;top:${(92.6 / TH * 100).toFixed(2)}%;width:${D}px;height:${D}px;${portrait(u.id, D)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div></div>`; })();
+  const venom = k => !has('Poison') ? '' : k === 'tint' ? `<div class="kwl venom tint tkw">${img(kit('kwl_vapour_tint.webp'))}</div>`
+    : `<div class="kwl venom fumes tkw">${img(kit('kwl_vapour_fumes.webp'), 'base')}<div class="vmask"><div class="flow v1" style="${ph(2, 14)}"></div></div></div>`;
+  return peek + img(tokenBase(u.owner), `tkbase${u.owner === 'W' ? ' wild' : ''}`) +
+    (has('Spikes') ? img(kit('kwl_thorns.webp'), 'kwl thorns') : '') +
+    (has('Armor') ? img(armorShell(u.owner), 'rimimg hex tkarmor') : '') +
+    `<div class="tkanimal${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}">${win}</div>` +
+    venom('tint') + (has('Stealth') ? `<div class="kwl mist tkw"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
+    numeral(u.str) +
+    (u.timer ? `<div class="timer" style="${TK_TIMER}" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
+    (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '') +
+    ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TK_TRG}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
 }
 
 // `g` is a viewer-space game { board, food, income, winFood }. `ui`: { rings: [cr] legal targets, hqRing (the enemy den can
@@ -145,6 +179,7 @@ export function renderBoard(el, M, g, cards, ui) {
       const ps = reg.corners.map(cr => at(...cr.split(',').map(Number))); return [ps.reduce((a, p) => a + p[0], 0) / ps.length, ps.reduce((a, p) => a + p[1], 0) / ps.length]; }
     const [c, r] = reg.c, [x1, y1] = at(c, r), [x2, y2] = at(c + 1, r + 1); return [(x1 + x2) / 2, (y1 + y2) / 2]; };
   let s = '';   // the painted ground is the game screen's (kit2/plate_wide.webp, under the stage), wider than any window
+  if (HEX.on) { const g = hexGeo(); el.style.setProperty('--tw', `${g.w}px`); el.style.setProperty('--th', `${g.h}px`); el.style.setProperty('--tkwin', WINDOW); }
 
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
   for (const reg of M.regions) {
@@ -153,8 +188,9 @@ export function renderBoard(el, M, g, cards, ui) {
   }
 
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
-  if (HEX.on) for (const side of ['A', 'B']) { const [x, y] = hexTip(side); s += put(`dentile ${side}`, x, y, `<img src="${kit(`hex_rim_${team(side)}.webp`)}" alt="" draggable="false">`); }
-  const CRS = HEX.on && M.crossroads ? M.crossroads.map(cr => cr.split(',').map(Number)) : Array.from({ length: M.cols * M.rows }, (_, i) => [i % M.cols + 1, Math.floor(i / M.cols) + 1]);
+  if (HEX.on) for (const side of ['A', 'B']) { const [x, y] = hexTip(side); s += put(`dentile ${side}`, x, y, `<img src="${denBase(side)}" alt="" draggable="false">`); }
+  // the hex board's pieces top row first, so a head that rises over its rim lies over the row above, as pieces on a table
+  const CRS = HEX.on && M.crossroads ? M.crossroads.map(cr => cr.split(',').map(Number)).sort((a, b) => b[0] - a[0] || a[1] - b[1]) : Array.from({ length: M.cols * M.rows }, (_, i) => [i % M.cols + 1, Math.floor(i / M.cols) + 1]);
   for (const [c, r] of CRS) {
     // an animal that roamed into the den stands only in its mouth, not also where it came from
     const cr = key(c, r), st = (g.board[cr] || []).filter(u => !ui.capture || u.iid !== ui.capture.iid), [x, y] = at(c, r);
@@ -190,7 +226,7 @@ export function renderBoard(el, M, g, cards, ui) {
   for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui, flowAt(side, 'pay'));
   for (const side of ['A', 'B']) if (ui.leaders && ui.leaders[side]) s += leaderPiece(side, ui.leaders[side], cards, ui);
   // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
-  if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = VIEW.port ? my + (ui.capture.side === 'A' ? 22 : -22) : my;   // seated in the mouth, clear of the crossroad beside it
+  if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port || HEX.on ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = HEX.on ? my : VIEW.port ? my + (ui.capture.side === 'A' ? 22 : -22) : my;   // on the hex board, on its den's tip   // seated in the mouth, clear of the crossroad beside it
     s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' : ''}`, x, y, unit(ui.capture, [], cards)); }
   el.innerHTML = s;
 
