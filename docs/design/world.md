@@ -22,3 +22,8 @@ The game's animals live in a world of our own, not on Earth: decided by Martin o
 ## What the inhabitants are, 2026-11-19
 
 - His reactions: tools and armour make sense for thinking creatures, so the old no-human-made-things rule was a belief from the real-animal days; "no matter what we do, it shouldn't be humans that look like animals" (human bodies with animal heads read as furry, "boring, cheap, doesn't really fit my style"); Ice Age's characters read as animals with human personalities, not humans; they need human-like emotions to be relatable ("the game is fucking made by human for humans"). His generator question: what if every animal, not only one line of apes, had become as intelligent as humans (and then no humans would exist). His thread: animals have no ego the way humans do, and both self-expression and needless war come from ego.
+
+## Invented creatures, 2026-11-19
+
+- His thinking aloud, not yet decided: "the invented ones are going to work much better, but psychologically they need to clearly resemble the existing ones ... not ... some blobs that have no resemblance"; not Earth's animals made intelligent but "a planet where every living creature that exists kind of evolved with the human-like ego and self-awareness".
+- On the art: invent two or three new creatures to see them, and push the tools and crafts "all the way" ("a monkey in a forge, like forging a sword").
