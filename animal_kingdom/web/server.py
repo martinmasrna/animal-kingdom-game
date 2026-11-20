@@ -1632,13 +1632,19 @@ async def create_match(req):
         level, bdeck = bot.get("level"), bot.get("deck")
         if not isinstance(level, str) or not isinstance(bdeck, str):
             raise web.HTTPBadRequest(text="bad bot")
-        if level in ranking.BANDS and bot_deck_ok(bdeck):
-            level = pilot_for(level, bdeck)          # one of the five bots, as on the ladder: the pilot follows the band
-        if level not in BOT_LEVELS or not bot_deck_ok(bdeck):
-            raise web.HTTPBadRequest(text="bad bot")
-        if level == "expert" and player is None:    # an Expert move takes a core for up to 8 s: only for a profile (Martin, 2026-11-05)
-            raise web.HTTPUnauthorized(text="the Expert needs a profile")
-        match.join(Seat(secrets.token_urlsafe(12), bot_seat_name(level, bdeck), bot=level, deck=bdeck))
+        if ruleset == "mana":
+            # the mana collection has no bot decks yet: the bot plays a mirror of the player's own deck (Martin, 2026-11-20,
+            # Practice refused the pool's animal decks; "Change bot's deck to the one I created on my profile")
+            level = level if level in BOT_LEVELS else next((l for l, b in ranking.PILOT_BAND.items() if b == level), "easy")
+            match.join(Seat(secrets.token_urlsafe(12), f"{ranking.PILOT_BAND.get(level, 'Bot')} Bot", bot=level, deck=deck))
+        else:
+            if level in ranking.BANDS and bot_deck_ok(bdeck):
+                level = pilot_for(level, bdeck)          # one of the five bots, as on the ladder: the pilot follows the band
+            if level not in BOT_LEVELS or not bot_deck_ok(bdeck):
+                raise web.HTTPBadRequest(text="bad bot")
+            if level == "expert" and player is None:    # an Expert move takes a core for up to 8 s: only for a profile (Martin, 2026-11-05)
+                raise web.HTTPUnauthorized(text="the Expert needs a profile")
+            match.join(Seat(secrets.token_urlsafe(12), bot_seat_name(level, bdeck), bot=level, deck=bdeck))
     else:
         match.version += 1
     if not match.tutorial:      # a tutorial is neither a game log for balance nor a match in the history

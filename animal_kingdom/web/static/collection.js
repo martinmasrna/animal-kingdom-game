@@ -27,6 +27,7 @@ let R = { deckSize: 25, copies: {}, starBudget: 0 };   // until the server's arr
 let M = false;
 const costOf = c => c.mana ?? 99;   // a card with no cost sorts last
 const COSTS = [1, 2, 3, 4, 5, 6];
+const MANA_COSTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];   // the cost row of the mana collection
 // The open deck in the mana rules, two ways (Martin, 2026-11-20: he wanted to try the deck as board tiles, and named the side
 // list cleaned up as the other way; neither is settled): `tray`, a band of pieces under the grid (the default), or `list`,
 // the side column's strips. ?deckview=list or ?deckview=tray on the address switches, kept in the browser like ?rules.
@@ -147,10 +148,10 @@ export function deckBody(list, cards, mana = false) {
   const counts = countsOf(list);
   return stripsHTML(Object.keys(counts), cards, id => counts[id], mana);
 }
-// The mana rules' curve: how many of the deck's cards cost 1, 2, 3, 4, 5 and 6 (a plain count, the lead session's default
-// for the prototype, not something Martin asked for).
+// The mana rules' curve: how many of the deck's cards cost 0 to 10 (a plain count, the lead session's default for the
+// prototype, not something Martin asked for).
 const curveHTML = list => { const n = {}; for (const id of list) { const k = C[id] && C[id].mana; n[k] = (n[k] || 0) + 1; }
-  return `<div class="mcurve">${COSTS.map(k => `<span class="${n[k] ? '' : 'zero'}">${costChip(k)}<b>${n[k] || 0}</b></span>`).join('')}</div>`; };
+  return `<div class="mcurve">${MANA_COSTS.map(k => `<span class="${n[k] ? '' : 'zero'}">${costChip(k)}<b>${n[k] || 0}</b></span>`).join('')}</div>`; };
 
 // The deck as a tray of pieces (DECKVIEW 'tray'): the leader as one large piece at the left, then a cell for each of the
 // deck's cards in two interlocking rows of board tiles, every copy its own piece, filled in cost order and zig-zagging
@@ -207,7 +208,9 @@ function render(app, all) {
       const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the card count and the stars show on their counters)
       return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${M ? manaPiece(c, { cost: c.mana ?? null, w: 150 }) : cardHTML(c, { cls: 'compact', lazy: true })}${n && c.rarity !== 'legendary' ? `<span class="pips${n > limit(c) ? ' over' : ''}">${pips(n, Math.max(n, limit(c)))}</span>` : ''}</div>`; }).join('') + '</div>';
 
-  const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${headCrop(id, 36)}"></div></div>`).join('');
+  // the mana rules: a row of costs to pick from, as Hearthstone's collection has, in place of the animal families (Martin, 2026-11-20)
+  const tabs = M ? MANA_COSTS.map(n => `<div class="ctab${st.cost === String(n) ? ' on' : ''}" data-cost="${n}">${costChip(n)}</div>`).join('')
+    : FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${headCrop(id, 36)}"></div></div>`).join('');
   const strengths = [...Array(8).keys()].map(String).concat('8+');
   // the levels the collection's cards have, highest first (no level is offered that no card has)
   const levels = [...new Set(cards.map(c => c.stars | 0))].sort((a, b) => b - a);
@@ -215,9 +218,8 @@ function render(app, all) {
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'All cards'], ['legendary', 'Legendary']])}
-    ${M ? dd('cost', st.cost, [['', 'Any cost'], ...COSTS.map(v => [String(v), `Cost ${v}`])])
-      : dd('lvl', st.lvl, [['', LABEL.five ? 'Any number' : 'Any stars'], ...levels.map(v => [String(v), lvlName(v)])])}
-    ${dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
+    ${M ? '' : dd('lvl', st.lvl, [['', LABEL.five ? 'Any number' : 'Any stars'], ...levels.map(v => [String(v), lvlName(v)])])}
+    ${M ? '' : dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
   const body = d => (M ? curveHTML(d.list) : '') + deckBody(d.list, C, M);
@@ -298,6 +300,7 @@ function wire(app, all, open) {
   app.querySelectorAll('.fbx').forEach(b => b.onclick = X.feedback);
   wireDd(app, (k, v) => { st[k] = k === 'rar' ? (v || null) : v; redo(); });
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
+  app.querySelectorAll('[data-cost]').forEach(e => e.onclick = () => { st.cost = st.cost === e.dataset.cost ? '' : e.dataset.cost; redo(); });   // one cost at a time; again: every cost
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t; st.families.has(f) ? st.families.delete(f) : st.families.add(f); redo(); });   // toggles; none chosen shows every family
   const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, hab: '', str: '', lvl: '', cost: '', q: '' }); redo(); };
   app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; if (!st.open) { st.open = e.dataset.d; st.sheet = false; redo(); } });
