@@ -153,7 +153,6 @@ async function boot() {
     if (kb) { s.setProperty('--vvt', vv.offsetTop + 'px'); s.setProperty('--vvh', vv.height + 'px'); } };
     vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); }
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
-    if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
     
     // Space ends your turn: the same check as clicking End turn
     if (screen === 'game' && !/INPUT|TEXTAREA/.test(e.target.tagName) && !e.repeat) {
@@ -192,6 +191,8 @@ function route() {
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'friend' && id) { manaHome(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'deck' && parts[1]) return deckLinkScreen(parts.slice(1).join('/'));
+  if (parts[0] === 'account') return accountScreen();
+  if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : manaHome({ join: id });
   if (parts[0] === 'm' && id) return matchScreen(id);
   manaHome();
@@ -199,7 +200,7 @@ function route() {
 
 // ------------------------------------------------------------------ home: where a match starts
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
-const TOPICON = { feedback: TI('feedback'), friends: TI('friends') };
+const TOPICON = { feedback: TI('feedback'), friends: TI('friends'), person: TI('person') };
 
 function settingsBody() {
   const v = Math.round(volume() * 100);
@@ -250,6 +251,65 @@ function deckLinkScreen(arg) {
   };
 }
 
+// ------------------------------------------------------------------ ladder, and your account (in Settings)
+// The ladder: the leaderboard and your match history as its two tabs, one column on the ground; your account (name,
+// sign-in, the sign-in code) lives in Settings and your friends in the Friends panel (Martin, 2026-10-04).
+const PROVIDER = { google: 'Google', discord: 'Discord' };
+// ------------------------------------------------------------------ your account
+// Your name, signing in with Google or Discord (the server's providers: web/oauth.py) and, before you do, the sign-in code
+// that plays as you on another device.
+function accountBody() {
+  const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
+  const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
+  const account = ME.logins.length
+    ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
+        <div class="row">${unlinked.map(p => `<button class="slab" data-login="${p}">Also ${PROVIDER[p]}</button>`).join('')}<button class="slab" id="signout">Sign out</button></div>`)
+    : ME.providers.length ? sect('Account', `<p>Sign in to keep your decks and matches on every device.</p>
+        <div class="row">${ME.providers.map(p => `<button class="slab" data-login="${p}">${PROVIDER[p]}</button>`).join('')}</div>`) : '';
+  const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
+      <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
+    + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
+  return sect('Name', `<div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>`) + account + code;
+}
+function wireAccount(root, redraw) {
+  const $r = id => root.querySelector('#' + id);
+  const nm = $r('pname');
+  nm.onchange = async () => { const r = await api('/api/me', { method: 'PATCH', body: JSON.stringify({ name: nm.value }) });
+    if (!r.ok) return toast(await r.text()); ME = await r.json(); redraw(); };
+  root.querySelectorAll('[data-login]').forEach(el => el.onclick = async () => {
+    const r = await api('/api/auth/' + el.dataset.login, { method: 'POST' });
+    if (!r.ok) return toast(await r.text());
+    location.href = (await r.json()).url;
+  });
+  const so = $r('signout');
+  if (so) so.onclick = async () => { await api('/api/signout', { method: 'POST' }); localStorage.removeItem('ak:key'); await loadProfile(); location.hash = '#/'; };
+  if (ME.logins.length) return;
+  $r('showkey').onclick = () => { ui.showKey = !ui.showKey; redraw(); };
+  $r('copykey').onclick = () => navigator.clipboard.writeText(store('ak:key')).then(() => toast('Sign-in code copied', true), () => toast(store('ak:key')));
+  const other = $r('other');
+  const signIn = async () => { const r = await api('/api/signin', { method: 'POST', body: JSON.stringify({ code: other.value }) });
+    if (!r.ok) return toast('No profile has that sign-in code');
+    ME = await r.json(); store('ak:key', other.value.trim().toUpperCase()); ui.showKey = false; toast(`Signed in as ${ME.name}#${ME.tag}`, true); redraw(); };
+  $r('signin').onclick = signIn;
+  other.onkeydown = e => { if (e.key === 'Enter') signIn(); };
+}
+function accountScreen() {
+  screen = 'account';
+  app.innerHTML = `<div class="mscr lead sets"><div class="lcol"><div class="hhead"><h2>Account</h2></div>
+    <div class="lbody">${accountBody()}</div>
+    <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
+  document.getElementById('back').onclick = () => { location.hash = '#/'; };
+  wireAccount(app, accountScreen);
+}
+// Back from Google or Discord: the one-time code swapped for this device's own session key.
+async function finishSignIn(code) {
+  history.replaceState(null, '', '#/account');
+  const r = code && code !== 'failed' ? await api('/api/auth/redeem', { method: 'POST', body: JSON.stringify({ code }) }) : null;
+  if (!r || !r.ok) { toast('Sign-in didn\'t go through, try again'); return accountScreen(); }
+  const m = await r.json(); store('ak:key', m.key); ME = m.profile;
+  toast(`Signed in as ${ME.name}#${ME.tag}`, true); accountScreen();
+}
+
 // A deck legal under the deck rules (decks.deck_problems): its size, its copies, only collectible cards, and a leader of
 // its own.
 function legal(list, leader) {
@@ -280,7 +340,7 @@ async function challengeFriend(f) {
 function manaHome(mode = {}) {
   screen = 'home';
   if (!mode.play && !mode.join) {
-    app.innerHTML = `<div class="mhome"><div class="mtop"><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button></div><div class="box">
+    app.innerHTML = `<div class="mhome"><div class="mtop"><a class="acct" href="#/account" data-tip="Account" aria-label="Account">${TOPICON.person}</a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button></div><div class="box">
       <h1>Animal Kingdom<small>A prototype</small></h1>
       <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><button class="go" id="mprac">Practice</button><a class="go" id="mcoll" href="#/collection">Collection</a></div>
       </div></div>`;

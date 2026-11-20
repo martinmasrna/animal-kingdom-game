@@ -196,7 +196,6 @@ def test_feedback_mail_has_a_server_wide_cap_and_an_oversized_view_is_dropped(ap
     mailed, kept = [], []
     monkeypatch.setitem(guard.LIMITS, "mail", (2, 3600))
     monkeypatch.setattr(server.feedback, "mail", lambda *a: mailed.append(a))
-    monkeypatch.setattr(server.discord, "post", lambda *a: None)
     real_keep = server.feedback.keep
     monkeypatch.setattr(server.feedback, "keep", lambda db, pid, sender, text, ctx, view: kept.append(view) or real_keep(db, pid, sender, text, ctx, view))
 

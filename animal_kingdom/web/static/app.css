@@ -48,7 +48,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .ftab { display: none; position: fixed; right: 0; top: 50%; z-index: 5; transform: translateY(-50%) rotate(180deg); writing-mode: vertical-rl; align-items: center; gap: 8px;
   padding: 16px 11px; border: 0; border-radius: 0 12px 12px 0; background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; color: #f0e8da; cursor: pointer;
   font: 600 17px 'Fira Sans Condensed', sans-serif; box-shadow: 0 6px 16px rgba(0,0,0,.6); }
-body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app > .mscr.ladder) .ftab { display: flex; }   /* where the screen's edge is free */
+body:has(> #app > .mhome, > #app > .mscr.sets) .ftab { display: flex; }   /* where the screen's edge is free */
 .ftab:hover { filter: brightness(1.2); }
 
 @media (orientation: portrait) { body .ftab { display: none !important; }  }   /* a phone's edge is never free: Feedback moves into the menu */
@@ -386,4 +386,14 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   
    
 .ladder .dlink { margin: 8px 0 14px; }
-
+/* Account (app.js accountScreen): name, sign-in with Google or Discord, the sign-in code. */
+.sets .sect { margin-bottom: 22px; }
+.sets .namerow { display: flex; align-items: center; gap: 8px; }
+.sets .namein { flex: 1; min-width: 0; font: 700 22px 'Fira Sans Condensed', sans-serif; height: 48px; }
+.sets .sect h4 { margin: 0 0 8px; font: 600 15px 'Fira Sans Condensed', sans-serif; color: #a89d8c; }
+.sets .sect p { margin: 0 0 10px; font-size: 15px; line-height: 1.35; color: #b3a996; }
+.sets .keycode { font-size: 15px; letter-spacing: .04em; white-space: nowrap; overflow: hidden; }
+.sets .login { font-size: 16px; margin-bottom: 8px; }
+.lead .lcol { width: 100%; max-width: 560px; display: grid; grid-template-rows: 72px minmax(0, 1fr) auto auto; min-height: 0; height: 100%; }
+.lead .lbody { overflow-y: auto; padding: 4px 24px 16px; display: flex; flex-direction: column; gap: 6px; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; }
+@media (max-width: 700px) { .lead .hhead, .lead .lbody, .lead .sfoot { padding-left: 12px; padding-right: 12px; } .lead .lr { font-size: 16px; grid-template-columns: 36px 1fr minmax(64px, auto); } }

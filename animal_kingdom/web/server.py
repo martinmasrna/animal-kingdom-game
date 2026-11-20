@@ -24,7 +24,7 @@ from ..engine.cards import COPY_LIMITS, load_cards
 from ..engine.leaders import LEADERS
 from ..engine.state import EngineError
 from ..decks import DECK_SIZE
-from . import custom_decks, discord, events, feedback, guard, oauth
+from . import custom_decks, events, feedback, guard, oauth
 from .chat import Chat, ChatError
 from .friends import FriendError, Friends
 from .match import DECK_NAMES, Match, Seat, card_pool, map_info
@@ -220,12 +220,6 @@ class Hub:
                 events.record(profiles.db, s.profile, "game_end", {
                     "match": match.id, "game": match.rematches + 1, "won": r["winner"] == p, "reason": r["reason"],
                     "rounds": r["turns"]})
-                if r["winner"] == p:   # a line for the Discord channel, when it is one worth a line (web/discord.py)
-                    opp = match.seats.get("B" if p == "A" else "A")
-                    deck = lambda q: DECK_NAMES.get(q.deck, "their own deck") if q else ""
-                    text = discord.result_text(s.name, opp.name if opp else "", deck(s), deck(opp), "bot" if opp and opp.is_bot else None)
-                    if text:
-                        asyncio.get_running_loop().run_in_executor(None, discord.post, "events", text)
 
     async def push(self, match: Match) -> None:
         await self.broadcast(match)
@@ -470,7 +464,6 @@ async def send_feedback(req):
         raise web.HTTPBadRequest(text=str(e))
     if guard.limiter.allow("mail", "all"):    # kept either way; mailed while the server-wide hourly cap allows
         asyncio.get_running_loop().run_in_executor(None, feedback.mail, display(p), text, context, view)
-        asyncio.get_running_loop().run_in_executor(None, discord.post, "feedback", discord.feedback_text(display(p), text, context))
     return web.json_response({})
 
 

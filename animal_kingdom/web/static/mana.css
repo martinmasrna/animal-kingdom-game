@@ -187,10 +187,10 @@
 .mhome h1 { font: 700 34px 'Fira Sans Condensed', sans-serif; }
 .mhome h1 small { display: block; font-size: 16px; font-weight: 500; color: #8d95a1; margin-top: 4px; }
 .mhome h2 { font: 600 14px 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #8d95a1; margin-top: 8px; }
-.mhome .mtop { position: fixed; right: 16px; top: 16px; z-index: 5; }   /* Friends, in the corner (chat.js opens its panel under it) */
-.mhome .mtop .chatbtn { box-sizing: border-box; height: 52px; min-width: 52px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 10px; border: 0; border-radius: 10px;
+.mhome .mtop { position: fixed; right: 16px; top: 16px; z-index: 5; display: flex; gap: 10px; }   /* Friends, in the corner (chat.js opens its panel under it) */
+.mhome .mtop .chatbtn, .mhome .mtop .acct { box-sizing: border-box; height: 52px; min-width: 52px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 10px; border: 0; border-radius: 10px;
   background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #f0e8da; cursor: pointer; }
-.mhome .mtop .chatbtn:hover { filter: brightness(1.2); }
+.mhome .mtop .chatbtn:hover, .mhome .mtop .acct:hover { filter: brightness(1.2); }
 .mhome .mtop .tic { width: 32px; height: 32px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
 .mhome .decks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .mhome .dk { text-align: left; padding: 10px 14px; border-radius: 10px; border: 1px solid #3d434c; background: #2b2f36; color: #e6eaf0; font: 500 17px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
