@@ -1163,6 +1163,7 @@ function showView(prev) {
   if (V.phase === 'lobby') return lobbyScreen();
   if (V.phase === 'prematch') return prematchScreen();
   if (!prev || prev.phase === 'game_over' && V.phase === 'playing') ui.peek = false;
+  if (prev && prev.phase !== 'playing' && V.phase === 'playing') ui.skips = [];   // a new game (a rematch keeps the match's id and count): the last one's skipped turns are gone
   if (prev && prev.phase === 'playing' && V.phase !== 'playing') showChallenge();
   if (prev && prev.game && V.game && prev.game.history.length > V.game.history.length) ui.sel = null;
   // One-shot animation input: what the board and food were before this view (same game only).
@@ -1473,7 +1474,7 @@ function drawGame() {
   // the mana screen: a row of pieces under the board (the full cards, large, while the opening hands are chosen)
   const n = held.length, cw = M ? (mull ? 176 : 100) : 143, gap = M ? (mull ? 18 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0) : n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0,
     x0 = (M ? STAGE.w / 2 : PL().handC) - (n * cw + (n - 1) * gap) / 2;
-  const hand = $('hand'); hand.classList.toggle('mull', mull);
+  const hand = $('hand'); hand.classList.toggle('mull', mull); hand.classList.toggle('free', M && !!(d.pend && d.pend.mode !== 'choice' && !mull));   // a free play: the costs step back
   let drawnK = 0;
   const lit = handLights(d, held);   // a lesson's hints (coach.js)
   const was = new Map([...hand.querySelectorAll('.hc')].map(el => [el.dataset.iid, el.offsetLeft]));   // where each card stood
@@ -1567,7 +1568,8 @@ function drawGame() {
     const peek = d.cardOpts.length ? `<span class="skip" id="optpeek">${ui.optsHidden ? 'Show cards' : 'Hide cards'}</span>` : '';
     // a pick from your hand is headed by what it does; the asking card's rule stays under it
     const ask = { discard: 'Discard a card', shuffle: `Shuffle ${d.pend.left === 1 ? 'a card' : d.pend.left + ' cards'} into your deck` }[d.pend.kind];
-    bar.innerHTML = `<div class="line">${ask ? `<b>${ask}</b>${src ? `<p>${src.name}: ${src.text}</p>` : ''}` : src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${peek}${skip}</div>` + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
+    const free = M && d.pend.mode !== 'choice' ? '<span class="mfree">Free</span>' : '';   // the mana rules: a card an effect plays costs nothing
+    bar.innerHTML = `<div class="line">${ask ? `<b>${ask}</b>${src ? `<p>${src.name}: ${src.text}</p>` : ''}` : src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${free}${peek}${skip}</div>` + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
     bar.classList.add('on');
     if (d.cardOpts.length) {
       opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${M ? manaCard(c, { ...(o.str == null ? {} : { str: o.str }), w: 170 }) : cardHTML(c, o.str == null ? {} : { str: o.str })}</div>`; }).join('');
@@ -1857,7 +1859,7 @@ function wireRail() {
   const hide = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
   rail.addEventListener('mouseover', e => {
     const lead = e.target.closest('[data-lead]'), deck = e.target.closest('[data-deck]');
-    if (lead && !touch()) { pop.className = 'pop'; pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
+    if (lead && !touch()) { pop.className = 'pop' + (isMana() ? ' mpop' : ''); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
       const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.max(10, r.left - w - 12) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
     hide();
@@ -1961,7 +1963,7 @@ function wireBoard() {
   });
   board.addEventListener('mouseover', e => {
     const lead = e.target.closest('[data-lead]');   // a leader reads on hover: its ability as it stands
-    if (lead && !touch()) { showStack(null, null); pop.className = 'pop'; pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
+    if (lead && !touch()) { showStack(null, null); pop.className = 'pop' + (isMana() ? ' mpop' : ''); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
       const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.min(r.right + 10, innerWidth - w - 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
     if (!lead && pop.querySelector('.ev.lead')) { pop.style.display = 'none'; pop.style.minHeight = ''; }
@@ -2010,7 +2012,7 @@ function manaHover(cr) {
   const notes = [top.timer ? resolvesIn(top.timer) : '', under.length ? `Covers ${under.map(u => `${(CARDS[u.id] || {}).name || u.id} (${u.str})`).join(', ')}` : ''].filter(Boolean);
   el.innerHTML = `<div class="abs" style="left:${x - w / 2}px;top:${y - ph / 2}px">${manaCard(formOf(top.id, stackSeat(top)), { str: top.str, owner: side, w, iid: top.iid })}`
     + (notes.length ? `<div class="under" style="left:${w + 10}px;top:${ph * .3}px">${notes.map(esc).join('<br>')}</div>` : '') + '</div>';
-  fitPlaques(el); el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
+  el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); fitPlaques(el);   // measured once shown (hidden, it has no height)
 }
 // A board piece's stack, as the hover popup (stackAt) and the read (readStack) both show it: each animal's card in its
 // owner's form (viewer space: A is you), at its strength now, with its timer under it.

@@ -216,3 +216,28 @@
 .coll .zbox > .mcard { flex: none; }
 .coll .zside .rel .mcard { flex: none; }
 .mhome a.sec { color: #e6eaf0; text-decoration: none; }
+
+/* the match's plain chrome beyond the board: the turn plate, the panels, the Remove Pile, a read's keywords, the leader's
+   hover, the Friends panel (beside the controls at the top left, clear of the rail) */
+.game.mana .yourturn { background: #2b2f36; box-shadow: 0 12px 32px rgba(0,0,0,.5), inset 0 0 0 2px #4f8fd6; padding: 16px 40px; border-radius: 14px; white-space: nowrap; }
+.game.mana .yourturn b { font-size: 40px; color: #eef2f7; text-shadow: none; }
+.game.mana .yourturn.skipped { box-shadow: 0 12px 32px rgba(0,0,0,.5), inset 0 0 0 2px #6b727d; }
+.game.mana .yourturn.skipped b { font-size: 26px; font-weight: 700; }
+.game.mana .panel { background: #2b2f36; border: 1px solid #3d434c; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.game.mana .pmodal .pbox { background: #2b2f36; border: 1px solid #3d434c; }
+.readov:has(.mcard) .zside .kw { background: #2b2f36; box-shadow: none; border: 1px solid #3d434c; }
+.pop.mpop .ev, .pop.mpop .ev.lead { background: none; border: 0; color: #c8ced8; }
+body:has(.game.mana) .chatp.inmatch { left: 16px; right: auto; }
+/* a play an effect gives costs nothing: the prompt says Free, the hand's costs step back */
+.game.mana .prompt .mfree { padding: 3px 10px; border-radius: 999px; background: #f2c94c; color: #1d1606; font: 700 14px 'Fira Sans Condensed', sans-serif; }
+.game.mana .hand.free .mcost { opacity: .3; }
+/* the end of a game and the concede question, plain */
+.game.mana .endbox { background: #2b2f36; border: 1px solid #3d434c; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+.game.mana .endbox .btns > * { background: #3a404a; border: 1px solid #555d69; border-radius: 10px; color: #eef2f7; filter: none; box-shadow: none; text-shadow: none; }
+.game.mana .endbox .btns > *:hover { background: #46505c; filter: none; }
+.game.mana .endbox .btns > .play { background: #2a4466; border-color: #4f8fd6; }
+.game.mana .endbox .btns > .play:hover { background: #355682; }
+.game.mana .reveal .actlbl { font-family: 'Fira Sans Condensed', sans-serif; font-size: 19px; background: #2b2f36; border: 1px solid #4a515c; color: #eef2f7; }
+.game.mana .tbtn.B { padding: 0 12px; gap: 6px; font-size: 14px; }   /* "Your opponent's turn" and its clock fit the pill */
+.game.mana .tbtn.B .clock b { font-size: 13px; }
+.game.mana .mhover .under { white-space: normal; width: max-content; max-width: 240px; line-height: 1.35; }   /* a tall stack's list wraps, never off the screen */

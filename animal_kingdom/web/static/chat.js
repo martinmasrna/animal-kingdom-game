@@ -83,7 +83,8 @@ function piece(name, text, other) {
   const btn = [...document.querySelectorAll('.chatbtn')].find(b => b.offsetParent), top = document.querySelector('.home .top');
   el.style.left = el.style.right = el.style.top = '';
   el.classList.toggle('inmatch', match);
-  if (match && btn) { const r = btn.getBoundingClientRect(); el.style.right = (innerWidth - r.left + 8) + 'px'; el.style.top = r.top + 'px'; }
+  if (match && btn) { const r = btn.getBoundingClientRect(); el.style.top = r.top + 'px';   // beside the button, on the screen's side (the mana screen's buttons are at the left)
+    if (r.left < innerWidth / 2) el.style.left = (r.right + 8) + 'px'; else el.style.right = (innerWidth - r.left + 8) + 'px'; }
   else if (top) { const r = top.getBoundingClientRect(); el.style.right = (innerWidth - r.right) + 'px'; el.style.top = (r.bottom + 8) + 'px'; }
   else { el.style.right = '16px'; el.style.top = '16px'; }
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
