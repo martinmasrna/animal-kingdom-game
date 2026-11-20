@@ -45,14 +45,21 @@ const PORT_AT = { cols: [150, 352, 550], rows: [1037, 853, 660, 469, 271],
 // own geometry turned a quarter (its flat-top hexagons become pointy-top ones), so neighbours on the map are neighbours
 // here. A region is the corner three of them share. Drawn on a ground without trails (kit2/plate_hex.webp).
 // w: a token's width on the stage (static/token.js draws it at any size), x: the board's middle, top: the top tip's top.
-const HEX = { on: false, cols: [2, 3, 4, 3, 2] };
-export function setBoardMap(M) { HEX.on = !!(M && M.hex); }
+// The mana ruleset's board (map_hex19, the prototype of 2026-11-20): the same tokens in rows of 3, 4, 5, 4, 3, each player's
+// row of 3 their base, no dens; "row,col" with row 1 your base at the bottom. HEX.mana draws it plainly (game.css .mana):
+// no ground painting, no dens, a dot on each region's shared corner instead of the stone, the leaders on the screen's rail.
+const HEX = { on: false, mana: false, cols: [2, 3, 4, 3, 2], last: 6 };
+export function setBoardMap(M) { HEX.on = !!(M && (M.hex || M.hex19)); HEX.mana = !!(M && M.hex19);
+  Object.assign(HEX, HEX.mana ? { cols: [3, 4, 5, 4, 3], last: 5 } : { cols: [2, 3, 4, 3, 2], last: 6 }); }
 export const hexBoard = () => HEX.on;
+export const manaBoard = () => HEX.mana;
 // landscape: the board the stage's full height under the opponent's hand (to y 66), right of the middle so your hand has
-// the ground beside its foot (app.js PL); upright: between the dens' ridges
-const hexGeo = () => { const g = VIEW.port ? { w: 162, x: STAGE.w / 2, top: 150 } : { w: 114, x: 940, top: 70 }; g.h = g.w * TH / TW; return g; };
+// the ground beside its foot (app.js PL); upright: between the dens' ridges. The mana board stands in the middle column,
+// as tall as the stage allows between the opponent's hand and yours.
+const hexGeo = () => { const g = HEX.mana ? { w: 128, x: STAGE.w / 2, top: 34 } : VIEW.port ? { w: 162, x: STAGE.w / 2, top: 150 } : { w: 114, x: 940, top: 70 }; g.h = g.w * TH / TW; return g; };
+export const tokenWidth = () => hexGeo().w;
 const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
-  return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (6 - c) * .75 * g.h]; };
+  return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * .75 * g.h]; };
 const hexTip = side => { const g = hexGeo(); return [g.x, g.top + g.h / 2 + (side === 'A' ? 6 * .75 * g.h : 0)]; };
 const at = (c, r) => { if (HEX.on) return hexAt(c, r);
   if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
@@ -136,9 +143,11 @@ function unit(u, under, cards, fire = false) {
 // stone shell over the frame, Spikes the thorns on its rim, just past its edge, Stealth's mist and Poison's vapour in the window; the trigger
 // mark on the rim's upper right, a timer on its upper left.
 const TK_TRG = 'left:86.9%;top:31.6%', TK_TIMER = 'left:13.1%;top:31.6%';
-function hexUnit(u, under, cards, fire = false) {
+// The token alone, `w` stage px wide, for anything drawn off the board as the piece (the mana ruleset's card: mana.js).
+export const tokenHTML = (u, cards, w) => hexUnit(u, [], cards, false, w);
+function hexUnit(u, under, cards, fire = false, tw = null) {
   const c = cards[u.id], kws = u.inked ? [] : [u.armor && 'Armor', u.hidden && 'Stealth', u.spikes && 'Spikes', u.poison && 'Poison'].filter(Boolean);
-  const has = k => kws.includes(k), g = hexGeo();
+  const has = k => kws.includes(k), g = tw ? { w: tw } : hexGeo();
   const ph = (i, dur) => `animation-delay:${(-((Date.now() / 1000 + (u.iid * 7919 + i * 433) % 997) % dur)).toFixed(2)}s`;
   const img = (src, cls = '', st = '') => `<img class="${cls}" src="${src}" alt="" draggable="false"${st ? ` style="${st}"` : ''}>`;
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen tkpeek" style="transform:translate(${4 + i * 3}%,${3.5 + i * 2.5}%)">${img(tokenBase(b.owner), b.owner === 'W' ? 'wild' : '')}</div>`).reverse().join('');   // the deepest first, under the others
@@ -152,7 +161,7 @@ function hexUnit(u, under, cards, fire = false) {
     (has('Armor') ? img(armorShell(u.owner), 'rimimg hex tkarmor') : '') +
     `<div class="tkanimal${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}">${win}</div>` +
     venom('tint') + (has('Stealth') ? `<div class="kwl mist tkw"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
-    numeral(u.str) +
+    (u.str == null ? '' : numeral(u.str)) +
     (u.timer ? `<div class="timer" style="${TK_TIMER}" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
     (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '') +
     ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TK_TRG}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
@@ -163,6 +172,7 @@ function hexUnit(u, under, cards, fire = false) {
 // fx, fromStones } when this view follows one (so what changed animates; static/timeline.js plays one step per view), else null, capture: { side, id, owner, str } when a
 // unit took a den, which ends the game (it stands in that den's mouth) }.
 export function renderBoard(el, M, g, cards, ui) {
+  const bases = { A: new Set((ui.bases || {}).A || []), B: new Set((ui.bases || {}).B || []) };   // the mana board's bases, viewer space
   const A = ui.anim, rings = new Set(ui.rings || []), roamable = new Set(ui.roamable || []), fire = new Set(ui.fire || []);   // fire: the animals whose own effect this step is   // your animals that can roam now
   // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)
   const shown = new Set([...(ui.region || []), ...(ui.acting || [])]), shownAt = ui.region && ui.region[0].split(',').map(Number);
@@ -184,17 +194,18 @@ export function renderBoard(el, M, g, cards, ui) {
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
   for (const reg of M.regions) {
     const [x, y] = stoneAt(reg), h = held.find(r => r.id === reg.id);
+    if (HEX.mana) { s += put(`rdot${h ? ' ' + h.owner : ''}`, x, y); continue; }   // the mana board: a dot, coloured while one side holds all three
     s += put(`stone pboss ${h ? h.owner : ''}${reg.c.every((v, i) => shownAt && v === shownAt[i]) ? ' shown' : ''}`, x, y, chalk('+' + pays(reg, h)));
   }
 
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
-  if (HEX.on) for (const side of ['A', 'B']) { const [x, y] = hexTip(side); s += put(`dentile ${side}`, x, y, `<img src="${denBase(side)}" alt="" draggable="false">`); }
+  if (HEX.on && !HEX.mana) for (const side of ['A', 'B']) { const [x, y] = hexTip(side); s += put(`dentile ${side}`, x, y, `<img src="${denBase(side)}" alt="" draggable="false">`); }
   // the hex board's pieces top row first, so a head that rises over its rim lies over the row above, as pieces on a table
   const CRS = HEX.on && M.crossroads ? M.crossroads.map(cr => cr.split(',').map(Number)).sort((a, b) => b[0] - a[0] || a[1] - b[1]) : Array.from({ length: M.cols * M.rows }, (_, i) => [i % M.cols + 1, Math.floor(i / M.cols) + 1]);
   for (const [c, r] of CRS) {
     // an animal that roamed into the den stands only in its mouth, not also where it came from
     const cr = key(c, r), st = (g.board[cr] || []).filter(u => !ui.capture || u.iid !== ui.capture.iid), [x, y] = at(c, r);
-    const cls = (rings.has(cr) ? ' tgt' : '') + (roamable.has(cr) ? (ui.roamFrom === cr ? ' roamsel' : ' roamable') : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');
+    const cls = (bases.A.has(cr) ? ' base A' : bases.B.has(cr) ? ' base B' : '') + (rings.has(cr) ? ' tgt' : '') + (roamable.has(cr) ? (ui.roamFrom === cr ? ' roamsel' : ' roamable') : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');
     const pv = ui.preview && ui.preview.cr === cr ? ui.preview : null;
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }
@@ -223,8 +234,8 @@ export function renderBoard(el, M, g, cards, ui) {
 
   // a region's income flies from its stone; a card's food comes from no stone
   const stonesOf = side => A && A.fromStones === false ? flowAt(side, 'food') : held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: pays(r, r) }; });
-  for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui, flowAt(side, 'pay'));
-  for (const side of ['A', 'B']) if (ui.leaders && ui.leaders[side]) s += leaderPiece(side, ui.leaders[side], cards, ui);
+  if (!HEX.mana) for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui, flowAt(side, 'pay'));   // the mana board has no dens: its food is on the screen's rail
+  if (!HEX.mana) for (const side of ['A', 'B']) if (ui.leaders && ui.leaders[side]) s += leaderPiece(side, ui.leaders[side], cards, ui);
   // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
   if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port || HEX.on ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = HEX.on ? my : VIEW.port ? my + (ui.capture.side === 'A' ? 22 : -22) : my;   // on the hex board, on its den's tip   // seated in the mouth, clear of the crossroad beside it
     s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' : ''}`, x, y, unit(ui.capture, [], cards)); }

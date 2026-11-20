@@ -129,3 +129,21 @@ test('a card drawn and given strength in the same move shows its old number, the
   for (const x of p.slice(0, p.indexOf(rise))) if (x.view.game.hand.length) assert.equal(str(x.view), 4, 'drawn as a 4');
   assert.equal(str(p[p.length - 1].view), 6);
 });
+
+// The mana rules (2026-11-20) skip a turn its player can pay for nothing in: its start and end come in one view, with
+// nothing played between, and the screen says so instead of announcing "Your turn". A turn ended by hand, and the default
+// rules, keep "Your turn".
+test('a turn the mana rules skip is a skipped step, not "Your turn"', () => {
+  const view = (ruleset, events, current = 'A') => ({ id: 'M', you: 'A', ruleset, phase: 'playing', results: [],
+    game: { board: {}, food: { A: 0, B: 0 }, handCount: { A: 3, B: 4 }, hand: [], current, history: [], events } });
+  const prev = view('mana', [{ seq: 1, e: 'turn_start', player: 'B', turn: 0 }], 'B');
+  const ev = [{ seq: 1, e: 'turn_start', player: 'B', turn: 0 }, { seq: 2, e: 'turn_end', player: 'B' },
+    { seq: 3, e: 'turn_start', player: 'A', turn: 1 }, { seq: 4, e: 'turn_end', player: 'A' }, { seq: 5, e: 'turn_start', player: 'B', turn: 2 }];
+  const kinds = v => plan(prev, v).map(s => s.step && s.step.kind).filter(Boolean);
+  const steps = plan(prev, view('mana', ev, 'B')).map(s => s.step).filter(Boolean);
+  assert.deepEqual(steps.map(s => s.kind), ['skipped'], 'your skipped turn says so');
+  assert.equal(steps[0].player, 'A'); assert.equal(steps[0].turn, 1);
+  assert.deepEqual(kinds(view('default', ev, 'B')), ['yourturn'], 'the default rules: unchanged');
+  const played = [...ev.slice(0, 3), { seq: 4, e: 'place', player: 'A', card: 'kitten', iid: 7, cr: '1,1', owner: 'A' }];
+  assert.ok(!kinds(view('mana', played, 'A')).includes('skipped'), 'a turn with a play is no skip');
+});

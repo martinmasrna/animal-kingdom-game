@@ -25,7 +25,7 @@ function culprit(board, cause, cr, causeIid) {
   return best;
 }
 
-export const DUR = { act: 1.1, strength: 0.6, to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5 };
+export const DUR = { act: 1.1, strength: 0.6, to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5, skipped: 1.6 };
 // Food in flight: one fruit per food, 0.035 s apart, each flying 0.7 s, then the count settles.
 export const foodDur = n => Math.min(2.4, 0.7 + 0.035 * Math.max(0, n - 1) + 0.3);
 
@@ -91,6 +91,9 @@ export function plan(prev, next, cards = {}) {
   const flushFood = () => { if (food) { push({ ...food, src: food.kind === 'food' ? food.from.map(f => f.cr) : [], dur: food.kind === 'pay' && !food.from.length ? DUR.pay : foodDur(food.n) }); food = null; } };
   const toHand = e => { s.handCount[e.player] += 1;
     if (e.player === you) s.hand.push(finalCard(e.iid) || { iid: e.iid, id: e.card, str: (cards[e.card] || {}).str }); };
+  const skipped = i => { for (let j = i + 1; j < fresh.length; j++) { const x = fresh[j];
+    if (x.e === 'turn_end') return x.player === fresh[i].player;
+    if (['place', 'roam', 'act', 'leader_power', 'capture'].includes(x.e)) return false; } return false; };
   for (let i = 0; i < fresh.length; i++) {
     const e = fresh[i]; cur = e;
     if (e.e !== 'food' && e.e !== 'pay') flushFood();
@@ -193,6 +196,9 @@ export function plan(prev, next, cards = {}) {
         break;
       case 'turn_start':
         s.current = e.player;
+        // the mana rules skip a turn its player can pay for nothing in: the server starts and ends it in one go, so its start
+        // and end arrive together with nothing played between (a turn its player ends by hand comes in a later view)
+        if (next.ruleset === 'mana' && skipped(i)) { push({ kind: 'skipped', player: e.player, turn: e.turn, dur: DUR.skipped }); break; }
         if (e.player === you) push({ kind: 'yourturn', dur: DUR.yourturn });
         break;
       case 'capture':

@@ -61,7 +61,9 @@ export function recordMatches(n = 7) {
 }
 
 // Pages open as a player who has done the tutorial (home shows the full piece); `newPlayer` opens them as a first visit.
-export async function openBrowser({ newPlayer = false } = {}) {
+// Every page opens in the default ruleset's home (on localhost the mana rules are home's default, app.js MANA_HOME);
+// `mana` opens it in the mana rules'.
+export async function openBrowser({ newPlayer = false, mana = false } = {}) {
   // root (a cloud container) can't run Chrome's sandbox
   const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new', defaultViewport: { width: 1512, height: 800 },
     args: process.getuid?.() === 0 ? ['--no-sandbox'] : [] });
@@ -69,8 +71,13 @@ export async function openBrowser({ newPlayer = false } = {}) {
   // pipes then keeps the test process alive for minutes after its last test (a hang seen on 2026-10-04). Close our end.
   const close = b.close.bind(b), proc = b.process();
   b.close = async () => { await close(); proc?.stdout?.destroy(); proc?.stderr?.destroy(); };
-  if (!newPlayer) { const open = b.newPage.bind(b);
-    b.newPage = async () => { const p = await open(); await p.evaluateOnNewDocument(() => { try { localStorage.setItem('ak:learned', '1'); } catch { /* no storage */ } }); return p; }; }
+  const init = p => p.evaluateOnNewDocument((learned, rules) => { try { if (learned) localStorage.setItem('ak:learned', '1'); if (!localStorage.getItem('ak:rules')) localStorage.setItem('ak:rules', rules); } catch { /* no storage */ } }, !newPlayer, mana ? 'mana' : 'default');
+  const open = b.newPage.bind(b);
+  b.newPage = async () => { const p = await open(); await init(p); return p; };
+  const context = b.createBrowserContext.bind(b);   // a second player's window (its own storage): the same set-up, but home's rules only
+  b.createBrowserContext = async (...a) => { const ctx = await context(...a), cOpen = ctx.newPage.bind(ctx);
+    ctx.newPage = async () => { const p = await cOpen(); await p.evaluateOnNewDocument(rules => { try { if (!localStorage.getItem('ak:rules')) localStorage.setItem('ak:rules', rules); } catch { /* no storage */ } }, mana ? 'mana' : 'default'); return p; };
+    return ctx; };
   return b;
 }
 

@@ -16,8 +16,8 @@ import { fitNames } from './card.js';
 export const FLY_MS = 520;
 export const LIFT = 0;                // stage pixels above its crossroad the card stops and turns: none, it turns right over it and the piece falls toward the board (game.css landf)
 const POP_MS = 90;                    // the pop out of the hand
-export const CARD_END = 130;                 // the card's width over its place, in stage pixels: its painting about the piece's size
-export const PIC_UP = 2.55 / 20;             // the card's painting's centre above the card's centre, in card widths (app.css .card)
+export const CARD_END = 130; const CARD_W = CARD_END;                 // the card's width over its place, in stage pixels: its painting about the piece's size
+export const PIC_UP = 2.55 / 20; const PIC_C = PIC_UP;             // the card's painting's centre above the card's centre, in card widths (app.css .card)
 // The turn, as Hearthstone turns a minion (its 60 fps frames, design sandbox screen/play-flight/hs-ref/): at rest over its
 // crossroad the card turns to light, a painted plate of sunlight in its shape (kit2/glow_plate.webp) brightening over it;
 // under the light the card becomes the piece; the light thins and draws in to the portrait, which settles onto the board
@@ -30,7 +30,7 @@ const GLOW_IN = 90, GLOW_HOLD = 90, GLOW_OUT = 260;   // ms: the card lights up,
 export const TURN = new URLSearchParams(globalThis.location?.search || '').get('turn') === 'glow' ? 'glow' : 'impact';
 if (globalThis.document) document.documentElement.dataset.turn = TURN;
 const REAR_MS = 120, THROW_MS = 180;  // the card rears up toward the eye, then is thrown down onto its place
-const REAR_W = 152, HIT_W = 128;      // its width reared up, and as it hits (the piece's rim is 134), in stage pixels
+const REAR_C = 152, HIT_C = 128;      // its width reared up, and as it hits (the piece's rim is 134), in stage pixels
 export const HIT_DELAY = TURN === 'impact' ? 0 : .41;   // s from the cut to the piece's impact (game.css landf / landi)
 let cur = null;                       // the flight in the air: { cr, el, arrived, onArrive, before, anim }
 let last = null;                      // the latest flight's { cr, end }, kept after its layer goes: the landing it handed to runs on
@@ -47,8 +47,11 @@ export const FLIGHT = globalThis.location?.hostname !== 'animal-kingdom.fly.dev'
 
 // `start`: the pose of a card held in the pointer's grip (carry.js release()), which it flies on from, without the pop out of
 // the hand: a held card is already over its crossroad, so its flight is the short settle into place.
-export function fly(from, target, id, cr, before, onArrive, html = null, start = null) {
+// `geo`: another card form's measures (the mana ruleset's card, mana.js: the piece over a plaque), { end: its width over its
+// place, up: its piece's centre above its own centre in card widths, rear, hit: its widths reared up and as it hits }.
+export function fly(from, target, id, cr, before, onArrive, html = null, start = null, geo = null) {
   if (!FLIGHT || (!from && !start) || !target || !hasArt(id) || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  const CARD_END = geo ? geo.end : CARD_W, PIC_UP = geo ? geo.up : PIC_C, REAR_W = geo ? geo.rear : REAR_C, HIT_W = geo ? geo.hit : HIT_C;
   const stage = document.getElementById('stage'), k = stage.getBoundingClientRect().width / stage.offsetWidth;
   const C = start ? null : from.getBoundingClientRect(), t = target.getBoundingClientRect();
   const w = start ? start.w : from.offsetWidth, h = start ? start.h : from.offsetHeight;   // the card's own size (the full card has the same outline)

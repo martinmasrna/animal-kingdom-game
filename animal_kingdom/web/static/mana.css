@@ -1,0 +1,187 @@
+/* The mana ruleset's match screen and card (the prototype of 2026-11-20, mana.js; plain prototype chrome, nothing settled).
+   A calm dark ground, no painting. Centre column: the opponent's hand peeking at the top, the board, your hand at the
+   bottom; one rail right of the board (their leader, mana and deck; their food; End turn; your food; your leader; your
+   mana); the last plays left of it; the small controls in a row at the top left. */
+
+/* ---------------------------------------------------------------- the card: the piece over a plaque (any page) */
+.mcard { --mw: 100px; position: relative; width: var(--mw); height: calc(var(--mw) * 2.0667); font-family: 'Source Serif 4', Georgia, serif; color: #eef2f7; }
+.mcard .mpiece { position: absolute; left: 0; top: 0; width: var(--mw); height: calc(var(--mw) * 1.15556); z-index: 2; }
+.mcard .mpiece .tkbase, .mcard .mpiece .tkarmor { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.mcard .mpiece .tkbase { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45)); }
+.mcard .mpiece .tkanimal { position: absolute; inset: 0; pointer-events: none; }
+.mcard .mpiece .tkfig { position: absolute; inset: 0; }
+.mcard .mpiece .tkfig img { position: absolute; max-width: none; filter: drop-shadow(0 calc(var(--tw) * .0093) calc(var(--tw) * .011) rgba(0, 0, 0, .45)); }
+.mcard .mpiece .tkwin { position: absolute; inset: 0; clip-path: var(--tkwin); }
+.mcard .mpiece .tkwin .ring { position: absolute; background-color: #333; background-repeat: no-repeat; border-radius: 0; }
+.mcard .mpiece .ring.noart { display: grid; place-items: center; font-size: 11px; }
+.mcard .mpiece .boss.tknum { position: absolute; margin: 0; border: 0; border-radius: 0; background: none; display: block; text-shadow: none; z-index: 3; }
+.mcard .mpiece .boss.tknum img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.mcard .mpiece .kw.trg { position: absolute; width: calc(var(--tw) * .27); height: calc(var(--tw) * .27); margin: calc(var(--tw) * -.135) 0 0 calc(var(--tw) * -.135); display: grid; place-items: center; background: url(/static/kit2/boss_n.webp) center / contain no-repeat; z-index: 3; }
+.mcard .mpiece .kw.trg img { width: 68%; height: 68%; object-fit: contain; }
+.mcard .plaque { position: absolute; left: 0; top: calc(var(--mw) * .8667); width: var(--mw); height: calc(var(--mw) * 1.2); z-index: 1; transition: opacity .2s; }
+.mcard .plaque .mpl { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.mcard .plaque polygon { stroke-width: 2.5px; stroke-linejoin: round; }
+.mcard.A .plaque polygon { fill: #213349; stroke: #4f8fd6; } .mcard.B .plaque polygon { fill: #432321; stroke: #d0574c; }
+.mcard .pin { position: absolute; left: 7%; right: 7%; top: calc(var(--mw) * .3); bottom: calc(var(--mw) * .3); display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; }
+.mcard .pname { font-weight: 600; font-size: calc(var(--mw) * .118); line-height: 1.15; margin-bottom: .25em; }
+.mcard .pin p { font-size: calc(var(--mw) * .078); line-height: 1.28; color: #dfe5ee; }
+.mcard .pin p b { font-weight: 700; color: #fff; }
+.mcard .pin i { margin-top: auto; padding-top: .3em; font: 600 calc(var(--mw) * .052) 'Fira Sans Condensed', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #9fb0c4; font-style: normal; }
+.mcard.B .pin i { color: #c9a29c; }
+/* the cost: a gold hexagon in the piece's upper-left corner, its edges on the piece's rim (mana.js COST_AT) */
+.mcard .mcost { position: absolute; z-index: 4; pointer-events: none; }
+.mcard .mcost svg, .mchip svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.mcard .mcost polygon, .mchip polygon { fill: #f2c94c; stroke: #2a2006; stroke-width: 5; stroke-linejoin: round; }
+.mcard .mcost text, .mchip text { font: 700 62px 'Source Serif 4', Georgia, serif; fill: #1d1606; }
+.mchip { display: inline-block; width: 18px; height: 21px; vertical-align: -5px; margin: 0 2px; }
+
+/* the mana: six small gold hexagons */
+.mpips { display: inline-flex; gap: 4px; }
+.mpips i { width: 17px; height: 19.6px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: #f2c94c; position: relative; }
+.mpips i.spent { background: #4a4433; }
+.mpips i.off { background: #7d7f86; } .mpips i.off::after { content: ''; position: absolute; inset: 2px; clip-path: inherit; background: #1f2228; }
+
+/* a card in flight: its plaque fades as the piece goes to its tile (flight.js, carry.js) */
+.flight .fcard > .mcard { position: absolute; left: 0; top: 0; }
+.flight:not(.carry) .fcard > .mcard .plaque { animation: plaquefade .22s ease-out both; }
+.flight:not(.carry) .fcard > .mcard .mcost { animation: plaquefade .22s ease-out both; }
+@keyframes plaquefade { to { opacity: 0; } }
+.flight .fcard > .mcard { filter: drop-shadow(4px 10px 8px rgba(0,0,0,.45)); }
+.pop .mcard { margin: 0 auto; }
+.pop.mpop { min-height: 0; padding: 10px; background: #2a2e35; border: 1px solid #3d434c; border-radius: 10px; }
+.pop.mpop .ev { max-width: 230px; }
+
+/* ---------------------------------------------------------------- the screen */
+.game.mana { background: #1f2228; overflow: clip; }   /* the hand's cards hang below the edge: nothing may scroll the screen to them */
+.game.mana #world { display: none; }
+.game.mana #stage { background: #1f2228; }
+.game.mana .ledge, .game.mana .deck, .game.mana #recent { display: none !important; }
+/* the board: plain tiles, each base lightly tinted in its team's colour, a dot on each region's corner */
+.game.mana.kit.hexb .cr.clear { background: #383d45; filter: none; clip-path: polygon(50% 1.5%, 98.5% 25.5%, 98.5% 74.5%, 50% 98.5%, 1.5% 74.5%, 1.5% 25.5%); }
+.game.mana.kit.hexb .cr.clear.base.A { background: #2c3c55; } .game.mana.kit.hexb .cr.clear.base.B { background: #4c3033; }
+.game.mana .rdot { color: inherit; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #565c66; box-shadow: 0 0 0 2px #1f2228; z-index: 4; pointer-events: none; }
+.game.mana .rdot.A { background: #5aa2f0; } .game.mana .rdot.B { background: #e05a4c; }
+.game.mana .cr.unit:hover { z-index: 5; }
+
+/* the opponent's hand: small backs peeking over the top edge */
+.game.mana .opphand { height: 40px; }
+.game.mana .opphand .back { top: -26px; width: 46px; height: 53px; border: 0; border-radius: 0; box-shadow: none; background: #8c3a32; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+.game.mana .opphand .back::after { content: ''; position: absolute; inset: 3px; clip-path: inherit; background: #5a2420; }
+
+/* your hand: a row of pieces at rest, the plaque below the screen's edge; hovered, a card lifts and grows to be read */
+.game.mana .hand { top: 0; height: 800px; }
+.game.mana .hc { width: 100px; height: 207px; top: 684px; transform-origin: 50% 100%; transition: transform .16s cubic-bezier(.3,.7,.4,1); }
+.game.mana .hc .mcard { --mw: 100px; }
+.game.mana .hc:hover, .game.mana .hc.shown { transform: translateY(-99px) scale(1.62); z-index: 30 !important; }
+.game.mana .hc.sel, .game.mana .hc.sel:hover { transform: translateY(-22px); z-index: 3; }   /* picked: it stays a piece, clear of the board it goes to */
+.game.mana .hc.dim::after { display: none; }
+.game.mana .hc.dim .mcard { filter: brightness(.45) saturate(.5); }
+.game.mana .hc.dim { cursor: default; }
+.game.mana .hc.sel .mcard, .game.mana .hc.pick .mcard { filter: drop-shadow(0 0 2px #f4efe6) drop-shadow(0 0 4px #f4efe6); }
+.game.mana .hc.ready .mcard { filter: drop-shadow(0 0 2px var(--ready)) drop-shadow(0 0 7px var(--ready)); }
+/* the opening hand: the full cards, large, over the board */
+.game.mana .hand.mull .hc { top: 268px; width: 176px; height: 364px; transition: transform .16s; }
+.game.mana .hand.mull .hc .mcard { --mw: 176px; }
+.game.mana .hand.mull .hc:hover { transform: translateY(-8px); }
+.game.mana .hand.mull .hc.pick .mcard { filter: none; }
+.game.mana .hand.mull .hc.pick:hover .mcard { filter: drop-shadow(0 0 3px #f4efe6) drop-shadow(0 0 6px #f4efe6); }
+.game.mana .prompt.mull { left: 50%; top: 104px; width: 520px; margin-left: -260px; text-align: center; transform: none; }
+.game.mana .prompt.mull .btns { justify-content: center; }
+
+/* the rail */
+.game.mana .mrail { left: 1150px; top: 0; width: 300px; height: 800px; pointer-events: none; font-family: 'Fira Sans Condensed', sans-serif; color: #c8ced8; }
+.game.mana .mrail > * { pointer-events: auto; }
+.game.mana .mlead { position: absolute; left: 10px; display: flex; align-items: center; gap: 14px; }
+.game.mana .mlead .ltok { position: relative; width: 78px; height: 90px; flex: none; }
+.game.mana .mlead .ltok .unit { position: absolute; inset: 0; --tw: 78px; }
+.game.mana .mlead .ltok.dim { filter: brightness(.5) saturate(.6); }
+.game.mana .mlead .ltok.can { cursor: pointer; }
+.game.mana .mlead .ltok.can::after { content: ''; position: absolute; inset: -5px; clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 5%, 4.5% 27.5%, 4.5% 72.5%, 50% 95%, 95.5% 72.5%, 95.5% 27.5%, 50% 5%); background: #f2c94c; }
+.game.mana .mlead .ltok.can:hover { filter: brightness(1.15); }
+.game.mana .mlead .lt { font-size: 15px; line-height: 1.5; color: #aab2bf; }
+.game.mana .mlead .lt b { color: #eef2f7; font-weight: 600; }
+.game.mana .mlead .ldeck { cursor: pointer; }
+.game.mana .mlead .ldeck:hover { color: #eef2f7; }
+.game.mana .mlead.B { top: 30px; } .game.mana .mlead.A { top: 520px; }
+.game.mana .mfood { color: #aab2bf; position: absolute; left: 30px; width: 158px; height: 74px; border-radius: 12px; border: 2px solid; display: flex; align-items: center; justify-content: center; gap: 14px; background: #262a31; }
+.game.mana .mfood.B { top: 160px; border-color: #c45247; } .game.mana .mfood.A { top: 412px; border-color: #4f8fd6; }
+.game.mana .mfood b { font: 700 40px 'Fira Sans Condensed', sans-serif; color: #f4f6f9; font-variant-numeric: tabular-nums; }
+.game.mana .mfood span { display: flex; flex-direction: column; font-size: 14px; line-height: 1.2; color: #aab2bf; }
+.game.mana .mfood span em { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f2c94c; font-style: normal; }
+.game.mana .mfood.won { box-shadow: 0 0 0 4px rgba(242,201,76,.35); }
+.game.mana .mmana { position: absolute; left: 14px; top: 720px; font-size: 15px; }
+.game.mana .mmana .mpips i { width: 24px; height: 27.7px; } .game.mana .mmana .mpips { gap: 6px; }
+.game.mana .mmana .mpips i.off::after { inset: 2.5px; }
+.game.mana .mmana div { margin-top: 6px; }
+/* End turn, between the two food counts */
+.game.mana .tbtn, .game.mana.kit .tbtn { left: 1180px; top: 290px; width: 180px; height: 62px; border-radius: 31px; border: 2px solid #4f8fd6; background: #2a4466; filter: none; color: #f4f6f9; text-shadow: none;
+  translate: none; flex-direction: row; gap: 10px; font: 700 21px 'Fira Sans Condensed', sans-serif; }
+.game.mana .tbtn.A.can:hover { background: #355682; transform: none; }
+.game.mana .tbtn.A:not(.can) { opacity: .55; }
+.game.mana .tbtn.B { background: #2b2e34; border-color: #555b64; font-size: 15px; color: #aab2bf; white-space: nowrap; }
+.game.mana .tbtn .pips i { display: none; }
+.game.mana .tbtn .clock b { font-size: 15px; font-weight: 600; opacity: .8; }
+.game.mana .waiting { left: 1150px; right: auto; width: 240px; top: 362px; text-align: center; translate: none; font-size: 14px; color: #aab2bf; text-shadow: none; }
+.game.mana:has(.tbtn.B) .waiting { display: block; }
+
+/* the last plays, left of the board */
+.game.mana .mlast { left: 150px; top: 230px; width: 250px; font-family: 'Fira Sans Condensed', sans-serif; color: #8d95a1; }
+.game.mana .mlast h5 { font: 600 13px 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; color: #8d95a1; }
+.game.mana .mlast .row { display: flex; align-items: center; gap: 10px; height: 52px; font-size: 15px; color: #c8ced8; cursor: default; }
+.game.mana .mlast .row .mini { position: relative; width: 40px; height: 46px; flex: none; }
+.game.mana .mlast .row .mini .unit { position: absolute; inset: 0; --tw: 40px; }
+.game.mana .mlast .row .mini .tknum { display: none; }
+.game.mana .mlast .row.skip .mini { clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: #383d45; }
+.game.mana .mlast .row small { display: block; font-size: 12px; color: #8d95a1; }
+
+/* the small controls, plain, in a row at the top left */
+.game.mana .menu { right: auto !important; top: 10px; translate: calc(-1 * var(--side, 0px)) calc(-1 * var(--above, 0px)); background: #2b2f36; border: 1px solid #3d434c; color: #c8ced8; }
+.game.mana .menu:hover { background: #343943; filter: none; }
+.game.mana .panel.histp { left: 16px; right: auto; top: 62px; translate: calc(-1 * var(--side, 0px)) calc(-1 * var(--above, 0px)); }
+.game.mana .panel.mine { right: 330px; bottom: auto; top: 380px; }
+.game.mana .panel.theirs { left: auto; right: 330px; margin: 0; top: 30px; }
+
+/* a choice: one line over the board; cards offered float over it in the new form */
+.game.mana .prompt:not(.mull) { top: 46px; background: #2b2f36; border: 1px solid #4a515c; }
+.game.mana .opts .hc { width: 170px; height: 352px; position: relative; top: auto; } .game.mana .opts .hc .mcard { --mw: 170px; }
+.game.mana .opts .hc:hover { transform: translateY(-8px); }
+.game.mana .opts { top: 200px; }
+
+/* a played card shown large (the opponent's, an Echo, a leader's power): the full card */
+.game.mana .reveal .mcard { --mw: 190px; position: absolute; left: -95px; top: -196px; }
+.game.mana .reveal .actlbl { top: 210px; }
+
+/* a board piece hovered: it grows and its plaque slides out under it */
+.game.mana .mhover { z-index: 25; pointer-events: none; display: none; }
+.game.mana .mhover.on { display: block; }
+.game.mana .mhover .mcard { position: absolute; }
+.game.mana .mhover .plaque { animation: plaqueout .18s cubic-bezier(.3,.7,.4,1) both; }
+.game.mana .mhover.on .mcard { animation: piecegrow .14s cubic-bezier(.3,.7,.4,1) both; }
+.game.mana .mhover .under { position: absolute; font: 500 13px 'Fira Sans Condensed', sans-serif; color: #c8ced8; background: #2b2f36; border: 1px solid #3d434c; border-radius: 8px; padding: 5px 9px; white-space: nowrap; }
+@keyframes plaqueout { from { transform: translateY(-28%); opacity: 0; } }
+@keyframes piecegrow { from { transform: scale(.78); } }
+
+/* the end */
+.game.mana .endov { background: rgba(20,22,26,.8); }
+
+/* ---------------------------------------------------------------- home in the mana ruleset: a friend match only */
+.mhome { position: fixed; inset: 0; background: #1f2228; color: #e6eaf0; font-family: 'Fira Sans Condensed', sans-serif; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; }
+.mhome .box { width: 560px; margin: 70px 16px; display: flex; flex-direction: column; gap: 18px; }
+.mhome h1 { font: 700 34px 'Fira Sans Condensed', sans-serif; }
+.mhome h1 small { display: block; font-size: 16px; font-weight: 500; color: #8d95a1; margin-top: 4px; }
+.mhome h2 { font: 600 14px 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #8d95a1; margin-top: 8px; }
+.mhome .decks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mhome .dk { text-align: left; padding: 10px 14px; border-radius: 10px; border: 1px solid #3d434c; background: #2b2f36; color: #e6eaf0; font: 500 17px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.mhome .dk small { display: block; font-size: 13px; color: #8d95a1; }
+.mhome .dk:hover { background: #343943; } .mhome .dk.on { border-color: #4f8fd6; background: #2a4466; }
+.mhome .row { display: flex; gap: 10px; align-items: center; }
+.mhome .go { padding: 14px 26px; border-radius: 12px; border: 0; background: #3f7fd0; color: #fff; font: 700 20px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.mhome .go:hover { background: #4b8de0; }
+.mhome .sec { padding: 10px 16px; border-radius: 10px; border: 1px solid #3d434c; background: #2b2f36; color: #e6eaf0; font: 600 16px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.mhome .sec:hover { background: #343943; }
+.mhome input { width: 140px; padding: 11px 12px; border-radius: 10px; border: 1px solid #3d434c; background: #15181b; color: #e6eaf0; font: 600 18px 'Fira Sans Condensed', sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.mhome p { color: #aab2bf; font-size: 15px; line-height: 1.4; }
+.mhome a { color: #8fb8ea; }
+.mhome .foot { font-size: 14px; color: #8d95a1; }
+.game.mana .yourturn.skipped b { font-size: 30px; }
+.mcard.W .plaque polygon { fill: #33363c; stroke: #8a8f98; }

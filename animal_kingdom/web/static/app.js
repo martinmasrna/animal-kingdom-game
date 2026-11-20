@@ -1,12 +1,13 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
-import { cardHTML, fitNames, readSide } from './card.js';
+import { cardHTML, fitNames, readSide, KEYWORDS } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan, DUR } from './timeline.js';
 import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt, resolvesIn, setBoardMap, hexBoard } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt, resolvesIn, setBoardMap, hexBoard, tokenWidth } from './board.js';
+import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo } from './mana.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripHTML, stripsHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
@@ -27,7 +28,7 @@ const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
-let RULES = null, CARDS = {}, MAP, MAPS = {}, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null, LEADERS = {};   // LEADERS: the leaders prototype, card id -> {kind, text}   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
+let RULESETS = {}, RULES = null, CARDS = {}, MAP, MAPS = {}, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null, LEADERS = {};   // LEADERS: the leaders prototype, card id -> {kind, text}   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
 
@@ -85,7 +86,8 @@ function formOf(id, seat) {
 // keywords explained (under it on a narrow screen). `extra`: what goes under the card itself (a board piece's timer).
 function cardRead(id, str, seat = V && V.you, extra = '') {
   const c = formOf(id, seat); if (!c) return '';
-  return `<div class="rcard${(c.related || []).length ? ' wide' : ''}">${cardHTML(c, str == null ? {} : { str })}${extra}${readSide(c, CARDS)}</div>`;
+  const face = isMana() ? manaCard(c, { ...(str == null ? {} : { str }), owner: seat === V.you ? 'A' : 'B', w: 230 }) : cardHTML(c, str == null ? {} : { str });   // the mana rules' card, piece and plaque
+  return `<div class="rcard${(c.related || []).length ? ' wide' : ''}">${face}${extra}${readSide(c, CARDS)}</div>`;
 }
 function readCard(id, str, seat = V && V.you) {
   const html = cardRead(id, str, seat); if (html) readOverlay(html);
@@ -139,7 +141,7 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; MAPS = p.maps || { [p.map.id]: p.map }; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; RULES = p.rules; LEADERS = p.leaders || {};
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; MAPS = p.maps || { [p.map.id]: p.map }; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; RULES = p.rules; LEADERS = p.leaders || {}; RULESETS = p.rulesets || {};
   if (CARDS.bumblebee_legend) CARDS.bumblebee_legend.base = CARDS.bumblebee_legend.text; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
   COVER = Object.fromEntries([...DECKS, ...BOT_ONLY].map(d => [d.id, d.cover]));
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
@@ -194,7 +196,7 @@ async function boot() {
 async function rejoin(only) {
   const r = await api('/api/current').catch(() => null), m = r && r.ok ? await r.json() : {};
   if (!m.id || (only && m.id !== only)) return false;
-  setToken(m.id, m.token);
+  if (!getToken(m.id)) setToken(m.id, m.token);   // a tab that holds a seat keeps it: one profile may hold both seats of a friend match, one window each
   if (!only && !location.hash.startsWith('#/m/' + m.id)) location.hash = '#/m/' + m.id;
   return true;
 }
@@ -281,6 +283,7 @@ const mePiece = () => {   // the Ladder, with your league (or, before leagues, y
 };
 let homeMode = {};   // the mode home was last drawn in: a late redraw keeps to it (not to the mode it was first opened with)
 function homeScreen(mode = {}) {
+  if (MANA_HOME && !mode.gauntlet) return manaHome(mode);
   screen = 'home'; homeMode = mode;
   if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(homeMode); }); }   // the dot and "Since you last played" once it's known
   if (mode.gauntlet) play.opp = 'gauntlet'; else if (mode.join) play.opp = 'friend';
@@ -880,6 +883,72 @@ const BOARD = (() => { const q = new URLSearchParams(location.search).get('board
 // turn's free card and from effects. ?draw=on on the address brings the action back, ?draw=off turns the trial on again.
 const DRAW_OFF = (() => { const q = new URLSearchParams(location.search).get('draw');
   try { if (q) localStorage.setItem('ak:draw', q === 'on' ? 'on' : 'off'); return localStorage.getItem('ak:draw') !== 'on'; } catch { return q !== 'on'; } })();
+// The mana ruleset (the prototype of 2026-11-20): ?rules=mana or ?rules=default on the address, kept in the browser like
+// ?board. On localhost (Martin plays the unreleased rules there) the mana rules are the default; on any other host the
+// default ruleset stays the default. It decides only what home offers: in the mana rules, a friend match (no bot plays
+// them). A match's own screen follows the match's ruleset (its view's `ruleset`), whatever the switch says.
+const LOCALHOST = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+const MANA_HOME = (() => { const q = new URLSearchParams(location.search).get('rules');
+  try { if (q) localStorage.setItem('ak:rules', q === 'mana' ? 'mana' : 'default'); return (localStorage.getItem('ak:rules') || (LOCALHOST ? 'mana' : 'default')) === 'mana'; }
+  catch { return q ? q === 'mana' : LOCALHOST; } })();
+const isMana = () => !!(V && V.ruleset === 'mana');
+// A ruleset's own wording (the view's `texts` and `keywords`: the mana rules read the Beaver, the Cheetah, the Falcon and six
+// keywords their way): put into the card pool and the keyword list while its match is shown, the stored wording back after.
+const KW_BASE = { ...KEYWORDS };
+let wordingOf = '';
+function applyWording(v) {
+  const texts = (v && v.texts) || {}, kws = (v && v.keywords) || {}, key = JSON.stringify([texts, kws]);
+  if (key === wordingOf) return; wordingOf = key;
+  for (const c of Object.values(CARDS)) if (c.storedText !== undefined) { c.text = c.storedText; delete c.storedText; }
+  for (const [id, t] of Object.entries(texts)) if (CARDS[id]) { CARDS[id].storedText = CARDS[id].text; CARDS[id].text = t; }
+  for (const k of Object.keys(KW_BASE)) KEYWORDS[k] = kws[k] || KW_BASE[k];
+}
+// A deck legal under the mana rules (decks.decklist_problems with ruleset "mana"): its size, its copies, only collectible
+// cards with a mana cost, and a leader of its own (a leader is required in every ruleset, decks.deck_problems).
+function manaLegal(list, leader) {
+  const R = (RULESETS.mana || {}).deck; if (!R) return false;
+  const n = {}; for (const id of list) n[id] = (n[id] || 0) + 1;
+  return list.length === R.deckSize && !!leader && list.includes(leader) && !!LEADERS[leader]
+    && Object.entries(n).every(([id, k]) => CARDS[id] && CARDS[id].status === 'collectible' && CARDS[id].mana != null && k <= R.copies[CARDS[id].rarity]);
+}
+// Home in the mana rules: a friend match only. Your decks that are legal under them, then the six pool decks (Deck 1 to 6);
+// create a match (its code and link on the next screen), or join one by its code. The collection and deck builder for these
+// rules are the next stage.
+function manaHome(mode = {}) {
+  screen = 'home'; homeMode = mode;
+  const mine = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));
+    return { id: 'my:' + d.id, name: d.name, mine: true, list, leader: d.leader }; }).filter(d => manaLegal(d.list, d.leader));
+  const pool = BOT_ONLY.filter(d => /^pool_\d+$/.test(d.id)).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+  const all = [...mine, ...pool], chosen = all.find(d => d.id === store('ak:manadeck')) || all[0];
+  const leaderName = d => { const ls = d.leader ? [d.leader] : [...new Set(d.list || [])].filter(id => LEADERS[id]);   // a pool deck: the one card in it that can lead
+    return ls.length === 1 && CARDS[ls[0]] ? CARDS[ls[0]].name.split(':')[0] : ''; };
+  const tile = d => `<button class="dk${chosen && d.id === chosen.id ? ' on' : ''}" data-deck="${d.id}">${esc(d.name)}${leaderName(d) ? `<small>${esc(leaderName(d))}</small>` : ''}</button>`;
+  app.innerHTML = `<div class="mhome"><div class="box">
+    <h1>Friend match<small>The mana rules, a prototype</small></h1>
+    <h2>Your deck</h2><div class="decks">${all.map(tile).join('') || '<p>No deck of yours is legal under these rules yet.</p>'}</div>
+    <div class="row"><button class="go" id="mgo">${mode.join ? `Join match ${esc(mode.join)}` : 'Create match'}</button></div>
+    ${mode.join ? '' : `<h2>Join a friend's match</h2><div class="row"><input id="mcode" maxlength="6" placeholder="Code" autocomplete="off"><button class="sec" id="mjoin">Join</button></div>`}
+    <p class="foot"><a href="?rules=default#/">Play the usual rules</a></p></div></div>`;
+  const $ = id => document.getElementById(id);
+  app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:manadeck', el.dataset.deck); manaHome(mode); });
+  const spec = d => d.mine ? { name: d.name, list: d.list, leader: d.leader } : d.id;
+  const join = async code => {
+    if (!chosen) return toast('Choose a deck first');
+    const r = await api(`/api/match/${code}/join`, { method: 'POST', body: JSON.stringify({ deck: spec(chosen), name: 'Friend' }) });
+    if (!r.ok) return toast(r.status === 404 ? `No match ${code}` : await r.text());
+    const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+  };
+  $('mgo').onclick = async () => {
+    if (mode.join) return join(mode.join);
+    if (!chosen) return toast('Choose a deck first');
+    const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: spec(chosen), ruleset: 'mana', name: 'You' }) });
+    if (!r.ok) return toast(await r.text());
+    const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+  };
+  const code = $('mcode');
+  if (code) { const go = () => { const c = code.value.trim().toUpperCase(); if (c) join(c); };
+    code.onkeydown = e => { if (e.key === 'Enter') go(); }; $('mjoin').onclick = go; }
+}
 let LOCAL = null;
 async function startLocal(body) {
   const lib = await prepareLocal(api);
@@ -898,7 +967,7 @@ function localScreen() {
   screen = null; V = null; ui.sel = null; release(); ui.carry = null; ui.back = null; ui.peek = false;
   LOCAL.show();
 }
-function disconnect() { if (LOCAL) { LOCAL.close(); LOCAL = null; if (wsId === 'LOCAL') wsId = null; } if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; }   // a step still timed would redraw the game over the next screen
+function disconnect() { if (LOCAL) { LOCAL.close(); LOCAL = null; if (wsId === 'LOCAL') wsId = null; } if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; applyWording(null); }   // a step still timed would redraw the game over the next screen
 
 async function matchScreen(id) {
   if (!getToken(id) && !(await rejoin(id))) { location.hash = '#/join/' + id; return; }   // a new tab: the server knows your seat
@@ -960,6 +1029,7 @@ const act = action => { if (action.kind === 'place' && ui.carry != null) { relea
 const canGrip = id => FLIGHT && !touch() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
 function grip(el, id, iid) {
   const h = (V.game.hand || []).find(h => h.iid === iid);
+  if (isMana()) { carry(el.querySelector('.mcard'), manaCard(formOf(id, V.you), { str: h ? h.str : undefined, cost: h ? h.cost : null, w: 100 }), flightGeo()); ui.carry = iid; return; }   // its piece on the pointer
   carry(el.querySelector('.card'), cardHTML(formOf(id, V.you), { str: h ? h.str : undefined })); ui.carry = iid;
 }
 // A card let go of without being placed goes back to its place in the hand, which opens for it as it comes.
@@ -968,7 +1038,7 @@ function ungrip() {
   const iid = ui.carry; ui.carry = null;
   if (!carrying()) return;
   ui.back = iid; drawGame();
-  carryDrop(document.querySelector(`#hand .hc[data-iid="${iid}"] .card`), () => { if (ui.back === iid) { ui.back = null; if (screen === 'game') drawGame(); } });
+  carryDrop(document.querySelector(`#hand .hc[data-iid="${iid}"] ${isMana() ? '.mcard' : '.card'}`), () => { if (ui.back === iid) { ui.back = null; if (screen === 'game') drawGame(); } });
 }
 
 // A new view: its events (static/timeline.js) play as steps, each view drawn for its step's length, the new view last.
@@ -981,14 +1051,15 @@ const landNow = covered => { if (screen !== 'game') return; drawBoard(); sfx(cov
 const LAND_HIT = HIT_DELAY;   // s from the cut to the piece's impact (flight.js: none for Impact, game.css landf for the glow)
 // The board a match is played on (match.py MAPS): its view names it, and the screen draws that board (the hex prototype on its own ground).
 // the painted ground: the hex board's own (no trails), upright too; the square board's wide one, or its upright painting
-const plateSrc = () => `/static/kit2/plate_${MAP.hex ? 'hex' : VIEW.port ? 'port' : 'wide'}.webp`;
+const plateSrc = () => `/static/kit2/plate_${MAP.hex || MAP.hex19 ? 'hex' : VIEW.port ? 'port' : 'wide'}.webp`;
 function useMap(v) {
+  applyWording(v);
   const id = (v && v.map) || 'map_b';
   if (MAPS[id] && MAP.id !== id) MAP = MAPS[id];
   setBoardMap(MAP);
   const img = document.querySelector('#world img'), scr = document.getElementById('scr');
   if (img) { const src = plateSrc(); if (!img.src.endsWith(src)) img.src = src; }
-  if (scr) scr.classList.toggle('hexb', !!MAP.hex);
+  if (scr) { scr.classList.toggle('hexb', !!(MAP.hex || MAP.hex19)); scr.classList.toggle('mana', !!(v && v.ruleset === 'mana')); }
 }
 function onView(prev) {
   useMap(V);
@@ -1099,6 +1170,12 @@ function showView(prev) {
           ? { kind: ui.step.kind, side: rel(ui.step.player), at: ui.step.from.map(f => ({ cr: dcr(f.cr), n: f.n })) } : null,
         strength: strengthFlash(ui.step) } : null;
   if (ui.step && ui.step.kind === 'yourturn' && screen === 'game') { turnPlate(); turnCue.until = Date.now() + 900; }
+  if (ui.step && ui.step.kind === 'skipped' && screen === 'game') {   // the mana rules: a turn with nothing its player could pay for
+    const key = `${V.id}-${V.results.length}`, mine = ui.step.player === V.you;
+    ui.skips = (ui.skips || []).filter(k => k.key === key);
+    if (!ui.skips.some(k => k.turn === ui.step.turn)) ui.skips.push({ key, turn: ui.step.turn, seat: ui.step.player });
+    turnPlate(mine ? 'Turn skipped: you can\'t pay for anything' : 'Turn skipped: your opponent can\'t pay for anything', true);
+  }
   gameScreen();
 }
 
@@ -1114,7 +1191,7 @@ async function labScreen(name, fx) {
 // Before the match: the key art dimmed, the menus' granite. Waiting for a friend: the code to send, on one piece.
 function lobbyScreen() {
   screen = 'lobby';
-  const link = `${location.origin}/#/join/${V.id}`;
+  const link = `${location.origin}/${V.ruleset === 'mana' ? '?rules=mana' : ''}#/join/${V.id}`;   // a mana match's link opens the mana rules' home
   app.innerHTML = `<div class="mscr pre"><div class="piece lobbyp"><div class="bigcode">${V.id}</div>
       <button class="slab" id="copy">${matchMedia('(hover: none)').matches ? 'Share link' : 'Copy link'}</button><p>Waiting for your friend to join</p></div>
     <a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
@@ -1189,8 +1266,12 @@ function decision() {
     const ids = Object.keys(d.places);
     if (!ui.sel && ids.length === 1 && d.pend) ui.sel = ids[0];   // a "play this card" prompt: preselect it
     // ...and when the prompt names the very copy (Babaji plays the animal he returned, not its twin in hand), that copy is the one selected and the only one that can be played
+    // (a card none of whose copies is named plays as usual: a prompt for any animal names only the copies that differ, the
+    // Mole's free play with two Capuchins of different strength in hand)
     d.named = d.pend && G.legal.copies ? Object.keys(G.legal.copies).map(Number) : null;
-    if (d.named && ui.sel && !d.named.includes(ui.selIid)) ui.selIid = d.named[0];
+    const namedIds = new Set((d.named || []).map(i => (G.hand.find(h => h.iid === i) || {}).id));
+    d.barred = h => !!d.named && namedIds.has(h.id) && !d.named.includes(h.iid);   // a twin of a named copy
+    if (d.named && ui.sel && namedIds.has(ui.sel) && !d.named.includes(ui.selIid)) ui.selIid = d.named.find(i => (G.hand.find(h => h.iid === i) || {}).id === ui.sel);
     if (ui.sel) for (const t of selPlaces(d)) { if (t[0] === 'cr') d.rings.push(dcr(t[1])); else d.hqRing = true; }
     // Roam: click one of your animals that can move (it wears a dashed ring), its destinations ring, click one
     if (!d.pend) for (const [from, ts] of Object.entries(G.legal.roam || {})) d.roams[dcr(from)] = ts;
@@ -1220,7 +1301,7 @@ function wireTips(root) {
 function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="game kit${MAP.hex ? ' hexb' : ''}" id="scr"><div id="world"><img src="${plateSrc()}" alt="" draggable="false"></div><div id="stage">
+    app.innerHTML = `<div class="game kit${MAP.hex || MAP.hex19 ? ' hexb' : ''}${isMana() ? ' mana' : ''}" id="scr"><div id="world"><img src="${plateSrc()}" alt="" draggable="false"></div><div id="stage">
       <div class="abs ledge"></div>
       <div id="board"></div>
       <div class="abs menu snd" id="sndbtn"></div><div class="panel setp" id="setp"></div>
@@ -1242,6 +1323,7 @@ function gameScreen() {
       <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
       <div class="abs rbar" id="rbar"></div>
       <div class="abs recent" id="recent"></div>
+      <div class="abs mrail" id="mrail"></div><div class="abs mlast" id="mlast"></div><div class="abs mhover" id="mhover"></div>
       <div class="endov" id="endov"></div>
       <div class="endov" id="concov"><div class="endbox ask"><b>Concede this game?</b>
         <div class="btns"><button class="slab" id="keep">Keep playing</button><button class="play danger" id="concede">Concede</button></div></div></div></div></div>`;
@@ -1277,7 +1359,7 @@ function gameScreen() {
     $('sndbtn').onclick = e => { e.stopPropagation(); if (ui.panel !== 'set') { const p = $('setp'); p.innerHTML = `<h4>Settings</h4>${settingsBody()}`; wireSettings(p); }
       ui.panel = ui.panel === 'set' ? null : 'set'; showPanel(); };
     $('setp').onclick = e => e.stopPropagation(); preload();
-    wireBoard();
+    wireBoard(); wireRail();
   }
   drawGame();
 }
@@ -1321,9 +1403,9 @@ function turnCue(mine) {
 }
 addEventListener('visibilitychange', () => { if (!document.hidden) { document.title = 'Animal Kingdom'; if (matchScreen.wake) matchScreen.wake(); } });
 // Hearthstone's plate, on granite, with the knock.
-function turnPlate() {
-  sfx('yourturn');
-  const b = document.createElement('div'); b.className = 'yourturn'; b.innerHTML = '<b>Your turn</b>';
+function turnPlate(text = 'Your turn', quiet = false) {
+  if (!quiet) sfx('yourturn');
+  const b = document.createElement('div'); b.className = 'yourturn' + (quiet ? ' skipped' : ''); b.innerHTML = `<b>${text}</b>`;
   document.getElementById('stage').appendChild(b); setTimeout(() => b.remove(), 1500);
 }
 
@@ -1342,6 +1424,8 @@ function drawGame() {
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   keepAwake(playing && !RP.views.length);
   lastDecision = d;
+  const M = isMana(), mull = M && G.decision === 'mulligan';   // the mana rules' screen (mana.css); its opening hand shown in full
+  $('scr').classList.toggle('mana', M);
   drawIntro();
   if ($('scr').classList.contains('rp') !== !!RP.views.length) { $('scr').classList.toggle('rp', !!RP.views.length); fitStage(false); }   // a replay: upright its controls take a row under the stage
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
@@ -1350,6 +1434,8 @@ function drawGame() {
     $('series').style.right = 16 + w * n + 'px'; $('pilebtn').style.right = 16 + w * (n + 1) + 'px';
     $('sndbtn').style.right = 16 + w * (n + 2) + 'px'; $('chatbtn').style.right = 16 + w * (n + 3) + 'px'; }   // the Remove Pile left of History; Friends, left of sound
   $('chatbtn').style.display = V.id && !isTutorial() && hasFriends() ? '' : 'none';   // a real match or replay, once you have a friend   // sound, left of History   // History, left of feedback and the flag
+  ['menubtn', 'fbbtn', 'series', 'pilebtn', 'sndbtn', 'chatbtn'].forEach(id => { $(id).style.left = ''; });
+  if (M) ['menubtn', 'fbbtn', 'series', 'pilebtn', 'sndbtn', 'chatbtn'].filter(id => $(id).style.display !== 'none').forEach((id, i) => { $(id).style.left = 16 + 52 * i + 'px'; });   // the mana screen: a plain row at the top left
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
@@ -1365,8 +1451,8 @@ function drawGame() {
   // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye
   // hides them), and face up in a game while they play with their hand revealed (your legendary Giraffe).
   const shown = (RP.views.length && RP.eye && G.oppHand) || G.revealedHand, faces = !!shown;
-  const nb = G.handCount[them], step = faces ? Math.min(VIEW.port ? 40 : 72, 504 / Math.max(1, nb - 1)) : VIEW.port ? 36 : 52,   // face up, a gap between cards as in your hand; a full hand (10) stays clear of the replay's controls
-    bx0 = (VIEW.port ? 184 : STAGE.w / 2) - ((faces ? 66 : 84) + (nb - 1) * step) / 2;   // upright, left of the buttons
+  const nb = G.handCount[them], step = faces ? Math.min(VIEW.port ? 40 : 72, 504 / Math.max(1, nb - 1)) : M ? 50 : VIEW.port ? 36 : 52,   // face up, a gap between cards as in your hand; a full hand (10) stays clear of the replay's controls
+    bx0 = (VIEW.port ? 184 : STAGE.w / 2) - ((faces ? 66 : M ? 46 : 84) + (nb - 1) * step) / 2;   // upright, left of the buttons; the mana screen's backs are small hexagons
   const A = ui.anim, oppDrew = A ? Math.max(0, nb - A.oppHand) : 0;   // their new cards slide down into their hand
   const slot = i => `${i >= nb - oppDrew ? ' drawn' : ''}" style="left:${bx0 + i * step}px;animation-delay:${(i - (nb - oppDrew)) * 0.12}s`;
   $('opphand').innerHTML = faces
@@ -1377,26 +1463,32 @@ function drawGame() {
 
   // Your hand, centred under the board.
   const held = G.hand.filter(h => h.iid !== ui.flyIid && h.iid !== ui.carry);   // the card in flight or in the grip has left it (flight.js, carry.js)
-  const n = held.length, cw = 143, gap = n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0, x0 = PL().handC - (n * cw + (n - 1) * gap) / 2;
-  const hand = $('hand');
+  // the mana screen: a row of pieces under the board (the full cards, large, while the opening hands are chosen)
+  const n = held.length, cw = M ? (mull ? 176 : 100) : 143, gap = M ? (mull ? 18 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0) : n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0,
+    x0 = (M ? STAGE.w / 2 : PL().handC) - (n * cw + (n - 1) * gap) / 2;
+  const hand = $('hand'); hand.classList.toggle('mull', mull);
   let drawnK = 0;
   const lit = handLights(d, held);   // a lesson's hints (coach.js)
   const was = new Map([...hand.querySelectorAll('.hc')].map(el => [el.dataset.iid, el.offsetLeft]));   // where each card stood
   hand.innerHTML = held.map((h, i) => {
-    const c = formOf(h.id, V.you), can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!d.named || d.named.includes(h.iid)) && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
+    const c = formOf(h.id, V.you), can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && !(d.barred && d.barred(h)) && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = lit.hint(can), shown = lit.shown(h.id);
     const talking = lit.talking || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
-    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || selCopy()).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
+    // the mana rules dim a card its owner can't play: on your turn one the mana left can't pay for (or with nowhere to go), on your
+    // opponent's one your next turn's mana won't pay for; never while the opening hands are chosen
+    const dim = M ? !mull && !pick && (d.mine ? !can : h.cost > ((G.mana || {})[you] || {}).left) : !can && !pick && !talking;
+    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || selCopy()).iid ? 'sel' : '', dim ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first; a card an effect made or
     // fetched (a Kitten, a Young Stag) came from no deck, so it rises into its place instead (Martin, 2026-10-31: flying in
     // from the deck "just looks weird")
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = drawn && ui.step && ui.step.kind === 'to_hand';
     const from = drawn ? `${made ? '' : `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
-    const r = rise(h), html = cardHTML(c, { str: r ? r.now : h.str, cls: 'compact' });
+    const r = rise(h), html = M ? manaCard(c, { str: r ? r.now : h.str, cost: h.cost, w: cw, iid: h.iid }) : cardHTML(c, { str: r ? r.now : h.str, cls: 'compact' });
+    if (M) return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${html}</div>`;
     return `<div class="hc ${r ? cls.replace(' dim', '') + ' rise' : cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}${r ? `--ago:${-r.ago}ms` : ''}">${r
       ? html.replace('<div class="stab">', `<div class="stab">${cardHTML(c, { str: r.was, cls: 'compact' }).match(/<span class="n[^"]*">.*?<\/span>/)[0].replace('class="n', 'class="n was')}`) : html}</div>`;
   }).join('');
-  fitNames(hand);
+  fitNames(hand); if (M) fitPlaques(hand);
   // a card that left (played, discarded) or came: the others slide to their new places rather than jump
   if (FLIGHT && !matchMedia('(prefers-reduced-motion: reduce)').matches) hand.querySelectorAll('.hc:not(.drawn):not(.made)').forEach(el => {
     const dx = was.get(el.dataset.iid) - el.offsetLeft;
@@ -1440,7 +1532,7 @@ function drawGame() {
     return `<i class="${i < used ? 'used' : i === used ? 'next' : ''}"></i>`; }).join('') : '';
   if (playing && G.current === you) {
     tb.className = 'abs tbtn A num' + (canEnd(d) ? ' can' : '') + (Date.now() < (turnCue.until || 0) ? ' yours' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`; delete tb.dataset.tip;
-  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = `<span class="pips">${pips}<span class="clock" id="clock"></span></span>`; tb.dataset.tip = 'Your opponent\'s turn'; }
+  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = `${M ? (G.decision === 'mulligan' ? '<b>Opening hands</b>' : '<b>Your opponent\'s turn</b>') : ''}<span class="pips">${pips}<span class="clock" id="clock"></span></span>`; tb.dataset.tip = 'Your opponent\'s turn'; }
   else { tb.className = 'abs tbtn'; tb.innerHTML = ''; delete tb.dataset.tip; }
 
   // A pending choice: the asking card and its rule; card options float above the hand.
@@ -1451,7 +1543,7 @@ function drawGame() {
     const k = d.pend.returned;
     // a player's first real match says what the mulligan is for, in plain words (the tutorial skips it); later ones, the short rule
     const first = !store('ak:mullseen');
-    const how = tapWords(first ? `This is your starting hand. Don't like a card? Click it to swap it for a new one, up to ${d.pend.cap} times. Then click ${k ? 'Done' : 'Keep hand'}.`
+    const how = M ? 'Click a card to swap it for another from your deck. No copy of a card you swap can come back.' : tapWords(first ? `This is your starting hand. Don't like a card? Click it to swap it for a new one, up to ${d.pend.cap} times. Then click ${k ? 'Done' : 'Keep hand'}.`
       : 'Click a card to replace it; no copy of a card you replace can come back.');
     bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + (RP.views.length ? '' : `<p>${how}</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`);
     bar.classList.add('on');
@@ -1471,8 +1563,8 @@ function drawGame() {
     bar.innerHTML = `<div class="line">${ask ? `<b>${ask}</b>${src ? `<p>${src.name}: ${src.text}</p>` : ''}` : src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${peek}${skip}</div>` + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
     bar.classList.add('on');
     if (d.cardOpts.length) {
-      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${cardHTML(c, o.str == null ? {} : { str: o.str })}</div>`; }).join('');
-      opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); opts.classList.toggle('many', d.cardOpts.length > 6); fitNames(opts);
+      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${M ? manaCard(c, { ...(o.str == null ? {} : { str: o.str }), w: 170 }) : cardHTML(c, o.str == null ? {} : { str: o.str })}</div>`; }).join('');
+      opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); opts.classList.toggle('many', d.cardOpts.length > 6); fitNames(opts); if (M) fitPlaques(opts);
       $('optpeek').onclick = e => { e.stopPropagation(); ui.optsHidden = !ui.optsHidden; drawGame(); };
       opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });
     }
@@ -1484,10 +1576,15 @@ function drawGame() {
     $('actuse').onclick = e => { e.stopPropagation(); sfx('pick'); ui.roam = null; act({ kind: 'leader' }); };
     $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
   } else if (d.mine && ui.roam && d.acts.has(ui.roam)) {   // an Action animal picked: its card's rule and the button that uses it
-    const u = (viewerGame().board[ui.roam] || []).slice(-1)[0], c = u && CARDS[u.id], echo = c && /^Echo\./.test(c.text);
-    bar.innerHTML = `<div class="line">${c ? `<b>${c.name}</b><p>${c.text}</p>` : '<b>Action</b>'}<span class="skip use" id="actuse">${echo ? 'Echo' : 'Use Action'}</span><span class="skip" id="actno">Cancel</span></div>`;
+    const u = (viewerGame().board[ui.roam] || []).slice(-1)[0], c = u && CARDS[u.id], echo = c && /(^|\. )Echo\./.test(c.text);
+    bar.innerHTML = `<div class="line">${c ? `<b>${c.name}</b><p>${c.text}</p>` : '<b>Action</b>'}<span class="skip use" id="actuse">${echo ? 'Echo' : 'Use Action'}${M ? costChip(G.abilityCost) : ''}</span><span class="skip" id="actno">Cancel</span></div>`;
     bar.classList.add('on');
     $('actuse').onclick = e => { e.stopPropagation(); sfx('pick'); act({ kind: 'act', from: dcr(ui.roam) }); };
+    $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
+  } else if (M && d.mine && ui.roam && d.roams[ui.roam]) {   // the mana rules: an animal picked to roam says what it costs (a roam a card gave is free)
+    const u = (viewerGame().board[ui.roam] || []).slice(-1)[0], c = u && CARDS[u.id], free = ((G.legal || {}).freeRoam || []).includes(dcr(ui.roam));
+    bar.innerHTML = `<div class="line"><b>${c ? `${c.name}: Roam` : 'Roam'}</b><p>${free ? 'Free this turn.' : `${costChip(G.abilityCost)} Pick where it goes.`}</p><span class="skip" id="actno">Cancel</span></div>`;
+    bar.classList.add('on');
     $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
   } else {
     bar.classList.remove('on');
@@ -1505,28 +1602,30 @@ function drawGame() {
     : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
   if (st && st.kind === 'act') {   // an Action used: the card shown large over the board, shrinking into the animal that used it
     const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
-    rv.innerHTML = cardHTML(formOf(st.card, st.player)) + `<div class="actlbl">${/^Echo\./.test((CARDS[st.card] || {}).text || '') ? 'Echo' : 'Action'}</div>`; fitNames(rv);
+    rv.innerHTML = (M ? manaCard(formOf(st.card, st.player), { owner: rel(st.player), w: 190 }) : cardHTML(formOf(st.card, st.player))) + `<div class="actlbl">${/(^|\. )Echo\./.test((CARDS[st.card] || {}).text || '') ? 'Echo' : 'Action'}</div>`; fitNames(rv); if (M) fitPlaques(rv);
     rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
   }
   if (st && st.kind === 'leader') {   // a leader's power used: the leader's card shown large, shrinking into its place by the den
     const [tx, ty] = leaderAt(rel(st.player)), rv = $('reveal');
-    rv.innerHTML = cardHTML(CARDS[st.card]) + '<div class="actlbl">Leader</div>'; fitNames(rv);
+    rv.innerHTML = (M ? manaCard({ ...CARDS[st.card], text: ((G.leaders || {})[st.player] || {}).text || CARDS[st.card].text }, { owner: rel(st.player), w: 190, str: null }) : cardHTML(CARDS[st.card])) + '<div class="actlbl">Leader</div>'; fitNames(rv); if (M) fitPlaques(rv);
     rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
   }
   if (st && st.kind === 'reveal') {   // the opponent's card, shown large and flown down onto its crossroad; the next step lands it
     const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
-    rv.innerHTML = cardHTML(formOf(st.card, st.player)); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
+    rv.innerHTML = M ? manaCard(formOf(st.card, st.player), { owner: rel(st.player), w: 190, cost: (CARDS[st.card] || {}).mana ?? null }) : cardHTML(formOf(st.card, st.player)); fitNames(rv); if (M) fitPlaques(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.style.setProperty('--hx', `${VIEW.port ? 184 - STAGE.w / 2 : 0}px`); rv.style.setProperty('--hy', `${5 - (VIEW.port ? 560 : 300)}px`);   // their hand's centre
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
     // after its hold the card flies down and lands as the piece (flight.js); without art it shrinks away as before
-    clearTimeout(drawGame.rvfly); drawGame.rvfly = setTimeout(() => { if (ui.step === st && fly(rv.querySelector('.card'), $('board').querySelector(`[data-cr="${dcr(st.cr)}"]`), st.card, dcr(st.cr), viewerGame().board[dcr(st.cr)], landNow)) rv.classList.remove('on'); },
+    clearTimeout(drawGame.rvfly); drawGame.rvfly = setTimeout(() => { if (ui.step === st && fly(rv.querySelector(M ? '.mcard' : '.card'), $('board').querySelector(`[data-cr="${dcr(st.cr)}"]`), st.card, dcr(st.cr), viewerGame().board[dcr(st.cr)], landNow, null, null, M ? flightGeo() : null)) rv.classList.remove('on'); },
       DUR_REVEAL_HOLD * 1000 / (window.AK_SPEED || 1));
   }
   drawCoach($('coach'), d.lesson, d.rings);   // a lesson's coach (coach.js); none while steps play
   drawBoard(d);
   if (A && !RP.views.length) soundsFor(document, CARDS);   // one sound per thing that just moved
+  drawRail(G, d); drawLast(G);
+  if (M && (ui.sel || d.rings.length)) { clearTimeout(stackTimer); stackCr = null; manaHover(null); }   // a hovered piece never covers the places a click acts on
   drawEnd();
 }
 
@@ -1599,7 +1698,7 @@ function showPanel() {
 function fitStage(redraw = true) {
   const st = document.getElementById('stage'); if (!st) return;
   // a window taller than wide gets the upright layout (board.js setView); turning the phone redraws the screen
-  const port = innerHeight > innerWidth, flip = port !== VIEW.port;
+  const port = innerHeight > innerWidth && !isMana(), flip = port !== VIEW.port;   // the mana rules' screen is the desktop one, scaled, on any window
   setView(port); document.getElementById('scr').classList.toggle('port', port);
   // upright, a replay keeps a row under the stage for its controls (game.css .port .rbar): the stage fits the window less it,
   // with 60 stage px of savanna kept above and below (about what a phone shows in play), so the hand, which sits at the edge,
@@ -1631,7 +1730,7 @@ function moveLine(m) {
     if (f.k === 'food') return `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}${f.n > 0 ? 'gained' : 'paid'} ${Math.abs(f.n)} food`;
     return null;
   }).filter(Boolean);
-  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? 'captured the HQ' : m.kind === 'roam' ? 'roamed' : m.kind === 'act' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'its'} ${CARDS[m.card] && /^Echo\./.test(CARDS[m.card].text) ? 'Echo' : 'Action'}`
+  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? 'captured the HQ' : m.kind === 'roam' ? 'roamed' : m.kind === 'act' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'its'} ${CARDS[m.card] && /(^|\. )Echo\./.test(CARDS[m.card].text) ? 'Echo' : 'Action'}`
     : m.kind === 'leader' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'the leader'}'s power` : '';
   return [`${who} · turn ${m.round}`, what, ...fx].filter(Boolean).join(' · ');
 }
@@ -1682,7 +1781,8 @@ function drawBoard(d) {
   const region = shownRegion(d);
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
   const fire = st && st.src ? st.src.map(dcr) : null;   // the animals whose own effect this is: their trigger marks brighten
-  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, roamable: [...Object.keys(d.roams || {}), ...(d.acts || [])], acting: st && st.kind === 'act' ? [dcr(st.cr)] : [], roamFrom: ui.roam, preview, anim: A, ago, capture, strike, fire, leaders: g.leaders,
+  const G = V.game, bases = G.bases ? { A: (G.bases[V.you] || []).map(dcr), B: (G.bases[opp()] || []).map(dcr) } : null;   // the mana board's bases
+  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { bases, region, rings: d.rings, hqRing: d.hqRing, roamable: [...Object.keys(d.roams || {}), ...(d.acts || [])], acting: st && st.kind === 'act' ? [dcr(st.cr)] : [], roamFrom: ui.roam, preview, anim: A, ago, capture, strike, fire, leaders: g.leaders,
     beat: endBeat(), current: V.phase === 'playing' ? rel(V.game.current) : null });
   draw();
   if (startBeat(g, A, ago, capture)) draw();
@@ -1716,18 +1816,89 @@ const endBeat = () => { const key = V && `${V.id}-${V.results.length}`;
 
 // The leaders prototype: a leader as the player reads it (its name, what kind of ability, the ability as it stands now).
 const LEADER_KIND = { power: 'Hero power: costs one of your actions.', once: 'Once per game: costs one of your actions.', passive: 'Always on.' };
+const LEADER_MANA = n => ({ power: `Hero power: costs ${n} mana.`, once: `Once per game: costs ${n} mana.`, passive: 'Always on.' });   // the mana rules
 function leaderPanel(side) {
   const L = viewerGame().leaders[side]; if (!L) return '';
-  const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader";
-  return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${LEADER_KIND[L.kind] || ''}</p><p>${L.text}</p>`;
+  const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader", kind = isMana() ? LEADER_MANA(V.game.abilityCost) : LEADER_KIND;
+  return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${kind[L.kind] || ''}</p><p>${L.text}</p>`;
+}
+// The mana rules' rail (mana.css), right of the board: your opponent's leader with their mana and deck, their food, End turn
+// (#tbtn, its own element), your food, your leader with its power's price and your deck, your mana level with your hand.
+// Food and income are each side's own; their mana while it isn't their turn is their next turn's, unspent.
+function drawRail(G, d) {
+  const el = document.getElementById('mrail'); if (!el) return;
+  if (!isMana() || !G) { el.innerHTML = ''; return; }
+  const you = V.you, them = opp(), mana = G.mana || {}, cost = G.abilityCost;
+  const lead = side => {
+    const p = side === 'A' ? you : them, L = (G.leaders || {})[p], m = mana[p] || { left: 0, total: 0 };
+    const deck = (G.deckCount || {})[p], c = L && CARDS[L.id];
+    const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && (L.spent || (L.kind !== 'passive' && !L.usable && (side === 'B' || G.current === you)));
+    const power = !L ? '' : L.kind === 'passive' ? 'Always on' : L.spent ? 'Used' : `${L.kind === 'once' ? 'Once a game' : 'Power'} ${costChip(L.cost ?? cost)}`;
+    const tok = L ? `<div class="ltok${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:78px">${leaderToken(L.id, side, CARDS, 78)}</div></div>` : '';
+    return `<div class="mlead ${side}">${tok}<div class="lt">${c ? `<b>${esc(c.name.split(':')[0])}</b><br>` : ''}${power}${side === 'B' ? `<br>${pipsHTML(m.left, m.total)}` : ''}`
+      + `<br><span class="ldeck" data-deck="${side}">Deck ${deck ?? ''}</span></div></div>`;
+  };
+  const food = side => { const p = side === 'A' ? you : them;
+    return `<div class="mfood ${side}" data-tip="${G.food[p]} / ${G.winFood} food"><b>${G.food[p]}</b><span><em>+${G.income[p]}</em>a turn</span></div>`; };
+  const m = mana[you] || { left: 0, total: 0 }, mine = G.current === you && V.phase === 'playing';
+  el.innerHTML = lead('B') + food('B') + food('A') + lead('A')
+    + `<div class="mmana">${pipsHTML(m.left, m.total)}<div>${mine ? `${m.left} of ${m.total} mana left` : `Next turn: ${m.total} mana`}</div></div>`;
+}
+// The rail's leaders and decks read on hover (a leader's power, a decklist), and your leader's power is pressed there.
+function wireRail() {
+  const rail = document.getElementById('mrail'); if (!rail || rail.wired) return; rail.wired = true;
+  const hide = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
+  rail.addEventListener('mouseover', e => {
+    const lead = e.target.closest('[data-lead]'), deck = e.target.closest('[data-deck]');
+    if (lead && !touch()) { pop.className = 'pop'; pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
+      const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+      pop.style.left = Math.max(10, r.left - w - 12) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
+    hide();
+    if (deck && !touch()) { const k = deck.dataset.deck === 'A' ? 'mine' : 'theirs'; if (ui.panel !== k) { ui.panel = k; showPanel(); } }
+  });
+  rail.addEventListener('mouseout', e => { if (!rail.contains(e.relatedTarget)) { hide(); if (ui.panel === 'mine' || ui.panel === 'theirs') { ui.panel = null; showPanel(); } } });
+  rail.addEventListener('click', e => {
+    const lead = e.target.closest('[data-lead]'), d = lastDecision; e.stopPropagation();
+    if (lead && lead.dataset.lead === 'A') { const L = viewerGame().leaders.A;
+      if (L && L.usable && d && d.mine && !d.pend) { hide(); sfx('pick'); ui.roam = null; ui.sel = null; return act({ kind: 'leader' }); } }
+    if (lead && touch()) return readOverlay(leaderPanel(lead.dataset.lead));
+    const deck = e.target.closest('[data-deck]'); if (deck) { const k = deck.dataset.deck === 'A' ? 'mine' : 'theirs'; ui.panel = ui.panel === k ? null : k; showPanel(); }
+  });
+}
+// The mana rules' last plays, left of the board: the newest first, each the piece played (or the animal that moved, or the
+// leader) with who did what; a turn the server skipped (nothing its player could pay for) as its own line. Hovering a play
+// shows its card and what it did.
+function drawLast(G) {
+  const el = document.getElementById('mlast'); if (!el) return;
+  if (!isMana() || !G) { el.innerHTML = ''; return; }
+  const key = `${V.id}-${V.results.length}`, turnOf = m => (m.round - 1) * 2 + (m.seat === G.first ? 0 : 1);
+  const items = G.history.map((m, i) => ({ t: turnOf(m), m, i })).concat((ui.skips || []).filter(k => k.key === key).map(k => ({ t: k.turn, skip: k.seat })));
+  items.sort((a, b) => a.t - b.t);
+  const who = p => p === V.you ? 'You' : 'Your opponent';
+  const verb = m => m.kind === 'place' ? 'played' : m.kind === 'roam' ? 'roamed' : m.kind === 'leader' ? 'used the power' : m.kind === 'act' ? (/(^|\. )Echo\./.test((CARDS[m.card] || {}).text || '') ? 'Echo' : 'Action') : 'drew';
+  const row = x => x.skip ? `<div class="row skip"><div class="mini"></div><span>Turn skipped<small>${who(x.skip)}</small></span></div>`
+    : `<div class="row" data-h="${x.i}"><div class="mini">${x.m.card ? `<div class="unit ${rel(x.m.seat)}" style="--tw:40px">${leaderToken(x.m.card, rel(x.m.seat), CARDS, 40)}</div>` : ''}</div>`
+      + `<span>${esc((CARDS[x.m.card] || {}).name || '')}<small>${who(x.m.seat)} · ${verb(x.m)}</small></span></div>`;
+  const last = items.slice(-6).reverse();
+  el.innerHTML = last.length ? '<h5>Last plays</h5>' + last.map(row).join('') : '';
+  el.querySelectorAll('[data-h]').forEach(r => {
+    const m = G.history[r.dataset.h];
+    r.onmouseenter = () => { if (!m.card || !CARDS[m.card]) return;
+      pop.className = 'pop mpop'; pop.innerHTML = manaCard(formOf(m.card, m.seat), { owner: rel(m.seat), w: 180 }) + `<div class="ev">${moveLine(m)}</div>`;
+      pop.style.minHeight = '0'; pop.style.display = 'flex'; fitPlaques(pop);
+      const b = r.getBoundingClientRect(); pop.style.left = (b.right + 12) + 'px'; pop.style.top = Math.max(8, Math.min(b.top - 120, innerHeight - pop.offsetHeight - 10)) + 'px'; };
+    r.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; pop.className = 'pop'; };
+  });
 }
 // Place the picked card on crossroad `cr` (its element `g`): it flies there from the hand, or settles from the grip, and turns
 // into the piece (flight.js); the hand closes up behind it.
 function placeAt(g, cr) {
-  const iid = selCopy().iid, start = ui.carry === iid ? release() : null; ui.carry = null;
-  const flew = fly(start ? null : document.querySelector(`#hand .hc[data-iid="${iid}"] .card`), g, ui.sel, cr, viewerGame().board[cr], landNow,
-    cardHTML(formOf(ui.sel, V.you), { str: selCopy().str }), start);   // in full, text and all, as the opponent's
+  const iid = selCopy().iid, start = ui.carry === iid ? release() : null, M = isMana(); ui.carry = null;
+  // in full, text and all, as the opponent's; the mana rules' card as it sat in the hand (its plaque fades as the piece goes)
+  const flew = fly(start ? null : document.querySelector(`#hand .hc[data-iid="${iid}"] ${M ? '.mcard' : '.card'}`), g, ui.sel, cr, viewerGame().board[cr], landNow,
+    M ? manaCard(formOf(ui.sel, V.you), { str: selCopy().str, cost: selCopy().cost, w: 100 }) : cardHTML(formOf(ui.sel, V.you), { str: selCopy().str }), start, M ? flightGeo() : null);
   act(placeAction(['cr', dcr(cr)]));
+  if (M) { clearTimeout(stackTimer); stackCr = cr; manaHover(null); }   // the piece landing under the pointer isn't read until the pointer moves on
   if (flew) { ui.flyIid = iid; drawGame();
     setTimeout(() => { if (ui.flyIid === iid && screen === 'game') { ui.flyIid = null; drawGame(); } }, 5000); }   // a refused play: the card is back
 }
@@ -1816,10 +1987,23 @@ let stackTimer = null, stackCr = null;
 function showStack(g, cr) {
   if (touch()) return;   // touch reads a piece by holding or tapping it (readStack)
   if (cr === stackCr) return;
-  stackCr = cr; clearTimeout(stackTimer); stackpop.style.display = 'none';
+  stackCr = cr; clearTimeout(stackTimer); stackpop.style.display = 'none'; manaHover(null);
   const st = cr && viewerGame().board[cr];
   if (!st || !st.length || ui.sel || (lastDecision && lastDecision.rings.length)) return;
-  stackTimer = setTimeout(() => stackAt(cr), 350);
+  stackTimer = isMana() ? setTimeout(() => manaHover(cr), 120) : setTimeout(() => stackAt(cr), 350);
+}
+// The mana rules' board piece hovered: it grows where it stands and its plaque slides out under it (mana.css .mhover); what
+// it covers and its timer beside it.
+function manaHover(cr) {
+  const el = document.getElementById('mhover'); if (!el) return;
+  const st = cr && V && V.game && viewerGame().board[cr];
+  if (!st || !st.length) { el.classList.remove('on'); el.innerHTML = ''; return; }
+  const top = st[st.length - 1], under = st.slice(0, -1).reverse(), [x, y] = crossroadAt(cr), w = Math.round(tokenWidth() * 1.3), ph = w * 624 / 540;
+  const side = top.owner === 'W' ? 'W' : top.owner;
+  const notes = [top.timer ? resolvesIn(top.timer) : '', under.length ? `Covers ${under.map(u => `${(CARDS[u.id] || {}).name || u.id} (${u.str})`).join(', ')}` : ''].filter(Boolean);
+  el.innerHTML = `<div class="abs" style="left:${x - w / 2}px;top:${y - ph / 2}px">${manaCard(formOf(top.id, stackSeat(top)), { str: top.str, owner: side, w, iid: top.iid })}`
+    + (notes.length ? `<div class="under" style="left:${w + 10}px;top:${ph * .3}px">${notes.map(esc).join('<br>')}</div>` : '') + '</div>';
+  fitPlaques(el); el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
 }
 // A board piece's stack, as the hover popup (stackAt) and the read (readStack) both show it: each animal's card in its
 // owner's form (viewer space: A is you), at its strength now, with its timer under it.
