@@ -360,7 +360,7 @@ def test_reaching_twenty_food_wins():
 
 def test_deck_rules_in_the_mana_ruleset():
     # Each ruleset its own collection (Martin, 2026-11-20): the mana one holds the Wisps and Djinn, the default one never does.
-    wisps = sorted((c.id for c in CARDS.values() if c.ruleset == "mana" and c.name == "Wisp"), key=lambda cid: CARDS[cid].cost)
+    wisps = sorted((c.id for c in CARDS.values() if c.ruleset == "mana" and c.id.startswith("wisp_")), key=lambda cid: CARDS[cid].cost)
     assert [CARDS[w].cost for w in wisps] == list(range(11))
     assert all(CARDS[w].in_collection("mana") and CARDS[w].cost is not None for w in wisps)
     deck = [w for w in wisps for _ in range(2)] + wisps[:3]

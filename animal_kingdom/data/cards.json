@@ -4371,7 +4371,7 @@
     },
     {
       "id": "wisp_0",
-      "name": "Wisp",
+      "name": "Wisp 0",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4385,7 +4385,7 @@
     },
     {
       "id": "wisp_1",
-      "name": "Wisp",
+      "name": "Wisp 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4399,7 +4399,7 @@
     },
     {
       "id": "wisp_2",
-      "name": "Wisp",
+      "name": "Wisp 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4413,7 +4413,7 @@
     },
     {
       "id": "wisp_3",
-      "name": "Wisp",
+      "name": "Wisp 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4427,7 +4427,7 @@
     },
     {
       "id": "wisp_4",
-      "name": "Wisp",
+      "name": "Wisp 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4441,7 +4441,7 @@
     },
     {
       "id": "wisp_5",
-      "name": "Wisp",
+      "name": "Wisp 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4455,7 +4455,7 @@
     },
     {
       "id": "wisp_6",
-      "name": "Wisp",
+      "name": "Wisp 6",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4469,7 +4469,7 @@
     },
     {
       "id": "wisp_7",
-      "name": "Wisp",
+      "name": "Wisp 7",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4483,7 +4483,7 @@
     },
     {
       "id": "wisp_8",
-      "name": "Wisp",
+      "name": "Wisp 8",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4497,7 +4497,7 @@
     },
     {
       "id": "wisp_9",
-      "name": "Wisp",
+      "name": "Wisp 9",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4511,7 +4511,7 @@
     },
     {
       "id": "wisp_10",
-      "name": "Wisp",
+      "name": "Wisp 10",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4525,7 +4525,7 @@
     },
     {
       "id": "djinn_hand",
-      "name": "Djinn",
+      "name": "Hand Djinn",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4539,7 +4539,7 @@
     },
     {
       "id": "djinn_ally",
-      "name": "Djinn",
+      "name": "Ally Djinn",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4553,7 +4553,7 @@
     },
     {
       "id": "djinn_enemy",
-      "name": "Djinn",
+      "name": "Enemy Djinn",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4567,7 +4567,7 @@
     },
     {
       "id": "djinn_food",
-      "name": "Djinn",
+      "name": "Food Djinn",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4581,7 +4581,7 @@
     },
     {
       "id": "djinn_removed",
-      "name": "Djinn",
+      "name": "Remove Djinn",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4595,7 +4595,7 @@
     },
     {
       "id": "shade_hand",
-      "name": "Shade",
+      "name": "Hand Shade",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4610,7 +4610,7 @@
     },
     {
       "id": "shade_ally",
-      "name": "Shade",
+      "name": "Ally Shade",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4625,7 +4625,7 @@
     },
     {
       "id": "shade_enemy",
-      "name": "Shade",
+      "name": "Enemy Shade",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4640,7 +4640,7 @@
     },
     {
       "id": "shade_food",
-      "name": "Shade",
+      "name": "Food Shade",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4655,7 +4655,7 @@
     },
     {
       "id": "shade_removed",
-      "name": "Shade",
+      "name": "Remove Shade",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4670,7 +4670,7 @@
     },
     {
       "id": "spiky_2",
-      "name": "Spiky",
+      "name": "Spikes 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4686,7 +4686,7 @@
     },
     {
       "id": "spiky_3",
-      "name": "Spiky",
+      "name": "Spikes 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4702,7 +4702,7 @@
     },
     {
       "id": "spiky_4",
-      "name": "Spiky",
+      "name": "Spikes 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4718,7 +4718,7 @@
     },
     {
       "id": "flyer_2",
-      "name": "Flyer",
+      "name": "Flight 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4734,7 +4734,7 @@
     },
     {
       "id": "flyer_3",
-      "name": "Flyer",
+      "name": "Flight 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4750,7 +4750,7 @@
     },
     {
       "id": "flyer_4",
-      "name": "Flyer",
+      "name": "Flight 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4766,7 +4766,7 @@
     },
     {
       "id": "flyer_5",
-      "name": "Flyer",
+      "name": "Flight 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4782,7 +4782,7 @@
     },
     {
       "id": "flyer_6",
-      "name": "Flyer",
+      "name": "Flight 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4798,7 +4798,7 @@
     },
     {
       "id": "flyer_7",
-      "name": "Flyer",
+      "name": "Flight 6",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4814,7 +4814,7 @@
     },
     {
       "id": "flyer_8",
-      "name": "Flyer",
+      "name": "Flight 7",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4830,7 +4830,7 @@
     },
     {
       "id": "flyer_10",
-      "name": "Flyer",
+      "name": "Flight 8",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4846,7 +4846,7 @@
     },
     {
       "id": "hunter_3",
-      "name": "Hunter",
+      "name": "Hunter 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4860,7 +4860,7 @@
     },
     {
       "id": "hunter_5",
-      "name": "Hunter",
+      "name": "Hunter 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4874,7 +4874,7 @@
     },
     {
       "id": "hunter_7",
-      "name": "Hunter",
+      "name": "Hunter 7",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4888,7 +4888,7 @@
     },
     {
       "id": "hunter_6",
-      "name": "Hunter",
+      "name": "Hunter 6",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4902,7 +4902,7 @@
     },
     {
       "id": "hunter_4",
-      "name": "Hunter",
+      "name": "Hunter 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4916,7 +4916,7 @@
     },
     {
       "id": "hunter_2",
-      "name": "Hunter",
+      "name": "Hunter 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4944,7 +4944,7 @@
     },
     {
       "id": "venomous_2",
-      "name": "Venomous",
+      "name": "Poison 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4960,7 +4960,7 @@
     },
     {
       "id": "venomous_3",
-      "name": "Venomous",
+      "name": "Poison 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4976,7 +4976,7 @@
     },
     {
       "id": "venomous_4",
-      "name": "Venomous",
+      "name": "Poison 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4992,7 +4992,7 @@
     },
     {
       "id": "sneaky_6",
-      "name": "Sneaky",
+      "name": "Stealth 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5008,7 +5008,7 @@
     },
     {
       "id": "sneaky_7",
-      "name": "Sneaky",
+      "name": "Stealth 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5024,7 +5024,7 @@
     },
     {
       "id": "sneaky_8",
-      "name": "Sneaky",
+      "name": "Stealth 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5040,7 +5040,7 @@
     },
     {
       "id": "sneaky_10",
-      "name": "Sneaky",
+      "name": "Stealth 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5184,7 +5184,7 @@
     },
     {
       "id": "glutton_2",
-      "name": "Glutton",
+      "name": "Hungry 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5200,7 +5200,7 @@
     },
     {
       "id": "glutton_3",
-      "name": "Glutton",
+      "name": "Hungry 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5216,7 +5216,7 @@
     },
     {
       "id": "glutton_4",
-      "name": "Glutton",
+      "name": "Hungry 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5232,7 +5232,7 @@
     },
     {
       "id": "glutton_5",
-      "name": "Glutton",
+      "name": "Hungry 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5248,7 +5248,7 @@
     },
     {
       "id": "glutton_6",
-      "name": "Glutton",
+      "name": "Hungry 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5264,7 +5264,7 @@
     },
     {
       "id": "glutton_7",
-      "name": "Glutton",
+      "name": "Hungry 6",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5280,7 +5280,7 @@
     },
     {
       "id": "glutton_8",
-      "name": "Glutton",
+      "name": "Hungry 7",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5296,7 +5296,7 @@
     },
     {
       "id": "glutton_10",
-      "name": "Glutton",
+      "name": "Hungry 8",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5312,7 +5312,7 @@
     },
     {
       "id": "spiky_6",
-      "name": "Spiky",
+      "name": "Spikes 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5328,7 +5328,7 @@
     },
     {
       "id": "spiky_8",
-      "name": "Spiky",
+      "name": "Spikes 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5344,7 +5344,7 @@
     },
     {
       "id": "spiky_10",
-      "name": "Spiky",
+      "name": "Spikes 6",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5360,7 +5360,7 @@
     },
     {
       "id": "venomous_6",
-      "name": "Venomous",
+      "name": "Poison 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5376,7 +5376,7 @@
     },
     {
       "id": "venomous_8",
-      "name": "Venomous",
+      "name": "Poison 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5392,7 +5392,7 @@
     },
     {
       "id": "venomous_10",
-      "name": "Venomous",
+      "name": "Poison 6",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5408,7 +5408,7 @@
     },
     {
       "id": "scout_2",
-      "name": "Scout",
+      "name": "Cantrip 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5422,7 +5422,7 @@
     },
     {
       "id": "scout_3",
-      "name": "Scout",
+      "name": "Cantrip 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5436,7 +5436,7 @@
     },
     {
       "id": "scout_4",
-      "name": "Scout",
+      "name": "Cantrip 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5450,7 +5450,7 @@
     },
     {
       "id": "scout_5",
-      "name": "Scout",
+      "name": "Cantrip 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5464,7 +5464,7 @@
     },
     {
       "id": "scout_6",
-      "name": "Scout",
+      "name": "Cantrip 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5478,7 +5478,7 @@
     },
     {
       "id": "scout_7",
-      "name": "Scout",
+      "name": "Cantrip 6",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5492,7 +5492,7 @@
     },
     {
       "id": "scout_8",
-      "name": "Scout",
+      "name": "Cantrip 7",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5506,7 +5506,7 @@
     },
     {
       "id": "scout_10",
-      "name": "Scout",
+      "name": "Cantrip 8",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5520,7 +5520,7 @@
     },
     {
       "id": "winged_scout_3",
-      "name": "Winged Scout",
+      "name": "Flying Cantrip 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5536,7 +5536,7 @@
     },
     {
       "id": "winged_scout_4",
-      "name": "Winged Scout",
+      "name": "Flying Cantrip 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5552,7 +5552,7 @@
     },
     {
       "id": "winged_scout_5",
-      "name": "Winged Scout",
+      "name": "Flying Cantrip 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5568,7 +5568,7 @@
     },
     {
       "id": "winged_scout_6",
-      "name": "Winged Scout",
+      "name": "Flying Cantrip 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5584,7 +5584,7 @@
     },
     {
       "id": "winged_scout_7",
-      "name": "Winged Scout",
+      "name": "Flying Cantrip 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5600,7 +5600,7 @@
     },
     {
       "id": "winged_scout_8",
-      "name": "Winged Scout",
+      "name": "Flying Cantrip 6",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5616,7 +5616,7 @@
     },
     {
       "id": "winged_scout_10",
-      "name": "Winged Scout",
+      "name": "Flying Cantrip 7",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
