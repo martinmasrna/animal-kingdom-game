@@ -359,8 +359,8 @@ def test_reaching_twenty_food_wins():
 # ------------------------------------------------------------------ decks
 
 def test_deck_rules_in_the_mana_ruleset():
-    # Each ruleset its own collection (Martin, 2026-11-20): the mana one holds only the Wisps, the default one never does.
-    wisps = sorted((c.id for c in CARDS.values() if c.ruleset == "mana"), key=lambda cid: CARDS[cid].cost)
+    # Each ruleset its own collection (Martin, 2026-11-20): the mana one holds the Wisps and Djinn, the default one never does.
+    wisps = sorted((c.id for c in CARDS.values() if c.ruleset == "mana" and c.name == "Wisp"), key=lambda cid: CARDS[cid].cost)
     assert [CARDS[w].cost for w in wisps] == list(range(11))
     assert all(CARDS[w].collectible and CARDS[w].cost is not None for w in wisps)
     deck = [w for w in wisps for _ in range(2)] + wisps[:3]
@@ -510,3 +510,17 @@ def test_the_default_ruleset_is_unchanged():
     m.join(Seat("tb", "Bob", deck="pool_3"))
     assert m.ruleset == "default" and "ruleset" not in m.state.config.__dict__.get("_x", {}) and not m.state.config.mana
     assert "mana" not in m.view("A")["game"]
+
+
+def test_djinn_costs_less_for_each_of_its_count():
+    # The Djinn (Martin, 2026-11-20): 10 mana less its count, never below 0; the hand counts itself, the food is yours,
+    # the Remove Pile's animals your opponent's.
+    from animal_kingdom.engine.effects import mana_cost
+    s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed"]}, food={"A": 4, "B": 9})
+    put(s, "1,1", "wisp_1", "A"); put(s, "1,2", "wisp_1", "A"); put(s, "3,3", "wisp_1", "B")
+    s.remove_pile.extend(["wisp_0", "wisp_0", "wisp_2"]); s.pile_owners.extend(["B", "B", "A"])
+    assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed")} == \
+        {"djinn_hand": 5, "djinn_ally": 8, "djinn_enemy": 9, "djinn_food": 6, "djinn_removed": 8}
+    s.food["A"] = 15
+    assert mana_cost(s, "djinn_food") == 0
+    assert mana_cost(s, "djinn_food", "B") == 1   # B's own food, 9

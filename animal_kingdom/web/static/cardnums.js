@@ -59,6 +59,11 @@ export const CARD_NUMS = [
   "wisp_8",
   "wisp_9",
   "wisp_10",
+  "djinn_hand",
+  "djinn_ally",
+  "djinn_enemy",
+  "djinn_food",
+  "djinn_removed",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

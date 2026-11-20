@@ -836,7 +836,7 @@ class Match:
         """A hand card in the mana ruleset: its cost, and whether the mana its owner has left pays it now (their turn, nothing
         resolving). Paying is not playing: `legal.place` says where it may go."""
         st = self.state
-        cost = mana_cost(st, u.card_id)
+        cost = mana_cost(st, u.card_id, u.owner)
         mine = st.current == u.owner and st.pending is None and st.result is None
         return {"cost": cost, "affordable": mine and cost <= rules.mana_left(st, u.owner)}
 

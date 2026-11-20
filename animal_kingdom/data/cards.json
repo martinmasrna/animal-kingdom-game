@@ -4522,6 +4522,76 @@
       "habitat": "",
       "cost": 10,
       "ruleset": "mana"
+    },
+    {
+      "id": "djinn_hand",
+      "name": "Djinn",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "text": "Costs 1 less for each card in your hand.",
+      "species": "Djinn",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "djinn_ally",
+      "name": "Djinn",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "text": "Costs 1 less for each ally.",
+      "species": "Djinn",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "djinn_enemy",
+      "name": "Djinn",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "text": "Costs 1 less for each enemy.",
+      "species": "Djinn",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "djinn_food",
+      "name": "Djinn",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "text": "Costs 1 less for each food you have.",
+      "species": "Djinn",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "djinn_removed",
+      "name": "Djinn",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "text": "Costs 1 less for each animal in your opponent's Remove Pile.",
+      "species": "Djinn",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": []
     }
   ]
 }

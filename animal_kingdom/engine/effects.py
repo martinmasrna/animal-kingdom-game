@@ -1143,11 +1143,31 @@ def ability_cost(state: GameState) -> int:
     return state.config.mana_per_action if state.config.mana else 1
 
 
-def mana_cost(state: GameState, card_id: str) -> int:
-    """The mana ruleset: what playing `card_id` from hand costs, its card's `cost`. A card with none (a form an effect
-    turned a card into in hand, such as Xanthe's stages) costs what the card that makes it costs (its `related`); a card
-    with no cost anywhere can't be paid for (more than any turn's mana)."""
+# The Djinn (Martin, 2026-11-20): the mana ruleset's Giants, 10 mana, "Costs 1 less for each ..." of their owner's count;
+# the hand counts the Djinn itself, the food is its owner's, the removed animals its opponent's.
+def _djinn_count(state: GameState, player: str, what: str) -> int:
+    opp = other_player(player)
+    if what == "hand":
+        return len(state.hands[player])
+    if what in ("ally", "enemy"):
+        side = player if what == "ally" else opp
+        return sum(1 for stack in state.board.values() if stack and stack[-1].owner == side)
+    if what == "food":
+        return state.food.get(player, 0)
+    return sum(1 for o in state.pile_owners if o == opp)
+
+
+DJINN = {"djinn_hand": "hand", "djinn_ally": "ally", "djinn_enemy": "enemy", "djinn_food": "food", "djinn_removed": "removed"}
+
+
+def mana_cost(state: GameState, card_id: str, player: str | None = None) -> int:
+    """The mana ruleset: what playing `card_id` from hand costs, its card's `cost` (a Djinn's less its count, never below
+    0, for `player`, the current player by default). A card with none (a form an effect turned a card into in hand, such
+    as Xanthe's stages) costs what the card that makes it costs (its `related`); a card with no cost anywhere can't be
+    paid for (more than any turn's mana)."""
     card = state.cards[card_id]
+    if card.cost is not None and card_id in DJINN:
+        return max(0, card.cost - _djinn_count(state, player or state.current, DJINN[card_id]))
     if card.cost is not None:
         return card.cost
     maker = _MAKERS.get(card_id)
