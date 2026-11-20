@@ -442,7 +442,7 @@ function confirmDelete(app, d, done) {
 // (2026-11-17). Its card is in the deck while it leads: choosing another leader swaps the cards, and the leader's own strip
 // stays put. The row shows the leader with its ability; a click picks another.
 const KIND = { power: 'Hero power', once: 'Once per game', passive: 'Always on' };
-const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible');
+const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible' && (C[id].ruleset || null) === (M ? 'mana' : null));   // each ruleset its own leaders
 // A leader's ability as a hero power, as in Hearthstone Battlegrounds: a round token, the card's head under the board's painted
 // rim, the ability on a plate beneath (Martin, 2026-11-17; the card's head stands in until the powers have art of their own).
 // `D`: the token's width; `plate`: false for the token alone.

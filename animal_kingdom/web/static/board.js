@@ -177,6 +177,8 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
     `<div class="tkanimal${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}">${win}</div>` +
     venom('tint') + (has('Stealth') ? `<div class="kwl mist tkw"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
     (u.str == null ? '' : numeral(u.str)) +
+    // a legendary of the mana prototype: a painted gold gem on the top tip (Martin, 2026-11-20, a placeholder mark)
+    (c && c.rarity === 'legendary' && c.ruleset === 'mana' ? img('/static/hex/gem.webp', 'tkgem', 'position:absolute;left:40%;top:-4%;width:20%;z-index:4;pointer-events:none') : '') +
     (stand ? (([fw, fh]) => `<img class="mstand" src="/static/hex/fig/${u.id}.webp" alt="" draggable="false" style="height:${STAND * g.w}px;width:${STAND * g.w * fw / fh}px">`)(FIG_DIMS(u.id)) : '') +
     (u.timer ? `<div class="timer" style="${TK_TIMER}" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
     (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '') +
