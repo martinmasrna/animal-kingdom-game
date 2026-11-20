@@ -450,7 +450,7 @@ def starter_cards() -> dict[str, dict]:
 # stars prototype's two-copy limit never trims a saved deck quietly; a deck over it says so in the collection instead.
 COPY_LIMIT = {cid: 1 if c.rarity == "legendary" else 3 for cid, c in CARDS.items()}
 # The cards a player's deck can hold: the starter decks' and the bench's (not the reserve's, the tutorial's or tokens).
-COLLECTIBLE = {cid for cid, c in CARDS.items() if c.collectible and not c.ruleset}   # a mana-only card is in no default deck
+COLLECTIBLE = {cid for cid, c in CARDS.items() if c.status == "collectible"}   # every collection's, the mana prototype's too: a saved deck keeps them (each ruleset checks its own deck when played)
 
 
 def profile_view(p: dict) -> dict:
