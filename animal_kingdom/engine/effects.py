@@ -3786,7 +3786,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "hunter_6": {"on_place": _drains("hunter_6_drain")},   # the mana prototype (Martin, 2026-11-20)
     "hunter_4": {"on_place": _drains("hunter_4_drain")},   # the mana prototype (Martin, 2026-11-20)
     "hunter_2": {"on_place": _drains("hunter_2_drain")},   # the mana prototype (Martin, 2026-11-20)
-    "giant_hunter": {"on_place": _removes(min_attr="giant_hunter_min")},   # the mana prototype (Martin, 2026-11-20)
+    "giant_hunter": {"on_place": _removes()},   # the mana prototype (Martin, 2026-11-20)
     "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _removes("black_mamba_max")},
     "mosquito": {"on_place": _mosquito_place},

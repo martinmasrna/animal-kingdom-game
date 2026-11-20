@@ -540,14 +540,14 @@ def test_shade_strength_is_its_count():
 
 def test_hunters_weaken_and_the_giant_hunter_removes():
     # The Hunters (Martin, 2026-11-20): Roar: give an adjacent enemy -N strength (it dies below 0); the Giant Hunter
-    # removes an adjacent enemy of strength 8 or more.
+    # removes an adjacent enemy, any.
     from animal_kingdom.engine.effects import _adjacent_enemy_targets
     from animal_kingdom.engine.strength import effective_strength
     s = state(hands={"A": ["hunter_3"]})
     put(s, "1,1", "wisp_1", "A")
     foe = put(s, "2,2", "wisp_6", "B")      # strength 8
     me = put(s, "1,2", "giant_hunter", "A")
-    assert _adjacent_enemy_targets(s, me, "1,2", min_strength=MANA.giant_hunter_min) == ["2,2"]
+    assert _adjacent_enemy_targets(s, me, "1,2") == ["2,2"]   # any adjacent enemy
     from animal_kingdom.engine.effects import _drain_place, resolve
     _drain_place(s, me, "1,2", MANA.hunter_3_drain)
     step = s.effect_stack[-1]

@@ -5015,10 +5015,10 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
-      "text": "Roar: remove an adjacent enemy of strength 8 or more.",
+      "text": "Roar: remove an adjacent enemy.",
       "species": "Giant Hunter",
       "habitat": "",
-      "cost": 3,
+      "cost": 5,
       "ruleset": "mana",
       "keywords": []
     },
