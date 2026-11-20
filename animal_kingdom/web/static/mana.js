@@ -80,9 +80,14 @@ export function fitPlaques(root) {
     const pin = p.parentElement, room = pin.clientHeight - 4;   // the text's own height: a centred box hides overflow above it from scrollHeight
     if (room <= 0 || p.offsetHeight <= room) continue;
     let hi = 1, lo = .55;   // a share of the card's own size (mana.css .pin p), so a card resized after the fit stays fitted
-    const fits = f => { p.style.fontSize = `calc(var(--mw) * ${(.074 * f).toFixed(4)})`; return p.offsetHeight <= room; };
+    const fits = f => { p.style.fontSize = `calc(var(--mw) * ${(.096 * f).toFixed(4)})`; return p.offsetHeight <= room; };
     for (let i = 0; i < 7; i++) { const mid = (lo + hi) / 2; if (fits(mid)) lo = mid; else hi = mid; }
     fits(lo);
+  }
+  for (const b of root.querySelectorAll('.mcard .mplate .pname')) {   // a long name narrows to its plate, as a share of the card's size
+    b.style.fontSize = '';
+    const room = b.parentElement.clientWidth * .94, wd = b.scrollWidth;
+    if (room > 0 && wd > room) b.style.fontSize = `calc(var(--mw) * ${(.128 * room / wd).toFixed(4)})`;
   }
 }
 
