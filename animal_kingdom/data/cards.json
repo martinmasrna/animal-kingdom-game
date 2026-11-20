@@ -4733,70 +4733,6 @@
       ]
     },
     {
-      "id": "spiky_6",
-      "name": "Spiky",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 5,
-      "text": "Spikes.",
-      "species": "Spiky",
-      "habitat": "",
-      "cost": 6,
-      "ruleset": "mana",
-      "keywords": [
-        "Spikes"
-      ]
-    },
-    {
-      "id": "spiky_7",
-      "name": "Spiky",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 6,
-      "text": "Spikes.",
-      "species": "Spiky",
-      "habitat": "",
-      "cost": 7,
-      "ruleset": "mana",
-      "keywords": [
-        "Spikes"
-      ]
-    },
-    {
-      "id": "spiky_8",
-      "name": "Spiky",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 8,
-      "text": "Spikes.",
-      "species": "Spiky",
-      "habitat": "",
-      "cost": 8,
-      "ruleset": "mana",
-      "keywords": [
-        "Spikes"
-      ]
-    },
-    {
-      "id": "spiky_10",
-      "name": "Spiky",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 12,
-      "text": "Spikes.",
-      "species": "Spiky",
-      "habitat": "",
-      "cost": 10,
-      "ruleset": "mana",
-      "keywords": [
-        "Spikes"
-      ]
-    },
-    {
       "id": "flyer_2",
       "name": "Flyer",
       "status": "collectible",
@@ -5087,134 +5023,6 @@
       ]
     },
     {
-      "id": "venomous_6",
-      "name": "Venomous",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 6,
-      "text": "Poison.",
-      "species": "Venomous",
-      "habitat": "",
-      "cost": 6,
-      "ruleset": "mana",
-      "keywords": [
-        "Poison"
-      ]
-    },
-    {
-      "id": "venomous_7",
-      "name": "Venomous",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 8,
-      "text": "Poison.",
-      "species": "Venomous",
-      "habitat": "",
-      "cost": 7,
-      "ruleset": "mana",
-      "keywords": [
-        "Poison"
-      ]
-    },
-    {
-      "id": "venomous_8",
-      "name": "Venomous",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 10,
-      "text": "Poison.",
-      "species": "Venomous",
-      "habitat": "",
-      "cost": 8,
-      "ruleset": "mana",
-      "keywords": [
-        "Poison"
-      ]
-    },
-    {
-      "id": "venomous_10",
-      "name": "Venomous",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 15,
-      "text": "Poison.",
-      "species": "Venomous",
-      "habitat": "",
-      "cost": 10,
-      "ruleset": "mana",
-      "keywords": [
-        "Poison"
-      ]
-    },
-    {
-      "id": "sneaky_2",
-      "name": "Sneaky",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 2,
-      "text": "Stealth.",
-      "species": "Sneaky",
-      "habitat": "",
-      "cost": 2,
-      "ruleset": "mana",
-      "keywords": [
-        "Stealth"
-      ]
-    },
-    {
-      "id": "sneaky_3",
-      "name": "Sneaky",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 3,
-      "text": "Stealth.",
-      "species": "Sneaky",
-      "habitat": "",
-      "cost": 3,
-      "ruleset": "mana",
-      "keywords": [
-        "Stealth"
-      ]
-    },
-    {
-      "id": "sneaky_4",
-      "name": "Sneaky",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 4,
-      "text": "Stealth.",
-      "species": "Sneaky",
-      "habitat": "",
-      "cost": 4,
-      "ruleset": "mana",
-      "keywords": [
-        "Stealth"
-      ]
-    },
-    {
-      "id": "sneaky_5",
-      "name": "Sneaky",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 5,
-      "text": "Stealth.",
-      "species": "Sneaky",
-      "habitat": "",
-      "cost": 5,
-      "ruleset": "mana",
-      "keywords": [
-        "Stealth"
-      ]
-    },
-    {
       "id": "sneaky_6",
       "name": "Sneaky",
       "status": "collectible",
@@ -5281,7 +5089,7 @@
     {
       "id": "armored_2",
       "name": "Armored",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -5297,7 +5105,7 @@
     {
       "id": "armored_3",
       "name": "Armored",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
@@ -5313,7 +5121,7 @@
     {
       "id": "armored_4",
       "name": "Armored",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
@@ -5329,7 +5137,7 @@
     {
       "id": "armored_5",
       "name": "Armored",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -5345,7 +5153,7 @@
     {
       "id": "armored_6",
       "name": "Armored",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
@@ -5361,7 +5169,7 @@
     {
       "id": "armored_7",
       "name": "Armored",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
@@ -5377,7 +5185,7 @@
     {
       "id": "armored_8",
       "name": "Armored",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
@@ -5393,7 +5201,7 @@
     {
       "id": "armored_10",
       "name": "Armored",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 12,
