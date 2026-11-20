@@ -365,7 +365,7 @@ def test_reaching_thirty_food_wins():
 def test_deck_rules_in_the_mana_ruleset():
     # Each ruleset its own collection (Martin, 2026-11-20): the mana one holds the Wisps and Djinn, the default one never does.
     wisps = sorted((c.id for c in CARDS.values() if c.ruleset == "mana" and c.id.startswith("wisp_")), key=lambda cid: CARDS[cid].cost)
-    assert [CARDS[w].cost for w in wisps] == list(range(11))
+    assert [CARDS[w].cost for w in wisps] == list(range(1, 11))
     assert all(CARDS[w].in_collection("mana") and CARDS[w].cost is not None for w in wisps)
     deck = [w for w in wisps for _ in range(2)] + wisps[:3]
     problems = deck_problems(deck, None, ruleset="mana")
@@ -522,7 +522,7 @@ def test_djinn_costs_less_for_each_of_its_count():
     from animal_kingdom.engine.effects import mana_cost
     s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed"]}, food={"A": 4, "B": 9})
     put(s, "1,1", "wisp_1", "A"); put(s, "1,2", "wisp_1", "A"); put(s, "3,3", "wisp_1", "B")
-    s.remove_pile.extend(["wisp_0", "wisp_0", "wisp_2"]); s.pile_owners.extend(["B", "B", "A"])
+    s.remove_pile.extend(["wisp_1", "wisp_1", "wisp_2"]); s.pile_owners.extend(["B", "B", "A"])
     assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed")} == \
         {"djinn_hand": 5, "djinn_ally": 8, "djinn_enemy": 9, "djinn_food": 6, "djinn_removed": 8}
     s.food["A"] = 15
@@ -533,11 +533,11 @@ def test_djinn_costs_less_for_each_of_its_count():
 def test_shade_strength_is_its_count():
     # The Shades (Martin, 2026-11-20): 0 strength, +1 for each of their owner's count; an ally Shade counts itself.
     from animal_kingdom.engine.strength import effective_strength
-    s = state(hands={"A": ["wisp_0", "wisp_0", "wisp_0"]}, food={"A": 7, "B": 2})
+    s = state(hands={"A": ["wisp_1", "wisp_1", "wisp_1"]}, food={"A": 7, "B": 2})
     shades = {k: put(s, cr, f"shade_{k}", "A") for k, cr in
               (("hand", "1,1"), ("ally", "1,2"), ("enemy", "1,3"), ("food", "2,1"), ("removed", "2,2"))}
     put(s, "4,1", "wisp_1", "B"); put(s, "4,2", "wisp_1", "B")
-    s.remove_pile.extend(["wisp_0", "wisp_2"]); s.pile_owners.extend(["B", "A"])
+    s.remove_pile.extend(["wisp_1", "wisp_2"]); s.pile_owners.extend(["B", "A"])
     assert {k: effective_strength(s, u) for k, u in shades.items()} == \
         {"hand": 3, "ally": 5, "enemy": 2, "food": 7, "removed": 1}
 
@@ -581,7 +581,7 @@ def test_a_mana_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
 
 def test_a_scout_draws_a_card():
     # The mana prototype's cantrips (Martin, 2026-11-20): Roar: draw a card; the Winged Scout has Flight too.
-    s = state(turn=11, hands={"A": ["scout_2", "winged_scout_3"]}, decks={"A": ["wisp_0"] * 5, "B": ["wisp_0"] * 5})
+    s = state(turn=11, hands={"A": ["scout_2", "winged_scout_3"]}, decks={"A": ["wisp_1"] * 5, "B": ["wisp_1"] * 5})
     put(s, "1,1", "wisp_1", "A")
     n = len(s.hands["A"])
     rules.apply_action(s, PlaceAction("scout_2", ("cr", "1,2")))

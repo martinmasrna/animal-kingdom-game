@@ -11422,33 +11422,6 @@
       "at": 1794906768
     }
   },
-  "wisp_0": {
-    "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "CROP": null,
-          "STRIP": null,
-          "FULL": null
-        }
-      },
-      "by": "claude",
-      "at": 1795195162
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Wisp",
-          "species": "Wisp"
-        }
-      },
-      "by": "claude",
-      "at": 1795201437
-    }
-  },
   "wisp_1": {
     "crop": {
       "review": {
@@ -11474,6 +11447,15 @@
       },
       "by": "claude",
       "at": 1795201437
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "by": "claude",
+      "at": 1795206566
     }
   },
   "wisp_2": {
@@ -11501,6 +11483,15 @@
       },
       "by": "claude",
       "at": 1795201437
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795206566
     }
   },
   "wisp_3": {
@@ -11528,6 +11519,15 @@
       },
       "by": "claude",
       "at": 1795201438
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "by": "claude",
+      "at": 1795206566
     }
   },
   "wisp_4": {
@@ -11555,6 +11555,15 @@
       },
       "by": "claude",
       "at": 1795201438
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795206566
     }
   },
   "wisp_5": {
@@ -11582,6 +11591,15 @@
       },
       "by": "claude",
       "at": 1795201438
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "by": "claude",
+      "at": 1795206567
     }
   },
   "wisp_6": {
@@ -11617,7 +11635,7 @@
         "prev": 8
       },
       "by": "claude",
-      "at": 1795202522
+      "at": 1795206567
     }
   },
   "wisp_7": {
@@ -11653,7 +11671,7 @@
         "prev": 10
       },
       "by": "claude",
-      "at": 1795202522
+      "at": 1795206567
     }
   },
   "wisp_8": {
@@ -11689,7 +11707,7 @@
         "prev": 12
       },
       "by": "claude",
-      "at": 1795202522
+      "at": 1795206567
     }
   },
   "wisp_9": {
@@ -11725,7 +11743,7 @@
         "prev": 15
       },
       "by": "claude",
-      "at": 1795202522
+      "at": 1795206567
     }
   },
   "wisp_10": {
@@ -11761,7 +11779,7 @@
         "prev": 20
       },
       "by": "claude",
-      "at": 1795202523
+      "at": 1795206567
     }
   },
   "djinn_hand": {
@@ -11786,6 +11804,15 @@
       },
       "by": "claude",
       "at": 1795201447
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "by": "claude",
+      "at": 1795206572
     }
   },
   "djinn_ally": {
@@ -11810,6 +11837,15 @@
       },
       "by": "claude",
       "at": 1795201447
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "by": "claude",
+      "at": 1795206572
     }
   },
   "djinn_enemy": {
@@ -11834,6 +11870,15 @@
       },
       "by": "claude",
       "at": 1795201447
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "by": "claude",
+      "at": 1795206572
     }
   },
   "djinn_food": {
@@ -11883,6 +11928,15 @@
       },
       "by": "claude",
       "at": 1795201448
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "by": "claude",
+      "at": 1795206572
     }
   },
   "shade_hand": {
@@ -12193,6 +12247,15 @@
       },
       "by": "claude",
       "at": 1795202746
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "by": "claude",
+      "at": 1795206568
     }
   },
   "spiky_4": {
@@ -12217,6 +12280,15 @@
       },
       "by": "claude",
       "at": 1795202747
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795206568
     }
   },
   "flyer_2": {
@@ -12241,6 +12313,15 @@
       },
       "by": "claude",
       "at": 1795201439
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "by": "claude",
+      "at": 1795206569
     }
   },
   "flyer_5": {
@@ -12265,6 +12346,15 @@
       },
       "by": "claude",
       "at": 1795202749
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795206570
     }
   },
   "flyer_7": {
@@ -12297,7 +12387,7 @@
         "prev": 8
       },
       "by": "claude",
-      "at": 1795202749
+      "at": 1795206570
     }
   },
   "flyer_10": {
@@ -12330,7 +12420,7 @@
         "prev": 15
       },
       "by": "claude",
-      "at": 1795202749
+      "at": 1795206570
     }
   },
   "venomous_2": {
@@ -12355,6 +12445,15 @@
       },
       "by": "claude",
       "at": 1795201444
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "by": "claude",
+      "at": 1795206569
     }
   },
   "venomous_3": {
@@ -12379,6 +12478,15 @@
       },
       "by": "claude",
       "at": 1795201444
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795206569
     }
   },
   "venomous_4": {
@@ -12403,6 +12511,15 @@
       },
       "by": "claude",
       "at": 1795201444
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "by": "claude",
+      "at": 1795206569
     }
   },
   "sneaky_6": {
@@ -12427,6 +12544,15 @@
       },
       "by": "claude",
       "at": 1795201445
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "by": "claude",
+      "at": 1795206567
     }
   },
   "sneaky_7": {
@@ -12459,7 +12585,7 @@
         "prev": 8
       },
       "by": "claude",
-      "at": 1795202745
+      "at": 1795206567
     }
   },
   "sneaky_8": {
@@ -12492,7 +12618,7 @@
         "prev": 10
       },
       "by": "claude",
-      "at": 1795202746
+      "at": 1795206568
     }
   },
   "sneaky_10": {
@@ -12525,7 +12651,7 @@
         "prev": 15
       },
       "by": "claude",
-      "at": 1795202746
+      "at": 1795206568
     }
   },
   "armored_2": {
@@ -12718,6 +12844,15 @@
       },
       "by": "claude",
       "at": 1795202749
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "by": "claude",
+      "at": 1795206570
     }
   },
   "glutton_4": {
@@ -12742,6 +12877,15 @@
       },
       "by": "claude",
       "at": 1795202750
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795206570
     }
   },
   "glutton_5": {
@@ -12766,6 +12910,15 @@
       },
       "by": "claude",
       "at": 1795202750
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "by": "claude",
+      "at": 1795206570
     }
   },
   "glutton_6": {
@@ -12798,7 +12951,7 @@
         "prev": 8
       },
       "by": "claude",
-      "at": 1795202750
+      "at": 1795206570
     }
   },
   "glutton_8": {
@@ -12831,7 +12984,7 @@
         "prev": 12
       },
       "by": "claude",
-      "at": 1795202750
+      "at": 1795206571
     }
   },
   "spiky_6": {
@@ -12856,6 +13009,15 @@
       },
       "by": "claude",
       "at": 1795202747
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "by": "claude",
+      "at": 1795206568
     }
   },
   "spiky_8": {
@@ -12880,6 +13042,15 @@
       },
       "by": "claude",
       "at": 1795202747
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795206568
     }
   },
   "spiky_10": {
@@ -12904,6 +13075,15 @@
       },
       "by": "claude",
       "at": 1795202747
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 7
+      },
+      "by": "claude",
+      "at": 1795206569
     }
   },
   "venomous_6": {
@@ -12936,7 +13116,7 @@
         "prev": 5
       },
       "by": "claude",
-      "at": 1795202748
+      "at": 1795206569
     }
   },
   "venomous_8": {
@@ -12969,7 +13149,7 @@
         "prev": 7
       },
       "by": "claude",
-      "at": 1795202748
+      "at": 1795206569
     }
   },
   "scout_2": {
@@ -13018,6 +13198,15 @@
       },
       "by": "claude",
       "at": 1795201440
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "by": "claude",
+      "at": 1795206571
     }
   },
   "scout_4": {
@@ -13042,6 +13231,15 @@
       },
       "by": "claude",
       "at": 1795201440
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795206571
     }
   },
   "scout_5": {
@@ -13066,6 +13264,15 @@
       },
       "by": "claude",
       "at": 1795201440
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795206571
     }
   },
   "scout_6": {
@@ -13090,6 +13297,15 @@
       },
       "by": "claude",
       "at": 1795201441
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "by": "claude",
+      "at": 1795206571
     }
   },
   "winged_scout_3": {
@@ -13138,6 +13354,15 @@
       },
       "by": "claude",
       "at": 1795201443
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "by": "claude",
+      "at": 1795206571
     }
   },
   "winged_scout_5": {
@@ -13162,6 +13387,15 @@
       },
       "by": "claude",
       "at": 1795201443
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "by": "claude",
+      "at": 1795206572
     }
   },
   "winged_scout_6": {
@@ -13186,6 +13420,15 @@
       },
       "by": "claude",
       "at": 1795201443
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795206572
     }
   },
   "winged_scout_8": {
@@ -13218,7 +13461,7 @@
         "prev": 8
       },
       "by": "claude",
-      "at": 1795202752
+      "at": 1795206572
     }
   },
   "sneaky_9": {
@@ -13243,6 +13486,15 @@
       },
       "by": "claude",
       "at": 1795202746
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 9
+      },
+      "by": "claude",
+      "at": 1795206568
     }
   },
   "flyer_3": {
@@ -13267,6 +13519,15 @@
       },
       "by": "claude",
       "at": 1795202758
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795206569
     }
   },
   "warlord_legend": {
@@ -13278,6 +13539,15 @@
       },
       "by": "claude",
       "at": 1795203274
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "by": "claude",
+      "at": 1795206572
     }
   },
   "raider_legend": {
@@ -13289,6 +13559,15 @@
       },
       "by": "claude",
       "at": 1795203274
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "by": "claude",
+      "at": 1795206573
     }
   },
   "sage_legend": {
@@ -13300,6 +13579,15 @@
       },
       "by": "claude",
       "at": 1795203274
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "by": "claude",
+      "at": 1795206573
     }
   }
 }
