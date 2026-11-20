@@ -124,7 +124,7 @@ if __name__ == "__main__":
     ap.add_argument("--leader-decks", action="store_true", help="play the bot decks' leader variants under their leaders")
     a = ap.parse_args()
     cards = load_cards()
-    pool = sorted(c for c, card in cards.items() if a.all_cards or card.collectible)
+    pool = sorted(c for c, card in cards.items() if (a.all_cards or card.collectible) and not card.ruleset)   # the Rust twin knows the default rules only: no mana prototype cards
     config = Config.default()
     eng = ak_engine.Engine(CARDS_JSON, MAPS_JSON, json.dumps(dataclasses.asdict(config)), "map_b")
     t0 = time.time()
