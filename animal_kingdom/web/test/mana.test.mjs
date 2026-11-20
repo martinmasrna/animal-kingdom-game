@@ -18,8 +18,9 @@ const click = async (p, sel) => { for (let i = 0; i < 5; i++) { try { await p.cl
 test('a mana friend match: home, the opening hands, the rail, a dimmed card and a card paid for', async () => {
   const A = await seat(), B = await seat();
   await A.goto(server.url + '/', { waitUntil: 'networkidle0' });
-  assert.ok(await A.$('.mhome'), 'home in the mana rules is the friend match');
+  assert.ok(await A.$('.mhome #mplay') && await A.$('.mhome #mprac') && await A.$('.mhome #mcoll'), 'home in the mana rules: Play, Practice, Collection');
   assert.equal(await A.$('.home'), null, 'not the usual home');
+  await click(A, '#mplay'); await A.waitForSelector('[data-deck="pool_1"]');
   await click(A, '[data-deck="pool_1"]'); await click(A, '#mgo');
   await A.waitForSelector('.bigcode');
   const code = await A.$eval('.bigcode', e => e.textContent);
@@ -61,10 +62,10 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
   assert.deepEqual([...A.errors, ...B.errors], []);
 });
 
-test('a mana match against the bot: Play a bot starts it and the bot plays its cards', async () => {
+test('a mana match against the bot: Practice starts it and the bot plays its cards', async () => {
   const p = await seat();
   await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
-  await click(p, '[data-deck="pool_1"]'); await click(p, '#mbot');
+  await click(p, '#mprac');   // Practice: straight into a match, both sides on a random pool deck
   assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
   await click(p, '#skip');
   // play on: end each of our turns at once; the bot's pieces reach the board

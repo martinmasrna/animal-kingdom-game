@@ -216,6 +216,7 @@ function route() {
   if (parts[0] !== 'm' || id !== wsId) disconnect();
   if (parts[0] !== 'replay') stopReplay();
   play.open = null;   // a chooser never outlives its screen
+  if (parts[0] === 'play' && MANA_HOME) return manaHome({ play: true });   // the mana rules' Play: a deck and a friend
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
   if ((parts[0] || '').split('?')[0] === 'gauntlet') {   // #/gauntlet?skip=a,b&games=2 narrows the field; ?decks=a,b names it; ?level= picks the bot
     const lv = new URLSearchParams(location.hash.split('?')[1] || '').get('level'); if (lv && BANDS.includes(lv)) play.level = lv;
@@ -709,7 +710,7 @@ function collectionScreen(open) {
   const mana = MANA_HOME && !!(RULESETS.mana || {}).deck;
   applyWording(mana ? RULESETS.mana : null);
   renderCollection(app, { open, mana, rules: mana ? { ...RULES, ...RULESETS.mana.deck } : RULES, cards: CARDS, leaders: LEADERS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
-    play: d => { store(mana ? 'ak:manadeck' : 'ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
+    play: d => { store(mana ? 'ak:manadeck' : 'ak:deck', 'my:' + d.id); location.hash = mana ? '#/play' : '#/'; }, back: () => { location.hash = '#/'; } });
 }
 
 // ------------------------------------------------------------------ share links (docs/share-links.md)
@@ -916,11 +917,28 @@ function manaLegal(list, leader) {
   return list.length === R.deckSize && !!leader && list.includes(leader) && !!LEADERS[leader]
     && Object.entries(n).every(([id, k]) => CARDS[id] && CARDS[id].status === 'collectible' && CARDS[id].mana != null && k <= R.copies[CARDS[id].rarity]);
 }
-// Home in the mana rules: a friend match, or the simple bot. Your decks that are legal under them, then the six pool decks (Deck 1 to 6);
-// create a match (its code and link on the next screen), or join one by its code. The collection builds decks for these rules
-// (collectionScreen); a deck of yours that isn't legal under them is counted under the list, to be fixed there.
+// Home in the mana rules (a plain prototype, Martin, 2026-11-20): three buttons. Play opens the friend match (#/play: a deck,
+// then a match to invite a friend to, or a friend's code); Practice starts a match against the simple bot at once, both
+// sides on a random pool deck, only for seeing the screen; Collection is the collection. In Play: your decks that are legal
+// under these rules, then the six pool decks (Deck 1 to 6); a deck of yours that isn't legal is counted under the list.
 function manaHome(mode = {}) {
   screen = 'home'; homeMode = mode;
+  const poolDecks = () => BOT_ONLY.filter(d => /^pool_\d+$/.test(d.id));
+  if (!mode.play && !mode.join) {
+    app.innerHTML = `<div class="mhome"><div class="box">
+      <h1>Animal Kingdom<small>The mana rules, a prototype</small></h1>
+      <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><button class="go" id="mprac">Practice</button><a class="go" id="mcoll" href="#/collection">Collection</a></div>
+      <p class="foot"><a href="?rules=default#/">Play the usual rules</a></p></div></div>`;
+    document.getElementById('mprac').onclick = async () => {
+      const pd = poolDecks(), pick = () => pd[Math.floor(Math.random() * pd.length)];
+      const mine = pick(), opp = pick();
+      if (!mine) return toast('No pool deck to practise with');
+      const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: mine.id, ruleset: 'mana', name: 'You', bot: { level: 'easy', deck: opp.id } }) });
+      if (!r.ok) return toast(await r.text());
+      const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+    };
+    return;
+  }
   const own = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));
     return { id: 'my:' + d.id, name: d.name, mine: true, list, leader: d.leader }; }), mine = own.filter(d => manaLegal(d.list, d.leader)), off = own.length - mine.length;
   const pool = BOT_ONLY.filter(d => /^pool_\d+$/.test(d.id)).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
@@ -929,12 +947,12 @@ function manaHome(mode = {}) {
     return ls.length === 1 && CARDS[ls[0]] ? CARDS[ls[0]].name.split(':')[0] : ''; };
   const tile = d => `<button class="dk${chosen && d.id === chosen.id ? ' on' : ''}" data-deck="${d.id}">${esc(d.name)}${leaderName(d) ? `<small>${esc(leaderName(d))}</small>` : ''}</button>`;
   app.innerHTML = `<div class="mhome"><div class="box">
-    <h1>Friend match<small>The mana rules, a prototype</small></h1>
+    <h1>Play<small>Choose a deck, then invite a friend</small></h1>
     <h2>Your deck</h2><div class="decks">${all.map(tile).join('') || '<p>No deck of yours is legal under these rules yet.</p>'}</div>
     ${off ? `<p class="foot">${off === 1 ? 'One deck of yours isn\'t' : `${off} decks of yours aren't`} legal in these rules: the collection says why.</p>` : ''}
-    <div class="row"><button class="go" id="mgo">${mode.join ? `Join match ${esc(mode.join)}` : 'Create match'}</button>${mode.join ? '' : '<button class="sec" id="mbot">Play a bot</button>'}<a class="sec" id="mcoll" href="#/collection">Build a deck</a></div>
+    <div class="row"><button class="go" id="mgo">${mode.join ? `Join match ${esc(mode.join)}` : 'Create match'}</button><a class="sec" href="#/">Back</a></div>
     ${mode.join ? '' : `<h2>Join a friend's match</h2><div class="row"><input id="mcode" maxlength="6" placeholder="Code" autocomplete="off"><button class="sec" id="mjoin">Join</button></div>`}
-    <p class="foot"><a href="?rules=default#/">Play the usual rules</a></p></div></div>`;
+    </div></div>`;
   const $ = id => document.getElementById(id);
   app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:manadeck', el.dataset.deck); manaHome(mode); });
   const spec = d => d.mine ? { name: d.name, list: d.list, leader: d.leader } : d.id;
@@ -948,15 +966,6 @@ function manaHome(mode = {}) {
     if (mode.join) return join(mode.join);
     if (!chosen) return toast('Choose a deck first');
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: spec(chosen), ruleset: 'mana', name: 'You' }) });
-    if (!r.ok) return toast(await r.text());
-    const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
-  };
-  // A bot on a pool deck, for trying the screen alone: the server plays it with the simple greedy bot (match.bot_for).
-  if ($('mbot')) $('mbot').onclick = async () => {
-    if (!chosen) return toast('Choose a deck first');
-    const opp = pool[Math.floor(Math.random() * pool.length)];
-    if (!opp) return toast('No pool deck for the bot');
-    const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: spec(chosen), ruleset: 'mana', name: 'You', bot: { level: 'easy', deck: opp.id } }) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
   };
