@@ -4675,14 +4675,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "",
+      "text": "Spikes.",
       "species": "Spiky",
       "habitat": "",
       "cost": 2,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
     },
     {
       "id": "spiky_3",
@@ -4691,14 +4691,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "",
+      "text": "Spikes.",
       "species": "Spiky",
       "habitat": "",
       "cost": 3,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
     },
     {
       "id": "spiky_4",
@@ -4707,14 +4707,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "",
+      "text": "Spikes.",
       "species": "Spiky",
       "habitat": "",
       "cost": 4,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
     },
     {
       "id": "spiky_5",
@@ -4723,14 +4723,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "",
+      "text": "Spikes.",
       "species": "Spiky",
       "habitat": "",
       "cost": 5,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
     },
     {
       "id": "spiky_6",
@@ -4739,14 +4739,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "",
+      "text": "Spikes.",
       "species": "Spiky",
       "habitat": "",
       "cost": 6,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
     },
     {
       "id": "spiky_7",
@@ -4755,14 +4755,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "",
+      "text": "Spikes.",
       "species": "Spiky",
       "habitat": "",
       "cost": 7,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
     },
     {
       "id": "spiky_8",
@@ -4771,14 +4771,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "",
+      "text": "Spikes.",
       "species": "Spiky",
       "habitat": "",
       "cost": 8,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
     },
     {
       "id": "spiky_10",
@@ -4787,14 +4787,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 12,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "",
+      "text": "Spikes.",
       "species": "Spiky",
       "habitat": "",
       "cost": 10,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
     },
     {
       "id": "flyer_2",
@@ -4803,14 +4803,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "",
+      "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
       "cost": 2,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "flyer_3",
@@ -4819,14 +4819,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "",
+      "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
       "cost": 3,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "flyer_4",
@@ -4835,14 +4835,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "",
+      "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
       "cost": 4,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "flyer_5",
@@ -4851,14 +4851,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "",
+      "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
       "cost": 5,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "flyer_6",
@@ -4867,14 +4867,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "",
+      "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
       "cost": 6,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "flyer_7",
@@ -4883,14 +4883,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "",
+      "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
       "cost": 7,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "flyer_8",
@@ -4899,14 +4899,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 10,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "",
+      "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
       "cost": 8,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "flyer_10",
@@ -4915,14 +4915,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 15,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "",
+      "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
       "cost": 10,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "hunter_3",
@@ -5029,14 +5029,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "",
+      "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
       "cost": 2,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
     },
     {
       "id": "venomous_3",
@@ -5045,14 +5045,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "",
+      "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
       "cost": 3,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
     },
     {
       "id": "venomous_4",
@@ -5061,14 +5061,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "",
+      "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
       "cost": 4,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
     },
     {
       "id": "venomous_5",
@@ -5077,14 +5077,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "",
+      "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
       "cost": 5,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
     },
     {
       "id": "venomous_6",
@@ -5093,14 +5093,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "",
+      "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
       "cost": 6,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
     },
     {
       "id": "venomous_7",
@@ -5109,14 +5109,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "",
+      "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
       "cost": 7,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
     },
     {
       "id": "venomous_8",
@@ -5125,14 +5125,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 10,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "",
+      "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
       "cost": 8,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
     },
     {
       "id": "venomous_10",
@@ -5141,14 +5141,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 15,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "",
+      "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
       "cost": 10,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
     },
     {
       "id": "sneaky_2",
@@ -5157,14 +5157,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "",
+      "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
       "cost": 2,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Stealth"
+      ]
     },
     {
       "id": "sneaky_3",
@@ -5173,14 +5173,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "",
+      "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
       "cost": 3,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Stealth"
+      ]
     },
     {
       "id": "sneaky_4",
@@ -5189,14 +5189,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "",
+      "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
       "cost": 4,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Stealth"
+      ]
     },
     {
       "id": "sneaky_5",
@@ -5205,14 +5205,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "",
+      "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
       "cost": 5,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Stealth"
+      ]
     },
     {
       "id": "sneaky_6",
@@ -5221,14 +5221,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "",
+      "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
       "cost": 6,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Stealth"
+      ]
     },
     {
       "id": "sneaky_7",
@@ -5237,14 +5237,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "",
+      "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
       "cost": 7,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Stealth"
+      ]
     },
     {
       "id": "sneaky_8",
@@ -5253,14 +5253,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 10,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "",
+      "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
       "cost": 8,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Stealth"
+      ]
     },
     {
       "id": "sneaky_10",
@@ -5269,14 +5269,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 15,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "",
+      "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
       "cost": 10,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Stealth"
+      ]
     },
     {
       "id": "armored_2",
@@ -5285,14 +5285,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "",
+      "text": "Armor.",
       "species": "Armored",
       "habitat": "",
       "cost": 2,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Armor"
+      ]
     },
     {
       "id": "armored_3",
@@ -5301,14 +5301,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "",
+      "text": "Armor.",
       "species": "Armored",
       "habitat": "",
       "cost": 3,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Armor"
+      ]
     },
     {
       "id": "armored_4",
@@ -5317,14 +5317,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "",
+      "text": "Armor.",
       "species": "Armored",
       "habitat": "",
       "cost": 4,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Armor"
+      ]
     },
     {
       "id": "armored_5",
@@ -5333,14 +5333,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "",
+      "text": "Armor.",
       "species": "Armored",
       "habitat": "",
       "cost": 5,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Armor"
+      ]
     },
     {
       "id": "armored_6",
@@ -5349,14 +5349,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "",
+      "text": "Armor.",
       "species": "Armored",
       "habitat": "",
       "cost": 6,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Armor"
+      ]
     },
     {
       "id": "armored_7",
@@ -5365,14 +5365,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "",
+      "text": "Armor.",
       "species": "Armored",
       "habitat": "",
       "cost": 7,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Armor"
+      ]
     },
     {
       "id": "armored_8",
@@ -5381,14 +5381,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "",
+      "text": "Armor.",
       "species": "Armored",
       "habitat": "",
       "cost": 8,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Armor"
+      ]
     },
     {
       "id": "armored_10",
@@ -5397,14 +5397,14 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 12,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "",
+      "text": "Armor.",
       "species": "Armored",
       "habitat": "",
       "cost": 10,
-      "ruleset": "mana"
+      "ruleset": "mana",
+      "keywords": [
+        "Armor"
+      ]
     }
   ]
 }
