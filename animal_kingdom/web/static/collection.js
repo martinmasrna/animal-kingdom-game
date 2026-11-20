@@ -183,8 +183,7 @@ function trayHTML(d) {
       cells += id ? `<div class="cell${id === leader ? ' lcopy' : ''}${over(id) ? ' over' : ''}" data-card="${id}" style="${at}">${manaPiece(C[id], { cost: C[id].mana ?? null, w: g.w })}</div>`
         : `<div class="cell empty" style="${at}">${HEX_SVG}</div>`;
       i++; }
-    if (r.k != null) { const a = first * g.p / 2 + x0, b = (i - 1) * g.p / 2 + x0 + g.w;
-      counts += `<span class="rcount" style="left:${a.toFixed(1)}px;width:${(b - a).toFixed(1)}px;top:${(g.dy + g.h + 6).toFixed(1)}px">${r.ids.length}</span>`; } });
+    });   // no count under a cost's run: the pieces are there to count (Martin, 2026-11-20)
   const combW = (i - 1) * g.p / 2 + x0 + g.w, combH = g.dy + g.h;
   const lead = leader ? `<div class="tlead" id="dlead" data-card="${leader}" style="width:${g.lead}px">${manaPiece(C[leader], { str: null, w: g.lead })}</div>`
     : `<div class="tlead none" id="dlead" style="width:${g.lead}px;height:${(g.lead * PH).toFixed(1)}px">${HEX_SVG}<span>Choose a leader</span></div>`;
