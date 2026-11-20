@@ -1743,12 +1743,13 @@ function moveLine(m) {
     if (f.k === 'remove') return `removed ${name(f.card)}`;
     if (f.k === 'placed') return `${f.owner === V.you ? 'you' : 'your opponent'} placed ${name(f.card)} on it`;
     if (f.k === 'bounce') return `returned ${name(f.card)}`;
+    if (f.k === 'scare') return `scared off ${name(f.card)}`;
     if (f.k === 'draw') return m.kind === 'draw' && f.seat === m.seat ? null : `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}drew ${f.n}`;
     if (f.k === 'lose') return `${f.seat === V.you ? 'you' : 'your opponent'} lost ${f.n} food`;
     if (f.k === 'food') return `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}${f.n > 0 ? 'gained' : 'paid'} ${Math.abs(f.n)} food`;
     return null;
   }).filter(Boolean);
-  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? 'captured the HQ' : m.kind === 'roam' ? 'roamed' : m.kind === 'act' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'its'} ${CARDS[m.card] && /(^|\. )Echo\./.test(CARDS[m.card].text) ? 'Echo' : 'Action'}`
+  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? (isMana() ? 'raided the den' : 'captured the HQ') : m.kind === 'roam' ? 'roamed' : m.kind === 'act' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'its'} ${CARDS[m.card] && /(^|\. )Echo\./.test(CARDS[m.card].text) ? 'Echo' : 'Action'}`
     : m.kind === 'leader' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'the leader'}'s power` : '';
   return [`${who} · turn ${m.round}`, what, ...fx].filter(Boolean).join(' · ');
 }
@@ -1893,7 +1894,7 @@ function drawLast(G) {
   const items = G.history.map((m, i) => ({ t: turnOf(m), m, i })).concat((ui.skips || []).filter(k => k.key === key).map(k => ({ t: k.turn, skip: k.seat })));
   items.sort((a, b) => a.t - b.t);
   const who = p => p === V.you ? 'You' : 'Your opponent';
-  const verb = m => m.kind === 'place' ? 'played' : m.kind === 'roam' ? 'roamed' : m.kind === 'leader' ? 'used the power' : m.kind === 'act' ? (/(^|\. )Echo\./.test((CARDS[m.card] || {}).text || '') ? 'Echo' : 'Action') : 'drew';
+  const verb = m => m.target && m.target[0] === 'hq' && isMana() ? 'raided the den' : m.kind === 'place' ? 'played' : m.kind === 'roam' ? 'roamed' : m.kind === 'leader' ? 'used the power' : m.kind === 'act' ? (/(^|\. )Echo\./.test((CARDS[m.card] || {}).text || '') ? 'Echo' : 'Action') : 'drew';
   const row = x => x.skip ? `<div class="row skip"><div class="mini"></div><span>Turn skipped<small>${who(x.skip)}</small></span></div>`
     : `<div class="row" data-h="${x.i}"><div class="mini">${x.m.card ? `<div class="unit ${rel(x.m.seat)}" style="--tw:40px">${leaderToken(x.m.card, rel(x.m.seat), CARDS, 40)}</div>` : ''}</div>`
       + `<span>${esc((CARDS[x.m.card] || {}).name || '')}<small>${who(x.m.seat)} · ${verb(x.m)}</small></span></div>`;

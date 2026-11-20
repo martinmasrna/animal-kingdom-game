@@ -252,7 +252,7 @@ def test_effects_reach_across_the_base_line():
 
 def test_twenty_four_regions_of_three_mutually_adjacent_tiles():
     regs = list(HEX19.regions.values())
-    assert len(regs) == 24 and all(r.food == 5 for r in regs)
+    assert len(regs) == 24 and all(r.food == 1 for r in regs)        # one food a region, 20 to win (Martin, 2026-11-20)
     triangles = {frozenset(t) for t in combinations(sorted(HEX19.crossroads), 3)
                  if all(HEX19.adjacent(a, b) for a, b in combinations(t, 2))}
     assert {frozenset(r.corners) for r in regs} == triangles
@@ -267,7 +267,7 @@ def test_region_owners_and_income():
     s = state(turn=4)
     for cr in HEX19.crossroads:
         put(s, cr, "squirrel", "A")
-    assert len(rules.regions_controlled(s, "A")) == 24 and rules.region_income(s, "A") == 120
+    assert len(rules.regions_controlled(s, "A")) == 24 and rules.region_income(s, "A") == 24
     s = state(turn=4)
     for cr in ("1,1", "1,2", "2,2"):
         put(s, cr, "squirrel", "A")
@@ -277,20 +277,79 @@ def test_region_owners_and_income():
     assert [set(r.corners) for r in rules.regions_controlled(s, "B")] == [{"4,3", "5,2", "5,3"}]
 
 
-def test_no_animal_enters_or_captures_a_den():
-    s = state(turn=11, current="B", hands={"B": ["lion", "kitten"]})
+def _b_at_a_base(s, food):
+    """B's chain from its base to A's, a Wolf of B's on A's base tile 1,1: A's den is open to B."""
     _b_chain(s)
-    put(s, "1,1", "wolf", "B")                                    # put there by hand (no rule puts it there): its pack
-    for a in rules.legal_actions(s):                              # stands on A's den front, as a capture would need
-        assert not (isinstance(a, (PlaceAction, RoamAction)) and a.target[0] == "hq")
-    rng = random.Random(1)
-    for seed in range(20):                                        # and no game ends on a den
+    put(s, "1,1", "wolf", "B")
+    s.food.update(food)
+
+
+def raids(s):
+    return [a for a in rules.legal_actions(s) if isinstance(a, (PlaceAction, RoamAction)) and a.target[0] == "hq"]
+
+
+def test_a_den_is_raided_only_through_its_base():
+    """The den raid (Martin, 2026-11-20): the den is entered from the base tiles in front of it, along your chain."""
+    s = state(turn=11, current="B", hands={"B": ["lion"]})
+    _b_chain(s)                                                   # next to A's base, not on it
+    assert not raids(s)
+    put(s, "1,1", "wolf", "B")
+    assert {a.target for a in raids(s)} == {("hq", "A")}
+
+
+def test_a_raid_steals_the_raiders_strength_and_spends_it():
+    s = state(turn=11, current="B", hands={"B": ["lion"]})
+    _b_at_a_base(s, {"A": 10, "B": 0})
+    rules.apply_action(s, PlaceAction("lion", ("hq", "A")))       # a 7
+    assert s.food == {"A": 3, "B": 7} and s.result is None
+    assert all(u.card_id != "lion" for st in s.board.values() for u in st) and "lion" in s.remove_pile
+    assert rules.mana_left(s, "B") == 3                           # it cost its mana
+
+
+def test_a_raid_takes_at_most_what_the_den_holds():
+    s = state(turn=11, current="B", hands={"B": ["lion"]})
+    _b_at_a_base(s, {"A": 4, "B": 0})
+    rules.apply_action(s, PlaceAction("lion", ("hq", "A")))
+    assert s.food == {"A": 0, "B": 4}
+
+
+def test_a_raid_can_win_and_a_roam_can_raid():
+    s = state(turn=11, current="B")
+    _b_at_a_base(s, {"A": 9, "B": 15})
+    rules.apply_action(s, RoamAction("1,1", ("hq", "A")))         # the Wolf, a 6, walks in
+    assert s.top_unit("1,1") is None and s.food["A"] == 3
+    assert s.result is not None and s.result.winner == "B" and s.result.reason == "food"
+
+
+def test_a_covered_animal_is_scared_off_into_its_owners_deck():
+    s = state(turn=11, current="B", hands={"B": ["lion", "kitten"]})          # the Kitten keeps B's turn going
+    _b_chain(s)
+    put(s, "1,1", "mongoose", "A")
+    before = list(s.decks["A"])
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
+    resolve_choices(s)
+    assert [u.card_id for u in s.board["1,1"]] == ["lion"]
+    assert sorted(s.decks["A"]) == sorted(before + ["mongoose"]) and "mongoose" not in s.remove_pile
+
+
+def test_covering_your_own_animal_scares_it_off_too():
+    s = state(turn=11, hands={"A": ["lion"]})
+    put(s, "1,1", "mongoose", "A")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
+    resolve_choices(s)
+    assert [u.card_id for u in s.board["1,1"]] == ["lion"] and "mongoose" in s.decks["A"]
+
+
+def test_random_mana_games_keep_one_animal_a_tile():
+    for seed in range(20):
         r = _random_game(seed)
+        if not r.effect_stack:                                    # a game can end with the scare still to resolve
+            assert all(len(st) == 1 for st in r.board.values()), seed
         assert r.result is None or r.result.reason != "hq_capture"
 
 
-def test_reaching_one_hundred_food_wins():
-    s = state(turn=4, food={"A": 95, "B": 0})
+def test_reaching_twenty_food_wins():
+    s = state(turn=4, food={"A": 19, "B": 0})
     for cr in ("1,1", "1,2", "2,2"):
         put(s, cr, "squirrel", "A")
     rules.apply_action(s, PassAction())

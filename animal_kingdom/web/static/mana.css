@@ -58,11 +58,15 @@
 .game.mana #world { display: none; }
 .game.mana #stage { background: #1f2228; }
 .game.mana .ledge, .game.mana .deck, .game.mana #recent { display: none !important; }
-/* the board: plain tiles, a soft fade in each side's colour beyond its base row (board.js basefade), a dot on each region's corner */
-.game.mana.kit.hexb .cr.clear { background: #383d45; filter: none; clip-path: polygon(50% 1.5%, 98.5% 25.5%, 98.5% 74.5%, 50% 98.5%, 1.5% 74.5%, 1.5% 25.5%); }
-.game.mana .basefade { pointer-events: none; z-index: 0; }
-.game.mana .basefade.A { background: radial-gradient(closest-side, rgba(90, 162, 240, .42), rgba(90, 162, 240, .16) 55%, transparent); }
-.game.mana .basefade.B { background: radial-gradient(closest-side, rgba(224, 90, 76, .42), rgba(224, 90, 76, .16) 55%, transparent); }
+/* the board: plain tiles, a dot on each region's corner; behind each base row its den (board.js mden): a dark chamber
+   holding that side's food, the enemy's ringed while an animal could raid it */
+.game.mana .mden { display: flex; align-items: center; justify-content: center; gap: 10px; box-sizing: border-box; border-radius: 14px;
+  background: radial-gradient(ellipse at 50% 45%, #2b2e35, #16181c 80%); border: 2px solid #3a3f48; box-shadow: inset 0 2px 8px rgba(0, 0, 0, .6); z-index: 1; }
+.game.mana .mden.A { border-color: #3d5675; } .game.mana .mden.B { border-color: #6b3530; }
+.game.mana .mden .mfruit { height: 52%; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6)); }
+.game.mana .mden b { font: 600 calc(var(--th) * .34) 'Source Serif 4', Georgia, serif; color: #f1ece2; line-height: 1; }
+.game.mana .mden i { font: 500 15px 'Fira Sans Condensed', sans-serif; color: #8b93a0; font-style: normal; align-self: flex-end; margin-bottom: 14%; }
+.game.mana .mden.tgt { cursor: pointer; border-color: #f2c94c; box-shadow: inset 0 2px 8px rgba(0, 0, 0, .6), 0 0 0 3px rgba(242, 201, 76, .55); }
 .game.mana .rdot { color: inherit; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #565c66; box-shadow: 0 0 0 2px #1f2228; z-index: 4; pointer-events: none; }
 .game.mana .rdot.A { background: #5aa2f0; } .game.mana .rdot.B { background: #e05a4c; }
 .game.mana .cr.unit:hover { z-index: 5; }

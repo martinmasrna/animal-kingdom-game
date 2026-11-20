@@ -251,10 +251,25 @@ def do_placement(state: GameState, player: str, card_id: str, target, iid: Optio
     state.turn_flags.pop(f"flight_next_{player}", None)   # [ACTION 5]: the next animal you play has Flight, then it is spent
     kind, where = target
     if kind == "hq":
+        if state.config.den_raid:
+            _raid(state, player, unit, where, strength)
+            return
         state.emit("capture", player=player, iid=unit.iid, card=card_id, den=where, str=strength)
         state.result = Result(player, "hq_capture")
         return
     _land_unit(state, player, unit, where, from_hand=True)
+
+
+def _raid(state: GameState, player: str, unit: UnitInstance, enemy: str, strength: int, *, roam: bool = False) -> None:
+    """The den raid (the mana ruleset, Martin, 2026-11-20): an animal that enters the enemy den steals food equal to its
+    strength, at most what they have, and is spent: it goes to the Remove Pile without landing (no Roar, no reactions)."""
+    n = min(max(strength, 0), state.food[enemy])
+    state.emit("raid", player=player, iid=unit.iid, card=unit.card_id, den=enemy, str=strength, n=n,
+               **({"roam": True} if roam else {}))
+    state.pile_add(unit.card_id, unit.owner)
+    if n:
+        state.food[enemy] -= n
+        gain_food(state, player, n)
 
 
 def _settle_play_strength(state: GameState, player: str, unit: UnitInstance) -> None:
@@ -348,6 +363,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
                **({"reveal": True} if reveal else {}))
     if covered is not None:
         state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
+        _push_scare(state, cr)
 
     # Apex Predator: it covers the occupant like any placement, and eats it afterwards
     # (Martin, 2026-09-29): the roar, then every reaction to the cover (Spikes, Poison,
@@ -671,6 +687,28 @@ def remove_top(state, cr, *, by_player, by_effect=True, by_card=None) -> bool:
     return _remove_specific(state, cr, top, by_player=by_player, by_effect=by_effect, by_card=by_card)
 
 
+def _push_scare(state: GameState, cr: str) -> None:
+    """The scare (the mana ruleset): pushed first when an animal is covered, so it resolves after the cover's Roar and
+    every reaction to it."""
+    if state.config.cover_scares:
+        state.effect_stack.append({"op": "scare", "cr": cr})
+
+
+def _op_scare(state, step):
+    """Every animal still beneath the top of `cr` is scared off: shuffled into its owner's deck, a token simply gone. It
+    is not removed (no Remove Pile, no removal reactions). If the coverer is gone, what it covered is the top again and
+    stays."""
+    stack = state.board.get(step["cr"])
+    if not stack or len(stack) < 2:
+        return None
+    for unit in stack[:-1]:
+        stack.remove(unit)
+        state.emit("scare", cr=step["cr"], iid=unit.iid, card=unit.card_id, owner=unit.owner)
+        if state.cards[unit.card_id].status != "token":
+            shuffle_back(state, unit.owner, [unit.card_id])
+    return None
+
+
 def _op_apex_eat(state, step):
     """An Apex eats what it covered, if the prey is still right beneath it, and it can be eaten (not Armor, judged as
     the prey stood on top: a Capybara's Armor still shields what the predator landed on). Stealth doesn't save it: a
@@ -924,7 +962,7 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
     occ = state.connected_occupied(player)
     enemy = other_player(player)
     # HQ capture: connection only (not Flight); a map with bases has no den to capture
-    enemy_hq = not gm.bases and any(cr in occ for cr in gm.hq_front(enemy))
+    enemy_hq = (not gm.bases or state.config.den_raid) and any(cr in occ for cr in gm.hq_front(enemy))
 
     # Connection legality depends only on (player, occ), never on the card, so the set of
     # connection-legal crossroads is identical for every non-Flight/non-extra card. Compute it
@@ -1068,7 +1106,7 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None)
             out.append(("cr", c))
     if occ is None:
         occ = state.connected_occupied(player)
-    if not is_apex and not gm.bases and cr in occ and any(c in pack for c in gm.hq_front(enemy)):
+    if not is_apex and (not gm.bases or state.config.den_raid) and cr in occ and any(c in pack for c in gm.hq_front(enemy)):
         out.append(("hq", enemy))                     # the den: along a chain from your own den, as from the hand
     return out
 
@@ -1135,6 +1173,13 @@ def do_roam(state: GameState, player: str, origin: str, target, *, by_effect: bo
     state.turn_flags[f"roams_{player}"] = state.turn_flags.get(f"roams_{player}", 0) + 1
     state.turn_flags["any_roamed"] = True             # the Fox's Roar asks
     kind, where = target
+    if kind == "hq" and state.config.den_raid:        # the raid: it leaves the board for the den and is spent
+        stack.pop()
+        if not stack:
+            del state.board[origin]
+        state.emit("roam", player=player, iid=unit.iid, card=unit.card_id, cr=origin, to=None, den=where)
+        _raid(state, player, unit, where, effective_strength(state, unit), roam=True)
+        return
     if kind == "hq":                                  # the game ends as it steps onto the den
         state.emit("roam", player=player, iid=unit.iid, card=unit.card_id, cr=origin, to=None, den=where)
         state.emit("capture", player=player, iid=unit.iid, card=unit.card_id, den=where,
@@ -1150,6 +1195,7 @@ def do_roam(state: GameState, player: str, origin: str, target, *, by_effect: bo
     state.board.setdefault(where, []).append(unit)
     if covered is not None:
         state.emit("cover", cr=where, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
+        _push_scare(state, where)
     _push_theron(state, unit, covered)
     _push_cat_leader(state, unit, covered)
     if statics.has_keyword(state, unit, "Apex Predator", where) and covered is not None:
@@ -1718,6 +1764,7 @@ OPS: dict[str, Callable] = {
     "remove_choice": _op_remove_choice,
     "remove_iid": _op_remove_iid,
     "apex_eat": _op_apex_eat,
+    "scare": _op_scare,
     "play_extra": _op_play_extra,
     "play_named": _op_play_named,
     "grant_strength": _op_grant_strength,

@@ -230,6 +230,10 @@ def _effects(events: list, move: Move) -> list:
             fx.append({"k": "food", "seat": e["player"], "n": e["n"]})
         elif e["e"] == "pay" and e.get("card") == "food_thief":     # the actions prototype: food taken from the opponent
             fx.append({"k": "lose", "seat": e["player"], "n": e["n"]})
+        elif e["e"] == "raid" and e["n"]:                 # the mana ruleset's den raid: what the raided den lost
+            fx.append({"k": "lose", "seat": e["den"], "n": e["n"]})
+        elif e["e"] == "scare":                           # the mana ruleset: a covered animal scared back into its deck
+            fx.append({"k": "scare", "card": e["card"], "owner": e["owner"]})
     merged = []   # several draws or food gains by one player in a row read as one
     for f in fx:
         if merged and f["k"] in ("draw", "food") and merged[-1]["k"] == f["k"] and merged[-1]["seat"] == f["seat"]:
@@ -945,9 +949,10 @@ def map_info(map_id: str = MAP_ID) -> dict:
     # the hex prototype draws its board from its own geometry (board.js), so it names its crossroads and its dens' fronts
     return {"id": gm.id, "name": gm.name, "cols": cols, "rows": rows, "regions": regions, "winFood": gm.win_food,
             "crossroads": sorted(gm.crossroads), "hex": gm.id == "map_hex",
-            # map_hex19 (the mana ruleset's board): its tiles' adjacency and each player's base; no den can be captured
+            # map_hex19 (the mana ruleset's board): its tiles' adjacency and each player's base; a den behind each base,
+            # raided from it (Martin, 2026-11-20)
             **({"hex19": True, "edges": [list(e) for e in gm.edges], "bases": {p: sorted(t) for p, t in gm.bases.items()},
-                "dens": False} if gm.bases else {})}
+                "dens": True} if gm.bases else {})}
 
 
 def card_pool() -> list[dict]:

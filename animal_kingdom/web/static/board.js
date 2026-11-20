@@ -56,7 +56,7 @@ export const manaBoard = () => HEX.mana;
 // landscape: the board the stage's full height under the opponent's hand (to y 66), right of the middle so your hand has
 // the ground beside its foot (app.js PL); upright: between the dens' ridges. The mana board stands in the middle column,
 // as tall as the stage allows between the opponent's hand and yours.
-const hexGeo = () => { const g = HEX.mana ? { w: 128, x: STAGE.w / 2, top: 34 } : VIEW.port ? { w: 162, x: STAGE.w / 2, top: 150 } : { w: 114, x: 940, top: 70 }; g.h = g.w * TH / TW; return g; };
+const hexGeo = () => { const g = HEX.mana ? { w: 100, x: STAGE.w / 2, top: 134 } : VIEW.port ? { w: 162, x: STAGE.w / 2, top: 150 } : { w: 114, x: 940, top: 70 }; g.h = g.w * TH / TW; return g; };
 export const tokenWidth = () => hexGeo().w;
 const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
   return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * .75 * g.h]; };
@@ -198,14 +198,15 @@ export function renderBoard(el, M, g, cards, ui) {
     s += put(`stone pboss ${h ? h.owner : ''}${reg.c.every((v, i) => shownAt && v === shownAt[i]) ? ' shown' : ''}`, x, y, chalk('+' + pays(reg, h)));
   }
 
-  // the mana board: no tint on the bases; a soft fade in each side's colour beyond its base row (below yours, above
-  // theirs), the row a player's animals connect from (Martin, 2026-11-20)
+  // the mana board's dens (Martin, 2026-11-20): a chamber behind each base row holding that side's food, the one thing a
+  // raid takes and the only way to win; the enemy's is a target (data-hq) while an animal could raid it
   if (HEX.mana) for (const side of ['A', 'B']) {
     const ps = [...bases[side]].map(cr => at(...cr.split(',').map(Number)));
     if (!ps.length) continue;
-    const G = hexGeo(), x0 = Math.min(...ps.map(p => p[0])), x1 = Math.max(...ps.map(p => p[0])), y = ps[0][1] + (side === 'A' ? .32 : -.32) * G.h;
-    const w = x1 - x0 + 2.2 * G.w, h = 1.5 * G.h;
-    s += put(`basefade ${side}`, (x0 + x1) / 2 - w / 2, y - h / 2, '', '', `width:${w}px;height:${h}px`);
+    const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2, w = 2.1 * G.w, h = .62 * G.h;
+    const y = ps[0][1] + (side === 'A' ? 1 : -1) * (.5 * G.h + .1 * G.h + h / 2);
+    s += put(`mden ${side}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x - w / 2, y - h / 2,
+      `<img class="mfruit" src="/static/kit2/fruit.webp" alt="" draggable="false"><b>${g.food[side]}</b><i>of ${g.winFood}</i>`, `data-hq="${side}"`, `width:${w}px;height:${h}px`);
   }
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
   if (HEX.on && !HEX.mana) for (const side of ['A', 'B']) { const [x, y] = hexTip(side); s += put(`dentile ${side}`, x, y, `<img src="${denBase(side)}" alt="" draggable="false">`); }
