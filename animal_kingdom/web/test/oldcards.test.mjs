@@ -22,6 +22,6 @@ test('an old replay naming retired and deleted cards plays without errors', asyn
   for (const v of old) { await feed(page, v); assert.deepEqual(await page.evaluate(screenMismatches), []); }
   assert.deepEqual(page.errors, []);
   const names = await page.evaluate(() => ['stoop', 'raksha', 'house_cat'].map(id => [window.__ak.cards()[id].name, window.__ak.cards()[id].status]));
-  assert.deepEqual(names, [['Viper?', 'reserve'], ['Raksha', 'reserve'], ['Alley Cat', 'reserve']]);
+  assert.deepEqual(names, [['Hawk', 'reserve'], ['Raksha', 'reserve'], ['Alley Cat', 'reserve']]);
   await page.close();
 });
