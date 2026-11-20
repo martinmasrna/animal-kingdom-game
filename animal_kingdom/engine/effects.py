@@ -3773,6 +3773,13 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cottonmouth": {"on_place": _king_cobra_place},
     "weasel": {"on_place": _removes("weasel_max")},
     "mongoose": {"on_place": _removes("mongoose_max")},   # (Martin, 2026-11-16)   # Roar: remove an adjacent enemy of strength 3 or less (Martin, 2026-11-16)
+    "hunter_3": {"on_place": _removes("hunter_3_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_5": {"on_place": _removes("hunter_5_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_7": {"on_place": _removes("hunter_7_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_6": {"on_place": _removes("hunter_6_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_4": {"on_place": _removes("hunter_4_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_2": {"on_place": _removes("hunter_2_max")},   # the mana prototype (Martin, 2026-11-20)
+    "giant_hunter": {"on_place": _removes(min_attr="giant_hunter_min")},   # the mana prototype (Martin, 2026-11-20)
     "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _removes("black_mamba_max")},
     "mosquito": {"on_place": _mosquito_place},

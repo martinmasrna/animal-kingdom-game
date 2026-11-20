@@ -536,3 +536,15 @@ def test_shade_strength_is_its_count():
     s.remove_pile.extend(["wisp_0", "wisp_2"]); s.pile_owners.extend(["B", "A"])
     assert {k: effective_strength(s, u) for k, u in shades.items()} == \
         {"hand": 3, "ally": 5, "enemy": 2, "food": 7, "removed": 1}
+
+
+def test_hunters_remove_by_their_limit():
+    # The Hunters (Martin, 2026-11-20): Roar: remove an adjacent enemy of strength N or less; the Giant Hunter, 8 or more.
+    from animal_kingdom.engine.effects import _adjacent_enemy_targets
+    s = state()
+    for cr, cid in (("2,1", "wisp_1"), ("2,2", "wisp_6")):   # strength 2 and 8, next to 1,1
+        put(s, cr, cid, "B")
+    me = put(s, "1,1", "hunter_2", "A")
+    small = _adjacent_enemy_targets(s, me, "1,1", max_strength=MANA.hunter_2_max)
+    big = _adjacent_enemy_targets(s, me, "1,1", min_strength=MANA.giant_hunter_min)
+    assert small == ["2,1"] and big == ["2,2"]

@@ -129,6 +129,14 @@ class Config:
     stoop_max: int = 4                   # Hawk
     capuchin_draw: int = 2               # Capuchin: Roar: draw 2 cards (Martin, 2026-11-16)
     mongoose_max: int = 5                # Mongoose: Roar: remove an adjacent enemy of strength 5 or less (Martin, 2026-11-16)
+    # The mana prototype's Hunters (Martin, 2026-11-20, his table as written): Roar: remove an adjacent enemy of strength N or less (or more)
+    hunter_3_max: int = 3
+    hunter_5_max: int = 5
+    hunter_7_max: int = 7
+    hunter_6_max: int = 6
+    hunter_4_max: int = 4
+    hunter_2_max: int = 2
+    giant_hunter_min: int = 8
     rhinoceros_max: int = 3
     hippopotamus_max: int = 5
     cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this

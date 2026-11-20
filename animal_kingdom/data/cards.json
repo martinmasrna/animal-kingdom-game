@@ -4923,6 +4923,488 @@
       "habitat": "",
       "cost": 10,
       "ruleset": "mana"
+    },
+    {
+      "id": "hunter_3",
+      "name": "Hunter",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
+      "species": "Hunter",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "hunter_5",
+      "name": "Hunter",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "text": "Roar: remove an adjacent enemy of strength 5 or less.",
+      "species": "Hunter",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "hunter_7",
+      "name": "Hunter",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "text": "Roar: remove an adjacent enemy of strength 7 or less.",
+      "species": "Hunter",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "hunter_6",
+      "name": "Hunter",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "text": "Roar: remove an adjacent enemy of strength 6 or less.",
+      "species": "Hunter",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "hunter_4",
+      "name": "Hunter",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Roar: remove an adjacent enemy of strength 4 or less.",
+      "species": "Hunter",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "hunter_2",
+      "name": "Hunter",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "text": "Roar: remove an adjacent enemy of strength 2 or less.",
+      "species": "Hunter",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "giant_hunter",
+      "name": "Giant Hunter",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "text": "Roar: remove an adjacent enemy of strength 8 or more.",
+      "species": "Giant Hunter",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "venomous_2",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [
+        "Poison"
+      ],
+      "text": "",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 2,
+      "ruleset": "mana"
+    },
+    {
+      "id": "venomous_3",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [
+        "Poison"
+      ],
+      "text": "",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana"
+    },
+    {
+      "id": "venomous_4",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [
+        "Poison"
+      ],
+      "text": "",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana"
+    },
+    {
+      "id": "venomous_5",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [
+        "Poison"
+      ],
+      "text": "",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana"
+    },
+    {
+      "id": "venomous_6",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [
+        "Poison"
+      ],
+      "text": "",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana"
+    },
+    {
+      "id": "venomous_7",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "keywords": [
+        "Poison"
+      ],
+      "text": "",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 7,
+      "ruleset": "mana"
+    },
+    {
+      "id": "venomous_8",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "keywords": [
+        "Poison"
+      ],
+      "text": "",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana"
+    },
+    {
+      "id": "venomous_10",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 15,
+      "keywords": [
+        "Poison"
+      ],
+      "text": "",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana"
+    },
+    {
+      "id": "sneaky_2",
+      "name": "Sneaky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [
+        "Stealth"
+      ],
+      "text": "",
+      "species": "Sneaky",
+      "habitat": "",
+      "cost": 2,
+      "ruleset": "mana"
+    },
+    {
+      "id": "sneaky_3",
+      "name": "Sneaky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [
+        "Stealth"
+      ],
+      "text": "",
+      "species": "Sneaky",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana"
+    },
+    {
+      "id": "sneaky_4",
+      "name": "Sneaky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [
+        "Stealth"
+      ],
+      "text": "",
+      "species": "Sneaky",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana"
+    },
+    {
+      "id": "sneaky_5",
+      "name": "Sneaky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [
+        "Stealth"
+      ],
+      "text": "",
+      "species": "Sneaky",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana"
+    },
+    {
+      "id": "sneaky_6",
+      "name": "Sneaky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [
+        "Stealth"
+      ],
+      "text": "",
+      "species": "Sneaky",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana"
+    },
+    {
+      "id": "sneaky_7",
+      "name": "Sneaky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "keywords": [
+        "Stealth"
+      ],
+      "text": "",
+      "species": "Sneaky",
+      "habitat": "",
+      "cost": 7,
+      "ruleset": "mana"
+    },
+    {
+      "id": "sneaky_8",
+      "name": "Sneaky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "keywords": [
+        "Stealth"
+      ],
+      "text": "",
+      "species": "Sneaky",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana"
+    },
+    {
+      "id": "sneaky_10",
+      "name": "Sneaky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 15,
+      "keywords": [
+        "Stealth"
+      ],
+      "text": "",
+      "species": "Sneaky",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana"
+    },
+    {
+      "id": "armored_2",
+      "name": "Armored",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "keywords": [
+        "Armor"
+      ],
+      "text": "",
+      "species": "Armored",
+      "habitat": "",
+      "cost": 2,
+      "ruleset": "mana"
+    },
+    {
+      "id": "armored_3",
+      "name": "Armored",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [
+        "Armor"
+      ],
+      "text": "",
+      "species": "Armored",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana"
+    },
+    {
+      "id": "armored_4",
+      "name": "Armored",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [
+        "Armor"
+      ],
+      "text": "",
+      "species": "Armored",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana"
+    },
+    {
+      "id": "armored_5",
+      "name": "Armored",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [
+        "Armor"
+      ],
+      "text": "",
+      "species": "Armored",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana"
+    },
+    {
+      "id": "armored_6",
+      "name": "Armored",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [
+        "Armor"
+      ],
+      "text": "",
+      "species": "Armored",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana"
+    },
+    {
+      "id": "armored_7",
+      "name": "Armored",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [
+        "Armor"
+      ],
+      "text": "",
+      "species": "Armored",
+      "habitat": "",
+      "cost": 7,
+      "ruleset": "mana"
+    },
+    {
+      "id": "armored_8",
+      "name": "Armored",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "keywords": [
+        "Armor"
+      ],
+      "text": "",
+      "species": "Armored",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana"
+    },
+    {
+      "id": "armored_10",
+      "name": "Armored",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 12,
+      "keywords": [
+        "Armor"
+      ],
+      "text": "",
+      "species": "Armored",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana"
     }
   ]
 }

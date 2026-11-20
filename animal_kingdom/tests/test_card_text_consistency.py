@@ -167,6 +167,13 @@ STRENGTH_LIMITS = {
     "hornet": "hornet_max",
     "weasel": "weasel_max",
     "mongoose": "mongoose_max",
+    "hunter_3": "hunter_3_max",
+    "hunter_5": "hunter_5_max",
+    "hunter_7": "hunter_7_max",
+    "hunter_6": "hunter_6_max",
+    "hunter_4": "hunter_4_max",
+    "hunter_2": "hunter_2_max",
+    "giant_hunter": "giant_hunter_min",
 }
 
 
