@@ -384,7 +384,8 @@ function homeScreen(mode = {}) {
       if (q.get('games')) body.gauntlet.games = Math.max(1, Math.round(+q.get('games')));   // games per deck, who goes first alternating
     }
     if (BOARD !== 'map_b' && play.opp !== 'friend') body.map = BOARD;
-    if (body.bot && !body.map && LOCAL_PLAY && await startLocal(body)) return;
+    if (DRAW_OFF && (body.bot || body.gauntlet)) body.draw = false;
+    if (body.bot && !body.map && body.draw !== false && LOCAL_PLAY && await startLocal(body)) return;
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); play.open = null;
@@ -875,6 +876,10 @@ const LOCAL_PLAY = new URLSearchParams(location.search).get('local') !== '0';
 // The hex board prototype (Martin's diamond, 2026-11-16): ?board=hex on the address plays your next matches on it, ?board=classic switches back.
 const BOARD = (() => { const q = new URLSearchParams(location.search).get('board');
   try { if (q) localStorage.setItem('ak:board', q === 'hex' ? 'map_hex' : 'map_b'); return localStorage.getItem('ak:board') || 'map_hex'; } catch { return q === 'classic' ? 'map_b' : 'map_hex'; } })();
+// The Draw action is off in your matches against a bot (Martin, 2026-11-20, a trial: "Okay, we can try it."): cards come from the
+// turn's free card and from effects. ?draw=on on the address brings the action back, ?draw=off turns the trial on again.
+const DRAW_OFF = (() => { const q = new URLSearchParams(location.search).get('draw');
+  try { if (q) localStorage.setItem('ak:draw', q === 'on' ? 'on' : 'off'); return localStorage.getItem('ak:draw') !== 'on'; } catch { return q !== 'on'; } })();
 let LOCAL = null;
 async function startLocal(body) {
   const lib = await prepareLocal(api);

@@ -238,6 +238,8 @@ class Config:
     draw_action_count: int = 1           # cards drawn by one Draw action (overview.md §5)
     turn_draw_count: int = 1             # cards a player draws free at the start of each turn, the first player's first
                                           # turn excepted (Martin, 2026-11-16: "Gain 1 card per turn, pay 1 action to draw 1.")
+    draw_action: bool = True             # whether the Draw action is offered at all; False = cards come only from the turn's free card and from effects
+                                          # (the trial of 2026-11-20, set per match by web/match.py; the default ruleset leaves it on)
     actions_per_turn: int = 2            # top-level actions (place/draw) per turn (overview.md §5)
     first_turn_actions: int = 1          # the first player's first turn only: the tempo the second player
                                          # lacks (Martin, 2026-10-11, from his gauntlets: 82% first vs 67% second)
@@ -261,7 +263,8 @@ class Config:
         first turn (2026-10-11) carries no `first_turn_actions`, and its first turn had two; one from before the four-card
         hands carries no `first_player_opening_draw`, and its first player drew three."""
         return replace(self, first_turn_actions=log.get("first_turn_actions", self.actions_per_turn),
-                       first_player_opening_draw=log.get("first_player_opening_draw", 3))
+                       first_player_opening_draw=log.get("first_player_opening_draw", 3),
+                       draw_action=log.get("draw_action", True))
 
 
 def load_config_overrides(path: Optional[str]) -> Optional[Config]:

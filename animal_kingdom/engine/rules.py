@@ -61,7 +61,7 @@ def _top_level_actions(state: GameState) -> list[Action]:
     if left <= 0:                                  # the turn stays open only for a free roam (Roam)
         return list(effects.legal_roams(state, player, free_only=True)) if effects.free_roams_left(state, player) else []
     actions: list[Action] = []
-    if state.decks[player]:
+    if state.decks[player] and state.config.draw_action:
         actions.append(DrawAction())
     titan_ok = left >= titan_cost(state, player) and state.food[player] >= titan_food(state, player)
     actions.extend(effects.legal_placements(state, player, titan_ok=titan_ok))
@@ -90,7 +90,7 @@ def _has_top_level_action(state: GameState) -> bool:
     """Whether the current player can do anything at all: `_top_level_actions` without building the list. A Draw
     settles it at once; only an empty deck needs the placements looked at. (Asked at every turn start, also in every
     line a bot searches, where building the full list was nearly half of a bot's time.)"""
-    if _actions_left(state) > 0 and state.decks[state.current]:
+    if _actions_left(state) > 0 and state.decks[state.current] and state.config.draw_action:
         return True
     return bool(_top_level_actions(state))
 

@@ -723,3 +723,46 @@ def test_practice_accepts_a_bot_deck_from_the_ladders_pool(monkeypatch):
     monkeypatch.setattr(server, "ladder", SimpleNamespace(decks=["martin_league_list"]))
     assert server.bot_deck_ok("martin_league_list") and server.bot_deck_ok("lions30")
     assert not server.bot_deck_ok("nobody_s_list") and not server.bot_deck_ok(None)
+
+
+def test_the_draw_action_can_be_switched_off_for_a_match():
+    """The trial of 2026-11-20: no Draw action; the free card at turn start still comes. Off per match, on by default."""
+    from animal_kingdom.engine.actions import DrawAction
+    on, r = _match(), random.Random(1)
+    seen = False
+    for _ in range(80):                   # past the mulligan, the default ruleset offers the Draw action
+        if on.phase != "playing":
+            break
+        legal = rules.legal_actions(on.state)
+        seen = seen or any(isinstance(a, DrawAction) for a in legal)
+        on.act(on.to_act(), r.choice([a for a in legal if not isinstance(a, DrawAction)] or legal).to_dict())
+    assert seen
+    m = Match("T", Seat("ta", "A", bot="easy", deck="cats"))
+    m.draw_action = False
+    m.join(Seat("tb", "B", bot="easy", deck="egg_control"))
+    rng = random.Random(5)
+    turns = 0
+    while m.phase == "playing" and turns < 400:
+        legal = rules.legal_actions(m.state)
+        assert not any(isinstance(a, DrawAction) for a in legal)
+        with pytest.raises(EngineError):
+            rules.apply_action(m.state.clone(), DrawAction())
+        s = m.to_act()
+        m.act(s, rng.choice(legal).to_dict())
+        turns += 1
+    assert all(a.get("kind") != "draw" for a in m.actions)
+    assert m.game_log()["draw_action"] is False
+    back = Match.from_dict(json.loads(json.dumps(m.to_dict())))   # a restart keeps the rule
+    assert back.draw_action is False and back.state.config.draw_action is False
+
+
+def test_the_free_card_still_arrives_with_the_draw_action_off():
+    from animal_kingdom.engine.config import Config
+    from animal_kingdom.engine.state import new_game
+    from animal_kingdom.decks import load_premade_deck
+    s = new_game(load_premade_deck("cats"), load_premade_deck("egg_control"), 1, first_player="A",
+                 config=Config.default().sweep(draw_action=False))
+    assert Config.default().draw_action is True
+    before = len(s.hands["B"])
+    rules._end_turn(s)
+    assert len(s.hands["B"]) == before + 1

@@ -31,7 +31,7 @@ fn top_level_actions(st: &State) -> Vec<Action> {
         return if effects::free_roams_left(st, player, None) > 0 { effects::legal_roams(st, player, true) } else { Vec::new() };
     }
     let mut actions = Vec::new();
-    if !st.decks[player as usize].is_empty() {
+    if st.cfg().draw_action && !st.decks[player as usize].is_empty() {
         actions.push(Action::Draw);
     }
     let titan_ok = left >= titan_cost(st, player) && st.food[player.min(1) as usize] >= titan_food(st, player);
@@ -45,7 +45,7 @@ fn top_level_actions(st: &State) -> Vec<Action> {
 }
 
 fn has_top_level_action(st: &State) -> bool {
-    if actions_left(st) > 0 && !st.decks[st.current as usize].is_empty() {
+    if actions_left(st) > 0 && st.cfg().draw_action && !st.decks[st.current as usize].is_empty() {
         return true;
     }
     !top_level_actions(st).is_empty()

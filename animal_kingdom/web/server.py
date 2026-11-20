@@ -1562,6 +1562,10 @@ async def create_match(req):
         if body["map"] not in MAPS:
             raise web.HTTPBadRequest(text="no such board")
         match.map_id = body["map"]
+    if body.get("draw") is not None:         # the trial of 2026-11-20: "draw": false plays without the Draw action (the client sends it; ?draw=on brings the action back)
+        if not isinstance(body["draw"], bool):
+            raise web.HTTPBadRequest(text="bad draw")
+        match.draw_action = body["draw"]
     bot = body.get("bot")
     gauntlet = body.get("gauntlet")
     if (bot is not None and not isinstance(bot, dict)) or (gauntlet is not None and not isinstance(gauntlet, dict)):

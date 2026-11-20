@@ -270,6 +270,7 @@ class Match:
         self.rematch_declined: Optional[str] = None  # ...and the seat that declined it
         self.takeover = False            # a game played on from a logged position (start_from): neither logged nor rated
         self.map_id = MAP_ID             # the board this match is played on (MAPS)
+        self.draw_action = True          # False: the Draw action is off, cards come from the turn's free card and from effects (the trial of 2026-11-20)
         self.last_log: Optional[dict] = None   # the last finished game (game_log), for its replay
         self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
         self.rng = random.Random(secrets.randbits(32))
@@ -363,7 +364,8 @@ class Match:
             self.state = new_game(load_premade_deck(self.seats["A"].deck),
                                   load_premade_deck(self.seats["B"].deck), seed,
                                   map_id=self.map_id, first_player=first,
-                                  leaders=leaders_for(self.seats["A"].deck, self.seats["B"].deck))
+                                  leaders=leaders_for(self.seats["A"].deck, self.seats["B"].deck),
+                                  config=Config.default().sweep(draw_action=self.draw_action))
         self.bots = {s: bot_for(seat.bot, seed + i, self.map_id) for i, (s, seat) in enumerate(self.seats.items())
                      if seat.is_bot}
         self.history = []
@@ -604,6 +606,7 @@ class Match:
         return {"deck_a": self.seats["A"].deck, "deck_b": self.seats["B"].deck, "seed": self.seed,
                 "map_id": self.state.game_map.id, "first_player": r["first"], "first_turn_actions": self.state.config.first_turn_actions,
                 "first_player_opening_draw": self.state.config.first_player_opening_draw,
+                **({"draw_action": False} if not self.state.config.draw_action else {}),
                 "bots": [self.seats[p].bot or "human" for p in "AB"],
                 "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
                 "actions": list(self.actions), "action_times": list(self.action_times),
@@ -641,7 +644,7 @@ class Match:
                 "actions": self.actions, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
                 "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
-                "takeover": self.takeover, "map_id": self.map_id, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
+                "takeover": self.takeover, "map_id": self.map_id, "draw_action": self.draw_action, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history],
                 "events": self.events, "seq": self.seq}
@@ -660,11 +663,12 @@ class Match:
         m.last_log = d.get("last_log")
         m.takeover = d.get("takeover", False)
         m.map_id = d.get("map_id", MAP_ID)
+        m.draw_action = d.get("draw_action", True)
         m.clock = d.get("clock")
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's
         m.created = datetime.fromisoformat(d["created"])
-        m.state = GameState.from_dict(d["state"]) if d["state"] else None
+        m.state = GameState.from_dict(d["state"], config=Config.default().sweep(draw_action=m.draw_action)) if d["state"] else None
         m.history = [Move(**h) for h in d["history"]]
         m.events, m.seq = d.get("events", []), d.get("seq", 0)
         if m.state is not None and m.seed is not None:
