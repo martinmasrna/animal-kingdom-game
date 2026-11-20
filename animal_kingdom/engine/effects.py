@@ -264,7 +264,8 @@ def _raid(state: GameState, player: str, unit: UnitInstance, enemy: str, strengt
     """The den raid (the mana ruleset, Martin, 2026-11-20): an animal that enters the enemy den destroys food equal to its
     strength, at most what they have ("instead of stealing it destroys"), and is spent: it goes to the Remove Pile
     without landing (no Roar, no reactions). A den emptied loses the game (Config.zero_food_loses)."""
-    n = min(max(strength, 0), state.food[enemy])
+    bonus = state.config.raider_leader_bonus if _leads(state, player, L.RAIDER) else 0   # the mana prototype's Raider
+    n = min(max(strength, 0) + bonus, state.food[enemy])
     state.emit("raid", player=player, iid=unit.iid, card=unit.card_id, den=enemy, str=strength, n=n,
                **({"roam": True} if roam else {}))
     state.pile_add(unit.card_id, unit.owner)
@@ -444,7 +445,13 @@ def _push_theron(state, coverer, covered) -> None:
     everything else the cover sets off, so it resolves last: the Cat acts first (an Apex Cat eats, and the legendary
     Leopard grows for it), and Theron removes whatever it left. Decision G: House Cat/extra-placement chains can
     cover multiple enemies in one turn - `cap_king_theron` (off by default) limits Theron to one free removal per turn."""
-    if covered is None or covered.owner == coverer.owner or "Cat" not in state.cards[coverer.card_id].tags:
+    if covered is None or covered.owner == coverer.owner:
+        return
+    if _leads(state, coverer.owner, L.WARLORD):     # the mana prototype's Warlord: any cover of an enemy
+        state.effect_stack.append({"op": "gain_food", "player": coverer.owner, "amount": state.config.warlord_leader_food,
+                                   "by_card": L.WARLORD})
+        return
+    if "Cat" not in state.cards[coverer.card_id].tags:
         return
     for top in statics.active_tops(state, coverer.owner, "lion_legend_3"):
         if not _capped(state, "cap_king_theron", top):
@@ -3000,13 +3007,6 @@ def _mosquito_place(state, unit, cr):
     _drain_place(state, unit, cr, state.config.mosquito_drain)
 
 
-def _drains(attr):
-    """Roar: give an adjacent enemy -N strength, N the config's `attr` (the mana prototype's Hunters)."""
-    def handler(state, unit, cr):
-        _drain_place(state, unit, cr, getattr(state.config, attr))
-    return handler
-
-
 def _drain_place(state, unit, cr, amount):
     """Roar: give an adjacent enemy -N strength."""
     _push_choose(state, unit.owner, [nb for nb, top in _adjacent_tops(state, cr)
@@ -3813,12 +3813,12 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cottonmouth": {"on_place": _king_cobra_place},
     "weasel": {"on_place": _removes("weasel_max")},
     "mongoose": {"on_place": _removes("mongoose_max")},   # (Martin, 2026-11-16)   # Roar: remove an adjacent enemy of strength 3 or less (Martin, 2026-11-16)
-    "hunter_3": {"on_place": _drains("hunter_3_drain")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_5": {"on_place": _drains("hunter_5_drain")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_7": {"on_place": _drains("hunter_7_drain")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_6": {"on_place": _drains("hunter_6_drain")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_4": {"on_place": _drains("hunter_4_drain")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_2": {"on_place": _drains("hunter_2_drain")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_3": {"on_place": _removes("hunter_3_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_5": {"on_place": _removes("hunter_5_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_7": {"on_place": _removes("hunter_7_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_6": {"on_place": _removes("hunter_6_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_4": {"on_place": _removes("hunter_4_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_2": {"on_place": _removes("hunter_2_max")},   # the mana prototype (Martin, 2026-11-20)
     "giant_hunter": {"on_place": _removes()},   # the mana prototype (Martin, 2026-11-20)
     "scout_2": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
     "scout_3": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
@@ -4030,7 +4030,7 @@ def leader_usable(state: GameState, player: str) -> bool:
     if kind == "passive" or (kind == "once" and lead["spent"]):
         return False
     deck = state.decks[player]
-    if lid in (L.GRIMM, L.BABAJI):
+    if lid in (L.GRIMM, L.BABAJI, L.SAGE):
         return bool(deck)
     if lid == L.YUKI:
         return lead["stage"] < state.config.yuki_leader_uses and bool(den_connected_allies(state, player))
@@ -4055,7 +4055,9 @@ def do_leader(state: GameState, player: str) -> None:
     lid, cfg = lead["id"], state.config
     state.emit("leader_power", player=player, card=lid)
     src = {"by_card": lid}
-    if lid == L.GRIMM:
+    if lid == L.SAGE:                                # the mana prototype's Sage: draw a card
+        state.effect_stack.append({"op": "draw", "player": player, "n": 1, **src})
+    elif lid == L.GRIMM:
         state.effect_stack.append({"op": "draw", "player": player, "n": grimm_draws(state, lead), **src})
     elif lid == L.MELISSIA:
         state.effect_stack.append({"op": "scout", "player": player, "spec": L.MELISSIA_SPEC, **src})

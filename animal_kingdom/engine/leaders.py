@@ -36,6 +36,10 @@ SANTO = "macaque_legend"
 YUKI = "squirrel_legend"
 ASH = "honey_badger_legend"
 IRIS = "chameleon_legend"
+# the mana prototype's three leaders (Martin, 2026-11-20), plain legendaries of its own collection
+WARLORD = "warlord_legend"
+RAIDER = "raider_legend"
+SAGE = "sage_legend"
 
 # card id -> (kind, the ability as the player reads it)
 LEADERS: dict[str, tuple[str, str]] = {
@@ -60,6 +64,9 @@ LEADERS: dict[str, tuple[str, str]] = {
     ASH: ("passive", "Dusk: gain 1 food for each Poison, Spikes, Armor and Stealth on your animals. Animals adjacent to enemies earn double."),
     # the collector (Martin, 2026-11-17: a build-around, "like Reno Jackson")
     IRIS: ("passive", "The first time you control 3 copies of an animal, play a fourth copy."),
+    WARLORD: ("passive", "When you cover an enemy, gain 1 food."),
+    RAIDER: ("passive", "Your raids destroy 2 more food."),
+    SAGE: ("power", "Draw a card."),
     GRIMM: ("power", "Draw 2 animals. Draws one more animal for every 5 enemies removed this match."),   # Adira's first power, without the Cats (Martin, 2026-11-17)
 }
 

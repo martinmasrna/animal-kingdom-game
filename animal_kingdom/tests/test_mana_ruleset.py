@@ -540,20 +540,27 @@ def test_shade_strength_is_its_count():
         {"hand": 3, "ally": 5, "enemy": 2, "food": 7, "removed": 1}
 
 
-def test_hunters_weaken_and_the_giant_hunter_removes():
-    # The Hunters (Martin, 2026-11-20): Roar: give an adjacent enemy -N strength (it dies below 0); the Giant Hunter
-    # removes an adjacent enemy, any.
+def test_hunters_bite_and_the_giant_hunter_removes():
+    # The Hunters (Martin, 2026-11-20): "Roar: Bite N." (an adjacent enemy of strength N or less); the Giant Hunter
+    # removes any adjacent enemy.
     from animal_kingdom.engine.effects import _adjacent_enemy_targets
-    from animal_kingdom.engine.strength import effective_strength
-    s = state(hands={"A": ["hunter_3"]})
-    put(s, "1,1", "wisp_1", "A")
-    foe = put(s, "2,2", "wisp_6", "B")      # strength 8
-    me = put(s, "1,2", "giant_hunter", "A")
-    assert _adjacent_enemy_targets(s, me, "1,2") == ["2,2"]   # any adjacent enemy
-    from animal_kingdom.engine.effects import _drain_place, resolve
-    _drain_place(s, me, "1,2", MANA.hunter_3_drain)
-    step = s.effect_stack[-1]
-    assert step["then"] == "drain" and step["amount"] == 3 and "2,2" in step["options"]
+    s = state()
+    put(s, "2,1", "wisp_1", "B")            # strength 2
+    put(s, "2,2", "wisp_6", "B")            # strength 7
+    me = put(s, "1,1", "giant_hunter", "A")
+    assert _adjacent_enemy_targets(s, me, "1,1") == ["2,1", "2,2"]
+    assert _adjacent_enemy_targets(s, me, "1,1", max_strength=MANA.hunter_3_max) == ["2,1"]
+
+
+def test_the_three_mana_leaders():
+    # Martin, 2026-11-20: the Warlord (a cover of an enemy gains 1 food), the Raider (raids destroy 2 more), the Sage
+    # (power: draw a card).
+    from animal_kingdom.engine.leaders import LEADERS, RAIDER, SAGE, WARLORD
+    cfg = MANA
+    assert f"gain {cfg.warlord_leader_food} food" in LEADERS[WARLORD][1]
+    assert f"destroy {cfg.raider_leader_bonus} more" in LEADERS[RAIDER][1] and LEADERS[SAGE][0] == "power"
+    for lid in (WARLORD, RAIDER, SAGE):
+        assert CARDS[lid].rarity == "legendary" and CARDS[lid].in_collection("mana")
 
 
 def test_a_mana_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():

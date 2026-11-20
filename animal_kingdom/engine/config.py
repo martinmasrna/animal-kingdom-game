@@ -129,13 +129,13 @@ class Config:
     stoop_max: int = 4                   # Hawk
     capuchin_draw: int = 2               # Capuchin: Roar: draw 2 cards (Martin, 2026-11-16)
     mongoose_max: int = 5                # Mongoose: Roar: remove an adjacent enemy of strength 5 or less (Martin, 2026-11-16)
-    # The mana prototype's Hunters (Martin, 2026-11-20, his table): Roar: give an adjacent enemy -N strength; the Giant Hunter removes one
-    hunter_3_drain: int = 3
-    hunter_5_drain: int = 5
-    hunter_7_drain: int = 7
-    hunter_6_drain: int = 6
-    hunter_4_drain: int = 4
-    hunter_2_drain: int = 2
+    # The mana prototype's Hunters (Martin, 2026-11-20, his table): Roar: Bite N; the Giant Hunter removes any adjacent enemy
+    hunter_3_max: int = 3
+    hunter_5_max: int = 5
+    hunter_7_max: int = 7
+    hunter_6_max: int = 6
+    hunter_4_max: int = 4
+    hunter_2_max: int = 2
     rhinoceros_max: int = 3
     hippopotamus_max: int = 5
     cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this
@@ -198,6 +198,8 @@ class Config:
     protector_bonus: int = 2              # [ACTION 8]: your animals have +2 strength during your opponent's next turn
 
     # --- The leaders prototype (branch leaders; engine/leaders.py) ---
+    warlord_leader_food: int = 1         # the mana prototype's Warlord leader: "When you cover an enemy, gain 1 food." (Martin, 2026-11-20)
+    raider_leader_bonus: int = 2         # the mana prototype's Raider leader: "Your raids destroy 2 more food."
     adira_leader_food: int = 5           # Queen Adira's leader: "When one of your Cats covers an enemy, gain 5 food."
     theron_leader_grant: int = 1         # King Theron's leader: "When one of your Cats covers an enemy, give it +1 strength."
     mole_leader_count: int = 3           # the legendary Mole's leader: "When you play your third animal in a turn,...

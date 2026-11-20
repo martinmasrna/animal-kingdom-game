@@ -12015,7 +12015,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795199355
+      "at": 1795203264
     },
     "animal": {
       "review": {
@@ -12039,7 +12039,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795199356
+      "at": 1795203264
     },
     "animal": {
       "review": {
@@ -12063,7 +12063,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795199356
+      "at": 1795203264
     },
     "animal": {
       "review": {
@@ -12087,7 +12087,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795199356
+      "at": 1795203264
     },
     "animal": {
       "review": {
@@ -12111,7 +12111,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795199356
+      "at": 1795203264
     },
     "animal": {
       "review": {
@@ -12135,7 +12135,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795199355
+      "at": 1795203264
     },
     "animal": {
       "review": {
@@ -13267,6 +13267,39 @@
       },
       "by": "claude",
       "at": 1795202758
+    }
+  },
+  "warlord_legend": {
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "by": "claude",
+      "at": 1795203274
+    }
+  },
+  "raider_legend": {
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "by": "claude",
+      "at": 1795203274
+    }
+  },
+  "sage_legend": {
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "by": "claude",
+      "at": 1795203274
     }
   }
 }

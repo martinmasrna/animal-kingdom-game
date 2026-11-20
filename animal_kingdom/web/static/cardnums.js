@@ -140,6 +140,9 @@ export const CARD_NUMS = [
   "winged_scout_8",
   "winged_scout_10",
   "sneaky_9",
+  "warlord_legend",
+  "raider_legend",
+  "sage_legend",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck
