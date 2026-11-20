@@ -1,7 +1,7 @@
 """The card table's data: every card's values, read from and written to the game's own files, and how settled each one is.
 
 The values live where the game keeps them, one place each: animal_kingdom/data/cards.json (habitat, rarity, name and
-species, tags, strength, text, and the status: collectible, reserve, planned; the keywords are read from the text as it
+species, tags, strength, text, the mana cost the mana ruleset plays it at, and the status: collectible, reserve, planned; the keywords are read from the text as it
 is written), animal_kingdom/data/decklists.json (which starter deck a card ships in, and the starters' names) and
 animal_kingdom/web/static/art.js (the crops). The cards the engine makes itself (tokens, evolution stages, the Eagle's
 mate) are shown under the card that makes them; only their name, strength and text are edited here. The old pool's shelved cards (no
@@ -17,7 +17,8 @@ sets fine or locked. Martin's edits have no limits.
 
 As a command, for Claude:
     .venv/bin/python tools/cards/hq.py show [ID...]                  the rows, as JSON
-    .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary; stars: 0 to 4)
+    .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary; stars: 0 to 4;
+                                                                     cost: the mana cost, 0 to 10, empty for none)
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
     .venv/bin/python tools/cards/hq.py move ID DECK                  into a starter deck (its slug), or `pool` for none
     .venv/bin/python tools/cards/hq.py shelve ID                     a card in no starter out of the collection (into the reserve)
@@ -58,8 +59,8 @@ ART_JS = ROOT / "animal_kingdom" / "web" / "static" / "art.js"
 LEVELS = Path(__file__).parent / "levels.json"
 PY = Path(sys.executable)   # the venv this runs in (bin/ on Unix, Scripts/ on Windows)
 
-COLUMNS = ["habitat", "rarity", "animal", "tag", "strength", "stars", "effect", "art", "crop"]
-VALUE_COLS = ["habitat", "rarity", "animal", "tag", "strength", "stars", "effect"]
+COLUMNS = ["habitat", "rarity", "animal", "tag", "strength", "stars", "cost", "effect", "art", "crop"]
+VALUE_COLS = ["habitat", "rarity", "animal", "tag", "strength", "stars", "cost", "effect"]
 LEVELS_ORDER = ["empty", "draft", "problem", "fine", "locked"]
 HABITATS = ["Savanna", "Jungle", "Forest", "Meadow", "City", "Open Ocean",          # the launch six; the rest: docs/design/habitats.md
             "Deep Ocean", "Coral Reef", "Coast", "River and Lake", "Australia", "Islands", "Mountains", "Polar", "Desert",
@@ -176,6 +177,7 @@ def load() -> dict:
             "tag": ", ".join(c.get("tags", [])), "str": "*" if c["base_strength"] == "dynamic" else c["base_strength"],
             # its level (the stars prototype): set, or its rarity's
             "stars": c["stars"] if c.get("stars") is not None else STAR_DEFAULTS.get(c["rarity"]),
+            "cost": c.get("cost"),            # the mana ruleset's cost (2026-11-20); none: not in a mana deck
             "text": c.get("text", ""), "related": c.get("related", []), "evolves": bool(c.get("evolves")),
             "art": c["id"] in art["CROP"],
         })
@@ -196,7 +198,7 @@ def load() -> dict:
 
 def value_of(r: dict, col: str):
     return {"habitat": r["habitat"], "rarity": r["rarity"], "animal": {"name": r["name"], "species": r["species"]},
-            "tag": r["tag"], "strength": r["str"], "stars": r["stars"], "effect": r["text"], "art": r["art"], "crop": r["art"]}[col]
+            "tag": r["tag"], "strength": r["str"], "stars": r["stars"], "cost": r["cost"], "effect": r["text"], "art": r["art"], "crop": r["art"]}[col]
 
 
 def _blank(r: dict, col: str) -> bool:
@@ -313,6 +315,11 @@ def _apply_value(r: dict, col: str, value) -> None:
             c.pop("stars", None)
         else:
             c["stars"] = value
+    elif col == "cost":
+        if value in ("", None):
+            c.pop("cost", None)
+        else:
+            c["cost"] = value
     elif col == "effect":
         c["text"] = value.strip()
         for k in ("keywords", "hungry", "food_cost"):
@@ -332,7 +339,7 @@ def set_value(card_id: str, col: str, value, by: str = "martin", note: str | Non
         raise Refused(f"{r['id']} {col} isn't editable here")
     cur = _guard(r, col, by)
     prev = value_of(r, col)
-    if col in ("strength", "stars") and value not in ("", None):
+    if col in ("strength", "stars", "cost") and value not in ("", None):
         try:
             value = int(value)
         except ValueError:

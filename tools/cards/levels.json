@@ -72,6 +72,17 @@
       "note": "Martin 2026-10-31",
       "by": "claude",
       "at": 1793403518
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142670
     }
   },
   "anaconda": {
@@ -168,6 +179,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849331
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142673
     }
   },
   "eagle_legend_2": {
@@ -292,6 +314,17 @@
         "prev_note": "Martin, 2026-10-16: 4 -> 5 is the biggest step in the field (covers 47% -> 65% of cards); 5 body + 2 hand points = a Lion's 7, and in Handlock hand strength triggers Caterpillar, Gorilla and Chimpanzee. 6 would be a Lion that also buffs.",
         "prev": 5
       }
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142669
     }
   },
   "baboon_legend": {
@@ -326,6 +359,17 @@
           "species": "Baboon"
         }
       }
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142675
     }
   },
   "baby_bear": {
@@ -563,6 +607,17 @@
       "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
       "at": 1794906763
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142676
     }
   },
   "beaver": {
@@ -602,6 +657,17 @@
       "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
       "by": "claude",
       "at": 1794860299
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142676
     }
   },
   "capybara_legend": {
@@ -723,6 +789,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849334
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142672
     }
   },
   "black_panther": {
@@ -790,6 +867,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849318
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142668
     }
   },
   "swan_legend": {
@@ -880,6 +968,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849318
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142676
     }
   },
   "boar": {
@@ -1152,6 +1251,17 @@
       "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
       "at": 1794906767
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142671
     }
   },
   "butterfly_legend": {
@@ -1182,6 +1292,17 @@
           "species": "Butterfly"
         }
       }
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142674
     }
   },
   "butterfly_legend_butterfly": {
@@ -1431,6 +1552,17 @@
       "lv": "fine",
       "by": "martin",
       "at": 1792247957
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142669
     }
   },
   "caterpillar": {
@@ -1460,6 +1592,17 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1794861244
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142668
     }
   },
   "chameleon": {
@@ -1525,6 +1668,17 @@
         "prev_note": ""
       },
       "at": 1793870459
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142673
     }
   },
   "cheetah": {
@@ -1573,6 +1727,17 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142669
     }
   },
   "chimpanzee": {
@@ -1648,6 +1813,17 @@
       "note": "Martin, 2026-11-16: Echo closes the text, after the Roar it repeats (\"Yes.\" to moving it to the end)",
       "by": "claude",
       "at": 1794860299
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142671
     }
   },
   "wolf_legend_3": {
@@ -2116,6 +2292,17 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142672
     }
   },
   "earthworm": {
@@ -2234,6 +2421,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849317
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142674
     }
   },
   "pheasant_legend": {
@@ -2359,6 +2557,17 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142669
     }
   },
   "bumblebee_legend": {
@@ -2791,6 +3000,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849334
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142671
     }
   },
   "gorilla": {
@@ -2894,6 +3114,17 @@
       "note": "Martin, 2026-10-29: Groundhog turns from payoff into setup: every turn starts fed while it lives (the fed payoffs outnumbered the cards that feed them, and a food payoff on a food deck gave no tempo); a rare for it",
       "by": "claude",
       "at": 1793278278
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142671
     }
   },
   "guard_wasp": {
@@ -3098,6 +3329,17 @@
       "note": "back to the reserve as it was before 2026-11-16",
       "by": "claude",
       "at": 1794858753
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142672
     }
   },
   "hedgehog": {
@@ -3134,6 +3376,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849318
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142668
     }
   },
   "hippopotamus": {
@@ -3174,6 +3427,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849335
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142675
     }
   },
   "honey_badger": {
@@ -3216,6 +3480,17 @@
         "prev": 2
       },
       "note": "Martin's new pool, 2026-11-16 (his sheet)"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142671
     }
   },
   "honey_badger_legend": {
@@ -3254,6 +3529,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849330
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142676
     }
   },
   "hornet": {
@@ -3297,6 +3583,17 @@
       "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
       "at": 1794863007
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142673
     }
   },
   "hummingbird": {
@@ -3485,6 +3782,17 @@
       "note": "Martin, 2026-11-16: the keyword Bite for 'remove an adjacent enemy of strength N or less' (\"Roar: Bite 3.\")",
       "by": "claude",
       "at": 1794863007
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142672
     }
   },
   "jellyfish": {
@@ -3553,6 +3861,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849331
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142673
     }
   },
   "jellyfish_legend": {
@@ -3625,6 +3944,17 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142675
     }
   },
   "leopard": {
@@ -3752,6 +4082,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849317
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142672
     }
   },
   "wolf_legend_2": {
@@ -3834,6 +4175,17 @@
       "lv": "fine",
       "by": "martin",
       "at": 1792247934
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142672
     }
   },
   "macaque": {
@@ -3915,6 +4267,17 @@
       "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
       "at": 1794906764
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142674
     }
   },
   "macaw": {
@@ -3965,6 +4328,17 @@
       "note": "Martin, 2026-11-16: the Macaw back, 2 strength, 2 stars, with Echo (\"let's do your opponent's last\")",
       "by": "claude",
       "at": 1794860084
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142674
     }
   },
   "magpie": {
@@ -4129,6 +4503,17 @@
       "note": "Martin, 2026-11-17: \"card\" becomes \"animal\" in every text",
       "by": "claude",
       "at": 1794906764
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142670
     }
   },
   "tortoise_legend": {
@@ -4252,6 +4637,17 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142668
     }
   },
   "mouse": {
@@ -4517,6 +4913,17 @@
       "note": "Iris is a Chameleon since 2026-10-26; Open Ocean was left over from the Octopus (Martin, 2026-10-28)",
       "by": "claude",
       "at": 1793176561
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142675
     }
   },
   "okapi": {
@@ -4597,6 +5004,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849330
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142675
     }
   },
   "owl": {
@@ -4864,6 +5282,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849331
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142673
     }
   },
   "praying_mantis": {
@@ -5088,6 +5517,17 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142675
     }
   },
   "queen_bee": {
@@ -5323,6 +5763,17 @@
       "note": "Martin, 2026-10-27: the steal was weaker than the Raccoon's own-pile return; two of theirs puts clear space between them",
       "by": "claude",
       "at": 1793110894
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142674
     }
   },
   "remora": {
@@ -5418,6 +5869,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849335
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142674
     }
   },
   "baby_fox_2": {
@@ -5454,6 +5916,17 @@
         "prev_note": "Martin, 2026-10-15, mid-gauntlet.",
         "prev": 0
       }
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142670
     }
   },
   "fox_legend": {
@@ -5558,6 +6031,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849334
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142671
     }
   },
   "orangutan_legend": {
@@ -5655,6 +6139,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849333
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142670
     }
   },
   "sloth_legend": {
@@ -5785,6 +6280,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849333
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142667
     }
   },
   "squirrel_legend": {
@@ -5814,6 +6320,17 @@
       "note": "Martin, 2026-11-17: all her numbers are 3",
       "by": "claude",
       "at": 1794911097
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142674
     }
   },
   "stork": {
@@ -5963,6 +6480,17 @@
         "prev_note": "Martin, 2026-10-15: Scouting a Primate was too strong and too consistent; a random Primate keeps the tutor, drops the choice.",
         "prev": "Roar: draw a Primate and give it +1 strength."
       }
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142671
     }
   },
   "termite_king": {
@@ -6132,6 +6660,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849330
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142672
     }
   },
   "tortoise": {
@@ -6162,6 +6701,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849318
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142669
     }
   },
   "tuna": {
@@ -6188,6 +6738,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849331
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142670
     }
   },
   "tuna_legend": {
@@ -6269,6 +6830,17 @@
       "note": "moved from pool to egg-control",
       "by": "claude",
       "at": 1792086365
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142669
     }
   },
   "vulture": {
@@ -6405,6 +6977,17 @@
       "note": "6, the plain hunter one below the Lion",
       "by": "claude",
       "at": 1792670323
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142668
     }
   },
   "worker_ant": {
@@ -6474,6 +7057,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849332
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142667
     }
   },
   "worker_wasp": {
@@ -6868,6 +7462,17 @@
       "by": "claude",
       "at": 1794849318,
       "note": "Martin's new pool, 2026-11-16 (his sheet)"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142668
     }
   },
   "locust_legend": {
@@ -7111,6 +7716,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849330
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142675
     }
   },
   "octopus": {
@@ -7196,6 +7812,17 @@
       "note": "Martin's new pool, 2026-11-16 (his sheet)",
       "by": "claude",
       "at": 1794849335
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142676
     }
   },
   "mole_legend": {
@@ -7260,6 +7887,17 @@
       "note": "Martin, 2026-11-17",
       "by": "claude",
       "at": 1794901127
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142677
     }
   },
   "bat_legend": {
@@ -7515,6 +8153,17 @@
         "prev": 4
       },
       "note": "Martin's new pool, 2026-11-16 (his sheet)"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142672
     }
   },
   "peacock": {
@@ -7565,6 +8214,17 @@
       "note": "no Flight: people picture it on the ground (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792264215
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142670
     }
   },
   "dolphin": {
@@ -7746,6 +8406,17 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793632731
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142667
     }
   },
   "forager_ant": {
@@ -8226,6 +8897,17 @@
       "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
       "at": 1794700890
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142676
     }
   },
   "ocelot": {
@@ -8307,6 +8989,17 @@
       "note": "from his card board (Martin, 2026-11-15: \"adjust these 7 cards on the 8032 server ... then these 2 ... and also change juliette and Ash to 3 stars\")",
       "by": "claude",
       "at": 1794700889
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142676
     }
   },
   "stick_insect": {
@@ -8439,6 +9132,17 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793870468
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142673
     }
   },
   "krill": {
@@ -9152,6 +9856,17 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793632732
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142668
     }
   },
   "rodent_legend": {
@@ -9386,6 +10101,17 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1794849331
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142667
     }
   },
   "impala": {
@@ -9753,6 +10479,17 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793632548
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142670
     }
   },
   "bison": {
@@ -10462,6 +11199,17 @@
       },
       "by": "claude",
       "at": 1794778083
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142675
     }
   },
   "weasel": {
@@ -10506,6 +11254,17 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1794857287
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142669
     }
   },
   "mongoose": {
@@ -10550,6 +11309,17 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1794858753
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142670
     }
   },
   "capuchin": {
@@ -10615,6 +11385,17 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1794859531
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "mana ruleset prototype, Martin's list of 2026-11-20",
+      "by": "claude",
+      "at": 1795142673
     }
   },
   "rattlesnake": {

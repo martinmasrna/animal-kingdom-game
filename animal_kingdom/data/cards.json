@@ -228,7 +228,8 @@
       "keywords": [
         "Flight",
         "Echo"
-      ]
+      ],
+      "cost": 1
     },
     {
       "id": "pheasant_legend",
@@ -370,7 +371,8 @@
       "habitat": "Meadow",
       "keywords": [
         "Poison"
-      ]
+      ],
+      "cost": 1
     },
     {
       "id": "locust_legend",
@@ -506,7 +508,8 @@
       ],
       "species": "Orca",
       "habitat": "Open Ocean",
-      "stars": 3
+      "stars": 3,
+      "cost": 4
     },
     {
       "id": "fox",
@@ -568,7 +571,8 @@
         "Roam"
       ],
       "species": "Wolf",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "cost": 2
     },
     {
       "id": "bush_dog",
@@ -687,7 +691,8 @@
       "habitat": "Forest",
       "keywords": [
         "Flight"
-      ]
+      ],
+      "cost": 3
     },
     {
       "id": "chameleon",
@@ -699,7 +704,8 @@
       "text": "Roar: become a copy of an adjacent animal.",
       "species": "Chameleon",
       "habitat": "Jungle",
-      "keywords": []
+      "keywords": [],
+      "cost": 3
     },
     {
       "id": "skunk",
@@ -741,7 +747,8 @@
       "text": "Roar: if this is next to your opponent's den, draw 2 animals.",
       "species": "Cheetah",
       "habitat": "Savanna",
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "rat",
@@ -771,7 +778,8 @@
       "habitat": "Forest",
       "keywords": [
         "Flight"
-      ]
+      ],
+      "cost": 2
     },
     {
       "id": "bat",
@@ -787,7 +795,8 @@
       "keywords": [
         "Flight",
         "Echo"
-      ]
+      ],
+      "cost": 4
     },
     {
       "id": "mouse",
@@ -832,7 +841,8 @@
       "keywords": [],
       "species": "Mole",
       "habitat": "Meadow",
-      "stars": 3
+      "stars": 3,
+      "cost": 5
     },
     {
       "id": "mole_legend",
@@ -845,7 +855,8 @@
       "species": "Mole",
       "habitat": "Meadow",
       "stars": 4,
-      "keywords": []
+      "keywords": [],
+      "cost": 6
     },
     {
       "id": "lion_legend",
@@ -893,7 +904,8 @@
       "text": "When an allied Cat covers an enemy, remove that enemy.",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "cost": 4
     },
     {
       "id": "lion_legend_4",
@@ -907,7 +919,8 @@
       "text": "When an allied Cat removes an enemy, draw an animal.",
       "species": "Lion",
       "habitat": "Savanna",
-      "keywords": []
+      "keywords": [],
+      "cost": 4
     },
     {
       "id": "jaguar",
@@ -921,7 +934,8 @@
       "text": "Roar: Bite 5.",
       "species": "Jaguar",
       "habitat": "Jungle",
-      "keywords": []
+      "keywords": [],
+      "cost": 3
     },
     {
       "id": "serval",
@@ -936,7 +950,8 @@
       "species": "Serval",
       "habitat": "Savanna",
       "stars": 1,
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "leopard",
@@ -967,7 +982,8 @@
       "stars": 0,
       "keywords": [
         "Stealth"
-      ]
+      ],
+      "cost": 2
     },
     {
       "id": "lion",
@@ -982,7 +998,8 @@
       "keywords": [],
       "species": "Lion",
       "habitat": "Savanna",
-      "stars": 1
+      "stars": 1,
+      "cost": 3
     },
     {
       "id": "lynx",
@@ -996,7 +1013,8 @@
       "text": "Roar: draw an animal.",
       "species": "Lynx",
       "habitat": "Forest",
-      "keywords": []
+      "keywords": [],
+      "cost": 3
     },
     {
       "id": "caracal",
@@ -1012,7 +1030,8 @@
         "Reach"
       ],
       "species": "Caracal",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "cost": 2
     },
     {
       "id": "tiger",
@@ -1029,7 +1048,8 @@
       ],
       "species": "Tiger",
       "habitat": "Jungle",
-      "stars": 1
+      "stars": 1,
+      "cost": 3
     },
     {
       "id": "bobcat",
@@ -1061,7 +1081,8 @@
       "keywords": [],
       "related": [
         "kitten"
-      ]
+      ],
+      "cost": 2
     },
     {
       "id": "jellyfish_legend",
@@ -1200,7 +1221,8 @@
       "text": "Roar: fill adjacent empty crossroads with Sardines from your hand and deck.",
       "keywords": [],
       "species": "Sardine",
-      "habitat": "Open Ocean"
+      "habitat": "Open Ocean",
+      "cost": 2
     },
     {
       "id": "mahi_mahi",
@@ -1228,7 +1250,8 @@
       "text": "Has +1 strength for each other animal you control.",
       "species": "Tuna",
       "habitat": "Open Ocean",
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "sunfish",
@@ -1273,7 +1296,8 @@
       "text": "Roar: draw animals until you have as many as your opponent.",
       "species": "Macaque",
       "habitat": "City",
-      "keywords": []
+      "keywords": [],
+      "cost": 3
     },
     {
       "id": "rat_legend",
@@ -1330,7 +1354,8 @@
       "species": "Meerkat",
       "habitat": "Savanna",
       "stars": 0,
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "beaver",
@@ -1347,7 +1372,8 @@
       "stars": 3,
       "keywords": [
         "Echo"
-      ]
+      ],
+      "cost": 4
     },
     {
       "id": "dormouse",
@@ -1375,7 +1401,8 @@
       "text": "Roar: gain 10 food.",
       "keywords": [],
       "species": "Squirrel",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "cost": 1
     },
     {
       "id": "chipmunk",
@@ -1392,7 +1419,8 @@
       "stars": 1,
       "keywords": [
         "Echo"
-      ]
+      ],
+      "cost": 2
     },
     {
       "id": "gopher",
@@ -1407,7 +1435,8 @@
       "species": "Gopher",
       "habitat": "Meadow",
       "stars": 1,
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "muskrat",
@@ -1435,7 +1464,8 @@
       "text": "Dawn: gain 5 food.",
       "species": "Groundhog",
       "habitat": "Meadow",
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "hamster",
@@ -1475,7 +1505,8 @@
       "text": "Roar: lose all your food. In 3 turns, gain three times as much.",
       "species": "Squirrel",
       "habitat": "Forest",
-      "keywords": []
+      "keywords": [],
+      "cost": 3
     },
     {
       "id": "honey_badger_legend",
@@ -1493,7 +1524,8 @@
       ],
       "species": "Honey Badger",
       "habitat": "Savanna",
-      "stars": 4
+      "stars": 4,
+      "cost": 5
     },
     {
       "id": "chameleon_legend",
@@ -1505,7 +1537,8 @@
       "text": "Roar: become a copy of an animal in your hand. Add a copy to your hand and shuffle a copy into your deck.",
       "species": "Chameleon",
       "habitat": "Jungle",
-      "keywords": []
+      "keywords": [],
+      "cost": 4
     },
     {
       "id": "capybara",
@@ -1536,7 +1569,8 @@
       "keywords": [
         "Spikes"
       ],
-      "stars": 2
+      "stars": 2,
+      "cost": 3
     },
     {
       "id": "golden_orb_weaver",
@@ -1565,7 +1599,8 @@
       "keywords": [
         "Armor"
       ],
-      "stars": 2
+      "stars": 2,
+      "cost": 3
     },
     {
       "id": "hedgehog",
@@ -1579,7 +1614,8 @@
       "habitat": "Meadow",
       "keywords": [
         "Spikes"
-      ]
+      ],
+      "cost": 1
     },
     {
       "id": "dart_frog",
@@ -1609,7 +1645,8 @@
       "keywords": [
         "Poison"
       ],
-      "stars": 2
+      "stars": 2,
+      "cost": 3
     },
     {
       "id": "black_bear",
@@ -1637,7 +1674,8 @@
       "habitat": "Savanna",
       "keywords": [
         "Armor"
-      ]
+      ],
+      "cost": 2
     },
     {
       "id": "owl",
@@ -1685,7 +1723,8 @@
       "habitat": "Forest",
       "keywords": [
         "Flight"
-      ]
+      ],
+      "cost": 3
     },
     {
       "id": "swan_legend",
@@ -1717,7 +1756,8 @@
       "habitat": "Forest",
       "keywords": [
         "Flight"
-      ]
+      ],
+      "cost": 3
     },
     {
       "id": "cottonmouth",
@@ -1761,7 +1801,8 @@
       "text": "Roar: Bite 7.",
       "species": "Black Mamba",
       "habitat": "Savanna",
-      "keywords": []
+      "keywords": [],
+      "cost": 3
     },
     {
       "id": "egg_eater",
@@ -1790,7 +1831,8 @@
         "Flight"
       ],
       "species": "Mosquito",
-      "habitat": "City"
+      "habitat": "City",
+      "cost": 1
     },
     {
       "id": "raven",
@@ -1848,7 +1890,8 @@
       "text": "Roar: give an adjacent enemy -3 strength.",
       "keywords": [],
       "species": "Viper",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "cost": 2
     },
     {
       "id": "goose_legend",
@@ -1881,7 +1924,8 @@
       "habitat": "Savanna",
       "keywords": [
         "Echo"
-      ]
+      ],
+      "cost": 4
     },
     {
       "id": "orangutan_legend",
@@ -1914,7 +1958,8 @@
       "evolves": true,
       "species": "Butterfly",
       "habitat": "Meadow",
-      "keywords": []
+      "keywords": [],
+      "cost": 3
     },
     {
       "id": "eagle_legend",
@@ -1995,7 +2040,8 @@
       "habitat": "Jungle",
       "keywords": [
         "Echo"
-      ]
+      ],
+      "cost": 2
     },
     {
       "id": "chimpanzee",
@@ -2023,7 +2069,8 @@
       "text": "Roar: give 2 animals in your hand +1 strength.",
       "keywords": [],
       "species": "Baboon",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "cost": 2
     },
     {
       "id": "stork",
@@ -2065,7 +2112,8 @@
       "evolves": true,
       "species": "Butterfly",
       "habitat": "Meadow",
-      "keywords": []
+      "keywords": [],
+      "cost": 1
     },
     {
       "id": "gorilla",
@@ -2093,7 +2141,8 @@
       "text": "Has +1 strength for each animal in your hand.",
       "species": "Peacock",
       "habitat": "Jungle",
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "rhinoceros_legend",
@@ -2168,7 +2217,8 @@
       "species": "Rhinoceros",
       "habitat": "Savanna",
       "stars": 2,
-      "keywords": []
+      "keywords": [],
+      "cost": 4
     },
     {
       "id": "hippopotamus",
@@ -2181,7 +2231,8 @@
       "species": "Hippopotamus",
       "habitat": "Savanna",
       "stars": 2,
-      "keywords": []
+      "keywords": [],
+      "cost": 4
     },
     {
       "id": "whale_shark",
@@ -2254,7 +2305,8 @@
       "species": "Blue Whale",
       "habitat": "Open Ocean",
       "stars": 3,
-      "keywords": []
+      "keywords": [],
+      "cost": 5
     },
     {
       "id": "sloth",
@@ -2266,7 +2318,8 @@
       "text": "Roar: in 3 turns, gain 30 food.",
       "species": "Sloth",
       "habitat": "Jungle",
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "elephant",
@@ -2279,7 +2332,8 @@
       "species": "Elephant",
       "habitat": "Savanna",
       "stars": 2,
-      "keywords": []
+      "keywords": [],
+      "cost": 4
     },
     {
       "id": "moose",
@@ -2365,7 +2419,8 @@
       "text": "Roar: remove an adjacent enemy of strength 8 or more.",
       "species": "Honey Badger",
       "habitat": "Savanna",
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "okapi",
@@ -2532,7 +2587,8 @@
       "keywords": [
         "Apex Predator"
       ],
-      "stars": 2
+      "stars": 2,
+      "cost": 4
     },
     {
       "id": "butterfly",
@@ -2547,7 +2603,8 @@
       "stars": 1,
       "keywords": [
         "Flight"
-      ]
+      ],
+      "cost": 2
     },
     {
       "id": "macaw",
@@ -2565,7 +2622,8 @@
       "keywords": [
         "Flight",
         "Echo"
-      ]
+      ],
+      "cost": 3
     },
     {
       "id": "eagle",
@@ -2582,7 +2640,8 @@
       "keywords": [
         "Flight",
         "Apex Predator"
-      ]
+      ],
+      "cost": 3
     },
     {
       "id": "cuckoo",
@@ -2865,7 +2924,8 @@
       "habitat": "Open Ocean",
       "keywords": [
         "Flight"
-      ]
+      ],
+      "cost": 3
     },
     {
       "id": "cuckoo_legend",
@@ -3009,7 +3069,8 @@
         "Spikes"
       ],
       "species": "Bee",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "cost": 1
     },
     {
       "id": "forager_ant",
@@ -3425,7 +3486,8 @@
       "text": "Roar: Bite 3.",
       "species": "Weasel",
       "habitat": "Meadow",
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "dragonfly",
@@ -3573,7 +3635,8 @@
       "habitat": "City",
       "keywords": [
         "Flight"
-      ]
+      ],
+      "cost": 1
     },
     {
       "id": "sparrow",
@@ -3751,7 +3814,8 @@
       "stars": 3,
       "keywords": [
         "Apex Predator"
-      ]
+      ],
+      "cost": 5
     },
     {
       "id": "ocelot",
@@ -3766,7 +3830,8 @@
       "species": "Ocelot",
       "habitat": "Jungle",
       "stars": 2,
-      "keywords": []
+      "keywords": [],
+      "cost": 4
     },
     {
       "id": "stick_insect",
@@ -3806,7 +3871,8 @@
       "text": "Can cover animals of any strength.",
       "species": "Hercules Beetle",
       "habitat": "Jungle",
-      "keywords": []
+      "keywords": [],
+      "cost": 3
     },
     {
       "id": "krill",
@@ -4003,7 +4069,8 @@
       ],
       "base_strength": 1,
       "text": "Roar: draw an animal.",
-      "keywords": []
+      "keywords": [],
+      "cost": 1
     },
     {
       "id": "impala",
@@ -4093,7 +4160,8 @@
       "text": "Has +1 strength for each 10 food you have.",
       "species": "Marmot",
       "habitat": "Meadow",
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "bison",
@@ -4269,7 +4337,8 @@
       "species": "Gorilla",
       "habitat": "Jungle",
       "keywords": [],
-      "unnamed": true
+      "unnamed": true,
+      "cost": 4
     },
     {
       "id": "mongoose",
@@ -4281,7 +4350,8 @@
       "text": "Roar: Bite 5.",
       "species": "Mongoose",
       "habitat": "Savanna",
-      "keywords": []
+      "keywords": [],
+      "cost": 2
     },
     {
       "id": "capuchin",
@@ -4296,7 +4366,8 @@
       "species": "Capuchin",
       "habitat": "Jungle",
       "stars": 2,
-      "keywords": []
+      "keywords": [],
+      "cost": 3
     }
   ]
 }

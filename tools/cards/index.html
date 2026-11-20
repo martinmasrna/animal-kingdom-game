@@ -193,11 +193,11 @@ const LV = ['draft', 'problem', 'fine', 'locked'], LVKEY = { d: 'draft', p: 'pro
 const LVORD = ['empty', 'draft', 'problem', 'fine', 'locked'];
 const COLS = {
   habitat: { t: 'Habitat', cls: 'habc' }, rarity: { t: 'Rarity', cls: 'rar' }, animal: { t: 'Name', cls: 'ani' }, tag: { t: 'Tag', cls: 'tagc' },
-  strength: { t: 'Str', cls: 'str' }, effect: { t: 'Effect', cls: 'eff' }, art: { t: 'Art', cls: 'artc' }, crop: { t: 'Crop', cls: 'cropc' },
+  strength: { t: 'Str', cls: 'str' }, cost: { t: 'Cost', cls: 'str' }, effect: { t: 'Effect', cls: 'eff' }, art: { t: 'Art', cls: 'artc' }, crop: { t: 'Crop', cls: 'cropc' },
 };
 const VIEWS = {
-  all: { t: 'Everything', cols: ['habitat', 'rarity', 'animal', 'strength', 'effect', 'art', 'crop'] },
-  balance: { t: 'Balance', cols: ['rarity', 'animal', 'strength', 'effect'] },
+  all: { t: 'Everything', cols: ['habitat', 'rarity', 'animal', 'strength', 'cost', 'effect', 'art', 'crop'] },
+  balance: { t: 'Balance', cols: ['rarity', 'animal', 'strength', 'cost', 'effect'] },
   art: { t: 'Art', cols: ['art', 'crop'], cards: true },
   names: { t: 'Names', cols: ['art', 'animal', 'strength', 'effect'], only: r => r.rarity === 'L' && !r.parent },
 };
@@ -287,6 +287,7 @@ function valueHTML(r, col) {
       return `<b>${esc(nameOf(r))}</b>${sub(r.species && r.species !== r.name ? r.species : '')}`; }
     case 'tag': return r.tag ? esc(r.tag) : ' ';
     case 'strength': return r.str ?? '';
+    case 'cost': return r.cost ?? '';
     case 'effect': return r.text === '—' || (!r.text && r.deck === 'token') ? 'Vanilla' : rules(r.text);
     case 'art': return r.art ? `<div class="thumb" data-bg="${artUrl(r.id)}"></div>` : '<div class="noart"></div>';
     case 'crop': return r.art ? `<div class="ring" data-ring="${r.id}"></div>` : '';
@@ -396,6 +397,7 @@ function editorHTML(r, col) {
       : `<div class="two"><div><div class="lab">Name</div><input data-in="name" value="${esc(r.name)}"></div><div><div class="lab">Species</div><input data-in="species" value="${esc(r.species === r.name ? '' : r.species)}"></div></div><div><div class="lab">Tag</div><input data-tag value="${esc(r.tag)}"></div>`;
     case 'tag': return `<input data-in value="${esc(r.tag)}" placeholder="no tag">`;
     case 'strength': return `<input data-in type="number" min="0" max="15" value="${r.str ?? ''}">`;
+    case 'cost': return `<input data-in type="number" min="0" max="10" value="${r.cost ?? ''}">`;
     case 'effect': return `<textarea data-in rows="2" placeholder="No effect yet">${esc(r.text)}</textarea>`;
   }
   return '';
@@ -424,6 +426,7 @@ function readInput(r, col) {
 function sameValue(r, col, v) {
   if (col === 'animal') return v.name === r.name && v.species === r.species;
   if (col === 'strength') return String(v) === String(r.str ?? '');
+  if (col === 'cost') return String(v) === String(r.cost ?? '');
   if (col === 'effect') return v.trim() === r.text;
   return v === (col === 'tag' ? r.tag : r[col]);
 }
