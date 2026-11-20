@@ -1,6 +1,17 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  wisp_10: [.5, .5, .95],
+  wisp_9: [.5, .5, .95],
+  wisp_8: [.5, .5, .95],
+  wisp_7: [.5, .5, .95],
+  wisp_6: [.5, .5, .95],
+  wisp_5: [.5, .5, .95],
+  wisp_4: [.5, .5, .95],
+  wisp_3: [.5, .5, .95],
+  wisp_2: [.5, .5, .95],
+  wisp_1: [.5, .5, .95],
+  wisp_0: [.5, .5, .95],
   bat: [.52, .4, .75],
   hummingbird: [.56, .42, .62],
   hawk: [.55, .45, .7],

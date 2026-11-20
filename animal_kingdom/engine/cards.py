@@ -85,6 +85,7 @@ class Card:
     evolves: bool = False          # its related cards are what it becomes, in order (display only)
     stars: int = 0                 # its level (STAR_LEVELS): what one copy costs of a deck's star budget
     cost: Optional[int] = None     # its mana cost in the mana ruleset (Config.mana); None: not playable in a mana deck
+    ruleset: Optional[str] = None  # the one ruleset whose collection holds it (the mana prototype's Wisps, 2026-11-20); None: the default's
 
     @property
     def is_dynamic(self) -> bool:
@@ -168,6 +169,9 @@ def validate_card_record(rec: dict) -> None:
     if cost is not None and (isinstance(cost, bool) or not isinstance(cost, int) or not 0 <= cost <= 10):
         raise CardDataError(f"card {cid!r}: cost must be a whole number from 0 to 10, got {cost!r}")
 
+    if rec.get("ruleset") not in (None, "mana"):
+        raise CardDataError(f"card {cid!r}: ruleset must be 'mana' or absent, got {rec['ruleset']!r}")
+
     if "reach" in rec:
         raise CardDataError(f"card {cid!r}: Reach has no number (every Reach lands two crossroads out, config.reach)")
 
@@ -192,6 +196,7 @@ def _build_card(rec: dict) -> Card:
         evolves=bool(rec.get("evolves", False)),
         stars=rec["stars"] if rec.get("stars") is not None else STAR_DEFAULTS.get(rec["rarity"], 0),
         cost=rec.get("cost"),
+        ruleset=rec.get("ruleset"),
     )
 
 

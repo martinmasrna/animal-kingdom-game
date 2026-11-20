@@ -359,20 +359,16 @@ def test_reaching_twenty_food_wins():
 # ------------------------------------------------------------------ decks
 
 def test_deck_rules_in_the_mana_ruleset():
-    costed = sorted(c.id for c in CARDS.values() if c.collectible and c.cost is not None and c.rarity != "legendary")
-    deck = ["mole_legend"] + [cid for cid in costed for _ in range(2)][:24]
-    assert deck_problems(deck, "mole_legend", ruleset="mana") == []
-    big = ["mole_legend", "honey_badger_legend", "gorilla_legend_2", "tiger_legend", "lion_legend_3", "lion_legend_4",
-           "baboon_legend", "chameleon_legend", "raven_legend", "squirrel_legend", "macaque_legend", "butterfly_legend"]
-    stars = big + [cid for cid in costed for _ in range(2)][:13]
-    assert deck_problems(stars, "mole_legend", ruleset="mana") == []       # no star budget...
-    assert any("stars" in p for p in deck_problems(stars, "mole_legend"))  # ...which the default ruleset keeps
-    assert deck_problems(deck[:24], "mole_legend", ruleset="mana")         # 25 cards exactly
-    assert deck_problems(deck[:-1] + [deck[1]], "mole_legend", ruleset="mana")   # at most 2 of an animal
-    assert deck_problems(deck[:-1] + ["mole_legend"], "mole_legend", ruleset="mana")   # 1 of a legendary
-    reserve = next(c.id for c in CARDS.values() if c.cost is None and c.status != "planned")
-    assert deck_problems(deck[:-1] + [reserve], "mole_legend", ruleset="mana")   # no cost: not in a mana deck
-    assert all(CARDS[c].cost is not None for c in CARDS if CARDS[c].collectible)   # every collectible card has one
+    # Each ruleset its own collection (Martin, 2026-11-20): the mana one holds only the Wisps, the default one never does.
+    wisps = sorted((c.id for c in CARDS.values() if c.ruleset == "mana"), key=lambda cid: CARDS[cid].cost)
+    assert [CARDS[w].cost for w in wisps] == list(range(11))
+    assert all(CARDS[w].collectible and CARDS[w].cost is not None for w in wisps)
+    deck = [w for w in wisps for _ in range(2)] + wisps[:3]
+    problems = deck_problems(deck, None, ruleset="mana")
+    assert not any("collection" in p or "stars" in p or "cost" in p for p in problems)   # no star budget, every Wisp costed
+    assert any("at most 2" in p for p in problems)                                        # the copy limit stays
+    assert any("not in the mana collection" in p for p in deck_problems(deck[:-1] + ["lion"], None, ruleset="mana"))
+    assert any("not in the default collection" in p for p in deck_problems(deck, None))
 
 
 # ------------------------------------------------------------------ the three readings

@@ -47,7 +47,7 @@ export const NO_LEADER = 'Choose a leader', NO_LEADER_CARD = 'Add a legendary th
 export function deckIssue(list, cards = C, rules = R, leader = null, leaders = (X && X.leaders) || {}) {
   const counts = countsOf(list);
   // the mana rules (rules.needsCost): only collectible cards with a mana cost
-  const nocost = rules.needsCost ? Object.keys(counts).filter(id => !cards[id] || cards[id].status !== 'collectible' || cards[id].mana == null) : [];
+  const nocost = rules.needsCost ? Object.keys(counts).filter(id => !cards[id] || cards[id].status !== 'collectible' || cards[id].ruleset !== 'mana' || cards[id].mana == null) : [];
   if (nocost.length === 1) return `${(cards[nocost[0]] || { name: 'A card' }).name} has no mana cost`;
   if (nocost.length) return `${nocost.length} cards have no mana cost`;
   const over = Object.keys(counts).filter(id => cards[id] && counts[id] > rules.copies[cards[id].rarity]);
@@ -115,7 +115,7 @@ const FB = '<button class="backbtn fbx" data-tip="Feedback" aria-label="Feedback
 export function collectionScreen(app, ctx) {
   X = ctx; C = ctx.cards; if (ctx.rules) R = ctx.rules; M = !!ctx.mana;
   if (!saved) saved = Object.fromEntries(decks().map(d => [d.id, [...d.list]]));
-  cards = Object.values(C).filter(c => c.status === 'collectible');   // the starters' cards and the bench (cleared cards in no starter)
+  cards = Object.values(C).filter(c => c.status === 'collectible' && (c.ruleset || null) === (M ? 'mana' : null));   // the starters' cards and the bench; each ruleset its own collection (the mana prototype holds only the Wisps)
   if (!wired) { wired = true; wireGlobal(); }
   const all = decks();
   // Opens your first deck; with none yet, nothing is open and the grid is for browsing.

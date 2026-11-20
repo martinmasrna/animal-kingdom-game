@@ -965,6 +965,8 @@ def card_pool() -> list[dict]:
              "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat,
              # its mana cost in the mana ruleset (None: not in a mana deck); "cost" above is the food a card costs
              "mana": c.cost,
+             # the one ruleset whose collection holds it (the mana prototype's Wisps); absent: the default rules'
+             **({"ruleset": c.ruleset} if c.ruleset else {}),
              # its level (the stars prototype): what a copy costs of a deck's budget; a token is in no deck, so none
              "stars": 0 if c.status == "token" else c.stars,
              "related": list(c.related or ahead.get(c.id, ())), "evolves": c.evolves or bool(ahead.get(c.id)),

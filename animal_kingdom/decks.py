@@ -125,7 +125,9 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
         if card is None or not card.collectible:
             problems.append(f"{cid!r} is not a collectible card")
             continue
-        if mana and card.cost is None:
+        if card.ruleset != ruleset if card.ruleset else mana:   # each ruleset its own collection (the mana prototype's Wisps, 2026-11-20)
+            problems.append(f"{card.name} is not in the {ruleset or 'default'} collection")
+        elif mana and card.cost is None:
             problems.append(f"{card.name} has no mana cost")
         limit = COPY_LIMITS[card.rarity]
         if n > limit:

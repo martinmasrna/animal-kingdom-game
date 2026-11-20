@@ -48,6 +48,17 @@ export const CARD_NUMS = [
   "dung_beetle_legend_form4", "mara", "wolverine", "pigeon", "elephant_legend", "rodent_legend", "sardine_legend", "deer_legend", "kitten", "impala", "baby_impala", "rabbit", "bunny", "vole", "marmot", "bison", "deer_legend_2", "young_stag", "great_stag",
   "food_maker", "card_burner", "refueler", "trainer", "flight_giver", "lookout", "food_thief", "protector",
   "gorilla_legend_2",
+  "wisp_0",
+  "wisp_1",
+  "wisp_2",
+  "wisp_3",
+  "wisp_4",
+  "wisp_5",
+  "wisp_6",
+  "wisp_7",
+  "wisp_8",
+  "wisp_9",
+  "wisp_10",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

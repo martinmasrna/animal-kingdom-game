@@ -11421,5 +11421,170 @@
       "by": "claude",
       "at": 1794906768
     }
+  },
+  "wisp_0": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195162
+    }
+  },
+  "wisp_1": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195162
+    }
+  },
+  "wisp_2": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195162
+    }
+  },
+  "wisp_3": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195162
+    }
+  },
+  "wisp_4": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195162
+    }
+  },
+  "wisp_5": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195162
+    }
+  },
+  "wisp_6": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195163
+    }
+  },
+  "wisp_7": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195163
+    }
+  },
+  "wisp_8": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195163
+    }
+  },
+  "wisp_9": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195163
+    }
+  },
+  "wisp_10": {
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "CROP": null,
+          "STRIP": null,
+          "FULL": null
+        }
+      },
+      "by": "claude",
+      "at": 1795195163
+    }
   }
 }
