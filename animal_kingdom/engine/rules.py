@@ -58,8 +58,8 @@ def can_pass(state: GameState) -> bool:
 def _top_level_actions(state: GameState) -> list[Action]:
     player = state.current
     left = _actions_left(state)
-    if state.config.mana:
-        return _mana_actions(state, player, left)
+    if state.config.mana:   # nothing payable: ending the turn is the move (the mana ruleset never ends a turn by itself)
+        return _mana_actions(state, player, left) or [PassAction()]
     if left <= 0:                                  # the turn stays open only for a free roam (Roam)
         return list(effects.legal_roams(state, player, free_only=True)) if effects.free_roams_left(state, player) else []
     actions: list[Action] = []
@@ -276,6 +276,8 @@ def _resolve_and_maybe_end_turn(state: GameState) -> None:
         return  # game decided (HQ capture / food)
     if state.effect_stack or state.pending is not None:
         return  # still resolving (a choice is pending or steps remain)
+    if state.config.mana:
+        return  # the mana ruleset: the player ends the turn, never the game (Martin, 2026-11-20)
     if _has_top_level_action(state):
         return  # actions (or a free roam) remain and something is playable: the turn stays open
     _end_turn(state)
@@ -291,13 +293,10 @@ def _decided(state: GameState) -> bool:
 def _end_turn(state: GameState, *, forced: bool = False) -> None:
     """End the current player's turn. `forced`: it opened with nothing they could do."""
     player = state.current
-    # the mana ruleset: a turn the mana couldn't pay for is skipped, not passed, while its player has a deck to draw from
-    # (else both players' first turns, 1 mana each, could end the game); the event says so, for the client to show
-    skipped = forced and state.config.mana and bool(state.decks[player])
-    if skipped:
-        state.emit("turn_end", player=player, skipped=True)
-    else:
-        state.emit("turn_end", player=player)
+    # the mana ruleset: a turn ended with nothing the mana could pay for is no pass (else both players' first turns, 1 mana
+    # each, could end the game); the player always ends it themselves (Martin, 2026-11-20: no turn is skipped for them)
+    skipped = state.config.mana and bool(state.decks[player]) and (forced or not _mana_actions(state, player, _actions_left(state)))
+    state.emit("turn_end", player=player)
     effects.end_of_turn(state, player)      # on_end_of_turn triggers (Dingo, Worker Wasp, Methuselah)
     effects.resolve(state)                  # choice-free by design, so it drains fully
     if _decided(state):
@@ -329,7 +328,7 @@ def _end_turn(state: GameState, *, forced: bool = False) -> None:
     effects.start_of_turn(state, state.current)
     effects.resolve(state)
     # A player who can neither draw nor place nor roam passes; the game goes on.
-    if state.result is None and state.pending is None and not state.effect_stack \
+    if state.result is None and state.pending is None and not state.effect_stack and not state.config.mana \
             and state.turn_counter < state.config.max_turns and not _has_top_level_action(state):
         _end_turn(state, forced=True)        # (never past the turn cap: is_terminal ends the game there)
 

@@ -1501,9 +1501,9 @@ function drawGame() {
     const c = formOf(h.id, V.you), can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && !(d.barred && d.barred(h)) && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = lit.hint(can), shown = lit.shown(h.id);
     const talking = lit.talking || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
-    // the mana rules dim a card its owner can't play: on your turn one the mana left can't pay for (or with nowhere to go), on your
-    // opponent's one your next turn's mana won't pay for; never while the opening hands are chosen
-    const dim = M ? !mull && !pick && (d.mine ? !can : h.cost > ((G.mana || {})[you] || {}).left) : !can && !pick && !talking;
+    // the mana rules light only a card you can play now: on your opponent's turn none is lit (Martin, 2026-11-20); never
+    // dimmed while the opening hands are chosen
+    const dim = M ? !mull && !pick && !can : !can && !pick && !talking;
     const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || selCopy()).iid ? 'sel' : '', dim ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first; a card an effect made or
     // fetched (a Kitten, a Young Stag) came from no deck, so it rises into its place instead (Martin, 2026-10-31: flying in
@@ -1867,7 +1867,7 @@ function drawRail(G, d) {
   };
   const m = mana[you] || { left: 0, total: 0 }, t = mana[them] || { left: 0, total: 0 }, mine = G.current === you && V.phase === 'playing';
   el.innerHTML = lead('B') + lead('A')
-    + `<div class="mmana A">${pipsHTML(m.left, m.total)}<div>${mine ? `${m.left} of ${m.total} mana` : `Next turn: ${m.total} mana`}</div></div>`
+    + `<div class="mmana A">${pipsHTML(m.left, m.total)}</div>`   // the pips say it all (Martin, 2026-11-20: no text where the eye can see)
     + `<div class="mmana B">${pipsHTML(t.left, t.total)}</div>`;
 }
 // The rail's leaders and decks read on hover (a leader's power, a decklist), and your leader's power is pressed there.
@@ -1900,13 +1900,10 @@ function drawLast(G) {
   const key = `${V.id}-${V.results.length}`, turnOf = m => (m.round - 1) * 2 + (m.seat === G.first ? 0 : 1);
   const items = G.history.map((m, i) => ({ t: turnOf(m), m, i })).concat((ui.skips || []).filter(k => k.key === key).map(k => ({ t: k.turn, skip: k.seat })));
   items.sort((a, b) => a.t - b.t);
-  const who = p => p === V.you ? 'You' : 'Your opponent';
-  const verb = m => m.target && m.target[0] === 'hq' && isMana() ? 'raided the den' : m.kind === 'place' ? 'played' : m.kind === 'roam' ? 'roamed' : m.kind === 'leader' ? 'used the power' : m.kind === 'act' ? (/(^|\. )Echo\./.test((CARDS[m.card] || {}).text || '') ? 'Echo' : 'Action') : 'drew';
-  const row = x => x.skip ? `<div class="row skip"><div class="mini"></div><span>Turn skipped<small>${who(x.skip)}</small></span></div>`
-    : `<div class="row" data-h="${x.i}"><div class="mini">${x.m.card ? `<div class="unit ${rel(x.m.seat)}" style="--tw:40px">${leaderToken(x.m.card, rel(x.m.seat), CARDS, 40)}</div>` : ''}</div>`
-      + `<span>${esc((CARDS[x.m.card] || {}).name || '')}<small>${who(x.m.seat)} · ${verb(x.m)}</small></span></div>`;
+  // the piece in its team's rim says who, the board says what: no words beside it (Martin, 2026-11-20); hover reads the card
+  const row = x => x.skip ? '' : `<div class="row" data-h="${x.i}"><div class="mini">${x.m.card ? `<div class="unit ${rel(x.m.seat)}" style="--tw:40px">${leaderToken(x.m.card, rel(x.m.seat), CARDS, 40)}</div>` : ''}</div></div>`;
   const last = items.slice(-6).reverse();
-  el.innerHTML = last.length ? '<h5>Last plays</h5>' + last.map(row).join('') : '';
+  el.innerHTML = last.map(row).join('');
   el.querySelectorAll('[data-h]').forEach(r => {
     const m = G.history[r.dataset.h];
     r.onmouseenter = () => { if (!m.card || !CARDS[m.card]) return;

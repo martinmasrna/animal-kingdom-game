@@ -84,14 +84,16 @@ def test_unspent_mana_is_lost_and_a_real_game_counts_its_turns():
         assert p == "AB"[turn % 2] and total == left == min(turn // 2 + 1, MANA.mana_cap)
 
 
-def test_a_skipped_turn_says_so_on_its_end_and_a_turn_ended_by_hand_does_not():
-    """The client shows a skipped turn only from the server's word: `skipped` on the turn's turn_end event."""
+def test_no_turn_is_skipped_and_ending_one_with_nothing_payable_is_no_pass():
+    # Martin, 2026-11-20: the player ends every turn themselves, even one with nothing to play; such an end is no pass,
+    # so two empty opening turns don't end the game.
     s = state(hands={"A": ["lion"], "B": ["lion"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})   # lions cost 3
-    rules.apply_action(s, PassAction())                      # A ends their first turn by hand, nothing played
-    assert s.current == "A" and s.turn_counter == 4          # B's 1 and A's 2 and B's 2 mana paid for nothing: skipped
-    ends = [e for e in s.events if e["e"] == "turn_end"]
-    assert [(e["player"], bool(e.get("skipped"))) for e in ends] == [("A", False), ("B", True), ("A", True), ("B", True)]
-    assert all(e.get("skipped") is None for e in new_game(load_premade_deck("pool_1"), load_premade_deck("pool_3"), 7).events)
+    assert rules.legal_actions(s) == [PassAction()]          # 1 mana, nothing payable: End turn is the move
+    rules.apply_action(s, PassAction())
+    assert s.current == "B" and s.turn_counter == 1           # B's turn waits for B
+    rules.apply_action(s, PassAction())
+    assert s.result is None and s.idle_turns == 0
+    assert not any(e.get("skipped") for e in s.events)
 
 
 def test_a_card_costs_its_mana_and_a_card_the_mana_left_cannot_pay_is_refused():
@@ -105,11 +107,11 @@ def test_a_card_costs_its_mana_and_a_card_the_mana_left_cannot_pay_is_refused():
         rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
 
 
-def test_the_turn_ends_when_nothing_can_be_paid():
+def test_the_turn_stays_open_when_nothing_more_can_be_paid():
     s = state(turn=2, hands={"A": ["kitten", "lion"]}, decks={"A": ["lion"] * 3, "B": ["squirrel"] * 3})
     rules.apply_action(s, PlaceAction("kitten", ("cr", "1,2")))    # 2 mana: the Kitten (1) draws a Lion; 1 left, no Lion
     resolve_choices(s)
-    assert s.turn_counter == 3 and s.current == "B"                # nothing payable is left: the turn ended
+    assert s.current == "A" and rules.legal_actions(s) == [PassAction()]   # the player ends it
 
 
 def test_echo_costs_three_mana():
