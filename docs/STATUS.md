@@ -8,7 +8,7 @@ The map. Read it first each session and keep it current: when something here cha
 
 **Now: designing the mana game.** On 2026-11-20 Martin made the mana ruleset the whole game ("Literally nothing else than what's currently on the staging server (and localhost 8000) matters") and the old rules, their 71 animals, bots and tools were deleted. The game is set in a world of our own, not on Earth (Martin, 2026-11-19: "I thought about it and it's 1000% the right decision"), and its cards are not traditional Earth animals (Martin, 2026-11-20: "alltogether, at least the traditional Earth animals"). What the cards and the world are instead is open. Every number and rule below is a working version from his playtests, not settled.
 
-Why mana: the old game's two actions a turn ate two cards a turn, so cards could never be scarce and a held card had no worth; Martin's model of a card game is a plan of his own carried out against a hidden hand, every turn a decision about *when* (`essay-core.md` in the workspace is his essay on it).
+What the game is for, why mana, and Martin's words on the rules' shape and the board: [`design.md`](design.md).
 
 ## The rules as they play
 
@@ -24,7 +24,6 @@ Why mana: the old game's two actions a turn ate two cards a turn, so cards could
 
 73 in `data/cards.json` (63 collectible, 10 reserve), all placeholders built as ladders over a vanilla curve, so the shape of the game can be felt before the cards have a theme: the Wisps (strength rising faster than cost: 1 to 10 mana), Djinn and Shades (strength from a count), and keyword ladders at a mana tax over the Wisps (Flight, Spikes, Poison, Stealth, Hungry, Hunters, Scouts and Winged Scouts, and the Ally, Enemy, Hand, Remove ladders). Three leaders: the Warlord ("When you cover an enemy, gain 1 food."), the Raider ("Your raids destroy 2 more food.") and the Sage. Reserve: the Armored ladder, and the Food Djinn and Food Shade (benched until they count something other than your food). Their art is one placeholder sheet painted in a single prompt, infrared to black hole (`design/cards/wisp_sheet.png`), cut into the stand-in figures.
 
-How a point of strength is priced, in Martin's words (2026-11-20): it is removal (covers one more size), flexibility (more tiles to land on), defence (one more size can't cover it) and burn (one more food on a raid) at once; cards never attack, so two 5s hold two tiles where one 10 holds one; and cost is a liability of its own, so strength per mana rises with cost and decks live mostly at 0 to 3 mana.
 
 ## What exists
 
