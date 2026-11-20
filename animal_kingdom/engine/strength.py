@@ -45,7 +45,7 @@ def _dynamic_strength(state: GameState, rule: Optional[str], owner: str) -> int:
     # The Shades (Martin, 2026-11-20): their owner's count, as the Djinn's discounts count it (effects._djinn_count); an
     # ally Shade counts itself.
     shade = {"hand_count": "hand", "ally_count": "ally", "enemy_count": "enemy", "food_count": "food",
-             "opp_removed_count": "removed"}.get(rule)
+             "opp_removed_count": "removed"}.get(rule or "")
     if shade:
         from .effects import _djinn_count
         return state.config.shade_growth * _djinn_count(state, owner, shade)

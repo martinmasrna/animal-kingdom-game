@@ -263,6 +263,7 @@ class Config:
     # animal, yours or theirs, is removed, so a tile holds one animal.
     den_raid: bool = False
     cover_removes: bool = False
+    hungry_food: int = 1                 # the mana prototype's Hungry: the food its removal gains (Martin, 2026-11-20)
 
     # --- Engine safety / sim hygiene ---
     max_actions_per_turn: int = 30       # a turn ends after this many applied actions, choices included, even mid-effect (Martin, 2026-11-18)
@@ -331,6 +332,8 @@ def _mana_texts() -> tuple[dict[str, str], dict[str, str]]:
                 "empty tile, onto one of your animals, or onto an enemy it beats. Once per turn.",
         "Reach": "Can be placed up to two tiles away from one of your connected animals, jumping over what stands between.",
         "Apex Predator": "Must be placed on top of another animal, yours or an enemy's, and eats it.",
+        # the mana prototype's own Hungry (Martin, 2026-11-20)
+        "Hungry": f"Must be placed on top of an enemy it beats. When that enemy is removed, gain {c.hungry_food} food.",
     }
     return cards, keywords
 

@@ -17,7 +17,7 @@ from animal_kingdom.engine.cards import (
 from animal_kingdom.decks import BOT_DECKS, PREMADE_DECKS
 
 RETIRED_TAGS = {"Reptile", "Insect"}
-DYNAMIC_IDS = {"egg_eater"}
+DYNAMIC_IDS = {"egg_eater", "shade_hand", "shade_ally", "shade_enemy", "shade_food", "shade_removed"}   # the Shades: the mana prototype
 
 
 # ----------------------------------------------------------------- pool composition
@@ -36,7 +36,8 @@ def test_ids_and_names_globally_unique():
     # species meanwhile (the Wolf beside the common Wolf), and tokens and the tutorial's cards share their animals' names.
     ids = [c.id for c in cards.values()]
     assert len(set(ids)) == len(ids) == len(cards)
-    names = [c.name for c in cards.values() if not c.unnamed and c.status not in ("token", "tutorial") and c.name != "??"]   # "??" is Martin's placeholder name
+    names = [c.name for c in cards.values() if not c.unnamed and c.status not in ("token", "tutorial") and c.name != "??"
+             and not c.ruleset]   # "??" is Martin's placeholder name; the mana prototype's ladders share placeholder names
     assert len(set(names)) == len(names)
 
 
@@ -70,5 +71,5 @@ def test_keywords_and_tags_within_allowed_sets_no_retired_tags():
 def test_food_cost_present_only_where_text_says_costs():
     for c in load_cards().values():
         has_cost = c.food_cost > 0
-        says_costs = "Costs" in c.text
+        says_costs = "Costs" in c.text and not c.text.startswith("Costs 1 less")   # the Djinn's mana discount is no food cost
         assert has_cost == says_costs, f"{c.id}: food_cost={c.food_cost} text={c.text!r}"

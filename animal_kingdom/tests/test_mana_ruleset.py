@@ -362,7 +362,7 @@ def test_deck_rules_in_the_mana_ruleset():
     # Each ruleset its own collection (Martin, 2026-11-20): the mana one holds the Wisps and Djinn, the default one never does.
     wisps = sorted((c.id for c in CARDS.values() if c.ruleset == "mana" and c.name == "Wisp"), key=lambda cid: CARDS[cid].cost)
     assert [CARDS[w].cost for w in wisps] == list(range(11))
-    assert all(CARDS[w].collectible and CARDS[w].cost is not None for w in wisps)
+    assert all(CARDS[w].in_collection("mana") and CARDS[w].cost is not None for w in wisps)
     deck = [w for w in wisps for _ in range(2)] + wisps[:3]
     problems = deck_problems(deck, None, ruleset="mana")
     assert not any("collection" in p or "stars" in p or "cost" in p for p in problems)   # no star budget, every Wisp costed
@@ -552,3 +552,17 @@ def test_hunters_weaken_and_the_giant_hunter_removes():
     _drain_place(s, me, "1,2", MANA.hunter_3_drain)
     step = s.effect_stack[-1]
     assert step["then"] == "drain" and step["amount"] == 3 and "2,2" in step["options"]
+
+
+def test_a_mana_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
+    # The mana prototype's Hungry (Martin, 2026-11-20): only onto an enemy it beats; when that enemy is removed, 1 food.
+    s = state(turn=11, hands={"A": ["glutton_2"]})          # strength 3
+    put(s, "1,1", "wisp_1", "A")
+    put(s, "2,1", "wisp_1", "B")                          # strength 2: edible
+    put(s, "2,2", "wisp_3", "B")                          # strength 4: too big
+    assert places(s, "glutton_2") == {"2,1"}
+    food = s.food["A"]
+    rules.apply_action(s, PlaceAction("glutton_2", ("cr", "2,1")))
+    resolve_choices(s)
+    assert [u.card_id for u in s.board["2,1"]] == ["glutton_2"] and "wisp_1" in s.remove_pile
+    assert s.food["A"] == food + MANA.hungry_food

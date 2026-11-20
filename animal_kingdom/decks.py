@@ -122,10 +122,10 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
         counts[cid] = counts.get(cid, 0) + 1
     for cid, n in counts.items():
         card = cards.get(cid)
-        if card is None or not card.collectible:
+        if card is None or card.status != "collectible":
             problems.append(f"{cid!r} is not a collectible card")
             continue
-        if card.ruleset != ruleset if card.ruleset else mana:   # each ruleset its own collection (the mana prototype's Wisps, 2026-11-20)
+        if not card.in_collection(ruleset):   # each ruleset its own collection (the mana prototype's Wisps, 2026-11-20)
             problems.append(f"{card.name} is not in the {ruleset or 'default'} collection")
         elif mana and card.cost is None:
             problems.append(f"{card.name} has no mana cost")

@@ -95,8 +95,13 @@ class Card:
 
     @property
     def collectible(self) -> bool:
-        """Whether a deck may hold this card (not a reserve design, the tutorial's or a token)."""
-        return self.status == "collectible"
+        """Whether a default-rules deck may hold this card (not a reserve design, the tutorial's or a token, nor a card of
+        another ruleset's own collection: the mana prototype's)."""
+        return self.status == "collectible" and self.ruleset is None
+
+    def in_collection(self, ruleset: Optional[str]) -> bool:
+        """Whether a deck in `ruleset` (None: the default rules) may hold this card: each ruleset its own collection."""
+        return self.status == "collectible" and self.ruleset == (ruleset if ruleset == "mana" else None)
 
     @property
     def has_roar(self) -> bool:
@@ -160,7 +165,8 @@ def validate_card_record(rec: dict) -> None:
     hungry = rec.get("hungry")
     if hungry is not None and (isinstance(hungry, bool) or not isinstance(hungry, int) or hungry < 1):
         raise CardDataError(f"card {cid!r}: hungry must be a positive int, got {hungry!r}")
-    if ("Hungry" in rec.get("keywords", [])) != (hungry is not None):
+    # the mana prototype's Hungry has no number: it must land on an enemy it beats, and its removal gains food
+    if ("Hungry" in rec.get("keywords", [])) != (hungry is not None) and rec.get("ruleset") != "mana":
         raise CardDataError(f"card {cid!r}: the Hungry keyword and its `hungry` number go together")
 
     stars = rec.get("stars")

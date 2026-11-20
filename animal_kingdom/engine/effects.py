@@ -363,6 +363,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
                **({"reveal": True} if reveal else {}))
     if covered is not None:
         state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
+        if onto_enemy and _mana_hungry(state.cards[unit.card_id]):
+            state.effect_stack.append({"op": "hungry_food", "player": player, "prey": covered.iid, "by_card": unit.card_id})
         _push_scare(state, cr)
 
     # Apex Predator: it covers the occupant like any placement, and eats it afterwards
@@ -687,6 +689,23 @@ def remove_top(state, cr, *, by_player, by_effect=True, by_card=None) -> bool:
     return _remove_specific(state, cr, top, by_player=by_player, by_effect=by_effect, by_card=by_card)
 
 
+def _mana_hungry(card) -> bool:
+    """The mana prototype's Hungry (Martin, 2026-11-20): no number, it must land on an enemy it beats."""
+    return card.ruleset == "mana" and "Hungry" in card.keywords
+
+
+def _op_hungry_food(state, step):
+    """A mana Hungry's prey: once it is gone from the board (removed by the cover), its eater's player gains the food. A
+    prey still standing (the eater died to Spikes first) gives nothing."""
+    if not any(u.iid == step["prey"] for st in state.board.values() for u in st):
+        prev, state.cause = state.cause, step["by_card"]
+        try:
+            gain_food(state, step["player"], state.config.hungry_food)
+        finally:
+            state.cause = prev
+    return None
+
+
 def _push_scare(state: GameState, cr: str) -> None:
     """A cover removes what it covered (the mana ruleset, Config.cover_removes): pushed first when an animal is covered,
     so it resolves after the cover's Roar and every reaction to it."""
@@ -987,6 +1006,7 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
         if "Titan" in card.keywords and not titan_ok:
             continue                                  # Titan: two actions, never a free placement
         is_apex = "Apex Predator" in card.keywords
+        hunts = _mana_hungry(card)                    # the mana prototype's Hungry: only onto an enemy it beats
         flight = flight_next or statics.ignores_connection(state, card_id)
         extra = statics.extra_placement_crossroads(state, card_id, player)
         reach = statics.reach_of(state, card_id)
@@ -998,7 +1018,10 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
             if not (flight or cr in connectable or cr in extra):
                 continue
             top = state.top_unit(cr)
-            if is_apex:
+            if hunts:
+                if top is not None and top.owner != player and statics.can_cover(state, placer, top):
+                    out.append(PlaceAction(card_id, ("cr", cr), iid))
+            elif is_apex:
                 if top is not None and _apex_can_land(state, placer, top):
                     out.append(PlaceAction(card_id, ("cr", cr), iid))   # must land on an occupant
             elif top is None or top.owner == player:
@@ -1006,7 +1029,7 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
             elif statics.can_cover(state, placer, top):
                 out.append(PlaceAction(card_id, ("cr", cr), iid))
         # Apex Predators can never capture an HQ (decision D).
-        if enemy_hq and not is_apex:
+        if enemy_hq and not is_apex and not hunts:
             out.append(PlaceAction(card_id, ("hq", enemy), iid))
     return out
 
@@ -1453,7 +1476,7 @@ def _op_timed_hook(state, step):
 def _eat(state, unit, cr) -> None:
     """Hungry N (keywords.md): at the start of your turn the animal eats up to N of your food and gets -1 strength, for
     good, for each food it was short. An inked animal isn't Hungry."""
-    if not statics.has_keyword(state, unit, "Hungry", cr):
+    if not statics.has_keyword(state, unit, "Hungry", cr) or _mana_hungry(state.cards[unit.card_id]):
         return
     n = state.cards[unit.card_id].hungry
     prev, state.cause, state.cause_iid = (state.cause, state.cause_iid), unit.card_id, unit.iid
@@ -1783,6 +1806,7 @@ OPS: dict[str, Callable] = {
     "remove_iid": _op_remove_iid,
     "apex_eat": _op_apex_eat,
     "cover_remove": _op_cover_remove,
+    "hungry_food": _op_hungry_food,
     "play_extra": _op_play_extra,
     "play_named": _op_play_named,
     "grant_strength": _op_grant_strength,

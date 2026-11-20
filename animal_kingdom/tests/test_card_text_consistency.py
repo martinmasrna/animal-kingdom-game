@@ -429,7 +429,7 @@ def test_hungry_number_matches_its_field_and_reach_has_none():
     """"Hungry N" opening a card's text is its `hungry` field (written by the converter); Reach prints no number."""
     for cid, card in _cards().items():
         m = re.match(r"(?:\w+(?: \w+)?\. )*Hungry (\d+)\.", card.text)
-        if "Hungry" in card.keywords:
+        if "Hungry" in card.keywords and card.ruleset != "mana":   # the mana prototype's Hungry has no number
             assert m and int(m.group(1)) == card.hungry, f"{cid}: Hungry {card.hungry} vs text {card.text!r}"
         assert not re.search(r"Reach \d", card.text), f"{cid}: {card.text!r}"
 

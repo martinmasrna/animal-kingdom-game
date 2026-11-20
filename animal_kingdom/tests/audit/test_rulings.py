@@ -89,7 +89,7 @@ def ids(s, cr):
 
 def test_identity__every_collectible_card_name_is_unique():
     raw = load_bundled_json("cards.json")["cards"]
-    names = [c["name"] for c in raw if c.get("status") == "collectible" and c["name"] != "??"]   # "??" is a placeholder
+    names = [c["name"] for c in raw if c.get("status") == "collectible" and c["name"] != "??" and not c.get("ruleset")]   # "??" is a placeholder; the mana prototype's ladders share their placeholder names
     assert len(names) == len(set(names))
 
 

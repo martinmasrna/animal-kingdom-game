@@ -5213,6 +5213,134 @@
       "keywords": [
         "Armor"
       ]
+    },
+    {
+      "id": "glutton_2",
+      "name": "Glutton",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "text": "Hungry.",
+      "species": "Glutton",
+      "habitat": "",
+      "cost": 2,
+      "ruleset": "mana",
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "glutton_3",
+      "name": "Glutton",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Hungry.",
+      "species": "Glutton",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana",
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "glutton_4",
+      "name": "Glutton",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "text": "Hungry.",
+      "species": "Glutton",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana",
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "glutton_5",
+      "name": "Glutton",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "text": "Hungry.",
+      "species": "Glutton",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana",
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "glutton_6",
+      "name": "Glutton",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "text": "Hungry.",
+      "species": "Glutton",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana",
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "glutton_7",
+      "name": "Glutton",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "text": "Hungry.",
+      "species": "Glutton",
+      "habitat": "",
+      "cost": 7,
+      "ruleset": "mana",
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "glutton_8",
+      "name": "Glutton",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 12,
+      "text": "Hungry.",
+      "species": "Glutton",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana",
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "glutton_10",
+      "name": "Glutton",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 20,
+      "text": "Hungry.",
+      "species": "Glutton",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": [
+        "Hungry"
+      ]
     }
   ]
 }
