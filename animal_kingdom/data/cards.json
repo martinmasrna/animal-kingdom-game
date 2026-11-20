@@ -4667,6 +4667,262 @@
       "ruleset": "mana",
       "dynamic_strength": "opp_removed_count",
       "keywords": []
+    },
+    {
+      "id": "spiky_2",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "keywords": [
+        "Spikes"
+      ],
+      "text": "",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 2,
+      "ruleset": "mana"
+    },
+    {
+      "id": "spiky_3",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [
+        "Spikes"
+      ],
+      "text": "",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana"
+    },
+    {
+      "id": "spiky_4",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [
+        "Spikes"
+      ],
+      "text": "",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana"
+    },
+    {
+      "id": "spiky_5",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [
+        "Spikes"
+      ],
+      "text": "",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana"
+    },
+    {
+      "id": "spiky_6",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [
+        "Spikes"
+      ],
+      "text": "",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana"
+    },
+    {
+      "id": "spiky_7",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [
+        "Spikes"
+      ],
+      "text": "",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 7,
+      "ruleset": "mana"
+    },
+    {
+      "id": "spiky_8",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "keywords": [
+        "Spikes"
+      ],
+      "text": "",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana"
+    },
+    {
+      "id": "spiky_10",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 12,
+      "keywords": [
+        "Spikes"
+      ],
+      "text": "",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana"
+    },
+    {
+      "id": "flyer_2",
+      "name": "Flyer",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [
+        "Flight"
+      ],
+      "text": "",
+      "species": "Flyer",
+      "habitat": "",
+      "cost": 2,
+      "ruleset": "mana"
+    },
+    {
+      "id": "flyer_3",
+      "name": "Flyer",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [
+        "Flight"
+      ],
+      "text": "",
+      "species": "Flyer",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana"
+    },
+    {
+      "id": "flyer_4",
+      "name": "Flyer",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [
+        "Flight"
+      ],
+      "text": "",
+      "species": "Flyer",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana"
+    },
+    {
+      "id": "flyer_5",
+      "name": "Flyer",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [
+        "Flight"
+      ],
+      "text": "",
+      "species": "Flyer",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana"
+    },
+    {
+      "id": "flyer_6",
+      "name": "Flyer",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [
+        "Flight"
+      ],
+      "text": "",
+      "species": "Flyer",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana"
+    },
+    {
+      "id": "flyer_7",
+      "name": "Flyer",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "keywords": [
+        "Flight"
+      ],
+      "text": "",
+      "species": "Flyer",
+      "habitat": "",
+      "cost": 7,
+      "ruleset": "mana"
+    },
+    {
+      "id": "flyer_8",
+      "name": "Flyer",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "keywords": [
+        "Flight"
+      ],
+      "text": "",
+      "species": "Flyer",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana"
+    },
+    {
+      "id": "flyer_10",
+      "name": "Flyer",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 15,
+      "keywords": [
+        "Flight"
+      ],
+      "text": "",
+      "species": "Flyer",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana"
     }
   ]
 }

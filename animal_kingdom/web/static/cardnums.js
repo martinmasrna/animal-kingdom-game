@@ -69,6 +69,22 @@ export const CARD_NUMS = [
   "shade_enemy",
   "shade_food",
   "shade_removed",
+  "spiky_2",
+  "spiky_3",
+  "spiky_4",
+  "spiky_5",
+  "spiky_6",
+  "spiky_7",
+  "spiky_8",
+  "spiky_10",
+  "flyer_2",
+  "flyer_3",
+  "flyer_4",
+  "flyer_5",
+  "flyer_6",
+  "flyer_7",
+  "flyer_8",
+  "flyer_10",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

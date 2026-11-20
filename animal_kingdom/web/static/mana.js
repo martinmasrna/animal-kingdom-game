@@ -93,9 +93,9 @@ export function fitPlaques(root) {
   }
 }
 
-// The mana as six small gold hexagons (more while a bonus raises the turn past six): available filled, spent dimmed, not
+// The mana as ten small gold hexagons (more while a bonus raises the turn past ten): available filled, spent dimmed, not
 // yet reached outlined.
-export function pipsHTML(left, total, cap = 6) {
+export function pipsHTML(left, total, cap = 10) {
   const n = Math.max(cap, total), spent = total - left;
   return `<span class="mpips">${Array.from({ length: n }, (_, i) => `<i class="${i < spent ? 'spent' : i < total ? 'on' : 'off'}"></i>`).join('')}</span>`;
 }

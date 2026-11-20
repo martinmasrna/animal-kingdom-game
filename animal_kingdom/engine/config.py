@@ -249,7 +249,7 @@ class Config:
     # animal from hand costs its card's `cost`; anything an effect puts into play is free; a Roam, an Echo, a leader's power
     # and a printed "Action:" cost mana_per_action each, and the Beaver's "1 additional action" is that much more mana.
     mana: bool = False
-    mana_cap: int = 6
+    mana_cap: int = 10                   # Martin, 2026-11-20: "Mana cap at 10 of course"
     mana_per_action: int = 3
     # The den raid and the scare (Martin, 2026-11-20, both in the mana ruleset): an animal placed or roaming into the
     # enemy den steals food equal to its strength, at most what they have, and is spent (the Remove Pile); a covered

@@ -61,8 +61,8 @@ def test_mana_grows_one_a_turn_to_six_for_both_players():
     s = state()
     for turn in range(16):
         s.turn_counter, s.current = turn, "AB"[turn % 2]
-        assert rules.mana_total(s, s.current) == min(turn // 2 + 1, 6)
-        assert rules.turn_actions(s) == min(turn // 2 + 1, 6)
+        assert rules.mana_total(s, s.current) == min(turn // 2 + 1, MANA.mana_cap)
+        assert rules.turn_actions(s) == min(turn // 2 + 1, MANA.mana_cap)
 
 
 def test_unspent_mana_is_lost_and_a_real_game_counts_its_turns():
@@ -81,7 +81,7 @@ def test_unspent_mana_is_lost_and_a_real_game_counts_its_turns():
             rules.apply_action(s, PassAction())
     assert len(seen) == 14 and s.result is None             # turns the mana couldn't pay for are skipped, not passed
     for turn, p, total, left in seen:                        # each turn opens with its full mana, never last turn's rest
-        assert p == "AB"[turn % 2] and total == left == min(turn // 2 + 1, 6)
+        assert p == "AB"[turn % 2] and total == left == min(turn // 2 + 1, MANA.mana_cap)
 
 
 def test_a_skipped_turn_says_so_on_its_end_and_a_turn_ended_by_hand_does_not():
@@ -485,7 +485,7 @@ def test_the_view_carries_mana_costs_and_the_board():
     v = m.view(s)
     g = v["game"]
     assert v["ruleset"] == "mana" and set(v["texts"]) == {"beaver", "cheetah", "falcon"} and "Echo" in v["keywords"]
-    n = min(m.state.turn_counter // 2 + 1, 6)                     # an opening turn with nothing payable is skipped
+    n = min(m.state.turn_counter // 2 + 1, MANA.mana_cap)                     # an opening turn with nothing payable is skipped
     assert g["mana"][s] == {"left": n, "total": n} and g["abilityCost"] == 3
     assert {p: set(t) for p, t in g["bases"].items()} == BASE
     assert all({"cost", "affordable"} <= set(h) for h in g["hand"])
