@@ -45,7 +45,9 @@ const FRAME_SVG = `<svg class="mpl" viewBox="0 0 1000 ${n(HC)}"><defs><linearGra
   + `<polygon fill="#0f1215" points="${hexPts(+n(BD + (LW - 1.05) / 2), +n(-Y0 - .025 * P), +n(1.05), +n(1.05 * P))}"/></svg>`;
 // The cost: the card's own top-left corner, its upper-left vertex on the card's shoulder.
 const GH = GEM * P;
-const COST_SVG = c => `<svg viewBox="0 0 100 ${(100 * P).toFixed(2)}"><polygon points="${hexPts(0, 0, 100, 100 * P)}"/><text x="50" y="${(50 * P).toFixed(2)}" text-anchor="middle" dominant-baseline="central">${c}</text></svg>`;
+// The number in Martin's strength numerals (token.js numeral, static/hex/num), inked dark on the gold.
+const COST_SVG = c => { const h = 100 * P * .62, w = h * 2 / 1.2;
+  return `<svg viewBox="0 0 100 ${(100 * P).toFixed(2)}"><polygon points="${hexPts(0, 0, 100, 100 * P)}"/><image class="mnum" href="/static/hex/num/${Math.max(0, Math.min(20, c))}.svg" x="${(50 - w / 2).toFixed(2)}" y="${(50 * P - h / 2).toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}"/></svg>`; };
 const COST_AT = box(X0, Y0 + YS - GH / 4, GEM, GH);
 // The piece alone (a deck tray, a shown hand) keeps the cost in the piece's own upper-left corner, sharing its two edges.
 const PIECE_COST_AT = box(0, .25 * P * (1 - .3), .3, .3 * P);
@@ -62,14 +64,14 @@ export function manaCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cl
     + `<div class="pin" style="${box(BD + .025 * WC, BX_T, WC - 2 * BD - .05 * WC, BX_H)}">${c.text ? `<p>${rules(c.text)}</p>` : ''}</div>`
     + (tags ? `<i class="mfam" style="top:${k(HC - TIP * .62)}">${esc(tags)}</i>` : '') + '</div>'
     + `<div class="mpiece unit ${owner}" style="--tw:${w}px">${piece}</div>`
-    + (cost != null ? `<div class="mcost" style="${COST_AT}">${COST_SVG(cost)}</div>` : '') + '</div>';
+    + (cost != null ? `<div class="mcost" data-n="${cost}" style="${COST_AT}">${COST_SVG(cost)}</div>` : '') + '</div>';
 }
 
 // The piece alone, as a hand shows it under its plaque: the token with its cost hexagon (the collection's deck tray).
 // `str: null` draws no strength (a leader, as the rail draws it); `cost: null` no cost mark.
 export function manaPiece(c, { str = c.str, cost = null, owner = 'A', w = 60, cls = '', attrs = '' } = {}) {
   return `<div class="mcard mpc ${owner}${cls ? ' ' + cls : ''}" style="--mw:${w}px" ${attrs}><div class="mpiece unit ${owner}" style="--tw:${w}px">${tokenHTML({ id: c.id, owner, str, iid: 0 }, { [c.id]: c }, w)}</div>`
-    + (cost != null ? `<div class="mcost" style="${PIECE_COST_AT}">${COST_SVG(cost)}</div>` : '') + '</div>';
+    + (cost != null ? `<div class="mcost" data-n="${cost}" style="${PIECE_COST_AT}">${COST_SVG(cost)}</div>` : '') + '</div>';
 }
 
 // A long rule sets smaller until it fits its plaque (as card.js fitNames does for the rectangular card).
@@ -87,7 +89,7 @@ export function fitPlaques(root) {
   for (const b of root.querySelectorAll('.mcard .mplate .pname')) {   // a long name narrows to its plate, as a share of the card's size
     b.style.fontSize = '';
     const room = b.parentElement.clientWidth * .94, wd = b.scrollWidth;
-    if (room > 0 && wd > room) b.style.fontSize = `calc(var(--mw) * ${(.128 * room / wd).toFixed(4)})`;
+    if (room > 0 && wd > room) b.style.fontSize = `calc(var(--mw) * ${(.14 * room / wd).toFixed(4)})`;
   }
 }
 
@@ -99,7 +101,7 @@ export function pipsHTML(left, total, cap = 6) {
 }
 
 // A small gold hexagon with a number, for an ability's price beside its button (Roam, Echo, a leader's power).
-export const costChip = n => `<span class="mchip">${COST_SVG(n)}</span>`;
+export const costChip = n => `<span class="mchip" data-n="${n}">${COST_SVG(n)}</span>`;
 
 // The leader on the rail: its token, no strength (it is not on the board), dimmed while its power can't be used.
 export function leaderToken(id, owner, cards, w) {

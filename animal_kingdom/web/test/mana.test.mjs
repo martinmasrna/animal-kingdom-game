@@ -27,7 +27,7 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
   await click(B, '[data-deck="pool_3"]'); await click(B, '#mgo');
   for (const p of [A, B]) assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull .hc .mcard .plaque')), 'the opening hand in full');
   // each card in the opening hand: its cost in the gold hexagon, as the view says
-  const costs = await A.evaluate(() => { const { V } = window.__ak(); return V.game.hand.map(h => [String(h.cost), document.querySelector(`#hand .hc[data-iid="${h.iid}"] .mcost text`)?.textContent]); });
+  const costs = await A.evaluate(() => { const { V } = window.__ak(); return V.game.hand.map(h => [String(h.cost), document.querySelector(`#hand .hc[data-iid="${h.iid}"] .mcost`)?.dataset.n]); });
   for (const [want, shown] of costs) assert.equal(shown, want);
   for (const p of [A, B]) await click(p, '#skip');
   // the first turn that can be played (a turn the mana pays for nothing in is skipped): the rail's six hexagons, the
@@ -85,7 +85,7 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   await p.goto(server.url + '/?deckview=tray', { waitUntil: 'networkidle0' });
   await click(p, '#mcoll');
   await p.waitForSelector('.coll .cgrid .tl .mcard');
-  const grid = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => ({ id: t.dataset.card, cost: t.querySelector('.mcost text')?.textContent, rect: !!t.querySelector('.card') })));
+  const grid = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => ({ id: t.dataset.card, cost: t.querySelector('.mcost')?.dataset.n, rect: !!t.querySelector('.card') })));
   const pool = await (await fetch(server.url + '/api/pool')).json(), C = Object.fromEntries(pool.cards.map(c => [c.id, c]));
   assert.ok(grid.length > 40 && grid.every(g => !g.rect && g.cost === String(C[g.id].mana)), 'every tile is the mana card with its cost');
   assert.deepEqual(grid.map(g => +g.cost), grid.map(g => +g.cost).sort((a, b) => a - b), 'the grid sorts by cost first');
@@ -99,7 +99,7 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   const want = ['chipmunk', 'chipmunk', 'tarsier', 'tarsier', 'lion', 'lion', 'lynx', 'lynx', 'ocelot', 'ocelot', 'mole', 'mole', 'serval', 'serval', 'caracal', 'caracal',
     'cheetah', 'cheetah', 'black_panther', 'black_panther', 'jaguar', 'jaguar', 'bat', 'bat'];
   for (const id of want) { await click(p, `.cgrid .tl[data-card="${id}"]`); await wait(30); }
-  const tray = await p.evaluate(() => ({ cells: [...document.querySelectorAll('.mtray .cell')].map(e => ({ id: e.dataset.card || null, cost: +(e.querySelector('.mcost text')?.textContent || 0),
+  const tray = await p.evaluate(() => ({ cells: [...document.querySelectorAll('.mtray .cell')].map(e => ({ id: e.dataset.card || null, cost: +(e.querySelector('.mcost')?.dataset.n || 0),
       x: e.getBoundingClientRect().left, y: e.getBoundingClientRect().top })),
     counts: [...document.querySelectorAll('.mtray .rcount')].map(b => +b.textContent), leader: document.querySelector('.mtray .tlead')?.dataset.card,
     stars: !!document.querySelector('#fstars, .coll .lvs'), play: document.querySelector('#play').textContent, ok: !document.querySelector('#play').disabled,
@@ -133,7 +133,7 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   // and the strength; two copies as two dots, no third number; no stars anywhere
   await p.goto(server.url + '/?deckview=list#/collection', { waitUntil: 'networkidle0' });
   await p.evaluate(() => [...document.querySelectorAll('.dtile[data-d]')].find(e => e.textContent.includes('Mana test')).click()); await p.waitForSelector('.side .st.mst');
-  const list = await p.evaluate(() => ({ strips: [...document.querySelectorAll('.side .st')].map(s => ({ id: s.dataset.card, cost: +(s.querySelector('.sc text')?.textContent || 0),
+  const list = await p.evaluate(() => ({ strips: [...document.querySelectorAll('.side .st')].map(s => ({ id: s.dataset.card, cost: +(s.querySelector('.sc .mchip')?.dataset.n || 0),
       fig: !!s.querySelector('.hd img'), dots: s.querySelectorAll('.x i').length, x: s.querySelector('.x').textContent })), stars: !!document.querySelector('.coll .lvs, #fstars'), tray: !!document.querySelector('.mtray') }));
   assert.equal(list.tray, false); assert.equal(list.stars, false, 'no stars');
   assert.deepEqual(list.strips.map(s => s.cost), list.strips.map(s => C[s.id].mana).sort((a, b) => a - b), 'the list by cost');

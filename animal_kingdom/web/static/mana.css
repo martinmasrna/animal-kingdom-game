@@ -4,7 +4,7 @@
    mana); the last plays left of it; the small controls in a row at the top left. */
 
 /* ---------------------------------------------------------------- the card: the piece set in a hexagon card (any page, mana.js) */
-.mcard { --mw: 100px; position: relative; width: var(--mw); height: calc(var(--mw) * 2.127); font-family: 'Source Serif 4', Georgia, serif; color: #eef2f7; }
+.mcard { --mw: 100px; position: relative; width: var(--mw); height: calc(var(--mw) * 2.127); font-family: 'Fira Sans Condensed', sans-serif; color: #eef2f7; }
 .mcard .mpiece { position: absolute; left: 0; top: 0; width: var(--mw); height: calc(var(--mw) * 1.15556); z-index: 2; }
 .mcard .mpiece .tkbase, .mcard .mpiece .tkarmor { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
 .mcard .mpiece .tkbase { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45)); }
@@ -25,17 +25,17 @@
 .mcard .plaque .mfo { fill: url(#mfr); stroke: #121417; stroke-width: 1.6px; vector-effect: non-scaling-stroke; }
 .mcard .plaque .mib { fill: none; stroke: rgba(0, 0, 0, .45); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
 .mcard .mplate { position: absolute; display: grid; place-items: center; background: linear-gradient(180deg, #59606b, #41474f); box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .14), inset -1px -1px 0 rgba(0, 0, 0, .3), 0 0 0 1.5px #121417; }
-.mcard .pname { font-weight: 600; font-size: calc(var(--mw) * .128); line-height: 1; padding-top: calc(var(--mw) * .034); color: #f1ede4; text-shadow: 0 1px 0 #000; white-space: nowrap; }
+.mcard .pname { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; letter-spacing: .01em; font-size: calc(var(--mw) * .14); line-height: 1; padding-top: calc(var(--mw) * .034); color: #f1ede4; text-shadow: 0 1px 0 #000; white-space: nowrap; }
 .mcard .pin { position: absolute; box-sizing: border-box; padding: 0 calc(var(--mw) * .05); display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;
   background: linear-gradient(170deg, #e6e0d2, #d3ccbb); box-shadow: inset 1px 2px 5px rgba(0, 0, 0, .35), 0 0 0 1.5px #22262c; }
-.mcard .pin p { margin: 0; font-size: calc(var(--mw) * .096); line-height: 1.22; color: #1d2126; }
+.mcard .pin p { margin: 0; font-family: 'Fira Sans Condensed', sans-serif; font-weight: 500; font-size: calc(var(--mw) * .096); line-height: 1.2; color: #1d2126; }
 .mcard .pin p b { font-weight: 700; color: #0d0f12; }
 .mcard .mfam { position: absolute; left: 0; right: 0; text-align: center; font: 600 calc(var(--mw) * .068) 'Fira Sans Condensed', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #c9c4b8; font-style: normal; }
 /* the cost: a gold hexagon, the card's top-left corner (mana.js COST_AT); a piece alone keeps it in its own corner */
 .mcard .mcost { position: absolute; z-index: 4; pointer-events: none; }
 .mcard .mcost svg, .mchip svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .mcard .mcost polygon, .mchip polygon { fill: #f2c94c; stroke: #2a2006; stroke-width: 5; stroke-linejoin: round; }
-.mcard .mcost text, .mchip text { font: 700 62px 'Source Serif 4', Georgia, serif; fill: #1d1606; }
+.mcard .mcost .mnum, .mchip .mnum { filter: brightness(0); opacity: .88; }   /* the strength numerals, inked */
 .mchip { display: inline-block; width: 18px; height: 21px; vertical-align: -5px; margin: 0 2px; }
 
 /* the mana: six small gold hexagons */
