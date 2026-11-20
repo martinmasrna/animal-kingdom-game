@@ -538,13 +538,17 @@ def test_shade_strength_is_its_count():
         {"hand": 3, "ally": 5, "enemy": 2, "food": 7, "removed": 1}
 
 
-def test_hunters_remove_by_their_limit():
-    # The Hunters (Martin, 2026-11-20): Roar: remove an adjacent enemy of strength N or less; the Giant Hunter, 8 or more.
+def test_hunters_weaken_and_the_giant_hunter_removes():
+    # The Hunters (Martin, 2026-11-20): Roar: give an adjacent enemy -N strength (it dies below 0); the Giant Hunter
+    # removes an adjacent enemy of strength 8 or more.
     from animal_kingdom.engine.effects import _adjacent_enemy_targets
-    s = state()
-    for cr, cid in (("2,1", "wisp_1"), ("2,2", "wisp_6")):   # strength 2 and 8, next to 1,1
-        put(s, cr, cid, "B")
-    me = put(s, "1,1", "hunter_2", "A")
-    small = _adjacent_enemy_targets(s, me, "1,1", max_strength=MANA.hunter_2_max)
-    big = _adjacent_enemy_targets(s, me, "1,1", min_strength=MANA.giant_hunter_min)
-    assert small == ["2,1"] and big == ["2,2"]
+    from animal_kingdom.engine.strength import effective_strength
+    s = state(hands={"A": ["hunter_3"]})
+    put(s, "1,1", "wisp_1", "A")
+    foe = put(s, "2,2", "wisp_6", "B")      # strength 8
+    me = put(s, "1,2", "giant_hunter", "A")
+    assert _adjacent_enemy_targets(s, me, "1,2", min_strength=MANA.giant_hunter_min) == ["2,2"]
+    from animal_kingdom.engine.effects import _drain_place, resolve
+    _drain_place(s, me, "1,2", MANA.hunter_3_drain)
+    step = s.effect_stack[-1]
+    assert step["then"] == "drain" and step["amount"] == 3 and "2,2" in step["options"]

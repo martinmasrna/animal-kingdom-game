@@ -2967,6 +2967,13 @@ def _mosquito_place(state, unit, cr):
     _drain_place(state, unit, cr, state.config.mosquito_drain)
 
 
+def _drains(attr):
+    """Roar: give an adjacent enemy -N strength, N the config's `attr` (the mana prototype's Hunters)."""
+    def handler(state, unit, cr):
+        _drain_place(state, unit, cr, getattr(state.config, attr))
+    return handler
+
+
 def _drain_place(state, unit, cr, amount):
     """Roar: give an adjacent enemy -N strength."""
     _push_choose(state, unit.owner, [nb for nb, top in _adjacent_tops(state, cr)
@@ -3773,12 +3780,12 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cottonmouth": {"on_place": _king_cobra_place},
     "weasel": {"on_place": _removes("weasel_max")},
     "mongoose": {"on_place": _removes("mongoose_max")},   # (Martin, 2026-11-16)   # Roar: remove an adjacent enemy of strength 3 or less (Martin, 2026-11-16)
-    "hunter_3": {"on_place": _removes("hunter_3_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_5": {"on_place": _removes("hunter_5_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_7": {"on_place": _removes("hunter_7_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_6": {"on_place": _removes("hunter_6_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_4": {"on_place": _removes("hunter_4_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_2": {"on_place": _removes("hunter_2_max")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_3": {"on_place": _drains("hunter_3_drain")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_5": {"on_place": _drains("hunter_5_drain")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_7": {"on_place": _drains("hunter_7_drain")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_6": {"on_place": _drains("hunter_6_drain")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_4": {"on_place": _drains("hunter_4_drain")},   # the mana prototype (Martin, 2026-11-20)
+    "hunter_2": {"on_place": _drains("hunter_2_drain")},   # the mana prototype (Martin, 2026-11-20)
     "giant_hunter": {"on_place": _removes(min_attr="giant_hunter_min")},   # the mana prototype (Martin, 2026-11-20)
     "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _removes("black_mamba_max")},

@@ -167,12 +167,6 @@ STRENGTH_LIMITS = {
     "hornet": "hornet_max",
     "weasel": "weasel_max",
     "mongoose": "mongoose_max",
-    "hunter_3": "hunter_3_max",
-    "hunter_5": "hunter_5_max",
-    "hunter_7": "hunter_7_max",
-    "hunter_6": "hunter_6_max",
-    "hunter_4": "hunter_4_max",
-    "hunter_2": "hunter_2_max",
     "giant_hunter": "giant_hunter_min",
 }
 
@@ -212,7 +206,9 @@ STRENGTH_LOSS_RE = re.compile(r"(?:gets?|enemy) -(\d+) strength", re.IGNORECASE)
 def test_strength_loss_text_matches_config():
     """Viper's and Mosquito's printed "-N strength" equal their constants, and no other card prints a loss unchecked."""
     printed = {cid: int(m.group(1)) for cid, c in _cards().items() if (m := STRENGTH_LOSS_RE.search(c.text))}
-    assert printed == {"viper": Config.default().viper_poison, "mosquito": Config.default().mosquito_drain}
+    cfg = Config.default()
+    assert printed == {"viper": cfg.viper_poison, "mosquito": cfg.mosquito_drain,
+                       **{f"hunter_{n}": getattr(cfg, f"hunter_{n}_drain") for n in (2, 3, 4, 5, 6, 7)}}
 
 
 def test_eon_decay_text_matches_config():
