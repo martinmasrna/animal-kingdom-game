@@ -37,6 +37,7 @@ def game_log_record(rec, *, map_id: str, bots: tuple[str, str], config: Optional
         "winner": rec.winner, "reason": rec.reason, "turns": rec.turns,
         "actions": list(rec.actions),
         **({"draw_action": False} if not config.draw_action else {}),
+        **({"ruleset": config.ruleset} if config.ruleset != "default" else {}),
         **({"capped": list(rec.capped)} if getattr(rec, "capped", None) else {}),
         **({"leaders": lead} if any((lead := leaders_for(rec.deck_a, rec.deck_b)).values()) else {}),
     }

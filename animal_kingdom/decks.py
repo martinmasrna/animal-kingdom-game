@@ -107,9 +107,12 @@ def deck_stars(decklist: Sequence[str], cards: dict[str, Card]) -> int:
     return sum(cards[cid].stars for cid in decklist if cid in cards)
 
 
-def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
+def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None,
+                      ruleset: Optional[str] = None) -> list[str]:
     """What makes `decklist` illegal under the deck rules (rules §13); empty when it's legal.
-    Only collectible cards (the starter decks' and the bench) may be in it."""
+    Only collectible cards (the starter decks' and the bench) may be in it. In the mana ruleset (2026-11-20) the same size
+    and copy limits, no star budget, and only cards with a mana cost."""
+    mana = ruleset == "mana"
     cards = cards if cards is not None else load_cards()
     problems = []
     if len(decklist) != DECK_SIZE:
@@ -122,11 +125,13 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
         if card is None or not card.collectible:
             problems.append(f"{cid!r} is not a collectible card")
             continue
+        if mana and card.cost is None:
+            problems.append(f"{card.name} has no mana cost")
         limit = COPY_LIMITS[card.rarity]
         if n > limit:
             problems.append(f"at most {limit} {card.name}")
     stars = deck_stars(decklist, cards)
-    if stars > STAR_BUDGET:
+    if stars > STAR_BUDGET and not mana:
         problems.append(f"{stars} stars, over the {STAR_BUDGET} a deck may hold")
     return problems
 
@@ -165,13 +170,14 @@ def make_vanilla_deck(
     return pool[:n]
 
 
-def deck_problems(decklist: Sequence[str], leader: Optional[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
+def deck_problems(decklist: Sequence[str], leader: Optional[str], *, cards: Optional[dict[str, Card]] = None,
+                  ruleset: Optional[str] = None) -> list[str]:
     """What makes a deck illegal for play: the list's problems (decklist_problems), and its leader's. Every deck has a
     leader, one of its own legendaries that can lead (Martin, 2026-11-16: "how is it not illegal to have decks without
     leader? ... same way you can't have deck with too many/too little cards, and too many stars"). The engine plays any
     deck; this is the deck rule, checked where a deck is put into play (a player's, the bots' pool, the league)."""
     from .engine.leaders import leader_problem
-    problems = decklist_problems(decklist, cards=cards)
+    problems = decklist_problems(decklist, cards=cards, ruleset=ruleset)
     if not leader:
         problems.append("a deck needs a leader")
     elif (bad := leader_problem(leader, decklist)):

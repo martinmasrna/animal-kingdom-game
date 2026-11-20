@@ -243,6 +243,13 @@ class Config:
     actions_per_turn: int = 2            # top-level actions (place/draw) per turn (overview.md §5)
     first_turn_actions: int = 1          # the first player's first turn only: the tempo the second player
                                          # lacks (Martin, 2026-10-11, from his gauntlets: 82% first vs 67% second)
+    # --- The mana ruleset (the prototype Martin asked for on 2026-11-20; RULESETS["mana"], off by default) ---
+    # No action count: on a player's Nth own turn they have min(N, mana_cap) mana, lost at the end of the turn. Playing an
+    # animal from hand costs its card's `cost`; anything an effect puts into play is free; a Roam, an Echo, a leader's power
+    # and a printed "Action:" cost mana_per_action each, and the Beaver's "1 additional action" is that much more mana.
+    mana: bool = False
+    mana_cap: int = 6
+    mana_per_action: int = 3
 
     # --- Engine safety / sim hygiene ---
     max_actions_per_turn: int = 30       # a turn ends after this many applied actions, choices included, even mid-effect (Martin, 2026-11-18)
@@ -258,13 +265,66 @@ class Config:
         """Return a copy with the given fields overridden (for balance sweeps)."""
         return replace(self, **overrides)
 
+    @property
+    def ruleset(self) -> str:
+        """The ruleset this config plays (a key of RULESETS)."""
+        return "mana" if self.mana else "default"
+
+    def for_ruleset(self, name: Optional[str]) -> "Config":
+        """This config under a named ruleset (RULESETS; None or "default" changes nothing)."""
+        if name not in RULESETS:
+            raise ValueError(f"no ruleset {name!r}; one of {sorted(RULESETS)}")
+        return replace(self, **RULESETS[name])
+
     def for_log(self, log: dict) -> "Config":
         """This config with the turn rules a game log was played under: a log from before the first player's one-action
         first turn (2026-10-11) carries no `first_turn_actions`, and its first turn had two; one from before the four-card
-        hands carries no `first_player_opening_draw`, and its first player drew three."""
-        return replace(self, first_turn_actions=log.get("first_turn_actions", self.actions_per_turn),
+        hands carries no `first_player_opening_draw`, and its first player drew three. A log of another ruleset names it
+        (`"ruleset": "mana"`)."""
+        base = self.for_ruleset(log.get("ruleset") or "default")
+        return replace(base, first_turn_actions=log.get("first_turn_actions", base.actions_per_turn),
                        first_player_opening_draw=log.get("first_player_opening_draw", 3),
-                       draw_action=log.get("draw_action", True))
+                       draw_action=log.get("draw_action", base.draw_action if log.get("ruleset") else True))
+
+
+# The per-match rulesets: the fields each sets over the default. "mana" is the prototype of 2026-11-20 (Martin: opening
+# hands "3 for first and 4 for second"; no Draw action), played on its own board (RULESET_MAPS).
+RULESETS: dict[str, dict] = {
+    "default": {},
+    "mana": {"mana": True, "draw_action": False, "first_player_opening_draw": 3, "second_player_opening_draw": 4},
+}
+RULESET_MAPS: dict[str, str] = {"mana": "map_hex19"}
+
+
+def _mana_texts() -> tuple[dict[str, str], dict[str, str]]:
+    """How the mana ruleset reads the cards whose stored text speaks of actions or a den (the stored text stays the
+    default ruleset's), and the keywords whose explanation does. These readings are the lead session's defaults of
+    2026-11-20, not Martin's decisions: the Beaver's extra action is mana_per_action more mana; "next to your opponent's
+    den" is next to their base (effects.next_to_enemy_den)."""
+    c = Config()
+    more = c.mana_per_action * c.beaver_bonus_actions
+    cards = {
+        "beaver": f"Roar: next turn, you have {more} more mana. Echo.",
+        "cheetah": "Roar: if this is next to your opponent's base, draw 2 animals.",
+        "falcon": "Flight. Roar: if this is next to your opponent's base, draw an animal.",
+    }
+    n = c.mana_per_action
+    keywords = {
+        "Action": f"Costs {n} mana. Each animal can do it once a turn.",
+        "Echo": f"Pay {n} mana to repeat its Roar. Each animal can do it once a turn.",
+        "Flight": "Can be placed on any tile, even one not connected to yours, except your opponent's base.",
+        "Roam": f"For {n} mana, move it through your animals connected to it, then one tile beyond (two with Reach): onto an "
+                "empty tile, onto one of your animals, or onto an enemy it beats, never onto your opponent's base. Once per turn.",
+        "Reach": "Can be placed up to two tiles away from one of your connected animals, jumping over what stands between, "
+                 "never onto your opponent's base.",
+        "Apex Predator": "Must be placed on top of another animal, yours or an enemy's, and eats it.",
+    }
+    return cards, keywords
+
+
+# Per-ruleset text for the client: card id -> the card's text in that ruleset, keyword -> its explanation there.
+RULESET_TEXT: dict[str, dict[str, str]] = {"default": {}, "mana": _mana_texts()[0]}
+RULESET_KEYWORDS: dict[str, dict[str, str]] = {"default": {}, "mana": _mana_texts()[1]}
 
 
 def load_config_overrides(path: Optional[str]) -> Optional[Config]:

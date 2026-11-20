@@ -58,6 +58,8 @@ def can_pass(state: GameState) -> bool:
 def _top_level_actions(state: GameState) -> list[Action]:
     player = state.current
     left = _actions_left(state)
+    if state.config.mana:
+        return _mana_actions(state, player, left)
     if left <= 0:                                  # the turn stays open only for a free roam (Roam)
         return list(effects.legal_roams(state, player, free_only=True)) if effects.free_roams_left(state, player) else []
     actions: list[Action] = []
@@ -69,6 +71,21 @@ def _top_level_actions(state: GameState) -> list[Action]:
     actions.extend(effects.legal_acts(state, player))     # Action animals (the actions prototype): one action each
     if state.leaders and effects.leader_usable(state, player):
         actions.append(LeaderAction())                    # your den's power (the leaders prototype): one action
+    return actions
+
+
+def _mana_actions(state: GameState, player: str, left: int) -> list[Action]:
+    """The mana ruleset's top-level actions: every play from hand whose card's cost the mana left pays, and, while it pays
+    an ability (Config.mana_per_action), every Roam, Echo or Action and the leader's power. A free roam needs no mana. There
+    is no Draw action and no Titan rule (a card's cost is its whole price)."""
+    actions: list[Action] = [p for p in effects.legal_placements(state, player, titan_ok=True)
+                             if effects.mana_cost(state, p.card_id) <= left]
+    ability = left >= state.config.mana_per_action
+    actions.extend(effects.legal_roams(state, player, free_only=not ability))
+    if ability:
+        actions.extend(effects.legal_acts(state, player))
+        if state.leaders and effects.leader_usable(state, player):
+            actions.append(LeaderAction())
     return actions
 
 
@@ -100,11 +117,38 @@ TITAN_ACTIONS = 2   # Titan (keywords.md): playing it costs two actions instead 
 
 def turn_actions(state: GameState) -> int:
     """The current turn's actions: two, one on the first player's first turn, plus any bonus (Beaver); the Electric Eel
-    caps the turn it shocks at its number."""
+    caps the turn it shocks at its number. In the mana ruleset, the turn's mana (mana_total): the count the turn spends
+    from is mana there, so everything that asks what is left reads the mana left."""
+    if state.config.mana:
+        return mana_total(state, state.current)
     base = state.config.first_turn_actions if state.turn_counter == 0 else state.config.actions_per_turn
     total = base + state.turn_flags.get(f"bonus_actions_{state.current}", 0)
     cap = state.turn_flags.get(f"action_cap_{state.current}")
     return total if cap is None else min(total, cap)
+
+
+def own_turn_number(state: GameState, player: str) -> int:
+    """Which of `player`'s own turns is the current one if it is theirs, else their next: 1 for their first."""
+    return (state.turn_counter + (0 if player == state.current else 1)) // 2 + 1
+
+
+def mana_total(state: GameState, player: str) -> int:
+    """The mana ruleset: `player`'s mana this turn if it is theirs, else at the start of their next: min(N, mana_cap) on
+    their Nth own turn, plus mana_per_action for each extra action granted (the Beaver); an action cap (the Electric Eel)
+    holds it to that many actions' worth."""
+    cfg = state.config
+    total = min(own_turn_number(state, player), cfg.mana_cap)
+    if player != state.current:
+        return total
+    total += cfg.mana_per_action * state.turn_flags.get(f"bonus_actions_{player}", 0)
+    cap = state.turn_flags.get(f"action_cap_{player}")
+    return total if cap is None else min(total, cap * cfg.mana_per_action)
+
+
+def mana_left(state: GameState, player: str) -> int:
+    """The mana `player` has left to spend: this turn's unspent mana, or all of their next turn's while it isn't theirs."""
+    total = mana_total(state, player)
+    return total - state.actions_taken_this_turn if player == state.current else total
 
 
 def _actions_left(state: GameState) -> int:
@@ -181,6 +225,9 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     elif isinstance(action, DrawAction):
         state.actions_taken_this_turn += 1
         _do_draw(state, state.current)
+    elif isinstance(action, PlaceAction) and state.config.mana:
+        state.actions_taken_this_turn += effects.mana_cost(state, action.card_id)
+        effects.do_placement(state, state.current, action.card_id, action.target, action.iid)
     elif isinstance(action, PlaceAction):
         titan = "Titan" in state.cards[action.card_id].keywords
         state.actions_taken_this_turn += titan_cost(state, state.current) if titan else 1
@@ -194,10 +241,10 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
         effects.pay_for_roam(state, state.current, stack[-1] if stack else None)
         effects.do_roam(state, state.current, action.origin, action.target)
     elif isinstance(action, ActAction):
-        state.actions_taken_this_turn += 1
+        state.actions_taken_this_turn += effects.ability_cost(state)
         effects.do_act(state, state.current, action.origin)
     elif isinstance(action, LeaderAction):
-        state.actions_taken_this_turn += 1
+        state.actions_taken_this_turn += effects.ability_cost(state)
         effects.do_leader(state, state.current)
     else:
         raise EngineError(f"unexpected action {action!r}")
@@ -241,7 +288,8 @@ def _decided(state: GameState) -> bool:
     return state.result is not None
 
 
-def _end_turn(state: GameState) -> None:
+def _end_turn(state: GameState, *, forced: bool = False) -> None:
+    """End the current player's turn. `forced`: it opened with nothing they could do."""
     player = state.current
     state.emit("turn_end", player=player)
     effects.end_of_turn(state, player)      # on_end_of_turn triggers (Dingo, Worker Wasp, Methuselah)
@@ -254,7 +302,11 @@ def _end_turn(state: GameState) -> None:
     # Both players ending a turn without acting, back to back, ends the game (more food wins;
     # on a tie, the player whose pass ended it loses). A player with no move passes too.
     acted = state.actions_taken_this_turn or state.turn_flags.get(f"roams_{player}")   # a free roam is acting too
-    state.idle_turns = 0 if acted else state.idle_turns + 1
+    if forced and state.config.mana and state.decks[player]:
+        pass        # the mana ruleset: a turn the mana couldn't pay for is skipped, not passed, while its player has a deck
+                    # to draw from (else both players' first turns, 1 mana each, could end the game)
+    else:
+        state.idle_turns = 0 if acted else state.idle_turns + 1
     if state.idle_turns >= 2:
         state.result = _resolve_passes(state)
         return
@@ -274,7 +326,7 @@ def _end_turn(state: GameState) -> None:
     # A player who can neither draw nor place nor roam passes; the game goes on.
     if state.result is None and state.pending is None and not state.effect_stack \
             and state.turn_counter < state.config.max_turns and not _has_top_level_action(state):
-        _end_turn(state)                     # (never past the turn cap: is_terminal ends the game there)
+        _end_turn(state, forced=True)        # (never past the turn cap: is_terminal ends the game there)
 
 
 # ------------------------------------------------------------- regions / food

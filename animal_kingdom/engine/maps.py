@@ -40,6 +40,9 @@ class GameMap:
     regions: dict[str, Region]
     win_food: int
     edges: tuple[tuple[str, str], ...] = field(default=())
+    # player -> their base: tiles only that player may place on, by any means (the mana ruleset's map_hex19, 2026-11-20).
+    # A map with bases has no den to capture: its dens front the bases and are never a target. Empty on every other map.
+    bases: dict[str, frozenset[str]] = field(default_factory=dict)
     # Precomputed cr -> sorted-neighbour tuple. The map is immutable, so this is derived once
     # in __post_init__ (see `neighbors`); excluded from eq/repr as pure derived state.
     _sorted_adjacency: dict[str, tuple[str, ...]] = field(
@@ -69,6 +72,17 @@ class GameMap:
     def hq_front(self, player: str) -> frozenset[str]:
         """The crossroads in front of `player`'s HQ (its defended approaches)."""
         return self.hq_connects[player]
+
+    def closed_to(self, player: str) -> frozenset[str]:
+        """The tiles `player` may never place on: the other player's base (none on a map without bases)."""
+        for p, base in self.bases.items():
+            if p != player:
+                return base
+        return frozenset()
+
+    def next_to_base(self, player: str, cr: str) -> bool:
+        """Whether `cr` is next to `player`'s base: adjacent to one of its tiles."""
+        return any(cr in self._adjacency.get(b, ()) for b in self.bases.get(player, ()))
 
     @property
     def players(self) -> tuple[str, ...]:
@@ -119,6 +133,10 @@ def validate_map_record(rec: dict) -> None:
         if not isinstance(food, int) or food < 0:
             raise MapDataError(f"map {mid!r}: region {rid!r} has bad food {food!r}")
 
+    for player, base in rec.get("bases", {}).items():
+        if player not in rec["hqs"] or not base or any(cr not in crossroad_set for cr in base):
+            raise MapDataError(f"map {mid!r}: base {player!r} must be known crossroads of a player with a den")
+
     win_food = rec["win_food"]
     if not isinstance(win_food, int) or win_food <= 0:
         raise MapDataError(f"map {mid!r}: win_food must be a positive int, got {win_food!r}")
@@ -145,6 +163,7 @@ def _build_map(rec: dict) -> GameMap:
         },
         win_food=rec["win_food"],
         edges=tuple(edges),
+        bases={player: frozenset(base) for player, base in rec.get("bases", {}).items()},
     )
 
 
