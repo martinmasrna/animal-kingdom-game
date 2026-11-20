@@ -11836,18 +11836,6 @@
       "at": 1795199093
     }
   },
-  "spiky_5": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199093
-    }
-  },
   "flyer_2": {
     "effect": {
       "review": {
@@ -11969,18 +11957,6 @@
     }
   },
   "venomous_4": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199095
-    }
-  },
-  "venomous_5": {
     "effect": {
       "review": {
         "prev_lv": "empty",
@@ -12302,6 +12278,258 @@
       "lv": "draft",
       "by": "claude",
       "at": 1795200391
+    }
+  },
+  "spiky_6": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795200990
+    }
+  },
+  "spiky_8": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795200991
+    }
+  },
+  "spiky_10": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795200991
+    }
+  },
+  "venomous_6": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795200991
+    }
+  },
+  "venomous_8": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795200991
+    }
+  },
+  "venomous_10": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795200992
+    }
+  },
+  "scout_2": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201240
+    }
+  },
+  "scout_3": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201240
+    }
+  },
+  "scout_4": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201241
+    }
+  },
+  "scout_5": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201241
+    }
+  },
+  "scout_6": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201241
+    }
+  },
+  "scout_7": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201242
+    }
+  },
+  "scout_8": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201242
+    }
+  },
+  "scout_10": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201242
+    }
+  },
+  "winged_scout_3": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201242
+    }
+  },
+  "winged_scout_4": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201243
+    }
+  },
+  "winged_scout_5": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201243
+    }
+  },
+  "winged_scout_6": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201243
+    }
+  },
+  "winged_scout_7": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201243
+    }
+  },
+  "winged_scout_8": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201244
+    }
+  },
+  "winged_scout_10": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1795201244
     }
   }
 }

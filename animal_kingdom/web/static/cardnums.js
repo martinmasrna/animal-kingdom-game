@@ -124,6 +124,21 @@ export const CARD_NUMS = [
   "glutton_7",
   "glutton_8",
   "glutton_10",
+  "scout_2",
+  "scout_3",
+  "scout_4",
+  "scout_5",
+  "scout_6",
+  "scout_7",
+  "scout_8",
+  "scout_10",
+  "winged_scout_3",
+  "winged_scout_4",
+  "winged_scout_5",
+  "winged_scout_6",
+  "winged_scout_7",
+  "winged_scout_8",
+  "winged_scout_10",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

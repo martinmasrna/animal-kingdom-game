@@ -3809,6 +3809,21 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "hunter_4": {"on_place": _drains("hunter_4_drain")},   # the mana prototype (Martin, 2026-11-20)
     "hunter_2": {"on_place": _drains("hunter_2_drain")},   # the mana prototype (Martin, 2026-11-20)
     "giant_hunter": {"on_place": _removes()},   # the mana prototype (Martin, 2026-11-20)
+    "scout_2": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
+    "scout_3": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
+    "scout_4": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
+    "scout_5": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
+    "scout_6": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
+    "scout_7": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
+    "scout_8": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
+    "scout_10": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
+    "winged_scout_3": {"on_place": _draw1},
+    "winged_scout_4": {"on_place": _draw1},
+    "winged_scout_5": {"on_place": _draw1},
+    "winged_scout_6": {"on_place": _draw1},
+    "winged_scout_7": {"on_place": _draw1},
+    "winged_scout_8": {"on_place": _draw1},
+    "winged_scout_10": {"on_place": _draw1},
     "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _removes("black_mamba_max")},
     "mosquito": {"on_place": _mosquito_place},

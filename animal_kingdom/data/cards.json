@@ -4717,22 +4717,6 @@
       ]
     },
     {
-      "id": "spiky_5",
-      "name": "Spiky",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 4,
-      "text": "Spikes.",
-      "species": "Spiky",
-      "habitat": "",
-      "cost": 5,
-      "ruleset": "mana",
-      "keywords": [
-        "Spikes"
-      ]
-    },
-    {
       "id": "flyer_2",
       "name": "Flyer",
       "status": "collectible",
@@ -5001,22 +4985,6 @@
       "species": "Venomous",
       "habitat": "",
       "cost": 4,
-      "ruleset": "mana",
-      "keywords": [
-        "Poison"
-      ]
-    },
-    {
-      "id": "venomous_5",
-      "name": "Venomous",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 5,
-      "text": "Poison.",
-      "species": "Venomous",
-      "habitat": "",
-      "cost": 5,
       "ruleset": "mana",
       "keywords": [
         "Poison"
@@ -5340,6 +5308,326 @@
       "ruleset": "mana",
       "keywords": [
         "Hungry"
+      ]
+    },
+    {
+      "id": "spiky_6",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Spikes.",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
+    },
+    {
+      "id": "spiky_8",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "text": "Spikes.",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
+    },
+    {
+      "id": "spiky_10",
+      "name": "Spiky",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 7,
+      "text": "Spikes.",
+      "species": "Spiky",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": [
+        "Spikes"
+      ]
+    },
+    {
+      "id": "venomous_6",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "text": "Poison.",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
+    },
+    {
+      "id": "venomous_8",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 7,
+      "text": "Poison.",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
+    },
+    {
+      "id": "venomous_10",
+      "name": "Venomous",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 9,
+      "text": "Poison.",
+      "species": "Venomous",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": [
+        "Poison"
+      ]
+    },
+    {
+      "id": "scout_2",
+      "name": "Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Roar: draw a card.",
+      "species": "Scout",
+      "habitat": "",
+      "cost": 2,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "scout_3",
+      "name": "Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "text": "Roar: draw a card.",
+      "species": "Scout",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "scout_4",
+      "name": "Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "text": "Roar: draw a card.",
+      "species": "Scout",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "scout_5",
+      "name": "Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "text": "Roar: draw a card.",
+      "species": "Scout",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "scout_6",
+      "name": "Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "text": "Roar: draw a card.",
+      "species": "Scout",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "scout_7",
+      "name": "Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "text": "Roar: draw a card.",
+      "species": "Scout",
+      "habitat": "",
+      "cost": 7,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "scout_8",
+      "name": "Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 10,
+      "text": "Roar: draw a card.",
+      "species": "Scout",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "scout_10",
+      "name": "Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 15,
+      "text": "Roar: draw a card.",
+      "species": "Scout",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": []
+    },
+    {
+      "id": "winged_scout_3",
+      "name": "Winged Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Flight. Roar: draw a card.",
+      "species": "Winged Scout",
+      "habitat": "",
+      "cost": 3,
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "winged_scout_4",
+      "name": "Winged Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "text": "Flight. Roar: draw a card.",
+      "species": "Winged Scout",
+      "habitat": "",
+      "cost": 4,
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "winged_scout_5",
+      "name": "Winged Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Flight. Roar: draw a card.",
+      "species": "Winged Scout",
+      "habitat": "",
+      "cost": 5,
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "winged_scout_6",
+      "name": "Winged Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "text": "Flight. Roar: draw a card.",
+      "species": "Winged Scout",
+      "habitat": "",
+      "cost": 6,
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "winged_scout_7",
+      "name": "Winged Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "text": "Flight. Roar: draw a card.",
+      "species": "Winged Scout",
+      "habitat": "",
+      "cost": 7,
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "winged_scout_8",
+      "name": "Winged Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "text": "Flight. Roar: draw a card.",
+      "species": "Winged Scout",
+      "habitat": "",
+      "cost": 8,
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "winged_scout_10",
+      "name": "Winged Scout",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 12,
+      "text": "Flight. Roar: draw a card.",
+      "species": "Winged Scout",
+      "habitat": "",
+      "cost": 10,
+      "ruleset": "mana",
+      "keywords": [
+        "Flight"
       ]
     }
   ]

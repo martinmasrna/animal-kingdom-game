@@ -566,3 +566,14 @@ def test_a_mana_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
     resolve_choices(s)
     assert [u.card_id for u in s.board["2,1"]] == ["glutton_2"] and "wisp_1" in s.remove_pile
     assert s.food["A"] == food + MANA.hungry_food
+
+
+def test_a_scout_draws_a_card():
+    # The mana prototype's cantrips (Martin, 2026-11-20): Roar: draw a card; the Winged Scout has Flight too.
+    s = state(turn=11, hands={"A": ["scout_2", "winged_scout_3"]}, decks={"A": ["wisp_0"] * 5, "B": ["wisp_0"] * 5})
+    put(s, "1,1", "wisp_1", "A")
+    n = len(s.hands["A"])
+    rules.apply_action(s, PlaceAction("scout_2", ("cr", "1,2")))
+    resolve_choices(s)
+    assert len(s.hands["A"]) == n          # one played, one drawn
+    assert "Flight" in CARDS["winged_scout_3"].keywords
