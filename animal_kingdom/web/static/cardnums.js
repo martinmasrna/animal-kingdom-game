@@ -64,6 +64,11 @@ export const CARD_NUMS = [
   "djinn_enemy",
   "djinn_food",
   "djinn_removed",
+  "shade_hand",
+  "shade_ally",
+  "shade_enemy",
+  "shade_food",
+  "shade_removed",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

@@ -34,7 +34,9 @@ CASTE_TAGS = frozenset({"Soldier", "Nurse"})
 BOT_TAGS = frozenset(TAGS - CASTE_TAGS - {"Beetle"})
 # The keywords the bots' trained networks take a column for: Echo (the leaders prototype) came after them.
 BOT_KEYWORDS = frozenset(KEYWORDS - {"Echo"})
-DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg Eater
+DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count",  # Python, Egg Eater
+                     # the Shades (Martin, 2026-11-20): +1 for each card in your hand, ally, enemy, food of yours, animal in your opponent's Remove Pile
+                     "hand_count", "ally_count", "enemy_count", "food_count", "opp_removed_count"}
 
 # A card's status. Cards are cards and decks are decks (Martin, 2026-10-19): a card belongs to no deck, and the
 # decks the game ships (decklists.json: the starter decks a new profile gets, the decks the bots play) are lists over

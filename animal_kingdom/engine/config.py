@@ -53,6 +53,7 @@ class Config:
 
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
     egg_eater_growth: int = 2            # Egg Eater: +strength for each removed Egg
+    shade_growth: int = 1                # the Shades (mana ruleset): +strength for each of their count
 
     # --- Payoff food ---
     gazelle_food: int = 5                # Gazelle: Roar: draw a card and gain 5 food (its Flee brings the Roar back)

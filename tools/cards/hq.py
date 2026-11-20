@@ -470,7 +470,7 @@ def add(name: str, habitat: str, species: str = "") -> str:
     return cid
 
 
-def add_mana(cid: str, name: str, strength: int, cost: int) -> str:
+def add_mana(cid: str, name: str, strength: int, cost: int, dynamic: str = "") -> str:
     """A card of the mana prototype's own collection (the Wisps, Martin 2026-11-20): collectible only under the mana rules,
     in no default deck; vanilla until Martin writes it. Its number for deck codes is appended."""
     cards = _read(CARDS)
@@ -478,6 +478,8 @@ def add_mana(cid: str, name: str, strength: int, cost: int) -> str:
         raise Refused(f"{cid} already exists")
     rec = {"id": cid, "name": name, "status": "collectible", "rarity": "common", "tags": [], "base_strength": strength,
            "keywords": [], "text": "", "species": name, "habitat": "", "cost": cost, "ruleset": "mana"}
+    if dynamic:   # a strength that is a count (engine/cards.py DYNAMIC_STRENGTHS): the Shades
+        rec["base_strength"], rec["dynamic_strength"] = "dynamic", dynamic
     validate_card_record(rec)
     cards["cards"].append(rec)
     _save_cards(cards)
@@ -703,7 +705,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("delete"); s.add_argument("id")
     s = sub.add_parser("rename"); s.add_argument("old"); s.add_argument("new")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
-    s = sub.add_parser("add-mana"); s.add_argument("id"); s.add_argument("name"); s.add_argument("strength", type=int); s.add_argument("cost", type=int)
+    s = sub.add_parser("add-mana"); s.add_argument("id"); s.add_argument("name"); s.add_argument("strength", type=int); s.add_argument("cost", type=int); s.add_argument("--dynamic", default="")
     s = sub.add_parser("stage"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("text")
     s = sub.add_parser("token"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("name"); s.add_argument("strength", type=int); s.add_argument("--tags", default="")
     s = sub.add_parser("untoken"); s.add_argument("maker"); s.add_argument("id")
@@ -740,7 +742,7 @@ def main(argv=None) -> None:
         elif a.cmd == "add":
             print(add(a.name, a.habitat, a.species))
         elif a.cmd == "add-mana":
-            print(add_mana(a.id, a.name, a.strength, a.cost))
+            print(add_mana(a.id, a.name, a.strength, a.cost, a.dynamic))
         elif a.cmd == "stage":
             print(add_stage(a.maker, a.id, a.text))
         elif a.cmd == "token":

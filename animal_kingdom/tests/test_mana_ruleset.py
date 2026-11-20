@@ -524,3 +524,15 @@ def test_djinn_costs_less_for_each_of_its_count():
     s.food["A"] = 15
     assert mana_cost(s, "djinn_food") == 0
     assert mana_cost(s, "djinn_food", "B") == 1   # B's own food, 9
+
+
+def test_shade_strength_is_its_count():
+    # The Shades (Martin, 2026-11-20): 0 strength, +1 for each of their owner's count; an ally Shade counts itself.
+    from animal_kingdom.engine.strength import effective_strength
+    s = state(hands={"A": ["wisp_0", "wisp_0", "wisp_0"]}, food={"A": 7, "B": 2})
+    shades = {k: put(s, cr, f"shade_{k}", "A") for k, cr in
+              (("hand", "1,1"), ("ally", "1,2"), ("enemy", "1,3"), ("food", "2,1"), ("removed", "2,2"))}
+    put(s, "4,1", "wisp_1", "B"); put(s, "4,2", "wisp_1", "B")
+    s.remove_pile.extend(["wisp_0", "wisp_2"]); s.pile_owners.extend(["B", "A"])
+    assert {k: effective_strength(s, u) for k, u in shades.items()} == \
+        {"hand": 3, "ally": 5, "enemy": 2, "food": 7, "removed": 1}

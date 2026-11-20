@@ -349,6 +349,11 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "giraffe": ["giraffe_bonus"],
     "crocodile": ["crocodile_penalty"],
     "cockroach_legend": ["cockroach_legend_growth"],
+    "shade_hand": ["shade_growth"],
+    "shade_ally": ["shade_growth"],
+    "shade_enemy": ["shade_growth"],
+    "shade_food": ["shade_growth"],
+    "shade_removed": ["shade_growth"],
 }
 
 
