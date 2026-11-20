@@ -7,10 +7,6 @@
 .coll .chead > * { flex: none; }
 .coll .tabs { display: flex; gap: 6px; margin-right: 14px; }
 .coll .tab { position: relative; border-radius: 50%; cursor: pointer; }
-.coll .med { box-sizing: border-box; border-radius: 50%; border: 2px solid #44484c; background-repeat: no-repeat; background-color: #3a3d40; }
-.coll .tab .med { width: 40px; height: 40px; }
-.coll .tab:hover .med { border-color: #8b8e92; }
-.coll .tab.on .med { border-color: #f0ece4; box-shadow: 0 0 0 2px #16181a, 0 0 0 4px #f0ece4; }
 
 /* The card grid: compact cards filling the columns, copies in the open deck as dots, dimmed when no further copy can go in. */
 .coll .cgrid { grid-column: 1; grid-row: 2; overflow-y: auto; padding: 8px 24px 36px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
@@ -32,11 +28,10 @@
 /* Feedback: a refused add shakes the card and flashes the limit that stopped it; an added card flashes in the deck. */
 @keyframes collShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
 @keyframes collFlash { 0% { background-color: #7fb2e8; } 100% { background-color: #2a2d30; } }
-@keyframes collPulse { 0%, 60% { color: #ff8a78; transform: scale(1.25); } 100% { transform: scale(1); } }
 @keyframes collPips { 0%, 60% { transform: translateX(-50%) scale(1.3); background: #b24a3a; } 100% { transform: translateX(-50%); } }
 .coll .shake { animation: collShake .3s; }
 .coll .st.flash { animation: collFlash .9s ease-out; }
-.coll .rh span.flash { display: inline-block; animation: collPulse .7s; }
+
 .coll .pips.flash { animation: collPips .7s; }
 
 /* Dialogs (delete, cover). */
@@ -54,12 +49,9 @@
 .coll .cv { container-type: inline-size; cursor: pointer; border-radius: 10px; transition: transform .1s; } .coll .cv .card { --w: 100cqw; } .coll .cv:hover { transform: translateY(-3px); }
 .coll .cv.on { box-shadow: 0 0 0 3px #24272a, 0 0 0 5px #f0ece4; }
 
-/* ---------- a touch of the world (design sandbox coll2/, "10% of concept A"): the grey-box as it is, plus the den's granite under the
-   deck column, and the board's stone rims on the family medallions. ---------- */
-.coll .tab .med { border: 0; }
 .coll .tab::before { content: ''; position: absolute; inset: -3px; z-index: 2; pointer-events: none; background: url(/static/kit2/rim_n.webp) center / contain no-repeat; }
 .coll .tab.on::before { background-image: url(/static/kit2/rim_a.webp); }
-.coll .tab.on .med { box-shadow: none; }
+
 .coll .tab:hover:not(.on)::before { filter: brightness(1.25); }
 .coll .chead { border-bottom: 0; }
 /* The column's surfaces in the rock's warm dark, not the grey-box's cool grey. */
@@ -147,7 +139,7 @@
   .coll .chead .dd .sel { width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .coll .search { min-width: 0; }
 }
-@media (max-width: 700px) { .coll .tab .med { width: 34px; height: 34px; } .coll .tabs { gap: 5px; } }   /* all nine families on one row */
+@media (max-width: 700px) {  .coll .tabs { gap: 5px; } }   /* all nine families on one row */
 @media (max-width: 1000px) and (orientation: landscape) { .coll { grid-template-rows: auto minmax(0, 1fr); } }
 /* Upright, last so it wins over the narrow rules: the filters on two rows (families; strength, rarity, search), and the deck
    column as a sheet along the bottom, shut by default so the cards take the screen (collection.js: the grip or the count opens it). */
@@ -177,7 +169,7 @@
 }
 /* The stars prototype's level filter is a fourth dropdown: the header gives it room with slightly smaller family medallions. */
 @media not (orientation: portrait) {
-  .coll .chead { gap: 8px; } .coll .tabs { gap: 4px; margin-right: 8px; } .coll .tab .med { width: 36px; height: 36px; } .coll .searchw { min-width: 92px; }
+  .coll .chead { gap: 8px; } .coll .tabs { gap: 4px; margin-right: 8px; }  .coll .searchw { min-width: 92px; }
 }
 /* the leaders prototype: the open deck's leader, and the dialog that picks it */
 .coll .lrow { display: flex; gap: 10px; align-items: center; padding: 8px 10px; margin: 6px 0 4px; border-radius: 8px; background: rgba(0,0,0,.28); cursor: pointer; }

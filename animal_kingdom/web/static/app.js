@@ -44,7 +44,7 @@ function toast(msg, ok) {
 }
 // A decklist in the game's panels: the collection's strips, each with the copies left.
 function rows(list, counts) {
-  return stripsHTML(Object.keys(list), CARDS, id => counts ? (counts[id] || 0) : list[id], true);   // the mana rules: by cost, each with its cost
+  return stripsHTML(Object.keys(list), CARDS, id => counts ? (counts[id] || 0) : list[id]);   // by cost, each with its cost
 }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 function cardPop(el, id, extra, place) {
@@ -199,7 +199,7 @@ function route() {
 
 // ------------------------------------------------------------------ home: where a match starts
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
-const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends'), menu: TI('menu') };
+const TOPICON = { feedback: TI('feedback'), friends: TI('friends') };
 
 function settingsBody() {
   const v = Math.round(volume() * 100);
@@ -257,13 +257,20 @@ function legal(list, leader) {
   return list.length === RULES.deckSize && !!leader && list.includes(leader) && !!LEADERS[leader]
     && Object.entries(n).every(([id, k]) => CARDS[id] && CARDS[id].status === 'collectible' && k <= RULES.copies[CARDS[id].rarity]);
 }
-// A conversation's Challenge (chat.js): your chosen deck against the friend's, the match once they accept.
+// A friend's Challenge (the Friends panel, chat.js): your chosen deck, as Play would play it. An online friend is asked at
+// once and the match opens when they accept; an offline one gets a link to a match waiting for them.
 async function challengeFriend(f) {
-  const d = chosenDeck();
+  const d = chosenDeck(), name = f.name.split('#')[0];
   if (!d) return toast('Build a legal deck in the Collection first: 25 cards and a leader');
-  toast(`Challenge sent to ${f.name.split('#')[0]}`, true);
+  if (!f.online) {
+    const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: deckSpec(d), name: 'You' }) });
+    if (!r.ok) return toast(await r.text());
+    const m = await r.json(); setToken(m.id, m.token);
+    shareLink(`${location.origin}/#/join/${m.id}`, 'A match in Animal Kingdom'); location.hash = '#/m/' + m.id; return;
+  }
+  toast(`Waiting for ${name} to accept`, true);
   const r = await api('/api/challenge', { method: 'POST', body: JSON.stringify({ friend: f.id, deck: deckSpec(d) }) });
-  if (!r.ok) return toast(await r.text());
+  if (!r.ok) return toast(r.status === 409 ? await r.text() : 'The challenge didn\'t go through');
   const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
 }
 // Home (a plain prototype, Martin, 2026-11-20): three buttons. Play opens the friend match (#/play: a deck,
@@ -273,10 +280,11 @@ async function challengeFriend(f) {
 function manaHome(mode = {}) {
   screen = 'home';
   if (!mode.play && !mode.join) {
-    app.innerHTML = `<div class="mhome"><div class="box">
+    app.innerHTML = `<div class="mhome"><div class="mtop"><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button></div><div class="box">
       <h1>Animal Kingdom<small>A prototype</small></h1>
       <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><button class="go" id="mprac">Practice</button><a class="go" id="mcoll" href="#/collection">Collection</a></div>
       </div></div>`;
+    wireChatButton(document.getElementById('hchat'));
     document.getElementById('mprac').onclick = async () => {
       // your own deck (the one chosen in Play, else your first legal one); the bot plays a mirror of it (server.py, Martin,
       // 2026-11-20: the pool's animal decks are no mana decks any more)
@@ -429,18 +437,6 @@ function onView(prev) {
 // 2026-10-15, after Hearthstone's hand buffs). The hand redraws on every view, so the motion is timed from when its step began
 // (--ago, a negative delay) and carries on across redraws; the old number and the new are both drawn, and CSS swaps them.
 const RISE_MS = 1100, rising = new Map();   // iid: { step, t0, was, now }
-// A strength step's changes as the board flashes them: each unit named, or every copy of a card that grows as one
-// (Rattlesnake, Eon) on its owner's side.
-function strengthFlash(step) {
-  const m = new Map();
-  if (!step || step.kind !== 'strength') return m;
-  for (const c of step.changes) {
-    const dir = c.n > 0 ? 'up' : 'down';
-    if (c.iid != null) m.set(c.iid, dir);
-    else for (const st of Object.values(V.game.board)) for (const u of st) if (u.id === c.card && u.owner === c.owner) m.set(u.iid, dir);
-  }
-  return m;
-}
 // Tell the server the screen has played the events out: a bot opponent waits for it before its next move (server._watched).
 function played() {
   if (!wsId || 0 || !V || !V.game) return;
@@ -491,9 +487,8 @@ function showView(prev) {
         hand: prev.game.hand.map(h => h.iid), oppHand: prev.game.handCount[prev.you === 'A' ? 'B' : 'A'], hist: prev.game.history.length,
         fromStones: !(ui.step && ui.step.kind === 'food' && !ui.step.income),   // only region income flies from the stones
         // a card's food flies from the animals whose doing it is; food eaten (Hungry) flies to the animals that ate it
-        flow: ui.step && (ui.step.kind === 'pay' || ui.step.kind === 'food' && !ui.step.income) && ui.step.from
-          ? { kind: ui.step.kind, side: rel(ui.step.player), at: ui.step.from.map(f => ({ cr: dcr(f.cr), n: f.n })) } : null,
-        strength: strengthFlash(ui.step) } : null;
+        flow: ui.step && ui.step.kind === 'food' && !ui.step.income && ui.step.from
+          ? { kind: ui.step.kind, side: rel(ui.step.player), at: ui.step.from.map(f => ({ cr: dcr(f.cr), n: f.n })) } : null } : null;
   if (ui.step && ui.step.kind === 'yourturn' && screen === 'game') { turnPlate(); turnCue.until = Date.now() + 900; }
   gameScreen();
 }
@@ -737,7 +732,7 @@ function drawGame() {
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first; a card an effect made or
     // fetched (a Kitten, a Young Stag) came from no deck, so it rises into its place instead (Martin, 2026-10-31: flying in
     // from the deck "just looks weird")
-    const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = drawn && ui.step && ui.step.kind === 'to_hand';
+    const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = false;
     const from = drawn ? `${made ? '' : `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
     const html = manaCard(c, { str: h.str, cost: h.cost, w: cw, iid: h.iid });
     return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${html}</div>`;
@@ -950,7 +945,6 @@ function moveLine(m) {
     if (f.k === 'cover') return `covered ${name(f.card)}`;
     if (f.k === 'remove') return `removed ${name(f.card)}`;
     if (f.k === 'placed') return `${f.owner === V.you ? 'you' : 'your opponent'} placed ${name(f.card)} on it`;
-    if (f.k === 'bounce') return `returned ${name(f.card)}`;
     if (f.k === 'scare') return `scared off ${name(f.card)}`;
     if (f.k === 'draw') return m.kind === 'draw' && f.seat === m.seat ? null : `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}drew ${f.n}`;
     if (f.k === 'lose') return `${f.seat === V.you ? 'you' : 'your opponent'} lost ${f.n} food`;
@@ -1000,36 +994,27 @@ function drawBoard(d) {
   if (ui.anim) { ui.animKeep = { A: ui.anim, t0: now }; ui.anim = null; }
   const keep = ui.animKeep && now - ui.animKeep.t0 < ANIM_MAX ? ui.animKeep : null;
   let A = keep ? keep.A : null; const ago = keep ? now - keep.t0 : 0;
-  // a den taken: the animal that took it, as it was played (the engine's capture event), standing in the den's mouth
-  const cap = V.game.result && V.game.result.reason === 'hq_capture' && (V.game.events || []).filter(e => e.e === 'capture').pop();
-  const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str, iid: cap.iid } : null;
-  const region = null;
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
   const fire = st && st.src ? st.src.map(dcr) : null;   // the animals whose own effect this is: their trigger marks brighten
   const G = V.game, bases = G.bases ? { A: (G.bases[V.you] || []).map(dcr), B: (G.bases[opp()] || []).map(dcr) } : null;   // the mana board's bases
-  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { bases, region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, ago, capture, strike, fire, leaders: g.leaders,
+  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { bases, rings: d.rings, hqRing: d.hqRing, preview, anim: A, ago, strike, fire, leaders: g.leaders,
     beat: endBeat(), current: V.phase === 'playing' ? rel(V.game.current) : null });
   draw();
-  if (startBeat(g, A, ago, capture)) draw();
+  if (startBeat(g, A, ago)) draw();
   const fc = flying(); if (fc && document.querySelector(`#board .cr.flown[data-cr="${fc}"]`)) flightLanded(fc);   // the piece is landing: the card's flight is over
 }
 
 // The end's beat (board.js): the game's last move shown rather than told. A den taken falls apart once the animal that took it
 // has landed in its mouth; a den that reached the food to win lights up once its gem has counted to the total. It starts once
 // per game (beat.key), as the move plays; a game already over when drawn (a reload, a replay's end) shows how it ended at once.
-function startBeat(g, A, ago, capture) {
+function startBeat(g, A, ago) {
   const res = V.game.result, key = `${V.id}-${V.rematches}`;
-  if (!res || (ui.beat && ui.beat.key === key) || !['hq_capture', 'food'].includes(res.reason) || res.winner === null) return false;
+  if (!res || (ui.beat && ui.beat.key === key) || res.reason !== 'food' || res.winner === null) return false;
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches, now = Date.now();
-  if (res.reason === 'hq_capture') {
-    if (!capture) return false;   // its step hasn't come yet
-    ui.beat = { key, kind: 'fall', side: capture.side, t0: A && motion ? now - ago + 400 : now - BEAT_MS - 1 };   // the landing takes .36 s
-  } else {
-    const side = rel(res.winner);
-    if (g.food[side] < V.game.food[res.winner]) return false;   // the winning food hasn't arrived yet
-    const gem = document.querySelector(`#board .dcount.${side}.tick`), count = gem ? +gem.dataset.lag + +gem.dataset.dur : 0;
-    ui.beat = { key, kind: 'lit', side, t0: A && motion ? now - ago + count + 150 : now - BEAT_MS - 1 };
-  }
+  const side = rel(res.winner);
+  if (g.food[side] < V.game.food[res.winner]) return false;   // the winning food hasn't arrived yet
+  const gem = document.querySelector(`#board .dcount.${side}.tick`), count = gem ? +gem.dataset.lag + +gem.dataset.dur : 0;
+  ui.beat = { key, kind: 'lit', side, t0: A && motion ? now - ago + count + 150 : now - BEAT_MS - 1 };
   if (ui.beat.t0 > now - BEAT_MS) {   // the board shakes as a den is struck (once, not on a redraw)
     if (ui.beat.kind === 'fall') setTimeout(() => document.getElementById('board')?.animate([0, 1, 2, 3, 4, 5, 6].map(i => ({ transform: i === 6 ? 'none'
       : `translate(${Math.sin(i * 2.3) * 16 * (1 - i / 6)}px, ${Math.cos(i * 3.1) * 16 * (1 - i / 6)}px)` })), { duration: 800 }), ui.beat.t0 - now);
@@ -1241,8 +1226,8 @@ function drawEnd() {
   if (drawEnd.key !== key) {
     const motion = !(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
     drawEnd.until = drawEnd.live && motion && G.result.reason !== 'concede' ? Date.now() + 900 : 0; drawEnd.key = key; drawEnd.live = false; drawEnd.since = Date.now(); }
-  // a den taken or a full den: the result waits for its beat (which waits for the move), never longer than 9 s
-  if (drawEnd.until && ['hq_capture', 'food'].includes(G.result.reason) && G.result.winner !== null) {
+  // a full den: the result waits for its beat (which waits for the move), never longer than 9 s
+  if (drawEnd.until && G.result.reason === 'food' && G.result.winner !== null) {
     const b = ui.beat && ui.beat.key === key ? ui.beat : null;
     drawEnd.until = b ? Math.max(drawEnd.until, b.t0 + BEAT_MS) : Math.max(drawEnd.until, Math.min(Date.now() + 200, drawEnd.since + 9000)); }
   const wait = (drawEnd.until || 0) - Date.now();
@@ -1256,7 +1241,7 @@ function drawEnd() {
   const how = { food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, starved: `${w === you ? 'Your opponent' : 'You'} ran out of food`, max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
   // a den taken: the board showed it (Martin, 2026-10-17); a full den says who reached the food, as the lessons' Victory does
   // (phone walkthrough finding 20: a Defeat on food said nothing)
-  const howLine = G.result.reason === 'hq_capture' && w !== null ? '' : `<div class="how">${how}.</div>`;
+  const howLine = `<div class="how">${how}.</div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
   {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems

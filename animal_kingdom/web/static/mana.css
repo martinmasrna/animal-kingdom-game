@@ -58,7 +58,7 @@
 .game.mana { background: #1f2228; overflow: clip; }   /* the hand's cards hang below the edge: nothing may scroll the screen to them */
 .game.mana #world { display: none; }
 .game.mana #stage { background: #1f2228; }
-.game.mana .ledge, .game.mana .deck, .game.mana #recent { display: none !important; }
+.game.mana .ledge, .game.mana .deck { display: none !important; }
 /* the board: plain tiles, a dot on each region's corner; behind each base row its den (board.js mden): a dark chamber
    holding that side's food, the enemy's ringed while an animal could raid it */
 .game.mana .mden { display: flex; align-items: center; justify-content: center; gap: 10px; box-sizing: border-box; border-radius: 14px;
@@ -81,8 +81,6 @@
 .game.mana .opphand .back { top: -26px; width: 46px; height: 53px; border: 0; border-radius: 0; box-shadow: none; background: #8c3a32; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
 .game.mana .opphand .back::after { content: ''; position: absolute; inset: 3px; clip-path: inherit; background: #5a2420; }
 
-/* their hand when a card shows it: small pieces left of the board, over the last plays (app.js) */
-.game.mana .opphand .mopplbl { position: absolute; left: 150px; top: 70px; font: 600 13px 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #8d95a1; }
 .game.mana .opphand .oc { width: 50px; height: 58px; filter: none; }
 .game.mana .opphand .oc .mcard { --mw: 50px; } .game.mana .opphand .oc .plaque { display: none; }
 
@@ -189,6 +187,11 @@
 .mhome h1 { font: 700 34px 'Fira Sans Condensed', sans-serif; }
 .mhome h1 small { display: block; font-size: 16px; font-weight: 500; color: #8d95a1; margin-top: 4px; }
 .mhome h2 { font: 600 14px 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #8d95a1; margin-top: 8px; }
+.mhome .mtop { position: fixed; right: 16px; top: 16px; z-index: 5; }   /* Friends, in the corner (chat.js opens its panel under it) */
+.mhome .mtop .chatbtn { box-sizing: border-box; height: 52px; min-width: 52px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 10px; border: 0; border-radius: 10px;
+  background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #f0e8da; cursor: pointer; }
+.mhome .mtop .chatbtn:hover { filter: brightness(1.2); }
+.mhome .mtop .tic { width: 32px; height: 32px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
 .mhome .decks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .mhome .dk { text-align: left; padding: 10px 14px; border-radius: 10px; border: 1px solid #3d434c; background: #2b2f36; color: #e6eaf0; font: 500 17px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
 .mhome .dk small { display: block; font-size: 13px; color: #8d95a1; }
@@ -205,7 +208,6 @@
 .mhome a { color: #8fb8ea; }
 .mhome .foot { font-size: 14px; color: #8d95a1; }
 .game.mana .yourturn.skipped b { font-size: 30px; }
-
 
 /* ---------------------------------------------------------------- the collection in the mana rules (collection.js `M`) */
 /* each grid tile (and a dialog's card) is the mana card, as wide as its column */
@@ -240,8 +242,7 @@
 .readov:has(.mcard) .zside .kw { background: #2b2f36; box-shadow: none; border: 1px solid #3d434c; }
 .pop.mpop .ev, .pop.mpop .ev.lead { background: none; border: 0; color: #c8ced8; }
 body:has(.game.mana) .chatp.inmatch { left: 16px; right: auto; }
-/* a play an effect gives costs nothing: the prompt says Free, the hand's costs step back */
-.game.mana .prompt .mfree { padding: 3px 10px; border-radius: 999px; background: #f2c94c; color: #1d1606; font: 700 14px 'Fira Sans Condensed', sans-serif; }
+
 .game.mana .hand.free .mcost { opacity: .3; }
 /* the end of a game and the concede question, plain */
 .game.mana .endbox { background: #2b2f36; border: 1px solid #3d434c; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
@@ -272,9 +273,7 @@ body:has(.game.mana) .chatp.inmatch { left: 16px; right: auto; }
 .coll .mtray .cell.empty polygon { fill: rgba(0,0,0,.28); stroke: rgba(240,232,218,.22); stroke-width: 1.5px; }
 @keyframes trayIn { 0% { transform: translateY(-10px) scale(1.15); filter: drop-shadow(0 0 6px #fff) brightness(1.3); } 100% { transform: none; filter: none; } }
 .coll .mtray .cell.flash .mcard { animation: trayIn .45s ease-out; }
-/* each cost's run: a bracket under it with its count */
-.coll .mtray .rcount { position: absolute; height: 20px; box-sizing: border-box; padding-top: 6px; text-align: center; font: 700 14px/1 'Fira Sans Condensed', sans-serif; color: #cfc4b2; pointer-events: none; }
-.coll .mtray .rcount::before { content: ''; position: absolute; left: 4px; right: 4px; top: 0; height: 4px; border: 1.5px solid rgba(240,232,218,.3); border-top: 0; border-radius: 0 0 3px 3px; }
+
 /* the deck's name, count and buttons at the tray's right end */
 .coll .mtray .tside { flex: none; width: 250px; margin-left: auto; display: flex; flex-direction: column; gap: 8px; }
 .coll .mtray .tname { position: relative; display: flex; align-items: center; gap: 4px; height: 32px; }

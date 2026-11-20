@@ -1,8 +1,8 @@
-// The collection, which is the deckbuilder (design sandbox builder/notes.md, round B2). The card grid on the left with the
-// family, strength, rarity and search filters over it; the decks on the right, the open one unfolded under its tile.
-// Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
-// app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
-import { fitNames, readSide, markGlyphs, LABEL } from './card.js';
+// The collection, which is the deckbuilder. Every card is the card the match draws (mana.js), the grid and the deck sort
+// by cost, with a row of costs and the strength, rarity and search filters over the grid. Click a card to add a copy,
+// right-click it or click its strip to take one out; every change saves.
+// app.js hands in what it owns: the cards, the player's decks and how to save them, toast, play, back.
+import { fitNames, readSide } from './card.js';
 import { CROP, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck, deckOrder } from './deckcode.js';
 import { dd, wireDd, onHold } from './menu.js';
@@ -10,15 +10,10 @@ import { track } from './log.js';
 import { manaCard, manaPiece, fitPlaques, costChip } from './mana.js';
 import { hasFigure } from './token.js';
 
-const RANK = { legendary: 0, rare: 1, common: 2 };
+const RANK = { legendary: 0, common: 1 };
 // The deck rules come from the server (/api/pool's rules: decks.py, engine/cards.py and web/profiles.py hold the numbers): the
-// deck size, the copies a rarity allows, the stars prototype's budget (a card's level, c.stars, counted per copy), and the
-// most decks a profile keeps.
-let R = { deckSize: 25, copies: {}, starBudget: 0 };   // until the server's arrive
-// The mana ruleset's deck builder (the prototype of 2026-11-20; app.js hands in `mana` and that ruleset's deck rules): every
-// card is the mana card (mana.js, the one the match draws), the grid and the deck sort by cost first, a filter by cost
-// takes the stars' place, the deck shows how many cards it has at each cost, and the rules are the mana deck rules (no
-// star budget; a card with no mana cost is not legal). The default ruleset's screen is unchanged.
+// deck size, the copies a rarity allows, and the most decks a profile keeps.
+let R = { deckSize: 25, copies: {} };   // until the server's arrive
 
 const costOf = c => c.mana ?? 99;   // a card with no cost sorts last
 const MANA_COSTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];   // the cost row of the mana collection
@@ -29,32 +24,25 @@ const DECKVIEW = (() => { const q = typeof location === 'undefined' ? null : new
   try { if (q) localStorage.setItem('ak:deckview', q === 'list' ? 'list' : 'tray'); return localStorage.getItem('ak:deckview') === 'list' ? 'list' : 'tray'; }
   catch { return q === 'list' ? 'list' : 'tray'; } })();
 const tray = () => (DECKVIEW === 'tray');
-// A card in the grid, a pop or a dialog: the mana card with its cost, or the rectangular card. `w`: the mana card's width.
+// A card in the grid, a pop or a dialog: the card with its cost. `w`: its width.
 const face = (c, w, opts = {}) => (manaCard(c, { cost: c.mana ?? null, w }));
 const fitAll = el => { fitNames(el); fitPlaques(el); };
-const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
 // What keeps a deck from play under the rules, in plain words: copies over a card's limit, more cards than a deck holds (a
-// deck saved under the old rules, three copies and 30 cards, keeps its list: it shows what is over and is fixed here), too
-// many stars. Too few cards is the caller's (the count shows it).
+// deck saved under other rules keeps its list: it shows what is over and is fixed here). Too few cards is the caller's (the
+// count shows it).
 // '' for a playable deck. Home uses it too (app.js), to send such a deck here instead of into a match.
 // Every deck has a leader (Martin, 2026-11-16): one of its own legendaries that can lead (`leaders`: the server's map).
 export const NO_LEADER = 'Choose a leader', NO_LEADER_CARD = 'Add a legendary that can lead';
 export function deckIssue(list, cards = C, rules = R, leader = null, leaders = (X && X.leaders) || {}) {
   const counts = countsOf(list);
   const over = Object.keys(counts).filter(id => cards[id] && counts[id] > rules.copies[cards[id].rarity]);
-  const stars = rules.starBudget == null ? 0 : list.reduce((n, id) => n + ((cards[id] || {}).stars | 0), 0) - rules.starBudget;   // the mana rules: no star budget
   if (over.length === 1) { const c = cards[over[0]], k = counts[over[0]] - rules.copies[c.rarity];
     return `${counts[over[0]]} ${c.name}: take out ${k === 1 ? 'one' : k}, ${rules.copies[c.rarity] === 1 ? 'one' : 'two'} at most`; }
   if (over.length) return `${over.length} cards have a copy too many`;
   if (list.length > rules.deckSize) return `${list.length} cards: take ${list.length - rules.deckSize} out, ${rules.deckSize} at most`;
-  if (stars > 0) return LABEL.five ? `${stars} over the ${shown5(rules.starBudget, rules.deckSize)}` : `${stars} star${stars > 1 ? 's' : ''} over the ${rules.starBudget}`;
   if (!(leader && list.includes(leader) && leaders[leader])) return list.some(id => leaders[id]) ? NO_LEADER : NO_LEADER_CARD;
   return '';
 }
-// The other labelling (Martin wants to feel which is easier): every card numbered 1 to 5, its level + 2, and the budget shifted
-// to match (the budget + 2 per card). Display only: the rule underneath is the same.
-const shown5 = (stars, cards) => stars + 2 * cards;
-try { LABEL.five = localStorage.getItem('ak:five') === '1'; } catch { /* no storage */ }
 const sv = c => c.str === '*' ? -1 : c.str;
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const svg = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -72,7 +60,7 @@ export const ICON = {
 // Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 
-let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', lvl: '', cost: '', q: '', sheet: false }, flash = null, wired = false;
+let X, C, cards, st = { open: null, rar: null, str: '', cost: '', q: '', sheet: false }, flash = null, wired = false;
 const limit = c => R.copies[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
 // A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
 export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
@@ -118,23 +106,22 @@ export function collectionScreen(app, ctx) {
 // One strip: a sliver of the card; the number of copies at its end when there are two or more (the game's decklists: copies
 // left), as in Hearthstone. A strip with none left is marked gone.
 // `mana`: the mana rules' strip (mstripHTML).
-export const stripHTML = (id, cards, have, mana = false) => mana ? mstripHTML(id, cards, have) : `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}${have > (R.copies[cards[id].rarity] ?? 9) || mana && cards[id].mana == null ? ' over' : ''}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div>${mana ? `<span class="sc">${cards[id].mana != null ? costChip(cards[id].mana) : ''}</span>` : ''}<span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span>${markGlyphs(cards[id], 'lvs')}<span class="x">${have > 1 ? have : ''}</span></div>`;
 // The mana rules' strip: the cost in its gold hexagon, the piece's figure where the painting was, the name, the strength
 // in the piece's own numerals; two copies are two dots, so a row holds two numbers, not three (Martin, 2026-11-20: "it's
 // like holding three different numbers in one row"). No stars.
 const numImg = n => /^\d+$/.test(String(n)) && +n <= 20 ? `<img src="/static/hex/num/${n}.svg" alt="${n}" draggable="false">` : esc(n);
-const mstripHTML = (id, cards, have) => { const c = cards[id];
+export const stripHTML = (id, cards, have) => { const c = cards[id];
   return `<div class="st mst ${c.rarity}${have ? '' : ' gone'}${have > (R.copies[c.rarity] ?? 9) || c.mana == null ? ' over' : ''}" data-card="${id}">`
     + `<span class="sc">${c.mana != null ? costChip(c.mana) : ''}</span>`
     + `<span class="hd">${hasFigure(id) ? `<img src="/static/hex/fig/${id}.webp" alt="" draggable="false">` : ''}</span>`
     + `<span class="n">${esc(c.name)}</span><span class="ms">${numImg(c.str)}</span><span class="x">${have > 1 ? pips(have) : ''}</span></div>`; };
 // A deck's strips, one list, in deckOrder (the legendaries first, their gold edge says so, then every other card by strength).
 // `have(id)`: the copies a strip shows (a match's decklists: the copies left). `mana`: the mana rules' list, by cost first.
-export const stripsHTML = (ids, cards, have, mana = false) => { const by = deckOrder(cards);
-  return `<div class="dbody flat">${[...ids].sort(mana ? (a, b) => costOf(cards[a]) - costOf(cards[b]) || by(a, b) : by).map(id => stripHTML(id, cards, have(id), mana)).join('')}</div>`; };
-export function deckBody(list, cards, mana = false) {
+export const stripsHTML = (ids, cards, have) => { const by = deckOrder(cards);
+  return `<div class="dbody flat">${[...ids].sort((a, b) => costOf(cards[a]) - costOf(cards[b]) || by(a, b)).map(id => stripHTML(id, cards, have(id))).join('')}</div>`; };
+export function deckBody(list, cards) {
   const counts = countsOf(list);
-  return stripsHTML(Object.keys(counts), cards, id => counts[id], mana);
+  return stripsHTML(Object.keys(counts), cards, id => counts[id]);
 }
 // The mana rules' curve: how many of the deck's cards cost 0 to 10 (a plain count, the lead session's default for the
 // prototype, not something Martin asked for).
@@ -185,8 +172,8 @@ function render(app, all) {
   const q = st.q.toLowerCase();
   // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
   const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
-  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (true) && ((st.cost === '') || String(c.mana) === st.cost)
-    && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ') + ' ' + made(c)).toLowerCase().includes(q)))
+  const shown = cards.filter(c => (!st.rar || c.rarity === st.rar) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (true) && ((st.cost === '') || String(c.mana) === st.cost)
+    && (!q || (c.name + ' ' + c.text + ' ' + made(c)).toLowerCase().includes(q)))
     .sort((a, b) => ((costOf(a) - costOf(b))) || sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
@@ -195,12 +182,9 @@ function render(app, all) {
       const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the card count and the stars show on their counters)
       return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${(manaPiece(c, { cost: c.mana ?? null, w: 150 }))}${n && c.rarity !== 'legendary' ? `<span class="pips${n > limit(c) ? ' over' : ''}">${pips(n, Math.max(n, limit(c)))}</span>` : ''}</div>`; }).join('') + '</div>';
 
-  // the mana rules: a row of costs to pick from, as Hearthstone's collection has, in place of the animal families (Martin, 2026-11-20)
+  // a row of costs to pick from, as Hearthstone's collection has (Martin, 2026-11-20)
   const tabs = (MANA_COSTS.map(n => `<div class="ctab${st.cost === String(n) ? ' on' : ''}" data-cost="${n}">${costChip(n)}</div>`).join(''));
   const strengths = [...Array(8).keys()].map(String).concat('8+');
-  // the levels the collection's cards have, highest first (no level is offered that no card has)
-  const levels = [...new Set(cards.map(c => c.stars | 0))].sort((a, b) => b - a);
-  const lvlName = v => LABEL.five ? `Number ${v + 2}` : v === 0 ? 'No stars' : v === 1 ? '1 star' : `${v} stars`;   // 0 to 7, then 8 and up together: few animals are 8 or more (Martin, 2026-10-30)
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'All cards'], ['legendary', 'Legendary']])}
@@ -208,7 +192,7 @@ function render(app, all) {
     ${('')}
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
-  const body = d => ((curveHTML(d.list))) + deckBody(d.list, C, true);
+  const body = d => ((curveHTML(d.list))) + deckBody(d.list, C);
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${leaderRow(d)}${body(d)}`
@@ -217,15 +201,11 @@ function render(app, all) {
     : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list, C, R, d.leader) ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : (iss => !iss ? '' : `<span class="left">${iss === NO_LEADER || iss === NO_LEADER_CARD ? 'No leader' : /no mana cost/.test(iss) ? 'No cost' : 'Too many'}</span>`)(deckIssue(d.list, C, R, d.leader))}</div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
-  // The deck's stars beside its cards, read the same way; over the budget, it turns red and Play says by how much.
-  const stars = open ? starsOf(open.list) : 0, over = Math.max(0, stars - R.starBudget), issue = open && open.list.length >= R.deckSize ? deckIssue(open.list, C, R, open.leader) : '';
-  // One sunken count holds both (the foot is 300 px): the cards, then the stars; a click on the stars switches the labelling.
-  const starCount = !open || true ? '' : `<span class="fc fstars${over ? ' over' : ''}" id="fstars" data-tip="${LABEL.five ? 'Count in stars' : 'Count 1 to 5 instead'}">`
-    + (LABEL.five ? `<b>${shown5(stars, open.list.length)}/${shown5(R.starBudget, R.deckSize)}</b><span>Points</span>` : `<b>${stars}/${R.starBudget}</b><span>Stars</span>`) + '</span>';
+  const issue = open && open.list.length >= R.deckSize ? deckIssue(open.list, C, R, open.leader) : '';
   const column = open
     ? `<div class="clist editing">${tile(open)}</div>
       <div class="sfoot"><button class="play" id="play"${open.list.length === R.deckSize && !issue ? '' : ' disabled'}>${issue || 'Play this deck'}</button>
-        <div class="frow"><div class="fcount${('')}"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span>${starCount}</div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
+        <div class="frow"><div class="fcount${('')}"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span></div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
     : `<div class="clist">${all.map(tile).join('')}${all.length < R.decksMax ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${R.decksMax}</b><span>Decks</span></div>${FB}<button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
@@ -287,8 +267,7 @@ function wire(app, all, open) {
   wireDd(app, (k, v) => { st[k] = k === 'rar' ? (v || null) : v; redo(); });
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-cost]').forEach(e => e.onclick = () => { st.cost = st.cost === e.dataset.cost ? '' : e.dataset.cost; redo(); });   // one cost at a time; again: every cost
-  app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t; st.families.has(f) ? st.families.delete(f) : st.families.add(f); redo(); });   // toggles; none chosen shows every family
-  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, hab: '', str: '', lvl: '', cost: '', q: '' }); redo(); };
+  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { rar: null, str: '', cost: '', q: '' }); redo(); };
   app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; if (!st.open) { st.open = e.dataset.d; st.sheet = false; redo(); } });
 
   const nm = app.querySelector('.nm-edit');
@@ -338,15 +317,14 @@ function wire(app, all, open) {
   }
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play && !play.disabled) play.onclick = () => X.play(open);
-  const fs = $('fstars'); if (fs) fs.onclick = ev => { ev.stopPropagation(); LABEL.five = !LABEL.five; try { localStorage.setItem('ak:five', LABEL.five ? '1' : '0'); } catch { /* no storage */ } st.lvl = ''; redo(); };
 
   // Click a card to add a copy; a refused add says why. Right-click a card, or click its strip, to take one out.
   app.querySelectorAll('.cgrid [data-card]').forEach(e => {
     e.onclick = () => { const c = C[e.dataset.card];
       if (!open && matchMedia('(hover: none)').matches) { hidePop(); return zoom(app, c); }   // touch, browsing: a tap reads it
       if (!open) return X.toast(`Open a deck ${portrait() ? 'below' : 'on the right'} to build it`);
-      const n = open.list.filter(x => x === c.id).length, lv = c.stars | 0, left = R.starBudget == null ? Infinity : R.starBudget - starsOf(open.list);
-      const why = open.list.length >= R.deckSize ? 'tot' : n >= limit(c) ? 'pips' : (lv > 0 && lv > left ? 'stars' : null);
+      const n = open.list.filter(x => x === c.id).length;
+      const why = open.list.length >= R.deckSize ? 'tot' : n >= limit(c) ? 'pips' : null;
       if (why) return refuse(app, e, why, c);
       open.list.push(c.id); hidePop(); flash = c.id; change(); };
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
@@ -389,12 +367,6 @@ function refuse(app, el, why, c) {
   again(el, 'shake');
   if (why === 'tot') { again(app.querySelector('.fcount'), 'shake'); X.toast('The deck is full: take a card out first'); }
   else if (why === 'pips') again(el.querySelector('.pips'), 'flash');
-  else if (why === 'cost') X.toast(`${c.name} has no mana cost, so no mana deck can hold it`);
-  else if (why === 'stars') { again(app.querySelector('#fstars'), 'shake');
-    const left = Math.max(0, R.starBudget - starsOf(st.open ? decks().find(d => d.id === st.open).list : []));
-    const n = v => LABEL.five ? `${v}` : `${v} star${v === 1 ? '' : 's'}`;
-    X.toast(LABEL.five ? `${c.name} is a ${(c.stars | 0) + 2}, and the deck has room for ${left} more: take a card out first`
-      : `${c.name} needs ${n(c.stars | 0)}, and the deck has ${left} left of its ${R.starBudget}: take a starred card out first`); }
 }
 
 // Dialogs: Cancel, Escape or a click outside close them.

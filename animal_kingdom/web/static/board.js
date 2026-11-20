@@ -3,7 +3,6 @@
 // (blue, den on the left), the opponent 'B' (red). What changed since the last view comes from turn.js; this file only
 // draws it. Layout and look: the design sandbox's screen/plan.md and screen/kit/.
 import { CROP, hasArt, artUrl } from './art.js';
-import { KEYWORDS } from './card.js';
 import { flightEnd, inFlight } from './flight.js';
 import { heldRegions, boardChanges } from './turn.js';
 import { TW, TH, WINDOW, hasFigure, figure, numeral, tokenBase, armorShell } from './token.js';
@@ -18,14 +17,6 @@ export const LAND = { w: 1512, h: 800 }, PORT = { w: 720, h: 1440 };
 export const VIEW = { port: false };
 export function setView(port) { Object.assign(STAGE, port ? PORT : LAND); VIEW.port = port; }
 const key = (c, r) => `${c},${r}`;
-// An animal whose effect fires on its own wears one mark on its rim, bottom right, clear of its number (Martin, 2026-10-15,
-// after Hearthstone's trigger bolt): a moon for Dusk, a sun for Dawn, an eye for "when/whenever". When it fires, the mark
-// brightens and the effect plays out of the animal. A Roar wears none: you see it played.
-const lower = t => t[0].toLowerCase() + t.slice(1);   // the keyword's explanation (card.js KEYWORDS) after its name
-const TRIGGER = [[/\bDusk:/, 'dusk', `Dusk: ${lower(KEYWORDS.Dusk)}`], [/\bDawn:/, 'dawn', `Dawn: ${lower(KEYWORDS.Dawn)}`],
-  [/(^|\. )When(ever)? |\bthe first enemy placed next to this\b/, 'when', 'Happens on its own when its condition is met.']];
-const triggerOf = c => TRIGGER.find(([re]) => re.test(c.text || ''));
-const TRG_AT = (() => { const a = -32 * Math.PI / 180; return `left:calc(${(50 + 47.8 * Math.cos(a)).toFixed(1)}% - 19px);top:calc(${(50 - 47.8 * Math.sin(a)).toFixed(1)}% - 19px)`; })();
 const kit = f => `/static/kit2/${f}`;
 const team = side => (side === 'A' ? 'a' : side === 'W' ? 'n' : 'b');   // n: the neutral paint of a Wild animal
 
@@ -58,7 +49,6 @@ const hexGeo = () => { const g = ({ w: 120, x: STAGE.w / 2, top: 41 }); g.h = g.
 export const tokenWidth = () => hexGeo().w;
 const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
   return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * .75 * g.h]; };
-const hexTip = side => { const g = hexGeo(); return [g.x, g.top + g.h / 2 + (side === 'A' ? 6 * .75 * g.h : 0)]; };
 const at = (c, r) => { return hexAt(c, r);
   if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
   const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
@@ -76,9 +66,6 @@ export function project(x, y) {
   return [ox + (x - ox) * k, oy + dy * Math.cos(t) * k];
 }
 export const crossroadAt = cr => project(...at(...cr.split(',').map(Number)));
-// A den's cave mouth (its HQ) on the stage, and the gem on its crown.
-export const denMouthAt = side => (hexTip(side));
-const CROWN = { A: [PX(118), PY(150)], B: [PX(1565), PY(150)] }, MOUTH = { A: [PX(176), PY(390)], B: [PX(1500), PY(378)] };
 
 // Numbers are painted digits: chalk on a boss (strength, payouts), bold numerals in the den's gem. Every count animates
 // through all digits, so they load up front (a digit fetched mid-count shows as a gap).
@@ -138,14 +125,14 @@ function unit(u, under, cards, fire = false) {
     `<div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
     (u.timer ? `<div class="timer" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
     (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '') +   // Yuki's leader (a plain plaque until it has a painted mark)
-    ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TRG_AT}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
+    '';
 }
 
 // A unit on the hex board: the token (static/token.js) in its owner's frame, the animals under it peeking out behind, down
 // and right, as the same token a shade darker; its board keywords as on the round piece, fitted to the token: Armor its
 // stone shell over the frame, Spikes the thorns on its rim, just past its edge, Stealth's mist and Poison's vapour in the window; the trigger
 // mark on the rim's upper right, a timer on its upper left.
-const TK_TRG = 'left:86.9%;top:31.6%', TK_TIMER = 'left:13.1%;top:31.6%';
+const TK_TIMER = 'left:13.1%;top:31.6%';
 // The token alone, `w` stage px wide, for anything drawn off the board as the piece (the mana ruleset's card: mana.js).
 export const tokenHTML = (u, cards, w) => hexUnit(u, [], cards, false, w);
 function hexUnit(u, under, cards, fire = false, tw = null) {
@@ -170,14 +157,12 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
     (c && c.rarity === 'legendary' ? img('/static/hex/gem.webp', 'tkgem', 'position:absolute;left:40%;top:-4%;width:20%;z-index:4;pointer-events:none') : '') +
     (stand ? (([fw, fh]) => `<img class="mstand" src="/static/hex/fig/${u.id}.webp" alt="" draggable="false" style="height:${STAND * g.w}px;width:${STAND * g.w * fw / fh}px">`)(FIG_DIMS(u.id)) : '') +
     (u.timer ? `<div class="timer" style="${TK_TIMER}" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
-    (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '') +
-    ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TK_TRG}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
+    (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '');
 }
 
 // `g` is a viewer-space game { board, food, income, winFood }. `ui`: { rings: [cr] legal targets, hqRing (the enemy den can
 // be taken), preview: {cr, id, str} (the selected card under the pointer), anim: the previous view's { board, food, income,
-// fx, fromStones } when this view follows one (so what changed animates; static/timeline.js plays one step per view), else null, capture: { side, id, owner, str } when a
-// unit took a den, which ends the game (it stands in that den's mouth) }.
+// fx, fromStones } when this view follows one (so what changed animates; static/timeline.js plays one step per view), else null }.
 export function renderBoard(el, M, g, cards, ui) {
   const bases = { A: new Set((ui.bases || {}).A || []), B: new Set((ui.bases || {}).B || []) };   // the mana board's bases, viewer space
   const A = ui.anim, rings = new Set(ui.rings || []), roamable = new Set(ui.roamable || []), fire = new Set(ui.fire || []);   // fire: the animals whose own effect this step is   // your animals that can roam now
@@ -189,7 +174,6 @@ export function renderBoard(el, M, g, cards, ui) {
   // the animals a card's food flies from, or eaten food flies to (Hungry): [{ x, y, food }] on `side`
   const flowAt = (side, kind) => A && A.flow && A.flow.kind === kind && A.flow.side === side
     ? A.flow.at.map(f => { const [x, y] = at(...f.cr.split(',').map(Number)); return { x, y, food: f.n }; }) : [];
-  const eating = new Set(A && A.flow && A.flow.kind === 'pay' ? A.flow.at.map(f => f.cr) : []);
   // what a stone pays: its holder's yield (the legendary Wildebeest and Boar move it), the printed food while no one holds it
   const pays = (reg, h) => (h && g.regionFood && g.regionFood[h.owner] || {})[reg.id] ?? reg.food;
   const stoneAt = reg => { if (reg.corners) {   // the corner three hexagons share: the centre of their three centres
@@ -224,7 +208,7 @@ export function renderBoard(el, M, g, cards, ui) {
   const CRS = (M.crossroads) ? M.crossroads.map(cr => cr.split(',').map(Number)).sort((a, b) => b[0] - a[0] || a[1] - b[1]) : Array.from({ length: M.cols * M.rows }, (_, i) => [i % M.cols + 1, Math.floor(i / M.cols) + 1]);
   for (const [c, r] of CRS) {
     // an animal that roamed into the den stands only in its mouth, not also where it came from
-    const cr = key(c, r), st = (g.board[cr] || []).filter(u => !ui.capture || u.iid !== ui.capture.iid), [x, y] = at(c, r);
+    const cr = key(c, r), st = (g.board[cr] || []), [x, y] = at(c, r);
     const cls = (bases.A.has(cr) ? ' base A' : bases.B.has(cr) ? ' base B' : '') + (rings.has(cr) ? ' tgt' : '') + (roamable.has(cr) ? (ui.roamFrom === cr ? ' roamsel' : ' roamable') : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');
     const pv = ui.preview && ui.preview.cr === cr ? ui.preview : null;
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
@@ -242,7 +226,7 @@ export function renderBoard(el, M, g, cards, ui) {
         : put('cr clear', x, y, '', `data-cr="${cr}"`);
       continue; }
     const fe = flightEnd(cr), flown = fe ? `--fd:${Math.round(fe - (Date.now() - (ui.ago || 0)))}ms` : '';
-    s += put(`cr unit ${u.owner}${cls}${flown ? ' flown' : ''}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}${eating.has(cr) ? ' eat' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards, fire.has(cr)), `data-cr="${cr}" data-card="${u.id}"`, [strike, flown].filter(Boolean).join(';'));
+    s += put(`cr unit ${u.owner}${cls}${flown ? ' flown' : ''}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards, fire.has(cr)), `data-cr="${cr}" data-card="${u.id}"`, [strike, flown].filter(Boolean).join(';'));
   }
 
   // Removed units drain, sink and leave dust; returned ones lift and fly to their owner's side of the screen.
@@ -257,8 +241,6 @@ export function renderBoard(el, M, g, cards, ui) {
      // the mana board has no dens: its food is on the screen's rail
   
   // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
-  if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port || true ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = (my);   // on the hex board, on its den's tip   // seated in the mouth, clear of the crossroad beside it
-    s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' : ''}`, x, y, unit(ui.capture, [], cards)); }
   el.innerHTML = s;
 
   // A redraw of the same moment (ui.ago ms after it began) carries every CSS animation on from where it is, never from the start.

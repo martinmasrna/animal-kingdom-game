@@ -20,11 +20,11 @@ html.kb .mscr { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phon
 .mscr .frow .backbtn { width: auto; flex: none; min-width: 112px; }
 
 /* The one loud control (the game screen's too): the slab in your team blue (the board's blue). Disabled, it is stone and does nothing. */
-.mscr .play, .game .play, .fbov .play, #qpill { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
+.mscr .play, .game .play, .fbov .play { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
   background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto; background-blend-mode: color, normal, normal;
   box-shadow: inset 0 1px 0 rgba(200,225,255,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55);
   color: #f4f8ff; font: 700 19px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
-.mscr .play:hover, .game .play:hover, .fbov .play:hover, #qpill:hover { filter: brightness(1.15); }
+.mscr .play:hover, .game .play:hover, .fbov .play:hover { filter: brightness(1.15); }
 .mscr .play:disabled, .fbov .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); cursor: default; }
 
 /* Sunken: a count, or a field you type into. */
@@ -93,25 +93,23 @@ html.kb .mscr { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phon
 .mscr .ic:hover { color: #f0ece4; border-color: #8b8e92; }
 .mscr .ic.del { color: #ff8a78; border-color: #9a3f33; } .mscr .ic.del:hover { color: #fff; background: #b24a3a; border-color: #b24a3a; }
 :is(.mscr, .game) .dbody { margin: -8px 0 0; padding: 10px 8px 8px; border-radius: 0 0 8px 8px; background: #24272a; }
-.mscr .rh { display: flex; justify-content: space-between; margin: 10px 2px 4px; font: 600 11px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: #6b6f74; }
-.mscr .rh .full { color: #7fb2e8; }
+
 :is(.mscr, .game) .st { position: relative; display: flex; align-items: center; height: 27px; margin-bottom: 3px; border-radius: 6px; overflow: hidden; background: #2a2d30; cursor: pointer; }
 :is(.mscr, .game) .st .art { position: absolute; right: 0; top: 0; bottom: 0; width: 60%; background: center 30% / cover; -webkit-mask-image: linear-gradient(90deg, transparent, #000 70%); mask-image: linear-gradient(90deg, transparent, #000 70%); opacity: .75; }
 :is(.mscr, .game) .st .s { position: relative; width: 28px; text-align: center; font: 700 15px 'Fira Sans Condensed', sans-serif; }
 :is(.mscr, .game) .st .n { position: relative; flex: 1; font: 600 14px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 :is(.mscr, .game) .st .x { position: relative; display: flex; gap: 3px; padding: 0 8px; } :is(.mscr, .game) .st .x i { width: 7px; height: 7px; filter: drop-shadow(0 1px 1px #000); }
-.mscr .tacts [data-tip]::after { left: auto; right: 0; transform: none; }   /* at the column's right edge */
-.mscr .rh { font: 600 12px 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; }
+.mscr .tacts [data-tip]::after { left: auto; right: 0; transform: none; }   
 :is(.mscr, .game) .dbody { background: rgba(14,12,10,.45); }
 :is(.mscr, .game) .st { background: #2a2521; }
-.mscr .rh { color: #8f8577; }
+
 .mscr .clist { scrollbar-color: #4a4540 transparent; }
 .mscr .clist.editing .dtile.on { margin-top: 2px; }
 /* (6) The deck list, tighter (as Hearthstone's): strips close together, little margin either side. */
 .mscr .clist.editing { padding-left: 12px; padding-right: 12px; }
 :is(.mscr, .game) .dbody { padding: 8px 4px 6px; }
 :is(.mscr, .game) .dbody .st { margin-bottom: 2px; height: 28px; }
-.mscr .rh { margin: 8px 4px 3px; }
+
 /* (8) The tile's actions are bare icons; renaming keeps them in view at the right of the name field. */
 .mscr .tacts { gap: 2px; }
 .mscr .tacts .ic, .mscr .ic { width: 30px; height: 30px; border: 0; background: none; box-shadow: none; color: #e4dccd; filter: drop-shadow(0 1px 2px rgba(0,0,0,.9)); }
@@ -120,12 +118,12 @@ html.kb .mscr { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phon
 .mscr .tacts { z-index: 5; }
 /* Strips touch, as in Hearthstone: no gap, square corners, each separated by its own thin dark edge. */
 :is(.mscr, .game) .dbody .st { margin-bottom: 0; border-radius: 0; box-shadow: inset 0 -1px 0 rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.07); }
-:is(.mscr, .game) .dbody .rh + .st { border-radius: 4px 4px 0 0; }
+
 :is(.mscr, .game) .dbody .st:has(+ .rh), :is(.mscr, .game) .dbody .st:last-child { border-radius: 0 0 4px 4px; }
 /* Left/right: strips flush with the deck tile above them, the column's side padding trimmed. */
 .mscr .clist.editing { padding-left: 8px; padding-right: 8px; }
 :is(.mscr, .game) .dbody { padding-left: 0; padding-right: 0; }
-:is(.mscr, .game) .dbody .rh { margin-left: 8px; margin-right: 8px; }
+
 /* The open deck is one framed panel, as in Hearthstone: its tile on top, then a sunken field with the tiles' rim that runs down to the foot;
    the strips sit inside it with a small inset. */
 .mscr .clist.editing { display: flex; flex-direction: column; padding-bottom: 8px; }
@@ -133,7 +131,7 @@ html.kb .mscr { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phon
 .mscr .clist.editing .dbody { flex: 1 0 auto; margin-top: 0; padding: 4px 4px 8px; border-radius: 0 0 8px 8px;
   background: rgba(8,7,6,.55); box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.28), inset 0 2px 6px rgba(0,0,0,.6); }
 .mscr .clist.editing .dtile.on { border-radius: 8px 8px 0 0; }
-:is(.mscr, .game) .dbody .rh { margin-left: 6px; margin-right: 6px; }
+
 .mscr .clist.editing { gap: 0; }
 /* Strips are slivers of the cards: strength on a small driftwood tab in the card's dark digits, the card's rarity edge around each. */
 :is(.mscr, .game) .dbody .st { height: 30px; box-shadow: inset 0 0 0 1px var(--edge-st, rgba(0,0,0,.6)), inset 0 -1px 0 rgba(0,0,0,.7); }
@@ -153,10 +151,7 @@ html.kb .mscr { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phon
 :is(.mscr, .game) .st .s img { height: 13px; margin-top: -4px; }
 :is(.mscr, .game) .dbody .st { padding-left: 0; }
 :is(.mscr, .game) .dbody .st .art { z-index: 0; }
-.mscr .rh { font: 600 14px 'Fira Sans Condensed', sans-serif; letter-spacing: 0; text-transform: none; color: #a89d8c; margin: 10px 6px 4px; }
-.mscr .rh span:last-child { color: #a89d8c; }
-.mscr .rh .full { color: #a89d8c; }
-.mscr .rh span.flash { color: #ff8a78; }
+
 :is(.mscr, .game) .dbody .st.legendary + .st.rare, :is(.mscr, .game) .dbody .st.rare + .st.common, :is(.mscr, .game) .dbody .st.legendary + .st.common { margin-top: 0; }
 /* Strip strength: a driftwood tile capping the strip's left end, full height, bevelled so stacked tiles stay separate pieces
    (Martin, 2026-10-04); together they close the group's left edge. */
@@ -220,8 +215,8 @@ html { touch-action: manipulation; }
 .mscr .dot.on { border: 0; background: #7fd07a; box-shadow: 0 0 6px rgba(127,208,122,.6); }
 .mscr .fr .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 .mscr .fr small { color: #a99f8e; font-size: 13px; }
-.mscr .flist { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
-.mscr .flist > * { flex: none; } .mscr #addfriend { height: 40px; }
+
+ .mscr #addfriend { height: 40px; }
 .chal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 150; width: min(380px, calc(100vw - 24px)); box-sizing: border-box; padding: 16px;
   display: flex; flex-direction: column; gap: 12px; border-radius: 16px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto;
   box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12); color: #f0ece4; font-family: 'Fira Sans Condensed', sans-serif; animation: chalin .25s ease-out; }
@@ -298,22 +293,11 @@ html { touch-action: manipulation; }
   background: url(/static/kit2/card_plaque.webp) center / 240% 240%; filter: var(--tint); }
 .mscr .ic.txt { width: auto; padding: 0 10px; font: inherit; font-size: 14px; }   /* Share, as text until it has an icon (docs/share-links.md) */
 
-/* A strip's level (the stars prototype, card.js markGlyphs): the card's mark in the strip's light ink, before the copies. */
-:is(.mscr, .game) .st .lvs { position: relative; display: flex; align-items: center; gap: 1px; padding-left: 6px; filter: drop-shadow(0 1px 1px #000); }
-:is(.mscr, .game) .st .lvs .g { display: block; width: 13px; height: 13px; opacity: .92; }
-:is(.mscr, .game) .st .lvs .g.claw { width: auto; }
-:is(.mscr, .game) .st .lvs .gem { display: block; width: 17px; height: 17px; overflow: visible; }
-:is(.mscr, .game) .st .lvs .gem .sol { fill: #fff; stroke: #fff; }
-:is(.mscr, .game) .st .lvs .gem text { font: 700 10.5px 'Fira Sans Condensed', sans-serif; fill: #2b1f12; }
-:is(.mscr, .game) .st .lvs .num { font: 700 13px/1 'Fira Sans Condensed', sans-serif; font-style: normal; color: #fff; opacity: .92; }
-:is(.mscr, .game) .st .lvs.five { box-sizing: border-box; width: 19px; height: 19px; margin-left: 6px; padding: 0; justify-content: center; border-radius: 50%;
-  border: 1.5px solid #e9e4da; font: 700 12px/1 'Fira Sans Condensed', sans-serif; color: #e9e4da; }
 /* The cards and the stars, one over the other in the one sunken count (the foot is 300 px wide). */
 .mscr .fcount.two { grid-auto-flow: row; align-items: center; row-gap: 3px; }
 .mscr .fcount .fc { display: flex; align-items: baseline; gap: 5px; }
 .mscr .fcount.two b { font-size: 16px; min-width: 38px; text-align: right; } .mscr .fcount.two span span { font-size: 14px; }
-.mscr .fcount .fstars { cursor: pointer; }
-.mscr .fcount .fstars.over b, .mscr .fcount .fstars.over span { color: #ff8a78; }
+
 /* A card held past its copy limit (a deck saved under the old three-copy rule): its count in red, as the over star count. */
 :is(.mscr, .game) .st.over .x { color: #ff8a78; }
 .coll .pips.over i.on { background: #ff8a78; border-color: #ff8a78; }

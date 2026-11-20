@@ -25,7 +25,7 @@ function culprit(board, cause, cr, causeIid) {
   return best;
 }
 
-export const DUR = { act: 1.1, strength: 0.6, to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5, skipped: 1.6 };
+export const DUR = { leader: 1.1, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, draw: 0.5, yourturn: 1.5 };
 // Food in flight: one fruit per food, 0.035 s apart, each flying 0.7 s, then the count settles.
 export const foodDur = n => Math.min(2.4, 0.7 + 0.035 * Math.max(0, n - 1) + 0.3);
 
@@ -36,10 +36,10 @@ const lastSeq = v => { const ev = v && v.game && v.game.events; return ev && ev.
 // or events from before the oldest one kept): then the new view simply replaces the old.
 export function newEvents(prev, next) {
   if (!prev || !next || !prev.game || !next.game || prev.you !== next.you || prev.id !== next.id) return null;
-  // A new game in a series starts its own events: nothing of the last one plays. The view that ends a game also adds a
+  // A rematch starts its own events: nothing of the last game plays. The view that ends a game also adds a
   // result, but its last move still plays in full before the end shows (Martin, 2026-10-02: a food win was announced as
   // the card landed, before its fruit had flown).
-  if ((prev.results || []).length !== (next.results || []).length && next.phase === 'playing') return null;
+  if ((prev.rematches || 0) !== (next.rematches || 0) && next.phase === 'playing') return null;
   const ev = next.game.events || [], seen = lastSeq(prev);
   if (!ev.length || (ev[0].seq > seen + 1 && seen > 0)) return null;
   return ev.filter(e => e.seq > seen);
@@ -52,15 +52,8 @@ export function plan(prev, next, cards = {}) {
   const you = next.you, them = you === 'A' ? 'B' : 'A';
   const g0 = prev.game, gN = next.game;
   const s = { board: clone(g0.board), food: { ...g0.food }, handCount: { ...g0.handCount }, hand: clone(g0.hand), current: g0.current };
+  const finalCard = iid => gN.hand.find(x => x.iid === iid);
   const finalUnit = iid => { for (const st of Object.values(gN.board)) for (const u of st) if (u.iid === iid) return u; return null; };
-  // a card entering your hand, as it was then: the final view's copy less the gains still to come in these events (a
-  // Tarsier's Primate arrives without its +2, then rises to it)
-  const finalCard = iid => {
-    const h = gN.hand.find(x => x.iid === iid);
-    if (!h) return h;
-    const later = fresh.slice(fresh.indexOf(cur) + 1).filter(x => x.e === 'strength' && x.iid === iid).reduce((a, x) => a + x.n, 0);
-    return later ? { ...h, str: h.str - later } : h;
-  };
   const view = () => {
     const v = clone(next);
     Object.assign(v.game, { board: clone(s.board), food: { ...s.food }, handCount: { ...s.handCount }, hand: clone(s.hand),
@@ -75,8 +68,8 @@ export function plan(prev, next, cards = {}) {
   const out = [], push = step => { if (!step.src) { const cr = cur && at(cur.cause_iid); if (cr) step.src = [cr]; } out.push({ view: view(), step }); };
   const take = (cr, iid) => { const st = s.board[cr] || [], i = st.findIndex(u => u.iid === iid); if (i < 0) return null;
     const [u] = st.splice(i, 1); if (!st.length) delete s.board[cr]; return u; };
-  // food in a row by one player flies together: gains into the den (from the stones, or from the animals whose doing they
-  // are), or food eaten out of it (Hungry: to the animals that ate it). `from`: [{ cr, n }], the animals' crossroads.
+  // food in a row by one player flies together into the den, from the stones or from the animals whose doing it is.
+  // `from`: [{ cr, n }], the animals' tiles.
   let food = null;
   const at = iid => { if (iid == null) return null; for (const [cr, st] of Object.entries(s.board)) if (st.some(u => u.iid === iid)) return cr; return null; };
   const flow = (kind, e) => {
@@ -87,24 +80,16 @@ export function plan(prev, next, cards = {}) {
     const cr = at(e.cause_iid), f = cr && food.from.find(x => x.cr === cr);
     if (f) f.n += e.n; else if (cr) food.from.push({ cr, n: e.n });
   };
-  const landed = new Set();   // units put down in these steps: they already show their final strength
-  const flushFood = () => { if (food) { push({ ...food, src: food.kind === 'food' ? food.from.map(f => f.cr) : [], dur: food.kind === 'pay' && !food.from.length ? DUR.pay : foodDur(food.n) }); food = null; } };
-  const toHand = e => { s.handCount[e.player] += 1;
-    if (e.player === you) s.hand.push(finalCard(e.iid) || { iid: e.iid, id: e.card, str: (cards[e.card] || {}).str }); };
-  // a turn the server skipped (the mana rules: nothing its player could pay for) ends with `skipped` on its turn_end, in the
-  // same batch of events as its start
-  const skipped = i => { for (let j = i + 1; j < fresh.length; j++) { const x = fresh[j];
-    if (x.e === 'turn_end') return !!x.skipped && x.player === fresh[i].player; } return false; };
+  const flushFood = () => { if (food) { push({ ...food, src: food.kind === 'food' ? food.from.map(f => f.cr) : [], dur: foodDur(food.n) }); food = null; } };
   for (let i = 0; i < fresh.length; i++) {
     const e = fresh[i]; cur = e;
-    if (e.e !== 'food' && e.e !== 'pay') flushFood();
+    if (e.e !== 'food') flushFood();
     switch (e.e) {
       case 'place': {
         // a card they played is shown large first; units an effect puts down (a Sardine's swarm) are its doing, not plays,
         // unless the engine asks for the card to be shown (`reveal`: Vesper, out of their hand or deck onto your animal)
         if (e.player === them && ((e.from_hand && !e.cause) || e.reveal)) push({ kind: 'reveal', dur: DUR.reveal, card: e.card, cr: e.cr, player: e.player });
         const put = p => { const u = finalUnit(p.iid) || { iid: p.iid, id: p.card, owner: p.player, str: (cards[p.card] || {}).str };
-          landed.add(p.iid);
           const st = (s.board[p.cr] = s.board[p.cr] || []);
           if (p.at != null) st.splice(p.at, 0, u); else st.push(u);   // a Cockroach comes back at its old height
           if (p.from_hand) {   // from a hand (an effect putting a unit down from the deck leaves the hand alone)
@@ -117,31 +102,18 @@ export function plan(prev, next, cards = {}) {
         push({ kind: 'land', dur: DUR.land, cr: e.cr, card: e.card, player: e.player });
         break;
       }
-      case 'roam': {   // an animal moves along a path: it lands where it went (a den taken by roaming is the capture step)
-        if (!e.to) break;
-        const u = take(e.cr, e.iid) || finalUnit(e.iid) || { iid: e.iid, id: e.card, owner: e.player, str: (cards[e.card] || {}).str };
-        (s.board[e.to] = s.board[e.to] || []).push(u);
-        push({ kind: 'land', dur: DUR.land, cr: e.to, card: e.card, player: e.player, from: e.cr });
+      case 'leader_power':   // a leader's power used: its card shown, shrinking into its place by the den
+        push({ kind: 'leader', dur: DUR.leader, card: e.card, player: e.player });
         break;
-      }
-      case 'leader_power':   // the leaders prototype: a leader's power used (its card shown, shrinking into its place by the den)
-        push({ kind: 'leader', dur: DUR.act, card: e.card, player: e.player });
-        break;
-      case 'act':   // the actions prototype: an animal uses its Action (its card shown, the animal lit, then what it does)
-        push({ kind: 'act', dur: DUR.act, cr: e.cr, card: e.card, player: e.player, src: [e.cr] });
-        break;
-      case 'remove': case 'bounce': case 'to_deck':
+      case 'remove':
         if (e.cr) {
           take(e.cr, e.iid);
-          if (e.e === 'bounce' && fresh[i + 1] && fresh[i + 1].e === 'to_hand') toHand(fresh[++i]);   // it flies back into the hand
-          // what a swarm takes goes together, in one beat, as its landing did: the Locusts eating the whole board and flying
-          // off. A run of removals and Wild fly-aways by one card is a swarm when several of its animals did them; one
-          // animal's removals keep a beat each.
-          const gone = x => x && x.cr && (x.e === 'remove' || (x.e === 'bounce' && x.owner === 'wild'));
+          // removals by one card that several of its animals did go together, in one beat; one animal's keep a beat each
+          const gone = x => x && x.cr && x.e === 'remove';
           let j = i;
           while (gone(e) && e.cause && gone(fresh[j + 1]) && fresh[j + 1].cause === e.cause) j++;
           const many = new Set(fresh.slice(i, j + 1).map(r => r.cause_iid)).size > 1;
-          const kind = many ? 'remove' : e.e;
+          const kind = 'remove';
           if (many) for (; i < j; i++) take(fresh[i + 1].cr, fresh[i + 1].iid);
           push({ kind, dur: DUR[kind], cr: e.cr, card: e.card, owner: e.owner, by: many ? null : culprit(s.board, e.cause, e.cr, e.cause_iid) });
         }
@@ -154,9 +126,6 @@ export function plan(prev, next, cards = {}) {
       case 'food':
         flow('food', e); s.food[e.player] += e.n;
         break;
-      case 'pay':   // a Hungry animal eating, the legendary Squirrel's stake
-        flow('pay', e); s.food[e.player] -= e.n;
-        break;
       case 'draw': {
         const n = e.cards ? e.cards.length : e.n;
         s.handCount[e.player] += n;
@@ -164,48 +133,9 @@ export function plan(prev, next, cards = {}) {
         push({ kind: 'draw', dur: DUR.draw, player: e.player, n });
         break;
       }
-      case 'to_hand':
-        toHand(e); push({ kind: 'to_hand', dur: DUR.to_hand, player: e.player });
-        break;
-      case 'leave_hand':
-        s.handCount[e.owner] = Math.max(0, s.handCount[e.owner] - 1);
-        if (e.owner === you) s.hand = s.hand.filter(h => h.iid !== e.iid);
-        push({ kind: 'leave_hand', dur: DUR.leave_hand, owner: e.owner });
-        break;
-      case 'steal':
-        s.handCount[e.victim] = Math.max(0, s.handCount[e.victim] - 1); s.handCount[e.player] += 1;
-        if (e.victim === you) s.hand = s.hand.filter(h => h.iid !== e.iid);
-        if (e.player === you) s.hand.push(finalCard(e.new) || { iid: e.new, id: e.card, str: (cards[e.card] || {}).str });
-        push({ kind: 'steal', dur: DUR.steal, player: e.player, card: e.card });
-        break;
-      case 'strength': {   // a stored change (a Roar's grant, Rattlesnake's growth, Viper's poison): auras are not events
-        const ch = { iid: e.iid, card: e.card, owner: e.owner, n: e.n }, last = out[out.length - 1];
-        // the number changes as it flashes, and stays changed through the steps after (a unit already on the board)
-        const hit = u => (e.iid ? u.iid === e.iid : u.id === e.card && u.owner === e.owner) && !landed.has(u.iid);
-        for (const st of Object.values(s.board)) for (const u of st) if (hit(u)) u.str += e.n;
-        if (last && last.step && last.step.kind === 'strength')   // shown with the change before it: in that step's board too
-          for (const st of Object.values(last.view.game.board)) for (const u of st) if (hit(u)) u.str += e.n;
-        if (last && last.step && last.step.kind === 'strength') {   // several in a row show together
-          last.step.changes.push(ch); const cr = at(e.cause_iid); if (cr) last.step.src = [...new Set([...(last.step.src || []), cr])]; }
-        else push({ kind: 'strength', dur: DUR.strength, changes: [ch] });
-        for (const h of s.hand) if (e.iid != null && h.iid === e.iid) h.str += e.n;   // a hand card keeps its new number after it rises
-        break;
-      }
-      case 'transform':   // it becomes another card where it is (the Butterfly's stages in hand, the mimic Octopus's copy)
-        for (const st of Object.values(s.board)) for (const u of st) if (u.iid === e.iid) u.id = e.card;
-        for (const h of s.hand) if (h.iid === e.iid) h.id = e.card;
-        break;
       case 'turn_start':
         s.current = e.player;
-        if (skipped(i)) { push({ kind: 'skipped', player: e.player, turn: e.turn, dur: DUR.skipped }); break; }
         if (e.player === you) push({ kind: 'yourturn', dur: DUR.yourturn });
-        break;
-      case 'capture':
-        if (!e.roam) {   // played from the hand (a roaming animal walks in from the board)
-          s.handCount[e.player] = Math.max(0, s.handCount[e.player] - 1);
-          if (e.player === you) s.hand = s.hand.filter(h => h.iid !== e.iid);
-        }
-        push({ kind: 'capture', dur: DUR.capture, card: e.card, player: e.player, den: e.den });
         break;
       // cover (the land step shows it), turn_end, mulligan (its own screen) need no step of their own
     }

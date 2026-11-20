@@ -252,10 +252,8 @@
 @keyframes dust { 0% { transform: scale(.55); opacity: 0; } 15% { opacity: 1; } 100% { transform: scale(1.3); opacity: 0; } }
 /* food coming in: the changed pits ripen bottom-up (new state fades in over the old, with a small pop); the gem pulses */
 .game .pit img { position: absolute; inset: 0; }
-.game .pit.ripen img.now { animation: ripen .38s cubic-bezier(.3,.7,.4,1.3) both; }
-.game .pit.ripen img.was { animation: unripe .38s ease-in both; }
+
 @keyframes ripen { 0% { opacity: 0; transform: scale(.9); } 60% { opacity: 1; transform: scale(1.08); } 100% { transform: none; } }
-@keyframes unripe { 0% { opacity: 1; } 100% { opacity: 0; } }
 .game .dcount.tick { animation: gempulse .5s ease-out .15s both; }
 @keyframes gempulse { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
 /* income in flight: painted fruit arc from each held stone to the pit it fills, then the pit ripens */
@@ -411,25 +409,15 @@
 .game .endbox .btns > .play { flex: 1 0 100%; order: 1; font-size: 19px; }   /* the loud action on its own row under the rest (a ranked search's timer grows in it) */
 .game .waiting .slab { pointer-events: auto; height: 40px; padding: 0 16px; }
 .tip { max-width: 300px; line-height: 1.3; }
-/* The tutorial's coach: a granite piece beside what it talks about (placeCoach in app.js), a notch of the same stone
-   pointing at it. Only the card it asks for breathes in the act colour: rings mean a click acts there, so nothing else gets one. */
-.game .coach { width: 300px; box-sizing: border-box; padding: 15px 18px; border-radius: 14px; z-index: 25; display: none; pointer-events: none;
-  background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 12px 30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,245,230,.12); }
-.game .coach.on { display: block; } .game .coach.left, .game .coach.right { transform: translateY(-50%); }
-.game .coach::after { content: ''; position: absolute; width: 16px; height: 16px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; transform: rotate(45deg); }
-.game .coach.above::after { left: calc(var(--nx) - 8px); bottom: -7px; }
-.game .coach.right::after { left: -7px; top: calc(50% - 8px); } .game .coach.left::after { right: -7px; top: calc(50% - 8px); }
-.game .coach p { font: 500 21px/1.3 'Fira Sans Condensed', sans-serif; color: #efe6d4; }
-.game .coach.late { animation: coachin .25s ease-out both; } @keyframes coachin { from { opacity: 0; } to { opacity: 1; } }
-.game .coach.talk { pointer-events: auto; } .game .coach .slab { display: block; margin: 12px 0 0 auto; height: 40px; padding: 0 22px; font: 600 18px 'Fira Sans Condensed', sans-serif; }
-.game .coach.mid { transform: translateY(-50%); } .game .coach.mid::after { display: none; }   /* the welcome points at nothing: the whole board */
-.game .coach.below::after { left: calc(var(--nx) - 8px); top: -7px; }
-.game .hc.hint .card { animation: hint 1.4s ease-in-out infinite; }
+
+ 
+
+ 
+
+ .game .hc.hint .card { animation: hint 1.4s ease-in-out infinite; }
 @keyframes hint { 0%, 100% { filter: drop-shadow(0 0 0 var(--act)) drop-shadow(0 0 2px var(--act)); } 50% { filter: drop-shadow(0 0 1px var(--act)) drop-shadow(0 0 7px var(--act)) drop-shadow(0 0 3px var(--act)); } }
-.game.kit .tbtn.B { padding: 0 14px; box-sizing: border-box; text-align: center; font-size: 17px; line-height: 1.1; }   /* Opponent's turn: two centred lines inside the stone */
-.game .coach.group, .game .coach.mid { transform: translateY(-50%); } .game .coach.group::after { display: none; }
-/* a choice of places: the rings the coach talks about breathe, as the card it asks for does */
-.game #board.pulse .cr.tgt::after { animation: ringpulse 1.4s ease-in-out infinite; }
+.game.kit .tbtn.B { padding: 0 14px; box-sizing: border-box; text-align: center; font-size: 17px; line-height: 1.1; }    
+
 @keyframes ringpulse { 0%, 100% { opacity: .55; transform: scale(.97); } 50% { opacity: 1; transform: scale(1.05); } }
 
 /* A replay's controls, where the menu stands in a game: back, play or pause, forward, the match's progress (click to jump), Leave. */
@@ -450,16 +438,11 @@
 /* The progress bar marks where each turn starts. */
 .game .rbar .track b { position: absolute; top: 15px; width: 2px; height: 14px; margin-left: -1px; border-radius: 1px; background: rgba(240,232,218,.4); z-index: 2; pointer-events: none; }
 .game .rbar .track { touch-action: none; }
-/* A replay's recent moves beside the turn: the history's small pieces, newest last, a gap where a turn starts. */
-.game .recent { left: 16px; top: 6px; display: flex; align-items: center; gap: 3px; z-index: 20; }
-.game .recent .hi { cursor: pointer; }
-.game .recent .tgap { width: 10px; }
+
 /* A hand card read large (hover, or the tutorial explaining it) shows its rules panel, so it frames its painting as the full
    card does (its FULL height), not as the compact card's top-aligned crop. */
 .game .hc:hover .card .pic, .game .hc.shown .card .pic { bottom: var(--rp, 8.15em); background-position: 50% var(--fy, 30%); }
 .game .hc:hover .card, .game .hc.shown .card { --fr: var(--frf); --rd: 1; }   /* read in full: the frame with its rules panel */
-/* the coach over a hovered card: the card grows to 2.1x from its bottom (top at y 347), so the coach stands above that */
-.game .coach.above.risen { bottom: calc(467px - var(--up, 0px)) !important; z-index: 31; }
 
 /* Conceding asks in the middle of the dimmed board, on the end-of-game piece: the question, Keep playing over Concede (the red slab), one width. */
 .game #concov { z-index: 80; }
@@ -470,8 +453,6 @@
 .game .play.danger { background: linear-gradient(rgba(196,64,48,.55), rgba(160,44,34,.62)), #6e2a22 url(/static/kit2/coll_slab.webp) center / 300px auto;
   box-shadow: inset 0 1px 0 rgba(255,210,200,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #fff6f2; }
 
-/* The screen's edges are the window's (fitStage sets --above and --side, the savanna beyond the stage in stage px). */
-.game .recent { translate: calc(-1 * var(--side, 0px)) calc(-1 * var(--above, 0px)); }
 .game .menu, .game .rbar, .game .panel.histp { translate: var(--side, 0px) calc(-1 * var(--above, 0px)); }
 .game .prompt:not(.mull) { translate: 0 calc(-1 * var(--above, 0px)); }
 .game .hand { translate: 0 var(--above, 0px); }
@@ -504,8 +485,7 @@
 .game.port.kit .deck { left: 606px; top: 1238px; width: 98px; height: 128px; font-size: 22px; }   /* the deck over End turn, at the right end of the hand's row */
 .game.port.kit .tbtn { left: 600px; top: 1372px; width: 110px; height: 62px; font-size: 19px; gap: 3px; }
 .game.port .waiting { left: auto; right: 16px; top: 1390px; }
-.game.port .coach { width: 400px; } .game.port .coach p { font-size: 26px; } .game.port .coach .slab { height: 80px; padding: 0 34px; font-size: 30px; }   /* Next, thumb-sized */
-.game .coach.gabove::after, .game .coach.gbelow::after, .game .coach.cleft::after { display: none; }
+     
 .game.port .menu { top: 4px; width: 80px; height: 80px; border-radius: 14px; }   /* 44 CSS px on a phone: a thumb's size */ .game.port .menu svg { width: 40px; height: 40px; }
 .game.port .menu.fb { right: 104px; } .game.port .menu.fb.alone { right: 16px; }
 .game.port .panel.histp, .game.port .panel.setp { top: 96px; scale: 1.5; transform-origin: top right; }   /* below the thumb-sized buttons, read on a phone */
@@ -559,13 +539,8 @@
 .game .intro .iside { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .game .intro .iobj { position: relative; filter: drop-shadow(0 18px 30px rgba(0,0,0,.7)); }
 .game .intro .iobj, .game .intro .card { --w: 300px; }
-/* a ranked match: the rating gem set into the card's bottom edge, in a ring of the card's own frame (its wood, its tint), the jewel alone inside it (its painted bezel cropped away: the ring is its setting; Martin, 2026-10-02) */
-.game .intro .iring { position: absolute; left: 50%; top: 100%; translate: -50% -50%; z-index: 1; font-size: calc(var(--w) / 20);
-  width: 5.07em; height: 5.07em; padding: var(--bw); box-sizing: border-box; border-radius: 50%; box-shadow: 0 .2em .5em rgba(0,0,0,.45); }
-.game .intro .iring .jewel { width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  background: url(/static/kit2/gem_a.webp) center / 142% no-repeat; }
-.game .intro .iside.B .iring .jewel { background-image: url(/static/kit2/gem_b.webp); }
-.game .intro .iring .gemnum { height: 1em; } .game .intro .iring .q { font: 700 .95em/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; margin-left: .05em; }
+
+ 
 .game .intro .card .stab { display: none; } .game .intro .card .nbar { left: .55em; padding: 0 .5em; } .game .intro .card .nbar::after { flex-grow: 1; }   /* a deck's face here, not a card to weigh: no strength, the name centred */
 .game .intro .iside.A { animation: introL .7s cubic-bezier(.2,.8,.3,1) both; } .game .intro .iside.B { animation: introR .7s cubic-bezier(.2,.8,.3,1) both; }
 @keyframes introL { from { transform: translateX(-60vw); } } @keyframes introR { from { transform: translateX(60vw); } }
@@ -660,8 +635,7 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 @keyframes bdark { from { opacity: 0; } }
 .game .pit.lit { animation: pitlit .65s ease-out both; }
 @keyframes pitlit { 35% { filter: brightness(1.9) drop-shadow(0 0 14px #ffd76a); transform: scale(1.22); } 100% { filter: brightness(1.2) drop-shadow(0 0 8px #ffd76a); transform: none; } }
-.game .dcount.flare { animation: gemflare .7s cubic-bezier(.3,1.6,.5,1) both; }
-.game .dcount.tick.flare { animation: gempulse .5s ease-out both, gemflare .7s cubic-bezier(.3,1.6,.5,1) both; }
+
 @keyframes gemflare { 35% { scale: 1.6; } 100% { scale: 1.25; } }
 .game .bglow { width: 200px; height: 200px; margin: -100px 0 0 -100px; z-index: 0; border-radius: 50%; background: radial-gradient(circle, rgba(255,226,140,.9), rgba(255,200,90,0) 65%); animation: bglow .9s ease-out both; }
 @keyframes bglow { 0% { transform: scale(.2); opacity: 0; } 30% { transform: scale(1.3); opacity: 1; } 100% { transform: none; opacity: .55; } }
@@ -682,17 +656,14 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .pmodal .pgrid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
 .game .pmodal .pc { position: relative; width: 156px; height: 229px; } .game .pmodal .pc .card { --w: 156px; }
 .game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }
-/* A card read in full in the hand keeps its level's wood piece on the painting's corner, above the rules (app.css, mk-br). */
-.game .hc:hover .card.mk-br .lvl, .game .hc.shown .card.mk-br .lvl { bottom: 8.6em; }
+
 /* The leaders prototype: a leader beside its den (board.js leaderPiece), a size up from an animal */
 .game .cr.leader { width: 140px; height: 140px; margin: -70px 0 0 -70px; z-index: 3; cursor: default; }
 .game .cr.leader.roamable { cursor: pointer; }
 .game .cr.leader.dim .ring { filter: grayscale(1) brightness(.62); }
 .game .cr.leader.dim .rimimg { filter: grayscale(.7) brightness(.8); }
-.game .cr.leader .lpips { position: absolute; left: 50%; bottom: -40px; transform: translateX(-50%); display: flex; gap: 5px; }
-.game .cr.leader .lpips i { width: 12px; height: 12px; border-radius: 50%; background: rgba(20,14,8,.75); border: 2px solid #f3e6c8; }
-.game .cr.leader .lpips i.on { background: #f3e6c8; }
-.game .cr.leader .lname, .game .cr .gname { position: absolute; left: 50%; bottom: -26px; transform: translateX(-50%); white-space: nowrap; padding: 1px 10px;
+
+.game .cr .gname { position: absolute; left: 50%; bottom: -26px; transform: translateX(-50%); white-space: nowrap; padding: 1px 10px;
   font: 600 16px/1.3 'Fira Sans Condensed', sans-serif; color: #fff6e0; background: rgba(40,28,16,.88); border-radius: 6px; }
 .pop .ev.lead { display: block; max-width: 300px; } .pop .ev.lead p { margin: 4px 0 0; } .pop .ev.lead .lk { opacity: .8; font-size: .92em; }
 
@@ -719,7 +690,7 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
    (board.js sets both), every layer inside it placed in percentages of the token, so it draws at any size. An empty
    crossroad is a sunk hexagon of the clearings' sand, a den its team's frame over a dark hollow; the region stones sit on
    the corners three crossroads share, above the pieces. */
-.game.hexb #board .cr:not(.leader), .game.kit.hexb #board .cr.unit:not(.leader), .game.hexb .dentile, .game.hexb .leave.unit { width: var(--tw); height: var(--th); margin: calc(var(--th) / -2) 0 0 calc(var(--tw) / -2); }
+.game.hexb #board .cr:not(.leader), .game.kit.hexb #board .cr.unit:not(.leader), .game.hexb .leave.unit { width: var(--tw); height: var(--th); margin: calc(var(--th) / -2) 0 0 calc(var(--tw) / -2); }
 .game.kit.hexb .cr.clear { background: url(/static/hex/slot.webp) center / 94% 94% no-repeat; filter: brightness(.86) saturate(.85); }   /* a place: a sunk hexagon a little inside its token's outline, quieter than the pieces */
 .game.hexb .unit .tkbase, .game.hexb .unit .tkarmor { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
 .game.hexb .unit .tkbase { filter: drop-shadow(0 1px 2px rgba(20, 12, 4, .35)); }
@@ -760,8 +731,7 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
   clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 6%, 5.5% 28%, 5.5% 72%, 50% 94%, 94.5% 72%, 94.5% 28%, 50% 6%); }
 .game.hexb .cr.roamable::after { opacity: .7; }
 .game.hexb .cr.roamsel::after { background: var(--ready); }
-.game .dentile { pointer-events: none; filter: drop-shadow(0 1px 2px rgba(20, 12, 4, .35)); }
-.game .dentile img { position: absolute; inset: 0; width: 100%; height: 100%; }
+
 /* the hex board's den: its whole tip is the mouth, ringed as a crossroad is when it can be taken */
 .game.hexb .mouth { width: var(--tw); height: var(--th); margin: calc(var(--th) / -2) 0 0 calc(var(--tw) / -2); border-radius: 0; z-index: 2; }
 .game.hexb .mouth.tgt::after { inset: 0; border: 0; border-radius: 0; background: var(--act);
