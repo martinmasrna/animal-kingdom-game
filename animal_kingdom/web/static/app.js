@@ -890,8 +890,8 @@ const DRAW_OFF = (() => { const q = new URLSearchParams(location.search).get('dr
   try { if (q) localStorage.setItem('ak:draw', q === 'on' ? 'on' : 'off'); return localStorage.getItem('ak:draw') !== 'on'; } catch { return q !== 'on'; } })();
 // The mana ruleset (the prototype of 2026-11-20): ?rules=mana or ?rules=default on the address, kept in the browser like
 // ?board. On localhost (Martin plays the unreleased rules there) the mana rules are the default; on any other host the
-// default ruleset stays the default. It decides only what home offers: in the mana rules, a friend match (no bot plays
-// them). A match's own screen follows the match's ruleset (its view's `ruleset`), whatever the switch says.
+// default ruleset stays the default. It decides only what home offers: in the mana rules, a friend match or the simple
+// bot (the server's Python greedy bot: the Rust bots know only the default rules). A match's own screen follows the match's ruleset (its view's `ruleset`), whatever the switch says.
 const LOCALHOST = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 const MANA_HOME = (() => { const q = new URLSearchParams(location.search).get('rules');
   try { if (q) localStorage.setItem('ak:rules', q === 'mana' ? 'mana' : 'default'); return (localStorage.getItem('ak:rules') || (LOCALHOST ? 'mana' : 'default')) === 'mana'; }
@@ -916,7 +916,7 @@ function manaLegal(list, leader) {
   return list.length === R.deckSize && !!leader && list.includes(leader) && !!LEADERS[leader]
     && Object.entries(n).every(([id, k]) => CARDS[id] && CARDS[id].status === 'collectible' && CARDS[id].mana != null && k <= R.copies[CARDS[id].rarity]);
 }
-// Home in the mana rules: a friend match only. Your decks that are legal under them, then the six pool decks (Deck 1 to 6);
+// Home in the mana rules: a friend match, or the simple bot. Your decks that are legal under them, then the six pool decks (Deck 1 to 6);
 // create a match (its code and link on the next screen), or join one by its code. The collection builds decks for these rules
 // (collectionScreen); a deck of yours that isn't legal under them is counted under the list, to be fixed there.
 function manaHome(mode = {}) {
@@ -932,7 +932,7 @@ function manaHome(mode = {}) {
     <h1>Friend match<small>The mana rules, a prototype</small></h1>
     <h2>Your deck</h2><div class="decks">${all.map(tile).join('') || '<p>No deck of yours is legal under these rules yet.</p>'}</div>
     ${off ? `<p class="foot">${off === 1 ? 'One deck of yours isn\'t' : `${off} decks of yours aren't`} legal in these rules: the collection says why.</p>` : ''}
-    <div class="row"><button class="go" id="mgo">${mode.join ? `Join match ${esc(mode.join)}` : 'Create match'}</button><a class="sec" id="mcoll" href="#/collection">Build a deck</a></div>
+    <div class="row"><button class="go" id="mgo">${mode.join ? `Join match ${esc(mode.join)}` : 'Create match'}</button>${mode.join ? '' : '<button class="sec" id="mbot">Play a bot</button>'}<a class="sec" id="mcoll" href="#/collection">Build a deck</a></div>
     ${mode.join ? '' : `<h2>Join a friend's match</h2><div class="row"><input id="mcode" maxlength="6" placeholder="Code" autocomplete="off"><button class="sec" id="mjoin">Join</button></div>`}
     <p class="foot"><a href="?rules=default#/">Play the usual rules</a></p></div></div>`;
   const $ = id => document.getElementById(id);
@@ -948,6 +948,15 @@ function manaHome(mode = {}) {
     if (mode.join) return join(mode.join);
     if (!chosen) return toast('Choose a deck first');
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: spec(chosen), ruleset: 'mana', name: 'You' }) });
+    if (!r.ok) return toast(await r.text());
+    const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+  };
+  // A bot on a pool deck, for trying the screen alone: the server plays it with the simple greedy bot (match.bot_for).
+  if ($('mbot')) $('mbot').onclick = async () => {
+    if (!chosen) return toast('Choose a deck first');
+    const opp = pool[Math.floor(Math.random() * pool.length)];
+    if (!opp) return toast('No pool deck for the bot');
+    const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: spec(chosen), ruleset: 'mana', name: 'You', bot: { level: 'easy', deck: opp.id } }) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
   };

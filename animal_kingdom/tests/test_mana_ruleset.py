@@ -421,14 +421,26 @@ def test_a_mana_match_plays_to_its_end_logs_its_ruleset_and_replays():
     assert s.food == m.state.food and (rules.is_terminal(s) or s.result) == m.state.result
 
 
-def test_a_mana_match_survives_a_restart_and_refuses_bots():
+def test_a_mana_match_survives_a_restart():
     m = _mana_match()
     back = Match.from_dict(json.loads(json.dumps(m.to_dict())))
     assert back.ruleset == "mana" and back.state.config.mana and back.map_id == "map_hex19"
-    lone = Match("MANA02", Seat("ta", "Ann", deck="pool_1"))
-    lone.set_ruleset("mana")
-    with pytest.raises(EngineError):
-        lone.join(Seat("tb", "Bot", bot="easy", deck="pool_3"))
+
+
+def test_a_mana_match_against_the_bot_plays_to_the_end():
+    """The simple Python greedy bot plays the mana rules, whatever level is asked (the Rust bots know only the default)."""
+    m = Match("MANA02", Seat("ta", "Ann", deck="pool_1"))
+    m.set_ruleset("mana")
+    m.join(Seat("tb", "Bot", bot="easy", deck="pool_3"))
+    m.ready("A")
+    if m.state is None:
+        m.ready("B")
+    for _ in range(2000):
+        if m.state.result is not None:
+            break
+        s = m.to_act()
+        m.act(s, (m.bot_move() if m.seats[s].is_bot else rules.legal_actions(m.state)[0]).to_dict())
+    assert m.state.result is not None and m.state.config.mana
 
 
 def test_the_view_carries_mana_costs_and_the_board():

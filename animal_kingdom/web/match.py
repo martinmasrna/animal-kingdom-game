@@ -137,7 +137,9 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     return out
 
 
-def bot_for(level: str, seed: int, map_id: str = MAP_ID):
+def bot_for(level: str, seed: int, map_id: str = MAP_ID, ruleset: str = "default"):
+    if ruleset != "default":   # the Rust engine the levels think on knows only the default rules: the Python greedy bot, any level
+        return make_bot("greedy", seed, python_only=True)
     if level in tutorial.BOTS.values():
         return tutorial.TutorialBot(seed=seed, lesson=next(n for n, b in tutorial.BOTS.items() if b == level))
     # The Expert's network reads today's 15 crossroads by place; on another board it is the Normal search until it is retrained.
@@ -315,8 +317,6 @@ class Match:
     def join(self, seat: Seat) -> str:
         if "B" in self.seats:
             raise EngineError("match is full")
-        if seat.is_bot and self.ruleset != "default":   # the bots play the default rules only (they think on the Rust engine)
-            raise EngineError(f"no bot plays the {self.ruleset} rules")
         self.seats["B"] = seat
         self._maybe_prematch()
         return "B"
@@ -383,14 +383,12 @@ class Match:
                                   map_id=MAP_ID, first_player="A", stacked=True, config=tutorial.config(2 if self.seats["B"].bot == tutorial.BOTS[2] else 1))
             tutorial.set_up(self.state, 2 if self.seats["B"].bot == tutorial.BOTS[2] else 1)
         else:
-            if self.ruleset != "default" and any(seat.is_bot for seat in self.seats.values()):
-                raise EngineError(f"no bot plays the {self.ruleset} rules")
             self.state = new_game(load_premade_deck(self.seats["A"].deck),
                                   load_premade_deck(self.seats["B"].deck), seed,
                                   map_id=self.map_id, first_player=first,
                                   leaders=leaders_for(self.seats["A"].deck, self.seats["B"].deck),
                                   config=self.config())
-        self.bots = {s: bot_for(seat.bot, seed + i, self.map_id) for i, (s, seat) in enumerate(self.seats.items())
+        self.bots = {s: bot_for(seat.bot, seed + i, self.map_id, self.ruleset) for i, (s, seat) in enumerate(self.seats.items())
                      if seat.is_bot}
         self.history = []
         self.events, self.seq = [], 0
@@ -408,7 +406,7 @@ class Match:
         self.actions, self.action_times = [], []
         self.started_at = time.time()
         self.state = state
-        self.bots = {s: bot_for(seat.bot, seed + i) for i, (s, seat) in enumerate(self.seats.items()) if seat.is_bot}
+        self.bots = {s: bot_for(seat.bot, seed + i, self.map_id, self.ruleset) for i, (s, seat) in enumerate(self.seats.items()) if seat.is_bot}
         self.history, self.events, self.seq = [], [], 0
         self.phase = "playing"
         self.clock = None
@@ -648,7 +646,7 @@ class Match:
 
     def fresh_bot(self, s: str) -> None:
         """A new bot for seat `s`, when its search was abandoned: the stuck thread keeps the old one."""
-        self.bots[s] = bot_for(self.seats[s].bot, self.rng.randrange(1 << 30))
+        self.bots[s] = bot_for(self.seats[s].bot, self.rng.randrange(1 << 30), self.map_id, self.ruleset)
 
     def fallback_move(self):
         """A legal move when the bot's own choice failed: the Easy bot's, else the first legal action."""
@@ -698,7 +696,7 @@ class Match:
         m.history = [Move(**h) for h in d["history"]]
         m.events, m.seq = d.get("events", []), d.get("seq", 0)
         if m.state is not None and m.seed is not None:
-            m.bots = {s: bot_for(seat.bot, m.seed + i, m.map_id) for i, (s, seat) in enumerate(m.seats.items())
+            m.bots = {s: bot_for(seat.bot, m.seed + i, m.map_id, m.ruleset) for i, (s, seat) in enumerate(m.seats.items())
                       if seat.is_bot}
         return m
 

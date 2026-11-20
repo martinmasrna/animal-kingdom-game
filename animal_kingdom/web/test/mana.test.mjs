@@ -1,5 +1,5 @@
-// The mana rules' friend match in the browser (the prototype of 2026-11-20; static/mana.js, mana.css): home offers only a
-// friend match, two windows create and join one, the opening hands are the full cards with their costs, and in play the
+// The mana rules' friend match in the browser (the prototype of 2026-11-20; static/mana.js, mana.css): home offers a
+// friend match or the simple bot, two windows create and join one, the opening hands are the full cards with their costs, and in play the
 // rail shows the mana, a card the mana can't pay for is dimmed, and a card played is paid for and lands on the board.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -59,6 +59,25 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
     assert.ok(await P.evaluate(() => !document.querySelector('#board .cr.unit .mcost')), 'a piece on the board has no cost');
   }
   assert.deepEqual([...A.errors, ...B.errors], []);
+});
+
+test('a mana match against the bot: Play a bot starts it and the bot plays its cards', async () => {
+  const p = await seat();
+  await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
+  await click(p, '[data-deck="pool_1"]'); await click(p, '#mbot');
+  assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
+  await click(p, '#skip');
+  // play on: end each of our turns at once; the bot's pieces reach the board
+  const theirs = () => { const a = window.__ak(); return a.V && Object.values(a.V.game.board).flat().some(u => u.owner === 'B'); };
+  let ok = false;
+  for (let i = 0; i < 200 && !ok; i++) {
+    ok = await p.evaluate(theirs);
+    if (!ok && await p.evaluate(() => { const a = window.__ak(); return a.V.game.decision === 'yours' && !a.PB.busy; })) await p.keyboard.press('Space').catch(() => {});
+    await wait(150);
+  }
+  if (process.env.SHOTS) await p.screenshot({ path: process.env.SHOTS + '/mana-bot.png' });
+  assert.ok(ok, 'the bot has a piece on the board');
+  assert.deepEqual(p.errors, []);
 });
 
 test('the collection in the mana rules: the mana card with its cost, sorted by cost, the deck as a tray of pieces, the mana deck rules, and the deck on home', async () => {

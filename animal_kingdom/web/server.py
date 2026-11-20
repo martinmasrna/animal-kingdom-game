@@ -1560,11 +1560,11 @@ async def create_match(req):
             raise EngineError("no such lesson")
         if lesson not in (0, *tutorial.BOTS):
             raise EngineError("no such lesson")
-        ruleset = body.get("ruleset") or "default"     # the mana prototype (2026-11-20): "ruleset": "mana", a friend match only
+        ruleset = body.get("ruleset") or "default"     # the mana prototype (2026-11-20): "ruleset": "mana", a friend match or the greedy bot (match.bot_for)
         if ruleset not in RULESETS:
             raise EngineError("no such ruleset")
-        if ruleset != "default" and (lesson or body.get("bot") or body.get("gauntlet") or body.get("map") is not None):
-            raise EngineError(f"the {ruleset} rules are played between two people, on their own board")
+        if ruleset != "default" and (lesson or body.get("gauntlet") or body.get("map") is not None):
+            raise EngineError(f"the {ruleset} rules are played on their own board, against a friend or the simple bot")
         deck = f"{tutorial.BOTS[lesson]}_you" if lesson else custom_decks.resolve(body.get("deck"), ruleset)
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
