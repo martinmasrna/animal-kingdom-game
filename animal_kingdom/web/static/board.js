@@ -7,6 +7,8 @@ import { KEYWORDS } from './card.js';
 import { flightEnd, inFlight } from './flight.js';
 import { pitStates, heldRegions, boardChanges, incomeFlights, eatFlights } from './turn.js';
 import { TW, TH, WINDOW, hasFigure, figure, numeral, tokenBase, denBase, armorShell } from './token.js';
+import { FIGS } from './hex/figs.js';
+const FIG_DIMS = id => FIGS[id] || [400, 420];
 
 export const STAGE = { w: 1512, h: 800 };
 // A window taller than wide (a phone held upright) gets its own board: a painting made upright (kit2/plate_port.webp,
@@ -56,7 +58,7 @@ export const manaBoard = () => HEX.mana;
 // landscape: the board the stage's full height under the opponent's hand (to y 66), right of the middle so your hand has
 // the ground beside its foot (app.js PL); upright: between the dens' ridges. The mana board stands in the middle column,
 // as tall as the stage allows between the opponent's hand and yours.
-const hexGeo = () => { const g = HEX.mana ? { w: 100, x: STAGE.w / 2, top: 134 } : VIEW.port ? { w: 162, x: STAGE.w / 2, top: 150 } : { w: 114, x: 940, top: 70 }; g.h = g.w * TH / TW; return g; };
+const hexGeo = () => { const g = HEX.mana ? { w: 120, x: STAGE.w / 2, top: 41 } : VIEW.port ? { w: 162, x: STAGE.w / 2, top: 150 } : { w: 114, x: 940, top: 70 }; g.h = g.w * TH / TW; return g; };
 export const tokenWidth = () => hexGeo().w;
 const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
   return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * .75 * g.h]; };
@@ -65,7 +67,19 @@ const at = (c, r) => { if (HEX.on) return hexAt(c, r);
   if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
   const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
 // A crossroad's centre on the stage, for anything that travels to it.
-export const crossroadAt = cr => at(...cr.split(',').map(Number));
+// The mana board lies tilted on the screen, seen at an angle (Martin, 2026-11-20: on a short desktop window the tilt gives
+// the height back), its animals standing up out of their tokens. The board's drawing stays flat (at); the browser tilts
+// #board about the board's middle, and project() says where a flat board point lands on the stage, for anything drawn
+// outside the board (a card flying to its crossroad). TILT.deg is the board's lean away from you (90 minus the camera's
+// elevation); STAND, how tall a standing animal is, in token widths.
+export const TILT = { deg: 40, persp: 1400 }, STAND = .66;
+const tiltOrigin = () => { const g = hexGeo(); return [g.x, g.top + g.h / 2 + 2 * .75 * g.h]; };
+export function project(x, y) {
+  if (!HEX.mana || !TILT.deg) return [x, y];
+  const [ox, oy] = tiltOrigin(), t = TILT.deg * Math.PI / 180, dy = y - oy, k = TILT.persp / (TILT.persp - dy * Math.sin(t));
+  return [ox + (x - ox) * k, oy + dy * Math.cos(t) * k];
+}
+export const crossroadAt = cr => project(...at(...cr.split(',').map(Number)));
 // A den's cave mouth (its HQ) on the stage, and the gem on its crown.
 export const denMouthAt = side => HEX.on ? hexTip(side) : VIEW.port ? PORT_AT.mouth[side] : MOUTH[side];
 export const gemAt = side => VIEW.port ? PORT_AT.crown[side] : CROWN[side];
@@ -152,7 +166,8 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
   const img = (src, cls = '', st = '') => `<img class="${cls}" src="${src}" alt="" draggable="false"${st ? ` style="${st}"` : ''}>`;
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen tkpeek" style="transform:translate(${4 + i * 3}%,${3.5 + i * 2.5}%)">${img(tokenBase(b.owner), b.owner === 'W' ? 'wild' : '')}</div>`).reverse().join('');   // the deepest first, under the others
   // a card with no stand-in figure (a token, a reserve card) shows its painting's crop in the window
-  const win = hasFigure(u.id) ? figure(u.id) : (() => { const D = g.w * 380 / TW;
+  const stand = !tw && HEX.mana && TILT.deg && hasFigure(u.id);   // the board's piece in the mana ruleset: the animal stands
+  const win = stand ? '' : hasFigure(u.id) ? figure(u.id) : (() => { const D = g.w * 380 / TW;
     return `<div class="tkwin"><div class="ring${hasArt(u.id) ? '' : ' noart'}" style="left:${(80 / TW * 100).toFixed(2)}%;top:${(92.6 / TH * 100).toFixed(2)}%;width:${D}px;height:${D}px;${portrait(u.id, D)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div></div>`; })();
   const venom = k => !has('Poison') ? '' : k === 'tint' ? `<div class="kwl venom tint tkw">${img(kit('kwl_vapour_tint.webp'))}</div>`
     : `<div class="kwl venom fumes tkw">${img(kit('kwl_vapour_fumes.webp'), 'base')}<div class="vmask"><div class="flow v1" style="${ph(2, 14)}"></div></div></div>`;
@@ -162,6 +177,7 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
     `<div class="tkanimal${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}">${win}</div>` +
     venom('tint') + (has('Stealth') ? `<div class="kwl mist tkw"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
     (u.str == null ? '' : numeral(u.str)) +
+    (stand ? (([fw, fh]) => `<img class="mstand" src="/static/hex/fig/${u.id}.webp" alt="" draggable="false" style="height:${STAND * g.w}px;width:${STAND * g.w * fw / fh}px">`)(FIG_DIMS(u.id)) : '') +
     (u.timer ? `<div class="timer" style="${TK_TIMER}" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
     (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '') +
     ((t => t && !u.inked && !u.spent ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TK_TRG}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c)));
@@ -190,6 +206,9 @@ export function renderBoard(el, M, g, cards, ui) {
     const [c, r] = reg.c, [x1, y1] = at(c, r), [x2, y2] = at(c + 1, r + 1); return [(x1 + x2) / 2, (y1 + y2) / 2]; };
   let s = '';   // the painted ground is the game screen's (kit2/plate_wide.webp, under the stage), wider than any window
   if (HEX.on) { const g = hexGeo(); el.style.setProperty('--tw', `${g.w}px`); el.style.setProperty('--th', `${g.h}px`); el.style.setProperty('--tkwin', WINDOW); }
+  if (HEX.mana) { const [ox, oy] = tiltOrigin();   // the tilt: the board turns about its middle; what stands on it turns back upright
+    el.style.transformOrigin = `${ox}px ${oy}px`; el.style.transform = TILT.deg ? `perspective(${TILT.persp}px) rotateX(${TILT.deg}deg)` : '';
+    el.style.setProperty('--tilt', `${TILT.deg}deg`); }
 
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
   for (const reg of M.regions) {
@@ -206,7 +225,7 @@ export function renderBoard(el, M, g, cards, ui) {
     const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2, w = 2.1 * G.w, h = .62 * G.h;
     const y = ps[0][1] + (side === 'A' ? 1 : -1) * (.5 * G.h + .1 * G.h + h / 2);
     s += put(`mden ${side}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x - w / 2, y - h / 2,
-      `<img class="mfruit" src="/static/kit2/fruit.webp" alt="" draggable="false"><b>${g.food[side]}</b><i>of ${g.winFood}</i>`, `data-hq="${side}"`, `width:${w}px;height:${h}px`);
+      `<img class="mfruit" src="/static/kit2/fruit.webp" alt="" draggable="false"><b>${g.food[side]}</b><i>+${(g.income || {})[side] ?? 0}</i>`, `data-hq="${side}"`, `width:${w}px;height:${h}px`);
   }
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
   if (HEX.on && !HEX.mana) for (const side of ['A', 'B']) { const [x, y] = hexTip(side); s += put(`dentile ${side}`, x, y, `<img src="${denBase(side)}" alt="" draggable="false">`); }

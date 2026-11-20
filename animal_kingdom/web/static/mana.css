@@ -66,7 +66,7 @@
 .game.mana .mden.A { border-color: #3d5675; } .game.mana .mden.B { border-color: #6b3530; }
 .game.mana .mden .mfruit { height: 52%; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6)); }
 .game.mana .mden b { font: 600 calc(var(--th) * .34) 'Source Serif 4', Georgia, serif; color: #f1ece2; line-height: 1; }
-.game.mana .mden i { font: 500 15px 'Fira Sans Condensed', sans-serif; color: #8b93a0; font-style: normal; align-self: flex-end; margin-bottom: 14%; }
+.game.mana .mden i { font: 700 18px 'Fira Sans Condensed', sans-serif; color: #f2c94c; font-style: normal; align-self: flex-end; margin-bottom: 16%; }   /* next turn's income */
 .game.mana .mden.tgt { cursor: pointer; border-color: #f2c94c; box-shadow: inset 0 2px 8px rgba(0, 0, 0, .6), 0 0 0 3px rgba(242, 201, 76, .55); }
 .game.mana .rdot { color: inherit; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #565c66; box-shadow: 0 0 0 2px #1f2228; z-index: 4; pointer-events: none; }
 .game.mana .rdot.A { background: #5aa2f0; } .game.mana .rdot.B { background: #e05a4c; }
@@ -106,33 +106,28 @@
 .game.mana .prompt.mull { left: 50%; top: 64px; width: 520px; margin-left: -260px; text-align: center; transform: none; }
 .game.mana .prompt.mull .btns { justify-content: center; }
 
-/* the rail */
-.game.mana .mrail { left: 1150px; top: 0; width: 300px; height: 800px; pointer-events: none; font-family: 'Fira Sans Condensed', sans-serif; color: #c8ced8; }
+/* the controls around the dens (app.js drawRail): the layer covers the stage, its parts placed by the tilted board's dens
+   (board.js TILT, 120 px tiles: your den about x 607 to 905, y 572 to 670; theirs about x 647 to 865, y 52 to 140) */
+.game.mana .mrail { left: 0; top: 0; width: 1512px; height: 800px; pointer-events: none; font-family: 'Fira Sans Condensed', sans-serif; color: #c8ced8; }
 .game.mana .mrail > * { pointer-events: auto; }
-.game.mana .mlead { position: absolute; left: 10px; display: flex; align-items: center; gap: 14px; }
-.game.mana .mlead .ltok { position: relative; width: 100px; height: 115.6px; flex: none; }
-.game.mana .mlead .ltok .unit { position: absolute; inset: 0; --tw: 100px; }
+.game.mana .mlead { position: absolute; display: flex; align-items: center; gap: 8px; }
+.game.mana .mlead .ltok { position: relative; width: 84px; height: 97px; flex: none; }
+.game.mana .mlead .ltok .unit { position: absolute; inset: 0; --tw: 84px; }
 .game.mana .mlead .ltok.dim { filter: grayscale(.85) brightness(.7); }   /* a once-a-game power, used */
 .game.mana .mlead .ltok.can { cursor: pointer; }
 .game.mana .mlead .ltok.can::after { content: ''; position: absolute; inset: -5px; clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 5%, 4.5% 27.5%, 4.5% 72.5%, 50% 95%, 95.5% 72.5%, 95.5% 27.5%, 50% 5%); background: #f2c94c; }
 .game.mana .mlead .ltok.can:hover { filter: brightness(1.15); }
-.game.mana .mlead .lt { font-size: 16px; line-height: 1.5; color: #aab2bf; }
-.game.mana .mlead .lt b { color: #eef2f7; font-weight: 600; font-size: 18px; }
-.game.mana .mlead .ldeck { cursor: pointer; }
-.game.mana .mlead .ldeck:hover { color: #eef2f7; }
-.game.mana .mlead.B { top: 22px; } .game.mana .mlead.A { top: 510px; }
-.game.mana .mfood { color: #aab2bf; position: absolute; left: 30px; width: 158px; height: 74px; border-radius: 12px; border: 2px solid; display: flex; align-items: center; justify-content: center; gap: 14px; background: #262a31; }
-.game.mana .mfood.B { top: 160px; border-color: #c45247; } .game.mana .mfood.A { top: 412px; border-color: #4f8fd6; }
-.game.mana .mfood b { font: 700 40px 'Fira Sans Condensed', sans-serif; color: #f4f6f9; font-variant-numeric: tabular-nums; }
-.game.mana .mfood span { display: flex; flex-direction: column; font-size: 14px; line-height: 1.2; color: #aab2bf; }
-.game.mana .mfood span em { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f2c94c; font-style: normal; }
-.game.mana .mfood.won { box-shadow: 0 0 0 4px rgba(242,201,76,.35); }
-.game.mana .mmana { position: absolute; left: 14px; top: 720px; font-size: 15px; }
-.game.mana .mmana .mpips i { width: 24px; height: 27.7px; } .game.mana .mmana .mpips { gap: 6px; }
+.game.mana .mlead .lt { font-size: 15px; color: #aab2bf; }
+.game.mana .mlead .lt .mchip { width: 22px; height: 25px; }
+.game.mana .mlead.A { left: 486px; top: 566px; } .game.mana .mlead.B { left: 538px; top: 46px; }
+.game.mana .mmana { position: absolute; font-size: 15px; }
+.game.mana .mmana.A { left: 930px; top: 648px; } .game.mana .mmana.B { left: 882px; top: 70px; }
+.game.mana .mmana .mpips i { width: 22px; height: 25.4px; } .game.mana .mmana .mpips { gap: 5px; }
+.game.mana .mmana.B .mpips i { width: 16px; height: 18.5px; } .game.mana .mmana.B .mpips { gap: 3px; }
 .game.mana .mmana .mpips i.off::after { inset: 2.5px; }
-.game.mana .mmana div { margin-top: 6px; }
-/* End turn, between the two food counts */
-.game.mana .tbtn, .game.mana.kit .tbtn { left: 1180px; top: 290px; width: 180px; height: 62px; border-radius: 31px; border: 2px solid #4f8fd6; background: #2a4466; filter: none; color: #f4f6f9; text-shadow: none;
+.game.mana .mmana div { margin-top: 5px; }
+/* End turn, right of your den */
+.game.mana .tbtn, .game.mana.kit .tbtn { left: 930px; top: 582px; width: 170px; height: 56px; border-radius: 31px; border: 2px solid #4f8fd6; background: #2a4466; filter: none; color: #f4f6f9; text-shadow: none;
   translate: none; flex-direction: row; gap: 10px; font: 700 21px 'Fira Sans Condensed', sans-serif; }
 .game.mana .tbtn.A.can:hover { background: #355682; transform: none; }
 .game.mana .tbtn.A:not(.can) { opacity: .55; }
@@ -160,7 +155,7 @@
 .game.mana .panel.theirs { left: auto; right: 330px; margin: 0; top: 30px; }
 
 /* a choice: one line over the board; cards offered float over it in the new form. Every prompt plain, the mulligan's too */
-.game.mana .prompt:not(.mull) { top: 46px; }
+.game.mana .prompt:not(.mull) { top: 300px; left: 1120px; right: auto; max-width: 360px; transform: none; }   /* right of the board, where the rail was: the top is their den */
 .game.mana .prompt { background: #2b2f36; border: 1px solid #4a515c; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
 .game.mana .prompt b { color: #eef2f7; } .game.mana .prompt p { color: #c8ced8; }
 .game.mana .prompt .skip { background: #3a404a; border: 1px solid #555d69; color: #eef2f7; filter: none; }

@@ -37,7 +37,7 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
   let P = null;
   for (let i = 0; i < 100 && !P; i++) { for (const p of [A, B]) if (await p.evaluate(mine)) P = p; await wait(100); }
   assert.ok(P, 'a player may act');
-  const look = await P.evaluate(() => ({ pips: document.querySelectorAll('.mmana .mpips i').length, on: document.querySelectorAll('.mmana .mpips i.on').length,
+  const look = await P.evaluate(() => ({ pips: document.querySelectorAll('.mmana.A .mpips i').length, on: document.querySelectorAll('.mmana.A .mpips i.on').length,
     left: window.__ak().V.game.mana[window.__ak().V.you].left, dots: document.querySelectorAll('#board .rdot').length, baseA: document.querySelectorAll('#board .cr.base.A').length, baseB: document.querySelectorAll('#board .cr.base.B').length,
     dens: document.querySelectorAll('#board .dentile, #board .pit, #board .dcount').length,
     hand: window.__ak().V.game.hand.map(h => ({ iid: h.iid, cost: h.cost, dim: document.querySelector(`#hand .hc[data-iid="${h.iid}"]`).classList.contains('dim'),
@@ -52,8 +52,8 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
     assert.ok(await until(P, () => { const a = window.__ak(); return Object.keys(a.V.game.board).length === 1 && !a.PB.busy; }), 'the card is on the board');
     assert.equal(await P.evaluate(() => document.querySelectorAll('#board .cr.unit').length), 1);
     // its cost spent; with nothing left to pay for, the turn ends by itself and the rail shows the next turn's mana
-    const after = await P.evaluate(() => { const { V } = window.__ak(); return { mine: V.game.current === V.you, spent: document.querySelectorAll('.mmana .mpips i.spent').length,
-      label: document.querySelector('.mmana div').textContent, left: V.game.mana[V.you].left }; });
+    const after = await P.evaluate(() => { const { V } = window.__ak(); return { mine: V.game.current === V.you, spent: document.querySelectorAll('.mmana.A .mpips i.spent').length,
+      label: document.querySelector('.mmana.A div').textContent, left: V.game.mana[V.you].left }; });
     if (after.mine) assert.equal(after.spent, play.cost, 'its cost spent');
     else assert.match(after.label, /^Next turn: \d mana$/);
     assert.ok(await P.evaluate(() => !document.querySelector('#board .cr.unit .mcost')), 'a piece on the board has no cost');

@@ -1841,27 +1841,24 @@ function leaderPanel(side) {
   const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader", kind = isMana() ? LEADER_MANA(V.game.abilityCost) : LEADER_KIND;
   return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${kind[L.kind] || ''}</p><p>${L.text}</p>`;
 }
-// The mana rules' rail (mana.css), right of the board: your opponent's leader with their mana and deck, their food, End turn
-// (#tbtn, its own element), your food, your leader with its power's price and your deck, your mana level with your hand.
-// Food and income are each side's own; their mana while it isn't their turn is their next turn's, unspent.
+// The mana rules' controls around the dens (mana.css; Martin, 2026-11-20, the den layout): each side's leader small, left
+// of its den, with its power's price; your mana and End turn (#tbtn, its own element) right of your den, their mana right
+// of theirs. Food is in the dens (board.js). Their mana while it isn't their turn is their next turn's, unspent.
 function drawRail(G, d) {
   const el = document.getElementById('mrail'); if (!el) return;
   if (!isMana() || !G) { el.innerHTML = ''; return; }
   const you = V.you, them = opp(), mana = G.mana || {}, cost = G.abilityCost;
   const lead = side => {
-    const p = side === 'A' ? you : them, L = (G.leaders || {})[p], m = mana[p] || { left: 0, total: 0 };
-    const deck = (G.deckCount || {})[p], c = L && CARDS[L.id];
-    const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && L.spent;   // the token stays readable; the gold ring says when your power can be used
-    const power = !L ? '' : L.kind === 'passive' ? 'Always on' : L.spent ? 'Used' : `${L.kind === 'once' ? 'Once a game' : 'Power'} ${costChip(L.cost ?? cost)}`;
-    const tok = L ? `<div class="ltok${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:100px">${leaderToken(L.id, side, CARDS, 100)}</div></div>` : '';
-    return `<div class="mlead ${side}">${tok}<div class="lt">${c ? `<b>${esc(c.name.split(':')[0])}</b><br>` : ''}${power}${side === 'B' ? `<br>${pipsHTML(m.left, m.total)}` : ''}`
-      + `<br><span class="ldeck" data-deck="${side}">Deck ${deck ?? ''}</span></div></div>`;
+    const p = side === 'A' ? you : them, L = (G.leaders || {})[p];
+    const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && L.spent;   // the gold ring says when your power can be used
+    const power = !L || L.kind === 'passive' ? '' : L.spent ? '<span class="lused">Used</span>' : costChip(L.cost ?? cost);
+    const tok = L ? `<div class="ltok${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:84px">${leaderToken(L.id, side, CARDS, 84)}</div></div>` : '';
+    return `<div class="mlead ${side}">${tok}<div class="lt">${power}</div></div>`;
   };
-  const food = side => { const p = side === 'A' ? you : them;
-    return `<div class="mfood ${side}" data-tip="${G.food[p]} / ${G.winFood} food"><b>${G.food[p]}</b><span><em>+${G.income[p]}</em>a turn</span></div>`; };
-  const m = mana[you] || { left: 0, total: 0 }, mine = G.current === you && V.phase === 'playing';
-  el.innerHTML = lead('B') + food('B') + food('A') + lead('A')
-    + `<div class="mmana">${pipsHTML(m.left, m.total)}<div>${mine ? `${m.left} of ${m.total} mana left` : `Next turn: ${m.total} mana`}</div></div>`;
+  const m = mana[you] || { left: 0, total: 0 }, t = mana[them] || { left: 0, total: 0 }, mine = G.current === you && V.phase === 'playing';
+  el.innerHTML = lead('B') + lead('A')
+    + `<div class="mmana A">${pipsHTML(m.left, m.total)}<div>${mine ? `${m.left} of ${m.total} mana` : `Next turn: ${m.total} mana`}</div></div>`
+    + `<div class="mmana B">${pipsHTML(t.left, t.total)}</div>`;
 }
 // The rail's leaders and decks read on hover (a leader's power, a decklist), and your leader's power is pressed there.
 function wireRail() {
