@@ -1,101 +1,55 @@
-"""The effect engine: placement mechanic, event dispatch, and the effect-stack interpreter.
+"""The effect engine: the placement mechanic, the cover, removal, food, draws, and the effect-stack interpreter.
 
-Design (plan decision 6): effect resolution is **declarative op-step data** on
-`state.effect_stack`, drained by `resolve()`. A step that needs a choice surfaces as
-`state.pending`; the choice arrives as a normal Action and resumes the paused op. Steps
-are plain dicts (serializable / cloneable / replayable) - never closures.
+Effects resolve as declarative op-steps (plain dicts) on `state.effect_stack`, drained by `resolve()`. A step that needs a
+choice surfaces as `state.pending`; the choice arrives as a normal action and resumes the paused step. Steps are plain
+data, so a position clones, saves and replays.
 
-Layering: this module sits below rules.py (rules orchestrates; effects holds the core
-mechanic + card behavior). It imports state/statics/strength only - never rules.
-
-Card behavior lives in two registries:
-  - EFFECTS[card_id] -> {hook_name: fn}   (triggered effects; push op-steps)
-  - OPS[op_name] -> fn(state, step)        (the op interpreter; returns PendingRequest|None)
-
-M2a implements a representative slice; remaining cards are added in M2b.
+Card behaviour: EFFECTS[card_id] -> {"on_place": fn} (a Roar), and OPS[op] -> fn(state, step) (the interpreter).
 """
 
 from __future__ import annotations
 
-from collections import deque
-
 from dataclasses import dataclass
 from typing import Callable, Optional
 
-from .actions import SKIP, ActAction, ChoiceAction, PlaceAction, RoamAction
-from .state import JELLY_SOURCE, WILD, EngineError, GameState, Result, UnitInstance, other_player
-from . import statics
-from .strength import effective_strength, hand_counter, placement_strength, play_adjustment, raw_strength, small_starting_deck
+from .actions import SKIP, ChoiceAction, PlaceAction
+from .state import EngineError, GameState, Result, UnitInstance, other_player
 from . import leaders as L
+from . import statics
+from .strength import count, effective_strength
 
 
-# ============================================================== pending / requests
+# ============================================================== pending choices
 
 @dataclass
 class PendingRequest:
-    """What an op returns when it needs a choice; converted into state.pending."""
-    mode: str                       # "choice" or "place"
+    """What an op returns when it needs a choice; becomes state.pending."""
+    mode: str                       # "choice"
     chooser: str
-    optional: bool                  # may the player skip it: always said, never assumed
-    options: Optional[list] = None        # mode == "choice": serializable option values
-    placements: Optional[list] = None     # mode == "place": [{card_id, target}]
-    kind: Optional[str] = None            # "mulligan" for the setup choice (bots keep by default)
-    from_deck_reveal: bool = False        # options are cards just peeked/drawn from the hidden
-                                          # deck (Owl, Raven). Generic provenance tag: a search
-                                          # bot that re-samples deck order (determinize) knows
-                                          # the specific option identities are noise in
-                                          # lookahead and may collapse the choice instead of
-                                          # branching on every one. Pure engine data.
+    optional: bool
+    options: list
+    kind: Optional[str] = None      # "mulligan" for the opening hands
 
     def to_pending(self) -> dict:
-        p = {"mode": self.mode, "chooser": self.chooser, "optional": self.optional}
-        if self.mode == "choice":
-            p["options"] = list(self.options)  # type: ignore[arg-type]
-        else:
-            p["placements"] = list(self.placements)  # type: ignore[arg-type]
-        if self.from_deck_reveal:
-            p["from_deck_reveal"] = True
+        p = {"mode": self.mode, "chooser": self.chooser, "optional": self.optional, "options": list(self.options)}
         if self.kind:
             p["kind"] = self.kind
         return p
 
 
 def legal_pending(state: GameState) -> list:
-    """Actions offered while a choice is pending."""
     p = state.pending
     assert p is not None
-    acts: list = []
-    if p["mode"] == "choice":
-        acts = [ChoiceAction(o) for o in p["options"]]
-    else:  # "place"
-        acts = [PlaceAction(pl["card_id"], tuple(pl["target"]), pl.get("iid")) for pl in p["placements"]]
+    acts: list = [ChoiceAction(o) for o in p["options"]]
     if p["optional"]:
         acts.append(ChoiceAction(SKIP))
     return acts
 
 
-def _place_dict(action) -> dict:
-    """A PlaceAction as a pending placement or a recorded choice keeps it: card, target, and the copy when named."""
-    d = {"card_id": action.card_id, "target": list(action.target)}
-    if action.iid is not None:
-        d["iid"] = action.iid
-    return d
-
-
 def apply_pending(state: GameState, action) -> None:
-    """Record the chosen option onto the paused step, then continue resolving."""
-    p = state.pending
-    assert p is not None
-    step = state.effect_stack[-1]  # the paused op (left on the stack by resolve)
-    if p["mode"] == "choice":
-        step["choice"] = action.choice
-    else:  # "place"
-        if isinstance(action, ChoiceAction) and action.choice == SKIP:
-            step["place_action"] = SKIP
-        else:
-            step["place_action"] = _place_dict(action)
+    """Record the choice on the paused step; the caller resolves on."""
+    state.effect_stack[-1]["choice"] = action.choice
     state.pending = None
-    # Resolution is driven by the caller (rules._resolve_and_maybe_end_turn).
 
 
 # ===================================================================== resolve loop
@@ -104,68 +58,12 @@ REQUIRE_SOURCE = False   # tests turn it on: every choice but the mulligan must 
 
 
 def resolve(state: GameState) -> None:
-    """Drain the effect stack until empty, a choice is needed, or the game is won. Once it is empty, every animal below
-    0 strength dies, and what that sets off drains too."""
-    while True:
-        _drain(state)
-        if state.pending is not None or state.result is not None or state.effect_stack:
-            return
-        if _remove_below_zero(state):
-            continue
-        if not _iris_trios(state):
-            return
-
-
-def _iris_trios(state: GameState) -> bool:
-    """Iris's leader: "The first time you control 3 copies of an animal, play a fourth copy." Read off the board once
-    everything has settled, so a copy counts however it got there (played, made, or a Chameleon that became one). The
-    fourth is made and played free. Returns whether any was set off."""
-    if not state.leaders:
-        return False
-    fired = False
-    for player in sorted(state.leaders):
-        if state.leaders[player]["id"] != L.IRIS:
-            continue
-        counts: dict[str, int] = {}
-        for stack in state.board.values():
-            if stack and stack[-1].owner == player:
-                counts[stack[-1].card_id] = counts.get(stack[-1].card_id, 0) + 1
-        for cid in sorted(c for c, n in counts.items() if n >= state.config.iris_leader_copies and c not in state.trios[player]):
-            state.trios[player][cid] = 1
-            state.effect_stack.append({"op": "play_named", "chooser": player, "card_id": cid, "make": True, "by_card": L.IRIS})
-            fired = True
-    return fired
-
-
-def _remove_below_zero(state: GameState) -> bool:
-    """An animal whose strength drops below 0 dies (Martin, 2026-10-26): removed by the rules, not by an effect, so Armor
-    doesn't stop it, and it counts as removed for everything that counts removals. Returns whether any died."""
-    dying = [(cr, st[-1]) for cr, st in sorted(state.board.items()) if st and raw_strength(state, st[-1]) < 0]
-    for cr, unit in dying:
-        _remove_specific(state, cr, unit, by_player=unit.owner, by_effect=False)
-    return bool(dying)
-
-
-def record_cap(state: GameState, cap: str, cards) -> None:
-    """A turn cap fired (Config.max_actions_per_turn, max_effect_steps_per_turn): the `turn_capped` event, and the same
-    record kept on the state (`caps`) for whoever reads a finished game. `cards` are the cards the dropped steps came
-    from: a looping combination shows up in them."""
-    rec = {"cap": cap, "player": state.current, "turn": state.turn_counter, "cards": sorted({c for c in cards if c})}
-    state.caps.append(rec)
-    state.emit("turn_capped", **rec)
-
-
-def stack_cards(state: GameState, *extra) -> list:
-    return [s.get("by_card") for s in state.effect_stack] + list(extra)
-
-
-def _drain(state: GameState) -> None:
+    """Drain the effect stack until it is empty, a choice is needed, or the game is decided."""
     while state.pending is None and state.result is None and state.effect_stack:
         step = state.effect_stack.pop()
         state.effect_steps_this_turn += 1
         if state.effect_steps_this_turn > state.config.max_effect_steps_per_turn:
-            # The turn's effect cap: a loop that needs no player input would never reach the action cap. What is left is
-            # dropped, and the turn ends (rules.apply_action) once this resolve returns.
+            # The turn's effect cap: what is left is dropped, and the turn ends (rules.apply_action) once this returns.
             if state.effect_steps_this_turn == state.config.max_effect_steps_per_turn + 1:
                 record_cap(state, "effect_steps", stack_cards(state, step.get("by_card")))
             state.effect_stack.clear()
@@ -182,7 +80,7 @@ def _drain(state: GameState) -> None:
                 new.setdefault("by_card", step["by_card"])
                 if "by_iid" in step and new["by_card"] == step["by_card"]:
                     new.setdefault("by_iid", step["by_iid"])
-        if req is not None:           # op needs a choice: put the step back and pause
+        if req is not None:           # the step needs a choice: put it back and pause
             if REQUIRE_SOURCE and step["op"] != "mulligan" and not step.get("by_card"):
                 raise AssertionError(f"a {step['op']!r} choice with no source card")
             state.effect_stack.append(step)
@@ -190,13 +88,23 @@ def _drain(state: GameState) -> None:
             return
 
 
+def record_cap(state: GameState, cap: str, cards) -> None:
+    """A turn cap fired (Config.max_actions_per_turn, max_effect_steps_per_turn): the `turn_capped` event, kept on the
+    state too (`caps`). `cards`: where the dropped steps came from."""
+    rec = {"cap": cap, "player": state.current, "turn": state.turn_counter, "cards": sorted({c for c in cards if c})}
+    state.caps.append(rec)
+    state.emit("turn_capped", **rec)
+
+
+def stack_cards(state: GameState, *extra) -> list:
+    return [s.get("by_card") for s in state.effect_stack] + list(extra)
+
+
 # ================================================================== mulligan
 
 def _op_mulligan(state, step):
-    """Gwent-style blacklist mulligan (overview.md §4.4): each returned card is replaced at once by
-    the top deck card that is no copy of anything returned so far, up to the config's mulligan_cap returns (the opening hand's size)
-    (a replacement may itself be returned); SKIP keeps the rest. Returned cards are shuffled back
-    at the end. Raw draws and a raw shuffle: no on-draw or on-shuffle triggers, like the deal."""
+    """A blacklist mulligan: each returned card is replaced at once by the top deck card that is no copy of anything
+    returned so far, up to the opening hand's size; SKIP keeps the rest. Returned cards are shuffled back at the end."""
     player, returned = step["player"], step["returned"]
     deck, hand = state.decks[player], state.hands[player]
     done = False
@@ -209,18 +117,16 @@ def _op_mulligan(state, step):
             if inst is not None and _mulligan_replacement(deck, returned + [inst.card_id]) is not None:
                 hand.remove(inst)
                 returned.append(inst.card_id)
-                i = _mulligan_replacement(deck, returned)
-                new = UnitInstance(deck.pop(i), player, state.new_iid())
+                new = UnitInstance(deck.pop(_mulligan_replacement(deck, returned)), player, state.new_iid())
                 hand.append(new)
                 state.emit("mulligan", player=player, returned=inst.iid, drawn=[new.iid, new.card_id])   # hidden from the other
-    if not done and hand and len(returned) < state.config.mulligan_cap(player, state.first_player) and _mulligan_replacement(deck, returned) is not None:
+    if not done and hand and len(returned) < state.config.mulligan_cap(player, state.first_player) \
+            and _mulligan_replacement(deck, returned) is not None:
         return PendingRequest("choice", player, optional=True, kind="mulligan", options=[u.iid for u in hand])
     if returned:                      # a kept hand leaves the deck order (and the RNG) untouched
         deck.extend(returned)
         state.rng.shuffle(deck)
     if not any(st.get("op") == "mulligan" for st in state.effect_stack):   # both done: the first turn begins
-        for p in ("A", "B"):
-            state.ensure_mates(p)         # the opening hands are final: a legendary Eagle brings its mate now
         state.emit("turn_start", player=state.current, turn=state.turn_counter)
     return None
 
@@ -231,547 +137,136 @@ def _mulligan_replacement(deck, blacklist):
     return next((i for i in range(len(deck) - 1, -1, -1) if deck[i] not in banned), None)
 
 
-# ============================================================ placement + events
+# ============================================================== mana
 
-def do_placement(state: GameState, player: str, card_id: str, target, iid: Optional[int] = None) -> None:
-    """Place an occupant from hand (the copy `iid` when given). Handles food cost, HQ capture, and crossroad landing."""
-    unit = playable_copy(state, player, card_id) if iid is None else next(
-        (u for u in playable_copies(state, player, card_id) if u.iid == iid), None)
-    if unit is None:
-        raise EngineError(f"{player} has no playable {card_id!r} in hand")
-    strength = placement_strength(state, unit)   # as it is played (a den capture shows it)
-    if state.leaders or state.next_strength:
-        _settle_play_strength(state, player, unit)   # Arne's shared strength, the Gorilla's: carried onto the board
-    state.hands[player].remove(unit)
-    cost = state.cards[card_id].food_cost          # "Costs X food" (decision F): paid on placement
-    if cost:
-        state.food[player] -= cost
-        state.emit("pay", player=player, n=cost, card=card_id)
-    state.units_placed_this_turn += 1
-    state.turn_flags.pop(f"flight_next_{player}", None)   # [ACTION 5]: the next animal you play has Flight, then it is spent
-    kind, where = target
-    if kind == "hq":
-        if state.config.den_raid:
-            _raid(state, player, unit, where, strength)
-            return
-        state.emit("capture", player=player, iid=unit.iid, card=card_id, den=where, str=strength)
-        state.result = Result(player, "hq_capture")
-        return
-    _land_unit(state, player, unit, where, from_hand=True)
+# The Djinn: "Costs 1 less for each ...": card id -> what it counts (strength.count).
+DJINN = {"djinn_hand": "hand", "djinn_ally": "ally", "djinn_enemy": "enemy", "djinn_food": "food", "djinn_removed": "removed"}
 
 
-def _raid(state: GameState, player: str, unit: UnitInstance, enemy: str, strength: int, *, roam: bool = False) -> None:
-    """The den raid (the mana ruleset, Martin, 2026-11-20): an animal that enters the enemy den destroys food equal to its
-    strength, at most what they have ("instead of stealing it destroys"), and is spent: it goes to the Remove Pile
-    without landing (no Roar, no reactions). A den emptied loses the game (Config.zero_food_loses)."""
-    bonus = state.config.raider_leader_bonus if _leads(state, player, L.RAIDER) else 0   # the mana prototype's Raider
-    n = min(max(strength, 0) + bonus, state.food[enemy])
-    state.emit("raid", player=player, iid=unit.iid, card=unit.card_id, den=enemy, str=strength, n=n,
-               **({"roam": True} if roam else {}))
-    state.pile_add(unit.card_id, unit.owner)
-    if n:
-        state.food[enemy] -= n
-    _starved(state, enemy)
+def mana_cost(state: GameState, card_id: str, player: Optional[str] = None) -> int:
+    """What playing `card_id` from hand costs `player` (the current player by default): its card's cost, a Djinn's less
+    its count, never below 0."""
+    cost = state.cards[card_id].cost
+    if card_id in DJINN:
+        return max(0, cost - count(state, player or state.current, DJINN[card_id]))
+    return cost
 
 
-def _starved(state: GameState, player: str) -> None:
-    """The mana ruleset's other way to win: a player whose food drops to 0 loses (Martin, 2026-11-20)."""
-    if state.config.zero_food_loses and state.result is None and state.food[player] <= 0:
-        state.result = Result(other_player(player), "starved")
-
-
-def _settle_play_strength(state: GameState, player: str, unit: UnitInstance) -> None:
-    """The leaders prototype: the strength an animal is played with beyond its own counter becomes its counter, so it
-    keeps it on the board: Arne's "copies of the same animal in your hand share their strength" (it leaves the hand at
-    the strongest copy's strength), [GORILLA]'s Roar "the next animal you play has this animal's strength" (spent by this
-    play) and his leader's "the first animal you play each turn has +1 strength"."""
-    shared = hand_counter(state, unit)
-    if shared != unit.strength_counter:
-        state.note_strength(unit.iid, shared - unit.strength_counter, L.ARNE)
-        unit.strength_counter = shared
-    adj = play_adjustment(state, unit)
-    for src, n in adj:
-        if n:
-            unit.strength_counter += n
-            state.note_strength(unit.iid, n, src)
-    state.next_strength.pop(player, None)
-
-
-def playable_copies(state: GameState, player: str, card_id: str) -> list:
-    """The copies of `card_id` in hand that can be played now (not Skunk-locked), in hand order."""
-    return [u for u in state.hands[player] if u.card_id == card_id and u.locked_until_turn <= state.turn_counter]
-
-
-def copy_choices(state: GameState, player: str, card_id: str) -> list:
-    """(iid, copy) for each distinct playable version of `card_id` in hand: one (None, best copy) when the copies are
-    alike, else the first copy of each strength counter with its iid, so a player can play the weaker one."""
-    copies = playable_copies(state, player, card_id)
-    firsts: dict = {}
-    for u in copies:
-        firsts.setdefault(u.strength_counter, u)
-    if len(firsts) <= 1 or _leads(state, player, L.ARNE):   # Arne's leader: the copies share their strength, so they are alike
-        best = playable_copy(state, player, card_id)
-        return [(None, best)] if best is not None else []
-    return [(u.iid, u) for u in firsts.values()]
-
-
-def canonical_place(state: GameState, player: str, action):
-    """A PlaceAction naming any copy in hand, as legal_placements names it: the first copy of that strength, or no
-    copy when the copies are alike. A copy that isn't in hand is left as it is (and fails validation)."""
-    if action.iid is None:
-        return action
-    unit = next((u for u in state.hands[player] if u.iid == action.iid and u.card_id == action.card_id), None)
-    if unit is None:
-        return action
-    choices = copy_choices(state, player, action.card_id)
-    if len(choices) == 1 and choices[0][0] is None:
-        return type(action)(action.card_id, action.target)
-    rep = next((iid for iid, u in choices if u.strength_counter == unit.strength_counter), action.iid)
-    return type(action)(action.card_id, action.target, rep)
-
+# ============================================================ placement
 
 def playable_copy(state: GameState, player: str, card_id: str) -> Optional[UnitInstance]:
-    """The hand instance a PlaceAction for `card_id` plays: the highest-counter copy that is not
-    Skunk-locked (F4), first in hand order on ties. PlaceAction is keyed only by card id, so move
-    generation and execution must both pick through this one predicate."""
-    best = None
-    for u in state.hands[player]:
-        if u.card_id != card_id or u.locked_until_turn > state.turn_counter:
-            continue
-        if best is None or u.strength_counter > best.strength_counter:
-            best = u
-    return best
+    """The hand instance a PlaceAction for `card_id` plays: the first copy in hand."""
+    return next((u for u in state.hands[player] if u.card_id == card_id), None)
 
 
-def _take_from_hand(state: GameState, player: str, card_id: str) -> UnitInstance:
-    """Remove and return a hand instance of `card_id`, preferring the highest-counter copy."""
-    candidates = [u for u in state.hands[player] if u.card_id == card_id]
-    unit = max(candidates, key=lambda u: u.strength_counter)
+def legal_placements(state: GameState, player: str) -> list:
+    """Every placement `player` could make from hand now, whatever it costs (rules filters by mana). Sorted, so a game
+    replays identically. A card lands on an empty tile, on its owner's animal, or on an enemy it is stronger than; Flight
+    lands anywhere; Hungry only on an enemy it is stronger than. A connected animal (or a flier) may raid the enemy den,
+    reached through their base."""
+    gm = state.game_map
+    occ = state.connected_occupied(player)
+    enemy = other_player(player)
+    reach_den = any(cr in occ for cr in gm.hq_front(enemy))
+    tiles = sorted(gm.crossroads)
+    connectable = {cr for cr in tiles if state.is_connected(player, cr, occ)}
+    out = []
+    for card_id in sorted({u.card_id for u in state.hands[player]}):
+        placer = playable_copy(state, player, card_id)
+        keywords = state.cards[card_id].keywords
+        hungry, flight = "Hungry" in keywords, "Flight" in keywords
+        for cr in tiles:
+            if not (flight or cr in connectable):
+                continue
+            top = state.top_unit(cr)
+            if hungry:
+                if top is not None and top.owner != player and statics.can_cover(state, placer, top):
+                    out.append(PlaceAction(card_id, ("cr", cr)))
+            elif top is None or top.owner == player or statics.can_cover(state, placer, top):
+                out.append(PlaceAction(card_id, ("cr", cr)))
+        if (reach_den or flight) and not hungry:
+            out.append(PlaceAction(card_id, ("hq", enemy)))
+    return out
+
+
+def do_placement(state: GameState, player: str, card_id: str, target) -> None:
+    unit = playable_copy(state, player, card_id)
+    if unit is None:
+        raise EngineError(f"{player} has no {card_id!r} in hand")
+    strength = effective_strength(state, unit)   # as it is played
     state.hands[player].remove(unit)
-    return unit
+    kind, where = target
+    if kind == "hq":
+        _raid(state, player, unit, where, strength)
+    else:
+        _land_unit(state, player, unit, where)
 
 
-def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, from_hand: bool,
-               roar: bool = True, play: bool = True, reveal: bool = False,
-               tops: dict[str, UnitInstance] | None = None) -> None:
-    """The same hand instance lands on the board, carrying its strength counter. `roar=False` is a placement by an
-    effect that doesn't set off the animal's Roar (the Sardines an effect fills in); every reaction to the landing still
-    happens. `play=False`: the animal is placed, not played (rulings.md, "Place versus play"), so "when you play"
-    reactions (Queen Honoria) don't see it. `reveal`: the client shows the card large as it lands (Vesper). `tops`: the
-    board's top animals as they stood before a placement that lands several animals at once (the Locust swarm): every
-    landing's reactions see that board, not the one the earlier landings left (Martin, 2026-11-05)."""
+def _raid(state: GameState, player: str, unit: UnitInstance, enemy: str, strength: int) -> None:
+    """The den raid (Martin, 2026-11-20): an animal that enters the enemy den destroys food equal to its strength, at most
+    what they have ("instead of stealing it destroys"), and is spent to the Remove Pile without landing (no Roar). A den
+    emptied loses the game."""
+    bonus = state.config.raider_leader_bonus if _leads(state, player, L.RAIDER) else 0
+    n = min(max(strength, 0) + bonus, state.food[enemy])
+    state.emit("raid", player=player, iid=unit.iid, card=unit.card_id, den=enemy, str=strength, n=n)
+    state.pile_add(unit.card_id, unit.owner)
+    state.food[enemy] -= n
+    if state.result is None and state.food[enemy] <= 0:
+        state.result = Result(player, "starved")
+
+
+def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> None:
+    """The played animal lands on `cr`. What it covered is removed once its Roar and every reaction to the cover have
+    resolved (the stack is last in, first out: that removal goes in first)."""
     covered = state.top_unit(cr)
-    is_apex = "Apex Predator" in state.cards[unit.card_id].keywords
     onto_enemy = covered is not None and covered.owner != player
-
-    unit.placed_on_turn = state.turn_counter
-    state.stamp_played(unit)
     state.board.setdefault(cr, []).append(unit)
-    state.emit("place", player=player, iid=unit.iid, card=unit.card_id, cr=cr, from_hand=from_hand,
-               **({"reveal": True} if reveal else {}))
+    state.emit("place", player=player, iid=unit.iid, card=unit.card_id, cr=cr, from_hand=True)
     if covered is not None:
         state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
-        if onto_enemy and _mana_hungry(state.cards[unit.card_id]):
+        if onto_enemy and "Hungry" in state.cards[unit.card_id].keywords:
             state.effect_stack.append({"op": "hungry_food", "player": player, "prey": covered.iid, "by_card": unit.card_id})
-        _push_scare(state, cr)
-
-    # Apex Predator: it covers the occupant like any placement, and eats it afterwards
-    # (Martin, 2026-09-29): the roar, then every reaction to the cover (Spikes, Poison,
-    # King Theron), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
-    _push_theron(state, unit, covered)
-    _push_cat_leader(state, unit, covered)
-    if is_apex and covered is not None:
-        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id,
-                                   "cr": cr, "owner": unit.owner})
-
-    # Reactive triggers resolve AFTER the placed unit's roar (decision 8). The stack
-    # is LIFO, so push reactive first (lower) and the roar last (on top).
-    _push_reactions(state, unit, cr, covered, onto_enemy, tops)
-    if onto_enemy:
-        _fire_cover_event(state, unit, covered)
-        _push_flee(state, covered, unit, cr)
-    if play:
-        key = f"played_{player}"         # what each player played this turn, for "if you played another Cat" (Serval)
-        state.turn_flags[key] = [*state.turn_flags.get(key, []), [unit.iid, unit.card_id]]
-        # the legendary Mole's leader: "When you play your third animal in a turn, draw 2 cards." (after that animal's Roar)
-        if len(state.turn_flags[key]) == state.config.mole_leader_count and _leads(state, player, L.MOLE):
-            state.effect_stack.append({"op": "draw", "player": player, "n": state.config.mole_leader_draw, "by_card": L.MOLE})
-    _fire_place_event(state, unit)       # the Worker Wasp: gain food whenever you place an animal, played or not
-    if roar:
-        if unit.card_id != "macaw" and _hook(state, unit.card_id, "on_place"):
-            state.last_roar[player] = unit.card_id        # the Macaw repeats it (its own copy records the copied card)
-        times = 1
-        if (state.roar_twice.get(unit.owner) == state.turn_counter and unit.card_id != "woodpecker"
-                and (_hook(state, unit.card_id, "on_place") or (onto_enemy and _hook(state, unit.card_id, "on_place_onto_enemy")))):
-            del state.roar_twice[unit.owner]            # the Woodpecker: this Roar happens twice, then the double is spent
-            times = 2
-        if times == 2:
-            # The second time is pushed first (the stack is LIFO), as a step that runs the Roar when it comes off the
-            # stack: it happens after the first has resolved and picks its targets then, so it never offers an animal
-            # the first one already removed.
-            state.effect_stack.append({"op": "roar_again", "iid": unit.iid, "cr": cr, "onto_enemy": onto_enemy,
-                                       "by_card": unit.card_id, "by_iid": unit.iid})
-        _push_hook(state, unit, cr, "on_place")
-        if onto_enemy:
-            _push_hook(state, unit, cr, "on_place_onto_enemy")
-
-
-def _op_roar_again(state, step):
-    """The Woodpecker's second Roar: run it now, against the board as it stands after the first. It needs the animal
-    still on the board, where it roars from."""
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is None:
-        return None
-    _push_hook(state, unit, cr, "on_place")
-    if step["onto_enemy"]:
-        _push_hook(state, unit, cr, "on_place_onto_enemy")
-    return None
-
-
-def _fire_cover_event(state, coverer, covered) -> None:
-    hook = _hook(state, coverer.card_id, "on_cover_enemy")   # "Whenever this covers an enemy" (Dhole)
-    if hook:
-        hook(state, coverer, covered)
-    # The legendary Oxpecker: "Whenever your animal of strength 8 or more covers an enemy, play an Oxpecker." Made,
-    # then played by its owner like the Rabbit's Bunny: a full placement (Flight: anywhere), its Roar and all.
-    if effective_strength(state, coverer) >= state.config.oxpecker_legend_min:
-        for bird in statics.active_tops(state, coverer.owner, "oxpecker_legend"):
-            state.effect_stack.append({"op": "play_named", "chooser": coverer.owner, "card_id": "oxpecker", "make": True,
-                                       "by_card": bird.card_id, "by_iid": bird.iid})
-
-
-def _push_theron(state, coverer, covered) -> None:
-    """King Theron: when one of your Cats covers an enemy unit, remove that enemy (now buried). Pushed before
-    everything else the cover sets off, so it resolves last: the Cat acts first (an Apex Cat eats, and the legendary
-    Leopard grows for it), and Theron removes whatever it left. Decision G: House Cat/extra-placement chains can
-    cover multiple enemies in one turn - `cap_king_theron` (off by default) limits Theron to one free removal per turn."""
-    if covered is None or covered.owner == coverer.owner:
-        return
-    if _leads(state, coverer.owner, L.WARLORD):     # the mana prototype's Warlord: any cover of an enemy
-        state.effect_stack.append({"op": "gain_food", "player": coverer.owner, "amount": state.config.warlord_leader_food,
+        state.effect_stack.append({"op": "cover_remove", "cr": cr})
+    if onto_enemy and _leads(state, player, L.WARLORD):
+        state.effect_stack.append({"op": "gain_food", "player": player, "amount": state.config.warlord_leader_food,
                                    "by_card": L.WARLORD})
-        return
-    if "Cat" not in state.cards[coverer.card_id].tags:
-        return
-    for top in statics.active_tops(state, coverer.owner, "lion_legend_3"):
-        if not _capped(state, "cap_king_theron", top):
-            state.effect_stack.append(
-                remove_iid_step(covered.iid, by_player=coverer.owner, by_effect=True, source_iid=None, by_card=coverer.card_id))
-        return
-
-
-def _push_cat_leader(state, coverer, covered) -> None:
-    """The two Cat leaders, on the event King Theron's card reads: one of your Cats covers an enemy. Queen Adira: "gain 5
-    food." King Theron: "give it +1 strength." (the Cat that covered, as a stored gain). Pushed straight after his card's
-    step, so it resolves after the Cat's Roar and every reaction to the cover: a Cat that Spikes removed gains nothing,
-    and Adira's food comes all the same (the cover happened)."""
-    if covered is None or covered.owner == coverer.owner or "Cat" not in state.cards[coverer.card_id].tags:
-        return
-    if _leads(state, coverer.owner, L.ADIRA):
-        state.effect_stack.append({"op": "gain_food", "player": coverer.owner, "amount": state.config.adira_leader_food,
-                                   "by_card": L.ADIRA})
-    elif _leads(state, coverer.owner, L.THERON):
-        state.effect_stack.append({"op": "grant_strength", "iids": [coverer.iid], "amount": state.config.theron_leader_grant,
-                                   "by_card": L.THERON})
-
-
-def _push_flee(state, covered, coverer, cr) -> None:
-    """Flee (keywords.md): when an enemy covers this, it returns to its owner's hand. Pushed after every other reaction
-    to the cover, so it resolves first: the animal runs before anything else can eat or remove it (an Apex Predator
-    finds nothing left to eat)."""
-    if coverer.owner != covered.owner and statics.has_keyword(state, covered, "Flee", cr):
-        state.effect_stack.append({"op": "flee", "iid": covered.iid, "coverer": coverer.iid, "by_card": covered.card_id,
-                                   "by_iid": covered.iid})
-
-
-def _op_flee(state, step):
-    """The fleer is back in hand (with its stored strength), then the reactions: the player's other top animals'
-    "whenever one of your animals flees" (the legendary Deer), and the fleer's own "when this flees" (the Zebra's kick,
-    the legendary Deer growing itself). Hooks get the hand instance, the one that goes on existing."""
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is None:
-        return None
-    fled = _bounce(state, cr, unit)
-    if fled is None:                                  # a Wild fleer has no hand: nothing to react to
-        return None
-    for st in list(state.board.values()):
-        top = st[-1] if st else None
-        if top is None or top.owner != fled.owner:
-            continue
-        hook = _hook(state, top.card_id, "on_friendly_flee")
-        if hook:
-            hook(state, top, fled)
-    hook = _hook(state, fled.card_id, "on_flee")
-    if hook:
-        hook(state, fled, step["coverer"])
-    return None
-
-
-def _op_flee_return(state, step):
-    """Zebra: "When this flees, return the enemy that covered it to its owner's hand." (A return: Armor resists it.)"""
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is not None and statics.can_be_removed(state, unit, cr):
-        _bounce(state, cr, unit)
-    return None
-
-
-def _fire_place_event(state, placed) -> None:
-    """Fire "whenever you place" reactors for a unit its controller just landed (Queen Melissia's food): played from
-    hand, placed by an effect (Vesper, the Vultures) or made as a token alike (Martin, 2026-10-21: "place", not "play",
-    so Vesper and the Vulture count). The placed unit itself is skipped."""
-    for st in state.board.values():
-        top = st[-1] if st else None
-        if not (top and top.owner == placed.owner and top.iid != placed.iid):
-            continue
-        hook = _hook(state, top.card_id, "on_friendly_place")
-        if hook is not None:
-            hook(state, top, placed)
-
-
-def _push_reactions(state, unit, cr, covered, onto_enemy, tops=None) -> None:
-    # Traps reacting to a unit arriving adjacent: placed, or roamed in (keywords.md, Roam). An enemy's (Hippopotamus,
-    # Meerkat, Golden Orb-Weaver) or anyone's (City Spider). A trap that cares which it was can tell from the arriving
-    # unit's `roamed_{iid}` turn flag.
-    for nb in sorted(state.game_map.neighbors(cr)):
-        top = state.top_unit(nb) if tops is None else tops.get(nb)
-        if top is None:
-            continue
-        if top.owner != unit.owner:
-            hook = _hook(state, top.card_id, "on_enemy_placed_adjacent")
-            if hook:
-                hook(state, top, unit, cr)
-        hook = _hook(state, top.card_id, "on_animal_placed_adjacent")
-        if hook:
-            hook(state, top, unit, cr)
-    if covered is not None:
-        keywords = statics.unit_keywords(state, covered, cr)
-        if "Spikes" in keywords:   # the keyword is the behaviour: any card with Spikes has it
+    if onto_enemy:
+        if statics.has_keyword(state, covered, "Spikes"):
             _spikes_covered(state, covered, unit, cr)
-        if "Poison" in keywords:
+        if statics.has_keyword(state, covered, "Poison"):
             _poison_covered(state, covered, unit)
-        hook = _hook(state, covered.card_id, "on_covered")
-        if hook:
-            hook(state, covered, unit, cr)
-        if covered.owner != unit.owner and "Colony" in state.cards[covered.card_id].tags:
-            _push_queen_guards(state, covered.owner, unit, cr)
-        # "When an ally is covered" / "Whenever your opponent covers an allied Fish": the covered unit's side watches.
-        watching = [st[-1] if st else None for st in state.board.values()] if tops is None else list(tops.values())
-        for top in watching:
-            if top and top.owner == covered.owner and top is not covered:
-                hook = _hook(state, top.card_id, "on_ally_covered")
-                if hook:
-                    hook(state, top, covered, unit, cr)
-
-
-# Cards whose trigger works from their owner's hand or deck: when an enemy covers an allied Colony animal, they're placed on it.
-QUEEN_GUARDS = frozenset({"hornet_legend"})
-
-
-def _push_queen_guards(state, owner, coverer, cr) -> None:
-    """Vesper: "When an enemy covers an allied Colony animal, place Vesper on it from your hand or deck." A trigger that works
-    while the card is in its owner's hand or deck: one step per such card there, pushed with the other reactions to the
-    cover, so it resolves after the coverer's Roar (as Spikes does). Whether the card is in hand or deck changes nothing,
-    and the two together are public (open decklists, minus what has been seen leaving them), so the engine reading them
-    here tells a bot nothing hidden."""
-    held = {u.card_id for u in state.hands[owner]} | set(state.decks[owner])
-    for cid in sorted(held & QUEEN_GUARDS):
-        state.effect_stack.append({"op": "queen_guard", "card": cid, "player": owner, "coverer": coverer.iid, "cr": cr,
-                                   "by_card": cid})
-
-
-def _op_queen_guard(state, step):
-    """The guard leaves its owner's hand (first) or deck and is placed on top of the enemy that covered the Colony animal: no
-    action, no connection or strength check, no Roar. Nothing happens if that enemy has left the crossroad meanwhile, or
-    the guard has left the hand and deck (played, discarded, stolen)."""
-    cid, owner = step["card"], step["player"]
-    # One event can cover several of the owner's Colony animals at once (the Locust swarm): the guard goes to the one
-    # played earliest, as Dawn and Dusk are ordered (Martin, 2026-10-31); the other calls stay queued and fizzle, it being
-    # gone from hand and deck.
-    calls = [step] + [s for s in state.effect_stack if s.get("op") == "queen_guard" and s["card"] == cid and s["player"] == owner]
-    live = []
-    for call in calls:
-        stack = state.board.get(call["cr"], [])
-        pos = next((i for i, u in enumerate(stack) if u.iid == call["coverer"]), None)
-        if pos is not None:                       # the coverer is still there (an Apex may have eaten what it covered)
-            under = stack[pos - 1] if pos else None
-            live.append((under.play_seq if under else 1 << 30, call["cr"]))
-    if not live:
-        return None
-    cr = min(live)[1]
-    inst = next((u for u in state.hands[owner] if u.card_id == cid), None)
-    from_hand = inst is not None
-    if from_hand:
-        state.hands[owner].remove(inst)
-    elif cid in state.decks[owner]:
-        state.decks[owner].remove(cid)
-        inst = state.deck_instance(owner, cid)
-    else:
-        return None
-    _land_unit(state, owner, inst, cr, from_hand=from_hand, roar=False, play=False, reveal=True)
-    return None
-
-
-def _push_hook(state, unit, cr, hook_name) -> None:
-    hook = _hook(state, unit.card_id, hook_name)
-    if hook:
-        hook(state, unit, cr)
-
-
-def _hook(state, card_id, hook_name, *, as_card=None) -> Optional[Callable]:
-    """A card's hook, wrapped so every step it pushes carries the card as its source (`by_card`): the player is always
-    told which card is asking, never left to a guess. `as_card`: another card runs this one's effect as its own (the
-    Macaw repeating a Roar), so the source is that card."""
-    hooks = EFFECTS.get(card_id)
-    fn = hooks.get(hook_name) if hooks else None
-    if fn is None:
-        return None
-    key = (card_id, hook_name, as_card)
-    hit = _STAMPED.get(key)
-    if hit is not None and hit[0] is fn:      # the wrapper closes over fn and the card only: built once per hook
-        return hit[1]
-    card_id = as_card or card_id
-    def stamped(state, unit, *args, **kw):   # every hook gets its own card's unit first
-        if state.inked and statics.inked(state, unit):
-            return None                       # an inked animal has no effects
-        n, was = len(state.effect_stack), (state.cause, state.cause_iid)
-        state.cause, state.cause_iid = card_id, unit.iid   # what it does now is this unit's doing (events say so)
+    roar = EFFECTS.get(unit.card_id, {}).get("on_place")
+    if roar:
+        n = len(state.effect_stack)
+        prev, state.cause, state.cause_iid = (state.cause, state.cause_iid), unit.card_id, unit.iid
         try:
-            out = fn(state, unit, *args, **kw)
+            roar(state, unit, cr)
         finally:
-            state.cause, state.cause_iid = was
-        for step in state.effect_stack[n:]:
-            step.setdefault("by_card", card_id)
-            if step["by_card"] == card_id:
+            state.cause, state.cause_iid = prev
+        for step in state.effect_stack[n:]:     # every step a Roar pushes names its card and unit as the source
+            step.setdefault("by_card", unit.card_id)
+            if step["by_card"] == unit.card_id:
                 step.setdefault("by_iid", unit.iid)
-        return out
-    _STAMPED[key] = (fn, stamped)
-    return stamped
 
 
-_STAMPED: dict = {}   # (card id, hook name, as_card) -> (the hook it wraps, its stamped wrapper); the search asks millions of times a move
+def _spikes_covered(state, covered, coverer, cr):
+    """Spikes: the first time an enemy covers it, that enemy is removed. Once per animal."""
+    if covered.retaliation_used:
+        return
+    covered.retaliation_used = True
+    if statics.can_be_removed(state, coverer):
+        state.effect_stack.append(remove_iid_step(coverer.iid, by_player=covered.owner, by_card=covered.card_id))
+
+
+def _poison_covered(state, covered, coverer):
+    """Poison: the enemy that covers it is removed at the start of the Poison animal's owner's next turn, wherever it is
+    by then, unless it has left the board first. It is a removal, so Armor resists it."""
+    state.scheduled.append({"iid": coverer.iid, "owner": covered.owner, "remaining": 1,
+                            "step": remove_iid_step(coverer.iid, by_player=covered.owner, by_card=covered.card_id)})
+    state.emit("poisoned", iid=coverer.iid, card=coverer.card_id, owner=coverer.owner, by=covered.iid)
 
 
 # ================================================================= removal & food
-
-def _dispose(state: GameState, unit: UnitInstance) -> bool:
-    """Send a board unit to the Remove Pile. Returns True: it entered the pile (a genuine *remove*). (A "return
-    instead" card, which never reached the pile, would return False here; none is in the pool now.)"""
-    state.pile_add(unit.card_id, unit.owner)
-    return True
-
-
-def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None, armor_checked=False) -> bool:
-    """Remove a specific unit from a stack (mid-stack ok). Fires removal reactions. `by_card`
-    is the card id of the effect's source unit, if any (for Queen Adira's "a Cat removes"). `armor_checked`: the caller
-    judged Armor already, as the board stood (a stack wipe judges the whole stack before taking any of it)."""
-    stack = state.board.get(cr)
-    if not stack or unit not in stack:
-        return False
-    # Only the physics gate lives here (Armor blocks any effect-removal, whoever chose
-    # it). Stealth is a *choice* restriction, enforced where enemy option lists are built,
-    # never at resolution - so mass/random/automatic removals
-    # (Pestis, Rhino/Brutus, Grizzly, Hippo, King Theron, Pufferfish) hit Stealth units.
-    if by_effect and not armor_checked and not statics.can_be_removed(state, unit):
-        return False
-    was_top = stack[-1] is unit
-    pos = stack.index(unit)
-    state.emit("remove", cr=cr, iid=unit.iid, card=unit.card_id, owner=unit.owner, by=by_player)
-    stack.remove(unit)
-    # "if an ally was removed this turn" (Piranha, Vulture), "for each animal removed this turn" (Hyena),
-    # "if an animal was removed this turn" (Great White Shark): board removals, counted per owner.
-    state.turn_flags[f"lost_{unit.owner}"] = state.turn_flags.get(f"lost_{unit.owner}", 0) + 1
-    state.turn_flags["removed_any"] = True
-    for p in ("A", "B"):        # Python: "Whenever an enemy is removed, gain 1 strength (wherever this is)"
-        if p != unit.owner and _owns_copy(state, p, "python"):
-            grown = state.card_strength_counters.setdefault(p, {})
-            grown["python"] = grown.get("python", 0) + state.config.python_growth
-    # A unit uncovered by this very removal was buried when it happened, so it doesn't react to it.
-    uncovered = stack[-1] if was_top and stack else None
-    if not stack:
-        del state.board[cr]
-    entered_pile = _dispose(state, unit)
-    if entered_pile:                        # the remove trigger fires first (F9), then...
-        _fire_remove_event(state, unit.card_id, unit.owner, cr, by_player, by_card, uncovered)
-    _fire_on_remove(state, unit, cr, pos)   # ...the unit's own Deathrattle (e.g. Ember relocates)
-    return True
-
-
-def remove_top(state, cr, *, by_player, by_effect=True, by_card=None) -> bool:
-    top = state.top_unit(cr)
-    if top is None:
-        return False
-    return _remove_specific(state, cr, top, by_player=by_player, by_effect=by_effect, by_card=by_card)
-
-
-def _mana_hungry(card) -> bool:
-    """The mana prototype's Hungry (Martin, 2026-11-20): no number, it must land on an enemy it beats."""
-    return card.ruleset == "mana" and "Hungry" in card.keywords
-
-
-def _op_hungry_food(state, step):
-    """A mana Hungry's prey: once it is gone from the board (removed by the cover), its eater's player gains the food. A
-    prey still standing (the eater died to Spikes first) gives nothing."""
-    if not any(u.iid == step["prey"] for st in state.board.values() for u in st):
-        prev, state.cause = state.cause, step["by_card"]
-        try:
-            gain_food(state, step["player"], state.config.hungry_food)
-        finally:
-            state.cause = prev
-    return None
-
-
-def _push_scare(state: GameState, cr: str) -> None:
-    """A cover removes what it covered (the mana ruleset, Config.cover_removes): pushed first when an animal is covered,
-    so it resolves after the cover's Roar and every reaction to it."""
-    if state.config.cover_removes:
-        state.effect_stack.append({"op": "cover_remove", "cr": cr})
-
-
-def _op_cover_remove(state, step):
-    """Every animal still beneath the top of `cr` is removed (Martin, 2026-11-20: "covered units don't get shuffled back
-    into the deck, they just get removed"): by the rules, not an ability, so Armor doesn't hold, and it counts as removed
-    for everything that counts removals. If the coverer is gone, what it covered is the top again and stays."""
-    stack = state.board.get(step["cr"])
-    if not stack or len(stack) < 2:
-        return None
-    top = stack[-1]
-    for unit in list(stack[:-1]):
-        _remove_specific(state, step["cr"], unit, by_player=top.owner, by_effect=False, by_card=top.card_id, armor_checked=True)
-    return None
-
-
-def _op_apex_eat(state, step):
-    """An Apex eats what it covered, if the prey is still right beneath it, and it can be eaten (not Armor, judged as
-    the prey stood on top: a Capybara's Armor still shields what the predator landed on). Stealth doesn't save it: a
-    predator eats what it lands on, nobody chooses a target (Martin, 2026-10-01). It eats even when the cover's other
-    reactions removed it first: Spikes kill it and it still eats the prey, both die (Martin, 2026-10-24); the prey is
-    then the top of the crossroad."""
-    cr, apex = _find_unit(state, step["iid"])
-    if apex is None:
-        stack = state.board.get(step["cr"])
-        prey = stack[-1] if stack else None
-        if prey is not None and prey.iid == step["prey"] and statics.can_be_removed(state, prey, step["cr"], as_top=True):
-            _remove_specific(state, step["cr"], prey, by_player=step["owner"], by_card=step["by_card"], armor_checked=True)
-        return None
-    stack = state.board[cr]
-    i = stack.index(apex)
-    prey = stack[i - 1] if i > 0 else None
-    if prey is not None and prey.iid == step["prey"]:
-        gained = effective_strength(state, prey)
-        if not statics.can_be_removed(state, prey, cr, as_top=True):
-            return None
-        if _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id, armor_checked=True):
-            grown = 0
-            if apex.card_id == "anaconda":        # Anaconda: "Whenever this removes an animal, gain its strength."
-                grown = gained
-            elif apex.card_id == "leopard_legend":   # the legendary Leopard: "Whenever this removes an animal, gain 1 strength."
-                grown = state.config.leopard_legend_growth
-            if grown:
-                apex.strength_counter += grown
-                state.note_strength(apex.iid, grown, apex.card_id)
-                state.emit("strength", iid=apex.iid, card=apex.card_id, owner=apex.owner, n=grown)
-    return None
-
 
 def _find_unit(state, iid):
     for cr, stack in state.board.items():
@@ -781,741 +276,84 @@ def _find_unit(state, iid):
     return None, None
 
 
-def _fire_on_remove(state, unit, cr, pos) -> None:
-    """A unit leaving the board: its own "When this is removed" effect, told where it stood (`cr`, and `pos`, its place
-    in the stack from the bottom) so it can leave something there (Earthworm)."""
-    hook = _hook(state, unit.card_id, "on_remove")
-    if hook:
-        hook(state, unit, cr, pos)
+def _remove_specific(state, cr, unit, *, by_player, by_effect=True) -> bool:
+    """Remove a unit from its stack (mid-stack too) to the Remove Pile. Armor stops any removal by an ability
+    (`by_effect`); the rules' own removals pass it."""
+    stack = state.board.get(cr)
+    if not stack or unit not in stack:
+        return False
+    if by_effect and not statics.can_be_removed(state, unit):
+        return False
+    state.emit("remove", cr=cr, iid=unit.iid, card=unit.card_id, owner=unit.owner, by=by_player)
+    stack.remove(unit)
+    if not stack:
+        del state.board[cr]
+    state.pile_add(unit.card_id, unit.owner)
+    return True
 
 
-def _food_gained_this_turn(state: GameState, player: str) -> int:
-    """Food `player` has gained since the start of their current turn (turn_flags reset each
-    turn end). Powers the food_otk signature cards: Scrooge / Gopher / Muskrat / Groundhog."""
-    return state.turn_flags.get(f"food_gained_{player}", 0)
+def _op_cover_remove(state, step):
+    """Every animal still beneath the top of `cr` is removed (Martin, 2026-11-20: "covered units don't get shuffled back
+    into the deck, they just get removed"), by the rules, so Armor doesn't hold. If the coverer is gone, what it covered
+    is the top again and stays."""
+    stack = state.board.get(step["cr"])
+    if not stack or len(stack) < 2:
+        return None
+    top = stack[-1]
+    for unit in list(stack[:-1]):
+        _remove_specific(state, step["cr"], unit, by_player=top.owner, by_effect=False)
+    return None
 
 
-def _fed_this_turn(state: GameState, player: str) -> bool:
-    return _food_gained_this_turn(state, player) >= state.config.fed_threshold
+def _op_hungry_food(state, step):
+    """Hungry: once its prey is gone from the board, its player gains the food. A prey still standing (the eater died to
+    Spikes first) gives nothing."""
+    if _find_unit(state, step["prey"])[1] is None:
+        gain_food(state, step["player"], state.config.hungry_food)
+    return None
 
 
-def _lost_this_turn(state: GameState, player: str) -> int:
-    """How many of `player`'s animals have been removed from the board this turn."""
-    return state.turn_flags.get(f"lost_{player}", 0)
-
-
-def lose_food(state: GameState, player: str, amount: int, *, card: Optional[str] = None) -> None:
-    """`player` loses food (the legendary Squirrel's stake, a Hungry animal eating): never below 0."""
-    amount = min(amount, state.food[player])
-    if amount > 0:
-        state.food[player] -= amount
-        state.emit("pay", player=player, n=amount, **({"card": card} if card else {}))
-        _starved(state, player)
-
-
-def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True, income: bool = False) -> None:
-    cap = statics.food_cap(state)          # Methuselah: every gain this turn, from any source, counts toward the cap
-    if cap is not None:
-        amount = min(amount, cap - _food_gained_this_turn(state, player))
+def gain_food(state: GameState, player: str, amount: int, *, income: bool = False) -> None:
     if amount <= 0:
         return
     state.food[player] += amount
     state.emit("food", player=player, n=amount, **({"income": True} if income else {}))
-    state.turn_flags[f"food_gained_{player}"] = _food_gained_this_turn(state, player) + amount
-    if rider:   # Lord Bumbleton's card counts each time you gain food; his leader's extra 1 is part of the same gain
-        state.food_gains[player] = state.food_gains.get(player, 0) + 1
     if state.food[player] >= state.game_map.win_food:
         state.result = Result(player, "food")
-        return
-    # Lord Bumbleton's leader: "Whenever you gain food, gain 1 food." (The extra 1 does not trigger itself.)
-    if rider and _leads(state, player, L.BUMBLETON):
-        was, (state.cause, state.cause_iid) = (state.cause, state.cause_iid), (L.BUMBLETON, None)
-        try:
-            gain_food(state, player, state.config.bumbleton_leader_food, rider=False)
-        finally:
-            state.cause, state.cause_iid = was
-
-
-# ============================================ draw / shuffle / remove event engine
-#
-# Discrete events (decision F2/F9): one event per card drawn, shuffled-into-deck, or
-# removed. Board-top units react via on_draw_event / on_shuffle_event / on_remove_event
-# hooks (Eon/Vulture); Rattlesnake's shuffle growth applies in every zone; a *drawn card* may also react to itself via on_draw (Black Swan). Reactors resolve
-# immediately, so no extra stack steps and no re-entrancy in this stage. state.py stays
-# free of effect imports - these wrappers sit above the card-movement primitives.
-
-def _fire_event(state, hook_name: str, event: dict, skip=None) -> None:
-    """Dispatch one event to every board-top unit that reacts to it (deterministic order).
-    `skip` is a unit that must not react (one the event itself uncovered)."""
-    for cr in sorted(state.board):
-        top = state.board[cr][-1]
-        if top is skip:
-            continue
-        hook = _hook(state, top.card_id, hook_name)
-        if hook:
-            hook(state, top, cr, event)
-    if hook_name == "on_shuffle_event":
-        _rattlesnake_shuffle_event(state, event)
-
-
-def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_card=None, uncovered=None) -> None:
-    if state.leaders and cr is not None:    # an enemy is an animal on the board: a card discarded from a hand or deck is none
-        for p, lead in state.leaders.items():
-            if p != owner and lead["id"] == L.GRIMM:    # every enemy removed, whatever removed it
-                lead["kills"] += 1
-                state.emit("leader", player=p, kills=lead["kills"])
-    event = {"card_id": card_id, "owner": owner, "cr": cr, "tags": state.cards[card_id].tags,
-             "by_player": by_player, "by_card": by_card}
-    _fire_event(state, "on_remove_event", event, skip=uncovered)
-
-
-def _fire_draw(state, drawn) -> None:
-    if drawn:
-        state.emit("draw", player=drawn[0].owner, cards=[[u.iid, u.card_id] for u in drawn])
-        # Over the hand limit, the newest cards burn: a remove from hand, and no ON_DRAW.
-        over = len(state.hands[drawn[0].owner]) - state.config.hand_limit
-        if over > 0:
-            burned, drawn = drawn[-over:], drawn[:-over]
-            for inst in burned:
-                remove_from_hand(state, inst.owner, inst)
-    for inst in drawn:
-        _fire_event(state, "on_draw_event", {"card_id": inst.card_id, "player": inst.owner})
-        hook = _hook(state, inst.card_id, "on_draw")     # the drawn card reacting to itself
-        if hook:
-            hook(state, inst)
-    if drawn:
-        hand = state.hands[drawn[0].owner]
-        before = len(hand)
-        state.ensure_mates(drawn[0].owner, drawn)        # a legendary Eagle entering the hand brings its mate
-        _burn_over_limit(state, drawn[0].owner, hand[before:])
 
 
 def draw_cards(state: GameState, player: str, n: int) -> list:
-    """Draw n cards (the canonical draw used by ops/rules) and fire ON_DRAW events."""
+    """Draw n cards; the newest past the hand limit burn to the Remove Pile."""
     drawn = state.draw(player, n)
-    _fire_draw(state, drawn)
+    if drawn:
+        state.emit("draw", player=player, cards=[[u.iid, u.card_id] for u in drawn])
+        over = len(state.hands[player]) - state.config.hand_limit
+        for inst in drawn[-over:] if over > 0 else []:
+            state.hands[player].remove(inst)
+            state.pile_add(inst.card_id, inst.owner)
+            state.emit("remove", zone="hand", iid=inst.iid, card=inst.card_id, owner=inst.owner)
     return drawn
 
 
-def draw_filtered_random(state: GameState, player: str, n: int, spec: str) -> list:
-    """Draw up to n cards chosen uniformly at random among the deck cards matching `spec`
-    (decision F10: random, no inspection, no choice; fizzle if none). Fires ON_DRAW."""
-    drawn = []
-    for _ in range(n):
-        candidates = [cid for cid in state.decks[player] if _matches(state.cards[cid], spec)]
-        if not candidates:
-            break
-        cid = state.rng.choice(candidates)
-        state.decks[player].remove(cid)
-        inst = state.deck_instance(player, cid)
-        state.hands[player].append(inst)
-        drawn.append(inst)
-    _fire_draw(state, drawn)
-    return drawn
-
-
-def shuffle_back(state: GameState, player: str, card_ids: list, *, by: Optional[str] = None) -> None:
-    """Put `card_ids` into `player`'s deck, shuffle, and fire one ON_SHUFFLE event per card (F2). `by` is the player
-    doing the shuffling when it isn't the deck's owner (the Cuckoo shuffles its eggs into the opponent's deck): the
-    events are theirs ("Whenever you shuffle a card")."""
-    deck = state.decks[player]
-    deck.extend(card_ids)
-    state.rng.shuffle(deck)
-    for cid in card_ids:
-        _fire_event(state, "on_shuffle_event", {"card_id": cid, "player": by or player})
-
-
-def gain_to_hand(state: GameState, player: str, card_id: str, *, strength_counter: int = 0) -> UnitInstance:
-    """A card entering `player`'s hand other than by a draw (returned, made, stolen, copied, taken from a Remove Pile).
-    Past the hand limit it burns, as a drawn card does (overview.md §3.5); so does a mate it brings."""
-    before = len(state.hands[player])
-    inst = state.add_to_hand(player, card_id, strength_counter=strength_counter)
-    _burn_over_limit(state, player, state.hands[player][before:])
-    return inst
-
-
-def _burn_over_limit(state: GameState, player: str, entered: list) -> None:
-    """The newest of `entered` past the hand limit go to the Remove Pile (a remove from hand)."""
-    over = len(state.hands[player]) - state.config.hand_limit
-    for inst in entered[-over:] if over > 0 else []:
-        if inst in state.hands[player]:
-            remove_from_hand(state, player, inst)
-
-
-def remove_from_hand(state: GameState, player: str, inst: UnitInstance) -> None:
-    """Remove a card from hand to the Remove Pile: a *remove* (fires the remove event) but
-    NOT a Deathrattle (it never was on the board). Used by Black Swan, Rat, discards."""
-    state.hands[player].remove(inst)
-    state.pile_add(inst.card_id, inst.owner)
-    state.emit("remove", zone="hand", iid=inst.iid, card=inst.card_id, owner=inst.owner)
-    _fire_remove_event(state, inst.card_id, inst.owner, None)
-
-
-def _matches(card, spec: str) -> bool:
-    """A serializable filter for filtered draws: 'tag:Bird', 'rarity:legendary',
-    """
-    if "|" in spec:                       # Queen Melissia's leader: a Worker, Soldier or Nurse Colony animal
-        return any(_matches(card, part) for part in spec.split("|"))
-    if "&" in spec:                       # Ocelot: "draw 2 common Cats" is 'tag:Cat&rarity:common'
-        return all(_matches(card, part) for part in spec.split("&"))
-    kind, _, val = spec.partition(":")
-    if kind == "tag":
-        return val in card.tags
-    if kind == "rarity":
-        return card.rarity == val
-    if kind == "keyword":                 # Badger: "draw an animal with Roam"
-        return val in card.keywords
-    raise EngineError(f"unknown filter spec {spec!r}")
-
-
-def _capped(state, flag_name: str, unit: UnitInstance) -> bool:
-    """For decision-G once-per-turn caps: True if this reactor already fired this turn under
-    an enabled cap (so it should be skipped). Caps default off (config) = uncapped/as printed."""
-    if not getattr(state.config, flag_name):
-        return False
-    key = f"{flag_name}_{unit.iid}"
-    if state.turn_flags.get(key):
-        return True
-    state.turn_flags[key] = True
-    return False
-
-
-# ========================================================== legal placement helper
-
-def legal_placements(state: GameState, player: str, allowed_cards: Optional[set] = None, *,
-                     titan_ok: bool = False) -> list:
-    """All legal placements for `player` (used by rules.legal_actions and play_extra).
-
-    `allowed_cards` (a set of card ids) restricts which hand cards may be played.
-    `titan_ok`: a Titan may be played (it costs two actions: the turn has two left; a free placement never can).
-    Deterministic order (sorted) for reproducible replay.
-    """
-    gm = state.game_map
-    occ = state.connected_occupied(player)
-    enemy = other_player(player)
-    # HQ capture: connection only (not Flight); a map with bases has no den to capture
-    enemy_hq = (not gm.bases or state.config.den_raid) and any(cr in occ for cr in gm.hq_front(enemy))
-
-    # Connection legality depends only on (player, occ), never on the card, so the set of
-    # connection-legal crossroads is identical for every non-Flight/non-extra card. Compute it
-    # once instead of calling is_connected per (card x crossroad); Flight/extra bypasses layer
-    # on top per card below. (Byte-identical: `cr in connectable` == is_connected(player, cr).)
-    sorted_crossroads = sorted(gm.crossroads)
-    flight_next = bool(state.turn_flags.get(f"flight_next_{player}"))   # [ACTION 5]: this play has Flight
-    connectable = {cr for cr in sorted_crossroads if state.is_connected(player, cr, occ)}
-
-    # One placement per distinct hand card id, using the copy that would actually be played; per strength when
-    # copies of a card differ, so the weaker one can be played (copy_choices).
-    choices: list = []
-    for card_id in sorted({u.card_id for u in state.hands[player]}):
-        if allowed_cards is not None and card_id not in allowed_cards:
-            continue
-        choices.extend((card_id, iid, placer) for iid, placer in copy_choices(state, player, card_id))
-
-    out = []
-    reach_sets: dict[int, set] = {}                   # Reach's crossroads, worked out once
-    for card_id, iid, placer in choices:
-        card = state.cards[card_id]
-        if card.food_cost > state.food[player]:
-            continue                                  # "Costs X food": only if affordable (dec. F)
-        if "Titan" in card.keywords and not titan_ok:
-            continue                                  # Titan: two actions, never a free placement
-        is_apex = "Apex Predator" in card.keywords
-        hunts = _mana_hungry(card)                    # the mana prototype's Hungry: only onto an enemy it beats
-        flight = flight_next or statics.ignores_connection(state, card_id)
-        extra = statics.extra_placement_crossroads(state, card_id, player)
-        reach = statics.reach_of(state, card_id)
-        if reach:
-            if reach not in reach_sets:
-                reach_sets[reach] = statics.reach_crossroads(state, player, reach, occ)
-            extra = extra | reach_sets[reach]
-        for cr in sorted_crossroads:
-            if not (flight or cr in connectable or cr in extra):
-                continue
-            top = state.top_unit(cr)
-            if hunts:
-                if top is not None and top.owner != player and statics.can_cover(state, placer, top):
-                    out.append(PlaceAction(card_id, ("cr", cr), iid))
-            elif is_apex:
-                if top is not None and _apex_can_land(state, placer, top):
-                    out.append(PlaceAction(card_id, ("cr", cr), iid))   # must land on an occupant
-            elif top is None or top.owner == player:
-                out.append(PlaceAction(card_id, ("cr", cr), iid))
-            elif statics.can_cover(state, placer, top):
-                out.append(PlaceAction(card_id, ("cr", cr), iid))
-        # Apex Predators can never capture an HQ (decision D).
-        # a flier drops straight into the enemy den (the mana ruleset's raid, Martin, 2026-11-20: "flying units could be
-        # played straight into opponents base as well")
-        flies_in = flight and state.config.den_raid
-        if (enemy_hq or flies_in) and not is_apex and not hunts:
-            out.append(PlaceAction(card_id, ("hq", enemy), iid))
-    return out
-
-
-def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) -> bool:
-    """Apex Predator landing rules (decision D + keyword-review C1): it may land wherever it
-    could legally cover - free on your own occupants, `statics.can_cover` vs an enemy, so
-    the covering statics apply to apexes exactly as to normal placements: Snow Leopard lets
-    an apex Cat land at equal strength. If the occupant can be eaten it is; if not (Armor) it is simply
-    covered (see _land_unit)."""
-    if top.owner == placer.owner:
-        return True
-    return statics.can_cover(state, placer, top)
-
-
-# ======================================================================== Roam
-#
-# Roam (keywords.md): as an action, move an animal you own that is connected to your den to an adjacent crossroad under
-# the placement rules, at most once per animal per turn. Moving isn't placing: no Roar, no "when you play" reactions, no
-# new place in the play order. Arriving is: adjacency traps, covering reactions (Spikes, Poison, King Theron) and
-# an Apex Predator's eat all happen as on a placement.
-#
-# Hooks for the cards that build on it (none exist yet):
-#   - EFFECTS[card]["on_roam"](state, unit, cr, event): "whenever this roams…", resolves first, where a Roar would;
-#   - EFFECTS[card]["on_friendly_roam"](state, watcher, roamer, event): "whenever one of your animals roams…" (any of
-#     the player's other top units; event["onto_enemy"] tells a cover);
-#   - statics.can_roam: who roams (printed Roam, or the Coyote's gift, UnitInstance.granted_roam);
-#   - free roams: statics.free_roams(state, player) per turn, plus turn_flags["free_roams_<player>"] granted by the
-#     `grant_free_roam` op; a free roam is spent before an action.
-# The event dict: {"player", "iid", "from", "to" (None for a den), "covered" (iid or None), "onto_enemy"}.
-# turn_flags: "roamed_<iid>" (this animal has roamed this turn), "roams_<player>" (how many this turn).
-
-def legal_roams(state: GameState, player: str, *, free_only: bool = False) -> list:
-    """Every legal Roam for `player`, in a deterministic order. `free_only`: only roams a free roam pays for (the turn's
-    actions are spent)."""
-    given = {int(k[14:]) for k in state.turn_flags if k.startswith("free_roam_iid_")}   # animals an effect gave a roam
-    if not any(st and st[-1].owner == player and (statics.can_roam(state, st[-1])
-                                                   or (st[-1].iid in given and statics.active(state, st[-1])))
-               for st in state.board.values()):
-        return []                                     # the usual case, and the search's hot path: skip the BFS
-    occ = state.connected_occupied(player)
-    enemy_front = state.game_map.hq_front(other_player(player))
-    out: list = []
-    for cr in sorted(cr for cr, st in state.board.items() if st and st[-1].owner == player):
-        unit = state.board[cr][-1]
-        if not (statics.can_roam(state, unit) or (unit.iid in given and statics.active(state, unit))) \
-                or state.turn_flags.get(f"roamed_{unit.iid}"):
-            continue
-        if free_only and not free_roams_left(state, player, unit):
-            continue
-        out.extend(RoamAction(cr, t) for t in roam_targets(state, unit, cr, enemy_front=enemy_front, occ=occ))
-    return out
-
-
-def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None) -> list:
-    """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy). A roam moves the animal
-    through your own animals connected to it (its pack), then up to its Reach beyond them, one step without Reach,
-    jumping over whatever stands between (Martin, 2026-10-15): distance counts from the animal, never from the den. It
-    lands by the placement rules: empty, your own animal, or an enemy it beats; an Apex
-    Predator lands only on an animal. It takes the den only when its pack stands on the den front and is connected to
-    your own den, as a card from the hand would. `enemy_front` and `occ` are accepted for old callers."""
-    player = unit.owner
-    enemy = other_player(player)
-    gm = state.game_map
-    pack, queue = {cr}, deque([cr])                   # the animal and your animals touching it, transitively
-    while queue:
-        c = queue.popleft()
-        for nb in gm.neighbors(c):
-            if nb not in pack and state.owner_of(nb) == player:
-                pack.add(nb)
-                queue.append(nb)
-    n = max(1, statics.reach_of(state, unit.card_id))
-    dist = {c: 0 for c in pack}
-    queue = deque(pack)
-    while queue:
-        c = queue.popleft()
-        if dist[c] < n:
-            for nb in gm.neighbors(c):
-                if nb not in dist:
-                    dist[nb] = dist[c] + 1
-                    queue.append(nb)
-    is_apex = statics.has_keyword(state, unit, "Apex Predator", cr)
-    out = []
-    for c in sorted(dist):
-        if c == cr:
-            continue
-        top = state.top_unit(c)
-        if top is None:
-            ok = not is_apex                          # an Apex lands only on an animal
-        elif top.owner == player:
-            ok = True
-        else:
-            ok = statics.can_cover(state, unit, top, roaming=True)
-        if ok:
-            out.append(("cr", c))
-    if occ is None:
-        occ = state.connected_occupied(player)
-    if not is_apex and (not gm.bases or state.config.den_raid) and cr in occ and any(c in pack for c in gm.hq_front(enemy)):
-        out.append(("hq", enemy))                     # the den: along a chain from your own den, as from the hand
-    return out
-
-
-def _own_free_roams(state: GameState, player: str, unit=None) -> int:
-    """Free roams given to one animal ("It roams", the African Wild Dog): `unit`'s own, or with no unit, any of `player`'s
-    animals still on top that hasn't roamed this turn."""
-    if unit is not None:
-        return state.turn_flags.get(f"free_roam_iid_{unit.iid}", 0)
-    return sum(1 for st in state.board.values() if st and st[-1].owner == player
-               and state.turn_flags.get(f"free_roam_iid_{st[-1].iid}") and not state.turn_flags.get(f"roamed_{st[-1].iid}"))
-
-
-def free_roams_left(state: GameState, player: str, unit=None) -> int:
-    """Free roams `player` still holds this turn; with `unit`, those that animal may use."""
-    granted = statics.free_roams(state, player, unit) + state.turn_flags.get(f"free_roams_{player}", 0)
-    return max(0, granted - state.turn_flags.get(f"free_roams_used_{player}", 0)) + _own_free_roams(state, player, unit)
-
-
-def pay_for_roam(state: GameState, player: str, unit=None) -> None:
-    """A roam spends the animal's own free roam first, then a free roam the player holds that it may use, else one of
-    the turn's actions."""
-    if unit is not None and state.turn_flags.get(f"free_roam_iid_{unit.iid}"):
-        del state.turn_flags[f"free_roam_iid_{unit.iid}"]
-    elif free_roams_left(state, player, unit) - _own_free_roams(state, player, unit):
-        state.turn_flags[f"free_roams_used_{player}"] = state.turn_flags.get(f"free_roams_used_{player}", 0) + 1
-    else:
-        state.actions_taken_this_turn += ability_cost(state)
-
-
-def ability_cost(state: GameState) -> int:
-    """What a Roam, an Echo, a printed Action or a leader's power takes from the turn: one action, or in the mana ruleset
-    Config.mana_per_action mana."""
-    return state.config.mana_per_action if state.config.mana else 1
-
-
-# The Djinn (Martin, 2026-11-20): the mana ruleset's Giants, 10 mana, "Costs 1 less for each ..." of their owner's count;
-# the hand counts the Djinn itself, the food is its owner's, the removed animals its opponent's.
-def _djinn_count(state: GameState, player: str, what: str) -> int:
-    opp = other_player(player)
-    if what == "hand":
-        return len(state.hands[player])
-    if what in ("ally", "enemy"):
-        side = player if what == "ally" else opp
-        return sum(1 for stack in state.board.values() if stack and stack[-1].owner == side)
-    if what == "food":
-        return state.food.get(player, 0)
-    return sum(1 for o in state.pile_owners if o == opp)
-
-
-DJINN = {"djinn_hand": "hand", "djinn_ally": "ally", "djinn_enemy": "enemy", "djinn_food": "food", "djinn_removed": "removed"}
-
-
-def mana_cost(state: GameState, card_id: str, player: str | None = None) -> int:
-    """The mana ruleset: what playing `card_id` from hand costs, its card's `cost` (a Djinn's less its count, never below
-    0, for `player`, the current player by default). A card with none (a form an effect turned a card into in hand, such
-    as Xanthe's stages) costs what the card that makes it costs (its `related`); a card with no cost anywhere can't be
-    paid for (more than any turn's mana)."""
-    card = state.cards[card_id]
-    if card.cost is not None and card_id in DJINN:
-        return max(0, card.cost - _djinn_count(state, player or state.current, DJINN[card_id]))
-    if card.cost is not None:
-        return card.cost
-    maker = _MAKERS.get(card_id)
-    if maker is None:
-        maker = next((c.id for c in state.cards.values() if card_id in c.related and c.cost is not None), "")
-        _MAKERS[card_id] = maker
-    cost = state.cards[maker].cost if maker else None
-    return cost if cost is not None else 1 << 20
-
-
-_MAKERS: dict[str, str] = {}
-
-
-def do_roam(state: GameState, player: str, origin: str, target, *, by_effect: bool = False) -> None:
-    """Move the top animal of `origin` to `target`. Leaving uncovers whatever was beneath it. `by_effect`: a card's "It
-    roams", which isn't the animal's one roam of the turn (Martin, 2026-10-28)."""
-    stack = state.board.get(origin)
-    if not stack or stack[-1].owner != player:
-        raise EngineError(f"{player} has no animal on {origin!r} to roam")
-    unit = stack[-1]
-    if not by_effect:
-        state.turn_flags[f"roamed_{unit.iid}"] = True
-    state.turn_flags[f"roams_{player}"] = state.turn_flags.get(f"roams_{player}", 0) + 1
-    state.turn_flags["any_roamed"] = True             # the Fox's Roar asks
-    kind, where = target
-    if kind == "hq" and state.config.den_raid:        # the raid: it leaves the board for the den and is spent
-        stack.pop()
-        if not stack:
-            del state.board[origin]
-        state.emit("roam", player=player, iid=unit.iid, card=unit.card_id, cr=origin, to=None, den=where)
-        _raid(state, player, unit, where, effective_strength(state, unit), roam=True)
-        return
-    if kind == "hq":                                  # the game ends as it steps onto the den
-        state.emit("roam", player=player, iid=unit.iid, card=unit.card_id, cr=origin, to=None, den=where)
-        state.emit("capture", player=player, iid=unit.iid, card=unit.card_id, den=where,
-                   str=effective_strength(state, unit), roam=True)
-        state.result = Result(player, "hq_capture")
-        return
-    stack.pop()
-    if not stack:
-        del state.board[origin]
-    state.emit("roam", player=player, iid=unit.iid, card=unit.card_id, cr=origin, to=where)
-    covered = state.top_unit(where)
-    onto_enemy = covered is not None and covered.owner != player
-    state.board.setdefault(where, []).append(unit)
-    if covered is not None:
-        state.emit("cover", cr=where, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
-        _push_scare(state, where)
-    _push_theron(state, unit, covered)
-    _push_cat_leader(state, unit, covered)
-    if statics.has_keyword(state, unit, "Apex Predator", where) and covered is not None:
-        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id,
-                                   "cr": where, "owner": unit.owner})
-    _push_reactions(state, unit, where, covered, onto_enemy)
-    if onto_enemy:
-        _fire_cover_event(state, unit, covered)
-        _push_flee(state, covered, unit, where)
-    event = {"player": player, "iid": unit.iid, "from": origin, "to": where,
-             "covered": covered.iid if covered is not None else None, "onto_enemy": onto_enemy}
-    for st in list(state.board.values()):
-        top = st[-1] if st else None
-        if top and top.owner == player and top.iid != unit.iid:
-            hook = _hook(state, top.card_id, "on_friendly_roam")
-            if hook:
-                hook(state, top, unit, event)
-    hook = _hook(state, unit.card_id, "on_roam")
-    if hook:
-        hook(state, unit, where, event)
-
-
-def _op_grant_free_roam(state, step):
-    """A free roam for `player` this turn (the turn it resolves in): spent before an action."""
-    key = f"free_roams_{step['player']}"
-    state.turn_flags[key] = state.turn_flags.get(key, 0) + step["n"]
-    return None
-
-
-# ===================================================================== Action
-#
-# The actions prototype (branch actions): "Action: <effect>." on a card. As one of the turn's actions, the top animal of a
-# crossroad uses it: once per animal per turn, the turn it is placed too. Not a placement and not a Roar, so nothing that
-# reacts to placing or to Roars sees it, and nothing that repeats a Roar repeats it. An inked animal (no effects) has no
-# Action. Each card's effect is its EFFECTS hook "on_act"; ACT_NEEDS says when it is offered at all.
-# turn_flags: "acted_<iid>" (this animal used its Action this turn), "flight_next_<player>" ([ACTION 5]).
-
-ACT_NEEDS = {
-    "baboon_legend": lambda state, p, cr: bool(_babaji_allies(state, p, cr)),   # Echo: his Roar needs an ally to return
-    "card_burner": lambda state, p, cr: bool(state.hands[p]),     # discard a card: only with a card in hand
-    "trainer": lambda state, p, cr: bool(state.hands[p]),     # give an animal in your hand +2: only with one there
-    "tarsier": lambda state, p, cr: bool(state.hands[p]),     # Echo: give an animal in your hand +2: only with one there
-    "macaw": lambda state, p, cr: bool(state.last_roar.get(other_player(p))),   # Echo: only with an opponent's Roar to repeat
-    "lookout": lambda state, p, cr: bool(state.decks[p]),     # Scout: only with a deck to look at
-}
-
-
-def has_act(state: GameState, unit) -> bool:
-    """Whether `unit`'s card carries an Action (printed) or Echo (the leaders prototype: "spend one action to repeat its
-    Roar"), its effects working."""
-    hooks = EFFECTS.get(unit.card_id)
-    if not hooks:
-        return False
-    if "on_act" in hooks or ("on_place" in hooks and "Echo" in state.cards[unit.card_id].keywords):
-        return statics.active(state, unit)
-    return False
-
-
-def legal_acts(state: GameState, player: str) -> list:
-    """Every Action `player` may use now (the caller checks the turn has an action left), in crossroad order."""
-    out = []
-    for cr in sorted(cr for cr, st in state.board.items() if st and st[-1].owner == player):
-        unit = state.board[cr][-1]
-        if not has_act(state, unit) or state.turn_flags.get(f"acted_{unit.iid}"):
-            continue
-        need = ACT_NEEDS.get(unit.card_id)
-        if need is None or need(state, player, cr):
-            out.append(ActAction(cr))
-    return out
-
-
-def do_act(state: GameState, player: str, origin: str) -> None:
-    """The animal on top of `origin` uses its Action (the caller has paid the action)."""
-    stack = state.board.get(origin)
-    if not stack or stack[-1].owner != player:
-        raise EngineError(f"{player} has no animal on {origin!r} to act")
-    unit = stack[-1]
-    state.turn_flags[f"acted_{unit.iid}"] = True
-    state.emit("act", player=player, iid=unit.iid, card=unit.card_id, cr=origin)
-    if "on_act" in EFFECTS.get(unit.card_id, {}):
-        _push_hook(state, unit, origin, "on_act")
-    else:                                  # Echo: its Roar happens again, from where it stands
-        _push_hook(state, unit, origin, "on_place")
-
-
-def _food_maker_act(state, unit, cr):
-    """Action: gain 10 food."""
-    _push_gain(state, unit.owner, state.config.food_maker_food)
-
-
-def _card_burner_act(state, unit, cr):
-    """Action: discard a card to gain 15 food (the player picks the card)."""
-    o = unit.owner
-    _push_gain(state, o, state.config.card_burner_food)
-    _push_choose(state, o, _hand_iids(state, o), "discard")
-
-
-def _refueler_act(state, unit, cr):
-    """Action: gain 5 food and draw a card (an empty deck: the food all the same)."""
-    _push_draw(state, unit.owner, state.config.refueler_draw)
-    _push_gain(state, unit.owner, state.config.refueler_food)
-
-
-def _trainer_act(state, unit, cr):
-    """Action: give an animal in your hand +2 strength (a counter it carries onto the board)."""
-    _push_choose(state, unit.owner, _hand_iids(state, unit.owner), "grant", amount=state.config.trainer_grant)
-
-
-def _flight_giver_act(state, unit, cr):
-    """Action: the next animal you play this turn has Flight (spent by that play; gone at the end of the turn)."""
-    state.turn_flags[f"flight_next_{unit.owner}"] = True
-
-
-def _lookout_act(state, unit, cr):
-    """Action: Scout a card."""
-    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": None})
-
-
-def _food_thief_act(state, unit, cr):
-    """Action: your opponent loses 10 food (never below 0)."""
-    lose_food(state, other_player(unit.owner), state.config.food_thief_drain, card=unit.card_id)
-
-
-def _protector_act(state, unit, cr):
-    """Action: your animals have +2 strength during your opponent's next turn (live; two of them stack)."""
-    turn, n = state.turn_counter + 1, state.config.protector_bonus
-    g = state.action_guard.get(unit.owner)
-    state.action_guard[unit.owner] = [turn, g[1] + n] if g and g[0] == turn else [turn, n]
-
-
-# ============================================================= delayed scheduler
-
-def schedule(state: GameState, unit, owner_turn_delay: int, step: dict, *, while_buried: bool,
-             turn_of: Optional[str] = None) -> None:
-    """Queue `step` to fire after `owner_turn_delay` more of `unit`'s owner's turns (`turn_of`: another player's turns,
-    the Electric Eel's on its opponent's).
-
-    The timer belongs to the **unit**, not the board (rules `overview.md` §9.1): it advances only
-    while `unit` is the top of its crossroad, and is cancelled outright if `unit` leaves the board.
-    A bounced unit re-enters play as a fresh instance with a new iid, so replaying it starts a new
-    timer rather than resuming this one - "bounce resets".
-    """
-    step.setdefault("by_card", unit.card_id)   # a delayed effect still names its card when it fires
-    step.setdefault("by_iid", unit.iid)        # and its animal (the timer dies with it, so it is on the board when it fires: its food flies from it)
-    state.scheduled.append({"iid": unit.iid, "owner": turn_of or unit.owner, "while_buried": while_buried,   # keep ticking under a cover?
-                            "remaining": owner_turn_delay, "step": step})
-
+# ============================================================= turn start
 
 def start_of_turn(state: GameState, player: str) -> None:
-    """Advance `player`'s pending timers and fire those that come due, then run on_start_of_turn hooks (Dawn) after
-    them (the caller resolves the stack).
-
-    Per `overview.md` §9.1 a timer ticks only for a unit that is currently the **top** of its
-    crossroad: a buried unit's timer is suspended (not lost) and resumes if it becomes visible
-    again; a unit that has left the board has its timer cancelled.
-    """
+    """Advance `player`'s timers (Poison) and push those that come due; a timer on a unit gone from the board is
+    cancelled. The caller resolves."""
     on_board = {u.iid for stack in state.board.values() for u in stack}
-    tops = {stack[-1].iid for stack in state.board.values() if stack}
-    fired: list = []
-    keep: list = []
+    fired, keep = [], []
     for s in state.scheduled:
-        if s["owner"] not in (player, WILD):       # a Wild animal's timer ticks every turn: every turn is its turn
+        if s["owner"] != player:
             keep.append(s)
-        elif s["iid"] not in on_board:
-            continue                       # removed: cancelled outright (§9.1)
-        elif s["iid"] not in tops and not s["while_buried"]:
-            keep.append(s)                 # buried: suspended, does not tick (§9.1)
-        else:
+        elif s["iid"] in on_board:
             s["remaining"] -= 1
             (fired if s["remaining"] <= 0 else keep).append(s)
     state.scheduled = keep
-    lead = state.leaders.get(player) if state.leaders else None
-    if lead is not None and lead["id"] == L.XANTHE and lead["stage"] < len(L.XANTHE_STAGES) - 1:
-        lead["stage"] += 1                    # Xanthe's leader evolves on the den, one stage at each of your Dawns
-        state.emit("leader", player=player, stage=lead["stage"])
-    for inst in list(state.hands[player]):     # a Dawn that works from the hand too (the legendary Butterfly's)
-        hook = _hook(state, inst.card_id, "on_dawn_in_hand")
-        if hook:
-            hook(state, inst, None)
-    # Dawn under the timers: the delayed payouts resolve first, so a Sloth's food feeds the Hungry (Martin, 2026-10-24)
-    _push_timed_hooks(state, player, "on_start_of_turn")
-    for s in fired[::-1]:      # earliest-scheduled ends on top of the stack -> resolves first (reversed() trips mypyc here)
+    for s in fired[::-1]:      # the earliest scheduled ends on top of the stack and resolves first
         state.effect_stack.append(s["step"])
 
 
-def end_of_turn(state: GameState, player: str) -> None:
-    """Queue `player`'s Dusk effects (on_end_of_turn hooks); the caller resolves them.
-
-    End-of-turn effects are choice-free (auto/deterministic) so the turn can still advance
-    without a pending decision - see rules._end_turn.
-    """
-    if _leads(state, player, L.SOLENIA):      # Queen Solenia's leader: "Dusk: gain 1 food for each animal you control."
-        state.effect_stack.append({"op": "gain_food", "player": player, "by_card": L.SOLENIA,
-                                   "amount": state.config.solenia_leader_per * _control_tag_count(state, player)})
-    if _leads(state, player, L.ASH):          # Ash's leader: each of the four keywords on each of her top animals, as the board shows them
-        state.effect_stack.append({"op": "gain_food", "player": player, "by_card": L.ASH, "amount": ash_food(state, player)})
-    _vultures_dusk(state, player)
-    _push_timed_hooks(state, player, "on_end_of_turn")
-
-
-def _push_timed_hooks(state: GameState, player: str, hook_name: str) -> None:
-    """Dawn and Dusk: several of one player's resolve in the order their animals were played (keywords.md), each in
-    full before the next begins. Each is a `timed_hook` step, earliest-played on top of the stack, and re-checks its
-    animal when its turn comes: one an earlier effect removed or buried does nothing (overview.md §9, a queued reaction
-    fizzles when its unit is gone)."""
-    due = []
-    for cr, stack in state.board.items():
-        top = stack[-1] if stack else None
-        if not top or top.owner != player:
-            continue
-        if hook_name in EFFECTS.get(top.card_id, {}):
-            due.append((top.play_seq, cr, top.iid, top.card_id, hook_name))
-        # Hungry N is a Dawn effect too ("food is made at the end of your turn and eaten at the start of the next").
-        if hook_name == "on_start_of_turn" and "Hungry" in state.cards[top.card_id].keywords:
-            due.append((top.play_seq, cr, top.iid, top.card_id, "hungry"))
-    # The legendary Sloth: "Your Dusk effects happen twice." Each one runs twice in a row.
-    times = 2 if hook_name == "on_end_of_turn" and statics.active_tops(state, player, "sloth_legend") else 1
-    for _, _, iid, card_id, hook in sorted(due, reverse=True):
-        for _ in range(times):
-            state.effect_stack.append({"op": "timed_hook", "hook": hook, "iid": iid, "player": player,
-                                       "by_card": card_id, "by_iid": iid})
-
-
-def _op_timed_hook(state, step):
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is None or state.board[cr][-1] is not unit or unit.owner != step["player"]:
-        return None
-    if step["hook"] == "hungry":
-        _eat(state, unit, cr)
-        return None
-    hook = _hook(state, unit.card_id, step["hook"])
-    if hook:
-        hook(state, unit, cr)
-    return None
-
-
-def _eat(state, unit, cr) -> None:
-    """Hungry N (keywords.md): at the start of your turn the animal eats up to N of your food and gets -1 strength, for
-    good, for each food it was short. An inked animal isn't Hungry."""
-    if not statics.has_keyword(state, unit, "Hungry", cr) or _mana_hungry(state.cards[unit.card_id]):
-        return
-    n = state.cards[unit.card_id].hungry
-    prev, state.cause, state.cause_iid = (state.cause, state.cause_iid), unit.card_id, unit.iid
-    try:
-        eaten = min(n, state.food[unit.owner])
-        lose_food(state, unit.owner, eaten, card=unit.card_id)
-        if eaten:
-            state.hungry_eaten[unit.owner] = state.hungry_eaten.get(unit.owner, 0) + eaten
-            for inst in state.hands[unit.owner]:     # the legendary Dung Beetle evolves in hand (in the deck, as it's drawn)
-                form = state.eaten_form(unit.owner, inst.card_id)
-                if form != inst.card_id:
-                    _transform(state, inst, form)
-        if eaten < n:
-            unit.strength_counter -= n - eaten
-            state.note_strength(unit.iid, eaten - n, unit.card_id)
-            state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=eaten - n)
-    finally:
-        state.cause, state.cause_iid = prev
-
-
-# ===================================================================== op registry
+# ===================================================================== ops
 
 def _op_gain_food(state, step):
     gain_food(state, step["player"], step["amount"])
@@ -1527,2687 +365,106 @@ def _op_draw(state, step):
     return None
 
 
-def _op_draw_filtered(state, step):
-    draw_filtered_random(state, step["player"], step["n"], step["spec"])
-    return None
+def remove_iid_step(iid, *, by_player, by_card) -> dict:
+    return {"op": "remove_iid", "iid": iid, "by_player": by_player, "by_card": by_card}
 
 
-def _op_egg_hatch(state, step):
-    cr, egg = _find_unit(state, step["iid"])
-    if egg is None:
-        return None  # egg already gone (removed before it hatched) - no payoff
-    _remove_specific(state, cr, egg, by_player=egg.owner, by_effect=False)
-    draw_filtered_random(state, egg.owner, step["n"], step["spec"])
-    return None
-
-
-def _op_raven_dig(state, step):
-    player = step["player"]
-    if "remaining" not in step:
-        draw_cards(state, player, state.config.raven_draw)   # draw (fires ON_DRAW), then...
-        step["remaining"] = min(state.config.raven_shuffle, len(state.hands[player]))
-        step["shuffled"] = []
-
-    if "choice" in step:
-        iid = step.pop("choice")
-        inst = next((u for u in state.hands[player] if u.iid == iid), None)
-        if inst is not None:
-            state.hands[player].remove(inst)
-            state.emit("leave_hand", zone="hand", owner=player, iid=inst.iid, card=inst.card_id, to="deck")
-            step["shuffled"].append(inst.card_id)
-            step["remaining"] -= 1
-
-    if step["remaining"] > 0 and state.hands[player]:
-        options = [u.iid for u in state.hands[player]]
-        if len(options) == 1:
-            step["choice"] = options[0]
-            return _op_raven_dig(state, step)
-        return PendingRequest("choice", player, optional=False, options=options, from_deck_reveal=True)
-
-    if step["shuffled"]:
-        shuffle_back(state, player, step["shuffled"])
-    return None
-
-
-def _op_scout(state, step):
-    """Scout: look at `scout_count` different cards of your deck, draw one (chosen), shuffle the rest back.
-    Unfiltered (Owl) it looks from the top of the deck down; with a `spec` (a Bird, a legendary unit)
-    at random matching cards. Either way it takes one copy of a card and passes over its other copies,
-    so the choice is between that many different cards whenever the deck holds them (Martin, 2026-10-02:
-    three Owls in the deck showed one card three times). Nothing matching: nothing happens."""
-    player = step["player"]
-    if "pulled" not in step:
-        deck = state.decks[player]
-        n = state.config.scout_count
-        if step["spec"] is None:   # from the top of the deck (its end) down
-            order = list(range(len(deck) - 1, -1, -1))
-        else:                      # random cards of that kind
-            order = [i for i, cid in enumerate(deck) if _matches(state.cards[cid], step["spec"])]
-            state.rng.shuffle(order)
-        picks, seen = [], set()
-        for i in order:
-            if len(picks) == n:
-                break
-            if deck[i] not in seen:
-                seen.add(deck[i]); picks.append(i)
-        pulled = [deck.pop(i) for i in sorted(picks, reverse=True)]
-        if not pulled:
-            return None
-        step["pulled"] = pulled
-        if len(set(pulled)) == 1:
-            step["choice"] = pulled[0]
-        else:
-            return PendingRequest("choice", player, optional=False, options=sorted(set(pulled)),
-                                  from_deck_reveal=True)
-    pulled = list(step["pulled"])
-    pulled.remove(step["choice"])
-    inst = state.deck_instance(player, step["choice"])
-    state.hands[player].append(inst)
-    if step.get("grant"):                 # Babaji's leader: "Scout an animal and give it +1 strength."
-        _grant(state, [inst.iid], step["grant"])
-    _fire_draw(state, [inst])
-    shuffle_back(state, player, pulled)
-    return None
-
-
-def _op_bird_egg_hatch(state, step):
-    cr, egg = _find_unit(state, step["iid"])
-    if egg is None:
-        return None  # removed before it hatched - no payoff
-    _remove_specific(state, cr, egg, by_player=egg.owner, by_effect=False)
-    # the hatch draws a Bird, no choice: nothing asks a player to decide at the start of their turn (Martin, 2026-10-08)
-    state.effect_stack.append({"op": "draw_filtered", "player": egg.owner, "n": 1, "spec": "tag:Bird"})
+def _op_remove_iid(state, step):
+    cr, unit = _find_unit(state, step["iid"])
+    if unit is not None:
+        _remove_specific(state, cr, unit, by_player=step["by_player"])
     return None
 
 
 def _op_remove_choice(state, step):
-    """Remove the top unit at a chosen crossroad among `options`."""
-    options = step["options"]
-    if not options:
+    """The player picks the enemy a Roar removes, even when there is one: they click what it hits."""
+    if not step["options"]:
         return None
-    if "choice" not in step:   # asked even with one target: the player clicks what the Roar hits
-        return PendingRequest("choice", step["chooser"], optional=step["optional"], options=options)
-    chosen = step["choice"]
-    if chosen == SKIP:
-        return None
-    remove_top(state, chosen, by_player=step["by_player"], by_card=step.get("by_card"))
-    return None
-
-
-def remove_iid_step(iid, *, by_player, by_effect, source_iid, by_card=None) -> dict:
-    """A queued removal of one unit. Every fact is required: who removes it (the friendly/enemy-removal reactions read it),
-    whether as an effect (Armor stops only those), and the unit whose leaving makes it fizzle (None: nothing)."""
-    return {"op": "remove_iid", "iid": iid, "by_player": by_player, "by_effect": by_effect, "source_iid": source_iid,
-            **({"by_card": by_card} if by_card else {})}
-
-
-def remove_choice_step(chooser, options, *, by_card, optional) -> dict:
-    """A removal the player aims (a Roar's target among `options`)."""
-    return {"op": "remove_choice", "chooser": chooser, "by_player": chooser, "by_card": by_card, "options": options,
-            "optional": optional}
-
-
-def _op_remove_iid(state, step):
-    # A reactive removal may name a unit whose leaving the board makes it fizzle (`source_iid`).
-    # The placement traps (Hippopotamus, Golden Orb-Weaver) name none: once set off, they
-    # resolve even if the placed animal's Roar removed the trap first.
-    src = step["source_iid"]
-    if src is not None and _find_unit(state, src)[1] is None:
-        return None
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is not None:
-        _remove_specific(state, cr, unit, by_player=step["by_player"], by_effect=step["by_effect"], by_card=step.get("by_card"))
-    return None
-
-
-def _hand_allowed(state, player, filt: dict) -> set:
-    """Hand card ids a play_extra may place, matching the
-    filter `tags_all` / `tags_none` / `exclude_id` (decision F1 per-card constraints)."""
-    allowed = set()
-    for u in state.hands[player]:
-        card = state.cards[u.card_id]
-        if u.card_id == filt.get("exclude_id"):
-            continue
-        if any(t not in card.tags for t in filt.get("tags_all", ())):
-            continue
-        if any(t in card.tags for t in filt.get("tags_none", ())):
-            continue
-        allowed.add(u.card_id)
-    return allowed
-
-
-def _op_play_extra(state, step):
-    """Play one more unit from hand (optionally filtered), as part of resolution (decision F1:
-    a full normal placement that doesn't consume the turn action)."""
-    if step.get("played"):
-        return None
-    if "place_action" in step:
-        pa = step["place_action"]
-        if pa != SKIP:
-            do_placement(state, step["chooser"], pa["card_id"], tuple(pa["target"]), pa.get("iid"))
-        step["played"] = True
-        return None
-    allowed = _hand_allowed(state, step["chooser"], step["filter"])   # {} means any card, and is said so
-    placements = legal_placements(state, step["chooser"], allowed)
-    near = step["filter"].get("adjacent_to")       # Naked Mole-Rat: "play another animal adjacent to this"
-    if near is not None:
-        enemy_den = state.game_map.hq_front(other_player(step["chooser"]))
-        placements = [p for p in placements
-                      if (p.target[0] == "cr" and state.game_map.adjacent(near, p.target[1]))
-                      or (p.target[0] == "hq" and near in enemy_den)]
-    if not placements:
-        return None
-    return PendingRequest("place", step["chooser"], optional=step["optional"],
-                          placements=[_place_dict(p) for p in placements])
-
-
-def _op_play_named(state, step):
-    """Play a specific named card from hand OR deck (the Prince Leo / Princess Lea twins -
-    the one F10 exception to "filtered draws are random"). Mandatory when it has a legal
-    place (Martin, 2026-09-30); a twin fetched from the deck that can't be placed goes back.
-    With `make`, the card is made out of thin air instead (Queen Bee plays a Young Bee): a token that can't be placed
-    is simply gone."""
-    player, cid = step["chooser"], step["card_id"]
-    if "fetched" not in step and step.get("make"):
-        state.add_to_hand(player, cid)              # only to be placed at once: not a gain, so no hand-limit burn
-        step["fetched"] = "made"
-    if "fetched" not in step:                       # fetch the twin from deck if not in hand
-        in_hand = any(u.card_id == cid for u in state.hands[player])
-        if not in_hand and cid in state.decks[player]:
-            state.decks[player].remove(cid)
-            jellied = state.jelly_take(player, cid)
-            inst = state.add_to_hand(player, cid, strength_counter=jellied or 0)   # only to be placed at once: not a gain, so no hand-limit burn
-            state.note_strength(inst.iid, jellied or 0, JELLY_SOURCE)
-            step["fetched"] = True
-        else:
-            step["fetched"] = False
-
-    def _return_if_fetched():
-        if step["fetched"] and any(u.card_id == cid for u in state.hands[player]):
-            back = _take_from_hand(state, player, cid)
-            if step["fetched"] == "made":
-                state.emit("leave_hand", zone="hand", owner=player, iid=back.iid, card=cid, to="gone")
-                return
-            state.emit("leave_hand", zone="hand", owner=player, iid=back.iid, card=cid, to="deck")
-            state.decks[player].append(cid)
-
-    if "place_action" in step:
-        pa = step["place_action"]
-        if pa == SKIP:
-            _return_if_fetched()
-        else:
-            do_placement(state, player, pa["card_id"], tuple(pa["target"]), pa.get("iid"))
-        return None
-    allowed = {cid} if any(u.card_id == cid for u in state.hands[player]) else set()
-    placements = legal_placements(state, player, allowed)
-    near = step.get("adjacent_to")                  # Rabbit: "play a Bunny next to this": a neighbouring crossroad, or the den it fronts (Martin, 2026-10-30)
-    if near is not None:
-        placements = [p for p in placements
-                      if (p.target[0] == "cr" and state.game_map.adjacent(near, p.target[1]))
-                      or (p.target[0] == "hq" and near in state.game_map.hq_connects[p.target[1]])]
-    if not placements:
-        _return_if_fetched()
-        return None
-    return PendingRequest("place", player, optional=False,
-                          placements=[_place_dict(p) for p in placements])
-
-
-def _op_grant_strength(state, step):
-    """Add a stored strength counter to each target instance (board or hand), firing
-    ON_GAIN_STRENGTH for the board units that gain (decision E)."""
-    amount = step["amount"]
-    for iid in step["iids"]:
-        inst = _find_instance(state, iid)
-        if inst is None:
-            continue
-        inst.strength_counter += amount
-        state.note_strength(iid, amount, state.cause)
-        state.emit("strength", iid=iid, card=inst.card_id, owner=inst.owner, n=amount)   # a stored gain
-        if amount <= 0:
-            continue
-        if _crossroad_of(state, iid) is not None:
-            _fire_on_gain_strength(state, inst)
-        elif inst in state.hands[inst.owner]:
-            _gain_in_hand(state, inst, amount)
-        else:
-            continue
-        grows = _hook(state, inst.card_id, "on_gain")    # "Whenever this gains strength", wherever it is
-        if grows:
-            grows(state, inst, amount)
-    return None
-
-
-def _gain_in_hand(state, inst, amount) -> None:
-    """A hand card gained strength: its mate shares it (the Eagles: "While this and its mate are in your hand, they
-    share their strength", so a buff to either counts for both, and one buff to each counts twice for both), and a card that reacts to growing in hand does
-    (the legendary Butterfly evolves, the Caterpillar turns into a Butterfly)."""
-    mate = state.cards[inst.card_id].mate
-    if mate:
-        partner = next((u for u in state.hands[inst.owner] if u.card_id == mate), None)
-        if partner is not None:
-            partner.strength_counter += amount
-            state.note_strength(partner.iid, amount, state.cause)
-            state.emit("strength", iid=partner.iid, card=partner.card_id, owner=partner.owner, n=amount)
-    hook = _hook(state, inst.card_id, "on_gain_in_hand")
-    if hook:
-        hook(state, inst, amount)
-
-
-def _op_cap_actions(state, step):
-    """Electric Eel: `player` takes at most `n` actions this turn (it fires at the start of their turn; turn_flags reset
-    at its end, so the cap lasts that one turn)."""
-    key = f"action_cap_{step['player']}"
-    state.turn_flags[key] = min(state.turn_flags.get(key, step["n"]), step["n"])
-    return None
-
-
-def _op_grant_action(state, step):
-    """Chinchilla: add extra top-level actions to `player` for the turn this fires on (it is
-    scheduled to fire at the start of the owner's next turn). Read by rules._resolve_and_maybe_end_turn
-    off turn_flags, which resets each turn end - so the grant lasts exactly that one turn."""
-    key = f"bonus_actions_{step['player']}"
-    state.turn_flags[key] = state.turn_flags.get(key, 0) + step["n"]
+    if "choice" not in step:
+        return PendingRequest("choice", step["chooser"], optional=step["optional"], options=step["options"])
+    if step["choice"] != SKIP:
+        cr = step["choice"]
+        top = state.top_unit(cr)
+        if top is not None:
+            _remove_specific(state, cr, top, by_player=step["chooser"])
     return None
 
 
 OPS: dict[str, Callable] = {
     "mulligan": _op_mulligan,
-    "roar_again": _op_roar_again,
-    "gain_food": _op_gain_food,
-    "draw": _op_draw,
-    "draw_filtered": _op_draw_filtered,
-    "egg_hatch": _op_egg_hatch,
-    "raven_dig": _op_raven_dig,
-    "scout": _op_scout,
-    "bird_egg_hatch": _op_bird_egg_hatch,
-    "remove_choice": _op_remove_choice,
-    "remove_iid": _op_remove_iid,
-    "apex_eat": _op_apex_eat,
     "cover_remove": _op_cover_remove,
     "hungry_food": _op_hungry_food,
-    "play_extra": _op_play_extra,
-    "play_named": _op_play_named,
-    "grant_strength": _op_grant_strength,
-    "grant_action": _op_grant_action,
-    "cap_actions": _op_cap_actions,
-    "grant_free_roam": _op_grant_free_roam,
-    "timed_hook": _op_timed_hook,
-    "flee": _op_flee,
-    "flee_return": _op_flee_return,
-    "queen_guard": _op_queen_guard,
+    "gain_food": _op_gain_food,
+    "draw": _op_draw,
+    "remove_iid": _op_remove_iid,
+    "remove_choice": _op_remove_choice,
 }
 
 
+# ============================================================== the cards' Roars
 
-# ============================================ instance / strength-counter helpers
-
-def _find_instance(state, iid):
-    """An instance by iid, searching the board then both hands (counters live in both)."""
-    for stack in state.board.values():
-        for u in stack:
-            if u.iid == iid:
-                return u
-    for hand in state.hands.values():
-        for u in hand:
-            if u.iid == iid:
-                return u
-    return None
-
-
-def _crossroad_of(state, iid):
-    for cr, stack in state.board.items():
-        for u in stack:
-            if u.iid == iid:
-                return cr
-    return None
-
-
-def _fire_on_gain_strength(state, unit) -> None:
-    """ON_GAIN_STRENGTH reactor for a board unit: at most once per turn per unit, which also guards against
-    grant->gain->grant loops (decision E). No card in the pool reacts to it now; the seam stays."""
-    hook = _hook(state, unit.card_id, "on_gain_strength")
-    if hook is None:
-        return
-    flag = f"gain_str_{unit.iid}"
-    if state.turn_flags.get(flag):
-        return
-    state.turn_flags[flag] = True
-    hook(state, unit, _crossroad_of(state, unit.iid))
-
-
-def _adjacent_enemy_targets(state, unit, cr, *, max_strength=None, min_strength=None,
-                            chosen=True):
-    """Crossroads adjacent to `cr` whose enemy top unit is removable and within the optional
-    [min_strength, max_strength] effective-strength bounds. `chosen=True` (the enemy player
-    picks from this list) also excludes Stealth units; mass/random effects pass
-    `chosen=False` so Stealth does not hide from them (keyword-review decision B)."""
+def _adjacent_enemy_targets(state, unit, cr, max_strength=None) -> list:
+    """The adjacent enemies `unit`'s player may choose to remove: removable (no Armor), choosable (no Stealth), and of
+    strength `max_strength` or less when given."""
     out = []
-    for nb in sorted(state.game_map.neighbors(cr)):
+    for nb in state.game_map.neighbors(cr):
         top = state.top_unit(nb)
-        if not (top and top.owner != unit.owner):
+        if top is None or top.owner == unit.owner or not statics.can_be_removed(state, top) \
+                or not statics.can_be_chosen(state, top, unit.owner):
             continue
-        if not statics.can_be_removed(state, top, nb):
-            continue
-        if chosen and not statics.can_be_chosen(state, top, unit.owner, nb):
-            continue
-        s = effective_strength(state, top)
-        if max_strength is not None and s > max_strength:
-            continue
-        if min_strength is not None and s < min_strength:
-            continue
-        out.append(nb)
+        if max_strength is None or effective_strength(state, top) <= max_strength:
+            out.append(nb)
     return out
 
 
-def _adjacent_friendly_units(state, unit, cr):
-    """Crossroads adjacent to `cr` whose top is a friendly, removable unit. Stealth never
-    hides from its own controller; Armor blocks its own controller's removals too
-    (decision A2: that's the keyword's cost)."""
-    return [nb for nb in sorted(state.game_map.neighbors(cr))
-            if (top := state.top_unit(nb)) and top.owner == unit.owner and statics.can_be_removed(state, top, nb)]
-
-
-def _adjacent_tops(state, cr, owner=None):
-    """(crossroad, top unit) for every occupied crossroad adjacent to `cr`, sorted; only `owner`'s when given."""
-    return [(nb, top) for nb in sorted(state.game_map.neighbors(cr))
-            if (top := state.top_unit(nb)) and (owner is None or top.owner == owner)]
-
-
-def _control_tag_count(state, player, *tags) -> int:
-    """How many animals carrying all of `tags` `player` controls (tops), each as `statics.animal_worth` says."""
-    return sum(
-        statics.animal_worth(state, player, c) for c, st in state.board.items()
-        if st and st[-1].owner == player and all(t in state.cards[st[-1].card_id].tags for t in tags)
-    )
-
-
-def _friendly_adjacent_canine_iids(state, unit, cr):
-    """Top units adjacent to `cr` that are friendly Canines (for the Canine buffers)."""
-    return [top.iid for _, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags]
-
-
-def _grant(state, iids, amount):
-    if iids and amount:
-        state.effect_stack.append({"op": "grant_strength", "iids": list(iids), "amount": amount})
-
-
-def _push_gain(state, owner, amount):
-    if amount:
-        state.effect_stack.append({"op": "gain_food", "player": owner, "amount": amount})
-
-
-def _push_draw(state, owner, n):
-    if n:
-        state.effect_stack.append({"op": "draw", "player": owner, "n": n})
-
-
-def _push_remove_choice(state, owner, by_card, targets, *, optional=False):
-    if targets:
-        state.effect_stack.append(remove_choice_step(owner, targets, by_card=by_card, optional=optional))
-
-
-def _push_choose(state, chooser, options, then, *, optional=False, **args):
-    """A choice among `options` (crossroads, iids or card ids) whose pick `THEN[then]` acts on. Asked even with one
-    option: the player clicks what the effect hits."""
-    if options:
-        state.effect_stack.append({"op": "choose", "chooser": chooser, "options": list(options), "then": then,
-                                   "optional": optional, **args})
-
-
-def _op_choose(state, step):
-    if "choice" not in step:
-        return PendingRequest("choice", step["chooser"], optional=step["optional"], options=step["options"],
-                              from_deck_reveal=step.get("hidden", False))
-    if step["choice"] == SKIP:
-        return None
-    THEN[step["then"]](state, step, step["choice"])
-    return None
-
-
-def _push_play_extra(state, owner, *, filter=None, optional=False):
-    state.effect_stack.append(
-        {"op": "play_extra", "chooser": owner, "filter": filter or {}, "optional": optional})
-
-
-def _bounce(state, cr, top, *, lock_until=0):
-    """Return a board unit to its owner's hand (not a removal: no Remove Pile, no triggers). The card keeps its stored
-    strength, as it does through every other change of place (a fled animal the legendary Deer grew stays grown).
-    Returns the hand instance, or None for a Wild animal."""
-    state.emit("bounce", cr=cr, iid=top.iid, card=top.card_id, owner=top.owner)
-    state.board[cr].remove(top)
-    if not state.board[cr]:
-        del state.board[cr]
-    if top.owner == WILD:       # a Wild animal has no hand to go back to: it just leaves
-        return None
-    inst = gain_to_hand(state, top.owner, top.card_id, strength_counter=top.strength_counter)
-    state.copy_strength_sources(top.iid, inst.iid)
-    inst.locked_until_turn = lock_until
-    return inst
-
-
-def _spawn(state, owner, card_id, cr):
-    """A token made on `cr` by an effect: it lands as a placement would (traps see it), with nothing to Roar."""
-    _land_unit(state, owner, UnitInstance(card_id, owner, state.new_iid()), cr, from_hand=False, play=False)
-
-
-def _empty_neighbors(state, cr):
-    """The empty crossroads next to `cr`."""
-    return [nb for nb in sorted(state.game_map.neighbors(cr)) if not state.board.get(nb)]
-
-
-def _hand_iids(state, player, *, tag=None):
-    return [u.iid for u in state.hands[player] if tag is None or tag in state.cards[u.card_id].tags]
-
-
-def _transform(state, inst, card_id) -> None:
-    """`inst` becomes another card, keeping its strength counter (the Butterfly's stages, the Caterpillar). In hand or on
-    the board: it is that card from now on, wherever it goes."""
-    was, inst.card_id = inst.card_id, card_id
-    state.emit("transform", iid=inst.iid, owner=inst.owner, card=card_id, was=was)
-
-
-# ============================================================== THEN: what a choice does
-
-def _then_remove(state, step, cr):
-    remove_top(state, cr, by_player=step["chooser"], by_card=step.get("by_card"))
-
-
-def _then_set_strength(state, step, cr):
-    """Serval: "set an adjacent enemy's strength to 1." Its counter takes the difference, so later buffs count on top."""
-    top = state.top_unit(cr)
-    if top is not None:
-        delta = state.config.serval_set - effective_strength(state, top)
-        top.strength_counter += delta
-        state.note_strength(top.iid, delta, state.cause)
-        state.emit("strength", iid=top.iid, card=top.card_id, owner=top.owner, n=delta)
-
-
-def _then_drain(state, step, cr):
-    """Viper, Mosquito: the chosen adjacent enemy gets -N strength, for good."""
-    top = state.top_unit(cr)
-    if top is not None:
-        top.strength_counter -= step["amount"]
-        state.note_strength(top.iid, -step["amount"], state.cause)
-        state.emit("strength", iid=top.iid, card=top.card_id, owner=top.owner, n=-step["amount"])
-
-
-def _then_grant(state, step, target):
-    """Give +N to the chosen animal: on the board (a crossroad) or in hand (an iid)."""
-    inst = state.top_unit(target) if isinstance(target, str) else _find_instance(state, target)
-    if inst is not None:
-        _grant(state, [inst.iid], step["amount"])
-
-
-def _then_hand_grant(state, step, iid):
-    """Baboon: give N different animals in your hand +1, one choice at a time."""
-    step.setdefault("picked", []).append(iid)
-    left = step["count"] - len(step["picked"])
-    rest = [i for i in _hand_iids(state, step["chooser"]) if i not in step["picked"]]
-    if left > 0 and rest:
-        _push_choose(state, step["chooser"], rest, "hand_grant", amount=step["amount"], count=step["count"],
-                     picked=step["picked"], by_card=step.get("by_card"))
-    _grant(state, [iid], step["amount"])
-
-
-def _then_coyote(state, step, cr):
-    """Coyote: the ally gets Roam, for as long as it stays on the board, and roams now."""
-    top = state.top_unit(cr)
-    if top is None:
-        return
-    top.granted_roam = True
-    _push_it_roams(state, top.iid)
-
-
-def _then_street_dog(state, step, cr):
-    """Street Dog: the ally gets +3 strength, then roams."""
-    top = state.top_unit(cr)
-    if top is None:
-        return
-    _push_it_roams(state, top.iid)                    # pushed first, so the +3 lands before it moves
-    _grant(state, [top.iid], step["amount"])
-
-
-def _push_it_roams(state, iid):
-    state.effect_stack.append({"op": "it_roams", "iid": iid})
-
-
-def _op_it_roams(state, step):
-    """"It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
-    Roam rules, the den included (Martin, 2026-10-28: "if a card says 'draw 2 cards' does that mean I get to choose when
-    it happens?"); its owner picks where. It isn't the animal's one roam of the turn ("it should NOT count towards the
-    'one roam per turn' limit")."""
-    cr = _crossroad_of(state, step["iid"])
-    top = state.top_unit(cr) if cr is not None else None
-    if top is None or top.iid != step["iid"] or not statics.active(state, top):
-        return None
-    options = ["den" if kind == "hq" else where for kind, where in roam_targets(state, top, cr)]
-    _push_choose(state, top.owner, options, "roam_to", iid=top.iid)
-    return None
-
-
-OPS["it_roams"] = _op_it_roams
-
-
-def _become(state, step, card_id, counter, from_iid) -> None:
-    """The Chameleons: this becomes a copy of `card_id` - its strength, keywords and text, not its Roar (it isn't placed).
-    It is that card from now on (a Faceless Manipulator: removed, it goes to the Remove Pile as the copy)."""
-    me = _find_instance(state, step["self"])
-    if me is None or _crossroad_of(state, me.iid) is None:
-        return
-    me.strength_counter = counter
-    state.copy_strength_sources(from_iid, me.iid)
-    _transform(state, me, card_id)
-
-
-def _then_copy_adjacent(state, step, cr):
-    """The Chameleon: "become a copy of an adjacent animal", its counter and its ticking timers included."""
-    target = state.top_unit(cr)
-    if target is None:
-        return
-    _become(state, step, target.card_id, target.strength_counter, target.iid)
-    me = _find_instance(state, step["self"])
-    if me is not None and _crossroad_of(state, me.iid) is not None:
-        _copy_timers(state, target, me)
-
-
-def _copy_timers(state, source, copy) -> None:
-    """A copy carries the animal's ticking timers, as far along as they are (Martin, 2026-10-27): its own (a Sloth's food,
-    an Electric Eel's cap) seen from the copy's side, so an enemy Sloth's food comes to the copy's owner; and the ones on
-    it (venom, poison) as they are, so a poisoned animal's copy is poisoned too."""
-    swap = {}
-    if source.owner != copy.owner and source.owner != WILD:
-        swap = {source.owner: copy.owner, other_player(source.owner): other_player(copy.owner)}
-    for s in [s for s in state.scheduled if s["iid"] == source.iid]:
-        own = s["step"].get("by_iid") == source.iid
-        step = {k: copy.iid if k in ("iid", "by_iid") and v == source.iid
-                else swap.get(v, v) if own and k in ("player", "by_player") else v
-                for k, v in s["step"].items()}
-        state.scheduled.append({**s, "iid": copy.iid, "step": step,
-                                "owner": swap.get(s["owner"], s["owner"]) if own else s["owner"]})
-
-
-def _then_copy_from_hand(state, step, iid):
-    """Iris: "become a copy of an animal in your hand" (its counter included); the card stays in your hand. Then (`more`)
-    "add a copy to your hand and shuffle a copy into your deck": plain cards both."""
-    inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
-    if inst is not None:
-        _become(state, step, inst.card_id, inst.strength_counter, inst.iid)
-        if step.get("more"):
-            gain_to_hand(state, step["chooser"], inst.card_id)
-            shuffle_back(state, step["chooser"], [inst.card_id])
-
-
-def _then_return_ally(state, step, cr):
-    top = state.top_unit(cr)
-    if top is not None and top.owner == step["chooser"] and statics.can_be_removed(state, top, cr):
-        _bounce(state, cr, top)
-
-
-def _then_cuckoo(state, step, cr):
-    """The legendary Cuckoo: remove the chosen animal; if it was yours, play another animal."""
-    top = state.top_unit(cr)
-    if top is None:
-        return
-    if top.owner == step["chooser"]:
-        _push_play_extra(state, step["chooser"])
-    remove_top(state, cr, by_player=step["chooser"], by_card=step.get("by_card"))
-
-
-def _then_remove_and_draw(state, step, cr):
-    """Praying Mantis: remove the chosen ally to draw N cards (no removal, no cards)."""
-    if remove_top(state, cr, by_player=step["chooser"], by_card=step.get("by_card")):
-        draw_cards(state, step["chooser"], step["n"])
-
-
-def _then_repeat_roar(state, step, cr):
-    """Vole: the chosen neighbour's Roar happens again, as the Vole's own, at the Vole's crossroad."""
-    top = state.top_unit(cr)
-    vole_cr, vole = _find_unit(state, step["vole"])
-    if top is None or vole is None:
-        return
-    hook = _hook(state, top.card_id, "on_place", as_card=vole.card_id)
-    if hook:
-        hook(state, vole, vole_cr)
-
-
-def _then_pile_to_hand(state, step, card_id):
-    """Raccoon (your own Remove Pile), the legendary Raven (your opponent's): the chosen card goes to your hand."""
-    if state.pile_take(card_id, step["from_owner"]):
-        state.emit("unremove", card=card_id, owner=step["from_owner"], to=step["chooser"])
-        gain_to_hand(state, step["chooser"], card_id)
-
-
-def _then_make_in_hand(state, step, card_id):
-    """Queen Bee: the chosen card is made out of thin air in your hand."""
-    gain_to_hand(state, step["chooser"], card_id)
-
-
-def _then_duplicate(state, step, iid):
-    """Orangutan: a copy of the chosen hand card, its strength counter included."""
-    inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
-    if inst is not None:
-        dup = gain_to_hand(state, step["chooser"], inst.card_id, strength_counter=inst.strength_counter)
-        state.copy_strength_sources(inst.iid, dup.iid)
-
-
-def _then_discard(state, step, iid):
-    inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
-    if inst is not None:
-        remove_from_hand(state, step["chooser"], inst)
-
-
-def _then_roam_to(state, step, cr):
-    _, unit = _find_unit(state, step["iid"])
-    origin = _crossroad_of(state, step["iid"])
-    if unit is not None and origin is not None and state.top_unit(origin) is unit:
-        do_roam(state, unit.owner, origin, ("hq", other_player(unit.owner)) if cr == "den" else ("cr", cr), by_effect=True)
-
-
-THEN = {
-    "remove": _then_remove, "set_strength": _then_set_strength, "drain": _then_drain, "grant": _then_grant,
-    "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "copy_adjacent": _then_copy_adjacent,
-    "copy_from_hand": _then_copy_from_hand, "return_ally": _then_return_ally,
-    "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
-    "repeat_roar": _then_repeat_roar,
-    "make_in_hand": _then_make_in_hand,
-    "duplicate": _then_duplicate, "discard": _then_discard, "roam_to": _then_roam_to,
-}
-
-
-def _op_draw_to_match(state, step):
-    """Divine Favor (the food-aggro legendary): draw until your hand is as big as your opponent's."""
-    n = len(state.hands[other_player(step["player"])]) - len(state.hands[step["player"]])
-    if n > 0:
-        draw_cards(state, step["player"], n)
-    return None
-
-
-def _op_anteater(state, step):
-    """Anteater: draw a card, then gain food equal to its strength (as it would be played now)."""
-    drawn = draw_cards(state, step["player"], 1)
-    if drawn and drawn[0] in state.hands[step["player"]]:
-        gain_food(state, step["player"], placement_strength(state, drawn[0]))
-    return None
-
-
-def _op_oxpecker(state, step):
-    """Oxpecker: draw a card, then gain food equal to the strongest animal in your hand (each as it would be played now)."""
-    draw_cards(state, step["player"], 1)
-    hand = state.hands[step["player"]]
-    if hand:
-        gain_food(state, step["player"], max(placement_strength(state, u) for u in hand))
-    return None
-
-
-OPS.update({
-    "choose": _op_choose,
-    "draw_to_match": _op_draw_to_match,
-    "anteater": _op_anteater,
-    "oxpecker": _op_oxpecker,
-    "steal_from_pile": lambda state, step: _op_steal_from_pile(state, step),
-})
-
-
-# ============================================================== card behavior
-
-def roar_condition(state, player, card_id, unit=None):
-    """Whether the "if ..." of `card_id`'s Roar holds: None for a card with no such
-    condition, or one that depends on where it lands (Lynx, Cheetah, Falcon, Remora). `unit` is the
-    placed unit while its Roar resolves; None asks about the card in hand, as if it were
-    played now (the client lights such cards up). The Roars below call this too, so the
-    two can't disagree."""
-    on_top = unit is not None and any(st and st[-1].iid == unit.iid for st in state.board.values())
-
-    def others(*tags):          # friendly tops carrying `tags`, not counting this card
-        n = _control_tag_count(state, player, *tags)
-        return n - 1 if on_top and all(t in state.cards[card_id].tags for t in tags) else n
-    cfg = state.config
-    colony_min = cfg.colony_synergy_threshold
-
-    def hand_after():           # cards in hand once this one has left it
-        return len(state.hands[player]) - (0 if unit is not None else 1)
-
-    def strength():
-        if unit is not None:
-            return effective_strength(state, unit)
-        inst = playable_copy(state, player, card_id)
-        return placement_strength(state, inst) if inst else 0
-    check = {
-        "gopher": lambda: _fed_this_turn(state, player),
-        "mara": lambda: _fed_this_turn(state, player),
-        "serval": lambda: _played_this_turn(state, player, "Cat", unit) >= 1,
-        "tutorial_lynx": lambda: others("Cat") >= 1,
-        "ocelot": lambda: others("Cat") >= 1,
-        "soldier_ant": lambda: others("Colony") + 1 >= colony_min,
-        "nurse_bee": lambda: others("Colony") + 1 >= colony_min,
-        "hammerhead": lambda: _lost_this_turn(state, player) >= 1,
-        "hare": lambda: hand_after() == 0,
-        "rat": lambda: hand_after() == 0,
-        "macaque": lambda: hand_after() >= cfg.macaque_hand_min,
-        "gorilla": lambda: strength() >= cfg.gorilla_min,
-        "fox": lambda: bool(state.turn_flags.get("any_roamed")),
-    }.get(card_id)
-    return check() if check else None
-
-
-def _played_this_turn(state, player, tag, unit) -> int:
-    """How many animals with `tag` `player` played this turn, other than `unit`."""
-    return sum(1 for iid, cid in state.turn_flags.get(f"played_{player}", [])
-               if tag in state.cards[cid].tags and (unit is None or iid != unit.iid))
-
-
-def _conditional(card_id, effect):
-    """`card_id`'s Roar, which happens only while its roar_condition holds (read for that card even when a repeat, Big Gus's
-    or the Macaw's, runs it on its own unit)."""
-    def handler(state, unit, cr):
-        if roar_condition(state, unit.owner, card_id, unit):
-            effect(state, unit, cr)
-    return handler
-
-
-def _draws(n_attr=None, n=1):
-    """A Roar (or Dawn/Dusk) that draws: `n_attr` names the config number, else `n` (1, printed "a card")."""
-    def handler(state, unit, cr):
-        _push_draw(state, unit.owner, getattr(state.config, n_attr) if n_attr else n)
-    return handler
-
-
-def _gains(attr):
-    def handler(state, unit, cr):
-        _push_gain(state, unit.owner, getattr(state.config, attr))
-    return handler
-
-
-def _rodent_legend_place(state, unit, cr):
-    _push_gain(state, unit.owner, _food_gained_this_turn(state, unit.owner))
-
-
-def _removes(max_attr=None, min_attr=None):
-    """Roar: remove an adjacent enemy (of strength N or less / more): the player picks it."""
-    def handler(state, unit, cr):
-        _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(
-            state, unit, cr,
-            max_strength=getattr(state.config, max_attr) if max_attr else None,
-            min_strength=getattr(state.config, min_attr) if min_attr else None))
-    return handler
-
-
-def _dung_beetle_form_place(form):
-    """The legendary Dung Beetle's later forms (Martin, 2026-10-27): form 2 "Roar: draw a card", form 3 also removes an
-    adjacent enemy (Martin, 2026-10-29, in place of 10 food), form 4 also plays another animal. In that order: the drawn
-    card can be played."""
-    def handler(state, unit, cr):
-        if form >= 4:
-            _push_play_extra(state, unit.owner)
-        if form >= 3:
-            _removes()(state, unit, cr)
-        _push_draw(state, unit.owner, 1)
-    return handler
-
-
-def _draws_filtered(spec, n=1):
-    def handler(state, unit, cr):
-        state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": n, "spec": spec})
-    return handler
-
-
-# --- Aristocrats -----------------------------------------------------------------------------------------------
-
-def _cuckoo_legend_place(state, unit, cr):
-    """Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal."""
-    cap = state.config.cuckoo_legend_max
-    options = [nb for nb, top in _adjacent_tops(state, cr)
-               if effective_strength(state, top) <= cap and statics.can_be_removed(state, top, nb)
-               and statics.can_be_chosen(state, top, unit.owner, nb)]
-    _push_choose(state, unit.owner, options, "cuckoo")
-
-
-def _pheasant_legend_remove(state, unit, cr, pos):
-    """Fall: shuffle this into your deck."""
-    if state.pile_take(unit.card_id, unit.owner):
-        shuffle_back(state, unit.owner, [unit.card_id])
-
-
-def _mantis_place(state, unit, cr):
-    """Roar: remove an adjacent ally to draw 2 cards. With an ally adjacent the Mantis eats one, no declining (Martin,
-    2026-10-21: a cost that may be declined reads as a lie on the card); with none, nothing happens."""
-    _push_choose(state, unit.owner, _adjacent_friendly_units(state, unit, cr), "remove_and_draw", optional=False,
-                 n=state.config.mantis_draw)
-
-
-def _tarantula_eot(state, unit, cr):
-    """Dusk: remove the weakest animal next to this, yours or theirs, and gain its strength (Martin, 2026-10-29: as the
-    City Spider picks; ties at random, Dusk asks no decision). The strength it showed then is kept for good."""
-    options = [(nb, top) for nb, top in _adjacent_tops(state, cr) if statics.can_be_removed(state, top, nb)]
-    if options:
-        low = min(effective_strength(state, top) for _, top in options)
-        nb = state.rng.choice([nb for nb, top in options if effective_strength(state, top) == low])
-        remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
-        if low > 0:
-            unit.strength_counter += low
-            state.note_strength(unit.iid, low, unit.card_id)
-            state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=low)
-
-
-def _city_spider_sot(state, unit, cr):
-    """Dawn: remove the weakest animal next to this, yours or theirs (ties at random: Dawn asks no decision)."""
-    options = [(nb, top) for nb, top in _adjacent_tops(state, cr) if statics.can_be_removed(state, top, nb)]
-    if options:
-        low = min(effective_strength(state, top) for _, top in options)
-        nb = state.rng.choice([nb for nb, top in options if effective_strength(state, top) == low])
-        remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
-
-
-def _sperm_whale_legend_eot(state, unit, cr):
-    """Dusk: remove the strongest adjacent enemy (ties at random: Dusk asks no decision; Stealth doesn't hide)."""
-    options = [(nb, top) for nb, top in _adjacent_tops(state, cr)
-               if top.owner != unit.owner and statics.can_be_removed(state, top, nb)]
-    if options:
-        high = max(effective_strength(state, top) for _, top in options)
-        nb = state.rng.choice([nb for nb, top in options if effective_strength(state, top) == high])
-        remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
-
-
-def _alley_cat_place(state, unit, cr):
-    """Roar: add 2 Kittens to your hand (Martin, 2026-10-29)."""
-    for _ in range(state.config.alley_cat_kittens):
-        gain_to_hand(state, unit.owner, "kitten")
-
-
-def _sea_turtle_eot(state, unit, cr):
-    """Dusk: add a Baby Turtle to your hand (Martin, 2026-10-26); the hand limit burns it like any gained card."""
-    gain_to_hand(state, unit.owner, "baby_turtle")
-
-
-def _raccoon_place(state, unit, cr):
-    """Roar: return an animal from your Remove Pile to your hand."""
-    _push_choose(state, unit.owner, sorted(set(state.pile_cards_of(unit.owner))), "pile_to_hand",
-                 from_owner=unit.owner)
-
-
-def _hyena_eot(state, unit, cr):
-    """Dusk: gain 3 food for each animal removed this turn (either player's or a Wild one)."""
-    removed = _lost_this_turn(state, "A") + _lost_this_turn(state, "B") + _lost_this_turn(state, WILD)
-    _push_gain(state, unit.owner, state.config.hyena_food_per * removed)
-
-
-def _vultures_dusk(state, player):
-    """Vulture: at your Dusk, if 3 or more animals were removed this turn, every Vulture in your hand and deck lands on a
-    random empty crossroad, all at once (Dusk asks no decision). Not a placement from the hand: nothing Roars."""
-    if _lost_this_turn(state, "A") + _lost_this_turn(state, "B") + _lost_this_turn(state, WILD) < state.config.vulture_removals:
-        return
-    for inst in [u for u in state.hands[player] if u.card_id == "vulture"]:
-        empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c))
-        if not empty:
-            return
-        state.hands[player].remove(inst)
-        _land_unit(state, player, inst, state.rng.choice(empty), from_hand=True, roar=False, play=False)
-    while "vulture" in state.decks[player]:
-        empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c))
-        if not empty:
-            return
-        state.decks[player].remove("vulture")
-        _land_unit(state, player, state.deck_instance(player, "vulture"), state.rng.choice(empty),
-                   from_hand=False, roar=False, play=False)
-
-
-def _earthworm_remove(state, unit, cr, pos):
-    """Fall: place two Worms on its crossroad: they land on top, as placements do, while the crossroad is
-    empty, yours or Wild. Under an enemy there is no room for them (rulings.md: Worms never cover an enemy). A Wild
-    Locust on top is no enemy: the Worms land over it, and a Locust that ate the Earthworm flies off from under them
-    (Martin, 2026-10-31: no Worms when a Locust or his Mantis took the Earthworm under a Locust). And draw a card."""
-    draw_cards(state, unit.owner, 1)
-    for _ in range(state.config.earthworm_worms):
-        top = state.top_unit(cr)
-        if top is not None and top.owner == other_player(unit.owner) or state.result is not None:
-            return
-        _spawn(state, unit.owner, "worm", cr)
-
-
-def _worm_remove(state, unit, cr, pos):
-    """Worm: when this is removed, draw a card."""
-    draw_cards(state, unit.owner, 1)
-
-
-def _put_back(state, unit, cr, pos, *, base) -> None:
-    """A fresh copy of a removed unit goes back into the same stack at the same height (on top, or still buried), with
-    `base` of its own growth raising its base and nothing else. It comes back, it isn't placed: nothing that reacts to a
-    placement sees it (a City Spider beside it would otherwise eat it for ever)."""
-    if state.pile_take(unit.card_id, unit.owner):
-        back = UnitInstance(unit.card_id, unit.owner, state.new_iid(), strength_counter=base)
-        state.note_strength(back.iid, base, unit.card_id, base=True)
-        stack = state.board.setdefault(cr, [])
-        at = min(pos, len(stack))
-        stack.insert(at, back)
-        state.emit("place", player=unit.owner, iid=back.iid, card=back.card_id, cr=cr, from_hand=False, at=at)
-
-
-def _cockroach_remove(state, unit, cr, pos):
-    """Fall: replace this with a Cockroach (a fresh one: nothing it was given or lost comes back) and place a Roach on an
-    adjacent empty crossroad (a random one)."""
-    _put_back(state, unit, cr, pos, base=0)
-    empty = _empty_neighbors(state, cr)
-    if empty and state.result is None:
-        _spawn(state, unit.owner, "roach", state.rng.choice(empty))
-
-
-def _cockroach_legend_remove(state, unit, cr, pos):
-    """Fall: put this back where it was with +1 strength and draw a card. The +1 raises its base, fall after fall: it
-    comes back at its printed strength plus 1 for every fall, and what other cards gave it or took from it is gone
-    (Martin, 2026-11-05)."""
-    _put_back(state, unit, cr, pos, base=state.base_bonus(unit.iid) + state.config.cockroach_legend_growth)
-    draw_cards(state, unit.owner, 1)
-
-
-def _blast_remove(state, unit, cr, pos):
-    """Fall: remove all animals next to this, yours or theirs: each in turn, so a chain settles."""
-    _remove_tops(state, unit, [nb for nb, _ in _adjacent_tops(state, cr)])
-
-
-def _locust_legend_place(state, unit, cr):
-    """Roar: cover the board with Locusts. A Wild Locust lands on every crossroad, this one too, as a placement would
-    (Spikes, Poison, Flee and the traps all see it), each with its own timer: "In 2 turns, remove this and the animal
-    under it". A Wild animal's timer ticks every turn, so the swarm eats at the start of the caster's next turn, after
-    the opponent's whole turn to see it; a covered Locust waits (overview.md §9.1), so covering one spares that crossroad.
-    The swarm lands all at once (Martin, 2026-11-05): every Locust's reactions see the board as it stood before it, so a
-    Hippopotamus takes every Locust around it, not only those that landed before its own crossroad's buried it."""
-    before = {c: state.top_unit(c) for c in state.game_map.crossroads}
-    tops = {c: u for c, u in before.items() if u is not None}
-    for c in sorted(state.game_map.crossroads):
-        locust = UnitInstance("locust_swarm", WILD, state.new_iid())
-        _land_unit(state, WILD, locust, c, from_hand=False, play=False, tops=tops)
-        schedule(state, locust, state.config.locust_delay,
-                 {"op": "locust_eat", "iid": locust.iid, "by_player": unit.owner}, while_buried=False)
-
-
-def _op_locust_eat(state, step):
-    """A Locust's time is up: "remove the animal underneath, then fly away". Armor still holds; flying away is a Wild
-    bounce, not a removal, so the swarm feeds removal counters (Python, Hyena) only with what it eats."""
-    cr, locust = _find_unit(state, step["iid"])
-    if locust is None or state.board[cr][-1] is not locust:
-        return None
-    if len(state.board[cr]) > 1:
-        _remove_specific(state, cr, state.board[cr][-2], by_player=step["by_player"], by_card="locust_swarm")
-    _bounce(state, cr, locust)
-    return None
-
-
-OPS["locust_eat"] = _op_locust_eat
-
-
-def _remove_tops(state, unit, crs):
-    """Queue the removal of the top animal on each of `crs` (Toad, Locust)."""
-    for nb in reversed(crs):
-        top = state.top_unit(nb)
-        if top is not None:
-            state.effect_stack.append(remove_iid_step(top.iid, by_player=unit.owner, by_effect=True,
-                                                      source_iid=None, by_card=unit.card_id))
-
-
-def _hammerhead_place(state, unit, cr):
-    """Roar (if an ally was removed this turn): remove an adjacent animal, yours or theirs: the player picks it."""
-    _push_remove_choice(state, unit.owner, unit.card_id,
-                        [nb for nb, top in _adjacent_tops(state, cr)
-                         if statics.can_be_removed(state, top, nb) and statics.can_be_chosen(state, top, unit.owner, nb)])
-
-
-# --- Canines ----------------------------------------------------------------------------------------------------
-
-def _black_wolf_grows(state, watcher, roamer):
-    """Whenever a Canine of yours roams: give it +1 strength and draw a card."""
-    if "Canine" in state.cards[roamer.card_id].tags:
-        _grant(state, [roamer.iid], state.config.black_wolf_grant)
-        _push_draw(state, watcher.owner, state.config.black_wolf_draw)
-
-
-def _black_wolf_friendly_roam(state, watcher, roamer, event):
-    _black_wolf_grows(state, watcher, roamer)
-
-
-def _black_wolf_own_roam(state, unit, cr, event):
-    _black_wolf_grows(state, unit, unit)
-
-
-def _wolf_legend_eot(state, unit, cr):
-    """Dusk: gain 1 strength for each of your adjacent Canines."""
-    n = sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags)
-    if n:
-        _grant(state, [unit.iid], n * state.config.wolf_legend_grant)
-
-
-def _fox_place(state, unit, cr):
-    """Roar: if an ally roamed this turn, draw 2 cards."""
-    if roar_condition(state, unit.owner, "fox", unit):
-        _push_draw(state, unit.owner, state.config.fox_draw)
-
-
-def _lonely(state, enemy_of, cr) -> bool:
-    """Whether no enemy of `enemy_of` tops a crossroad next to `cr`: the animal on `cr` has no other enemy beside it."""
-    return not any(top.owner != enemy_of for _, top in _adjacent_tops(state, cr))
-
-
-def _wolverine_place(state, unit, cr):
-    """Roar: remove an adjacent enemy with no other enemy next to it."""
-    _push_remove_choice(state, unit.owner, unit.card_id,
-                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if _lonely(state, unit.owner, nb)])
-
-
-def _dhole_cover(state, unit, covered):
-    """Whenever this covers an enemy with no other enemy next to it, draw 2 cards (judged as it is covered)."""
-    at = _crossroad_of(state, unit.iid)
-    if at is not None and _lonely(state, unit.owner, at):
-        _push_draw(state, unit.owner, state.config.dhole_draw)
-
-
-def _jackal_roam(state, unit, cr, event):
-    """Roam. Whenever this roams, Bite X, where X is this animal's strength (judged where it lands, by strength as it
-    stands then: the pack's buffs lengthen its reach; Martin, 2026-10-29; equal counts since 2026-11-16, as the Chimpanzee)."""
-    _push_remove_choice(state, unit.owner, unit.card_id,
-                        _adjacent_enemy_targets(state, unit, cr, max_strength=effective_strength(state, unit)))
-
-
-def _bush_dog_roam(state, unit, cr, event):
-    """Whenever this roams, place a Pup on the crossroad it left, on top of any animal that resurfaced there (Martin,
-    2026-10-31)."""
-    _spawn(state, unit.owner, "pup", event["from"])
-
-
-def _wild_dog_friendly_place(state, watcher, placed) -> None:
-    """African Wild Dog: whenever you play a Canine next to this, it roams. Played, from the hand: a token or an
-    animal an effect places isn't played (rulings.md, "Place versus play"), and a roam is never a placement, so it
-    can't loop (Martin, 2026-10-28)."""
-    played = any(iid == placed.iid for iid, _ in state.turn_flags.get(f"played_{placed.owner}", []))
-    at, here = _crossroad_of(state, placed.iid), _crossroad_of(state, watcher.iid)
-    if (played and "Canine" in state.cards[placed.card_id].tags and at is not None and here is not None
-            and at in state.game_map.neighbors(here)):
-        _push_it_roams(state, placed.iid)
-
-
-def _connected_allies(state, unit, cr) -> list:
-    """The crossroads of your other top animals connected to `unit` (on `cr`) through a chain of your own top animals."""
-    seen, queue = {cr}, deque([cr])
-    while queue:
-        for nb in state.game_map.neighbors(queue.popleft()):
-            if nb not in seen and state.owner_of(nb) == unit.owner:
-                seen.add(nb)
-                queue.append(nb)
-    return sorted(seen - {cr})
-
-
-def _coyote_place(state, unit, cr):
-    """Roar: give a connected ally Roam. It roams."""
-    _push_choose(state, unit.owner, _connected_allies(state, unit, cr), "coyote")
-
-
-def _street_dog_place(state, unit, cr):
-    """Roar: give a connected ally with Roam +3 strength. It roams."""
-    options = [c for c in _connected_allies(state, unit, cr) if "Roam" in statics.unit_keywords(state, state.top_unit(c), c)]
-    _push_choose(state, unit.owner, options, "street_dog", amount=state.config.street_dog_grant)
-
-
-def _dingo_eot(state, unit, cr):
-    _grant(state, _friendly_adjacent_canine_iids(state, unit, cr), state.config.dingo_grant)
-
-
-def _spawn_pups(state, unit, cr, n, token_ids=("pup",)):
-    """Land up to `n` tokens on random empty crossroads adjacent to `cr`, cycling through `token_ids`."""
-    empty = _empty_neighbors(state, cr)
-    state.rng.shuffle(empty)
-    for i, spot in enumerate(empty[:n]):
-        _spawn(state, unit.owner, token_ids[i % len(token_ids)], spot)
-
-
-def _alpha_place(state, unit, cr):
-    _spawn_pups(state, unit, cr, state.config.alpha_pups, ("baby_fox", "baby_fox_2"))
-
-
-# --- Cats -------------------------------------------------------------------------------------------------------
-
-def _serval_place(state, unit, cr):
-    """Roar: if you played another Cat this turn, remove an adjacent enemy of strength 8 or more."""
-    if roar_condition(state, unit.owner, "serval", unit):
-        _push_remove_choice(state, unit.owner, unit.card_id,
-                            _adjacent_enemy_targets(state, unit, cr, min_strength=state.config.serval_min))
-
-
-def _ocelot_place(state, unit, cr):
-    # The condition is read for the card's own text even when a Macaw or Big Gus repeats it on another unit (as the Rust twin)
-    if roar_condition(state, unit.owner, "ocelot", unit):
-        _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"], "adjacent_to": cr})
-
-
-def _twin_place(twin_id):
-    def handler(state, unit, cr):
-        state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": twin_id})
-    return handler
-
-
-def _lion_legend_4_remove_event(state, unit, cr, event):
-    if (event.get("by_player") == unit.owner and event["owner"] != unit.owner
-            and event.get("by_card") and "Cat" in state.cards[event["by_card"]].tags):
-        if not _capped(state, "cap_queen_adira", unit):
-            draw_cards(state, unit.owner, 1)
-
-
-# --- Colony -----------------------------------------------------------------------------------------------------
-
-def _bee_legend_place(state, unit, cr):
-    """Queen Melissia: Roar: draw a Worker, a Soldier and a Nurse Colony animal (each a random one from your deck)."""
-    for caste in ("Nurse", "Soldier", "Worker"):   # the stack runs last-in first: the Worker is drawn first
-        state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": f"tag:Colony&tag:{caste}"})
-
-
-def _worker_ant_place(state, unit, cr):
-    """Worker Ant: Roar: gain 3 food for each animal you control (itself included)."""
-    _push_gain(state, unit.owner, state.config.worker_ant_per * _control_tag_count(state, unit.owner))
-
-
-def _worker_wasp_friendly_place(state, watcher, placed) -> None:
-    """Worker Wasp: whenever you place an animal, gain 3 food."""
-    gain_food(state, placed.owner, state.config.worker_wasp_per_place)
-
-
-def _termite_king_place(state, unit, cr):
-    """Termite King: Roar: draw a card for each Colony Queen you control."""
-    n = _control_tag_count(state, unit.owner, "Colony", "Queen")
-    if n:
-        _push_draw(state, unit.owner, n)
-
-
-def _queen_bee_place(state, unit, cr):
-    """Queen Bee: Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand, made out of thin air; the owner picks
-    which (Martin, 2026-10-27)."""
-    _push_choose(state, unit.owner, ["worker_bee", "guard_bee", "nurse_bee"], "make_in_hand")
-
-
-def _queen_ant_eot(state, unit, cr):
-    """Queen Ant: Dusk: place a Young Ant on an adjacent empty crossroad (a random one: Dusk asks no decision)."""
-    empty = _empty_neighbors(state, cr)
-    if empty:
-        _spawn(state, unit.owner, "young_ant", state.rng.choice(empty))
-
-
-def _army_ant_legend_eot(state, unit, cr):
-    """Queen Solenia: Dusk: gain 2 food for each animal you control (each crossroad you top)."""
-    _push_gain(state, unit.owner, state.config.army_ant_legend_per * _control_tag_count(state, unit.owner))
-
-
-# Colony outside the precon: bench drafts (Martin, 2026-10-21; docs/design/effects-pass.md). Each card's condition is
-# one other decks meet for their own reasons (a food threshold, Flight, going wide); the Colony tag is only a tag.
-
-def _forager_ant_place(state, unit, cr):
-    """Roar: gain 5 food. If you gained 10 or more food this turn, draw a card. The gain lands first, so it counts."""
-    gain_food(state, unit.owner, state.config.forager_ant_food)
-    if _fed_this_turn(state, unit.owner):
-        _push_draw(state, unit.owner, state.config.forager_ant_draw)
-
-
-def _scout_bee_eot(state, unit, cr):
-    """[SCOUT BEE]: Dusk: if you gained 20 or more food this turn, draw a card."""
-    if _food_gained_this_turn(state, unit.owner) >= state.config.scout_bee_threshold:
-        _push_draw(state, unit.owner, state.config.scout_bee_draw)
-
-
-# --- Den Rush ---------------------------------------------------------------------------------------------------
-
-def _mole_legend_place(state, unit, cr):
-    """Roar: draw a card, then play another animal next to this."""
-    o = unit.owner
-    _push_play_extra(state, o, filter={"adjacent_to": cr})
-    _push_draw(state, o, 1)
-
-
-def _op_discard_choice(state, step):
-    """Discard a card of your choice from your hand (none to discard: nothing)."""
-    hand = _hand_iids(state, step["player"])
-    if hand:
-        _push_choose(state, step["player"], hand, "discard", by_card=step.get("by_card"))
-    return None
-
-
-OPS["discard_choice"] = _op_discard_choice
-
-
-def _mole_place(state, unit, cr):
-    """Roar: play another animal adjacent to this (the Mole; the shelved Naked Mole-Rat had it first)."""
-    _push_play_extra(state, unit.owner, filter={"adjacent_to": cr})
-
-
-def _falcon_legend_place(state, unit, cr):
-    # "Roar: draw a card for each animal you control adjacent to the opponent's den" (Gale included).
-    front = state.game_map.hq_front(other_player(unit.owner))
-    _push_draw(state, unit.owner, sum(1 for c in front if (top := state.top_unit(c)) and top.owner == unit.owner))
-
-
-def next_to_enemy_den(state, player: str, cr: str) -> bool:
-    """"Next to your opponent's den": on one of its front crossroads (F6). On a map with bases (map_hex19, the mana
-    ruleset) the den sits behind the opponent's base, so it reads as next to their base: adjacent to any of its tiles."""
-    gm, enemy = state.game_map, other_player(player)
-    if gm.bases:
-        return gm.next_to_base(enemy, cr)
-    return cr in gm.hq_front(enemy)
-
-
-def _hq_adjacent_draw(state, unit, cr, n=1):
-    if next_to_enemy_den(state, unit.owner, cr):
-        _push_draw(state, unit.owner, n)
-
-
-def _cheetah_place(state, unit, cr):
-    """Roar: if this is next to your opponent's den, draw 2 cards."""
-    _hq_adjacent_draw(state, unit, cr, state.config.cheetah_draw)
-
-
-def _adjacent_enemy_unit_crossroads(state, unit, cr, *, chosen=True):
-    """Adjacent crossroads topped by an enemy *unit* that can be moved (for bounces).
-    Armor can't be moved by anyone; Stealth only hides from a `chosen` pick (Skunk),
-    not from a mass bounce (Sirocco, `chosen=False`) - keyword-review decision B."""
-    return [nb for nb, top in _adjacent_tops(state, cr)
-            if top.owner != unit.owner and statics.can_be_removed(state, top, nb)
-            and (not chosen or statics.can_be_chosen(state, top, unit.owner, nb))]
-
-
-def _rat_place(state, unit, cr):
-    """Roar: if your hand is empty, remove an adjacent enemy (Hare's condition)."""
-    _push_remove_choice(state, unit.owner, "rat", _adjacent_enemy_targets(state, unit, cr))
-
-
-def _has_spare_copy(state, player, card_id) -> bool:
-    return (any(u.card_id == card_id for u in state.hands[player])
-            or card_id in state.decks[player])
-
-
-def _remove_another_copy(state, player, card_id) -> None:
-    """Consume one other copy of `card_id` from hand (if any) else deck, to the Remove Pile
-    (a remove, not a Deathrattle - the paid copy never touched the board)."""
-    for inst in state.hands[player]:
-        if inst.card_id == card_id:
-            remove_from_hand(state, player, inst)
-            return
-    state.decks[player].remove(card_id)
-    state.jelly_take(player, card_id)
-    state.pile_add(card_id, player)
-    state.emit("remove", zone="deck", card=card_id, owner=player)
-    _fire_remove_event(state, card_id, player, None)
-
-
-def _hornet_place(state, unit, cr):
-    targets = _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.hornet_max)
-    if targets and _has_spare_copy(state, unit.owner, "hornet"):
-        state.effect_stack.append({"op": "hornet_kill", "chooser": unit.owner, "options": targets})
-
-
-def _op_hornet_kill(state, step):
-    # The cost is paid when it can be (Martin, 2026-10-21: a Roar's cost is never declined); the Roar only asks which enemy.
-    if "choice" not in step:
-        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
-    if step["choice"] == SKIP or not _has_spare_copy(state, step["chooser"], "hornet"):
-        return None   # no other Hornet left by the time the Roar resolves: nothing to discard, so nothing removed
-    _remove_another_copy(state, step["chooser"], "hornet")
-    remove_top(state, step["choice"], by_player=step["chooser"], by_card="hornet")
-    return None
-
-
-def _rat_legend_2_place(state, unit, cr):
-    # "Remove an adjacent animal and every animal under it": the target is a chosen top, an enemy
-    # (Stealth and Armor off limits, as for any removal) or an ally (Armor off limits), and the whole
-    # stack goes. Never declined (Martin, 2026-10-21): a Pestis next to only its own animals wipes one of them.
-    options = sorted(_adjacent_enemy_unit_crossroads(state, unit, cr) + _adjacent_friendly_units(state, unit, cr))
-    if options:
-        state.effect_stack.append({"op": "rat_legend_2_wipe", "chooser": unit.owner, "options": options})
-
-
-def _op_pestis_wipe(state, step):
-    if "choice" not in step:   # asked even with one target
-        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
-    if step["choice"] == SKIP:
-        return None
-    target = step["choice"]
-    # Remove the entire stack under the enemy, both players' units, top-down. A buried
-    # Armor unit is skipped in place, not a shield: everything else is still wiped around it.
-    # Armor is judged on the stack as it stands, before any of it goes: a buried ally is out of a neighbour's aura
-    # (rulings.md) and stays out of it while the units above it are being removed.
-    doomed = [u for u in reversed(list(state.board.get(target) or [])) if statics.can_be_removed(state, u)]
-    for unit in doomed:
-        _remove_specific(state, target, unit, by_player=step["chooser"], by_card="rat_legend_2", armor_checked=True)
-    return None
-
-
-def _fawn_place(state, unit, cr):
-    """The legendary Fawn: Roar: add a Young Stag to your hand (Martin, 2026-10-30)."""
-    gain_to_hand(state, unit.owner, "young_stag")
-
-
-def _young_stag_place(state, unit, cr):
-    """Roar: add a Great Stag to your hand: the fawn's arc, each stage handing you the next."""
-    gain_to_hand(state, unit.owner, "great_stag")
-
-
-def _great_stag_place(state, unit, cr):
-    """Roar: return every adjacent enemy weaker than this to its owner's hand (the rutting bellow). Automatic: Stealth
-    doesn't hide, Armor stays, as for every mass bounce."""
-    mine = effective_strength(state, unit)
-    for nb in _adjacent_enemy_unit_crossroads(state, unit, cr, chosen=False):
-        if effective_strength(state, state.top_unit(nb)) < mine:
-            state.effect_stack.append({"op": "bounce_iid", "iid": state.top_unit(nb).iid})
-
-
-def _skunk_legend_place(state, unit, cr):
-    for nb in _adjacent_enemy_unit_crossroads(state, unit, cr, chosen=False):  # mass bounce
-        state.effect_stack.append({"op": "bounce_iid", "iid": state.top_unit(nb).iid})
-
-
-def _op_bounce_iid(state, step):
-    cr, u = _find_unit(state, step["iid"])
-    if u is not None:
-        _bounce(state, cr, u)
-    return None
-
-
-def _skunk_place(state, unit, cr):
-    options = _adjacent_enemy_unit_crossroads(state, unit, cr)
-    if options:
-        state.effect_stack.append({"op": "skunk_bounce", "chooser": unit.owner, "options": options})
-
-
-def _op_skunk_bounce(state, step):
-    if "choice" not in step:   # asked even with one target
-        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
-    top = state.top_unit(step["choice"])
-    if top is not None:                                  # locked through the owner's next turn (F4)
-        _bounce(state, step["choice"], top, lock_until=state.turn_counter + 2)
-    return None
-
-
-def _fill(state, unit, cr):
-    """Sardine: place every copy of this card from your hand and deck on random adjacent empty crossroads.
-    Hand copies go first; the placed copies don't Roar, and leftovers stay where they are."""
-    cid, o = unit.card_id, unit.owner
-    hand = [u for u in state.hands[o] if u.card_id == cid]
-    sources = [("hand", inst) for inst in hand] + [("deck", None)] * state.decks[o].count(cid)
-    state.rng.shuffle(sources)
-    empty = _empty_neighbors(state, cr)
-    state.rng.shuffle(empty)
-    for (kind, inst), spot in zip(sources, empty):
-        if state.board.get(spot) or state.result is not None:
-            continue
-        if kind == "hand":
-            if inst not in state.hands[o]:
-                continue
-            state.hands[o].remove(inst)
-        else:
-            if cid not in state.decks[o]:
-                continue
-            state.decks[o].remove(cid)
-            inst = state.deck_instance(o, cid)
-        _land_unit(state, o, inst, spot, from_hand=kind == "hand", roar=False, play=False)
-
-
-# --- Egg Control ------------------------------------------------------------------------------------------------
-
-def _rattlesnake_shuffle_event(state, event):
-    """Each copy grows on its owner's shuffle, including copies still in the deck."""
-    player = event["player"]
-    if _owns_copy(state, player, "rattlesnake"):
-        counters = state.card_strength_counters.setdefault(player, {})
-        counters["rattlesnake"] = counters.get("rattlesnake", 0) + 1
-        state.emit("strength", card="rattlesnake", owner=player, n=1)   # every copy, wherever it is
-
-
-def _owns_copy(state, player: str, card_id: str) -> bool:
-    """Whether `player` has `card_id` anywhere: starting deck, deck, hand or board."""
-    return (
-        card_id in state.starting_decks.get(player, ())
-        or card_id in state.decks[player]
-        or any(u.card_id == card_id for u in state.hands[player])
-        or any(u.card_id == card_id and u.owner == player
-               for stack in state.board.values() for u in stack)
-    )
-
-
-def _omen_drawn(state, inst):
-    """Black Swan: whenever you draw it, your opponent discards a random card (a remove, not a Deathrattle)."""
-    opponent = other_player(inst.owner)
-    hand = state.hands[opponent]
-    if hand:
-        remove_from_hand(state, opponent, state.rng.choice(hand))
-
-
-def _raven_legend_place(state, unit, cr):
-    """Roar: put 2 animals from your opponent's Remove Pile into your hand."""
-    state.effect_stack.append({"op": "steal_from_pile", "player": unit.owner, "n": state.config.raven_legend_steals})
-
-
-def _op_steal_from_pile(state, step):
-    """Grimm: one pick from the opponent's Remove Pile, then the next with the options asked afresh (a card taken by the
-    first pick isn't offered again)."""
-    opp = other_player(step["player"])
-    names = sorted(set(state.pile_cards_of(opp)))
-    if not names or step["n"] <= 0:
-        return None
-    if step["n"] > 1:
-        state.effect_stack.append({**step, "n": step["n"] - 1})
-    _push_choose(state, step["player"], names, "pile_to_hand", from_owner=opp)
-    return None
-
-
-def _owl_place(state, unit, cr):
-    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": None})   # the deck's top cards
-
-
-def _raven_place(state, unit, cr):
-    state.effect_stack.append({"op": "raven_dig", "player": unit.owner})
-
-
-def _viper_place(state, unit, cr):
-    _drain_place(state, unit, cr, state.config.viper_poison)
-
-
-def _mosquito_place(state, unit, cr):
-    _drain_place(state, unit, cr, state.config.mosquito_drain)
-
-
-def _drain_place(state, unit, cr, amount):
-    """Roar: give an adjacent enemy -N strength."""
-    _push_choose(state, unit.owner, [nb for nb, top in _adjacent_tops(state, cr)
-                                     if top.owner != unit.owner and statics.can_be_chosen(state, top, unit.owner, nb)],
-                 "drain", amount=amount)
-
-
-def _king_cobra_place(state, unit, cr):
-    """Roar: choose an adjacent enemy. At the start of your next turn, remove it."""
-    targets = _adjacent_enemy_targets(state, unit, cr)
-    if targets:
-        state.effect_stack.append({"op": "venom", "chooser": unit.owner, "options": targets})
-
-
-def _op_venom(state, step):
-    """King Cobra: the chosen adjacent enemy is removed at the start of the cobra owner's next turn. The venom is on the
-    bitten unit, not on the snake (rules §9.1 exception): it resolves even if the cobra is gone or the bitten unit is
-    buried, and is cancelled only if the bitten unit leaves the board."""
-    if "choice" not in step:   # asked even with one target
-        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
-    target = state.top_unit(step["choice"])
-    if target is not None:
-        state.scheduled.append({"iid": target.iid, "owner": step["chooser"], "remaining": 1, "while_buried": True,
-                                "step": remove_iid_step(target.iid, by_player=step["chooser"], by_effect=True,
-                                                        source_iid=None, by_card=step.get("by_card"))})
-    return None
-
-
-def _anaconda_legend_end_of_turn(state, unit, cr):
-    # The Ouroboros: it leaves the board (a return, not a remove - no Deathrattle, nothing to
-    # the Remove Pile) and shuffles into its owner's deck, a little smaller each cycle. The loss
-    # is kept per card id, like Rattlesnake's growth, so it survives the trip through the deck.
-    # Shrunk to nothing, it is removed instead (Martin, 2026-10-09: an endless loop otherwise).
-    counters = state.card_strength_counters.setdefault(unit.owner, {})
-    if state.cards["anaconda_legend"].base_strength + counters.get("anaconda_legend", 0) - state.config.anaconda_legend_decay <= 0:
-        _remove_specific(state, cr, unit, by_player=unit.owner, by_card="anaconda_legend")
-        return
-    state.emit("to_deck", cr=cr, iid=unit.iid, card=unit.card_id, owner=unit.owner)
-    state.board[cr].remove(unit)
-    if not state.board[cr]:
-        del state.board[cr]
-    counters["anaconda_legend"] = counters.get("anaconda_legend", 0) - state.config.anaconda_legend_decay
-    state.emit("strength", card="anaconda_legend", owner=unit.owner, n=-state.config.anaconda_legend_decay)   # every copy (this one is in the deck now)
-    shuffle_back(state, unit.owner, ["anaconda_legend"])
-    _push_draw(state, unit.owner, 1)              # "and draw a card": after the shuffle, so it may be Eon again
-
-
-def _magpie_place(state, unit, cr):
-    state.effect_stack.append({"op": "magpie_steal", "player": unit.owner})
-
-
-def _op_magpie_steal(state, step):
-    """Take a random card from the opponent's hand (it becomes yours), then discard a card of
-    your choice. The stolen card isn't a remove: it changes hands; the discard is (Remove Pile)."""
-    player = step["player"]
-    if "stolen" not in step:
-        step["stolen"] = True
-        theirs = state.hands[other_player(player)]
-        if theirs:
-            inst = state.rng.choice(theirs)
-            theirs.remove(inst)
-            new = UnitInstance(inst.card_id, player, state.new_iid())
-            before = len(state.hands[player])
-            state.hands[player].append(new)
-            state.emit("steal", player=player, victim=other_player(player), iid=inst.iid, new=new.iid, card=inst.card_id)
-            state.ensure_mates(player, [new])
-            _burn_over_limit(state, player, state.hands[player][before:])
-    hand = state.hands[player]
-    if not hand:
-        return None
-    if "choice" not in step:
-        if len(hand) == 1:
-            step["choice"] = hand[0].iid
-        else:
-            return PendingRequest("choice", player, optional=False, options=[u.iid for u in hand], from_deck_reveal=True)
-    inst = next((u for u in hand if u.iid == step["choice"]), None)
-    if inst is not None:
-        remove_from_hand(state, player, inst)
-    return None
-
-
-def _bird_egg_place(state, unit, cr):
-    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "tag:Bird"})
-    schedule(state, unit, state.config.bird_egg_hatch_delay,
-             {"op": "bird_egg_hatch", "iid": unit.iid}, while_buried=False)
-
-
-def _snake_egg_place(state, unit, cr):
-    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner,
-                               "n": state.config.snake_egg_draw, "spec": "tag:Snake"})
-    schedule(state, unit, state.config.egg_hatch_delay,
-             {"op": "egg_hatch", "iid": unit.iid, "n": state.config.egg_hatch_draw, "spec": "tag:Snake"}, while_buried=False)
-
-
-def _goose_legend_start(state, unit, cr):
-    """Dawn: shuffle two Golden Eggs into your deck."""
-    shuffle_back(state, unit.owner, ["golden_egg"] * state.config.aurum_eggs, by=unit.owner)
-
-
-def _golden_egg_drawn(state, inst):
-    """Golden Egg: when you draw this, remove it and draw 2 cards (a removed Egg, for the Egg Eater)."""
-    if inst in state.hands[inst.owner]:
-        remove_from_hand(state, inst.owner, inst)
-    draw_cards(state, inst.owner, state.config.golden_egg_draw)
-
-
-def _bat_legend_start(state, unit, cr):
-    """Dawn: draw a card."""
-    _push_draw(state, unit.owner, 1)
-
-
-# --- Fish -------------------------------------------------------------------------------------------------------
-
-def _tuna_legend_place(state, unit, cr):
-    """Roar: for each region you control, draw a card and gain 5 food."""
-    n = len(statics.regions_of(state, unit.owner))
-    _push_gain(state, unit.owner, n * state.config.tuna_legend_food)
-    _push_draw(state, unit.owner, n)
-
-
-def _manta_legend_eot(state, unit, cr):
-    """Dusk: if you control 2 or more regions, draw 2 cards."""
-    if len(statics.regions_of(state, unit.owner)) >= state.config.manta_legend_regions:
-        _push_draw(state, unit.owner, state.config.manta_legend_draw)
-
-
-def _adjacent_ally_fish(state, unit, cr) -> int:
-    return statics.fish_count(state, unit.owner, crs={nb for nb, _ in _adjacent_tops(state, cr, unit.owner)})
-
-
-def _swordfish_place(state, unit, cr):
-    """Roar: remove a random adjacent enemy for each adjacent allied Fish."""
-    n = _adjacent_ally_fish(state, unit, cr)
-    targets = _adjacent_enemy_targets(state, unit, cr, chosen=False)
-    state.rng.shuffle(targets)
-    for nb in targets[:n]:
-        state.effect_stack.append(remove_iid_step(state.top_unit(nb).iid, by_player=unit.owner, by_effect=True,
-                                                  source_iid=None, by_card=unit.card_id))
-
-
-def _barracuda_place(state, unit, cr):
-    """Roar: remove an adjacent enemy with strength up to the number of your Fish (this one included)."""
-    _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(
-        state, unit, cr, max_strength=statics.fish_count(state, unit.owner)))
-
-
-def _piranha_legend_place(state, unit, cr):
-    """Roar: remove each enemy next to 2 or more of your Fish (the Sardine's double count included)."""
-    for where, st in list(state.board.items()):
-        if st and st[-1].owner != unit.owner and _adjacent_ally_fish(state, unit, where) >= state.config.piranha_legend_fish:
-            state.effect_stack.append(remove_iid_step(st[-1].iid, by_player=unit.owner, by_effect=True,
-                                                      source_iid=None, by_card=unit.card_id))
-
-
-def _manta_ally_covered(state, watcher, covered, coverer, cr):
-    """Whenever your opponent covers an adjacent allied Fish, draw a card."""
-    at = statics.crossroad_of(state, watcher)
-    if (coverer.owner != watcher.owner and "Fish" in state.cards[covered.card_id].tags
-            and at is not None and state.game_map.adjacent(at, cr)):
-        _push_draw(state, watcher.owner, 1)
-
-
-def _remora_place(state, unit, cr):
-    """Roar: if this is next to an allied Fish, play another Fish."""
-    if _adjacent_ally_fish(state, unit, cr) >= 1:
-        _push_play_extra(state, unit.owner, filter={"tags_all": ["Fish"]})
-
-
-def _cod_place(state, unit, cr):
-    """Roar: draw a card for each adjacent allied Fish."""
-    _push_draw(state, unit.owner, _adjacent_ally_fish(state, unit, cr))
-
-
-def _spawns_beside(token):
-    """Roar: place `token` on a random adjacent empty crossroad (Sunfish's Baby Fish, Deer's Fawn)."""
-    def handler(state, unit, cr):
-        empty = _empty_neighbors(state, cr)
-        if empty:
-            _spawn(state, unit.owner, token, state.rng.choice(empty))
-    return handler
-
-
-# --- Food Aggro -------------------------------------------------------------------------------------------------
-
-def _repeat_legend_place(state, unit, cr):
-    """Roar: repeat the Roar of each of your adjacent Rodents. Big Gus absorbs them: each repeat is Big Gus's own, here,
-    as the Macaw's copy is the Macaw's (Martin, 2026-10-29: the instinctive reading), so its food, removals and timers
-    come from Big Gus. It repeats by calling the other Roar straight away, with no effect step in between to count, so it never
-    repeats a repeater (another of these, a Vole): that would recurse without end, which no cap can stop."""
-    for _nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
-        if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id and top.card_id not in REPEATERS:
-            hook = _hook(state, top.card_id, "on_place", as_card=unit.card_id)
-            if hook:
-                hook(state, unit, cr)
-
-
-REPEATERS = {"vole", "capybara_legend"}      # what the repeat legend never repeats: it calls Roars directly (see _repeat_legend_place)
-
-
-def _hamster_draw_event(state, unit, cr, event):
-    """Whenever you draw a card, gain 5 food (Martin, 2026-10-29): the owner's draws only, one gain per card."""
-    if event["player"] == unit.owner:
-        _push_gain(state, unit.owner, state.config.hamster_draw_food)
-
-
-def _vole_place(state, unit, cr):
-    """Roar: repeat the Roar of an adjacent Rodent (Martin, 2026-10-29). The Vole picks one of its Rodent neighbours with
-    a Roar and repeats it as its own, here, as Big Gus does. Another Vole is a Rodent with a Roar like any other: two replay each
-    other, one choice at a time, until the turn's action cap ends the turn."""
-    options = [nb for nb, top in _adjacent_tops(state, cr, unit.owner)
-               if "Rodent" in state.cards[top.card_id].tags
-               and _hook(state, top.card_id, "on_place")]
-    _push_choose(state, unit.owner, options, "repeat_roar", optional=False, vole=unit.iid)
-
-
-def _refill_legend_place(state, unit, cr):
-    """Roar: draw cards until you have as many as your opponent."""
-    state.effect_stack.append({"op": "draw_to_match", "player": unit.owner})
-
-
-def _chipmunk_legend_place(state, unit, cr):
-    """Roar: gain 3 food for each 10 food you have. Snapshot now; the gain resolves as a literal amount."""
-    cfg = state.config
-    _push_gain(state, unit.owner, cfg.chipmunk_legend_food_per * (state.food[unit.owner] // cfg.chipmunk_legend_food_step))
-
-
-def _rat_king_place(state, unit, cr):
-    others = _control_tag_count(state, unit.owner, "Rodent") - 1     # Barley: other Rodents
-    _push_draw(state, unit.owner, 1)
-    _push_gain(state, unit.owner, state.config.rat_king_per_rodent * max(0, others))
-
-
-def _meerkat_enemy_placed(state, meerkat, placed, cr):
-    """When an enemy is placed adjacent to this, draw a card."""
-    _push_draw(state, meerkat.owner, 1)
-
-
-def _beaver_place(state, unit, cr):
-    """Roar: next turn, take 1 additional action."""
-    schedule(state, unit, 1, {"op": "grant_action", "player": unit.owner, "n": state.config.beaver_bonus_actions},
-             while_buried=False)
-
-
-def _krill_place(state, unit, cr):
-    """Roar: draw a card. The next Titan you play this turn costs one action (a flag, not a stack: two Krill still
-    lower one)."""
-    state.turn_flags[f"titan_discount_{unit.owner}"] = True
-    _push_draw(state, unit.owner, 1)
-
-
-def _flying_squirrel_place(state, unit, cr):
-    """Flight. Roar: gain 10 food and draw a card (the stack runs last-in first: the food, then the card)."""
-    _push_draw(state, unit.owner, 1)
-    _push_gain(state, unit.owner, state.config.flying_squirrel_food)
-
-
-def _electric_eel_place(state, unit, cr):
-    """Roar: your opponent takes only 1 action next turn. The Beaver's mirror: it lands on the opponent's very next turn,
-    as a timer that ticks on their turn (and dies with the Eel, as the Beaver's does)."""
-    opp = other_player(unit.owner)
-    schedule(state, unit, 1, {"op": "cap_actions", "player": opp, "n": state.config.eel_actions},
-             while_buried=True, turn_of=opp)
-
-
-def _dormouse_eot(state, unit, cr):
-    """Dusk: draw a card for each 10 food you gained this turn. Dusk comes before region income, so only the turn's
-    own food counts."""
-    n = _food_gained_this_turn(state, unit.owner) // state.config.fed_threshold
-    if n:
-        _push_draw(state, unit.owner, n)
-
-
-def _chipmunk_place(state, unit, cr):
-    """Roar: gain 10 food. Echo."""
-    _push_gain(state, unit.owner, state.config.chipmunk_food_now)
-
-
-def _tutorial_chipmunk_place(state, unit, cr):
-    """The tutorial's Chipmunk keeps the card it was written with ("Roar: gain 10 food. At the start of your next turn,
-    gain 10 more.")."""
-    _push_gain(state, unit.owner, state.config.chipmunk_food_now)
-    schedule(state, unit, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.chipmunk_food_later},
-             while_buried=False)
-
-
-# --- Food OTK ---------------------------------------------------------------------------------------------------
-
-def _chameleon_legend_2_place(state, unit, cr):
-    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "rarity:legendary"})
-
-
-def _otk_squirrel_place(state, unit, cr):
-    """Roar: lose all your food. In 3 turns, gain three times as much. (A timer on this animal: covering it pauses it,
-    removing it loses the stake.)"""
-    stake = state.food[unit.owner]
-    lose_food(state, unit.owner, stake, card=unit.card_id)
-    if stake:
-        schedule(state, unit, state.config.otk_squirrel_delay,
-                 {"op": "gain_food", "player": unit.owner, "amount": stake * state.config.otk_squirrel_multiplier},
-                 while_buried=False)
-
-
-def _chameleon_legend_place(state, unit, cr):
-    """Iris: Roar: become a copy of an animal in your hand. Add a copy to your hand and shuffle a copy into your deck."""
-    _push_choose(state, unit.owner, _hand_iids(state, unit.owner), "copy_from_hand", self=unit.iid, more=True)
-
-
-def _chameleon_place(state, unit, cr):
-    """Roar: become a copy of an adjacent animal (an enemy only if it may be chosen)."""
-    _push_choose(state, unit.owner, [nb for nb, top in _adjacent_tops(state, cr)
-                                     if statics.can_be_chosen(state, top, unit.owner, nb)], "copy_adjacent", self=unit.iid)
-
-
-def _orb_weaver_enemy_placed(state, spider, placed, cr):
-    """When an enemy with Flight or Roam is placed adjacent to this (or roams there), remove it."""
-    if (statics.has_keyword(state, placed, "Flight", cr) or statics.has_keyword(state, placed, "Roam", cr)) \
-            and statics.can_be_removed(state, placed, cr):
-        state.effect_stack.append(remove_iid_step(placed.iid, by_player=spider.owner, by_effect=True,
-                                                  source_iid=None, by_card=spider.card_id))
-
-
-def _stag_beetle_place(state, unit, cr):
-    """Roar: gain 5 food for each of your animals with Armor (this one included)."""
-    n = sum(statics.animal_worth(state, unit.owner, c) for c, st in state.board.items()
-            if st and st[-1].owner == unit.owner and statics.has_keyword(state, st[-1], "Armor", c))
-    _push_gain(state, unit.owner, n * state.config.stag_beetle_per_armor)
-
-
-def _grizzly_place(state, unit, cr):
-    """Roar: your opponent draws a card (the price of an 8)."""
-    _push_draw(state, other_player(unit.owner), 1)
-
-
-def _black_bear_place(state, unit, cr):
-    schedule(state, unit, state.config.black_bear_delay,
-             {"op": "draw", "player": unit.owner, "n": state.config.black_bear_draw}, while_buried=False)
-
-
-# --- Giants -----------------------------------------------------------------------------------------------------
-
-def _rhinoceros_place(state, unit, cr):
-    for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.rhinoceros_max,
-                                      chosen=False):        # mass AoE hits Stealth
-        state.effect_stack.append(remove_iid_step(state.top_unit(nb).iid, by_player=unit.owner, by_effect=True,
-                                                  source_iid=None, by_card=unit.card_id))
-
-
-def _elephant_legend_lands(state, unit, cr):
-    """Whenever this lands (placed, or arriving by a roam): remove all adjacent enemies of strength 3 or less."""
-    for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.elephant_legend_max,
-                                      chosen=False):        # mass AoE hits Stealth
-        state.effect_stack.append(remove_iid_step(state.top_unit(nb).iid, by_player=unit.owner, by_effect=True,
-                                                  source_iid=None, by_card=unit.card_id))
-
-
-def _elephant_legend_roam(state, unit, cr, event):
-    _elephant_legend_lands(state, unit, cr)
-
-
-def _albatross_place(state, unit, cr):
-    """Roar: remove all adjacent enemies of strength 2 or less (the Rhinoceros's sweep, landing anywhere)."""
-    for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.albatross_max,
-                                      chosen=False):        # mass AoE hits Stealth
-        state.effect_stack.append(remove_iid_step(state.top_unit(nb).iid, by_player=unit.owner, by_effect=True,
-                                                  source_iid=None, by_card=unit.card_id))
-
-
-def _remove_all_adjacent(state, unit, cr):
-    """Brutus, Sperm Whale: "Roar: remove all adjacent animals." Yours too; Armor survives; Stealth doesn't hide."""
-    for nb, top in _adjacent_tops(state, cr):
-        if statics.can_be_removed(state, top, nb):
-            state.effect_stack.append(remove_iid_step(top.iid, by_player=unit.owner, by_effect=True,
-                                                      source_iid=None, by_card=unit.card_id))
-
-
-def _hippo_enemy_placed(state, hippo, placed, cr):
-    # Automatic trigger, nobody "chose" the target: Stealth doesn't hide (decision B). Set off by the placement, it
-    # resolves even when the placed animal's Roar removed the Hippo first: the two go together (Martin, 2026-10-27).
-    if (effective_strength(state, placed) <= state.config.hippopotamus_max
-            and statics.can_be_removed(state, placed, cr)):
-        state.effect_stack.append(remove_iid_step(placed.iid, by_player=hippo.owner, by_effect=True,
-                                                  source_iid=None, by_card=hippo.card_id))
-
-
-def _tortoise_legend_eot(state, unit, cr):
-    _push_gain(state, unit.owner, state.config.tortoise_legend_food)
-
-
-def _oxpecker_place(state, unit, cr):
-    state.effect_stack.append({"op": "oxpecker", "player": unit.owner})
-
-
-def _anteater_place(state, unit, cr):
-    state.effect_stack.append({"op": "anteater", "player": unit.owner})
-
-
-def _dung_beetle_eot(state, unit, cr):
-    """At the end of your turn, gain 5 food for each Hungry animal you control."""
-    n = sum(statics.animal_worth(state, unit.owner, c) for c, st in state.board.items()
-            if st and st[-1].owner == unit.owner and statics.has_keyword(state, st[-1], "Hungry", c))
-    _push_gain(state, unit.owner, n * state.config.dung_beetle_per)
-
-
-def _sloth_place(state, unit, cr):
-    """"In 3 turns, gain 30 food." Its counterplay is the timed-effect rule (overview.md 9.1): cover the Sloth and the
-    timer suspends for as long as the cover holds."""
-    schedule(state, unit, state.config.sloth_delay,
-             {"op": "gain_food", "player": unit.owner, "amount": state.config.sloth_food}, while_buried=False)
-
-
-# --- Handlock ---------------------------------------------------------------------------------------------------
-
-def _baboon_legend_sot(state, unit, cr):
-    """Dawn: give 2 random animals in your hand +1 strength."""
-    hand = _hand_iids(state, unit.owner)
-    k = min(len(hand), state.config.baboon_legend_count)
-    _grant(state, state.rng.sample(hand, k), state.config.baboon_legend_grant)
-
-
-def _bee_legend_2_place(state, unit, cr):
-    """Royal jelly: "Roar: if your starting deck has no animal of strength 4 or more, give your animals on the board, in
-    your hand and in your deck +2 strength." (The Capybara's condition.) Each on the board (itself included, the top
-    animals and those buried) and in hand is given +2 as a buff (one in hand that grows there reacts, the Butterfly
-    evolving); the deck's copies come out with it (GameState.deck_instance)."""
-    p = unit.owner
-    if not small_starting_deck(state, p, unit.card_id):
-        return
-    state.jelly[p] = {cid: [state.decks[p].count(cid), state.jelly_counter(p, cid)] for cid in set(state.decks[p])}
-    mine = [u for stack in state.board.values() for u in stack if u.owner == p] + list(state.hands[p])
-    _grant(state, [inst.iid for inst in mine], state.config.jelly_grant)
-
-
-def _orangutan_legend_place(state, unit, cr):
-    """Roar: give all animals in your hand +2 strength."""
-    _grant(state, _hand_iids(state, unit.owner), state.config.orangutan_legend_grant)
-
-
-BUTTERFLY_STAGES = ["butterfly_legend", "butterfly_legend_caterpillar", "butterfly_legend_chrysalis",
-                    "butterfly_legend_butterfly", "butterfly_legend_monarch"]
-
-
-def _butterfly_evolve(state, inst, _):
-    """The legendary Butterfly: "Dawn: evolve. Whenever this gains strength, evolve." In hand or on the board, it moves
-    one stage on (one Dawn or one buff, one stage; five stages, each adding to the last)."""
-    i = BUTTERFLY_STAGES.index(inst.card_id)
-    if i + 1 < len(BUTTERFLY_STAGES):
-        _transform(state, inst, BUTTERFLY_STAGES[i + 1])
-
-
-_BUTTERFLY_GROWS = {"on_dawn_in_hand": _butterfly_evolve, "on_start_of_turn": _butterfly_evolve, "on_gain": _butterfly_evolve}
-
-
-def _hand_grant_one(state, unit, amount):
-    """"give an animal in your hand +N": the player picks it."""
-    _push_choose(state, unit.owner, _hand_iids(state, unit.owner), "grant", amount=amount)
-
-
-def _draw_then_give_one(state, unit, cr):
-    """Butterfly, the Chrysalis stage: "Roar: draw a card, then give an animal in your hand +1 strength."."""
-    state.effect_stack.append({"op": "hand_grant_one", "player": unit.owner, "amount": state.config.butterfly_grant})
-    _push_draw(state, unit.owner, 1)
-
-
-def _op_hand_grant_one(state, step):
-    _push_choose(state, step["player"], _hand_iids(state, step["player"], tag=step.get("tag")), "grant",
-                 amount=step["amount"], by_card=step.get("by_card"))
-    return None
-
-
-OPS["hand_grant_one"] = _op_hand_grant_one
-
-
-def _op_hand_grant_all(state, step):
-    _grant(state, _hand_iids(state, step["player"]), step["amount"])
-    return None
-
-
-OPS["hand_grant_all"] = _op_hand_grant_all
-
-
-def _butterfly_stage_place(draw_attr, grant_attr):
-    """The Butterfly stage and the Monarch: "Roar: draw N, then give all animals in your hand +N strength."."""
-    def handler(state, unit, cr):
-        state.effect_stack.append({"op": "hand_grant_all", "player": unit.owner,
-                                   "amount": getattr(state.config, grant_attr)})
-        _push_draw(state, unit.owner, getattr(state.config, draw_attr) if draw_attr else 1)
-    return handler
-
-
-def _macaque_place(state, unit, cr):
-    if roar_condition(state, unit.owner, "macaque", unit):     # its own condition, also when a Macaw repeats it
-        _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(state, unit, cr))
-
-
-def _orangutan_place(state, unit, cr):
-    """Roar: duplicate a Primate in your hand."""
-    _push_choose(state, unit.owner, _hand_iids(state, unit.owner, tag="Primate"), "duplicate")
-
-
-def _tarsier_place(state, unit, cr):
-    """Roar: give an animal in your hand +2 strength (tarsier_grant). Echo."""
-    state.effect_stack.append({"op": "hand_grant_one", "player": unit.owner, "amount": state.config.tarsier_grant})
-
-
-def _chimpanzee_place(state, unit, cr):
-    """Roar: remove an adjacent enemy of equal or lower strength."""
-    _push_remove_choice(state, unit.owner, unit.card_id,
-                        _adjacent_enemy_targets(state, unit, cr, max_strength=effective_strength(state, unit)))
-
-
-def _baboon_place(state, unit, cr):
-    """Roar: give 2 animals in your hand +1 strength (two different ones, the player's pick)."""
-    cfg = state.config
-    hand = _hand_iids(state, unit.owner)
-    if len(hand) <= cfg.baboon_count:
-        _grant(state, hand, cfg.baboon_grant)
-    else:
-        _push_choose(state, unit.owner, hand, "hand_grant", amount=cfg.baboon_grant, count=cfg.baboon_count)
-
-
-YOUNGLINGS = ["baby_lion", "baby_wolf", "baby_squirrel", "baby_owl", "baby_python", "baby_bear", "baby_gorilla",
-              "baby_zebra"]
-
-
-def _stork_place(state, unit, cr):
-    """Roar: add two random younglings to your hand (two different ones)."""
-    for cid in state.rng.sample(YOUNGLINGS, state.config.stork_younglings):
-        gain_to_hand(state, unit.owner, cid)
-
-
-def _caterpillar_grows(state, inst, amount):
-    """When this gains strength in your hand, draw a card and turn into a Butterfly."""
-    _transform(state, inst, "butterfly")
-    draw_cards(state, inst.owner, 1)
-
-
-def _gorilla_place(state, unit, cr):
-    if roar_condition(state, unit.owner, "gorilla", unit):
-        _push_draw(state, unit.owner, 1)
-
-
-# --- Hoofed -----------------------------------------------------------------------------------------------------
-
-def _zebra_legend_place(state, unit, cr):
-    """Roar: draw a card for each of your grazing Hoofed animals (itself too, when it lands grazing)."""
-    n = sum(1 for c, st in state.board.items()
-            if st and st[-1].owner == unit.owner and "Hoofed" in state.cards[st[-1].card_id].tags
-            and statics.grazing(state, st[-1], c))
-    _push_draw(state, unit.owner, n)
-
-
-def _rabbit_place(state, unit, cr):
-    """Roar: play a Bunny next to this (Martin, 2026-10-29): made, then played by its owner on a neighbouring crossroad,
-    a full placement that counts as a play (the Hare and the Rat see it)."""
-    state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "bunny", "make": True, "adjacent_to": cr})
-
-
-def _impala_place(state, unit, cr):
-    """Roar: play a Baby Impala (made, then placed by its owner as a full placement, Roar and all)."""
-    state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "baby_impala", "make": True})
-
-
-def _okapi_graze_draw(state, unit, cr):
-    """Dawn and Dusk: if this is grazing, draw a card (Martin, 2026-10-29: both ends of the turn)."""
-    if statics.grazing(state, unit, cr):
-        _push_draw(state, unit.owner, 1)
-
-
-def _gazelle_place(state, unit, cr):
-    """Roar: draw a card and gain 5 food (gazelle_food)."""
-    _push_gain(state, unit.owner, state.config.gazelle_food)
-    _push_draw(state, unit.owner, 1)
-
-
-def _zebra_flee(state, fled, coverer_iid):
-    """When this flees, return the enemy that covered it to its owner's hand (Martin, 2026-10-29: the kick, back)."""
-    state.effect_stack.append({"op": "flee_return", "iid": coverer_iid})
-
-
-def _deer_legend_place(state, unit, cr):
-    """Roar: draw 2 animals with Flee (random among the deck's fleers, as every filtered draw)."""
-    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": state.config.deer_legend_draw,
-                               "spec": "keyword:Flee"})
-
-
-def _deer_legend_friendly_flee(state, watcher, fled):
-    """Whenever one of your animals flees, it gains 2 strength: the fled card, now in hand (deer_legend_grant)."""
-    _grant(state, [fled.iid], state.config.deer_legend_grant)
-
-
-def _deer_legend_own_flee(state, fled, coverer_iid):
-    """The legendary Deer fleeing grows itself (Martin, 2026-10-29: "make sure it gives strength to itself as well")."""
-    _grant(state, [fled.iid], state.config.deer_legend_grant)
-
-
-def _warthog_place(state, unit, cr):
-    """Roar: remove an adjacent enemy that has another of your Hoofed animals next to it (the herd mobs the intruder;
-    Martin, 2026-10-29: the old "covering an allied Hoofed" condition went dead once six Hoofed carry Flee)."""
-    def flanked(nb):
-        return any(top.iid != unit.iid and "Hoofed" in state.cards[top.card_id].tags
-                   for _, top in _adjacent_tops(state, nb, unit.owner))
-    _push_remove_choice(state, unit.owner, unit.card_id,
-                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if flanked(nb)])
-
-
-def _boar_enemy_placed(state, boar, placed, cr):
-    """Remove the first enemy placed next to this (Martin, 2026-10-30): one charge per Boar, spent on the first enemy
-    whatever happens to it (an Armor animal stays and the charge is gone all the same, as Spikes). `retaliation_used`
-    is the once-flag; the board's eye goes with it. Automatic, as the Hippopotamus: Stealth doesn't hide."""
-    if boar.retaliation_used:
-        return
-    boar.retaliation_used = True
-    if statics.can_be_removed(state, placed, cr):
-        state.effect_stack.append(remove_iid_step(placed.iid, by_player=boar.owner, by_effect=True,
-                                                  source_iid=None, by_card=boar.card_id))
-
-
-def _wildebeest_eot(state, unit, cr):
-    """At the end of your turn, if this is grazing, gain 5 food."""
-    if statics.grazing(state, unit, cr):
-        _push_gain(state, unit.owner, state.config.wildebeest_food)
-
-
-# --- The pool ---------------------------------------------------------------------------------------------------
-
-def _octopus_ink_place(state, unit, cr):
-    """Roar: adjacent enemies lose all their effects (keywords included, so Armor doesn't keep it out; nothing is
-    chosen, so neither does Stealth). For good: the ink stays while the animal is on the board."""
-    for nb in sorted(state.game_map.neighbors(cr)):
-        top = state.top_unit(nb)
-        if top is not None and top.owner != unit.owner and top.iid not in state.inked:
-            state.inked.add(top.iid)
-            state.emit("inked", iid=top.iid, card=top.card_id, owner=top.owner)
-
-
-def _macaw_place(state, unit, cr):
-    """Roar: repeat the last Roar your opponent played, as this card's own: next to the Macaw, for its owner. A
-    Macaw's copy is the copied Roar, so a Macaw repeating a Macaw repeats what that one repeated."""
-    copied = state.last_roar.get(other_player(unit.owner))
-    hook = copied and _hook(state, copied, "on_place", as_card="macaw")
-    if hook:
-        state.last_roar[unit.owner] = copied
-        hook(state, unit, cr)
-
-
-def _woodpecker_place(state, unit, cr):
-    """Roar: your next Roar this turn happens twice."""
-    state.roar_twice[unit.owner] = state.turn_counter
-
-
-def _cuckoo_place(state, unit, cr):
-    """Roar: shuffle two Cuckoo Eggs into your opponent's deck."""
-    shuffle_back(state, other_player(unit.owner), ["cuckoo_egg"] * state.config.cuckoo_eggs, by=unit.owner)
-
-
-def _cuckoo_egg_drawn(state, inst):
-    """Cuckoo Egg: when you draw this, your opponent draws a card."""
-    draw_cards(state, other_player(inst.owner), 1)
-
-
-def _opossum_place(state, unit, cr):
-    """Roar: return an adjacent ally to your hand."""
-    _push_choose(state, unit.owner, _adjacent_friendly_units(state, unit, cr), "return_ally")
-
-
-def _andean_condor_place(state, unit, cr):
-    o = unit.owner
-    mine, theirs = state.decks[o], state.decks[other_player(o)]
-    if not mine:
-        return                                           # empty own deck: fizzle
-    their_str = _base_int(state, theirs[-1]) if theirs else 0
-    if _base_int(state, mine[-1]) > their_str:           # strictly greater printed base (F13)
-        _push_draw(state, o, 1)
-
-
-def _base_int(state, card_id):
-    b = state.cards[card_id].base_strength
-    return b if isinstance(b, int) else 0
-
-
-# --- Reserve and test fixtures ----------------------------------------------------------------------------------
-
-OPS.update({
-    "hornet_kill": _op_hornet_kill,
-    "rat_legend_2_wipe": _op_pestis_wipe,
-    "bounce_iid": _op_bounce_iid,
-    "skunk_bounce": _op_skunk_bounce,
-    "venom": _op_venom,
-    "magpie_steal": _op_magpie_steal,
-})
-
-
-def _spikes_covered(state, covered, coverer, cr):
-    # Spikes (Porcupine, Hedgehog, the legendary Honey Badger): the first time an enemy covers this, remove that enemy.
-    # Once per instance (`retaliation_used` persists across turns, and the board's badge goes with it).
-    if coverer.owner == covered.owner or covered.retaliation_used:
-        return
-    covered.retaliation_used = True
-    if statics.can_be_removed(state, coverer, cr):
-        state.effect_stack.append(remove_iid_step(coverer.iid, by_player=covered.owner, by_effect=True,
-                                                  source_iid=None, by_card=covered.card_id))
-
-
-def _poison_covered(state, covered, coverer):
-    """Poison (keywords.md): an enemy that covers this is removed at the start of this animal's controller's next
-    turn, every time. Like King Cobra's venom (overview.md §9.1) the poison belongs to the coverer: it is queued on the
-    coverer's iid, ticks while the coverer is buried, resolves whether or not the Poison animal is still there, and is
-    cancelled only if the coverer leaves the board first (a bounce or a return gives it a new iid). It's a remove, so
-    Armor resists it. An Apex Predator landing here is poisoned and still eats."""
-    if coverer.owner == covered.owner:
-        return
-    state.scheduled.append({"iid": coverer.iid, "owner": covered.owner, "remaining": 1, "while_buried": True,
-                            "step": remove_iid_step(coverer.iid, by_player=covered.owner, by_effect=True,
-                                                    source_iid=None, by_card=covered.card_id)})
-    state.emit("poisoned", iid=coverer.iid, card=coverer.card_id, owner=coverer.owner, by=covered.iid)
-
-
-_draw1 = _draws()
-
+def _bite(n: Optional[int]):
+    """"Roar: Bite N.": remove an adjacent enemy of strength N or less (None: any adjacent enemy, the Giant Hunter's)."""
+    def roar(state, unit, cr):
+        targets = _adjacent_enemy_targets(state, unit, cr, n)
+        if targets:
+            state.effect_stack.append({"op": "remove_choice", "chooser": unit.owner, "by_card": unit.card_id,
+                                       "options": targets, "optional": False})
+    return roar
+
+
+def _draw_a_card(state, unit, cr):
+    """"Roar: draw a card."."""
+    state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1})
+
+
+# The Hunters bite as far as their text says (Martin, 2026-11-20, his table).
+BITES = {"hunter_2": 2, "hunter_3": 3, "hunter_4": 4, "hunter_5": 5, "hunter_6": 6, "hunter_7": 7, "giant_hunter": None}
+CANTRIPS = ("scout_2", "scout_3", "scout_4", "scout_5", "scout_6",
+            "winged_scout_3", "winged_scout_4", "winged_scout_5", "winged_scout_6", "winged_scout_8")
 
 EFFECTS: dict[str, dict[str, Callable]] = {
-    # Aristocrats.
-    "cuckoo_legend": {"on_place": _cuckoo_legend_place},
-    "pheasant_legend": {"on_remove": _pheasant_legend_remove},
-    "praying_mantis": {"on_place": _mantis_place},
-    "tarantula": {"on_end_of_turn": _tarantula_eot},
-    "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
-    "tiger_legend": {"on_place": _removes("tiger_legend_max")},
-    "raccoon": {"on_place": _raccoon_place},
-    "hammerhead": {"on_place": _conditional("hammerhead", _hammerhead_place)},
-    "hyena": {"on_end_of_turn": _hyena_eot},
-    "city_spider": {"on_start_of_turn": _city_spider_sot},
-    "earthworm": {"on_remove": _earthworm_remove},
-    "worm": {"on_remove": _worm_remove},
-    "cockroach": {"on_remove": _cockroach_remove},
-    "cockroach_legend": {"on_remove": _cockroach_legend_remove},
-    "dart_frog": {"on_remove": _blast_remove},
-    "locust_legend": {"on_place": _locust_legend_place},
-    # Canines (Clarion's free roam is a static).
-    "wolf_legend_2": {"on_friendly_roam": _black_wolf_friendly_roam, "on_roam": _black_wolf_own_roam},
-    "wolf_legend": {"on_end_of_turn": _wolf_legend_eot},
-    "fox": {"on_place": _fox_place},
-    "dhole": {"on_cover_enemy": _dhole_cover},
-    "wolverine": {"on_place": _wolverine_place},
-    "jackal": {"on_roam": _jackal_roam},
-    "bush_dog": {"on_roam": _bush_dog_roam},
-    "african_wild_dog": {"on_friendly_place": _wild_dog_friendly_place},
-    "badger": {"on_place": _draws_filtered("keyword:Roam")},
-    "coyote": {"on_place": _coyote_place},
-    "street_dog": {"on_place": _street_dog_place},
-    # Cats (King Theron fires from _fire_cover_event; Leopard is a static).
-    "lion_legend": {"on_place": _twin_place("lion_legend_2")},
-    "lion_legend_2": {"on_place": _twin_place("lion_legend")},
-    "lion_legend_4": {"on_remove_event": _lion_legend_4_remove_event},
-    "jaguar": {"on_place": _removes("jaguar_max")},
-    "serval": {"on_place": _serval_place},
-    "lynx": {"on_place": _draw1},   # Roar: draw a card (Martin, 2026-11-16)
-    "bobcat": {"on_place": _draw1},
-    "alley_cat": {"on_place": _alley_cat_place},
-    "kitten": {"on_place": _draw1},
-    # Colony.
-    "army_ant_legend": {"on_end_of_turn": _army_ant_legend_eot},
-    "bee_legend": {"on_place": _bee_legend_place},
-    "forager_ant": {"on_place": _forager_ant_place},
-    "queen_ant": {"on_end_of_turn": _queen_ant_eot},
-    "scout_bee": {"on_end_of_turn": _scout_bee_eot},
-    "nurse_bee": {"on_place": _conditional("nurse_bee", _draws("nurse_bee_draw"))},
-    "nurse_bumblebee": {"on_place": _draws_filtered("tag:Colony")},
-    "termite_king": {"on_place": _termite_king_place},
-    "termite_queen": {"on_place": lambda state, unit, cr: _push_play_extra(
-        state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"], "adjacent_to": cr})},
-    "queen_bee": {"on_place": _queen_bee_place},
-    "soldier_ant": {"on_place": _conditional("soldier_ant", _removes())},
-    "worker_ant": {"on_place": _worker_ant_place},
-    "worker_wasp": {"on_friendly_place": _worker_wasp_friendly_place},
-    "worker_bee": {"on_place": _gains("worker_bee_food")},
-    # Den Rush.
-    "mole_legend": {"on_place": _mole_legend_place},
-    "rat_legend_2": {"on_place": _rat_legend_2_place},
-    "skunk_legend": {"on_place": _skunk_legend_place},
-    "deer_legend_2": {"on_place": _fawn_place},
-    "young_stag": {"on_place": _young_stag_place},
-    "great_stag": {"on_place": _great_stag_place},
-    "falcon_legend": {"on_place": _falcon_legend_place},
-    "mole": {"on_place": _mole_place},
-    "naked_mole_rat": {"on_place": _mole_place},
-    "hornet": {"on_place": _hornet_place},
-    "skunk": {"on_place": _skunk_place},
-    "hare": {"on_place": _conditional("hare", _draws("hare_draw"))},
-    "ocelot": {"on_place": _ocelot_place},
-    "cheetah": {"on_place": _cheetah_place},
-    "rat": {"on_place": _conditional("rat", _rat_place)},
-    "falcon": {"on_place": _hq_adjacent_draw},
-    "bat": {"on_place": _draws("bat_draw")},
-    "dolphin": {"on_place": _draw1},
-    "mouse": {"on_place": _draws_filtered("tag:Rodent")},
-    # Egg Control.
-    "anaconda_legend": {"on_end_of_turn": _anaconda_legend_end_of_turn},
-    "raven_legend": {"on_place": _raven_legend_place},
-    "goose_legend": {"on_start_of_turn": _goose_legend_start},
-    "bat_legend": {"on_start_of_turn": _bat_legend_start},
-    "swan_legend": {"on_draw": _omen_drawn},
-    "hawk": {"on_place": _removes("stoop_max")},
-    "cottonmouth": {"on_place": _king_cobra_place},
-    "weasel": {"on_place": _removes("weasel_max")},
-    "mongoose": {"on_place": _removes("mongoose_max")},   # (Martin, 2026-11-16)   # Roar: remove an adjacent enemy of strength 3 or less (Martin, 2026-11-16)
-    "hunter_3": {"on_place": _removes("hunter_3_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_5": {"on_place": _removes("hunter_5_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_7": {"on_place": _removes("hunter_7_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_6": {"on_place": _removes("hunter_6_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_4": {"on_place": _removes("hunter_4_max")},   # the mana prototype (Martin, 2026-11-20)
-    "hunter_2": {"on_place": _removes("hunter_2_max")},   # the mana prototype (Martin, 2026-11-20)
-    "giant_hunter": {"on_place": _removes()},   # the mana prototype (Martin, 2026-11-20)
-    "scout_2": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
-    "scout_3": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
-    "scout_4": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
-    "scout_5": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
-    "scout_6": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
-    "scout_7": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
-    "scout_8": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
-    "scout_10": {"on_place": _draw1},   # the mana prototype's cantrips (Martin, 2026-11-20)
-    "winged_scout_3": {"on_place": _draw1},
-    "winged_scout_4": {"on_place": _draw1},
-    "winged_scout_5": {"on_place": _draw1},
-    "winged_scout_6": {"on_place": _draw1},
-    "winged_scout_7": {"on_place": _draw1},
-    "winged_scout_8": {"on_place": _draw1},
-    "winged_scout_10": {"on_place": _draw1},
-    "magpie": {"on_place": _magpie_place},
-    "black_mamba": {"on_place": _removes("black_mamba_max")},
-    "mosquito": {"on_place": _mosquito_place},
-    "raven": {"on_place": _raven_place},
-    "bird_egg": {"on_place": _bird_egg_place},
-    "snake_egg": {"on_place": _snake_egg_place},
-    # Fish (Mackerel and Tuna are anthems; the legendary Jellyfish an aura; the legendary Piranha a static).
-    "tuna_legend": {"on_place": _tuna_legend_place},
-    "manta_ray_legend": {"on_end_of_turn": _manta_legend_eot},
-    "swordfish": {"on_place": _swordfish_place},
-    "barracuda": {"on_place": _barracuda_place},
-    "piranha_legend": {"on_place": _piranha_legend_place},
-    "manta_ray": {"on_ally_covered": _manta_ally_covered},
-    "remora": {"on_place": _remora_place},
-    "cod": {"on_place": _cod_place},
-    "sardine": {"on_place": _fill},
-    "sunfish": {"on_place": _spawns_beside("baby_fish")},
-    # Food Aggro.
-    "capybara_legend": {"on_place": _repeat_legend_place},
-    "vole": {"on_place": _vole_place},
-    "hamster": {"on_draw_event": _hamster_draw_event},
-    "macaque_legend": {"on_place": _refill_legend_place},
-    "rat_legend": {"on_place": _rat_king_place},
-    "chipmunk_legend": {"on_place": _chipmunk_legend_place},
-    "flying_squirrel": {"on_place": _flying_squirrel_place},
-    "meerkat": {"on_enemy_placed_adjacent": _meerkat_enemy_placed},
-    "beaver": {"on_place": _beaver_place},
-    "electric_eel": {"on_place": _electric_eel_place},
-    "krill": {"on_place": _krill_place},
-    "dormouse": {"on_end_of_turn": _dormouse_eot},
-    "squirrel": {"on_place": _gains("squirrel_food")},
-    "chipmunk": {"on_place": _chipmunk_place},
-    "gopher": {"on_place": _conditional("gopher", _removes("gopher_max"))},
-    "mara": {"on_place": _conditional("mara", _draws("mara_draw"))},
-    "groundhog": {"on_start_of_turn": _gains("groundhog_food")},
-    "rodent_legend": {"on_place": _rodent_legend_place},
-    # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
-    "octopus_legend_2": {"on_place": _chameleon_legend_2_place},
-    "squirrel_legend": {"on_place": _otk_squirrel_place},
-    "chameleon_legend": {"on_place": _chameleon_legend_place},
-    "chameleon": {"on_place": _chameleon_place},
-    "golden_orb_weaver": {"on_enemy_placed_adjacent": _orb_weaver_enemy_placed},
-    "black_bear": {"on_place": _black_bear_place},
-    "grizzly_bear": {"on_place": _grizzly_place},
-    "stag_beetle": {"on_place": _stag_beetle_place},
-    "owl": {"on_place": _owl_place},
-    # Giants (Hungry and Titan are keywords).
-    "rhinoceros_legend": {"on_place": _removes()},            # the horn: one adjacent enemy, no cap (Martin, 2026-10-26)
-    "tortoise_legend": {"on_end_of_turn": _tortoise_legend_eot},
-    "sperm_whale_legend": {"on_end_of_turn": _sperm_whale_legend_eot},
-    "rhinoceros": {"on_place": _rhinoceros_place},
-    "elephant_legend": {"on_place": _elephant_legend_lands, "on_roam": _elephant_legend_roam},
-    "hippopotamus": {"on_enemy_placed_adjacent": _hippo_enemy_placed},
-    "whale_shark": {"on_end_of_turn": _draw1},
-    "dung_beetle_legend_form2": {"on_place": _dung_beetle_form_place(2)},
-    "dung_beetle_legend_form3": {"on_place": _dung_beetle_form_place(3)},
-    "dung_beetle_legend_form4": {"on_place": _dung_beetle_form_place(4)},
-    "oxpecker": {"on_place": _oxpecker_place},
-    "anteater": {"on_place": _anteater_place},
-    "dung_beetle": {"on_end_of_turn": _dung_beetle_eot},
-    "sloth": {"on_place": _sloth_place},
-    # Handlock (Grizzly Bear is an anthem; the Eagles' sharing lives in _gain_in_hand, the mate in state.ensure_mates).
-    "baboon_legend": {"on_start_of_turn": _baboon_legend_sot},
-    "orangutan_legend": {"on_place": _orangutan_legend_place},
-    "bee_legend_2": {"on_place": _bee_legend_2_place},
-    "butterfly_legend": _BUTTERFLY_GROWS,
-    "butterfly_legend_caterpillar": {"on_place": _draw1, **_BUTTERFLY_GROWS},
-    "butterfly_legend_chrysalis": {"on_place": _draw_then_give_one, **_BUTTERFLY_GROWS},
-    "butterfly_legend_butterfly": {"on_place": _butterfly_stage_place(None, "butterfly_legend_stage4_grant"),
-                                    **_BUTTERFLY_GROWS},
-    "butterfly_legend_monarch": {"on_place": _butterfly_stage_place("butterfly_legend_stage5_draw",
-                                                                       "butterfly_legend_stage5_grant")},
-    "hummingbird": {"on_place": _draws("hummingbird_draw")},
-    "capuchin": {"on_place": _draws("capuchin_draw")},   # Roar: draw 2 cards (Martin, 2026-11-16)
-    "macaque": {"on_place": _macaque_place},
-    "orangutan": {"on_place": _orangutan_place},
-    "tarsier": {"on_place": _tarsier_place},
-    "chimpanzee": {"on_place": _chimpanzee_place},
-    "baboon": {"on_place": _baboon_place},
-    "stork": {"on_place": _stork_place},
-    "caterpillar": {"on_gain_in_hand": _caterpillar_grows},
-    "gorilla": {"on_place": _gorilla_place},
-    # Hoofed (the legendary Wildebeest and Boar change region income; the legendary Giraffe reveals; Moose, Giraffe and
-    # Boar are anthems).
-    "zebra_legend": {"on_place": _zebra_legend_place},
-    "deer_legend": {"on_place": _deer_legend_place, "on_friendly_flee": _deer_legend_friendly_flee, "on_flee": _deer_legend_own_flee},
-    "honey_badger": {"on_place": _removes(min_attr="honey_badger_min")},
-    "okapi": {"on_start_of_turn": _okapi_graze_draw, "on_end_of_turn": _okapi_graze_draw},
-    "zebra": {"on_flee": _zebra_flee},
-    "warthog": {"on_place": _warthog_place},
-    "albatross": {"on_place": _albatross_place},
-    "boar": {"on_enemy_placed_adjacent": _boar_enemy_placed},
-    "gazelle": {"on_place": _gazelle_place},
-    "wildebeest": {"on_end_of_turn": _wildebeest_eot},
-    "deer": {"on_place": _spawns_beside("fawn")},
-    # Impala (Martin, 2026-10-29): "Flee. Roar: play a Baby Impala." The calf is made and played at once, a full placement
-    # with its own Roar; one that has no legal place is gone. The calf: "Flee. Roar: if this is grazing, draw a card."
-    "impala": {"on_place": _impala_place},
-    "rabbit": {"on_place": _rabbit_place},
-    "baby_impala": {"on_place": _okapi_graze_draw},
-    # The pool (Great White Shark's Reach is a static; Raksha, Verminus are anthems; Coyote, Cougar statics).
-    "octopus": {"on_place": _octopus_ink_place},
-    "macaw": {"on_place": _macaw_place},
-    "woodpecker": {"on_place": _woodpecker_place},
-    "sperm_whale": {"on_place": _remove_all_adjacent},
-    "butterfly": {"on_place": _draw_then_give_one},
-    "cuckoo": {"on_place": _cuckoo_place},
-    "cuckoo_egg": {"on_draw": _cuckoo_egg_drawn},
-    "golden_egg": {"on_draw": _golden_egg_drawn},
-    "opossum": {"on_place": _opossum_place},
-    "fox_legend": {"on_place": _alpha_place},
-    "viper": {"on_place": _viper_place},
-    "andean_condor": {"on_place": _andean_condor_place},
-    "dingo": {"on_end_of_turn": _dingo_eot},
-    # The tutorial's own cards, as they were when it was written.
-    "tutorial_lynx": {"on_place": _conditional("tutorial_lynx", _draw1)},
-    "tutorial_chipmunk": {"on_place": _tutorial_chipmunk_place},
+    **{cid: {"on_place": _bite(n)} for cid, n in BITES.items()},
+    **{cid: {"on_place": _draw_a_card} for cid in CANTRIPS},
 }
 
-# The actions prototype (branch actions): the eight Action animals, each its "on_act" hook (legal_acts, do_act).
-EFFECTS.update({
-    "food_maker": {"on_act": _food_maker_act},
-    "card_burner": {"on_act": _card_burner_act},
-    "refueler": {"on_act": _refueler_act},
-    "trainer": {"on_act": _trainer_act},
-    "flight_giver": {"on_act": _flight_giver_act},
-    "lookout": {"on_act": _lookout_act},
-    "food_thief": {"on_act": _food_thief_act},
-    "protector": {"on_act": _protector_act},
-})
 
-
-# ===================================================================== Leaders
-#
-# The leaders prototype (branch leaders; engine/leaders.py): a deck's leader sits on its den all match. A hero power or a
-# once-per-game power is a LeaderAction (rules._top_level_actions) costing one action; the passives hook in where they
-# act: gain_food (Lord Bumbleton), _fire_remove_event (Grimm's count), _push_cat_leader (Queen Adira and King Theron, on a
-# Cat's cover), start_of_turn (Xanthe's stage), end_of_turn (Queen Solenia), strength.py (Lady Juliette, Arne, [GORILLA])
-# and do_placement (what a play carries).
+# ===================================================================== leaders
 
 def _leads(state: GameState, player: str, leader_id: str) -> bool:
-    lead = state.leaders.get(player) if state.leaders else None
+    lead = state.leaders.get(player)
     return lead is not None and lead["id"] == leader_id
 
 
-def den_connected_allies(state: GameState, player: str) -> list:
-    """The crossroads of `player`'s top animals connected to their den through their own animals (Yuki's leader)."""
-    seen = {c for c in state.game_map.hq_front(player) if state.owner_of(c) == player}
-    queue = deque(sorted(seen))
-    while queue:
-        for nb in state.game_map.neighbors(queue.popleft()):
-            if nb not in seen and state.owner_of(nb) == player:
-                seen.add(nb)
-                queue.append(nb)
-    return sorted(seen)
-
-
-def _then_guard(state, step, cr):
-    """Yuki's leader: the chosen animal can't be covered until its player's next turn (statics.can_cover)."""
-    top = state.top_unit(cr)
-    if top is not None and top.owner == step["chooser"]:
-        top.locked_until_turn = state.turn_counter + 2
-        state.emit("guard", cr=cr, iid=top.iid, card=top.card_id, owner=top.owner)
-
-
-def ash_food(state: GameState, player: str) -> int:
-    """Ash's leader at Dusk: 1 food for each Poison, Spikes, Armor and Stealth `player`'s top animals carry now (printed or
-    given by a neighbour; Spikes only while unspent), double for an animal adjacent to an enemy."""
-    n, enemy, cfg = 0, other_player(player), state.config
-    for cr in sorted(state.board):
-        top = state.board[cr][-1]
-        if top.owner != player:
-            continue
-        kws = sum(1 for kw in ("Poison", "Spikes", "Armor", "Stealth")
-                  if statics.has_keyword(state, top, kw, cr) and not (kw == "Spikes" and top.retaliation_used))
-        contact = any(state.owner_of(nb) == enemy for nb in state.game_map.neighbors(cr))
-        n += kws * cfg.ash_leader_food * (cfg.ash_leader_contact if contact else 1)
-    return n
-
-
-def grimm_draws(state: GameState, lead: dict) -> int:
-    """Grimm's power: 2 cards, one more for every 5 enemies removed from the board this match."""
-    return state.config.grimm_leader_draw + lead["kills"] // state.config.grimm_leader_per
-
-
 def leader_usable(state: GameState, player: str) -> bool:
-    """Whether `player` may press their den now (the caller checks the turn has an action left): a power, not spent,
-    that would do something."""
+    """Whether `player`'s leader has a power that would do something now (the caller checks the mana)."""
     lead = state.leaders.get(player)
-    if lead is None:
+    if lead is None or L.kind_of(lead["id"]) != "power":
         return False
-    lid, kind = lead["id"], L.kind_of(lead["id"])
-    if kind == "passive" or (kind == "once" and lead["spent"]):
-        return False
-    deck = state.decks[player]
-    if lid in (L.GRIMM, L.BABAJI, L.SAGE):
-        return bool(deck)
-    if lid == L.YUKI:
-        return lead["stage"] < state.config.yuki_leader_uses and bool(den_connected_allies(state, player))
-    if lid == L.MELISSIA:
-        return any(_matches(state.cards[cid], L.MELISSIA_SPEC) for cid in deck)
-    if lid == L.XANTHE:
-        stage = lead["stage"]
-        if stage == 1:
-            return bool(deck)
-        if stage in (3, 4):
-            return bool(deck) or bool(state.hands[player])
-        return False
-    return False
+    return bool(state.decks[player])        # the Sage draws
 
 
 def do_leader(state: GameState, player: str) -> None:
-    """`player` presses their den: the leader's power (the caller has paid the action). Its steps name the leader as
-    their source, so every choice inside it says who asks."""
+    """`player` uses their leader's power (the caller has paid for it)."""
     lead = state.leaders.get(player)
     if lead is None:
         raise EngineError(f"{player} has no leader")
-    lid, cfg = lead["id"], state.config
-    state.emit("leader_power", player=player, card=lid)
-    src = {"by_card": lid}
-    if lid == L.SAGE:                                # the mana prototype's Sage: draw a card
-        state.effect_stack.append({"op": "draw", "player": player, "n": 1, **src})
-    elif lid == L.GRIMM:
-        state.effect_stack.append({"op": "draw", "player": player, "n": grimm_draws(state, lead), **src})
-    elif lid == L.MELISSIA:
-        state.effect_stack.append({"op": "scout", "player": player, "spec": L.MELISSIA_SPEC, **src})
-    elif lid == L.BABAJI:
-        state.effect_stack.append({"op": "scout", "player": player, "spec": None, "grant": cfg.babaji_leader_grant, **src})
-    elif lid == L.YUKI:
-        lead["stage"] += 1
-        _push_choose(state, player, den_connected_allies(state, player), "guard", **src)
-    elif lid == L.XANTHE:
-        lead["spent"] = True
-        stage = lead["stage"]
-        if stage == 3:      # "Draw a card, then give an animal in your hand +1 strength."
-            state.effect_stack.append({"op": "hand_grant_one", "player": player, "amount": cfg.xanthe_leader_grant, **src})
-        elif stage == 4:    # "Draw a card and give all animals in your hand +1 strength."
-            state.effect_stack.append({"op": "hand_grant_all", "player": player, "amount": cfg.xanthe_leader_grant, **src})
-        state.effect_stack.append({"op": "draw", "player": player, "n": 1, **src})
+    state.emit("leader_power", player=player, card=lead["id"])
+    if lead["id"] == L.SAGE:
+        state.effect_stack.append({"op": "draw", "player": player, "n": 1, "by_card": L.SAGE})
     else:
-        raise EngineError(f"{lid!r} has no power to use")
-
-
-# --- the leaders' own cards, as they change with this prototype -------------------------------------------------
-
-def _juliette_place(state, unit, cr):
-    """Lady Juliette: "Roar: if your starting deck has no animals of strength 4 or more, choose one of three small animals
-    and play it." Three of the twelve at random, made for the occasion (none taken from the deck)."""
-    p = unit.owner
-    if not small_starting_deck(state, p, unit.card_id):
-        return
-    shown = state.rng.sample(list(L.JULIETTE_WISHES), state.config.juliette_wish_shown)
-    _push_choose(state, p, shown, "wish")
-
-
-def _then_wish(state, step, card_id):
-    """The wished animal is made and played: a free placement on a legal crossroad of the player's choice, its Roar
-    and all. One with nowhere to go is gone."""
-    state.effect_stack.append({"op": "play_named", "chooser": step["chooser"], "card_id": card_id, "make": True})
-
-
-def _bumbleton_place(state, unit, cr):
-    """Lord Bumbleton: "Roar: gain 2 food for each time you have gained food this game." """
-    _push_gain(state, unit.owner, state.config.bumbleton_card_per * state.food_gains.get(unit.owner, 0))
-
-
-def _solenia_place(state, unit, cr):
-    """Queen Solenia: "Roar: gain 3 food for each animal you control. Your opponent loses the same amount." (Never below
-    0: an opponent with less loses what they have.)"""
-    n = state.config.solenia_card_per * _control_tag_count(state, unit.owner)
-    if n:
-        gain_food(state, unit.owner, n)
-        lose_food(state, other_player(unit.owner), n, card=unit.card_id)
-
-
-def _babaji_allies(state, player, cr) -> list:
-    """The allies next to `cr` Babaji's Roar may return (Armor resists a return, its owner's too). Another Babaji
-    included: two return and replay each other until the turn's action cap ends the turn."""
-    return [nb for nb in sorted(state.game_map.neighbors(cr))
-            if (top := state.top_unit(nb)) and top.owner == player
-            and statics.can_be_removed(state, top, nb)]
-
-
-def _babaji_place(state, unit, cr):
-    """Babaji: "Roar: return an adjacent ally to your hand, give it +2 strength, and play it." (Echo repeats it.)"""
-    _push_choose(state, unit.owner, _babaji_allies(state, unit.owner, cr), "babaji", amount=state.config.babaji_card_grant)
-
-
-def _then_babaji(state, step, cr):
-    top = state.top_unit(cr)
-    if top is None or top.owner != step["chooser"] or not statics.can_be_removed(state, top, cr):
-        return
-    inst = _bounce(state, cr, top)
-    if inst is None:
-        return
-    state.effect_stack.append({"op": "play_iid", "chooser": step["chooser"], "iid": inst.iid})   # then it is played...
-    _grant(state, [inst.iid], step["amount"])                                                    # ...after the +2
-
-
-def _op_play_iid(state, step):
-    """Play this very card from hand, free, on a legal crossroad of the player's choice (its Roar happens): Babaji's
-    replay. Mandatory when it has a legal place; one with none stays in hand."""
-    if "place_action" in step:
-        pa = step["place_action"]
-        if pa != SKIP:
-            do_placement(state, step["chooser"], pa["card_id"], tuple(pa["target"]), pa.get("iid"))
-        return None
-    player = step["chooser"]
-    inst = next((u for u in state.hands[player] if u.iid == step["iid"]), None)
-    if inst is None:
-        return None
-    placements = []
-    for pl in legal_placements(state, player, {inst.card_id}):
-        rep = _find_instance(state, pl.iid) if pl.iid is not None else None
-        if rep is None or rep.strength_counter == inst.strength_counter:    # a copy of the same strength is the same card
-            placements.append(pl)
-    if not placements:
-        return None
-    return PendingRequest("place", player, optional=False, placements=[_place_dict(p) for p in placements])
-
-
-OPS["play_iid"] = _op_play_iid
-
-
-def _xanthe_evolve(state, inst, _):
-    """Xanthe's card: "Whenever this gains strength, evolve." (No Dawn any more.)"""
-    i = BUTTERFLY_STAGES.index(inst.card_id)
-    if i + 1 < len(BUTTERFLY_STAGES):
-        _transform(state, inst, BUTTERFLY_STAGES[i + 1])
-
-
-def _monarch_place(state, unit, cr):
-    """Xanthe, the Monarch: "Roar: draw 2 cards, then give 2 animals in your hand +2 strength." (Two different ones, the
-    player's pick; all of them when there are two or fewer.)"""
-    cfg = state.config
-    state.effect_stack.append({"op": "hand_grant_count", "player": unit.owner, "amount": cfg.monarch_grant,
-                               "count": cfg.monarch_count})
-    _push_draw(state, unit.owner, cfg.butterfly_legend_stage5_draw)
-
-
-def _op_hand_grant_count(state, step):
-    hand = _hand_iids(state, step["player"])
-    if len(hand) <= step["count"]:
-        _grant(state, hand, step["amount"])
-    else:
-        _push_choose(state, step["player"], hand, "hand_grant", amount=step["amount"], count=step["count"],
-                     by_card=step.get("by_card"))
-    return None
-
-
-OPS["hand_grant_count"] = _op_hand_grant_count
-
-
-def _gorilla_legend_2_place(state, unit, cr):
-    """[GORILLA]: "Roar: the next animal you play has this animal's strength." The strength he has now, waiting across
-    turns for your next play, which it sets to exactly that number (strength.play_adjustment)."""
-    state.next_strength[unit.owner] = effective_strength(state, unit)
-
-
-THEN["wish"] = _then_wish
-THEN["babaji"] = _then_babaji
-THEN["guard"] = _then_guard
-
-EFFECTS.update({
-    "bee_legend_2": {"on_place": _juliette_place},
-    "bumblebee_legend": {"on_place": _bumbleton_place},
-    "army_ant_legend": {"on_place": _solenia_place},
-    "baboon_legend": {"on_place": _babaji_place},
-    "butterfly_legend": {"on_gain": _xanthe_evolve},
-    "butterfly_legend_caterpillar": {"on_place": _draw1, "on_gain": _xanthe_evolve},
-    "butterfly_legend_chrysalis": {"on_gain": _xanthe_evolve},
-    "butterfly_legend_butterfly": {"on_place": _draw_then_give_one, "on_gain": _xanthe_evolve},
-    "butterfly_legend_monarch": {"on_place": _monarch_place},
-    "caterpillar": {"on_gain": _caterpillar_grows},     # "When this gains strength, ...": in hand or on the board
-    "gorilla_legend_2": {"on_place": _gorilla_legend_2_place},
-})
+        raise EngineError(f"{lead['id']!r} has no power to use")

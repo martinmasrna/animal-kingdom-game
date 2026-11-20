@@ -2,6 +2,7 @@
 challenged and accept into one match, a declined challenge answers 409, removal ends the friendship."""
 
 import asyncio
+from animal_kingdom.tests._helpers import DECK, SLUG  # noqa: F401
 
 from aiohttp.test_utils import TestClient, TestServer
 
@@ -22,36 +23,36 @@ def test_friends_by_link_challenge_accept_decline_and_remove(monkeypatch):
             mine = (await (await c.get("/api/friends", headers=ha)).json())["friends"]
             assert [f["id"] for f in mine] == [b["profile"]["id"]] and not mine[0]["online"]
             # offline: no challenge
-            r = await c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": "giants"}, headers=ha)
+            r = await c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": DECK}, headers=ha)
             assert r.status == 409
             # B comes online; A challenges; B is told and accepts with its deck: one match, both seats
             ws = await c.ws_connect(f"/ws/presence?key={b['code']}")
             assert (await ws.receive_json(timeout=2))["t"] == "build"   # the server's client build, for a stale tab to reload
             await asyncio.sleep(0.05)
             assert (await (await c.get("/api/friends", headers=ha)).json())["friends"][0]["online"]
-            ask = asyncio.ensure_future(c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": "giants"}, headers=ha))
+            ask = asyncio.ensure_future(c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": DECK}, headers=ha))
             msg = await ws.receive_json(timeout=2)
             assert msg["t"] == "challenge" and msg["from"] == peek["name"].split("#")[0] and "deck" not in msg   # the only friend so named: no tag
-            mb = await (await c.post(f"/api/challenge/{msg['id']}/answer", json={"accept": True, "deck": "cats"}, headers=hb)).json()
+            mb = await (await c.post(f"/api/challenge/{msg['id']}/answer", json={"accept": True, "deck": DECK}, headers=hb)).json()
             ma = await (await ask).json()
             assert ma["id"] == mb["id"] and (ma["seat"], mb["seat"]) == ("A", "B")
-            assert server.hub.matches[ma["id"]].seats["B"].deck == "cats"
+            assert server.hub.matches[ma["id"]].seats["B"].deck.startswith("custom_")
             # a declined challenge answers 409
-            ask = asyncio.ensure_future(c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": "giants"}, headers=ha))
+            ask = asyncio.ensure_future(c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": DECK}, headers=ha))
             msg = None
             while not msg or msg["t"] != "challenge":
                 msg = await ws.receive_json(timeout=2)
             await c.post(f"/api/challenge/{msg['id']}/answer", json={"accept": False}, headers=hb)
             assert (await ask).status == 409
             # withdrawn: the friend's piece goes, and a late accept finds it gone
-            ask = asyncio.ensure_future(c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": "giants"}, headers=ha))
+            ask = asyncio.ensure_future(c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": DECK}, headers=ha))
             msg = None
             while not msg or msg["t"] != "challenge":
                 msg = await ws.receive_json(timeout=2)
             await c.delete("/api/challenge", headers=ha)
             gone = await ws.receive_json(timeout=2)
             assert gone == {"t": "challenge_gone", "id": msg["id"]} and (await ask).status == 409
-            assert (await c.post(f"/api/challenge/{msg['id']}/answer", json={"accept": True, "deck": "giants"}, headers=hb)).status == 410
+            assert (await c.post(f"/api/challenge/{msg['id']}/answer", json={"accept": True, "deck": DECK}, headers=hb)).status == 410
             # removed: friends no more, both ways
             await c.delete(f"/api/friends/{a['profile']['id']}", headers=hb)
             assert (await (await c.get("/api/friends", headers=ha)).json())["friends"] == []
@@ -104,7 +105,7 @@ def test_the_match_you_are_playing_can_be_rejoined_from_anywhere(monkeypatch):
             assert await (await c.get("/api/current", headers=ha)).json() == {}
             await c.post("/api/match", json={"tutorial": 1}, headers=ha)   # a lesson is never brought back
             assert await (await c.get("/api/current", headers=ha)).json() == {}
-            m = await (await c.post("/api/match", json={"deck": "cats", "bot": {"level": "easy", "deck": "giants"}}, headers=ha)).json()
+            m = await (await c.post("/api/match", json={"deck": DECK, "bot": True}, headers=ha)).json()
             match = server.hub.matches[m["id"]]
             if match.phase != "playing":
                 match.ready("A")

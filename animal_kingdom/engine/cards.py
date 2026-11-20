@@ -1,10 +1,5 @@
-"""Card registry: load static card data from data/cards.json and validate it.
-
-This module owns only *static* data (stats + printed text). Card *behavior* (effect
-handlers, static modifiers, dynamic strength) is bound in later milestones (effects.py,
-statics.py, strength.py) keyed by `Card.id`; the JSON↔logic split keeps a future TS
-client able to read stats/text from JSON while logic stays in Python (handoff §6.3).
-"""
+"""The card registry: static card data from data/cards.json, validated on load. Behaviour lives in effects.py (keyed by
+card id), statics.py and strength.py."""
 
 from __future__ import annotations
 
@@ -12,53 +7,18 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from .resources import load_bundled_json
-from .stars import STAR_DEFAULTS, STAR_LEVELS, merge_rarities
 
-# Allowed value domains (validation). Reworked 98-design pool: README decisions B-E.
-RARITIES = {"common", "rare", "legendary"}
-KEYWORDS = {"Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "Roam", "Reach", "Hungry", "Titan",
-            "Flee", "Wild", "Echo"}  # static keywords only (Echo: the leaders prototype);
-# Roar/Dawn/Dusk/Deathrattle are trigger prefixes printed in `text`, not stored keywords. A numbered keyword carries its
-# number in its own field: Hungry 3 is {"keywords": ["Hungry"], "hungry": 3}. Reach has none (its distance is config.reach).
-# Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
-TAGS = {
-    "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
-    "Arachnid", "Bear", "Megafauna", "Egg", "Fish", "Primate", "Hoofed",   # species families
-    "Queen", "Worker",                                # roles
-    "Soldier", "Nurse",                               # castes (below)
-    "Beetle",                                         # a family added after the networks were trained (2026-10-26)
-}
-# Castes only card text reads (Melissia draws by them; Martin's sheet, 2026-10-24). The bots'
-# trained networks take one column per tag in BOT_TAGS, so a tag added here stays out of the features until a retrain.
-CASTE_TAGS = frozenset({"Soldier", "Nurse"})
-BOT_TAGS = frozenset(TAGS - CASTE_TAGS - {"Beetle"})
-# The keywords the bots' trained networks take a column for: Echo (the leaders prototype) came after them.
-BOT_KEYWORDS = frozenset(KEYWORDS - {"Echo"})
-DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count",  # Python, Egg Eater
-                     # the Shades (Martin, 2026-11-20): +1 for each card in your hand, ally, enemy, food of yours, animal in your opponent's Remove Pile
-                     "hand_count", "ally_count", "enemy_count", "food_count", "opp_removed_count"}
-
-# A card's status. Cards are cards and decks are decks (Martin, 2026-10-19): a card belongs to no deck, and the
-# decks the game ships (decklists.json: the starter decks a new profile gets, the decks the bots play) are lists over
-# the collectible cards, read by decks.py.
-# "collectible" = a card a deck may hold: the starter decks' cards and the bench (finished cards in no starter deck).
-# "reserve" = shelved designs kept out of play (open designs, a later habitat's cards, the sim tools' calibration bodies).
-# "tutorial" = the tutorial's fixed deal, cards as they were when it was written.
-# "token" = made by effects (Baby Turtle, a Stork's younglings, the Butterfly's stages); never in a decklist.
-# A "planned" record in cards.json (an animal and habitat waiting for a design) is no card yet: the loader skips it.
-STATUSES = {"collectible", "reserve", "tutorial", "token"}
+RARITIES = {"common", "legendary"}
+KEYWORDS = {"Flight", "Armor", "Stealth", "Spikes", "Poison", "Hungry"}
+# A dynamic strength: the Shades' "+1 for each card in your hand, ally, enemy, food of yours, animal in your opponent's
+# Remove Pile".
+DYNAMIC_STRENGTHS = {"hand_count", "ally_count", "enemy_count", "food_count", "opp_removed_count"}
+# "collectible": a deck may hold it. "reserve": benched, out of every deck. A "planned" record is no card yet: the loader
+# skips it.
+STATUSES = {"collectible", "reserve"}
 PLANNED = "planned"
 
-# The decks the game ships (decklists.json), in menu order:
-# slug, name, cover (the card whose art faces it), starter (a new profile gets it), bot (the bots play it), cards
-# (id: copies). Starter slugs align to docs/cards/decks/ filenames.
-DECKLISTS: list[dict] = sorted(load_bundled_json("decklists.json")["decks"], key=lambda d: d.get("order", 0))
-STARTER_DECKS: list[dict] = [d for d in DECKLISTS if d.get("starter")]   # none while the cards change (Martin, 2026-10-29: back once they settle)
-DECK_SLUGS = {d["slug"] for d in DECKLISTS}               # every shipped deck: the sims' field and the gauntlet's
-
-# Copy limits by rarity. The stars prototype (engine/stars.py): two kinds of card, a legendary (one copy) and every other
-# (two copies); a rare is read as a common, so "rare" here only covers data loaded without the merge.
-COPY_LIMITS = {"common": 2, "rare": 2, "legendary": 1}
+COPY_LIMITS = {"common": 2, "legendary": 1}
 
 
 class CardDataError(ValueError):
@@ -67,27 +27,15 @@ class CardDataError(ValueError):
 
 @dataclass(frozen=True)
 class Card:
-    """Static data for one card design (one record in cards.json)."""
-
     id: str
     name: str
-    status: str                    # collectible / reserve / tutorial / token (STATUSES)
+    status: str
     rarity: str
-    tags: frozenset[str]
-    base_strength: int | str       # int 0-10, or the string "dynamic"
+    base_strength: int | str       # an int, or "dynamic"
+    cost: int
     keywords: frozenset[str] = field(default_factory=frozenset)
-    dynamic_strength: Optional[str] = None  # rule name when base_strength == "dynamic"
-    food_cost: int = 0             # placement cost; only on "Costs X food" cards
+    dynamic_strength: Optional[str] = None
     text: str = ""
-    hungry: int = 0                # Hungry N: eats up to N food at the start of your turn, -1 strength per food short (0: not Hungry)
-    unnamed: bool = False          # a legendary still waiting for its name: `name` shows its species meanwhile
-    mate: Optional[str] = None     # the card it pairs with in hand (the Eagles): a buff to either counts for both
-    habitat: str = ""              # the habitat (set) the card belongs to; display only, no rule reads it
-    related: tuple[str, ...] = ()  # the cards it makes, shown beside it when read large; display only
-    evolves: bool = False          # its related cards are what it becomes, in order (display only)
-    stars: int = 0                 # its level (STAR_LEVELS): what one copy costs of a deck's star budget
-    cost: Optional[int] = None     # its mana cost in the mana ruleset (Config.mana); None: not playable in a mana deck
-    ruleset: Optional[str] = None  # the one ruleset whose collection holds it (the mana prototype's Wisps, 2026-11-20); None: the default's
 
     @property
     def is_dynamic(self) -> bool:
@@ -95,143 +43,53 @@ class Card:
 
     @property
     def collectible(self) -> bool:
-        """Whether a default-rules deck may hold this card (not a reserve design, the tutorial's or a token, nor a card of
-        another ruleset's own collection: the mana prototype's)."""
-        return self.status == "collectible" and self.ruleset is None
-
-    def in_collection(self, ruleset: Optional[str]) -> bool:
-        """Whether a deck in `ruleset` (None: the default rules) may hold this card: each ruleset its own collection."""
-        return self.status == "collectible" and self.ruleset == (ruleset if ruleset == "mana" else None)
-
-    @property
-    def has_roar(self) -> bool:
-        """Whether the printed rules text declares an on-placement Roar."""
-        return "Roar:" in self.text
-
-    def has_keyword(self, kw: str) -> bool:
-        return kw in self.keywords
-
-    def has_tag(self, tag: str) -> bool:
-        return tag in self.tags
+        return self.status == "collectible"
 
 
 def validate_card_record(rec: dict) -> None:
-    """Check that a raw card record is well-formed; raise CardDataError on the first problem.
-
-    Separate from construction (parse, don't validate): the loader is the trust boundary,
-    so a constructed Card is always valid and the engine needs no defensive checks.
-    Directly unit-testable on its own.
-    """
-    required = ("id", "name", "status", "rarity", "tags", "base_strength")
-    for key in required:
+    """Raise CardDataError on the first problem with a raw card record."""
+    for key in ("id", "name", "status", "rarity", "base_strength", "cost"):
         if key not in rec:
             raise CardDataError(f"card {rec.get('id', rec)!r} missing required field {key!r}")
-    # keywords/text/dynamic_strength/food_cost are optional and default during construction.
-
     cid = rec["id"]
     if rec["rarity"] not in RARITIES:
         raise CardDataError(f"card {cid!r}: bad rarity {rec['rarity']!r}, expected one of {sorted(RARITIES)}")
     if rec["status"] not in STATUSES:
         raise CardDataError(f"card {cid!r}: bad status {rec['status']!r}, expected one of {sorted(STATUSES)}")
-
-    tags = rec["tags"]
-    if not isinstance(tags, list):
-        raise CardDataError(f"card {cid!r}: tags must be a list, got {tags!r}")
-    for tag in tags:
-        if tag not in TAGS:
-            raise CardDataError(f"card {cid!r}: unknown tag {tag!r}, expected subset of {sorted(TAGS)}")
-
     strength = rec["base_strength"]
     if strength == "dynamic":
-        ds = rec.get("dynamic_strength")
-        if ds not in DYNAMIC_STRENGTHS:
-            raise CardDataError(
-                f"card {cid!r}: base_strength 'dynamic' needs a valid 'dynamic_strength' "
-                f"(got {ds!r}, expected one of {sorted(DYNAMIC_STRENGTHS)})"
-            )
-    elif isinstance(strength, bool) or not isinstance(strength, int):
-        raise CardDataError(f"card {cid!r}: base_strength must be an int or 'dynamic', got {strength!r}")
-    elif strength < 0:
-        raise CardDataError(f"card {cid!r}: base_strength {strength} is below 0")
-
-    food_cost = rec.get("food_cost", 0)
-    if isinstance(food_cost, bool) or not isinstance(food_cost, int) or food_cost < 0:
-        raise CardDataError(f"card {cid!r}: food_cost must be an int >= 0, got {food_cost!r}")
-
+        if rec.get("dynamic_strength") not in DYNAMIC_STRENGTHS:
+            raise CardDataError(f"card {cid!r}: base_strength 'dynamic' needs a 'dynamic_strength' of {sorted(DYNAMIC_STRENGTHS)}")
+    elif isinstance(strength, bool) or not isinstance(strength, int) or strength < 0:
+        raise CardDataError(f"card {cid!r}: base_strength must be an int >= 0 or 'dynamic', got {strength!r}")
     for kw in rec.get("keywords", []):
         if kw not in KEYWORDS:
-            raise CardDataError(f"card {cid!r}: unknown keyword {kw!r}, expected subset of {sorted(KEYWORDS)}")
-
-    hungry = rec.get("hungry")
-    if hungry is not None and (isinstance(hungry, bool) or not isinstance(hungry, int) or hungry < 1):
-        raise CardDataError(f"card {cid!r}: hungry must be a positive int, got {hungry!r}")
-    # the mana prototype's Hungry has no number: it must land on an enemy it beats, and its removal gains food
-    if ("Hungry" in rec.get("keywords", [])) != (hungry is not None) and rec.get("ruleset") != "mana":
-        raise CardDataError(f"card {cid!r}: the Hungry keyword and its `hungry` number go together")
-
-    stars = rec.get("stars")
-    if stars is not None and (isinstance(stars, bool) or stars not in STAR_LEVELS):
-        raise CardDataError(f"card {cid!r}: stars must be one of {list(STAR_LEVELS)}, got {stars!r}")
-
-    cost = rec.get("cost")
-    if cost is not None and (isinstance(cost, bool) or not isinstance(cost, int) or not 0 <= cost <= 10):
+            raise CardDataError(f"card {cid!r}: unknown keyword {kw!r}, expected one of {sorted(KEYWORDS)}")
+    cost = rec["cost"]
+    if isinstance(cost, bool) or not isinstance(cost, int) or not 0 <= cost <= 10:
         raise CardDataError(f"card {cid!r}: cost must be a whole number from 0 to 10, got {cost!r}")
-
-    if rec.get("ruleset") not in (None, "mana"):
-        raise CardDataError(f"card {cid!r}: ruleset must be 'mana' or absent, got {rec['ruleset']!r}")
-
-    if "reach" in rec:
-        raise CardDataError(f"card {cid!r}: Reach has no number (every Reach lands two crossroads out, config.reach)")
 
 
 def _build_card(rec: dict) -> Card:
-    return Card(
-        id=rec["id"],
-        name=rec["name"],
-        status=rec["status"],
-        rarity=rec["rarity"],
-        tags=frozenset(rec["tags"]),
-        base_strength=rec["base_strength"],
-        keywords=frozenset(rec.get("keywords", [])),
-        dynamic_strength=rec.get("dynamic_strength"),
-        food_cost=rec.get("food_cost", 0),
-        text=rec.get("text", ""),
-        hungry=rec.get("hungry", 0),
-        unnamed=rec.get("unnamed", False),
-        mate=rec.get("mate"),
-        habitat=rec.get("habitat", ""),
-        related=tuple(rec.get("related", ())),
-        evolves=bool(rec.get("evolves", False)),
-        stars=rec["stars"] if rec.get("stars") is not None else STAR_DEFAULTS.get(rec["rarity"], 0),
-        cost=rec.get("cost"),
-        ruleset=rec.get("ruleset"),
-    )
+    return Card(id=rec["id"], name=rec["name"], status=rec["status"], rarity=rec["rarity"],
+                base_strength=rec["base_strength"], cost=rec["cost"], keywords=frozenset(rec.get("keywords", [])),
+                dynamic_strength=rec.get("dynamic_strength"), text=rec.get("text", ""))
 
 
-def load_cards(raw: Optional[dict] = None, *, validate: bool = True, as_played: bool = True) -> dict[str, Card]:
-    """Return a dict id -> Card. Loads bundled data/cards.json by default.
-
-    Pass `raw` (an already-parsed dict shaped like cards.json) to load custom data,
-    e.g. in tests. `validate` defaults to True (the loader is the trust boundary); pass
-    validate=False only for data already known to be well-formed.
-    """
+def load_cards(raw: Optional[dict] = None, *, validate: bool = True) -> dict[str, Card]:
+    """id -> Card, from the bundled data/cards.json or `raw` (a dict shaped like it)."""
     if raw is None:
-        raw = load_bundled_json("cards.json", as_played=as_played)
-
+        raw = load_bundled_json("cards.json")
     records = raw.get("cards")
     if not isinstance(records, list) or not records:
         raise CardDataError("cards.json must contain a non-empty 'cards' list")
-    if as_played:   # the stars prototype (engine/stars.py): each card's level, and a rare read as a common
-        records = merge_rarities(records)
-
     registry: dict[str, Card] = {}
     for rec in records:
         if rec.get("status") == PLANNED:
             continue
         if validate:
             validate_card_record(rec)
-        cid = rec["id"]
-        if cid in registry:
-            raise CardDataError(f"duplicate card id {cid!r}")
-        registry[cid] = _build_card(rec)
+        if rec["id"] in registry:
+            raise CardDataError(f"duplicate card id {rec['id']!r}")
+        registry[rec["id"]] = _build_card(rec)
     return registry

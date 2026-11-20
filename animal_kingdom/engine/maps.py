@@ -40,9 +40,8 @@ class GameMap:
     regions: dict[str, Region]
     win_food: int
     edges: tuple[tuple[str, str], ...] = field(default=())
-    # player -> their base: the row in front of their den (the mana ruleset's map_hex19, 2026-11-20); anyone places there
-    # (Martin, 2026-11-20: the rule that only its owner could was "just dumb").
-    # A map with bases has no den to capture: its dens front the bases and are never a target. Empty on every other map.
+    # player -> their base: the row in front of their den; anyone may place there (Martin, 2026-11-20: the rule that only
+    # its owner could was "just dumb").
     bases: dict[str, frozenset[str]] = field(default_factory=dict)
     # Precomputed cr -> sorted-neighbour tuple. The map is immutable, so this is derived once
     # in __post_init__ (see `neighbors`); excluded from eq/repr as pure derived state.
@@ -73,10 +72,6 @@ class GameMap:
     def hq_front(self, player: str) -> frozenset[str]:
         """The crossroads in front of `player`'s HQ (its defended approaches)."""
         return self.hq_connects[player]
-
-    def next_to_base(self, player: str, cr: str) -> bool:
-        """Whether `cr` is next to `player`'s base: adjacent to one of its tiles."""
-        return any(cr in self._adjacency.get(b, ()) for b in self.bases.get(player, ()))
 
     @property
     def players(self) -> tuple[str, ...]:

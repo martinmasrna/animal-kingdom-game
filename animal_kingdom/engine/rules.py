@@ -1,15 +1,11 @@
-"""The rules: legal-action generation, action application, and terminal detection.
+"""The rules: legal actions, applying an action, the turn, food and the end of the game.
 
-Three functions form the engine's contract (handoff §4):
-  - legal_actions(state) -> list[Action]
-  - apply_action(state, action) -> GameState   (mutates in place, returns same object)
-  - is_terminal(state) -> Optional[Result]
+Three functions are the engine's contract: legal_actions(state), apply_action(state, action), is_terminal(state). The
+placement mechanic, the cards' effects and the effect stack live in effects.py.
 
-rules.py orchestrates the turn structure and win conditions; the placement mechanic,
-card effects, and the effect-stack interpreter live in effects.py (which this imports).
-A turn ends only when resolution is complete (effect stack empty & nothing pending) -
-the decision-point gate. legal_actions iterates sorted collections so the action order
-is identical across processes (seed-based replay).
+A turn: on a player's Nth own turn they have min(N, mana_cap) mana. They play cards from hand, each for its cost, and
+their leader's power for its price, until they end the turn (never ended for them). At its end every region they hold
+pays its food. 30 food wins; a player whose food drops to 0 loses.
 """
 
 from __future__ import annotations
@@ -17,114 +13,34 @@ from __future__ import annotations
 from typing import Optional
 
 from . import effects, statics
-from .actions import Action, ActAction, DrawAction, LeaderAction, PassAction, PlaceAction, RoamAction
+from .actions import Action, LeaderAction, PassAction, PlaceAction, action_from_dict
 from .state import EngineError, GameState, Result, other_player
-from .strength import effective_strength  # re-exported (used by tests / future eval)
-
-__all__ = [
-    "legal_actions", "apply_action", "is_terminal", "can_pass",
-    "owner_of", "top_unit", "regions_controlled", "region_income", "effective_strength",
-]
-
-
-# -------------------------------------------------------- board query re-exports
-
-def owner_of(state: GameState, cr: str) -> Optional[str]:
-    return state.owner_of(cr)
-
-
-def top_unit(state: GameState, cr: str):
-    return state.top_unit(cr)
 
 
 # --------------------------------------------------------------- legal actions
 
 def legal_actions(state: GameState) -> list[Action]:
-    """Every legal action for the player to act. Empty only once the game is over: a turn that
-    opens with nothing to do passes at once (_end_turn)."""
-    if _decided(state):
+    """Every legal action for the player to act; ending the turn only when nothing else is. Empty once the game is over."""
+    if state.result is not None:
         return []
-    if state.pending is not None:          # mid-resolution: offer the sub-choices
+    if state.pending is not None:
         return effects.legal_pending(state)
-    return _top_level_actions(state)
+    return _plays(state, state.current) or [PassAction()]
 
 
 def can_pass(state: GameState) -> bool:
-    """Ending the turn early, even before any action, is allowed while nothing is resolving.
-    It is kept out of legal_actions: bots never pass."""
+    """Ending the turn is legal whenever nothing is resolving."""
     return state.result is None and state.pending is None and not state.effect_stack
 
 
-def _top_level_actions(state: GameState) -> list[Action]:
-    player = state.current
-    left = _actions_left(state)
-    if state.config.mana:   # nothing payable: ending the turn is the move (the mana ruleset never ends a turn by itself)
-        return _mana_actions(state, player, left) or [PassAction()]
-    if left <= 0:                                  # the turn stays open only for a free roam (Roam)
-        return list(effects.legal_roams(state, player, free_only=True)) if effects.free_roams_left(state, player) else []
-    actions: list[Action] = []
-    if state.decks[player] and state.config.draw_action:
-        actions.append(DrawAction())
-    titan_ok = left >= titan_cost(state, player) and state.food[player] >= titan_food(state, player)
-    actions.extend(effects.legal_placements(state, player, titan_ok=titan_ok))
-    actions.extend(effects.legal_roams(state, player))
-    actions.extend(effects.legal_acts(state, player))     # Action animals (the actions prototype): one action each
-    if state.leaders and effects.leader_usable(state, player):
-        actions.append(LeaderAction())                    # your den's power (the leaders prototype): one action
-    return actions
-
-
-def _mana_actions(state: GameState, player: str, left: int) -> list[Action]:
-    """The mana ruleset's top-level actions: every play from hand whose card's cost the mana left pays, and, while it pays
-    an ability (Config.mana_per_action), every Roam, Echo or Action and the leader's power. A free roam needs no mana. There
-    is no Draw action and no Titan rule (a card's cost is its whole price)."""
-    actions: list[Action] = [p for p in effects.legal_placements(state, player, titan_ok=True)
+def _plays(state: GameState, player: str) -> list[Action]:
+    """Every play from hand the mana left pays for, and the leader's power while it pays for that."""
+    left = mana_left(state, player)
+    actions: list[Action] = [p for p in effects.legal_placements(state, player)
                              if effects.mana_cost(state, p.card_id) <= left]
-    ability = left >= state.config.mana_per_action
-    actions.extend(effects.legal_roams(state, player, free_only=not ability))
-    if ability:
-        actions.extend(effects.legal_acts(state, player))
-        if state.leaders and effects.leader_usable(state, player):
-            actions.append(LeaderAction())
+    if left >= state.config.leader_power_cost and effects.leader_usable(state, player):
+        actions.append(LeaderAction())
     return actions
-
-
-def titan_cost(state: GameState, player: str) -> int:
-    """Two actions; one after a Krill this turn ("the next Titan you play this turn costs one action"), or while the
-    legendary Krill is yours ("Your Titans cost 10 food to play, but only 1 action")."""
-    cheap = state.turn_flags.get(f"titan_discount_{player}") or statics._controls(state, player, "krill_legend")
-    return TITAN_ACTIONS - 1 if cheap else TITAN_ACTIONS
-
-
-def titan_food(state: GameState, player: str) -> int:
-    """The legendary Krill's food for a Titan; none when a common Krill already made this one cost one action."""
-    if state.turn_flags.get(f"titan_discount_{player}") or not statics._controls(state, player, "krill_legend"):
-        return 0
-    return state.config.krill_legend_food
-
-
-def _has_top_level_action(state: GameState) -> bool:
-    """Whether the current player can do anything at all: `_top_level_actions` without building the list. A Draw
-    settles it at once; only an empty deck needs the placements looked at. (Asked at every turn start, also in every
-    line a bot searches, where building the full list was nearly half of a bot's time.)"""
-    if _actions_left(state) > 0 and state.decks[state.current] and state.config.draw_action:
-        return True
-    return bool(_top_level_actions(state))
-
-
-TITAN_ACTIONS = 2   # Titan (keywords.md): playing it costs two actions instead of one
-
-
-def turn_actions(state: GameState) -> int:
-    """The current turn's actions: two, one on the first player's first turn, plus any bonus (Beaver); the Electric Eel
-    caps the turn it shocks at its number. In the mana ruleset, the turn's mana (mana_total): the count the turn spends
-    from is mana there, so everything that asks what is left reads the mana left."""
-    if state.config.mana:
-        return mana_total(state, state.current)
-    base = state.config.first_turn_actions if state.turn_counter == 0 else state.config.actions_per_turn
-    total = base + state.turn_flags.get(f"bonus_actions_{state.current}", 0)
-    cap = state.turn_flags.get(f"action_cap_{state.current}")
-    return total if cap is None else min(total, cap)
 
 
 def own_turn_number(state: GameState, player: str) -> int:
@@ -133,67 +49,53 @@ def own_turn_number(state: GameState, player: str) -> int:
 
 
 def mana_total(state: GameState, player: str) -> int:
-    """The mana ruleset: `player`'s mana this turn if it is theirs, else at the start of their next: min(N, mana_cap) on
-    their Nth own turn, plus mana_per_action for each extra action granted (the Beaver); an action cap (the Electric Eel)
-    holds it to that many actions' worth."""
-    cfg = state.config
-    total = min(own_turn_number(state, player), cfg.mana_cap)
-    if player != state.current:
-        return total
-    total += cfg.mana_per_action * state.turn_flags.get(f"bonus_actions_{player}", 0)
-    cap = state.turn_flags.get(f"action_cap_{player}")
-    return total if cap is None else min(total, cap * cfg.mana_per_action)
+    """`player`'s mana this turn if it is theirs, else at the start of their next."""
+    return min(own_turn_number(state, player), state.config.mana_cap)
 
 
 def mana_left(state: GameState, player: str) -> int:
-    """The mana `player` has left to spend: this turn's unspent mana, or all of their next turn's while it isn't theirs."""
+    """The mana `player` has left: this turn's unspent mana, or all of their next turn's while it isn't theirs."""
     total = mana_total(state, player)
-    return total - state.actions_taken_this_turn if player == state.current else total
+    return total - state.mana_spent if player == state.current else total
 
 
-def _actions_left(state: GameState) -> int:
-    return turn_actions(state) - state.actions_taken_this_turn
-
-
-# ------------------------------------------------------------- apply / resolve
+# ------------------------------------------------------------- the mulligan, both at once
 
 def early_mulligan(state: GameState, player: str) -> Optional[int]:
-    """Where `player`'s mulligan waits under the one being chosen now, if it does: both players mulligan at once
-    (overview.md §4.4), though the stack resolves one step at a time. Its index on the effect stack, else None."""
+    """Where `player`'s mulligan waits under the one being chosen now, if it does: both players mulligan at once, though
+    the stack resolves one step at a time. Its index on the effect stack, else None."""
     if not state.pending or state.pending.get("kind") != "mulligan" or state.pending.get("chooser") == player:
         return None
     return next((i for i, st in enumerate(state.effect_stack[:-1]) if st["op"] == "mulligan" and st["player"] == player), None)
 
 
-def mulligan_request(state: GameState, player: str) -> dict:
-    return {"mode": "choice", "chooser": player, "optional": True, "kind": "mulligan",
-            "options": [u.iid for u in state.hands[player]]}
-
-
 def apply_early_mulligan(state: GameState, player: str, action: Action) -> None:
     """Apply `player`'s mulligan choice while the other player is still choosing theirs: their step comes to the top,
-    takes the choice (a returned card is replaced at once), and goes back under the other's if it isn't done. A step
-    that finishes leaves the other's request pending as before."""
+    takes the choice, and goes back under the other's if it isn't done."""
     i = early_mulligan(state, player)
     if i is None:
         raise EngineError("not your decision")
     stack, waiting = state.effect_stack, state.pending
-    step = stack.pop(i); stack.append(step)
-    state.pending = mulligan_request(state, player)
+    step = stack.pop(i)
+    stack.append(step)
+    state.pending = {"mode": "choice", "chooser": player, "optional": True, "kind": "mulligan",
+                     "options": [u.iid for u in state.hands[player]]}
     try:
         apply_action(state, action)
     except Exception:
-        stack.remove(step); stack.insert(i, step); state.pending = waiting
+        stack.remove(step)
+        stack.insert(i, step)
+        state.pending = waiting
         raise
-    if state.pending and state.pending.get("chooser") == player and stack and stack[-1] is step:   # more to choose: back underneath
-        stack.pop(); stack.insert(i, step)
+    if state.pending and state.pending.get("chooser") == player and stack and stack[-1] is step:   # more to choose: back under
+        stack.pop()
+        stack.insert(i, step)
         state.pending = waiting
 
 
 def apply_logged(state: GameState, adict: dict) -> None:
     """Apply one action as a game log records it: one marked "by" a player is their mulligan choice made while the other
-    player was choosing theirs (apply_early_mulligan); the rest go through apply_action."""
-    from .actions import action_from_dict
+    was choosing theirs."""
     by, action = adict.get("by"), action_from_dict(adict)
     if by and early_mulligan(state, by) is not None:
         apply_early_mulligan(state, by, action)
@@ -201,60 +103,35 @@ def apply_logged(state: GameState, adict: dict) -> None:
         apply_action(state, action)
 
 
-def apply_action(state: GameState, action: Action, *, validate: bool = True) -> GameState:
-    """Apply one action (a top-level move or a pending sub-choice), mutating `state`.
+# ------------------------------------------------------------- apply
 
-    Raises EngineError unless `action` is in `legal_actions(state)`. Bot search, which only
-    ever applies actions it just drew from `legal_actions`, passes `validate=False` to skip
-    regenerating them."""
-    if _decided(state):
+def apply_action(state: GameState, action: Action, *, validate: bool = True) -> GameState:
+    """Apply one action (a play, the leader's power, ending the turn, or a pending choice), mutating `state`. Raises
+    EngineError unless it is legal; a bot applying an action it just drew from legal_actions passes validate=False."""
+    if state.result is not None:
         raise EngineError("cannot act: the game is over")
     if isinstance(action, PassAction):
         if not can_pass(state):
             raise EngineError("cannot end the turn mid-resolution")
         _end_turn(state)
         return state
-    if isinstance(action, PlaceAction):
-        action = effects.canonical_place(state, state.pending["chooser"] if state.pending else state.current, action)
     if validate and action not in legal_actions(state):
         raise EngineError(f"illegal action {action!r}")
     state.applied_this_turn += 1
-
     if state.pending is not None:
         effects.apply_pending(state, action)
-    elif isinstance(action, DrawAction):
-        state.actions_taken_this_turn += 1
-        _do_draw(state, state.current)
-    elif isinstance(action, PlaceAction) and state.config.mana:
-        state.actions_taken_this_turn += effects.mana_cost(state, action.card_id)
-        effects.do_placement(state, state.current, action.card_id, action.target, action.iid)
     elif isinstance(action, PlaceAction):
-        titan = "Titan" in state.cards[action.card_id].keywords
-        state.actions_taken_this_turn += titan_cost(state, state.current) if titan else 1
-        if titan:
-            if food := titan_food(state, state.current):
-                effects.lose_food(state, state.current, food, card="krill_legend")
-            state.turn_flags.pop(f"titan_discount_{state.current}", None)
-        effects.do_placement(state, state.current, action.card_id, action.target, action.iid)
-    elif isinstance(action, RoamAction):
-        stack = state.board.get(action.origin)
-        effects.pay_for_roam(state, state.current, stack[-1] if stack else None)
-        effects.do_roam(state, state.current, action.origin, action.target)
-    elif isinstance(action, ActAction):
-        state.actions_taken_this_turn += effects.ability_cost(state)
-        effects.do_act(state, state.current, action.origin)
+        state.mana_spent += effects.mana_cost(state, action.card_id)
+        effects.do_placement(state, state.current, action.card_id, action.target)
     elif isinstance(action, LeaderAction):
-        state.actions_taken_this_turn += effects.ability_cost(state)
+        state.mana_spent += state.config.leader_power_cost
         effects.do_leader(state, state.current)
     else:
         raise EngineError(f"unexpected action {action!r}")
-
-    _resolve_and_maybe_end_turn(state)
-    # The turn's action cap: past it the turn ends at once, whatever is still resolving (a loop of cards, say). A turn
-    # that ended on its own has reset the count.
-    # The effect cap (effects._drain) has already dropped the stack and recorded itself.
+    effects.resolve(state)
+    # The turn's caps: past either the turn ends at once, whatever is still resolving (a loop of effects).
     over_effects = state.effect_steps_this_turn > state.config.max_effect_steps_per_turn
-    if (over_effects or state.applied_this_turn >= state.config.max_actions_per_turn) and not _decided(state):
+    if (over_effects or state.applied_this_turn >= state.config.max_actions_per_turn) and state.result is None:
         if not over_effects:
             effects.record_cap(state, "actions", effects.stack_cards(state))
         state.pending = None
@@ -263,126 +140,45 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     return state
 
 
-def _do_draw(state: GameState, player: str) -> None:
-    # Cards past the hand limit burn (effects._fire_draw); state.draw caps by deck.
-    effects.draw_cards(state, player, state.config.draw_action_count)    # the wrapper fires ON_DRAW (Eon, Black Swan, ...)
-
-
-def _resolve_and_maybe_end_turn(state: GameState) -> None:
-    """Drain pending effects; end the turn only when resolution is fully complete
-    and the player has no turn actions left (config.actions_per_turn)."""
-    effects.resolve(state)
-    if _decided(state):
-        return  # game decided (HQ capture / food)
-    if state.effect_stack or state.pending is not None:
-        return  # still resolving (a choice is pending or steps remain)
-    if state.config.mana:
-        return  # the mana ruleset: the player ends the turn, never the game (Martin, 2026-11-20)
-    if _has_top_level_action(state):
-        return  # actions (or a free roam) remain and something is playable: the turn stays open
-    _end_turn(state)
-
-
-def _decided(state: GameState) -> bool:
-    """Whether the game is over, asked afresh each time. A rule asks it more than once in a row, around calls that can win
-    the game; mypy would keep its first answer across those calls (narrowing never sees a call), and the compiled engine
-    (mypyc) checks that narrowed type at run time."""
-    return state.result is not None
-
-
-def _end_turn(state: GameState, *, forced: bool = False) -> None:
-    """End the current player's turn. `forced`: it opened with nothing they could do."""
+def _end_turn(state: GameState) -> None:
     player = state.current
-    # the mana ruleset: a turn ended with nothing the mana could pay for is no pass (else both players' first turns, 1 mana
-    # each, could end the game); the player always ends it themselves (Martin, 2026-11-20: no turn is skipped for them)
-    skipped = state.config.mana and bool(state.decks[player]) and (forced or not _mana_actions(state, player, _actions_left(state)))
     state.emit("turn_end", player=player)
-    effects.end_of_turn(state, player)      # on_end_of_turn triggers (Dingo, Worker Wasp, Methuselah)
-    effects.resolve(state)                  # choice-free by design, so it drains fully
-    if _decided(state):
-        return  # an end-of-turn food gain could already win
-    _produce_food(state, player)            # end-of-turn region income
-    if _decided(state):
-        return  # food win
-    # Both players ending a turn without acting, back to back, ends the game (more food wins;
-    # on a tie, the player whose pass ended it loses). A player with no move passes too.
-    acted = state.actions_taken_this_turn or state.turn_flags.get(f"roams_{player}")   # a free roam is acting too
-    if skipped:
-        pass        # a skipped turn (above) is not a pass
-    else:
-        state.idle_turns = 0 if acted else state.idle_turns + 1
-    if state.idle_turns >= 2 and not state.config.mana:   # the mana ruleset: ending a turn unplayed is a choice, never the end (Martin, 2026-11-20)
-        state.result = _resolve_passes(state)
+    _produce_food(state, player)
+    if state.result is not None:
         return
     state.turn_counter += 1
-    state.units_placed_this_turn = 0
-    state.actions_taken_this_turn = 0
+    state.mana_spent = 0
     state.applied_this_turn = 0
     state.effect_steps_this_turn = 0
-    state.turn_flags = {}                    # reset once-per-turn trigger flags
     state.current = other_player(player)
     state.emit("turn_start", player=state.current, turn=state.turn_counter)
-    if state.config.turn_draw_count:          # the turn's free card (Martin, 2026-11-16)
-        effects.draw_cards(state, state.current, state.config.turn_draw_count)
-    # Start of the new player's turn: delayed effects + start-of-turn triggers, then resolve.
+    effects.draw_cards(state, state.current, state.config.turn_draw_count)   # the turn's free card
     effects.start_of_turn(state, state.current)
     effects.resolve(state)
-    # A player who can neither draw nor place nor roam passes; the game goes on.
-    if state.result is None and state.pending is None and not state.effect_stack and not state.config.mana \
-            and state.turn_counter < state.config.max_turns and not _has_top_level_action(state):
-        _end_turn(state, forced=True)        # (never past the turn cap: is_terminal ends the game there)
 
 
 # ------------------------------------------------------------- regions / food
 
 def regions_controlled(state: GameState, player: str):
-    """Regions where `player` occupies every corner (overview.md §10)."""
     return statics.regions_of(state, player)
 
 
 def region_income(state: GameState, player: str) -> int:
-    """Food `player`'s regions produce at the end of their turn: each its printed food, moved by the legendary
-    Wildebeest and Boar (never below nothing); 0 while they control the Unnamed Giant ("Your regions produce no food")."""
-    return sum(region_yield(state, player, r) for r in regions_controlled(state, player))
-
-
-def region_yield(state: GameState, player: str, region) -> int:
-    """What `region` produces for `player` while they hold it: its printed food, moved by the legendary Wildebeest and
-    Boar (never below nothing)."""
-    return max(0, region.food + statics.region_food_modifier(state, player))
+    """The food `player`'s regions pay at the end of their turn."""
+    return sum(r.food for r in regions_controlled(state, player))
 
 
 def _produce_food(state: GameState, player: str) -> None:
-    total = region_income(state, player)
-    if total:
-        effects.gain_food(state, player, total, income=True)  # sets result on win; applies Queen Bee
+    effects.gain_food(state, player, region_income(state, player), income=True)
 
 
-# ------------------------------------------------------------------ terminal
+# ------------------------------------------------------------------ the end
 
 def is_terminal(state: GameState) -> Optional[Result]:
-    """The game's Result if over, else None. Authoritative (also detects the turn limit)."""
-    if _decided(state):
+    """The game's Result if it is over, else None (the turn limit ends it on food)."""
+    if state.result is not None:
         return state.result
     if state.turn_counter >= state.config.max_turns:
-        return _resolve_by_food(state, "max_turns")
+        a, b = state.food["A"], state.food["B"]
+        return Result("A" if a > b else "B" if b > a else None, "max_turns")
     return None
-
-
-def _resolve_passes(state: GameState) -> Result:
-    # more food wins; on a tie, the player who passed last loses.
-    food_a, food_b = state.food["A"], state.food["B"]
-    if food_a > food_b:
-        return Result("A", "passes")
-    if food_b > food_a:
-        return Result("B", "passes")
-    return Result(other_player(state.current), "passes")
-
-
-def _resolve_by_food(state: GameState, reason: str) -> Result:
-    food_a, food_b = state.food["A"], state.food["B"]
-    if food_a > food_b:
-        return Result("A", reason)
-    if food_b > food_a:
-        return Result("B", reason)
-    return Result(None, reason)  # draw

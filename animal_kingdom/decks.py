@@ -1,118 +1,35 @@
-"""The decks: the shipped lists (decklists.json) and the rules a list must obey.
+"""The deck rules, and the decks registered for play by slug (players' decks: web/custom_decks.py).
 
-Cards are cards and decks are decks (Martin, 2026-10-19). The game ships its decks as lists over the collectible
-cards in data/decklists.json: the **starter decks** (`starter: true`), the 12 4-4-6 decks a new profile gets, which
-share no card so a new player meets as many cards as possible; and the **bot decks** (`bot: true`), what the bots
-play ranked and in Practice's Random, which may overlap with anything. A deck can be both. `PREMADE_DECKS` holds
-every shipped deck and every ladder deck (data/ladder_decks.json, the decks people built and played) as its 30-card list;
-`BOT_DECKS` the bot pool's slugs, all of them; `load_premade_deck` any loadable slug.
-
-`make_vanilla_deck` survives as a fuzz/CLI helper: it builds a legal-ish deck from
-integer-strength cards only (the dynamic ones are excluded), respecting the copy limits.
-"""
+A deck is 25 cards: collectible cards only, at most two copies of a card and one of a legendary, and a leader, one of its
+own legendaries that can lead (engine/leaders.py)."""
 
 from __future__ import annotations
 
-import json
-import os
-import random
-import warnings
 from typing import Optional, Sequence
 
-from .engine.cards import COPY_LIMITS, Card, DECKLISTS, DECK_SLUGS, load_cards
+from .engine.cards import COPY_LIMITS, Card, load_cards
+from .engine.leaders import leader_problem
+
+DECK_SIZE = 25
+
+DECKS: dict[str, list[str]] = {}          # slug -> its 25 card ids
+DECK_LEADERS: dict[str, str] = {}         # slug -> its leader's card id
 
 
-def _expand(deck: dict) -> list[str]:
-    """A shipped deck's 30-card list from its design counts, in the file's order (the order the seed shuffles: a
-    set's order changes with each process's hash seed, and with it every sim's game seeds)."""
-    return [cid for cid, n in deck["cards"].items() for _ in range(n)]
-
-
-# Deck slug -> 30 card ids, every shipped deck (starters and bot decks), in menu order. Built once from
-# decklists.json, so it can never drift from it.
-PREMADE_DECKS: dict[str, list[str]] = {d["slug"]: _expand(d) for d in DECKLISTS}
-
-# The leaders prototype (engine/leaders.py): deck slug -> its leader's card id, for the decks that name one (the bot
-# decks' variants in decklists.json, and players' decks registered with one). A deck missing here has no leader.
-DECK_LEADERS: dict[str, str] = {d["slug"]: d["leader"] for d in DECKLISTS if d.get("leader")}
-
-
-def deck_leader(slug: Optional[str]) -> Optional[str]:
-    """The leader `slug`'s deck plays under, or None."""
-    return DECK_LEADERS.get(slug) if slug else None
-
-
-def leaders_for(slug_a: Optional[str], slug_b: Optional[str]) -> dict:
-    """new_game's `leaders` for two decks by slug."""
-    return {"A": deck_leader(slug_a), "B": deck_leader(slug_b)}
-
-# The ladder's wider pool (data/ladder_decks.json, built by sim/ladder_decks.py): the decks people built and played, as
-# the bots play them. Loadable like a shipped deck; `LADDER_DECK_NAMES` carries their builders' names.
-with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "ladder_decks.json"), encoding="utf-8") as _fh:
-    LADDER_DECKS: list[dict] = json.load(_fh)["decks"]
-LADDER_DECK_NAMES: dict[str, str] = {d["slug"]: d["name"] for d in LADDER_DECKS}
-PREMADE_DECKS.update({d["slug"]: list(d["list"]) for d in LADDER_DECKS})
-
-# The decks the bots play: every shipped deck and every ladder deck (Martin, 2026-10-24: the bots play many more decks
-# than a hand-picked pool, every pilot-and-deck pairing a player of its own on the ladder; a deck a pilot plays badly sits
-# low on the ladder, which is the ladder's own information). Ranked matchmaking, the ladder seed, Practice's 'Random'
-# and the bot benchmark panel draw from these.
-BOT_DECKS: tuple[str, ...] = tuple(d["slug"] for d in DECKLISTS) + tuple(d["slug"] for d in LADDER_DECKS)
-
-
-# The goodstuff pile: the greedy optimizer's best cross-deck list over the old seven-deck pool
-# (2026-09-29), its cards as they are now (Gaboon Viper for the retired Taipan). Stale since the
-# launch decks: kept loadable as the sim tools' default pile until the optimizer runs again.
-GOODSTUFF_DECK: list[str] = (
-    ["fox_legend", "rhinoceros_legend", "falcon_legend", "rat_legend_2"]
-    + ["chinchilla", "polar_bear", "rhinoceros", "cottonmouth"] * 2
-    + ["wolf", "elephant", "lemming", "lion", "mouse", "tiger"] * 3
-)
-
-# Decks loadable by slug that are not shipped premades: the goodstuff pile, and
-# synthetic decks the sim tools register (optimizer candidates, other piles, which may take the
-# "goodstuff" slug over for their own run). Registered decks are mirrored into
-# $AK_EXTRA_DECKS so `spawn`ed worker processes, which re-import this module, load them too.
-# A test opponent for the web client, reached by link only (#/?botdeck=lions30): Martin's heuristic that every deck
-# must beat 30 vanilla Lions. Not a legal deck (three copies at most), so never offered in the deck pickers.
-TEST_BOT_DECKS = {"lions30": ["lion"] * 30}
-EXTRA_DECKS: dict[str, list[str]] = {"goodstuff": GOODSTUFF_DECK, **TEST_BOT_DECKS}
-EXTRA_DECKS.update(json.loads(os.environ.get("AK_EXTRA_DECKS", "{}")))
-DECK_LEADERS.update(json.loads(os.environ.get("AK_EXTRA_LEADERS", "{}")))
-
-
-def register_deck(slug: str, decklist: Sequence[str], leader: Optional[str] = None) -> None:
-    """Make `decklist` loadable as `slug` in this process and in any worker it spawns later (`leader`: the card it is
-    led by, the leaders prototype)."""
-    if slug in PREMADE_DECKS:
-        raise ValueError(f"{slug!r} collides with a shipped deck's slug")
-    EXTRA_DECKS[slug] = list(decklist)
+def register_deck(slug: str, decklist: Sequence[str], leader: Optional[str]) -> None:
+    DECKS[slug] = list(decklist)
     if leader:
         DECK_LEADERS[slug] = leader
-        os.environ["AK_EXTRA_LEADERS"] = json.dumps({s: l for s, l in DECK_LEADERS.items() if s in EXTRA_DECKS})
-    os.environ["AK_EXTRA_DECKS"] = json.dumps(
-        {s: d for s, d in EXTRA_DECKS.items() if s != "baseline"})
 
 
-# 25 in the stars prototype (Martin, 2026-11-15: "let's change it to 25 cards a deck, shall we? with 20 stars still"); 30 before.
-DECK_SIZE = 25
-# The stars prototype (engine/cards.py STAR_LEVELS): a deck holds at most this many stars, counted per copy, in place of
-# the old caps of 8 rares and 4 legendaries (4 x 2 + 8 x 1 = 16, the first budget); Martin raised it to 20 on 2026-11-15
-# ("bump up the limit to 20 stars please").
-STAR_BUDGET = 20
+def load_deck(slug: str) -> list[str]:
+    if slug not in DECKS:
+        raise ValueError(f"unknown deck {slug!r}")
+    return list(DECKS[slug])
 
 
-def deck_stars(decklist: Sequence[str], cards: dict[str, Card]) -> int:
-    """The stars `decklist` spends: each copy's level."""
-    return sum(cards[cid].stars for cid in decklist if cid in cards)
-
-
-def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None,
-                      ruleset: Optional[str] = None) -> list[str]:
-    """What makes `decklist` illegal under the deck rules (rules §13); empty when it's legal.
-    Only collectible cards (the starter decks' and the bench) may be in it. In the mana ruleset (2026-11-20) the same size
-    and copy limits, no star budget, and only cards with a mana cost."""
-    mana = ruleset == "mana"
+def deck_problems(decklist: Sequence[str], leader: Optional[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
+    """What makes a deck illegal; empty when it's legal."""
     cards = cards if cards is not None else load_cards()
     problems = []
     if len(decklist) != DECK_SIZE:
@@ -122,89 +39,10 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
         counts[cid] = counts.get(cid, 0) + 1
     for cid, n in counts.items():
         card = cards.get(cid)
-        if card is None or card.status != "collectible":
+        if card is None or not card.collectible:
             problems.append(f"{cid!r} is not a collectible card")
-            continue
-        if not card.in_collection(ruleset):   # each ruleset its own collection (the mana prototype's Wisps, 2026-11-20)
-            problems.append(f"{card.name} is not in the {ruleset or 'default'} collection")
-        elif mana and card.cost is None:
-            problems.append(f"{card.name} has no mana cost")
-        limit = COPY_LIMITS[card.rarity]
-        if n > limit:
-            problems.append(f"at most {limit} {card.name}")
-    stars = deck_stars(decklist, cards)
-    if stars > STAR_BUDGET and not mana:
-        problems.append(f"{stars} stars, over the {STAR_BUDGET} a deck may hold")
-    return problems
-
-
-def load_premade_deck(slug: str, *, cards: Optional[dict[str, Card]] = None) -> list[str]:
-    """Return a fresh copy of the 30-card decklist for `slug`: a shipped deck's, or a registered one's."""
-    decks = {**PREMADE_DECKS, **EXTRA_DECKS}
-    if slug not in decks:
-        raise ValueError(f"unknown deck slug {slug!r}, expected one of {sorted(decks)}")
-    return list(decks[slug])
-
-
-def make_vanilla_deck(
-    n: int = 32,
-    *,
-    cards: Optional[dict[str, Card]] = None,
-    rng: Optional[random.Random] = None,
-    seed: Optional[int] = None,
-) -> list[str]:
-    """Return a list of `n` card ids drawn from integer-strength cards within copy limits."""
-    cards = cards or load_cards()
-    rng = rng if rng is not None else random.Random(seed)
-
-    pool: list[str] = []
-    for card in cards.values():
-        if not isinstance(card.base_strength, int):
-            continue  # exclude dynamic-strength cards (Goliath, Chameleon)
-        if not card.collectible:
-            continue  # exclude tokens / reserve designs
-        pool.extend([card.id] * COPY_LIMITS[card.rarity])
-
-    if len(pool) < n:
-        raise ValueError(f"vanilla pool too small ({len(pool)}) for deck size {n}")
-
-    rng.shuffle(pool)
-    return pool[:n]
-
-
-def deck_problems(decklist: Sequence[str], leader: Optional[str], *, cards: Optional[dict[str, Card]] = None,
-                  ruleset: Optional[str] = None) -> list[str]:
-    """What makes a deck illegal for play: the list's problems (decklist_problems), and its leader's. Every deck has a
-    leader, one of its own legendaries that can lead (Martin, 2026-11-16: "how is it not illegal to have decks without
-    leader? ... same way you can't have deck with too many/too little cards, and too many stars"). The engine plays any
-    deck; this is the deck rule, checked where a deck is put into play (a player's, the bots' pool, the league)."""
-    from .engine.leaders import leader_problem
-    problems = decklist_problems(decklist, cards=cards, ruleset=ruleset)
-    if not leader:
-        problems.append("a deck needs a leader")
-    elif (bad := leader_problem(leader, decklist)):
+        elif n > COPY_LIMITS[card.rarity]:
+            problems.append(f"at most {COPY_LIMITS[card.rarity]} {card.name}")
+    if (bad := leader_problem(leader, decklist)):
         problems.append(bad)
     return problems
-
-
-def shipped_problems() -> dict[str, list[str]]:
-    """Each shipped or ladder deck a card change has made illegal, with what's wrong with it (a missing leader too)."""
-    cards = load_cards()
-    return {slug: p for slug, decklist in PREMADE_DECKS.items() if (p := deck_problems(decklist, DECK_LEADERS.get(slug), cards=cards))}
-
-
-def _check_shipped() -> None:
-    """A deck a card change made illegal (a rarity moved, a card benched) loads with a warning and never fails a test,
-    commit or deploy: the decks get their pass before the game ships (Martin, 2026-10-27). It is not meant to be played;
-    marking it in the collection is on the to-do list (Martin, 2026-10-29)."""
-    for slug, problems in shipped_problems().items():
-        warnings.warn(f"deck {slug}: " + "; ".join(problems), stacklevel=2)
-
-
-_check_shipped()
-
-# The bots play only the decks that are legal now: an illegal deck is not meant to be played (Martin, 2026-10-29), and
-# after Martin's new pool of 2026-11-16 most shipped and ladder decks hold reserve cards.
-BOT_DECKS = tuple(s for s in BOT_DECKS if s not in shipped_problems())
-PANEL_OPPONENTS: tuple[str, ...] = ("pool_1", "pool_3", "pool_5")   # the benchmark's standing opponents, from the pool
-assert all(d in BOT_DECKS for d in PANEL_OPPONENTS), PANEL_OPPONENTS

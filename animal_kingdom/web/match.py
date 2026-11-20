@@ -1,9 +1,6 @@
-"""A match over the engine (one game for now; best-of-3 once there are three maps to reveal): seats, series score, move history, and per-seat views.
+"""One match as the web server holds it: its seats, the game, the turn clock, its history, and each seat's view.
 
-Transport-free: the server feeds it actions and reads views; nothing here does I/O. A view
-carries only what that seat may see (open decklists, public board and Remove Pile, its own
-hand); the opponent's hand and both deck orders never leave this module.
-"""
+A match is one game; Rematch starts another in the same match, the loser of the last going first."""
 
 from __future__ import annotations
 
@@ -16,159 +13,44 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from ..decks import LADDER_DECK_NAMES, leaders_for, load_premade_deck
-from ..engine import effects, rules, statics
-from ..engine.actions import SKIP, ActAction, ChoiceAction, DrawAction, LeaderAction, PassAction, PlaceAction, RoamAction, action_from_dict
+from ..bots.greedy import GreedyBot
+from ..decks import DECK_LEADERS, load_deck
+from ..engine import rules, statics
+from ..engine.actions import SKIP, ChoiceAction, LeaderAction, PassAction, PlaceAction, action_from_dict
 from ..engine import leaders as L
-from ..engine.effects import ability_cost, grimm_draws, leader_usable, mana_cost
-from ..engine.cards import DECKLISTS, load_cards
-from ..engine.config import RULESET_KEYWORDS, RULESET_MAPS, RULESET_TEXT, RULESETS, Config
-from ..engine.effects import roar_condition
+from ..engine.cards import load_cards
+from ..engine.effects import leader_usable, mana_cost
 from ..engine.maps import load_map
-from ..engine.state import EATEN_FORMS, EngineError, GameState, Result, new_game, other_player
-from ..engine.strength import card_strength, effective_strength, placement_strength
-from ..sim.runner import make_bot
-from . import tutorial
+from ..engine.state import MAP_ID, EngineError, GameState, Result, new_game, other_player
+from ..engine.strength import card_strength, effective_strength
 
+log = logging.getLogger(__name__)
 CARDS = load_cards()
-# What a pending choice asks, by the effect step asking it: a choice from your own hand names its verb (the client heads it).
-ASKS = {"mulligan": "mulligan", "magpie_steal": "discard", "raven_dig": "shuffle", "discard": "discard"}
-MAP_ID = "map_b"
-# The boards a match may be played on: today's, and the hex prototype (Martin's diamond, 2026-11-16; data/maps.json map_hex).
-MAPS = ("map_b", "map_hex")
-# The per-match rulesets (engine/config.py RULESETS): "mana", the prototype of 2026-11-20, plays on its own board
-# (RULESET_MAPS) between two people only: the bots think on the Rust engine, which plays the default rules alone.
-RULESET_NAMES = tuple(RULESETS)
-# One game per match while there is one map: the best-of-3 is part of the game, but its point is the three-map
-# reveal (rules §14), so it comes back with the maps (Martin, 2026-09-30). Rematch carries the loser-first rule.
-GAMES_TO_WIN = 1
-# The turn clock, for matches between two people (pre-launch.md: a starting guess, to be set from
-# real games). Whoever must act gets a free window each time the decision comes to them (unused
-# time is lost), then spends their bank for the game. At zero, the engine acts for them.
+ASKS = {"mulligan": "mulligan"}   # what a pending choice asks, by the step asking: the mulligan; anything else is "effect"
+# The turn clock, for matches between two people: whoever must act gets a free window each time the decision comes to
+# them (unused time is lost), then spends their bank for the game. At zero, the engine acts for them.
 CLOCK_FREE = 30.0
 CLOCK_BANK = 180.0
 CLOCK_CATCHUP_MAX = 8.0      # at most this long, a turn's clock waits for its player's screen to show the opponent's moves
-CLOCK_MULLIGAN = 30.0        # one window for both players' mulligans at once (Martin, 2026-10-01); what's left is kept
+CLOCK_MULLIGAN = 30.0        # one window for both players' mulligans at once; what's left is kept
 EVENTS_KEPT = 200            # a view carries the game's last events: enough for a client that missed a few views
 TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
 
-# Menu labels for the shipped decks (starters and bot decks, decklists.json) and the tutorial's.
-DECK_NAMES = {**{d["slug"]: d["name"] for d in DECKLISTS}, **LADDER_DECK_NAMES, **tutorial.NAMES, "lions30": "30 Lions"}
-# The card whose art covers each shipped deck (decklists.json).
-STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in DECKLISTS}
-
-# Easy / Normal / Expert, as in the play screen: the same bot kinds, with the same settings, the
-# simulations measure (a bare RefereeBot() is an untested configuration).
-log = logging.getLogger(__name__)
-# The Expert (docs/bots.md; shipped 2026-10-20, Martin: "of course it should be live if it makes the bot better"): the
-# referee with two turns of sight, the target-aware evaluation, den sense and the reply as a turn, its deepening capped at
-# 8 s so a move stays under the server's BOT_THINK_MAX. Since 2026-10-21 food is valued as the race to the win on a cubed
-# curve and no net-food term (Martin: a food lead you cannot convert is worth nothing; the board is what converts), and
-# the root screen ranks a placement after its own sub-choice resolves (quiesce; Martin's gauntlet game QR4OFW-4: a Hornet
-# ranked by its half-resolved position; +4.3 points a deck, results/bot_quality/wave2-quiesce), and it searches its
-# mulligan: each option played through the opening in sampled worlds (mulligan; +5.1 points a deck, wave2-mulligan).
-# Since 2026-10-23 its evaluation is the slot network of self-play rounds 4 to 6 (`data/learned/wave2_slot_r456.json`,
-# docs/bots.md: one encoder shared across the board's crossroads; +6.0 points a deck against the round-2 value network it
-# replaced the same day, which was +4.9 over the hand evaluation; the first evaluator to read Martin's own games better
-# than the hand formula); the hand weights stay for the terms the search prices outside the evaluation. The bots think on
-# the Rust engine (AK_RUST_BOTS=1 in the image), where the network's slower evaluation costs no depth inside the 8 s.
-# A won or lost game scores 500, not 1e9 (2026-10-28, docs/bots.md: at 1e9 a few sampled losses outweighed every
-# positional difference and the bot stacked on its own animals; +1.3 points a deck, results/bot_quality/decisive-mine).
-# Since 2026-10-29 the network is `wave2_slot_r4_10_live` (board_live features, retrained on self-play rounds 4 to 10 on
-# current cards and Martin's decks; +5.0 points a deck on his 11, results/bot_quality/net-r4-10; Hoofed Graze -6 clear,
-# shipped on Martin's call: the network cannot see grazing). Since that evening it keeps every den opener (den_open, Martin's
-# 2TZBCA: Tiger onto the Wildebeest guarding his den, then Kitten in, was cut by the safety filter before any search).
-# Since 2026-10-30 a deepened line is scored against each of the opponent's reply openings, the worst for the bot counting
-# (reply_min, Martin's G2EFVA: Serval's Roar spared his 9-strength Capybara beside the den because one sampled reply left a
-# Sardine win open, and that one reply scored as a win). Since that day a bot whose every line reads as lost plays to its
-# outs: the lost roots are replayed against 20 fresh sampled hands and ranked by how many fail to win (outs, Martin's YFRCBG:
-# thirty Lions put on 5,1 and 4,1 with both den fronts open, because among lost lines the one losing no Lion scored best).
-EXPERT = ("referee_learned:eval=wave2_slot_r4_10_live,depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,"
-          "w.buried_presence=0.25,w.food_progress=0,w.food_curve=3,w.food_proximity=60,w.food_race=true,quiesce=true,mulligan=true,"
-          "decisive=500,den_open=true,reply_min=true,outs=20")
-# The Normal pilot is the one-turn searcher with the den-front reach term (2026-10-21, Martin's game GMIDKA: it left two
-# cut-off Falcons in its den front for two turns). The Expert sees those threats through its reply search and the term
-# cost it a point on average (results/bot_quality/wave2-reach), so it stays off there.
-NORMAL = "turn:w.hq_threat_reach=0.5"
-# Since 2026-11-10 the Expert plans its whole turn at once (engine_rs/src/bots/atomic.rs, docs/bots.md): every turn it
-# could play scored by the board it leaves, then the six best followed through the opponent's reply over 20 imagined
-# hands, the candidate network (`cand_v4`) choosing which actions a line looks at. EXPERT above stays its base: the
-# evaluation, the imagined hands and the mulligan are that search's, and the tools build their bots from it. Against
-# that search on Martin's 12 decks it won 61.2% of the games the old one won 53.2% of (+9.1 points a deck, 95% interval
-# +4.3 to +13.7, 11 decks, results/bot_quality/wts20-m12*). A search has 20 s and the whole turn 30 (Martin's number;
-# a turn that draws searches again with what is left; `turn_budget`). A level the clock cuts keeps the turns it finished
-# when there are two or more (`partial=1`: the same level at a narrower width, chosen among turns that include the one
-# it would have played anyway; a quarter of the searches on the Mac were cut and dropped whole, more in a slower browser).
-EXPERT_TURN = (EXPERT.replace("referee_learned", "atomic_learned").replace("time_budget=8", "time_budget=20")
-               + ",rounds=2,draws=1,inner=1,width2=6,beam=6,hands=20,cand=animal_kingdom/data/learned/cand_v4.json,threads=1,turn_budget=30,partial=1")
-BOT_LEVELS = {"easy": "easy", "normal": NORMAL, "expert": EXPERT_TURN}
-
-
-def conditional_reach(state: GameState, card_id: str) -> bool:
-    """A card in hand whose Reach isn't printed but holds now (the Great White Shark after a removal) glows, as a Roar
-    whose condition holds does."""
-    return "Reach" not in state.cards[card_id].keywords and statics.reach_of(state, card_id) > 0
-
-
-def leader_view(st: GameState, p: str) -> Optional[dict]:
-    """A player's leader as both players see it (public, the leaders prototype): which card, the kind of ability, the
-    ability as it reads now, and its live state (Grimm's number and progress, Xanthe's stage, a spent power)."""
-    lead = st.leaders.get(p)
-    if lead is None:
-        return None
-    lid = lead["id"]
-    kind, text = L.LEADERS[lid]
-    out = {"id": lid, "kind": kind, "text": text, "usable": st.current == p and st.pending is None and st.result is None
-           and rules.turn_actions(st) - st.actions_taken_this_turn >= ability_cost(st) and leader_usable(st, p),
-           **({"cost": ability_cost(st)} if st.config.mana and kind != "passive" else {})}
-    if lid == L.GRIMM:
-        n, per = grimm_draws(st, lead), st.config.grimm_leader_per
-        out.update(draws=n, kills=lead["kills"], per=per, toward=lead["kills"] % per,
-                   text=f"Draw {n} animals. Draws one more animal for every {per} enemies removed.")
-    elif lid == L.YUKI:
-        uses = st.config.yuki_leader_uses
-        left = uses - lead["stage"]
-        out.update(per=uses, toward=left, spent=left <= 0, text=f"{text} (Left: {left}/{uses})")
-    elif lid == L.XANTHE:
-        name, does = L.XANTHE_STAGES[lead["stage"]]
-        out.update(stage=lead["stage"], stageName=name, spent=lead["spent"],
-                   text=("Used." if lead["spent"] else f"{name}: {does}" if does else f"{name}: nothing to use yet.")
-                   + " Evolves at each of your Dawns: Egg, Caterpillar, Chrysalis, Butterfly, Monarch.")
-    return out
-
-
-def bot_for(level: str, seed: int, map_id: str = MAP_ID, ruleset: str = "default"):
-    if ruleset != "default":   # the Rust engine the levels think on knows only the default rules: the Python greedy bot, any level
-        return make_bot("greedy", seed, python_only=True)
-    if level in tutorial.BOTS.values():
-        return tutorial.TutorialBot(seed=seed, lesson=next(n for n, b in tutorial.BOTS.items() if b == level))
-    # The Expert's network reads today's 15 crossroads by place; on another board it is the Normal search until it is retrained.
-    if map_id != MAP_ID and level == "expert":
-        level = "normal"
-    return make_bot(BOT_LEVELS[level], seed)
-
-
-def deck_list(slug: str) -> list[str]:
-    """A seat's deck as card ids: a premade deck, or one of the tutorial's fixed deals."""
-    return list(tutorial.DECKS[slug]) if slug in tutorial.DECKS else load_premade_deck(slug)
+DECK_NAMES: dict[str, str] = {}   # deck slug -> the name its builder gave it (web/custom_decks.py)
 
 
 @dataclass
 class Seat:
     token: str
     name: str
-    bot: Optional[str] = None        # bot level, or None for a human
+    bot: bool = False
     deck: Optional[str] = None
     ready: bool = False
     profile: Optional[str] = None    # the player's profile id, when they have one
-    ladder: Optional[str] = None     # on the ladder (a ranked match): a person's profile id, or a bot's ladder id
-    rating: Optional[str] = None     # a ranked match: the seat's rating as shown when it opened ("1781", "1500?"); a person's
-                                     # only in the top league (docs/ranked-leagues.md)
-    league: Optional[str] = None     # a ranked match: a person's league when it opened ("League 5"); bots have none
 
     @property
     def is_bot(self) -> bool:
-        return self.bot is not None
+        return self.bot
 
 
 @dataclass
@@ -176,7 +58,7 @@ class Move:
     """One top-level action and everything that resolved under it (choices included)."""
     round: int
     seat: str
-    kind: str                        # "draw" | "place" | "roam" (card: the animal that roamed)
+    kind: str                        # "place" | "leader"
     card: Optional[str] = None
     target: Optional[list] = None
     fx: list = field(default_factory=list)
@@ -189,51 +71,26 @@ class Move:
 
 
 def _snapshot(state: GameState) -> dict:
-    return {
-        "board": {cr: [(u.iid, u.card_id, u.owner) for u in st] for cr, st in state.board.items() if st},
-        "hands": {p: {u.iid for u in state.hands[p]} for p in "AB"},
-        "remove": len(state.remove_pile),
-        "food": dict(state.food),
-        "turn": state.turn_counter,
-    }
-
-
-def _jsonable(x):
-    """Sets (hand iids in a move's snapshot) become sorted lists; membership tests still work."""
-    if isinstance(x, dict):
-        return {k: _jsonable(v) for k, v in x.items()}
-    if isinstance(x, (list, tuple)):
-        return [_jsonable(v) for v in x]
-    if isinstance(x, set):
-        return sorted(x)
-    return x
+    return {"board": {cr: [(u.iid, u.card_id, u.owner) for u in st] for cr, st in state.board.items() if st},
+            "hands": {p: sorted(u.iid for u in state.hands[p]) for p in "AB"}, "remove": len(state.remove_pile),
+            "food": dict(state.food), "turn": state.turn_counter}
 
 
 def _effects(events: list, move: Move) -> list:
-    """What a move did, read from the engine's events in the order they happened (public facts only): an enemy covered,
-    each removal and bounce (exactly which unit), cards drawn, food from cards (a turn's region income is not the move's)."""
+    """What a move did, read from the engine's events in order (public facts only): an enemy covered, each removal, cards
+    drawn, food from cards (a turn's region income is not the move's), what a raid destroyed."""
     fx = []
     for e in events:
         if e["e"] == "cover" and e["owner"] != move.seat:
             fx.append({"k": "cover", "card": e["card"], "owner": e["owner"]})
-        elif e["e"] == "place" and e.get("reveal"):      # Vesper: out of a hand or deck onto the board
-            fx.append({"k": "placed", "card": e["card"], "owner": e["player"]})
         elif e["e"] == "remove" and e.get("cr"):
             fx.append({"k": "remove", "card": e["card"], "owner": e["owner"]})
-        elif e["e"] == "bounce":
-            fx.append({"k": "bounce", "card": e["card"], "owner": e["owner"]})
-        elif e["e"] == "to_deck":
-            fx.append({"k": "to_deck", "card": e["card"], "owner": e["owner"]})
         elif e["e"] == "draw":
             fx.append({"k": "draw", "seat": e["player"], "n": len(e["cards"])})
         elif e["e"] == "food" and not e.get("income"):
             fx.append({"k": "food", "seat": e["player"], "n": e["n"]})
-        elif e["e"] == "pay" and e.get("card") == "food_thief":     # the actions prototype: food taken from the opponent
-            fx.append({"k": "lose", "seat": e["player"], "n": e["n"]})
-        elif e["e"] == "raid" and e["n"]:                 # the mana ruleset's den raid: what the raided den lost
+        elif e["e"] == "raid" and e["n"]:
             fx.append({"k": "lose", "seat": e["den"], "n": e["n"]})
-        elif e["e"] == "scare":                           # the mana ruleset: a covered animal scared back into its deck
-            fx.append({"k": "scare", "card": e["card"], "owner": e["owner"]})
     merged = []   # several draws or food gains by one player in a row read as one
     for f in fx:
         if merged and f["k"] in ("draw", "food") and merged[-1]["k"] == f["k"] and merged[-1]["seat"] == f["seat"]:
@@ -247,11 +104,21 @@ def public_event(e: dict, viewer: str) -> dict:
     """An event as `viewer` may see it: the cards drawn into the other player's hand stay hidden (only how many)."""
     if e["e"] == "draw" and e["player"] != viewer:
         return {**{k: v for k, v in e.items() if k != "cards"}, "n": len(e["cards"])}
-    if e["e"] == "to_hand" and e["player"] != viewer and not e.get("public"):
-        return {k: v for k, v in e.items() if k not in ("card",)}
-    if e["e"] == "leave_hand" and e["owner"] != viewer:   # which card went back to their deck is theirs to know
-        return {k: v for k, v in e.items() if k not in ("card",)}
     return e
+
+
+def leader_view(st: GameState, p: str) -> Optional[dict]:
+    """A player's leader as both players see it: which card, its kind, its ability, whether its power can be used now, and
+    what the power costs."""
+    lead = st.leaders.get(p)
+    if lead is None:
+        return None
+    lid = lead["id"]
+    kind, text = L.LEADERS[lid]
+    cost = st.config.leader_power_cost
+    usable = st.current == p and st.pending is None and st.result is None and rules.mana_left(st, p) >= cost \
+        and leader_usable(st, p)
+    return {"id": lid, "kind": kind, "text": text, "usable": usable, **({"cost": cost} if kind == "power" else {})}
 
 
 class Match:
@@ -261,176 +128,64 @@ class Match:
         self.events: list[dict] = []     # the game's engine events, numbered (`seq`); see _take_events
         self.seq = 0
         self.played: dict[str, int] = {}   # seat -> the last event its screen has played out (server._watched); not saved
-        self.phase = "lobby"             # lobby -> prematch -> playing -> game_over -> match_over
-        self.results: list[dict] = []    # one {winner, reason, turns} per finished game
-        self.hold = False                # the tutorial's coach is talking: its opponent waits (not saved)
-        self.last_game: Optional[dict] = None   # the previous match's last game, so a rematch's loser goes first
+        self.phase = "lobby"             # lobby -> playing -> match_over
+        self.result: Optional[dict] = None   # {winner, reason, turns, first} once the game is over
+        self.last_result: Optional[dict] = None   # the previous game's, so a rematch's loser goes first
         self.state: Optional[GameState] = None
         self.history: list[Move] = []
-        self.bots: dict[str, object] = {}
+        self.bots: dict[str, GreedyBot] = {}
         self.version = 0                 # bumped on every change; the server pushes on bumps
         self.seed: Optional[int] = None
-        self.actions: list[dict] = []    # the current game's actions, for the replayable log
+        self.actions: list[dict] = []    # the game's actions, for the replayable log
         self.action_times: list[float] = []   # seconds since the game started, one per action
         self.started_at = 0.0
-        self.on_game_end = None          # callback(match, log record); the server saves human games
-        self.on_match_end = None         # callback(match); the server adds it to the players' histories
-        self.rematches = 0               # a rematch starts a new series in the same match
-        self.rematch_offer: Optional[str] = None     # a friend match: the seat that offered a rematch, until the other answers
+        self.on_game_end = None          # callback(match, log record): the server saves a game with a person in it
+        self.rematches = 0
+        self.rematch_offer: Optional[str] = None     # between two people: the seat that offered a rematch
         self.rematch_declined: Optional[str] = None  # ...and the seat that declined it
-        self.takeover = False            # a game played on from a logged position (start_from): neither logged nor rated
-        self.map_id = MAP_ID             # the board this match is played on (MAPS)
-        self.draw_action = True          # False: the Draw action is off, cards come from the turn's free card and from effects (the trial of 2026-11-20)
-        self.ruleset = "default"         # the rules this match plays (RULESETS); "mana" sets its own board, hands and no Draw action
-        self.last_log: Optional[dict] = None   # the last finished game (game_log), for its replay
         self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
-        self.schedule: Optional[list[dict]] = None   # gauntlet: one {seat, deck, first} per game, in order
-
-    def make_gauntlet(self, decks: list[str], games: int, rotating: str = "B", mirror: bool = False) -> None:
-        """A fixed series instead of a best-of-3: `games` games with each of `decks`, one deck at a time, who starts
-        alternating game by game across the whole series (one game a deck still splits the field: Martin, 2026-10-25). The decks rotate
-        through seat `rotating`: the bot's seat for a gauntlet, the player's for a reverse one; `mirror` puts
-        both seats on each deck (Martin, 2026-10-21: the skill gap, measured with the deck held equal)."""
-        self.schedule = [{"seat": rotating, "deck": d, "first": "A" if k % 2 == 0 else "B", **({"mirror": True} if mirror else {})}
-                         for k, d in enumerate(d for d in decks for _ in range(games))]
-        self.seats[rotating].deck = self.schedule[0]["deck"]
-        if mirror:
-            self.seats["A"].deck = self.schedule[0]["deck"]
 
     # ----------------------------------------------------------------- seats
     def seat_of(self, token: str) -> Optional[str]:
         return next((s for s, seat in self.seats.items() if seat.token == token), None)
 
-    def config(self) -> Config:
-        """The rules this match's games play: its ruleset, and in the default ruleset the Draw action trial's switch."""
-        if self.ruleset != "default":
-            return Config.default().for_ruleset(self.ruleset)
-        return Config.default().sweep(draw_action=self.draw_action)
-
-    def set_ruleset(self, name: str) -> None:
-        """Play this match under ruleset `name`, on that ruleset's board. Only before a game starts."""
-        if name not in RULESETS:
-            raise EngineError(f"no ruleset {name!r}")
-        if self.state is not None:
-            raise EngineError("the rules are fixed for the whole match")
-        self.ruleset = name
-        self.map_id = RULESET_MAPS.get(name, self.map_id)
-
     def join(self, seat: Seat) -> str:
         if "B" in self.seats:
             raise EngineError("match is full")
         self.seats["B"] = seat
-        self._maybe_prematch()
+        if all(s.deck for s in self.seats.values()):
+            for s in self.seats.values():
+                s.ready = True
+            self._start_game()
+        self.version += 1
         return "B"
 
-    def set_deck(self, s: str, deck: str) -> None:
-        if deck not in DECK_NAMES:
-            raise EngineError(f"unknown deck {deck!r}")
-        if self.phase not in ("lobby", "prematch"):
-            raise EngineError("decks are fixed for the whole match")
-        self.seats[s].deck = deck
-        self.seats[s].ready = False
-        self._maybe_prematch()
-
-    def _maybe_prematch(self) -> None:
-        if len(self.seats) == 2 and all(seat.deck for seat in self.seats.values()):
-            # No Ready step (Martin, 2026-10-01): both decklists are one hover away in the game, so a match starts as
-            # soon as both seats are filled.
-            self.phase = "prematch"
-            for seat in self.seats.values():
-                seat.ready = True
-            self._start_game()
-        self.version += 1
-
-    def ready(self, s: str) -> None:
-        if self.phase != "prematch":
-            return   # every match starts on its own now; an older client's Ready is harmless
-        self.seats[s].ready = True
-        if all(seat.ready for seat in self.seats.values()):
-            self._start_game()
-        self.version += 1
-
-    # ----------------------------------------------------------------- games
-    @property
-    def tutorial(self) -> bool:
-        """The tutorial: its opponent is the tutorial's bot."""
-        return "B" in self.seats and self.seats["B"].bot in tutorial.BOTS.values()
-
-    def lesson(self) -> int:
-        """The tutorial's lesson (1 or 2); 0 for any other match."""
-        bot = self.seats["B"].bot if "B" in self.seats else None
-        return next((n for n, b in tutorial.BOTS.items() if b == bot), 0)
-
-    def score(self) -> dict:
-        return {p: sum(1 for r in self.results if r["winner"] == p) for p in "AB"}
-
+    # ----------------------------------------------------------------- the game
     def _start_game(self) -> None:
-        # Game 1 is a coin flip; afterwards (and in a rematch) the loser of the previous game goes first
-        # (Martin, 2026-09-26). A drawn game keeps the previous first player.
-        first = None
-        if self.schedule:
-            entry = self.schedule[len(self.results)]
-            self.seats[entry.get("seat", "B")].deck, first = entry["deck"], entry["first"]
-            if entry.get("mirror"):               # a mirror gauntlet: both seats on the same deck, the pilot the only variable
-                self.seats["A"].deck = entry["deck"]
-        elif self.results or self.last_game:
-            last = self.results[-1] if self.results else self.last_game
-            first = other_player(last["winner"]) if last["winner"] else last["first"]
+        # Game 1 is a coin flip; in a rematch the loser of the last game goes first. A draw keeps the first player.
+        last = self.last_result
+        first = (other_player(last["winner"]) if last["winner"] else last["first"]) if last else None
         seed = self.seed = self.rng.randrange(1 << 30)
-        self.actions = []
-        self.action_times = []
-        self.started_at = time.time()
-        if self.tutorial:     # the fixed deal the lessons are written for: you first, no mulligan
-            self.state = new_game(deck_list(self.seats["A"].deck), deck_list(self.seats["B"].deck), seed,
-                                  map_id=MAP_ID, first_player="A", stacked=True, config=tutorial.config(2 if self.seats["B"].bot == tutorial.BOTS[2] else 1))
-            tutorial.set_up(self.state, 2 if self.seats["B"].bot == tutorial.BOTS[2] else 1)
-        else:
-            self.state = new_game(load_premade_deck(self.seats["A"].deck),
-                                  load_premade_deck(self.seats["B"].deck), seed,
-                                  map_id=self.map_id, first_player=first,
-                                  leaders=leaders_for(self.seats["A"].deck, self.seats["B"].deck),
-                                  config=self.config())
-        self.bots = {s: bot_for(seat.bot, seed + i, self.map_id, self.ruleset) for i, (s, seat) in enumerate(self.seats.items())
-                     if seat.is_bot}
-        self.history = []
-        self.events, self.seq = [], 0
+        self.actions, self.action_times, self.started_at = [], [], time.time()
+        decks = {p: self.seats[p].deck for p in "AB"}
+        self.state = new_game(load_deck(decks["A"]), load_deck(decks["B"]), seed, first_player=first,
+                              leaders={p: DECK_LEADERS.get(d) for p, d in decks.items()})
+        self.bots = {s: GreedyBot(seed + i) for i, (s, seat) in enumerate(self.seats.items()) if seat.is_bot}
+        self.history, self.events, self.seq, self.result = [], [], 0, None
         self.phase = "playing"
         self.clock = None if any(seat.is_bot for seat in self.seats.values()) else \
             {"bank": {"A": CLOCK_BANK, "B": CLOCK_BANK}, "holder": None, "turn": -1, "free": 0.0, "since": time.time(),
              "mull_until": time.time() + CLOCK_MULLIGAN, "out": {"A": 0, "B": 0}}
         self._clock_update()
 
-    def start_from(self, state: GameState, seed: int) -> None:
-        """A game from a given position: a takeover of a logged game (server.create_match `from`; Martin, 2026-10-21:
-        "what would you do as the bot here?", asked on the real board). The seats' decks are in the state already, the
-        clock is off, and whoever the position says is to act, acts. Neither logged nor rated (`takeover`)."""
-        self.seed = seed
-        self.actions, self.action_times = [], []
-        self.started_at = time.time()
-        self.state = state
-        self.bots = {s: bot_for(seat.bot, seed + i, self.map_id, self.ruleset) for i, (s, seat) in enumerate(self.seats.items()) if seat.is_bot}
-        self.history, self.events, self.seq = [], [], 0
-        self.phase = "playing"
-        self.clock = None
-        self.takeover = True
-        self._clock_update()
-        self.version += 1
-
-    def next_game(self) -> None:
-        if self.phase != "game_over":
-            raise EngineError("no game to continue from")
-        self._start_game()
-        self.version += 1
-
     def friendly(self) -> bool:
-        """Two people, unranked: a rematch is an offer the other accepts or declines (Martin, 2026-11-05, as on chess.com)."""
-        b = self.seats.get("B")
-        return b is not None and not b.is_bot and not self.seats["A"].is_bot and not (self.seats["A"].ladder and b.ladder)
+        """Two people: a rematch is an offer the other accepts or declines."""
+        return "B" in self.seats and not any(s.is_bot for s in self.seats.values())
 
     def offer_rematch(self, s: str) -> None:
-        """A seat's Rematch: against a bot it starts one; in a friend match it offers one, and the other's Rematch accepts."""
+        """A seat's Rematch: against a bot it starts one; between two people it offers one, and the other's accepts."""
         if self.phase != "match_over":
             raise EngineError("the match is still on")
         if not self.friendly() or self.rematch_offer == other_player(s):
@@ -451,22 +206,13 @@ class Match:
         if self.phase != "match_over":
             raise EngineError("the match is still on")
         self.rematch_offer = self.rematch_declined = None
-        self.last_game = self.results[-1]
-        self.results = []
-        self.state = None
-        self.history = []
-        self.events, self.seq = [], 0
+        self.last_result = self.result
         self.rematches += 1
-        self.phase = "prematch"
-        for seat in self.seats.values():
-            seat.ready = True
         self._start_game()
         self.version += 1
 
     def to_act(self) -> Optional[str]:
-        if self.phase != "playing":
-            return None
-        return self.state.player_to_act()
+        return self.state.player_to_act() if self.phase == "playing" else None
 
     def _take_events(self) -> list:
         """The engine's new events, numbered for the game (the view sends them; a client plays what it hasn't seen)."""
@@ -478,12 +224,12 @@ class Match:
         return new
 
     def mulliganing(self) -> bool:
-        """The game's opening mulligans are under way (both at once, on one shared clock window)."""
+        """The opening mulligans are under way (both at once, on one shared clock window)."""
         st = self.state
         return bool(st and st.result is None and st.pending and st.pending.get("kind") == "mulligan")
 
     def act(self, s: str, action, auto: bool = False) -> None:
-        """Apply one action for seat `s`: a top-level move or a pending sub-choice. `auto`: the clock acted for them."""
+        """Apply one action for seat `s`: a top-level move or a pending choice. `auto`: the clock acted for them."""
         if not auto and self.clock and "out" in self.clock:
             self.clock["out"][s] = 0
         if self.phase != "playing":
@@ -494,28 +240,23 @@ class Match:
         if state.player_to_act() != s and rules.early_mulligan(state, s) is not None:   # both mulligan at once
             rules.apply_early_mulligan(state, s, action)
             self._take_events()
-            self.actions.append({**action.to_dict(), "by": s})   # replays apply it the same way (replay.game_views)
+            self.actions.append({**action.to_dict(), "by": s})   # a replay applies it the same way (rules.apply_logged)
             self.action_times.append(round(time.time() - self.started_at, 1))
             self.version += 1
             return
         if state.player_to_act() != s:
             raise EngineError("not your decision")
-        # A placement starts a history entry, including a free extra play inside a Roar;
-        # draws and sub-choices fold into the entry they belong to.
-        starts_move = (state.pending is None and not isinstance(action, PassAction)) or isinstance(action, PlaceAction)
+        starts_move = state.pending is None and isinstance(action, (PlaceAction, LeaderAction))
         pre = _snapshot(state) if starts_move else None
-        roamer = state.top_unit(action.origin).card_id if isinstance(action, (RoamAction, ActAction)) and state.top_unit(action.origin) else None
         rules.apply_action(state, action)    # validates; raises EngineError if illegal
         new = self._take_events()
         self.actions.append(action.to_dict())
         self.action_times.append(round(time.time() - self.started_at, 1))
         if starts_move:
-            placed, roamed, acted = isinstance(action, PlaceAction), isinstance(action, RoamAction), isinstance(action, ActAction)
-            led = isinstance(action, LeaderAction)
-            self.history.append(Move(
-                round=pre["turn"] // 2 + 1, seat=s, kind="place" if placed else "roam" if roamed else "act" if acted else "leader" if led else "draw",
-                pre=pre, card=action.card_id if placed else roamer if not led else (state.leaders[s]["id"] if s in state.leaders else None),
-                target=list(action.target) if placed or roamed else ["cr", action.origin] if acted else None))
+            placed = isinstance(action, PlaceAction)
+            self.history.append(Move(round=pre["turn"] // 2 + 1, seat=s, kind="place" if placed else "leader", pre=pre,
+                                     card=action.card_id if placed else state.leaders[s]["id"],
+                                     target=list(action.target) if placed else None))
         if self.history:
             self.history[-1].events += new
             self.history[-1].fx = _effects(self.history[-1].events, self.history[-1])
@@ -525,8 +266,8 @@ class Match:
 
     # ----------------------------------------------------------------- turn clock
     def _clock_update(self, now: Optional[float] = None) -> None:
-        """Charge the time since the last update to whoever held the decision, then hand the
-        clock to whoever must act now: a fresh free window if it changed hands or a new turn began."""
+        """Charge the time since the last update to whoever held the decision, then hand the clock to whoever must act
+        now: a fresh free window if it changed hands or a new turn began."""
         c = self.clock
         if c is None:
             return
@@ -547,8 +288,7 @@ class Match:
 
     def played_out(self, s: str, seq: int, now: Optional[float] = None) -> bool:
         """Seat `s`'s screen has played the events up to `seq`: if its clock was waiting for that, the wait (up to
-        CLOCK_CATCHUP_MAX) is given back, the clock starting from now (player report 2026-10-04: the opponent's moves
-        animated while the clock ran). Returns whether the clock changed."""
+        CLOCK_CATCHUP_MAX) is given back, the clock starting from now. Returns whether the clock changed."""
         self.played[s] = seq
         c = self.clock
         if not c or c.get("catchup") is None or c["holder"] != s or seq < c["catchup"]:
@@ -568,8 +308,8 @@ class Match:
         return c["since"] + c["free"] + c["bank"][c["holder"]]
 
     def time_out(self, now: Optional[float] = None) -> bool:
-        """If the player to act is out of time, act for them: decline or take the first option of a
-        choice, else end their turn. Returns whether it acted."""
+        """If the player to act is out of time, act for them: decline or take the first option of a choice, else end
+        their turn. Returns whether it acted."""
         deadline = self.clock_deadline()
         now = time.time() if now is None else now
         if deadline is None or now < deadline:
@@ -595,7 +335,6 @@ class Match:
         return True
 
     def concede(self, s: str) -> None:
-        """The seat gives up the game in play; the series goes on as after any other loss."""
         if self.phase != "playing" or self.state.result is not None:
             raise EngineError("no game to concede")
         self._clock_update()
@@ -607,39 +346,24 @@ class Match:
         if result is None:
             return
         self.state.result = result
-        self.results.append({"winner": result.winner, "reason": result.reason,
-                             "turns": self.state.turn_counter // 2 + 1,
-                             "first": self.state.first_player, "opp_deck": self.seats["B"].deck,
-                             "series_deck": self.seats[self.schedule[len(self.results)].get("seat", "B")].deck
-                             if self.schedule else None})
-        self.last_log = self.game_log()
+        self.result = {"winner": result.winner, "reason": result.reason, "turns": self.state.turn_counter // 2 + 1,
+                       "first": self.state.first_player}
         for c in self.state.caps:      # a turn a cap ended: a looping combination of cards, to read in the log
-            log.warning("turn capped (%s) in match %s game %s, turn %s, %s: cards %s", c["cap"], self.id, len(self.results),
-                        c["turn"], c["player"], ", ".join(c["cards"]) or "?")
+            log.warning("turn capped (%s) in match %s, turn %s, %s: cards %s", c["cap"], self.id, c["turn"], c["player"],
+                        ", ".join(c["cards"]) or "?")
+        self.phase = "match_over"
         if self.on_game_end:
-            self.on_game_end(self, self.last_log)
-        score = self.score()
-        over = max(score.values()) >= GAMES_TO_WIN or len(self.results) >= 2 * GAMES_TO_WIN - 1
-        if self.schedule:
-            over = len(self.results) >= len(self.schedule)
-        self.phase = "match_over" if over else "game_over"
-        if over and self.on_match_end:
-            self.on_match_end(self)
+            self.on_game_end(self, self.game_log())
 
     def game_log(self) -> dict:
-        """The finished game in the sim.replay log format (replayable with no bot compute)."""
-        r = self.results[-1]
-        return {"deck_a": self.seats["A"].deck, "deck_b": self.seats["B"].deck, "seed": self.seed,
-                "map_id": self.state.game_map.id, "first_player": r["first"], "first_turn_actions": self.state.config.first_turn_actions,
-                "first_player_opening_draw": self.state.config.first_player_opening_draw,
-                **({"draw_action": False} if not self.state.config.draw_action else {}),
-                **({"ruleset": self.state.config.ruleset} if self.state.config.ruleset != "default" else {}),
-                "bots": [self.seats[p].bot or "human" for p in "AB"],
+        """The finished game as a log line (animal_kingdom/replay.py replays it with no bot compute)."""
+        r = self.result
+        return {"seed": self.seed, "first_player": r["first"], "bots": ["bot" if self.seats[p].is_bot else "human" for p in "AB"],
                 "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
                 "actions": list(self.actions), "action_times": list(self.action_times),
-                "match_id": self.id, "game_no": len(self.results), "series": self.rematches,
+                "match_id": self.id, "series": self.rematches,
                 "lists": [list(self.state.starting_decks[p]) for p in "AB"],
-                **({"leaders": {p: l["id"] for p, l in self.state.leaders.items()}} if self.state.leaders else {}),
+                "leaders": {p: lead["id"] for p, lead in self.state.leaders.items()},
                 **({"capped": [dict(c) for c in self.state.caps]} if self.state.caps else {})}
 
     def bot_move(self):
@@ -648,104 +372,57 @@ class Match:
         state = self.state.clone()
         return self.bots[s].choose(state.view_for(s), rules.legal_actions(state), state)
 
-    def fresh_bot(self, s: str) -> None:
-        """A new bot for seat `s`, when its search was abandoned: the stuck thread keeps the old one."""
-        self.bots[s] = bot_for(self.seats[s].bot, self.rng.randrange(1 << 30), self.map_id, self.ruleset)
-
     def fallback_move(self):
-        """A legal move when the bot's own choice failed: the Easy bot's, else the first legal action."""
-        s = self.to_act()
-        state = self.state.clone()
-        legal = rules.legal_actions(state)
-        try:
-            return make_bot("greedy", self.seed).choose(state.view_for(s), legal, state)
-        except Exception:
-            log.exception("fallback bot failed in match %s", self.id)
-            return legal[0]
+        """A legal move when the bot's own choice failed: the first legal action."""
+        return rules.legal_actions(self.state)[0]
 
     # ----------------------------------------------------------------- persistence
     def to_dict(self) -> dict:
         """Everything needed to resume this match after a server restart."""
         return {"id": self.id, "seats": {p: asdict(seat) for p, seat in self.seats.items()},
-                "phase": self.phase, "results": self.results, "seed": self.seed,
-                "actions": self.actions, "action_times": self.action_times,
-                "started_at": self.started_at, "created": self.created.isoformat(),
-                "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
-                "takeover": self.takeover, "map_id": self.map_id, "draw_action": self.draw_action, "ruleset": self.ruleset, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
+                "phase": self.phase, "result": self.result, "last_result": self.last_result, "seed": self.seed,
+                "actions": self.actions, "action_times": self.action_times, "started_at": self.started_at,
+                "created": self.created.isoformat(), "version": self.version, "rematches": self.rematches,
+                "clock": self.clock, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
                 "state": self.state.to_dict() if self.state is not None else None,
-                "history": [_jsonable(asdict(m)) for m in self.history],
-                "events": self.events, "seq": self.seq}
+                "history": [asdict(m) for m in self.history], "events": self.events, "seq": self.seq}
 
     @staticmethod
     def from_dict(d: dict) -> "Match":
         seats = {p: Seat(**s) for p, s in d["seats"].items()}
         m = Match(d["id"], seats["A"])
         m.seats = seats
-        m.phase, m.results, m.seed = d["phase"], d["results"], d["seed"]
-        m.actions, m.action_times = d["actions"], d["action_times"]
-        m.started_at, m.schedule, m.version = d["started_at"], d["schedule"], d["version"] + 1
-        m.rematches = d.get("rematches", 0)
-        m.rematch_offer, m.rematch_declined = d.get("rematch_offer"), d.get("rematch_declined")
-        m.last_game = d.get("last_game")
-        m.last_log = d.get("last_log")
-        m.takeover = d.get("takeover", False)
-        m.map_id = d.get("map_id", MAP_ID)
-        m.draw_action = d.get("draw_action", True)
-        m.ruleset = d.get("ruleset", "default")
-        m.clock = d.get("clock")
+        m.phase, m.result, m.last_result, m.seed = d["phase"], d["result"], d["last_result"], d["seed"]
+        m.actions, m.action_times, m.started_at = d["actions"], d["action_times"], d["started_at"]
+        m.version, m.rematches = d["version"] + 1, d["rematches"]
+        m.rematch_offer, m.rematch_declined = d["rematch_offer"], d["rematch_declined"]
+        m.clock = d["clock"]
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's
         m.created = datetime.fromisoformat(d["created"])
-        m.state = GameState.from_dict(d["state"], config=m.config()) if d["state"] else None
+        m.state = GameState.from_dict(d["state"]) if d["state"] else None
         m.history = [Move(**h) for h in d["history"]]
-        m.events, m.seq = d.get("events", []), d.get("seq", 0)
+        m.events, m.seq = d["events"], d["seq"]
         if m.state is not None and m.seed is not None:
-            m.bots = {s: bot_for(seat.bot, m.seed + i, m.map_id, m.ruleset) for i, (s, seat) in enumerate(m.seats.items())
-                      if seat.is_bot}
+            m.bots = {s: GreedyBot(m.seed + i) for i, (s, seat) in enumerate(m.seats.items()) if seat.is_bot}
         return m
 
     # ----------------------------------------------------------------- views
     def view(self, s: str) -> dict:
-        opp = other_player(s)
         v = {
-            "id": self.id, "you": s, "phase": self.phase, "version": self.version, "takeover": self.takeover, "map": self.map_id,
-            "ruleset": self.ruleset,
+            "id": self.id, "you": s, "phase": self.phase, "version": self.version,
             # a seat's deck by name only for you or a bot: a person's deck name is theirs (their list is open, by rule)
-            "seats": {p: {"name": seat.name, "bot": seat.bot, "ready": seat.ready, **({"rating": seat.rating} if seat.rating else {}),
-                          **({"league": seat.league} if seat.league else {}),
+            "seats": {p: {"name": seat.name, "bot": seat.is_bot, "ready": seat.ready,
                           **({"deck": seat.deck, "deckName": DECK_NAMES.get(seat.deck, seat.deck)} if p == s or seat.is_bot else {})}
                       for p, seat in self.seats.items()},
-            "results": [{k: r[k] for k in ("winner", "reason", "turns")} for r in self.results],
-            "score": self.score(),
-            "lists": {p: dict(Counter(deck_list(seat.deck)))
-                      for p, seat in self.seats.items() if seat.deck},
+            "result": self.result and {k: self.result[k] for k in ("winner", "reason", "turns")},
+            "lists": {p: dict(Counter(load_deck(seat.deck))) for p, seat in self.seats.items() if seat.deck},
             "game": None,
-            "ranked": bool(self.seats["A"].ladder and self.seats.get("B") and self.seats["B"].ladder),
         }
-        if self.rematch_offer or self.rematch_declined:   # a friend match: who offered a rematch, or declined one
+        if self.rematch_offer or self.rematch_declined:
             v["rematch"] = {"offer": self.rematch_offer, "declined": self.rematch_declined}
-        if getattr(self, "rating_change", None) and s in self.rating_change:   # a ranked match just rated: your before and after
-            v["rating"] = self.rating_change[s]
-        if getattr(self, "tier_change", None) and s in self.tier_change:   # ...and what it did to your league and stars
-            v["league"] = self.tier_change[s]
-        if self.schedule:
-            record = {}
-            for r in self.results:
-                d = r.get("series_deck") or r["opp_deck"]
-                w, l = record.get(d, (0, 0))
-                record[d] = (w + (r["winner"] == "A"), l + (r["winner"] == "B"))
-            n = len(self.results)
-            nxt = self.schedule[n] if n < len(self.schedule) else None
-            v["gauntlet"] = {"played": n, "total": len(self.schedule),
-                             "next": nxt and {"deckName": DECK_NAMES.get(nxt["deck"], nxt["deck"]),
-                                              "first": nxt["first"], "yours": nxt.get("seat", "B") == s},
-                             "record": [{"deckName": DECK_NAMES.get(d, d), "w": w, "l": l}
-                                        for d, (w, l) in record.items()]}
-        if self.ruleset != "default":     # how this ruleset reads its cards and keywords (the stored text is the default's)
-            v["texts"], v["keywords"] = RULESET_TEXT[self.ruleset], RULESET_KEYWORDS[self.ruleset]
         if self.state is not None:
-            v["game"] = self._game_view(s, opp)
-            v["game"]["drawCount"] = self.state.config.draw_action_count   # what the Draw action draws (the deck says it)
+            v["game"] = self._game_view(s, other_player(s))
         return v
 
     def _game_view(self, s: str, opp: str) -> dict:
@@ -754,100 +431,61 @@ class Match:
         timers = {x["iid"]: x["remaining"] for x in st.scheduled}
         board = {}
         for cr, stack in st.board.items():
-            if not stack:
-                continue
-            # "hidden": the enemy can't choose it right now (Stealth, printed or from an adjacent Armadillo).
+            # "hidden": the enemy can't choose it (Stealth); "spikes" until spent; "armor": no ability removes it
             board[cr] = [{"iid": u.iid, "id": u.card_id, "owner": u.owner, "str": effective_strength(st, u),
                           **({"timer": timers[u.iid]} if u.iid in timers else {}),
-                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner), cr) else {}),
-                          **({"spikes": True} if statics.has_keyword(st, u, "Spikes", cr) and not u.retaliation_used else {}),   # until used
-                          **({"spent": True} if u.card_id == "boar" and u.retaliation_used else {}),   # the Boar's one charge: its eye goes
-                          **({"poison": True} if statics.has_keyword(st, u, "Poison", cr) else {}),   # printed, or a neighbour's legendary Jellyfish
-                          # "armor": it can't be removed (printed, or a neighbour's Capybara); "inked": the Octopus's ink is on it
-                          **({"armor": True} if not statics.can_be_removed(st, u, cr) else {}),
-                          **({"guarded": True} if u.locked_until_turn > st.turn_counter else {}),   # Yuki's leader: it can't be covered now
-                          **({"inked": True} if statics.inked(st, u) else {})} for u in stack]
+                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner)) else {}),
+                          **({"spikes": True} if statics.has_keyword(st, u, "Spikes") and not u.retaliation_used else {}),
+                          **({"poison": True} if statics.has_keyword(st, u, "Poison") else {}),
+                          **({"armor": True} if not statics.can_be_removed(st, u) else {})} for u in stack]
         g = {
             "round": st.turn_counter // 2 + 1,
             "current": st.current,
             "toAct": to_act,
             "first": st.first_player,
-            "actionsLeft": rules.turn_actions(st) - st.actions_taken_this_turn,
-            "actionsTotal": rules.turn_actions(st),
             "canPass": rules.can_pass(st),
             "clock": {"on": False} if not self.clock else (self._mulligan_clock(s) if self.mulliganing() and self.clock.get("mull_until") else
                                      {**{k: self.clock[k] for k in ("bank", "holder", "free", "since")}, "now": time.time(),
                                      "on": self.clock_deadline() is not None}),
             "food": dict(st.food),
             "income": {p: rules.region_income(st, p) for p in "AB"},
-            # what each region produces for each player if they hold it (the Wildebeest's +5, the Boar's -5 on its stone)
-            "regionFood": {p: {r.id: rules.region_yield(st, p, r) for r in st.game_map.regions.values()} for p in "AB"},
             "winFood": st.game_map.win_food,
             "board": board,
-            "hand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u),
-                      **({"ready": True} if roar_condition(st, s, u.card_id) or conditional_reach(st, u.card_id) else {}),
-                      **(self._hand_mana(u) if st.config.mana else {})}
+            "hand": [{"iid": u.iid, "id": u.card_id, "str": effective_strength(st, u), "cost": mana_cost(st, u.card_id, s)}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
-            "eaten": {p: st.hungry_eaten.get(p, 0) for p in "AB"},   # what each side's Hungry animals ate (EVOLVES_AT)
-            # the opponent's hand, face up, while they play with it revealed (your legendary Giraffe)
-            **({"revealedHand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u)} for u in st.hands[opp]]}
-               if statics.hand_revealed(st, opp) else {}),
-            "handLimit": st.config.hand_limit,
-            # the leaders prototype: each player's leader on their den, public; Lord Bumbleton's card's live number
             "leaders": {p: v for p in "AB" if (v := leader_view(st, p))},
-            "foodGains": {p: st.food_gains.get(p, 0) * st.config.bumbleton_card_per for p in "AB"},
             "deckCount": {p: len(st.decks[p]) for p in "AB"},
             "deckLeft": dict(Counter(st.decks[s])),
-            # what the opponent may still hold: their deck, their hand, and the cards a choice of theirs holds in between
-            # (the mulligan's set-aside, a Scout's three, a Raven's put-back): counted out meanwhile, they told what was there
+            # what the opponent may still hold: their deck, their hand, and the cards their mulligan set aside
             "unseen": dict(Counter(st.decks[opp]) + Counter(u.card_id for u in st.hands[opp])
-                           + Counter(c for step in st.effect_stack if step.get("player") == opp
-                                     for k in ("returned", "pulled", "shuffled") for c in step.get(k, ()))),
+                           + Counter(c for step in st.effect_stack if step.get("player") == opp for c in step.get("returned", ()))),
             "removed": list(st.remove_pile),
-            # the Remove Pile by owner, each card at its strength now (a Python grows there too)
             "pile": [{"id": c, "owner": o, "str": card_strength(st, c, o or s)} for c, o in zip(st.remove_pile, st.pile_owners)],
             "result": st.result.to_dict() if st.result else None,
             "history": [m.public() for m in self.history],
             "events": [public_event(e, s) for e in self.events if not (e["e"] == "mulligan" and e["player"] != s)],
+            "mana": {p: {"left": rules.mana_left(st, p), "total": rules.mana_total(st, p)} for p in "AB"},
+            "abilityCost": st.config.leader_power_cost,
+            "bases": {p: sorted(t) for p, t in st.game_map.hq_connects.items()},
             "legal": None,
             "pending": None,
         }
-        if st.config.mana:
-            g.update(self._mana_view())
         if to_act == s:
             g["legal"], g["pending"] = self._decision(s)
         elif st.result is None and rules.early_mulligan(st, s) is not None:   # your mulligan, while theirs goes on too
             g["toAct"] = s
             i = rules.early_mulligan(st, s)
-            g["legal"] = {"draw": False, "place": {}, "roam": {}}
+            g["legal"] = {"place": {}, "leader": False}
             g["pending"] = {"mode": "choice", "optional": True, "source": None, "kind": "mulligan",
                             "returned": len(st.effect_stack[i]["returned"]), "cap": st.config.mulligan_cap(s, st.first_player),
                             "options": [self._describe_option(u.iid) for u in st.hands[s]]}
-        # who decides what, always stated (never left to a missing field): over, mulligan (both at once), yours / your
-        # choice, theirs / their choice
+        # who decides what, always stated: over, mulligan (both at once), yours / your choice, theirs / their choice
         mull = st.pending is not None and st.pending.get("kind") == "mulligan"
         g["decision"] = ("over" if st.result is not None else "mulligan" if mull
                          else ("your_choice" if st.pending else "yours") if g["toAct"] == s
                          else "their_choice" if st.pending else "theirs")
         return g
-
-    def _hand_mana(self, u) -> dict:
-        """A hand card in the mana ruleset: its cost, and whether the mana its owner has left pays it now (their turn, nothing
-        resolving). Paying is not playing: `legal.place` says where it may go."""
-        st = self.state
-        cost = mana_cost(st, u.card_id, u.owner)
-        mine = st.current == u.owner and st.pending is None and st.result is None
-        return {"cost": cost, "affordable": mine and cost <= rules.mana_left(st, u.owner)}
-
-    def _mana_view(self) -> dict:
-        """The mana ruleset's turn state, public: each player's mana (`left` and `total`: this turn's for the player whose
-        turn it is, their next turn's, unspent, for the other), what an ability costs (a Roam, an Echo, an Action, a leader's
-        power), and each base's tiles."""
-        st = self.state
-        return {"mana": {p: {"left": rules.mana_left(st, p), "total": rules.mana_total(st, p)} for p in "AB"},
-                "abilityCost": ability_cost(st),
-                "bases": {p: sorted(t) for p, t in st.game_map.bases.items()}}
 
     def _mulligan_clock(self, s: str) -> dict:
         """The shared mulligan window, shown to each player as their own time (no bank is touched)."""
@@ -859,123 +497,49 @@ class Match:
         st = self.state
         legal = rules.legal_actions(st)
         places: dict[str, list] = {}
-        copies: dict[int, list] = {}      # a named copy's own places, when copies of a card differ in strength
-        roams: dict[str, list] = {}       # crossroad of a roaming animal -> where it may go (Roam)
-        acts: list[str] = []              # crossroads of animals that can use their Action now (the actions prototype)
         for a in legal:
             if isinstance(a, PlaceAction):
-                ts = places.setdefault(a.card_id, [])
-                if list(a.target) not in ts:
-                    ts.append(list(a.target))
-                if a.iid is not None:
-                    copies.setdefault(a.iid, []).append(list(a.target))
-            elif isinstance(a, RoamAction):
-                roams.setdefault(a.origin, []).append(list(a.target))
-            elif isinstance(a, ActAction):
-                acts.append(a.origin)
-        if copies and st.pending is None:   # every copy in hand answers with the places of its strength's first copy (a pending placement names its very copies)
-            hand = st.hands[st.pending["chooser"] if st.pending else st.current]
-            for u in hand:
-                if u.iid not in copies:
-                    rep = next((v for v in hand if v.iid in copies and v.card_id == u.card_id
-                                and v.strength_counter == u.strength_counter), None)
-                    if rep is not None:
-                        copies[u.iid] = copies[rep.iid]
-        out = {"draw": any(isinstance(a, DrawAction) for a in legal), "place": places, "roam": roams, "act": acts,
-               # the mana ruleset: a roam free this turn (an animal's own, given by a card) costs nothing; the rest cost abilityCost
-               **({"freeRoam": sorted({a.origin for a in legal if isinstance(a, RoamAction)
-                                        and effects.free_roams_left(st, s, st.top_unit(a.origin))})}
-                  if st.config.mana and st.pending is None else {}),
-               "leader": any(isinstance(a, LeaderAction) for a in legal),
-               **({"copies": {str(k): v for k, v in copies.items()}} if copies else {})}
+                places.setdefault(a.card_id, []).append(list(a.target))
+        out = {"place": places, "leader": any(isinstance(a, LeaderAction) for a in legal)}
         if st.pending is None:
             return out, None
         p = st.pending
         step = st.effect_stack[-1] if st.effect_stack else {}
         pending = {"mode": p["mode"], "optional": bool(p.get("optional")), "source": self._source(),
-                   "kind": ASKS.get(step.get("then") if step.get("op") == "choose" else step.get("op"), "effect"),
+                   "kind": ASKS.get(step.get("op"), "effect"),
                    "returned": len(step.get("returned", ())) if step.get("op") == "mulligan" else 0,
                    "cap": st.config.mulligan_cap(step.get("player"), st.first_player) if step.get("op") == "mulligan" else 0,
-                   "options": []}
-        # a choice inside a leader's power: its steps name the leader and no animal (a card's steps name the very animal)
-        lead = st.leaders.get(p["chooser"])
-        if lead and step.get("by_card") == lead["id"] and "by_iid" not in step:
-            pending["leader"] = True
-        if p["mode"] == "choice":
-            owner = step.get("from_owner") or p["chooser"]   # whose cards a card choice offers: their strength is theirs
-            pending["options"] = [self._describe_option(o, owner) for o in p["options"]]
-        if pending["kind"] == "shuffle":
-            pending["left"] = step.get("remaining", 0)   # the Raven's cards still to shuffle back
+                   "options": [self._describe_option(o) for o in p["options"]]}
         return out, pending
 
     def _source(self) -> Optional[str]:
-        """The card whose effect is asking: every step carries it (effects.resolve stamps it), so nothing is guessed."""
+        """The card whose effect is asking: every step carries it (effects.resolve stamps it)."""
         step = self.state.effect_stack[-1] if self.state.effect_stack else {}
         return step.get("by_card") if step.get("by_card") in CARDS else None
 
-    def _describe_option(self, o, owner: Optional[str] = None) -> dict:
+    def _describe_option(self, o) -> dict:
         st = self.state
         if isinstance(o, str) and o in st.game_map.crossroads:
             return {"v": o, "kind": "cr"}
-        if o == "den":                                    # "It roams" onto the enemy den
-            return {"v": o, "kind": "hq"}
         if isinstance(o, int):
             for p in "AB":
                 for u in st.hands[p]:
                     if u.iid == o:
                         return {"v": o, "kind": "hand", "id": u.card_id}
-            for cr, stack in st.board.items():
-                for u in stack:
-                    if u.iid == o:
-                        return {"v": o, "kind": "cr", "cr": cr, "id": u.card_id}
-        if isinstance(o, str) and o in CARDS:
-            if not owner:
-                return {"v": o, "kind": "card", "id": o}
-            # a card offered out of a deck (the Owl's Scout) is shown as it would be drawn: in the form it has evolved to there
-            # (the legendary Dung Beetle) and at the strength it would come out with, the royal jelly's included
-            form = st.eaten_form(owner, o)
-            return {"v": o, "kind": "card", "id": form, "str": card_strength(st, form, owner) + st.jelly_peek(owner, o)}
         return {"v": o, "kind": "other", "label": str(o)}
 
 
-def map_info(map_id: str = MAP_ID) -> dict:
-    gm = load_map(map_id)
-    cols = max(int(c.split(",")[0]) for c in gm.crossroads)
-    rows = max(int(c.split(",")[1]) for c in gm.crossroads)
-    regions = []
-    for r in gm.regions.values():
-        cs = [tuple(map(int, c.split(","))) for c in r.corners]
-        regions.append({"id": r.id, "c": list(min(cs)), "corners": list(r.corners), "food": r.food})
-    # the hex prototype draws its board from its own geometry (board.js), so it names its crossroads and its dens' fronts
-    return {"id": gm.id, "name": gm.name, "cols": cols, "rows": rows, "regions": regions, "winFood": gm.win_food,
-            "crossroads": sorted(gm.crossroads), "hex": gm.id == "map_hex",
-            # map_hex19 (the mana ruleset's board): its tiles' adjacency and each player's base; a den behind each base,
-            # raided from it (Martin, 2026-11-20)
-            **({"hex19": True, "edges": [list(e) for e in gm.edges], "bases": {p: sorted(t) for p, t in gm.bases.items()},
-                "dens": True} if gm.bases else {})}
+def map_info() -> dict:
+    """The board as the client draws it: its tiles, their adjacency, each region and its food, and each player's base."""
+    gm = load_map(MAP_ID)
+    return {"id": gm.id, "name": gm.name, "winFood": gm.win_food, "crossroads": sorted(gm.crossroads),
+            "edges": [list(e) for e in gm.edges], "bases": {p: sorted(t) for p, t in gm.hq_connects.items()},
+            "regions": [{"id": r.id, "corners": list(r.corners), "food": r.food} for r in gm.regions.values()]}
 
 
 def card_pool() -> list[dict]:
-    # Each stage of an evolving card, read large, shows the stages still ahead of it, as the card itself shows them all
-    # (Martin, 2026-10-21: the legendary Caterpillar's later stages too).
-    ahead = {stage: c.related[i + 1:] for c in CARDS.values() if c.evolves for i, stage in enumerate(c.related)}
-    return [{"id": c.id, "name": c.name, "status": c.status, "rarity": c.rarity, "tags": sorted(c.tags),
-             # A variable-strength card (Python) prints 0: its text says what it gains ("+1 for each removed animal").
-             "str": 0 if c.is_dynamic else c.base_strength, "text": c.text,
-             "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat,
-             # its mana cost in the mana ruleset (None: not in a mana deck); "cost" above is the food a card costs
-             "mana": c.cost,
-             # the one ruleset whose collection holds it (the mana prototype's Wisps); absent: the default rules'
-             **({"ruleset": c.ruleset} if c.ruleset else {}),
-             # its level (the stars prototype): what a copy costs of a deck's budget; a token is in no deck, so none
-             "stars": 0 if c.status == "token" else c.stars,
-             "related": list(c.related or ahead.get(c.id, ())), "evolves": c.evolves or bool(ahead.get(c.id)),
-             **({"evolvesAt": EVOLVES_AT[c.id]} if c.id in EVOLVES_AT else {})}
+    """Every card as the client reads it."""
+    return [{"id": c.id, "name": c.name, "status": c.status, "rarity": c.rarity,
+             # a variable strength (the Shades) prints 0: its text says what it gains
+             "str": 0 if c.is_dynamic else c.base_strength, "text": c.text, "kw": sorted(c.keywords), "mana": c.cost}
             for c in CARDS.values()]
-
-
-# The legendary Dung Beetle's forms but the last: the food its owner's Hungry animals must have eaten for the next one. The
-# game screen prints the count towards it after the text, "(14/25)" (Martin, 2026-10-27).
-_CFG = Config.default()
-EVOLVES_AT = dict(zip(EATEN_FORMS, (_CFG.dung_beetle_legend_draw_at, _CFG.dung_beetle_legend_food_at, _CFG.dung_beetle_legend_play_at)))
-

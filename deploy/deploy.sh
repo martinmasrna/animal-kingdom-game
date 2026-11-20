@@ -2,9 +2,9 @@
 # Deploy the committed HEAD to Fly.io (never the working tree, which may hold other work in progress).
 #   deploy/deploy.sh            build and release HEAD to the live app
 #   deploy/deploy.sh staging    the same build to the staging app (deploy/fly.staging.toml): where Martin tests work that
-#                               isn't released yet, from any device; it sleeps when idle. No news check: nobody else plays there.
+#                               isn't released yet, from any device; it sleeps when idle
 #   deploy/deploy.sh pull [staging]   copy the server's human game logs into results/human_games/web/ (deploy/nightly.sh
-#                               does it every night for both)
+#                               does it every night for staging)
 #   deploy/deploy.sh feedback   pull every feedback message into results/feedback.jsonl, print the new ones
 #   deploy/deploy.sh players    pull who played what (profiles, match histories, their saved decks, events) into results/players.json
 set -euo pipefail
@@ -63,24 +63,11 @@ if [[ "${1:-}" == "players" ]]; then
   exit 0
 fi
 
-# News: a change to the rules or the cards after the newest release's day needs its release first (animal_kingdom/web/news/README.md).
-# NEWS_OK=1 deploys anyway (a change players won't notice).
-latest="$(ls "$repo/animal_kingdom/web/news" | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -1 | cut -c1-10)"
-# a release covers its day until 06:00 the next morning (a night's session belongs to the day it began)
-cutoff="$(date -j -v+1d -f %Y-%m-%d "$latest" +%Y-%m-%d 2>/dev/null || date -d "$latest +1 day" +%Y-%m-%d) 06:00:00"
-unwritten="$(git -C "$repo" log --since="$cutoff" --format='  %h %s' -- animal_kingdom/engine animal_kingdom/data/cards.json | cut -c1-110)"
-if [[ -n "$unwritten" && -z "${NEWS_OK:-}" && "$target" == live ]]; then
-  echo "rules or cards changed since the last news ($latest), with no release written for them:"; echo "$unwritten"
-  echo "write animal_kingdom/web/news/$(date -v-6H +%F 2>/dev/null || date -d "-6 hours" +%F).md (or NEWS_OK=1 if players won't notice), then deploy again"; exit 1
-fi
-
-# Live ships main and nothing else: the folder a deploy runs from may stand on another branch (2026-10-26: a session
-# moved the shared folder to cards mid-session and the next live deploy began building the unplayed cards).
+# Live ships main and nothing else: the folder a deploy runs from may stand on another branch.
 branch="$(git -C "$repo" branch --show-current)"
 if [[ "$target" == live && "$branch" != main ]]; then echo "this folder is on '$branch': live deploys only main (deploy from a main checkout)"; exit 1; fi
 
-# The web client's fast suite gates the deploy here (SKIP_TESTS=1 when it just passed); the Python fast tier runs in the
-# image's build, against the compiled engine that ships (deploy/Dockerfile).
+# The web client's suite gates the deploy here (SKIP_TESTS=1 when it just passed); the Python tests run in the image's build.
 [[ -n "${SKIP_TESTS:-}" ]] || (cd "$repo/animal_kingdom/web/test" && node --test > /tmp/ak-deploy-web.txt 2>&1) \
   || { grep -vE '^# Subtest|^ok ' /tmp/ak-deploy-web.txt | tail -40; echo "web tests failed: not deploying"; exit 1; }
 
@@ -102,44 +89,9 @@ attempt() {
   done
   wait "$pid"
 }
-retry() { attempt "$@" || { echo "retrying once"; attempt "$@" || { echo "DEPLOY FAILED twice"; exit 1; }; }; }
 
-# The paintings (static/art, static/kit2: 81 of the 85 MB) ship as their own image, built and pushed only when they change,
-# keyed by their git trees; the app's build copies them from it, so a card or code change uploads a few MB. The Fly builder
-# keeps no context between builds, so without this every deploy sent all of it (two minutes, ten on a slow line).
-art="art-$(git -C "$repo" rev-parse HEAD:animal_kingdom/web/static/art HEAD:animal_kingdom/web/static/kit2 | shasum | cut -c1-16)"
-artmark="$cache/art"; [[ "$target" == staging ]] && artmark="$cache/art-staging"   # each app's registry holds its own copy
-if [[ "$(cat "$artmark" 2>/dev/null)" != "$art" ]]; then
-  echo "the paintings changed: pushing them as $art"
-  mkdir -p "$tmp/art"
-  git -C "$repo" archive HEAD animal_kingdom/web/static/art animal_kingdom/web/static/kit2 | tar -x -C "$tmp/art" --strip-components 3
-  printf 'FROM scratch\nCOPY art /art\nCOPY kit2 /kit2\n' > "$tmp/art/Dockerfile"
-  cp "$cfg" "$tmp/art/fly.toml"
-  retry "$tmp/art" --config "$tmp/art/fly.toml" --dockerfile "$tmp/art/Dockerfile" --remote-only --build-only --push --image-label "$art"
-  echo "$art" > "$artmark"
-fi
-
-# Four trees for the image (deploy/Dockerfile): code/ (the engine, the bots, the server, the tests), data/ (cards, decks,
-# maps), ui/ (the client's static files but the paintings, the news, the studies) and rs/ (the Rust engine and its oracles).
-# The compiles run on code/ and rs/ alone, so a card or client change reuses both and pays only the tests.
-mkdir -p "$tmp/app/code" "$tmp/app/ui/animal_kingdom/web" "$tmp/app/rs"
-git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$tmp/app/code"
-git -C "$repo" archive HEAD engine_rs tools/engine_rs | tar -x -C "$tmp/app/rs"
-mv "$tmp/app/code/animal_kingdom/data" "$tmp/app/data"
-for d in static news studies; do [[ -d "$tmp/app/code/animal_kingdom/web/$d" ]] && mv "$tmp/app/code/animal_kingdom/web/$d" "$tmp/app/ui/animal_kingdom/web/"; done
-rm -rf "$tmp/app/ui/animal_kingdom/web/static/art" "$tmp/app/ui/animal_kingdom/web/static/kit2"
+mkdir -p "$tmp/app"
+git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$tmp/app"
 cp "$repo/deploy/Dockerfile" "$tmp/app/"; cp "$cfg" "$tmp/app/fly.toml"
-# A change to the client's static files alone (static/, the paintings aside) skips the image's Python gate: the engine,
-# the server and the cards are the ones the last deploy to this app already tested, and the web suite ran above
-# (Martin, 2026-10-26: a one-line CSS change waited three minutes on the fuzz and the Python tests).
-deployed="$cache/deployed-$target"; prev="$(cat "$deployed" 2>/dev/null || true)"; quick="${FORCE_QUICK:-}"   # FORCE_QUICK=1: skip the image's Python gate too (a prototype for a playtest)   # no record yet (a first deploy to an app): set -e would stop here
-if [[ -n "$prev" ]] && git -C "$repo" cat-file -e "$prev^{commit}" 2>/dev/null; then
-  # what ships in the image (the trees below and this folder); docs, notes and logs other sessions commit don't count
-  changed="$(git -C "$repo" diff --name-only "$prev" HEAD -- animal_kingdom engine_rs tools/engine_rs deploy)"
-  if [[ -n "$changed" ]] && ! grep -qv '^animal_kingdom/web/static/' <<< "$changed"; then
-    quick=1; echo "only the client's static files changed since ${prev:0:8}: the image skips the Python gate"
-  fi
-fi
 echo "deploying $(git -C "$repo" log --oneline -1) to $target ($app)"
-retry "$tmp/app" --config "$tmp/app/fly.toml" --remote-only --build-arg "ART=registry.fly.io/$app:$art" --build-arg "QUICK=$quick"
-git -C "$repo" rev-parse HEAD > "$deployed"
+attempt "$tmp/app" --config "$tmp/app/fly.toml" --remote-only || { echo "retrying once"; attempt "$tmp/app" --config "$tmp/app/fly.toml" --remote-only || { echo "DEPLOY FAILED twice"; exit 1; }; }

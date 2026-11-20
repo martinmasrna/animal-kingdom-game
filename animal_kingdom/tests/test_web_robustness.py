@@ -5,6 +5,7 @@ import asyncio
 import json
 import random
 import time
+from animal_kingdom.tests._helpers import DECK, SLUG  # noqa: F401
 
 import pytest
 from aiohttp.test_utils import TestClient, TestServer
@@ -44,7 +45,7 @@ def test_a_bot_that_always_fails_still_plays_the_match_to_its_end(quiet, monkeyp
     async def body():
         async with TestClient(TestServer(server.make_app())) as c:
             p = await (await c.post("/api/profile", json={})).json()
-            m = await (await c.post("/api/match", json={"deck": "cats", "bot": {"level": "expert", "deck": "cats"}},
+            m = await (await c.post("/api/match", json={"deck": DECK, "bot": True},
                                     headers={"X-AK-Key": p["code"]})).json()
             match = server.hub.matches[m["id"]]
             server.hub.kick_bot(match)
@@ -92,8 +93,8 @@ def test_a_stalled_or_dead_screen_never_holds_up_the_match_or_the_other_player(q
     dropped within SEND_TIMEOUT, and the other screens get their view (2026-11-05: the stalled send held the match until the
     heartbeat, then its ConnectionError killed the opponent's own socket handler)."""
     monkeypatch.setattr(server, "SEND_TIMEOUT", 0.2)
-    m = Match("T", server.Seat("ta", "A", deck="cats"))
-    m.join(server.Seat("tb", "B", deck="cats"))
+    m = Match("T", server.Seat("ta", "A", deck=SLUG))
+    m.join(server.Seat("tb", "B", deck=SLUG))
     live, stalled, dead = _Live(), _Stalled(), _Dead()
     server.hub.sockets["T"] = {(live, "A"), (stalled, "B"), (dead, "B")}
 
@@ -144,24 +145,24 @@ async def _act_until(ws, view, rng, done):
                 card = rng.choice(sorted(g["legal"]["place"]))
                 a = {"kind": "place", "card_id": card, "target": rng.choice(g["legal"]["place"][card])}
             else:
-                a = {"kind": "draw"} if g["legal"]["draw"] else {"kind": "pass"}
+                a = {"kind": "pass"}
             await ws.send_json({"t": "act", "action": a})
         view = await _view(ws)
     return view
 
 
 def test_a_player_whose_socket_drops_mid_turn_comes_back_to_the_same_turn(quiet):
-    """The socket closes after the first of the turn's two actions; a new socket on the same seat (the client's reconnect,
+    """The socket closes after the turn's first play; a new socket on the same seat (the client's reconnect,
     or another tab through /api/current) gets the same position and can finish the turn."""
     async def body():
         async with TestClient(TestServer(server.make_app())) as c:
             p = await (await c.post("/api/profile", json={})).json()
             key = {"X-AK-Key": p["code"]}
-            m = await (await c.post("/api/match", json={"deck": "cats", "bot": {"level": "easy", "deck": "cats"}}, headers=key)).json()
+            m = await (await c.post("/api/match", json={"deck": DECK, "bot": True}, headers=key)).json()
             ws = await c.ws_connect(f"/ws/{m['id']}?token={m['token']}")
             rng = random.Random(5)
             mid_turn = lambda v: (v["game"] and v["game"]["toAct"] == v["you"] and v["game"]["decision"] == "yours"
-                                  and v["game"]["actionsLeft"] < v["game"]["actionsTotal"]) or v["phase"] != "playing"
+                                  and v["game"]["mana"][v["you"]]["left"] < v["game"]["mana"][v["you"]]["total"]) or v["phase"] != "playing"
             before = await _act_until(ws, await _view(ws), rng, mid_turn)
             assert before["phase"] == "playing", "the game ended before a mid-turn moment"
             await ws.close()
@@ -170,7 +171,7 @@ def test_a_player_whose_socket_drops_mid_turn_comes_back_to_the_same_turn(quiet)
             ws2 = await c.ws_connect(f"/ws/{back['id']}?token={back['token']}")
             after = await _view(ws2)
             g0, g1 = before["game"], after["game"]
-            assert (g1["round"], g1["actionsLeft"], g1["decision"], g1["hand"]) == (g0["round"], g0["actionsLeft"], "yours", g0["hand"])
+            assert (g1["round"], g1["mana"], g1["decision"], g1["hand"]) == (g0["round"], g0["mana"], "yours", g0["hand"])
             end = await _act_until(ws2, after, rng, lambda v: v["phase"] != "playing")
             await ws2.close()
             return end["phase"]
@@ -183,7 +184,7 @@ def test_a_restart_in_the_middle_of_a_game_keeps_the_match(monkeypatch, tmp_path
     monkeypatch.delenv("AK_NO_GAME_LOGS", raising=False)
     monkeypatch.setenv("AK_DB", str(tmp_path / "web.db"))
     monkeypatch.setattr(server, "BOT_PAUSE", {"choice": 0, "open": 0, "move": 0})
-    for name in ("MATCH_DIR", "LOG_DIR", "REPLAY_DIR", "STUDY_DATA_DIR"):
+    for name in ("MATCH_DIR", "LOG_DIR"):
         monkeypatch.setattr(server, name, tmp_path / name.lower())
     monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "web_decks.json")
     monkeypatch.setattr(guard, "limiter", guard.Limiter())
@@ -193,7 +194,7 @@ def test_a_restart_in_the_middle_of_a_game_keeps_the_match(monkeypatch, tmp_path
         monkeypatch.setattr(server, "hub", server.Hub())
         async with TestClient(TestServer(server.make_app())) as c:
             p = await (await c.post("/api/profile", json={})).json()
-            m = await (await c.post("/api/match", json={"deck": "cats", "bot": {"level": "easy", "deck": "canines"}},
+            m = await (await c.post("/api/match", json={"deck": DECK, "bot": True},
                                     headers={"X-AK-Key": p["code"]})).json()
             ws = await c.ws_connect(f"/ws/{m['id']}?token={m['token']}")
             v = await _act_until(ws, await _view(ws), rng,
@@ -229,10 +230,10 @@ def test_an_idle_match_leaves_memory_and_comes_back_from_its_file(monkeypatch, t
     monkeypatch.setattr(server, "MATCH_DIR", tmp_path / "web_matches")
     hub = server.Hub()
     monkeypatch.setattr(server, "hub", hub)
-    m = Match("IDLE01", server.Seat("ta", "A", deck="cats"))
-    m.join(server.Seat("tb", "B", deck="canines"))
-    w = Match("WATCH1", server.Seat("tc", "A", deck="cats"))
-    w.join(server.Seat("td", "B", deck="canines"))
+    m = Match("IDLE01", server.Seat("ta", "A", deck=SLUG))
+    m.join(server.Seat("tb", "B", deck=SLUG))
+    w = Match("WATCH1", server.Seat("tc", "A", deck=SLUG))
+    w.join(server.Seat("td", "B", deck=SLUG))
     for x in (m, w):
         hub.matches[x.id] = x
         hub.save(x)

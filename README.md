@@ -1,52 +1,26 @@
 # Animal Kingdom
 
-A two-player tactical deckbuilding game about animals. Players place units onto a graph of crossroads; you win by capturing the enemy headquarters or by controlling enough regions to reach the food threshold. There is no mana and no combat: a unit is one number, strength, and every turn is two actions.
+A two-player card game about animals, played on a board of 19 hex tiles. Each turn you have mana (one more each turn, up to 10) and play cards from your hand onto the board; a card covers an enemy it is stronger than, and what it covers is removed. Regions you hold pay food; an animal that reaches the enemy den through their base destroys their food. 30 food wins, and a player whose food drops to 0 loses.
 
-This repo holds the rules engine, bots from random to search-based, the simulation tools used to design and balance the game, a web client and a terminal interface. The rules are in [`docs/rules/`](docs/rules/), the state of the project in [`docs/STATUS.md`](docs/STATUS.md).
+This repo holds the rules engine, a bot, and the web client. The state of the project is in [`docs/STATUS.md`](docs/STATUS.md).
 
 ## Setup
 
 ```sh
 python3 -m venv .venv
-.venv/bin/pip install -e '.[dev,cli]'
-.venv/bin/python -m pytest -q
+.venv/bin/pip install -e '.[dev]'
+./test
 ```
 
 ## Play
 
 ```sh
-./play                                            # the web client at http://localhost:8000 (needs '.[web]'; installs it if missing)
-./play --host 0.0.0.0                             # let other machines on the network join
-./run                                             # pick your deck, the opponent's deck and difficulty
-./run --bots human,turn --decks cats_midrange,ramp
-./run --bots greedy,referee --quiet               # watch two bots
-./record                                          # the Textual UI; records every decision (needs '.[tui]')
+./play                     # the web client at http://localhost:8000
+./play --host 0.0.0.0      # let other machines on the network join
 ```
 
-In the web client, Easy is the greedy bot, Normal turn and Expert referee; a friend match is a link or a six-letter code, and two browser tabs work as two players. Every web game with a human seat is saved to `results/human_games/web/`, replayable with `sim.replay`. In the terminal, Easy is random, Normal greedy, Hard turn, Expert referee.
+A friend match is a link or a six-letter code, and two browser windows work as two players. Practice plays the bot, on a mirror of your deck. Every web game with a person in it is saved to `results/human_games/web/`; `.venv/bin/python -m animal_kingdom.replay FILE` replays one.
 
-## Simulate
+## Cards
 
-```sh
-./report 200                                  # every deck against every deck, 200 games per matchup
-./report 200 --deck aggro --opponent cats     # one matchup, both seats
-./report 200 --format files --out results/x   # matchup matrix, per-card stats and summary as CSV/JSON
-```
-
-Games are seed-deterministic, so `--jobs` changes only speed. How to read the numbers, and how far to trust them, is in [`docs/balance.md`](docs/balance.md) and [`docs/bots.md`](docs/bots.md).
-
-## Layout
-
-```
-animal_kingdom/
-  engine/     rules: state, actions, effects, strength, maps, config (stdlib only)
-  data/       cards.json, maps.json, learned bot weights
-  bots/       random, greedy, turn and referee bots; features and the learned evaluator
-  learn/      self-play training for the learned evaluator
-  sim/        runners, reports, A/B benchmarks, deckbuilding and metagame search
-  render/     text rendering and the deck-doc generator
-  recording/  human-game recording and cohort schedules
-  tui/        the Textual game UI
-  web/        the web client: aiohttp server, match model, static JS client
-  cli.py      the terminal game
-```
+`./cards` is the card table (http://localhost:8002): every card's values, edited in place. Cards change only through `tools/cards/hq.py`.

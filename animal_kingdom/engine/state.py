@@ -1,22 +1,9 @@
-"""Game state: the mutable position plus setup, cloning, serialization, and per-seat views.
+"""Game state: the mutable position plus setup, cloning, serialization and per-seat views.
 
-State model (plan decision 4): **mutate-in-place + explicit clone()**. `apply_action`
-(rules.py) mutates a GameState; callers that need to branch (sims, lookahead) call
-`clone()` first. Guardrails against aliasing bugs:
-  (a) UnitInstance is immutable-by-convention (set at creation, never mutated);
-  (b) view_for(player) returns a genuinely read-only projection;
-  (c) a clone-independence test (tests/).
-
-Choice model (plan decision 6 - extensive form): a turn is a sequence of decision
-points. M1 has no mid-turn choices, but the *seams* are built in now so M2 slots in
-without reworking the action/bot contract:
-  - `effect_stack`  : declarative effect steps still to resolve (empty in M1);
-  - `pending`       : the choice currently awaiting an action, or None (None in M1);
-  - turn advancement is gated on "stack empty & nothing pending" (see rules.py).
-
-Randomness is a **carried seeded RNG** (`rng`): used by setup and by chance effects
-(e.g. Black Swan's random discard, filtered random draws). It is serialized and cloned,
-so games replay identically from (seed, action sequence) even with chance events.
+`apply_action` (rules.py) mutates a GameState in place; a caller that branches (a bot looking ahead) calls `clone()`
+first. Effects resolve as plain-dict op-steps on `effect_stack`; a step that needs a choice surfaces as `pending`, and
+the choice arrives as a normal action. Randomness is a seeded RNG carried on the state, so a game replays identically
+from (seed, actions).
 """
 
 from __future__ import annotations
@@ -28,165 +15,51 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Mapping, Optional
 
-try:                                   # mypyc's markers (the Docker image compiles the engine; the tree runs it plain)
-    from mypy_extensions import mypyc_attr
-except ImportError:                    # pragma: no cover
-    def mypyc_attr(*args, **kwargs):   # type: ignore[misc]
-        return lambda cls: cls
-
 from .cards import Card, load_cards
 from .config import Config
 from .maps import GameMap, load_map
-
-# The legendary Dung Beetle's forms, in order: each evolves at the next food count its owner's Hungry animals ate.
-EATEN_FORMS = ("dung_beetle_legend", "dung_beetle_legend_form2", "dung_beetle_legend_form3", "dung_beetle_legend_form4")
 
 
 class EngineError(Exception):
     """Raised on an illegal engine operation (bad action, unsupported state)."""
 
 
-WILD = "wild"      # the owner of a Wild animal (the Locusts): no one's, so it connects no one and holds no region
-
-
 def other_player(player: str) -> str:
     return "B" if player == "A" else "A"
 
 
-JELLY_SOURCE = "bee_legend_2"   # the legendary Bee whose royal jelly a deck card comes out with
-
-
 class UnitInstance:
-    """One card instance: a card id + owner + unique instance id. Lives in a hand and then
-    on the board - the *same* instance moves hand->board on placement, carrying its counter.
+    """One card instance: a card id, its owner and a unique instance id. The same instance moves from hand to board."""
 
-    Mostly set-once, but `strength_counter` and `placed_on_turn` are mutated during play
-    (decision E: "give +X" counters are stored on the instance, including hand instances).
-    Because instances are now mutable, `GameState.clone()` deep-copies them (it no longer
-    shares them by reference). Base/dynamic strength is NOT stored here - it is derived from
-    the Card registry and board state via strength.effective_strength; the counter is added.
-    """
+    __slots__ = ("card_id", "owner", "iid", "retaliation_used")
 
-    __slots__ = ("card_id", "owner", "iid", "placed_on_turn", "strength_counter", "locked_until_turn",
-                 "retaliation_used", "play_seq", "granted_roam")
-
-    def __init__(self, card_id: str, owner: str, iid: int, placed_on_turn: int = 0,
-                 strength_counter: int = 0, locked_until_turn: int = 0, retaliation_used: bool = False,
-                 play_seq: int = 0, granted_roam: bool = False):
+    def __init__(self, card_id: str, owner: str, iid: int, retaliation_used: bool = False):
         self.card_id = card_id
         self.owner = owner
         self.iid = iid
-        self.placed_on_turn = placed_on_turn  # turn_counter at placement (Egg timing); 0 in hand
-        self.strength_counter = strength_counter  # stored "give +X" buffs (signed); travels hand->board
-        self.locked_until_turn = locked_until_turn  # Skunk: unplayable from hand while turn < this
-        self.retaliation_used = retaliation_used  # the once-per-piece charge: Spikes (first enemy that covers this) and the Wild Boar (first enemy placed next to this)
-        self.play_seq = play_seq  # when it entered the board, game-wide (Dawn/Dusk resolve in play order); 0 in hand
-        self.granted_roam = granted_roam  # Coyote: "gains Roam" for as long as this instance stays on the board
+        self.retaliation_used = retaliation_used   # Spikes: spent on the first enemy that covers it
 
     def to_dict(self) -> dict:
-        return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid,
-                "placed_on_turn": self.placed_on_turn, "strength_counter": self.strength_counter,
-                "locked_until_turn": self.locked_until_turn, "retaliation_used": self.retaliation_used,
-                "play_seq": self.play_seq, "granted_roam": self.granted_roam}
+        return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid, "retaliation_used": self.retaliation_used}
 
     @staticmethod
     def from_dict(d: dict) -> "UnitInstance":
-        return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("placed_on_turn", 0),
-                            d.get("strength_counter", 0), d.get("locked_until_turn", 0),
-                            d.get("retaliation_used", False), d.get("play_seq", 0), d.get("granted_roam", False))
+        return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("retaliation_used", False))
 
     def __repr__(self) -> str:
-        c = f", +{self.strength_counter}" if self.strength_counter else ""
-        return f"UnitInstance({self.card_id!r}, {self.owner!r}, {self.iid}{c})"
+        return f"UnitInstance({self.card_id!r}, {self.owner!r}, {self.iid})"
 
 
 def _copy_unit(u: UnitInstance) -> UnitInstance:
-    """An independent copy of a unit instance (used by clone, now that instances mutate)."""
-    return UnitInstance(u.card_id, u.owner, u.iid, u.placed_on_turn, u.strength_counter,
-                        u.locked_until_turn, u.retaliation_used, u.play_seq, u.granted_roam)
+    return UnitInstance(u.card_id, u.owner, u.iid, u.retaliation_used)
 
 
-def _plain_copy(v):
-    """A deep copy specialised for the effect-model containers (effect_stack, pending,
-    scheduled, turn_flags, card_strength_counters). Those hold only JSON-shaped plain data
-    - nested dict/list/tuple of str/int/float/bool/None - so a typed recursive copy is
-    exactly equivalent to `copy.deepcopy` here, but skips deepcopy's generic memo/id
-    bookkeeping (the search clones states millions of times; deepcopy dominated the profile).
-    Anything unexpected falls back to `copy.deepcopy`, so correctness never depends on the
-    plain-data assumption holding."""
-    t = type(v)
-    if t in _LEAVES:
-        return v
-    if t is dict:
-        return {k: (x if type(x) in _LEAVES else _plain_copy(x)) for k, x in v.items()} if v else {}
-    if t is list:
-        return [x if type(x) in _LEAVES else _plain_copy(x) for x in v] if v else []
-    if t is tuple:
-        return tuple(x if type(x) in _LEAVES else _plain_copy(x) for x in v)
-    return copy.deepcopy(v)
-
-
-_LEAVES = frozenset({type(None), str, int, float, bool})
-
-
-@mypyc_attr(native_class=False)      # a random.Random subclass, built by __new__ in _copy_rng
-class Rng(random.Random):
-    """The game's random stream, cloned for nearly nothing. The search clones a position for every move it imagines and
-    almost none of those clones ever draw, while `getstate` builds a 625-int tuple each time (a tenth of the Expert's
-    move, 2026-10-20). So a clone takes its parent's snapshot, the state tuple the parent keeps until its next draw, and
-    becomes a generator of its own only when it draws. The stream is the same one `setstate(parent.getstate())` would
-    give, draw for draw."""
-    _snap: Optional[tuple] = None   # the state tuple at the current position, or None once a draw has moved past it
-    _live: bool = True              # False: a lazy clone whose generator still holds no state (its position is _snap)
-
-    def _wake(self) -> None:
-        if not self._live:
-            super().setstate(self._snap)  # type: ignore[arg-type]
-            self._live = True
-
-    def random(self) -> float:
-        self._wake(); self._snap = None
-        return super().random()
-
-    def getrandbits(self, k: int) -> int:
-        self._wake(); self._snap = None
-        return super().getrandbits(k)
-
-    def getstate(self):
-        if self._snap is None:
-            self._snap = super().getstate()
-        return self._snap
-
-    def setstate(self, state) -> None:
-        super().setstate(state)
-        self._snap, self._live = state, True
-
-    def seed(self, *args, **kw) -> None:
-        super().seed(*args, **kw)
-        self._snap, self._live = None, True
-
-    def __reduce__(self):
-        return (self.__class__, (), self.getstate())
-
-    def __setstate__(self, state) -> None:
-        self.setstate(state)
-
-
-def _copy_rng(rng: random.Random) -> "Rng":
-    """An independent RNG at the same position: a lazy Rng on the parent's snapshot (see Rng). `random.Random()` reads
-    OS entropy on construction only to have it overwritten, so __init__ is bypassed via __new__."""
-    new = Rng.__new__(Rng)
-    new._snap, new._live = rng.getstate(), False
-    return new
-
-
-@mypyc_attr(native_class=False)
 @dataclass(frozen=True)
 class Result:
-    """Terminal game outcome. winner is 'A'/'B', or None for a draw."""
+    """The game's outcome. winner is 'A'/'B', or None for a draw."""
 
     winner: Optional[str]
-    reason: str  # "hq_capture" | "food" | "starved" (mana) | "passes" | "max_turns" | "concede" (web matches; "exhaustion" in older logs)
+    reason: str  # "food" | "starved" | "max_turns" | "concede" | "timeout"
 
     def to_dict(self) -> dict:
         return {"winner": self.winner, "reason": self.reason}
@@ -198,55 +71,22 @@ class Result:
 
 @dataclass(frozen=True)
 class StateView:
-    """Read-only, per-seat projection of the state (guardrail b, handoff §4.5).
-
-    Hidden information is stripped: the opponent's hand contents and both decks'
-    order/contents become counts only. Board, the Remove Pile, and food totals are public.
-    All containers are immutable (tuples / MappingProxy) so a bot cannot mutate the
-    live game through its view. `pending` (when present) is what this seat must decide.
-    """
+    """What one seat may see: the opponent's hand and both decks as counts only. Immutable, so a bot can't touch the live
+    game through it."""
 
     player: str
     to_act: str
     current: str
     turn_counter: int
-    board: Mapping[str, tuple[tuple[str, str], ...]]  # cr -> ((card_id, owner) bottom->top)
+    board: Mapping[str, tuple[tuple[str, str], ...]]  # tile -> ((card_id, owner) bottom->top)
     own_hand: tuple[str, ...]
     opponent_hand_count: int
     own_deck_count: int
     opponent_deck_count: int
     remove_pile: tuple[str, ...]
     food: Mapping[str, int]
-    card_strength_counters: Mapping[str, Mapping[str, int]]
     pending: Optional[Mapping[str, Any]]
     result: Optional[Result]
-    opponent_hand: Optional[tuple[str, ...]] = None   # only while their hand is revealed (the legendary Giraffe)
-
-    def to_dict(self) -> dict:
-        """Return a JSON-safe snapshot of exactly what this player may observe."""
-        return {
-            **({"opponent_hand": list(self.opponent_hand)} if self.opponent_hand is not None else {}),
-            "player": self.player,
-            "to_act": self.to_act,
-            "current": self.current,
-            "turn_counter": self.turn_counter,
-            "board": {
-                cr: [list(unit) for unit in stack]
-                for cr, stack in self.board.items()
-            },
-            "own_hand": list(self.own_hand),
-            "opponent_hand_count": self.opponent_hand_count,
-            "own_deck_count": self.own_deck_count,
-            "opponent_deck_count": self.opponent_deck_count,
-            "remove_pile": list(self.remove_pile),
-            "food": dict(self.food),
-            "card_strength_counters": {
-                player: dict(counters)
-                for player, counters in self.card_strength_counters.items()
-            },
-            "pending": copy.deepcopy(dict(self.pending)) if self.pending else None,
-            "result": self.result.to_dict() if self.result else None,
-        }
 
 
 def _rng_to_dict(rng: random.Random) -> dict:
@@ -255,146 +95,55 @@ def _rng_to_dict(rng: random.Random) -> dict:
 
 
 def _rng_from_dict(d: dict) -> random.Random:
-    rng = Rng.__new__(Rng)
+    rng = random.Random()
     rng.setstate((d["version"], tuple(d["state"]), d["gauss"]))
     return rng
 
 
-def _upgrade_step(step: dict) -> dict:
-    """A step saved before its facts were required (2026-10-01) gets them as the engine used to assume them."""
-    op = step.get("op")
-    if op == "remove_iid":
-        step.setdefault("by_effect", True); step.setdefault("source_iid", None)
-    elif op == "remove_choice":
-        step.setdefault("optional", False)
-    elif op == "play_extra":
-        step.setdefault("filter", {}); step.setdefault("optional", False)
-    elif op == "scout":
-        step.setdefault("spec", None)
-    return step
+def _copy_rng(rng: random.Random) -> random.Random:
+    new = random.Random()
+    new.setstate(rng.getstate())
+    return new
 
 
-@mypyc_attr(native_class=False)      # built by __new__ in clone(), which a compiled (native) class forbids
 class GameState:
-    """The full mutable position. Construct via new_game() or from_dict().
+    """The full mutable position. Construct via new_game() or from_dict(). `game_map`, `cards` and `config` are shared
+    immutable singletons, never cloned or serialized."""
 
-    `game_map`, `cards`, and `config` are shared immutable singletons - referenced, never
-    cloned or serialized (rebuilt on load). Everything else is per-game state.
-    """
-
-    def __init__(
-        self,
-        game_map: GameMap,
-        cards: dict[str, Card],
-        config: Config,
-        *,
-        board: dict[str, list[UnitInstance]],
-        hands: dict[str, list[UnitInstance]],
-        decks: dict[str, list[str]],
-        remove_pile: list[str],
-        food: dict[str, int],
-        current: str,
-        first_player: str,
-        rng: Optional[random.Random] = None,
-        starting_decks: Optional[dict[str, tuple]] = None,
-        turn_counter: int = 0,
-        units_placed_this_turn: int = 0,
-        actions_taken_this_turn: int = 0,
-        applied_this_turn: int = 0,
-        effect_steps_this_turn: int = 0,
-        caps: list | None = None,
-        idle_turns: int = 0,
-        next_iid: int = 0,
-        play_seq: int = 0,
-        effect_stack: Optional[list[dict]] = None,
-        pending: Optional[dict] = None,
-        scheduled: Optional[list[dict]] = None,
-        turn_flags: Optional[dict] = None,
-        card_strength_counters: Optional[dict[str, dict[str, int]]] = None,
-        trios: Optional[dict[str, dict[str, int]]] = None,
-        result: Optional[Result] = None,
-        pile_owners: Optional[list] = None,
-        inked: Optional[set[int]] = None,
-        roar_twice: Optional[dict[str, int]] = None,
-        hungry_eaten: Optional[dict[str, int]] = None,
-        last_roar: Optional[dict[str, str]] = None,
-        action_guard: Optional[dict[str, list]] = None,
-        leaders: Optional[dict[str, dict]] = None,
-        food_gains: Optional[dict[str, int]] = None,
-        next_strength: Optional[dict[str, int]] = None,
-        jelly: Optional[dict[str, dict[str, Any]]] = None,
-        strength_sources: Optional[dict[int, tuple]] = None,
-    ):
+    def __init__(self, game_map: GameMap, cards: dict[str, Card], config: Config, *,
+                 board: dict[str, list[UnitInstance]], hands: dict[str, list[UnitInstance]], decks: dict[str, list[str]],
+                 remove_pile: list[str], food: dict[str, int], current: str, first_player: str,
+                 rng: Optional[random.Random] = None, starting_decks: Optional[dict[str, tuple]] = None,
+                 turn_counter: int = 0, mana_spent: int = 0, applied_this_turn: int = 0, effect_steps_this_turn: int = 0,
+                 caps: Optional[list] = None, next_iid: int = 0, effect_stack: Optional[list[dict]] = None,
+                 pending: Optional[dict] = None, scheduled: Optional[list[dict]] = None, result: Optional[Result] = None,
+                 pile_owners: Optional[list] = None, leaders: Optional[dict[str, dict]] = None):
         self.game_map = game_map
         self.cards = cards
         self.config = config
-        self.board = board                 # cr -> stack (bottom..top); top = visible/controls
-        self.hands = hands                 # player -> list of UnitInstance (carry counters)
-        self.decks = decks                 # player -> list of card ids (top = last, O(1) pop)
-        # The fixed 30-card starting decklists (immutable tuples), read by Oxpecker (F12).
+        self.board = board                 # tile -> stack (bottom..top); the top unit holds the tile
+        self.hands = hands                 # player -> list of UnitInstance
+        self.decks = decks                 # player -> list of card ids (the top is the end)
         self.starting_decks = starting_decks if starting_decks is not None else {"A": (), "B": ()}
-        self.remove_pile = remove_pile     # shared, public (formerly "discard")
-        # Whose each Remove Pile card is, in step with remove_pile ("your Remove Pile": Raccoon, the legendary Raven).
-        # None for a card put there by hand (tests) or by a state saved before owners were kept.
-        self.pile_owners = pile_owners if pile_owners is not None else [None] * len(remove_pile)
-        # Octopus ink: the iids of inked animals. An inked animal has no keywords and no effects, for as long as it is
-        # on the board (statics.inked).
-        self.inked = inked if inked is not None else set()
-        # Woodpecker: player -> the turn_counter in which that player's next Roar happens twice (spent by that Roar).
-        self.roar_twice = roar_twice if roar_twice is not None else {}
-        # The legendary Dung Beetle: player -> food that player's Hungry animals have eaten this game.
-        self.hungry_eaten = hungry_eaten if hungry_eaten is not None else {}
-        # The Macaw: player -> the card whose Roar that player played last (public; a Macaw's copy counts as the copied card).
-        self.last_roar = last_roar if last_roar is not None else {}
-        # [ACTION 8] (the actions prototype): player -> [the turn_counter of the opponent's turn it holds for, the bonus]:
-        # that player's animals have +bonus strength during that turn (strength.anthem_bonus).
-        self.action_guard = action_guard if action_guard is not None else {}
-        # The leaders prototype (engine/leaders.py): player -> their leader and its state ({"id", "kills", "stage",
-        # "spent"}); a player with no leader has no entry. Public.
-        self.leaders = leaders if leaders is not None else {}
-        # Lord Bumbleton's card: player -> how many times that player has gained food this game.
-        self.food_gains = food_gains if food_gains is not None else {}
-        # [GORILLA]'s card: player -> the strength the next animal that player trios has (set by the Roar, spent by the play).
-        self.next_strength = next_strength if next_strength is not None else {}
-        # The legendary Bee's royal jelly: player -> card id -> [how many deck copies it reached, the counter that made them
-        # strength 5 at the Roar]. Each comes out of the deck (drawn, played or placed from it) with that counter, so growth
-        # since the Roar (the Python's) stays on it; copies shuffled in later are untouched (deck_instance).
-        self.jelly = jelly if jelly is not None else {}
-        # Where each instance's stored strength came from (Martin, 2026-11-05: a card shows its buffs, as in Hearthstone):
-        # iid -> ((source card id or None, amount, base), ...), oldest first, summing to its strength_counter. `base` marks
-        # the card's own growth that raises its base (the Roach King's falls); the rest are what other cards gave it or
-        # took from it. Entries of an iid gone from the board and the hands are dead weight, never saved (to_dict).
-        self.strength_sources: dict[int, tuple] = strength_sources if strength_sources is not None else {}
+        self.remove_pile = remove_pile     # shared and public
+        self.pile_owners = pile_owners if pile_owners is not None else [None] * len(remove_pile)   # in step with remove_pile
+        self.leaders = leaders if leaders is not None else {}   # player -> {"id": card id}
         self.food = food
         self.current = current
         self.first_player = first_player
-        self.rng = rng if isinstance(rng, Rng) else _copy_rng(rng if rng is not None else random.Random())   # an Rng: cloned for free
+        self.rng = rng if rng is not None else random.Random()
         self.turn_counter = turn_counter
-        self.units_placed_this_turn = units_placed_this_turn
-        self.actions_taken_this_turn = actions_taken_this_turn
+        self.mana_spent = mana_spent       # this turn's mana spent so far
         self.applied_this_turn = applied_this_turn   # every apply_action of the turn, choices included (Config.max_actions_per_turn)
-        self.effect_steps_this_turn = effect_steps_this_turn   # effect-stack steps resolved this turn (Config.max_effect_steps_per_turn)
-        self.caps: list = caps if caps is not None else []     # every turn a cap ended: {cap, player, turn, cards} (the `turn_capped` event, kept)
-        self.idle_turns = idle_turns       # consecutive turns ended with no action (two end the game)
+        self.effect_steps_this_turn = effect_steps_this_turn   # effect steps resolved this turn (Config.max_effect_steps_per_turn)
+        self.caps: list = caps if caps is not None else []     # every turn a cap ended: {cap, player, turn, cards}
         self._next_iid = next_iid
-        self.play_seq = play_seq           # board entries so far: stamps each unit's play order (UnitInstance.play_seq)
-        # Decision-point + effect machinery (decision 6).
-        self.effect_stack = effect_stack if effect_stack is not None else []  # op-steps to resolve
-        self.pending = pending                                   # current choice awaiting an action
-        self.scheduled = scheduled if scheduled is not None else []  # delayed effects (Egg/Bear/Rabbit)
-        self.turn_flags = turn_flags if turn_flags is not None else {}  # once-per-turn trigger flags
-        # Persistent per-player/card growth that applies in every zone (Rattlesnake).
-        self.card_strength_counters = (
-            card_strength_counters if card_strength_counters is not None else {"A": {}, "B": {}}
-        )
-        # The animals each player has already controlled three copies of (Iris's leader plays a fourth copy the first
-        # time; kept only under her).
-        self.trios = trios if trios is not None else {"A": {}, "B": {}}
+        self.effect_stack = effect_stack if effect_stack is not None else []
+        self.pending = pending
+        self.scheduled = scheduled if scheduled is not None else []   # delayed steps: Poison's removal
         self.result = result
-        # What happened, in order, as it happened (placed, covered, removed, bounced, drawn, food, turns): the server
-        # hands these to the players instead of anyone diffing positions. Not part of the position: never saved, and a
-        # clone starts empty. `cause` is the card whose effect is running, `cause_iid` the very unit when it's known
-        # (two Servals on the board: which one roared), both stamped on each event.
+        # What happened, in order: the server hands these to the players. Never saved, and a clone starts empty. `cause`
+        # is the card whose effect is running, `cause_iid` the very unit when known; both are stamped on each event.
         self.events: list[dict] = []
         self.cause: Optional[str] = None
         self.cause_iid: Optional[int] = None
@@ -403,176 +152,48 @@ class GameState:
         self.events.append({"e": e, **fields, **({"cause": self.cause} if self.cause else {}),
                             **({"cause_iid": self.cause_iid} if self.cause and self.cause_iid is not None else {})})
 
-    # --- the Remove Pile, with each card's owner ---
-    def _sync_pile(self) -> None:
-        if len(self.pile_owners) != len(self.remove_pile):   # a pile edited by hand: owners unknown past what's kept
-            self.pile_owners = (self.pile_owners + [None] * len(self.remove_pile))[:len(self.remove_pile)]
-
     def pile_add(self, card_id: str, owner: Optional[str]) -> None:
-        self._sync_pile()
         self.remove_pile.append(card_id)
         self.pile_owners.append(owner)
 
-    def pile_cards_of(self, owner: str) -> list[str]:
-        """The Remove Pile cards `owner` owns (their Remove Pile), oldest first."""
-        self._sync_pile()
-        return [c for c, o in zip(self.remove_pile, self.pile_owners) if o == owner]
-
-    def pile_take(self, card_id: str, owner: Optional[str] = None) -> bool:
-        """Take one `card_id` out of the Remove Pile (the newest one `owner` owns, when given). False if there is none."""
-        self._sync_pile()
-        for i in range(len(self.remove_pile) - 1, -1, -1):
-            if self.remove_pile[i] == card_id and (owner is None or self.pile_owners[i] in (owner, None)):
-                del self.remove_pile[i]
-                del self.pile_owners[i]
-                return True
-        return False
-
-    def stamp_played(self, unit: "UnitInstance") -> None:
-        """Mark `unit` as entering the board now (its place in the play order Dawn and Dusk resolve by)."""
-        self.play_seq += 1
-        unit.play_seq = self.play_seq
-
-    # --- instance ids ---
     def new_iid(self) -> int:
         iid = self._next_iid
         self._next_iid += 1
         return iid
 
-    # --- card movement ---
-    def draw(self, player: str, n: int) -> list["UnitInstance"]:
-        """Move up to n cards from the top of `player`'s deck (its end) into their hand.
-
-        Each drawn card becomes a fresh UnitInstance (counter 0), so a future "give +X" in
-        hand attaches to it. Returns the instances drawn (so on-draw triggers can see them).
-        """
+    def draw(self, player: str, n: int) -> list[UnitInstance]:
+        """Move up to n cards from the top of `player`'s deck into their hand; returns the instances drawn."""
         deck, hand = self.decks[player], self.hands[player]
         drawn: list[UnitInstance] = []
         for _ in range(min(n, len(deck))):
-            inst = self.deck_instance(player, deck.pop())
+            inst = UnitInstance(deck.pop(), player, self.new_iid())
             hand.append(inst)
             drawn.append(inst)
         return drawn
 
-    def jelly_take(self, player: str, card_id: str) -> Optional[int]:
-        """A copy of `card_id` just left `player`'s deck: the stored counter the royal jelly gave it, or None if the jelly
-        didn't reach it. (Spends it.)"""
-        val = self.jelly.get(player, {}).get(card_id, (0, 0))
-        left, counter = (val, self.jelly_counter(player, card_id)) if isinstance(val, int) else val   # a match saved before 2026-10-22
-        if not left:
-            return None
-        if left == 1:
-            del self.jelly[player][card_id]
-        else:
-            self.jelly[player][card_id] = [left - 1, counter]
-        return counter
-
-    def jelly_peek(self, player: str, card_id: str) -> int:
-        """The counter a copy of `card_id` would leave `player`'s deck with right now (jelly_take without spending it): what a
-        card scouted out of the deck is shown at (Martin, 2026-10-31: "Scouting with owl should display real-time strength")."""
-        val = self.jelly.get(player, {}).get(card_id, (0, 0))
-        left, counter = (val, self.jelly_counter(player, card_id)) if isinstance(val, int) else val
-        return counter if left else 0
-
-    def jelly_counter(self, player: str, card_id: str) -> int:
-        """The stored counter the royal jelly gives a copy of `card_id` left in the deck: +2, on top of any growth its card id
-        carries."""
-        return self.config.jelly_grant
-
-    def eaten_form(self, player: str, card_id: str) -> str:
-        """The legendary Dung Beetle's form reached ("Evolves when your Hungry animals have eaten N food"), by the food
-        `player`'s Hungry animals ate this game; any other card is itself."""
-        if card_id not in EATEN_FORMS:
-            return card_id
-        cfg, n = self.config, self.hungry_eaten.get(player, 0)
-        return EATEN_FORMS[sum(n >= at for at in (cfg.dung_beetle_legend_draw_at, cfg.dung_beetle_legend_food_at,
-                                                  cfg.dung_beetle_legend_play_at))]
-
-    def deck_instance(self, player: str, card_id: str) -> "UnitInstance":
-        """An instance of a card just taken out of `player`'s deck, at the royal jelly's strength if it reached it, and in
-        the form it has evolved to there (the legendary Dung Beetle)."""
-        inst = UnitInstance(self.eaten_form(player, card_id), player, self.new_iid())
-        counter = self.jelly_take(player, card_id)
-        if counter is not None:
-            inst.strength_counter = counter
-            self.note_strength(inst.iid, counter, JELLY_SOURCE)
-        return inst
-
-    # --- where stored strength came from ---
-    def note_strength(self, iid: int, n: int, source: Optional[str], base: bool = False) -> None:
-        """Record that `n` of instance `iid`'s stored strength came from `source` (beside every counter change)."""
-        if n:
-            self.strength_sources[iid] = self.strength_sources.get(iid, ()) + ((source, n, base),)
-
-    def copy_strength_sources(self, from_iid: int, to_iid: int) -> None:
-        """`to_iid` now carries `from_iid`'s stored strength (a bounce, a copy): its sources replace whatever it had."""
-        entries = self.strength_sources.get(from_iid)
-        if entries:
-            self.strength_sources[to_iid] = entries
-        else:
-            self.strength_sources.pop(to_iid, None)
-
-    def base_bonus(self, iid: int) -> int:
-        """The part of `iid`'s stored strength that is its own growth raising its base (the Roach King's falls)."""
-        return sum(n for _, n, base in self.strength_sources.get(iid, ()) if base)
-
-    def _live_strength_sources(self) -> dict:
-        live = {u.iid for stack in self.board.values() for u in stack} | {u.iid for h in self.hands.values() for u in h}
-        return {str(iid): [list(e) for e in entries] for iid, entries in sorted(self.strength_sources.items())
-                if iid in live and entries}
-
-    def add_to_hand(self, player: str, card_id: str, *, strength_counter: int = 0) -> "UnitInstance":
-        """Create a fresh hand instance of `card_id` for `player` (test setup, Opossum return)."""
-        inst = UnitInstance(card_id, player, self.new_iid(), strength_counter=strength_counter)
-        self.hands[player].append(inst)
-        self.emit("to_hand", player=player, iid=inst.iid, card=card_id)
-        self.ensure_mates(player, [inst])
-        return inst
-
-    def ensure_mates(self, player: str, entered: Optional[list] = None) -> None:
-        """A card that brings its mate (the legendary Eagle: "When this enters your hand, add its mate to your hand") and
-        has just entered `player`'s hand (`entered`; the whole hand for an opening hand) brings it, unless it's there
-        already. One already in hand brings nothing when other cards arrive. The mate itself (a token) brings nothing."""
-        hand = self.hands[player]
-        for u in list(hand if entered is None else entered):
-            card = self.cards[u.card_id]
-            if card.mate and card.status != "token" and not any(h.card_id == card.mate for h in hand):
-                self.add_to_hand(player, card.mate)
-
-    # --- board queries (shared by rules and effects, hence here on the state) ---
-    def top_unit(self, cr: str) -> Optional["UnitInstance"]:
-        """The visible (top) unit on a crossroad, or None if empty."""
+    def top_unit(self, cr: str) -> Optional[UnitInstance]:
         stack = self.board.get(cr)
         return stack[-1] if stack else None
 
     def owner_of(self, cr: str) -> Optional[str]:
-        """The player controlling a crossroad (owner of its top unit), or None."""
         u = self.top_unit(cr)
         return u.owner if u else None
 
     def connected_occupied(self, player: str) -> set:
-        """Player-occupied crossroads connected to the player's HQ (overview.md §8)."""
-        gm = self.game_map
-        board = self.board
-        # owner_of(cr) == player, inlined: this BFS is the top search hot path, so skip the
-        # owner_of -> top_unit -> board.get call chain per node (empty stack is falsy = None).
-        seeds = [cr for cr in gm.hq_front(player)
-                 if (st := board.get(cr)) and st[-1].owner == player]
+        """The tiles `player` holds that are connected to their base through their own animals."""
+        board, adjacency = self.board, self.game_map._sorted_adjacency
+        seeds = [cr for cr in self.game_map.hq_front(player) if (st := board.get(cr)) and st[-1].owner == player]
         seen, queue = set(seeds), deque(seeds)
-        adjacency = gm._sorted_adjacency       # gm.neighbors(cr), inlined (the same tuples, in the same order)
         while queue:
-            cr = queue.popleft()
-            for nb in adjacency.get(cr, ()):
+            for nb in adjacency.get(queue.popleft(), ()):
                 if nb not in seen and (st := board.get(nb)) and st[-1].owner == player:
                     seen.add(nb)
                     queue.append(nb)
         return seen
 
     def is_connected(self, player: str, cr: str, occ: Optional[set] = None) -> bool:
-        """Whether `cr` is a connection-legal placement for `player` (HQ graph only).
-
-        Static bypasses (Flight, Cougar) are layered on top in legal_actions, not here.
-        """
+        """Whether `player` may place on `cr` without Flight: a tile of their base, or one held or touched by their
+        connected animals."""
         gm = self.game_map
         if cr in gm.hq_front(player):
             return True
@@ -580,99 +201,47 @@ class GameState:
             occ = self.connected_occupied(player)
         return cr in occ or any(nb in occ for nb in gm.neighbors(cr))
 
-    # --- whose decision is it ---
     def player_to_act(self) -> str:
-        """The seat that must act next: the pending chooser if mid-resolution, else current."""
-        if self.pending is not None:
-            return self.pending["chooser"]
-        return self.current
+        """The seat that must act next: the pending chooser mid-resolution, else the current player."""
+        return self.pending["chooser"] if self.pending is not None else self.current
 
-    # --- branching ---
     def clone(self) -> "GameState":
-        """An independent copy: mutating the clone never touches the original.
-
-        Containers are freshly built; the map/card/config singletons are shared by
-        reference (immutable). UnitInstances are now mutable (strength counters), so they
-        are **copied** - board and hand instances in the clone are independent of the
-        original. The RNG is copied to its own independent stream at the same position.
-        """
+        """An independent copy: mutating it never touches the original."""
         new = GameState.__new__(GameState)
-        new.game_map = self.game_map
-        new.cards = self.cards
-        new.config = self.config
+        new.game_map, new.cards, new.config = self.game_map, self.cards, self.config
         new.board = {cr: [_copy_unit(u) for u in stack] for cr, stack in self.board.items()}
         new.hands = {p: [_copy_unit(u) for u in h] for p, h in self.hands.items()}
         new.decks = {p: list(d) for p, d in self.decks.items()}
-        new.starting_decks = self.starting_decks   # immutable tuples - safe to share
+        new.starting_decks = self.starting_decks
         new.remove_pile = list(self.remove_pile)
+        new.pile_owners = list(self.pile_owners)
+        new.leaders = {p: dict(lead) for p, lead in self.leaders.items()}
         new.food = dict(self.food)
-        new.current = self.current
-        new.first_player = self.first_player
-        new.rng = _copy_rng(self.rng)  # independent RNG, same position
+        new.current, new.first_player = self.current, self.first_player
+        new.rng = _copy_rng(self.rng)
         new.turn_counter = self.turn_counter
-        new.units_placed_this_turn = self.units_placed_this_turn
-        new.actions_taken_this_turn = self.actions_taken_this_turn
+        new.mana_spent = self.mana_spent
         new.applied_this_turn = self.applied_this_turn
         new.effect_steps_this_turn = self.effect_steps_this_turn
         new.caps = list(self.caps)
-        new.idle_turns = self.idle_turns
         new._next_iid = self._next_iid
-        new.play_seq = self.play_seq
+        new.effect_stack = copy.deepcopy(self.effect_stack)
+        new.pending = copy.deepcopy(self.pending)
+        new.scheduled = copy.deepcopy(self.scheduled)
+        new.result = self.result
         new.events, new.cause, new.cause_iid = [], None, None
-        new.effect_stack = _plain_copy(self.effect_stack)
-        new.pending = _plain_copy(self.pending)
-        new.scheduled = _plain_copy(self.scheduled)
-        new.turn_flags = _plain_copy(self.turn_flags)
-        new.card_strength_counters = _plain_copy(self.card_strength_counters)
-        new.trios = _plain_copy(self.trios)
-        new.pile_owners = list(self.pile_owners)
-        new.inked = set(self.inked)
-        new.roar_twice = dict(self.roar_twice)
-        new.hungry_eaten = dict(self.hungry_eaten)
-        new.last_roar = dict(self.last_roar)
-        new.action_guard = {p: list(g) for p, g in self.action_guard.items()}
-        new.leaders = {p: dict(l) for p, l in self.leaders.items()} if self.leaders else {}
-        new.food_gains = dict(self.food_gains)
-        new.next_strength = dict(self.next_strength)
-        new.jelly = {p: dict(j) for p, j in self.jelly.items()}
-        new.strength_sources = dict(self.strength_sources)   # values are tuples: shared safely
-        new.result = self.result  # Result is frozen/immutable - safe to share
         return new
 
-    # --- per-seat view ---
     def view_for(self, player: str) -> StateView:
         opp = other_player(player)
-        board = {
-            cr: tuple((u.card_id, u.owner) for u in stack)
-            for cr, stack in self.board.items()
-        }
         return StateView(
-            player=player,
-            to_act=self.player_to_act(),
-            current=self.current,
-            turn_counter=self.turn_counter,
-            board=MappingProxyType(board),
-            own_hand=tuple(u.card_id for u in self.hands[player]),
-            opponent_hand_count=len(self.hands[opp]),
-            own_deck_count=len(self.decks[player]),
-            opponent_deck_count=len(self.decks[opp]),
-            remove_pile=tuple(self.remove_pile),
-            food=MappingProxyType(dict(self.food)),
-            card_strength_counters=MappingProxyType({
-                p: MappingProxyType(dict(counters))
-                for p, counters in self.card_strength_counters.items()
-            }),
-            pending=MappingProxyType(copy.deepcopy(self.pending)) if self.pending else None,
-            result=self.result,
-            opponent_hand=tuple(u.card_id for u in self.hands[opp]) if self.hand_revealed(opp) else None,
-        )
+            player=player, to_act=self.player_to_act(), current=self.current, turn_counter=self.turn_counter,
+            board=MappingProxyType({cr: tuple((u.card_id, u.owner) for u in stack) for cr, stack in self.board.items()}),
+            own_hand=tuple(u.card_id for u in self.hands[player]), opponent_hand_count=len(self.hands[opp]),
+            own_deck_count=len(self.decks[player]), opponent_deck_count=len(self.decks[opp]),
+            remove_pile=tuple(self.remove_pile), food=MappingProxyType(dict(self.food)),
+            pending=MappingProxyType(copy.deepcopy(self.pending)) if self.pending else None, result=self.result)
 
-    def hand_revealed(self, player: str) -> bool:
-        """Whether `player` trios with their hand revealed (their opponent controls the legendary Giraffe)."""
-        from .statics import hand_revealed   # statics reads the board (ink included); it imports this module
-        return hand_revealed(self, player)
-
-    # --- serialization ---
     def to_dict(self) -> dict:
         return {
             "map_id": self.game_map.id,
@@ -681,178 +250,84 @@ class GameState:
             "decks": {p: list(d) for p, d in self.decks.items()},
             "starting_decks": {p: list(d) for p, d in self.starting_decks.items()},
             "remove_pile": list(self.remove_pile),
+            "pile_owners": list(self.pile_owners),
+            "leaders": {p: dict(lead) for p, lead in sorted(self.leaders.items())},
             "food": dict(self.food),
             "current": self.current,
             "first_player": self.first_player,
             "rng": _rng_to_dict(self.rng),
             "turn_counter": self.turn_counter,
-            "units_placed_this_turn": self.units_placed_this_turn,
-            "actions_taken_this_turn": self.actions_taken_this_turn,
+            "mana_spent": self.mana_spent,
             "applied_this_turn": self.applied_this_turn,
             "effect_steps_this_turn": self.effect_steps_this_turn,
             "caps": [dict(c) for c in self.caps],
-            "idle_turns": self.idle_turns,
             "next_iid": self._next_iid,
-            "play_seq": self.play_seq,
             "effect_stack": copy.deepcopy(self.effect_stack),
             "pending": copy.deepcopy(self.pending),
             "scheduled": copy.deepcopy(self.scheduled),
-            "turn_flags": copy.deepcopy(self.turn_flags),
-            "card_strength_counters": copy.deepcopy(self.card_strength_counters),
-            "trios": {p: dict(sorted(v.items())) for p, v in self.trios.items()},
             "result": self.result.to_dict() if self.result else None,
-            "pile_owners": list(self.pile_owners),
-            "inked": sorted(self.inked),
-            "roar_twice": dict(sorted(self.roar_twice.items())),
-            "hungry_eaten": dict(sorted(self.hungry_eaten.items())),
-            "last_roar": dict(sorted(self.last_roar.items())),
-            "action_guard": {p: list(g) for p, g in sorted(self.action_guard.items())},
-            "leaders": {p: dict(l) for p, l in sorted(self.leaders.items())},
-            "food_gains": dict(sorted(self.food_gains.items())),
-            "next_strength": dict(sorted(self.next_strength.items())),
-            "jelly": {p: dict(sorted(j.items())) for p, j in sorted(self.jelly.items())},
-            "strength_sources": self._live_strength_sources(),
         }
 
     @staticmethod
-    def from_dict(
-        d: dict,
-        *,
-        cards: Optional[dict[str, Card]] = None,
-        config: Optional[Config] = None,
-    ) -> "GameState":
-        cards = cards or load_cards()
-        config = config or Config.default()
-        game_map = load_map(d["map_id"])
-        board = {
-            cr: [UnitInstance.from_dict(u) for u in stack]
-            for cr, stack in d["board"].items()
-        }
+    def from_dict(d: dict, *, cards: Optional[dict[str, Card]] = None, config: Optional[Config] = None) -> "GameState":
         return GameState(
-            game_map,
-            cards,
-            config,
-            board=board,
+            load_map(d["map_id"]), cards or load_cards(), config or Config(),
+            board={cr: [UnitInstance.from_dict(u) for u in stack] for cr, stack in d["board"].items()},
             hands={p: [UnitInstance.from_dict(u) for u in h] for p, h in d["hands"].items()},
             decks={p: list(dk) for p, dk in d["decks"].items()},
             starting_decks={p: tuple(dk) for p, dk in d.get("starting_decks", {}).items()},
             remove_pile=list(d["remove_pile"]),
-            food=dict(d["food"]),
-            current=d["current"],
-            first_player=d["first_player"],
-            rng=_rng_from_dict(d["rng"]),
-            turn_counter=d["turn_counter"],
-            units_placed_this_turn=d["units_placed_this_turn"],
-            actions_taken_this_turn=d.get("actions_taken_this_turn", 0),
-            applied_this_turn=d.get("applied_this_turn", 0),
-            effect_steps_this_turn=d.get("effect_steps_this_turn", 0),
-            caps=[dict(c) for c in d.get("caps", [])],
-            idle_turns=d.get("idle_turns", 0),
-            next_iid=d["next_iid"],
-            play_seq=d.get("play_seq", 0),
-            effect_stack=[_upgrade_step(x) for x in copy.deepcopy(d.get("effect_stack") or [])],
-            pending=copy.deepcopy(d.get("pending")),
-            scheduled=[{**x, "while_buried": x.get("while_buried", False), "step": _upgrade_step(x["step"])}
-                       for x in copy.deepcopy(d.get("scheduled") or [])],
-            turn_flags=copy.deepcopy(d.get("turn_flags") or {}),
-            card_strength_counters=copy.deepcopy(
-                d.get("card_strength_counters") or {"A": {}, "B": {}}
-            ),
-            trios=copy.deepcopy(d.get("trios") or {"A": {}, "B": {}}),
-            result=Result.from_dict(d["result"]) if d["result"] else None,
             pile_owners=list(d["pile_owners"]) if "pile_owners" in d else None,
-            inked={int(i[0] if isinstance(i, list) else i) for i in (d.get("inked") or [])},   # [iid, until]: saved while ink wore off
-            roar_twice=dict(d.get("roar_twice") or {}),
-            hungry_eaten=dict(d.get("hungry_eaten") or {}),
-            last_roar=dict(d.get("last_roar") or {}),
-            action_guard={p: list(g) for p, g in (d.get("action_guard") or {}).items()},
-            leaders={p: dict(l) for p, l in (d.get("leaders") or {}).items()},
-            food_gains=dict(d.get("food_gains") or {}),
-            next_strength=dict(d.get("next_strength") or {}),
-            jelly={p: dict(j) for p, j in (d.get("jelly") or {}).items()},
-            strength_sources={int(i): tuple((e[0], int(e[1]), bool(e[2])) for e in entries)
-                              for i, entries in (d.get("strength_sources") or {}).items()},
-        )
+            leaders={p: {"id": lead["id"]} for p, lead in (d.get("leaders") or {}).items()},
+            food=dict(d["food"]), current=d["current"], first_player=d["first_player"], rng=_rng_from_dict(d["rng"]),
+            turn_counter=d["turn_counter"], mana_spent=d.get("mana_spent", 0),
+            applied_this_turn=d.get("applied_this_turn", 0), effect_steps_this_turn=d.get("effect_steps_this_turn", 0),
+            caps=[dict(c) for c in d.get("caps", [])], next_iid=d["next_iid"],
+            effect_stack=copy.deepcopy(d.get("effect_stack") or []), pending=copy.deepcopy(d.get("pending")),
+            scheduled=copy.deepcopy(d.get("scheduled") or []),
+            result=Result.from_dict(d["result"]) if d["result"] else None)
 
 
-def new_game(
-    deck_a: list[str],
-    deck_b: list[str],
-    seed: int,
-    *,
-    map_id: str = "map_b",
-    cards: Optional[dict[str, Card]] = None,
-    config: Optional[Config] = None,
-    first_player: Optional[str] = None,
-    stacked: bool = False,
-    leaders: Optional[dict] = None,
-) -> GameState:
-    """Set up a fresh game: shuffle decks, pick first player, deal opening hands.
+MAP_ID = "map_hex19"
 
-    The seeded RNG created here is carried on the state, so later chance effects stay
-    reproducible. `deck_a`/`deck_b` are lists of card ids (order is irrelevant - shuffled).
-    `first_player`, if given ("A"/"B"), forces who goes first instead of the coin flip below -
-    the RNG is still drawn from so the rest of the stream (shuffles already happened, later
-    chance effects) is identical either way.
-    `stacked` keeps both decks in the given order, first card drawn first (the tutorial's fixed deal).
-    `leaders`: player -> the card id of that deck's leader (the leaders prototype, engine/leaders.py); none by default.
-    Setting them draws nothing from the RNG, so a game's stream is the same with or without.
-    """
+
+def new_game(deck_a: list[str], deck_b: list[str], seed: int, *, cards: Optional[dict[str, Card]] = None,
+             config: Optional[Config] = None, first_player: Optional[str] = None,
+             leaders: Optional[dict] = None, map_id: str = MAP_ID) -> GameState:
+    """A fresh game: both decks shuffled, the first player by coin flip (or `first_player`), the opening hands dealt and
+    the mulligan waiting. `leaders`: player -> their deck's leader's card id."""
     rng = random.Random(seed)
     cards = cards or load_cards()
-    config = config or Config.default()
-    game_map = load_map(map_id)
+    config = config or Config()
     unknown = sorted({c for c in (*deck_a, *deck_b) if c not in cards})
-    if unknown:                            # refused here, not by a KeyError once the card is first looked up
+    if unknown:
         raise EngineError(f"unknown card {', '.join(unknown)}")
-
     decks = {"A": list(deck_a), "B": list(deck_b)}
-    starting_decks = {"A": tuple(deck_a), "B": tuple(deck_b)}  # the fixed lists, for Oxpecker (F12)
-    if stacked:
-        decks = {p: d[::-1] for p, d in decks.items()}   # draws pop from the end
-    else:
-        rng.shuffle(decks["A"])
-        rng.shuffle(decks["B"])
-
-    coin_flip = "A" if rng.random() < 0.5 else "B"  # coin flip via injected seed
+    starting_decks = {"A": tuple(deck_a), "B": tuple(deck_b)}
+    rng.shuffle(decks["A"])
+    rng.shuffle(decks["B"])
+    coin_flip = "A" if rng.random() < 0.5 else "B"
     first = first_player if first_player is not None else coin_flip
     second = other_player(first)
-
-    state = GameState(
-        game_map,
-        cards,
-        config,
-        board={},
-        hands={"A": [], "B": []},
-        decks=decks,
-        remove_pile=[],
-        food={"A": config.start_food, "B": config.start_food},
-        current=first,
-        first_player=first,
-        rng=rng,
-        starting_decks=starting_decks,
-    )
-    from .leaders import leader_problem, leader_state
+    state = GameState(load_map(map_id), cards, config, board={}, hands={"A": [], "B": []}, decks=decks, remove_pile=[],
+                      food={"A": config.start_food, "B": config.start_food}, current=first, first_player=first, rng=rng,
+                      starting_decks=starting_decks)
+    from .leaders import leader_problem
     for p, lid in sorted((leaders or {}).items()):
         if lid is None:
             continue
         bad = leader_problem(lid, decks[p])
         if bad:
             raise EngineError(bad)
-        state.leaders[p] = leader_state(lid)
+        state.leaders[p] = {"id": lid}
     state.draw(first, config.first_player_opening_draw)
     state.draw(second, config.second_player_opening_draw)
     if config.mulligan:
-        # Mulligan (overview.md §4.4), first player first. Seeded as plain op-steps so this module
-        # needn't import the effect engine; the first step is the pending choice from the start.
         for player in (second, first):
             if state.hands[player]:
                 state.effect_stack.append({"op": "mulligan", "player": player, "returned": []})
         if state.effect_stack:
             chooser = state.effect_stack[-1]["player"]
-            state.pending = {"mode": "choice", "chooser": chooser, "optional": True,
-                             "kind": "mulligan", "options": [u.iid for u in state.hands[chooser]]}
-    if not state.effect_stack:            # no mulligan: the opening hands are final now (else the mulligan's end does this)
-        for player in (first, second):
-            state.ensure_mates(player)
+            state.pending = {"mode": "choice", "chooser": chooser, "optional": True, "kind": "mulligan",
+                             "options": [u.iid for u in state.hands[chooser]]}
     return state

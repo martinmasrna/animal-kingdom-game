@@ -1,18 +1,18 @@
-"""A whole friend match in the mana ruleset, played through the server's own API and websockets from both seats.
+"""A whole friend match, played through the server's own API and websockets from both seats.
 
-Starts a throwaway server (AK_NO_GAME_LOGS=1: it keeps nothing) on a spare port, creates a mana friend match for seat A,
+Starts a throwaway server (AK_NO_GAME_LOGS=1: it keeps nothing) on a spare port, creates a friend match for seat A,
 joins it as seat B, and plays both seats from what each one's view says: keep the opening hand, play the most expensive
 card the mana pays for on the tile that completes the most regions, take the first option of any choice, end the turn
 when nothing is left. Prints one line per action (turn, seat, mana before, the action, both players' food) and the
-result. A check that the server runs the ruleset end to end, not a bot.
+result. A check that the server runs the game end to end, not a bot. Both seats play the same deck: two of each Wisp,
+two Cantrips, two Spikes and the Warlord.
 
-    .venv/bin/python tools/mana/friend_match.py [--port 8011] [--deck-a pool_1] [--deck-b pool_3]
+    .venv/bin/python tools/mana/friend_match.py [--port 8011]
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
-import json
 import os
 import subprocess
 import sys
@@ -41,38 +41,29 @@ def choose(v: dict, regions: list[set], costs: dict) -> dict:
     if not places:
         return {"kind": "pass"}
 
-    copies = g["legal"].get("copies", {})       # copies of a card that differ in strength: each names its own places
-
-    def options():
-        for card, ts in places.items():
-            named = [h for h in g["hand"] if h["id"] == card and str(h["iid"]) in copies]
-            if named:
-                for h in named:
-                    for t in copies[str(h["iid"])]:
-                        yield card, t, h["iid"]
-            else:
-                for t in ts:
-                    yield card, t, None
-
     def score(o):
-        card, tgt, _ = o
+        card, tgt = o
         cr = tgt[1]
         done = sum(1 for r in regions if cr in r and r <= mine | {cr})
         return (done, costs.get(card) or 0, cr)
-    card, tgt, iid = max(options(), key=score)
-    return {"kind": "place", "card_id": card, "target": tgt, **({"iid": iid} if iid is not None else {})}
+    card, tgt = max(((card, t) for card, ts in places.items() for t in ts), key=score)
+    return {"kind": "place", "card_id": card, "target": tgt}
 
 
-async def play(port: int, deck_a: str, deck_b: str) -> int:
+DECK = {"name": "Wisps", "leader": "warlord_legend",
+        "list": [f"wisp_{n}" for n in range(1, 11) for _ in range(2)] + ["scout_2", "scout_2", "spiky_3", "spiky_3", "warlord_legend"]}
+
+
+async def play(port: int) -> int:
     base = f"http://127.0.0.1:{port}"
     async with aiohttp.ClientSession() as http:
         pool = await (await http.get(f"{base}/api/pool")).json()
-        regions = [set(r["corners"]) for r in pool["maps"]["map_hex19"]["regions"]]
+        regions = [set(r["corners"]) for r in pool["map"]["regions"]]
         costs = {c["id"]: c["mana"] for c in pool["cards"]}
-        r = await http.post(f"{base}/api/match", json={"deck": deck_a, "ruleset": "mana", "name": "Ann"})
+        r = await http.post(f"{base}/api/match", json={"deck": DECK, "name": "Ann"})
         assert r.status == 200, await r.text()
         a = await r.json()
-        r = await http.post(f"{base}/api/match/{a['id']}/join", json={"deck": deck_b, "name": "Bob"})
+        r = await http.post(f"{base}/api/match/{a['id']}/join", json={"deck": DECK, "name": "Bob"})
         assert r.status == 200, await r.text()
         b = await r.json()
         socks = {s["seat"]: await http.ws_connect(f"{base}/ws/{a['id']}?token={s['token']}") for s in (a, b)}
@@ -92,7 +83,7 @@ async def play(port: int, deck_a: str, deck_b: str) -> int:
                 elif msg.get("t") == "error":
                     raise SystemExit(f"{seat}: {msg}")
 
-        print(f"match {a['id']}: A {deck_a} vs B {deck_b}, ruleset mana")
+        print(f"match {a['id']}")
         print(f"{'turn':>4} seat  mana  action{'':36} food A-B")
         while True:
             for s in "AB":
@@ -126,14 +117,12 @@ async def play(port: int, deck_a: str, deck_b: str) -> int:
               f"after {va['game']['round']} rounds")
         for ws in socks.values():
             await ws.close()
-        return 0 if res["reason"] == "food" else 1
+        return 0 if res["reason"] in ("food", "starved") else 1
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=8011)
-    ap.add_argument("--deck-a", default="pool_1")
-    ap.add_argument("--deck-b", default="pool_3")
     a = ap.parse_args()
     env = {**os.environ, "AK_NO_GAME_LOGS": "1", "PYTHONWARNINGS": "ignore"}
     srv = subprocess.Popen([sys.executable, "-m", "animal_kingdom.web.server", "--port", str(a.port)], cwd=ROOT, env=env,
@@ -146,7 +135,7 @@ def main() -> None:
                 break
             except OSError:
                 time.sleep(0.2)
-        sys.exit(asyncio.run(play(a.port, a.deck_a, a.deck_b)))
+        sys.exit(asyncio.run(play(a.port)))
     finally:
         srv.terminate()
 

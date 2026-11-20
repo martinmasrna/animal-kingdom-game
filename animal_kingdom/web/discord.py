@@ -58,12 +58,8 @@ def queue_text(name: str, now: float | None = None) -> str:
     return f"**{name}** is looking for a ranked match"
 
 
-def result_text(winner: str, loser: str, winner_deck: str, loser_deck: str, loser_bot: str | None, lesson: int) -> str:
-    """What is worth a line: a newcomer's finished tutorial, a win over the Expert bot, a win over a person. '' otherwise."""
-    if lesson:
-        return f"**{winner}** finished the tutorial" if lesson == 2 else ""
-    if loser_bot == "expert":
-        return f"**{winner}** beat the Expert bot's {loser_deck} with {winner_deck}"
+def result_text(winner: str, loser: str, winner_deck: str, loser_deck: str, loser_bot: str | None) -> str:
+    """What is worth a line: a win over a person. '' otherwise."""
     if loser_bot is None:
         return f"**{winner}** beat **{loser}** ({winner_deck} over {loser_deck})"
     return ""

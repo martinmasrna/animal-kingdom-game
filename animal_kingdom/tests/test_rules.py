@@ -1,389 +1,344 @@
-"""M1 rules tests: connection, covering, stacks, region food, and the win conditions,
-each in a hand-constructed scenario."""
+"""The rules: mana, the board and its bases, covering, the den raid, food, the keywords, the cards' effects, the leaders."""
 
-from __future__ import annotations
+import random
+from itertools import combinations
 
-import pytest
-
+from animal_kingdom.decks import deck_problems
 from animal_kingdom.engine import rules
-from animal_kingdom.engine.actions import DrawAction, PlaceAction
+from animal_kingdom.engine.actions import SKIP, ChoiceAction, LeaderAction, PassAction, PlaceAction
+from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.state import EngineError, Result
+from animal_kingdom.engine.effects import BITES, _adjacent_enemy_targets, mana_cost
+from animal_kingdom.engine.leaders import LEADERS, RAIDER, SAGE, WARLORD
+from animal_kingdom.engine.maps import load_map
+from animal_kingdom.engine.state import MAP_ID, GameState, UnitInstance, new_game
+from animal_kingdom.engine.strength import effective_strength
 
-from ._helpers import make_state, place_targets, put
-
-# Reworked-pool card ids with known integer strengths used below, all vanilla-bodied
-# for rules tests (no Phase-1 effect handler, no keyword): alley_cat=1, caracal=4,
-# cheetah=5, lion=7.
-
-
-# ---------------------------------------------------------------------- connection
-
-def test_empty_board_only_own_hq_fronts_are_legal():
-    s = make_state(hands={"A": ["lion"], "B": []})
-    assert place_targets(s) == {"1,1", "1,2", "1,3"}
-    assert DrawAction() not in rules.legal_actions(s)  # deck empty
+CARDS = load_cards()
+CFG = Config()
+BOARD = load_map(MAP_ID)
+BASE = {"A": {"1,1", "1,2", "1,3"}, "B": {"5,1", "5,2", "5,3"}}
+DECK = [f"wisp_{n}" for n in range(1, 11) for _ in range(2)] + ["scout_2", "scout_2", "spiky_3", "spiky_3", "warlord_legend"]
 
 
-def test_connection_extends_through_occupied():
-    s = make_state(hands={"A": ["lion"], "B": []})
-    put(s, "1,2", "caracal", "A")  # an occupied, connected front
-    assert place_targets(s) == {"1,1", "1,2", "1,3", "2,2"}
-    assert "3,2" not in place_targets(s)  # two hops away, no chain yet
+def state(*, turn=0, current="A", hands=None, decks=None, food=None, leaders=None) -> GameState:
+    """A bare position: turn_counter `turn` (A's Nth own turn is turn 2N-2), nothing pending."""
+    s = GameState(BOARD, CARDS, CFG, board={}, hands={"A": [], "B": []},
+                  decks={p: list((decks or {}).get(p, ["wisp_1"] * 5)) for p in "AB"},
+                  remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A", turn_counter=turn,
+                  leaders={p: {"id": lid} for p, lid in (leaders or {}).items()})
+    for p, ids in (hands or {}).items():
+        for cid in ids:
+            s.hands[p].append(UnitInstance(cid, p, s.new_iid()))
+    return s
 
 
-# ------------------------------------------------------------------------ covering
-
-def test_covering_requires_strictly_greater_strength():
-    s = make_state(hands={"A": ["lion", "alley_cat", "caracal"], "B": []})
-    put(s, "1,2", "caracal", "A")           # A holds a connected front
-    put(s, "2,2", "caracal", "B")  # enemy strength 4, adjacent → connected for A
-    legal = rules.legal_actions(s)
-    assert PlaceAction("lion", ("cr", "2,2")) in legal             # 7 > 4 ✓
-    assert PlaceAction("alley_cat", ("cr", "2,2")) not in legal  # 1 > 4 ✗
-    assert PlaceAction("caracal", ("cr", "2,2")) not in legal  # 4 > 4 ✗ (strict)
+def put(s, cr, cid, owner):
+    u = UnitInstance(cid, owner, s.new_iid())
+    s.board.setdefault(cr, []).append(u)
+    return u
 
 
-def test_own_stacking_needs_no_strength():
-    s = make_state(hands={"A": ["alley_cat"], "B": []})
-    put(s, "1,2", "lion", "A")  # own strong unit
-    assert PlaceAction("alley_cat", ("cr", "1,2")) in rules.legal_actions(s)
+def places(s, cid=None):
+    return {a.target[1] for a in rules.legal_actions(s)
+            if isinstance(a, PlaceAction) and (cid is None or a.card_id == cid) and a.target[0] == "cr"}
 
 
-def test_stack_reveal_on_removal():
-    s = make_state()
-    put(s, "2,2", "caracal", "B")  # B (bottom)
-    put(s, "2,2", "lion", "A")             # A covers (top)
-    assert rules.owner_of(s, "2,2") == "A"
-    s.board["2,2"].pop()                   # remove the top
-    assert rules.owner_of(s, "2,2") == "B"  # the unit beneath now controls
+def raids(s):
+    return [a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.target[0] == "hq"]
 
 
-# ------------------------------------------------------------------ region & food
-
-def test_region_control_produces_food_at_end_of_turn():
-    s = make_state(current="A", hands={"B": ["lion"]}, decks={"A": ["lion"], "B": []})
-    for cr in ("1,1", "2,1", "1,2", "2,2"):  # all corners of R1 (food 10)
-        put(s, cr, "caracal", "A")
-    s.actions_taken_this_turn = s.config.actions_per_turn - 1  # make the Draw A's last action
-    rules.apply_action(s, DrawAction())
-    assert s.food["A"] == 10
-    assert s.current == "B"  # turn passed
+def resolve_choices(s):
+    while s.pending is not None and s.result is None:
+        rules.apply_action(s, rules.legal_actions(s)[0])
 
 
-# -------------------------------------------------------------------- win conditions
-
-def test_food_win():
-    s = make_state(current="A", decks={"A": ["lion"], "B": []}, food={"A": 95, "B": 0})
-    for cr in ("1,1", "2,1", "1,2", "2,2"):
-        put(s, cr, "caracal", "A")
-    s.actions_taken_this_turn = s.config.actions_per_turn - 1  # make the Draw A's last action
-    rules.apply_action(s, DrawAction())  # end of turn: region income +10 → 105 ≥ 100
-    assert s.result == Result("A", "food")
-    assert rules.is_terminal(s) == Result("A", "food")
+def random_game(seed):
+    rng = random.Random(seed)
+    s = new_game(DECK, DECK, seed, leaders={"A": "warlord_legend", "B": "warlord_legend"})
+    for _ in range(3000):
+        if rules.is_terminal(s):
+            break
+        rules.apply_action(s, rng.choice(rules.legal_actions(s)))
+    return s
 
 
-def test_hq_capture_win():
-    s = make_state(current="A", hands={"A": ["lion"], "B": []})
-    for cr in ("1,2", "2,2", "3,2", "4,2"):  # connected chain to B's front (4,2)
-        put(s, cr, "caracal", "A")
-    assert PlaceAction("lion", ("hq", "B")) in rules.legal_actions(s)
-    rules.apply_action(s, PlaceAction("lion", ("hq", "B")))
-    assert s.result == Result("A", "hq_capture")
+# ------------------------------------------------------------------ mana
+
+def test_mana_grows_one_a_turn_to_ten():
+    for n in range(1, 13):
+        s = state(turn=2 * (n - 1))
+        assert rules.mana_left(s, "A") == min(n, 10)
+        assert rules.mana_left(s, "B") == min(n, 10)         # B's next turn is their Nth
 
 
-def test_a_player_with_no_move_passes_and_the_game_goes_on():
-    s = make_state(current="A", hands={"A": ["lion"] * 3}, food={"A": 0, "B": 50})   # B: no hand, no deck
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
-    assert s.result is None and rules.is_terminal(s) is None
-    assert s.current == "A" and s.idle_turns == 1   # B had no move: its turn passed at once
-
-
-def test_both_players_without_a_move_end_the_game_on_food():
-    s = make_state(current="A", hands={"A": ["lion"]}, food={"A": 5, "B": 3})
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))   # then neither can act
-    assert s.result == Result("A", "passes")
-
-
-def test_both_stuck_on_equal_food_the_last_to_pass_loses():
-    s = make_state(current="A", hands={"A": ["lion"]}, food={"A": 3, "B": 3})
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))   # B passes, then A
-    assert s.result == Result("B", "passes")
-
-
-# ------------------------------------------------- actions per turn (2 per turn, the default)
-
-TWO_ACTIONS = Config.default()  # the shipped ruleset is 2 actions/turn, Draw draws 1, a free card each turn
-
-
-def test_two_actions_play_play_then_turn_ends():
-    s = make_state(hands={"A": ["lion", "caracal"], "B": ["lion"]}, config=TWO_ACTIONS)
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
-    assert s.current == "A"                      # first action: the turn stays open
-    assert s.actions_taken_this_turn == 1
-    rules.apply_action(s, PlaceAction("caracal", ("cr", "1,2")))
-    assert s.current == "B"                      # second action: the turn passes
-    assert s.actions_taken_this_turn == 0
-
-
-def test_two_actions_draw_draws_one_and_keeps_turn_open():
-    s = make_state(hands={"A": ["lion"], "B": ["lion"]},
-                   decks={"A": ["caracal", "cheetah"], "B": []}, config=TWO_ACTIONS)
-    rules.apply_action(s, DrawAction())
-    assert len(s.hands["A"]) == 2                # draw_action_count=1: lion + the one drawn
+def test_a_card_costs_its_mana_and_what_the_mana_cannot_pay_is_refused():
+    s = state(turn=4, hands={"A": ["wisp_3", "wisp_2"]})      # A's third turn: 3 mana
+    assert places(s, "wisp_3") and places(s, "wisp_2")
+    rules.apply_action(s, PlaceAction("wisp_2", ("cr", "1,1")))
+    assert rules.mana_left(s, "A") == 1 and not places(s, "wisp_3")
+    assert rules.legal_actions(s) == [PassAction()]          # nothing payable: ending the turn is the move, never automatic
     assert s.current == "A"
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
-    assert s.current == "B"
 
 
-def test_draw_at_the_hand_limit_burns_the_overflow():
-    full = ["alley_cat"] * TWO_ACTIONS.hand_limit
-    s = make_state(hands={"A": full, "B": ["lion"]},
-                   decks={"A": ["lion", "caracal", "cheetah"], "B": []}, config=TWO_ACTIONS)
-    rules.apply_action(s, DrawAction())          # the hand is full: the drawn card burns
-    assert len(s.hands["A"]) == TWO_ACTIONS.hand_limit
-    assert s.remove_pile == ["cheetah"]          # the deck's top is its end
-    assert DrawAction() in rules.legal_actions(s)  # a full hand may still draw (and burn)
+def test_opening_hands_are_three_and_four_and_the_turn_card_comes():
+    s = new_game(DECK, DECK, 1, first_player="A", leaders={"A": "warlord_legend", "B": "warlord_legend"})
+    assert len(s.hands["A"]) == 3 and len(s.hands["B"]) == 4
+    while s.pending is not None:
+        rules.apply_action(s, ChoiceAction(SKIP))
+    rules.apply_action(s, PassAction())
+    assert len(s.hands["B"]) == 5
 
 
-def test_turn_ends_early_when_no_second_action_exists():
-    s = make_state(hands={"A": ["lion"], "B": ["lion"]}, config=TWO_ACTIONS)
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))  # hand and deck now empty
-    assert s.current == "B"                      # no second action possible: turn passed
-
-
-def test_effect_granted_extra_play_consumes_no_action():
-    s = make_state(hands={"A": ["termite_queen", "worker_ant", "caracal"], "B": ["lion"]},
-                   config=TWO_ACTIONS)
-    rules.apply_action(s, PlaceAction("termite_queen", ("cr", "1,1")))
-    assert s.pending is not None                 # "play a non-Queen Colony animal" (mandatory)
-    extra = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction))
-    rules.apply_action(s, extra)                 # the free play resolves the pending
-    assert s.current == "A"                      # still action 1 of 2
-    assert s.actions_taken_this_turn == 1
-    remaining = [a for a in rules.legal_actions(s) if isinstance(a, PlaceAction)]
-    rules.apply_action(s, remaining[0])          # second real action
-    assert s.current == "B"
-
-
-def test_default_config_is_two_actions_per_turn():
-    # The shipped ruleset gives two actions/turn, so one placement keeps the turn open.
-    s = make_state(hands={"A": ["lion", "caracal"], "B": ["lion"]})
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
-    assert s.current == "A"
-    assert s.actions_taken_this_turn == 1
-    rules.apply_action(s, PlaceAction("caracal", ("cr", "1,2")))
-    assert s.current == "B"
-
-
-# ---------------------------------------------------------------------- action boundary
-
-def test_apply_action_rejects_illegal_placement():
-    s = make_state(hands={"A": ["lion"], "B": []})
-    with pytest.raises(EngineError):
-        rules.apply_action(s, PlaceAction("lion", ("cr", "3,3")))    # not connected
-    with pytest.raises(EngineError):
-        rules.apply_action(s, PlaceAction("cheetah", ("cr", "1,1")))  # not in hand
-
-
-def test_locked_copy_is_never_the_one_played():
-    # A Skunk-locked copy ahead of an unlocked copy of the same card, equal counters: the legal
-    # placement offered is the unlocked copy's, so that is the instance that must leave the hand.
-    s = make_state(hands={"A": ["lion", "lion"], "B": []})
-    locked, unlocked = s.hands["A"]
-    locked.locked_until_turn = s.turn_counter + 2
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
-    assert s.hands["A"] == [locked]
-    assert s.top_unit("1,1").iid == unlocked.iid
-
-
-# --------------------------------------------------------------- mulligan (overview.md §4.4)
-
-def test_mulligan_first_player_first_then_second_then_turn_one():
-    from animal_kingdom.decks import load_premade_deck
-    from animal_kingdom.engine.actions import SKIP, ChoiceAction
-    from animal_kingdom.engine.state import new_game, other_player
-    s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 5)
-    first, second = s.current, other_player(s.current)
-    assert s.pending["chooser"] == first
-    kept = [u.card_id for u in s.hands[first]]
-    returned = s.hands[first][0]
-    rules.apply_action(s, ChoiceAction(returned.iid))
-    # the replacement is in hand at once, and it is no copy of the returned card
-    assert s.pending["chooser"] == first and returned not in s.hands[first]
-    assert len(s.hands[first]) == len(kept) and s.hands[first][-1].card_id != returned.card_id
-    rules.apply_action(s, ChoiceAction(SKIP))
-    # the returned card shuffled back, deck size unchanged
-    assert len(s.hands[first]) == len(kept) and len(s.decks[first]) == len(load_premade_deck("cats")) - len(kept)
-    assert s.pending["chooser"] == second
-    rules.apply_action(s, ChoiceAction(SKIP))
-    assert s.pending is None and s.turn_counter == 0 and s.current == first
-    assert rules.legal_actions(s)[0].kind == "draw"
-
-
-def test_mulligan_blacklists_every_returned_card_and_stops_at_four():   # the cap: the 4-card opening hand
-    from animal_kingdom.decks import load_premade_deck
-    from animal_kingdom.engine.actions import ChoiceAction
-    from animal_kingdom.engine.state import new_game
-    s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 11)
-    first = s.current
-    gone = []
+def test_ending_turns_unplayed_never_ends_the_game():
+    s = state(turn=11, hands={"A": ["wisp_1"], "B": ["wisp_1"]})
     for _ in range(4):
-        inst = s.hands[first][-1]                       # always return the newest card, replacements included
-        gone.append(inst.card_id)
-        before = {u.iid for u in s.hands[first]}
-        rules.apply_action(s, ChoiceAction(inst.iid))
-        new = [u for u in s.hands[first] if u.iid not in before]
-        assert len(new) == 1 and new[0].card_id not in gone
-    assert s.pending["chooser"] != first                 # the cap ends this player's mulligan
-    assert len(s.decks[first]) + len(s.hands[first]) == len(load_premade_deck("cats"))
+        rules.apply_action(s, PassAction())
+    assert s.result is None
 
 
-def test_mulligan_cap_is_the_opening_hand_for_the_second_player_too():
-    from animal_kingdom.decks import load_premade_deck
-    from animal_kingdom.engine.actions import SKIP, ChoiceAction
-    from animal_kingdom.engine.state import new_game, other_player
-    s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 11)
-    first, second = s.current, other_player(s.current)
-    rules.apply_action(s, ChoiceAction(SKIP))
-    for _ in range(4):
-        assert s.pending["chooser"] == second
-        rules.apply_action(s, ChoiceAction(s.hands[second][0].iid))
-    assert s.pending is None or s.pending["chooser"] != second   # four returns, the whole opening hand, then it ends
+# ------------------------------------------------------------------ the board
+
+def test_the_board_is_nineteen_tiles_in_rows_of_three_four_five_four_three():
+    rows = {}
+    for cr in BOARD.crossroads:
+        rows.setdefault(int(cr.split(",")[0]), []).append(cr)
+    assert [len(rows[r]) for r in sorted(rows)] == [3, 4, 5, 4, 3]
+    assert {p: set(t) for p, t in BOARD.hq_connects.items()} == BASE
 
 
-def test_mulligan_can_be_disabled():
-    from animal_kingdom.decks import load_premade_deck
-    from animal_kingdom.engine.config import Config
-    from animal_kingdom.engine.state import new_game
-    s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 5,
-                 config=Config(mulligan=False))
-    assert s.pending is None and rules.legal_actions(s)[0].kind == "draw"
+def test_twenty_four_regions_of_three_mutually_adjacent_tiles():
+    triangles = {frozenset(t) for t in combinations(sorted(BOARD.crossroads), 3)
+                 if all(BOARD.adjacent(a, b) for a, b in combinations(t, 2))}
+    assert {frozenset(r.corners) for r in BOARD.regions.values()} == triangles and len(triangles) == 24
+    assert all(r.food == 1 for r in BOARD.regions.values())
 
 
-# ------------------------------------------------------------- ending the turn early (overview.md §5)
+def test_connection_starts_from_the_base_and_either_base_is_open():
+    s = state(turn=4, hands={"A": ["wisp_1"]})
+    assert places(s, "wisp_1") == BASE["A"]
+    put(s, "1,1", "wisp_1", "A")
+    assert places(s, "wisp_1") == BASE["A"] | {"2,1", "2,2"}
+    for cr in ("2,1", "3,1", "4,1"):
+        put(s, cr, "wisp_1", "A")
+    assert "5,1" in places(s, "wisp_1")                        # the opponent's base, reached along the chain
 
-def _fresh():
-    from animal_kingdom.decks import load_premade_deck
-    from animal_kingdom.engine.config import Config
-    from animal_kingdom.engine.state import new_game
-    return new_game(load_premade_deck("cats"), load_premade_deck("giants"), 5, config=Config(mulligan=False))
 
-
-def test_pass_ends_the_turn_with_or_without_an_action():
-    from animal_kingdom.engine.actions import DrawAction, PassAction
-    s = _fresh()
-    rules.apply_action(s, DrawAction())                   # the first player's one-action first turn
-    first = s.current
-    assert rules.can_pass(s)                              # even before the first action
-    rules.apply_action(s, DrawAction())
+def test_region_income_is_paid_at_the_end_of_the_turn():
+    s = state(turn=4, food={"A": 15, "B": 15})
+    for cr in ("1,1", "1,2", "2,2"):
+        put(s, cr, "wisp_1", "A")
+    assert rules.region_income(s, "A") == 1
     rules.apply_action(s, PassAction())
-    assert s.current != first and s.actions_taken_this_turn == 0
-    rules.apply_action(s, PassAction())                   # one idle turn: the game goes on
-    assert s.current == first and s.result is None and s.idle_turns == 1
+    assert s.food["A"] == 16
 
 
-def test_pass_is_never_offered_as_a_legal_action():
-    s = _fresh()
-    assert all(a.kind != "pass" for a in rules.legal_actions(s))
-
-
-def test_two_idle_turns_back_to_back_end_the_game_on_food():
-    from animal_kingdom.engine.actions import DrawAction, PassAction
-    s = _fresh(); first = s.current
+def test_reaching_thirty_food_wins():
+    assert BOARD.win_food == 30 and CFG.start_food == 15        # Martin, 2026-11-20
+    s = state(turn=4, food={"A": 29, "B": 15})
+    for cr in ("1,1", "1,2", "2,2"):
+        put(s, cr, "wisp_1", "A")
     rules.apply_action(s, PassAction())
-    rules.apply_action(s, DrawAction())                   # an action in between resets the count
+    assert s.result is not None and s.result.winner == "A" and s.result.reason == "food"
+
+
+# ------------------------------------------------------------------ covering and the raid
+
+def test_a_cover_needs_more_strength_and_removes_what_it_covered():
+    s = state(turn=11, hands={"A": ["wisp_3", "wisp_2"]})
+    put(s, "1,1", "wisp_1", "A")
+    put(s, "2,1", "wisp_3", "B")
+    assert "2,1" not in places(s, "wisp_2") and "2,1" not in places(s, "wisp_3")
+    s.hands["A"].append(UnitInstance("wisp_4", "A", s.new_iid()))
+    rules.apply_action(s, PlaceAction("wisp_4", ("cr", "2,1")))
+    assert [u.card_id for u in s.board["2,1"]] == ["wisp_4"] and "wisp_3" in s.remove_pile
+
+
+def test_covering_your_own_animal_removes_it_too():
+    s = state(turn=11, hands={"A": ["wisp_1"]})
+    put(s, "1,1", "wisp_5", "A")
+    rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1")))
+    assert [u.card_id for u in s.board["1,1"]] == ["wisp_1"] and "wisp_5" in s.remove_pile
+
+
+def test_random_games_keep_one_animal_a_tile_and_end():
+    for seed in range(20):
+        s = random_game(seed)
+        assert s.result is not None and s.result.reason in ("food", "starved"), seed
+        if not s.effect_stack:
+            assert all(len(st) == 1 for st in s.board.values()), seed
+
+
+def _a_chain_to_b_base(s):
+    for cr in ("1,1", "2,1", "3,1", "4,1"):
+        put(s, cr, "wisp_1", "A")
+
+
+def test_the_den_is_raided_only_through_its_base():
+    s = state(turn=11, hands={"A": ["wisp_6"]}, food={"A": 15, "B": 10})
+    _a_chain_to_b_base(s)
+    assert not raids(s)
+    put(s, "5,1", "wisp_1", "A")
+    assert {a.target for a in raids(s)} == {("hq", "B")}
+    rules.apply_action(s, PlaceAction("wisp_6", ("hq", "B")))       # a 6: destroyed, not stolen
+    assert s.food == {"A": 15, "B": 4} and "wisp_6" in s.remove_pile
+    assert all(u.card_id != "wisp_6" for st in s.board.values() for u in st)
+
+
+def test_a_raid_that_empties_the_den_wins():
+    s = state(turn=11, hands={"A": ["wisp_6"]}, food={"A": 15, "B": 4})
+    _a_chain_to_b_base(s)
+    put(s, "5,1", "wisp_1", "A")
+    rules.apply_action(s, PlaceAction("wisp_6", ("hq", "B")))
+    assert s.food["B"] == 0 and s.result.winner == "A" and s.result.reason == "starved"
+
+
+def test_a_flier_lands_anywhere_and_drops_straight_into_the_enemy_den():
+    s = state(turn=11, hands={"A": ["flyer_5", "wisp_5"]}, food={"A": 15, "B": 15})
+    assert places(s, "flyer_5") == set(BOARD.crossroads)
+    acts = rules.legal_actions(s)
+    assert PlaceAction("flyer_5", ("hq", "B")) in acts and PlaceAction("wisp_5", ("hq", "B")) not in acts
+    rules.apply_action(s, PlaceAction("flyer_5", ("hq", "B")))
+    assert s.food["B"] == 15 - CARDS["flyer_5"].base_strength
+
+
+# ------------------------------------------------------------------ the keywords
+
+def test_spikes_removes_the_first_enemy_that_covers_it_and_stays():
+    s = state(turn=21, hands={"A": ["wisp_3", "wisp_4"]})
+    put(s, "1,1", "wisp_1", "A")
+    spikes = put(s, "2,1", "spiky_3", "B")
+    rules.apply_action(s, PlaceAction("wisp_3", ("cr", "2,1")))
+    assert s.board["2,1"] == [spikes] and spikes.retaliation_used and "wisp_3" in s.remove_pile
+    rules.apply_action(s, PlaceAction("wisp_4", ("cr", "2,1")))     # spent: the next cover takes it
+    assert [u.card_id for u in s.board["2,1"]] == ["wisp_4"]
+
+
+def test_poison_removes_its_coverer_at_the_start_of_its_owners_turn():
+    s = state(turn=11, hands={"A": ["wisp_6"]})
+    put(s, "1,1", "wisp_1", "A")
+    put(s, "2,1", "venomous_2", "B")
+    rules.apply_action(s, PlaceAction("wisp_6", ("cr", "2,1")))
+    assert [u.card_id for u in s.board["2,1"]] == ["wisp_6"]
     rules.apply_action(s, PassAction())
-    assert s.idle_turns == 0 and s.result is None
-    s.food[first] = 5
-    rules.apply_action(s, PassAction())
-    rules.apply_action(s, PassAction())
-    assert rules.is_terminal(s) == Result(first, "passes")
+    assert "2,1" not in s.board and "wisp_6" in s.remove_pile
 
 
-def test_two_idle_turns_on_equal_food_lose_for_the_last_to_pass():
-    from animal_kingdom.engine.actions import PassAction
-    s = _fresh(); first = s.current
-    rules.apply_action(s, PassAction())
-    rules.apply_action(s, PassAction())                   # the second player's pass ends it
-    assert s.result == Result(first, "passes")
+def test_armor_stops_a_bite_and_stealth_hides_from_one():
+    s = state(turn=11)
+    me = put(s, "1,1", "giant_hunter", "A")
+    put(s, "2,1", "armored_2", "B")
+    put(s, "2,2", "sneaky_6", "B")
+    assert _adjacent_enemy_targets(s, me, "1,1") == []
 
 
-def test_both_players_mulligan_at_once_and_a_log_replays_it():
-    """The second player may mulligan while the first still does (overview.md §4.4); a log marks those choices "by" them."""
-    import copy
-    from animal_kingdom.decks import load_premade_deck
-    from animal_kingdom.engine.actions import SKIP, ChoiceAction
-    from animal_kingdom.engine.state import new_game, other_player
-    from animal_kingdom.web.match import Match, Seat
-    m = Match("MUL", Seat("ta", "A", deck="cats"))
-    m.join(Seat("tb", "B", deck="giants"))
-    m._start_game()
-    st = m.state
-    first, second = st.current, other_player(st.current)
-    v = m.view(second)["game"]
-    assert v["toAct"] == second and v["pending"]["kind"] == "mulligan" and v["pending"]["cap"] == 4   # their own, at once
-    before = [u.card_id for u in st.hands[second]]
-    m.act(second, {"kind": "choice", "choice": st.hands[second][0].iid})
-    assert [u.card_id for u in st.hands[second]] != before, "the replacement comes at once"
-    assert st.player_to_act() == first and m.view(first)["game"]["pending"]["kind"] == "mulligan", "the first still chooses"
-    m.act(second, {"kind": "choice", "choice": SKIP})
-    v = m.view(second)["game"]
-    assert v["decision"] == "mulligan" and v["toAct"] != second, "done: waiting for the opponent's mulligan"
-    m.act(first, {"kind": "choice", "choice": st.hands[first][0].iid})
-    m.act(first, {"kind": "choice", "choice": SKIP})
-    assert st.pending is None and st.turn_counter == 0 and st.current == first, "both done: the game starts"
-    assert [a.get("by") for a in m.actions] == [second, second, None, None]
-    # the log replays to the same position
-    from animal_kingdom.engine import rules
-    r = new_game(load_premade_deck("cats"), load_premade_deck("giants"), m.seed, first_player=first)
-    for a in m.actions:
-        rules.apply_logged(r, a)
-    assert [u.card_id for u in r.hands[first]] == [u.card_id for u in st.hands[first]]
-    assert [u.card_id for u in r.hands[second]] == [u.card_id for u in st.hands[second]] and r.decks == st.decks
+def test_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
+    s = state(turn=11, hands={"A": ["glutton_3"]})            # strength 3
+    put(s, "1,1", "wisp_1", "A")
+    put(s, "2,1", "wisp_2", "B")
+    put(s, "2,2", "wisp_3", "B")
+    assert places(s, "glutton_3") == {"2,1"} and not raids(s)
+    rules.apply_action(s, PlaceAction("glutton_3", ("cr", "2,1")))
+    assert s.food["A"] == CFG.hungry_food and "wisp_2" in s.remove_pile
 
 
-def test_one_shared_mulligan_window_then_three_timeouts_in_a_row_lose():
-    from animal_kingdom.engine.state import other_player
-    from animal_kingdom.web import match as mm
-    from animal_kingdom.web.match import Match, Seat
-    m = Match("CLK", Seat("ta", "A", deck="cats"))
-    m.join(Seat("tb", "B", deck="giants"))
-    m._start_game()
-    st, c = m.state, m.clock
-    first, second = st.current, other_player(st.current)
-    assert m.clock_deadline() == c["mull_until"], "both mulligans run on one window"
-    assert m.view(second)["game"]["clock"]["holder"] == second, "each sees it as their own time"
-    assert not m.time_out(c["mull_until"] - 1)
-    assert m.time_out(c["mull_until"] + 1) and not m.mulliganing(), "the window over: both keep their hands, the game starts"
-    assert c["bank"] == {"A": mm.CLOCK_BANK, "B": mm.CLOCK_BANK}, "no bank was spent on the mulligan"
-    # the second player has gone: their clock runs out each turn while the first keeps playing; the third in a row loses
-    from animal_kingdom.engine.actions import DrawAction, PassAction
-    def play_turn(p):
-        assert st.player_to_act() == p
-        m.act(p, DrawAction())
-        while st.result is None and st.player_to_act() == p:
-            m.act(p, PassAction() if st.pending is None else {"kind": "choice", "choice": "__skip__"})
-    if st.player_to_act() == first:
-        play_turn(first)
-    for n in range(1, 4):
-        assert st.player_to_act() == second and st.result is None
-        m.time_out(m.clock_deadline() + 1)
-        assert c["out"][second] == n
-        if n < 3:
-            play_turn(first)
-    assert st.result is not None and st.result.winner == first and st.result.reason == "timeout"
-    assert c["out"][first] == 0, "a player who moves is never counted"
+# ------------------------------------------------------------------ the cards
+
+def test_hunters_bite_as_far_as_their_text_says():
+    for cid, n in BITES.items():
+        assert CARDS[cid].text == (f"Roar: Bite {n}." if n is not None else "Roar: remove an adjacent enemy.")
+    s = state(turn=11, hands={"A": ["hunter_3"]})
+    put(s, "2,1", "wisp_3", "B")
+    put(s, "2,2", "wisp_4", "B")
+    rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))
+    assert s.pending["options"] == ["2,1"] and s.pending["chooser"] == "A"
+    rules.apply_action(s, ChoiceAction("2,1"))
+    assert "2,1" not in s.board
 
 
-def test_the_first_players_first_turn_has_one_action_and_every_turn_after_two():
-    s = _fresh()
-    first = s.current
-    assert s.turn_counter == 0 and rules.turn_actions(s) == 1
-    rules.apply_action(s, DrawAction())
-    assert s.current != first and rules.turn_actions(s) == 2
-    rules.apply_action(s, DrawAction())
-    assert s.current != first                    # the second player keeps both actions
-    rules.apply_action(s, DrawAction())
-    assert s.current == first and rules.turn_actions(s) == 2
+def test_a_cantrip_draws_a_card():
+    s = state(turn=11, hands={"A": ["scout_2"]})
+    rules.apply_action(s, PlaceAction("scout_2", ("cr", "1,2")))
+    assert [u.card_id for u in s.hands["A"]] == ["wisp_1"]
+
+
+def test_djinn_cost_less_for_each_of_their_count():
+    s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed"]}, food={"A": 4, "B": 9})
+    put(s, "1,1", "wisp_1", "A"); put(s, "1,2", "wisp_1", "A"); put(s, "3,3", "wisp_1", "B")
+    s.remove_pile.extend(["wisp_1", "wisp_1", "wisp_2"]); s.pile_owners.extend(["B", "B", "A"])
+    assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed")} == \
+        {"djinn_hand": 5, "djinn_ally": 8, "djinn_enemy": 9, "djinn_food": 6, "djinn_removed": 8}
+    s.food["A"] = 15
+    assert mana_cost(s, "djinn_food") == 0 and mana_cost(s, "djinn_food", "B") == 1
+
+
+def test_shade_strength_is_its_count():
+    s = state(hands={"A": ["wisp_1", "wisp_1", "wisp_1"]}, food={"A": 7, "B": 2})
+    shades = {k: put(s, cr, f"shade_{k}", "A") for k, cr in
+              (("hand", "1,1"), ("ally", "1,2"), ("enemy", "1,3"), ("food", "2,1"), ("removed", "2,2"))}
+    put(s, "4,1", "wisp_1", "B"); put(s, "4,2", "wisp_1", "B")
+    s.remove_pile.extend(["wisp_1", "wisp_2"]); s.pile_owners.extend(["B", "A"])
+    assert {k: effective_strength(s, u) for k, u in shades.items()} == {"hand": 3, "ally": 5, "enemy": 2, "food": 7, "removed": 1}
+
+
+# ------------------------------------------------------------------ the leaders
+
+def test_the_warlord_gains_a_food_for_each_cover_of_an_enemy():
+    s = state(turn=11, hands={"A": ["wisp_5"]}, leaders={"A": WARLORD})
+    put(s, "1,1", "wisp_1", "A")
+    put(s, "2,1", "wisp_1", "B")
+    rules.apply_action(s, PlaceAction("wisp_5", ("cr", "2,1")))
+    assert s.food["A"] == CFG.warlord_leader_food
+
+
+def test_the_raiders_raids_destroy_two_more():
+    s = state(turn=11, hands={"A": ["flyer_2"]}, food={"A": 15, "B": 15}, leaders={"A": RAIDER})
+    rules.apply_action(s, PlaceAction("flyer_2", ("hq", "B")))
+    assert s.food["B"] == 15 - 1 - CFG.raider_leader_bonus
+
+
+def test_the_sages_power_draws_a_card_for_three_mana_and_again():
+    s = state(turn=10, leaders={"A": SAGE})                       # 6 mana
+    assert LEADERS[SAGE][0] == "power"
+    rules.apply_action(s, LeaderAction())
+    rules.apply_action(s, LeaderAction())
+    assert len(s.hands["A"]) == 2 and rules.mana_left(s, "A") == 0 and LeaderAction() not in rules.legal_actions(s)
+
+
+# ------------------------------------------------------------------ decks and the game as a whole
+
+def test_deck_rules():
+    assert deck_problems(DECK, "warlord_legend") == []
+    assert deck_problems(DECK, None) == ["a deck needs a leader"]
+    assert deck_problems(DECK[:-1], "warlord_legend")
+    assert any("at most 2" in p for p in deck_problems(DECK[:-2] + ["wisp_1", "warlord_legend"], "warlord_legend"))
+    assert any("collectible" in p for p in deck_problems(DECK[:-2] + ["armored_2", "warlord_legend"], "warlord_legend"))
+
+
+def test_a_game_replays_from_its_seed_and_actions():
+    rng = random.Random(3)
+    s = new_game(DECK, DECK, 3, leaders={"A": "warlord_legend", "B": "warlord_legend"})
+    actions = []
+    while not rules.is_terminal(s):
+        a = rng.choice(rules.legal_actions(s))
+        actions.append(a.to_dict())
+        rules.apply_action(s, a)
+    again = new_game(DECK, DECK, 3, leaders={"A": "warlord_legend", "B": "warlord_legend"})
+    for a in actions:
+        rules.apply_logged(again, a)
+    assert again.food == s.food and again.result == s.result
+    assert GameState.from_dict(s.to_dict()).to_dict() == s.to_dict()
+
+
+def test_the_bot_beats_random_play():
+    from animal_kingdom.bots.greedy import GreedyBot
+    wins = 0
+    for seed in range(10):
+        rng, bot = random.Random(seed), GreedyBot(seed)
+        s = new_game(DECK, DECK, seed, leaders={"A": "warlord_legend", "B": "warlord_legend"})
+        while not rules.is_terminal(s):
+            legal = rules.legal_actions(s)
+            p = s.player_to_act()
+            rules.apply_action(s, bot.choose(s.view_for(p), legal, s) if p == "A" else rng.choice(legal))
+        wins += s.result.winner == "A"
+    assert wins >= 8

@@ -29,9 +29,8 @@ STATIC = hq.ROOT / "animal_kingdom" / "web" / "static"
 def pool() -> list[dict]:
     """The cards as the game's client gets them (web/match.py card_pool), read fresh so edits show at once."""
     cards = load_cards(json.loads(hq.CARDS.read_text()), validate=False)
-    return [{"id": c.id, "name": c.name, "rarity": c.rarity, "tags": sorted(c.tags), "str": 0 if c.is_dynamic else c.base_strength,
-             "text": c.text, "kw": sorted(c.keywords), "habitat": c.habitat, "related": list(c.related), "evolves": c.evolves}
-            for c in cards.values()]
+    return [{"id": c.id, "name": c.name, "rarity": c.rarity, "str": 0 if c.is_dynamic else c.base_strength,
+             "text": c.text, "kw": sorted(c.keywords), "mana": c.cost} for c in cards.values()]
 
 
 async def index(_req):
@@ -49,7 +48,7 @@ async def stamp(_req):
 
 
 QUIET = 20    # seconds without an edit before Martin's edits are committed together
-DATA = [hq.CARDS, hq.DECKLISTS, hq.ART_JS, hq.LEVELS]
+DATA = [hq.CARDS, hq.ART_JS, hq.LEVELS]
 _pending: list[str] = []
 _timer: asyncio.TimerHandle | None = None
 

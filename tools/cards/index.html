@@ -178,7 +178,7 @@ button { cursor: pointer; }
     <span id="colf"></span>
     <span class="sync" id="sync"></span>
   </div>
-  <div class="bar filt"><div class="seg" id="habs"></div><div class="seg" id="rars"></div><div class="seg" id="strs"></div></div>
+  <div class="bar filt"><div class="seg" id="rars"></div><div class="seg" id="strs"></div></div>
   <div class="head grid" id="head"></div>
 </div>
 <main id="main"></main>
@@ -187,39 +187,34 @@ button { cursor: pointer; }
 <div class="toast" id="toast" hidden></div>
 
 <script>
-const HABS = ['Savanna', 'Jungle', 'Forest', 'Meadow', 'City', 'Open Ocean', 'Polar', 'Desert', 'Mountains', 'Australia', 'Ice Age', ''];
-const RNAME = { L: 'Legendary', R: 'Rare', C: 'Common', '': '' }, RORD = { L: 0, R: 1, C: 2 };
+const RNAME = { L: 'Legendary', C: 'Common', '': '' }, RORD = { L: 0, C: 1 };
 const LV = ['draft', 'problem', 'fine', 'locked'], LVKEY = { d: 'draft', p: 'problem', f: 'fine', l: 'locked' };
 const LVORD = ['empty', 'draft', 'problem', 'fine', 'locked'];
 const COLS = {
-  habitat: { t: 'Habitat', cls: 'habc' }, rarity: { t: 'Rarity', cls: 'rar' }, animal: { t: 'Name', cls: 'ani' }, tag: { t: 'Tag', cls: 'tagc' },
+  rarity: { t: 'Rarity', cls: 'rar' }, animal: { t: 'Name', cls: 'ani' },
   strength: { t: 'Str', cls: 'str' }, cost: { t: 'Cost', cls: 'str' }, effect: { t: 'Effect', cls: 'eff' }, art: { t: 'Art', cls: 'artc' }, crop: { t: 'Crop', cls: 'cropc' },
 };
 const VIEWS = {
-  all: { t: 'Everything', cols: ['habitat', 'rarity', 'animal', 'strength', 'cost', 'effect', 'art', 'crop'] },
+  all: { t: 'Everything', cols: ['rarity', 'animal', 'strength', 'cost', 'effect', 'art', 'crop'] },
   balance: { t: 'Balance', cols: ['rarity', 'animal', 'strength', 'cost', 'effect'] },
   art: { t: 'Art', cols: ['art', 'crop'], cards: true },
-  names: { t: 'Names', cols: ['art', 'animal', 'strength', 'effect'], only: r => r.rarity === 'L' && !r.parent },
 };
 const SHOWS = { all: 'All', open: 'Open', problem: 'Problems', claude: 'Claude' };
-const KW = /\b(Roar|Dusk|Dawn|Flight|Armor|Stealth|Poison|Spikes|Roam|Flee|Titan|Apex Predator|Hungry \d+|Reach \d+|Scout)\b/g;
+const KW = /\b(Roar|Flight|Armor|Stealth|Poison|Spikes|Hungry|Bite \d+)\b/g;
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 let S = null, byId = {}, stampSeen = 0;
-let ui = { view: 'all', show: 'all', habs: [], rars: [], strs: [], q: '', colf: null, sel: null };
+let ui = { view: 'all', show: 'all', rars: [], strs: [], q: '', colf: null, sel: null };
 try { Object.assign(ui, JSON.parse(localStorage.getItem('cards-ui') || '{}'), { sel: null, colf: null }); } catch (e) {}
-const keep = () => { try { localStorage.setItem('cards-ui', JSON.stringify({ view: ui.view, show: ui.show, habs: ui.habs, rars: ui.rars, strs: ui.strs })); } catch (e) {} };
+const keep = () => { try { localStorage.setItem('cards-ui', JSON.stringify({ view: ui.view, show: ui.show, rars: ui.rars, strs: ui.strs })); } catch (e) {} };
 
 /* ---------- data ---------- */
 async function loadState() {
   const r = await fetch('/api/state');
   S = await r.json(); stampSeen = S.stamp;
   byId = Object.fromEntries(S.rows.map(r => [r.id, r]));
-  S.kids = {};
-  for (const r of S.rows) if (r.parent) (S.kids[r.parent] ||= []).push(r);
-  for (const k in S.kids) { const p = byId[k]; S.kids[k].sort((a, b) => p.related.indexOf(a.id) - p.related.indexOf(b.id)); }
 }
 async function post(path, body) {
   const r = await fetch('/api/' + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -247,28 +242,19 @@ function matches(r) {
   const cols = viewCols();
   if (ui.rars.length && !ui.rars.includes(r.rarity)) return false;
   if (ui.strs.length && !ui.strs.includes(String(r.str ?? ''))) return false;
-  if (ui.q) { const q = ui.q.toLowerCase(); if (![r.name, r.species, r.text, r.id, r.tag].some(x => String(x || '').toLowerCase().includes(q))) return false; }
+  if (ui.q) { const q = ui.q.toLowerCase(); if (![r.name, r.text, r.id].some(x => String(x || '').toLowerCase().includes(q))) return false; }
   if (ui.colf && cell(r, ui.colf.col).lv !== ui.colf.lv) return false;
   if (ui.show === 'open' && !cols.some(c => ['empty', 'draft', 'problem'].includes(cell(r, c).lv))) return false;
   if (ui.show === 'problem' && !cols.some(c => cell(r, c).lv === 'problem')) return false;
   if (ui.show === 'claude' && !Object.values(r.lv).some(c => c.review)) return false;
   return true;
 }
-function inScope(r) { const p = r.parent ? byId[r.parent] : r; return (!ui.habs.length || ui.habs.includes(p.habitat)) && (!VIEWS[ui.view].only || VIEWS[ui.view].only(r)); }
-const nameOf = r => r.name || r.species;
-// Families in table order: habitat, then rarity, then name; a card's related cards straight under it.
+const nameOf = r => r.name;
+// The cards in table order: by cost, then rarity, then name.
 function families() {
-  const tops = S.rows.filter(r => !r.parent);
-  tops.sort((a, b) => (HABS.indexOf(a.habitat) + 99) % 99 - (HABS.indexOf(b.habitat) + 99) % 99 || (RORD[a.rarity] ?? 3) - (RORD[b.rarity] ?? 3) || nameOf(a).localeCompare(nameOf(b)));
-  const out = [];
-  for (const t of tops) {
-    const fam = [t, ...(S.kids[t.id] || []).flatMap(k => [k, ...(S.kids[k.id] || [])])];
-    const shown = VIEWS[ui.view].only ? fam.filter(VIEWS[ui.view].only) : fam;
-    if (!shown.length || !inScope(t)) continue;
-    const hit = shown.map(matches);
-    if (hit.some(Boolean)) out.push({ hab: t.habitat, members: shown.map((r, i) => ({ r, faded: !hit[i] })) });
-  }
-  return out;
+  if (!VIEWS[ui.view]) ui.view = 'all';
+  const rows = [...S.rows].sort((a, b) => (a.cost ?? 99) - (b.cost ?? 99) || (RORD[a.rarity] ?? 3) - (RORD[b.rarity] ?? 3) || a.name.localeCompare(b.name));
+  return rows.filter(matches).map(r => ({ members: [{ r, faded: false }] }));
 }
 
 /* ---------- drawing a cell ---------- */
@@ -278,24 +264,19 @@ function ringCss(id, D, crop) { const [x, y, d] = crop || S.crops.CROP[id], w = 
   return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${D / 2 - x * w}px ${D / 2 - y * h}px`; }
 function valueHTML(r, col) {
   switch (col) {
-    case 'habitat': return r.habitat ? esc(r.habitat) : '';
     case 'rarity': return r.rarity ? `<span class="${r.rarity}">${RNAME[r.rarity]}</span>` : '';
     case 'animal':
-    { // the name, and under it the species (when it isn't the name) and the tag
-      const sub = (first) => { const t = [first, r.tag].filter(Boolean).join(' · '); return t ? `<small>${esc(t)}</small>` : ''; };
-      if (r.rarity === 'L' && !r.parent) return r.name ? `<b>${esc(r.name)}</b>${sub(r.species)}` : `<b class="ph">${esc(r.species || 'no animal')}</b>${sub('no name yet')}`;
-      return `<b>${esc(nameOf(r))}</b>${sub(r.species && r.species !== r.name ? r.species : '')}`; }
-    case 'tag': return r.tag ? esc(r.tag) : ' ';
+      return `<b>${esc(r.name)}</b>`;
     case 'strength': return r.str ?? '';
     case 'cost': return r.cost ?? '';
-    case 'effect': return r.text === '—' || (!r.text && r.deck === 'token') ? 'Vanilla' : rules(r.text);
+    case 'effect': return r.text ? rules(r.text) : 'Vanilla';
     case 'art': return r.art ? `<div class="thumb" data-bg="${artUrl(r.id)}"></div>` : '<div class="noart"></div>';
     case 'crop': return r.art ? `<div class="ring" data-ring="${r.id}"></div>` : '';
   }
 }
 function cellHTML(r, col) {
   const c = cell(r, col), v = valueHTML(r, col);
-  const empty = v === '' || (c.lv === 'empty' && col !== 'animal' && col !== 'tag');
+  const empty = v === '' || (c.lv === 'empty' && col !== 'animal');
   const vcls = 'v' + (empty ? ' dash' : '') + (col === 'effect' && v === 'Vanilla' ? ' vanilla' : '') + (col === 'rarity' ? ' ' + r.rarity : '');
   const note = c.note && col !== 'art' && col !== 'crop' ? `<div class="nt">${esc(c.note)}</div>` : '';
   const sel = ui.sel && ui.sel.id === r.id && ui.sel.col === col ? ' sel' : '';
@@ -322,27 +303,21 @@ function render() {
     `<button data-show="${k}" aria-pressed="${ui.show === k}">${t}${k === 'claude' ? `<b class="cl">${nClaude}</b>` : ''}</button>`).join('');
   const chips = (key, vals, label = v => v) => vals.map(v => `<button data-f="${key}" data-v="${esc(v)}" aria-pressed="${ui[key].includes(v)}">${esc(label(v))}</button>`).join('');
   // built once and then only re-marked, so a double click lands on the same button
-  if (!$('#habs').children.length) {
-    $('#habs').innerHTML = chips('habs', HABS.filter(h => h && S.rows.some(r => r.habitat === h)));
-    $('#rars').innerHTML = chips('rars', ['L', 'R', 'C'], k => RNAME[k]);
+  if (!$('#rars').children.length) {
+    $('#rars').innerHTML = chips('rars', ['L', 'C'], k => RNAME[k]);
     $('#strs').innerHTML = chips('strs', [...new Set(S.rows.map(r => r.str).filter(v => v !== null && v !== undefined))].sort((a, b) => a - b).map(String));
   }
   document.querySelectorAll('.filt [data-f]').forEach(b => b.setAttribute('aria-pressed', String(ui[b.dataset.f].includes(b.dataset.v))));
   $('#colf').innerHTML = ui.colf ? `<span class="chipf">${COLS[ui.colf.col].t}: ${ui.colf.lv}<button data-clearcolf aria-label="Clear">×</button></span>` : '';
   const head = $('#head'); head.className = 'head grid ' + ui.view; head.hidden = !!VIEWS[ui.view].cards;
   head.innerHTML = VIEWS[ui.view].cards ? '' : headHTML(fams);
-  let out = '', hab = null, block = [];
-  const flush = () => { if (!block.length) return; const n = block.reduce((s, f) => s + f.members.length, 0);
-    out += `<div class="hab"><h2>${esc(hab || 'No habitat')}</h2><span>${n}</span></div>`;
-    out += VIEWS[ui.view].cards ? `<div class="cards">${block.map(tilesHTML).join('')}</div>` : `<div class="grid ${ui.view}">${block.map(famHTML).join('')}</div>`;
-    block = []; };
-  for (const f of fams) { if (f.hab !== hab) { flush(); hab = f.hab; } block.push(f); }
-  flush();
+  const out = !fams.length ? '' : `<div class="hab"><h2>Cards</h2><span>${fams.length}</span></div>` +
+    (VIEWS[ui.view].cards ? `<div class="cards">${fams.map(tilesHTML).join('')}</div>` : `<div class="grid ${ui.view}">${fams.map(famHTML).join('')}</div>`);
   $('#main').innerHTML = out || '<p class="none">No card matches.</p>';
   if (VIEWS[ui.view].cards) { /* the art view's headline numbers sit in the pills */ }
   lazy();
 }
-const famHTML = f => f.members.map(({ r, faded }) => `<div class="row${r.parent ? ' kid' : ''}${faded ? ' faded' : ''}" data-row="${r.id}">${viewCols().map(c => cellHTML(r, c)).join('')}</div>`).join('');
+const famHTML = f => f.members.map(({ r, faded }) => `<div class="row${faded ? ' faded' : ''}" data-row="${r.id}">${viewCols().map(c => cellHTML(r, c)).join('')}</div>`).join('');
 
 /* the art view: each card as the game draws it, its art and crop levels under it */
 const chalk = n => String(n ?? '').split('').map(d => /\d/.test(d) ? `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">` : `<b>${esc(d)}</b>`).join('');
@@ -352,14 +327,13 @@ const lift = (id, full, crop) => { const y = full ?? (crop || S.crops.CROP[id] |
 function cardHTML(r, { compact = false, kind = '', live = null } = {}) {
   const rar = { L: 'legendary', R: 'rare', C: 'common' }[r.rarity], v = live || { crop: S.crops.CROP[r.id], full: S.crops.FULL[r.id] };
   const pos = r.art ? (compact ? `background-position:50% ${lift(r.id, v.full, v.crop)}em` : `background-position:50% ${fy(r.id, v.full, v.crop)}%`) : '';
-  const name = r.rarity === 'L' && !r.parent && !r.name ? r.species : nameOf(r);
-  const text = r.text === '—' ? '' : r.text;
+  const name = r.name, text = r.text;
   return `<div class="card ${rar}${compact ? ' compact' : ''}"><div class="pic${kind ? ' drag' : ''}" ${kind ? `data-drag="${kind}"` : ''} ${r.art ? `data-bg="${artUrl(r.id)}"` : ''} style="${pos}">${r.art ? '' : `<span>${esc(name)}</span>`}</div><div class="cframe"></div>` +
     `<div class="nbar"><span>${esc(name)}</span></div><div class="stab"><span class="n${String(r.str ?? '').length > 1 ? ' two' : ''}">${chalk(r.str)}</span></div>` +
-    `<div class="ctext">${text ? `<p>${esc(text).replace(KW, '<b>$&</b>')}</p>` : ''}<i>${esc(r.tag.split(',').map(s => s.trim()).filter(Boolean).join(' · '))}</i></div></div>`;
+    `<div class="ctext">${text ? `<p>${esc(text).replace(KW, '<b>$&</b>')}</p>` : ''}</div></div>`;
 }
 const pill = (r, col) => { const c = cell(r, col); return `<span class="pill ${c.lv}${c.review ? ' rv' : ''}" title="${esc(c.note || '')}">${COLS[col].t}: ${c.lv}</span>`; };
-const tilesHTML = f => f.members.map(({ r, faded }) => `<div class="tile${r.parent ? ' kid' : ''}${faded ? ' faded' : ''}" data-open="${r.id}">${cardHTML(r)}<div class="st2">${pill(r, 'art')}${r.art ? pill(r, 'crop') : ''}</div></div>`).join('');
+const tilesHTML = f => f.members.map(({ r, faded }) => `<div class="tile${faded ? ' faded' : ''}" data-open="${r.id}">${cardHTML(r)}<div class="st2">${pill(r, 'art')}${r.art ? pill(r, 'crop') : ''}</div></div>`).join('');
 
 // Pictures load as they near the screen.
 let io;
@@ -375,27 +349,21 @@ let popAt = null;
 function lvButtons(c) { return `<div class="lvl">${LV.map(l => `<button class="${l}" data-lv="${l}" aria-pressed="${c.lv === l}">${l[0].toUpperCase() + l.slice(1)}</button>`).join('')}</div>`; }
 function prevText(col, p) {
   if (p === undefined) return '';
-  if (col === 'animal') return [p.name, p.species].filter(Boolean).join(' / ');
   if (col === 'rarity') return RNAME[p] || p;
   return String(p ?? '—');
 }
 function rvHTML(r, col) {
   const c = cell(r, col); if (!c.review) return '';
-  const p = c.review, cur = col === 'animal' ? { name: r.name, species: r.species } : col === 'strength' ? r.str : col === 'effect' ? r.text : r[col];
+  const p = c.review, cur = col === 'animal' ? r.name : col === 'strength' ? r.str : col === 'effect' ? r.text : r[col];
   const change = 'prev' in p && col !== 'crop' ? `<div><span class="was">${esc(prevText(col, p.prev))}</span> → ${esc(prevText(col, cur))}</div>` : col === 'crop' && 'prev' in p ? '<div>Claude moved the crop.</div>' : '';
   const lvch = p.prev_lv !== c.lv ? `<div>Level: ${p.prev_lv} → ${c.lv}</div>` : '';
   const fresh = col === 'art' && !change && !lvch ? '<div>A new painting is installed.</div>' : '';
   return `<div class="rvbox"><b>Claude's change</b>${change}${lvch}${fresh}<div class="acts"><button class="btn pri" data-accept>Accept</button><button class="btn" data-revert>Revert</button></div></div>`;
 }
 function editorHTML(r, col) {
-  if (!r.editable && !['art', 'crop'].includes(col)) return '';
   switch (col) {
-    case 'habitat': return `<select data-in>${S.habitats.map(h => `<option ${h === r.habitat ? 'selected' : ''}>${h}</option>`).join('')}</select>`;
-    case 'rarity': return `<select data-in>${r.rarity ? '' : '<option value="" selected>—</option>'}${['L', 'R', 'C'].map(k => `<option value="${k}" ${k === r.rarity ? 'selected' : ''}>${RNAME[k]}</option>`).join('')}</select>`;
-    case 'animal': return r.rarity === 'L'
-      ? `<div class="two"><div><div class="lab">Name</div><input data-in="name" value="${esc(r.name)}" placeholder="no name yet"></div><div><div class="lab">Species</div><input data-in="species" value="${esc(r.species)}"></div></div><div><div class="lab">Tag</div><input data-tag value="${esc(r.tag)}"></div>`
-      : `<div class="two"><div><div class="lab">Name</div><input data-in="name" value="${esc(r.name)}"></div><div><div class="lab">Species</div><input data-in="species" value="${esc(r.species === r.name ? '' : r.species)}"></div></div><div><div class="lab">Tag</div><input data-tag value="${esc(r.tag)}"></div>`;
-    case 'tag': return `<input data-in value="${esc(r.tag)}" placeholder="no tag">`;
+    case 'rarity': return `<select data-in>${r.rarity ? '' : '<option value="" selected>—</option>'}${['L', 'C'].map(k => `<option value="${k}" ${k === r.rarity ? 'selected' : ''}>${RNAME[k]}</option>`).join('')}</select>`;
+    case 'animal': return `<input data-in value="${esc(r.name)}">`;
     case 'strength': return `<input data-in type="number" min="0" max="15" value="${r.str ?? ''}">`;
     case 'cost': return `<input data-in type="number" min="0" max="10" value="${r.cost ?? ''}">`;
     case 'effect': return `<textarea data-in rows="2" placeholder="No effect yet">${esc(r.text)}</textarea>`;
@@ -407,7 +375,7 @@ function openPop(id, col) {
   const el = document.querySelector(`.c[data-id="${id}"][data-col="${col}"]`); if (!el) return;
   popAt = { id, col };
   const pop = $('#pop');
-  pop.innerHTML = `<h4>${COLS[col].t} · ${esc(nameOf(r) || r.species)}<span>${r.parent ? 'made by ' + esc(nameOf(byId[r.parent])) : ''}</span></h4>${rvHTML(r, col)}${editorHTML(r, col)}${lvButtons(c)}` +
+  pop.innerHTML = `<h4>${COLS[col].t} · ${esc(r.name)}</h4>${rvHTML(r, col)}${editorHTML(r, col)}${lvButtons(c)}` +
     `<textarea data-note rows="1" placeholder="Note">${esc(c.note || '')}</textarea>`;
   pop.hidden = false;
   const b = el.getBoundingClientRect(), w = 420;
@@ -419,25 +387,21 @@ function openPop(id, col) {
 function closePop() { $('#pop').hidden = true; popAt = null; }
 function readInput(r, col) {
   const pop = $('#pop');
-  if (col === 'animal') { const n = pop.querySelector('[data-in="name"]').value.trim(), s = pop.querySelector('[data-in="species"]').value.trim();
-    return { name: n, species: r.rarity === 'L' ? s : (s || n) }; }
   const el = pop.querySelector('[data-in]'); return el ? el.value : undefined;
 }
 function sameValue(r, col, v) {
-  if (col === 'animal') return v.name === r.name && v.species === r.species;
+  if (col === 'animal') return v.trim() === r.name;
   if (col === 'strength') return String(v) === String(r.str ?? '');
   if (col === 'cost') return String(v) === String(r.cost ?? '');
   if (col === 'effect') return v.trim() === r.text;
-  return v === (col === 'tag' ? r.tag : r[col]);
+  return v === r[col];
 }
 async function savePop(close = true) {
   if (!popAt) return;
   const { id, col } = popAt, r = byId[id];
   const note = $('#pop [data-note]').value.trim();
   try {
-    if (r.editable && !['art', 'crop'].includes(col)) { const v = readInput(r, col); if (v !== undefined && !sameValue(r, col, v)) { const j = await post('value', { id, col, value: v }); toast(changedNote(j.report)); } }
-    const tag = $('#pop [data-tag]');
-    if (tag && r.editable && tag.value.trim() !== byId[id].tag) { const j = await post('value', { id, col: 'tag', value: tag.value.trim() }); toast(changedNote(j.report)); }
+    if (!['art', 'crop'].includes(col)) { const v = readInput(r, col); if (v !== undefined && !sameValue(r, col, v)) { const j = await post('value', { id, col, value: v }); toast(changedNote(j.report)); } }
     if (note !== (cell(byId[id], col).note || '')) await post('note', { id, col, note });
   } catch (e) { return; }
   if (close) closePop();
@@ -514,7 +478,7 @@ function drawer(id) {
   live = { crop: [...(S.crops.CROP[id] || [.5, .4, .7])], strip: [...(S.crops.STRIP[id] || [.5, .35, 1])], full: S.crops.FULL[id] ?? null };
   const a = cell(r, 'art'), c = cell(r, 'crop');
   const d = $('#drawer');
-  d.innerHTML = `<header><h3>${esc(r.rarity === 'L' && !r.name && !r.parent ? r.species : nameOf(r))}</h3><span>${RNAME[r.rarity]} · ${esc(r.habitat)} · ${esc(r.id)}</span><button data-x aria-label="Close">×</button></header>
+  d.innerHTML = `<header><h3>${esc(r.name)}</h3><span>${RNAME[r.rarity]} · ${esc(r.id)}</span><button data-x aria-label="Close">×</button></header>
     <section data-col="art"><h4 class="dh">Art</h4>${rvHTML(r, 'art')}<div class="bigart">${r.art ? `<img src="${artUrl(id)}" alt="">` : '<div class="noart" style="width:170px;height:255px"></div>'}
       <div class="side">${lvButtons(a)}<textarea data-note rows="4" placeholder="Note">${esc(a.note || '')}</textarea></div></div></section>
     ${r.art ? `<section data-col="crop"><h4 class="dh">Crop</h4>${rvHTML(r, 'crop')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start">${lvButtons(c)}<textarea data-note rows="1" placeholder="Note">${esc(c.note || '')}</textarea></div><div class="frames">

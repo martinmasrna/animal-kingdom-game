@@ -6,6 +6,7 @@ access log."""
 import asyncio
 import json
 import logging
+from animal_kingdom.tests._helpers import DECK, SLUG  # noqa: F401
 
 import pytest
 from aiohttp.test_utils import TestClient, TestServer
@@ -38,14 +39,6 @@ BAD = [   # (method, path, request kwargs, needs a profile)
     ("POST", "/api/profile", {"json": [1, 2]}, False),
     ("POST", "/api/signin", {"json": []}, False),
     ("POST", "/api/auth/redeem", {"json": []}, False),
-    ("POST", "/api/match", {"json": {"deck": "cats", "bot": "easy"}}, False),
-    ("POST", "/api/match", {"json": {"deck": "cats", "bot": {"level": ["x"], "deck": "cats"}}}, False),
-    ("POST", "/api/match", {"json": {"deck": "cats", "gauntlet": {"level": {"a": 1}}}}, False),
-    ("POST", "/api/match", {"json": {"deck": "cats", "gauntlet": {"decks": [[1]]}}}, False),
-    ("POST", "/api/match", {"json": {"deck": "cats", "gauntlet": {"games": "2"}}}, False),
-    ("POST", "/api/match", {"json": {"tutorial": "abc"}}, False),
-    ("POST", "/api/match", {"json": {"tutorial": [1]}}, False),
-    ("POST", "/api/match", {"json": {"from": "x"}}, True),
     ("POST", "/api/challenge", {"json": {"friend": {"a": 1}}}, True),
     ("POST", "/api/feedback", {"json": {"text": ["hi"]}}, True),
     ("POST", "/api/news/seen", {"json": []}, True),
@@ -81,8 +74,8 @@ def test_a_lone_surrogate_in_a_name_feedback_or_chat_is_dropped_not_a_server_err
 def test_a_name_can_carry_no_tag_and_no_invisible_or_direction_changing_characters(app):
     async def body(c):
         p = await (await c.post("/api/profile", json={"name": "‮Mar​tin\x00"})).json()
-        m = await (await c.post("/api/match", json={"deck": "cats", "name": "Laras#4821"})).json()
-        long = await (await c.post("/api/match", json={"deck": "cats", "name": "N" * 100_000})).json()
+        m = await (await c.post("/api/match", json={"deck": DECK, "name": "Laras#4821"})).json()
+        long = await (await c.post("/api/match", json={"deck": DECK, "name": "N" * 100_000})).json()
         return p["profile"]["name"], server.hub.matches[m["id"]].seats["A"].name, server.hub.matches[long["id"]].seats["A"].name
     name, guest, long = run(app, body)
     assert name == "Martin"
@@ -91,7 +84,7 @@ def test_a_name_can_carry_no_tag_and_no_invisible_or_direction_changing_characte
 
 
 async def _bot_match(c):
-    m = await (await c.post("/api/match", json={"deck": "cats", "bot": {"level": "easy", "deck": "cats"}})).json()
+    m = await (await c.post("/api/match", json={"deck": DECK, "bot": True})).json()
     ws = await c.ws_connect(f"/ws/{m['id']}?token={m['token']}")
     assert json.loads((await ws.receive()).data)["t"] == "build"
     view = json.loads((await ws.receive()).data)["view"]
@@ -183,7 +176,7 @@ def test_the_routes_a_loop_could_abuse_are_limited_per_address(app, monkeypatch)
         ip = {"Fly-Client-IP": "203.0.113.7"}
         made = [(await c.post("/api/profile", json={}, headers=ip)).status for _ in range(5)]
         other = (await c.post("/api/profile", json={}, headers={"Fly-Client-IP": "203.0.113.8"})).status
-        matches = [(await c.post("/api/match", json={"deck": "cats"}, headers=ip)).status for _ in range(3)]
+        matches = [(await c.post("/api/match", json={"deck": DECK}, headers=ip)).status for _ in range(3)]
         return made, other, matches
     made, other, matches = run(app, body)
     assert made == [200, 200, 200, 429, 429] and other == 200

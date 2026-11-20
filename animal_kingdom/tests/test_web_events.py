@@ -3,6 +3,7 @@ included, whoever ends it; a client's batch only as well-formed events within th
 
 import json
 import sqlite3
+from animal_kingdom.tests._helpers import DECK, SLUG  # noqa: F401
 
 from animal_kingdom.engine.actions import ChoiceAction
 from animal_kingdom.web import events, server
@@ -21,8 +22,8 @@ def _rows(db):
 def test_a_game_start_and_end_are_recorded_for_the_person_in_it(monkeypatch):
     monkeypatch.setattr(server, "profiles", _Profiles())
     hub = server.Hub()
-    m = Match("EVT", Seat("ta", "A", deck="cats", profile="p1"))
-    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
+    m = Match("EVT", Seat("ta", "A", deck=SLUG, profile="p1"))
+    m.join(Seat("tb", "Bot", bot=True, deck=SLUG))
     m._start_game()
     hub.note(m)
     hub.note(m)                                   # nothing new: nothing recorded twice
@@ -32,7 +33,7 @@ def test_a_game_start_and_end_are_recorded_for_the_person_in_it(monkeypatch):
     hub.note(m)
     rows = _rows(server.profiles.db)
     assert [k for k, _ in rows] == ["game_start", "game_end"]
-    assert rows[0][1]["opp"] == "bot:easy" and rows[0][1]["lesson"] == 0
+    assert rows[0][1]["opp"] == "bot"
     assert rows[1][1] == {**rows[1][1], "won": False, "reason": "concede", "match": "EVT"}
 
 

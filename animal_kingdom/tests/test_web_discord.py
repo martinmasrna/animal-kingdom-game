@@ -20,11 +20,8 @@ def test_a_queue_line_is_said_once_per_person_per_quiet_window():
 
 
 def test_results_worth_a_line():
-    assert discord.result_text("Ana#1", "Bot (Expert)", "Cats", "Giants", "expert", 0) == "**Ana#1** beat the Expert bot's Giants with Cats"
-    assert discord.result_text("Ana#1", "Bot (Normal)", "Cats", "Giants", "normal", 0) == ""
-    assert discord.result_text("Ana#1", "Bo#2", "Cats", "their own deck", None, 0) == "**Ana#1** beat **Bo#2** (Cats over their own deck)"
-    assert discord.result_text("Ana#1", "Wild dogs", "Cats", "Cats", "tutorial", 2) == "**Ana#1** finished the tutorial"
-    assert discord.result_text("Ana#1", "Wild dogs", "Cats", "Cats", "tutorial", 1) == ""
+    assert discord.result_text("Ana#1", "Bot", "Wisps", "Wisps", "bot") == ""
+    assert discord.result_text("Ana#1", "Bo#2", "Wisps", "their own deck", None) == "**Ana#1** beat **Bo#2** (Wisps over their own deck)"
 
 
 def test_feedback_line_carries_the_moment():

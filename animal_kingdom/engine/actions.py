@@ -1,100 +1,27 @@
-"""Action types - the single interface a player (bot or future human) uses to act.
-
-A turn is exactly one action (overview.md §5): either draw or place one unit. Actions
-are immutable, value-equal, hashable (so legal_actions can dedupe), and JSON-serializable
-(same representation for sim logs, replays, and a future API payload).
-"""
+"""Action types: the one interface a player (bot or person) acts through. Immutable, value-equal, hashable (legal_actions
+dedupes them) and JSON-serializable (the same shape in game logs, replays and the web API)."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar, Optional, Union
-
-
-@dataclass(frozen=True)
-class DrawAction:
-    """Draw cards (count/limits resolved by the rules, per config)."""
-
-    kind: ClassVar[str] = "draw"  # a tag, not part of value identity
-
-    def to_dict(self) -> dict:
-        return {"kind": self.kind}
+from typing import ClassVar, Union
 
 
 @dataclass(frozen=True)
 class PlaceAction:
-    """Place one unit from hand onto a target.
-
-    `target` is one of:
-      ("cr", "<crossroad>")  - place on a crossroad (empty / own / covering an enemy)
-      ("hq", "<player>")     - place onto an enemy HQ (captures it)
-    """
+    """Play an animal from hand. `target` is ("cr", "<tile>") or ("hq", "<player>"): a raid on that player's den."""
 
     card_id: str
     target: tuple[str, str]
-    # Which copy in hand, when copies of the card differ in strength (a buffed one beside a plain one): the iid of the
-    # first copy of that strength in hand. None when every playable copy is alike, which is nearly always.
-    iid: Optional[int] = None
-    kind: ClassVar[str] = "place"  # a tag, not part of value identity
+    kind: ClassVar[str] = "place"
 
     def to_dict(self) -> dict:
-        d: dict = {"kind": self.kind, "card_id": self.card_id, "target": list(self.target)}
-        if self.iid is not None:
-            d["iid"] = self.iid
-        return d
-
-    @property
-    def is_hq_capture(self) -> bool:
-        return self.target[0] == "hq"
-
-    @property
-    def crossroad(self) -> str:
-        """The destination crossroad (only valid when not an HQ capture)."""
-        return self.target[1]
-
-
-@dataclass(frozen=True)
-class RoamAction:
-    """Roam (keywords.md): move the animal on top of `origin` to an adjacent crossroad, or onto the enemy
-    den next to it. Costs one of the turn's actions, unless the player holds a free roam.
-
-    `target` has PlaceAction's shape: ("cr", "<crossroad>") or ("hq", "<player>") for a den capture.
-    """
-
-    origin: str
-    target: tuple[str, str]
-    kind: ClassVar[str] = "roam"
-
-    def to_dict(self) -> dict:
-        return {"kind": self.kind, "from": self.origin, "target": list(self.target)}
-
-    @property
-    def is_hq_capture(self) -> bool:
-        return self.target[0] == "hq"
-
-    @property
-    def crossroad(self) -> str:
-        """The destination crossroad (only valid when not an HQ capture)."""
-        return self.target[1]
-
-
-@dataclass(frozen=True)
-class ActAction:
-    """Use the Action of the animal on top of `origin` ("Action: ..." on its card; the actions prototype): costs one of
-    the turn's actions, once per animal per turn, only from the top of its crossroad. Not a placement and not a Roar."""
-
-    origin: str
-    kind: ClassVar[str] = "act"
-
-    def to_dict(self) -> dict:
-        return {"kind": self.kind, "from": self.origin}
+        return {"kind": self.kind, "card_id": self.card_id, "target": list(self.target)}
 
 
 @dataclass(frozen=True)
 class LeaderAction:
-    """Press your den: your leader's power (the leaders prototype, engine/leaders.py). Costs one of the turn's actions; a
-    hero power may be pressed again the same turn, a once-per-game power once a match. Any choice inside it (the card a
-    Scout keeps, the animal a buff lands on) comes after, as a pending choice."""
+    """Use your leader's power (engine/leaders.py); it costs Config.leader_power_cost mana."""
 
     kind: ClassVar[str] = "leader"
 
@@ -104,8 +31,8 @@ class LeaderAction:
 
 @dataclass(frozen=True)
 class PassAction:
-    """End the turn early, declining the remaining actions (overview.md §5). Legal only after the
-    turn's first action and outside effect resolution; never offered by legal_actions (see rules.can_pass)."""
+    """End the turn. Legal whenever nothing is resolving (rules.can_pass); offered by legal_actions only when nothing else
+    is."""
 
     kind: ClassVar[str] = "pass"
 
@@ -115,12 +42,7 @@ class PassAction:
 
 @dataclass(frozen=True)
 class ChoiceAction:
-    """A sub-decision during effect resolution (which target/card/option to pick).
-
-    `choice` is a JSON-serializable, hashable value: a crossroad string, a unit iid,
-    a card id, a yes/no option, or the literal SKIP for declining an optional effect.
-    Surfaced by legal_actions only while `state.pending` is set.
-    """
+    """A sub-decision while an effect resolves: a tile, a unit iid, or SKIP to decline an optional one."""
 
     choice: object
     kind: ClassVar[str] = "choice"
@@ -129,21 +51,15 @@ class ChoiceAction:
         return {"kind": self.kind, "choice": self.choice}
 
 
-SKIP = "__skip__"  # the ChoiceAction value that declines an optional effect
+SKIP = "__skip__"
 
-Action = Union[DrawAction, PlaceAction, RoamAction, ActAction, LeaderAction, PassAction, ChoiceAction]
+Action = Union[PlaceAction, LeaderAction, PassAction, ChoiceAction]
 
 
 def action_from_dict(d: dict) -> Action:
     kind = d["kind"]
-    if kind == "draw":
-        return DrawAction()
     if kind == "place":
-        return PlaceAction(card_id=d["card_id"], target=tuple(d["target"]), iid=d.get("iid"))
-    if kind == "roam":
-        return RoamAction(origin=d["from"], target=tuple(d["target"]))
-    if kind == "act":
-        return ActAction(origin=d["from"])
+        return PlaceAction(card_id=d["card_id"], target=tuple(d["target"]))
     if kind == "leader":
         return LeaderAction()
     if kind == "choice":

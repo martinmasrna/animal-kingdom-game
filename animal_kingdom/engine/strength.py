@@ -1,285 +1,40 @@
-"""Effective strength - the single chokepoint used wherever strength matters.
-
-Decision E (keywords.md): one number, three layers, evaluated **live** wherever strength
-matters (covering, removal thresholds, region holding, conditions like Coyote's "if 5+"):
-
-    effective_strength = base_or_dynamic + global_growth + stored_counters
-                         + active_anthems                                      (clamped >= 0)
-
-- base_or_dynamic: the printed int, or a dynamic rule (Goliath = #removed units; Chameleon).
-- global_growth: persistent per-player/card growth that applies in every zone (Rattlesnake).
-- stored_counters: `UnitInstance.strength_counter` - one-time "give +X" grants (Unnamed Rallier,
-  Clarion, Dhole, Dingo, Bush Dog, Shuck). Stored on the instance; persist after the
-  granter dies; travel hand->board. `GameState.strength_sources` says where each part came from
-  (`strength_breakdown`), and which part is the card's own growth raising its base (the Roach King's falls).
-- active_anthems: live "has +X" auras (Mackerel, Moose, Guard Wasp).
-  Recomputed from the board every time; vanish when their condition lapses.
-
-For covering legality a card is still in hand (no board iid yet), so anthems are computed
-"as a prospective placement" (`card_strength`); the instance's counter is added on top.
-"""
+"""Strength: one number, wherever it matters (covering, a Bite's reach, a raid's food). A card's printed strength, or a
+Shade's live count; never below 0."""
 
 from __future__ import annotations
 
-from typing import Optional
+from .state import EngineError, GameState, UnitInstance, other_player
 
-from .state import EngineError, GameState, UnitInstance
-
-
-def count_units_controlled(state: GameState, player: str) -> int:
-    """Number of crossroads whose top (visible) unit belongs to `player`."""
-    return sum(1 for stack in state.board.values() if stack and stack[-1].owner == player)
+# A Shade's count: "+1 strength for each card in your hand, ally, enemy, food of yours, animal in your opponent's Remove
+# Pile". The Djinn's discounts count the same things (effects.mana_cost).
+COUNTS = {"hand_count": "hand", "ally_count": "ally", "enemy_count": "enemy", "food_count": "food",
+          "opp_removed_count": "removed"}
 
 
-def _tops_owned(state: GameState, owner: str) -> list[UnitInstance]:
-    """The top (controlling) units `owner` holds across the board."""
-    return [stack[-1] for stack in state.board.values() if stack and stack[-1].owner == owner]
-
-
-def _dynamic_strength(state: GameState, rule: Optional[str], owner: str) -> int:
-    if rule == "removed_units_count":    # Python: +1 for each removed unit
-        return len(state.remove_pile)
-    if rule == "removed_eggs_count":     # Egg Eater: +N for each removed Egg
-        return state.config.egg_eater_growth * sum(
-            "Egg" in state.cards[cid].tags for cid in state.remove_pile)
-    # The Shades (Martin, 2026-11-20): their owner's count, as the Djinn's discounts count it (effects._djinn_count); an
-    # ally Shade counts itself.
-    shade = {"hand_count": "hand", "ally_count": "ally", "enemy_count": "enemy", "food_count": "food",
-             "opp_removed_count": "removed"}.get(rule or "")
-    if shade:
-        from .effects import _djinn_count
-        return state.config.shade_growth * _djinn_count(state, owner, shade)
-    raise EngineError(f"unknown dynamic strength rule {rule!r}")
-
-
-def _base_or_dynamic(state: GameState, card, owner: str) -> int:
-    if isinstance(card.base_strength, int):
-        return card.base_strength
-    return _dynamic_strength(state, card.dynamic_strength, owner)
-
-
-def _global_growth(state: GameState, card_id: str, owner: str) -> int:
-    return state.card_strength_counters.get(owner, {}).get(card_id, 0)
-
-
-def _inked(state: GameState, iid: Optional[int]) -> bool:
-    """Octopus ink (statics.inked, inlined here: statics imports this module): the unit's effects are off."""
-    return iid is not None and iid in state.inked
-
-
-# Auras on the board that give your other animals of a family strength: card id -> (family, config attr of the
-# bonus, whether only during your opponent's turn). Each source counts, and none counts for itself.
-FAMILY_AURAS = {
-    "mahi_mahi": ("Fish", "mahi_mahi_anthem", False),   # "Your other Fish have +1 strength."
-    "cape_buffalo": ("Hoofed", "buffalo_anthem", True),   # "Your other Hoofed animals have +1 strength during your opponent's turn."
-}
-AURA_FAMILIES = frozenset(fam for fam, _, _ in FAMILY_AURAS.values())
-# The cards whose own text is a live "+X" (the branches of anthem_bonus). Any other card, of a family no aura reaches,
-# has no anthem at all: anthem_bonus answers 0 for it before walking the board. The search asks for every unit's strength
-# in every position it imagines, so that walk, once per unit, was the hottest line of the engine (2026-10-20).
-ANTHEM_CARDS = frozenset({"guard_wasp", "tuna", "marmot", "peacock", "giraffe", "crocodile", "capybara"})
-
-
-_SMALL_DECKS: dict = {}
-
-
-def small_starting_deck(state: GameState, owner: str, but: str) -> bool:
-    """No animal of strength `capybara_small_max` + 1 or more in `owner`'s starting deck apart from `but` (printed
-    strength; a dynamic one counts as its printed 0). The starting deck never changes, so the answer is kept."""
-    deck = state.starting_decks.get(owner, ())
-    key = (deck, but)
-    if key not in _SMALL_DECKS:
-        cap = state.config.capybara_small_max
-        _SMALL_DECKS[key] = all(cid == but or not isinstance(s := state.cards[cid].base_strength, int) or s <= cap
-                                for cid in deck)
-    return _SMALL_DECKS[key]
-
-
-def aura_sources(state: GameState) -> list:
-    """The board's family-aura sources as (unit, aura) pairs: what anthem_bonus looks for. An evaluation of a whole board
-    gathers them once and hands them to effective_strength for every unit, instead of walking the board per unit."""
-    return [(u, aura) for stack in state.board.values() if stack and (aura := FAMILY_AURAS.get((u := stack[-1]).card_id)) is not None]
-
-
-def guard_bonus(state: GameState, owner: str) -> int:
-    """[ACTION 8] (the actions prototype): "your animals have +2 strength during your opponent's next turn". Live, on
-    every animal `owner` has, during the one opponent's turn it was used for (state.action_guard)."""
-    g = state.action_guard.get(owner) if state.action_guard else None
-    return g[1] if g and state.current != owner and g[0] == state.turn_counter else 0
-
-
-def leader_bonus(state: GameState, owner: str) -> int:
-    """Lady Juliette's leader (the leaders prototype): "If your starting deck has no animals of strength 4 or more, your
-    animals have +1 strength." Live, on every animal `owner` has, on the board and as it would be played from hand."""
-    lead = state.leaders.get(owner)
-    if lead is None or lead["id"] != "bee_legend_2" or not state.starting_decks.get(owner):
-        return 0
-    return state.config.juliette_leader_bonus if small_starting_deck(state, owner, "") else 0
-
-
-def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], sources: Optional[list] = None) -> int:
-    """The live "has +X" bonus for a unit of `card` controlled by `owner`: the cards' anthems and auras, plus
-    [ACTION 8]'s guard (guard_bonus) and Lady Juliette's leader (leader_bonus)."""
-    return (_anthem_bonus(state, card, owner, self_iid, sources) + (guard_bonus(state, owner) if state.action_guard else 0)
-            + (leader_bonus(state, owner) if state.leaders else 0))
-
-
-def _anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], sources: Optional[list] = None) -> int:
-    """The live "has +X" anthem bonus for a unit of `card` controlled by `owner`. `sources`: aura_sources(state), if the
-    caller has them.
-
-    `self_iid` is the unit's iid if it is on the board, or None for a prospective placement
-    (a card still in hand). "Other X" auras exclude the unit itself; "you control N X" counts
-    include it once it is on the board, but a card in hand is not yet controlled, so it covers
-    with the count the board gives it now.
-    An inked unit has no anthem of its own, and an inked source gives none.
-    """
-    cfg = state.config
-    their_turn = state.current != owner
-    if card.id not in ANTHEM_CARDS:
-        if card.tags.isdisjoint(AURA_FAMILIES):
-            return 0
-        bonus = 0                           # only an aura can reach it: look for sources, never gather the board
-        for u, aura in (aura_sources(state) if sources is None else sources):
-            if u.owner != owner or u.iid == self_iid or aura[0] not in card.tags or _inked(state, u.iid) or (aura[2] and not their_turn):
-                continue
-            bonus += getattr(cfg, aura[1])
-        return bonus
-    tops = _tops_owned(state, owner)
-
-    def count(tag: str, *, include_self: bool) -> int:
-        if include_self:
-            return sum(1 for u in tops if tag in state.cards[u.card_id].tags)
-        return sum(1 for u in tops if tag in state.cards[u.card_id].tags and u.iid != self_iid)
-
-    cid = card.id
-    bonus = 0
-    if not _inked(state, self_iid):
-        if cid == "guard_wasp":             # +3 while you control >= threshold Colony units (itself once on the board)
-            if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
-                bonus += cfg.guard_hornet_bonus
-        elif cid == "tuna":                     # +1 for each other animal you control
-            bonus += cfg.tuna_per_fish * sum(1 for u in tops if u.iid != self_iid)
-        elif cid == "marmot":                   # +1 for each 10 food you have (the Hamster's until 2026-10-29)
-            bonus += cfg.marmot_per_step * (state.food[owner] // cfg.marmot_food_step)
-        elif cid == "peacock":                  # +1 for each card in your hand: itself while there, one less once it lands
-            bonus += cfg.hand_per_card * len(state.hands[owner])
-        elif cid == "giraffe":                  # +5 during your opponent's turn
-            bonus += cfg.giraffe_bonus if their_turn else 0
-        elif cid == "crocodile":                # -3 during your opponent's turn
-            bonus -= cfg.crocodile_penalty if their_turn else 0
-        elif cid == "capybara":                 # 8 if your starting deck holds no other animal of 4 or more
-            if state.starting_decks.get(owner) and small_starting_deck(state, owner, cid):
-                bonus += cfg.capybara_strength - int(state.cards[cid].base_strength)   # a printed number, never "dynamic"
-
-    for u in tops:
-        aura = FAMILY_AURAS.get(u.card_id)
-        if aura is None or u.iid == self_iid or aura[0] not in card.tags or _inked(state, u.iid):
-            continue
-        if aura[2] and not their_turn:
-            continue
-        bonus += getattr(cfg, aura[1])
-    return bonus
-
-
-def raw_strength(state: GameState, unit: UnitInstance, sources: Optional[list] = None) -> int:
-    """Strength of a unit in play: base/dynamic + its stored counter + live anthems, below 0 too (an animal below 0
-    dies: effects.resolve removes it). `sources`: aura_sources(state), when the caller scores the whole board."""
-    card = state.cards[unit.card_id]
-    if _inked(state, unit.iid):             # its own effects are off: a dynamic strength is its printed 0
-        base = card.base_strength if isinstance(card.base_strength, int) else 0
-        return (base + _global_growth(state, card.id, unit.owner) + unit.strength_counter
-                + anthem_bonus(state, card, unit.owner, unit.iid, sources))
-    return (_base_or_dynamic(state, card, unit.owner)
-            + _global_growth(state, card.id, unit.owner)
-            + unit.strength_counter
-            + anthem_bonus(state, card, unit.owner, unit.iid, sources))
-
-
-def effective_strength(state: GameState, unit: UnitInstance, sources: Optional[list] = None) -> int:
-    """Strength of a unit in play, >= 0."""
-    return max(0, raw_strength(state, unit, sources))
+def count(state: GameState, player: str, what: str) -> int:
+    """`player`'s count of `what`: cards in their hand, their or their opponent's animals on the board (top units), their
+    food, or the animals in their opponent's Remove Pile."""
+    if what == "hand":
+        return len(state.hands[player])
+    if what in ("ally", "enemy"):
+        side = player if what == "ally" else other_player(player)
+        return sum(1 for stack in state.board.values() if stack and stack[-1].owner == side)
+    if what == "food":
+        return state.food.get(player, 0)
+    opp = other_player(player)
+    return sum(1 for o in state.pile_owners if o == opp)
 
 
 def card_strength(state: GameState, card_id: str, owner: str) -> int:
-    """Strength of a unit of `card_id` for `owner`, anthems as a prospective placement and
-    ignoring any per-instance counter (callers that have an instance add its counter)."""
+    """The strength a unit of `card_id` has for `owner` now: on the board, or as it would be played from hand."""
     card = state.cards[card_id]
-    val = (_base_or_dynamic(state, card, owner)
-           + _global_growth(state, card.id, owner)
-           + anthem_bonus(state, card, owner, None))
-    return max(0, val)
+    if isinstance(card.base_strength, int):
+        return card.base_strength
+    what = COUNTS.get(card.dynamic_strength or "")
+    if what is None:
+        raise EngineError(f"unknown dynamic strength rule {card.dynamic_strength!r}")
+    return max(0, state.config.shade_growth * count(state, owner, what))
 
 
-def hand_counter(state: GameState, inst: UnitInstance) -> int:
-    """A hand instance's stored strength as it stands in hand: its own, or under Arne's leader ("Copies of the same animal
-    in your hand share their strength") the strongest copy's (copies of one card differ only by their counters)."""
-    if not state.leaders:
-        return inst.strength_counter
-    lead = state.leaders.get(inst.owner)
-    if lead is None or lead["id"] != "eagle_legend":
-        return inst.strength_counter
-    best = inst.strength_counter
-    for u in state.hands.get(inst.owner, ()):
-        if u.card_id == inst.card_id and u.strength_counter > best:
-            best = u.strength_counter
-    return best
-
-
-def play_adjustment(state: GameState, inst: UnitInstance) -> list:
-    """What playing `inst` now adds to its strength beyond its card and its counter, as (source card, amount): [GORILLA]'s
-    Roar ("the next animal you play has this animal's strength": exactly that number, so the difference, either way) and
-    his leader ("the first animal you play each turn has +1 strength", after it), and Don Santo's leader."""
-    out = []
-    owner = inst.owner
-    n = state.next_strength.get(owner)
-    if n is not None:
-        out.append(("gorilla_legend_2", n - (card_strength(state, inst.card_id, owner) + hand_counter(state, inst))))
-    lead = state.leaders.get(owner) if state.leaders else None
-    if lead is not None and lead["id"] == "gorilla_legend_2" and not state.turn_flags.get(f"played_{owner}"):
-        out.append(("gorilla_legend_2", state.config.gorilla_leader_bonus))
-    # Don Santo's leader: "Your last animal in hand has +3 strength." (the only card left there, and it keeps it when played)
-    if lead is not None and lead["id"] == "macaque_legend":
-        hand = state.hands[owner]
-        if len(hand) == 1 and hand[0].iid == inst.iid:
-            out.append(("macaque_legend", state.config.santo_leader_bonus))
-    return out
-
-
-def placement_strength(state: GameState, inst: UnitInstance) -> int:
-    """Effective strength of a hand instance if it were placed now (for covering legality)."""
-    if not (state.leaders or state.next_strength):
-        return max(0, card_strength(state, inst.card_id, inst.owner) + inst.strength_counter)
-    return max(0, card_strength(state, inst.card_id, inst.owner) + hand_counter(state, inst)
-               + sum(n for _, n in play_adjustment(state, inst)))
-
-
-def strength_breakdown(state: GameState, unit: UnitInstance) -> dict:
-    """Where a unit's strength comes from, for the player to see (Martin, 2026-11-05, as Hearthstone shows a card's buffs):
-    `printed` (None for a dynamic strength), `base` (its printed or dynamic number as it stands; an inked dynamic one is its
-    printed 0), `base_bonus` (its own growth raising its base: the Roach King's falls), `growth` (card-wide, on every copy:
-    the Python's), `changes` (what other cards gave it or took from it, each [source, amount], oldest first; source None for
-    a counter set by hand), `auras` (live "has +X", each [source, amount]: its own text or an ally's aura) and `total`
-    (raw_strength, below 0 too)."""
-    card = state.cards[unit.card_id]
-    printed = card.base_strength if isinstance(card.base_strength, int) else None
-    base = (printed or 0) if _inked(state, unit.iid) else _base_or_dynamic(state, card, unit.owner)
-    entries = state.strength_sources.get(unit.iid, ())
-    base_bonus = sum(n for _, n, b in entries if b)
-    changes = [[src, n] for src, n, b in entries if not b]
-    rest = unit.strength_counter - base_bonus - sum(n for _, n in changes)
-    if rest:
-        changes.append([None, rest])
-    their_turn = state.current != unit.owner
-    auras = sorted([u.card_id, getattr(state.config, aura[1])] for u, aura in aura_sources(state)
-             if u.owner == unit.owner and u.iid != unit.iid and aura[0] in card.tags and not _inked(state, u.iid)
-             and not (aura[2] and not their_turn))
-    if guard := guard_bonus(state, unit.owner):
-        auras.append(["protector", guard])
-    if state.leaders and (lb := leader_bonus(state, unit.owner)):
-        auras.append(["bee_legend_2", lb])
-    own = anthem_bonus(state, card, unit.owner, unit.iid) - sum(n for _, n in auras)
-    if own:
-        auras.insert(0, [card.id, own])
-    return {"printed": printed, "base": base, "base_bonus": base_bonus, "growth": _global_growth(state, card.id, unit.owner),
-            "changes": changes, "auras": auras, "total": raw_strength(state, unit)}
+def effective_strength(state: GameState, unit: UnitInstance) -> int:
+    return card_strength(state, unit.card_id, unit.owner)

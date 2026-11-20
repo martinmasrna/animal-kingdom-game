@@ -1,368 +1,47 @@
-"""Tunable constants in one place (handoff §11; memory data-architecture-decision).
-
-These are deliberately *untuned placeholders* for the reworked pool (decisions G/H are a
-sim job - see docs/balance/backlog.md). The whole point of the simulator is to sweep them together on one
-shared food scale, so every magic number a card effect or rule depends on lives here -
-never hard-coded in effect logic. Card text is the source of the *defaults*; the sim
-re-derives the real values against `win_food` (100) and region output (data/maps.json).
-
-Build a Config once (usually `Config.default()`) and thread it through the engine. The sim
-constructs variant Configs via `sweep(**overrides)` to explore balance dials.
-"""
+"""The rules' numbers in one place. Build a Config once (`Config()`) and thread it through the engine; the map holds the
+board's own numbers (each region's food, the food that wins: data/maps.json)."""
 
 from __future__ import annotations
 
-import json
-from dataclasses import dataclass, fields, replace
+from dataclasses import dataclass, replace
 from typing import Optional
 
 
 @dataclass(frozen=True)
 class Config:
-    # --- One-off food gains on placement (Roar "gain N food") ---
-    squirrel_food: int = 10              # trimmed from 12 in the 2026-07-05 balance pass
-    chipmunk_food_now: int = 10          # Chipmunk: gain 10 now...
-    chipmunk_food_later: int = 10         # ...and 10 more at the start of the owner's next turn
-    flying_squirrel_food: int = 10       # synced to card text "gain 10 food" (was 8; text/const desync broke groundhog fed-threshold combo, 2026-07-09)
-    rat_king_per_rodent: int = 4         # Roar: gain N food per OTHER Rodent you control
-    worker_bee_food: int = 6            # Worker Bee: Roar: gain 12 food
-    worker_ant_per: int = 3              # Worker Ant: Roar: gain 3 food for each animal you control
-    worker_wasp_per_place: int = 3       # Worker Wasp: whenever you place an animal, gain 3 food (any animal since 2026-11-12; 2 on Martin's sheet; 3 after his first games, 2026-10-24)
-    tortoise_legend_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
-                                          # recurring passive in the pool - ruled down 2026-07-02)
-    tortoise_legend_food_cap: int = 20        # Methuselah: each player gains at most this much food per turn
-    cheetah_draw: int = 2                # Roar: if this is next to your opponent's den, draw 2 cards (Martin, 2026-10-30)
-    army_ant_legend_per: int = 2         # Queen Solenia: Dusk: gain 2 food for each animal you control (Martin's sheet, 2026-10-24)
-    # Colony outside the precon, bench drafts (Martin, 2026-10-21; effects-pass.md)
-    forager_ant_food: int = 5            # Forager Ant: Roar: gain 5 food
-    forager_ant_draw: int = 1            # ... if you gained fed_threshold or more food this turn, draw a card
-    scout_bee_threshold: int = 20        # [SCOUT BEE]: Dusk: if you gained 20 or more food this turn ...
-    scout_bee_draw: int = 1              # ... draw a card
-    bumblebee_legend_food_rider: int = 3         # extra food whenever you gain food
+    # Mana: on a player's Nth own turn they have min(N, mana_cap), lost at the end of the turn. Playing a card from hand
+    # costs its card's `cost`; a leader's power costs leader_power_cost.
+    mana_cap: int = 10                   # Martin, 2026-11-20: "Mana cap at 10 of course"
+    leader_power_cost: int = 3
 
-    # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---
-    # A shared threshold read by Gopher/Muskrat/Groundhog.
-    fed_threshold: int = 10              # food gained this turn to arm Gopher/Muskrat/Groundhog
-    mara_draw: int = 2                  # Mara: draw N if fed this turn
-    piranha_legend_fish: int = 2        # the legendary Piranha: removes each enemy next to N or more of your Fish
-    groundhog_food: int = 5            # Groundhog: Dawn: gain N food
-    chipmunk_legend_food_per: int = 1           # Tally: Roar: gain 1 food for each 3 food you have
-    chipmunk_legend_food_step: int = 3
-    beaver_bonus_actions: int = 1       # Beaver: extra top-level actions on your NEXT turn
-    eel_actions: int = 1                # Electric Eel: the actions your opponent takes on their next turn
+    # The food race (Martin, 2026-11-20: "both players starting at 15, you need 30 to win, and if you drop to 0 you
+    # lost"): a raid destroys food; each region a player holds pays its food at the end of their turn.
+    start_food: int = 15
 
-    # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
-    egg_eater_growth: int = 2            # Egg Eater: +strength for each removed Egg
-    shade_growth: int = 1                # the Shades (mana ruleset): +strength for each of their count
+    hand_limit: int = 10                 # past it, the newest cards drawn burn
+    first_player_opening_draw: int = 3   # Martin, 2026-11-20: "make it 3 for first and 4 for second"
+    second_player_opening_draw: int = 4
+    mulligan: bool = True                # a blacklist mulligan, both players at once
+    turn_draw_count: int = 1             # the free card at the start of each turn, the first player's first turn excepted
 
-    # --- Payoff food ---
-    gazelle_food: int = 5                # Gazelle: Roar: draw a card and gain 5 food (its Flee brings the Roar back)
-    sloth_food: int = 30                 # Sloth: gain food when its timer comes due
-    locust_delay: int = 2                # Locust (The First of Many's): turns until it eats, every turn counting (Wild)
-    sloth_delay: int = 3                 # owner-turns until Sloth pays out (ticks only while it is
-                                          # top of its crossroad - see rules overview.md 9.1)
+    hungry_food: int = 1                 # Hungry: the food its prey's removal gains (Martin, 2026-11-20)
+    shade_growth: int = 1                # the Shades: +1 strength for each of their count
+    warlord_leader_food: int = 1         # the Warlord: "When you cover an enemy, gain 1 food."
+    raider_leader_bonus: int = 2         # the Raider: "Your raids destroy 2 more food."
 
-    # --- Strength anthems ("has +X", live; decision E) ---
-    guard_hornet_bonus: int = 3          # while >= threshold Colony units (4 until Martin's round robin of 2026-11-12)
-    guard_hornet_colony_threshold: int = 4
-    mahi_mahi_anthem: int = 1            # Mahi-mahi: your other Fish have +1 (the Mackerel's aura, Martin 2026-10-30)
-    tuna_per_fish: int = 1               # Tuna: +1 for each other animal you control (2026-11-16; each other Fish before)
-    giraffe_bonus: int = 3               # Giraffe: +3 during your opponent's turn (5 on a 4 until 2026-10-26)
-    crocodile_penalty: int = 3           # Crocodile: -3 during your opponent's turn
-    buffalo_anthem: int = 1              # Cape Buffalo: your other Hoofed animals have +1 during your opponent's turn
-    hand_per_card: int = 1               # [PLACEHOLDER]: +1 for each other card in your hand
-    albatross_max: int = 3               # Albatross: remove all adjacent enemies of strength 3 or less
-
-    # --- Strength counters ("give +X", stored on the instance; decision E) ---
-    dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
-    wolf_legend_grant: int = 1           # the legendary Wolf: Dusk: +1 for each adjacent Canine
-    street_dog_grant: int = 3            # Street Dog: Roar: give a connected ally with Roam +3 strength. It roams.
-    black_wolf_grant: int = 1            # the legendary Black Wolf: whenever a Canine roams, give it +1 strength
-    black_wolf_draw: int = 1             # ... and draw a card
-    deer_legend_grant: int = 2           # the legendary Deer: whenever one of your animals flees, it gains 2 strength (itself too)
-    deer_legend_draw: int = 2            # the legendary Deer: Roar: draw 2 animals with Flee (Martin, 2026-10-30)
-    fox_draw: int = 2                    # Fox: Roar: if a Canine roamed this turn, draw 2 cards
-    dhole_draw: int = 2                  # Dhole: whenever it covers an enemy with no other enemy next to it, draw 2 cards
-    elephant_legend_max: int = 3         # the legendary Elephant: whenever it lands, remove all adjacent enemies of strength 3 or less
-    orangutan_legend_grant: int = 1            # Silverback: Roar: every animal in your hand +1
-    baboon_grant: int = 1                # Baboon: Roar: 2 animals in your hand +1...
-    baboon_count: int = 2                # ...this many of them
-    baboon_legend_grant: int = 1         # the legendary Baboon: Dawn: 2 random animals in your hand +1...
-    baboon_legend_count: int = 2         # ...this many
-    tarsier_grant: int = 2               # Tarsier: the Primate in hand it picks gets +2
-    butterfly_grant: int = 1             # Butterfly (and the Chrysalis stage): an animal in your hand +1
-    butterfly_legend_stage4_grant: int = 1   # the Butterfly stage: every animal in your hand +1
-    butterfly_legend_stage5_grant: int = 2   # the Monarch stage: every animal in your hand +2
-    butterfly_legend_stage5_draw: int = 2    # the Monarch stage: draw 2
-
-    # --- Token spawns (Canine go-wide; 2026-07-05) ---
-    alpha_pups: int = 2                  # Pups Scarlett places on adjacent empty crossroads
-    stork_younglings: int = 2            # Stork: random younglings added to your hand
-    cuckoo_eggs: int = 2                 # Cuckoo: Cuckoo Eggs shuffled into your opponent's deck
-    aurum_eggs: int = 2                  # Aurum: Golden Eggs shuffled into your deck each Dawn
-    golden_egg_draw: int = 2             # Golden Egg (Aurum's): cards drawn when you draw it
-    earthworm_worms: int = 2             # Earthworm: Worms placed on its crossroad when it's removed
-    cockroach_legend_growth: int = 1           # Roach King: comes back with +1 strength
-    python_growth: int = 1               # Python: +1 strength whenever an enemy is removed
-    leopard_legend_growth: int = 1       # the legendary Leopard: +1 strength whenever it removes an animal (every kill makes him bigger)
-
-    # --- Thresholds / strength gates ---
-    colony_synergy_threshold: int = 4    # Nurse Bee / Soldier Ant "4 or more Colony"
-    hare_draw: int = 2                   # ...this many cards
-    macaque_hand_min: int = 5            # Macaque: remove if you have this many cards in hand
-    gorilla_min: int = 8                 # Gorilla: draw if this has this much strength
-    manta_legend_regions: int = 2        # the legendary Manta Ray: draw at Dusk with this many regions...
-    manta_legend_draw: int = 2           # ...this many cards
-    capybara_strength: int = 8           # Capybara: this has 8 strength if your starting deck has no other animal...
-    capybara_small_max: int = 3          # ...of strength 4 or more (the small-deck archetype's line)
-    jelly_grant: int = 2                 # the legendary Bee: "give your animals on the board, in your hand and in your deck +2 strength"
-    vulture_removals: int = 3            # Vulture: lands at your Dusk if this many animals were removed this turn
-
-    # --- Removal-strength caps on Roar removals ---
-    jaguar_max: int = 5
-    gopher_max: int = 7                  # Gopher: ...remove an adjacent enemy of strength 7 or less (2026-11-16)
-    serval_min: int = 8                  # Serval: ...remove an adjacent enemy of strength 8 or more (2026-11-16)
-    hornet_max: int = 7                  # Hornet: ...to remove an adjacent enemy of strength 7 or less (2026-11-16)
-    weasel_max: int = 3                  # Weasel: Roar: remove an adjacent enemy of strength 3 or less (Martin, 2026-11-16)
-    bat_draw: int = 2                    # Bat: Flight. Roar: draw 2 cards. Echo. (2026-11-16)
-    honey_badger_min: int = 8            # Honey Badger removes an enemy of strength >= this
-    stoop_max: int = 4                   # Hawk
-    capuchin_draw: int = 2               # Capuchin: Roar: draw 2 cards (Martin, 2026-11-16)
-    mongoose_max: int = 5                # Mongoose: Roar: remove an adjacent enemy of strength 5 or less (Martin, 2026-11-16)
-    # The mana prototype's Hunters (Martin, 2026-11-20, his table): Roar: Bite N; the Giant Hunter removes any adjacent enemy
-    hunter_3_max: int = 3
-    hunter_5_max: int = 5
-    hunter_7_max: int = 7
-    hunter_6_max: int = 6
-    hunter_4_max: int = 4
-    hunter_2_max: int = 2
-    rhinoceros_max: int = 3
-    hippopotamus_max: int = 5
-    cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this
-
-    # --- Draws, food and other magnitudes of the launch decks ---
-    mantis_draw: int = 2                 # Praying Mantis: remove an adjacent ally to draw 2
-    hyena_food_per: int = 3              # Hyena: Dusk: 3 food for each animal removed this turn
-    hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
-    alley_cat_kittens: int = 2           # Alley Cat: Roar: add 2 Kittens to your hand
-    kitten_draw: int = 1                 # Kitten: Roar: draw a common animal (no printed number)
-    tiger_legend_max: int = 7            # [TIGER] (legendary): Roar: remove an adjacent enemy of strength 7 or less
-    marmot_per_step: int = 1             # Marmot: +1 strength for each 10 food you have
-    marmot_food_step: int = 10
-    hamster_draw_food: int = 5           # Hamster: whenever you draw a card, gain 5 food
-    tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food
-    stag_beetle_per_armor: int = 5       # Stag Beetle: 5 food for each of your animals with Armor
-    wildebeest_food: int = 6             # Wildebeest: at the end of your turn, if grazing, gain 6 (Martin, 2026-10-29)
-    dung_beetle_per: int = 4             # Dung Beetle: 4 food for each Hungry animal you control (Martin, 2026-10-30)
-    otk_squirrel_multiplier: int = 3     # the legendary Squirrel: in 2 turns, gain three times the food it lost...
-    otk_squirrel_delay: int = 3          # ...after this many of your turns (covering pauses it)
-    migration_bonus: int = 5             # the legendary Wildebeest: your regions produce 5 more food
-    boar_penalty: int = 5                # the legendary Boar: your opponent's regions produce 5 less food
-    reach: int = 2                       # Reach: lands up to this many crossroads from a connected unit
-    mosquito_drain: int = 2              # Mosquito: an adjacent enemy -2 strength
-
-    # --- Placement costs (decision F) ---
-    # NOTE: there is deliberately no constant here. A printed "Costs X food" is a card-intrinsic
-    # field (`food_cost` in cards.json, gated in effects.py), like base_strength - tune it there.
-    # A vestigial `costs_20_food = 20` lived here until 2026-07-15, unread by any code and stale
-    # since a27f0df cut those bodies to 15; it could only mislead a Decision H re-derivation.
-
-    # --- Delayed / multi-turn effects (scheduler; "your turns" are 2 apart) ---
-    snake_egg_draw: int = 1              # Snake Egg's Roar: Snakes drawn at once
-    egg_hatch_delay: int = 2             # Snake Egg: turns until it hatches
-    egg_hatch_draw: int = 2              # Snakes drawn when a Snake Egg hatches
-    bird_egg_hatch_delay: int = 1        # Bird Egg: turns until it hatches (and Scouts again)
-    scout_count: int = 3                 # Scout: cards looked at, one drawn, the rest shuffled back
-    black_bear_delay: int = 2           # turns until Black Bear draws
-    black_bear_draw: int = 2            # baseline-ruler tuning 2026-07-13: 1→2 (draw-1 too weak vs draw-2 default)
-    raven_draw: int = 3                 # Raven's Roar: cards drawn...
-    raven_shuffle: int = 2              # ...then shuffled back from the hand
-    nurse_bee_draw: int = 2             # Nurse Bee: drawn with 4 or more Colony animals (Martin's sheet, 2026-10-24)
-    viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
-    black_mamba_max: int = 7                 # Black Mamba removes an adjacent enemy of at most this strength
-    anaconda_legend_decay: int = 1                  # Eon's strength lost each time it shuffles itself back
-    raven_legend_steals: int = 2                    # Grimm: animals taken from the opponent's Remove Pile
-    dung_beetle_legend_draw_at: int = 5            # the legendary Dung Beetle: food your Hungry animals ate this game
-    dung_beetle_legend_food_at: int = 15            #   for each tier: a card, then a removal, then another animal
-    dung_beetle_legend_play_at: int = 30
-    oxpecker_legend_min: int = 8                    # the legendary Oxpecker: your covering animals this strong call an Oxpecker
-    krill_legend_food: int = 10                     # the legendary Krill: a Titan's food, for one action instead of two
-
-    # --- The actions prototype: "Action: ..." animals (branch actions; [ACTION 1] to [ACTION 8]) ---
-    food_maker_food: int = 10              # [ACTION 1]: Action: gain 10 food
-    card_burner_food: int = 15              # [ACTION 2]: Action: discard a card to gain 15 food
-    refueler_food: int = 5               # [ACTION 3]: Action: gain 5 food and draw a card
-    refueler_draw: int = 1
-    trainer_grant: int = 2              # [ACTION 4]: Action: give an animal in your hand +2 strength
-    food_thief_drain: int = 10             # [ACTION 7]: Action: your opponent loses 10 food
-    protector_bonus: int = 2              # [ACTION 8]: your animals have +2 strength during your opponent's next turn
-
-    # --- The leaders prototype (branch leaders; engine/leaders.py) ---
-    warlord_leader_food: int = 1         # the mana prototype's Warlord leader: "When you cover an enemy, gain 1 food." (Martin, 2026-11-20)
-    raider_leader_bonus: int = 2         # the mana prototype's Raider leader: "Your raids destroy 2 more food."
-    adira_leader_food: int = 5           # Queen Adira's leader: "When one of your Cats covers an enemy, gain 5 food."
-    theron_leader_grant: int = 1         # King Theron's leader: "When one of your Cats covers an enemy, give it +1 strength."
-    mole_leader_count: int = 3           # the legendary Mole's leader: "When you play your third animal in a turn,...
-    mole_leader_draw: int = 1            # ...draw a card." (1, not 2: he has to run empty for the Rat and Hare; Martin, 2026-11-17)
-    santo_leader_bonus: int = 3          # Don Santo's leader: "Your last animal in hand has +3 strength."
-    yuki_leader_uses: int = 3            # Yuki's leader: the uses a match has of "Choose a connected ally. It can't be covered..."
-    ash_leader_food: int = 1             # Ash's leader: "Dusk: gain 1 food for each Poison, Spikes, Armor and Stealth on your animals...
-    ash_leader_contact: int = 2          # ...Animals adjacent to enemies earn double."
-    iris_leader_copies: int = 3          # Iris's leader: "The first time you control 3 copies of an animal, play a fourth copy."
-    grimm_leader_draw: int = 2           # Grimm's leader: "Draw 2 cards."...
-    grimm_leader_per: int = 5            # ...one more for every 5 enemies removed this match
-    juliette_leader_bonus: int = 1       # Lady Juliette's leader: your animals have +1 strength (small starting deck)
-    bumbleton_leader_food: int = 1       # Lord Bumbleton's leader: whenever you gain food, gain 1 food
-    bumbleton_card_per: int = 2          # Lord Bumbleton's card: Roar: gain 2 food for each time you have gained food
-    solenia_leader_per: int = 1          # Queen Solenia's leader: Dusk: gain 1 food for each animal you control
-    solenia_card_per: int = 3            # Queen Solenia's card: Roar: gain 3 food for each animal you control...
-    babaji_leader_grant: int = 1         # Babaji's leader: Scout an animal and give it +1 strength
-    babaji_card_grant: int = 2           # Babaji's card: return an adjacent ally, give it +2 strength, and play it
-    xanthe_leader_grant: int = 1         # Xanthe's leader at Butterfly and Monarch: +1 strength
-    monarch_grant: int = 2               # Xanthe's card, the Monarch: draw 2 cards, then give 2 animals in your hand +2
-    monarch_count: int = 2
-    gorilla_leader_bonus: int = 1        # [GORILLA]'s leader: the first animal you play each turn has +1 strength
-    juliette_wish_shown: int = 3         # Lady Juliette's card: choose one of three small animals
-
-    # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
-    # per-card default ruling and the data behind it) ---
-    cap_queen_adira: bool = False
-    cap_falstaff: bool = False
-    cap_king_theron: bool = False
-
-    # Region outputs and win_food are map-defined (data/maps.json) and intentionally not
-    # duplicated here - maps are the single source of truth for board food.
-
-    # --- Core rules constants (overview.md) ---
-    hand_limit: int = 10                 # max hand size (overview.md §3.5)
-    first_player_opening_draw: int = 4   # overview.md §4.3: four each (Martin, 2026-10-11, with the one-action first turn;
-    second_player_opening_draw: int = 4  # 3 and 4 plus that turn made the first player win 43% in 1,080 Expert games)
-    mulligan: bool = True                # overview.md §4.4: blacklist mulligan, first player first
-    mulligan_max: Optional[int] = None   # returns per mulligan; None: as many as the player's opening hand
-                                          # (Hearthstone's rule, Martin 2026-10-01)
+    # Safety caps, so a loop of effects can never hang a game.
+    max_actions_per_turn: int = 30       # a turn ends after this many applied actions, choices included (Martin, 2026-11-18)
+    max_effect_steps_per_turn: int = 1000
+    max_turns: int = 400
 
     def mulligan_cap(self, player: str, first_player: str) -> int:
-        if self.mulligan_max is not None:
-            return self.mulligan_max
+        """Cards a player may return in the mulligan: as many as their opening hand."""
         return self.first_player_opening_draw if player == first_player else self.second_player_opening_draw
-    draw_action_count: int = 1           # cards drawn by one Draw action (overview.md §5)
-    turn_draw_count: int = 1             # cards a player draws free at the start of each turn, the first player's first
-                                          # turn excepted (Martin, 2026-11-16: "Gain 1 card per turn, pay 1 action to draw 1.")
-    draw_action: bool = True             # whether the Draw action is offered at all; False = cards come only from the turn's free card and from effects
-                                          # (the trial of 2026-11-20, set per match by web/match.py; the default ruleset leaves it on)
-    actions_per_turn: int = 2            # top-level actions (place/draw) per turn (overview.md §5)
-    first_turn_actions: int = 1          # the first player's first turn only: the tempo the second player
-                                         # lacks (Martin, 2026-10-11, from his gauntlets: 82% first vs 67% second)
-    # --- The mana ruleset (the prototype Martin asked for on 2026-11-20; RULESETS["mana"], off by default) ---
-    # No action count: on a player's Nth own turn they have min(N, mana_cap) mana, lost at the end of the turn. Playing an
-    # animal from hand costs its card's `cost`; anything an effect puts into play is free; a Roam, an Echo, a leader's power
-    # and a printed "Action:" cost mana_per_action each, and the Beaver's "1 additional action" is that much more mana.
-    mana: bool = False
-    mana_cap: int = 10                   # Martin, 2026-11-20: "Mana cap at 10 of course"
-    mana_per_action: int = 3
-    # The den raid and the cover (Martin, 2026-11-20, both in the mana ruleset): an animal placed or roaming into the
-    # enemy den steals food equal to its strength, at most what they have, and is spent (the Remove Pile); a covered
-    # animal, yours or theirs, is removed, so a tile holds one animal.
-    den_raid: bool = False
-    cover_removes: bool = False
-    hungry_food: int = 1                 # the mana prototype's Hungry: the food its removal gains (Martin, 2026-11-20)
-    # The food race both ways (the mana ruleset, Martin, 2026-11-20: "both players starting at 15, you need 30 to win,
-    # and if you drop to 0 you lost", and a raid destroys food instead of stealing it): each player starts with
-    # start_food, and a player whose food drops to 0 loses.
-    start_food: int = 0
-    zero_food_loses: bool = False
-
-    # --- Engine safety / sim hygiene ---
-    max_actions_per_turn: int = 30       # a turn ends after this many applied actions, choices included, even mid-effect (Martin, 2026-11-18)
-    max_effect_steps_per_turn: int = 1000  # a turn ends after this many effect steps resolve in it, with no player input needed (Martin, 2026-11-18)
-    max_turns: int = 400                 # hard cap so fuzz games always terminate (M1)
-
-    @staticmethod
-    def default() -> "Config":
-        """The v0 placeholder constants for the reworked pool (untuned; see docs/balance/backlog.md G/H)."""
-        return Config()
 
     def sweep(self, **overrides) -> "Config":
-        """Return a copy with the given fields overridden (for balance sweeps)."""
         return replace(self, **overrides)
 
-    @property
-    def ruleset(self) -> str:
-        """The ruleset this config plays (a key of RULESETS)."""
-        return "mana" if self.mana else "default"
 
-    def for_ruleset(self, name: Optional[str]) -> "Config":
-        """This config under a named ruleset (RULESETS; None or "default" changes nothing)."""
-        if name not in RULESETS:
-            raise ValueError(f"no ruleset {name!r}; one of {sorted(RULESETS)}")
-        return replace(self, **RULESETS[name])
-
-    def for_log(self, log: dict) -> "Config":
-        """This config with the turn rules a game log was played under: a log from before the first player's one-action
-        first turn (2026-10-11) carries no `first_turn_actions`, and its first turn had two; one from before the four-card
-        hands carries no `first_player_opening_draw`, and its first player drew three. A log of another ruleset names it
-        (`"ruleset": "mana"`)."""
-        base = self.for_ruleset(log.get("ruleset") or "default")
-        return replace(base, first_turn_actions=log.get("first_turn_actions", base.actions_per_turn),
-                       first_player_opening_draw=log.get("first_player_opening_draw", 3),
-                       draw_action=log.get("draw_action", base.draw_action if log.get("ruleset") else True))
-
-
-# The per-match rulesets: the fields each sets over the default. "mana" is the prototype of 2026-11-20 (Martin: opening
-# hands "3 for first and 4 for second"; no Draw action), played on its own board (RULESET_MAPS).
-RULESETS: dict[str, dict] = {
-    "default": {},
-    "mana": {"mana": True, "draw_action": False, "first_player_opening_draw": 3, "second_player_opening_draw": 4,
-             "den_raid": True, "cover_removes": True, "start_food": 15, "zero_food_loses": True},
-}
-RULESET_MAPS: dict[str, str] = {"mana": "map_hex19"}
-
-
-def _mana_texts() -> tuple[dict[str, str], dict[str, str]]:
-    """How the mana ruleset reads the cards whose stored text speaks of actions or a den (the stored text stays the
-    default ruleset's), and the keywords whose explanation does. These readings are the lead session's defaults of
-    2026-11-20, not Martin's decisions: the Beaver's extra action is mana_per_action more mana; "next to your opponent's
-    den" is next to their base (effects.next_to_enemy_den)."""
-    c = Config()
-    more = c.mana_per_action * c.beaver_bonus_actions
-    cards = {
-        "beaver": f"Roar: next turn, you have {more} more mana. Echo.",
-        "cheetah": "Roar: if this is next to your opponent's base, draw 2 animals.",
-        "falcon": "Flight. Roar: if this is next to your opponent's base, draw an animal.",
-    }
-    n = c.mana_per_action
-    keywords = {
-        "Action": f"Costs {n} mana. Each animal can do it once a turn.",
-        "Echo": f"Pay {n} mana to repeat its Roar. Each animal can do it once a turn.",
-        "Flight": "Can be placed on any tile, even one not connected to yours.",
-        "Roam": f"For {n} mana, move it through your animals connected to it, then one tile beyond (two with Reach): onto an "
-                "empty tile, onto one of your animals, or onto an enemy it beats. Once per turn.",
-        "Reach": "Can be placed up to two tiles away from one of your connected animals, jumping over what stands between.",
-        "Apex Predator": "Must be placed on top of another animal, yours or an enemy's, and eats it.",
-        # the mana prototype's own Hungry (Martin, 2026-11-20)
-        "Hungry": f"Must be placed on top of an enemy it beats. When that enemy is removed, gain {c.hungry_food} food.",
-    }
-    return cards, keywords
-
-
-# Per-ruleset text for the client: card id -> the card's text in that ruleset, keyword -> its explanation there.
-RULESET_TEXT: dict[str, dict[str, str]] = {"default": {}, "mana": _mana_texts()[0]}
-RULESET_KEYWORDS: dict[str, dict[str, str]] = {"default": {}, "mana": _mana_texts()[1]}
-
-
-def load_config_overrides(path: Optional[str]) -> Optional[Config]:
-    """Load a JSON dict of `Config` field overrides; unspecified fields keep defaults.
-
-    Shared by every CLI's `--config` flag. `None`, `''`, and `'none'` mean "no overrides"
-    (return None ⇒ callers fall back to `Config.default()`, the shipped ruleset).
-    """
-    if path is None or path.strip().lower() in ("", "none"):
-        return None
-    with open(path) as f:
-        raw = json.load(f)
-    overrides = {k: v for k, v in raw.items() if not k.startswith("_")}  # "_comment" etc.
-    valid = {f.name for f in fields(Config)}
-    unknown = set(overrides) - valid
-    if unknown:
-        raise SystemExit(f"unknown Config field(s) in {path}: {sorted(unknown)}")
-    return Config.default().sweep(**overrides)
+def for_log(log: Optional[dict] = None) -> Config:
+    """The config a game log was played under (every log of these rules plays the defaults)."""
+    return Config()

@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     created REAL NOT NULL, UNIQUE (name COLLATE NOCASE, tag));
 CREATE TABLE IF NOT EXISTS decks (
     profile TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, cards TEXT NOT NULL, pos INTEGER NOT NULL,
-    PRIMARY KEY (profile, id));
+    cover TEXT NOT NULL DEFAULT '', leader TEXT NOT NULL DEFAULT '', PRIMARY KEY (profile, id));
 CREATE TABLE IF NOT EXISTS sessions (
     key_hash TEXT PRIMARY KEY, profile TEXT NOT NULL, created REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS identities (
@@ -45,9 +45,6 @@ CREATE TABLE IF NOT EXISTS history (
     profile TEXT NOT NULL, match TEXT NOT NULL, ended REAL NOT NULL, kind TEXT NOT NULL,
     my_deck TEXT NOT NULL, opp TEXT NOT NULL, opp_deck TEXT NOT NULL, won INTEGER NOT NULL, lost INTEGER NOT NULL,
     PRIMARY KEY (profile, match));
-CREATE TABLE IF NOT EXISTS shares (
-    token TEXT PRIMARY KEY, profile TEXT NOT NULL, match TEXT NOT NULL, seat TEXT NOT NULL, created REAL NOT NULL,
-    UNIQUE (profile, match));
 """
 
 
@@ -84,31 +81,7 @@ class Profiles:
         self.db = sqlite3.connect(path)
         self.db.row_factory = sqlite3.Row
         self.db.executescript(SCHEMA)
-        if "cover" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # decks saved before covers
-            self.db.execute("ALTER TABLE decks ADD COLUMN cover TEXT NOT NULL DEFAULT ''")
-        if "seat" not in [r[1] for r in self.db.execute("PRAGMA table_info(history)")]:   # matches from before replays and deck covers
-            for col in ("seat", "my_cover", "opp_cover"):
-                self.db.execute(f"ALTER TABLE history ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
-        if "mode" not in [r[1] for r in self.db.execute("PRAGMA table_info(history)")]:   # matches from before the mode was kept
-            self.db.execute("ALTER TABLE history ADD COLUMN mode TEXT NOT NULL DEFAULT ''")
-        with self.db:   # bots were named "Bot · Normal" once
-            self.db.execute("UPDATE history SET opp = 'Bot (' || substr(opp, 7) || ')' WHERE opp LIKE 'Bot · %'")
-        if "leader" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # the leaders prototype: a deck's leader
-            self.db.execute("ALTER TABLE decks ADD COLUMN leader TEXT NOT NULL DEFAULT ''")
-        if "seeded" not in [r[1] for r in self.db.execute("PRAGMA table_info(profiles)")]:   # profiles from before starter decks were theirs
-            self.db.execute("ALTER TABLE profiles ADD COLUMN seeded INTEGER NOT NULL DEFAULT 0")
-        if "starter" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # decks saved before a copy could follow its starter
-            self.db.execute("ALTER TABLE decks ADD COLUMN starter TEXT NOT NULL DEFAULT ''")
-            self.db.execute("ALTER TABLE decks ADD COLUMN edited INTEGER NOT NULL DEFAULT 0")
-        if "starters_seen" not in [r[1] for r in self.db.execute("PRAGMA table_info(profiles)")]:   # before the pool's starters could change
-            self.db.execute("ALTER TABLE profiles ADD COLUMN starters_seen TEXT NOT NULL DEFAULT ''")
-            with self.db:   # a seeded profile has seen the starters it holds a copy of (one it deleted was a retired one)
-                for (pid,) in self.db.execute("SELECT id FROM profiles WHERE seeded = 1").fetchall():
-                    seen = sorted({r[0] for r in self.db.execute("SELECT starter FROM decks WHERE profile = ? AND starter != ''", (pid,))})
-                    self.db.execute("UPDATE profiles SET starters_seen = ? WHERE id = ?", (json.dumps(seen), pid))
-        with self.db:   # sign-ins once brought each device's untouched starters along: keep one untouched copy of each starter
-            self.db.execute("DELETE FROM decks WHERE starter != '' AND edited = 0 AND rowid NOT IN "
-                            "(SELECT MIN(rowid) FROM decks WHERE starter != '' AND edited = 0 GROUP BY profile, starter)")
+
 
     # ------------------------------------------------------------- identity
     def _free_tag(self, name: str) -> str:
@@ -173,17 +146,14 @@ class Profiles:
         return self.get(pid)
 
     def _absorb(self, pid: str, guest: str) -> None:
-        """Move a guest profile's decks and history into `pid`, unless the guest is itself an account. Only decks the guest
-        built or edited come along: its untouched starters are the account's already (each device's guest gets them)."""
+        """Move a guest profile's decks and history into `pid`, unless the guest is itself an account."""
         if self.db.execute("SELECT 1 FROM identities WHERE profile = ?", (guest,)).fetchone():
             return
         pos = self.db.execute("SELECT COALESCE(MAX(pos), -1) FROM decks WHERE profile = ?", (pid,)).fetchone()[0]
-        for d in self.db.execute("SELECT id, name, cards, cover, starter, edited FROM decks WHERE profile = ? ORDER BY pos", (guest,)).fetchall():
-            if d["starter"] and not d["edited"]:
-                continue
+        for d in self.db.execute("SELECT id, name, cards, cover, leader FROM decks WHERE profile = ? ORDER BY pos", (guest,)).fetchall():
             pos += 1
-            self.db.execute("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover, starter, edited) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                            (pid, f"{d['id']}-{guest[:4]}", d["name"], d["cards"], pos, d["cover"], d["starter"], d["edited"]))
+            self.db.execute("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover, leader) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                            (pid, f"{d['id']}-{guest[:4]}", d["name"], d["cards"], pos, d["cover"], d["leader"]))
         self.db.execute("UPDATE OR IGNORE history SET profile = ? WHERE profile = ?", (pid, guest))
         for table in ("decks", "history", "sessions"):
             self.db.execute(f"DELETE FROM {table} WHERE profile = ?", (guest,))
@@ -204,156 +174,43 @@ class Profiles:
         return self.get(pid)
 
     # ------------------------------------------------------------- decks
-    def decks(self, pid: str, starters: Optional[dict[str, dict]] = None) -> list[dict]:
-        """The profile's decks. A deck still following its starter (unedited so far) is resolved from
-        `starters` (a starter's id -> its current {card id: copies}), not from what was last saved for it,
-        so it shows the starter's current list; everything else shows what was saved."""
-        starters = starters or {}
+    def decks(self, pid: str, pool: Optional[set] = None, renamed: Optional[dict] = None) -> list[dict]:
+        """The profile's decks. A card whose id changed (`renamed`: old id -> new id) reads as the new one; a card gone
+        from the game (not in `pool`) leaves the deck, which stays, short, for the player to refill."""
         out = []
-        for r in self.db.execute("SELECT id, name, cards, cover, starter, edited, leader FROM decks WHERE profile = ? ORDER BY pos", (pid,)):
-            live = starters.get(r["starter"]) if r["starter"] and not r["edited"] else None
-            out.append({"id": r["id"], "name": r["name"], "cards": live if live is not None else json.loads(r["cards"]),
+        for r in self.db.execute("SELECT id, name, cards, cover, leader FROM decks WHERE profile = ? ORDER BY pos", (pid,)):
+            cards: dict = {}
+            for c, n in json.loads(r["cards"]).items():
+                c = (renamed or {}).get(c, c)
+                if pool is None or c in pool:
+                    cards[c] = cards.get(c, 0) + n
+            out.append({"id": r["id"], "name": r["name"], "cards": cards,
                         **({"cover": r["cover"]} if r["cover"] else {}), **({"leader": r["leader"]} if r["leader"] else {})})
         return out
 
-    def seed_decks(self, pid: str, starters: list[dict], pool: Optional[set] = None, renamed: Optional[dict] = None,
-                   limits: Optional[dict] = None) -> None:
-        """Give a profile each starter deck as its own, once per starter: appended after any decks it already has
-        (up to DECKS_MAX). An untouched copy then follows its starter as the starter's list changes; the moment its card
-        list is edited, it's the player's own, frozen as it then stood -- renaming or re-covering it doesn't count.
-        A card whose id changed (`renamed`: old id -> new id, the same animal) follows into the player's decks first,
-        at most `limits[new id]` copies.
-        As the pool changes: an untouched copy of a starter that no longer exists goes, a starter new to the profile is
-        given (one the player deleted is not given back), and cards gone from the pool (`pool`: the card ids that
-        exist) leave the player's own decks, which stay, short of 30, for the player to refill."""
-        row = self.db.execute("SELECT seeded, starters_seen FROM profiles WHERE id = ?", (pid,)).fetchone()
-        current = {d["id"]: d["cards"] for d in starters}
-        seen = set(json.loads(row["starters_seen"])) if row["starters_seen"] else set()
-        with self.db:
-            for r in self.db.execute("SELECT DISTINCT starter FROM decks WHERE profile = ? AND starter != '' AND edited = 0", (pid,)).fetchall():
-                if r[0] not in current:
-                    self.db.execute("DELETE FROM decks WHERE profile = ? AND starter = ? AND edited = 0", (pid, r[0]))
-        mine = self.decks(pid, current)
-        changed = False
-        for d in mine:
-            if renamed and any(c in renamed for c in d["cards"]):
-                cards = {}
-                for c, n in d["cards"].items():
-                    c = renamed.get(c, c)
-                    cards[c] = min(cards.get(c, 0) + n, (limits or {}).get(c, cards.get(c, 0) + n))
-                d["cards"], changed = cards, True
-            if renamed and d.get("cover") in renamed:
-                d["cover"], changed = renamed[d["cover"]], True
-        if pool is not None:
-            for d in mine:
-                kept = {c: n for c, n in d["cards"].items() if c in pool}
-                if kept != d["cards"]:
-                    d["cards"], changed = kept, True
-        taken = {d["id"] for d in mine}
-        fresh = [d for d in starters if d["id"] not in taken and (not row["seeded"] or d["id"] not in seen)]
-        new = mine + fresh[:max(0, DECKS_MAX - len(mine))]
-        if fresh or changed or not row["seeded"]:
-            self.save_decks(pid, new, current)
-        with self.db:
-            self.db.execute("UPDATE profiles SET seeded = 1, starters_seen = ? WHERE id = ?", (json.dumps(sorted(seen | set(current))), pid))
-
-    def save_decks(self, pid: str, decks: list, starters: Optional[dict[str, dict]] = None) -> list[dict]:
-        """Replace the profile's decks with `decks` ([{id, name, cards: {card id: copies}, cover?}]). Drafts
-        are allowed, so this checks shape only; the deck rules are checked when a deck is played.
-
-        `starters` (a starter's id -> its current {card id: copies}) is how a deck keeps following its
-        starter: a deck whose id is a starter's and whose cards still match it stays linked; once its cards
-        ever differ, it detaches for good, even if it's later edited back to match.
-        """
-        starters = starters or {}
+    def save_decks(self, pid: str, decks: list) -> list[dict]:
+        """Replace the profile's decks with `decks` ([{id, name, cards: {card id: copies}, cover?, leader?}]). Drafts are
+        allowed, so this checks shape only; the deck rules are checked when a deck is played."""
         if not isinstance(decks, list) or len(decks) > DECKS_MAX:
             raise ProfileError("bad deck list")
-        prev = {r["id"]: (r["starter"], r["edited"]) for r in
-                self.db.execute("SELECT id, starter, edited FROM decks WHERE profile = ?", (pid,))}
         rows = []
         for pos, d in enumerate(decks):
             cards = d.get("cards") if isinstance(d, dict) else None
             if not isinstance(cards, dict) or not all(type(n) is int and 0 < n <= 3 for n in cards.values()) \
                     or sum(cards.values()) > 30 or not all(len(k) <= 40 for k in cards):   # a card id is a short word
                 raise ProfileError("bad deck")
-            did = str(d.get("id") or pos)[:40]
-            cards_norm = {str(k): n for k, n in cards.items()}
-            prev_starter, prev_edited = prev.get(did, ("", 0))
-            starter = prev_starter or (did if did in starters else "")
-            edited = 1 if prev_edited else int(bool(starter) and starters.get(starter) is not None and cards_norm != starters[starter])
-            rows.append((pid, did, (str(d.get("name") or "").strip() or "New deck")[:40], json.dumps(cards_norm),
-                         pos, str(d.get("cover") or "")[:40], starter, edited, str(d.get("leader") or "")[:40]))
+            rows.append((pid, str(d.get("id") or pos)[:40], (str(d.get("name") or "").strip() or "New deck")[:40],
+                         json.dumps({str(k): n for k, n in cards.items()}), pos, str(d.get("cover") or "")[:40],
+                         str(d.get("leader") or "")[:40]))
         with self.db:
             self.db.execute("DELETE FROM decks WHERE profile = ?", (pid,))
-            self.db.executemany("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover, starter, edited, leader) "
-                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", rows)
-        return self.decks(pid, starters)
-
-    def link_starters(self, starters: dict[str, dict]) -> tuple[int, int]:
-        """One-time-per-row backfill for decks saved before a copy could follow its starter: a deck whose id
-        is a starter's and whose saved cards still equal that starter's current list is linked as untouched,
-        from now on following it; one that differs is left alone -- it might be a real edit, or just an old
-        list this can't check against -- and is left showing what it already shows. Returns (linked, left)."""
-        linked = left = 0
-        rows = self.db.execute("SELECT profile, id, cards, starter FROM decks").fetchall()
-        with self.db:
-            for r in rows:
-                if r["starter"] or r["id"] not in starters:   # already classified, or not a starter's id
-                    continue
-                same = json.loads(r["cards"]) == starters[r["id"]]
-                self.db.execute("UPDATE decks SET starter = ?, edited = ? WHERE profile = ? AND id = ?",
-                                (r["id"], 0 if same else 1, r["profile"], r["id"]))
-                linked, left = linked + same, left + (not same)
-        return linked, left
+            self.db.executemany("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover, leader) "
+                                "VALUES (?, ?, ?, ?, ?, ?, ?)", rows)
+        return self.decks(pid)
 
     # ------------------------------------------------------------- history
-    def record(self, pid: str, match: str, *, kind: str, my_deck: str, opp: str, opp_deck: str,
-               won: int, lost: int, seat: str = "", my_cover: str = "", opp_cover: str = "", mode: str = "") -> None:
-        """`kind`: who the opponent was ("bot" or "friend", a person); `mode`: what the match was ("ranked", "practice",
-        "friendly"; empty for matches from before it was kept)."""
+    def record(self, pid: str, match: str, *, kind: str, my_deck: str, opp: str, opp_deck: str, won: int, lost: int) -> None:
+        """A finished match in `pid`'s history (`kind`: "bot" or "friend"); deploy/deploy.sh players reads it."""
         with self.db:
-            self.db.execute("INSERT OR REPLACE INTO history (profile, match, ended, kind, my_deck, opp, opp_deck, won, lost, "
-                            "seat, my_cover, opp_cover, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            (pid, match, time.time(), kind, my_deck, opp, opp_deck, won, lost, seat, my_cover, opp_cover, mode))
-
-    def history(self, pid: str) -> list[dict]:
-        return [dict(r) for r in self.db.execute(
-            "SELECT match, ended, kind, mode, my_deck, opp, opp_deck, won, lost, my_cover, opp_cover FROM history "
-            "WHERE profile = ? ORDER BY ended DESC LIMIT ?", (pid, HISTORY_SHOWN))]
-
-    def match(self, pid: str, match: str) -> Optional[dict]:
-        r = self.db.execute("SELECT * FROM history WHERE profile = ? AND match = ?", (pid, match)).fetchone()
-        return r and dict(r)
-
-    def all_matches(self) -> list[dict]:
-        return [dict(r) for r in self.db.execute("SELECT profile, match, kind, seat FROM history")]
-
-    def set_seat(self, pid: str, match: str, seat: str) -> None:
-        with self.db:
-            self.db.execute("UPDATE history SET seat = ? WHERE profile = ? AND match = ?", (seat, pid, match))
-
-    def share(self, pid: str, match: str, seat: str) -> str:
-        """The share token of one of your matches' replays (docs/share-links.md): made on the first Share, the same after."""
-        r = self.db.execute("SELECT token FROM shares WHERE profile = ? AND match = ?", (pid, match)).fetchone()
-        if r:
-            return r[0]
-        token = secrets.token_urlsafe(12)
-        with self.db:
-            self.db.execute("INSERT INTO shares (token, profile, match, seat, created) VALUES (?, ?, ?, ?, ?)",
-                            (token, pid, match, seat, time.time()))
-        return token
-
-    def shared(self, token: str) -> Optional[dict]:
-        """The match and seat a share token opens, or None."""
-        r = self.db.execute("SELECT match, seat FROM shares WHERE token = ?", (token,)).fetchone()
-        return r and dict(r)
-
-    def forget(self, pid: str, match: str) -> None:
-        with self.db:
-            self.db.execute("DELETE FROM history WHERE profile = ? AND match = ?", (pid, match))
-
-    def records(self, pid: str) -> list[dict]:
-        """Games won and lost with each of your decks, over every match (the cover from its latest)."""
-        return [dict(r) for r in self.db.execute(
-            "SELECT my_deck AS deck, my_cover AS cover, SUM(won) AS won, SUM(lost) AS lost, MAX(ended) AS last FROM history "
-            "WHERE profile = ? GROUP BY my_deck ORDER BY SUM(won) + SUM(lost) DESC", (pid,))]
+            self.db.execute("INSERT OR REPLACE INTO history (profile, match, ended, kind, my_deck, opp, opp_deck, won, lost) "
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (pid, match, time.time(), kind, my_deck, opp, opp_deck, won, lost))
