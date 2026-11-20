@@ -1,0 +1,22 @@
+# The live app while the game is rebuilt: one "coming soon" page on the smallest machine. Its volume (ak_data: the old
+# profiles and matches) stays attached and untouched. Deploy: cd deploy/coming-soon && fly deploy. deploy/deploy.sh puts the game back.
+app = "animal-kingdom"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[mounts]]
+  source = "ak_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
