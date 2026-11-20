@@ -261,15 +261,22 @@ def do_placement(state: GameState, player: str, card_id: str, target, iid: Optio
 
 
 def _raid(state: GameState, player: str, unit: UnitInstance, enemy: str, strength: int, *, roam: bool = False) -> None:
-    """The den raid (the mana ruleset, Martin, 2026-11-20): an animal that enters the enemy den steals food equal to its
-    strength, at most what they have, and is spent: it goes to the Remove Pile without landing (no Roar, no reactions)."""
+    """The den raid (the mana ruleset, Martin, 2026-11-20): an animal that enters the enemy den destroys food equal to its
+    strength, at most what they have ("instead of stealing it destroys"), and is spent: it goes to the Remove Pile
+    without landing (no Roar, no reactions). A den emptied loses the game (Config.zero_food_loses)."""
     n = min(max(strength, 0), state.food[enemy])
     state.emit("raid", player=player, iid=unit.iid, card=unit.card_id, den=enemy, str=strength, n=n,
                **({"roam": True} if roam else {}))
     state.pile_add(unit.card_id, unit.owner)
     if n:
         state.food[enemy] -= n
-        gain_food(state, player, n)
+    _starved(state, enemy)
+
+
+def _starved(state: GameState, player: str) -> None:
+    """The mana ruleset's other way to win: a player whose food drops to 0 loses (Martin, 2026-11-20)."""
+    if state.config.zero_food_loses and state.result is None and state.food[player] <= 0:
+        state.result = Result(other_player(player), "starved")
 
 
 def _settle_play_strength(state: GameState, player: str, unit: UnitInstance) -> None:
@@ -796,6 +803,7 @@ def lose_food(state: GameState, player: str, amount: int, *, card: Optional[str]
     if amount > 0:
         state.food[player] -= amount
         state.emit("pay", player=player, n=amount, **({"card": card} if card else {}))
+        _starved(state, player)
 
 
 def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True, income: bool = False) -> None:

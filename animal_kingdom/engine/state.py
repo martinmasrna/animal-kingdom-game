@@ -186,7 +186,7 @@ class Result:
     """Terminal game outcome. winner is 'A'/'B', or None for a draw."""
 
     winner: Optional[str]
-    reason: str  # "hq_capture" | "food" | "passes" | "max_turns" | "concede" (web matches; "exhaustion" in older logs)
+    reason: str  # "hq_capture" | "food" | "starved" (mana) | "passes" | "max_turns" | "concede" (web matches; "exhaustion" in older logs)
 
     def to_dict(self) -> dict:
         return {"winner": self.winner, "reason": self.reason}
@@ -826,7 +826,7 @@ def new_game(
         hands={"A": [], "B": []},
         decks=decks,
         remove_pile=[],
-        food={"A": 0, "B": 0},
+        food={"A": config.start_food, "B": config.start_food},
         current=first,
         first_player=first,
         rng=rng,

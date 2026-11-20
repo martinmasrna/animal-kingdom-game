@@ -264,6 +264,11 @@ class Config:
     den_raid: bool = False
     cover_removes: bool = False
     hungry_food: int = 1                 # the mana prototype's Hungry: the food its removal gains (Martin, 2026-11-20)
+    # The food race both ways (the mana ruleset, Martin, 2026-11-20: "both players starting at 15, you need 30 to win,
+    # and if you drop to 0 you lost", and a raid destroys food instead of stealing it): each player starts with
+    # start_food, and a player whose food drops to 0 loses.
+    start_food: int = 0
+    zero_food_loses: bool = False
 
     # --- Engine safety / sim hygiene ---
     max_actions_per_turn: int = 30       # a turn ends after this many applied actions, choices included, even mid-effect (Martin, 2026-11-18)
@@ -306,7 +311,7 @@ class Config:
 RULESETS: dict[str, dict] = {
     "default": {},
     "mana": {"mana": True, "draw_action": False, "first_player_opening_draw": 3, "second_player_opening_draw": 4,
-             "den_raid": True, "cover_removes": True},
+             "den_raid": True, "cover_removes": True, "start_food": 15, "zero_food_loses": True},
 }
 RULESET_MAPS: dict[str, str] = {"mana": "map_hex19"}
 

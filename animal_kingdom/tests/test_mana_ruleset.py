@@ -297,28 +297,29 @@ def test_a_den_is_raided_only_through_its_base():
     assert {a.target for a in raids(s)} == {("hq", "A")}
 
 
-def test_a_raid_steals_the_raiders_strength_and_spends_it():
+def test_a_raid_destroys_the_raiders_strength_and_spends_it():
     s = state(turn=11, current="B", hands={"B": ["lion"]})
-    _b_at_a_base(s, {"A": 10, "B": 0})
+    _b_at_a_base(s, {"A": 10, "B": 5})
     rules.apply_action(s, PlaceAction("lion", ("hq", "A")))       # a 7
-    assert s.food == {"A": 3, "B": 7} and s.result is None
+    assert s.food == {"A": 3, "B": 5} and s.result is None        # destroyed, not stolen (Martin, 2026-11-20)
     assert all(u.card_id != "lion" for st in s.board.values() for u in st) and "lion" in s.remove_pile
     assert rules.mana_left(s, "B") == 3                           # it cost its mana
 
 
-def test_a_raid_takes_at_most_what_the_den_holds():
+def test_a_raid_that_empties_the_den_wins():
     s = state(turn=11, current="B", hands={"B": ["lion"]})
-    _b_at_a_base(s, {"A": 4, "B": 0})
+    _b_at_a_base(s, {"A": 4, "B": 5})
     rules.apply_action(s, PlaceAction("lion", ("hq", "A")))
-    assert s.food == {"A": 0, "B": 4}
+    assert s.food == {"A": 0, "B": 5}
+    assert s.result is not None and s.result.winner == "B" and s.result.reason == "starved"
 
 
 def test_a_raid_can_win_and_a_roam_can_raid():
     s = state(turn=11, current="B")
-    _b_at_a_base(s, {"A": 9, "B": 15})
+    _b_at_a_base(s, {"A": 6, "B": 15})
     rules.apply_action(s, RoamAction("1,1", ("hq", "A")))         # the Wolf, a 6, walks in
-    assert s.top_unit("1,1") is None and s.food["A"] == 3
-    assert s.result is not None and s.result.winner == "B" and s.result.reason == "food"
+    assert s.top_unit("1,1") is None and s.food["A"] == 0
+    assert s.result is not None and s.result.winner == "B" and s.result.reason == "starved"
 
 
 def test_a_covered_animal_is_removed():
@@ -348,8 +349,9 @@ def test_random_mana_games_keep_one_animal_a_tile():
         assert r.result is None or r.result.reason != "hq_capture"
 
 
-def test_reaching_twenty_food_wins():
-    s = state(turn=4, food={"A": 19, "B": 0})
+def test_reaching_thirty_food_wins():
+    assert HEX19.win_food == 30 and MANA.start_food == 15        # Martin, 2026-11-20
+    s = state(turn=4, food={"A": 29, "B": 15})
     for cr in ("1,1", "1,2", "2,2"):
         put(s, cr, "squirrel", "A")
     rules.apply_action(s, PassAction())

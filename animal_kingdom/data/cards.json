@@ -4568,7 +4568,7 @@
     {
       "id": "djinn_food",
       "name": "Food Djinn",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 10,
@@ -4641,7 +4641,7 @@
     {
       "id": "shade_food",
       "name": "Food Shade",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": "dynamic",
