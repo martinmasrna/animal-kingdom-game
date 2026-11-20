@@ -258,11 +258,11 @@ class Config:
     mana: bool = False
     mana_cap: int = 10                   # Martin, 2026-11-20: "Mana cap at 10 of course"
     mana_per_action: int = 3
-    # The den raid and the scare (Martin, 2026-11-20, both in the mana ruleset): an animal placed or roaming into the
+    # The den raid and the cover (Martin, 2026-11-20, both in the mana ruleset): an animal placed or roaming into the
     # enemy den steals food equal to its strength, at most what they have, and is spent (the Remove Pile); a covered
-    # animal, yours or theirs, is scared off: shuffled into its owner's deck (a token is gone), so a tile holds one animal.
+    # animal, yours or theirs, is removed, so a tile holds one animal.
     den_raid: bool = False
-    cover_scares: bool = False
+    cover_removes: bool = False
 
     # --- Engine safety / sim hygiene ---
     max_actions_per_turn: int = 30       # a turn ends after this many applied actions, choices included, even mid-effect (Martin, 2026-11-18)
@@ -305,7 +305,7 @@ class Config:
 RULESETS: dict[str, dict] = {
     "default": {},
     "mana": {"mana": True, "draw_action": False, "first_player_opening_draw": 3, "second_player_opening_draw": 4,
-             "den_raid": True, "cover_scares": True},
+             "den_raid": True, "cover_removes": True},
 }
 RULESET_MAPS: dict[str, str] = {"mana": "map_hex19"}
 

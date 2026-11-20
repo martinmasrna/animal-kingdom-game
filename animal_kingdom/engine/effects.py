@@ -688,24 +688,22 @@ def remove_top(state, cr, *, by_player, by_effect=True, by_card=None) -> bool:
 
 
 def _push_scare(state: GameState, cr: str) -> None:
-    """The scare (the mana ruleset): pushed first when an animal is covered, so it resolves after the cover's Roar and
-    every reaction to it."""
-    if state.config.cover_scares:
-        state.effect_stack.append({"op": "scare", "cr": cr})
+    """A cover removes what it covered (the mana ruleset, Config.cover_removes): pushed first when an animal is covered,
+    so it resolves after the cover's Roar and every reaction to it."""
+    if state.config.cover_removes:
+        state.effect_stack.append({"op": "cover_remove", "cr": cr})
 
 
-def _op_scare(state, step):
-    """Every animal still beneath the top of `cr` is scared off: shuffled into its owner's deck, a token simply gone. It
-    is not removed (no Remove Pile, no removal reactions). If the coverer is gone, what it covered is the top again and
-    stays."""
+def _op_cover_remove(state, step):
+    """Every animal still beneath the top of `cr` is removed (Martin, 2026-11-20: "covered units don't get shuffled back
+    into the deck, they just get removed"): by the rules, not an ability, so Armor doesn't hold, and it counts as removed
+    for everything that counts removals. If the coverer is gone, what it covered is the top again and stays."""
     stack = state.board.get(step["cr"])
     if not stack or len(stack) < 2:
         return None
-    for unit in stack[:-1]:
-        stack.remove(unit)
-        state.emit("scare", cr=step["cr"], iid=unit.iid, card=unit.card_id, owner=unit.owner)
-        if state.cards[unit.card_id].status != "token":
-            shuffle_back(state, unit.owner, [unit.card_id])
+    top = stack[-1]
+    for unit in list(stack[:-1]):
+        _remove_specific(state, step["cr"], unit, by_player=top.owner, by_effect=False, by_card=top.card_id, armor_checked=True)
     return None
 
 
@@ -1784,7 +1782,7 @@ OPS: dict[str, Callable] = {
     "remove_choice": _op_remove_choice,
     "remove_iid": _op_remove_iid,
     "apex_eat": _op_apex_eat,
-    "scare": _op_scare,
+    "cover_remove": _op_cover_remove,
     "play_extra": _op_play_extra,
     "play_named": _op_play_named,
     "grant_strength": _op_grant_strength,

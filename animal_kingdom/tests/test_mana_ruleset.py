@@ -321,7 +321,7 @@ def test_a_raid_can_win_and_a_roam_can_raid():
     assert s.result is not None and s.result.winner == "B" and s.result.reason == "food"
 
 
-def test_a_covered_animal_is_scared_off_into_its_owners_deck():
+def test_a_covered_animal_is_removed():
     s = state(turn=11, current="B", hands={"B": ["lion", "kitten"]})          # the Kitten keeps B's turn going
     _b_chain(s)
     put(s, "1,1", "mongoose", "A")
@@ -329,21 +329,21 @@ def test_a_covered_animal_is_scared_off_into_its_owners_deck():
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
     resolve_choices(s)
     assert [u.card_id for u in s.board["1,1"]] == ["lion"]
-    assert sorted(s.decks["A"]) == sorted(before + ["mongoose"]) and "mongoose" not in s.remove_pile
+    assert sorted(s.decks["A"]) == sorted(before) and "mongoose" in s.remove_pile
 
 
-def test_covering_your_own_animal_scares_it_off_too():
+def test_covering_your_own_animal_removes_it_too():
     s = state(turn=11, hands={"A": ["lion"]})
     put(s, "1,1", "mongoose", "A")
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
     resolve_choices(s)
-    assert [u.card_id for u in s.board["1,1"]] == ["lion"] and "mongoose" in s.decks["A"]
+    assert [u.card_id for u in s.board["1,1"]] == ["lion"] and "mongoose" in s.remove_pile
 
 
 def test_random_mana_games_keep_one_animal_a_tile():
     for seed in range(20):
         r = _random_game(seed)
-        if not r.effect_stack:                                    # a game can end with the scare still to resolve
+        if not r.effect_stack:                                    # a game can end with the cover's removal still to resolve
             assert all(len(st) == 1 for st in r.board.values()), seed
         assert r.result is None or r.result.reason != "hq_capture"
 
