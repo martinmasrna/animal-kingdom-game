@@ -13,25 +13,35 @@ const until = async (page, fn, arg, ms = 10000) => { const t = Date.now(); while
 const seat = async () => { const ctx = await browser.createBrowserContext(), p = await ctx.newPage(); p.errors = [];
   p.on('pageerror', e => p.errors.push(e.message)); await p.evaluateOnNewDocument(() => localStorage.setItem('ak:learned', '1'));
   await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]); return p; };
+// A deck of the mana collection on the profile: 22 Wisps (0 to 10, two each), two Spikes 3 and the Warlord (25, legal in the mana rules).
+const DECK = { ...Object.fromEntries([...Array(11).keys()].map(i => ['wisp_' + i, 2])), spiky_3: 2, warlord_legend: 1 };
+// A cheap one (nothing over 3 mana) for the matches that must get going: the Wisps 0 to 3, the cantrips, fliers, poisons, a Spikes and a Hungry, and the Warlord.
+const CHEAP = { ...Object.fromEntries([0, 1, 2, 3].map(i => ['wisp_' + i, 2])), scout_2: 2, scout_3: 2, flyer_2: 2, flyer_3: 2, venomous_2: 2, venomous_3: 2, spiky_3: 2, glutton_3: 2, warlord_legend: 1 };
+const giveDeck = async (p, id, name, cards = DECK, leader = 'warlord_legend') => {
+  await p.evaluate(async (d) => { const r = await fetch('/api/me/decks', { method: 'PUT', headers: { 'X-AK-Key': localStorage.getItem('ak:key'), 'Content-Type': 'application/json' }, body: JSON.stringify([d]) }); if (!r.ok) throw new Error(await r.text()); },
+    { id, name, cards, leader });
+  await p.reload({ waitUntil: 'networkidle0' });
+};
 const click = async (p, sel) => { for (let i = 0; i < 5; i++) { try { await p.click(sel); return; } catch { await wait(150); } } throw new Error('no ' + sel); };
 
 test('a mana friend match: home, the opening hands, the rail, a dimmed card and a card paid for', async () => {
   const A = await seat(), B = await seat();
-  await A.goto(server.url + '/', { waitUntil: 'networkidle0' });
+  await A.goto(server.url + '/', { waitUntil: 'networkidle0' }); await giveDeck(A, 'w1', 'Wisps A');
   assert.ok(await A.$('.mhome #mplay') && await A.$('.mhome #mprac') && await A.$('.mhome #mcoll'), 'home in the mana rules: Play, Practice, Collection');
   assert.equal(await A.$('.home'), null, 'not the usual home');
-  await click(A, '#mplay'); await A.waitForSelector('[data-deck="pool_1"]');
-  await click(A, '[data-deck="pool_1"]'); await click(A, '#mgo');
+  await click(A, '#mplay'); await A.waitForSelector('[data-deck="my:w1"]');
+  await click(A, '[data-deck="my:w1"]'); await click(A, '#mgo');
   await A.waitForSelector('.bigcode');
   const code = await A.$eval('.bigcode', e => e.textContent);
+  await B.goto(`${server.url}/`, { waitUntil: 'networkidle0' }); await giveDeck(B, 'w2', 'Wisps B');
   await B.goto(`${server.url}/?rules=mana#/join/${code}`, { waitUntil: 'networkidle0' });
-  await click(B, '[data-deck="pool_3"]'); await click(B, '#mgo');
+  await click(B, '[data-deck="my:w2"]'); await click(B, '#mgo');
   for (const p of [A, B]) assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull .hc .mcard .plaque')), 'the opening hand in full');
   // each card in the opening hand: its cost in the gold hexagon, as the view says
   const costs = await A.evaluate(() => { const { V } = window.__ak(); return V.game.hand.map(h => [String(h.cost), document.querySelector(`#hand .hc[data-iid="${h.iid}"] .mcost`)?.dataset.n]); });
   for (const [want, shown] of costs) assert.equal(shown, want);
   for (const p of [A, B]) await click(p, '#skip');
-  // the first turn that can be played (a turn the mana pays for nothing in is skipped): the rail's six hexagons, the
+  // the first turn that can be played (a turn the mana pays for nothing in is skipped): the rail's ten hexagons, the
   // board's 24 regions and two bases of three
   const mine = () => { const a = window.__ak(); return !!(a.d && a.d.mine && !a.PB.busy && a.V.game.decision === 'yours'); };
   assert.ok(await until(A, () => window.__ak().V.game.decision !== 'mulligan'));
@@ -43,7 +53,7 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
     dens: document.querySelectorAll('#board .dentile, #board .pit, #board .dcount').length,
     hand: window.__ak().V.game.hand.map(h => ({ iid: h.iid, cost: h.cost, dim: document.querySelector(`#hand .hc[data-iid="${h.iid}"]`).classList.contains('dim'),
       can: !!(window.__ak().V.game.legal.place[h.id]) })) }));
-  assert.deepEqual([look.pips, look.on], [6, look.left], 'the mana left, of six');
+  assert.deepEqual([look.pips, look.on], [10, look.left], 'the mana left, of ten');
   assert.deepEqual([look.dots, look.baseA, look.baseB, look.dens], [24, 3, 3, 0]);
   for (const h of look.hand) assert.equal(h.dim, !h.can, `card ${h.iid} (cost ${h.cost}) dimmed exactly when it can't be played`);
   const play = look.hand.find(h => h.can);
@@ -53,10 +63,11 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
     assert.ok(await until(P, () => { const a = window.__ak(); return Object.keys(a.V.game.board).length === 1 && !a.PB.busy; }), 'the card is on the board');
     assert.equal(await P.evaluate(() => document.querySelectorAll('#board .cr.unit').length), 1);
     // its cost spent; with nothing left to pay for, the turn ends by itself and the rail shows the next turn's mana
+    await until(P, () => !!document.querySelector('.mmana.A .mpips') && !window.__ak().PB.busy);   // the rail is redrawn as the turn passes
     const after = await P.evaluate(() => { const { V } = window.__ak(); return { mine: V.game.current === V.you, spent: document.querySelectorAll('.mmana.A .mpips i.spent').length,
-      label: document.querySelector('.mmana.A div').textContent, left: V.game.mana[V.you].left }; });
+      left: V.game.mana[V.you].left }; });
     if (after.mine) assert.equal(after.spent, play.cost, 'its cost spent');
-    else assert.match(after.label, /^Next turn: \d mana$/);
+    else assert.equal(after.spent, 0, 'the turn passed: the rail shows the next turn\'s mana, unspent');
     assert.ok(await P.evaluate(() => !document.querySelector('#board .cr.unit .mcost')), 'a piece on the board has no cost');
   }
   assert.deepEqual([...A.errors, ...B.errors], []);
@@ -64,17 +75,25 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
 
 test('a mana match against the bot: Practice starts it and the bot plays its cards', async () => {
   const p = await seat();
-  await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
-  await click(p, '#mprac');   // Practice: straight into a match, both sides on a random pool deck
-  assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
-  await click(p, '#skip');
-  // play on: end each of our turns at once; the bot's pieces reach the board
+  await p.goto(server.url + '/', { waitUntil: 'networkidle0' }); await giveDeck(p, 'w1', 'Cheap', CHEAP);
+  // the bot plays a mirror of our deck (server.py); two idle turns in a row end a match, and a hand with nothing for the bot's first mana
+  // is a coin toss, so a match that ends before the bot has played is dealt again
   const theirs = () => { const a = window.__ak(); return a.V && Object.values(a.V.game.board).flat().some(u => u.owner === 'B'); };
+  const myPlay = () => { const a = window.__ak(); return a.V.game.decision === 'yours' && !a.PB.busy ? (a.V.game.hand.find(h => a.V.game.legal.place[h.id]) || {}).iid || 0 : null; };
   let ok = false;
-  for (let i = 0; i < 200 && !ok; i++) {
-    ok = await p.evaluate(theirs);
-    if (!ok && await p.evaluate(() => { const a = window.__ak(); return a.V.game.decision === 'yours' && !a.PB.busy; })) await p.keyboard.press('Space').catch(() => {});
-    await wait(150);
+  for (let game = 0; game < 6 && !ok; game++) {
+    if (game) await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
+    await click(p, '#mprac');   // Practice: straight into a match, your deck against its mirror
+    assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
+    await click(p, '#skip');
+    for (let i = 0; i < 200 && !ok; i++) {
+      ok = await p.evaluate(theirs);
+      if (ok || await p.evaluate(() => window.__ak().V.game.decision === 'over')) break;
+      const iid = await p.evaluate(myPlay);
+      if (iid) { await click(p, `#hand .hc[data-iid="${iid}"]`); await click(p, '#board .cr.tgt').catch(() => {}); }
+      else if (iid === 0) await p.keyboard.press('Space').catch(() => {});
+      await wait(150);
+    }
   }
   if (process.env.SHOTS) await p.screenshot({ path: process.env.SHOTS + '/mana-bot.png' });
   assert.ok(ok, 'the bot has a piece on the board');
@@ -90,43 +109,49 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   const pool = await (await fetch(server.url + '/api/pool')).json(), C = Object.fromEntries(pool.cards.map(c => [c.id, c]));
   assert.ok(grid.length > 40 && grid.every(g => !g.rect && g.cost === String(C[g.id].mana)), 'every tile is the mana card with its cost');
   assert.deepEqual(grid.map(g => +g.cost), grid.map(g => +g.cost).sort((a, b) => a - b), 'the grid sorts by cost first');
-  assert.ok(await p.$('.dd[data-k="cost"], [data-dd="cost"], .dd'), 'filters are there');
+  // the filter bar: a row of costs 0 to 10 in place of the animal families, no habitat or cost menu; one cost at a time, again for every cost
+  assert.deepEqual(await p.evaluate(() => [document.querySelectorAll('.chead .ctab').length, document.querySelectorAll('.chead .tab').length, !!document.querySelector('.chead [data-k="hab"], .chead [data-k="cost"]')]), [11, 0, false], 'a cost row, no families, no habitat or cost menu');
+  await click(p, '.chead .ctab[data-cost="3"]'); await wait(80);
+  const only3 = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => t.querySelector('.mcost')?.dataset.n));
+  assert.ok(only3.length > 3 && only3.every(n => n === '3'), 'one cost shows only its cards');
+  await click(p, '.chead .ctab[data-cost="3"]'); await wait(80);
+  assert.equal(await p.$$eval('.cgrid .tl', e => e.length), grid.length, 'the same cost again: every card');
   // a new deck: its leader first, then cards; the tray holds a piece per copy in cost order, a count per cost, the rest
   // empty cells; the deck rules are the mana ones (no stars)
-  await click(p, '#dnew'); await p.waitForSelector('.lv'); await click(p, '.lv[data-id="baboon_legend"]');
+  await click(p, '#dnew'); await p.waitForSelector('.lv'); await click(p, '.lv[data-id="warlord_legend"]');
   await p.keyboard.type('Mana test'); await p.keyboard.press('Enter');
   assert.equal(await p.$('.coll .side'), null, 'an open deck is the tray, not the side column');
   assert.equal(await p.$$eval('.mtray .cell.empty', e => e.length), 24, 'the leader\'s card and 24 empty cells');
-  const want = ['chipmunk', 'chipmunk', 'tarsier', 'tarsier', 'lion', 'lion', 'lynx', 'lynx', 'ocelot', 'ocelot', 'mole', 'mole', 'serval', 'serval', 'caracal', 'caracal',
-    'cheetah', 'cheetah', 'black_panther', 'black_panther', 'jaguar', 'jaguar', 'bat', 'bat'];
+  const want = ['wisp_1', 'wisp_1', 'wisp_2', 'wisp_2', 'wisp_3', 'wisp_3', 'wisp_4', 'wisp_4', 'wisp_5', 'wisp_5', 'wisp_6', 'wisp_6', 'spiky_3', 'spiky_3', 'flyer_2', 'flyer_2',
+    'venomous_2', 'venomous_2', 'wisp_0', 'wisp_0', 'scout_2', 'scout_2', 'glutton_3', 'glutton_3'];
   for (const id of want) { await click(p, `.cgrid .tl[data-card="${id}"]`); await wait(30); }
   const tray = await p.evaluate(() => ({ cells: [...document.querySelectorAll('.mtray .cell')].map(e => ({ id: e.dataset.card || null, cost: +(e.querySelector('.mcost')?.dataset.n || 0),
       x: e.getBoundingClientRect().left, y: e.getBoundingClientRect().top })),
     counts: [...document.querySelectorAll('.mtray .rcount')].map(b => +b.textContent), leader: document.querySelector('.mtray .tlead')?.dataset.card,
     stars: !!document.querySelector('#fstars, .coll .lvs'), play: document.querySelector('#play').textContent, ok: !document.querySelector('#play').disabled,
     count: document.querySelector('.mtray .fcount b').textContent, name: document.querySelector('.mtray .tname b').textContent }));
-  const all = [...want, 'baboon_legend'];
+  const all = [...want, 'warlord_legend'];
   assert.equal(tray.cells.length, 25); assert.ok(tray.cells.every(c => c.id), 'every cell filled');
   assert.deepEqual(tray.cells.map(c => c.id).sort(), [...all].sort(), 'a piece per copy');
   assert.deepEqual(tray.cells.map(c => c.cost), tray.cells.map(c => C[c.id].mana).sort((a, b) => a - b), 'in cost order, each with its cost');
-  assert.deepEqual(tray.counts, [1, 2, 3, 4, 5, 6].map(k => all.filter(id => C[id].mana === k).length).filter(Boolean), 'a count per cost');
+  assert.deepEqual(tray.counts, [...new Set(all.map(id => C[id].mana))].sort((a, b) => a - b).map(k => all.filter(id => C[id].mana === k).length), 'a count per cost');
   // two rows, interlocking: cell i in row i % 2, each half a piece right of the one before it, and wider gaps between costs
   const ys = [...new Set(tray.cells.map(c => Math.round(c.y)))]; assert.equal(ys.length, 2, 'two rows');
   tray.cells.forEach((c, i) => assert.equal(Math.round(c.y), Math.min(...ys) + (i % 2) * (Math.max(...ys) - Math.min(...ys))));
   const steps = tray.cells.slice(1).map((c, i) => c.x - tray.cells[i].x), split = tray.cells.slice(1).map((c, i) => c.cost !== tray.cells[i].cost);
   assert.ok(Math.min(...steps.filter((d, i) => split[i])) > Math.max(...steps.filter((d, i) => !split[i])) + 10, 'the costs are parted by a crack');
-  assert.deepEqual([tray.leader, tray.stars, tray.count, tray.name], ['baboon_legend', false, '25/25', 'Mana test']);
+  assert.deepEqual([tray.leader, tray.stars, tray.count, tray.name], ['warlord_legend', false, '25/25', 'Mana test']);
   assert.deepEqual([tray.ok, tray.play], [true, 'Play this deck']);
   // hovering a piece shows its card above the tray; clicking it takes that copy out and leaves an empty cell
   const trayTop = await p.$eval('.mtray', e => e.getBoundingClientRect().top);
-  const piece = await p.$('.mtray .cell[data-card="lion"]'), b = await piece.boundingBox();
+  const piece = await p.$('.mtray .cell[data-card="wisp_3"]'), b = await piece.boundingBox();
   await p.mouse.move(b.x + 4, b.y + 4); await p.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
   const pop = await p.evaluate(() => { const e = document.getElementById('pop'); return { on: e.style.display !== 'none', bottom: e.getBoundingClientRect().bottom, name: e.querySelector('.pname')?.textContent }; });
-  assert.ok(pop.on && pop.bottom <= trayTop && pop.name === C.lion.name, 'the full card, clear of the tray');
+  assert.ok(pop.on && pop.bottom <= trayTop && pop.name === C.wisp_3.name, 'the full card, clear of the tray');
   await piece.click(); await wait(50);
-  assert.deepEqual(await p.evaluate(() => [document.querySelectorAll('.mtray .cell[data-card="lion"]').length, document.querySelectorAll('.mtray .cell.empty').length,
+  assert.deepEqual(await p.evaluate(() => [document.querySelectorAll('.mtray .cell[data-card="wisp_3"]').length, document.querySelectorAll('.mtray .cell.empty').length,
     document.querySelector('.mtray .fcount b').textContent]), [1, 1, '24/25']);
-  await click(p, '.cgrid .tl[data-card="lion"]'); await wait(50);
+  await click(p, '.cgrid .tl[data-card="wisp_3"]'); await wait(50);
   await click(p, '#play');
   await p.waitForSelector('.mhome');
   assert.match(await p.$eval('.mhome .dk.on', e => e.textContent), /Mana test/, 'the deck is on home, chosen');
@@ -156,8 +181,8 @@ test('the mana deck rules in the deck builder: a card with no mana cost makes th
   const p = await seat();
   await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
   const r = await p.evaluate(async () => { const { deckIssue } = await import('/static/collection.js');
-    const cards = { a: { name: 'Ant', rarity: 'common', status: 'collectible', mana: 1 }, w: { name: 'Wolf', rarity: 'common', status: 'collectible' },
-      l: { name: 'Leo', rarity: 'legendary', status: 'collectible', mana: 3 } };
+    const cards = { a: { name: 'Ant', rarity: 'common', status: 'collectible', ruleset: 'mana', mana: 1 }, w: { name: 'Wolf', rarity: 'common', status: 'collectible', ruleset: 'mana' },
+      l: { name: 'Leo', rarity: 'legendary', status: 'collectible', ruleset: 'mana', mana: 3 } };
     const mana = { deckSize: 4, copies: { common: 2, legendary: 1 }, starBudget: null, needsCost: true }, old = { ...mana, starBudget: 0, needsCost: false };
     return [deckIssue(['a', 'a', 'w', 'l'], cards, mana, 'l', { l: {} }), deckIssue(['a', 'a', 'w', 'w', 'l'].slice(1), cards, mana, 'l', { l: {} }),
       deckIssue(['a', 'a', 'l'], cards, mana, 'l', { l: {} }), deckIssue(['a', 'a', 'w', 'l'], cards, old, 'l', { l: {} })]; });
