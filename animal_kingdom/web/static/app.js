@@ -915,25 +915,27 @@ function manaLegal(list, leader) {
   const R = (RULESETS.mana || {}).deck; if (!R) return false;
   const n = {}; for (const id of list) n[id] = (n[id] || 0) + 1;
   return list.length === R.deckSize && !!leader && list.includes(leader) && !!LEADERS[leader]
-    && Object.entries(n).every(([id, k]) => CARDS[id] && CARDS[id].status === 'collectible' && CARDS[id].mana != null && k <= R.copies[CARDS[id].rarity]);
+    && Object.entries(n).every(([id, k]) => CARDS[id] && CARDS[id].status === 'collectible' && CARDS[id].ruleset === 'mana' && CARDS[id].mana != null && k <= R.copies[CARDS[id].rarity]);
 }
 // Home in the mana rules (a plain prototype, Martin, 2026-11-20): three buttons. Play opens the friend match (#/play: a deck,
-// then a match to invite a friend to, or a friend's code); Practice starts a match against the simple bot at once, both
-// sides on a random pool deck, only for seeing the screen; Collection is the collection. In Play: your decks that are legal
-// under these rules, then the six pool decks (Deck 1 to 6); a deck of yours that isn't legal is counted under the list.
+// then a match to invite a friend to, or a friend's code); Practice starts a match against the simple bot at once, your
+// deck against its mirror; Collection is the collection. In Play: your decks that are legal under these rules; a deck of
+// yours that isn't legal is counted under the list.
 function manaHome(mode = {}) {
   screen = 'home'; homeMode = mode;
-  const poolDecks = () => BOT_ONLY.filter(d => /^pool_\d+$/.test(d.id));
   if (!mode.play && !mode.join) {
     app.innerHTML = `<div class="mhome"><div class="box">
       <h1>Animal Kingdom<small>The mana rules, a prototype</small></h1>
       <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><button class="go" id="mprac">Practice</button><a class="go" id="mcoll" href="#/collection">Collection</a></div>
       <p class="foot"><a href="?rules=default#/">Play the usual rules</a></p></div></div>`;
     document.getElementById('mprac').onclick = async () => {
-      const pd = poolDecks(), pick = () => pd[Math.floor(Math.random() * pd.length)];
-      const mine = pick(), opp = pick();
-      if (!mine) return toast('No pool deck to practise with');
-      const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: mine.id, ruleset: 'mana', name: 'You', bot: { level: 'easy', deck: opp.id } }) });
+      // your own deck (the one chosen in Play, else your first legal one); the bot plays a mirror of it (server.py, Martin,
+      // 2026-11-20: the pool's animal decks are no mana decks any more)
+      const legal = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)), leader: d.leader }))
+        .filter(d => manaLegal(d.list, d.leader));
+      const mine = legal.find(d => d.id === store('ak:manadeck')) || legal[0];
+      if (!mine) return toast('Build a legal deck in the Collection first: 25 cards and a leader');
+      const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: { name: mine.name, list: mine.list, leader: mine.leader }, ruleset: 'mana', name: 'You', bot: { level: 'easy', deck: 'mirror' } }) });
       if (!r.ok) return toast(await r.text());
       const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
     };
@@ -941,8 +943,7 @@ function manaHome(mode = {}) {
   }
   const own = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));
     return { id: 'my:' + d.id, name: d.name, mine: true, list, leader: d.leader }; }), mine = own.filter(d => manaLegal(d.list, d.leader)), off = own.length - mine.length;
-  const pool = BOT_ONLY.filter(d => /^pool_\d+$/.test(d.id)).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-  const all = [...mine, ...pool], chosen = all.find(d => d.id === store('ak:manadeck')) || all[0];
+  const all = [...mine], chosen = all.find(d => d.id === store('ak:manadeck')) || all[0];   // your legal decks only: the pool's animal decks are no mana decks (2026-11-20)
   const leaderName = d => { const ls = d.leader ? [d.leader] : [...new Set(d.list || [])].filter(id => LEADERS[id]);   // a pool deck: the one card in it that can lead
     return ls.length === 1 && CARDS[ls[0]] ? CARDS[ls[0]].name.split(':')[0] : ''; };
   const tile = d => `<button class="dk${chosen && d.id === chosen.id ? ' on' : ''}" data-deck="${d.id}">${esc(d.name)}${leaderName(d) ? `<small>${esc(leaderName(d))}</small>` : ''}</button>`;
