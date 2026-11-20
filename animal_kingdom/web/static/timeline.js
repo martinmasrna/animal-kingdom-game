@@ -91,9 +91,10 @@ export function plan(prev, next, cards = {}) {
   const flushFood = () => { if (food) { push({ ...food, src: food.kind === 'food' ? food.from.map(f => f.cr) : [], dur: food.kind === 'pay' && !food.from.length ? DUR.pay : foodDur(food.n) }); food = null; } };
   const toHand = e => { s.handCount[e.player] += 1;
     if (e.player === you) s.hand.push(finalCard(e.iid) || { iid: e.iid, id: e.card, str: (cards[e.card] || {}).str }); };
+  // a turn the server skipped (the mana rules: nothing its player could pay for) ends with `skipped` on its turn_end, in the
+  // same batch of events as its start
   const skipped = i => { for (let j = i + 1; j < fresh.length; j++) { const x = fresh[j];
-    if (x.e === 'turn_end') return x.player === fresh[i].player;
-    if (['place', 'roam', 'act', 'leader_power', 'capture'].includes(x.e)) return false; } return false; };
+    if (x.e === 'turn_end') return !!x.skipped && x.player === fresh[i].player; } return false; };
   for (let i = 0; i < fresh.length; i++) {
     const e = fresh[i]; cur = e;
     if (e.e !== 'food' && e.e !== 'pay') flushFood();
@@ -196,9 +197,7 @@ export function plan(prev, next, cards = {}) {
         break;
       case 'turn_start':
         s.current = e.player;
-        // the mana rules skip a turn its player can pay for nothing in: the server starts and ends it in one go, so its start
-        // and end arrive together with nothing played between (a turn its player ends by hand comes in a later view)
-        if (next.ruleset === 'mana' && skipped(i)) { push({ kind: 'skipped', player: e.player, turn: e.turn, dur: DUR.skipped }); break; }
+        if (skipped(i)) { push({ kind: 'skipped', player: e.player, turn: e.turn, dur: DUR.skipped }); break; }
         if (e.player === you) push({ kind: 'yourturn', dur: DUR.yourturn });
         break;
       case 'capture':

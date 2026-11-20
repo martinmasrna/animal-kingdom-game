@@ -291,7 +291,13 @@ def _decided(state: GameState) -> bool:
 def _end_turn(state: GameState, *, forced: bool = False) -> None:
     """End the current player's turn. `forced`: it opened with nothing they could do."""
     player = state.current
-    state.emit("turn_end", player=player)
+    # the mana ruleset: a turn the mana couldn't pay for is skipped, not passed, while its player has a deck to draw from
+    # (else both players' first turns, 1 mana each, could end the game); the event says so, for the client to show
+    skipped = forced and state.config.mana and bool(state.decks[player])
+    if skipped:
+        state.emit("turn_end", player=player, skipped=True)
+    else:
+        state.emit("turn_end", player=player)
     effects.end_of_turn(state, player)      # on_end_of_turn triggers (Dingo, Worker Wasp, Methuselah)
     effects.resolve(state)                  # choice-free by design, so it drains fully
     if _decided(state):
@@ -302,9 +308,8 @@ def _end_turn(state: GameState, *, forced: bool = False) -> None:
     # Both players ending a turn without acting, back to back, ends the game (more food wins;
     # on a tie, the player whose pass ended it loses). A player with no move passes too.
     acted = state.actions_taken_this_turn or state.turn_flags.get(f"roams_{player}")   # a free roam is acting too
-    if forced and state.config.mana and state.decks[player]:
-        pass        # the mana ruleset: a turn the mana couldn't pay for is skipped, not passed, while its player has a deck
-                    # to draw from (else both players' first turns, 1 mana each, could end the game)
+    if skipped:
+        pass        # a skipped turn (above) is not a pass
     else:
         state.idle_turns = 0 if acted else state.idle_turns + 1
     if state.idle_turns >= 2:

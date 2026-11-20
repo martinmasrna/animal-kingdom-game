@@ -84,6 +84,16 @@ def test_unspent_mana_is_lost_and_a_real_game_counts_its_turns():
         assert p == "AB"[turn % 2] and total == left == min(turn // 2 + 1, 6)
 
 
+def test_a_skipped_turn_says_so_on_its_end_and_a_turn_ended_by_hand_does_not():
+    """The client shows a skipped turn only from the server's word: `skipped` on the turn's turn_end event."""
+    s = state(hands={"A": ["lion"], "B": ["lion"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})   # lions cost 3
+    rules.apply_action(s, PassAction())                      # A ends their first turn by hand, nothing played
+    assert s.current == "A" and s.turn_counter == 4          # B's 1 and A's 2 and B's 2 mana paid for nothing: skipped
+    ends = [e for e in s.events if e["e"] == "turn_end"]
+    assert [(e["player"], bool(e.get("skipped"))) for e in ends] == [("A", False), ("B", True), ("A", True), ("B", True)]
+    assert all(e.get("skipped") is None for e in new_game(load_premade_deck("pool_1"), load_premade_deck("pool_3"), 7).events)
+
+
 def test_a_card_costs_its_mana_and_a_card_the_mana_left_cannot_pay_is_refused():
     s = state(turn=4, hands={"A": ["lion", "squirrel", "kitten"]})   # A's third turn: 3 mana
     assert CARDS["lion"].cost == 3 and CARDS["squirrel"].cost == 1
