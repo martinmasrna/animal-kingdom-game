@@ -106,14 +106,15 @@ export function fitNames(root) {
 // A card read large: the cards it makes (its related cards, in the order they come; arrows when they are what it becomes)
 // and each keyword on any of them explained, as one block (.zside) the collection's zoom and the game's card view lay out
 // right of the card. One related card takes the keywords beside it ('few'); two or more, under them, as wide as their row.
-export function readSide(c, cards) {
+// `draw`: how a related card is drawn (the mana rules draw their own card, mana.js).
+export function readSide(c, cards, draw = r => cardHTML(r)) {
   const rel = (c.related || []).map(id => cards[id]).filter(Boolean);
   const kws = Object.keys(KEYWORDS).filter(k => [c, ...rel].some(x => hasKeyword(x, k)))
     .concat(Object.keys(TERMS).filter(t => [c, ...rel].some(x => new RegExp(`\\b${t.toLowerCase()}\\b`).test(x.text || ''))));
   if (!rel.length && !kws.length) return '';
   const cls = !rel.length ? '' : rel.length === 1 ? ' few' : ' row';
   return `<div class="zside${cls}">` +
-    (rel.length ? `<div class="rel${rel.length > 4 ? ' many' : ''}">${rel.map(r => cardHTML(r)).join(c.evolves ? '<i class="arr"></i>' : '')}</div>` : '') +
+    (rel.length ? `<div class="rel${rel.length > 4 ? ' many' : ''}">${rel.map(draw).join(c.evolves ? '<i class="arr"></i>' : '')}</div>` : '') +
     (kws.length ? `<div class="kws">${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k] || TERMS[k]}</p></div>`).join('')}</div>` : '') + '</div>';
 }
 

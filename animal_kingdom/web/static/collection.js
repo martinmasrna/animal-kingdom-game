@@ -8,6 +8,7 @@ import { encodeDeck, decodeDeck, deckOrder } from './deckcode.js';
 import { portrait as headCrop } from './board.js';   // the board's round head crop (the local portrait() is the screen's orientation)
 import { dd, wireDd, onHold } from './menu.js';
 import { track } from './log.js';
+import { manaCard, fitPlaques, costChip } from './mana.js';
 
 // Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
 const FAMILIES = [['Cat', 'lion'], ['Canine', 'wolf_legend_3'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
@@ -18,6 +19,16 @@ const RANK = { legendary: 0, rare: 1, common: 2 };
 // deck size, the copies a rarity allows, the stars prototype's budget (a card's level, c.stars, counted per copy), and the
 // most decks a profile keeps.
 let R = { deckSize: 25, copies: {}, starBudget: 0 };   // until the server's arrive
+// The mana ruleset's deck builder (the prototype of 2026-11-20; app.js hands in `mana` and that ruleset's deck rules): every
+// card is the mana card (mana.js, the one the match draws), the grid and the deck sort by cost first, a filter by cost
+// takes the stars' place, the deck shows how many cards it has at each cost, and the rules are the mana deck rules (no
+// star budget; a card with no mana cost is not legal). The default ruleset's screen is unchanged.
+let M = false;
+const costOf = c => c.mana ?? 99;   // a card with no cost sorts last
+const COSTS = [1, 2, 3, 4, 5, 6];
+// A card in the grid, a pop or a dialog: the mana card with its cost, or the rectangular card. `w`: the mana card's width.
+const face = (c, w, opts = {}) => M ? manaCard(c, { cost: c.mana ?? null, w }) : cardHTML(c, opts);
+const fitAll = el => { fitNames(el); if (M) fitPlaques(el); };
 const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
 // What keeps a deck from play under the rules, in plain words: copies over a card's limit, more cards than a deck holds (a
 // deck saved under the old rules, three copies and 30 cards, keeps its list: it shows what is over and is fixed here), too
@@ -27,8 +38,12 @@ const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
 export const NO_LEADER = 'Choose a leader', NO_LEADER_CARD = 'Add a legendary that can lead';
 export function deckIssue(list, cards = C, rules = R, leader = null, leaders = (X && X.leaders) || {}) {
   const counts = countsOf(list);
+  // the mana rules (rules.needsCost): only collectible cards with a mana cost
+  const nocost = rules.needsCost ? Object.keys(counts).filter(id => !cards[id] || cards[id].status !== 'collectible' || cards[id].mana == null) : [];
+  if (nocost.length === 1) return `${(cards[nocost[0]] || { name: 'A card' }).name} has no mana cost`;
+  if (nocost.length) return `${nocost.length} cards have no mana cost`;
   const over = Object.keys(counts).filter(id => cards[id] && counts[id] > rules.copies[cards[id].rarity]);
-  const stars = list.reduce((n, id) => n + ((cards[id] || {}).stars | 0), 0) - rules.starBudget;
+  const stars = rules.starBudget == null ? 0 : list.reduce((n, id) => n + ((cards[id] || {}).stars | 0), 0) - rules.starBudget;   // the mana rules: no star budget
   if (over.length === 1) { const c = cards[over[0]], k = counts[over[0]] - rules.copies[c.rarity];
     return `${counts[over[0]]} ${c.name}: take out ${k === 1 ? 'one' : k}, ${rules.copies[c.rarity] === 1 ? 'one' : 'two'} at most`; }
   if (over.length) return `${over.length} cards have a copy too many`;
@@ -60,7 +75,7 @@ const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${
 
 // The launch habitats, in the order the sets are presented.
 const HABITATS = ['Savanna', 'Forest', 'Meadow', 'Jungle', 'City', 'Open Ocean'];
-let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', lvl: '', q: '', sheet: false }, flash = null, wired = false;
+let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', lvl: '', cost: '', q: '', sheet: false }, flash = null, wired = false;
 const limit = c => R.copies[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
 // A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
 export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
@@ -90,7 +105,7 @@ function save(all) {
 // Feedback beside Back (or Done) while the game is in testing: the side panel holds the screen's edge, where home has its tab.
 const FB = '<button class="backbtn fbx" data-tip="Feedback" aria-label="Feedback"><img class="tic" src="/static/kit2/top/feedback.webp" alt="" draggable="false"></button>';
 export function collectionScreen(app, ctx) {
-  X = ctx; C = ctx.cards; if (ctx.rules) R = ctx.rules;
+  X = ctx; C = ctx.cards; if (ctx.rules) R = ctx.rules; M = !!ctx.mana;
   if (!saved) saved = Object.fromEntries(decks().map(d => [d.id, [...d.list]]));
   cards = Object.values(C).filter(c => c.status === 'collectible');   // the starters' cards and the bench (cleared cards in no starter)
   if (!wired) { wired = true; wireGlobal(); }
@@ -105,14 +120,20 @@ export function collectionScreen(app, ctx) {
 // Strips are slivers of the cards: strength on a driftwood plaque, the name, copies as dots (legendaries have one).
 // One strip: a sliver of the card; the number of copies at its end when there are two or more (the game's decklists: copies
 // left), as in Hearthstone. A strip with none left is marked gone.
-export const stripHTML = (id, cards, have) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}${have > (R.copies[cards[id].rarity] ?? 9) ? ' over' : ''}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span>${markGlyphs(cards[id], 'lvs')}<span class="x">${have > 1 ? have : ''}</span></div>`;
+// `mana`: the mana rules' strip, its cost in a gold hexagon before the strength.
+export const stripHTML = (id, cards, have, mana = false) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}${have > (R.copies[cards[id].rarity] ?? 9) || mana && cards[id].mana == null ? ' over' : ''}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div>${mana ? `<span class="sc">${cards[id].mana != null ? costChip(cards[id].mana) : ''}</span>` : ''}<span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span>${markGlyphs(cards[id], 'lvs')}<span class="x">${have > 1 ? have : ''}</span></div>`;
 // A deck's strips, one list, in deckOrder (the legendaries first, their gold edge says so, then every other card by strength).
-// `have(id)`: the copies a strip shows (a match's decklists: the copies left).
-export const stripsHTML = (ids, cards, have) => `<div class="dbody flat">${[...ids].sort(deckOrder(cards)).map(id => stripHTML(id, cards, have(id))).join('')}</div>`;
-export function deckBody(list, cards) {
+// `have(id)`: the copies a strip shows (a match's decklists: the copies left). `mana`: the mana rules' list, by cost first.
+export const stripsHTML = (ids, cards, have, mana = false) => { const by = deckOrder(cards);
+  return `<div class="dbody flat">${[...ids].sort(mana ? (a, b) => costOf(cards[a]) - costOf(cards[b]) || by(a, b) : by).map(id => stripHTML(id, cards, have(id), mana)).join('')}</div>`; };
+export function deckBody(list, cards, mana = false) {
   const counts = countsOf(list);
-  return stripsHTML(Object.keys(counts), cards, id => counts[id]);
+  return stripsHTML(Object.keys(counts), cards, id => counts[id], mana);
 }
+// The mana rules' curve: how many of the deck's cards cost 1, 2, 3, 4, 5 and 6 (a plain count, the lead session's default
+// for the prototype, not something Martin asked for).
+const curveHTML = list => { const n = {}; for (const id of list) { const k = C[id] && C[id].mana; n[k] = (n[k] || 0) + 1; }
+  return `<div class="mcurve">${COSTS.map(k => `<span class="${n[k] ? '' : 'zero'}">${costChip(k)}<b>${n[k] || 0}</b></span>`).join('')}</div>`; };
 
 function render(app, all) {
   const keep = [...app.querySelectorAll('.clist, .cgrid')].map(e => e.scrollTop);
@@ -121,14 +142,14 @@ function render(app, all) {
   const q = st.q.toLowerCase();
   // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
   const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
-  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (st.lvl === '' || String(c.stars | 0) === st.lvl)
+  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (M || st.lvl === '' || String(c.stars | 0) === st.lvl) && (!M || st.cost === '' || String(c.mana) === st.cost)
     && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ') + ' ' + made(c)).toLowerCase().includes(q)))
-    .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
+    .sort((a, b) => (M ? costOf(a) - costOf(b) : 0) || sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
     : '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0;
       const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the card count and the stars show on their counters)
-      return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact', lazy: true })}${n && c.rarity !== 'legendary' ? `<span class="pips${n > limit(c) ? ' over' : ''}">${pips(n, Math.max(n, limit(c)))}</span>` : ''}</div>`; }).join('') + '</div>';
+      return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${M ? manaCard(c, { cost: c.mana ?? null, w: 150 }) : cardHTML(c, { cls: 'compact', lazy: true })}${n && c.rarity !== 'legendary' ? `<span class="pips${n > limit(c) ? ' over' : ''}">${pips(n, Math.max(n, limit(c)))}</span>` : ''}</div>`; }).join('') + '</div>';
 
   const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${headCrop(id, 36)}"></div></div>`).join('');
   const strengths = [...Array(8).keys()].map(String).concat('8+');
@@ -138,28 +159,29 @@ function render(app, all) {
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'All cards'], ['legendary', 'Legendary']])}
-    ${dd('lvl', st.lvl, [['', LABEL.five ? 'Any number' : 'Any stars'], ...levels.map(v => [String(v), lvlName(v)])])}
+    ${M ? dd('cost', st.cost, [['', 'Any cost'], ...COSTS.map(v => [String(v), `Cost ${v}`])])
+      : dd('lvl', st.lvl, [['', LABEL.five ? 'Any number' : 'Any stars'], ...levels.map(v => [String(v), lvlName(v)])])}
     ${dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
-  const body = d => deckBody(d.list, C);
+  const body = d => (M ? curveHTML(d.list) : '') + deckBody(d.list, C, M);
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${leaderRow(d)}${body(d)}`
     // a deck still short of its cards is marked with its count, as on home's chooser (Martin, 2026-10-31)
     // a deck over the rules (copies, stars) says so on its tile: open it to see what (the stars prototype)
-    : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list, C, R, d.leader) ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : (iss => !iss ? '' : `<span class="left">${iss === NO_LEADER || iss === NO_LEADER_CARD ? 'No leader' : 'Too many'}</span>`)(deckIssue(d.list, C, R, d.leader))}</div>`;
+    : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list, C, R, d.leader) ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : (iss => !iss ? '' : `<span class="left">${iss === NO_LEADER || iss === NO_LEADER_CARD ? 'No leader' : /no mana cost/.test(iss) ? 'No cost' : 'Too many'}</span>`)(deckIssue(d.list, C, R, d.leader))}</div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
   // The deck's stars beside its cards, read the same way; over the budget, it turns red and Play says by how much.
   const stars = open ? starsOf(open.list) : 0, over = Math.max(0, stars - R.starBudget), issue = open && open.list.length >= R.deckSize ? deckIssue(open.list, C, R, open.leader) : '';
   // One sunken count holds both (the foot is 300 px): the cards, then the stars; a click on the stars switches the labelling.
-  const starCount = !open ? '' : `<span class="fc fstars${over ? ' over' : ''}" id="fstars" data-tip="${LABEL.five ? 'Count in stars' : 'Count 1 to 5 instead'}">`
+  const starCount = !open || M ? '' : `<span class="fc fstars${over ? ' over' : ''}" id="fstars" data-tip="${LABEL.five ? 'Count in stars' : 'Count 1 to 5 instead'}">`
     + (LABEL.five ? `<b>${shown5(stars, open.list.length)}/${shown5(R.starBudget, R.deckSize)}</b><span>Points</span>` : `<b>${stars}/${R.starBudget}</b><span>Stars</span>`) + '</span>';
   const column = open
     ? `<div class="clist editing">${tile(open)}</div>
       <div class="sfoot"><button class="play" id="play"${open.list.length === R.deckSize && !issue ? '' : ' disabled'}>${issue || 'Play this deck'}</button>
-        <div class="frow"><div class="fcount two"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span>${starCount}</div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
+        <div class="frow"><div class="fcount${M ? '' : ' two'}"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span>${starCount}</div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
     : `<div class="clist">${all.map(tile).join('')}${all.length < R.decksMax ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${R.decksMax}</b><span>Decks</span></div>${FB}<button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
@@ -167,7 +189,7 @@ function render(app, all) {
   lazyArt(app.querySelector('.cgrid'));
   fitStrips(app);   // the deck tiles are as wide as the column (upright, the window)
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
-  fitNames(app);
+  fitAll(app);
   wire(app, all, open);
 }
 
@@ -214,7 +236,7 @@ function wire(app, all, open) {
   wireDd(app, (k, v) => { st[k] = k === 'rar' ? (v || null) : v; redo(); });
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t; st.families.has(f) ? st.families.delete(f) : st.families.add(f); redo(); });   // toggles; none chosen shows every family
-  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, hab: '', str: '', lvl: '', q: '' }); redo(); };
+  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, hab: '', str: '', lvl: '', cost: '', q: '' }); redo(); };
   app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; if (!st.open) { st.open = e.dataset.d; st.sheet = false; redo(); } });
 
   const nm = app.querySelector('.nm-edit');
@@ -269,8 +291,8 @@ function wire(app, all, open) {
     e.onclick = () => { const c = C[e.dataset.card];
       if (!open && matchMedia('(hover: none)').matches) { hidePop(); return zoom(app, c); }   // touch, browsing: a tap reads it
       if (!open) return X.toast(`Open a deck ${portrait() ? 'below' : 'on the right'} to build it`);
-      const n = open.list.filter(x => x === c.id).length, lv = c.stars | 0, left = R.starBudget - starsOf(open.list);
-      const why = open.list.length >= R.deckSize ? 'tot' : n >= limit(c) ? 'pips' : lv > 0 && lv > left ? 'stars' : null;
+      const n = open.list.filter(x => x === c.id).length, lv = c.stars | 0, left = R.starBudget == null ? Infinity : R.starBudget - starsOf(open.list);
+      const why = open.list.length >= R.deckSize ? 'tot' : n >= limit(c) ? 'pips' : R.needsCost && c.mana == null ? 'cost' : lv > 0 && lv > left ? 'stars' : null;
       if (why) return refuse(app, e, why, c);
       open.list.push(c.id); hidePop(); flash = c.id; change(); };
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
@@ -291,7 +313,7 @@ function wire(app, all, open) {
   let on = null;
   const show = e => { on = e; const r = e.getBoundingClientRect(), inSide = !!e.closest('.side');
     const pw = powerOf(C[e.dataset.card]);
-    pop.className = 'pop' + (pw ? ' ldr' : ''); pop.innerHTML = cardHTML(C[e.dataset.card]) + pw; pop.style.display = 'flex';
+    pop.className = 'pop' + (pw ? ' ldr' : '') + (M ? ' mcoll' : ''); pop.innerHTML = face(C[e.dataset.card], 230) + pw; pop.style.display = 'flex'; if (M) fitPlaques(pop);
     const w = pop.offsetWidth, h = pop.offsetHeight;
     pop.style.left = (inSide || r.right + 10 + w > side ? r.left - w - 10 : r.right + 10) + 'px';
     pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
@@ -309,6 +331,7 @@ function refuse(app, el, why, c) {
   again(el, 'shake');
   if (why === 'tot') { again(app.querySelector('.fcount'), 'shake'); X.toast('The deck is full: take a card out first'); }
   else if (why === 'pips') again(el.querySelector('.pips'), 'flash');
+  else if (why === 'cost') X.toast(`${c.name} has no mana cost, so no mana deck can hold it`);
   else if (why === 'stars') { again(app.querySelector('#fstars'), 'shake');
     const left = Math.max(0, R.starBudget - starsOf(st.open ? decks().find(d => d.id === st.open).list : []));
     const n = v => LABEL.five ? `${v}` : `${v} star${v === 1 ? '' : 's'}`;
@@ -331,9 +354,9 @@ function dialog(app, html) {
 // (as in Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
 function zoom(app, c) {
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
-  const side = readSide(c, C);
-  m.innerHTML = `<div class="zbox">${cardHTML(c)}${powerOf(c)}${side}</div>`;
-  fitNames(m);
+  const side = readSide(c, C, M ? r => manaCard(r, { cost: r.mana ?? null, w: 170 }) : undefined);
+  m.innerHTML = `<div class="zbox">${face(c, 300)}${powerOf(c)}${side}</div>`;
+  fitAll(m);
   const close = () => { m.classList.remove('on', 'zoom'); m.innerHTML = ''; removeEventListener('keydown', key, true); };
   const key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
   addEventListener('keydown', key, true);
@@ -373,15 +396,15 @@ function leaderRow(d) {
 // `d`: the deck whose leader changes, or null for a new deck.
 function pickLeader(app, d, done) {
   const cur = d && d.leader;
-  const { m, close } = dialog(app, `<div class="dlg cov ldr"><h3>Choose a leader</h3><div class="leads">${leaderIds().map(id => `<div class="lv${id === cur ? ' on' : ''}" data-id="${id}"><div class="cv">${cardHTML(C[id], { cls: 'compact' })}</div>${powerHTML(id, 96)}</div>`).join('')}</div>
-    <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitNames(m);
+  const { m, close } = dialog(app, `<div class="dlg cov ldr"><h3>Choose a leader</h3><div class="leads">${leaderIds().map(id => `<div class="lv${id === cur ? ' on' : ''}" data-id="${id}"><div class="cv">${face(C[id], 110, { cls: 'compact' })}</div>${powerHTML(id, 96)}</div>`).join('')}</div>
+    <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitAll(m);
   m.querySelectorAll('.lv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
 }
 
 function pickCover(app, d, done) {
   const ids = [...new Set(d.list)].filter(id => CROP[id]).sort(deckOrder(C));
-  const { m, close } = dialog(app, `<div class="dlg cov"><h3>Choose a cover</h3><div class="covs">${ids.map(id => `<div class="cv${id === d.cover ? ' on' : ''}" data-id="${id}">${cardHTML(C[id], { cls: 'compact' })}</div>`).join('')}</div>
-    <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitNames(m);
+  const { m, close } = dialog(app, `<div class="dlg cov"><h3>Choose a cover</h3><div class="covs">${ids.map(id => `<div class="cv${id === d.cover ? ' on' : ''}" data-id="${id}">${face(C[id], 140, { cls: 'compact' })}</div>`).join('')}</div>
+    <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitAll(m);
   m.querySelectorAll('.cv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
 }
 
