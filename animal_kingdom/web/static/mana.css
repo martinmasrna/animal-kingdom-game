@@ -58,9 +58,11 @@
 .game.mana #world { display: none; }
 .game.mana #stage { background: #1f2228; }
 .game.mana .ledge, .game.mana .deck, .game.mana #recent { display: none !important; }
-/* the board: plain tiles, each base lightly tinted in its team's colour, a dot on each region's corner */
+/* the board: plain tiles, a soft fade in each side's colour beyond its base row (board.js basefade), a dot on each region's corner */
 .game.mana.kit.hexb .cr.clear { background: #383d45; filter: none; clip-path: polygon(50% 1.5%, 98.5% 25.5%, 98.5% 74.5%, 50% 98.5%, 1.5% 74.5%, 1.5% 25.5%); }
-.game.mana.kit.hexb .cr.clear.base.A { background: #2c3c55; } .game.mana.kit.hexb .cr.clear.base.B { background: #4c3033; }
+.game.mana .basefade { pointer-events: none; z-index: 0; }
+.game.mana .basefade.A { background: radial-gradient(closest-side, rgba(90, 162, 240, .42), rgba(90, 162, 240, .16) 55%, transparent); }
+.game.mana .basefade.B { background: radial-gradient(closest-side, rgba(224, 90, 76, .42), rgba(224, 90, 76, .16) 55%, transparent); }
 .game.mana .rdot { color: inherit; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #565c66; box-shadow: 0 0 0 2px #1f2228; z-index: 4; pointer-events: none; }
 .game.mana .rdot.A { background: #5aa2f0; } .game.mana .rdot.B { background: #e05a4c; }
 .game.mana .cr.unit:hover { z-index: 5; }

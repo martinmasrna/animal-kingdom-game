@@ -925,7 +925,6 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
     enemy = other_player(player)
     # HQ capture: connection only (not Flight); a map with bases has no den to capture
     enemy_hq = not gm.bases and any(cr in occ for cr in gm.hq_front(enemy))
-    closed = gm.closed_to(player)                     # the opponent's base: never theirs to place on (map_hex19)
 
     # Connection legality depends only on (player, occ), never on the card, so the set of
     # connection-legal crossroads is identical for every non-Flight/non-extra card. Compute it
@@ -960,7 +959,7 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
                 reach_sets[reach] = statics.reach_crossroads(state, player, reach, occ)
             extra = extra | reach_sets[reach]
         for cr in sorted_crossroads:
-            if not (flight or cr in connectable or cr in extra) or cr in closed:
+            if not (flight or cr in connectable or cr in extra):
                 continue
             top = state.top_unit(cr)
             if is_apex:
@@ -1054,10 +1053,9 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None)
                     dist[nb] = dist[c] + 1
                     queue.append(nb)
     is_apex = statics.has_keyword(state, unit, "Apex Predator", cr)
-    closed = gm.closed_to(player)                     # never onto the opponent's base (map_hex19)
     out = []
     for c in sorted(dist):
-        if c == cr or c in closed:
+        if c == cr:
             continue
         top = state.top_unit(c)
         if top is None:
@@ -1885,10 +1883,9 @@ def _spawn(state, owner, card_id, cr):
     _land_unit(state, owner, UnitInstance(card_id, owner, state.new_iid()), cr, from_hand=False, play=False)
 
 
-def _empty_neighbors(state, cr, owner=None):
-    """The empty crossroads next to `cr`; with `owner`, only those that player may place on (not the opponent's base)."""
-    closed = state.game_map.closed_to(owner) if owner is not None else frozenset()
-    return [nb for nb in sorted(state.game_map.neighbors(cr)) if not state.board.get(nb) and nb not in closed]
+def _empty_neighbors(state, cr):
+    """The empty crossroads next to `cr`."""
+    return [nb for nb in sorted(state.game_map.neighbors(cr)) if not state.board.get(nb)]
 
 
 def _hand_iids(state, player, *, tag=None):
@@ -2333,13 +2330,13 @@ def _vultures_dusk(state, player):
     if _lost_this_turn(state, "A") + _lost_this_turn(state, "B") + _lost_this_turn(state, WILD) < state.config.vulture_removals:
         return
     for inst in [u for u in state.hands[player] if u.card_id == "vulture"]:
-        empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c) and c not in state.game_map.closed_to(player))
+        empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c))
         if not empty:
             return
         state.hands[player].remove(inst)
         _land_unit(state, player, inst, state.rng.choice(empty), from_hand=True, roar=False, play=False)
     while "vulture" in state.decks[player]:
-        empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c) and c not in state.game_map.closed_to(player))
+        empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c))
         if not empty:
             return
         state.decks[player].remove("vulture")
@@ -2382,7 +2379,7 @@ def _cockroach_remove(state, unit, cr, pos):
     """Fall: replace this with a Cockroach (a fresh one: nothing it was given or lost comes back) and place a Roach on an
     adjacent empty crossroad (a random one)."""
     _put_back(state, unit, cr, pos, base=0)
-    empty = _empty_neighbors(state, cr, unit.owner)
+    empty = _empty_neighbors(state, cr)
     if empty and state.result is None:
         _spawn(state, unit.owner, "roach", state.rng.choice(empty))
 
@@ -2547,7 +2544,7 @@ def _dingo_eot(state, unit, cr):
 
 def _spawn_pups(state, unit, cr, n, token_ids=("pup",)):
     """Land up to `n` tokens on random empty crossroads adjacent to `cr`, cycling through `token_ids`."""
-    empty = _empty_neighbors(state, cr, unit.owner)
+    empty = _empty_neighbors(state, cr)
     state.rng.shuffle(empty)
     for i, spot in enumerate(empty[:n]):
         _spawn(state, unit.owner, token_ids[i % len(token_ids)], spot)
@@ -2618,7 +2615,7 @@ def _queen_bee_place(state, unit, cr):
 
 def _queen_ant_eot(state, unit, cr):
     """Queen Ant: Dusk: place a Young Ant on an adjacent empty crossroad (a random one: Dusk asks no decision)."""
-    empty = _empty_neighbors(state, cr, unit.owner)
+    empty = _empty_neighbors(state, cr)
     if empty:
         _spawn(state, unit.owner, "young_ant", state.rng.choice(empty))
 
@@ -2822,7 +2819,7 @@ def _fill(state, unit, cr):
     hand = [u for u in state.hands[o] if u.card_id == cid]
     sources = [("hand", inst) for inst in hand] + [("deck", None)] * state.decks[o].count(cid)
     state.rng.shuffle(sources)
-    empty = _empty_neighbors(state, cr, o)
+    empty = _empty_neighbors(state, cr)
     state.rng.shuffle(empty)
     for (kind, inst), spot in zip(sources, empty):
         if state.board.get(spot) or state.result is not None:
@@ -3079,7 +3076,7 @@ def _cod_place(state, unit, cr):
 def _spawns_beside(token):
     """Roar: place `token` on a random adjacent empty crossroad (Sunfish's Baby Fish, Deer's Fawn)."""
     def handler(state, unit, cr):
-        empty = _empty_neighbors(state, cr, unit.owner)
+        empty = _empty_neighbors(state, cr)
         if empty:
             _spawn(state, unit.owner, token, state.rng.choice(empty))
     return handler

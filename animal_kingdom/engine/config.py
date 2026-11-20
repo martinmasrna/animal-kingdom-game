@@ -312,11 +312,10 @@ def _mana_texts() -> tuple[dict[str, str], dict[str, str]]:
     keywords = {
         "Action": f"Costs {n} mana. Each animal can do it once a turn.",
         "Echo": f"Pay {n} mana to repeat its Roar. Each animal can do it once a turn.",
-        "Flight": "Can be placed on any tile, even one not connected to yours, except your opponent's base.",
+        "Flight": "Can be placed on any tile, even one not connected to yours.",
         "Roam": f"For {n} mana, move it through your animals connected to it, then one tile beyond (two with Reach): onto an "
-                "empty tile, onto one of your animals, or onto an enemy it beats, never onto your opponent's base. Once per turn.",
-        "Reach": "Can be placed up to two tiles away from one of your connected animals, jumping over what stands between, "
-                 "never onto your opponent's base.",
+                "empty tile, onto one of your animals, or onto an enemy it beats. Once per turn.",
+        "Reach": "Can be placed up to two tiles away from one of your connected animals, jumping over what stands between.",
         "Apex Predator": "Must be placed on top of another animal, yours or an enemy's, and eats it.",
     }
     return cards, keywords

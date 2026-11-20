@@ -198,6 +198,15 @@ export function renderBoard(el, M, g, cards, ui) {
     s += put(`stone pboss ${h ? h.owner : ''}${reg.c.every((v, i) => shownAt && v === shownAt[i]) ? ' shown' : ''}`, x, y, chalk('+' + pays(reg, h)));
   }
 
+  // the mana board: no tint on the bases; a soft fade in each side's colour beyond its base row (below yours, above
+  // theirs), the row a player's animals connect from (Martin, 2026-11-20)
+  if (HEX.mana) for (const side of ['A', 'B']) {
+    const ps = [...bases[side]].map(cr => at(...cr.split(',').map(Number)));
+    if (!ps.length) continue;
+    const G = hexGeo(), x0 = Math.min(...ps.map(p => p[0])), x1 = Math.max(...ps.map(p => p[0])), y = ps[0][1] + (side === 'A' ? .32 : -.32) * G.h;
+    const w = x1 - x0 + 2.2 * G.w, h = 1.5 * G.h;
+    s += put(`basefade ${side}`, (x0 + x1) / 2 - w / 2, y - h / 2, '', '', `width:${w}px;height:${h}px`);
+  }
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
   if (HEX.on && !HEX.mana) for (const side of ['A', 'B']) { const [x, y] = hexTip(side); s += put(`dentile ${side}`, x, y, `<img src="${denBase(side)}" alt="" draggable="false">`); }
   // the hex board's pieces top row first, so a head that rises over its rim lies over the row above, as pieces on a table

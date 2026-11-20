@@ -213,49 +213,25 @@ def _b_chain(s):
         put(s, cr, "squirrel", "B")
 
 
-def test_no_card_of_the_opponent_lands_on_a_base_from_hand():
-    s = state(turn=11, current="B", hands={"B": ["lion", "tiger"]})
-    put(s, "1,1", "mongoose", "A")                                # a 1 the Lion would cover anywhere else
+def test_the_opponents_base_is_open_to_place_on():
+    """Anyone places on either base (Martin, 2026-11-20: the rule that only its owner could was "just dumb"); a base is
+    only where its owner's connection starts."""
+    s = state(turn=11, current="B", hands={"B": ["lion", "pigeon", "caracal"]})
+    put(s, "1,1", "mongoose", "A")                                # a 1 the Lion covers
     _b_chain(s)
-    assert not places(s) & BASE["A"]
-    assert "2,2" in places(s, "lion")
-    with pytest.raises(EngineError):
-        rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))
-    with pytest.raises(EngineError):
-        rules.apply_action(s, PlaceAction("tiger", ("cr", "1,1")))   # nor an Apex Predator onto an animal there
+    assert "1,1" in places(s, "lion")
+    assert BASE["A"] <= places(s, "pigeon")                       # Flight: anywhere
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
+    assert s.top_unit("1,1").card_id == "lion"
 
 
-def test_flight_and_reach_never_land_on_the_opponents_base():
-    s = state(turn=11, current="B", hands={"B": ["pigeon", "caracal", "eagle"]})
-    put(s, "1,1", "mongoose", "A")
-    for cr in ("5,2", "4,2", "3,2"):
-        put(s, cr, "squirrel", "B")
-    assert places(s, "pigeon") == set(HEX19.crossroads) - BASE["A"] - {"5,2", "4,2", "3,2"} | {"5,2", "4,2", "3,2"}
-    assert "2,1" in places(s, "caracal") and not places(s, "caracal") & BASE["A"]   # Reach jumps two, never onto it
-    assert not places(s, "eagle") & BASE["A"]                     # a flying Apex can't eat what stands there
-
-
-def test_a_roam_never_lands_on_the_opponents_base():
+def test_a_roam_may_land_on_the_opponents_base():
     s = state(turn=11, current="B")
     _b_chain(s)
     put(s, "2,2", "wolf", "B")                                    # next to A's 1,2 and 1,3
     targets = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, RoamAction) and a.origin == "2,2"}
-    assert targets and not targets & BASE["A"]
+    assert targets & BASE["A"]
     assert not any(a.target[0] == "hq" for a in rules.legal_actions(s) if isinstance(a, RoamAction))
-
-
-def test_an_effect_never_puts_an_animal_on_the_opponents_base():
-    s = state(turn=11, current="B", hands={"B": ["mole", "lion"]})
-    _b_chain(s)
-    rules.apply_action(s, PlaceAction("mole", ("cr", "2,2")))     # "play another animal next to this"
-    extra = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
-    assert extra and not extra & BASE["A"]
-    s = state(turn=11, current="B", hands={"B": ["sardine", "sardine"]}, decks={"B": ["sardine"] * 2})
-    _b_chain(s)
-    rules.apply_action(s, PlaceAction("sardine", ("cr", "2,2")))  # fills its empty neighbours, the base's excepted
-    resolve_choices(s)
-    assert any(s.top_unit(cr) and s.top_unit(cr).card_id == "sardine" for cr in ("2,3", "3,3"))
-    assert not any(s.top_unit(cr) for cr in BASE["A"])
 
 
 def test_effects_reach_across_the_base_line():
@@ -367,7 +343,7 @@ def test_cheetah_and_falcon_draw_next_to_the_opponents_base():
     assert cheetah_at("4,1") == 2 and cheetah_at("3,3") == 0
     for cr, drawn in (("4,4", 1), ("3,5", 0)):
         s = state(turn=11, current="A", hands={"A": ["falcon"]})
-        rules.apply_action(s, PlaceAction("falcon", ("cr", cr)))    # Flight: anywhere but B's base
+        rules.apply_action(s, PlaceAction("falcon", ("cr", cr)))    # Flight: anywhere
         resolve_choices(s)
         assert len(s.hands["A"]) == drawn
 
@@ -470,7 +446,7 @@ def test_the_default_ruleset_is_unchanged():
     assert d.first_player_opening_draw == 4 and d.second_player_opening_draw == 4
     assert not d.for_log({"first_turn_actions": 1, "first_player_opening_draw": 4}).mana
     for mid in ("map_a", "map_b", "map_hex"):
-        assert load_map(mid).bases == {} and load_map(mid).closed_to("A") == frozenset()
+        assert load_map(mid).bases == {}
     s = new_game(load_premade_deck("pool_1"), load_premade_deck("pool_2"), 3, map_id="map_hex", first_player="A")
     assert len(s.hands["A"]) == 4 and len(s.hands["B"]) == 4
     resolve_choices(s)
