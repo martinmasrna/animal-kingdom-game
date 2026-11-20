@@ -599,3 +599,12 @@ def test_a_flier_drops_straight_into_the_enemy_den():
     assert not any(isinstance(a, PlaceAction) and a.card_id == "wisp_5" and a.target[0] == "hq" for a in acts)
     rules.apply_action(s, PlaceAction("flyer_5", ("hq", "B")))
     assert s.food["B"] == 15 - CARDS["flyer_5"].base_strength and "flyer_5" in s.remove_pile
+
+
+def test_two_turns_ended_unplayed_do_not_end_a_mana_game():
+    # Martin, 2026-11-20 ("Both passed · more food wins" ended a game with his brother): passing is a choice here.
+    s = state(turn=11, hands={"A": ["wisp_1"], "B": ["wisp_1"]})
+    rules.apply_action(s, PassAction())
+    rules.apply_action(s, PassAction())
+    rules.apply_action(s, PassAction())
+    assert s.result is None

@@ -311,7 +311,7 @@ def _end_turn(state: GameState, *, forced: bool = False) -> None:
         pass        # a skipped turn (above) is not a pass
     else:
         state.idle_turns = 0 if acted else state.idle_turns + 1
-    if state.idle_turns >= 2:
+    if state.idle_turns >= 2 and not state.config.mana:   # the mana ruleset: ending a turn unplayed is a choice, never the end (Martin, 2026-11-20)
         state.result = _resolve_passes(state)
         return
     state.turn_counter += 1
