@@ -214,6 +214,9 @@
 /* each grid tile (and a dialog's card) is the mana card, as wide as its column */
 .coll :is(.tl, .cv) .mcard { --mw: calc(100cqw / 1.2333) !important; margin: calc(var(--mw) * .1348) 0 0 calc(var(--mw) * .1167); }   /* the card's frame reaches a fifth past its piece */
 .coll :is(.tl, .cv) .mcard .mpiece { --tw: calc(100cqw / 1.2333) !important; }
+/* the grid shows each card as its piece with its cost (collection.js); the full card opens on hover */
+.coll .tl .mcard.mpc { --mw: 100cqw !important; margin: 0; } .coll .tl .mcard.mpc .mpiece { --tw: 100cqw !important; }
+.coll .crow:has(.mcard.mpc) { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 16px 12px; }
 .coll .tl.max .mcard { filter: brightness(.45) saturate(.6); }
 /* a strip's cost, a gold hexagon before its strength */
 :is(.mscr, .game) .st .sc { position: relative; flex: none; width: 24px; display: grid; place-items: center; padding-left: 4px; }
