@@ -6,17 +6,17 @@ import assert from 'node:assert/strict';
 import { startServer, openBrowser } from './harness.mjs';
 
 let server, browser;
-before(async () => { server = await startServer(); browser = await openBrowser({ mana: true }); });
+before(async () => { server = await startServer(); browser = await openBrowser(); });
 after(async () => { await browser?.close(); server?.stop(); });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const until = async (page, fn, arg, ms = 10000) => { const t = Date.now(); while (Date.now() - t < ms) { if (await page.evaluate(fn, arg)) return true; await wait(100); } return false; };
 const seat = async () => { const ctx = await browser.createBrowserContext(), p = await ctx.newPage(); p.errors = [];
   p.on('pageerror', e => p.errors.push(e.message)); await p.evaluateOnNewDocument(() => localStorage.setItem('ak:learned', '1'));
   await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]); return p; };
-// A deck of the mana collection on the profile: 22 Wisps (0 to 10, two each), two Spikes 3 and the Warlord (25, legal in the mana rules).
-const DECK = { ...Object.fromEntries([...Array(11).keys()].map(i => ['wisp_' + i, 2])), spiky_3: 2, warlord_legend: 1 };
+// A deck of the mana collection on the profile: 20 Wisps (1 to 10, two each), two Spikes 3, two Cantrips and the Warlord (25, legal in the mana rules).
+const DECK = { ...Object.fromEntries([...Array(10).keys()].map(i => ['wisp_' + (i + 1), 2])), spiky_3: 2, scout_2: 2, warlord_legend: 1 };
 // A cheap one (nothing over 3 mana) for the matches that must get going: the Wisps 0 to 3, the cantrips, fliers, poisons, a Spikes and a Hungry, and the Warlord.
-const CHEAP = { ...Object.fromEntries([0, 1, 2, 3].map(i => ['wisp_' + i, 2])), scout_2: 2, scout_3: 2, flyer_2: 2, flyer_3: 2, venomous_2: 2, venomous_3: 2, spiky_3: 2, glutton_3: 2, warlord_legend: 1 };
+const CHEAP = { ...Object.fromEntries([1, 2, 3].map(i => ['wisp_' + i, 2])), scout_4: 2, scout_2: 2, scout_3: 2, flyer_2: 2, flyer_3: 2, venomous_2: 2, venomous_3: 2, spiky_3: 2, glutton_3: 2, warlord_legend: 1 };
 const giveDeck = async (p, id, name, cards = DECK, leader = 'warlord_legend') => {
   await p.evaluate(async (d) => { const r = await fetch('/api/me/decks', { method: 'PUT', headers: { 'X-AK-Key': localStorage.getItem('ak:key'), 'Content-Type': 'application/json' }, body: JSON.stringify([d]) }); if (!r.ok) throw new Error(await r.text()); },
     { id, name, cards, leader });
@@ -34,7 +34,7 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
   await A.waitForSelector('.bigcode');
   const code = await A.$eval('.bigcode', e => e.textContent);
   await B.goto(`${server.url}/`, { waitUntil: 'networkidle0' }); await giveDeck(B, 'w2', 'Wisps B');
-  await B.goto(`${server.url}/?rules=mana#/join/${code}`, { waitUntil: 'networkidle0' });
+  await B.goto(`${server.url}/#/join/${code}`, { waitUntil: 'networkidle0' });
   await click(B, '[data-deck="my:w2"]'); await click(B, '#mgo');
   for (const p of [A, B]) assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull .hc .mcard .plaque')), 'the opening hand in full');
   // each card in the opening hand: its cost in the gold hexagon, as the view says
@@ -123,7 +123,7 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   assert.equal(await p.$('.coll .side'), null, 'an open deck is the tray, not the side column');
   assert.equal(await p.$$eval('.mtray .cell.empty', e => e.length), 24, 'the leader\'s card and 24 empty cells');
   const want = ['wisp_1', 'wisp_1', 'wisp_2', 'wisp_2', 'wisp_3', 'wisp_3', 'wisp_4', 'wisp_4', 'wisp_5', 'wisp_5', 'wisp_6', 'wisp_6', 'spiky_3', 'spiky_3', 'flyer_2', 'flyer_2',
-    'venomous_2', 'venomous_2', 'wisp_0', 'wisp_0', 'scout_2', 'scout_2', 'glutton_3', 'glutton_3'];
+    'venomous_2', 'venomous_2', 'wisp_7', 'wisp_7', 'scout_2', 'scout_2', 'glutton_3', 'glutton_3'];
   for (const id of want) { await click(p, `.cgrid .tl[data-card="${id}"]`); await wait(30); }
   const tray = await p.evaluate(() => ({ cells: [...document.querySelectorAll('.mtray .cell')].map(e => ({ id: e.dataset.card || null, cost: +(e.querySelector('.mcost')?.dataset.n || 0),
       x: e.getBoundingClientRect().left, y: e.getBoundingClientRect().top })),
@@ -134,7 +134,6 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   assert.equal(tray.cells.length, 25); assert.ok(tray.cells.every(c => c.id), 'every cell filled');
   assert.deepEqual(tray.cells.map(c => c.id).sort(), [...all].sort(), 'a piece per copy');
   assert.deepEqual(tray.cells.map(c => c.cost), tray.cells.map(c => C[c.id].mana).sort((a, b) => a - b), 'in cost order, each with its cost');
-  assert.deepEqual(tray.counts, [...new Set(all.map(id => C[id].mana))].sort((a, b) => a - b).map(k => all.filter(id => C[id].mana === k).length), 'a count per cost');
   // two rows, interlocking: cell i in row i % 2, each half a piece right of the one before it, and wider gaps between costs
   const ys = [...new Set(tray.cells.map(c => Math.round(c.y)))]; assert.equal(ys.length, 2, 'two rows');
   tray.cells.forEach((c, i) => assert.equal(Math.round(c.y), Math.min(...ys) + (i % 2) * (Math.max(...ys) - Math.min(...ys))));
@@ -177,14 +176,3 @@ test('the tray fits the window: a deck of 25 at 1280 x 720, 1512 x 800 and 1920 
   for (const g of r) { assert.ok(g.used <= g.W, `${g.W} x ${g.H}: ${g.used} px wide`); assert.ok(g.w >= 48, `${g.W}: pieces ${g.w} px`); assert.ok(g.tall <= .26 * g.H, `${g.W} x ${g.H}: ${g.tall} px tall`); }
 });
 
-test('the mana deck rules in the deck builder: a card with no mana cost makes the deck illegal and says so', async () => {
-  const p = await seat();
-  await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
-  const r = await p.evaluate(async () => { const { deckIssue } = await import('/static/collection.js');
-    const cards = { a: { name: 'Ant', rarity: 'common', status: 'collectible', ruleset: 'mana', mana: 1 }, w: { name: 'Wolf', rarity: 'common', status: 'collectible', ruleset: 'mana' },
-      l: { name: 'Leo', rarity: 'legendary', status: 'collectible', ruleset: 'mana', mana: 3 } };
-    const mana = { deckSize: 4, copies: { common: 2, legendary: 1 }, starBudget: null, needsCost: true }, old = { ...mana, starBudget: 0, needsCost: false };
-    return [deckIssue(['a', 'a', 'w', 'l'], cards, mana, 'l', { l: {} }), deckIssue(['a', 'a', 'w', 'w', 'l'].slice(1), cards, mana, 'l', { l: {} }),
-      deckIssue(['a', 'a', 'l'], cards, mana, 'l', { l: {} }), deckIssue(['a', 'a', 'w', 'l'], cards, old, 'l', { l: {} })]; });
-  assert.deepEqual(r, ['Wolf has no mana cost', 'Wolf has no mana cost', '', ''], 'the mana rules refuse a card with no cost; no star budget; the default rules don\'t ask for a cost');
-});

@@ -45,6 +45,5 @@ export function numeral(n) {
   return `<div class="boss num tknum two" style="${NUM_BOX}">${img(a, 'left:-17.5%;scale:.96')}${img(b, 'left:17.5%;scale:.96')}</div>`;
 }
 export const tokenBase = side => hex(`token_${side === 'A' ? 'a' : 'b'}.webp`);
-export const denBase = side => hex(`den_${side === 'A' ? 'a' : 'b'}.webp`);
 export const armorShell = side => hex(`armor_${side === 'A' ? 'a' : 'b'}.webp`);
 if (typeof Image !== 'undefined') { for (let d = 0; d <= 20; d++) new Image().src = hex(`num/${d}.svg`); for (const s of ['A', 'B']) new Image().src = tokenBase(s); }

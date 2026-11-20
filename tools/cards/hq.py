@@ -384,7 +384,6 @@ def collect(card_id: str, by: str = "martin") -> str:
 
 RENAMED = ROOT / "animal_kingdom" / "web" / "renamed.py"
 CARDNUMS = ROOT / "animal_kingdom" / "web" / "static" / "cardnums.js"
-DESIGN = ROOT.parent / "design"
 # Records of what happened, kept as written: the human games.
 HISTORY = ("results/",)
 TEXT = (".py", ".js", ".mjs", ".json", ".jsonl", ".md", ".html", ".css", ".txt", ".toml", ".sh")
@@ -396,7 +395,7 @@ def _git_files(repo: Path) -> list[str]:
 
 def rename(old: str, new: str) -> str:
     """Give a card a new id everywhere the game knows it: the card data, the levels, the crops,
-    the code, tests and docs, its painting (here and the design repo's master); its deck-code number stays, and players'
+    the code, tests and docs, its painting; its deck-code number stays, and players'
     saved decks, old replays and saved matches follow it through the rename map (web/renamed.py, SUCCESSOR). Ids name the
     card's animal (AGENTS.md, Invariants), so a card changes id when its animal does, never when its name does."""
     ids = {c["id"] for c in _read(CARDS)["cards"]}
@@ -429,14 +428,7 @@ def rename(old: str, new: str) -> str:
     src = RENAMED.read_text(encoding="utf-8")
     RENAMED.write_text(src.replace("RENAMED_IDS = {", f'RENAMED_IDS = {{"{old}": "{new}", ', 1), encoding="utf-8")
     src = CARDNUMS.read_text(encoding="utf-8")
-    CARDNUMS.write_text(src.replace("export const SUCCESSOR = { ", f"export const SUCCESSOR = {{ {old}: '{new}', ", 1), encoding="utf-8")
-    if DESIGN.is_dir():   # the master painting, and the art rounds' manifest that installs and counts it
-        for ext in (".png", ".jpg"):
-            if (DESIGN / "cards" / (old + ext)).is_file():
-                subprocess.run(["git", "-C", str(DESIGN), "mv", f"cards/{old}{ext}", f"cards/{new}{ext}"], check=True)
-        man = DESIGN / "cards" / "bar" / "manifest.jsonl"
-        if man.is_file():
-            man.write_text(re.sub(rf'"card": "{re.escape(old)}"', f'"card": "{new}"', man.read_text(encoding="utf-8")), encoding="utf-8")
+    CARDNUMS.write_text(src.replace("export const SUCCESSOR = {", f"export const SUCCESSOR = {{ {old}: '{new}', ", 1), encoding="utf-8")
     return f"{old} -> {new} ({changed} files)"
 
 

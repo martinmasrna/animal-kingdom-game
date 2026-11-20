@@ -2,19 +2,14 @@
 // family, strength, rarity and search filters over it; the decks on the right, the open one unfolded under its tile.
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
-import { cardHTML, fitNames, readSide, markGlyphs, LABEL } from './card.js';
+import { fitNames, readSide, markGlyphs, LABEL } from './card.js';
 import { CROP, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck, deckOrder } from './deckcode.js';
-import { portrait as headCrop } from './board.js';   // the board's round head crop (the local portrait() is the screen's orientation)
 import { dd, wireDd, onHold } from './menu.js';
 import { track } from './log.js';
 import { manaCard, manaPiece, fitPlaques, costChip } from './mana.js';
 import { hasFigure } from './token.js';
 
-// Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
-const FAMILIES = [['Cat', 'lion'], ['Canine', 'wolf_legend_3'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
-  ['Snake', 'viper'], ['Bear', 'polar_bear'], ['Hoofed', 'rhinoceros'], ['Fish', 'sardine'], ['Primate', 'gorilla'], ['Arachnid', 'tarantula'],
-  ['Beetle', 'stag_beetle']];
 const RANK = { legendary: 0, rare: 1, common: 2 };
 // The deck rules come from the server (/api/pool's rules: decks.py, engine/cards.py and web/profiles.py hold the numbers): the
 // deck size, the copies a rarity allows, the stars prototype's budget (a card's level, c.stars, counted per copy), and the
@@ -24,9 +19,8 @@ let R = { deckSize: 25, copies: {}, starBudget: 0 };   // until the server's arr
 // card is the mana card (mana.js, the one the match draws), the grid and the deck sort by cost first, a filter by cost
 // takes the stars' place, the deck shows how many cards it has at each cost, and the rules are the mana deck rules (no
 // star budget; a card with no mana cost is not legal). The default ruleset's screen is unchanged.
-let M = false;
+
 const costOf = c => c.mana ?? 99;   // a card with no cost sorts last
-const COSTS = [1, 2, 3, 4, 5, 6];
 const MANA_COSTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];   // the cost row of the mana collection
 // The open deck in the mana rules, two ways (Martin, 2026-11-20: he wanted to try the deck as board tiles, and named the side
 // list cleaned up as the other way; neither is settled): `tray`, a band of pieces under the grid (the default), or `list`,
@@ -34,10 +28,10 @@ const MANA_COSTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];   // the cost row of the 
 const DECKVIEW = (() => { const q = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('deckview');
   try { if (q) localStorage.setItem('ak:deckview', q === 'list' ? 'list' : 'tray'); return localStorage.getItem('ak:deckview') === 'list' ? 'list' : 'tray'; }
   catch { return q === 'list' ? 'list' : 'tray'; } })();
-const tray = () => M && DECKVIEW === 'tray';
+const tray = () => (DECKVIEW === 'tray');
 // A card in the grid, a pop or a dialog: the mana card with its cost, or the rectangular card. `w`: the mana card's width.
-const face = (c, w, opts = {}) => M ? manaCard(c, { cost: c.mana ?? null, w }) : cardHTML(c, opts);
-const fitAll = el => { fitNames(el); if (M) fitPlaques(el); };
+const face = (c, w, opts = {}) => (manaCard(c, { cost: c.mana ?? null, w }));
+const fitAll = el => { fitNames(el); fitPlaques(el); };
 const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
 // What keeps a deck from play under the rules, in plain words: copies over a card's limit, more cards than a deck holds (a
 // deck saved under the old rules, three copies and 30 cards, keeps its list: it shows what is over and is fixed here), too
@@ -47,10 +41,6 @@ const starsOf = list => list.reduce((n, id) => n + (C[id].stars | 0), 0);
 export const NO_LEADER = 'Choose a leader', NO_LEADER_CARD = 'Add a legendary that can lead';
 export function deckIssue(list, cards = C, rules = R, leader = null, leaders = (X && X.leaders) || {}) {
   const counts = countsOf(list);
-  // the mana rules (rules.needsCost): only collectible cards with a mana cost
-  const nocost = rules.needsCost ? Object.keys(counts).filter(id => !cards[id] || cards[id].status !== 'collectible' || cards[id].ruleset !== 'mana' || cards[id].mana == null) : [];
-  if (nocost.length === 1) return `${(cards[nocost[0]] || { name: 'A card' }).name} has no mana cost`;
-  if (nocost.length) return `${nocost.length} cards have no mana cost`;
   const over = Object.keys(counts).filter(id => cards[id] && counts[id] > rules.copies[cards[id].rarity]);
   const stars = rules.starBudget == null ? 0 : list.reduce((n, id) => n + ((cards[id] || {}).stars | 0), 0) - rules.starBudget;   // the mana rules: no star budget
   if (over.length === 1) { const c = cards[over[0]], k = counts[over[0]] - rules.copies[c.rarity];
@@ -82,8 +72,6 @@ export const ICON = {
 // Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 
-// The launch habitats, in the order the sets are presented.
-const HABITATS = ['Savanna', 'Forest', 'Meadow', 'Jungle', 'City', 'Open Ocean'];
 let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', lvl: '', cost: '', q: '', sheet: false }, flash = null, wired = false;
 const limit = c => R.copies[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
 // A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
@@ -114,9 +102,9 @@ function save(all) {
 // Feedback beside Back (or Done) while the game is in testing: the side panel holds the screen's edge, where home has its tab.
 const FB = '<button class="backbtn fbx" data-tip="Feedback" aria-label="Feedback"><img class="tic" src="/static/kit2/top/feedback.webp" alt="" draggable="false"></button>';
 export function collectionScreen(app, ctx) {
-  X = ctx; C = ctx.cards; if (ctx.rules) R = ctx.rules; M = !!ctx.mana;
+  X = ctx; C = ctx.cards; if (ctx.rules) R = ctx.rules;
   if (!saved) saved = Object.fromEntries(decks().map(d => [d.id, [...d.list]]));
-  cards = Object.values(C).filter(c => c.status === 'collectible' && (c.ruleset || null) === (M ? 'mana' : null));   // the starters' cards and the bench; each ruleset its own collection (the mana prototype holds only the Wisps)
+  cards = Object.values(C).filter(c => c.status === 'collectible');   // the starters' cards and the bench; each ruleset its own collection (the mana prototype holds only the Wisps)
   if (!wired) { wired = true; wireGlobal(); }
   const all = decks();
   // Opens your first deck; with none yet, nothing is open and the grid is for browsing.
@@ -177,7 +165,7 @@ function trayHTML(d) {
   if (ids.length < n) runs.push({ k: null, ids: Array(n - ids.length).fill(null) });
   const g = trayGeo(innerWidth, innerHeight, n);   // room for every crack, so the pieces keep their size as the deck fills
   let i = 0, x0 = 0, cells = '', counts = '';
-  const seen = {}, over = id => (seen[id] = (seen[id] || 0) + 1) > (R.copies[C[id].rarity] ?? 9) || (R.needsCost && C[id].mana == null);   // a copy past its limit, or a card the rules refuse: marked
+  const seen = {}, over = id => (seen[id] = (seen[id] || 0) + 1) > (R.copies[C[id].rarity] ?? 9) || (false);   // a copy past its limit, or a card the rules refuse: marked
   runs.forEach((r, ri) => { if (ri) x0 += g.crack; const first = i;
     for (const id of r.ids) { const at = `left:${(i * g.p / 2 + x0).toFixed(1)}px;top:${(i % 2 * g.dy).toFixed(1)}px;width:${g.w}px;height:${g.h.toFixed(1)}px`;
       cells += id ? `<div class="cell${id === leader ? ' lcopy' : ''}${over(id) ? ' over' : ''}" data-card="${id}" style="${at}">${manaPiece(C[id], { cost: C[id].mana ?? null, w: g.w })}</div>`
@@ -197,19 +185,18 @@ function render(app, all) {
   const q = st.q.toLowerCase();
   // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
   const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
-  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (M || st.lvl === '' || String(c.stars | 0) === st.lvl) && (!M || st.cost === '' || String(c.mana) === st.cost)
+  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (true) && ((st.cost === '') || String(c.mana) === st.cost)
     && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ') + ' ' + made(c)).toLowerCase().includes(q)))
-    .sort((a, b) => (M ? costOf(a) - costOf(b) : 0) || sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
+    .sort((a, b) => ((costOf(a) - costOf(b))) || sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
     : '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0;
       // the mana rules show each card as its piece, with its cost; the full card opens on hover (Martin, 2026-11-20)
       const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the card count and the stars show on their counters)
-      return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${M ? manaPiece(c, { cost: c.mana ?? null, w: 150 }) : cardHTML(c, { cls: 'compact', lazy: true })}${n && c.rarity !== 'legendary' ? `<span class="pips${n > limit(c) ? ' over' : ''}">${pips(n, Math.max(n, limit(c)))}</span>` : ''}</div>`; }).join('') + '</div>';
+      return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${(manaPiece(c, { cost: c.mana ?? null, w: 150 }))}${n && c.rarity !== 'legendary' ? `<span class="pips${n > limit(c) ? ' over' : ''}">${pips(n, Math.max(n, limit(c)))}</span>` : ''}</div>`; }).join('') + '</div>';
 
   // the mana rules: a row of costs to pick from, as Hearthstone's collection has, in place of the animal families (Martin, 2026-11-20)
-  const tabs = M ? MANA_COSTS.map(n => `<div class="ctab${st.cost === String(n) ? ' on' : ''}" data-cost="${n}">${costChip(n)}</div>`).join('')
-    : FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${headCrop(id, 36)}"></div></div>`).join('');
+  const tabs = (MANA_COSTS.map(n => `<div class="ctab${st.cost === String(n) ? ' on' : ''}" data-cost="${n}">${costChip(n)}</div>`).join(''));
   const strengths = [...Array(8).keys()].map(String).concat('8+');
   // the levels the collection's cards have, highest first (no level is offered that no card has)
   const levels = [...new Set(cards.map(c => c.stars | 0))].sort((a, b) => b - a);
@@ -217,11 +204,11 @@ function render(app, all) {
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'All cards'], ['legendary', 'Legendary']])}
-    ${M ? '' : dd('lvl', st.lvl, [['', LABEL.five ? 'Any number' : 'Any stars'], ...levels.map(v => [String(v), lvlName(v)])])}
-    ${M ? '' : dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
+    ${('')}
+    ${('')}
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
-  const body = d => (M ? curveHTML(d.list) : '') + deckBody(d.list, C, M);
+  const body = d => ((curveHTML(d.list))) + deckBody(d.list, C, true);
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${leaderRow(d)}${body(d)}`
@@ -233,12 +220,12 @@ function render(app, all) {
   // The deck's stars beside its cards, read the same way; over the budget, it turns red and Play says by how much.
   const stars = open ? starsOf(open.list) : 0, over = Math.max(0, stars - R.starBudget), issue = open && open.list.length >= R.deckSize ? deckIssue(open.list, C, R, open.leader) : '';
   // One sunken count holds both (the foot is 300 px): the cards, then the stars; a click on the stars switches the labelling.
-  const starCount = !open || M ? '' : `<span class="fc fstars${over ? ' over' : ''}" id="fstars" data-tip="${LABEL.five ? 'Count in stars' : 'Count 1 to 5 instead'}">`
+  const starCount = !open || true ? '' : `<span class="fc fstars${over ? ' over' : ''}" id="fstars" data-tip="${LABEL.five ? 'Count in stars' : 'Count 1 to 5 instead'}">`
     + (LABEL.five ? `<b>${shown5(stars, open.list.length)}/${shown5(R.starBudget, R.deckSize)}</b><span>Points</span>` : `<b>${stars}/${R.starBudget}</b><span>Stars</span>`) + '</span>';
   const column = open
     ? `<div class="clist editing">${tile(open)}</div>
       <div class="sfoot"><button class="play" id="play"${open.list.length === R.deckSize && !issue ? '' : ' disabled'}>${issue || 'Play this deck'}</button>
-        <div class="frow"><div class="fcount${M ? '' : ' two'}"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span>${starCount}</div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
+        <div class="frow"><div class="fcount${('')}"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span>${starCount}</div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
     : `<div class="clist">${all.map(tile).join('')}${all.length < R.decksMax ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${R.decksMax}</b><span>Decks</span></div>${FB}<button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
@@ -359,7 +346,7 @@ function wire(app, all, open) {
       if (!open && matchMedia('(hover: none)').matches) { hidePop(); return zoom(app, c); }   // touch, browsing: a tap reads it
       if (!open) return X.toast(`Open a deck ${portrait() ? 'below' : 'on the right'} to build it`);
       const n = open.list.filter(x => x === c.id).length, lv = c.stars | 0, left = R.starBudget == null ? Infinity : R.starBudget - starsOf(open.list);
-      const why = open.list.length >= R.deckSize ? 'tot' : n >= limit(c) ? 'pips' : R.needsCost && c.mana == null ? 'cost' : lv > 0 && lv > left ? 'stars' : null;
+      const why = open.list.length >= R.deckSize ? 'tot' : n >= limit(c) ? 'pips' : (lv > 0 && lv > left ? 'stars' : null);
       if (why) return refuse(app, e, why, c);
       open.list.push(c.id); hidePop(); flash = c.id; change(); };
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
@@ -381,7 +368,7 @@ function wire(app, all, open) {
   let on = null;
   const show = e => { on = e; const r = e.getBoundingClientRect(), inSide = !!e.closest('.side');
     const pw = powerOf(C[e.dataset.card]);
-    pop.className = 'pop' + (pw ? ' ldr' : '') + (M ? ' mcoll' : ''); pop.innerHTML = face(C[e.dataset.card], 230) + pw; pop.style.display = 'flex'; if (M) fitPlaques(pop);
+    pop.className = 'pop' + (pw ? ' ldr' : '') + ((' mcoll')); pop.innerHTML = face(C[e.dataset.card], 230) + pw; pop.style.display = 'flex'; fitPlaques(pop);
     const w = pop.offsetWidth, h = pop.offsetHeight;
     if (e.closest('.mtray')) {   // a piece in the tray: its card above the tray, centred on it, covering none of the tray
       pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
@@ -425,7 +412,7 @@ function dialog(app, html) {
 // (as in Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
 function zoom(app, c) {
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
-  const side = readSide(c, C, M ? r => manaCard(r, { cost: r.mana ?? null, w: 170 }) : undefined);
+  const side = readSide(c, C, (r => manaCard(r, { cost: r.mana ?? null, w: 170 })));
   m.innerHTML = `<div class="zbox">${face(c, 300)}${powerOf(c)}${side}</div>`;
   fitAll(m);
   const close = () => { m.classList.remove('on', 'zoom'); m.innerHTML = ''; removeEventListener('keydown', key, true); };
@@ -444,14 +431,10 @@ function confirmDelete(app, d, done) {
 // (2026-11-17). Its card is in the deck while it leads: choosing another leader swaps the cards, and the leader's own strip
 // stays put. The row shows the leader with its ability; a click picks another.
 const KIND = { power: 'Hero power', once: 'Once per game', passive: 'Always on' };
-const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible' && (C[id].ruleset || null) === (M ? 'mana' : null));   // each ruleset its own leaders
-// A leader's ability as a hero power, as in Hearthstone Battlegrounds: a round token, the card's head under the board's painted
-// rim, the ability on a plate beneath (Martin, 2026-11-17; the card's head stands in until the powers have art of their own).
-// `D`: the token's width; `plate`: false for the token alone.
-const orb = (id, D) => `<div class="orb" style="--d:${D}px"><div class="face" style="${headCrop(id, Math.round(D * .732))}"></div><img src="/static/kit2/rim_n.webp" alt="" draggable="false"></div>`;
+const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible');   // each ruleset its own leaders
 // In the mana rules the plate alone: the card beside it already shows the animal, and the orb is the old painting's.
 const powerHTML = (id, D = 150) => { const L = X.leaders[id];
-  return `<div class="hpow${M ? ' bare' : ''}">${M ? '' : orb(id, D)}<div class="plate"><b>${KIND[L.kind]}</b><p>${esc(L.text)}</p></div></div>`; };
+  return `<div class="hpow${(' bare')}">${('')}<div class="plate"><b>${KIND[L.kind]}</b><p>${esc(L.text)}</p></div></div>`; };
 // beside a legendary in the collection (in a match the card is just a card)
 const powerOf = c => (X.leaders || {})[c.id] && c.status === 'collectible' ? powerHTML(c.id) : '';
 function setLeader(d, id) {
@@ -462,7 +445,7 @@ function setLeader(d, id) {
 }
 function leaderRow(d) {
   const id = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null, L = id && X.leaders[id];
-  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? (M ? `<div class="lpc">${manaPiece(C[id], { str: null, w: 50 })}</div>` : orb(id, 60)) : `<div class="lmed empty"></div>`}`
+  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? ((`<div class="lpc">${manaPiece(C[id], { str: null, w: 50 })}</div>`)) : `<div class="lmed empty"></div>`}`
     + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${KIND[L.kind]}. ${esc(L.text)}</span>` : `<b>No leader</b><span>Choose a leader for this deck</span>`}</div></div>`;
 }
 // `d`: the deck whose leader changes, or null for a new deck.

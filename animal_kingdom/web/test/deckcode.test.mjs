@@ -7,7 +7,7 @@ import { CARD_NUMS } from '../static/cardnums.js';
 
 const pool = JSON.parse(readFileSync(new URL('../../data/cards.json', import.meta.url))).cards.filter(c => c.status !== 'planned');   // a planned animal is no card yet
 const C = Object.fromEntries(pool.map(c => [c.id, { ...c, str: c.base_strength === 'dynamic' ? '*' : c.base_strength }]));
-const colony = ['lion_legend_4', 'tiger_legend', 'meerkat', ...['lion', 'tiger', 'black_panther', 'caracal', 'cheetah', 'alley_cat', 'kitten', 'bobcat', 'serval', 'jaguar', 'ocelot'].flatMap(id => [id, id])];   // the first pool deck
+const wisps = ['warlord_legend', ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].flatMap(n => ['wisp_' + n, 'wisp_' + n]), 'scout_2', 'scout_2', 'spiky_3', 'spiky_3'];
 const sorted = l => [...l].sort();
 
 test('every card has a permanent number, once', () => {
@@ -16,24 +16,18 @@ test('every card has a permanent number, once', () => {
 });
 
 test('a deck survives its code, and the code is short', () => {
-  const code = encodeDeck('Colony copy', colony, C), line = code.split('\n').pop();
+  const code = encodeDeck('Wisps', wisps, C), line = code.split('\n').pop();
   assert.ok(line.length < 50, `AK1 line is ${line.length} characters`);
   const d = decodeDeck(code, C);
-  assert.equal(d.name, 'Colony copy'); assert.deepEqual(sorted(d.list), sorted(colony));
-  assert.deepEqual(sorted(decodeDeck(line, C).list), sorted(colony), 'the AK1 line alone is enough');
+  assert.equal(d.name, 'Wisps'); assert.deepEqual(sorted(d.list), sorted(wisps));
+  assert.deepEqual(sorted(decodeDeck(line, C).list), sorted(wisps), 'the AK1 line alone is enough');
 });
 
 test('a readable list works without the code line (typed by hand or by an agent)', () => {
-  const d = decodeDeck('### Agent cats\n3x Lion\n2x (1) Alley Cat\n1x Gorrak One-Eye\nnonsense line', C);
-  assert.equal(d.name, 'Agent cats'); assert.deepEqual(sorted(d.list), sorted(['lion', 'lion', 'lion', 'alley_cat', 'alley_cat', 'tiger_legend']));
+  const d = decodeDeck('### Agent wisps\n2x Wisp 3\n2x (1) Wisp 1\n1x Warlord\nnonsense line', C);
+  assert.equal(d.name, 'Agent wisps'); assert.deepEqual(sorted(d.list), sorted(['wisp_3', 'wisp_3', 'wisp_1', 'wisp_1', 'warlord_legend']));
 });
 
 test('text without a deck is not a deck', () => {
   assert.equal(decodeDeck('hello', C), null); assert.equal(decodeDeck('AK1:!!!', C), null);
-});
-
-test('an old code still imports: a retired card comes as its successor, a card no deck can hold is left out', () => {
-  const code = encodeDeck('Old', ['chinchilla', 'chinchilla', 'jerboa', 'lion', 'lemming'], C);   // all three are reserve cards now
-  assert.deepEqual(sorted(decodeDeck(code, C).list), ['beaver', 'beaver', 'lion', 'mole'], 'Beaver and Mole by succession; the Lemming dropped');
-  assert.equal(decodeDeck('3x Lemming', C), null, 'a hand-typed reserve card is not a deck card');
 });

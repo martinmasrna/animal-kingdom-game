@@ -5,15 +5,6 @@
 const key = (c, r) => `${c},${r}`;
 const top = (board, cr) => (board[cr] || []).slice(-1)[0];
 
-// Each den's ten pits, bottom first: how many ripe fruit (food stored) and ghost fruit (next turn's income) each holds.
-// One fruit is one food, so a pit holds winFood / 10.
-export function pitStates(food, income, winFood, pits = 10) {
-  const per = winFood / pits, ripe = Math.min(food, winFood), ghost = Math.max(0, Math.min(income, winFood - ripe));
-  return Array.from({ length: pits }, (_, i) => {
-    const r = Math.max(0, Math.min(per, ripe - i * per)), t = Math.max(0, Math.min(per, ripe + ghost - i * per));
-    return { ripe: r, ghost: t - r };
-  });
-}
 
 // The regions a player holds: every corner's top unit is theirs.
 export function heldRegions(regions, board) {
@@ -46,21 +37,4 @@ export function boardChanges(before, after, fx = []) {
   return { landed, covered, leaving };   // strength changes are events (the timeline's strength step), not a diff
 }
 
-// Income in flight: one fruit per food gained, flown from the player's held stones (each sends as many as it pays) to the
-// pit it fills, in the order the pits fill. Returns [{ from: stone index, pit, delay }]; empty when food came from
-// anything but held regions (no stone to fly from) or nothing was gained.
-export function incomeFlights(foodBefore, foodAfter, winFood, stones, { gap = 0.035, pits = 10 } = {}) {
-  const per = winFood / pits, n = Math.min(foodAfter, winFood) - foodBefore;
-  if (n <= 0 || !stones.length) return [];
-  const sources = stones.flatMap((s, i) => Array(s.food).fill(i));
-  return Array.from({ length: n }, (_, j) => ({ from: sources[j % sources.length], pit: Math.min(pits - 1, Math.floor((foodBefore + j) / per)), delay: j * gap }));
-}
 
-// Food eaten in flight (Hungry): one fruit per food lost, from the pit it empties (the top ones first) to the animal that
-// ate it (`eaters`: [{ food }], each takes as many as it ate). Returns [{ to: eater index, pit, delay }].
-export function eatFlights(foodBefore, foodAfter, winFood, eaters, { gap = 0.035, pits = 10 } = {}) {
-  const per = winFood / pits, top = Math.min(foodBefore, winFood), n = top - Math.max(0, foodAfter);
-  if (n <= 0 || !eaters.length) return [];
-  const to = eaters.flatMap((e, i) => Array(e.food).fill(i));
-  return Array.from({ length: n }, (_, j) => ({ to: to[j % to.length], pit: Math.max(0, Math.min(pits - 1, Math.floor((top - 1 - j) / per))), delay: j * gap }));
-}

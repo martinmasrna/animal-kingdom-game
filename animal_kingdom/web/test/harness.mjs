@@ -1,8 +1,7 @@
-// Shared set-up for the browser tests: a private server on a free port (games not logged), recorded view sequences,
-// and a page that plays views through the client (window.__ak.feed) the way the socket delivers them.
-import { spawn, execFileSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, existsSync } from 'node:fs';
-import { tmpdir, homedir } from 'node:os';
+// Shared set-up for the browser tests: a private server on a free port (games not logged) and a headless browser.
+import { spawn } from 'node:child_process';
+import { readdirSync, existsSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
@@ -32,17 +31,11 @@ const CHROME = process.env.CHROME || chromeForTesting() || (process.platform ===
 
 const freePort = () => new Promise(res => { const s = net.createServer(); s.listen(0, () => { const { port } = s.address(); s.close(() => res(port)); }); });
 
-const TEST_STARTERS = ['colony', 'aristocrats', 'canines', 'den_rush', 'cats', 'fish', 'food_aggro', 'food_otk', 'egg_control', 'handlock', 'giants', 'hoofed'];
-
 export async function startServer(env = {}) {   // env: extra variables for the server (a test's AK_DB, say)
   const port = await freePort();
   // The server exits when its stdin closes, so a test process that dies without reaching after() takes it down too
   // (otherwise each killed run left a server running for days).
-  // The game ships no starter decks while the cards change (Martin, 2026-10-29); the client's tests still need a new
-  // profile that owns decks, so their server hands it the twelve lists that were the starters.
   const boot = 'import os, sys, threading, runpy; threading.Thread(target=lambda: (sys.stdin.read(), os._exit(0)), daemon=True).start(); '
-    + 'from animal_kingdom.engine import cards as _c; _c.STARTER_DECKS[:] = [d for d in _c.DECKLISTS if d["slug"] in '
-    + `${JSON.stringify(TEST_STARTERS).replace(/"/g, "'")}]; `
     + `sys.argv = ['server', '--port', '${port}', '--no-open']; runpy.run_module('animal_kingdom.web.server', run_name='__main__')`;
   const proc = spawn(PY, ['-c', boot],
     { cwd: REPO, env: { ...process.env, AK_NO_GAME_LOGS: '1', AK_BOT_PAUSE: '0', ...env }, stdio: ['pipe', 'ignore', 'ignore'] });
@@ -53,17 +46,7 @@ export async function startServer(env = {}) {   // env: extra variables for the 
   proc.kill(); throw new Error('server did not start');
 }
 
-// Bot-vs-bot matches recorded as the views one seat receives (record_views.py), both seats per match.
-export function recordMatches(n = 7) {
-  const dir = mkdtempSync(join(tmpdir(), 'ak-views-'));
-  execFileSync(PY, ['-m', 'animal_kingdom.web.test.record_views', dir, '--matches', String(n)], { cwd: REPO, stdio: 'ignore' });
-  return readdirSync(dir).filter(f => f.endsWith('.json')).sort().map(f => ({ name: f, views: JSON.parse(readFileSync(join(dir, f))) }));
-}
-
-// Pages open as a player who has done the tutorial (home shows the full piece); `newPlayer` opens them as a first visit.
-// Every page opens in the default ruleset's home (on localhost the mana rules are home's default, app.js MANA_HOME);
-// `mana` opens it in the mana rules'.
-export async function openBrowser({ newPlayer = false, mana = false } = {}) {
+export async function openBrowser() {
   // root (a cloud container) can't run Chrome's sandbox
   const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new', defaultViewport: { width: 1512, height: 800 },
     args: process.getuid?.() === 0 ? ['--no-sandbox'] : [] });
@@ -71,99 +54,9 @@ export async function openBrowser({ newPlayer = false, mana = false } = {}) {
   // pipes then keeps the test process alive for minutes after its last test (a hang seen on 2026-10-04). Close our end.
   const close = b.close.bind(b), proc = b.process();
   b.close = async () => { await close(); proc?.stdout?.destroy(); proc?.stderr?.destroy(); };
-  const init = p => p.evaluateOnNewDocument((learned, rules) => { try { if (learned) localStorage.setItem('ak:learned', '1'); if (!localStorage.getItem('ak:rules')) localStorage.setItem('ak:rules', rules); } catch { /* no storage */ } }, !newPlayer, mana ? 'mana' : 'default');
-  const open = b.newPage.bind(b);
-  b.newPage = async () => { const p = await open(); await init(p); return p; };
-  const context = b.createBrowserContext.bind(b);   // a second player's window (its own storage): the same set-up, but home's rules only
-  b.createBrowserContext = async (...a) => { const ctx = await context(...a), cOpen = ctx.newPage.bind(ctx);
-    ctx.newPage = async () => { const p = await cOpen(); await p.evaluateOnNewDocument(rules => { try { if (!localStorage.getItem('ak:rules')) localStorage.setItem('ak:rules', rules); } catch { /* no storage */ } }, mana ? 'mana' : 'default'); return p; };
-    return ctx; };
   return b;
 }
 
 // A console error from another server (the Google Fonts stylesheet, when the network hiccups) is not the game's.
 export const offsite = m => /^https?:\/\//.test(m.location()?.url || '') && !/^https?:\/\/(localhost|127\.0\.0\.1)[:/]/.test(m.location().url);
 
-// A game page showing the frozen lab view, ready to be fed; `still` asks for reduced motion, which the client honours by
-// showing every change at once, so each view can be checked the moment it is drawn. Page errors are collected in page.errors.
-export async function gamePage(browser, url, { still = true } = {}) {
-  const page = await browser.newPage();
-  page.errors = [];
-  page.on('pageerror', e => page.errors.push(e.message));
-  page.on('console', m => { if (m.type() === 'error' && !offsite(m) && !/favicon/.test(m.text())) page.errors.push(m.text()); });
-  await page.goto(`${url}/#/lab/mid`, { waitUntil: 'networkidle0' });
-  if (still) await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-  return page;
-}
-
-export const feed = (page, view) => page.evaluate(v => window.__ak.feed(v), view);
-
-// Runs in the page: what the screen shows, against what the current view says it should show. Returns a list of
-// mismatches (empty when the screen is right).
-export function screenMismatches() {
-  const { V } = window.__ak(), G = V.game, out = [];
-  if (!G) return out;
-  const you = V.you, them = you === 'A' ? 'B' : 'A', rel = p => (p === you ? 'A' : p === 'wild' ? 'W' : 'B');
-  const dcr = cr => { if (you === 'A') return cr; const [c, r] = cr.split(','); return `${6 - +c},${r}`; };
-  const visible = e => { const s = getComputedStyle(e), r = e.getBoundingClientRect(); return s.display !== 'none' && s.visibility !== 'hidden' && +s.opacity > 0.5 && r.width > 20; };
-  const digits = e => [...e.querySelectorAll('img')].map(i => i.alt).join('');
-
-  // the board
-  const want = {};
-  for (const [cr, st] of Object.entries(G.board)) want[dcr(cr)] = st;
-  for (const el of document.querySelectorAll('#board .cr[data-cr]')) {
-    const cr = el.dataset.cr, st = want[cr];
-    if (!st) { if (el.classList.contains('unit') && !el.classList.contains('ghost')) out.push(`${cr}: a unit shown on an empty crossroad`); continue; }
-    if (el.classList.contains('ghost')) continue;   // a placement preview under the pointer
-    const top = st[st.length - 1];
-    if (!el.classList.contains('unit')) { out.push(`${cr}: ${top.id} missing`); continue; }
-    if (!visible(el)) out.push(`${cr}: ${top.id} not visible`);
-    if (!el.classList.contains(rel(top.owner))) out.push(`${cr}: ${top.id} in the wrong colour`);
-    const str = digits(el.querySelector('.boss'));
-    if (str !== String(top.str)) out.push(`${cr}: ${top.id} shows strength ${str}, is ${top.str}`);
-    const timer = el.querySelector('.timer');
-    const alts = e => [...e.querySelectorAll('img')].map(i => i.alt).join('');   // painted digits: their alt text
-    if (top.timer && !(timer && alts(timer) === String(top.timer))) out.push(`${cr}: ${top.id} timer ${top.timer} not shown`);
-    // the board keywords the view gives it (printed or lent by a neighbour; Spikes until used), none while inked; the
-    // trigger mark (Dawn, Dusk, eye) is a separate badge, not a keyword
-    const kw = top.inked ? [] : [top.armor && 'Armor', top.hidden && 'Stealth', top.spikes && 'Spikes', top.poison && 'Poison'].filter(Boolean);
-    const worn = [el.querySelector('.rimimg.hex') && 'Armor', el.querySelector('.kwl.mist') && 'Stealth', el.querySelector('.kwl.thorns') && 'Spikes',
-      el.querySelector('.kwl.venom') && 'Poison'].filter(Boolean);   // each painted on the piece (hexagon rim, mist, thorns, venom)
-    if (worn.join(', ') !== kw.join(', ')) out.push(`${cr}: ${top.id} is ${kw.join(', ') || 'plain'} but wears ${worn.join(', ') || 'nothing'}`);
-    const buried = el.querySelectorAll('.buried').length;
-    if (buried !== Math.min(3, st.length - 1)) out.push(`${cr}: ${buried} buried discs for a stack of ${st.length}`);
-    delete want[cr];
-  }
-  for (const cr of Object.keys(want)) out.push(`${cr}: no crossroad element for ${want[cr].slice(-1)[0].id}`);
-
-  // the dens: the gem shows the food; pit i holds the ripe and ghost fruit of food and income, ten to a pit
-  for (const side of ['A', 'B']) {
-    const seat = side === 'A' ? you : them, food = G.food[seat], inc = G.income[seat], win = G.winFood;
-    const gem = document.querySelector(`#board .dcount.${side}`);
-    if (!gem || digits(gem) !== String(food)) out.push(`den ${side}: gem shows ${gem && digits(gem)}, food is ${food}`);
-    const ripe = Math.min(food, win), green = Math.max(0, Math.min(inc, win - ripe));
-    const pits = [...document.querySelectorAll('#board .pit img.now')].filter(i => i.src.includes(`/${side.toLowerCase()}pit`));
-    if (pits.length !== 10) out.push(`den ${side}: ${pits.length} pits`);
-    pits.forEach((img, i) => {
-      const r = Math.max(0, Math.min(10, ripe - i * 10)), t = Math.max(0, Math.min(10, ripe + green - i * 10));
-      if (!img.src.endsWith(`_${r}_${t - r}.webp`)) out.push(`den ${side} pit ${i}: shows ${img.src.split('/').pop()}, should hold ${r} ripe ${t - r} ghost`);
-    });
-  }
-
-  // both hands
-  const backs = document.querySelectorAll('#opphand .back, #opphand .oc').length;   // a replay shows their cards face up
-  if (backs !== G.handCount[them]) out.push(`${backs} cards of theirs shown, they hold ${G.handCount[them]}`);
-  const hand = [...document.querySelectorAll('#hand .hc')].map(e => +e.dataset.iid);
-  if (hand.join() !== G.hand.map(h => h.iid).join()) out.push(`hand shows ${hand}, is ${G.hand.map(h => h.iid)}`);
-
-  // a game won by taking a den shows the unit that took it, in that den's mouth
-  if (G.result && G.result.reason === 'hq_capture') { const cap = document.querySelector('#board .cr.unit.capture');
-    if (!cap || !visible(cap)) out.push('the unit that took the den is not shown'); }
-
-  // whose turn, and the end of a game
-  const tbe = document.getElementById('tbtn'), tb = tbe.textContent;   // yours says End turn; theirs is the red piece, no words
-  if (V.phase === 'playing' && !(G.current === you ? /End turn/.test(tb) && tbe.classList.contains('A') : tbe.classList.contains('B') && !/End turn/.test(tb))) out.push(`turn button says "${tb}"`);
-  const ended = V.phase === 'game_over' || V.phase === 'match_over';
-  if (ended !== document.getElementById('endov').classList.contains('on')) out.push(`end overlay ${ended ? 'missing' : 'shown mid-game'}`);
-  return out;
-}

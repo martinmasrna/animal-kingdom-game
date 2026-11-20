@@ -1,34 +1,29 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
-import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
-import { cardHTML, fitNames, readSide, KEYWORDS } from './card.js';
-import { SUCCESSOR } from './cardnums.js';
+import { fitStrips } from './art.js';
+import { fitNames, readSide } from './card.js';
 import { plan, DUR } from './timeline.js';
 import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, gemDigits, portrait, leaderAt, resolvesIn, setBoardMap, hexBoard, tokenWidth } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, leaderAt, resolvesIn, tokenWidth } from './board.js';
 import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo } from './mana.js';
 import { decodeDeck } from './deckcode.js';
-import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripHTML, stripsHTML, ICON } from './collection.js';
-import { dd, wireDd, onHold, holdEvents } from './menu.js';
+import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripsHTML } from './collection.js';
+import { onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { track } from './log.js';
-import { prepare as prepareLocal, LocalMatch } from './local/match.js';
-import { loadNews, unread as newsUnread, newsScreen, showSince, hideSince } from './news.js';
-import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
+import { openPresence, showChallenge, confirmFriend, shareLink } from './friends.js';
 import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends } from './chat.js';
-import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, handLights, holdFood, shownRegion, lessonEnd, drawCoach } from './coach.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
-let COVER = {};   // starter deck id -> the card covering it (the server's pool says, from cards.json)
 const SKIP = '__skip__';
 const store = (k, v) => { try { v === undefined ? null : localStorage.setItem(k, v); return localStorage.getItem(k); } catch { return null; } };
 const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
-let RULESETS = {}, RULES = null, CARDS = {}, MAP, MAPS = {}, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null, LEADERS = {};   // LEADERS: the leaders prototype, card id -> {kind, text}   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
+let RULES = null, CARDS = {}, MAP, ME = null, LEADERS = {};   // RULES: the deck rules; LEADERS: card id -> {kind, text}; ME: your profile {id, name, tag, decks}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
 
@@ -49,15 +44,15 @@ function toast(msg, ok) {
 }
 // A decklist in the game's panels: the collection's strips, each with the copies left.
 function rows(list, counts) {
-  return stripsHTML(Object.keys(list), CARDS, id => counts ? (counts[id] || 0) : list[id], isMana());   // the mana rules: by cost, each with its cost
+  return stripsHTML(Object.keys(list), CARDS, id => counts ? (counts[id] || 0) : list[id], true);   // the mana rules: by cost, each with its cost
 }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 function cardPop(el, id, extra, place) {
   const c = CARDS[id], r = el.getBoundingClientRect();
-  const M = isMana();   // the mana rules' card
-  pop.className = 'pop ' + c.rarity + (M ? ' mpop' : '');
-  pop.innerHTML = (M ? manaCard(c, { cost: c.mana ?? null, w: 200 }) : cardHTML(c)) + (extra ? `<div class="ev">${extra}</div>` : '');
-  pop.style.display = 'flex'; fitNames(pop); if (M) fitPlaques(pop);
+     // the mana rules' card
+  pop.className = 'pop ' + c.rarity + ((' mpop'));
+  pop.innerHTML = ((manaCard(c, { cost: c.mana ?? null, w: 200 }))) + (extra ? `<div class="ev">${extra}</div>` : '');
+  pop.style.display = 'flex'; fitNames(pop); fitPlaques(pop);
   const h = pop.offsetHeight;
   const w = pop.offsetWidth;
   if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - w - 10) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
@@ -76,19 +71,12 @@ function readOverlay(html) {
   ov.addEventListener('click', e => { e.stopPropagation(); if (pressed) ov.remove(); });
   ov.addEventListener('contextmenu', e => { e.preventDefault(); ov.remove(); });
 }
-// A card that evolves at a food count its owner's Hungry animals reach (the legendary Dung Beetle; Martin, 2026-10-27):
-// in a game its text ends with the count towards the next form, "(14/25)".
-function formOf(id, seat) {
-  const c = CARDS[id], at = c && c.evolvesAt;
-  if (!at || !V || !V.game || !V.game.eaten) return c;
-  return { ...c, text: `${c.text} (${Math.min(V.game.eaten[seat] || 0, at)}/${at})` };
-}
 // A card read large, the one way everywhere (the hand, a board piece): the card, and beside it the cards it makes and its
 // keywords explained (under it on a narrow screen). `extra`: what goes under the card itself (a board piece's timer).
 function cardRead(id, str, seat = V && V.you, extra = '') {
-  const c = formOf(id, seat); if (!c) return '';
-  const M = isMana(), face = M ? manaCard(c, { ...(str == null ? {} : { str }), cost: c.mana ?? null, owner: seat === V.you ? 'A' : 'B', w: 230 }) : cardHTML(c, str == null ? {} : { str });   // the mana rules' card, piece, plaque and cost
-  return `<div class="rcard${(c.related || []).length ? ' wide' : ''}">${face}${extra}${readSide(c, CARDS, M ? r => manaCard(r, { cost: r.mana ?? null, w: 170 }) : undefined)}</div>`;
+  const c = CARDS[id]; if (!c) return '';
+  const face = (manaCard(c, { ...(str == null ? {} : { str }), cost: c.mana ?? null, owner: seat === V.you ? 'A' : 'B', w: 230 }));   // the mana rules' card, piece, plaque and cost
+  return `<div class="rcard${(c.related || []).length ? ' wide' : ''}">${face}${extra}${readSide(c, CARDS, (r => manaCard(r, { cost: r.mana ?? null, w: 170 })))}</div>`;
 }
 function readCard(id, str, seat = V && V.you) {
   const html = cardRead(id, str, seat); if (html) readOverlay(html);
@@ -101,7 +89,7 @@ function wirePops(root) {
   });
 }
 // A deck's cover: the player's chosen one, else the collection's default.
-const coverFor = d => d.cover || COVER[d.id] || coverOf(d.list, CARDS);
+const coverFor = d => d.cover || coverOf(d.list, CARDS);
 // Your profile: the server knows you by the sign-in code this browser keeps (localStorage 'ak:key').
 const api = (path, opts = {}) => fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-AK-Key': store('ak:key') || '', ...(opts.headers || {}) } });
 async function loadProfile() {
@@ -125,7 +113,7 @@ const playable = () => { const mine = myDecks().map(d => { const list = Object.e
     const leader = d.leader && list.includes(d.leader) && LEADERS[d.leader] ? d.leader : null;   // every deck has one (deckIssue)
     const size = RULES ? RULES.deckSize : 30, short = Math.max(0, size - deckSize(d.cards)), fix = short || !RULES ? '' : deckIssue(list, CARDS, RULES, leader, LEADERS);
     return { id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: short || (fix ? -1 : 0), fix, list, leader }; });
-  return mine.some(d => !d.short) ? mine : [...DECKS, ...mine]; };
+  return mine; };
 const chosenDeck = () => { const all = playable().filter(d => !d.short), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list, ...(d.leader ? { leader: d.leader } : {}) } : d.id;
 
@@ -142,25 +130,18 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; MAPS = p.maps || { [p.map.id]: p.map }; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; RULES = p.rules; LEADERS = p.leaders || {}; RULESETS = p.rulesets || {};
-  if (CARDS.bumblebee_legend) CARDS.bumblebee_legend.base = CARDS.bumblebee_legend.text; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
-  COVER = Object.fromEntries([...DECKS, ...BOT_ONLY].map(d => [d.id, d.cover]));
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; BUILD = p.build; RULES = p.rules; LEADERS = p.leaders;
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
   // Feedback while the game is in testing: a tab on the screen's edge where the edge is free (home, News, Settings: app.css shows
   // it by screen); Collection and the profile have it beside Back, their side panels holding the edge; the game its own button.
   document.body.insertAdjacentHTML('beforeend', `<button class="ftab" id="ftab">${TOPICON.feedback}<span>Feedback</span></button>`);
   document.getElementById('ftab').onclick = feedback;
-  bindCoach({ V: () => V, ui, CARDS: () => CARDS, send: m => send(m), drawGame: () => drawGame(), tapWords, PL: () => PL(), store, startTutorial, firstMatch });
   openPresence({ api, toast, build: checkBuild, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
-  initChat({ api, toast, inMatch: () => screen === 'game' && !!V && V.phase === 'playing' && !RP.views.length,
+  initChat({ api, toast, inMatch: () => screen === 'game' && !!V && V.phase === 'playing',
     changed: () => { if (screen === 'game' && V) drawGame(); },   // the game's Friends button shows once you have a friend
-    challenge: (f, all) => {   // a conversation's Challenge: home's Play with that friend picked
-      play.opp = 'friend'; play.friend = f.id; play.friends = all; play.open = null;
-      if (location.hash.replace(/^#\/?/, '')) location.hash = '#/'; else homeScreen();
-      setTimeout(() => { const go = document.getElementById('go'); if (go && screen === 'home') go.click(); });
-    } });
+    challenge: f => challengeFriend(f) });
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   // A phone's keyboard covers the bottom of the page instead of shrinking it, so a field low on a menu screen (a new deck's
@@ -173,14 +154,10 @@ async function boot() {
     vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); }
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
     if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
-    if (e.key === 'Escape' && ['ladder', 'news', 'settings'].includes(screen) && !/INPUT|TEXTAREA/.test(e.target.tagName)) {   // a screen with Back: Escape is Back
-      const back = document.getElementById('back'); if (back) back.click(); return;
-    }
-    if (RP.views.length && screen === 'game' && replayKey(e)) return;
-    // Space ends your turn, D draws: the same checks as clicking the tablet or the deck (never in a lesson, whose Space is Next)
-    if (screen === 'game' && !RP.views.length && !isTutorial() && !/INPUT|TEXTAREA/.test(e.target.tagName) && !e.repeat) {
+    
+    // Space ends your turn: the same check as clicking End turn
+    if (screen === 'game' && !/INPUT|TEXTAREA/.test(e.target.tagName) && !e.repeat) {
       if (e.key === ' ' && document.querySelector('#tbtn.can')) { e.preventDefault(); return document.getElementById('tbtn').click(); }
-      if ((e.key === 'd' || e.key === 'D') && document.querySelector('#deck.can')) return document.getElementById('deck').click();
     }
     if (e.key !== 'Escape' || screen !== 'game') return;
     const ask = document.getElementById('concov');
@@ -202,246 +179,28 @@ async function rejoin(only) {
   return true;
 }
 
-// The home painting at the viewer's time of day (a small easter egg): ?tod=dawn|day|dusk|night overrides it.
-const timeOfDay = h => new URLSearchParams(location.search).get('tod') || (h >= 5 && h < 9 ? 'dawn' : h >= 9 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night');
 function route() {
   track('screen', { route: (location.hash.slice(1) || '/').split('/').slice(0, 2).join('/'), w: innerWidth, h: innerHeight });
-  pop.style.display = 'none'; stackpop.style.display = 'none'; hideSince();
+  pop.style.display = 'none'; stackpop.style.display = 'none';
   if (!location.hash.startsWith('#/m/')) keepAwake(false);
   const tip = document.getElementById('tip'); if (tip) tip.style.display = 'none';   // the game's hover label lives on body: it must not outlive the screen
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
-  queueMicrotask(drawSearch);   // the search's pill, on a screen without its button
-  document.documentElement.dataset.tod = timeOfDay(new Date().getHours());
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
-  if (parts[0] !== 'replay') stopReplay();
-  play.open = null;   // a chooser never outlives its screen
-  if (parts[0] === 'play' && MANA_HOME) return manaHome({ play: true });   // the mana rules' Play: a deck and a friend
-  if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
-  if ((parts[0] || '').split('?')[0] === 'gauntlet') {   // #/gauntlet?skip=a,b&games=2 narrows the field; ?decks=a,b names it; ?level= picks the bot
-    const lv = new URLSearchParams(location.hash.split('?')[1] || '').get('level'); if (lv && BANDS.includes(lv)) play.level = lv;
-    return homeScreen({ gauntlet: true });
-  }
+  if (parts[0] === 'play') return manaHome({ play: true });   // Play: a deck and a friend
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
-  if (parts[0] === 'leaderboard' || parts[0] === 'profile') { history.replaceState(null, '', '#/ladder' + (parts[1] ? '/' + parts[1] : '')); parts[0] = 'ladder'; }   // the old addresses
-  if (parts[0] === 'settings') return settingsScreen();
-  if (parts[0] === 'news') { screen = 'news'; return newsScreen(app, { api, cards: CARDS, back: () => { location.hash = '#/'; } }); }
-  if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
-  if (parts[0] === 'ladder') { ladderScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/ladder')) ladderScreen(); }); }   // a match just played shows
-  if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
+  if (parts[0] === 'friend' && id) { manaHome(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'deck' && parts[1]) return deckLinkScreen(parts.slice(1).join('/'));
-  if (parts[0] === 'study' && parts[1]) return studyScreen(parts[1]);
-  if (parts[0] === 'auth') return finishSignIn(parts[1]);
-  if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
-  if (parts[0] === 'm' && id === 'LOCAL') return localScreen();
+  if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : manaHome({ join: id });
   if (parts[0] === 'm' && id) return matchScreen(id);
-  if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1], parts[2]);
-  homeScreen(); if (play.opp === 'ranked') loadProfile().then(() => { if (screen === 'home' && !play.open) homeScreen(); });   // your rating after a ranked game
+  manaHome();
 }
 
 // ------------------------------------------------------------------ home: where a match starts
-// There is no separate Play screen (design sandbox play/, 2026-09-30): the usual visit is one click, so home carries the match.
-// The key art, the title along its top and, on its ground, one granite piece: your deck | the opponent, Play under them. Each
-// side opens its chooser above the piece. Collection and the profile stand beside it for now, until the hub holds more.
-// #/gauntlet is the same screen with the developer's gauntlet as the opponent; #/join/<code> the same with a friend's match.
-const BANDS = ['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Legendary'], OLD_LEVELS = { easy: 'Beginner', normal: 'Advanced', expert: 'Expert' };   // the five bots (web/ladder.py RUNGS): the same five on the ladder and in Practice
-const play = { opp: 'bot', level: 'Beginner', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };   // a newcomer starts on the weakest bot (it was Advanced after the tutorial; phone walkthrough finding 16)
-// The decks an Easy bot plays when nobody chose one (Random, and the tutorial's first match): the simpler half of the ones
-// Easy is weakest with (Martin, 2026-10-17: Easy with Cats or Fish beats the greedy bot 4 games in 10, with these 1 to 3;
-// Egg and Aristocrats are weaker still but the hardest to read). The ranked queue picks by rating instead.
-const EASY_POOL = ['colony', 'hoofed', 'giants'];
-// The opponent you set up (Practice or Ranked, the bot's level and deck, who plays your deck) is kept in the browser, as
-// the chosen deck is: a reload (a new build reloads open tabs) or another visit finds it as you left it.
-try { const k = JSON.parse(store('ak:play') || '{}');
-  if (['bot', 'ranked'].includes(k.opp)) play.opp = k.opp;
-  if (BANDS.includes(k.level)) play.level = k.level; else if (k.level in OLD_LEVELS) play.level = OLD_LEVELS[k.level];   // the five bots; a stored pilot level from before 2026-10-20 maps to its band
-  if (typeof k.botDeck === 'string') play.botDeck = k.botDeck;
-  if (['mine', 'theirs'].includes(k.side)) play.side = k.side; } catch { /* nothing kept */ }
-const keepPlay = () => { if (['bot', 'ranked'].includes(play.opp)) store('ak:play', JSON.stringify({ opp: play.opp, level: play.level, botDeck: play.botDeck, side: play.side })); };
-const TEST_BOTS = [['lions30', '30 Lions']];   // test opponents (decks.TEST_BOT_DECKS), offered only after #/?botdeck=<id>
-const LEVELS = BANDS.map(b => [b, b]), SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
-const GFIELDS = [['mine', 'Against your other decks'], ['shipped', 'Against the shipped decks']], GGAMES = [['1', '1 game a deck'], ['2', '2 games a deck'], ['5', '5 games a deck'], ['10', '10 games a deck']];   // the gauntlet's field and length, chosen on home (Martin, 2026-11-04: a gauntlet he can reach without a link)
-const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
-// Home's corner piece (design sandbox screen/nav/, 2026-10-02): the Ladder (where you stand on it), Collection by name, and a menu (three bars) listing the rest, the gear kept for Settings in it; seven equal icons were too many. Feedback is a tab on the
-// screen's edge while the game is in testing (moves into the menu's list at launch; see boot). Icons painted in the board numbers' chalk.
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
 const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends'), menu: TI('menu') };
-let newsAsked = false;
-// Ranked leagues (docs/ranked-leagues.md; the server's web/tiers.py): a league named by its material, three stages in it,
-// five wins a stage, the stages numbered as divisions III to I; in the top league the rating instead. The emblem (a
-// placeholder until the league art exists: a shield of the material with the division carved in) says league and
-// division by itself, so the name is written only where the word is wanted, and the wins are a pip each beside it.
-const lgDisc = lg => lg.top ? '' : `<img class="lgem" src="/static/kit2/league/${lg.emblem}.webp" alt="${esc(lg.label)}" title="${esc(lg.label)}">`;
-const lgPips = lg => lg.top ? '' : `<i class="lgpips" aria-label="${lg.stars} of ${lg.of} wins">${Array.from({ length: lg.of }, (_, i) => `<s${i < lg.stars ? ' class="on"' : ''}></s>`).join('')}</i>`;
-const leagueShort = lg => !lg ? '' : lg.top ? `${esc(lg.label)} · ${lg.rating}` : `${lgDisc(lg)}${lgPips(lg)}`;   // the emblem and the wins, no words
-const leagueNamed = lg => !lg ? '' : lg.top ? leagueShort(lg) : `${lgDisc(lg)}${esc(lg.name)}${lgPips(lg)}`;   // with the league's name, where the word is wanted
-const leagueText = lg => !lg ? '' : lg.top ? `${lg.label} · ${lg.rating}` : lg.label;   // where only text fits
-const leagueLong = lg => !lg ? '' : [leagueNamed(lg), lg.streak >= 2 ? `${lg.streak} wins in a row` : ''].filter(Boolean).join(' · ');
-const mePiece = () => {   // the Ladder, with your league (or, before leagues, your rating) and your place once you have played ranked
-  const sub = !ME ? '' : ME.league && ME.rank ? `${leagueShort(ME.league)} · #${ME.rank}` : ME.league && (ME.league.stars || ME.league.division < 3 || ME.league.league > 1) ? leagueShort(ME.league)
-    : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
-  return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
-};
-let homeMode = {};   // the mode home was last drawn in: a late redraw keeps to it (not to the mode it was first opened with)
-function homeScreen(mode = {}) {
-  if (MANA_HOME && !mode.gauntlet) return manaHome(mode);
-  screen = 'home'; homeMode = mode;
-  if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(homeMode); }); }   // the dot and "Since you last played" once it's known
-  if (mode.gauntlet) play.opp = 'gauntlet'; else if (mode.join) play.opp = 'friend';
-  const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
-  const testBot = new URLSearchParams(location.hash.split('?')[1] || '').get('botdeck');   // a test opponent, by link only
-  if (TEST_BOTS.some(([id]) => id === testBot)) play.botDeck = testBot;
-  const isTest = TEST_BOTS.some(([id]) => id === play.botDeck);
-  const botAll = [...DECKS, ...BOT_ONLY];   // every deck a bot can be given: the starters and the bots' own
-  if (play.botDeck && play.botDeck !== 'random' && !isTest && !botAll.some(d => d.id === play.botDeck)) play.botDeck = 'random';   // a deck that's gone
-  keepPlay();   // home draws on every change of the choice: what it draws is what's kept
-  const bd = botAll.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
-  const botDecks = [['random', 'Random'], ...botAll.map(d => [d.id, d.name]), ...(isTest ? TEST_BOTS : [])];   // the starters, the bots' own decks (and a test opponent once its link was opened)
-  // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
-  const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
-  const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
-  const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? friendLabel(fr, play.friends) : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
-    : play.opp === 'ranked' ? ['Ranked', ME && ME.league ? leagueText(ME.league) : `your rating ${(ME && ME.rating) || '1500?'}`]
-    : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : isTest ? label(TEST_BOTS, play.botDeck) : 'Random'}`];
-  const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
-  const tile = (d, W, cls = '') => `<div class="dtile${cls}${d.short ? ' short' : ''}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b>${d.fix ? '<span class="left">Too many</span>' : d.short ? `<span class="left">${RULES.deckSize - d.short}/${RULES.deckSize}</span>` : ''}</div>`;
-  // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
-  const deckList = d => deckBody(d.list, CARDS) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
-  const chooser = play.open === 'decks'
-    ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, chosen && d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${peek ? deckList(peek) : ''}</div></div>`
-    : play.open === 'opp' ? `<div class="chooser opps">${`<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend'], ['gauntlet', 'Gauntlet']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
-        + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f, '', play.friends)}</button>`).join('')}</div>
-          <button class="slab" id="addfriend">Add a friend</button><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
-          : play.opp === 'gauntlet' ? levels + dd('side', play.side || 'mine', SIDES) + dd('gfield', play.gfield || 'mine', GFIELDS) + dd('ggames', play.ggames || '2', GGAMES)
-          : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
-    : play.open === 'menu' ? `<div class="chooser gear">${!learned() ? '' : `<button class="slab" id="learn2">${TOPICON.learn}How to play</button>`}<a class="slab" href="#/news">${TOPICON.news}News${newsUnread() ? '<i class="ndot"></i>' : ''}</a><a class="slab" href="#/settings">${TOPICON.settings}Settings</a><button class="slab fbm" id="fbmenu">${TOPICON.feedback}Feedback</button></div>`
-    : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
-  // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
-  const first = !learned() && !mode.join && !mode.gauntlet;
-  app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top">${mePiece()}<a class="backbtn lab" href="#/collection" aria-label="Collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.menu}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
-    ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar">${chosen ? `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>` : `<button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn"><b>Choose a deck</b><i class="chev"></i></button>`}
-      <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}<i class="chev"></i></button>
-      <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
-  const $ = id => document.getElementById(id), root = app.querySelector('.home');
-  fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
-  if (!first && !mode.join && !mode.gauntlet) showSince(api, { onRead: () => { location.hash = '#/news'; } });   // a returning player, once
-  wireChatButton($('hchat'));
-  $('gearbtn').onclick = () => { play.open = play.open === 'menu' || play.open === 'learn' ? null : 'menu'; play.peek = null; redraw(); };   // the gear opens its list, or closes the lessons it led to
-  if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
-    $('learn').onclick = () => { track('learn_to_play'); startTutorial(store('ak:lesson') === '1' ? 2 : 1); };
-    $('known').onclick = () => { track('skip_tutorial'); store('ak:learned', '1'); redraw(); }; return; }
-  const toggle = k => { play.open = play.open === k ? null : k; play.peek = null; redraw(); };
-  if ($('learn2')) $('learn2').onclick = () => toggle('learn');
-  if ($('fbmenu')) $('fbmenu').onclick = feedback;   // a phone held upright: its edge tab gives way to the menu (app.css .ftab)   // any lesson again, not only from the first
-  root.querySelectorAll('[data-lesson]').forEach(el => el.onclick = () => startTutorial(+el.dataset.lesson));
-  $('deckbtn').onclick = () => toggle('decks');
-  // a friend's match link holds the opponent to that match; the piece lets go of it, opening the usual choice
-  $('oppbtn').onclick = mode.join ? () => { history.replaceState(null, '', '#/'); play.open = 'opp'; homeScreen(); } : () => toggle('opp');
-  root.onclick = e => { if (play.open && !e.target.closest('.chooser, .pick, #gearbtn')) { play.open = null; redraw(); } };   // a click elsewhere closes the chooser
-  root.querySelectorAll('.chooser [data-deck]').forEach(el => {
-    // A click picks the deck and shows its list; the chooser stays open to read it (hover changed the list on the way to it).
-    el.onclick = () => {
-      const d = all.find(x => x.id === el.dataset.deck);
-      if (d && d.short) { play.open = null; location.hash = '#/collection/' + d.id.slice(3); return; }   // unfinished: finish it where it is built
-      store('ak:deck', el.dataset.deck); play.peek = el.dataset.deck; redraw(); };
-  });
-  const wireList = () => { const e = $('dedit'); if (e) e.onclick = () => { play.open = null; location.hash = "#/collection/" + play.peek.slice(3); };
-    const dl = root.querySelector('.dl'); if (dl) wirePops(dl); };
-  if (play.open === 'decks') { play.peek = peek && peek.id; wireList(); }
-  if (play.open === 'opp' && play.opp === 'friend' && !play.friends) api('/api/friends').then(r => r.ok && r.json()).then(j => {
-    play.friends = j ? j.friends : []; play.code = play.code || ''; play.friendCode = j && j.code; if (screen === 'home') redraw(); });
-  root.querySelectorAll('[data-friend]').forEach(el => el.onclick = () => { play.friend = play.friend === el.dataset.friend ? null : el.dataset.friend; redraw(); });
-  if ($('addfriend')) $('addfriend').onclick = () => play.friendCode && shareLink(`${location.origin}/#/friend/${play.friendCode}`, 'Be my friend in Animal Kingdom');
-  root.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; redraw(); });
-  root.querySelectorAll('[data-level]').forEach(el => el.onclick = () => { play.level = el.dataset.level; redraw(); });
-  wireDd(root, (k, v) => { play[k] = v; redraw(); });
-  const code = $('code');
-  if (code) {
-    code.oninput = () => play.code = code.value.trim().toUpperCase();
-    code.onkeydown = e => { if (e.key === 'Enter') joinCode(); };
-    $('joinbtn').onclick = joinCode;
-  }
-  $('go').onclick = async () => {
-    if (!chosen) return toast('Choose a deck first');
-    if (mode.join) {
-      const r = await api(`/api/match/${mode.join}/join`, { method: 'POST', body: JSON.stringify({ deck: deckSpec(chosen), name: 'Friend' }) });
-      if (!r.ok) return toast(r.status === 404 ? `No match ${mode.join}` : await r.text());
-      const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id; return;
-    }
-    if (search) return cancelSearch();
-    if (play.opp === 'ranked') return findRanked('go', deckSpec(chosen));
-    if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
-    const body = { deck: deckSpec(chosen), name: 'You' };
-    if (play.opp === 'bot') {
-      const easy = play.level === 'Beginner' ? botAll.filter(d => EASY_POOL.includes(d.id)) : [], pool = easy.length ? easy : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
-      body.bot = { level: play.level, deck };
-    }
-    if (play.opp === 'gauntlet') {
-      const q = new URLSearchParams(location.hash.split('?')[1] || '');
-      body.gauntlet = { level: play.level, reverse: play.side === 'theirs', games: +(play.ggames || 2) };
-      if ((play.gfield || 'mine') === 'mine' && !q.get('decks')) body.gauntlet.decks = all.filter(d => d.mine && !d.short && d.id !== chosen.id).map(deckSpec);   // your other finished decks, by their lists
-      if (q.get('skip')) body.gauntlet.skip = q.get('skip').split(',');
-      if (q.get('decks')) body.gauntlet.decks = q.get('decks').split(',');       // #/gauntlet?decks=a,b: exactly this field (Martin, 2026-10-21: the three piles)
-      if (q.get('level')) body.gauntlet.level = q.get('level');
-      if (q.get('mirror')) body.gauntlet.mirror = true;                          // both seats on each named deck: the pilot is the only variable
-      if (q.get('games')) body.gauntlet.games = Math.max(1, Math.round(+q.get('games')));   // games per deck, who goes first alternating
-    }
-    if (BOARD !== 'map_b' && play.opp !== 'friend') body.map = BOARD;
-    if (DRAW_OFF && (body.bot || body.gauntlet)) body.draw = false;
-    if (body.bot && !body.map && body.draw !== false && LOCAL_PLAY && await startLocal(body)) return;
-    const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
-    if (!r.ok) return toast(await r.text());
-    const m = await r.json(); setToken(m.id, m.token); play.open = null;
-    location.hash = '#/m/' + m.id;
-  };
-}
-// One search at a time: the ranked queue (a person near your rating, else the nearest bot) or a challenge to an online
-// friend. Its state lives here, so the button that started it (home's Play, or Play again after a ranked game) shows it
-// across redraws; clicking it again cancels it (a cancelled challenge tells the server, so the friend's piece goes). It
-// carries on while you look around (collection, profile, leaderboard): there a pill at the bottom keeps its count and cancels
-// it on a click, and a match found opens from wherever you are.
-let search = null, searchShown = '';   // search: { kind, btn, who, t0, ctl }
-const searchLabel = () => { const t = Math.floor((Date.now() - search.t0) / 1000);
-  return `<span class="search">${search.kind === 'ranked' ? 'Finding an opponent' : `Waiting for ${esc(search.who)}`} · ${mmss(t)}<small>${tapWords('click to cancel')}</small></span>`; };
-function drawSearch() {
-  const b = search ? document.getElementById(search.btn) : document.querySelector('.play.searching');
-  if (b) { if (search) { b.innerHTML = searchLabel(); b.classList.add('searching'); } else { b.innerHTML = searchShown; b.classList.remove('searching'); } }
-  let pill = document.getElementById('qpill');
-  if (!search || b || location.hash.startsWith('#/m/')) return pill && pill.remove();
-  if (!pill) { pill = document.createElement('button'); pill.id = 'qpill'; pill.className = 'play searching'; pill.onclick = cancelSearch; document.body.append(pill); }
-  pill.innerHTML = searchLabel();
-}
-function cancelSearch() {
-  if (!search) return;
-  const s = search; search = null; s.ctl.abort();
-  if (s.kind === 'challenge') api('/api/challenge', { method: 'DELETE' });
-  if (s.kind === 'ranked') api('/api/ranked', { method: 'DELETE' });   // the server doesn't notice the request dropped
-  drawSearch();
-}
-async function startSearch(kind, btn, url, body, who) {
-  if (search) return cancelSearch();
-  const ctl = new AbortController(), el = document.getElementById(btn);
-  searchShown = el ? el.innerHTML : 'Play';
-  search = { kind, btn, who, t0: Date.now(), ctl }; drawSearch();
-  const iv = setInterval(drawSearch, 1000);
-  try {
-    const r = await api(url, { method: 'POST', body: JSON.stringify(body), signal: ctl.signal });
-    if (!r.ok) throw new Error(r.status === 409 && kind === 'challenge' ? `${who} is busy` : await r.text());
-    const m = await r.json(); search = null; setToken(m.id, m.token); play.open = null; sfx('found'); location.hash = '#/m/' + m.id;
-  } catch (e) { if (e.name !== 'AbortError' && search && search.ctl === ctl) toast(e.message || 'Could not find a match'); }
-  finally { clearInterval(iv); if (search && search.ctl === ctl) search = null; drawSearch(); if (kind === 'challenge') refreshFriends(); }
-}
-// The friends list again (who is online changes): kept until the fresh one arrives, so the chosen friend stays chosen.
-const refreshFriends = () => api('/api/friends').then(r => r.ok && r.json()).then(j => { if (j) { play.friends = j.friends; play.friendCode = j.code; }
-  if (screen === 'home' && !search) homeScreen(); }, () => {});
-const findRanked = (btn, deck) => startSearch('ranked', btn, '/api/ranked', { deck });
 
-// The leaderboard: everyone on the ladder, people and bots together, best first; your row marked and in view.
-// Settings: one column on the ground, like the leaderboard. Sound volume (0 is off) and the sound credits. The game screen
-// opens the same controls over the board from its gear (settingsBody is shared).
-const CREDITS_URL = '/static/kit2/snd/CREDITS.txt';
 function settingsBody() {
   const v = Math.round(volume() * 100);
   return `<div class="srow"><span>Sound</span><input type="range" id="vol" min="0" max="100" step="5" value="${v}" aria-label="Sound volume"><b id="volv">${v ? v + '%' : 'Off'}</b></div>`;
@@ -451,266 +210,23 @@ function wireSettings(root) {
   r.oninput = () => { setVolume(r.value / 100); out.textContent = +r.value ? r.value + '%' : 'Off'; };
   r.onchange = () => sfx('land');   // a sample at the new volume
 }
-async function settingsScreen() {
-  screen = 'settings';
-  app.innerHTML = `<div class="mscr lead sets"><div class="lcol"><div class="hhead"><h2>Settings</h2></div>
-    <div class="lbody">${accountBody()}${settingsBody()}<div class="credits"><h3>Sound credits</h3><pre id="credits"></pre></div></div>
-    <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
-  document.getElementById('back').onclick = () => { location.hash = '#/'; };
-  wireSettings(app); wireAccount(app, settingsScreen);
-  // The studies this account may open (a developer's tool, Martin 2026-10-21): listed here so a phone's bookmark reaches them.
-  api('/api/studies').then(r => r.ok ? r.json() : []).then(list => {
-    const cr = document.querySelector('.credits'); if (!cr || !list.length || screen !== 'settings') return;
-    cr.insertAdjacentHTML('beforebegin', `<div class="studies"><h3>Studies</h3>${list.map(s => `<a class="slab" href="#/study/${esc(s.name)}">${esc(s.title)} <small>${s.count}</small></a>`).join('')}
-      <a class="slab" href="#/gauntlet?decks=bot_optimized,optimizer_1,optimizer_4&level=Expert&games=6&mirror=1">Mirror on the three piles, Expert <small>18 games, same deck both seats</small></a>
-      <a class="slab" href="#/gauntlet?decks=bot_optimized,optimizer_1,optimizer_4&level=Expert&games=6">Your deck against the three piles, Expert <small>18 games</small></a></div>`);
-  }).catch(() => {});
-  const r = await fetch(CREDITS_URL).catch(() => null), t = r && r.ok ? await r.text() : '';
-  const el = document.getElementById('credits'); if (el) el.textContent = t.trim();
-}
-
-// A name with its #tag small and dim: the tag only tells two players of one name apart.
-// On a person's row (not yours, not a friend's): Add friend, or that you've asked.
-const addFriend = x => !x.id || x.friend ? '' : x.asked ? '<small class="asked">Request sent</small>'
-  : `<button class="addf" data-addf="${esc(x.id)}" data-tip="Add friend" aria-label="Add friend">${ICON.addfriend}</button>`;
-const nameTag = n => { const [a, t] = String(n).split('#'); return esc(a) + (t ? `<i class="tg">#${esc(t)}</i>` : ''); };
-// The leaderboard, a tab of the profile: everyone on the ladder, people and bots together, best first; your row marked and
-// in view, or, while you're placing, your progress pinned over it.
-// A person's row: their league in the number's place, their stars beside the name; in the top league the rating, the
-// league's name beside the name. A bot's row is as it was (bots have no league).
-const lgCell = x => !x.league ? x.rating : x.league.top ? x.rating : lgDisc(x.league);
-const lgNote = lg => !lg ? '' : lg.top ? `<small class="lg">${esc(lg.name)}</small>` : '';
-async function fillLeaderboard() {
-  const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, pl = j.placing, box = document.getElementById('lboard');
-  if (!box) return;
-  box.innerHTML = (pl ? `<div class="lr you placing"><span></span><span class="nm">${nameTag(pl.name)}<small>placing, ${pl.games} of ${pl.of}</small></span><b>${pl.rating}</b></div>` : '')
-    + j.rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${nameTag(x.name)}${lgNote(x.league)}${addFriend(x)}</span><b>${lgCell(x)}</b></div>`).join('');
-  box.querySelectorAll('[data-addf]').forEach(b => b.onclick = async () => {
-    b.disabled = true;
-    const r = await api('/api/friends/request', { method: 'POST', body: JSON.stringify({ to: b.dataset.addf }) });
-    if (!r.ok) { b.disabled = false; return toast(await r.text()); }
-    const name = b.closest('.nm').firstChild.textContent;
-    if ((await r.json()).friends) { b.replaceWith(''); toast(`You and ${name} are friends`, true); }
-    else { b.outerHTML = '<small class="asked">Request sent</small>'; toast(`Friend request sent to ${name}`, true); }
-  });
-  const mine = box.querySelector('.lr.you:not(.placing)'); if (mine) mine.scrollIntoView({ block: 'center' });
-}
-
-// The Meta tab (docs/meta-tab.md): the competitive player's two questions, which deck to play and how to play it, answered
-// with raw numbers presented well and nothing written for them (Martin, 2026-10-24). Rating and days filter the whole tab;
-// the overview is every archetype's share and win rate and the matchup matrix, where clicking columns adds each deck's
-// average against just those; an archetype opens its lists and one list's card figures (a player plays an exact list;
-// Martin, 2026-10-26), against one opponent when chosen. A week by default: one list's figures need its games.
-const META = { lo: null, hi: null, days: 7, min: 30, rar: '', list: null, listOf: null, sel: new Set(), sort: 'share', csort: null, vs: '' };
-const pct = (w, n) => n ? (100 * w / n).toFixed(1) : '';
-const tint = (v, base = 50, span = 10) => {   // a win rate's colour: red below the base, green above, full at `span` points
-  if (v === null || v === undefined || v === '') return '';
-  const d = Math.max(-1, Math.min(1, (v - base) / span));
-  return `background:${d >= 0 ? `rgba(120,180,100,${(.55 * d).toFixed(3)})` : `rgba(200,100,80,${(-.55 * d).toFixed(3)})`}`;
-};
-async function fillMeta() {
-  const box = document.getElementById('metar'); if (!box) return;
-  const id = decodeURIComponent(location.hash.split('/')[3] || '');
-  const q = () => `lo=${META.lo ?? 0}&hi=${META.hi ?? 10000}&days=${META.days}`;
-  if (META.lo === null) {   // first visit: the range around your rating, else every rating
-    const j0 = await (await api(`/api/meta?lo=0&hi=10000&days=${META.days}`)).json();
-    const b = j0.bands || [];
-    const c = j0.you ? Math.floor(j0.you / 100) * 100 : null;
-    if (c !== null && b.some(x => x >= c - 200 && x < c + 300)) { META.lo = Math.max(b[0], c - 200); META.hi = Math.min(b[b.length - 1] + 100, c + 300); }
-    else if (b.length) { META.lo = b[0]; META.hi = b[b.length - 1] + 100; }   // no games near your rating: every rating, never an empty first page
-    META.bands = b;
-  }
-  if (id) return metaArchetype(box, id, q);
-  const j = await (await api(`/api/meta?${q()}`)).json();
-  if (j.bands?.length) META.bands = j.bands;
-  if (!j.games) { box.innerHTML = metaControls(false) + '<p class="none">No games in this range yet.</p>'; wireMetaControls(box); return; }
-  // the games filter holds for decks too: a deck with fewer games is neither a row nor a column (Martin, 2026-10-26)
-  const min = META.min, rows = j.archetypes.filter(r => r.games >= min), mx = j.matrix;
-  const cell = (x, y) => { const v = (mx[x] || {})[y]; return v && v[0] >= min ? 100 * v[1] / v[0] : null; };
-  const vsSel = x => { const vs = [...META.sel].filter(y => y !== x).map(y => cell(x, y)).filter(v => v !== null); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
-  const wr = r => r.decided ? 100 * r.wins / r.decided : null;
-  const key = { share: r => r.share, wr: r => wr(r) ?? -1, games: r => r.games, vs: r => vsSel(r.id) ?? -1 }[META.sort] || (r => r.share);
-  const sorted = [...rows].sort((a, b) => (META.sortUp ? -1 : 1) * (key(b) - key(a)));
-  const cols = [...rows].sort((a, b) => b.share - a.share);
-  const th = (k, label) => `<th class="num sortable${META.sort === k ? ' on' + (META.sortUp ? ' up' : '') : ''}" data-sort="${k}">${label}</th>`;
-  const fmt = v => v === null ? '' : v.toFixed(1) + '%';
-  box.innerHTML = metaControls(true) + `<div class="mxw"><table class="mx"><thead><tr><th class="an"></th>${th('share', 'Share')}${th('wr', 'Win rate')}${th('games', 'Games')}${META.sel.size ? th('vs', 'vs selected') : ''}
-    ${cols.map(c => `<th class="col${META.sel.has(c.id) ? ' sel' : ''}" data-col="${esc(c.id)}" data-mtip="${esc(c.name)}"><span>${esc(c.name)}</span></th>`).join('')}</tr></thead><tbody>
-    ${sorted.map(r => `<tr><th class="an"><a href="#/ladder/meta/${encodeURIComponent(r.id)}">${esc(r.name)}</a></th><td class="num">${(100 * r.share).toFixed(1)}%</td><td class="num" style="${tint(wr(r))}">${fmt(wr(r))}</td><td class="num dim">${r.games}</td>
-      ${META.sel.size ? `<td class="num vs" style="${tint(vsSel(r.id))}">${fmt(vsSel(r.id))}</td>` : ''}
-      ${cols.map(c => { if (c.id === r.id) return '<td class="mir"></td>'; const v = (mx[r.id] || {})[c.id], x = cell(r.id, c.id);
-        return `<td class="m${META.sel.has(c.id) ? ' sel' : ''}" style="${tint(x)}">${x === null ? '' : x.toFixed(0)}</td>`; }).join('')}</tr>`).join('')}
-    </tbody></table></div>${metaCards(j.cards || [], 'acsort')}`;
-  wireMetaControls(box);
-  wireCardReads(box); fitStrips(box);
-  box.querySelectorAll('th[data-acsort]').forEach(t => t.onclick = () => { flipSort('acsort', t.dataset.acsort, 'd'); fillMeta(); });
-  box.querySelectorAll('th[data-sort]').forEach(t => t.onclick = () => { flipSort('sort', t.dataset.sort, 'share'); fillMeta(); });
-  box.querySelectorAll('th[data-col]').forEach(t => t.onclick = () => { const c = t.dataset.col; META.sel.has(c) ? META.sel.delete(c) : META.sel.add(c); if (META.sel.size) META.sort = 'vs'; else if (META.sort === 'vs') META.sort = 'share'; fillMeta(); });
-}
-// A card's figures as HSReplay counts them (web/meta.py impacts; Martin, 2026-10-26), each its win rate minus its list's,
-// in points: Mulligan, in the opening hand after the mulligan; Drawn, drawn at any point; Played, played. Coloured by the
-// number; a figure on fewer games than the filter asks carries a "?". Only the column heads explain themselves on hover,
-// never a cell (Martin, 2026-10-26).
-const IMPACT = { k: ['Mulligan', 'Win rate when in the opening hand after the mulligan, minus the list\'s win rate'], d: ['Drawn', 'Win rate when drawn at any point, minus the list\'s win rate'],
-  p: ['Played', 'Win rate when played, minus the list\'s win rate'] };
-const impVal = v => v && v.i !== null ? v.i : null;
-function impCell(v, e, min) {
-  const x = impVal(v);
-  if (x === null) return '<td class="num dim">·</td>';
-  const few = v.yes[0] < min;
-  return `<td class="num${few ? ' few' : ''}" style="${tint(100 * x, 0, 8)}">${x >= 0 ? '+' : '−'}${Math.abs(100 * x).toFixed(1)}${few ? '<sup>?</sup>' : ''}</td>`;
-}
-const impHead = (e, on, attr, up) => `<th class="num sortable${on ? ' on' + (up ? ' up' : '') : ''}" ${attr}="${e}" data-mtip="${IMPACT[e][1]}">${IMPACT[e][0]}</th>`;
-// A column's first click sorts it best first, the next worst first, and so on (Martin, 2026-10-26); the figures with a
-// "?" come after the sure ones and the empty last, whichever way it runs.
-function flipSort(k, col, dflt) { if ((META[k] || dflt) === col) META[k + 'Up'] = !META[k + 'Up']; else { META[k] = col; META[k + 'Up'] = false; } }
-const impRank = (v, min) => impVal(v) === null ? [2, 0] : v.yes[0] < min ? [1, v.i] : [0, v.i];
-const impCmp = (e, min, up) => e === 'g' ? (a, b) => (up ? -1 : 1) * (b.d.yes[0] - a.d.yes[0])   // Games: the most drawn first
-  : (a, b) => { const x = impRank(a[e], min), y = impRank(b[e], min); return x[0] - y[0] || (up ? -1 : 1) * (y[1] - x[1]); };
-const gHead = (on, attr, up) => `<th class="num sortable${on ? ' on' + (up ? ' up' : '') : ''}" ${attr}="g" data-mtip="Games it was drawn in">Games</th>`;
-// Every card in the range, its figures pooled over every list that runs it, best drawn first.
-function metaCards(cards, key) {
-  const min = META.min, sort = META.acsort || 'd';
-  const cmp = impCmp(sort, min, META.acsortUp);
-  const rows = cards.filter(c => CARDS[c.card] && c.d.yes[0] && (!META.rar || CARDS[c.card].rarity === META.rar)).sort((a, b) => cmp(a, b) || b.d.yes[0] - a.d.yes[0]);
-  const rar = dd('mrar', META.rar, [['', 'All cards'], ['legendary', 'Legendary']]);   // the stars prototype: legendary and the rest
-  return `<div class="mcardsh"><h4 class="msub mcards">Cards</h4>${rar}</div>${rows.length ? '' : '<p class="none">No cards of this rarity in the range.</p>'}<div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${impHead('k', sort === 'k', 'data-' + key, META.acsortUp)}${impHead('d', sort === 'd', 'data-' + key, META.acsortUp)}${impHead('p', sort === 'p', 'data-' + key, META.acsortUp)}${gHead(sort === 'g', 'data-' + key, META.acsortUp)}</tr></thead><tbody>
-    ${rows.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, 1)}</div></th>${impCell(c.k, 'k', min)}${impCell(c.d, 'd', min)}${impCell(c.p, 'p', min)}<td class="num dim">${c.d.yes[0]}</td></tr>`).join('')}</tbody></table></div>`;
-}
-// The Meta tab's hover labels (a column's meaning, a cell's record): the menus' stone tag (menu.css), one element on the
-// page that follows the pointer's target and stays inside the window, as the native tooltip's tiny grey box never looked.
-const mtip = document.createElement('div'); mtip.className = 'mtip'; document.body.appendChild(mtip);
-document.addEventListener('mouseover', e => {
-  const t = e.target.closest && e.target.closest('.metar [data-mtip]');
-  if (!t || matchMedia('(hover: none)').matches) { mtip.style.display = 'none'; return; }
-  mtip.textContent = t.dataset.mtip; mtip.style.display = 'block';
-  const r = t.getBoundingClientRect(), w = mtip.offsetWidth, h = mtip.offsetHeight;
-  mtip.style.left = Math.max(8, Math.min(innerWidth - w - 8, (r.left + r.right) / 2 - w / 2)) + 'px';
-  mtip.style.top = (r.bottom + 8 + h > innerHeight - 4 ? r.top - h - 8 : r.bottom + 8) + 'px';
-});
-document.addEventListener('scroll', () => { mtip.style.display = 'none'; }, { capture: true, passive: true });
-// Every card on a Meta page reads as in the collection: hovered, the card beside it; right-clicked, held or tapped on a phone, large.
-function wireCardReads(box) {
-  box.querySelectorAll('.mf[data-card], .mstrip [data-card]').forEach(el => {
-    const read = () => { pop.style.display = 'none'; readCard(el.dataset.card); };
-    if (matchMedia('(hover: none)').matches) el.addEventListener('click', e => { e.stopPropagation(); read(); });   // touch: a tap reads it large (a list is picked by its win rate)
-    else { el.onmouseenter = () => cardPop(el, el.dataset.card); el.onmouseleave = () => pop.style.display = 'none'; }
-    el.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); read(); });
-    onHold(el, read);
-  });
-}
-function metaControls(withMin, extra = '') {   // extra: the archetype page's opponent, a filter like the rest
-  // the rating range: one slider with two handles over the bands that have games, in steps of a band (100)
-  const b = META.bands || [], min = b.length ? b[0] : 0, max = b.length ? b[b.length - 1] + 100 : 100;
-  const range = b.length > 1 ? `<div class="mrange"><span class="lb">Rating</span><span class="rv">${META.lo}–${META.hi}</span>
-    <div class="rs" style="--a:${(META.lo - min) / (max - min)};--b:${(META.hi - min) / (max - min)}"><div class="rt"></div>
-    <input type="range" id="mrlo" min="${min}" max="${max}" step="100" value="${META.lo}" aria-label="Lowest rating"><input type="range" id="mrhi" min="${min}" max="${max}" step="100" value="${META.hi}" aria-label="Highest rating"></div></div>` : '';
-  return `<div class="mctl">${range}
-    ${dd('mdays', String(META.days), [['0', 'All time'], ['1', 'Last day'], ['3', 'Last 3 days'], ['7', 'Last week']])}
-    ${withMin ? dd('mmin', String(META.min), [['10', 'At least 10 games'], ['30', 'At least 30 games'], ['100', 'At least 100 games'], ['300', 'At least 300 games']]) : ''}${extra}</div>`;
-}
-function wireMetaControls(box) {
-  const lo = box.querySelector('#mrlo'), hi = box.querySelector('#mrhi');
-  if (lo && hi) {   // the handles move freely, never closer than one band; the tables follow when a handle is let go
-    const min = +lo.min, span = +lo.max - min, rs = lo.parentNode, rv = box.querySelector('.mrange .rv');
-    const move = moved => { if (+hi.value - +lo.value < 100) moved === lo ? lo.value = +hi.value - 100 : hi.value = +lo.value + 100;
-      rs.style.setProperty('--a', (lo.value - min) / span); rs.style.setProperty('--b', (hi.value - min) / span); rv.textContent = `${lo.value}–${hi.value}`; };
-    for (const r of [lo, hi]) { r.oninput = () => move(r); r.onchange = () => { META.lo = +lo.value; META.hi = +hi.value; fillMeta(); }; }
-  }
-  wireDd(box, (k, v) => {
-    if (k === 'mdays') META.days = +v;
-    if (k === 'mmin') META.min = +v;
-    if (k === 'mvs') META.vs = v;
-    if (k === 'mrar') META.rar = v;
-    fillMeta();
-  });
-}
-async function metaArchetype(box, id, q) {
-  if (META.listOf !== id) { META.listOf = id; META.list = null; }   // another archetype opens on its most played list
-  const ov = await (await api(`/api/meta?${q()}`)).json();
-  const r = await api(`/api/meta/archetype?id=${encodeURIComponent(id)}&${q()}${META.vs ? `&vs=${encodeURIComponent(META.vs)}` : ''}${META.list ? `&list=${encodeURIComponent(META.list)}` : ''}`);
-  if (!r.ok) { box.innerHTML = `<p class="none">No such archetype.</p>`; return; }
-  const j = await r.json(), min = META.min, base = j.games ? 100 * j.wins / j.games : 50;
-  const others = ov.archetypes.filter(a => a.id !== id).sort((a, b) => b.share - a.share);
-  const vsDd = dd('mvs', META.vs, [['', 'Against every deck'], ...others.map(a => [a.id, 'Against ' + esc(a.name)])]);
-  const rate = (v, b = base) => v && v[0] >= min ? `<td class="num" style="${tint(100 * v[1] / v[0], b)}">${pct(v[1], v[0])}%</td>` : `<td class="num dim">·</td>`;
-  const RANKS = { legendary: 0, rare: 1, common: 2 }, strv = c => CARDS[c] ? (CARDS[c].str === '*' ? -1 : CARDS[c].str) : 99;
-  const order = (a, b) => (RANKS[CARDS[a.card]?.rarity] ?? 3) - (RANKS[CARDS[b.card]?.rarity] ?? 3) || strv(a.card) - strv(b.card) || a.card.localeCompare(b.card);
-
-  const cards = [...j.cards].filter(c => CARDS[c.card]).sort(META.csort ? (a, b) => impCmp(META.csort, min, META.csortUp)(a, b) || order(a, b) : order);   // unsorted, the list's own order
-  const strip = c => `<div class="mstrip">${stripHTML(c, CARDS, 1)}</div>`;
-  // the lists, each told apart by the cards it runs beyond the ones every list shares (copies counted)
-  const count = l => l.reduce((m, c) => (m[c] = (m[c] || 0) + 1, m), {});
-  const counts = j.lists.map(l => count(l.list)), core = {};
-  for (const c of Object.keys(counts[0] || {})) core[c] = Math.min(...counts.map(m => m[c] || 0));
-  const face = (c, n) => {   // a card as its round board portrait, its copies beside it; read as in the collection (below)
-    const [x, y, d] = CROP[c] || [.5, .4, .7], S = 44, w = S / d;
-    const art = hasArt(c) ? `background-image:url(${artUrl(c)});background-size:${w}px ${1.5 * w}px;background-position:${S / 2 - x * w}px ${S / 2 - y * 1.5 * w}px` : '';
-    return `<span class="mf ${CARDS[c].rarity}" data-card="${c}"><span class="p" style="${art}"></span>${n > 1 ? `<b>${n}</b>` : ''}</span>`; };
-  const own = m => Object.entries(m).filter(([c, n]) => n > (core[c] || 0) && CARDS[c]).sort(([a], [b]) => order({ card: a }, { card: b }))
-    .map(([c, n]) => face(c, n - (core[c] || 0))).join('');
-  const picker = j.lists.length > 1 ? `<div class="mpick">${j.lists.map((l, i) => `<button class="mpk${l.slug === j.list ? ' on' : ''}" data-list="${esc(l.slug)}">
-    <span class="mpn"><b style="${tint(l.games ? 100 * l.wins / l.games : null, base)}">${pct(l.wins, l.games) || '–'}%</b><small>${l.games} games</small></span><span class="own">${own(counts[i])}</span></button>`).join('')}</div>` : '';
-  const mine = count(j.lists.find(l => l.slug === j.list)?.list || []);   // the table's strips carry the chosen list's copies
-  const theirs = c => c.p[0] >= min ? c.p[1] / c.p[0] : 0;
-  const opp = j.opp ? [...j.opp].filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => theirs(b) - theirs(a)) : null;
-  const flip = v => v ? [v[0], v[0] - v[1]] : v;   // their card's games counted with your wins
-  box.innerHTML = metaControls(true, vsDd) + `<div class="mah"><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}">${j.games ? base.toFixed(1) + '%' : '–'}</span></div>${picker}
-    <div class="mbody"><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${impHead('k', META.csort === 'k', 'data-csort', META.csortUp)}${impHead('d', META.csort === 'd', 'data-csort', META.csortUp)}${impHead('p', META.csort === 'p', 'data-csort', META.csortUp)}${gHead(META.csort === 'g', 'data-csort', META.csortUp)}</tr></thead><tbody>
-      ${cards.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, mine[c.card] || 1)}</div></th>${impCell(c.k, 'k', min)}${impCell(c.d, 'd', min)}${impCell(c.p, 'p', min)}<td class="num dim">${c.d.yes[0]}</td></tr>`).join('')}
-    </tbody></table></div><div class="mside">
-    ${opp ? `<h4 class="msub">${esc(j.vs_name)}'s cards</h4><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th><th class="num" data-mtip="Your win rate when they drew it">Drawn</th><th class="num" data-mtip="Your win rate when they played it">Played</th><th class="num">Games</th></tr></thead><tbody>
-      ${opp.map(c => `<tr><th class="an">${strip(c.card)}</th>${rate(flip(c.d))}${rate(flip(c.p))}<td class="num dim">${c.d[0]}</td></tr>`).join('')}</tbody></table></div>` : ''}</div></div>`;
-  wireMetaControls(box);
-  fitStrips(box);
-  box.querySelectorAll('.mpk').forEach(b => b.onclick = () => { pop.style.display = 'none'; META.list = b.dataset.list; fillMeta(); });
-  wireCardReads(box);
-  box.querySelectorAll('th[data-csort]').forEach(t => t.onclick = () => { flipSort('csort', t.dataset.csort, null); fillMeta(); });
-}
-
-// The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
-// Two lessons: the basics (won by taking the den), then the deeper mechanics (won on food). Learned after the second.
-const LESSON_NAMES = ['The basics', 'Special powers'];   // tutorial.py's lessons, in order
-const learned = () => !!store('ak:learned') || !!(ME && ME.history && ME.history.length);
-async function startTutorial(lesson = 1) {
-  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ tutorial: lesson, name: 'You' }) });
-  if (!r.ok) return toast(await r.text());
-  const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
-}
-// After the tutorial, straight into a real match: Cats against an Easy bot playing Den Rush (the deck chosen for later games too).
-async function firstMatch() {
-  const name = ([...DECKS, ...BOT_ONLY].find(d => d.id === 'cats') || {}).name;
-  const cats = playable().find(d => d.name === name && !d.short);   // the player's own Cats deck (a copy of the starter), else the starter
-  if (cats) store('ak:deck', cats.id);
-  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats', name: 'You', bot: { level: 'Beginner', deck: EASY_POOL[Math.floor(Math.random() * EASY_POOL.length)] } }) });
-  if (!r.ok) return toast(await r.text());
-  const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
-}
-function joinCode() { if (play.code) { play.open = null; location.hash = '#/join/' + play.code; } }
 
 // Feedback from anywhere; on the game screen it carries the match, the turn and the seat's whole view (a bug as it happened).
 function feedback() {
   const g = screen === 'game' && V && V.id ? V : null;
   const context = g ? { match: g.id, turn: g.game.round, seat: g.you, opponent: (g.seats[opp()] || {}).bot || 'person',
-    replay: RP.views.length ? 'yes' : 'no', ...(isTutorial() ? { lesson: lessonOf(g) } : {}) } : {};
+ } : {};
   track('feedback_open', { screen: context.screen });
   openFeedback({ api, toast, context, view: g });
 }
 
-// On a touch screen the coach's and the mulligan's "click" is a tap.
-const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b/g, 'Tap').replace(/\bclick\b/g, 'tap') : t;
-
 // ------------------------------------------------------------------ collection (= the deckbuilder): collection.js
 // #/collection/<deck id> opens that deck (home's "Open in collection").
-// In the mana rules (MANA_HOME) it builds decks for them: their deck rules and wording, the mana card, Play picks the deck on
-// the mana home. Decks are one collection whichever rules build them.
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  const mana = MANA_HOME && !!(RULESETS.mana || {}).deck;
-  applyWording(mana ? RULESETS.mana : null);
-  renderCollection(app, { open, mana, rules: mana ? { ...RULES, ...RULESETS.mana.deck } : RULES, cards: CARDS, leaders: LEADERS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
-    play: d => { store(mana ? 'ak:manadeck' : 'ak:deck', 'my:' + d.id); location.hash = mana ? '#/play' : '#/'; }, back: () => { location.hash = '#/'; } });
+  renderCollection(app, { open, rules: RULES, cards: CARDS, leaders: LEADERS, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
+    play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/play'; }, back: () => { location.hash = '#/'; } });
 }
 
 // ------------------------------------------------------------------ share links (docs/share-links.md)
@@ -722,7 +238,7 @@ function deckLinkScreen(arg) {
   screen = 'decklink';
   const [code, q] = arg.split('?'), name = new URLSearchParams(q || '').get('n');
   const d = decodeDeck(`${name ? '### ' + name + '\n' : ''}AK1:${code}`, CARDS);
-  if (!d) { history.replaceState(null, '', '#/'); homeScreen(); return toast('That deck link holds no cards'); }
+  if (!d) { history.replaceState(null, '', '#/'); manaHome(); return toast('That deck link holds no cards'); }
   app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="#/" aria-label="Back"></a><span class="ptab on">${esc(d.name)}</span></div></div>
     <div class="hbody"><div class="dlink">${deckBody(d.list, CARDS)}</div><p><button class="slab" id="dimport">Add to my collection</button> <a class="slab" href="#/">Home</a></p></div></div></div>`;
   document.getElementById('dimport').onclick = () => {
@@ -733,217 +249,50 @@ function deckLinkScreen(arg) {
     saveDecks([...mine, nd]); toast(`Imported ${d.name}`, true); location.hash = '#/collection/' + nd.id;
   };
 }
-async function shareReplay(key) {
-  const r = await api(`/api/replay/${encodeURIComponent(key)}/share`, { method: 'POST' });
-  if (!r.ok) return toast(await r.text());
-  shareLink(`${location.origin}/#/replay/${(await r.json()).token}`, 'A match in Animal Kingdom');
-}
 
-// ------------------------------------------------------------------ ladder, and your account (in Settings)
-// The ladder: the leaderboard and your match history as its two tabs, one column on the ground; your account (name,
-// sign-in, the sign-in code) lives in Settings and your friends in the Friends panel (Martin, 2026-10-04).
-const PROVIDER = { google: 'Google', discord: 'Discord' };
-// Back from Google/Discord: swap the one-time code for this device's own session key.
-async function finishSignIn(code) {
-  history.replaceState(null, '', '#/settings');
-  const r = code && code !== 'failed' ? await api('/api/auth/redeem', { method: 'POST', body: JSON.stringify({ code }) }) : null;
-  if (!r || !r.ok) { toast('Sign-in didn\'t go through, try again'); return settingsScreen(); }
-  const m = await r.json(); store('ak:key', m.key); ME = m.profile;
-  toast(`Signed in as ${ME.name}#${ME.tag}`, true); settingsScreen();
-}
-// A deck's face: its cover, else (matches from before covers were kept) the starter or your deck of that name.
-const deckFace = (cover, name) => cover || COVER[(DECKS.find(d => d.name === name) || {}).id] || (ME.decks.find(d => d.name === name) || {}).cover || '';
-// A deck as a board piece: its face in the plain rim (the row's sides already say whose; colour is left to nothing here).
-const piece = (id, attrs = '') => `<span class="pm" ${attrs}>${id && hasArt(id) ? `<span class="face" style="${portrait(id, 35)}"></span>` : ''}<img src="/static/kit2/rim_n.webp" alt="" draggable="false"></span>`;
-function ladderScreen() {
-  screen = 'ladder';
-  const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-  // Which deck's matches: a dropdown in the header, as the collection's filters, each deck with its games won–lost.
-  const wl = (w, l) => `<i>${w}–${l}</i>`, all = ME.records.reduce((a, r) => [a[0] + r.won, a[1] + r.lost], [0, 0]);
-  const filter = dd('deck', ui.histDeck || '', [['', `All decks ${wl(...all)}`], ...ME.records.map(r => [esc(r.deck), `${esc(r.deck)} ${wl(r.won, r.lost)}`])]);
-  const shown = ME.history.filter(h => !ui.histDeck || h.my_deck === ui.histDeck);
-  const bot = h => h.kind !== 'friend';   // a bot's deck has a name you know; a person's deck name is theirs, so the row names the person
-  const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';
-  const mode = h => ({ ranked: 'Ranked · ', practice: 'Practice · ', friendly: 'Friendly · ' })[h.mode] || '';   // older matches: unknown   // a match is one game (older best-of-3s by their result)
-  // the game's name in the logs, to point at it ("look at GMIDKA", Martin, 2026-10-21): here, not on the result screen
-  const gid = h => { const [, id, n] = h.match.match(/^(.*)-(\d+)$/) || [, h.match, null]; return ` · ${esc(id)}${n === null ? '' : ` game ${+n + 1}`}`; };
-  const side = (s, name) => `data-side="${s}" data-name="${esc(name)}"`;   // a deck in the row: hovered (tapped), its list shows
-  const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
-    ${piece(deckFace(h.my_cover, h.my_deck), side('mine', h.my_deck))}<span class="dk" ${side('mine', h.my_deck)}>${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck), side('theirs', h.opp_deck))}<span class="dk" ${side('theirs', h.opp_deck)}>${esc(h.opp_deck)}</span>
-    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)} · <a class="hshare" data-share="${esc(h.match)}" href="#">Share</a></span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)} · <a class="hshare" data-share="${esc(h.match)}" href="#">Share</a></span>`}</div>`).join('');
-  // the leaderboard first (Martin, 2026-10-02), the match history its second tab, the meta report its third (2026-10-24)
-  const meta = location.hash.startsWith('#/ladder/meta'), lead = !meta && location.hash !== '#/ladder/history';
-  // back goes up one level: an archetype to every deck, a tab to home (Martin, 2026-10-26: it went home from an archetype)
-  const up = /^#\/ladder\/meta\/./.test(location.hash) ? '#/ladder/meta' : '#/';
-  app.innerHTML = `<div class="mscr ladder"><div class="hist${meta ? ' wide' : ''}"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="${up}" aria-label="Back"></a><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
-    <div class="hbody">${lead ? `${ME.league ? `<p class="lstand" id="lstand">${leagueLong(ME.league)}</p>` : ''}<div class="lead lb" id="lboard"></div>` : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
-    </div></div>`;
-  if (lead) fillLeaderboard();
-  if (meta) fillMeta();
-  wireDd(app, (k, v) => { ui.histDeck = v || null; ladderScreen(); });
-  app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
-  app.querySelectorAll('[data-share]').forEach(el => el.onclick = e => { e.preventDefault(); e.stopPropagation(); shareReplay(el.dataset.share); });
-  wireDeckPeek(app);
-}
-// A deck in a match's row shows its list as it was played, beside the row: on hover, or on a touch screen a tap (which
-// there opens no replay; the rest of the row does).
-// A replay or an old decklist can name a card the game no longer has (a match from before a card changed). Each such id
-// is filed under the reserve, so the collection and deck codes never offer it: a retired id as its successor (the same
-// animal, or its effect on another), a card gone for good as a plain stand-in under its name. Without it the game
-// screen stopped on the first unknown card.
-function adoptRetired(ids) {
-  for (const id of ids) {
-    if (typeof id !== 'string' || CARDS[id] || !/^[a-z][a-z0-9_]*$/.test(id)) continue;
-    const s = CARDS[SUCCESSOR[id]];
-    CARDS[id] = s ? { ...s, id, status: 'reserve' }
-      : { id, name: id.split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' '), status: 'reserve', rarity: 'common', tags: [], str: 0,
-          text: '', kw: [], cost: null, habitat: '', related: [], evolves: false };
-  }
-}
-// The card ids in a replay's views: units and hand cards ("id"), events ("card", [iid, card] pairs, lists of ids) and the
-// seats' decklists ("lists", keyed by card id). adoptRetired passes over anything that isn't an unknown card-shaped id.
-function replayIds(views) {
-  const out = new Set();
-  const walk = x => { if (Array.isArray(x)) { x.forEach(y => typeof y === 'string' ? out.add(y) : walk(y)); }
-    else if (x && typeof x === 'object') for (const [k, v] of Object.entries(x)) {
-      if (k === 'lists' && v && typeof v === 'object') Object.values(v).forEach(l => l && typeof l === 'object' && Object.keys(l).forEach(id => out.add(id)));
-      else if ((k === 'id' || k === 'card') && typeof v === 'string') out.add(v);
-      else walk(v); } };
-  walk(views); return out;
-}
-
-// Lists come from the saved replay (/api/replay/<match>/lists), fetched once per match.
-const listsOf = {};
-function wireDeckPeek(root) {
-  const box = document.createElement('div'); box.className = 'hpeek'; box.style.display = 'none'; root.querySelector('.ladder').append(box);
-  let on = null;
-  const hide = () => { on = null; box.style.display = 'none'; };
-  const show = async el => {
-    on = el; const key = el.closest('[data-m]').dataset.m;
-    listsOf[key] = listsOf[key] || api(`/api/replay/${encodeURIComponent(key)}/lists`).then(r => r.ok ? r.json() : null).catch(() => null);
-    const lists = await listsOf[key]; if (on !== el) return;
-    const list = lists && lists[el.dataset.side];
-    if (list) adoptRetired(Object.keys(list));
-    if (!list) { box.innerHTML = `<h4>${esc(el.dataset.name)}</h4><p class="none">This match's decklists weren't kept.</p>`; }
-    else box.innerHTML = `<h4>${esc(el.dataset.name)}</h4>${deckBody(Object.entries(list).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]), CARDS)}`;
-    box.style.display = 'block'; fitStrips(box);
-    const r = el.closest('.hr').getBoundingClientRect(), w = box.offsetWidth, h = box.offsetHeight;
-    box.style.left = (r.right + 12 + w <= innerWidth - 8 ? r.right + 12 : Math.max(8, r.left - 12 - w)) + 'px';
-    box.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 8)) + 'px';
-  };
-  root.querySelectorAll('[data-side]').forEach(el => {
-    el.onmouseenter = () => { if (!matchMedia('(hover: none)').matches) show(el); };
-    el.onmouseleave = () => { if (!matchMedia('(hover: none)').matches) hide(); };
-    el.onclick = e => { if (!matchMedia('(hover: none)').matches) return; e.stopPropagation(); on === el ? hide() : show(el); };   // a click opens the replay as anywhere on the row
-  });
-  root.querySelector('.hbody').addEventListener('scroll', hide, { passive: true });
-  root.addEventListener('pointerdown', e => { if (on && !e.target.closest('[data-side], .hpeek')) hide(); });
-}
-// Your account, at the top of Settings: your name#tag (renamed in place), Google/Discord, and while you have neither, the
-// sign-in code that brings this profile to another device.
-function accountBody() {
-  const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
-  const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
-  const account = ME.logins.length
-    ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
-        <div class="row">${unlinked.map(p => `<button class="slab" data-login="${p}">Also ${PROVIDER[p]}</button>`).join('')}<button class="slab" id="signout">Sign out</button></div>`)
-    : ME.providers.length ? sect('Account', `<p>Sign in to keep your decks and matches on every device.</p>
-        <div class="row">${ME.providers.map(p => `<button class="slab" data-login="${p}">${PROVIDER[p]}</button>`).join('')}</div>`) : '';
-  const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
-      <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
-    + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
-  return sect('Name', `<div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>`) + account + code;
-}
-function wireAccount(root, redraw) {
-  const $r = id => root.querySelector('#' + id);
-  const nm = $r('pname');
-  nm.onchange = async () => { const r = await api('/api/me', { method: 'PATCH', body: JSON.stringify({ name: nm.value }) });
-    if (!r.ok) return toast(await r.text()); ME = await r.json(); redraw(); };
-  root.querySelectorAll('[data-login]').forEach(el => el.onclick = async () => {
-    const r = await api('/api/auth/' + el.dataset.login, { method: 'POST' });
-    if (!r.ok) return toast(await r.text());
-    location.href = (await r.json()).url;
-  });
-  const so = $r('signout');
-  if (so) so.onclick = async () => { await api('/api/signout', { method: 'POST' }); localStorage.removeItem('ak:key'); await loadProfile(); location.hash = '#/'; };
-  if (ME.logins.length) return;
-  $r('showkey').onclick = () => { ui.showKey = !ui.showKey; redraw(); };
-  $r('copykey').onclick = () => navigator.clipboard.writeText(store('ak:key')).then(() => toast('Sign-in code copied', true), () => toast(store('ak:key')));
-  const other = $r('other');
-  const signIn = async () => { const r = await api('/api/signin', { method: 'POST', body: JSON.stringify({ code: other.value }) });
-    if (!r.ok) return toast('No profile has that sign-in code');
-    ME = await r.json(); store('ak:key', other.value.trim().toUpperCase()); ui.showKey = false; toast(`Signed in as ${ME.name}#${ME.tag}`, true); redraw(); };
-  $r('signin').onclick = signIn;
-  other.onkeydown = e => { if (e.key === 'Enter') signIn(); };
-}
-
-// ------------------------------------------------------------------ match connection
-// A practice match against a bot plays in the browser (static/local/match.js), the bot in a Web Worker, no round trip a
-// move; the server takes the finished match (Martin, 2026-11-05: the default). Without the wasm, or with one built from
-// other engine sources than the server's, the match plays on the server. ?local=0 plays it on the server anyway.
-const LOCAL_PLAY = new URLSearchParams(location.search).get('local') !== '0';
-// The hex board prototype (Martin's diamond, 2026-11-16): ?board=hex on the address plays your next matches on it, ?board=classic switches back.
-const BOARD = (() => { const q = new URLSearchParams(location.search).get('board');
-  try { if (q) localStorage.setItem('ak:board', q === 'hex' ? 'map_hex' : 'map_b'); return localStorage.getItem('ak:board') || 'map_hex'; } catch { return q === 'classic' ? 'map_b' : 'map_hex'; } })();
-// The Draw action is off in your matches against a bot (Martin, 2026-11-20, a trial: "Okay, we can try it."): cards come from the
-// turn's free card and from effects. ?draw=on on the address brings the action back, ?draw=off turns the trial on again.
-const DRAW_OFF = (() => { const q = new URLSearchParams(location.search).get('draw');
-  try { if (q) localStorage.setItem('ak:draw', q === 'on' ? 'on' : 'off'); return localStorage.getItem('ak:draw') !== 'on'; } catch { return q !== 'on'; } })();
-// The mana ruleset (the prototype of 2026-11-20): ?rules=mana or ?rules=default on the address, kept in the browser like
-// ?board. On localhost (Martin plays the unreleased rules there) the mana rules are the default; on any other host the
-// default ruleset stays the default. It decides only what home offers: in the mana rules, a friend match or the simple
-// bot (the server's Python greedy bot: the Rust bots know only the default rules). A match's own screen follows the match's ruleset (its view's `ruleset`), whatever the switch says.
-const LOCALHOST = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-const MANA_HOME = (() => { const q = new URLSearchParams(location.search).get('rules');
-  try { if (q) localStorage.setItem('ak:rules', q === 'mana' ? 'mana' : 'default'); return (localStorage.getItem('ak:rules') || (LOCALHOST ? 'mana' : 'default')) === 'mana'; }
-  catch { return q ? q === 'mana' : LOCALHOST; } })();
-const isMana = () => !!(V && V.ruleset === 'mana');
-// A ruleset's own wording (the view's `texts` and `keywords`: the mana rules read the Beaver, the Cheetah, the Falcon and six
-// keywords their way): put into the card pool and the keyword list while its match is shown, the stored wording back after.
-const KW_BASE = { ...KEYWORDS };
-let wordingOf = '';
-function applyWording(v) {
-  const texts = (v && v.texts) || {}, kws = (v && v.keywords) || {}, key = JSON.stringify([texts, kws]);
-  if (key === wordingOf) return; wordingOf = key;
-  for (const c of Object.values(CARDS)) if (c.storedText !== undefined) { c.text = c.storedText; delete c.storedText; }
-  for (const [id, t] of Object.entries(texts)) if (CARDS[id]) { CARDS[id].storedText = CARDS[id].text; CARDS[id].text = t; }
-  for (const k of Object.keys(KW_BASE)) KEYWORDS[k] = kws[k] || KW_BASE[k];
-}
-// A deck legal under the mana rules (decks.decklist_problems with ruleset "mana"): its size, its copies, only collectible
-// cards with a mana cost, and a leader of its own (a leader is required in every ruleset, decks.deck_problems).
-function manaLegal(list, leader) {
-  const R = (RULESETS.mana || {}).deck; if (!R) return false;
+// A deck legal under the deck rules (decks.deck_problems): its size, its copies, only collectible cards, and a leader of
+// its own.
+function legal(list, leader) {
   const n = {}; for (const id of list) n[id] = (n[id] || 0) + 1;
-  return list.length === R.deckSize && !!leader && list.includes(leader) && !!LEADERS[leader]
-    && Object.entries(n).every(([id, k]) => CARDS[id] && CARDS[id].status === 'collectible' && CARDS[id].ruleset === 'mana' && CARDS[id].mana != null && k <= R.copies[CARDS[id].rarity]);
+  return list.length === RULES.deckSize && !!leader && list.includes(leader) && !!LEADERS[leader]
+    && Object.entries(n).every(([id, k]) => CARDS[id] && CARDS[id].status === 'collectible' && k <= RULES.copies[CARDS[id].rarity]);
 }
-// Home in the mana rules (a plain prototype, Martin, 2026-11-20): three buttons. Play opens the friend match (#/play: a deck,
+// A conversation's Challenge (chat.js): your chosen deck against the friend's, the match once they accept.
+async function challengeFriend(f) {
+  const d = chosenDeck();
+  if (!d) return toast('Build a legal deck in the Collection first: 25 cards and a leader');
+  toast(`Challenge sent to ${f.name.split('#')[0]}`, true);
+  const r = await api('/api/challenge', { method: 'POST', body: JSON.stringify({ friend: f.id, deck: deckSpec(d) }) });
+  if (!r.ok) return toast(await r.text());
+  const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+}
+// Home (a plain prototype, Martin, 2026-11-20): three buttons. Play opens the friend match (#/play: a deck,
 // then a match to invite a friend to, or a friend's code); Practice starts a match against the simple bot at once, your
 // deck against its mirror; Collection is the collection. In Play: your decks that are legal under these rules; a deck of
 // yours that isn't legal is counted under the list.
 function manaHome(mode = {}) {
-  screen = 'home'; homeMode = mode;
+  screen = 'home';
   if (!mode.play && !mode.join) {
     app.innerHTML = `<div class="mhome"><div class="box">
-      <h1>Animal Kingdom<small>The mana rules, a prototype</small></h1>
+      <h1>Animal Kingdom<small>A prototype</small></h1>
       <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><button class="go" id="mprac">Practice</button><a class="go" id="mcoll" href="#/collection">Collection</a></div>
-      <p class="foot"><a href="?rules=default#/">Play the usual rules</a></p></div></div>`;
+      </div></div>`;
     document.getElementById('mprac').onclick = async () => {
       // your own deck (the one chosen in Play, else your first legal one); the bot plays a mirror of it (server.py, Martin,
       // 2026-11-20: the pool's animal decks are no mana decks any more)
-      const legal = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)), leader: d.leader }))
-        .filter(d => manaLegal(d.list, d.leader));
-      const mine = legal.find(d => d.id === store('ak:manadeck')) || legal[0];
+      const decks = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)), leader: d.leader }))
+        .filter(d => legal(d.list, d.leader));
+      const mine = decks.find(d => d.id === store('ak:deck')) || decks[0];
       if (!mine) return toast('Build a legal deck in the Collection first: 25 cards and a leader');
-      const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: { name: mine.name, list: mine.list, leader: mine.leader }, ruleset: 'mana', name: 'You', bot: { level: 'easy', deck: 'mirror' } }) });
+      const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: { name: mine.name, list: mine.list, leader: mine.leader }, name: 'You', bot: true }) });
       if (!r.ok) return toast(await r.text());
       const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
     };
     return;
   }
   const own = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));
-    return { id: 'my:' + d.id, name: d.name, mine: true, list, leader: d.leader }; }), mine = own.filter(d => manaLegal(d.list, d.leader)), off = own.length - mine.length;
-  const all = [...mine], chosen = all.find(d => d.id === store('ak:manadeck')) || all[0];   // your legal decks only: the pool's animal decks are no mana decks (2026-11-20)
+    return { id: 'my:' + d.id, name: d.name, mine: true, list, leader: d.leader }; }), mine = own.filter(d => legal(d.list, d.leader)), off = own.length - mine.length;
+  const all = [...mine], chosen = all.find(d => d.id === store('ak:deck')) || all[0];   // your legal decks only: the pool's animal decks are no mana decks (2026-11-20)
   const leaderName = d => { const ls = d.leader ? [d.leader] : [...new Set(d.list || [])].filter(id => LEADERS[id]);   // a pool deck: the one card in it that can lead
     return ls.length === 1 && CARDS[ls[0]] ? CARDS[ls[0]].name.split(':')[0] : ''; };
   const tile = d => `<button class="dk${chosen && d.id === chosen.id ? ' on' : ''}" data-deck="${d.id}">${esc(d.name)}${leaderName(d) ? `<small>${esc(leaderName(d))}</small>` : ''}</button>`;
@@ -955,7 +304,7 @@ function manaHome(mode = {}) {
     ${mode.join ? '' : `<h2>Join a friend's match</h2><div class="row"><input id="mcode" maxlength="6" placeholder="Code" autocomplete="off"><button class="sec" id="mjoin">Join</button></div>`}
     </div></div>`;
   const $ = id => document.getElementById(id);
-  app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:manadeck', el.dataset.deck); manaHome(mode); });
+  app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); manaHome(mode); });
   const spec = d => d.mine ? { name: d.name, list: d.list, leader: d.leader } : d.id;
   const join = async code => {
     if (!chosen) return toast('Choose a deck first');
@@ -966,7 +315,7 @@ function manaHome(mode = {}) {
   $('mgo').onclick = async () => {
     if (mode.join) return join(mode.join);
     if (!chosen) return toast('Choose a deck first');
-    const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: spec(chosen), ruleset: 'mana', name: 'You' }) });
+    const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: spec(chosen), name: 'You' }) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
   };
@@ -974,25 +323,7 @@ function manaHome(mode = {}) {
   if (code) { const go = () => { const c = code.value.trim().toUpperCase(); if (c) join(c); };
     code.onkeydown = e => { if (e.key === 'Enter') go(); }; $('mjoin').onclick = go; }
 }
-let LOCAL = null;
-async function startLocal(body) {
-  const lib = await prepareLocal(api);
-  if (!lib) return false;
-  const r = await api('/api/local/setup', { method: 'POST', body: JSON.stringify(body) });
-  if (!r.ok) { toast(await r.text()); return true; }
-  const setup = await r.json();
-  disconnect();
-  LOCAL = new LocalMatch(lib, setup, body, v => { const prev = V; V = v; V.rx = Date.now() / 1000; onView(prev); }, { toast, api });
-  wsId = 'LOCAL'; play.open = null;
-  location.hash = '#/m/local';
-  return true;
-}
-function localScreen() {
-  if (!LOCAL) { history.replaceState(null, '', '#/'); return homeScreen(); }   // a reload: the match lived in the page
-  screen = null; V = null; ui.sel = null; release(); ui.carry = null; ui.back = null; ui.peek = false;
-  LOCAL.show();
-}
-function disconnect() { if (LOCAL) { LOCAL.close(); LOCAL = null; if (wsId === 'LOCAL') wsId = null; } if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; applyWording(null); }   // a step still timed would redraw the game over the next screen
+function disconnect() {  if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; }   // a step still timed would redraw the game over the next screen
 
 async function matchScreen(id) {
   if (!getToken(id) && !(await rejoin(id))) { location.hash = '#/join/' + id; return; }   // a new tab: the server knows your seat
@@ -1018,8 +349,7 @@ async function matchScreen(id) {
   matchScreen.wake = () => { if (document.hidden || wsId !== id) return;
     if (!ws || ws.readyState > 1) { if (ws) ws.onclose = null; connect(); } };
 }
-const send = msg => { if (msg.t === 'act' && window.__ak.onAct) return window.__ak.onAct(msg.action), true;   // the position analyser plays the move itself
-  if (LOCAL && wsId === 'LOCAL') return LOCAL.handle(msg), true;   // a match in the browser (?local=1) takes the socket's messages
+const send = msg => {
   clog('send ' + (msg.t === 'act' ? JSON.stringify(msg.action).slice(0, 50) : msg.t) + (ws && ws.readyState === 1 ? '' : ' DROPPED (socket ' + (ws ? ws.readyState : 'none') + ')')); if (!(ws && ws.readyState === 1)) { if (msg.t === 'act') toast('Reconnecting… try again in a moment'); return false; } return ws.send(JSON.stringify(msg)); };   // a dropped move says so (feedback 2026-10-04: clicks that did nothing)
 // ?clicklog: a live record of presses, clicks and what the game did with them, in a corner (chasing clicks that do
 // nothing, 2026-10-04). Off unless asked for; it costs nothing then.
@@ -1043,9 +373,8 @@ const selCopy = () => {
   const hand = V.game.hand || [], same = hand.filter(h => h.id === ui.sel);
   return same.find(h => h.iid === ui.selIid) || same.reduce((a, h) => (!a || h.str > a.str ? h : a), null) || {};
 };
-const copyPlaces = () => ((V.game.legal || {}).copies || {})[ui.selIid];
-const selPlaces = d => (ui.selIid != null && copyPlaces()) || d.places[ui.sel] || [];
-const placeAction = target => ({ kind: 'place', card_id: ui.sel, target, ...(ui.selIid != null && copyPlaces() ? { iid: ui.selIid } : {}) });
+const selPlaces = d => d.places[ui.sel] || [];
+const placeAction = target => ({ kind: 'place', card_id: ui.sel, target });
 const act = action => { if (action.kind === 'place' && ui.carry != null) { release(); ui.carry = null; }   // a held card placed is played, not put back
   ui.sel = null; ui.roam = null; ui.hover = null; send({ t: 'act', action }); };
 // The hand's grip (carry.js): with a mouse, a card picked (clicked, or dragged out) leaves the hand and hangs over the pointer
@@ -1054,8 +383,7 @@ const act = action => { if (action.kind === 'place' && ui.carry != null) { relea
 const canGrip = id => FLIGHT && !touch() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
 function grip(el, id, iid) {
   const h = (V.game.hand || []).find(h => h.iid === iid);
-  if (isMana()) { carry(el.querySelector('.mcard'), manaCard(formOf(id, V.you), { str: h ? h.str : undefined, cost: h ? h.cost : null, w: 100 }), flightGeo()); ui.carry = iid; return; }   // its piece on the pointer
-  carry(el.querySelector('.card'), cardHTML(formOf(id, V.you), { str: h ? h.str : undefined })); ui.carry = iid;
+  carry(el.querySelector('.mcard'), manaCard(CARDS[id], { str: h ? h.str : undefined, cost: h ? h.cost : null, w: 100 }), flightGeo()); ui.carry = iid;   // its piece on the pointer
 }
 // A card let go of without being placed goes back to its place in the hand, which opens for it as it comes.
 function ungrip() {
@@ -1063,7 +391,7 @@ function ungrip() {
   const iid = ui.carry; ui.carry = null;
   if (!carrying()) return;
   ui.back = iid; drawGame();
-  carryDrop(document.querySelector(`#hand .hc[data-iid="${iid}"] ${isMana() ? '.mcard' : '.card'}`), () => { if (ui.back === iid) { ui.back = null; if (screen === 'game') drawGame(); } });
+  carryDrop(document.querySelector(`#hand .hc[data-iid="${iid}"] ${('.mcard')}`), () => { if (ui.back === iid) { ui.back = null; if (screen === 'game') drawGame(); } });
 }
 
 // A new view: its events (static/timeline.js) play as steps, each view drawn for its step's length, the new view last.
@@ -1074,24 +402,13 @@ const DUR_REVEAL_HOLD = DUR.reveal * 0.62;   // s: the opponent's card held at t
 // there drew the crossroad as it was, so it made none).
 const landNow = covered => { if (screen !== 'game') return; drawBoard(); sfx(covered ? 'cover' : 'land', LAND_HIT); };
 const LAND_HIT = HIT_DELAY;   // s from the cut to the piece's impact (flight.js: none for Impact, game.css landf for the glow)
-// The board a match is played on (match.py MAPS): its view names it, and the screen draws that board (the hex prototype on its own ground).
-// the painted ground: the hex board's own (no trails), upright too; the square board's wide one, or its upright painting
-const plateSrc = () => `/static/kit2/plate_${MAP.hex || MAP.hex19 ? 'hex' : VIEW.port ? 'port' : 'wide'}.webp`;
-function useMap(v) {
-  applyWording(v);
-  const id = (v && v.map) || 'map_b';
-  if (MAPS[id] && MAP.id !== id) MAP = MAPS[id];
-  setBoardMap(MAP);
-  const img = document.querySelector('#world img'), scr = document.getElementById('scr');
-  if (img) { const src = plateSrc(); if (!img.src.endsWith(src)) img.src = src; }
-  if (scr) { scr.classList.toggle('hexb', !!(MAP.hex || MAP.hex19)); scr.classList.toggle('mana', !!(v && v.ruleset === 'mana')); }
-}
+// the painted ground
+const plateSrc = () => '/static/kit2/plate_hex.webp';
 function onView(prev) {
-  useMap(V);
   if (PB.busy) { PB.queue.push(V); V = PB.shown; return; }   // keep showing the step in play
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once
   const steps = motion && (screen === 'game' || screen === null) ? plan(prev, V, CARDS) : [{ view: V, step: null }];
-  if (steps.length === 1) { ui.step = null; showView(prev); played(); if (RP.playing) replayPlay(true); return; }   // a replay moves on after an update with nothing to animate too
+  if (steps.length === 1) { ui.step = null; showView(prev); played();  return; }   // a replay moves on after an update with nothing to animate too
   PB.busy = true; PB.target = V;   // the view these steps play towards
   const run = (i, before) => {
     const { view, step } = steps[i];
@@ -1104,7 +421,7 @@ function onView(prev) {
   const finish = shown => {
     PB.busy = false; ui.step = null; played();
     if (PB.queue.length) { const latest = PB.queue[PB.queue.length - 1]; PB.queue = []; V = latest; return onView(shown); }
-    if (RP.playing) replayPlay(true);   // a replay moves on once this one has played out
+       // a replay moves on once this one has played out
   };
   run(0, prev);
 }
@@ -1112,20 +429,6 @@ function onView(prev) {
 // 2026-10-15, after Hearthstone's hand buffs). The hand redraws on every view, so the motion is timed from when its step began
 // (--ago, a negative delay) and carries on across redraws; the old number and the new are both drawn, and CSS swaps them.
 const RISE_MS = 1100, rising = new Map();   // iid: { step, t0, was, now }
-function rise(h) {
-  const st = ui.step, ch = st && st.kind === 'strength' && st.changes.find(c => c.iid === h.iid);
-  let r = rising.get(h.iid);
-  if (ch && (!r || r.step !== st)) {
-    rising.set(h.iid, r = { step: st, t0: performance.now(), was: h.str, now: h.str + ch.n });
-    // a rising card is drawn undimmed: redraw once it has settled, or it stays lit through a quiet opponent's turn (a
-    // playback still running redraws on its next step anyway)
-    setTimeout(() => { if (screen === 'game' && V && V.game && !PB.busy) drawGame(); }, RISE_MS + 30);
-  }
-  if (!r) return null;
-  const ago = performance.now() - r.t0;
-  if (ago > RISE_MS) { rising.delete(h.iid); return null; }
-  return { ...r, ago };
-}
 // A strength step's changes as the board flashes them: each unit named, or every copy of a card that grows as one
 // (Rattlesnake, Eon) on its owner's side.
 function strengthFlash(step) {
@@ -1140,7 +443,7 @@ function strengthFlash(step) {
 }
 // Tell the server the screen has played the events out: a bot opponent waits for it before its next move (server._watched).
 function played() {
-  if (!wsId || RP.views.length || !V || !V.game) return;
+  if (!wsId || 0 || !V || !V.game) return;
   const ev = V.game.events || [];
   if (ev.length && ev[ev.length - 1].seq !== played.seq) { played.seq = ev[ev.length - 1].seq; send({ t: 'played', seq: played.seq }); }
 }
@@ -1151,7 +454,7 @@ function stopPlayback() { clearTimeout(PB.t); PB.busy = false; PB.queue = []; ui
 // there now.
 let skipped = null;
 function skipToYourMove(e) {
-  if (!PB.busy || RP.views.length || screen !== 'game') return;
+  if (!PB.busy || 0 || screen !== 'game') return;
   const latest = PB.queue.length ? PB.queue[PB.queue.length - 1] : PB.target;   // the newest view: queued, else the one playing
   if (!latest || !latest.game || latest.game.toAct !== latest.you) return;
   const shown = PB.shown; clearTimeout(PB.t); PB.busy = false; PB.queue = []; ui.step = null; V = latest; V.rx = Date.now() / 1000;
@@ -1170,8 +473,6 @@ addEventListener('pointerup', e => {
 addEventListener('click', e => { if (e.isTrusted && Date.now() < noClickUntil) { noClickUntil = 0; e.stopPropagation(); e.preventDefault(); } }, true);
 
 function showView(prev) {
-  // Lord Bumbleton's card (the leaders prototype): "(Current: X)" reads your number now
-  const bb = CARDS.bumblebee_legend; if (bb && bb.base && V && V.game && V.game.foodGains) bb.text = bb.base.replace('X', V.game.foodGains[V.you]);
   ui.flyIid = null;   // the card in flight (flight.js) is in the hand again, or gone from it, as this view says
   // While an animation the player started must play out (the tutorial's fruit on Next), new views wait: a redraw would cut
   // it short. The first held view's predecessor is kept, so what changed meanwhile still animates when they apply.
@@ -1180,9 +481,7 @@ function showView(prev) {
     showView.t = setTimeout(() => { const p = showView.kept; showView.kept = null; showView(p); }, hold + 20); return; }
   if (prev && prev.phase === 'lobby' && V.phase === 'playing') sfx('found');   // your friend joined
   if (V.phase === 'lobby') return lobbyScreen();
-  if (V.phase === 'prematch') return prematchScreen();
-  if (!prev || prev.phase === 'game_over' && V.phase === 'playing') ui.peek = false;
-  if (prev && prev.phase !== 'playing' && V.phase === 'playing') ui.skips = [];   // a new game (a rematch keeps the match's id and count): the last one's skipped turns are gone
+  if (!prev || prev.phase !== 'playing' && V.phase === 'playing') ui.peek = false;
   if (prev && prev.phase === 'playing' && V.phase !== 'playing') showChallenge();
   if (prev && prev.game && V.game && prev.game.history.length > V.game.history.length) ui.sel = null;
   // One-shot animation input: what the board and food were before this view (same game only).
@@ -1196,28 +495,13 @@ function showView(prev) {
           ? { kind: ui.step.kind, side: rel(ui.step.player), at: ui.step.from.map(f => ({ cr: dcr(f.cr), n: f.n })) } : null,
         strength: strengthFlash(ui.step) } : null;
   if (ui.step && ui.step.kind === 'yourturn' && screen === 'game') { turnPlate(); turnCue.until = Date.now() + 900; }
-  if (ui.step && ui.step.kind === 'skipped' && screen === 'game') {   // the mana rules: a turn with nothing its player could pay for
-    const key = `${V.id}-${V.results.length}`, mine = ui.step.player === V.you;
-    ui.skips = (ui.skips || []).filter(k => k.key === key);
-    if (!ui.skips.some(k => k.turn === ui.step.turn)) ui.skips.push({ key, turn: ui.step.turn, seat: ui.step.player });
-    turnPlate(mine ? 'Turn skipped: you can\'t pay for anything' : 'Turn skipped: your opponent can\'t pay for anything', true);
-  }
   gameScreen();
-}
-
-// Lab: #/lab/<name> renders the frozen view static/lab/<name>.json (no server match; nothing can be played).
-// The browser tests start here and feed recorded views through window.__ak.feed. #/lab/<name>/<fx> also runs the effects
-// prototype static/lab/_fx/<fx>.js on it.
-async function labScreen(name, fx) {
-  V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
-  screen = null; gameScreen();
-  if (fx) import(`/static/lab/_fx/${fx}.js?v=${Date.now()}`);
 }
 
 // Before the match: the key art dimmed, the menus' granite. Waiting for a friend: the code to send, on one piece.
 function lobbyScreen() {
   screen = 'lobby';
-  const link = `${location.origin}/${V.ruleset === 'mana' ? '?rules=mana' : ''}#/join/${V.id}`;   // a mana match's link opens the mana rules' home
+  const link = `${location.origin}/#/join/${V.id}`;
   app.innerHTML = `<div class="mscr pre"><div class="piece lobbyp"><div class="bigcode">${V.id}</div>
       <button class="slab" id="copy">${matchMedia('(hover: none)').matches ? 'Share link' : 'Copy link'}</button><p>Waiting for your friend to join</p></div>
     <a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
@@ -1229,20 +513,6 @@ function seatLabel(p) {
   if (!s) return '';
   if (s.bot) return esc(s.name || 'Bot');   // its band, as the server named it ("Expert Bot")
   return p === V.you ? 'You' : esc(s.name || 'Opponent');
-}
-
-// Both decklists are open from the start (a rule), so this screen is the two lists, facing, and Ready between them.
-function prematchScreen() {
-  screen = 'prematch';
-  const you = V.you, opp = you === 'A' ? 'B' : 'A', me = V.seats[you];
-  const side = (p, cls) => { const counts = V.lists[p], list = Object.entries(counts).flatMap(([id, n]) => Array(n).fill(id));
-    return `<div class="piece side ${cls}"><div class="who">${seatLabel(p)}</div>
-      <div class="dl">${deckBody(list, CARDS)}</div></div>`; };
-  app.innerHTML = `<div class="mscr pre"><div class="face">${side(you, 'mine')}
-      <div class="mid">${me.ready ? '<p class="wait">Waiting for your opponent</p>' : '<button class="play" id="ready">Ready</button>'}</div>
-      ${side(opp, 'theirs')}</div><a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
-  const b = document.getElementById('ready'); if (b) b.onclick = () => send({ t: 'ready' });
-  wirePops(app); fitStrips(app);
 }
 
 // The turn clock (matches between two people): the free window, then the game bank, of whoever must act.
@@ -1264,14 +534,10 @@ const opp = () => V.you === 'A' ? 'B' : 'A';
 const rel = p => p === V.you ? 'A' : p === 'wild' ? 'W' : 'B';   // W: a Wild animal, no one's (the Locusts)
 const dcr = cr => { if (V.you === 'A') return cr; const [c, r] = cr.split(','); return `${MAP.cols + 1 - Number(c)},${r}`; };
 
-// A lesson (coach.js holds everything the tutorial does on this screen).
-const isTutorial = () => isLesson(V);
-
 // What the seat can do right now, in viewer space.
 function decision() {
-  const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you && !RP.views.length, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, roams: {}, acts: new Set(), pend: null };
-  d.lesson = lessonNow();   // a lesson's step for this moment (coach.js), else null
-  if (RP.views.length && V.phase === 'playing' && G.toAct === V.you) d.pend = G.pending;   // a replay shows what you were asked, read-only
+  const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, pend: null };
+     // a replay shows what you were asked, read-only
   if (!d.mine) return d;
   d.pend = G.pending; d.places = G.legal.place;
   if (d.pend && d.pend.mode === 'choice') {
@@ -1283,28 +549,13 @@ function decision() {
       else if (o.kind === 'card') d.cardOpts.push(o);
       else d.otherOpts.push(o);
     }
-    narrowChoice(d);   // a lesson's target step: only the target it teaches
     d.rings = Object.keys(d.crChoice);
     ui.sel = null;
   } else {
-    narrowPlaces(d);   // what a lesson lets be placed
     if (ui.sel && !d.places[ui.sel]) ui.sel = null;
     const ids = Object.keys(d.places);
     if (!ui.sel && ids.length === 1 && d.pend) ui.sel = ids[0];   // a "play this card" prompt: preselect it
-    // ...and when the prompt names the very copy (Babaji plays the animal he returned, not its twin in hand), that copy is the one selected and the only one that can be played
-    // (a card none of whose copies is named plays as usual: a prompt for any animal names only the copies that differ, the
-    // Mole's free play with two Capuchins of different strength in hand)
-    d.named = d.pend && G.legal.copies ? Object.keys(G.legal.copies).map(Number) : null;
-    const namedIds = new Set((d.named || []).map(i => (G.hand.find(h => h.iid === i) || {}).id));
-    d.barred = h => !!d.named && namedIds.has(h.id) && !d.named.includes(h.iid);   // a twin of a named copy
-    if (d.named && ui.sel && namedIds.has(ui.sel) && !d.named.includes(ui.selIid)) ui.selIid = d.named.find(i => (G.hand.find(h => h.iid === i) || {}).id === ui.sel);
     if (ui.sel) for (const t of selPlaces(d)) { if (t[0] === 'cr') d.rings.push(dcr(t[1])); else d.hqRing = true; }
-    // Roam: click one of your animals that can move (it wears a dashed ring), its destinations ring, click one
-    if (!d.pend) for (const [from, ts] of Object.entries(G.legal.roam || {})) d.roams[dcr(from)] = ts;
-    // Action (the actions prototype): an animal that can use its Action is picked the same way; the bar offers it
-    if (!d.pend) for (const from of G.legal.act || []) d.acts.add(dcr(from));
-    if (ui.sel || (!d.roams[ui.roam] && !d.acts.has(ui.roam))) ui.roam = null;
-    if (ui.roam) for (const t of d.roams[ui.roam] || []) { if (t[0] === 'cr') d.rings.push(dcr(t[1])); else d.hqRing = true; }
   }
   return d;
 }
@@ -1327,7 +578,7 @@ function wireTips(root) {
 function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="game kit${MAP.hex || MAP.hex19 ? ' hexb' : ''}${isMana() ? ' mana' : ''}" id="scr"><div id="world"><img src="${plateSrc()}" alt="" draggable="false"></div><div id="stage">
+    app.innerHTML = `<div class="game kit${(' hexb')}${(' mana')}" id="scr"><div id="world"><img src="${plateSrc()}" alt="" draggable="false"></div><div id="stage">
       <div class="abs ledge"></div>
       <div id="board"></div>
       <div class="abs menu snd" id="sndbtn"></div><div class="panel setp" id="setp"></div>
@@ -1342,29 +593,22 @@ function gameScreen() {
       <div class="abs tbtn" id="tbtn"></div>
       <div class="abs waiting" id="waiting"></div>
       <div class="abs prompt" id="choicebar"></div>
-      <div class="abs coach" id="coach"></div>
       <div class="abs opts" id="opts"></div>
       <div class="abs reveal" id="reveal"></div>
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
       <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
-      <div class="abs rbar" id="rbar"></div>
-      <div class="abs recent" id="recent"></div>
       <div class="abs mrail" id="mrail"></div><div class="abs mlast" id="mlast"></div><div class="abs mhover" id="mhover"></div>
       <div class="endov" id="endov"></div>
       <div class="endov" id="concov"><div class="endbox ask"><b>Concede this game?</b>
         <div class="btns"><button class="slab" id="keep">Keep playing</button><button class="play danger" id="concede">Concede</button></div></div></div></div></div>`;
     fitStage(false); wireTips(document.getElementById('scr'));
-    // The coach points at a card in the hand; hovering that card enlarges it over the coach, so the coach rises above it.
-    const hand = document.getElementById('hand'), coach = document.getElementById('coach');
-    hand.addEventListener('mouseover', e => { const h = e.target.closest('.hc'); coach.classList.toggle('risen', !!h && !!coach.dataset.iid && (coach.dataset.iid === 'any' || h.dataset.iid === coach.dataset.iid)); });
-    hand.addEventListener('mouseleave', () => coach.classList.remove('risen'));
     const $ = id => document.getElementById(id);
     // The flag concedes, after the question in the middle of the board (Keep playing, Escape or a click beside it says no).
     // In a tutorial it leaves for home at once: there is nothing to lose.
     const ask = $('concov');
     $('fbbtn').onclick = e => { e.stopPropagation(); feedback(); };
     wireChatButton($('chatbtn'));
-    $('menubtn').onclick = e => { e.stopPropagation(); if (isTutorial()) { location.hash = '#/'; return; } ask.classList.add('on'); };
+    $('menubtn').onclick = e => { e.stopPropagation();  ask.classList.add('on'); };
     ask.onclick = e => { e.stopPropagation(); if (e.target === ask) ask.classList.remove('on'); };
     $('keep').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); };
     $('concede').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); send({ t: 'concede' }); };
@@ -1378,7 +622,7 @@ function gameScreen() {
     // touch reads your deck as it reads a card: hold it, or tap it when a tap would draw nothing
     const myList = () => { ui.panel = 'mine'; showPanel(); };
     onHold($('deck'), myList);
-    $('deck').onclick = e => { e.stopPropagation(); if (canDraw(lastDecision)) act({ kind: 'draw' }); else if (touch()) myList(); };
+    $('deck').onclick = e => { e.stopPropagation(); if (touch()) myList(); };
     $('tbtn').onclick = e => { e.stopPropagation(); if (canEnd(lastDecision)) { sfx('endturn'); act({ kind: 'pass' }); } };
     $('sndbtn').dataset.tip = 'Settings';
     $('sndbtn').innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
@@ -1394,19 +638,17 @@ function gameScreen() {
 // deck's cover card comes in from the left and the opponent's from the right, "vs" between them; it holds, then lifts off
 // the board. Nothing to press; a click skips it. Once per game, never in a lesson or a replay.
 function drawIntro() {
-  const G = V.game, key = V.id + ':' + V.results.length;
-  if (V.phase !== 'playing' || !G || G.history.length || isTutorial() || RP.views.length || !V.id || ui.intro === key) return;
+  const G = V.game, key = V.id + ':' + V.rematches;
+  if (V.phase !== 'playing' || !G || G.history.length || 0 || !V.id || ui.intro === key) return;
   ui.intro = key;
   const side = p => { const s = V.seats[p] || {}, list = Object.keys(V.lists[p] || {}), mine = p === V.you;
-    adoptRetired(list);   // a list from an old log may name a card this build no longer has; the cover must not stop the screen
     const own = mine && playable().find(d => d.id === s.deck || d.id === 'my:' + s.deck);
-    const cover = own ? coverFor(own) : COVER[s.deck] || coverOf(list, CARDS);
+    const cover = own ? coverFor(own) : coverOf(list, CARDS);
     // One object per player (Martin, 2026-10-02): their cover card, their name in its bar (yours too: a nameplate, not a
     // sentence; the #tag only tells namesakes apart, so it stays on the profile), and in a ranked match their rating as it
     // stands going in, in a gem set into the card's bottom edge. No deck name: a person's deck name is never shown to their opponent.
-    const name = s.bot ? seatLabel(p) : esc((s.name || 'Opponent').split('#')[0]), c = CARDS[cover], r = V.ranked && s.rating;
-    const gem = r ? `<div class="iring edge ${c.rarity}"><div class="jewel">${gemDigits(parseInt(r, 10))}${r.endsWith('?') ? '<span class="q">?</span>' : ''}</div></div>` : '';
-    return `<div class="iside ${p === V.you ? 'A' : 'B'}"><div class="iobj">${cardHTML({ ...c, name, label: c.name }, { cls: 'compact named' })}${gem}</div></div>`; };
+    const name = s.bot ? seatLabel(p) : esc((s.name || 'Opponent').split('#')[0]), c = CARDS[cover];
+    return `<div class="iside ${p === V.you ? 'A' : 'B'}"><div class="iobj">${manaCard({ ...c, name }, { cost: null, owner: p === V.you ? 'A' : 'B', w: 230 })}</div></div>`; };
   const el = document.createElement('div'); el.className = 'intro'; el.id = 'intro';
   el.innerHTML = `${side(V.you)}<div class="ivs">vs</div>${side(opp())}`;
   document.getElementById('scr').appendChild(el); fitNames(el); sfx('versus', .55);
@@ -1419,8 +661,8 @@ function drawIntro() {
 
 // Your turn begins: the tablet lights up once, and a tab in the background says so in its title (a friend's clock is running).
 function turnCue(mine) {
-  const key = V.id + ':' + V.results.length + ':' + (V.game && V.game.round);
-  if (mine && turnCue.was === false && turnCue.key !== key && !RP.views.length) {
+  const key = V.id + ':' + V.rematches + ':' + (V.game && V.game.round);
+  if (mine && turnCue.was === false && turnCue.key !== key) {
     turnCue.key = key;   // the plate itself is the timeline's step (showView), after everything before it has played
     if (document.hidden) document.title = 'Your turn · Animal Kingdom';
   }
@@ -1443,79 +685,64 @@ function keepAwake(on) {
     wake = navigator.wakeLock.request('screen').then(l => { l.onrelease = () => { wake = null; }; return l; }).catch(() => { wake = null; });
   } else if (!on && wake) { wake.then(l => l && l.release()).catch(() => {}); wake = null; }
 }
-addEventListener('visibilitychange', () => { if (!document.hidden && screen === 'game' && V && V.phase === 'playing' && !RP.views.length) keepAwake(true); });   // the lock lapses while hidden
+addEventListener('visibilitychange', () => { if (!document.hidden && screen === 'game' && V && V.phase === 'playing') keepAwake(true); });   // the lock lapses while hidden
 
 function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
-  keepAwake(playing && !RP.views.length);
+  keepAwake(playing);
   lastDecision = d;
-  const M = isMana(), mull = M && G.decision === 'mulligan';   // the mana rules' screen (mana.css); its opening hand shown in full
-  $('scr').classList.toggle('mana', M);
+  const mull = (G.decision === 'mulligan');   // the mana rules' screen (mana.css); its opening hand shown in full
+  $('scr').classList.toggle('mana', true);
   drawIntro();
-  if ($('scr').classList.contains('rp') !== !!RP.views.length) { $('scr').classList.toggle('rp', !!RP.views.length); fitStage(false); }   // a replay: upright its controls take a row under the stage
-  $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
+  if ($('scr').classList.contains('rp') !== false) { $('scr').classList.toggle('rp', false); fitStage(false); }   // a replay: upright its controls take a row under the stage
+  $('menubtn').style.display = playing && V.id ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
   { const n = [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length, w = VIEW.port ? 88 : 52;
     $('series').style.right = 16 + w * n + 'px'; $('pilebtn').style.right = 16 + w * (n + 1) + 'px';
     $('sndbtn').style.right = 16 + w * (n + 2) + 'px'; $('chatbtn').style.right = 16 + w * (n + 3) + 'px'; }   // the Remove Pile left of History; Friends, left of sound
-  $('chatbtn').style.display = V.id && !isTutorial() && hasFriends() ? '' : 'none';   // a real match or replay, once you have a friend   // sound, left of History   // History, left of feedback and the flag
+  $('chatbtn').style.display = V.id && hasFriends() ? '' : 'none';   // a real match or replay, once you have a friend   // sound, left of History   // History, left of feedback and the flag
   ['menubtn', 'fbbtn', 'series', 'pilebtn', 'sndbtn', 'chatbtn'].forEach(id => { $(id).style.left = ''; });
-  if (M) ['menubtn', 'fbbtn', 'series', 'pilebtn', 'sndbtn', 'chatbtn'].filter(id => $(id).style.display !== 'none').forEach((id, i) => { $(id).style.left = 16 + 52 * i + 'px'; });   // the mana screen: a plain row at the top left
-  $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
+  ['menubtn', 'fbbtn', 'series', 'pilebtn', 'sndbtn', 'chatbtn'].filter(id => $(id).style.display !== 'none').forEach((id, i) => { $(id).style.left = 16 + 52 * i + 'px'; });   // the mana screen: a plain row at the top left
+  $('menubtn').dataset.tip = ('Concede');
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
-  $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
-    : '<path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/>';
+  $('menubtn').querySelector('svg').innerHTML = ('<path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/>');
   if (!playing) $('concov').classList.remove('on');
-  drawReplayBar();
 
   // Top left: the turn (a match is one game while there is one map); it opens the history.
   drawHistory(G); drawLists(G); showPanel();
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
   turnCue(playing && G.current === you);   // the card shown, flown down, landed and its dust settled
-  // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye
-  // hides them), and face up in a game while they play with their hand revealed (your legendary Giraffe).
-  const shown = (RP.views.length && RP.eye && G.oppHand) || G.revealedHand, faces = !!shown;
-  const nb = G.handCount[them], step = faces ? Math.min(VIEW.port ? 40 : 72, 504 / Math.max(1, nb - 1)) : M ? 50 : VIEW.port ? 36 : 52,   // face up, a gap between cards as in your hand; a full hand (10) stays clear of the replay's controls
-    bx0 = (VIEW.port ? 184 : STAGE.w / 2) - ((faces ? 66 : M ? 46 : 84) + (nb - 1) * step) / 2;   // upright, left of the buttons; the mana screen's backs are small hexagons
+  // The opponent's hand: one small back each, centred across the board from yours.
+  const nb = G.handCount[them], step = 50, bx0 = STAGE.w / 2 - (46 + (nb - 1) * step) / 2;
   const A = ui.anim, oppDrew = A ? Math.max(0, nb - A.oppHand) : 0;   // their new cards slide down into their hand
   const slot = i => `${i >= nb - oppDrew ? ' drawn' : ''}" style="left:${bx0 + i * step}px;animation-delay:${(i - (nb - oppDrew)) * 0.12}s`;
-  $('opphand').innerHTML = faces && M   // the mana screen: small pieces with their costs, in rows of five left of the board
-    ? '<div class="mopplbl">Your opponent\'s hand</div>' + shown.map((h, i) => `<div class="abs oc" data-card="${h.id}" style="left:${150 + (i % 5) * 56}px;top:${92 + Math.floor(i / 5) * 64}px">${manaCard(CARDS[h.id], { str: h.str, cost: h.cost ?? CARDS[h.id].mana ?? null, owner: 'B', w: 50 })}</div>`).join('')
-    : faces ? shown.map((h, i) => `<div class="abs oc ${CARDS[h.id].rarity}${slot(i)}" data-card="${h.id}">${cardHTML(CARDS[h.id], { str: h.str, cls: 'compact' })}</div>`).join('')
-    : Array.from({ length: nb }, (_, i) => `<div class="abs back${slot(i)}"></div>`).join('');
-  if (faces) { fitNames($('opphand')); $('opphand').querySelectorAll('[data-card]').forEach(el => {
-    el.onmouseenter = () => cardPop(el, el.dataset.card, null, 'below'); el.onmouseleave = () => pop.style.display = 'none'; }); }
+  $('opphand').innerHTML = Array.from({ length: nb }, (_, i) => `<div class="abs back${slot(i)}"></div>`).join('');
 
   // Your hand, centred under the board.
   const held = G.hand.filter(h => h.iid !== ui.flyIid && h.iid !== ui.carry);   // the card in flight or in the grip has left it (flight.js, carry.js)
   // the mana screen: a row of pieces under the board (the full cards, large, while the opening hands are chosen)
-  const n = held.length, cw = M ? (mull ? 176 : 100) : 143, gap = M ? (mull ? 18 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0) : n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0,
-    x0 = (M ? STAGE.w / 2 : PL().handC) - (n * cw + (n - 1) * gap) / 2;
-  const hand = $('hand'); hand.classList.toggle('mull', mull); hand.classList.toggle('free', M && !!(d.pend && d.pend.mode !== 'choice' && !mull));   // a free play: the costs step back
+  const n = held.length, cw = (mull ? 176 : 100), gap = (mull ? 18 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0),
+    x0 = ((STAGE.w / 2)) - (n * cw + (n - 1) * gap) / 2;
+  const hand = $('hand'); hand.classList.toggle('mull', mull); hand.classList.toggle('free', (!!(d.pend && d.pend.mode !== 'choice' && !mull)));   // a free play: the costs step back
   let drawnK = 0;
-  const lit = handLights(d, held);   // a lesson's hints (coach.js)
   const was = new Map([...hand.querySelectorAll('.hc')].map(el => [el.dataset.iid, el.offsetLeft]));   // where each card stood
   hand.innerHTML = held.map((h, i) => {
-    const c = formOf(h.id, V.you), can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && !(d.barred && d.barred(h)) && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
-    const hint = lit.hint(can), shown = lit.shown(h.id);
-    const talking = lit.talking || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
+    const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
     // the mana rules light only a card you can play now: on your opponent's turn none is lit (Martin, 2026-11-20); never
     // dimmed while the opening hands are chosen
-    const dim = M ? !mull && !pick && !can : !can && !pick && !talking;
-    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || selCopy()).iid ? 'sel' : '', dim ? 'dim' : ''].join(' ');   // one copy of the picked card rises
+    const dim = (!mull && !pick && !can);
+    const cls = [c.rarity, can ? 'can' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === selCopy().iid ? 'sel' : '', dim ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first; a card an effect made or
     // fetched (a Kitten, a Young Stag) came from no deck, so it rises into its place instead (Martin, 2026-10-31: flying in
     // from the deck "just looks weird")
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = drawn && ui.step && ui.step.kind === 'to_hand';
     const from = drawn ? `${made ? '' : `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
-    const r = rise(h), html = M ? manaCard(c, { str: r ? r.now : h.str, cost: h.cost, w: cw, iid: h.iid }) : cardHTML(c, { str: r ? r.now : h.str, cls: 'compact' });
-    if (M) return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${html}</div>`;
-    return `<div class="hc ${r ? cls.replace(' dim', '') + ' rise' : cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}${r ? `--ago:${-r.ago}ms` : ''}">${r
-      ? html.replace('<div class="stab">', `<div class="stab">${cardHTML(c, { str: r.was, cls: 'compact' }).match(/<span class="n[^"]*">.*?<\/span>/)[0].replace('class="n', 'class="n was')}`) : html}</div>`;
+    const html = manaCard(c, { str: h.str, cost: h.cost, w: cw, iid: h.iid });
+    return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${html}</div>`;
   }).join('');
-  fitNames(hand); if (M) fitPlaques(hand);
+  fitNames(hand); fitPlaques(hand);
   // a card that left (played, discarded) or came: the others slide to their new places rather than jump
   if (FLIGHT && !matchMedia('(prefers-reduced-motion: reduce)').matches) hand.querySelectorAll('.hc:not(.drawn):not(.made)').forEach(el => {
     const dx = was.get(el.dataset.iid) - el.offsetLeft;
@@ -1549,17 +776,12 @@ function drawGame() {
   }));
   ungrip();
 
-  // The deck is the Draw action, saying how many it draws (the game's rule: 1 since Martin's of 2026-11-16, 2 in the lessons,
-  // written for the earlier one); the End turn button is also the turn indicator.
-  const draws = canDraw(d);
-  $('deck').className = 'abs deck num' + (draws ? ' can' : ''); $('deck').innerHTML = draws ? `Draw ${G.drawCount}` : '';
+  $('deck').className = 'abs deck num'; $('deck').innerHTML = '';
   const tb = $('tbtn');
-  // the moves left in the turn, for either player; the next one to be spent pulses while the opponent is thinking
-  const pips = playing ? Array.from({ length: G.actionsTotal }, (_, i) => { const used = G.actionsTotal - G.actionsLeft;
-    return `<i class="${i < used ? 'used' : i === used ? 'next' : ''}"></i>`; }).join('') : '';
+  const pips = '';
   if (playing && G.current === you) {
     tb.className = 'abs tbtn A num' + (canEnd(d) ? ' can' : '') + (Date.now() < (turnCue.until || 0) ? ' yours' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`; delete tb.dataset.tip;
-  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = `${M ? (G.decision === 'mulligan' ? '<b>Opening hands</b>' : '<b>Your opponent\'s turn</b>') : ''}<span class="pips">${pips}<span class="clock" id="clock"></span></span>`; tb.dataset.tip = 'Your opponent\'s turn'; }
+  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = `${(G.decision === 'mulligan' ? '<b>Opening hands</b>' : '<b>Your opponent\'s turn</b>')}<span class="pips">${pips}<span class="clock" id="clock"></span></span>`; tb.dataset.tip = 'Your opponent\'s turn'; }
   else { tb.className = 'abs tbtn'; tb.innerHTML = ''; delete tb.dataset.tip; }
 
   // A pending choice: the asking card and its rule; card options float above the hand.
@@ -1570,9 +792,8 @@ function drawGame() {
     const k = d.pend.returned;
     // a player's first real match says what the mulligan is for, in plain words (the tutorial skips it); later ones, the short rule
     const first = !store('ak:mullseen');
-    const how = M ? 'Click a card to swap it for another from your deck. No copy of a card you swap can come back.' : tapWords(first ? `This is your starting hand. Don't like a card? Click it to swap it for a new one, up to ${d.pend.cap} times. Then click ${k ? 'Done' : 'Keep hand'}.`
-      : 'Click a card to replace it; no copy of a card you replace can come back.');
-    bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + (RP.views.length ? '' : `<p>${how}</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`);
+    const how = ('Click a card to swap it for another from your deck. No copy of a card you swap can come back.');
+    bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + ((`<p>${how}</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`));
     bar.classList.add('on');
     if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); store('ak:mullseen', '1'); act({ kind: 'choice', choice: SKIP }); };
   } else if (d.pend) {   // a choice only ever reaches the screen after the steps that led to it have played
@@ -1581,18 +802,16 @@ function drawGame() {
     // One line at the top centre, where the eyes are: the card that asks and its rule, then Skip when it may be declined;
     // named options as slabs under it.
     const other = d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('');
-    const skip = d.pend.optional && !RP.views.length ? '<span class="skip" id="skip">Skip</span>' : '';
+    const skip = d.pend.optional ? '<span class="skip" id="skip">Skip</span>' : '';
     // offered cards float over the board: a toggle lowers them to read the board, and raises them again (a new choice shows them)
     const pk = JSON.stringify(d.cardOpts.map(o => o.v)); if (ui.optsKey !== pk) { ui.optsKey = pk; ui.optsHidden = false; }
     const peek = d.cardOpts.length ? `<span class="skip" id="optpeek">${ui.optsHidden ? 'Show cards' : 'Hide cards'}</span>` : '';
     // a pick from your hand is headed by what it does; the asking card's rule stays under it
-    const ask = { discard: 'Discard a card', shuffle: `Shuffle ${d.pend.left === 1 ? 'a card' : d.pend.left + ' cards'} into your deck` }[d.pend.kind];
-    const free = M && d.pend.mode !== 'choice' ? '<span class="mfree">Free</span>' : '';   // the mana rules: a card an effect plays costs nothing
-    bar.innerHTML = `<div class="line">${ask ? `<b>${ask}</b>${src ? `<p>${src.name}: ${src.text}</p>` : ''}` : src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${free}${peek}${skip}</div>` + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
+    bar.innerHTML = `<div class="line">${src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${peek}${skip}</div>` + (other ? `<div class="btns">${other}</div>` : '');
     bar.classList.add('on');
     if (d.cardOpts.length) {
-      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${M ? manaCard(c, { ...(o.str == null ? {} : { str: o.str }), w: 170 }) : cardHTML(c, o.str == null ? {} : { str: o.str })}</div>`; }).join('');
-      opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); opts.classList.toggle('many', d.cardOpts.length > 6); fitNames(opts); if (M) fitPlaques(opts);
+      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${(manaCard(c, { ...(o.str == null ? {} : { str: o.str }), w: 170 }))}</div>`; }).join('');
+      opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); opts.classList.toggle('many', d.cardOpts.length > 6); fitNames(opts); fitPlaques(opts);
       $('optpeek').onclick = e => { e.stopPropagation(); ui.optsHidden = !ui.optsHidden; drawGame(); };
       opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });
     }
@@ -1603,65 +822,45 @@ function drawGame() {
     bar.classList.add('on');
     $('actuse').onclick = e => { e.stopPropagation(); sfx('pick'); ui.roam = null; act({ kind: 'leader' }); };
     $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
-  } else if (d.mine && ui.roam && d.acts.has(ui.roam)) {   // an Action animal picked: its card's rule and the button that uses it
-    const u = (viewerGame().board[ui.roam] || []).slice(-1)[0], c = u && CARDS[u.id], echo = c && /(^|\. )Echo\./.test(c.text);
-    bar.innerHTML = `<div class="line">${c ? `<b>${c.name}</b><p>${c.text}</p>` : '<b>Action</b>'}<span class="skip use" id="actuse">${echo ? 'Echo' : 'Use Action'}${M ? costChip(G.abilityCost) : ''}</span><span class="skip" id="actno">Cancel</span></div>`;
-    bar.classList.add('on');
-    $('actuse').onclick = e => { e.stopPropagation(); sfx('pick'); act({ kind: 'act', from: dcr(ui.roam) }); };
-    $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
-  } else if (M && d.mine && ui.roam && d.roams[ui.roam]) {   // the mana rules: an animal picked to roam says what it costs (a roam a card gave is free)
-    const u = (viewerGame().board[ui.roam] || []).slice(-1)[0], c = u && CARDS[u.id], free = ((G.legal || {}).freeRoam || []).includes(dcr(ui.roam));
-    bar.innerHTML = `<div class="line"><b>${c ? `${c.name}: Roam` : 'Roam'}</b><p>${free ? 'Free this turn.' : `${costChip(G.abilityCost)} Pick where it goes.`}</p><span class="skip" id="actno">Cancel</span></div>`;
-    bar.classList.add('on');
-    $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
   } else {
     bar.classList.remove('on');
     if (playing && G.decision === 'their_choice') waiting.textContent = 'Opponent is choosing';
     else if (playing && G.decision === 'mulligan' && G.toAct !== you) waiting.textContent = 'Opponent is mulliganing';
   }
   clearTimeout(drawGame.think);
-  if (playing && G.toAct === them && V.seats[them].bot && !RP.views.length) {
+  if (playing && G.toAct === them && V.seats[them].bot) {
     const ver = V.version;
     drawGame.think = setTimeout(() => { if (V && V.version === ver && screen === 'game') waiting.textContent = 'Bot is thinking'; }, 2500);
   }
   // The opponent's card, shown large at the centre as it is played, then flown down onto its crossroad (the piece lands as it arrives).
   const st = ui.step;   // what this step shows (static/timeline.js); a view without events just shows what changed
-  if (A) A.fx = st ? (st.kind === 'bounce' ? [{ k: 'bounce', card: st.card, owner: rel(st.owner) }] : [])
+  if (A) A.fx = st ? []
     : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
-  if (st && st.kind === 'act') {   // an Action used: the card shown large over the board, shrinking into the animal that used it
-    const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
-    rv.innerHTML = (M ? manaCard(formOf(st.card, st.player), { owner: rel(st.player), w: 190 }) : cardHTML(formOf(st.card, st.player))) + `<div class="actlbl">${/(^|\. )Echo\./.test((CARDS[st.card] || {}).text || '') ? 'Echo' : 'Action'}</div>`; fitNames(rv); if (M) fitPlaques(rv);
-    rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
-    rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
-  }
   if (st && st.kind === 'leader') {   // a leader's power used: the leader's card shown large, shrinking into its place by the den
     const [tx, ty] = leaderAt(rel(st.player)), rv = $('reveal');
-    rv.innerHTML = (M ? manaCard({ ...CARDS[st.card], text: ((G.leaders || {})[st.player] || {}).text || CARDS[st.card].text }, { owner: rel(st.player), w: 190, str: null }) : cardHTML(CARDS[st.card])) + '<div class="actlbl">Leader</div>'; fitNames(rv); if (M) fitPlaques(rv);
+    rv.innerHTML = ((manaCard({ ...CARDS[st.card], text: ((G.leaders || {})[st.player] || {}).text || CARDS[st.card].text }, { owner: rel(st.player), w: 190, str: null }))) + '<div class="actlbl">Leader</div>'; fitNames(rv); fitPlaques(rv);
     rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
   }
   if (st && st.kind === 'reveal') {   // the opponent's card, shown large and flown down onto its crossroad; the next step lands it
     const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
-    rv.innerHTML = M ? manaCard(formOf(st.card, st.player), { owner: rel(st.player), w: 190, cost: (CARDS[st.card] || {}).mana ?? null }) : cardHTML(formOf(st.card, st.player)); fitNames(rv); if (M) fitPlaques(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
+    rv.innerHTML = (manaCard(CARDS[st.card], { owner: rel(st.player), w: 190, cost: (CARDS[st.card] || {}).mana ?? null })); fitNames(rv); fitPlaques(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.style.setProperty('--hx', `${VIEW.port ? 184 - STAGE.w / 2 : 0}px`); rv.style.setProperty('--hy', `${5 - (VIEW.port ? 560 : 300)}px`);   // their hand's centre
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
     // after its hold the card flies down and lands as the piece (flight.js); without art it shrinks away as before
-    clearTimeout(drawGame.rvfly); drawGame.rvfly = setTimeout(() => { if (ui.step === st && fly(rv.querySelector(M ? '.mcard' : '.card'), $('board').querySelector(`[data-cr="${dcr(st.cr)}"]`), st.card, dcr(st.cr), viewerGame().board[dcr(st.cr)], landNow, null, null, M ? flightGeo() : null)) rv.classList.remove('on'); },
+    clearTimeout(drawGame.rvfly); drawGame.rvfly = setTimeout(() => { if (ui.step === st && fly(rv.querySelector(('.mcard')), $('board').querySelector(`[data-cr="${dcr(st.cr)}"]`), st.card, dcr(st.cr), viewerGame().board[dcr(st.cr)], landNow, null, null, (flightGeo()))) rv.classList.remove('on'); },
       DUR_REVEAL_HOLD * 1000 / (window.AK_SPEED || 1));
   }
-  drawCoach($('coach'), d.lesson, d.rings);   // a lesson's coach (coach.js); none while steps play
   drawBoard(d);
-  if (A && !RP.views.length) soundsFor(document, CARDS);   // one sound per thing that just moved
+  if (A) soundsFor(document, CARDS);   // one sound per thing that just moved
   drawRail(G, d); drawLast(G);
-  if (M && (ui.sel || d.rings.length)) { clearTimeout(stackTimer); stackCr = null; manaHover(null); }   // a hovered piece never covers the places a click acts on
+  if ((ui.sel || d.rings.length)) { clearTimeout(stackTimer); stackCr = null; manaHover(null); }   // a hovered piece never covers the places a click acts on
   drawEnd();
 }
 
 // Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
 // deck's and End turn's centre tops.
-const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 360 : 300, handW: RP.views.length ? 680 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row; a replay's hand takes the whole row, its controls under the stage
-  : hexBoard() ? { hand: 590, handC: 532, handW: 560, deck: [1299, 606], end: [1439, 664] }   // the hex board fills the stage's height: your hand beside its foot, left of your den's tip
-  : { hand: 590, handC: STAGE.w / 2, deck: [1299, 606], end: [1439, 664], handW: 940 };
+const PL = () => ({ hand: 590, handC: 532, handW: 560, deck: [1299, 606], end: [1439, 664] });
 
 // The history strip and both decklists, shared by both game screens.
 // One move in small: a draw is its count on the team's boss (as a held payout); a placement the unit, as on the board.
@@ -1676,7 +875,7 @@ function wireHist(root, G) {
     const m = G.history[el.dataset.h];
     el.onmouseenter = () => { if (m.kind === 'place' || m.kind === 'roam' || m.kind === 'act' || m.kind === 'leader') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
     el.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
-    if (RP.views.length) el.onclick = e => { e.stopPropagation(); pop.style.display = 'none'; replayPlay(false); replayStep(replayMoveEnd(Number(el.dataset.h))); };
+    
   });
 }
 function drawHistory(G) {
@@ -1690,7 +889,6 @@ function drawHistory(G) {
   wireHist(hist, G);
   const removed = document.getElementById('removed');
   removed.innerHTML = `Removed <b>${G.removed.length}</b>`;
-  drawRecent(G);
 }
 function drawLists(G) {
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0), you = V.you, them = opp();
@@ -1706,7 +904,7 @@ function drawPile(G) {
   const side = (who, label) => {
     const cs = (G.pile || []).filter(c => c.owner === who).reverse();
     return `<div class="t">${label}<span class="n">${cs.length}</span></div>` + (cs.length
-      ? `<div class="pgrid">${cs.map(c => `<div class="pc ${CARDS[c.id].rarity}">${cardHTML(CARDS[c.id], { str: c.str })}</div>`).join('')}</div>`
+      ? `<div class="pgrid">${cs.map(c => `<div class="pc ${CARDS[c.id].rarity}">${manaCard(CARDS[c.id], { str: c.str, cost: CARDS[c.id].mana, w: 150 })}</div>`).join('')}</div>`
       : '<div class="nil">Nothing removed yet</div>');
   };
   const el = document.getElementById('pilep');
@@ -1717,7 +915,7 @@ function drawPile(G) {
   document.getElementById('pclose').onclick = close;
 }
 function showPanel() {
-  if (isTutorial()) ui.panel = null;   // the tutorial never opens the decklists or the history: nothing it teaches, and they give away its deal
+     // the tutorial never opens the decklists or the history: nothing it teaches, and they give away its deal
   for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp'], ['set', 'setp'], ['pile', 'pilep']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
   if (ui.panel === 'hist') { const h = document.getElementById('hist'); h.scrollTop = h.scrollHeight; }
 }
@@ -1726,12 +924,12 @@ function showPanel() {
 function fitStage(redraw = true) {
   const st = document.getElementById('stage'); if (!st) return;
   // a window taller than wide gets the upright layout (board.js setView); turning the phone redraws the screen
-  const port = innerHeight > innerWidth && !isMana(), flip = port !== VIEW.port;   // the mana rules' screen is the desktop one, scaled, on any window
+  const port = innerHeight > innerWidth && false, flip = port !== VIEW.port;   // the mana rules' screen is the desktop one, scaled, on any window
   setView(port); document.getElementById('scr').classList.toggle('port', port);
   // upright, a replay keeps a row under the stage for its controls (game.css .port .rbar): the stage fits the window less it,
   // with 60 stage px of savanna kept above and below (about what a phone shows in play), so the hand, which sits at the edge,
   // stays clear of your den: the board comes out a little smaller
-  const rp = port && RP.views.length ? 56 : 0, H = innerHeight - rp;
+  const rp = port && 0 ? 56 : 0, H = innerHeight - rp;
   const k = Math.min(innerWidth / STAGE.w, H / (STAGE.h + (rp ? 120 : 0))), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
   st.style.transform = t; document.getElementById('world').style.transform = t;
   st.style.top = document.getElementById('world').style.top = rp ? `calc(50% - ${rp / 2}px)` : '';
@@ -1759,7 +957,7 @@ function moveLine(m) {
     if (f.k === 'food') return `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}${f.n > 0 ? 'gained' : 'paid'} ${Math.abs(f.n)} food`;
     return null;
   }).filter(Boolean);
-  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? (isMana() ? 'raided the den' : 'captured the HQ') : m.kind === 'roam' ? 'roamed' : m.kind === 'act' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'its'} ${CARDS[m.card] && /(^|\. )Echo\./.test(CARDS[m.card].text) ? 'Echo' : 'Action'}`
+  const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? (('raided the den')) : m.kind === 'roam' ? 'roamed' : m.kind === 'act' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'its'} ${CARDS[m.card] && /(^|\. )Echo\./.test(CARDS[m.card].text) ? 'Echo' : 'Action'}`
     : m.kind === 'leader' ? `used ${CARDS[m.card] ? CARDS[m.card].name : 'the leader'}'s power` : '';
   return [`${who} · turn ${m.round}`, what, ...fx].filter(Boolean).join(' · ');
 }
@@ -1786,7 +984,6 @@ function viewerMap() {
 
 let lastDecision = null;
 // Whether the deck (the Draw action) and the End turn button act now: one test lights them and lets their click through.
-const canDraw = d => !!(d && d.mine && !d.pend && V.game.legal.draw && !d.noDraw);
 const canEnd = d => !!(d && d.mine && !d.pend && V.game.canPass && !d.noPass);
 const ANIM_MAX = 3500;   // ms: longer than any board animation a step starts (fruit, pits, gem, landings)
 function drawBoard(d) {
@@ -1803,15 +1000,14 @@ function drawBoard(d) {
   if (ui.anim) { ui.animKeep = { A: ui.anim, t0: now }; ui.anim = null; }
   const keep = ui.animKeep && now - ui.animKeep.t0 < ANIM_MAX ? ui.animKeep : null;
   let A = keep ? keep.A : null; const ago = keep ? now - keep.t0 : 0;
-  [A, g] = holdFood(d, A, g);   // a lesson may hold the fruit until its Next (coach.js)
   // a den taken: the animal that took it, as it was played (the engine's capture event), standing in the den's mouth
   const cap = V.game.result && V.game.result.reason === 'hq_capture' && (V.game.events || []).filter(e => e.e === 'capture').pop();
   const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str, iid: cap.iid } : null;
-  const region = shownRegion(d);
+  const region = null;
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
   const fire = st && st.src ? st.src.map(dcr) : null;   // the animals whose own effect this is: their trigger marks brighten
   const G = V.game, bases = G.bases ? { A: (G.bases[V.you] || []).map(dcr), B: (G.bases[opp()] || []).map(dcr) } : null;   // the mana board's bases
-  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { bases, region, rings: d.rings, hqRing: d.hqRing, roamable: [...Object.keys(d.roams || {}), ...(d.acts || [])], acting: st && st.kind === 'act' ? [dcr(st.cr)] : [], roamFrom: ui.roam, preview, anim: A, ago, capture, strike, fire, leaders: g.leaders,
+  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { bases, region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, ago, capture, strike, fire, leaders: g.leaders,
     beat: endBeat(), current: V.phase === 'playing' ? rel(V.game.current) : null });
   draw();
   if (startBeat(g, A, ago, capture)) draw();
@@ -1822,7 +1018,7 @@ function drawBoard(d) {
 // has landed in its mouth; a den that reached the food to win lights up once its gem has counted to the total. It starts once
 // per game (beat.key), as the move plays; a game already over when drawn (a reload, a replay's end) shows how it ended at once.
 function startBeat(g, A, ago, capture) {
-  const res = V.game.result, key = `${V.id}-${V.results.length}`;
+  const res = V.game.result, key = `${V.id}-${V.rematches}`;
   if (!res || (ui.beat && ui.beat.key === key) || !['hq_capture', 'food'].includes(res.reason) || res.winner === null) return false;
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches, now = Date.now();
   if (res.reason === 'hq_capture') {
@@ -1840,15 +1036,13 @@ function startBeat(g, A, ago, capture) {
   }
   return true;
 }
-const endBeat = () => { const key = V && `${V.id}-${V.results.length}`;
+const endBeat = () => { const key = V && `${V.id}-${V.rematches}`;
   return ui.beat && ui.beat.key === key ? { kind: ui.beat.kind, side: ui.beat.side, ago: Date.now() - ui.beat.t0 } : null; };
 
-// The leaders prototype: a leader as the player reads it (its name, what kind of ability, the ability as it stands now).
-const LEADER_KIND = { power: 'Hero power: costs one of your actions.', once: 'Once per game: costs one of your actions.', passive: 'Always on.' };
 const LEADER_MANA = n => ({ power: `Hero power: costs ${n} mana.`, once: `Once per game: costs ${n} mana.`, passive: 'Always on.' });   // the mana rules
 function leaderPanel(side) {
   const L = viewerGame().leaders[side]; if (!L) return '';
-  const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader", kind = isMana() ? LEADER_MANA(V.game.abilityCost) : LEADER_KIND;
+  const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader", kind = (LEADER_MANA(V.game.abilityCost));
   return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${kind[L.kind] || ''}</p><p>${L.text}</p>`;
 }
 // The mana rules' controls around the dens (mana.css; Martin, 2026-11-20, the den layout): each side's leader small, left
@@ -1856,7 +1050,7 @@ function leaderPanel(side) {
 // of theirs. Food is in the dens (board.js). Their mana while it isn't their turn is their next turn's, unspent.
 function drawRail(G, d) {
   const el = document.getElementById('mrail'); if (!el) return;
-  if (!isMana() || !G) { el.innerHTML = ''; return; }
+  if ((!G)) { el.innerHTML = ''; return; }
   const you = V.you, them = opp(), mana = G.mana || {}, cost = G.abilityCost;
   const lead = side => {
     const p = side === 'A' ? you : them, L = (G.leaders || {})[p];
@@ -1876,7 +1070,7 @@ function wireRail() {
   const hide = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
   rail.addEventListener('mouseover', e => {
     const lead = e.target.closest('[data-lead]'), deck = e.target.closest('[data-deck]');
-    if (lead && !touch()) { pop.className = 'pop' + (isMana() ? ' mpop' : ''); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
+    if (lead && !touch()) { pop.className = 'pop' + ((' mpop')); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
       const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.max(10, r.left - w - 12) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
     hide();
@@ -1896,8 +1090,8 @@ function wireRail() {
 // shows its card and what it did.
 function drawLast(G) {
   const el = document.getElementById('mlast'); if (!el) return;
-  if (!isMana() || !G) { el.innerHTML = ''; return; }
-  const key = `${V.id}-${V.results.length}`, turnOf = m => (m.round - 1) * 2 + (m.seat === G.first ? 0 : 1);
+  if ((!G)) { el.innerHTML = ''; return; }
+  const key = `${V.id}-${V.rematches}`, turnOf = m => (m.round - 1) * 2 + (m.seat === G.first ? 0 : 1);
   const items = G.history.map((m, i) => ({ t: turnOf(m), m, i })).concat((ui.skips || []).filter(k => k.key === key).map(k => ({ t: k.turn, skip: k.seat })));
   items.sort((a, b) => a.t - b.t);
   // the piece in its team's rim says who, the board says what: no words beside it (Martin, 2026-11-20); hover reads the card
@@ -1907,7 +1101,7 @@ function drawLast(G) {
   el.querySelectorAll('[data-h]').forEach(r => {
     const m = G.history[r.dataset.h];
     r.onmouseenter = () => { if (!m.card || !CARDS[m.card]) return;
-      pop.className = 'pop mpop'; pop.innerHTML = manaCard(formOf(m.card, m.seat), { owner: rel(m.seat), w: 180 }) + `<div class="ev">${moveLine(m)}</div>`;
+      pop.className = 'pop mpop'; pop.innerHTML = manaCard(CARDS[m.card], { owner: rel(m.seat), w: 180 }) + `<div class="ev">${moveLine(m)}</div>`;
       pop.style.minHeight = '0'; pop.style.display = 'flex'; fitPlaques(pop);
       const b = r.getBoundingClientRect(); pop.style.left = (b.right + 12) + 'px'; pop.style.top = Math.max(8, Math.min(b.top - 120, innerHeight - pop.offsetHeight - 10)) + 'px'; };
     r.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; pop.className = 'pop'; };
@@ -1916,12 +1110,12 @@ function drawLast(G) {
 // Place the picked card on crossroad `cr` (its element `g`): it flies there from the hand, or settles from the grip, and turns
 // into the piece (flight.js); the hand closes up behind it.
 function placeAt(g, cr) {
-  const iid = selCopy().iid, start = ui.carry === iid ? release() : null, M = isMana(); ui.carry = null;
+  const iid = selCopy().iid, start = ui.carry === iid ? release() : null; ui.carry = null;
   // in full, text and all, as the opponent's; the mana rules' card as it sat in the hand (its plaque fades as the piece goes)
-  const flew = fly(start ? null : document.querySelector(`#hand .hc[data-iid="${iid}"] ${M ? '.mcard' : '.card'}`), g, ui.sel, cr, viewerGame().board[cr], landNow,
-    M ? manaCard(formOf(ui.sel, V.you), { str: selCopy().str, cost: selCopy().cost, w: 100 }) : cardHTML(formOf(ui.sel, V.you), { str: selCopy().str }), start, M ? flightGeo() : null);
+  const flew = fly(start ? null : document.querySelector(`#hand .hc[data-iid="${iid}"] ${('.mcard')}`), g, ui.sel, cr, viewerGame().board[cr], landNow,
+    (manaCard(CARDS[ui.sel], { str: selCopy().str, cost: selCopy().cost, w: 100 })), start, (flightGeo()));
   act(placeAction(['cr', dcr(cr)]));
-  if (M) { clearTimeout(stackTimer); stackCr = cr; manaHover(null); }   // the piece landing under the pointer isn't read until the pointer moves on
+  { clearTimeout(stackTimer); stackCr = cr; manaHover(null); }   // the piece landing under the pointer isn't read until the pointer moves on
   if (flew) { ui.flyIid = iid; drawGame();
     setTimeout(() => { if (ui.flyIid === iid && screen === 'game') { ui.flyIid = null; drawGame(); } }, 5000); }   // a refused play: the card is back
 }
@@ -1965,19 +1159,16 @@ function wireBoard() {
     const hq = e.target.closest('[data-hq]');
     if (hq && d.pend && d.pend.mode === 'choice' && d.hqRing) return act({ kind: 'choice', choice: 'den' });
     if (hq && ui.sel) { const t = selPlaces(d).find(t => t[0] === 'hq'); if (t) return act(placeAction(t)); }
-    if (hq && ui.roam && d.roams[ui.roam]) { const t = d.roams[ui.roam].find(t => t[0] === 'hq'); if (t) return act({ kind: 'roam', from: dcr(ui.roam), target: t }); }
     const g = e.target.closest('[data-cr]'); if (!g) return;
     const cr = g.dataset.cr;
     if (cr in d.crChoice) return act({ kind: 'choice', choice: d.crChoice[cr] });
     if (ui.sel && d.rings.includes(cr)) return placeAt(g, cr);
-    if (ui.roam && d.rings.includes(cr)) return act({ kind: 'roam', from: dcr(ui.roam), target: ['cr', dcr(cr)] });
-    if (d.roams[cr] || d.acts.has(cr)) { sfx('pick'); ui.roam = ui.roam === cr ? null : cr; ui.sel = null; return drawGame(); }   // pick (or drop) an animal to roam or act
     if (ui.roam) { ui.roam = null; return drawGame(); }
     if (touch() && !ui.sel) readStack(cr);
   });
   board.addEventListener('mouseover', e => {
     const lead = e.target.closest('[data-lead]');   // a leader reads on hover: its ability as it stands
-    if (lead && !touch()) { showStack(null, null); pop.className = 'pop' + (isMana() ? ' mpop' : ''); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
+    if (lead && !touch()) { showStack(null, null); pop.className = 'pop' + ((' mpop')); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
       const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.min(r.right + 10, innerWidth - w - 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
     if (!lead && pop.querySelector('.ev.lead')) { pop.style.display = 'none'; pop.style.minHeight = ''; }
@@ -2013,7 +1204,7 @@ function showStack(g, cr) {
   stackCr = cr; clearTimeout(stackTimer); stackpop.style.display = 'none'; manaHover(null);
   const st = cr && viewerGame().board[cr];
   if (!st || !st.length || ui.sel || (lastDecision && lastDecision.rings.length)) return;
-  stackTimer = isMana() ? setTimeout(() => manaHover(cr), 120) : setTimeout(() => stackAt(cr), 350);
+  stackTimer = (setTimeout(() => manaHover(cr), 120));
 }
 // The mana rules' board piece hovered: it grows where it stands and its plaque slides out under it (mana.css .mhover); what
 // it covers and its timer beside it.
@@ -2024,7 +1215,7 @@ function manaHover(cr) {
   const top = st[st.length - 1], under = st.slice(0, -1).reverse(), [x, y] = crossroadAt(cr), w = Math.round(tokenWidth() * 1.3), ph = w * 624 / 540;
   const side = top.owner === 'W' ? 'W' : top.owner;
   const notes = [top.timer ? resolvesIn(top.timer) : '', under.length ? `Covers ${under.map(u => `${(CARDS[u.id] || {}).name || u.id} (${u.str})`).join(', ')}` : ''].filter(Boolean);
-  el.innerHTML = `<div class="abs" style="left:${x - w / 2}px;top:${y - ph / 2}px">${manaCard(formOf(top.id, stackSeat(top)), { str: top.str, owner: side, w, iid: top.iid })}`
+  el.innerHTML = `<div class="abs" style="left:${x - w / 2}px;top:${y - ph / 2}px">${manaCard(CARDS[top.id], { str: top.str, owner: side, w, iid: top.iid })}`
     + (notes.length ? `<div class="under" style="left:${w + 10}px;top:${ph * .3}px">${notes.map(esc).join('<br>')}</div>` : '') + '</div>';
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); fitPlaques(el);   // measured once shown (hidden, it has no height)
 }
@@ -2032,22 +1223,11 @@ function manaHover(cr) {
 // owner's form (viewer space: A is you), at its strength now, with its timer under it.
 const stackSeat = u => u.owner === 'A' ? V.you : opp();
 const timerLine = u => u.timer ? `<div class="tm">${resolvesIn(u.timer)}</div>` : '';
-const stackCard = (u, attrs = '') => `<div class="sc ${u.owner}">${cardHTML(formOf(u.id, stackSeat(u)), { str: u.str, attrs })}${timerLine(u)}</div>`;
+const stackCard = (u, attrs = '') => `<div class="sc ${u.owner}">${manaCard(CARDS[u.id], { str: u.str, cost: null, owner: u.owner, w: 170 })}${timerLine(u)}</div>`;
 function readStack(cr) {
   const st = V && V.game && viewerGame().board[cr]; if (!st || !st.length) return;
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
   readOverlay(cardRead(top.id, top.str, stackSeat(top), timerLine(top)) + (buried.length ? `<div class="under">${buried.map(u => stackCard(u)).join('')}</div>` : ''));
-}
-function stackAt(cr) {
-  const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];
-  if (!g || !st) return;
-  const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
-  stackpop.innerHTML = `<div class="stk">${stackCard(top, 'style="--w:190px"')}</div>` +
-    buried.map(u => `<div class="stk">${stackCard(u, 'style="--w:150px"')}</div>`).join('');
-  stackpop.style.display = 'flex'; fitNames(stackpop);
-  const r = g.getBoundingClientRect(), w = stackpop.offsetWidth, h = stackpop.offsetHeight;
-  stackpop.style.left = (r.right + 8 + w > innerWidth ? r.left - 8 - w : r.right + 8) + 'px';
-  stackpop.style.top = Math.max(56, Math.min(r.top - 80, innerHeight - h - 10)) + 'px';
 }
 
 function drawEnd() {
@@ -2057,7 +1237,7 @@ function drawEnd() {
     return; }
   // The move that ended the game plays out first (the opponent's card shown and landed, a piece in the den, the fruit of the
   // last income or a Roar): the result shows once it has. Only for a game seen ending live, once; with reduced motion at once.
-  const key = `${V.id}-${V.results.length}`;
+  const key = `${V.id}-${V.rematches}`;
   if (drawEnd.key !== key) {
     const motion = !(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
     drawEnd.until = drawEnd.live && motion && G.result.reason !== 'concede' ? Date.now() + 900 : 0; drawEnd.key = key; drawEnd.live = false; drawEnd.since = Date.now(); }
@@ -2068,66 +1248,24 @@ function drawEnd() {
   const wait = (drawEnd.until || 0) - Date.now();
   if (wait > 0) { ov.classList.remove('on'); clearTimeout(drawEnd.t); drawEnd.t = setTimeout(() => { if (screen === 'game') drawEnd(); }, wait + 20); return; }
   if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<button class="slab" id="unpeek">Back to results</button>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
-  const you = V.you, them = opp(), w = G.result.winner, S = V.score;
-  const live = drawEnd.sounded !== key && drawEnd.until && w !== null && !RP.views.length;   // a game seen ending live: its sound and its entrance, once
+  const you = V.you, them = opp(), w = G.result.winner;
+  const live = drawEnd.sounded !== key && drawEnd.until && w !== null;   // a game seen ending live: its sound and its entrance, once
   if (live) sfx(w === you ? 'victory' : 'defeat');
   drawEnd.sounded = key;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
-  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, starved: `${w === you ? 'Your opponent' : 'You'} ran out of food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
+  const how = { food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, starved: `${w === you ? 'Your opponent' : 'You'} ran out of food`, max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
   // a den taken: the board showed it (Martin, 2026-10-17); a full den says who reached the food, as the lessons' Victory does
   // (phone walkthrough finding 20: a Defeat on food said nothing)
   const howLine = G.result.reason === 'hq_capture' && w !== null ? '' : `<div class="how">${how}.</div>`;
-  const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
-  if (RP.views.length) {
-    // a replay: the game's result, then the replay again or back to the profile
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
-      <div class="btns"><a class="slab" href="#/ladder/history">Back</a>${peek}<button class="play" id="again">Watch again</button></div></div>`;
-    document.getElementById('again').onclick = () => { replayStep(0); replayPlay(true); };
-  } else if (V.gauntlet) {
-    const g = V.gauntlet, tot = g.record.reduce((a, r) => [a[0] + r.w, a[1] + r.l], [0, 0]);
-    const rows = g.record.map(r => `<div>${r.deckName} <b>${r.w}–${r.l}</b></div>`).join('');
-    const done = V.phase === 'match_over';
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${done ? 'Gauntlet done' : res[1]}</div>${howLine}
-      <div class="how">Game ${g.played} of ${g.total} · overall <b>${tot[0]}–${tot[1]}</b></div><div class="how">${rows}</div>
-      ${done ? '' : `<div class="next">Next: ${g.next.yours ? `you play ${g.next.deckName}` : `vs ${g.next.deckName}`} · ${g.next.first === you ? 'you go first' : 'your opponent goes first'}</div>`}
-      <div class="btns">${peek}${done ? '<a class="play" href="#/">Menu</a>' : '<button class="play" id="nextg">Next game</button>'}</div></div>`;
-    if (!done) document.getElementById('nextg').onclick = () => send({ t: 'next' });
-  } else if (V.phase === 'game_over') {
-    const firstNext = w === null ? G.first : (w === you ? them : you);
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${score}
-      <div class="next">Game ${V.results.length + 1}: ${firstNext === you ? 'you go first' : 'your opponent goes first'}</div>
-      <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
-    document.getElementById('nextg').onclick = () => send({ t: 'next' });
-  } else if (isTutorial()) {
-    lessonEnd(ov, { res, how, won: w === you });
-  } else if (V.takeover) {
-    // a position played on from a logged game (a study): the result means little; on to the next position, or back to the list
-    const nx = studyNext();
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
-      <div class="btns">${nx ? `<a class="slab" href="#/study/${esc(nx.name)}">The study</a>` : `<a class="slab" href="#/">Menu</a>`}${peek}${nx && nx.i !== null ? `<button class="play" id="nextpos">Next position</button>` : ''}</div></div>`;
-    const np = document.getElementById('nextpos'); if (np) np.onclick = () => { if (STUDY.list.length) studyStart(nx.i); else location.hash = '#/study/' + nx.name; };
-  } else if (V.ranked) {
-    // a ranked game: its result and your rating before and after; Play again looks for the next opponent (no rematch)
-    // With leagues (V.league, the server's web/tiers.py) one line says what the game did to your stars, and the number
-    // shows only in the top league (docs/ranked-leagues.md); before leagues, the rating alone.
-    const lg = V.league, rt = lg && !lg.top ? null : V.rating, d = rt && rt.delta;
-    const lgLine = lg && (!lg.top || /^Up to/.test(lg.line)) ? `<div class="how lgline" id="lgline">${lgDisc(lg)}${esc(lg.line)}${lgPips(lg)}</div>` : '';
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${lgLine}
-      ${rt ? `<div class="rating"><small>Rating</small><div><b id="rnum">${live ? rt.before : rt.after}</b><span class="rd ${d >= 0 ? 'up' : 'down'}${live ? '' : ' on'}">${d >= 0 ? '+' : '−'}${Math.abs(d)}</span></div></div>` : ''}
-      <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
-    document.getElementById('again').onclick = () => findRanked('again', deckSpec(chosenDeck()));
-    if (live && rt) countRating(rt);
-  } else {
+  {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
-    const won = S[you] > S[them], series = V.results.length > 1;
     // a friend match: a Rematch is an offer the other player accepts or declines (Martin, 2026-11-05, as on chess.com)
     const rm = V.rematch || {}, rmLine = rm.offer === them ? '<div class="how">Your opponent wants a rematch.</div>'
       : rm.offer === you ? '<div class="how">Rematch offered.</div>' : rm.declined === them ? '<div class="how">Your opponent declined the rematch.</div>' : '';
     const rmBtns = rm.offer === them ? '<button class="slab" id="decline">Decline</button><button class="play" id="rematch">Rematch</button>'
       : rm.offer === you || rm.declined ? '' : '<button class="play" id="rematch">Rematch</button>';
-    ov.innerHTML = `<div class="endbox">${series ? `<div class="res ${won ? 'A' : 'B'}">${won ? 'Match won' : 'Match lost'}</div><div class="how">${res[1]} in game ${V.results.length} · ${how}</div>${score}`
-      : `<div class="res ${res[0]}">${res[1]}</div>${howLine}`}
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
       ${rmLine}<div class="btns"><a class="slab" href="#/">Menu</a>${peek}${rmBtns}</div></div>`;
     const rb = document.getElementById('rematch'); if (rb) rb.onclick = () => send({ t: 'rematch' });
     const db = document.getElementById('decline'); if (db) db.onclick = () => send({ t: 'rematch_decline' });
@@ -2138,163 +1276,9 @@ function drawEnd() {
   ov.classList.add('on');
 }
 
-// A ranked game seen ending live: once the result has landed, the rating counts from before to after, then the change shows.
-// The server sends the ratings as shown ("1781", "1500?" while provisional): count on the numbers, land on its text.
-function countRating(rt) {
-  const t0 = performance.now() + 700, dur = 1100, from = parseInt(rt.before, 10);
-  const step = now => { const n = document.getElementById('rnum'); if (!n) return;
-    const k = Math.min(1, Math.max(0, (now - t0) / dur)), e = 1 - (1 - k) ** 3;
-    n.textContent = k < 1 ? Math.round(from + rt.delta * e) : rt.after;
-    if (k < 1) requestAnimationFrame(step); else n.nextElementSibling.classList.add('on'); };
-  requestAnimationFrame(step);
-}
-
-// ------------------------------------------------------------------ study
-// A developer's study (Martin, 2026-10-21): positions from your logged games, in order, each a 'Play from here' as the other
-// seat. #/study/<name>; the list is the server's studies/<name>.json. 'Next position' on the end screen walks the list.
-const STUDY = { name: null, list: [] };
-const studyPlayed = () => { try { return JSON.parse(localStorage.getItem('ak:study:' + STUDY.name) || '[]'); } catch (e) { return []; } };
-async function studyStart(i) {
-  const p = STUDY.list[i]; if (!p) return;
-  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ from: { match: p.match, series: p.series || 0, game: p.game, round: p.round, seat: p.seat } }) });
-  if (!r.ok) return toast(await r.text());
-  const m = await r.json();
-  try { sessionStorage.setItem('ak:study', JSON.stringify({ name: STUDY.name, i })); localStorage.setItem('ak:study:' + STUDY.name, JSON.stringify([...new Set([...studyPlayed(), i])])); } catch (e) {}
-  setToken(m.id, m.token); location.hash = '#/m/' + m.id;
-}
-async function studyScreen(name) {
-  screen = 'study';
-  app.innerHTML = `<div class="mscr pre"><p class="wait">Loading the study…</p></div>`;
-  const r = await api('/api/study/' + encodeURIComponent(name));
-  if (!r.ok) { app.innerHTML = `<div class="mscr pre"><p class="wait">${esc(await r.text())}</p><a class="slab" href="#/">Menu</a></div>`; return; }
-  const s = await r.json(); STUDY.name = name; STUDY.list = s.positions;
-  const done = new Set(studyPlayed());
-  app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab on" href="#/study/${esc(name)}">${esc(s.title)}</a></div></div>
-    <p class="note">${esc(s.note)}</p>
-    ${s.positions.map((p, i) => `<div class="hr study${done.has(i) ? ' won' : ''}" data-i="${i}"><b>${i + 1}</b> <span>Bot ${esc(p.botDeck)} vs your ${esc(p.yourDeck)} · round ${p.round} of ${p.rounds}</span><small>${esc(p.match)}</small><button class="slab" data-i="${i}">${done.has(i) ? 'Again' : 'Play'}</button></div>`).join('')}
-    <div class="btns"><a class="slab" href="#/">Menu</a></div></div></div>`;
-  app.querySelectorAll('button[data-i]').forEach(b => b.onclick = () => studyStart(Number(b.dataset.i)));
-}
-function studyNext() {   // on a takeover's end screen: the study's next position, if a study is on
-  let st = null; try { st = JSON.parse(sessionStorage.getItem('ak:study') || 'null'); } catch (e) {}
-  if (!st || !STUDY.list.length && STUDY.name !== st.name) return st ? { name: st.name, i: null } : null;
-  return { name: st.name, i: st.i + 1 < STUDY.list.length ? st.i + 1 : null };
-}
-
-// ------------------------------------------------------------------ replay
-// A finished match played back on the game screen: every view you saw, one per action, stepped or played at the bot's pace.
-// Nothing can be done on the board; the controls sit where the menu does, and the arrows and Space drive them too.
-const RP = { key: null, views: [], i: 0, playing: false, timer: null, eye: true, shown: [], turns: [] };   // eye: the opponent's hand shown
-async function replayScreen(key) {
-  if (RP.key === key && RP.views.length) return;
-  stopReplay(); screen = null; RP.key = key;
-  app.innerHTML = `<div class="mscr pre"><p class="wait">Loading the replay…</p></div>`;
-  // a link someone shared leads home; your own replay back to your history
-  const back = msg => { RP.key = null; const own = ME.history && ME.history.some(h => h.match === key);
-    history.replaceState(null, '', own ? '#/ladder/history' : '#/'); own ? ladderScreen() : homeScreen(); toast(msg); };
-  let views;
-  try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); RP.shared = r.headers.get('X-AK-Shared') === '1'; }
-  catch (e) { if (RP.key === key) back(e.message || 'The replay didn\'t load, try again'); return; }
-  if (RP.key !== key) return;   // left while it loaded
-  adoptRetired(replayIds(views));
-  // A step is a view that brought something: new events (static/timeline.js plays them), a choice put to you, or the game's
-  // end. The rest (the opponent's hidden choices, their kept hand) is skipped; the progress bar marks each turn.
-  const seq = v => { const ev = v.game.events || []; return ev.length ? ev[ev.length - 1].seq : 0; };
-  const yours = v => JSON.stringify(v.game.toAct === v.you && v.game.pending);   // the choice put to you, if any
-  const legacy = !views.some(v => (v.game.events || []).length);   // matches from before events (2026-10-01): the old screen comparison
-  const look = v => JSON.stringify([v.phase, v.game.board, v.game.hand.map(h => h.id), (v.game.oppHand || []).map(h => h.id), v.game.food,
-    v.game.current, v.game.round, yours(v)]);
-  RP.shown = views.map((v, i) => i === 0 || i === views.length - 1 || (legacy ? look(v) !== look(views[i - 1])
-    : seq(v) !== seq(views[i - 1]) || yours(v) !== yours(views[i - 1]) || v.phase !== views[i - 1].phase));
-  RP.turns = views.flatMap((v, i) => i && v.game.round !== views[i - 1].game.round ? [i / (views.length - 1)] : []);
-  RP.views = views; RP.eye = true; ui.peek = false; ui.sel = null; ui.panel = null;
-  replayStep(0); replayPlay(true);
-}
-function stopReplay() { clearTimeout(RP.timer); if (RP.views.length) stopPlayback(); Object.assign(RP, { key: null, views: [], i: 0, playing: false, shown: [], turns: [], shared: false }); }
-function replayStep(i) {
-  i = Math.max(0, Math.min(RP.views.length - 1, i));
-  const prev = V, step = i === RP.i + 1 || (i > RP.i && RP.shown.slice(RP.i + 1, i).every(s => !s)); RP.i = i; V = RP.views[i]; V.rx = Date.now() / 1000;
-  onView(step ? prev : null);   // one step forward plays its animation; any jump lands at once
-}
-const replayNext = () => { let i = RP.i + 1; while (i < RP.views.length - 1 && !RP.shown[i]) i++; return i; };
-const replayPrev = () => { let i = RP.i - 1; while (i > 0 && !RP.shown[i]) i--; return i; };
-// The view where move h has fully resolved (its choices included): the last one before the next move.
-const replayMoveEnd = h => { let i = RP.views.findIndex(v => v.game.history.length > h + 1); return (i < 0 ? RP.views.length : i) - 1; };
-// Playing: the next view after the same beat the bot takes, longer while the opponent's card is shown.
-function replayPlay(on) {
-  clearTimeout(RP.timer); RP.playing = on && RP.i < RP.views.length - 1;
-  if (RP.playing) {
-    if (!PB.busy) RP.timer = setTimeout(() => { replayStep(replayNext()); }, RP.i === 0 ? 1200 : 500);   // a beat after the last step
-  }
-  drawReplayBar();
-}
-const RICON = { back: '<path d="M15 6l-6 6 6 6"/>', fwd: '<path d="M9 6l6 6-6 6"/>', play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>',
-  pause: '<path d="M8.5 6v12M15.5 6v12"/>', eye: '<path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
-  eyeoff: '<path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 20L20 4"/>' };
-const ric = k => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${RICON[k]}</svg>`;
-// The controls are built once per screen (a drag on the bar must outlive redraws); each view updates them.
-function drawReplayBar() {
-  const bar = document.getElementById('rbar');
-  if (!bar) return;
-  if (!RP.views.length) { bar.innerHTML = ''; bar.classList.remove('on'); return; }
-  const $ = id => document.getElementById(id), stop = f => e => { e.stopPropagation(); f(e); };
-  if (!$('rtrack')) {
-    bar.innerHTML = `<button class="slab" id="rback" tabindex="-1" data-tip="Back one move">${ric('back')}</button>
-      <button class="slab" id="rplay" tabindex="-1"></button>
-      <button class="slab" id="rfwd" tabindex="-1" data-tip="Forward one move">${ric('fwd')}</button>
-      <div class="track" id="rtrack"><i></i></div>
-      <button class="slab" id="reye" tabindex="-1"></button>
-      ${RP.shared ? '' : '<button class="slab take" id="rtake" tabindex="-1" data-tip="Take the other seat from this round and play on against the Expert">Play from here</button>'}
-      ${RP.shared ? '<a class="slab out" href="#/">Home</a>' : '<a class="slab out" href="#/ladder/history">Leave</a>'}`;
-    // Play from here (Martin, 2026-10-21): the other seat, from the start of its turn in the round shown, the Expert on yours.
-    if ($('rtake')) $('rtake').onclick = stop(async () => {
-      const v = RP.views[RP.i]; if (!v || v.phase !== 'playing') return toast('Step to a round first');
-      const key = RP.key.replace(/-\d+$/, ''), series = Number((RP.key.match(/-(\d+)$/) || [])[1] || 0);
-      const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ from: { match: key, series, round: v.game.round, seat: v.you === 'A' ? 'B' : 'A' } }) });
-      if (!r.ok) return toast(await r.text());
-      const m = await r.json(); stopReplay(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
-    });
-    $('rback').onclick = stop(() => { replayPlay(false); replayStep(replayPrev()); });
-    $('rfwd').onclick = stop(() => { replayPlay(false); replayStep(replayNext()); });
-    $('rplay').onclick = stop(() => replayPlay(!RP.playing));
-    $('reye').onclick = stop(() => { RP.eye = !RP.eye; drawGame(); });
-    // Click or drag along the bar: the game follows the pointer, the turn counter with it.
-    const track = $('rtrack'), seek = e => { const r = track.getBoundingClientRect();
-      const i = Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (RP.views.length - 1)); if (i !== RP.i) replayStep(i); };
-    track.onclick = e => e.stopPropagation();
-    track.onpointerdown = e => { e.stopPropagation(); track.setPointerCapture(e.pointerId); replayPlay(false); seek(e); track.onpointermove = seek; };
-    track.onpointerup = track.onpointercancel = () => { track.onpointermove = null; };
-  }
-  bar.classList.add('on');
-  const n = RP.views.length - 1;
-  $('rtrack').innerHTML = RP.turns.map(p => `<b style="left:${p * 100}%"></b>`).join('') + `<i style="width:${n ? RP.i / n * 100 : 100}%"></i>`;
-  $('rplay').dataset.tip = RP.playing ? 'Pause' : 'Play'; $('rplay').innerHTML = ric(RP.playing ? 'pause' : 'play');
-  $('reye').dataset.tip = `${RP.eye ? 'Hide' : 'Show'} your opponent's hand`; $('reye').innerHTML = ric(RP.eye ? 'eye' : 'eyeoff');
-}
-// The last few moves beside the turn, newest last (in a replay, where the history is how you find your way).
-function drawRecent(G) {
-  const el = document.getElementById('recent');
-  if (!el) return;
-  if (!RP.views.length || !G.history.length) { el.innerHTML = ''; return; }
-  const from = Math.max(0, G.history.length - 7);
-  el.innerHTML = G.history.slice(from).map((m, k) => { const i = from + k, prev = G.history[i - 1];
-    return (k && prev.round !== m.round ? '<span class="tgap"></span>' : '') + histItem(m, i); }).join('');
-  wireHist(el, G);
-}
-function replayKey(e) {
-  if (e.key === 'ArrowLeft') { replayPlay(false); replayStep(replayPrev()); }
-  else if (e.key === 'ArrowRight') { replayPlay(false); replayStep(replayNext()); }
-  else if (e.key === ' ') { e.preventDefault(); replayPlay(!RP.playing); }
-  else if (e.key === 'Escape' && !ui.panel) location.hash = '#/ladder/history';
-  else return false;
-  return true;
-}
-
-window.__ak = () => ({ V, ui, d: lastDecision, PB, RP });   // test hook: the headless play-through reads the view (and whether steps are playing, where a replay is)
+window.__ak = () => ({ V, ui, d: lastDecision, PB });   // test hook: the headless play-through reads the view (and whether steps are playing)
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.build = checkBuild;   // test hook: a socket naming another build
-window.__ak.local = () => LOCAL;   // test hook: the match in the browser, its bot's times and its log
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
-window.__ak.adopt = views => adoptRetired(replayIds(views));   // test hook: what loading a replay does to the cards it names
 boot();
 

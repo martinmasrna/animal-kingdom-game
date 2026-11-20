@@ -530,11 +530,14 @@ class Match:
 
 
 def map_info() -> dict:
-    """The board as the client draws it: its tiles, their adjacency, each region and its food, and each player's base."""
+    """The board as the client draws it: its tiles ("row,col"), their adjacency, each region (its tiles, its food, and `c`,
+    its lowest tile) and each player's base."""
     gm = load_map(MAP_ID)
+    regions = [{"id": r.id, "c": list(min(tuple(map(int, c.split(","))) for c in r.corners)), "corners": list(r.corners),
+                "food": r.food} for r in gm.regions.values()]
     return {"id": gm.id, "name": gm.name, "winFood": gm.win_food, "crossroads": sorted(gm.crossroads),
-            "edges": [list(e) for e in gm.edges], "bases": {p: sorted(t) for p, t in gm.hq_connects.items()},
-            "regions": [{"id": r.id, "corners": list(r.corners), "food": r.food} for r in gm.regions.values()]}
+            "cols": max(int(c.split(",")[0]) for c in gm.crossroads), "rows": max(int(c.split(",")[1]) for c in gm.crossroads),
+            "edges": [list(e) for e in gm.edges], "bases": {p: sorted(t) for p, t in gm.hq_connects.items()}, "regions": regions}
 
 
 def card_pool() -> list[dict]:
