@@ -49,14 +49,15 @@ function toast(msg, ok) {
 }
 // A decklist in the game's panels: the collection's strips, each with the copies left.
 function rows(list, counts) {
-  return stripsHTML(Object.keys(list), CARDS, id => counts ? (counts[id] || 0) : list[id]);
+  return stripsHTML(Object.keys(list), CARDS, id => counts ? (counts[id] || 0) : list[id], isMana());   // the mana rules: by cost, each with its cost
 }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 function cardPop(el, id, extra, place) {
   const c = CARDS[id], r = el.getBoundingClientRect();
-  pop.className = 'pop ' + c.rarity;
-  pop.innerHTML = cardHTML(c) + (extra ? `<div class="ev">${extra}</div>` : '');
-  pop.style.display = 'flex'; fitNames(pop);
+  const M = isMana();   // the mana rules' card
+  pop.className = 'pop ' + c.rarity + (M ? ' mpop' : '');
+  pop.innerHTML = (M ? manaCard(c, { cost: c.mana ?? null, w: 200 }) : cardHTML(c)) + (extra ? `<div class="ev">${extra}</div>` : '');
+  pop.style.display = 'flex'; fitNames(pop); if (M) fitPlaques(pop);
   const h = pop.offsetHeight;
   const w = pop.offsetWidth;
   if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - w - 10) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
@@ -86,8 +87,8 @@ function formOf(id, seat) {
 // keywords explained (under it on a narrow screen). `extra`: what goes under the card itself (a board piece's timer).
 function cardRead(id, str, seat = V && V.you, extra = '') {
   const c = formOf(id, seat); if (!c) return '';
-  const face = isMana() ? manaCard(c, { ...(str == null ? {} : { str }), owner: seat === V.you ? 'A' : 'B', w: 230 }) : cardHTML(c, str == null ? {} : { str });   // the mana rules' card, piece and plaque
-  return `<div class="rcard${(c.related || []).length ? ' wide' : ''}">${face}${extra}${readSide(c, CARDS)}</div>`;
+  const M = isMana(), face = M ? manaCard(c, { ...(str == null ? {} : { str }), cost: c.mana ?? null, owner: seat === V.you ? 'A' : 'B', w: 230 }) : cardHTML(c, str == null ? {} : { str });   // the mana rules' card, piece, plaque and cost
+  return `<div class="rcard${(c.related || []).length ? ' wide' : ''}">${face}${extra}${readSide(c, CARDS, M ? r => manaCard(r, { cost: r.mana ?? null, w: 170 }) : undefined)}</div>`;
 }
 function readCard(id, str, seat = V && V.you) {
   const html = cardRead(id, str, seat); if (html) readOverlay(html);
@@ -700,11 +701,15 @@ const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b
 
 // ------------------------------------------------------------------ collection (= the deckbuilder): collection.js
 // #/collection/<deck id> opens that deck (home's "Open in collection").
+// In the mana rules (MANA_HOME) it builds decks for them: their deck rules and wording, the mana card, Play picks the deck on
+// the mana home. Decks are one collection whichever rules build them.
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  renderCollection(app, { open, rules: RULES, cards: CARDS, leaders: LEADERS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
-    play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
+  const mana = MANA_HOME && !!(RULESETS.mana || {}).deck;
+  applyWording(mana ? RULESETS.mana : null);
+  renderCollection(app, { open, mana, rules: mana ? { ...RULES, ...RULESETS.mana.deck } : RULES, cards: CARDS, leaders: LEADERS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback, share: shareDeck,
+    play: d => { store(mana ? 'ak:manadeck' : 'ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
 }
 
 // ------------------------------------------------------------------ share links (docs/share-links.md)
@@ -912,12 +917,12 @@ function manaLegal(list, leader) {
     && Object.entries(n).every(([id, k]) => CARDS[id] && CARDS[id].status === 'collectible' && CARDS[id].mana != null && k <= R.copies[CARDS[id].rarity]);
 }
 // Home in the mana rules: a friend match only. Your decks that are legal under them, then the six pool decks (Deck 1 to 6);
-// create a match (its code and link on the next screen), or join one by its code. The collection and deck builder for these
-// rules are the next stage.
+// create a match (its code and link on the next screen), or join one by its code. The collection builds decks for these rules
+// (collectionScreen); a deck of yours that isn't legal under them is counted under the list, to be fixed there.
 function manaHome(mode = {}) {
   screen = 'home'; homeMode = mode;
-  const mine = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));
-    return { id: 'my:' + d.id, name: d.name, mine: true, list, leader: d.leader }; }).filter(d => manaLegal(d.list, d.leader));
+  const own = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));
+    return { id: 'my:' + d.id, name: d.name, mine: true, list, leader: d.leader }; }), mine = own.filter(d => manaLegal(d.list, d.leader)), off = own.length - mine.length;
   const pool = BOT_ONLY.filter(d => /^pool_\d+$/.test(d.id)).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
   const all = [...mine, ...pool], chosen = all.find(d => d.id === store('ak:manadeck')) || all[0];
   const leaderName = d => { const ls = d.leader ? [d.leader] : [...new Set(d.list || [])].filter(id => LEADERS[id]);   // a pool deck: the one card in it that can lead
@@ -926,7 +931,8 @@ function manaHome(mode = {}) {
   app.innerHTML = `<div class="mhome"><div class="box">
     <h1>Friend match<small>The mana rules, a prototype</small></h1>
     <h2>Your deck</h2><div class="decks">${all.map(tile).join('') || '<p>No deck of yours is legal under these rules yet.</p>'}</div>
-    <div class="row"><button class="go" id="mgo">${mode.join ? `Join match ${esc(mode.join)}` : 'Create match'}</button></div>
+    ${off ? `<p class="foot">${off === 1 ? 'One deck of yours isn\'t' : `${off} decks of yours aren't`} legal in these rules: the collection says why.</p>` : ''}
+    <div class="row"><button class="go" id="mgo">${mode.join ? `Join match ${esc(mode.join)}` : 'Create match'}</button><a class="sec" id="mcoll" href="#/collection">Build a deck</a></div>
     ${mode.join ? '' : `<h2>Join a friend's match</h2><div class="row"><input id="mcode" maxlength="6" placeholder="Code" autocomplete="off"><button class="sec" id="mjoin">Join</button></div>`}
     <p class="foot"><a href="?rules=default#/">Play the usual rules</a></p></div></div>`;
   const $ = id => document.getElementById(id);
@@ -1455,8 +1461,9 @@ function drawGame() {
     bx0 = (VIEW.port ? 184 : STAGE.w / 2) - ((faces ? 66 : M ? 46 : 84) + (nb - 1) * step) / 2;   // upright, left of the buttons; the mana screen's backs are small hexagons
   const A = ui.anim, oppDrew = A ? Math.max(0, nb - A.oppHand) : 0;   // their new cards slide down into their hand
   const slot = i => `${i >= nb - oppDrew ? ' drawn' : ''}" style="left:${bx0 + i * step}px;animation-delay:${(i - (nb - oppDrew)) * 0.12}s`;
-  $('opphand').innerHTML = faces
-    ? shown.map((h, i) => `<div class="abs oc ${CARDS[h.id].rarity}${slot(i)}" data-card="${h.id}">${cardHTML(CARDS[h.id], { str: h.str, cls: 'compact' })}</div>`).join('')
+  $('opphand').innerHTML = faces && M   // the mana screen: small pieces with their costs, in rows of five left of the board
+    ? '<div class="mopplbl">Your opponent\'s hand</div>' + shown.map((h, i) => `<div class="abs oc" data-card="${h.id}" style="left:${150 + (i % 5) * 56}px;top:${92 + Math.floor(i / 5) * 64}px">${manaCard(CARDS[h.id], { str: h.str, cost: h.cost ?? CARDS[h.id].mana ?? null, owner: 'B', w: 50 })}</div>`).join('')
+    : faces ? shown.map((h, i) => `<div class="abs oc ${CARDS[h.id].rarity}${slot(i)}" data-card="${h.id}">${cardHTML(CARDS[h.id], { str: h.str, cls: 'compact' })}</div>`).join('')
     : Array.from({ length: nb }, (_, i) => `<div class="abs back${slot(i)}"></div>`).join('');
   if (faces) { fitNames($('opphand')); $('opphand').querySelectorAll('[data-card]').forEach(el => {
     el.onmouseenter = () => cardPop(el, el.dataset.card, null, 'below'); el.onmouseleave = () => pop.style.display = 'none'; }); }
@@ -1832,9 +1839,9 @@ function drawRail(G, d) {
   const lead = side => {
     const p = side === 'A' ? you : them, L = (G.leaders || {})[p], m = mana[p] || { left: 0, total: 0 };
     const deck = (G.deckCount || {})[p], c = L && CARDS[L.id];
-    const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && (L.spent || (L.kind !== 'passive' && !L.usable && (side === 'B' || G.current === you)));
+    const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && L.spent;   // the token stays readable; the gold ring says when your power can be used
     const power = !L ? '' : L.kind === 'passive' ? 'Always on' : L.spent ? 'Used' : `${L.kind === 'once' ? 'Once a game' : 'Power'} ${costChip(L.cost ?? cost)}`;
-    const tok = L ? `<div class="ltok${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:78px">${leaderToken(L.id, side, CARDS, 78)}</div></div>` : '';
+    const tok = L ? `<div class="ltok${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:100px">${leaderToken(L.id, side, CARDS, 100)}</div></div>` : '';
     return `<div class="mlead ${side}">${tok}<div class="lt">${c ? `<b>${esc(c.name.split(':')[0])}</b><br>` : ''}${power}${side === 'B' ? `<br>${pipsHTML(m.left, m.total)}` : ''}`
       + `<br><span class="ldeck" data-deck="${side}">Deck ${deck ?? ''}</span></div></div>`;
   };
