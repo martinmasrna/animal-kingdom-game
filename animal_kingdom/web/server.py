@@ -50,6 +50,7 @@ from .profiles import DECKS_MAX, ProfileError, Profiles, clean_name
 from . import local
 from . import replay
 from . import tutorial
+from ..engine.config import RULESET_KEYWORDS, RULESET_MAPS, RULESET_TEXT, RULESETS
 from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, MAPS, STARTER_COVERS, Match, Seat, card_pool, map_info
 from . import discord
 
@@ -1394,7 +1395,13 @@ async def pool(_req):
         "decks": [{"id": d["slug"], "name": d["name"], "list": load_premade_deck(d["slug"]), "cover": d.get("cover", "")}
                   for d in STARTER_DECKS],
         "map": map_info(),
-        "maps": {m: map_info(m) for m in MAPS},
+        "maps": {m: map_info(m) for m in (*MAPS, *RULESET_MAPS.values())},
+        # the per-match rulesets (engine/config.py): each one's board, and how it reads the cards and keywords it changes
+        "rulesets": {name: {"map": RULESET_MAPS.get(name, MAP_ID), "texts": RULESET_TEXT[name], "keywords": RULESET_KEYWORDS[name],
+                            # its deck rules (decks.decklist_problems): the mana ruleset has no star budget and plays only cards with a mana cost
+                            "deck": {"deckSize": DECK_SIZE, "copies": COPY_LIMITS, "starBudget": None if name == "mana" else STAR_BUDGET,
+                                     "needsCost": name == "mana"}}
+                     for name in RULESETS},
         "levels": list(BOT_LEVELS),
         "bot_decks": list(ladder.decks if ladder else BOT_DECKS),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS plus the league's)
         # The bot decks that are not starters: shown by name and list wherever a bot's deck is (Practice's chooser,
@@ -1507,6 +1514,8 @@ async def takeover_match(req, src: dict):
     rec = find_log(key, series, src.get("game"))
     if rec is None:
         raise web.HTTPNotFound(text="This game wasn't kept")
+    if rec.get("ruleset", "default") != "default":     # the Expert plays the default rules only (the Rust engine)
+        raise web.HTTPBadRequest(text=f"No bot plays the {rec['ruleset']} rules yet")
     seat = src.get("seat")
     if seat not in ("A", "B"):
         seat = "A" if rec["bots"][0] != "human" else "B"       # the seat that wasn't yours
@@ -1551,13 +1560,19 @@ async def create_match(req):
             raise EngineError("no such lesson")
         if lesson not in (0, *tutorial.BOTS):
             raise EngineError("no such lesson")
-        deck = f"{tutorial.BOTS[lesson]}_you" if lesson else custom_decks.resolve(body.get("deck"))
+        ruleset = body.get("ruleset") or "default"     # the mana prototype (2026-11-20): "ruleset": "mana", a friend match only
+        if ruleset not in RULESETS:
+            raise EngineError("no such ruleset")
+        if ruleset != "default" and (lesson or body.get("bot") or body.get("gauntlet") or body.get("map") is not None):
+            raise EngineError(f"the {ruleset} rules are played between two people, on their own board")
+        deck = f"{tutorial.BOTS[lesson]}_you" if lesson else custom_decks.resolve(body.get("deck"), ruleset)
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
     player = profile_of(req)
     match = Match(mid, Seat(token, display(player) if player else guest_name(body, "You"), deck=deck,
                             profile=player and player["id"]))
+    match.set_ruleset(ruleset)
     if body.get("map") is not None:          # the board: today's, or the hex prototype (not on the ladder: ranked joins elsewhere)
         if body["map"] not in MAPS:
             raise web.HTTPBadRequest(text="no such board")
@@ -1714,7 +1729,7 @@ async def join_match(req):
         raise web.HTTPNotFound(text="no such match")
     body = await guard.body(req)
     try:
-        deck = custom_decks.resolve(body.get("deck"))
+        deck = custom_decks.resolve(body.get("deck"), match.ruleset)   # legal under the match's rules
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
     token = secrets.token_urlsafe(12)
@@ -1769,7 +1784,7 @@ async def socket(req):
                 if kind == "act":
                     match.act(seat, data["action"])
                 elif kind == "deck":
-                    match.set_deck(seat, custom_decks.resolve(data["deck"]))
+                    match.set_deck(seat, custom_decks.resolve(data["deck"], match.ruleset))
                 elif kind == "ready":
                     match.ready(seat)
                 elif kind == "next":

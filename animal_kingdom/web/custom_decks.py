@@ -8,7 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from ..decks import PREMADE_DECKS, deck_problems, register_deck
+from ..decks import DECK_LEADERS, PREMADE_DECKS, deck_problems, load_premade_deck, register_deck
 from ..engine.state import EngineError
 from .match import DECK_NAMES
 from .renamed import renamed
@@ -32,10 +32,17 @@ def load() -> None:
             _register(slug, d["name"], renamed(d["list"]), d.get("leader"))
 
 
-def resolve(spec) -> str:
-    """A premade slug, or a player's deck given as {"name", "list"}: returns the slug to play it under."""
+def resolve(spec, ruleset: str | None = None) -> str:
+    """A premade slug, or a player's deck given as {"name", "list"}: returns the slug to play it under. Under a ruleset
+    other than the default (the mana prototype), the deck must be legal under that ruleset's deck rules, a saved or
+    premade slug included."""
     if isinstance(spec, str):
         if spec in PREMADE_DECKS or spec in _saved:
+            if ruleset not in (None, "default"):
+                leader = _saved[spec].get("leader") if spec in _saved else DECK_LEADERS.get(spec)
+                problems = deck_problems(load_premade_deck(spec), leader, ruleset=ruleset)
+                if problems:
+                    raise EngineError(f"illegal deck for the {ruleset} rules: " + "; ".join(problems))
             return spec
         raise EngineError("unknown deck")
     if not isinstance(spec, dict) or not isinstance(spec.get("list"), list):
@@ -43,9 +50,10 @@ def resolve(spec) -> str:
     decklist = sorted(str(c) for c in spec["list"])
     name = (str(spec.get("name") or "").strip() or "My deck")[:40]
     leader = str(spec.get("leader") or "") or None          # the deck's leader, one of its legendaries: every deck has one
-    problems = deck_problems(decklist, leader)
+    problems = deck_problems(decklist, leader, ruleset=ruleset)
     if problems:
-        raise EngineError("illegal deck: " + "; ".join(problems))
+        raise EngineError(("illegal deck: " if ruleset in (None, "default") else f"illegal deck for the {ruleset} rules: ")
+                          + "; ".join(problems))
     slug = "custom_" + hashlib.sha1((name + "|" + ",".join(decklist) + (f"|{leader}" if leader else "")).encode()).hexdigest()[:10]
     if slug not in _saved:
         _register(slug, name, decklist, leader)

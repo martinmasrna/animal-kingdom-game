@@ -17,12 +17,12 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from ..decks import LADDER_DECK_NAMES, leaders_for, load_premade_deck
-from ..engine import rules, statics
+from ..engine import effects, rules, statics
 from ..engine.actions import SKIP, ActAction, ChoiceAction, DrawAction, LeaderAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine import leaders as L
-from ..engine.effects import grimm_draws, leader_usable
+from ..engine.effects import ability_cost, grimm_draws, leader_usable, mana_cost
 from ..engine.cards import DECKLISTS, load_cards
-from ..engine.config import Config
+from ..engine.config import RULESET_KEYWORDS, RULESET_MAPS, RULESET_TEXT, RULESETS, Config
 from ..engine.effects import roar_condition
 from ..engine.maps import load_map
 from ..engine.state import EATEN_FORMS, EngineError, GameState, Result, new_game, other_player
@@ -36,6 +36,9 @@ ASKS = {"mulligan": "mulligan", "magpie_steal": "discard", "raven_dig": "shuffle
 MAP_ID = "map_b"
 # The boards a match may be played on: today's, and the hex prototype (Martin's diamond, 2026-11-16; data/maps.json map_hex).
 MAPS = ("map_b", "map_hex")
+# The per-match rulesets (engine/config.py RULESETS): "mana", the prototype of 2026-11-20, plays on its own board
+# (RULESET_MAPS) between two people only: the bots think on the Rust engine, which plays the default rules alone.
+RULESET_NAMES = tuple(RULESETS)
 # One game per match while there is one map: the best-of-3 is part of the game, but its point is the three-map
 # reveal (rules §14), so it comes back with the maps (Martin, 2026-09-30). Rematch carries the loser-first rule.
 GAMES_TO_WIN = 1
@@ -116,7 +119,8 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     lid = lead["id"]
     kind, text = L.LEADERS[lid]
     out = {"id": lid, "kind": kind, "text": text, "usable": st.current == p and st.pending is None and st.result is None
-           and rules.turn_actions(st) - st.actions_taken_this_turn > 0 and leader_usable(st, p)}
+           and rules.turn_actions(st) - st.actions_taken_this_turn >= ability_cost(st) and leader_usable(st, p),
+           **({"cost": ability_cost(st)} if st.config.mana and kind != "passive" else {})}
     if lid == L.GRIMM:
         n, per = grimm_draws(st, lead), st.config.grimm_leader_per
         out.update(draws=n, kills=lead["kills"], per=per, toward=lead["kills"] % per,
@@ -271,6 +275,7 @@ class Match:
         self.takeover = False            # a game played on from a logged position (start_from): neither logged nor rated
         self.map_id = MAP_ID             # the board this match is played on (MAPS)
         self.draw_action = True          # False: the Draw action is off, cards come from the turn's free card and from effects (the trial of 2026-11-20)
+        self.ruleset = "default"         # the rules this match plays (RULESETS); "mana" sets its own board, hands and no Draw action
         self.last_log: Optional[dict] = None   # the last finished game (game_log), for its replay
         self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
         self.rng = random.Random(secrets.randbits(32))
@@ -292,9 +297,26 @@ class Match:
     def seat_of(self, token: str) -> Optional[str]:
         return next((s for s, seat in self.seats.items() if seat.token == token), None)
 
+    def config(self) -> Config:
+        """The rules this match's games play: its ruleset, and in the default ruleset the Draw action trial's switch."""
+        if self.ruleset != "default":
+            return Config.default().for_ruleset(self.ruleset)
+        return Config.default().sweep(draw_action=self.draw_action)
+
+    def set_ruleset(self, name: str) -> None:
+        """Play this match under ruleset `name`, on that ruleset's board. Only before a game starts."""
+        if name not in RULESETS:
+            raise EngineError(f"no ruleset {name!r}")
+        if self.state is not None:
+            raise EngineError("the rules are fixed for the whole match")
+        self.ruleset = name
+        self.map_id = RULESET_MAPS.get(name, self.map_id)
+
     def join(self, seat: Seat) -> str:
         if "B" in self.seats:
             raise EngineError("match is full")
+        if seat.is_bot and self.ruleset != "default":   # the bots play the default rules only (they think on the Rust engine)
+            raise EngineError(f"no bot plays the {self.ruleset} rules")
         self.seats["B"] = seat
         self._maybe_prematch()
         return "B"
@@ -361,11 +383,13 @@ class Match:
                                   map_id=MAP_ID, first_player="A", stacked=True, config=tutorial.config(2 if self.seats["B"].bot == tutorial.BOTS[2] else 1))
             tutorial.set_up(self.state, 2 if self.seats["B"].bot == tutorial.BOTS[2] else 1)
         else:
+            if self.ruleset != "default" and any(seat.is_bot for seat in self.seats.values()):
+                raise EngineError(f"no bot plays the {self.ruleset} rules")
             self.state = new_game(load_premade_deck(self.seats["A"].deck),
                                   load_premade_deck(self.seats["B"].deck), seed,
                                   map_id=self.map_id, first_player=first,
                                   leaders=leaders_for(self.seats["A"].deck, self.seats["B"].deck),
-                                  config=Config.default().sweep(draw_action=self.draw_action))
+                                  config=self.config())
         self.bots = {s: bot_for(seat.bot, seed + i, self.map_id) for i, (s, seat) in enumerate(self.seats.items())
                      if seat.is_bot}
         self.history = []
@@ -607,6 +631,7 @@ class Match:
                 "map_id": self.state.game_map.id, "first_player": r["first"], "first_turn_actions": self.state.config.first_turn_actions,
                 "first_player_opening_draw": self.state.config.first_player_opening_draw,
                 **({"draw_action": False} if not self.state.config.draw_action else {}),
+                **({"ruleset": self.state.config.ruleset} if self.state.config.ruleset != "default" else {}),
                 "bots": [self.seats[p].bot or "human" for p in "AB"],
                 "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
                 "actions": list(self.actions), "action_times": list(self.action_times),
@@ -644,7 +669,7 @@ class Match:
                 "actions": self.actions, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
                 "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
-                "takeover": self.takeover, "map_id": self.map_id, "draw_action": self.draw_action, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
+                "takeover": self.takeover, "map_id": self.map_id, "draw_action": self.draw_action, "ruleset": self.ruleset, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history],
                 "events": self.events, "seq": self.seq}
@@ -664,11 +689,12 @@ class Match:
         m.takeover = d.get("takeover", False)
         m.map_id = d.get("map_id", MAP_ID)
         m.draw_action = d.get("draw_action", True)
+        m.ruleset = d.get("ruleset", "default")
         m.clock = d.get("clock")
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's
         m.created = datetime.fromisoformat(d["created"])
-        m.state = GameState.from_dict(d["state"], config=Config.default().sweep(draw_action=m.draw_action)) if d["state"] else None
+        m.state = GameState.from_dict(d["state"], config=m.config()) if d["state"] else None
         m.history = [Move(**h) for h in d["history"]]
         m.events, m.seq = d.get("events", []), d.get("seq", 0)
         if m.state is not None and m.seed is not None:
@@ -681,6 +707,7 @@ class Match:
         opp = other_player(s)
         v = {
             "id": self.id, "you": s, "phase": self.phase, "version": self.version, "takeover": self.takeover, "map": self.map_id,
+            "ruleset": self.ruleset,
             # a seat's deck by name only for you or a bot: a person's deck name is theirs (their list is open, by rule)
             "seats": {p: {"name": seat.name, "bot": seat.bot, "ready": seat.ready, **({"rating": seat.rating} if seat.rating else {}),
                           **({"league": seat.league} if seat.league else {}),
@@ -712,6 +739,8 @@ class Match:
                                               "first": nxt["first"], "yours": nxt.get("seat", "B") == s},
                              "record": [{"deckName": DECK_NAMES.get(d, d), "w": w, "l": l}
                                         for d, (w, l) in record.items()]}
+        if self.ruleset != "default":     # how this ruleset reads its cards and keywords (the stored text is the default's)
+            v["texts"], v["keywords"] = RULESET_TEXT[self.ruleset], RULESET_KEYWORDS[self.ruleset]
         if self.state is not None:
             v["game"] = self._game_view(s, opp)
             v["game"]["drawCount"] = self.state.config.draw_action_count   # what the Draw action draws (the deck says it)
@@ -754,7 +783,8 @@ class Match:
             "winFood": st.game_map.win_food,
             "board": board,
             "hand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u),
-                      **({"ready": True} if roar_condition(st, s, u.card_id) or conditional_reach(st, u.card_id) else {})}
+                      **({"ready": True} if roar_condition(st, s, u.card_id) or conditional_reach(st, u.card_id) else {}),
+                      **(self._hand_mana(u) if st.config.mana else {})}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
             "eaten": {p: st.hungry_eaten.get(p, 0) for p in "AB"},   # what each side's Hungry animals ate (EVOLVES_AT)
@@ -781,6 +811,8 @@ class Match:
             "legal": None,
             "pending": None,
         }
+        if st.config.mana:
+            g.update(self._mana_view())
         if to_act == s:
             g["legal"], g["pending"] = self._decision(s)
         elif st.result is None and rules.early_mulligan(st, s) is not None:   # your mulligan, while theirs goes on too
@@ -797,6 +829,23 @@ class Match:
                          else ("your_choice" if st.pending else "yours") if g["toAct"] == s
                          else "their_choice" if st.pending else "theirs")
         return g
+
+    def _hand_mana(self, u) -> dict:
+        """A hand card in the mana ruleset: its cost, and whether the mana its owner has left pays it now (their turn, nothing
+        resolving). Paying is not playing: `legal.place` says where it may go."""
+        st = self.state
+        cost = mana_cost(st, u.card_id)
+        mine = st.current == u.owner and st.pending is None and st.result is None
+        return {"cost": cost, "affordable": mine and cost <= rules.mana_left(st, u.owner)}
+
+    def _mana_view(self) -> dict:
+        """The mana ruleset's turn state, public: each player's mana (`left` and `total`: this turn's for the player whose
+        turn it is, their next turn's, unspent, for the other), what an ability costs (a Roam, an Echo, an Action, a leader's
+        power), and each base's tiles."""
+        st = self.state
+        return {"mana": {p: {"left": rules.mana_left(st, p), "total": rules.mana_total(st, p)} for p in "AB"},
+                "abilityCost": ability_cost(st),
+                "bases": {p: sorted(t) for p, t in st.game_map.bases.items()}}
 
     def _mulligan_clock(self, s: str) -> dict:
         """The shared mulligan window, shown to each player as their own time (no bank is touched)."""
@@ -831,6 +880,10 @@ class Match:
                     if rep is not None:
                         copies[u.iid] = copies[rep.iid]
         out = {"draw": any(isinstance(a, DrawAction) for a in legal), "place": places, "roam": roams, "act": acts,
+               # the mana ruleset: a roam free this turn (an animal's own, given by a card) costs nothing; the rest cost abilityCost
+               **({"freeRoam": sorted({a.origin for a in legal if isinstance(a, RoamAction)
+                                        and effects.free_roams_left(st, s, st.top_unit(a.origin))})}
+                  if st.config.mana and st.pending is None else {}),
                "leader": any(isinstance(a, LeaderAction) for a in legal),
                **({"copies": {str(k): v for k, v in copies.items()}} if copies else {})}
         if st.pending is None:
@@ -893,7 +946,10 @@ def map_info(map_id: str = MAP_ID) -> dict:
         regions.append({"id": r.id, "c": list(min(cs)), "corners": list(r.corners), "food": r.food})
     # the hex prototype draws its board from its own geometry (board.js), so it names its crossroads and its dens' fronts
     return {"id": gm.id, "name": gm.name, "cols": cols, "rows": rows, "regions": regions, "winFood": gm.win_food,
-            "crossroads": sorted(gm.crossroads), "hex": gm.id == "map_hex"}
+            "crossroads": sorted(gm.crossroads), "hex": gm.id == "map_hex",
+            # map_hex19 (the mana ruleset's board): its tiles' adjacency and each player's base; no den can be captured
+            **({"hex19": True, "edges": [list(e) for e in gm.edges], "bases": {p: sorted(t) for p, t in gm.bases.items()},
+                "dens": False} if gm.bases else {})}
 
 
 def card_pool() -> list[dict]:
@@ -904,6 +960,8 @@ def card_pool() -> list[dict]:
              # A variable-strength card (Python) prints 0: its text says what it gains ("+1 for each removed animal").
              "str": 0 if c.is_dynamic else c.base_strength, "text": c.text,
              "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat,
+             # its mana cost in the mana ruleset (None: not in a mana deck); "cost" above is the food a card costs
+             "mana": c.cost,
              # its level (the stars prototype): what a copy costs of a deck's budget; a token is in no deck, so none
              "stars": 0 if c.status == "token" else c.stars,
              "related": list(c.related or ahead.get(c.id, ())), "evolves": c.evolves or bool(ahead.get(c.id)),
