@@ -4459,7 +4459,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 8,
+      "base_strength": 7,
       "keywords": [],
       "text": "",
       "species": "Wisp",
@@ -4473,7 +4473,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 10,
+      "base_strength": 8,
       "keywords": [],
       "text": "",
       "species": "Wisp",
@@ -4487,7 +4487,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 12,
+      "base_strength": 9,
       "keywords": [],
       "text": "",
       "species": "Wisp",
@@ -4501,7 +4501,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 15,
+      "base_strength": 10,
       "keywords": [],
       "text": "",
       "species": "Wisp",
@@ -4515,7 +4515,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 20,
+      "base_strength": 12,
       "keywords": [],
       "text": "",
       "species": "Wisp",
@@ -4669,24 +4669,8 @@
       "keywords": []
     },
     {
-      "id": "spiky_2",
-      "name": "Spikes 1",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 1,
-      "text": "Spikes.",
-      "species": "Spiky",
-      "habitat": "",
-      "cost": 2,
-      "ruleset": "mana",
-      "keywords": [
-        "Spikes"
-      ]
-    },
-    {
       "id": "spiky_3",
-      "name": "Spikes 2",
+      "name": "Spikes 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4702,7 +4686,7 @@
     },
     {
       "id": "spiky_4",
-      "name": "Spikes 3",
+      "name": "Spikes 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4733,40 +4717,8 @@
       ]
     },
     {
-      "id": "flyer_3",
-      "name": "Flight 2",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 3,
-      "text": "Flight.",
-      "species": "Flyer",
-      "habitat": "",
-      "cost": 3,
-      "ruleset": "mana",
-      "keywords": [
-        "Flight"
-      ]
-    },
-    {
-      "id": "flyer_4",
-      "name": "Flight 3",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 4,
-      "text": "Flight.",
-      "species": "Flyer",
-      "habitat": "",
-      "cost": 4,
-      "ruleset": "mana",
-      "keywords": [
-        "Flight"
-      ]
-    },
-    {
       "id": "flyer_5",
-      "name": "Flight 4",
+      "name": "Flight 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -4781,28 +4733,12 @@
       ]
     },
     {
-      "id": "flyer_6",
-      "name": "Flight 5",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 6,
-      "text": "Flight.",
-      "species": "Flyer",
-      "habitat": "",
-      "cost": 6,
-      "ruleset": "mana",
-      "keywords": [
-        "Flight"
-      ]
-    },
-    {
       "id": "flyer_7",
-      "name": "Flight 6",
+      "name": "Flight 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 8,
+      "base_strength": 7,
       "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
@@ -4813,28 +4749,12 @@
       ]
     },
     {
-      "id": "flyer_8",
-      "name": "Flight 7",
+      "id": "flyer_10",
+      "name": "Flight 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 10,
-      "text": "Flight.",
-      "species": "Flyer",
-      "habitat": "",
-      "cost": 8,
-      "ruleset": "mana",
-      "keywords": [
-        "Flight"
-      ]
-    },
-    {
-      "id": "flyer_10",
-      "name": "Flight 8",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 15,
       "text": "Flight.",
       "species": "Flyer",
       "habitat": "",
@@ -5012,7 +4932,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 8,
+      "base_strength": 7,
       "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
@@ -5028,7 +4948,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 10,
+      "base_strength": 8,
       "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
@@ -5040,11 +4960,11 @@
     },
     {
       "id": "sneaky_10",
-      "name": "Stealth 4",
+      "name": "Stealth 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 15,
+      "base_strength": 10,
       "text": "Stealth.",
       "species": "Sneaky",
       "habitat": "",
@@ -5183,24 +5103,8 @@
       ]
     },
     {
-      "id": "glutton_2",
-      "name": "Hungry 1",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 3,
-      "text": "Hungry.",
-      "species": "Glutton",
-      "habitat": "",
-      "cost": 2,
-      "ruleset": "mana",
-      "keywords": [
-        "Hungry"
-      ]
-    },
-    {
       "id": "glutton_3",
-      "name": "Hungry 2",
+      "name": "Hungry 1",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5216,7 +5120,7 @@
     },
     {
       "id": "glutton_4",
-      "name": "Hungry 3",
+      "name": "Hungry 2",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5232,7 +5136,7 @@
     },
     {
       "id": "glutton_5",
-      "name": "Hungry 4",
+      "name": "Hungry 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5248,11 +5152,11 @@
     },
     {
       "id": "glutton_6",
-      "name": "Hungry 5",
+      "name": "Hungry 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 8,
+      "base_strength": 7,
       "text": "Hungry.",
       "species": "Glutton",
       "habitat": "",
@@ -5263,28 +5167,12 @@
       ]
     },
     {
-      "id": "glutton_7",
-      "name": "Hungry 6",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 10,
-      "text": "Hungry.",
-      "species": "Glutton",
-      "habitat": "",
-      "cost": 7,
-      "ruleset": "mana",
-      "keywords": [
-        "Hungry"
-      ]
-    },
-    {
       "id": "glutton_8",
-      "name": "Hungry 7",
+      "name": "Hungry 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 12,
+      "base_strength": 9,
       "text": "Hungry.",
       "species": "Glutton",
       "habitat": "",
@@ -5295,24 +5183,8 @@
       ]
     },
     {
-      "id": "glutton_10",
-      "name": "Hungry 8",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 20,
-      "text": "Hungry.",
-      "species": "Glutton",
-      "habitat": "",
-      "cost": 10,
-      "ruleset": "mana",
-      "keywords": [
-        "Hungry"
-      ]
-    },
-    {
       "id": "spiky_6",
-      "name": "Spikes 4",
+      "name": "Spikes 3",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5328,7 +5200,7 @@
     },
     {
       "id": "spiky_8",
-      "name": "Spikes 5",
+      "name": "Spikes 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5344,7 +5216,7 @@
     },
     {
       "id": "spiky_10",
-      "name": "Spikes 6",
+      "name": "Spikes 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
@@ -5364,7 +5236,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 5,
+      "base_strength": 6,
       "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
@@ -5380,27 +5252,11 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 7,
+      "base_strength": 8,
       "text": "Poison.",
       "species": "Venomous",
       "habitat": "",
       "cost": 8,
-      "ruleset": "mana",
-      "keywords": [
-        "Poison"
-      ]
-    },
-    {
-      "id": "venomous_10",
-      "name": "Poison 6",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 9,
-      "text": "Poison.",
-      "species": "Venomous",
-      "habitat": "",
-      "cost": 10,
       "ruleset": "mana",
       "keywords": [
         "Poison"
@@ -5477,48 +5333,6 @@
       "keywords": []
     },
     {
-      "id": "scout_7",
-      "name": "Cantrip 6",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 8,
-      "text": "Roar: draw a card.",
-      "species": "Scout",
-      "habitat": "",
-      "cost": 7,
-      "ruleset": "mana",
-      "keywords": []
-    },
-    {
-      "id": "scout_8",
-      "name": "Cantrip 7",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 10,
-      "text": "Roar: draw a card.",
-      "species": "Scout",
-      "habitat": "",
-      "cost": 8,
-      "ruleset": "mana",
-      "keywords": []
-    },
-    {
-      "id": "scout_10",
-      "name": "Cantrip 8",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 15,
-      "text": "Roar: draw a card.",
-      "species": "Scout",
-      "habitat": "",
-      "cost": 10,
-      "ruleset": "mana",
-      "keywords": []
-    },
-    {
       "id": "winged_scout_3",
       "name": "Flying Cantrip 1",
       "status": "collectible",
@@ -5583,28 +5397,12 @@
       ]
     },
     {
-      "id": "winged_scout_7",
+      "id": "winged_scout_8",
       "name": "Flying Cantrip 5",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 6,
-      "text": "Flight. Roar: draw a card.",
-      "species": "Winged Scout",
-      "habitat": "",
-      "cost": 7,
-      "ruleset": "mana",
-      "keywords": [
-        "Flight"
-      ]
-    },
-    {
-      "id": "winged_scout_8",
-      "name": "Flying Cantrip 6",
-      "status": "collectible",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 8,
+      "base_strength": 7,
       "text": "Flight. Roar: draw a card.",
       "species": "Winged Scout",
       "habitat": "",
@@ -5615,16 +5413,32 @@
       ]
     },
     {
-      "id": "winged_scout_10",
-      "name": "Flying Cantrip 7",
+      "id": "sneaky_9",
+      "name": "Stealth 4",
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 12,
-      "text": "Flight. Roar: draw a card.",
-      "species": "Winged Scout",
+      "base_strength": 9,
+      "text": "Stealth.",
+      "species": "Sneaky",
       "habitat": "",
-      "cost": 10,
+      "cost": 9,
+      "ruleset": "mana",
+      "keywords": [
+        "Stealth"
+      ]
+    },
+    {
+      "id": "flyer_3",
+      "name": "Flight 2",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "text": "Flight.",
+      "species": "Flyer",
+      "habitat": "",
+      "cost": 3,
       "ruleset": "mana",
       "keywords": [
         "Flight"

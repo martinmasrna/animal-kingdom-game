@@ -1037,7 +1037,10 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
             elif statics.can_cover(state, placer, top):
                 out.append(PlaceAction(card_id, ("cr", cr), iid))
         # Apex Predators can never capture an HQ (decision D).
-        if enemy_hq and not is_apex and not hunts:
+        # a flier drops straight into the enemy den (the mana ruleset's raid, Martin, 2026-11-20: "flying units could be
+        # played straight into opponents base as well")
+        flies_in = flight and state.config.den_raid
+        if (enemy_hq or flies_in) and not is_apex and not hunts:
             out.append(PlaceAction(card_id, ("hq", enemy), iid))
     return out
 

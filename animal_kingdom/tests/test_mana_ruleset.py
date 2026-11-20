@@ -558,15 +558,15 @@ def test_hunters_weaken_and_the_giant_hunter_removes():
 
 def test_a_mana_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
     # The mana prototype's Hungry (Martin, 2026-11-20): only onto an enemy it beats; when that enemy is removed, 1 food.
-    s = state(turn=11, hands={"A": ["glutton_2"]})          # strength 3
+    s = state(turn=11, hands={"A": ["glutton_3"]})          # strength 4
     put(s, "1,1", "wisp_1", "A")
     put(s, "2,1", "wisp_1", "B")                          # strength 2: edible
     put(s, "2,2", "wisp_3", "B")                          # strength 4: too big
-    assert places(s, "glutton_2") == {"2,1"}
+    assert places(s, "glutton_3") == {"2,1"}
     food = s.food["A"]
-    rules.apply_action(s, PlaceAction("glutton_2", ("cr", "2,1")))
+    rules.apply_action(s, PlaceAction("glutton_3", ("cr", "2,1")))
     resolve_choices(s)
-    assert [u.card_id for u in s.board["2,1"]] == ["glutton_2"] and "wisp_1" in s.remove_pile
+    assert [u.card_id for u in s.board["2,1"]] == ["glutton_3"] and "wisp_1" in s.remove_pile
     assert s.food["A"] == food + MANA.hungry_food
 
 
@@ -579,3 +579,14 @@ def test_a_scout_draws_a_card():
     resolve_choices(s)
     assert len(s.hands["A"]) == n          # one played, one drawn
     assert "Flight" in CARDS["winged_scout_3"].keywords
+
+
+def test_a_flier_drops_straight_into_the_enemy_den():
+    # Martin, 2026-11-20: "flying units could be played straight into opponents base as well".
+    s = state(turn=11, hands={"A": ["flyer_5", "wisp_5"]}, food={"A": 15, "B": 15})
+    put(s, "1,1", "wisp_1", "A")
+    acts = rules.legal_actions(s)
+    assert any(isinstance(a, PlaceAction) and a.card_id == "flyer_5" and a.target == ("hq", "B") for a in acts)
+    assert not any(isinstance(a, PlaceAction) and a.card_id == "wisp_5" and a.target[0] == "hq" for a in acts)
+    rules.apply_action(s, PlaceAction("flyer_5", ("hq", "B")))
+    assert s.food["B"] == 15 - CARDS["flyer_5"].base_strength and "flyer_5" in s.remove_pile
