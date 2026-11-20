@@ -8,7 +8,8 @@ import { encodeDeck, decodeDeck, deckOrder } from './deckcode.js';
 import { portrait as headCrop } from './board.js';   // the board's round head crop (the local portrait() is the screen's orientation)
 import { dd, wireDd, onHold } from './menu.js';
 import { track } from './log.js';
-import { manaCard, fitPlaques, costChip } from './mana.js';
+import { manaCard, manaPiece, fitPlaques, costChip } from './mana.js';
+import { hasFigure } from './token.js';
 
 // Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
 const FAMILIES = [['Cat', 'lion'], ['Canine', 'wolf_legend_3'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
@@ -26,6 +27,13 @@ let R = { deckSize: 25, copies: {}, starBudget: 0 };   // until the server's arr
 let M = false;
 const costOf = c => c.mana ?? 99;   // a card with no cost sorts last
 const COSTS = [1, 2, 3, 4, 5, 6];
+// The open deck in the mana rules, two ways (Martin, 2026-11-20: he wanted to try the deck as board tiles, and named the side
+// list cleaned up as the other way; neither is settled): `tray`, a band of pieces under the grid (the default), or `list`,
+// the side column's strips. ?deckview=list or ?deckview=tray on the address switches, kept in the browser like ?rules.
+const DECKVIEW = (() => { const q = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('deckview');
+  try { if (q) localStorage.setItem('ak:deckview', q === 'list' ? 'list' : 'tray'); return localStorage.getItem('ak:deckview') === 'list' ? 'list' : 'tray'; }
+  catch { return q === 'list' ? 'list' : 'tray'; } })();
+const tray = () => M && DECKVIEW === 'tray';
 // A card in the grid, a pop or a dialog: the mana card with its cost, or the rectangular card. `w`: the mana card's width.
 const face = (c, w, opts = {}) => M ? manaCard(c, { cost: c.mana ?? null, w }) : cardHTML(c, opts);
 const fitAll = el => { fitNames(el); if (M) fitPlaques(el); };
@@ -120,8 +128,17 @@ export function collectionScreen(app, ctx) {
 // Strips are slivers of the cards: strength on a driftwood plaque, the name, copies as dots (legendaries have one).
 // One strip: a sliver of the card; the number of copies at its end when there are two or more (the game's decklists: copies
 // left), as in Hearthstone. A strip with none left is marked gone.
-// `mana`: the mana rules' strip, its cost in a gold hexagon before the strength.
-export const stripHTML = (id, cards, have, mana = false) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}${have > (R.copies[cards[id].rarity] ?? 9) || mana && cards[id].mana == null ? ' over' : ''}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div>${mana ? `<span class="sc">${cards[id].mana != null ? costChip(cards[id].mana) : ''}</span>` : ''}<span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span>${markGlyphs(cards[id], 'lvs')}<span class="x">${have > 1 ? have : ''}</span></div>`;
+// `mana`: the mana rules' strip (mstripHTML).
+export const stripHTML = (id, cards, have, mana = false) => mana ? mstripHTML(id, cards, have) : `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}${have > (R.copies[cards[id].rarity] ?? 9) || mana && cards[id].mana == null ? ' over' : ''}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div>${mana ? `<span class="sc">${cards[id].mana != null ? costChip(cards[id].mana) : ''}</span>` : ''}<span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span>${markGlyphs(cards[id], 'lvs')}<span class="x">${have > 1 ? have : ''}</span></div>`;
+// The mana rules' strip: the cost in its gold hexagon, the piece's figure where the painting was, the name, the strength
+// in the piece's own numerals; two copies are two dots, so a row holds two numbers, not three (Martin, 2026-11-20: "it's
+// like holding three different numbers in one row"). No stars.
+const numImg = n => /^\d+$/.test(String(n)) && +n <= 20 ? `<img src="/static/hex/num/${n}.svg" alt="${n}" draggable="false">` : esc(n);
+const mstripHTML = (id, cards, have) => { const c = cards[id];
+  return `<div class="st mst ${c.rarity}${have ? '' : ' gone'}${have > (R.copies[c.rarity] ?? 9) || c.mana == null ? ' over' : ''}" data-card="${id}">`
+    + `<span class="sc">${c.mana != null ? costChip(c.mana) : ''}</span>`
+    + `<span class="hd">${hasFigure(id) ? `<img src="/static/hex/fig/${id}.webp" alt="" draggable="false">` : ''}</span>`
+    + `<span class="n">${esc(c.name)}</span><span class="ms">${numImg(c.str)}</span><span class="x">${have > 1 ? pips(have) : ''}</span></div>`; };
 // A deck's strips, one list, in deckOrder (the legendaries first, their gold edge says so, then every other card by strength).
 // `have(id)`: the copies a strip shows (a match's decklists: the copies left). `mana`: the mana rules' list, by cost first.
 export const stripsHTML = (ids, cards, have, mana = false) => { const by = deckOrder(cards);
@@ -134,6 +151,44 @@ export function deckBody(list, cards, mana = false) {
 // for the prototype, not something Martin asked for).
 const curveHTML = list => { const n = {}; for (const id of list) { const k = C[id] && C[id].mana; n[k] = (n[k] || 0) + 1; }
   return `<div class="mcurve">${COSTS.map(k => `<span class="${n[k] ? '' : 'zero'}">${costChip(k)}<b>${n[k] || 0}</b></span>`).join('')}</div>`; };
+
+// The deck as a tray of pieces (DECKVIEW 'tray'): the leader as one large piece at the left, then a cell for each of the
+// deck's cards in two interlocking rows of board tiles, every copy its own piece, filled in cost order and zig-zagging
+// between the rows (cell i in row i % 2), so each cost is a run of pieces; a crack the width of .4 of a piece parts one
+// cost from the next, and a count under each run says how many it holds. The cells not yet filled are empty outlines
+// after the last run, so the tray shows how full the deck is. Every measure is in the piece's width `w`, chosen for the
+// window: as wide as fits 25 cells and six cracks across, and no taller than the window can spare.
+const SIDE_W = 250, PAD = 24, GAP = 22, PH = 1.15556;   // the controls' width; the tray's edges; between its parts; a piece's height
+export function trayGeo(W, H, n = 25, cracks = 6) {
+  const most = Math.max(48, Math.min(84, H * .085));
+  let w = most;
+  for (let k = 0; k < 4; k++) w = Math.min(most, (W - 2 * PAD - 1.75 * w - 2 * GAP - SIDE_W) / ((n - 1) * .53 + 1 + .4 * cracks));
+  w = Math.floor(w);
+  const h = w * PH, gap = Math.max(2, Math.round(w * .06));
+  return { w, h, p: w + gap, dy: .75 * h + gap * .866, crack: Math.round(w * .4), lead: Math.round(1.75 * w) };
+}
+const HEX_SVG = `<svg viewBox="0 0 100 ${100 * PH}" preserveAspectRatio="none"><polygon vector-effect="non-scaling-stroke" points="50,1 99,${25 * PH} 99,${75 * PH} 50,${100 * PH - 1} 1,${75 * PH} 1,${25 * PH}"/></svg>`;
+function trayHTML(d) {
+  const leader = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null;
+  const by = deckOrder(C), ids = [...d.list].filter(id => C[id]).sort((a, b) => costOf(C[a]) - costOf(C[b]) || by(a, b));
+  const n = Math.max(R.deckSize, ids.length), runs = [];
+  for (const id of ids) { const k = costOf(C[id]); if (!runs.length || runs.at(-1).k !== k) runs.push({ k, ids: [] }); runs.at(-1).ids.push(id); }
+  if (ids.length < n) runs.push({ k: null, ids: Array(n - ids.length).fill(null) });
+  const g = trayGeo(innerWidth, innerHeight, n);   // room for every crack, so the pieces keep their size as the deck fills
+  let i = 0, x0 = 0, cells = '', counts = '';
+  const seen = {}, over = id => (seen[id] = (seen[id] || 0) + 1) > (R.copies[C[id].rarity] ?? 9) || (R.needsCost && C[id].mana == null);   // a copy past its limit, or a card the rules refuse: marked
+  runs.forEach((r, ri) => { if (ri) x0 += g.crack; const first = i;
+    for (const id of r.ids) { const at = `left:${(i * g.p / 2 + x0).toFixed(1)}px;top:${(i % 2 * g.dy).toFixed(1)}px;width:${g.w}px;height:${g.h.toFixed(1)}px`;
+      cells += id ? `<div class="cell${id === leader ? ' lcopy' : ''}${over(id) ? ' over' : ''}" data-card="${id}" style="${at}">${manaPiece(C[id], { cost: C[id].mana ?? null, w: g.w })}</div>`
+        : `<div class="cell empty" style="${at}">${HEX_SVG}</div>`;
+      i++; }
+    if (r.k != null) { const a = first * g.p / 2 + x0, b = (i - 1) * g.p / 2 + x0 + g.w;
+      counts += `<span class="rcount" style="left:${a.toFixed(1)}px;width:${(b - a).toFixed(1)}px;top:${(g.dy + g.h + 6).toFixed(1)}px">${r.ids.length}</span>`; } });
+  const combW = (i - 1) * g.p / 2 + x0 + g.w, combH = g.dy + g.h;
+  const lead = leader ? `<div class="tlead" id="dlead" data-card="${leader}" style="width:${g.lead}px">${manaPiece(C[leader], { str: null, w: g.lead })}</div>`
+    : `<div class="tlead none" id="dlead" style="width:${g.lead}px;height:${(g.lead * PH).toFixed(1)}px">${HEX_SVG}<span>Choose a leader</span></div>`;
+  return `<div class="tleads" style="height:${combH.toFixed(1)}px">${lead}</div><div class="comb" style="width:${combW.toFixed(1)}px;height:${(combH + 26).toFixed(1)}px">${cells}${counts}</div>`;
+}
 
 function render(app, all) {
   const keep = [...app.querySelectorAll('.clist, .cgrid')].map(e => e.scrollTop);
@@ -185,7 +240,14 @@ function render(app, all) {
     : `<div class="clist">${all.map(tile).join('')}${all.length < R.decksMax ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${R.decksMax}</b><span>Decks</span></div>${FB}<button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
-  app.innerHTML = `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side${st.sheet ? ' up' : ''}"><button class="grip" id="grip" aria-label="Decks"></button>${column}</div><div class="modal" id="cmodal"></div></div>`;
+  // The tray (mana rules, a deck open): the deck under the grid, its name, count, Play and Done at its right end; the side
+  // column is for choosing a deck only.
+  const ctl = open && `<div class="tside"><div class="tname"><b class="nm-edit" title="Rename">${esc(open.name)}</b><span class="tacts"><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></span></div>
+      <button class="play" id="play"${open.list.length === R.deckSize && !issue ? '' : ' disabled'}>${issue || 'Play this deck'}</button>
+      <div class="frow"><div class="fcount"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span></div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`;
+  app.innerHTML = open && tray()
+    ? `<div class="coll mscr trayed">${head}<div class="cgrid">${grid}</div><div class="mtray">${trayHTML(open)}${ctl}</div><div class="modal" id="cmodal"></div></div>`
+    : `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side${st.sheet ? ' up' : ''}"><button class="grip" id="grip" aria-label="Decks"></button>${column}</div><div class="modal" id="cmodal"></div></div>`;
   lazyArt(app.querySelector('.cgrid'));
   fitStrips(app);   // the deck tiles are as wide as the column (upright, the window)
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
@@ -248,7 +310,7 @@ function wire(app, all, open) {
   const cp = $('dcopy'); if (cp) cp.onclick = () => navigator.clipboard.writeText(encodeDeck(open.name, open.list, C)).then(() => X.toast('Deck code copied', true), () => X.toast('Could not copy'));
   const shr = $('dshare'); if (shr) shr.onclick = () => X.share(encodeDeck(open.name, open.list, C), open.name);
   const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, id => { open.cover = id; change(); });
-  const ld = $('dlead'); if (ld) ld.onclick = () => pickLeader(app, open, id => { setLeader(open, id); change(); });
+  const ld = $('dlead'); if (ld) ld.onclick = () => hidePop() || pickLeader(app, open, id => { setLeader(open, id); change(); });
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
   // A new deck starts with its leader, as in Gwent (Martin, 2026-11-17): the leader is chosen first, its card is the deck's
   // first, and the deck opens with its name ready to type. Cancelled, no deck is made.
@@ -259,6 +321,7 @@ function wire(app, all, open) {
   // Upright the deck column is a sheet along the bottom: shut, the cards take the screen. Its grip drags it with the finger
   // and lets go to the nearer state (a flick goes its way); a tap on the grip or on the count opens or shuts it.
   const sh = app.querySelector('.side'), g = $('grip');
+  if (g) {
   const heights = () => { const was = sh.classList.contains('up'); sh.style.height = '';
     sh.classList.remove('up'); const lo = sh.offsetHeight; sh.classList.add('up'); const hi = sh.offsetHeight;
     sh.classList.toggle('up', was); return [lo, hi]; };
@@ -282,6 +345,7 @@ function wire(app, all, open) {
   g.onpointercancel = () => { if (drag) { const d = drag; drag = null; settle(st.sheet, d.hs); } };
   g.onclick = () => { if (tapped) tapped = false; else sheet(); };
   const fc = app.querySelector('.fcount'); if (fc && portrait()) fc.onclick = sheet;
+  }
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play && !play.disabled) play.onclick = () => X.play(open);
   const fs = $('fstars'); if (fs) fs.onclick = ev => { ev.stopPropagation(); LABEL.five = !LABEL.five; try { localStorage.setItem('ak:five', LABEL.five ? '1' : '0'); } catch { /* no storage */ } st.lvl = ''; redo(); };
@@ -298,23 +362,27 @@ function wire(app, all, open) {
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
     onHold(e, () => { hidePop(); zoom(app, C[e.dataset.card]); });   // touch: hold to read it large
   });
-  app.querySelectorAll('.side [data-card]').forEach(e => { e.onclick = () => {
+  app.querySelectorAll('.side [data-card], .mtray .cell[data-card]').forEach(e => { e.onclick = () => {
       if (e.dataset.card === open.leader) return X.toast(`${C[open.leader].name.split(':')[0]} leads this deck: choose another leader to take the card out`);
       open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); };
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
     onHold(e, () => { hidePop(); zoom(app, C[e.dataset.card]); }); });
-  const fl = flash && app.querySelector(`.side .st[data-card="${flash}"]`); flash = null;
-  if (fl) { fl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); fl.classList.add('flash'); }
+  const fl = flash && [...app.querySelectorAll(`.side .st[data-card="${flash}"], .mtray .cell[data-card="${flash}"]`)].at(-1); flash = null;
+  if (fl) { if (fl.closest('.side')) fl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); fl.classList.add('flash'); }
+  const tl = app.querySelector('.mtray .tlead'); if (tl && tl.dataset.card) onHold(tl, () => { hidePop(); zoom(app, C[tl.dataset.card]); });
 
   // Hovering a card or a strip shows the full card, beside it and clear of the deck column. Only the pointer moving opens
   // it: a scroll slides cards under a still pointer, so it closes the card and none opens until the pointer moves again
   // (the browser's own move after a scroll carries no movement).
-  const side = app.querySelector('.side').getBoundingClientRect().left;
+  const side = app.querySelector('.side')?.getBoundingClientRect().left ?? innerWidth, trayTop = app.querySelector('.mtray')?.getBoundingClientRect().top;
   let on = null;
   const show = e => { on = e; const r = e.getBoundingClientRect(), inSide = !!e.closest('.side');
     const pw = powerOf(C[e.dataset.card]);
     pop.className = 'pop' + (pw ? ' ldr' : '') + (M ? ' mcoll' : ''); pop.innerHTML = face(C[e.dataset.card], 230) + pw; pop.style.display = 'flex'; if (M) fitPlaques(pop);
     const w = pop.offsetWidth, h = pop.offsetHeight;
+    if (e.closest('.mtray')) {   // a piece in the tray: its card above the tray, centred on it, covering none of the tray
+      pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
+      pop.style.top = Math.max(8, trayTop - h - 6) + 'px'; return; }
     pop.style.left = (inSide || r.right + 10 + w > side ? r.left - w - 10 : r.right + 10) + 'px';
     pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
   const root = app.querySelector('.coll');
@@ -378,8 +446,9 @@ const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id]
 // rim, the ability on a plate beneath (Martin, 2026-11-17; the card's head stands in until the powers have art of their own).
 // `D`: the token's width; `plate`: false for the token alone.
 const orb = (id, D) => `<div class="orb" style="--d:${D}px"><div class="face" style="${headCrop(id, Math.round(D * .732))}"></div><img src="/static/kit2/rim_n.webp" alt="" draggable="false"></div>`;
+// In the mana rules the plate alone: the card beside it already shows the animal, and the orb is the old painting's.
 const powerHTML = (id, D = 150) => { const L = X.leaders[id];
-  return `<div class="hpow">${orb(id, D)}<div class="plate"><b>${KIND[L.kind]}</b><p>${esc(L.text)}</p></div></div>`; };
+  return `<div class="hpow${M ? ' bare' : ''}">${M ? '' : orb(id, D)}<div class="plate"><b>${KIND[L.kind]}</b><p>${esc(L.text)}</p></div></div>`; };
 // beside a legendary in the collection (in a match the card is just a card)
 const powerOf = c => (X.leaders || {})[c.id] && c.status === 'collectible' ? powerHTML(c.id) : '';
 function setLeader(d, id) {
@@ -390,7 +459,7 @@ function setLeader(d, id) {
 }
 function leaderRow(d) {
   const id = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null, L = id && X.leaders[id];
-  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? orb(id, 60) : `<div class="lmed empty"></div>`}`
+  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? (M ? `<div class="lpc">${manaPiece(C[id], { str: null, w: 50 })}</div>` : orb(id, 60)) : `<div class="lmed empty"></div>`}`
     + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${KIND[L.kind]}. ${esc(L.text)}</span>` : `<b>No leader</b><span>Choose a leader for this deck</span>`}</div></div>`;
 }
 // `d`: the deck whose leader changes, or null for a new deck.
@@ -411,6 +480,9 @@ function pickCover(app, d, done) {
 // Screen-wide keys and paste, live only while the collection is on screen.
 function wireGlobal() {
   const here = () => document.querySelector('.coll'), typing = e => /INPUT|SELECT|TEXTAREA/.test(e.target.tagName);
+  // the tray's pieces are measured for the window: a new size draws it again
+  let rs = null;
+  addEventListener('resize', () => { clearTimeout(rs); rs = setTimeout(() => { const h = here(); if (h && h.classList.contains('trayed') && !h.querySelector('.modal.on')) render(h.parentElement, decks()); }, 120); });
   addEventListener('keydown', e => {
     if (!here() || here().querySelector('.modal.on')) return;
     if (e.key === '/' && !typing(e)) { e.preventDefault(); here().querySelector('#q').focus(); }

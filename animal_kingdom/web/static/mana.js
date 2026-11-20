@@ -42,6 +42,13 @@ export function manaCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cl
     + (cost != null ? `<div class="mcost" style="${COST_AT}">${COST_SVG(cost)}</div>` : '') + '</div>';
 }
 
+// The piece alone, as a hand shows it under its plaque: the token with its cost hexagon (the collection's deck tray).
+// `str: null` draws no strength (a leader, as the rail draws it); `cost: null` no cost mark.
+export function manaPiece(c, { str = c.str, cost = null, owner = 'A', w = 60, cls = '', attrs = '' } = {}) {
+  return `<div class="mcard mpc ${owner}${cls ? ' ' + cls : ''}" style="--mw:${w}px" ${attrs}><div class="mpiece unit ${owner}" style="--tw:${w}px">${tokenHTML({ id: c.id, owner, str, iid: 0 }, { [c.id]: c }, w)}</div>`
+    + (cost != null ? `<div class="mcost" style="${COST_AT}">${COST_SVG(cost)}</div>` : '') + '</div>';
+}
+
 // A long rule sets smaller until it fits its plaque (as card.js fitNames does for the rectangular card).
 export function fitPlaques(root) {
   for (const p of root.querySelectorAll('.mcard .pin p')) {
