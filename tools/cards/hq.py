@@ -266,7 +266,7 @@ def _mark(levels: dict, r: dict, col: str, by: str, new_lv: str | None, note: st
 
 
 def _save_cards(cards: dict) -> None:
-    """Check every card the edit touched against the engine's rules, then write cards.json and the deck docs' tables."""
+    """Check every card the edit touched against the engine's rules, then write cards.json."""
     for c in cards["cards"]:
         if c["status"] != PLANNED:
             try:
@@ -274,7 +274,6 @@ def _save_cards(cards: dict) -> None:
             except CardDataError as e:
                 raise Refused(str(e)) from None
     _write(CARDS, cards)
-    subprocess.run([str(PY), "-m", "animal_kingdom.render.deck_docs"], cwd=ROOT, capture_output=True)
 
 
 def _apply_value(r: dict, col: str, value) -> None:
@@ -665,7 +664,6 @@ def rename(old: str, new: str) -> str:
         man = DESIGN / "cards" / "bar" / "manifest.jsonl"
         if man.is_file():
             man.write_text(re.sub(rf'"card": "{re.escape(old)}"', f'"card": "{new}"', man.read_text(encoding="utf-8")), encoding="utf-8")
-    subprocess.run([str(PY), "-m", "animal_kingdom.render.deck_docs"], cwd=ROOT, capture_output=True)
     return f"{old} -> {new} ({changed} files)"
 
 
