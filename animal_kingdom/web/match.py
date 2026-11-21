@@ -19,7 +19,7 @@ from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, LeaderAction, PassAction, PlaceAction, action_from_dict
 from ..engine import leaders as L
 from ..engine.cards import load_cards
-from ..engine.effects import MAKES, leader_usable, mana_cost
+from ..engine.effects import MAKES, leader_usable, mana_cost, power_cost
 from ..engine.maps import load_map
 from ..engine.state import MAP_ID, EngineError, GameState, Result, new_game, other_player
 from ..engine.strength import card_strength, effective_strength
@@ -115,10 +115,11 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
         return None
     lid = lead["id"]
     kind, text = L.LEADERS[lid]
-    cost = st.config.leader_power_cost
+    cost = power_cost(st, p)
     usable = st.current == p and st.pending is None and st.result is None and rules.mana_left(st, p) >= cost \
         and leader_usable(st, p)
-    return {"id": lid, "kind": kind, "text": text, "usable": usable, **({"cost": cost} if kind == "power" else {})}
+    spent = kind == "power" and st.current == p and st.power_used   # once a turn: "Used" until their next
+    return {"id": lid, "kind": kind, "text": text, "usable": usable, **({"cost": cost, "spent": spent} if kind == "power" else {})}
 
 
 class Match:

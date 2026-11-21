@@ -20,6 +20,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py collect ID                    a reserve card into the collection
     .venv/bin/python tools/cards/hq.py add ID NAME STRENGTH COST [--dynamic RULE] [--legendary]   a new collectible card
     .venv/bin/python tools/cards/hq.py delete ID                     a card out of the game entirely
+    .venv/bin/python tools/cards/hq.py dynamic ID RULE               what a variable strength counts (a Shade's: engine/cards.py DYNAMIC_STRENGTHS)
     .venv/bin/python tools/cards/hq.py rename OLD NEW                a new id everywhere
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d|reset] [--strip x,y,z|reset] [--full y|reset]
 
@@ -432,6 +433,23 @@ def rename(old: str, new: str) -> str:
     return f"{old} -> {new} ({changed} files)"
 
 
+def set_dynamic(card_id: str, rule: str, by: str = "martin") -> str:
+    """What a card with a variable strength counts (a Shade's "+1 for each ..."). Claude can't change a locked strength."""
+    r = _row(card_id)
+    _guard(r, "strength", by)
+    cards = _read(CARDS)
+    c = _rec(cards, r["id"])
+    if c["base_strength"] != "dynamic":
+        raise Refused(f"{c['id']}'s strength is a number, not a count")
+    prev = c.get("dynamic_strength")
+    c["dynamic_strength"] = rule
+    _save_cards(cards)
+    levels = _levels()
+    _mark(levels, r, "strength", by, None, None, prev_value=prev, changed_value=True)
+    _write(LEVELS, levels)
+    return f"{c['id']} counts: {prev} -> {rule}"
+
+
 def delete(card_id: str, by: str = "martin") -> str:
     """Remove a card from the game: out of cards.json, and its levels gone. Its number in static/cardnums.js stays, since
     deck codes depend on every number. Claude can't delete a card with a locked value."""
@@ -458,6 +476,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("collect"); s.add_argument("id")
     s = sub.add_parser("add"); s.add_argument("id"); s.add_argument("name"); s.add_argument("strength", type=int); s.add_argument("cost", type=int); s.add_argument("--dynamic", default=""); s.add_argument("--legendary", action="store_true")
     s = sub.add_parser("delete"); s.add_argument("id")
+    s = sub.add_parser("dynamic"); s.add_argument("id"); s.add_argument("rule")
     s = sub.add_parser("rename"); s.add_argument("old"); s.add_argument("new")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
@@ -479,6 +498,8 @@ def main(argv=None) -> None:
             print(add(a.id, a.name, a.strength, a.cost, a.dynamic, a.legendary))
         elif a.cmd == "delete":
             print(delete(a.id, "claude"))
+        elif a.cmd == "dynamic":
+            print(set_dynamic(a.id, a.rule, "claude"))
         elif a.cmd == "rename":
             print(rename(a.old, a.new))
         elif a.cmd == "crop":

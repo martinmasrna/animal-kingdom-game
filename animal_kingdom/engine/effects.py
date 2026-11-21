@@ -159,7 +159,7 @@ def _mulligan_replacement(deck, blacklist):
 # ============================================================== mana
 
 # The Djinn: "Costs 1 less for each ...": card id -> what it counts (strength.count).
-DJINN = {"djinn_hand": "hand", "djinn_ally": "ally", "djinn_enemy": "enemy", "djinn_food": "food", "djinn_removed": "removed"}
+DJINN = {"djinn_hand": "hand", "djinn_ally": "ally", "djinn_enemy": "enemy", "djinn_region": "region"}
 
 
 def mana_cost(state: GameState, card_id: str, player: Optional[str] = None) -> int:
@@ -349,7 +349,6 @@ def gain_food(state: GameState, player: str, amount: int, *, income: bool = Fals
     if amount <= 0:
         return
     state.food[player] += amount
-    state.food_gained[player] += amount
     state.emit("food", player=player, n=amount, **({"income": True} if income else {}))
     if state.food[player] >= state.game_map.win_food:
         state.result = Result(player, "food")
@@ -633,11 +632,20 @@ def _leads(state: GameState, player: str, leader_id: str) -> bool:
     return lead is not None and lead["id"] == leader_id
 
 
-def leader_usable(state: GameState, player: str) -> bool:
-    """Whether `player`'s leader has a power that would do something now (the caller checks the mana)."""
+def power_cost(state: GameState, player: str) -> int:
+    """What `player`'s leader's power costs: the Elf's its own, every other the config's."""
     lead = state.leaders.get(player)
-    if lead is None or L.kind_of(lead["id"]) != "power":
+    return state.config.elf_power_cost if lead and lead["id"] == L.ELF else state.config.leader_power_cost
+
+
+def leader_usable(state: GameState, player: str) -> bool:
+    """Whether `player`'s leader has a power that would do something now, not used yet this turn (Martin, 2026-11-21:
+    "only be used once a turn"); the caller checks the mana."""
+    lead = state.leaders.get(player)
+    if lead is None or L.kind_of(lead["id"]) != "power" or state.power_used:
         return False
+    if lead["id"] == L.ELF:
+        return count(state, player, "region") > 0   # food for each region you control: none, nothing to gain
     return bool(state.decks[player])        # the Sage draws
 
 
@@ -647,7 +655,11 @@ def do_leader(state: GameState, player: str) -> None:
     if lead is None:
         raise EngineError(f"{player} has no leader")
     state.emit("leader_power", player=player, card=lead["id"])
+    state.power_used = True
     if lead["id"] == L.SAGE:
         state.effect_stack.append({"op": "draw", "player": player, "n": 1, "by_card": L.SAGE})
+    elif lead["id"] == L.ELF:   # "Gain 1 food for each region you control."
+        state.effect_stack.append({"op": "gain_food", "player": player, "by_card": L.ELF,
+                                   "amount": state.config.elf_food_per_region * count(state, player, "region")})
     else:
         raise EngineError(f"{lead['id']!r} has no power to use")

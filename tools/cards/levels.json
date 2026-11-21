@@ -314,7 +314,7 @@
       "at": 1795263261
     }
   },
-  "djinn_food": {
+  "djinn_region": {
     "effect": {
       "review": {
         "prev_lv": "empty",
@@ -323,7 +323,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795263707
+      "at": 1795285398
     },
     "animal": {
       "review": {
@@ -335,41 +335,8 @@
         }
       },
       "by": "claude",
-      "at": 1795263707,
+      "at": 1795285398,
       "note": "into the collection"
-    }
-  },
-  "djinn_removed": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795196488
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Djinn",
-          "species": "Djinn"
-        }
-      },
-      "by": "claude",
-      "at": 1795201448
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 10
-      },
-      "by": "claude",
-      "at": 1795263261
     }
   },
   "shade_hand": {
@@ -471,7 +438,7 @@
       "at": 1795263082
     }
   },
-  "shade_food": {
+  "shade_region": {
     "effect": {
       "review": {
         "prev_lv": "empty",
@@ -480,7 +447,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795263707
+      "at": 1795285398
     },
     "animal": {
       "review": {
@@ -492,7 +459,7 @@
         }
       },
       "by": "claude",
-      "at": 1795263707,
+      "at": 1795285398,
       "note": "into the collection"
     },
     "cost": {
@@ -503,39 +470,15 @@
       },
       "by": "claude",
       "at": 1795263082
-    }
-  },
-  "shade_removed": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795196918
     },
-    "animal": {
+    "strength": {
       "review": {
         "prev_lv": "draft",
         "prev_note": "",
-        "prev": {
-          "name": "Shade",
-          "species": "Shade"
-        }
+        "prev": "food_count"
       },
       "by": "claude",
-      "at": 1795201448
-    },
-    "cost": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795263082
+      "at": 1795285398
     }
   },
   "hunter_3": {

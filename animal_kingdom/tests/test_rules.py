@@ -399,35 +399,22 @@ def test_the_young_rhino_and_albatross_remove_every_adjacent_enemy_of_three_or_l
 
 
 def test_djinn_cost_less_for_each_of_their_count():
-    s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed"]}, food={"A": 20, "B": 9})
-    s.food_gained = {"A": 4, "B": 9}                              # the Food Djinn counts what was gained, not what is held
-    put(s, "1,1", "wisp_1", "A"); put(s, "1,2", "wisp_1", "A"); put(s, "3,3", "wisp_1", "B")
-    s.remove_pile.extend(["wisp_1", "wisp_1", "wisp_2"]); s.pile_owners.extend(["B", "B", "A"])
-    assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed")} == \
-        {"djinn_hand": 5, "djinn_ally": 8, "djinn_enemy": 9, "djinn_food": 6, "djinn_removed": 8}
-    s.food_gained["A"] = 15
-    assert mana_cost(s, "djinn_food") == 0 and mana_cost(s, "djinn_food", "B") == 1
-
-
-def test_food_gained_counts_every_gain_and_not_the_start():
-    s = state(turn=4, food={"A": 15, "B": 15})
-    for cr in ("1,1", "1,2", "2,2"):
+    s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_region"]})
+    for cr in ("1,1", "1,2", "2,2"):                                  # three tiles: one region of A's
         put(s, cr, "wisp_1", "A")
-    rules.apply_action(s, PassAction())                         # a region's income
-    assert s.food_gained == {"A": 1, "B": 0}
+    put(s, "3,3", "wisp_1", "B")
+    assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_enemy", "djinn_region")} == \
+        {"djinn_hand": 6, "djinn_ally": 7, "djinn_enemy": 9, "djinn_region": 9}
+    assert mana_cost(s, "djinn_region", "B") == 10
 
 
 def test_shade_strength_is_its_count():
-    s = state(hands={"A": ["wisp_1", "wisp_1", "wisp_1"]}, food={"A": 20, "B": 2})
-    s.food_gained = {"A": 7, "B": 2}
-    shades = {k: put(s, cr, f"shade_{k}", "A") for k, cr in
-              (("hand", "1,1"), ("ally", "1,2"), ("enemy", "1,3"), ("food", "2,1"), ("removed", "2,2"))}
+    s = state(hands={"A": ["wisp_1", "wisp_1", "wisp_1"]})
+    shades = {k: put(s, cr, f"shade_{k}", "A") for k, cr in (("hand", "1,1"), ("ally", "1,2"), ("enemy", "1,3"), ("region", "2,2"))}
     put(s, "4,1", "wisp_1", "B"); put(s, "4,2", "wisp_1", "B")
-    s.remove_pile.extend(["wisp_1", "wisp_2"]); s.pile_owners.extend(["B", "A"])
-    assert {k: effective_strength(s, u) for k, u in shades.items()} == {"hand": 3, "ally": 5, "enemy": 2, "food": 7, "removed": 1}
+    assert rules.region_income(s, "A") == 1                          # 1,1 1,2 2,2: one region
+    assert {k: effective_strength(s, u) for k, u in shades.items()} == {"hand": 3, "ally": 4, "enemy": 2, "region": 1}
 
-
-# ------------------------------------------------------------------ the leaders
 
 def test_the_warlord_gains_a_food_for_each_cover_of_an_enemy():
     s = state(turn=11, hands={"A": ["wisp_5"]}, leaders={"A": WARLORD})
@@ -443,11 +430,16 @@ def test_the_raiders_raids_destroy_two_more():
     assert s.food["B"] == 15 - 1 - CFG.raider_leader_bonus
 
 
-def test_the_elfs_regions_produce_one_more_food_each():
-    s = state(turn=4, food={"A": 15, "B": 15}, leaders={"A": ELF})
-    for cr in ("1,1", "1,2", "2,2"):
+def test_the_elfs_power_gains_a_food_for_each_region_for_two_mana_once_a_turn():
+    s = state(turn=10, food={"A": 15, "B": 15}, leaders={"A": ELF})  # 6 mana
+    assert LEADERS[ELF][0] == "power"
+    assert LeaderAction() not in rules.legal_actions(s)               # no region: nothing to gain
+    for cr in ("1,1", "1,2", "2,2", "1,3", "2,3"):                    # three regions (1,2 2,2 2,3 is one too)
         put(s, cr, "wisp_1", "A")
-    assert rules.region_income(s, "A") == 1 + CFG.elf_region_bonus
+    rules.apply_action(s, LeaderAction())
+    assert s.food["A"] == 15 + 3 * CFG.elf_food_per_region and rules.mana_left(s, "A") == 6 - CFG.elf_power_cost
+    assert LeaderAction() not in rules.legal_actions(s)               # once a turn
+    assert rules.region_income(s, "A") == 3                           # its regions produce as any others
 
 
 def test_the_assassin_draws_after_the_third_card_of_a_turn_only():
@@ -458,15 +450,14 @@ def test_the_assassin_draws_after_the_third_card_of_a_turn_only():
     assert all(CARDS[l].cost == 5 and CARDS[l].base_strength == 10 for l in LEADERS)
 
 
-def test_the_sages_power_draws_a_card_for_three_mana_and_again():
+def test_the_sages_power_draws_a_card_for_three_mana_once_a_turn():
     s = state(turn=10, leaders={"A": SAGE})                       # 6 mana
     assert LEADERS[SAGE][0] == "power"
     rules.apply_action(s, LeaderAction())
-    rules.apply_action(s, LeaderAction())
-    assert len(s.hands["A"]) == 2 and rules.mana_left(s, "A") == 0 and LeaderAction() not in rules.legal_actions(s)
+    assert len(s.hands["A"]) == 1 and rules.mana_left(s, "A") == 3 and LeaderAction() not in rules.legal_actions(s)
+    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())   # B's turn, then A's again
+    assert LeaderAction() in rules.legal_actions(s)
 
-
-# ------------------------------------------------------------------ decks and the game as a whole
 
 def test_deck_rules():
     assert deck_problems(DECK, "warlord_legend") == []

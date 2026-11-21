@@ -1,7 +1,7 @@
 """Leaders: every deck names one of its legendaries as its leader. The leader stands beside its player's den for the whole
 match with an ability of its own, public to both players; its card stays in the deck as a normal card.
 
-An ability is a "power" (used for Config.leader_power_cost mana, again and again) or a "passive" (always on). The
+An ability is a "power" (used for its mana, effects.power_cost, once a turn) or a "passive" (always on). The
 behaviour is in effects.py. State (GameState.leaders): player -> {"id": the leader's card id}.
 """
 
@@ -18,7 +18,7 @@ LEADERS: dict[str, tuple[str, str]] = {
     WARLORD: ("passive", "When you cover an enemy, gain 1 food."),
     RAIDER: ("passive", "Your raids destroy 1 more food."),
     SAGE: ("power", "Draw a card."),
-    ELF: ("passive", "Your regions produce 1 more food."),                       # Martin, 2026-11-21
+    ELF: ("power", "Gain 1 food for each region you control."),                  # Martin, 2026-11-21: 2 mana
     ASSASSIN: ("passive", "After you play your third card in a turn, draw a card."),   # Martin, 2026-11-21
 }
 

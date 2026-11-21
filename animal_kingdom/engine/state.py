@@ -117,11 +117,10 @@ class GameState:
                  remove_pile: list[str], food: dict[str, int], current: str, first_player: str,
                  rng: Optional[random.Random] = None, starting_decks: Optional[dict[str, tuple]] = None,
                  turn_counter: int = 0, mana_spent: int = 0, applied_this_turn: int = 0, effect_steps_this_turn: int = 0,
-                 played_this_turn: int = 0,
+                 played_this_turn: int = 0, power_used: bool = False,
                  caps: Optional[list] = None, next_iid: int = 0, effect_stack: Optional[list[dict]] = None,
                  pending: Optional[dict] = None, scheduled: Optional[list[dict]] = None, result: Optional[Result] = None,
-                 pile_owners: Optional[list] = None, leaders: Optional[dict[str, dict]] = None,
-                 food_gained: Optional[dict[str, int]] = None):
+                 pile_owners: Optional[list] = None, leaders: Optional[dict[str, dict]] = None):
         self.game_map = game_map
         self.cards = cards
         self.config = config
@@ -133,7 +132,6 @@ class GameState:
         self.pile_owners = pile_owners if pile_owners is not None else [None] * len(remove_pile)   # in step with remove_pile
         self.leaders = leaders if leaders is not None else {}   # player -> {"id": card id}
         self.food = food
-        self.food_gained = food_gained if food_gained is not None else {"A": 0, "B": 0}   # every gain this game, start excluded
         self.current = current
         self.first_player = first_player
         self.rng = rng if rng is not None else random.Random()
@@ -141,6 +139,7 @@ class GameState:
         self.mana_spent = mana_spent       # this turn's mana spent so far
         self.applied_this_turn = applied_this_turn   # every apply_action of the turn, choices included (Config.max_actions_per_turn)
         self.played_this_turn = played_this_turn     # the cards its player has played from hand this turn (the Assassin)
+        self.power_used = power_used                 # its player has used their leader's power this turn (once a turn)
         self.effect_steps_this_turn = effect_steps_this_turn   # effect steps resolved this turn (Config.max_effect_steps_per_turn)
         self.caps: list = caps if caps is not None else []     # every turn a cap ended: {cap, player, turn, cards}
         self._next_iid = next_iid
@@ -223,13 +222,13 @@ class GameState:
         new.pile_owners = list(self.pile_owners)
         new.leaders = {p: dict(lead) for p, lead in self.leaders.items()}
         new.food = dict(self.food)
-        new.food_gained = dict(self.food_gained)
         new.current, new.first_player = self.current, self.first_player
         new.rng = _copy_rng(self.rng)
         new.turn_counter = self.turn_counter
         new.mana_spent = self.mana_spent
         new.applied_this_turn = self.applied_this_turn
         new.played_this_turn = self.played_this_turn
+        new.power_used = self.power_used
         new.effect_steps_this_turn = self.effect_steps_this_turn
         new.caps = list(self.caps)
         new._next_iid = self._next_iid
@@ -261,7 +260,6 @@ class GameState:
             "pile_owners": list(self.pile_owners),
             "leaders": {p: dict(lead) for p, lead in sorted(self.leaders.items())},
             "food": dict(self.food),
-            "food_gained": dict(self.food_gained),
             "current": self.current,
             "first_player": self.first_player,
             "rng": _rng_to_dict(self.rng),
@@ -269,6 +267,7 @@ class GameState:
             "mana_spent": self.mana_spent,
             "applied_this_turn": self.applied_this_turn,
             "played_this_turn": self.played_this_turn,
+            "power_used": self.power_used,
             "effect_steps_this_turn": self.effect_steps_this_turn,
             "caps": [dict(c) for c in self.caps],
             "next_iid": self._next_iid,
@@ -289,10 +288,10 @@ class GameState:
             remove_pile=list(d["remove_pile"]),
             pile_owners=list(d["pile_owners"]) if "pile_owners" in d else None,
             leaders={p: {"id": lead["id"]} for p, lead in (d.get("leaders") or {}).items()},
-            food=dict(d["food"]), food_gained=dict(d.get("food_gained") or {"A": 0, "B": 0}), current=d["current"], first_player=d["first_player"], rng=_rng_from_dict(d["rng"]),
+            food=dict(d["food"]), current=d["current"], first_player=d["first_player"], rng=_rng_from_dict(d["rng"]),
             turn_counter=d["turn_counter"], mana_spent=d.get("mana_spent", 0),
             applied_this_turn=d.get("applied_this_turn", 0), effect_steps_this_turn=d.get("effect_steps_this_turn", 0),
-            played_this_turn=d.get("played_this_turn", 0),
+            played_this_turn=d.get("played_this_turn", 0), power_used=d.get("power_used", False),
             caps=[dict(c) for c in d.get("caps", [])], next_iid=d["next_iid"],
             effect_stack=copy.deepcopy(d.get("effect_stack") or []), pending=copy.deepcopy(d.get("pending")),
             scheduled=copy.deepcopy(d.get("scheduled") or []),

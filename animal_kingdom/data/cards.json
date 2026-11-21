@@ -92,24 +92,14 @@
       "cost": 10
     },
     {
-      "id": "djinn_food",
-      "name": "Food Djinn",
+      "id": "djinn_region",
+      "name": "Region Djinn",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 10,
-      "text": "Costs 1 less for each food you gained this game.",
+      "text": "Costs 1 less for each region you control.",
       "cost": 10,
       "keywords": []
-    },
-    {
-      "id": "djinn_removed",
-      "name": "Remove Djinn",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 10,
-      "keywords": [],
-      "text": "Costs 1 less for each animal in your opponent's Remove Pile.",
-      "cost": 10
     },
     {
       "id": "shade_hand",
@@ -145,26 +135,15 @@
       "cost": 3
     },
     {
-      "id": "shade_food",
-      "name": "Food Shade",
+      "id": "shade_region",
+      "name": "Region Shade",
       "status": "collectible",
       "rarity": "common",
       "base_strength": "dynamic",
-      "dynamic_strength": "food_count",
-      "text": "Has +1 strength for each food you gained this game.",
+      "dynamic_strength": "region_count",
+      "text": "Has +1 strength for each region you control.",
       "cost": 3,
       "keywords": []
-    },
-    {
-      "id": "shade_removed",
-      "name": "Remove Shade",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": "dynamic",
-      "dynamic_strength": "opp_removed_count",
-      "keywords": [],
-      "text": "Has +1 strength for each animal in your opponent's Remove Pile.",
-      "cost": 3
     },
     {
       "id": "hunter_3",

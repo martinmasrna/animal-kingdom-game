@@ -27,7 +27,8 @@ class Config:
     hungry_food: int = 1                 # Hungry: the food its prey's removal gains (Martin, 2026-11-20)
     shade_growth: int = 1                # the Shades: +1 strength for each of their count
     warlord_leader_food: int = 1         # the Warlord: "When you cover an enemy, gain 1 food."
-    elf_region_bonus: int = 1            # the Elf: "Your regions produce 1 more food." (each region)
+    elf_power_cost: int = 2              # the Elf's power: "Gain 1 food for each region you control." (Martin, 2026-11-21)
+    elf_food_per_region: int = 1
     assassin_nth_card: int = 3           # the Assassin: "After you play your third card in a turn, draw a card."
     raider_leader_bonus: int = 1         # the Raider: "Your raids destroy 1 more food." (Martin, 2026-11-21: "only +1")
     mama_spores: int = 2                 # Mama Spore: "Roar: put 2 Spores into your hand." (Martin, 2026-11-21)
