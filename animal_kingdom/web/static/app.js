@@ -1204,7 +1204,7 @@ function drawLast(G) {
   el.querySelectorAll('[data-h]').forEach(r => {
     const m = G.history[r.dataset.h];
     r.onmouseenter = () => { if (!m.card || !CARDS[m.card]) return;
-      pop.className = 'pop mpop'; pop.innerHTML = manaCard(CARDS[m.card], { owner: rel(m.seat), w: 180 }) + `<div class="ev">${moveLine(m)}</div>`;
+      pop.className = 'pop mpop'; pop.innerHTML = manaCard(CARDS[m.card], { owner: rel(m.seat), cost: CARDS[m.card].mana ?? null, w: 180 }) + `<div class="ev">${moveLine(m)}</div>`;
       pop.style.minHeight = '0'; pop.style.display = 'flex'; fitPlaques(pop);
       const b = r.getBoundingClientRect(); pop.style.left = (b.right + 12) + 'px'; pop.style.top = Math.max(8, Math.min(b.top - 120, innerHeight - pop.offsetHeight - 10)) + 'px'; };
     r.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; pop.className = 'pop'; };
@@ -1318,7 +1318,7 @@ function manaHover(cr) {
   const top = st[st.length - 1], under = st.slice(0, -1).reverse(), [x, y] = crossroadAt(cr), w = Math.round(tokenWidth() * 1.3), ph = w * 624 / 540;
   const side = top.owner === 'W' ? 'W' : top.owner;
   const notes = [top.timer ? resolvesIn(top.timer) : '', under.length ? `Covers ${under.map(u => `${(CARDS[u.id] || {}).name || u.id} (${u.str})`).join(', ')}` : ''].filter(Boolean);
-  el.innerHTML = `<div class="abs" style="left:${x - w / 2}px;top:${y - ph / 2}px">${manaCard(CARDS[top.id], { str: top.str, owner: side, w, iid: top.iid })}`
+  el.innerHTML = `<div class="abs" style="left:${x - w / 2}px;top:${y - ph / 2}px">${manaCard(CARDS[top.id], { str: top.str, cost: CARDS[top.id].mana ?? null, owner: side, w, iid: top.iid })}`
     + (notes.length ? `<div class="under" style="left:${w + 10}px;top:${ph * .3}px">${notes.map(esc).join('<br>')}</div>` : '') + '</div>';
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); fitPlaques(el);   // measured once shown (hidden, it has no height)
 }
@@ -1326,7 +1326,7 @@ function manaHover(cr) {
 // owner's form (viewer space: A is you), at its strength now, with its timer under it.
 const stackSeat = u => u.owner === 'A' ? V.you : opp();
 const timerLine = u => u.timer ? `<div class="tm">${resolvesIn(u.timer)}</div>` : '';
-const stackCard = (u, attrs = '') => `<div class="sc ${u.owner}">${manaCard(CARDS[u.id], { str: u.str, cost: null, owner: u.owner, w: 170 })}${timerLine(u)}</div>`;
+const stackCard = (u, attrs = '') => `<div class="sc ${u.owner}">${manaCard(CARDS[u.id], { str: u.str, cost: CARDS[u.id].mana ?? null, owner: u.owner, w: 170 })}${timerLine(u)}</div>`;
 function readStack(cr) {
   const st = V && V.game && viewerGame().board[cr]; if (!st || !st.length) return;
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
