@@ -20,7 +20,7 @@ from aiohttp import web
 
 sys.path.insert(0, str(Path(__file__).parent))
 import hq  # noqa: E402
-from animal_kingdom.engine.cards import load_cards  # noqa: E402
+from animal_kingdom.game import PLANNED  # noqa: E402
 
 HERE = Path(__file__).parent
 STATIC = hq.ROOT / "animal_kingdom" / "web" / "static"
@@ -28,9 +28,9 @@ STATIC = hq.ROOT / "animal_kingdom" / "web" / "static"
 
 def pool() -> list[dict]:
     """The cards as the game's client gets them (web/match.py card_pool), read fresh so edits show at once."""
-    cards = load_cards(json.loads(hq.CARDS.read_text()), validate=False)
-    return [{"id": c.id, "name": c.name, "rarity": c.rarity, "str": 0 if c.is_dynamic else c.base_strength,
-             "text": c.text, "kw": sorted(c.keywords), "mana": c.cost} for c in cards.values()]
+    cards = [c for c in json.loads(hq.CARDS.read_text())["cards"] if c.get("status") != PLANNED]
+    return [{"id": c["id"], "name": c["name"], "rarity": c["rarity"], "str": 0 if c["base_strength"] == "dynamic" else c["base_strength"],
+             "text": c.get("text", ""), "kw": sorted(c.get("keywords", [])), "mana": c["cost"]} for c in cards]
 
 
 async def index(_req):

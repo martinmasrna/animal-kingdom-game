@@ -11,8 +11,8 @@ import json
 import sys
 from typing import Optional, Sequence
 
-from .engine import rules
-from .engine.state import GameState, new_game
+from . import game as rules
+from .game import GameState, new_game
 
 
 def load_logs(path: str) -> list[dict]:

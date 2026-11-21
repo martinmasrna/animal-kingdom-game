@@ -13,19 +13,14 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from ..bots.greedy import GreedyBot
+from .. import game
+from ..bot import GreedyBot
 from ..decks import DECK_LEADERS, load_deck
-from ..engine import rules, statics
-from ..engine.actions import SKIP, ChoiceAction, LeaderAction, PassAction, PlaceAction, action_from_dict
-from ..engine import leaders as L
-from ..engine.cards import load_cards
-from ..engine.effects import MAKES, leader_usable, mana_cost, power_cost, unit_cost
-from ..engine.maps import load_map
-from ..engine.state import MAP_ID, EngineError, GameState, Result, new_game, other_player
-from ..engine.strength import card_strength, effective_strength
+from ..game import (CARDS, LEADERS, MAKES, MAP_ID, SKIP, ChoiceAction, EngineError, GameState, LeaderAction, PassAction,
+                    PlaceAction, Result, action_from_dict, card_strength, leader_usable, load_map, new_game, other_player,
+                    power_cost)
 
 log = logging.getLogger(__name__)
-CARDS = load_cards()
 ASKS = {"mulligan": "mulligan"}   # what a pending choice asks, by the step asking: the mulligan; anything else is "effect"
 # The turn clock, for matches between two people: whoever must act gets a free window each time the decision comes to
 # them (unused time is lost), then spends their bank for the game. At zero, the engine acts for them.
@@ -114,9 +109,9 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     if lead is None:
         return None
     lid = lead["id"]
-    kind, text = L.LEADERS[lid]
+    kind, text = LEADERS[lid]
     cost = power_cost(st, p)
-    usable = st.current == p and st.pending is None and st.result is None and rules.mana_left(st, p) >= cost \
+    usable = st.current == p and st.pending is None and st.result is None and game.mana_left(st, p) >= cost \
         and leader_usable(st, p)
     spent = kind == "power" and st.current == p and st.power_used   # once a turn: "Used" until their next
     return {"id": lid, "kind": kind, "text": text, "usable": usable, **({"cost": cost, "spent": spent} if kind == "power" else {})}
@@ -238,10 +233,10 @@ class Match:
         state = self.state
         if isinstance(action, dict):
             action = action_from_dict({k: v for k, v in action.items() if k != "by"})
-        if state.player_to_act() != s and rules.early_mulligan(state, s) is not None:   # both mulligan at once
-            rules.apply_early_mulligan(state, s, action)
+        if state.player_to_act() != s and game.early_mulligan(state, s) is not None:   # both mulligan at once
+            game.apply_early_mulligan(state, s, action)
             self._take_events()
-            self.actions.append({**action.to_dict(), "by": s})   # a replay applies it the same way (rules.apply_logged)
+            self.actions.append({**action.to_dict(), "by": s})   # a replay applies it the same way (game.apply_logged)
             self.action_times.append(round(time.time() - self.started_at, 1))
             self.version += 1
             return
@@ -249,7 +244,7 @@ class Match:
             raise EngineError("not your decision")
         starts_move = state.pending is None and isinstance(action, (PlaceAction, LeaderAction))
         pre = _snapshot(state) if starts_move else None
-        rules.apply_action(state, action)    # validates; raises EngineError if illegal
+        game.apply_action(state, action)    # validates; raises EngineError if illegal
         new = self._take_events()
         self.actions.append(action.to_dict())
         self.action_times.append(round(time.time() - self.started_at, 1))
@@ -318,7 +313,7 @@ class Match:
         s, st = self.to_act(), self.state
         if self.mulliganing():   # the shared window is over: whoever is still mulliganing keeps the hand they have
             for p in "AB":
-                if rules.early_mulligan(st, p) is not None:
+                if game.early_mulligan(st, p) is not None:
                     self.act(p, ChoiceAction(SKIP), auto=True)
             while self.mulliganing():
                 self.act(self.to_act(), ChoiceAction(SKIP), auto=True)
@@ -331,7 +326,7 @@ class Match:
             if out[s] >= TIMEOUTS_TO_LOSE and self.state.result is None:   # gone: the match is the opponent's
                 self._check_end(Result(other_player(s), "timeout"))
         else:
-            legal = rules.legal_actions(st)
+            legal = game.legal_actions(st)
             self.act(s, ChoiceAction(SKIP) if ChoiceAction(SKIP) in legal else legal[0], auto=True)
         return True
 
@@ -343,7 +338,7 @@ class Match:
         self.version += 1
 
     def _check_end(self, result: Optional[Result] = None) -> None:
-        result = result or rules.is_terminal(self.state)
+        result = result or game.is_terminal(self.state)
         if result is None:
             return
         self.state.result = result
@@ -371,11 +366,16 @@ class Match:
         """The action the bot to act would take (pure: call off the event loop, apply after)."""
         s = self.to_act()
         state = self.state.clone()
-        return self.bots[s].choose(state.view_for(s), rules.legal_actions(state), state)
+        try:
+            return self.bots[s].choose(state)
+        except BaseException as e:   # a panic inside a compiled bot is no Exception: make it one, so the server plays on
+            if isinstance(e, Exception) or type(e).__name__ != "PanicException":
+                raise
+            raise RuntimeError(f"the bot panicked: {e}") from None
 
     def fallback_move(self):
         """A legal move when the bot's own choice failed: the first legal action."""
-        return rules.legal_actions(self.state)[0]
+        return game.legal_actions(self.state)[0]
 
     # ----------------------------------------------------------------- persistence
     def to_dict(self) -> dict:
@@ -433,27 +433,25 @@ class Match:
         board = {}
         for cr, stack in st.board.items():
             # "hidden": the enemy can't choose it (Stealth); "spikes" until spent; "armor": no ability removes it
-            board[cr] = [{"iid": u.iid, "id": u.card_id, "owner": u.owner, "str": effective_strength(st, u),
+            board[cr] = [{"iid": u.iid, "id": u.card_id, "owner": u.owner, "str": m["str"],
                           **({"timer": timers[u.iid]} if u.iid in timers else {}),
-                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner)) else {}),
-                          **({"spikes": True} if statics.has_keyword(st, u, "Spikes") and not u.retaliation_used else {}),
-                          **({"poison": True} if statics.has_keyword(st, u, "Poison") else {}),
-                          **({"armor": True} if not statics.can_be_removed(st, u) else {})} for u in stack]
+                          **{k: True for k in ("hidden", "spikes", "poison", "armor") if m[k]}}
+                         for u in stack for m in [game.unit_marks(st, u)]]
         g = {
             "round": st.turn_counter // 2 + 1,
             "current": st.current,
             "toAct": to_act,
             "first": st.first_player,
-            "canPass": rules.can_pass(st),
+            "canPass": game.can_pass(st),
             "clock": {"on": False} if not self.clock else (self._mulligan_clock(s) if self.mulliganing() and self.clock.get("mull_until") else
                                      {**{k: self.clock[k] for k in ("bank", "holder", "free", "since")}, "now": time.time(),
                                      "on": self.clock_deadline() is not None}),
             "food": dict(st.food),
-            "income": {p: rules.region_income(st, p) for p in "AB"},
+            "income": {p: game.region_income(st, p) for p in "AB"},
             "winFood": st.game_map.win_food,
             "board": board,
-            "hand": [{"iid": u.iid, "id": u.card_id, "str": effective_strength(st, u), "cost": unit_cost(st, u)}
-                     for u in st.hands[s]],
+            "hand": [{"iid": u.iid, "id": u.card_id, "str": m["str"], "cost": m["cost"]}
+                     for u in st.hands[s] for m in [game.unit_marks(st, u)]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
             "leaders": {p: v for p in "AB" if (v := leader_view(st, p))},
             "deckCount": {p: len(st.decks[p]) for p in "AB"},
@@ -466,7 +464,7 @@ class Match:
             "result": st.result.to_dict() if st.result else None,
             "history": [m.public() for m in self.history],
             "events": [public_event(e, s) for e in self.events if not (e["e"] == "mulligan" and e["player"] != s)],
-            "mana": {p: {"left": rules.mana_left(st, p), "total": rules.mana_total(st, p)} for p in "AB"},
+            "mana": {p: {"left": game.mana_left(st, p), "total": game.mana_total(st, p)} for p in "AB"},
             "abilityCost": st.config.leader_power_cost,
             "bases": {p: sorted(t) for p, t in st.game_map.hq_connects.items()},
             "legal": None,
@@ -474,12 +472,12 @@ class Match:
         }
         if to_act == s:
             g["legal"], g["pending"] = self._decision(s)
-        elif st.result is None and rules.early_mulligan(st, s) is not None:   # your mulligan, while theirs goes on too
+        elif st.result is None and game.early_mulligan(st, s) is not None:   # your mulligan, while theirs goes on too
             g["toAct"] = s
-            i = rules.early_mulligan(st, s)
+            i = game.early_mulligan(st, s)
             g["legal"] = {"place": {}, "leader": False}
             g["pending"] = {"mode": "choice", "optional": True, "source": None, "kind": "mulligan",
-                            "returned": len(st.effect_stack[i]["returned"]), "cap": st.config.mulligan_cap(s, st.first_player),
+                            "returned": len(st.effect_stack[i]["returned"]), "cap": game.mulligan_cap(st, s),
                             "options": [self._describe_option(u.iid) for u in st.hands[s]]}
         # who decides what, always stated: over, mulligan (both at once), yours / your choice, theirs / their choice
         mull = st.pending is not None and st.pending.get("kind") == "mulligan"
@@ -496,7 +494,7 @@ class Match:
 
     def _decision(self, s: str):
         st = self.state
-        legal = rules.legal_actions(st)
+        legal = game.legal_actions(st)
         places: dict[str, list] = {}
         for a in legal:
             if isinstance(a, PlaceAction):
@@ -509,7 +507,7 @@ class Match:
         pending = {"mode": p["mode"], "optional": bool(p.get("optional")), "source": self._source(),
                    "kind": ASKS.get(step.get("op"), "effect"),
                    "returned": len(step.get("returned", ())) if step.get("op") == "mulligan" else 0,
-                   "cap": st.config.mulligan_cap(step.get("player"), st.first_player) if step.get("op") == "mulligan" else 0,
+                   "cap": game.mulligan_cap(st, step["player"]) if step.get("op") == "mulligan" else 0,
                    "options": [self._describe_option(o) for o in p["options"]]}
         return out, pending
 

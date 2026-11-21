@@ -40,7 +40,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from animal_kingdom.engine.cards import PLANNED, CardDataError, validate_card_record  # noqa: E402
+from animal_kingdom.game import PLANNED, CardDataError, validate_card_record  # noqa: E402
 
 CARDS = ROOT / "animal_kingdom" / "data" / "cards.json"
 ART_JS = ROOT / "animal_kingdom" / "web" / "static" / "art.js"
@@ -346,7 +346,7 @@ def add(cid: str, name: str, strength: int, cost: int, dynamic: str = "", legend
         raise Refused(f"{cid} already exists")
     rec = {"id": cid, "name": name, "status": "collectible", "rarity": "legendary" if legendary else "common",
            "base_strength": strength, "keywords": [], "text": "", "cost": cost}
-    if dynamic:   # a strength that is a count (engine/cards.py DYNAMIC_STRENGTHS): the Shades
+    if dynamic:   # a strength that is a count (engine_rs/src/data.rs DYNAMIC_STRENGTHS): the Shades
         rec["base_strength"], rec["dynamic_strength"] = "dynamic", dynamic
     validate_card_record(rec)
     cards["cards"].append(rec)

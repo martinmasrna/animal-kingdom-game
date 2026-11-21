@@ -20,11 +20,7 @@ from pathlib import Path
 
 from aiohttp import WSMsgType, web
 
-from ..engine.cards import COPY_LIMITS, load_cards
-from ..engine.config import Config
-from ..engine.effects import power_price
-from ..engine.leaders import LEADERS
-from ..engine.state import EngineError
+from ..game import CARDS, COPY_LIMITS, LEADERS, Config, EngineError, power_price
 from ..decks import DECK_SIZE
 from . import custom_decks, events, feedback, guard, oauth
 from .chat import Chat, ChatError
@@ -33,7 +29,6 @@ from .match import DECK_NAMES, Match, Seat, card_pool, map_info
 from .profiles import DECKS_MAX, ProfileError, Profiles, clean_name
 from .renamed import RENAMED_IDS, renamed as _renamed
 
-CARDS = load_cards()
 
 STATIC = Path(__file__).parent / "static"
 # The client this server serves, as one fingerprint: its files and the card data. A tab left open across a deploy keeps

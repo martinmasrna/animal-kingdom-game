@@ -23,10 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from animal_kingdom.engine.cards import load_cards  # noqa: E402
-from animal_kingdom.engine.config import Config  # noqa: E402
-from animal_kingdom.engine.effects import power_price  # noqa: E402
-from animal_kingdom.engine.leaders import LEADERS  # noqa: E402
+from animal_kingdom.game import LEADERS, Config, load_cards, power_price  # noqa: E402
 
 WEB = ROOT / "animal_kingdom" / "web"
 OUT = WEB / "static" / "patches"

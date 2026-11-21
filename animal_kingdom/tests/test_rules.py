@@ -3,18 +3,15 @@
 import random
 from itertools import combinations
 
-from animal_kingdom.decks import deck_problems
-from animal_kingdom.engine import effects, rules
-from animal_kingdom.engine.actions import SKIP, ChoiceAction, LeaderAction, PassAction, PlaceAction
 from dataclasses import replace
 
-from animal_kingdom.engine.cards import load_cards
-from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.effects import WEAKENS, _adjacent_enemy_targets, mana_cost
-from animal_kingdom.engine.leaders import ASSASSIN, ELF, LEADERS, RAIDER, SAGE, WARLORD
-from animal_kingdom.engine.maps import load_map
-from animal_kingdom.engine.state import MAP_ID, GameState, UnitInstance, new_game
-from animal_kingdom.engine.strength import effective_strength
+from animal_kingdom import game as rules    # the rules, answered by the Rust engine
+from animal_kingdom.decks import deck_problems
+from animal_kingdom.game import (ASSASSIN, ELF, LEADERS, MAP_ID, RAIDER, SAGE, SKIP, WARLORD, WEAKENS, ChoiceAction, Config,
+                                 GameState, LeaderAction, PassAction, PlaceAction, UnitInstance, effective_strength,
+                                 load_cards, load_map, mana_cost, new_game)
+
+effects = rules
 
 CARDS = load_cards()
 # Poison, Armor and Stealth are on no card right now (Martin, 2026-11-21, his paper cards); the rules keep them, tested on
@@ -239,11 +236,11 @@ def test_poison_removes_its_coverer_at_the_start_of_its_owners_turn():
 
 
 def test_armor_stops_a_bite_and_stealth_hides_from_one():
-    s = state(turn=11)
-    me = put(s, "1,1", "giant_hunter", "A")
+    s = state(turn=11, hands={"A": ["giant_hunter"]})
     put(s, "2,1", "test_armor", "B")
     put(s, "2,2", "test_stealth", "B")
-    assert _adjacent_enemy_targets(s, me, "1,1") == []
+    rules.apply_action(s, PlaceAction("giant_hunter", ("cr", "1,1")))   # "Roar: remove an adjacent enemy."
+    assert s.pending is None and s.remove_pile == []                    # neither may be chosen: nothing is asked
 
 
 def test_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
@@ -534,7 +531,7 @@ def test_a_game_replays_from_its_seed_and_actions():
 
 
 def test_the_bot_beats_random_play():
-    from animal_kingdom.bots.greedy import GreedyBot
+    from animal_kingdom.bot import GreedyBot
     wins = 0
     for seed in range(10):
         rng, bot = random.Random(seed), GreedyBot(seed)
@@ -542,7 +539,7 @@ def test_the_bot_beats_random_play():
         while not rules.is_terminal(s):
             legal = rules.legal_actions(s)
             p = s.player_to_act()
-            rules.apply_action(s, bot.choose(s.view_for(p), legal, s) if p == "A" else rng.choice(legal))
+            rules.apply_action(s, bot.choose(s) if p == "A" else rng.choice(legal))
         wins += s.result.winner == "A"
     assert wins >= 8
 

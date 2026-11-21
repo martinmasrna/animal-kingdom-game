@@ -3,9 +3,7 @@ decks (web/profiles.py), saved matches and registered decks (web/server.py, web/
 SUCCESSOR is the same map for the client; tools/cards/hq.py rename adds to both."""
 from __future__ import annotations
 
-from ..engine.cards import load_cards
-
-CARDS = load_cards()
+from ..game import CARDS
 
 RENAMED_IDS = {"shade_enemy": "shade_combo", "djinn_enemy": "djinn_combo", "shade_food": "shade_region", "djinn_food": "djinn_region", }
 

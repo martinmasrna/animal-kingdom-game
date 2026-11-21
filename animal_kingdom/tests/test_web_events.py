@@ -5,7 +5,7 @@ import json
 import sqlite3
 from animal_kingdom.tests._helpers import DECK, SLUG  # noqa: F401
 
-from animal_kingdom.engine.actions import ChoiceAction
+from animal_kingdom.game import ChoiceAction
 from animal_kingdom.web import events, server
 from animal_kingdom.web.match import Match, Seat
 

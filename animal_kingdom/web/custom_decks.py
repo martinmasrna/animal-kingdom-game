@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 from ..decks import DECKS, deck_problems, register_deck
-from ..engine.state import EngineError
+from ..game import EngineError
 from .match import DECK_NAMES
 from .renamed import renamed
 

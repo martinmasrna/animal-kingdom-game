@@ -46,7 +46,7 @@ def test_a_deck_keeps_its_chosen_cover(db, tmp_path):
 
 
 def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch, tmp_path):
-    from animal_kingdom.engine.state import Result
+    from animal_kingdom.game import Result
     db = Profiles(":memory:")
     monkeypatch.setattr(server, "profiles", db)
     monkeypatch.setattr(server, "LOG_DIR", tmp_path)

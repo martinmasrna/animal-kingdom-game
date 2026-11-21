@@ -10,7 +10,7 @@ from animal_kingdom.tests._helpers import DECK, SLUG  # noqa: F401
 import pytest
 from aiohttp.test_utils import TestClient, TestServer
 
-from animal_kingdom.engine import rules
+from animal_kingdom import game as rules
 from animal_kingdom.web import custom_decks, guard, server
 from animal_kingdom.web.match import Match
 
@@ -134,7 +134,7 @@ async def _view(ws):
 
 async def _act_until(ws, view, rng, done):
     """Play the socket's seat with random legal moves until done(view)."""
-    from animal_kingdom.engine.actions import SKIP
+    from animal_kingdom.game import SKIP
     while not done(view):
         g = view["game"]
         if g and g["toAct"] == view["you"] and g["decision"] in ("yours", "your_choice", "mulligan"):
