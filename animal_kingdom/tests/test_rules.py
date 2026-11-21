@@ -23,7 +23,8 @@ for _kw in ("Poison", "Armor", "Stealth"):
     CARDS[f"test_{_kw.lower()}"] = replace(CARDS["wisp_1"], id=f"test_{_kw.lower()}", keywords=frozenset({_kw}))
 CARDS["test_reserve"] = replace(CARDS["wisp_1"], id="test_reserve", status="reserve")
 CARDS["test_one"] = replace(CARDS["wisp_1"], id="test_one", base_strength=1)
-CARDS["test_three"] = replace(CARDS["wisp_1"], id="test_three", base_strength=3)   # a plain 1, for a board that needs one
+CARDS["test_three"] = replace(CARDS["wisp_1"], id="test_three", base_strength=3)
+CARDS["test_five"] = replace(CARDS["wisp_1"], id="test_five", base_strength=5)   # a plain 1, for a board that needs one
 CFG = Config()
 BOARD = load_map(MAP_ID)
 BASE = {"A": {"1,1", "1,2", "1,3"}, "B": {"5,1", "5,2", "5,3"}}
@@ -386,6 +387,11 @@ def test_rhino_and_albatross_remove_every_adjacent_enemy_of_five_or_less():
         assert "1,2" not in s.board and "3,2" not in s.board and "2,3" in s.board and "3,3" in s.board
         assert "1,1" in s.board                                       # its own side untouched
     assert CARDS["albatross"].keywords == {"Flight"} and (CARDS["albatross"].cost, CARDS["albatross"].base_strength) == (8, 4)
+    assert CARDS["rhino"].text.endswith("5 or less.") and CARDS["albatross"].text.endswith("4 or less.")
+    s = state(turn=19, hands={"A": ["rhino", "albatross"]})          # an enemy of 5: the Rhino's, not the Albatross's
+    put(s, "1,1", "wisp_1", "A"); put(s, "3,1", "test_five", "B"); put(s, "3,2", "wisp_2", "B")   # 5 and 4, both next to 2,1
+    rules.apply_action(s, PlaceAction("albatross", ("cr", "2,1")))
+    assert "3,1" in s.board and "3,2" not in s.board
 
 
 def test_the_young_rhino_and_albatross_remove_adjacent_enemies_up_to_three_and_two():
@@ -398,7 +404,7 @@ def test_the_young_rhino_and_albatross_remove_adjacent_enemies_up_to_three_and_t
         put(s, "2,3", "wisp_2", "B")                                  # 4: stays
         rules.apply_action(s, PlaceAction(cid, ("cr", "2,2")))
         assert "1,2" not in s.board and "2,3" in s.board and ("2,1" in s.board) == (limit < 3)
-    assert [(CARDS[c].cost, CARDS[c].base_strength) for c in ("young_rhino", "young_albatross")] == [(4, 4), (4, 2)]
+    assert [(CARDS[c].cost, CARDS[c].base_strength) for c in ("young_rhino", "young_albatross")] == [(4, 6), (4, 2)]
 
 
 def test_djinn_cost_less_for_each_of_their_count():

@@ -560,7 +560,7 @@
       "name": "Rhino",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 8,
+      "base_strength": 10,
       "text": "Roar: remove all adjacent enemies with strength 5 or less.",
       "cost": 8,
       "keywords": []
@@ -571,7 +571,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 4,
-      "text": "Flight. Roar: remove all adjacent enemies with strength 5 or less.",
+      "text": "Flight. Roar: remove all adjacent enemies with strength 4 or less.",
       "cost": 8,
       "keywords": [
         "Flight"
@@ -582,7 +582,7 @@
       "name": "Young Rhino",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 4,
+      "base_strength": 6,
       "text": "Roar: remove all adjacent enemies with strength 3 or less.",
       "cost": 4,
       "keywords": []

@@ -614,7 +614,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     **{cid: {"on_place": _scout} for cid in SCOUTS},
     "duplicating_spore": {"on_place": _duplicate},
     "rhino": {"on_place": _crush("crush_max")},
-    "albatross": {"on_place": _crush("crush_max")},
+    "albatross": {"on_place": _crush("crush_albatross_max")},
     "young_rhino": {"on_place": _crush("crush_young_max")},
     "young_albatross": {"on_place": _crush("crush_young_albatross_max")},
     "mama_spore": {"on_place": _mama_spore},
