@@ -1,49 +1,60 @@
-# The engine in Rust
+# The engine
 
-The same game as the Python package's `animal_kingdom/engine/`: the position, the rules, every card's effect, built as the Python module `ak_engine`. It reads the same card table (`data/cards.json`), the same map (`data/maps.json`) and the same `Config`, and saves a position in the same shape, so a match saved by either engine loads in the other. `tools/engine_rs/fuzz.py` proves the two agree position by position.
+The game's rules: the position, what is legal, what every card does. It is the only implementation of them. The crate builds the Python module `ak_engine`; the server, the tools and the tests reach it through `animal_kingdom/game.py`, which holds no rules of its own. The bots (`src/bots/`) are Rust code calling the engine directly.
 
 ## Build
 
-```
-cd engine_rs && VIRTUAL_ENV=$PWD/../.venv PATH="$PWD/../.venv/bin:/opt/homebrew/bin:$PATH" ../.venv/bin/maturin develop --release
-```
+`./play`, `./test` and `./cards` build it themselves whenever its source is newer than the built module (`engine_rs/build.sh --if-stale`, about ten seconds). By hand: `engine_rs/build.sh`.
 
-It needs the Rust toolchain (`brew install rust`) and maturin in the venv (`.venv/bin/pip install maturin`), and takes about fifteen seconds. Build output goes to `engine_rs/target/`, which git ignores.
+It needs the Rust toolchain (`brew install rust`, or rustup) and maturin in the venv (`.venv/bin/pip install maturin`). Build output goes to `engine_rs/target/`, which git ignores. A machine with no Rust toolchain cannot run the game from source; it plays on staging.
+
+## Adding or changing a card
+
+- **Its numbers and text** (cost, strength, keywords, the words on it) are data: `tools/cards/hq.py`, nothing to build.
+- **An effect another card already has**: one line in `src/cards.rs` `behaviour()`, naming the card id under the effect.
+- **A new effect**: a variant in `src/cards.rs` (`Roar`, `OnCover`, `OnDeath`, `OnRaid`, or a field of `Behaviour`), and what it does in `src/effects.rs` (`run_roar` and its neighbours). An effect that waits for a choice is a step on the effect stack: a `StepKind` in `src/state.rs`, run in `effects.rs` `run_op`, saved and loaded in `src/json.rs`.
+- **Any number the effect uses** goes in the `config!` table in `src/data.rs`, never in effect code.
+- **A test** for the rule in `animal_kingdom/tests/test_rules.py` (it sets positions up by hand and plays them through the engine), then `tools/engine_rs/fuzz.py`.
 
 ## Use
 
 ```python
-import ak_engine, dataclasses, json
-eng = ak_engine.Engine(cards_json_text, maps_json_text, json.dumps(dataclasses.asdict(Config())), "map_hex19")
-st = eng.new_game(deck_a, deck_b, seed, first_player=None, leaders={"A": "elf_legend", "B": "sage_legend"})
-st = eng.from_dict(saved)            # a position saved by either engine
-st.legal_actions()                   # action dicts, in the Python engine's order
-st.apply_action({"kind": "place", "card_id": "wisp_2", "target": ["cr", "1,2"]})   # validate=False skips the legality check
-st.can_pass(); st.is_terminal(); st.player_to_act(); st.clone(); st.to_dict()
-st.record_events(True); st.take_events()     # the Python engine's event dicts; off by default, a search never needs them
+from animal_kingdom import game
+s = game.new_game(deck_a, deck_b, seed, leaders={"A": "elf_legend", "B": "sage_legend"})
+game.legal_actions(s); game.apply_action(s, game.PlaceAction("wisp_2", ("cr", "1,2"))); game.is_terminal(s)
+s.to_dict(); game.GameState.from_dict(saved)
 ```
 
-`State` also answers what the server shows: `mana_left`, `mana_total`, `mana_cost`, `power_cost`, `leader_usable`, `region_income`, `card_strength`, `effective_strength`, and `apply_logged` / `early_mulligan` / `apply_early_mulligan` for the mulligan both players make at once. `tools/engine_rs/common.py` builds both engines from the bundled data.
+`game.py` also gives the engine's data as Python values: `CARDS`, `LEADERS`, `MAKES`, `Config()` (the rules' numbers), `load_map()`, `deck_problems()`, `validate_card_record()`.
 
-## Proof
+The module itself, for code that needs speed (a bot, a tool playing many games):
 
-- `tools/engine_rs/fuzz.py --games 3000 --jobs 6 --coverage`: random games through both engines at once, compared after every action on the saved position (the board's tiles in the order they were taken), the legal actions in order, the events, the result, and each seat's mana, costs, strengths and income. Half the games add cards for the rules no card uses today (Armor, Stealth, Poison, a strength that is a count, a 0-strength body) and tight configs that reach the turn caps and the hand limit.
-- `tools/engine_rs/oracle.py`: every logged game that still replays on today's Python engine, replayed side by side.
-- `tools/engine_rs/speed.py`: clone-and-apply pairs a second for both engines on the same positions.
+```python
+import ak_engine
+eng = ak_engine.Engine(cards_json_text, maps_json_text, config_json_text, "map_hex19")
+st = eng.new_game(deck_a, deck_b, seed, None, {"A": "elf_legend", "B": "sage_legend"})
+st.legal_actions(); st.apply_action({"kind": "place", "card_id": "wisp_2", "target": ["cr", "1,2"]}); st.clone(); st.to_dict()
+```
 
-Run the fuzz and the oracle after any change to either engine. While the Python engine exists, a change to a rule or to a card's effect is made in both and the fuzz says whether they still agree; a change to a card's numbers is data and needs nothing.
+A broken rule raises `ValueError`. A panic inside the engine is caught at the binding and raised as `RuntimeError`, so it never takes the server down; `game.py` turns both into `EngineError`.
+
+## Checks
+
+- `tools/engine_rs/fuzz.py --games 3000 --jobs 6 --coverage`: random games over every card, and after every action the checks no position may fail (a saved position loads the same, a finished game offers nothing, no animal stays buried, no hand past its limit, a refused action changes nothing). Half the games add cards for the rules no card uses today (Armor, Stealth, Poison, a strength that is a count, a 0-strength body) and tight configs that reach the turn caps, the turn limit and the hand limit.
+- `animal_kingdom/tests/test_rules.py`: each rule and each card's effect, on positions set up by hand.
+- `tools/engine_rs/speed.py`: clone-and-apply pairs a second, the number a bot's thinking time buys (about 4 million on one core of the M1 Pro).
+
+The deploy image compiles the engine and runs the fuzz and the tests on that build before it ships (`deploy/Dockerfile`).
 
 ## Layout
 
-- `data.rs`: what never changes during a game: the card table, the map, the `Config`. A card id and a tile are small integers in the order of their names, so "sorted" is numeric.
-- `cards.rs`: what each card does, keyed by card id (the Python `EFFECTS` table). A new card effect starts here.
+- `data.rs`: what never changes during a game: the card table and what makes a record valid, the map, the rules' numbers (`config!`). A card id and a tile are small integers in the order of their names, so "sorted" is numeric.
+- `cards.rs`: what each card does, keyed by card id; the leaders and their texts; the cards a card makes.
 - `state.rs`: the position. The board is a flat array of top units and one short list of what is beneath them; hands, decks and the effect stack sit inline, so a clone is a few flat copies with no allocation when nothing is resolving.
 - `effects.rs`: strength and cost, placement, covering, removal, food, draws, the effect stack and its steps, the leaders' powers.
-- `rules.rs`: legal actions, applying an action, the turn, the mulligan at once, the end of the game.
+- `rules.rs`: legal actions, applying an action, the turn and its caps, the mulligan at once, the end of the game.
+- `view.rs`: what the server reads beyond the rules: a seat's view, how a unit shows, the leaders, the deck rules.
 - `actions.rs`, `json.rs`, `events.rs`: the action dicts, the saved position, the event dicts.
-- `rng.rs`: CPython's `random.Random`, bit for bit, so a game replays identically from its seed in either engine.
+- `rng.rs`: CPython's `random.Random`, bit for bit, so a logged game replays from its seed and a saved position keeps its random stream.
 - `py.rs`: the Python module.
-
-## Not here
-
-The seat's view (`GameState.view_for`), the card loader's validation, the deck rules (`animal_kingdom/decks.py`) and the `MAKES` table the client reads are not ported: nothing in the rules reads them.
+- `bots/`, `bin/bot_bench.rs`: the bots and their benchmark (`tools/bot_bench/README.md`).

@@ -1,11 +1,12 @@
 # Animal Kingdom game
 
-*Animal Kingdom* is a two-player card game Martin is designing, meant to become a digital game people play competitively. This repo holds its rules engine, one bot, the web client and the card table. It is `game/` in the Animal Kingdom workspace (the folder above, where every session starts); its sibling `design/` holds the art the board's pieces are exported from. **Start every session at [`docs/STATUS.md`](docs/STATUS.md).**
+*Animal Kingdom* is a two-player card game Martin is designing, meant to become a digital game people play competitively. This repo holds its rules engine (Rust, `engine_rs/`), the bots, the web client and the card table. It is `game/` in the Animal Kingdom workspace (the folder above, where every session starts); its sibling `design/` holds the art the board's pieces are exported from. **Start every session at [`docs/STATUS.md`](docs/STATUS.md).**
 
 ## Commands
 
-Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'`; the web tests need `cd animal_kingdom/web/test && npm install` once.
+Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip install -e '.[dev]' maturin`; the Rust toolchain (`brew install rust`); the web tests need `cd animal_kingdom/web/test && npm install` once.
 
+- The rules engine is compiled: `./play`, `./test` and `./cards` rebuild it whenever its source is newer than the built module (`engine_rs/build.sh --if-stale`, about ten seconds), so an edit under `engine_rs/src/` shows on the next run. How a card's effect is added or changed: [`engine_rs/README.md`](engine_rs/README.md).
 - Tests: `./test` runs the Python tests and the web client's suite in parallel; `./test <path or -k ...>` runs named Python tests in a second or two. Martin never waits on a test, a deploy or a check: run the named tests a change touches in the foreground, commit as soon as they pass, and run `./test` and any deploy in the background (anything over about 15 seconds; a workspace hook refuses a slow suite in the foreground), then keep the conversation going. Every client change passes the web suite (`cd animal_kingdom/web/test && node --test`) before Martin sees it, so design sessions never stall on bugs. A bug found in play gets a test that fails without the fix.
 - The web tests drive Chrome for Testing from `~/.cache/puppeteer/chrome/` (`npx @puppeteer/browsers install chrome@stable --path ~/.cache/puppeteer`): Martin's Cold Turkey blocker quits any Google Chrome without its extension, which kills test browsers mid-run ("Target closed"). If browser tests die that way, check which binary the harness picked; never touch Cold Turkey.
 - Web client: `./play` serves http://localhost:8000. Martin plays there; a `./play` he uses runs plain, logging (`AK_NO_GAME_LOGS=1` is for test servers only: it keeps nothing, not even the profile database). A server restart keeps running matches (saved to `results/web_matches/` after every move).
@@ -16,7 +17,8 @@ Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip i
 
 ## Invariants
 
-- `engine/` is stdlib-only and transport-agnostic; file loading happens only at construction. `apply_action` validates every action.
-- Card numbers live in `cards.json` or `engine/config.py`, never as literals in effect code.
+- The rules live once, in `engine_rs/`. Python holds none: `animal_kingdom/game.py` hands the engine's data to the server, the tools and the tests and asks the engine every question. `apply_action` validates every action.
+- Card numbers live in `cards.json` or the `config!` table in `engine_rs/src/data.rs`, never as literals in effect code.
+- A panic inside the engine never takes the server down: the Python binding turns it into an error.
 - The engine does exactly what a card's text says; an edge case gets a rewording, never a hidden rule.
 - The bot is honest: it never reads hidden information.

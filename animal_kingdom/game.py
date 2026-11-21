@@ -19,9 +19,7 @@ from typing import ClassVar, Optional, Union
 try:
     import ak_engine
 except ImportError as e:   # the compiled engine is not built for this Python
-    raise ImportError(
-        "the game's engine is not built: run  cd engine_rs && VIRTUAL_ENV=$PWD/../.venv PATH=\"$PWD/../.venv/bin:/opt/homebrew/bin:$PATH\""
-        " ../.venv/bin/maturin develop --release  (needs Rust: brew install rust; and .venv/bin/pip install maturin)") from e
+    raise ImportError("the game's rules engine is not built: run engine_rs/build.sh (it needs the Rust toolchain: brew install rust)") from e
 
 
 class EngineError(Exception):
