@@ -35,7 +35,6 @@
 .mcard .mcost { position: absolute; z-index: 4; pointer-events: none; }
 .mcard .mcost svg, .mchip svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .mcard .mcost polygon, .mchip polygon { fill: #f2c94c; stroke: #2a2006; stroke-width: 5; stroke-linejoin: round; }
-.mcard .mcost .mnum, .mchip .mnum { filter: brightness(0); opacity: .88; }   /* the strength numerals, inked */
 .mchip { display: inline-block; width: 18px; height: 21px; vertical-align: -5px; margin: 0 2px; }
 
 /* the mana: six small gold hexagons */
@@ -321,5 +320,5 @@ body:has(.game.mana) .chatp.inmatch { left: 16px; right: auto; }
 :is(.mscr, .game) .st.mst .x { width: 20px; justify-content: center; padding: 0 6px 0 0; }
 /* a leader's power's cost in the piece's drawer, where a card's strength sits (mana.js powerCostHTML) */
 .pcost { position: absolute; z-index: 5; pointer-events: none; } .pcost svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.pcost polygon { fill: #f2c94c; stroke: #2a2006; stroke-width: 5; stroke-linejoin: round; } .pcost .mnum { filter: brightness(0); opacity: .88; }
+.pcost polygon { fill: #f2c94c; stroke: #2a2006; stroke-width: 5; stroke-linejoin: round; }
 .pwcard { flex: none; margin-left: 46px; align-self: center; }   /* a card's frame reaches past its box: room enough beside the leader's */

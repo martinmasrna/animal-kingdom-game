@@ -48,9 +48,9 @@ const frameSVG = (u = ++frames) => `<svg class="mpl" viewBox="0 0 1000 ${n(HC)}"
   + `<polygon fill="#0f1215" points="${hexPts(+n(BD + (LW - 1.05) / 2), +n(-Y0 - .025 * P), +n(1.05), +n(1.05 * P))}"/></svg>`;
 // The cost: the card's own top-left corner, its upper-left vertex on the card's shoulder.
 const GH = GEM * P;
-// The number in Martin's strength numerals (token.js numeral, static/hex/num), inked dark on the gold.
+// The number in Martin's strength numerals (token.js numeral, static/hex/num), inked dark on the gold by an SVG filter: WebKit ignores CSS filters on SVG children.
 const COST_SVG = c => { const h = 100 * P * .62, w = h * 2 / 1.2;
-  return `<svg viewBox="0 0 100 ${(100 * P).toFixed(2)}"><polygon points="${hexPts(0, 0, 100, 100 * P)}"/><image class="mnum" href="/static/hex/num/${Math.max(0, Math.min(20, c))}.svg" x="${(50 - w / 2).toFixed(2)}" y="${(50 * P - h / 2).toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}"/></svg>`; };
+  return `<svg viewBox="0 0 100 ${(100 * P).toFixed(2)}"><filter id="mink"><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .88 0"/></filter><polygon points="${hexPts(0, 0, 100, 100 * P)}"/><image class="mnum" filter="url(#mink)" href="/static/hex/num/${Math.max(0, Math.min(20, c))}.svg" x="${(50 - w / 2).toFixed(2)}" y="${(50 * P - h / 2).toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}"/></svg>`; };
 const COST_AT = box(X0, Y0 + YS - GH / 4, GEM, GH);
 // The piece alone (a deck tray, a shown hand) keeps the cost in the piece's own upper-left corner, sharing its two edges.
 const PIECE_COST_AT = box(0, .25 * P * (1 - .3), .3, .3 * P);
