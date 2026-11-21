@@ -35,13 +35,22 @@ export function patchHTML(P) {
     + (P.removed.length ? `<h2>Removed</h2><div class="row">${P.removed.map(c => `<div class="gone" data-key="${c.id}">${card(c)}</div>`).join('')}</div>` : '');
 }
 
-// The screen: one patch (the newest unless `version` names one), Back to home. Opening the newest marks it seen.
-export async function patchScreen(app, { version, back, seen }) {
+// The window: one patch (the newest unless `version` names one) over whatever is on screen; ×, Escape or a click
+// outside closes it. Opening the newest marks it seen.
+export async function openPatch({ version, seen, closed } = {}) {
+  if (document.getElementById('patchpop')) return;
   const list = await patches(), v = version && list.includes(version) ? version : list[0];
   const P = v && await fetch(`/static/patches/${v}.json`).then(r => r.ok ? r.json() : null).catch(() => null);
-  app.innerHTML = `<div class="mscr patch"><div class="pscroll"><div class="pcol">${P ? patchHTML(P) : '<h1>Patch notes</h1>'}</div></div>`
-    + `<div class="pfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div>`;
-  fitNames(app); fitPlaques(app);
-  app.querySelector('#back').onclick = back;
-  if (P && v === list[0]) seen(v);
+  if (!P) return;
+  const el = document.createElement('div'); el.id = 'patchpop'; el.className = 'patchpop';
+  el.innerHTML = `<div class="mscr patch pwin"><div class="pscroll"><div class="pcol">${patchHTML(P)}</div></div>`
+    + `<button class="pclose" aria-label="Close"></button></div>`;
+  document.body.appendChild(el);
+  fitNames(el); fitPlaques(el);
+  const close = () => { el.remove(); removeEventListener('keydown', key); closed && closed(); };
+  const key = e => { if (e.key === 'Escape') close(); };
+  addEventListener('keydown', key);
+  el.onclick = e => { if (e.target === el) close(); };
+  el.querySelector('.pclose').onclick = close;
+  if (v === list[0]) seen && seen(v);
 }
