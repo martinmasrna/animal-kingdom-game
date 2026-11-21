@@ -625,7 +625,7 @@ function decision() {
       if (o.kind === 'cr') d.crChoice[dcr(o.cr || o.v)] = o.v;
       else if (o.kind === 'hq') d.hqRing = true;   // "It roams" may take the enemy den
       else if (o.kind === 'hand' && d.pend.kind === 'mulligan') d.handPick.add(o.v);   // the mulligan picks in the hand itself
-      else if (o.kind === 'hand') d.cardOpts.push({ ...o, str: (G.hand.find(h => h.iid === o.v) || {}).str });   // any other pick from your hand is laid out in the middle: a lit hand reads as "play one" (feedback 2026-10-01)
+      else if (o.kind === 'hand') { const h = G.hand.find(h => h.iid === o.v) || {}; d.cardOpts.push({ ...o, str: h.str, cost: h.cost }); }   // any other pick from your hand is laid out in the middle: a lit hand reads as "play one" (feedback 2026-10-01)
       else if (o.kind === 'card') d.cardOpts.push(o);
       else d.otherOpts.push(o);
     }
@@ -922,7 +922,7 @@ function drawGame() {
     bar.innerHTML = `<div class="line">${src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${peek}${skip}</div>` + (other ? `<div class="btns">${other}</div>` : '');
     bar.classList.add('on');
     if (d.cardOpts.length) {
-      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${(manaCard(c, { ...(o.str == null ? {} : { str: o.str }), w: 170 }))}</div>`; }).join('');
+      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${(manaCard(c, { ...(o.str == null ? {} : { str: o.str }), cost: o.cost ?? c.mana ?? null, w: 170 }))}</div>`; }).join('');
       opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); opts.classList.toggle('many', d.cardOpts.length > 6); fitNames(opts); fitPlaques(opts);
       $('optpeek').onclick = e => { e.stopPropagation(); ui.optsHidden = !ui.optsHidden; drawGame(); };
       opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });

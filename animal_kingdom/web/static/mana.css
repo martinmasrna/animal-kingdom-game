@@ -170,7 +170,7 @@
 .game.mana .prompt .skip.use:hover, .game.mana .prompt.mull #skip:hover { background: #355682; }
 .game.mana .opts .hc { width: 170px; height: 362px; position: relative; top: auto; } .game.mana .opts .hc .mcard { --mw: 170px; }
 .game.mana .opts .hc:hover { transform: translateY(-8px); }
-.game.mana .opts { top: 200px; }
+.game.mana .opts { top: 200px; gap: 64px; }   /* each card's frame and cost reach past its box: room enough that none covers the next */
 
 /* a played card shown large (the opponent's, an Echo, a leader's power): the full card */
 .game.mana .reveal .mcard { --mw: 190px; position: absolute; left: -95px; top: -196px; }
