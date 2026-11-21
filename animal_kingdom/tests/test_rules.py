@@ -10,7 +10,7 @@ from dataclasses import replace
 
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.effects import WEAKENS, _adjacent_enemy_targets, mana_cost
+from animal_kingdom.engine.effects import DAMAGES, _adjacent_enemy_targets, mana_cost
 from animal_kingdom.engine.leaders import LEADERS, RAIDER, SAGE, WARLORD
 from animal_kingdom.engine.maps import load_map
 from animal_kingdom.engine.state import MAP_ID, GameState, UnitInstance, new_game
@@ -250,22 +250,26 @@ def test_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
 
 # ------------------------------------------------------------------ the cards
 
-def test_hunters_give_an_adjacent_enemy_minus_n_strength_for_good():
-    for cid, n in WEAKENS.items():
-        assert CARDS[cid].text == f"Roar: give an adjacent enemy -{n} strength."
+def test_hunters_deal_damage_for_good_and_remove_at_zero():
+    for cid, n in DAMAGES.items():
+        assert CARDS[cid].text == f"Roar: deal {n} damage to an adjacent enemy."
     s = state(turn=11, hands={"A": ["hunter_3", "wisp_0"]})
     put(s, "2,1", "wisp_2", "B")                                # strength 4
-    put(s, "2,2", "wisp_1", "B")                                # strength 2
+    put(s, "2,2", "death_draw_1", "B")                          # strength 1
     rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))
     assert s.pending["options"] == ["2,1", "2,2"] and s.pending["chooser"] == "A"
     rules.apply_action(s, ChoiceAction("2,1"))
-    assert effective_strength(s, s.board["2,1"][0]) == 1        # stays, weaker, and the wisp_0 (1) can't cover it
+    assert effective_strength(s, s.board["2,1"][0]) == 1        # stays, weaker: the wisp_0 (1) can't cover it
     assert "2,1" not in places(s, "wisp_0")
     s.hands["A"].append(UnitInstance("hunter_3", "A", s.new_iid()))
     rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,2")))
     rules.apply_action(s, ChoiceAction("2,2"))
-    assert effective_strength(s, s.board["2,2"][0]) == 0 and "2,2" in s.board   # never below 0, and still standing
-    assert "2,2" in places(s, "wisp_0")
+    assert "2,2" not in s.board and len(s.hands["B"]) == 1      # brought to 0: removed, and its Death fires
+    s = state(turn=11, hands={"A": ["hunter_3"]})
+    put(s, "2,1", "test_armor", "B")
+    rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))
+    rules.apply_action(s, ChoiceAction("2,1"))
+    assert effective_strength(s, s.board["2,1"][0]) == 0        # Armor: at 0, still standing
 
 
 def test_the_giant_hunter_removes_any_adjacent_enemy():

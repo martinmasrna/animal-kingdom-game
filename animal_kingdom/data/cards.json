@@ -212,7 +212,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 3,
-      "text": "Roar: give an adjacent enemy -3 strength.",
+      "text": "Roar: deal 3 damage to an adjacent enemy.",
       "cost": 3,
       "keywords": []
     },
@@ -222,7 +222,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 3,
-      "text": "Roar: give an adjacent enemy -5 strength.",
+      "text": "Roar: deal 5 damage to an adjacent enemy.",
       "cost": 4,
       "keywords": []
     },
@@ -232,7 +232,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 3,
-      "text": "Roar: give an adjacent enemy -7 strength.",
+      "text": "Roar: deal 7 damage to an adjacent enemy.",
       "cost": 5,
       "keywords": []
     },
@@ -242,7 +242,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 2,
-      "text": "Roar: give an adjacent enemy -6 strength.",
+      "text": "Roar: deal 6 damage to an adjacent enemy.",
       "cost": 4,
       "keywords": []
     },
@@ -252,7 +252,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 4,
-      "text": "Roar: give an adjacent enemy -4 strength.",
+      "text": "Roar: deal 4 damage to an adjacent enemy.",
       "cost": 5,
       "keywords": []
     },
@@ -262,7 +262,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 6,
-      "text": "Roar: give an adjacent enemy -2 strength.",
+      "text": "Roar: deal 2 damage to an adjacent enemy.",
       "cost": 6,
       "keywords": []
     },
