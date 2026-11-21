@@ -25,6 +25,9 @@ CARDS["test_reserve"] = replace(CARDS["wisp_1"], id="test_reserve", status="rese
 CARDS["test_one"] = replace(CARDS["wisp_1"], id="test_one", base_strength=1)
 CARDS["test_three"] = replace(CARDS["wisp_1"], id="test_three", base_strength=3)
 CARDS["test_five"] = replace(CARDS["wisp_1"], id="test_five", base_strength=5)   # a plain 1, for a board that needs one
+# A strength that is a count is on no card since the Shades left (Martin, 2026-11-21); the engine keeps it, tested here.
+for _n in ("hand", "ally", "region", "played"):
+    CARDS[f"test_{_n}_count"] = replace(CARDS["wisp_1"], id=f"test_{_n}_count", base_strength="dynamic", dynamic_strength=f"{_n}_count")
 CFG = Config()
 BOARD = load_map(MAP_ID)
 BASE = {"A": {"1,1", "1,2", "1,3"}, "B": {"5,1", "5,2", "5,3"}}
@@ -279,11 +282,11 @@ def test_an_animal_at_zero_strength_is_removed_armor_or_not():
     rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))
     rules.apply_action(s, ChoiceAction("2,1"))
     assert "2,1" not in s.board                                 # the rules' removal: Armor doesn't hold
-    s = state(turn=11, hands={"A": ["shade_hand", "test_one"]})
-    rules.apply_action(s, PlaceAction("shade_hand", ("cr", "1,1")))
+    s = state(turn=11, hands={"A": ["test_hand_count", "test_one"]})
+    rules.apply_action(s, PlaceAction("test_hand_count", ("cr", "1,1")))
     assert effective_strength(s, s.board["1,1"][0]) == CFG.shade_growth   # one card left in hand
     rules.apply_action(s, PlaceAction("test_one", ("cr", "1,2")))
-    assert "1,1" not in s.board                                 # the hand emptied: the Hand Shade is at 0, removed
+    assert "1,1" not in s.board                                 # the hand emptied: it is at 0, removed
 
 
 def test_the_giant_hunter_removes_any_adjacent_enemy():
@@ -412,21 +415,21 @@ def test_djinn_cost_less_for_each_of_their_count():
     for cr in ("1,1", "1,2", "2,2"):                                  # three allies, one region of A's
         put(s, cr, "wisp_1", "A")
     assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_combo", "djinn_region")} == \
-        {"djinn_hand": 4, "djinn_ally": 7, "djinn_combo": 10, "djinn_region": 9}
+        {"djinn_hand": 6, "djinn_ally": 9, "djinn_combo": 12, "djinn_region": 11}
     rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,3"))); rules.apply_action(s, PlaceAction("wisp_1", ("cr", "2,3")))
-    assert mana_cost(s, "djinn_combo") == 10 - 2 * CFG.combo_djinn_discount   # two cards played this turn
-    assert mana_cost(s, "djinn_combo", "B") == 10                     # B played none: it isn't their turn
+    assert mana_cost(s, "djinn_combo") == 12 - 2 * CFG.combo_djinn_discount   # two cards played this turn
+    assert mana_cost(s, "djinn_combo", "B") == 12                     # B played none: it isn't their turn
 
 
-def test_shade_strength_is_its_count():
-    s = state(turn=19, hands={"A": ["wisp_1", "wisp_1", "wisp_1", "shade_combo"]})
-    shades = {k: put(s, cr, f"shade_{k}", "A") for k, cr in (("hand", "1,1"), ("ally", "1,2"), ("region", "2,2"))}
+def test_a_dynamic_strength_is_its_count():
+    s = state(turn=19, hands={"A": ["wisp_1", "wisp_1", "wisp_1", "test_played_count"]})
+    shades = {k: put(s, cr, f"test_{k}_count", "A") for k, cr in (("hand", "1,1"), ("ally", "1,2"), ("region", "2,2"))}
     assert rules.region_income(s, "A") == 1                          # 1,1 1,2 2,2: one region
     g = CFG.shade_growth
     assert {k: effective_strength(s, u) for k, u in shades.items()} == {"hand": 4 * g, "ally": 3 * g, "region": g}
     rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,3")))
-    rules.apply_action(s, PlaceAction("shade_combo", ("cr", "2,3")))  # the second card this turn
-    assert effective_strength(s, s.board["2,3"][-1]) == 2 * g and all(CARDS[f"shade_{k}"].cost == 5 for k in ("hand", "ally", "region", "combo"))
+    rules.apply_action(s, PlaceAction("test_played_count", ("cr", "2,3")))  # the second card this turn
+    assert effective_strength(s, s.board["2,3"][-1]) == 2 * g
 
 
 def test_the_warlord_gains_a_food_for_each_cover_of_an_enemy():

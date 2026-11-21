@@ -66,29 +66,29 @@
       "name": "Hand Djinn",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 10,
+      "base_strength": 12,
       "keywords": [],
       "text": "Costs 1 less for each card in your hand.",
-      "cost": 10
+      "cost": 12
     },
     {
       "id": "djinn_ally",
       "name": "Ally Djinn",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 10,
+      "base_strength": 12,
       "keywords": [],
       "text": "Costs 1 less for each ally.",
-      "cost": 10
+      "cost": 12
     },
     {
       "id": "djinn_combo",
       "name": "Combo Djinn",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 10,
+      "base_strength": 12,
       "text": "Costs 2 less for each card you played this turn.",
-      "cost": 10,
+      "cost": 12,
       "keywords": []
     },
     {
@@ -96,53 +96,9 @@
       "name": "Region Djinn",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 10,
+      "base_strength": 12,
       "text": "Costs 1 less for each region you control.",
-      "cost": 10,
-      "keywords": []
-    },
-    {
-      "id": "shade_hand",
-      "name": "Hand Shade",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": "dynamic",
-      "dynamic_strength": "hand_count",
-      "text": "Has +2 strength for each card in your hand.",
-      "cost": 5,
-      "keywords": []
-    },
-    {
-      "id": "shade_ally",
-      "name": "Ally Shade",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": "dynamic",
-      "dynamic_strength": "ally_count",
-      "text": "Has +2 strength for each ally.",
-      "cost": 5,
-      "keywords": []
-    },
-    {
-      "id": "shade_combo",
-      "name": "Combo Shade",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": "dynamic",
-      "dynamic_strength": "played_count",
-      "text": "Has +2 strength for each card you played this turn.",
-      "cost": 5,
-      "keywords": []
-    },
-    {
-      "id": "shade_region",
-      "name": "Region Shade",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": "dynamic",
-      "dynamic_strength": "region_count",
-      "text": "Has +2 strength for each region you control.",
-      "cost": 5,
+      "cost": 12,
       "keywords": []
     },
     {

@@ -245,7 +245,16 @@
         "prev": 10
       },
       "by": "claude",
-      "at": 1795263261
+      "at": 1795292654
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "by": "claude",
+      "at": 1795292653
     }
   },
   "djinn_ally": {
@@ -278,7 +287,16 @@
         "prev": 10
       },
       "by": "claude",
-      "at": 1795263261
+      "at": 1795292654
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "by": "claude",
+      "at": 1795292654
     }
   },
   "djinn_combo": {
@@ -311,7 +329,16 @@
         "prev": 10
       },
       "by": "claude",
-      "at": 1795263261
+      "at": 1795292654
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "by": "claude",
+      "at": 1795292654
     }
   },
   "djinn_region": {
@@ -337,157 +364,24 @@
       "by": "claude",
       "at": 1795285398,
       "note": "into the collection"
-    }
-  },
-  "shade_hand": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795291399
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Shade",
-          "species": "Shade"
-        }
-      },
-      "by": "claude",
-      "at": 1795201447
     },
     "cost": {
       "review": {
         "prev_lv": "draft",
         "prev_note": "",
-        "prev": 5
+        "prev": 10
       },
       "by": "claude",
-      "at": 1795291399
-    }
-  },
-  "shade_ally": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795291399
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Shade",
-          "species": "Shade"
-        }
-      },
-      "by": "claude",
-      "at": 1795201447
-    },
-    "cost": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795291399
-    }
-  },
-  "shade_combo": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795291399
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Shade",
-          "species": "Shade"
-        }
-      },
-      "by": "claude",
-      "at": 1795291399
-    },
-    "cost": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795291399
+      "at": 1795292654
     },
     "strength": {
       "review": {
         "prev_lv": "draft",
         "prev_note": "",
-        "prev": "enemy_count"
+        "prev": 10
       },
       "by": "claude",
-      "at": 1795291399
-    }
-  },
-  "shade_region": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795291399
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Shade",
-          "species": "Shade"
-        }
-      },
-      "by": "claude",
-      "at": 1795285398,
-      "note": "into the collection"
-    },
-    "cost": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795291399
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "food_count"
-      },
-      "by": "claude",
-      "at": 1795285398
+      "at": 1795292654
     }
   },
   "hunter_3": {

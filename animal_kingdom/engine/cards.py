@@ -66,8 +66,8 @@ def validate_card_record(rec: dict) -> None:
         if kw not in KEYWORDS:
             raise CardDataError(f"card {cid!r}: unknown keyword {kw!r}, expected one of {sorted(KEYWORDS)}")
     cost = rec["cost"]
-    if isinstance(cost, bool) or not isinstance(cost, int) or not 0 <= cost <= 10:
-        raise CardDataError(f"card {cid!r}: cost must be a whole number from 0 to 10, got {cost!r}")
+    if isinstance(cost, bool) or not isinstance(cost, int) or cost < 0:
+        raise CardDataError(f"card {cid!r}: cost must be a whole number of 0 or more, got {cost!r}")
 
 
 def _build_card(rec: dict) -> Card:

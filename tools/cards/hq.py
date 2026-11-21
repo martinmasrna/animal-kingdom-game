@@ -14,7 +14,7 @@ sets fine or locked. Martin's edits have no limits.
 
 As a command, for Claude:
     .venv/bin/python tools/cards/hq.py show [ID...]                  the rows, as JSON
-    .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (cost: the mana cost, 0 to 10)
+    .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (cost: the mana cost, 0 or more)
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
     .venv/bin/python tools/cards/hq.py shelve ID                     a card out of the collection (into the reserve)
     .venv/bin/python tools/cards/hq.py collect ID                    a reserve card into the collection
