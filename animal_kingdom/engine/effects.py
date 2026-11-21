@@ -616,7 +616,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "rhino": {"on_place": _crush("crush_max")},
     "albatross": {"on_place": _crush("crush_max")},
     "young_rhino": {"on_place": _crush("crush_young_max")},
-    "young_albatross": {"on_place": _crush("crush_young_max")},
+    "young_albatross": {"on_place": _crush("crush_young_albatross_max")},
     "mama_spore": {"on_place": _mama_spore},
     **{cid: {"on_cover": _draw_if_it_removes} for cid in KILL_DRAWS},
 }

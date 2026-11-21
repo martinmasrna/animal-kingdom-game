@@ -593,7 +593,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 2,
-      "text": "Flight. Roar: remove all adjacent enemies with strength 3 or less.",
+      "text": "Flight. Roar: remove all adjacent enemies with strength 2 or less.",
       "cost": 4,
       "keywords": [
         "Flight"
