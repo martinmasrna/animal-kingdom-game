@@ -6,4 +6,5 @@
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$here"
+"$here/engine_rs/build.sh" --if-stale || true   # the table checks every edit against the engine's card rules
 exec "$here/.venv/bin/python" tools/cards/serve.py "$@"

@@ -18,4 +18,11 @@ if ! "$py" -c "import aiohttp" 2>/dev/null; then
   "$py" -m pip install -q -e "$here[web]"
 fi
 
+# The rules engine is compiled (engine_rs/): rebuild it when its source moved. If that fails the server still starts on
+# the module it has, and says so; with no module at all there is no game to serve.
+if ! "$here/engine_rs/build.sh" --if-stale; then
+  "$py" -c "import ak_engine" 2>/dev/null || { echo "no rules engine is built: fix the build above, then ./play (engine_rs/build.sh builds it)" >&2; exit 1; }
+  echo "PLAYING ON THE LAST ENGINE THAT BUILT: rule changes since then are not in this server" >&2
+fi
+
 exec "$py" -m animal_kingdom.web.server "$@"

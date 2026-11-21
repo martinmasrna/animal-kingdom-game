@@ -223,6 +223,29 @@ def test_a_restart_in_the_middle_of_a_game_keeps_the_match(monkeypatch, tmp_path
     assert phase == "match_over"
 
 
+def test_a_saved_match_with_a_card_that_left_the_game_is_skipped_at_startup(monkeypatch, tmp_path, caplog):
+    """A match saved before a card was removed can't be read by today's engine: the server starts without it, on one
+    log line, and every other saved match comes back."""
+    from animal_kingdom.web.match import Match, Seat
+    monkeypatch.delenv("AK_NO_GAME_LOGS", raising=False)
+    monkeypatch.setattr(server, "MATCH_DIR", tmp_path)
+    saved = {}
+    for mid in ("good", "stale"):
+        m = Match(mid, Seat("ta", "Ann", deck=SLUG))
+        m.join(Seat("tb", "Bob", deck=SLUG))
+        saved[mid] = m.to_dict()
+    hand = saved["stale"]["state"]["hands"]["A"]
+    hand[0]["card_id"] = "a_card_that_left"
+    for mid, d in saved.items():
+        (tmp_path / f"{mid}.json").write_text(json.dumps(d), encoding="utf-8")
+    hub = server.Hub()
+    with caplog.at_level("WARNING"):
+        hub.load()
+    assert set(hub.matches) == {"good"}
+    skipped = [r for r in caplog.records if "stale.json" in r.getMessage()]
+    assert len(skipped) == 1 and skipped[0].exc_info is None and "a_card_that_left" in skipped[0].getMessage()
+
+
 def test_an_idle_match_leaves_memory_and_comes_back_from_its_file(monkeypatch, tmp_path):
     """A server keeping every match it ever made ran out of memory under load; forget() lets go of idle ones and get()
     reloads one from its file the moment someone asks for it (a socket, a join). One with a socket open stays."""

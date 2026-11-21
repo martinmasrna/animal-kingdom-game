@@ -6,6 +6,7 @@
 #   ./test animal_kingdom/tests/test_rules.py   # named Python tests only, in the foreground, a second or two
 set -uo pipefail
 cd "$(dirname "$0")"
+engine_rs/build.sh --if-stale || exit 1   # the rules engine is compiled: the tests run on its current source
 if (( $# )); then exec .venv/bin/python -m pytest -q -p no:cacheprovider "$@"; fi
 out="$(mktemp -d)"; trap 'rm -rf "$out"' EXIT
 .venv/bin/python -m pytest -q -n auto -p no:cacheprovider > "$out/py" 2>&1 & py=$!

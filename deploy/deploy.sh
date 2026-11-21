@@ -67,7 +67,8 @@ fi
 branch="$(git -C "$repo" branch --show-current)"
 if [[ "$target" == live && "$branch" != main ]]; then echo "this folder is on '$branch': live deploys only main (deploy from a main checkout)"; exit 1; fi
 
-# The web client's suite gates the deploy here (SKIP_TESTS=1 when it just passed); the Python tests run in the image's build.
+# The web client's suite gates the deploy here (SKIP_TESTS=1 when it just passed); the rules engine is compiled in the
+# image's build, where its fuzz and the Python tests run on it.
 [[ -n "${SKIP_TESTS:-}" ]] || (cd "$repo/animal_kingdom/web/test" && node --test > /tmp/ak-deploy-web.txt 2>&1) \
   || { grep -vE '^# Subtest|^ok ' /tmp/ak-deploy-web.txt | tail -40; echo "web tests failed: not deploying"; exit 1; }
 
@@ -91,7 +92,7 @@ attempt() {
 }
 
 mkdir -p "$tmp/app"
-git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$tmp/app"
+git -C "$repo" archive HEAD animal_kingdom engine_rs tools/engine_rs | tar -x -C "$tmp/app"   # the server, the rules engine's source, its fuzz
 cp "$repo/deploy/Dockerfile" "$tmp/app/"; cp "$cfg" "$tmp/app/fly.toml"
 echo "deploying $(git -C "$repo" log --oneline -1) to $target ($app)"
 attempt "$tmp/app" --config "$tmp/app/fly.toml" --remote-only || { echo "retrying once"; attempt "$tmp/app" --config "$tmp/app/fly.toml" --remote-only || { echo "DEPLOY FAILED twice"; exit 1; }; }

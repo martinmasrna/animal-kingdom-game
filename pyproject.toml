@@ -5,21 +5,20 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "animal-kingdom"
 version = "0.0.1"
-description = "Animal Kingdom: the rules engine, the bot and the web client"
+description = "Animal Kingdom: the web client and the tools over the Rust rules engine (engine_rs/)"
 requires-python = ">=3.11"
-# Core engine is standard-library only — no runtime dependencies (handoff §5).
+# The rules engine is the compiled module ak_engine, built from engine_rs/ into the venv (engine_rs/README.md); nothing
+# else is needed to run a game.
 dependencies = []
 
 [project.optional-dependencies]
-# The web client's server only (animal_kingdom/web). engine/ and bots/ stay stdlib-only.
+# The web client's server only (animal_kingdom/web).
 web = ["aiohttp>=3.9"]
 dev = ["pytest>=7.0", "pytest-xdist>=3.5", "aiohttp>=3.9"]
 
 [tool.setuptools]
 packages = [
     "animal_kingdom",
-    "animal_kingdom.engine",
-    "animal_kingdom.bots",
     "animal_kingdom.web",
 ]
 

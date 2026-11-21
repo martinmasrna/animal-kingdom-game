@@ -122,6 +122,9 @@ class Hub:
             if d["phase"] == "match_over" and time.time() - path.stat().st_mtime > KEEP_FINISHED:
                 return None
             match = Match.from_dict(_renamed(d))
+        except EngineError as e:   # a position today's engine can't read: a card that has left the game since
+            log.warning("skipped the saved match %s: %s", path.name, e)
+            return None
         except Exception:
             log.exception("could not reload %s", path.name)
             return None
@@ -744,9 +747,9 @@ async def pool(_req):
         "cards": card_pool(),
         "map": map_info(),
         "build": BUILD,
-        # The deck rules the collection builds to (decks.py, engine/cards.py, profiles.py): the client holds none of these numbers itself.
+        # The deck rules the collection builds to (game.py, profiles.py): the client holds none of these numbers itself.
         "rules": {"deckSize": DECK_SIZE, "copies": COPY_LIMITS, "decksMax": DECKS_MAX},
-        # the cards that can lead a deck, each with its kind and its ability (engine/leaders.py)
+        # the cards that can lead a deck, each with its kind and its ability (game.LEADERS)
         "leaders": {lid: {"kind": kind, "text": text, **({"cost": power_price(lid, Config())} if kind == "power" else {})}
                     for lid, (kind, text) in LEADERS.items()},
     })
