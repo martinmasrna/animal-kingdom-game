@@ -787,16 +787,18 @@ function drawGame() {
 
   // Your hand, centred under the board.
   const held = G.hand.filter(h => h.iid !== ui.flyIid && h.iid !== ui.carry);   // the card in flight or in the grip has left it (flight.js, carry.js)
-  // The opening hand sorts from cheapest to dearest once, as dealt (Martin, 2026-11-21); a card the mulligan brings in then
-  // takes the place of the one it replaced, nothing else moving ("shouldn't re-shuffle every time").
-  if (mull) {
+  // One order for the hand all match (Martin, 2026-11-21): the opening hand sorts from cheapest to dearest once, as dealt;
+  // a card the mulligan brings in takes the place of the one it replaced; after that the order holds ("why does it
+  // re-shuffle after the mulligan ends?") and a card drawn joins at the right. The cards in flight keep their places.
+  {
     const byCost = (x, y) => ((x.cost ?? CARDS[x.id].mana ?? 99) - (y.cost ?? CARDS[y.id].mana ?? 99)) || CARDS[x.id].name.localeCompare(CARDS[y.id].name);
-    const ids = held.map(h => h.iid), key = V.id + ':' + V.rematches;
-    let order = ui.mullOrder && ui.mullOrder.key === key ? ui.mullOrder.iids : null;
-    if (!order) order = [...held].sort(byCost).map(h => h.iid);
+    const ids = G.hand.map(h => h.iid), key = V.id + ':' + V.rematches;
+    let order = ui.handOrder && ui.handOrder.key === key ? ui.handOrder.iids : null;
+    if (!order) order = [...G.hand].sort(byCost).map(h => h.iid);
     else { const fresh = ids.filter(i => !order.includes(i));
-      order = order.map(i => ids.includes(i) ? i : fresh.shift()).filter(i => i != null).concat(fresh); }
-    ui.mullOrder = { key, iids: order };
+      order = mull ? order.map(i => ids.includes(i) ? i : fresh.shift()).filter(i => i != null).concat(fresh)   // a swap: the new card in the old one's place
+        : order.filter(i => ids.includes(i)).concat(fresh); }
+    ui.handOrder = { key, iids: order };
     held.sort((x, y) => order.indexOf(x.iid) - order.indexOf(y.iid));
   }
   // the mana screen: a row of pieces under the board (the full cards, large, while the opening hands are chosen)

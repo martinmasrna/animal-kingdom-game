@@ -101,6 +101,11 @@ test('a mana match against the bot: Practice starts it and the bot plays its car
     assert.deepEqual(after.filter((_, i) => i !== 1), before.filter((_, i) => i !== 1), 'the others stay where they were');
     assert.ok(!before.includes(after[1]), 'the new card in the swapped one\'s place');
     await click(p, '#skip');
+    // the order holds once the mulligan ends: the kept hand as it was, a card drawn on its right
+    assert.ok(await until(p, () => !document.querySelector('#hand.mull')), 'the mulligan ends');
+    await wait(600);
+    const played = await row();
+    assert.deepEqual(played.slice(0, after.length), after, 'the hand keeps its order after the mulligan');
     for (let i = 0; i < 200 && !ok; i++) {
       ok = await p.evaluate(theirs);
       if (ok || await p.evaluate(() => window.__ak().V.game.decision === 'over')) break;
