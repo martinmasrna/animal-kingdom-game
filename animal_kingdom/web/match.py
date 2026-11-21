@@ -19,7 +19,7 @@ from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, LeaderAction, PassAction, PlaceAction, action_from_dict
 from ..engine import leaders as L
 from ..engine.cards import load_cards
-from ..engine.effects import leader_usable, mana_cost
+from ..engine.effects import MAKES, leader_usable, mana_cost
 from ..engine.maps import load_map
 from ..engine.state import MAP_ID, EngineError, GameState, Result, new_game, other_player
 from ..engine.strength import card_strength, effective_strength
@@ -547,5 +547,6 @@ def card_pool() -> list[dict]:
     """Every card as the client reads it."""
     return [{"id": c.id, "name": c.name, "status": c.status, "rarity": c.rarity,
              # a variable strength (the Shades) prints 0: its text says what it gains
-             "str": 0 if c.is_dynamic else c.base_strength, "text": c.text, "kw": sorted(c.keywords), "mana": c.cost}
+             "str": 0 if c.is_dynamic else c.base_strength, "text": c.text, "kw": sorted(c.keywords), "mana": c.cost,
+             **({"related": list(MAKES[c.id])} if c.id in MAKES else {})}
             for c in CARDS.values()]

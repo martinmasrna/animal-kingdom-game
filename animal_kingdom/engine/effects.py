@@ -602,6 +602,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     **{cid: {"on_cover": _draw_if_it_removes} for cid in KILL_DRAWS},
 }
 
+# The cards a card makes, which a card read large shows beside it (Martin, 2026-11-21: "same way it was in the original game").
+MAKES: dict[str, tuple] = {"duplicating_spore": (SPORE,), "mama_spore": (SPORE,)}
+
 
 # ===================================================================== leaders
 
