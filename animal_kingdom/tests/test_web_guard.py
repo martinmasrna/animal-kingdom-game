@@ -224,3 +224,16 @@ def test_the_access_log_never_writes_a_sign_in_key_or_a_seat_token(caplog):
     text = caplog.text
     assert "ABCD" not in text and "sEcReT" not in text
     assert "/ws/presence?key=-&x=1" in text and "/ws/ABC123?token=-" in text
+
+
+def test_practice_gives_the_bot_the_deck_chosen_for_it(app, monkeypatch):
+    # Practice (Martin, 2026-11-21: "select deck for me and my opponent"): "bot_deck" is the bot's, else it mirrors yours
+    monkeypatch.setattr(server, "hub", server.Hub())
+    other = {"name": "Sky", "list": [c if c != "warlord_legend" else "raider_legend" for c in DECK["list"]], "leader": "raider_legend"}
+
+    async def body(c):
+        chosen = await (await c.post("/api/match", json={"deck": DECK, "bot_deck": other, "bot": True})).json()
+        mirror = await (await c.post("/api/match", json={"deck": DECK, "bot": True})).json()
+        return [custom_decks.DECKS[server.hub.matches[m["id"]].seats["B"].deck] for m in (chosen, mirror)]
+    chosen, mirror = run(app, body)
+    assert "raider_legend" in chosen and "raider_legend" not in mirror

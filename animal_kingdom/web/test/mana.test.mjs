@@ -76,14 +76,17 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
 test('a mana match against the bot: Practice starts it and the bot plays its cards', async () => {
   const p = await seat();
   await p.goto(server.url + '/', { waitUntil: 'networkidle0' }); await giveDeck(p, 'w1', 'Cheap', CHEAP);
-  // the bot plays a mirror of our deck (server.py); two idle turns in a row end a match, and a hand with nothing for the bot's first mana
+  // the bot plays the deck chosen for it, ours here (server.py); two idle turns in a row end a match, and a hand with nothing for the bot's first mana
   // is a coin toss, so a match that ends before the bot has played is dealt again
   const theirs = () => { const a = window.__ak(); return a.V && Object.values(a.V.game.board).flat().some(u => u.owner === 'B'); };
   const myPlay = () => { const a = window.__ak(); return a.V.game.decision === 'yours' && !a.PB.busy ? (a.V.game.hand.find(h => a.V.game.legal.place[h.id]) || {}).iid || 0 : null; };
   let ok = false;
   for (let game = 0; game < 6 && !ok; game++) {
     if (game) await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
-    await click(p, '#mprac');   // Practice: straight into a match, your deck against its mirror
+    await click(p, '#mprac');   // Practice: your deck and the bot's (both ours here), then Start
+    await p.waitForSelector('.mhome [data-opp]');
+    assert.ok(await p.$('.mhome [data-deck].on') && await p.$('.mhome [data-opp].on'), 'both decks chosen');
+    await click(p, '#mgo');
     assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
     await click(p, '#skip');
     for (let i = 0; i < 200 && !ok; i++) {

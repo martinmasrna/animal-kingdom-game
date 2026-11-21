@@ -187,6 +187,7 @@ function route() {
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
   if (parts[0] === 'play') return manaHome({ play: true });   // Play: a deck and a friend
+  if (parts[0] === 'practice') return manaHome({ practice: true });   // Practice: your deck and the bot's
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'friend' && id) { manaHome(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
@@ -334,28 +335,17 @@ async function challengeFriend(f) {
   const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
 }
 // Home (a plain prototype, Martin, 2026-11-20): three buttons. Play opens the friend match (#/play: a deck,
-// then a match to invite a friend to, or a friend's code); Practice starts a match against the simple bot at once, your
-// deck against its mirror; Collection is the collection. In Play: your decks that are legal under these rules; a deck of
-// yours that isn't legal is counted under the list.
+// then a match to invite a friend to, or a friend's code); Practice (#/practice) your deck and the simple bot's, both from
+// your decks (Martin, 2026-11-21: "select deck for me and my opponent"); Collection is the collection. In Play and
+// Practice: your decks that are legal under these rules; a deck of yours that isn't legal is counted under the list.
 function manaHome(mode = {}) {
   screen = 'home';
-  if (!mode.play && !mode.join) {
+  if (!mode.play && !mode.join && !mode.practice) {
     app.innerHTML = `<div class="mhome"><div class="mtop"><a class="acct" href="#/account" data-tip="Account" aria-label="Account">${TOPICON.person}</a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button></div><div class="box">
       <h1>Animal Kingdom<small>A prototype</small></h1>
-      <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><button class="go" id="mprac">Practice</button><a class="go" id="mcoll" href="#/collection">Collection</a></div>
+      <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><a class="go" id="mprac" href="#/practice">Practice</a><a class="go" id="mcoll" href="#/collection">Collection</a></div>
       </div></div>`;
     wireChatButton(document.getElementById('hchat'));
-    document.getElementById('mprac').onclick = async () => {
-      // your own deck (the one chosen in Play, else your first legal one); the bot plays a mirror of it (server.py, Martin,
-      // 2026-11-20: the pool's animal decks are no mana decks any more)
-      const decks = myDecks().map(d => ({ id: 'my:' + d.id, name: d.name, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)), leader: d.leader }))
-        .filter(d => legal(d.list, d.leader));
-      const mine = decks.find(d => d.id === store('ak:deck')) || decks[0];
-      if (!mine) return toast('Build a legal deck in the Collection first: 25 cards and a leader');
-      const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: { name: mine.name, list: mine.list, leader: mine.leader }, name: 'You', bot: true }) });
-      if (!r.ok) return toast(await r.text());
-      const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
-    };
     return;
   }
   const own = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));
@@ -364,6 +354,27 @@ function manaHome(mode = {}) {
   const leaderName = d => { const ls = d.leader ? [d.leader] : [...new Set(d.list || [])].filter(id => LEADERS[id]);   // a pool deck: the one card in it that can lead
     return ls.length === 1 && CARDS[ls[0]] ? CARDS[ls[0]].name.split(':')[0] : ''; };
   const tile = d => `<button class="dk${chosen && d.id === chosen.id ? ' on' : ''}" data-deck="${d.id}">${esc(d.name)}${leaderName(d) ? `<small>${esc(leaderName(d))}</small>` : ''}</button>`;
+  const spec = d => d.mine ? { name: d.name, list: d.list, leader: d.leader } : d.id;
+  if (mode.practice) {   // your deck in blue, the bot's in red (the teams' colours); the bot's starts as yours
+    const rival = all.find(d => d.id === store('ak:botdeck')) || chosen;
+    const otile = d => `<button class="dk opp${rival && d.id === rival.id ? ' on' : ''}" data-opp="${d.id}">${esc(d.name)}${leaderName(d) ? `<small>${esc(leaderName(d))}</small>` : ''}</button>`;
+    app.innerHTML = `<div class="mhome"><div class="box">
+      <h1>Practice<small>Your deck against the bot's</small></h1>
+      <h2>Your deck</h2><div class="decks">${all.map(tile).join('') || '<p>No deck of yours is legal under these rules yet.</p>'}</div>
+      ${all.length ? `<h2>The bot's deck</h2><div class="decks">${all.map(otile).join('')}</div>` : ''}
+      ${off ? `<p class="foot">${off === 1 ? 'One deck of yours isn\'t' : `${off} decks of yours aren't`} legal in these rules: the collection says why.</p>` : ''}
+      <div class="row"><button class="go" id="mgo">Start</button><a class="sec" href="#/">Back</a></div>
+      </div></div>`;
+    app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); manaHome(mode); });
+    app.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { store('ak:botdeck', el.dataset.opp); manaHome(mode); });
+    document.getElementById('mgo').onclick = async () => {
+      if (!chosen) return toast('Build a legal deck in the Collection first: 25 cards and a leader');
+      const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: spec(chosen), bot_deck: spec(rival), name: 'You', bot: true }) });
+      if (!r.ok) return toast(await r.text());
+      const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+    };
+    return;
+  }
   app.innerHTML = `<div class="mhome"><div class="box">
     <h1>Play<small>Choose a deck, then invite a friend</small></h1>
     <h2>Your deck</h2><div class="decks">${all.map(tile).join('') || '<p>No deck of yours is legal under these rules yet.</p>'}</div>
@@ -373,7 +384,6 @@ function manaHome(mode = {}) {
     </div></div>`;
   const $ = id => document.getElementById(id);
   app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); manaHome(mode); });
-  const spec = d => d.mine ? { name: d.name, list: d.list, leader: d.leader } : d.id;
   const join = async code => {
     if (!chosen) return toast('Choose a deck first');
     const r = await api(`/api/match/${code}/join`, { method: 'POST', body: JSON.stringify({ deck: spec(chosen), name: 'Friend' }) });

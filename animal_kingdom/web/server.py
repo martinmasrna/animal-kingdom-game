@@ -757,12 +757,13 @@ def guest_name(body: dict, default: str) -> str:
 
 
 async def create_match(req):
-    """A match: against the bot ("bot": true; it plays a mirror of your deck, as there are no bot decks yet: Martin,
-    2026-11-20), or a lobby a friend joins by its code."""
+    """A match: against the bot ("bot": true; it plays "bot_deck", chosen in Practice, else a mirror of yours), or a
+    lobby a friend joins by its code."""
     guard.limit_ip(req, "match")
     body = await guard.body(req)
     try:
         deck = custom_decks.resolve(body.get("deck"))
+        bot_deck = custom_decks.resolve(body["bot_deck"]) if body.get("bot") and body.get("bot_deck") else deck
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
@@ -770,7 +771,7 @@ async def create_match(req):
     match = Match(mid, Seat(token, display(player) if player else guest_name(body, "You"), deck=deck,
                             profile=player and player["id"]))
     if body.get("bot"):
-        match.join(Seat(secrets.token_urlsafe(12), "Bot", bot=True, deck=deck))
+        match.join(Seat(secrets.token_urlsafe(12), "Bot", bot=True, deck=bot_deck))
     else:
         match.version += 1
     _open(match)
