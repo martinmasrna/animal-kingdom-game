@@ -101,6 +101,8 @@ test('a mana match against the bot: Practice starts it and the bot plays its car
     assert.deepEqual(after.filter((_, i) => i !== 1), before.filter((_, i) => i !== 1), 'the others stay where they were');
     assert.ok(!before.includes(after[1]), 'the new card in the swapped one\'s place');
     await click(p, '#skip');
+    // the offered cards' row spans the screen: it lets the pointer through to the prompt's buttons (Hide cards; Martin, 2026-11-21)
+    assert.equal(await p.evaluate(() => getComputedStyle(document.getElementById('opts')).pointerEvents), 'none', 'the card row never covers a button');
     // the order holds once the mulligan ends: the kept hand as it was, a card drawn on its right
     assert.ok(await until(p, () => !document.querySelector('#hand.mull')), 'the mulligan ends');
     await wait(600);
