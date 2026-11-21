@@ -1150,9 +1150,9 @@ function drawRail(G, d) {
   };
   const m = mana[you] || { left: 0, total: 0 }, t = mana[them] || { left: 0, total: 0 }, mine = G.current === you && V.phase === 'playing';
   el.innerHTML = lead('B') + lead('A')
-    // what is left of the turn's mana as X/N beside the crystals, as Hearthstone counts it (Martin, 2026-11-21)
-    + `<div class="mmana A"><b class="mcount">${m.left}/${m.total}</b>${pipsHTML(m.left, m.total)}</div>`
-    + `<div class="mmana B"><b class="mcount">${t.left}/${t.total}</b>${pipsHTML(t.left, t.total)}</div>`;
+    // what is left of the turn's mana as X/N right of the crystals (Martin, 2026-11-21)
+    + `<div class="mmana A">${pipsHTML(m.left, m.total)}<b class="mcount">${m.left}/${m.total}</b></div>`
+    + `<div class="mmana B">${pipsHTML(t.left, t.total)}<b class="mcount">${t.left}/${t.total}</b></div>`;
 }
 // The rail's leaders and decks read on hover (a leader's power, a decklist), and your leader's power is pressed there.
 function wireRail() {
