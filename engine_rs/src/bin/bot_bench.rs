@@ -204,7 +204,22 @@ struct GameRec {
     capped: bool,
     food: [i32; 2],
     stats: [BotStats; 2],
+    habits: [Habits; 2],
     actions: Vec<Value>,
+}
+
+/// How a pilot played, counted from its actions.
+#[derive(Clone, Copy, Default)]
+struct Habits {
+    /// Turns it ended.
+    turns: u32,
+    /// Mana left when it ended them.
+    unspent: u32,
+    /// Turns it ended while a play was still legal (it held something back).
+    held: u32,
+    cards: u32,
+    raids: u32,
+    powers: u32,
 }
 
 impl GameRec {
@@ -223,6 +238,14 @@ impl GameRec {
             "turns": self.turns, "capped": self.capped, "food": {"A": self.food[0], "B": self.food[1]},
             "x": stats(&self.stats[0]), "y": stats(&self.stats[1]),
         });
+        for (k, h) in [("x", &self.habits[0]), ("y", &self.habits[1])] {
+            v[k]["ended"] = json!(h.turns);
+            v[k]["unspent"] = json!(h.unspent);
+            v[k]["held"] = json!(h.held);
+            v[k]["cards"] = json!(h.cards);
+            v[k]["raids"] = json!(h.raids);
+            v[k]["powers"] = json!(h.powers);
+        }
         if log_actions {
             v["actions"] = Value::Array(self.actions.clone());
         }
@@ -242,6 +265,7 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
     let mut bots: [Box<dyn Bot>; 2] = [make_bot(specs[0], bot_seed(seed, 0))?, make_bot(specs[1], bot_seed(seed, 1))?];
     let first = st.first_player;
     let mut actions = Vec::new();
+    let mut habits = [Habits::default(); 2];
     let mut applied = 0u32;
     if let Some(w) = watch.as_mut() {
         w(&st, None);
@@ -253,6 +277,21 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
         let seat = st.player_to_act();
         let pilot = if seat == 0 { pilot_a } else { 1 - pilot_a };
         let action = bots[pilot].choose(&st);
+        let h = &mut habits[pilot];
+        match action {
+            Action::Pass => {
+                h.turns += 1;
+                h.unspent += rules::mana_left(&st, seat).max(0) as u32;
+                h.held += rules::legal_actions(&st).iter().any(|a| *a != Action::Pass) as u32;
+            }
+            Action::Place { target: Target::Den(_), .. } => {
+                h.cards += 1;
+                h.raids += 1;
+            }
+            Action::Place { .. } => h.cards += 1,
+            Action::Leader => h.powers += 1,
+            Action::Choice(_) => {}
+        }
         rules::apply_action(&mut st, &action, true)
             .map_err(|e| format!("deal {deal} ({} v {}, seed {seed}): {} chose {}: {e}", decks[a].name, decks[b].name, specs[pilot], action.to_json(g)))?;
         if log_actions {
@@ -268,7 +307,7 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
     };
     Ok(GameRec {
         deal, a, b, seed, pilot_a, first, winner: result.winner, reason: result.reason.name().to_string(), turns: st.turn_counter,
-        capped: !st.caps.is_empty(), food: st.food, stats: [bots[0].stats(), bots[1].stats()], actions,
+        capped: !st.caps.is_empty(), food: st.food, stats: [bots[0].stats(), bots[1].stats()], habits, actions,
     })
 }
 
@@ -455,7 +494,22 @@ fn run(args: &Args) -> Result<(), String> {
         say(format!("{} {spec}: {:.0} positions and {:.2} ms a turn (most in one turn {}), {:.2} searches a turn; {} of turns cut short of a full search, {} met a draw",
             if p == 0 { "X" } else { "Y" }, t.positions as f64 / turns, t.nanos as f64 / 1e6 / turns, t.max_turn_positions, t.searches as f64 / turns,
             pct(t.turns_cut as f64 / turns), pct(t.turns_hidden as f64 / turns)));
-        bot_rows.push(json!({"spec": spec, "positions_per_turn": t.positions as f64 / turns, "ms_per_turn": t.nanos as f64 / 1e6 / turns,
+        let mut h = Habits::default();
+        for r in &recs {
+            let x = &r.habits[p];
+            h.turns += x.turns;
+            h.unspent += x.unspent;
+            h.held += x.held;
+            h.cards += x.cards;
+            h.raids += x.raids;
+            h.powers += x.powers;
+        }
+        let ended = (h.turns as f64).max(1.0);
+        let n_games = recs.len().max(1) as f64;
+        say(format!("  it plays {:.2} cards a turn and leaves {:.2} mana unspent; ends {} of its turns with a play still legal; {:.2} raids and {:.2} leader powers a game",
+            h.cards as f64 / ended, h.unspent as f64 / ended, pct(h.held as f64 / ended), h.raids as f64 / n_games, h.powers as f64 / n_games));
+        bot_rows.push(json!({"spec": spec, "cards_per_turn": h.cards as f64 / ended, "unspent_mana_per_turn": h.unspent as f64 / ended,
+            "turns_held": h.held as f64 / ended, "raids_per_game": h.raids as f64 / n_games, "powers_per_game": h.powers as f64 / n_games, "positions_per_turn": t.positions as f64 / turns, "ms_per_turn": t.nanos as f64 / 1e6 / turns,
             "max_turn_positions": t.max_turn_positions, "searches_per_turn": t.searches as f64 / turns,
             "turns_cut": t.turns_cut as f64 / turns, "turns_hidden": t.turns_hidden as f64 / turns}));
     }

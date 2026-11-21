@@ -18,7 +18,7 @@
 use std::collections::{HashMap, VecDeque};
 
 use crate::actions::{Action, Target};
-use crate::bots::eval::{evaluate, RaidOdds, Weights};
+use crate::bots::eval::{evaluate, greedy_evaluate, RaidOdds, Weights};
 use crate::bots::key::position_key;
 use crate::bots::seat::{self, Unseen};
 use crate::bots::{Bot, BotStats, Timer};
@@ -37,12 +37,15 @@ pub struct TurnSpec {
     pub width: usize,
     /// Sampled enemy hands behind the raid odds.
     pub samples: usize,
+    /// Score finished turns with the shipped greedy bot's evaluation instead (`eval=greedy`): what the search alone is
+    /// worth, with the evaluation held fixed.
+    pub greedy_eval: bool,
     pub weights: Weights,
 }
 
 impl Default for TurnSpec {
     fn default() -> TurnSpec {
-        TurnSpec { budget: 20_000, worlds: 4, width: 16_384, samples: 12, weights: Weights::default() }
+        TurnSpec { budget: 20_000, worlds: 4, width: 16_384, samples: 12, greedy_eval: false, weights: Weights::default() }
     }
 }
 
@@ -56,6 +59,11 @@ impl TurnSpec {
                 "worlds" => spec.worlds = int()?.max(1) as usize,
                 "width" => spec.width = int()?.max(1) as usize,
                 "samples" => spec.samples = int()?.max(1) as usize,
+                "eval" => spec.greedy_eval = match v {
+                    "greedy" => true,
+                    "food" => false,
+                    _ => return Err(format!("bot spec: eval={v:?} (food, greedy)")),
+                },
                 _ => match k.strip_prefix("w.") {
                     Some(name) => spec.weights.set(name, v.parse::<f32>().map_err(|_| format!("bot spec: {k}={v:?} is not a number"))?)?,
                     None => return Err(format!("bot spec: turn has no setting {k:?}")),
@@ -94,6 +102,14 @@ struct Ctx<'a> {
     w: &'a Weights,
     odds: &'a RaidOdds,
     max_width: usize,
+    greedy_eval: bool,
+}
+
+impl Ctx<'_> {
+    #[inline]
+    fn eval(&self, st: &State) -> f32 {
+        if self.greedy_eval { greedy_evaluate(st, self.me) as f32 } else { evaluate(st, self.me, self.w, self.odds) }
+    }
 }
 
 /// The search of one world: its first actions and the best finished turn found behind each.
@@ -147,7 +163,7 @@ impl WorldSearch {
         let mut p = st.clone();
         self.positions += 1;
         match rules::apply_action(&mut p, &Action::Pass, false) {
-            Ok(()) => evaluate(&p, ctx.me, ctx.w, ctx.odds),
+            Ok(()) => ctx.eval(&p),
             Err(_) => NEG,
         }
     }
@@ -179,7 +195,7 @@ impl WorldSearch {
                     // out of budget: the turn ends here in this pass (a position with a choice waiting is scored as it stands)
                     truncated = true;
                     if metas[depth][i].best == NEG {
-                        metas[depth][i].best = evaluate(&st, me, ctx.w, ctx.odds);
+                        metas[depth][i].best = ctx.eval(&st);
                     }
                     continue;
                 }
@@ -198,7 +214,7 @@ impl WorldSearch {
                         self.hidden = true;
                     }
                     if ended(&c) {
-                        layer_edges.push(Edge { action: a, child: LEAF, value: evaluate(&c, me, ctx.w, ctx.odds) });
+                        layer_edges.push(Edge { action: a, child: LEAF, value: ctx.eval(&c) });
                         continue;
                     }
                     let key = position_key(&c, me, true);
@@ -403,7 +419,7 @@ impl TurnBot {
         let allowance = (self.spec.budget.saturating_sub(self.used + positions) / 2).max(1);
         let can_draw = !world.decks[me as usize].is_empty();
         let k = if can_draw { self.spec.worlds.max(1) as u64 } else { 1 };
-        let ctx = Ctx { me, w: &self.spec.weights, odds: &odds, max_width: self.spec.width };
+        let ctx = Ctx { me, w: &self.spec.weights, odds: &odds, max_width: self.spec.width, greedy_eval: self.spec.greedy_eval };
         let mut s0 = WorldSearch::new(world, me);
         s0.run(&ctx, (allowance / k).max(1));
         if !s0.hidden && k > 1 {
@@ -504,7 +520,8 @@ impl Bot for TurnBot {
     }
 
     fn spec(&self) -> String {
-        format!("turn:budget={},worlds={},width={},samples={}", self.spec.budget, self.spec.worlds, self.spec.width, self.spec.samples)
+        format!("turn:budget={},worlds={},width={},samples={},eval={}", self.spec.budget, self.spec.worlds, self.spec.width, self.spec.samples,
+                if self.spec.greedy_eval { "greedy" } else { "food" })
     }
 }
 
