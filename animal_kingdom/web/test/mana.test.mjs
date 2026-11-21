@@ -88,6 +88,9 @@ test('a mana match against the bot: Practice starts it and the bot plays its car
     assert.ok(await p.$('.mhome [data-deck].on') && await p.$('.mhome [data-opp].on'), 'both decks chosen');
     await click(p, '#mgo');
     assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
+    const costs = await p.evaluate(() => [...document.querySelectorAll('#hand .hc')].sort((a, b) => a.offsetLeft - b.offsetLeft)
+      .map(el => window.__ak().V.game.hand.find(h => String(h.iid) === el.dataset.iid).cost));
+    assert.deepEqual(costs, [...costs].sort((a, b) => a - b), 'the opening hand from cheapest to dearest, left to right');
     await click(p, '#skip');
     for (let i = 0; i < 200 && !ok; i++) {
       ok = await p.evaluate(theirs);
