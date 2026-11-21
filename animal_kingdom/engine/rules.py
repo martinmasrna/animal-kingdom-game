@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import Optional
 
 from . import effects, statics
+from . import leaders as L
 from .actions import Action, LeaderAction, PassAction, PlaceAction, action_from_dict
 from .state import EngineError, GameState, Result, other_player
 
@@ -149,6 +150,7 @@ def _end_turn(state: GameState) -> None:
     state.turn_counter += 1
     state.mana_spent = 0
     state.applied_this_turn = 0
+    state.played_this_turn = 0
     state.effect_steps_this_turn = 0
     state.current = other_player(player)
     state.emit("turn_start", player=state.current, turn=state.turn_counter)
@@ -164,8 +166,10 @@ def regions_controlled(state: GameState, player: str):
 
 
 def region_income(state: GameState, player: str) -> int:
-    """The food `player`'s regions pay at the end of their turn."""
-    return sum(r.food for r in regions_controlled(state, player))
+    """The food `player`'s regions pay at the end of their turn: each its own, and 1 more each under the Elf."""
+    lead = state.leaders.get(player)
+    bonus = state.config.elf_region_bonus if lead and lead["id"] == L.ELF else 0
+    return sum(r.food + bonus for r in regions_controlled(state, player))
 
 
 def _produce_food(state: GameState, player: str) -> None:

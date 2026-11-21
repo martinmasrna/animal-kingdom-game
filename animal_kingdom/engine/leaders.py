@@ -10,12 +10,16 @@ from __future__ import annotations
 WARLORD = "warlord_legend"
 RAIDER = "raider_legend"
 SAGE = "sage_legend"
+ELF = "elf_legend"
+ASSASSIN = "assassin_legend"
 
 # card id -> (kind, the ability as the player reads it)
 LEADERS: dict[str, tuple[str, str]] = {
     WARLORD: ("passive", "When you cover an enemy, gain 1 food."),
     RAIDER: ("passive", "Your raids destroy 1 more food."),
     SAGE: ("power", "Draw a card."),
+    ELF: ("passive", "Your regions produce 1 more food."),                       # Martin, 2026-11-21
+    ASSASSIN: ("passive", "After you play your third card in a turn, draw a card."),   # Martin, 2026-11-21
 }
 
 

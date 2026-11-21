@@ -11,7 +11,7 @@ from dataclasses import replace
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.effects import WEAKENS, _adjacent_enemy_targets, mana_cost
-from animal_kingdom.engine.leaders import LEADERS, RAIDER, SAGE, WARLORD
+from animal_kingdom.engine.leaders import ASSASSIN, ELF, LEADERS, RAIDER, SAGE, WARLORD
 from animal_kingdom.engine.maps import load_map
 from animal_kingdom.engine.state import MAP_ID, GameState, UnitInstance, new_game
 from animal_kingdom.engine.strength import effective_strength
@@ -416,6 +416,21 @@ def test_the_raiders_raids_destroy_two_more():
     s = state(turn=11, hands={"A": ["flight_1"]}, food={"A": 15, "B": 15}, leaders={"A": RAIDER})
     rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
     assert s.food["B"] == 15 - 1 - CFG.raider_leader_bonus
+
+
+def test_the_elfs_regions_produce_one_more_food_each():
+    s = state(turn=4, food={"A": 15, "B": 15}, leaders={"A": ELF})
+    for cr in ("1,1", "1,2", "2,2"):
+        put(s, cr, "wisp_1", "A")
+    assert rules.region_income(s, "A") == 1 + CFG.elf_region_bonus
+
+
+def test_the_assassin_draws_after_the_third_card_of_a_turn_only():
+    s = state(turn=11, hands={"A": ["wisp_1", "wisp_1", "wisp_1", "wisp_1"]}, leaders={"A": ASSASSIN})
+    for i, cr in enumerate(("1,1", "1,2", "1,3", "2,1")):
+        rules.apply_action(s, PlaceAction("wisp_1", ("cr", cr)))
+        assert len(s.hands["A"]) == [3, 2, 2, 1][i]                  # the third card draws one; the fourth doesn't
+    assert all(CARDS[l].cost == 5 and CARDS[l].base_strength == 10 for l in LEADERS)
 
 
 def test_the_sages_power_draws_a_card_for_three_mana_and_again():

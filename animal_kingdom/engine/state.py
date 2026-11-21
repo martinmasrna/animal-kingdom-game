@@ -117,6 +117,7 @@ class GameState:
                  remove_pile: list[str], food: dict[str, int], current: str, first_player: str,
                  rng: Optional[random.Random] = None, starting_decks: Optional[dict[str, tuple]] = None,
                  turn_counter: int = 0, mana_spent: int = 0, applied_this_turn: int = 0, effect_steps_this_turn: int = 0,
+                 played_this_turn: int = 0,
                  caps: Optional[list] = None, next_iid: int = 0, effect_stack: Optional[list[dict]] = None,
                  pending: Optional[dict] = None, scheduled: Optional[list[dict]] = None, result: Optional[Result] = None,
                  pile_owners: Optional[list] = None, leaders: Optional[dict[str, dict]] = None,
@@ -139,6 +140,7 @@ class GameState:
         self.turn_counter = turn_counter
         self.mana_spent = mana_spent       # this turn's mana spent so far
         self.applied_this_turn = applied_this_turn   # every apply_action of the turn, choices included (Config.max_actions_per_turn)
+        self.played_this_turn = played_this_turn     # the cards its player has played from hand this turn (the Assassin)
         self.effect_steps_this_turn = effect_steps_this_turn   # effect steps resolved this turn (Config.max_effect_steps_per_turn)
         self.caps: list = caps if caps is not None else []     # every turn a cap ended: {cap, player, turn, cards}
         self._next_iid = next_iid
@@ -227,6 +229,7 @@ class GameState:
         new.turn_counter = self.turn_counter
         new.mana_spent = self.mana_spent
         new.applied_this_turn = self.applied_this_turn
+        new.played_this_turn = self.played_this_turn
         new.effect_steps_this_turn = self.effect_steps_this_turn
         new.caps = list(self.caps)
         new._next_iid = self._next_iid
@@ -265,6 +268,7 @@ class GameState:
             "turn_counter": self.turn_counter,
             "mana_spent": self.mana_spent,
             "applied_this_turn": self.applied_this_turn,
+            "played_this_turn": self.played_this_turn,
             "effect_steps_this_turn": self.effect_steps_this_turn,
             "caps": [dict(c) for c in self.caps],
             "next_iid": self._next_iid,
@@ -288,6 +292,7 @@ class GameState:
             food=dict(d["food"]), food_gained=dict(d.get("food_gained") or {"A": 0, "B": 0}), current=d["current"], first_player=d["first_player"], rng=_rng_from_dict(d["rng"]),
             turn_counter=d["turn_counter"], mana_spent=d.get("mana_spent", 0),
             applied_this_turn=d.get("applied_this_turn", 0), effect_steps_this_turn=d.get("effect_steps_this_turn", 0),
+            played_this_turn=d.get("played_this_turn", 0),
             caps=[dict(c) for c in d.get("caps", [])], next_iid=d["next_iid"],
             effect_stack=copy.deepcopy(d.get("effect_stack") or []), pending=copy.deepcopy(d.get("pending")),
             scheduled=copy.deepcopy(d.get("scheduled") or []),

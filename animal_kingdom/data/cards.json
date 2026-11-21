@@ -241,7 +241,7 @@
       "name": "Warlord",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 5,
+      "base_strength": 10,
       "keywords": [],
       "text": "",
       "cost": 5
@@ -251,7 +251,7 @@
       "name": "Raider",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 5,
+      "base_strength": 10,
       "keywords": [],
       "text": "",
       "cost": 5
@@ -261,7 +261,7 @@
       "name": "Sage",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 5,
+      "base_strength": 10,
       "keywords": [],
       "text": "",
       "cost": 5
@@ -555,6 +555,26 @@
       "text": "Roar: put 2 Spores into your hand.",
       "cost": 1,
       "keywords": []
+    },
+    {
+      "id": "elf_legend",
+      "name": "Elf",
+      "status": "collectible",
+      "rarity": "legendary",
+      "base_strength": 10,
+      "keywords": [],
+      "text": "",
+      "cost": 5
+    },
+    {
+      "id": "assassin_legend",
+      "name": "Assassin",
+      "status": "collectible",
+      "rarity": "legendary",
+      "base_strength": 10,
+      "keywords": [],
+      "text": "",
+      "cost": 5
     }
   ]
 }

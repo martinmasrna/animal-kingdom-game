@@ -213,6 +213,9 @@ def do_placement(state: GameState, player: str, card_id: str, target) -> None:
         raise EngineError(f"{player} has no {card_id!r} in hand")
     strength = effective_strength(state, unit)   # as it is played
     state.hands[player].remove(unit)
+    state.played_this_turn += 1
+    if state.played_this_turn == state.config.assassin_nth_card and _leads(state, player, L.ASSASSIN):
+        state.effect_stack.append({"op": "draw", "player": player, "n": 1, "by_card": L.ASSASSIN})
     kind, where = target
     if kind == "hq":
         _raid(state, player, unit, where, strength)

@@ -40,6 +40,8 @@ export const CARD_NUMS = [
   "spore",
   "duplicating_spore",
   "mama_spore",
+  "elf_legend",
+  "assassin_legend",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck
