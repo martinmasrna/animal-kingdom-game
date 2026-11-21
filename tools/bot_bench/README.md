@@ -27,3 +27,21 @@ A bot's budget is a count of positions it may make in a turn, never a clock, and
 - `turn`: plans its whole turn and scores only finished turns. `turn:budget=20000` sets the positions a turn may make; `worlds=4` the imagined decks a first action is averaged over when the turn can draw; `width=16384` the most unfinished positions a layer keeps; `w.NAME=V` one weight of the evaluation (`engine_rs/src/bots/eval.rs`); `eval=greedy` scores finished turns with the shipped bot's evaluation instead, which measures the search with the evaluation held fixed.
 
 Tests: `cd engine_rs && cargo test --release --no-default-features --lib bots` (a bot's choice does not change when the hidden cards are dealt another way; a world holds exactly the cards the seat can count; a seeded game replays).
+
+## Where the bots stand (2026-11-22, commit of this file's last change, Martin's five decks, 2,000 games a line)
+
+| X | Y | X wins | 95% interval |
+|---|---|---|---|
+| `turn:budget=2000` | `greedy` | 67.1% | 65.5 to 68.7 |
+| `turn:budget=20000` | `greedy` | 70.9% | 69.2 to 72.5 |
+| `turn:budget=200000` | `greedy` | 70.2% | 68.6 to 71.8 |
+| `turn:budget=20000` | `turn:budget=2000` | 54.7% | 53.6 to 55.8 |
+| `turn:budget=200000` | `turn:budget=20000` | 50.3% | 49.4 to 51.3 |
+| `turn:budget=20000` | `turn:budget=20000,eval=greedy` | 53.6% | 52.2 to 55.1 |
+| `turn:budget=20000,eval=greedy` | `greedy` | 69.1% | 67.5 to 70.7 |
+| `turn:budget=20000` | `turn:budget=20000,worlds=1` | 50.6% | 49.6 to 51.6 |
+| `turn:budget=20000` on 8 random decks (2,048 games) | `greedy` | 70.1% | 68.5 to 71.7 |
+
+What they say: planning the whole turn is worth about 20 points over one action at a time, and almost all of it comes from the search, not from the evaluation (the search on the greedy bot's own evaluation is at 69.1%). Past 20,000 positions a turn more search buys nothing. Averaging a first action over four imagined decks instead of one buys nothing measurable.
+
+The turn bot makes about 900,000 positions a second on one core: 3,250 positions and 3.6 ms a turn at a budget of 20,000. A turn's first search stops short of every whole turn in 51% of turns at 2,000, 28% at 20,000 and 13% at 200,000. The games are short, 12 turns for both players together; 99.7% end at 30 food, and the player who goes first wins 61% of them.

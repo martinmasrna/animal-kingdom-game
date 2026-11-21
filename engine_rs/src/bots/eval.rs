@@ -51,6 +51,12 @@ pub struct Weights {
     pub mana_rank: f32,
 }
 
+/// The numbers are a first guess corrected by one scan (2026-11-22, `tools/bot_bench/README.md`): each weight at 0, a
+/// half, double and four times its guess against the guess itself, 2,000 games each on Martin's five decks. The scan
+/// moved three things: an animal on the board is worth about eight times the guess (body 0.4 and strength 0.15 a point
+/// lost to 3.0 and 1.2 by 55% to 45%); a raid my hand could make next turn is worth nothing until it is made (counted, the
+/// bot held a flier all game for the threat); and a hand card's cost says nothing its count does not. Everything else
+/// played the same from a half to four times its guess. Nobody has tuned these against each other.
 impl Default for Weights {
     fn default() -> Weights {
         Weights {
@@ -58,16 +64,16 @@ impl Default for Weights {
             income: 2.5,
             threat_theirs: 0.6,
             lethal_theirs: 25.0,
-            threat_mine: 0.3,
+            threat_mine: 0.0,
             lethal_mine: 6.0,
             income_win_theirs: 200.0,
-            income_win_mine: 8.0,
-            body: 0.4,
-            strength: 0.15,
+            income_win_mine: 0.0,
+            body: 3.0,
+            strength: 1.2,
             region_near: 0.5,
             region_far: 0.1,
             hand_card: 0.4,
-            hand_cost: 0.05,
+            hand_cost: 0.0,
             mana_rank: 0.3,
         }
     }
@@ -277,7 +283,7 @@ pub fn evaluate(st: &State, me: Player, w: &Weights, odds: &RaidOdds) -> f32 {
     s
 }
 
-/// The shipped greedy bot's evaluation (`animal_kingdom/bots/greedy.py`), term for term.
+/// The evaluation of the greedy bot Practice plays (`animal_kingdom/bot.py`), term for term.
 pub fn greedy_evaluate(st: &State, me: Player) -> f64 {
     const GREEDY_WIN: f64 = 1_000_000.0;
     let opp = other(me);

@@ -1,4 +1,4 @@
-//! The shipped greedy bot (`animal_kingdom/bots/greedy.py`), the benchmark's fixed baseline: for each decision it tries
+//! The greedy bot Practice plays (`animal_kingdom/bot.py`), here as the benchmark's fixed baseline: for each decision it tries
 //! every legal action on a copy of the position and keeps the one whose position it scores best, ties at random. It
 //! keeps its opening hand, and it ends its turn only when nothing else is legal.
 
