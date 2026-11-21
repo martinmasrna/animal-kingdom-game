@@ -2,7 +2,7 @@
 //! speaking plain dicts: actions, the saved position, events. A rule broken is a ValueError; a panic inside the engine
 //! is caught here and raised as a RuntimeError, so it never takes the server down.
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
@@ -10,6 +10,7 @@ use pyo3::types::{PyBool, PyDict, PyFloat, PyInt, PyList, PyString, PyTuple};
 use serde_json as sj;
 
 use crate::actions::Action;
+use crate::bots;
 use crate::data::*;
 use crate::state::State;
 use crate::{effects, rules, view};
@@ -399,10 +400,50 @@ impl PyState {
     }
 }
 
+/// A bot (`engine_rs/src/bots/`), from its spec (`greedy`, `turn:budget=20000`, ...) and a seed. It keeps what it
+/// planned between calls, so one game gets one Bot.
+#[pyclass(name = "Bot")]
+pub struct PyBot {
+    bot: Mutex<Box<dyn bots::Bot>>,
+}
+
+#[pymethods]
+impl PyBot {
+    #[new]
+    fn new(spec: &str, seed: u64) -> PyResult<PyBot> {
+        Ok(PyBot { bot: Mutex::new(guard(|| bots::make_bot(spec, seed).map_err(err))?) })
+    }
+
+    /// The action for the seat to act in `state`, as a dict. The bot reads the position only as that seat may know it
+    /// (`bots/seat.rs`). It thinks with the interpreter released, and a panic inside it is a RuntimeError.
+    fn choose(&self, py: Python<'_>, state: &PyState) -> PyResult<Py<PyAny>> {
+        if state.st.result.is_some() {
+            return Err(err("the game is over".into()));
+        }
+        let st = &state.st;
+        let action = py.detach(|| guard(|| {
+            let mut bot = self.bot.lock().map_err(|_| PyRuntimeError::new_err("the bot panicked in an earlier move"))?;
+            Ok(bot.choose(st))
+        }))?;
+        json_to_py(py, &action.to_json(&st.g))
+    }
+
+    fn spec(&self) -> PyResult<String> {
+        Ok(self.bot.lock().map_err(|_| PyRuntimeError::new_err("the bot panicked in an earlier move"))?.spec())
+    }
+
+    /// What it has done so far: {decisions, turns, positions, ms, searches}.
+    fn stats(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        let s = self.bot.lock().map_err(|_| PyRuntimeError::new_err("the bot panicked in an earlier move"))?.stats();
+        json_to_py(py, &sj::json!({"decisions": s.decisions, "turns": s.turns, "positions": s.positions, "ms": s.nanos as f64 / 1e6, "searches": s.searches}))
+    }
+}
+
 #[pymodule]
 fn ak_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Engine>()?;
     m.add_class::<PyState>()?;
+    m.add_class::<PyBot>()?;
     m.add_function(wrap_pyfunction!(default_config, m)?)?;
     m.add_function(wrap_pyfunction!(py_validate_card_record, m)?)?;
     m.add_function(wrap_pyfunction!(card_rules, m)?)?;

@@ -569,6 +569,42 @@ def test_the_bot_beats_random_play():
     assert wins >= 8
 
 
+def test_the_practice_bot_plans_its_turn_and_beats_the_greedy_bot():
+    """The Practice opponent is the engine's whole-turn search: it ends a turn holding a play when that is better, which
+    the greedy bot cannot, and it wins most games against it from both seats."""
+    from animal_kingdom.bot import GreedyBot, SearchBot
+    from animal_kingdom.web.match import PRACTICE_BOT
+    wins, games, held = 0, 0, 0
+    for seed in range(6):
+        for seat in "AB":
+            bots = {seat: SearchBot(PRACTICE_BOT, seed), rules.other_player(seat): GreedyBot(seed)}
+            s = new_game(DECK, DECK, seed, leaders={"A": "warlord_legend", "B": "warlord_legend"})
+            while not rules.is_terminal(s):
+                p = s.player_to_act()
+                a = bots[p].choose(s)
+                if p == seat and isinstance(a, PassAction) and rules.legal_actions(s) != [PassAction()]:
+                    held += 1
+                rules.apply_action(s, a)
+            wins += s.result.winner == seat
+            games += 1
+            assert bots[seat].failures == 0
+    assert wins >= 8 and held > 0, (wins, games, held)
+
+
+def test_a_search_bot_that_fails_plays_the_greedy_bots_move():
+    from animal_kingdom.bot import SearchBot
+    s = new_game(DECK, DECK, 5, leaders={"A": "warlord_legend", "B": "warlord_legend"})
+    unknown = SearchBot("no-such-bot", 5)                              # a spec the engine does not know
+    assert unknown.choose(s) in rules.legal_actions(s)
+
+    class Broken:
+        def choose(self, state):
+            raise RuntimeError("the engine panicked: test")
+    bot = SearchBot("turn:budget=2000", 5)
+    bot._bot = Broken()
+    assert bot.choose(s) in rules.legal_actions(s) and bot.failures == 1
+
+
 def test_the_mana_blob_gains_2_mana_past_the_cap_too():
     s = state(turn=2, hands={"A": ["mana_blob", "wisp_1"]})            # A's 2nd turn: 2 mana
     rules.apply_action(s, PlaceAction("mana_blob", ("cr", "1,1")))

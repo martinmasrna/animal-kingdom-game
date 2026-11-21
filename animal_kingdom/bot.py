@@ -1,15 +1,19 @@
-"""The Practice opponent until the search bot (engine_rs/src/bots/) is wired in: at each decision it tries every legal
-action on a copy of the game and keeps the one whose position it scores best. It reads only what its seat may know: the
-board, the food, its own hand, and the number of cards in the opponent's hand. It keeps its opening hand."""
+"""The Practice opponent. `SearchBot` is the engine's own bot (`engine_rs/src/bots/`, by its spec: the whole-turn search);
+it reads the position only as its seat may know it. `GreedyBot` is the one-action-at-a-time bot the game shipped with,
+which plays a move whenever the search bot fails: at each decision it tries every legal action on a copy of the game and
+keeps the one whose position it scores best. Both keep their opening hand."""
 
 from __future__ import annotations
 
+import logging
 import random
 from typing import Optional
 
-from . import game
+import ak_engine
+
 from .game import SKIP, Action, ChoiceAction, GameState, PassAction, action_from_dict, other_player
 
+log = logging.getLogger(__name__)
 WIN = 1_000_000.0
 
 
@@ -55,3 +59,30 @@ class GreedyBot:
             elif score == best_score:
                 best.append(action)
         return action_from_dict(best[0] if len(best) == 1 else self.rng.choice(best))
+
+
+class SearchBot:
+    """The engine's bot `spec` (`engine_rs/src/bots/`; `tools/bot_bench/README.md` lists the specs). It plans across the
+    actions of a turn, so one game gets one SearchBot. A move it fails on is played by the greedy bot."""
+
+    def __init__(self, spec: str, seed: int):
+        self.spec = spec
+        self.failures = 0
+        self._greedy = GreedyBot(seed)
+        try:
+            self._bot = ak_engine.Bot(spec, seed % (1 << 64))
+        except Exception:   # a spec the built engine does not know: the greedy bot plays the game
+            log.exception("no bot %r; the greedy bot plays", spec)
+            self._bot = None
+
+    def choose(self, state: GameState) -> Action:
+        """The action the bot takes for the player to act in `state`."""
+        if self._bot is not None:
+            try:
+                return action_from_dict(self._bot.choose(state._sync()))
+            except BaseException as e:   # an error, or a panic the binding did not turn into one
+                if not isinstance(e, Exception) and type(e).__name__ != "PanicException":
+                    raise
+                self.failures += 1
+                log.exception("the bot %r failed; the greedy bot plays this move", self.spec)
+        return self._greedy.choose(state)

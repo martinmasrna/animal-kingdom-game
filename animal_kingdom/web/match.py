@@ -14,13 +14,16 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from .. import game
-from ..bot import GreedyBot
+from ..bot import SearchBot
 from ..decks import DECK_LEADERS, load_deck
 from ..game import (CARDS, LEADERS, MAKES, MAP_ID, SKIP, ChoiceAction, EngineError, GameState, LeaderAction, PassAction,
                     PlaceAction, Result, action_from_dict, card_strength, leader_usable, load_map, new_game, other_player,
                     power_cost)
 
 log = logging.getLogger(__name__)
+# The Practice opponent, as a bot spec of the engine (engine_rs/src/bots/; tools/bot_bench/README.md has the specs and
+# how each measures). The greedy bot plays any move this one fails on (animal_kingdom/bot.py).
+PRACTICE_BOT = "turn:budget=20000"
 ASKS = {"mulligan": "mulligan"}   # what a pending choice asks, by the step asking: the mulligan; anything else is "effect"
 # The turn clock, for matches between two people: whoever must act gets a free window each time the decision comes to
 # them (unused time is lost), then spends their bank for the game. At zero, the engine acts for them.
@@ -129,7 +132,7 @@ class Match:
         self.last_result: Optional[dict] = None   # the previous game's, so a rematch's loser goes first
         self.state: Optional[GameState] = None
         self.history: list[Move] = []
-        self.bots: dict[str, GreedyBot] = {}
+        self.bots: dict[str, SearchBot] = {}
         self.version = 0                 # bumped on every change; the server pushes on bumps
         self.seed: Optional[int] = None
         self.actions: list[dict] = []    # the game's actions, for the replayable log
@@ -168,7 +171,7 @@ class Match:
         decks = {p: self.seats[p].deck for p in "AB"}
         self.state = new_game(load_deck(decks["A"]), load_deck(decks["B"]), seed, first_player=first,
                               leaders={p: DECK_LEADERS.get(d) for p, d in decks.items()})
-        self.bots = {s: GreedyBot(seed + i) for i, (s, seat) in enumerate(self.seats.items()) if seat.is_bot}
+        self.bots = {s: SearchBot(PRACTICE_BOT, seed + i) for i, (s, seat) in enumerate(self.seats.items()) if seat.is_bot}
         self.history, self.events, self.seq, self.result = [], [], 0, None
         self.phase = "playing"
         self.clock = None if any(seat.is_bot for seat in self.seats.values()) else \
@@ -405,7 +408,7 @@ class Match:
         m.history = [Move(**h) for h in d["history"]]
         m.events, m.seq = d["events"], d["seq"]
         if m.state is not None and m.seed is not None:
-            m.bots = {s: GreedyBot(m.seed + i) for i, (s, seat) in enumerate(m.seats.items()) if seat.is_bot}
+            m.bots = {s: SearchBot(PRACTICE_BOT, m.seed + i) for i, (s, seat) in enumerate(m.seats.items()) if seat.is_bot}
         return m
 
     # ----------------------------------------------------------------- views
