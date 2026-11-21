@@ -59,7 +59,24 @@ REQUIRE_SOURCE = False   # tests turn it on: every choice but the mulligan must 
 
 
 def resolve(state: GameState) -> None:
-    """Drain the effect stack until it is empty, a choice is needed, or the game is decided."""
+    """Drain the effect stack until it is empty, a choice is needed, or the game is decided. Each time it empties, every
+    animal at 0 strength is removed (whatever that sets off resolves in turn)."""
+    while True:
+        _drain(state)
+        if state.pending is not None or state.result is not None or state.effect_stack or not _remove_the_weak(state):
+            return
+
+
+def _remove_the_weak(state: GameState) -> bool:
+    """The rule (Martin, 2026-11-21: "make it a general rule"): an animal at 0 strength is removed, by the rules, so
+    Armor doesn't hold. Whether any was."""
+    weak = [(cr, u) for cr, stack in state.board.items() for u in stack if effective_strength(state, u) <= 0]
+    for cr, u in weak:
+        _remove_specific(state, cr, u, by_player=None, by_effect=False)
+    return bool(weak)
+
+
+def _drain(state: GameState) -> None:
     while state.pending is None and state.result is None and state.effect_stack:
         step = state.effect_stack.pop()
         state.effect_steps_this_turn += 1
@@ -391,20 +408,16 @@ def _op_remove_iid(state, step):
     return None
 
 
-def _op_damage_choice(state, step):
-    """The player picks the enemy a Roar deals N damage to, even when there is one: -N strength for good, and removed
-    if that brings it to 0."""
+def _op_weaken_choice(state, step):
+    """The player picks the enemy a Roar gives -N strength, for good, even when there is one (at 0 the rule removes it)."""
     if not step["options"]:
         return None
     if "choice" not in step:
         return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
-    cr = step["choice"]
-    top = state.top_unit(cr)
+    top = state.top_unit(step["choice"])
     if top is not None:
         top.strength_mod -= step["amount"]
         state.emit("strength", iid=top.iid, card=top.card_id, owner=top.owner, n=-step["amount"])
-        if effective_strength(state, top) <= 0:
-            _remove_specific(state, cr, top, by_player=step["chooser"])
     return None
 
 
@@ -431,7 +444,7 @@ OPS: dict[str, Callable] = {
     "draw_if_gone": _op_draw_if_gone,
     "remove_iid": _op_remove_iid,
     "remove_choice": _op_remove_choice,
-    "damage_choice": _op_damage_choice,
+    "weaken_choice": _op_weaken_choice,
 }
 
 
@@ -459,15 +472,14 @@ def _remove_adjacent(state, unit, cr):
                                    "options": targets, "optional": False})
 
 
-def _damage(n: int):
-    """"Roar: deal N damage to an adjacent enemy.": -N strength for good; one brought to 0 is removed (an ability's
-    removal, so Armor keeps it on the board at 0). Stealth hides from it."""
+def _weaken(n: int):
+    """"Roar: give an adjacent enemy -N strength.": for good; at 0 the rule removes it. Stealth hides from it."""
     def roar(state, unit, cr):
         targets = [nb for nb in state.game_map.neighbors(cr)
                    if (top := state.top_unit(nb)) is not None and top.owner != unit.owner
                    and statics.can_be_chosen(state, top, unit.owner)]
         if targets:
-            state.effect_stack.append({"op": "damage_choice", "chooser": unit.owner, "by_card": unit.card_id,
+            state.effect_stack.append({"op": "weaken_choice", "chooser": unit.owner, "by_card": unit.card_id,
                                        "options": targets, "amount": n})
     return roar
 
@@ -489,15 +501,15 @@ def _draw_if_it_removes(state, unit, covered):
                                "by_card": unit.card_id, "by_iid": unit.iid})
 
 
-# The Hunters' damage, as their text says (Martin, 2026-11-21: "change Bite back"; "it should remove it" at 0).
-DAMAGES = {"hunter_2": 2, "hunter_3": 3, "hunter_4": 4, "hunter_5": 5, "hunter_6": 6, "hunter_7": 7}
+# The Hunters' -N, as their text says (Martin, 2026-11-21: "change Bite back").
+WEAKENS = {"hunter_2": 2, "hunter_3": 3, "hunter_4": 4, "hunter_5": 5, "hunter_6": 6, "hunter_7": 7}
 CANTRIPS = ("cantrip_2", "cantrip_3", "cantrip_4")
 DEATH_DRAWS = ("death_draw_1",)
 KILL_DRAWS = ("kill_draw_2",)
 DOUBLE_RAIDERS = ("double_raid_4",)
 
 EFFECTS: dict[str, dict[str, Callable]] = {
-    **{cid: {"on_place": _damage(n)} for cid, n in DAMAGES.items()},
+    **{cid: {"on_place": _weaken(n)} for cid, n in WEAKENS.items()},
     "giant_hunter": {"on_place": _remove_adjacent},
     **{cid: {"on_place": _draw_a_card} for cid in CANTRIPS},
     **{cid: {"on_death": _death_draw} for cid in DEATH_DRAWS},
