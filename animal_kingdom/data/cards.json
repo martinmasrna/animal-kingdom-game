@@ -62,46 +62,6 @@
       "cost": 6
     },
     {
-      "id": "wisp_7",
-      "name": "Wisp 7",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 14,
-      "keywords": [],
-      "text": "",
-      "cost": 7
-    },
-    {
-      "id": "wisp_8",
-      "name": "Wisp 8",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 16,
-      "keywords": [],
-      "text": "",
-      "cost": 8
-    },
-    {
-      "id": "wisp_9",
-      "name": "Wisp 9",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 18,
-      "keywords": [],
-      "text": "",
-      "cost": 9
-    },
-    {
-      "id": "wisp_10",
-      "name": "Wisp 10",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 20,
-      "keywords": [],
-      "text": "",
-      "cost": 10
-    },
-    {
       "id": "djinn_hand",
       "name": "Hand Djinn",
       "status": "collectible",
@@ -470,18 +430,6 @@
       "base_strength": 4,
       "text": "Spikes.",
       "cost": 5,
-      "keywords": [
-        "Spikes"
-      ]
-    },
-    {
-      "id": "spikes_8",
-      "name": "Spikes 8",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 5,
-      "text": "Spikes.",
-      "cost": 8,
       "keywords": [
         "Spikes"
       ]
