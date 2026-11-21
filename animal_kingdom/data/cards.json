@@ -404,7 +404,7 @@
       "name": "Cantrip 3",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Roar: draw a card.",
       "cost": 3,
       "keywords": []
@@ -414,7 +414,7 @@
       "name": "Cantrip 4",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 4,
+      "base_strength": 5,
       "text": "Roar: draw a card.",
       "cost": 4,
       "keywords": []
