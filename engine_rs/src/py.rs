@@ -1,9 +1,10 @@
 //! The Python module `ak_engine`: `Engine` (the card table, the map and the config, built once) and `State` (a position),
-//! speaking the Python engine's dicts: actions, the saved position, events.
+//! speaking plain dicts: actions, the saved position, events. A rule broken is a ValueError; a panic inside the engine
+//! is caught here and raised as a RuntimeError, so it never takes the server down.
 
 use std::sync::Arc;
 
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyBool, PyDict, PyFloat, PyInt, PyList, PyString, PyTuple};
 use serde_json as sj;
@@ -11,7 +12,7 @@ use serde_json as sj;
 use crate::actions::Action;
 use crate::data::*;
 use crate::state::State;
-use crate::{effects, rules};
+use crate::{effects, rules, view};
 
 fn json_to_py(py: Python<'_>, v: &sj::Value) -> PyResult<Py<PyAny>> {
     Ok(match v {
@@ -79,6 +80,44 @@ fn seat(s: &str) -> PyResult<Player> {
     player_from(s).map_err(err)
 }
 
+/// Run `f`; a panic inside it becomes a RuntimeError naming what the engine said.
+fn guard<T>(f: impl FnOnce() -> PyResult<T>) -> PyResult<T> {
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)) {
+        Ok(r) => r,
+        Err(e) => {
+            let msg = e.downcast_ref::<&str>().map(|s| s.to_string()).or_else(|| e.downcast_ref::<String>().cloned()).unwrap_or_else(|| "no message".into());
+            Err(PyRuntimeError::new_err(format!("the engine panicked: {msg}")))
+        }
+    }
+}
+
+fn parse(text: &str) -> PyResult<sj::Value> {
+    sj::from_str(text).map_err(|e| err(e.to_string()))
+}
+
+/// The rules' numbers as the engine ships them: {name: value}.
+#[pyfunction]
+fn default_config(py: Python<'_>) -> PyResult<Py<PyAny>> {
+    json_to_py(py, &Config::default().to_json())
+}
+
+/// Raise ValueError on the first problem with a raw card record (a dict of the card table).
+#[pyfunction(name = "validate_card_record")]
+fn py_validate_card_record(rec: &Bound<'_, PyAny>) -> PyResult<()> {
+    crate::data::validate_card_record(&py_to_json(rec)?).map_err(err)
+}
+
+/// The card table's own words: {"rarities", "statuses", "planned", "keywords", "dynamic_strengths", "copy_limits",
+/// "deck_size"}.
+#[pyfunction]
+fn card_rules(py: Python<'_>) -> PyResult<Py<PyAny>> {
+    json_to_py(py, &sj::json!({
+        "rarities": RARITIES, "statuses": STATUSES, "planned": PLANNED,
+        "keywords": KEYWORDS.iter().map(|(n, _)| *n).collect::<Vec<_>>(), "dynamic_strengths": DYNAMIC_STRENGTHS,
+        "copy_limits": {"common": copy_limit(false), "legendary": copy_limit(true)}, "deck_size": DECK_SIZE,
+    }))
+}
+
 #[pyclass]
 pub struct Engine {
     g: Arc<Game>,
@@ -90,14 +129,40 @@ impl Engine {
     #[new]
     #[pyo3(signature = (cards_json, maps_json, config_json, map_id="map_hex19"))]
     fn new(cards_json: &str, maps_json: &str, config_json: &str, map_id: &str) -> PyResult<Engine> {
-        let cards_raw: sj::Value = sj::from_str(cards_json).map_err(|e| err(e.to_string()))?;
-        let maps_raw: sj::Value = sj::from_str(maps_json).map_err(|e| err(e.to_string()))?;
-        let cfg_raw: sj::Value = sj::from_str(config_json).map_err(|e| err(e.to_string()))?;
-        let cards = Cards::from_json(&cards_raw).map_err(err)?;
-        let rec = maps_raw["maps"].as_array().and_then(|a| a.iter().find(|m| m["id"].as_str() == Some(map_id))).ok_or_else(|| err(format!("no such map {map_id:?}")))?;
-        let map = GameMap::from_json(rec).map_err(err)?;
-        let cfg = Config::from_json(&cfg_raw).map_err(err)?;
-        Ok(Engine { g: Arc::new(Game::new(cards, map, cfg)) })
+        guard(|| {
+            let (cards_raw, maps_raw, cfg_raw) = (parse(cards_json)?, parse(maps_json)?, parse(config_json)?);
+            let cards = Cards::from_json(&cards_raw).map_err(err)?;
+            let rec = maps_raw["maps"].as_array().and_then(|a| a.iter().find(|m| m["id"].as_str() == Some(map_id))).ok_or_else(|| err(format!("no such map {map_id:?}")))?;
+            let map = GameMap::from_json(rec).map_err(err)?;
+            let cfg = Config::from_json(&cfg_raw).map_err(err)?;
+            Ok(Engine { g: Arc::new(Game::new(cards, map, cfg)) })
+        })
+    }
+
+    /// Every card, in id order, as its record reads (plus "makes" and "weaken" where the card has them).
+    fn cards(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        json_to_py(py, &sj::Value::Array(self.g.cards.list.iter().map(|c| c.to_json()).collect()))
+    }
+
+    /// The board: {"id", "name", "win_food", "crossroads", "edges", "bases", "regions"}.
+    fn map(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        json_to_py(py, &self.g.map.to_json())
+    }
+
+    /// This engine's numbers: {name: value}.
+    fn config(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        json_to_py(py, &self.g.cfg.to_json())
+    }
+
+    /// Every leader in the game's order: {"id", "kind", "text", and a power's "cost"}.
+    fn leaders(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        json_to_py(py, &view::leaders_json(&self.g.cfg))
+    }
+
+    /// What makes a deck illegal, as sentences; empty when it is legal.
+    #[pyo3(signature = (decklist, leader=None))]
+    fn deck_problems(&self, decklist: Vec<String>, leader: Option<String>) -> Vec<String> {
+        view::deck_problems(&self.g.cards, &decklist, leader.as_deref())
     }
 
     /// A fresh game. `seed` is any int, read as `random.Random(seed)` reads it; `leaders` is {"A": card id, "B": card id}.
@@ -122,19 +187,19 @@ impl Engine {
                 lead[seat(&k.extract::<String>()?)? as usize] = Some(id);
             }
         }
-        let st = State::new_game(self.g.clone(), &ids(&deck_a), &ids(&deck_b), seed.unsigned_abs(), fp, lead).map_err(err)?;
+        let st = guard(|| State::new_game(self.g.clone(), &ids(&deck_a), &ids(&deck_b), seed.unsigned_abs(), fp, lead).map_err(err))?;
         Ok(PyState { st })
     }
 
     /// A position from its saved dict (`State.to_dict`, or the Python engine's `GameState.to_dict`).
     fn from_dict(&self, d: &Bound<'_, PyAny>) -> PyResult<PyState> {
         let v = py_to_json(d)?;
-        Ok(PyState { st: State::from_json(self.g.clone(), &v).map_err(err)? })
+        guard(|| Ok(PyState { st: State::from_json(self.g.clone(), &v).map_err(err)? }))
     }
 
     fn from_json(&self, text: &str) -> PyResult<PyState> {
-        let v: sj::Value = sj::from_str(text).map_err(|e| err(e.to_string()))?;
-        Ok(PyState { st: State::from_json(self.g.clone(), &v).map_err(err)? })
+        let v = parse(text)?;
+        guard(|| Ok(PyState { st: State::from_json(self.g.clone(), &v).map_err(err)? }))
     }
 
     /// Every card id the engine knows, sorted.
@@ -172,7 +237,7 @@ impl PyState {
     /// Every legal action for the player to act, as dicts; ending the turn is listed only when nothing else is legal
     /// (it is legal whenever `can_pass()`).
     fn legal_actions(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let acts: Vec<sj::Value> = rules::legal_actions(&self.st).iter().map(|a| a.to_json(&self.st.g)).collect();
+        let acts: Vec<sj::Value> = guard(|| Ok(rules::legal_actions(&self.st).iter().map(|a| a.to_json(&self.st.g)).collect()))?;
         json_to_py(py, &sj::Value::Array(acts))
     }
 
@@ -183,7 +248,7 @@ impl PyState {
     #[pyo3(signature = (action, validate=true))]
     fn apply_action(&mut self, action: &Bound<'_, PyAny>, validate: bool) -> PyResult<()> {
         let a = self.action(action)?;
-        rules::apply_action(&mut self.st, &a, validate).map_err(err)
+        guard(|| rules::apply_action(&mut self.st, &a, validate).map_err(err))
     }
 
     /// Apply one action as a game log records it: one marked "by" a player is their mulligan choice made while the other
@@ -194,7 +259,7 @@ impl PyState {
             Ok(b) if !b.is_none() => Some(seat(&b.extract::<String>()?)?),
             _ => None,
         };
-        rules::apply_logged(&mut self.st, &a, by).map_err(err)
+        guard(|| rules::apply_logged(&mut self.st, &a, by).map_err(err))
     }
 
     /// Where `player`'s mulligan waits under the one being chosen now (its index on the effect stack), else None.
@@ -204,7 +269,8 @@ impl PyState {
 
     fn apply_early_mulligan(&mut self, player: &str, action: &Bound<'_, PyAny>) -> PyResult<()> {
         let a = self.action(action)?;
-        rules::apply_early_mulligan(&mut self.st, seat(player)?, &a).map_err(err)
+        let p = seat(player)?;
+        guard(|| rules::apply_early_mulligan(&mut self.st, p, &a).map_err(err))
     }
 
     /// The game's result as {"winner", "reason"} if it is over, else None.
@@ -275,6 +341,37 @@ impl PyState {
         Some(effects::effective_strength(&self.st, &u))
     }
 
+    /// What `player` pays for the copy `iid` in their hand; None when no hand holds it.
+    fn unit_cost(&self, iid: i32) -> Option<i32> {
+        let u = self.st.hands.iter().flatten().find(|u| u.iid == iid)?;
+        Some(effects::unit_cost(&self.st, u))
+    }
+
+    /// How the unit `iid` stands, on the board or in a hand: {"str", "cost", "hidden", "spikes", "poison", "armor"};
+    /// None when it is in neither.
+    fn unit_view(&self, py: Python<'_>, iid: i32) -> PyResult<Py<PyAny>> {
+        match view::unit_view(&self.st, iid) {
+            Some(v) => json_to_py(py, &v),
+            None => Ok(py.None()),
+        }
+    }
+
+    /// What `player` may see of the position: the opponent's hand and both decks as counts only.
+    fn view_for(&self, py: Python<'_>, player: &str) -> PyResult<Py<PyAny>> {
+        json_to_py(py, &view::seat_view(&self.st, seat(player)?))
+    }
+
+    /// The cards `player` may return in the mulligan.
+    fn mulligan_cap(&self, player: &str) -> PyResult<i32> {
+        Ok(self.st.cfg().mulligan_cap(seat(player)?, self.st.first_player))
+    }
+
+    /// The tiles `player` holds that are connected to their base through their own animals.
+    fn connected_occupied(&self, player: &str) -> PyResult<Vec<String>> {
+        let m = self.st.connected_occupied(seat(player)?);
+        Ok((0..self.st.g.map.n_tiles() as Tile).filter(|&t| m >> t & 1 == 1).map(|t| self.st.g.map.tile_name(t).to_string()).collect())
+    }
+
     /// A timing loop, for the speed comparison with the Python engine: `reps` times over, every action that is legal
     /// here (ending the turn too, where it is legal) is applied to its own clone of this position. Returns the number
     /// of clone-and-apply pairs and the seconds they took.
@@ -306,5 +403,8 @@ impl PyState {
 fn ak_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Engine>()?;
     m.add_class::<PyState>()?;
+    m.add_function(wrap_pyfunction!(default_config, m)?)?;
+    m.add_function(wrap_pyfunction!(py_validate_card_record, m)?)?;
+    m.add_function(wrap_pyfunction!(card_rules, m)?)?;
     Ok(())
 }

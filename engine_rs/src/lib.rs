@@ -1,5 +1,5 @@
-//! Animal Kingdom's rules engine: the position, the rules, every card's effect. The Python package's `engine/` is the
-//! same game; `tools/engine_rs/fuzz.py` proves the two agree position by position.
+//! Animal Kingdom's rules engine: the position, the rules, every card's effect. The Python package reaches it through
+//! the module `ak_engine` (py.rs) and holds no rules of its own.
 
 #[cfg(not(target_arch = "wasm32"))]
 #[global_allocator]
@@ -14,6 +14,7 @@ pub mod json;
 pub mod rng;
 pub mod rules;
 pub mod state;
+pub mod view;
 
 #[cfg(feature = "python")]
 mod py;

@@ -12,6 +12,25 @@ pub const ASSASSIN: &str = "assassin_legend";
 /// The Spores' token: in no deck, made by the Duplicating Spore and Mama Spore.
 pub const SPORE: &str = "spore";
 
+/// Every leader, in the order the game lists them, with its ability as the player reads it. Whether an ability is a power
+/// or a passive is in `behaviour`.
+pub const LEADERS: [(&str, &str); 5] = [
+    (WARLORD, "When you cover an enemy, gain 1 food."),
+    (RAIDER, "Your raids destroy 1 more food."),
+    (SAGE, "Draw a card."),
+    (ELF, "Gain 1 food for each region you control."),                       // Martin, 2026-11-21: 2 mana
+    (ASSASSIN, "After every third card you play in a turn, draw a card."),    // Martin, 2026-11-21: "multiple times a turn"
+];
+
+/// The cards a card makes, which a card read large shows beside it (Martin, 2026-11-21: "same way it was in the original
+/// game").
+pub fn makes(id: &str) -> &'static [&'static str] {
+    match id {
+        "duplicating_spore" | "mama_spore" => &[SPORE],
+        _ => &[],
+    }
+}
+
 /// Which Config number a "remove all adjacent enemies with strength N or less" reads.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CrushLimit {

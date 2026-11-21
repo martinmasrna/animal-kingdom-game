@@ -157,7 +157,7 @@ pub fn step_from_json(g: &Game, v: &Value) -> Result<Step, String> {
     })
 }
 
-fn pending_to_json(g: &Game, p: &Pending) -> Value {
+pub fn pending_to_json(g: &Game, p: &Pending) -> Value {
     let options: Value = match &p.options {
         Options::Iids(v) => Value::Array(v.iter().map(|&i| Value::from(i)).collect()),
         Options::Tiles(v) => tiles_to_json(g, v),
