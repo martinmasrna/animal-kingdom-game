@@ -181,9 +181,9 @@
       "name": "Hunter 5",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 3,
+      "base_strength": 5,
       "text": "Roar: give an adjacent enemy -5 strength.",
-      "cost": 4,
+      "cost": 5,
       "keywords": []
     },
     {
@@ -191,9 +191,9 @@
       "name": "Hunter 7",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 3,
+      "base_strength": 7,
       "text": "Roar: give an adjacent enemy -7 strength.",
-      "cost": 5,
+      "cost": 7,
       "keywords": []
     },
     {
@@ -201,9 +201,9 @@
       "name": "Hunter 6",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 2,
+      "base_strength": 6,
       "text": "Roar: give an adjacent enemy -6 strength.",
-      "cost": 4,
+      "cost": 6,
       "keywords": []
     },
     {
@@ -213,7 +213,7 @@
       "rarity": "common",
       "base_strength": 4,
       "text": "Roar: give an adjacent enemy -4 strength.",
-      "cost": 5,
+      "cost": 4,
       "keywords": []
     },
     {
@@ -221,9 +221,9 @@
       "name": "Hunter 2",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 6,
+      "base_strength": 2,
       "text": "Roar: give an adjacent enemy -2 strength.",
-      "cost": 6,
+      "cost": 2,
       "keywords": []
     },
     {

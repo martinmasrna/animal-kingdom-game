@@ -584,6 +584,24 @@
       },
       "by": "claude",
       "at": 1795201446
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "by": "claude",
+      "at": 1795277079
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795277079
     }
   },
   "hunter_7": {
@@ -608,6 +626,24 @@
       },
       "by": "claude",
       "at": 1795201446
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795277079
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795277079
     }
   },
   "hunter_6": {
@@ -632,6 +668,24 @@
       },
       "by": "claude",
       "at": 1795201446
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "by": "claude",
+      "at": 1795277079
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "by": "claude",
+      "at": 1795277079
     }
   },
   "hunter_4": {
@@ -656,6 +710,15 @@
       },
       "by": "claude",
       "at": 1795201446
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795277079
     }
   },
   "hunter_2": {
@@ -680,6 +743,24 @@
       },
       "by": "claude",
       "at": 1795201446
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "by": "claude",
+      "at": 1795277078
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "by": "claude",
+      "at": 1795277078
     }
   },
   "giant_hunter": {
