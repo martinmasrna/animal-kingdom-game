@@ -342,6 +342,7 @@ def gain_food(state: GameState, player: str, amount: int, *, income: bool = Fals
     if amount <= 0:
         return
     state.food[player] += amount
+    state.food_gained[player] += amount
     state.emit("food", player=player, n=amount, **({"income": True} if income else {}))
     if state.food[player] >= state.game_map.win_food:
         state.result = Result(player, "food")

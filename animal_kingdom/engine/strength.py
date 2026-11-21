@@ -5,22 +5,22 @@ from __future__ import annotations
 
 from .state import EngineError, GameState, UnitInstance, other_player
 
-# A Shade's count: "+1 strength for each card in your hand, ally, enemy, food of yours, animal in your opponent's Remove
-# Pile". The Djinn's discounts count the same things (effects.mana_cost).
+# A Shade's count: "+1 strength for each card in your hand, ally, enemy, food you gained this game, animal in your
+# opponent's Remove Pile". The Djinn's discounts count the same things (effects.mana_cost).
 COUNTS = {"hand_count": "hand", "ally_count": "ally", "enemy_count": "enemy", "food_count": "food",
           "opp_removed_count": "removed"}
 
 
 def count(state: GameState, player: str, what: str) -> int:
-    """`player`'s count of `what`: cards in their hand, their or their opponent's animals on the board (top units), their
-    food, or the animals in their opponent's Remove Pile."""
+    """`player`'s count of `what`: cards in their hand, their or their opponent's animals on the board (top units), the
+    food they gained this game, or the animals in their opponent's Remove Pile."""
     if what == "hand":
         return len(state.hands[player])
     if what in ("ally", "enemy"):
         side = player if what == "ally" else other_player(player)
         return sum(1 for stack in state.board.values() if stack and stack[-1].owner == side)
     if what == "food":
-        return state.food.get(player, 0)
+        return state.food_gained.get(player, 0)
     opp = other_player(player)
     return sum(1 for o in state.pile_owners if o == opp)
 

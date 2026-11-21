@@ -119,7 +119,8 @@ class GameState:
                  turn_counter: int = 0, mana_spent: int = 0, applied_this_turn: int = 0, effect_steps_this_turn: int = 0,
                  caps: Optional[list] = None, next_iid: int = 0, effect_stack: Optional[list[dict]] = None,
                  pending: Optional[dict] = None, scheduled: Optional[list[dict]] = None, result: Optional[Result] = None,
-                 pile_owners: Optional[list] = None, leaders: Optional[dict[str, dict]] = None):
+                 pile_owners: Optional[list] = None, leaders: Optional[dict[str, dict]] = None,
+                 food_gained: Optional[dict[str, int]] = None):
         self.game_map = game_map
         self.cards = cards
         self.config = config
@@ -131,6 +132,7 @@ class GameState:
         self.pile_owners = pile_owners if pile_owners is not None else [None] * len(remove_pile)   # in step with remove_pile
         self.leaders = leaders if leaders is not None else {}   # player -> {"id": card id}
         self.food = food
+        self.food_gained = food_gained if food_gained is not None else {"A": 0, "B": 0}   # every gain this game, start excluded
         self.current = current
         self.first_player = first_player
         self.rng = rng if rng is not None else random.Random()
@@ -219,6 +221,7 @@ class GameState:
         new.pile_owners = list(self.pile_owners)
         new.leaders = {p: dict(lead) for p, lead in self.leaders.items()}
         new.food = dict(self.food)
+        new.food_gained = dict(self.food_gained)
         new.current, new.first_player = self.current, self.first_player
         new.rng = _copy_rng(self.rng)
         new.turn_counter = self.turn_counter
@@ -255,6 +258,7 @@ class GameState:
             "pile_owners": list(self.pile_owners),
             "leaders": {p: dict(lead) for p, lead in sorted(self.leaders.items())},
             "food": dict(self.food),
+            "food_gained": dict(self.food_gained),
             "current": self.current,
             "first_player": self.first_player,
             "rng": _rng_to_dict(self.rng),
@@ -281,7 +285,7 @@ class GameState:
             remove_pile=list(d["remove_pile"]),
             pile_owners=list(d["pile_owners"]) if "pile_owners" in d else None,
             leaders={p: {"id": lead["id"]} for p, lead in (d.get("leaders") or {}).items()},
-            food=dict(d["food"]), current=d["current"], first_player=d["first_player"], rng=_rng_from_dict(d["rng"]),
+            food=dict(d["food"]), food_gained=dict(d.get("food_gained") or {"A": 0, "B": 0}), current=d["current"], first_player=d["first_player"], rng=_rng_from_dict(d["rng"]),
             turn_counter=d["turn_counter"], mana_spent=d.get("mana_spent", 0),
             applied_this_turn=d.get("applied_this_turn", 0), effect_steps_this_turn=d.get("effect_steps_this_turn", 0),
             caps=[dict(c) for c in d.get("caps", [])], next_iid=d["next_iid"],

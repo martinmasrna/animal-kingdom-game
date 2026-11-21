@@ -134,12 +134,12 @@
     {
       "id": "djinn_food",
       "name": "Food Djinn",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "common",
       "base_strength": 10,
-      "keywords": [],
-      "text": "Costs 1 less for each food you have.",
-      "cost": 10
+      "text": "Costs 1 less for each food you gained this game.",
+      "cost": 10,
+      "keywords": []
     },
     {
       "id": "djinn_removed",
@@ -187,13 +187,13 @@
     {
       "id": "shade_food",
       "name": "Food Shade",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "common",
       "base_strength": "dynamic",
       "dynamic_strength": "food_count",
-      "keywords": [],
-      "text": "Has +1 strength for each food you have.",
-      "cost": 3
+      "text": "Has +1 strength for each food you gained this game.",
+      "cost": 3,
+      "keywords": []
     },
     {
       "id": "shade_removed",

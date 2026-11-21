@@ -467,7 +467,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795196488
+      "at": 1795263707
     },
     "animal": {
       "review": {
@@ -479,8 +479,8 @@
         }
       },
       "by": "claude",
-      "at": 1795201689,
-      "note": "out of the collection (in the reserve)"
+      "at": 1795263707,
+      "note": "into the collection"
     }
   },
   "djinn_removed": {
@@ -624,7 +624,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795196918
+      "at": 1795263707
     },
     "animal": {
       "review": {
@@ -636,8 +636,8 @@
         }
       },
       "by": "claude",
-      "at": 1795201689,
-      "note": "out of the collection (in the reserve)"
+      "at": 1795263707,
+      "note": "into the collection"
     },
     "cost": {
       "review": {

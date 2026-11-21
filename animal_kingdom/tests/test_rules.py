@@ -21,6 +21,7 @@ CARDS = load_cards()
 # stand-ins.
 for _kw in ("Poison", "Armor", "Stealth"):
     CARDS[f"test_{_kw.lower()}"] = replace(CARDS["wisp_1"], id=f"test_{_kw.lower()}", keywords=frozenset({_kw}))
+CARDS["test_reserve"] = replace(CARDS["wisp_1"], id="test_reserve", status="reserve")
 CFG = Config()
 BOARD = load_map(MAP_ID)
 BASE = {"A": {"1,1", "1,2", "1,3"}, "B": {"5,1", "5,2", "5,3"}}
@@ -333,17 +334,27 @@ def test_double_raid_destroys_double_its_strength():
 
 
 def test_djinn_cost_less_for_each_of_their_count():
-    s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed"]}, food={"A": 4, "B": 9})
+    s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed"]}, food={"A": 20, "B": 9})
+    s.food_gained = {"A": 4, "B": 9}                              # the Food Djinn counts what was gained, not what is held
     put(s, "1,1", "wisp_1", "A"); put(s, "1,2", "wisp_1", "A"); put(s, "3,3", "wisp_1", "B")
     s.remove_pile.extend(["wisp_1", "wisp_1", "wisp_2"]); s.pile_owners.extend(["B", "B", "A"])
     assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed")} == \
         {"djinn_hand": 5, "djinn_ally": 8, "djinn_enemy": 9, "djinn_food": 6, "djinn_removed": 8}
-    s.food["A"] = 15
+    s.food_gained["A"] = 15
     assert mana_cost(s, "djinn_food") == 0 and mana_cost(s, "djinn_food", "B") == 1
 
 
+def test_food_gained_counts_every_gain_and_not_the_start():
+    s = state(turn=4, food={"A": 15, "B": 15})
+    for cr in ("1,1", "1,2", "2,2"):
+        put(s, cr, "wisp_1", "A")
+    rules.apply_action(s, PassAction())                         # a region's income
+    assert s.food_gained == {"A": 1, "B": 0}
+
+
 def test_shade_strength_is_its_count():
-    s = state(hands={"A": ["wisp_1", "wisp_1", "wisp_1"]}, food={"A": 7, "B": 2})
+    s = state(hands={"A": ["wisp_1", "wisp_1", "wisp_1"]}, food={"A": 20, "B": 2})
+    s.food_gained = {"A": 7, "B": 2}
     shades = {k: put(s, cr, f"shade_{k}", "A") for k, cr in
               (("hand", "1,1"), ("ally", "1,2"), ("enemy", "1,3"), ("food", "2,1"), ("removed", "2,2"))}
     put(s, "4,1", "wisp_1", "B"); put(s, "4,2", "wisp_1", "B")
@@ -382,7 +393,7 @@ def test_deck_rules():
     assert deck_problems(DECK, None) == ["a deck needs a leader"]
     assert deck_problems(DECK[:-1], "warlord_legend")
     assert any("at most 2" in p for p in deck_problems(DECK[:-2] + ["wisp_1", "warlord_legend"], "warlord_legend"))
-    assert any("collectible" in p for p in deck_problems(DECK[:-2] + ["djinn_food", "warlord_legend"], "warlord_legend"))
+    assert any("collectible" in p for p in deck_problems(DECK[:-2] + ["test_reserve", "warlord_legend"], "warlord_legend", cards=CARDS))
 
 
 def test_a_game_replays_from_its_seed_and_actions():
