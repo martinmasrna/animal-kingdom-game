@@ -319,3 +319,6 @@ body:has(.game.mana) .chatp.inmatch { left: 16px; right: auto; }
 :is(.mscr, .game) .st.mst .hd img { position: absolute; left: 50%; top: 2px; width: 42px; transform: translateX(-50%); filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
 :is(.mscr, .game) .st.mst .x .lgem { width: 15px; height: auto; display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
 :is(.mscr, .game) .st.mst .x { width: 20px; justify-content: center; padding: 0 6px 0 0; }
+/* the cost on the card's top point (mana.js COST_POS, a trial): a legendary's gem, which sits there, moves to the piece's
+   upper-right shoulder wherever a cost shows */
+.mcard.costtop:has(.mcost) .tkgem { left: 74% !important; top: 12% !important; }
