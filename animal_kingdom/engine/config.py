@@ -28,6 +28,7 @@ class Config:
     shade_growth: int = 1                # the Shades: +1 strength for each of their count
     warlord_leader_food: int = 1         # the Warlord: "When you cover an enemy, gain 1 food."
     raider_leader_bonus: int = 1         # the Raider: "Your raids destroy 1 more food." (Martin, 2026-11-21: "only +1")
+    mama_spores: int = 2                 # Mama Spore: "Roar: put 2 Spores into your hand." (Martin, 2026-11-21)
     scout_look: int = 3                  # Scout: the cards of your deck's top it looks at (the old game's Scout, Martin, 2026-11-21)
     double_raid_factor: int = 2          # "Its raids destroy double food." (Martin, 2026-11-21, his paper cards)
 

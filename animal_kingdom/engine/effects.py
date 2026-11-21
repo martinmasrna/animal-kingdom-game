@@ -391,6 +391,31 @@ def _op_draw_if_gone(state, step):
     return None
 
 
+def _op_place_token(state, step):
+    """Put a token into play on the tile its player chooses (free, as anything an effect puts into play): it lands as a
+    placed animal does, so it may cover, and it has no Roar."""
+    if not step["options"]:
+        return None
+    if "choice" not in step:
+        return PendingRequest("choice", step["player"], optional=False, options=step["options"])
+    _land_unit(state, step["player"], UnitInstance(step["card"], step["player"], state.new_iid()), step["choice"])
+    return None
+
+
+def _op_to_hand(state, step):
+    """Put `n` new copies of a card into a player's hand; past the hand limit they burn, as a draw does."""
+    player, made = step["player"], []
+    for _ in range(step["n"]):
+        inst = UnitInstance(step["card"], player, state.new_iid())
+        state.hands[player].append(inst); made.append(inst)
+    state.emit("draw", player=player, cards=[[u.iid, u.card_id] for u in made])
+    over = len(state.hands[player]) - state.config.hand_limit
+    for inst in made[-over:] if over > 0 else []:
+        state.hands[player].remove(inst); state.pile_add(inst.card_id, inst.owner)
+        state.emit("remove", zone="hand", iid=inst.iid, card=inst.card_id, owner=inst.owner)
+    return None
+
+
 def _op_scout(state, step):
     """Scout: look at the top cards of your deck (Config.scout_look), put the one you choose into your hand and shuffle
     the rest back. The options are "deck:K", the Kth card from the top; only the chooser sees them."""
@@ -467,6 +492,8 @@ OPS: dict[str, Callable] = {
     "draw": _op_draw,
     "draw_if_gone": _op_draw_if_gone,
     "scout": _op_scout,
+    "place_token": _op_place_token,
+    "to_hand": _op_to_hand,
     "remove_iid": _op_remove_iid,
     "remove_choice": _op_remove_choice,
     "weaken_choice": _op_weaken_choice,
@@ -519,6 +546,21 @@ def _scout(state, unit, cr):
     state.effect_stack.append({"op": "scout", "player": unit.owner})
 
 
+SPORE = "spore"   # the Spores' token: a 1-mana 1, in no deck (status reserve), made by the cards below
+
+
+def _duplicate(state, unit, cr):
+    """"Roar: place a Spore on an adjacent empty tile."."""
+    empty = [nb for nb in state.game_map.neighbors(cr) if state.top_unit(nb) is None]
+    if empty:
+        state.effect_stack.append({"op": "place_token", "player": unit.owner, "card": SPORE, "options": sorted(empty)})
+
+
+def _mama_spore(state, unit, cr):
+    """"Roar: put 2 Spores into your hand."."""
+    state.effect_stack.append({"op": "to_hand", "player": unit.owner, "card": SPORE, "n": state.config.mama_spores})
+
+
 def _raid_draw(state, unit):
     """"After it raids, draw a card.": once its raid has destroyed the food, its owner draws."""
     state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1, "by_card": unit.card_id, "by_iid": unit.iid})
@@ -552,6 +594,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     **{cid: {"on_death": _death_draw} for cid in DEATH_DRAWS},
     **{cid: {"on_raid": _raid_draw} for cid in RAID_DRAWS},
     **{cid: {"on_place": _scout} for cid in SCOUTS},
+    "duplicating_spore": {"on_place": _duplicate},
+    "mama_spore": {"on_place": _mama_spore},
     **{cid: {"on_cover": _draw_if_it_removes} for cid in KILL_DRAWS},
 }
 

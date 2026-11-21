@@ -525,6 +525,36 @@
       "text": "Roar: Scout a card.",
       "cost": 3,
       "keywords": []
+    },
+    {
+      "id": "spore",
+      "name": "Spore",
+      "status": "reserve",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "",
+      "cost": 1
+    },
+    {
+      "id": "duplicating_spore",
+      "name": "Duplicating Spore",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Roar: place a Spore on an adjacent empty tile.",
+      "cost": 1,
+      "keywords": []
+    },
+    {
+      "id": "mama_spore",
+      "name": "Mama Spore",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Roar: put 2 Spores into your hand.",
+      "cost": 1,
+      "keywords": []
     }
   ]
 }

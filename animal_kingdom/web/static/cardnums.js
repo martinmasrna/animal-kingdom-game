@@ -37,6 +37,9 @@ export const CARD_NUMS = [
   "raid_draw_5",
   "flight_4",
   "flight_6",
+  "spore",
+  "duplicating_spore",
+  "mama_spore",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

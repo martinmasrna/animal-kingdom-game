@@ -353,6 +353,26 @@ def test_scout_takes_one_of_the_top_three_and_shuffles_the_rest_back():
     assert sorted(s.decks["A"]) == ["wisp_1", "wisp_2", "wisp_3", "wisp_5"]
 
 
+def test_duplicating_spore_places_a_spore_on_an_adjacent_empty_tile():
+    s = state(turn=11, hands={"A": ["duplicating_spore"]})
+    put(s, "1,2", "wisp_1", "A")                                     # taken: not offered
+    rules.apply_action(s, PlaceAction("duplicating_spore", ("cr", "1,1")))
+    assert "1,2" not in s.pending["options"] and s.pending["options"]
+    tile = s.pending["options"][0]
+    rules.apply_action(s, ChoiceAction(tile))
+    assert [u.card_id for u in s.board[tile]] == ["spore"]
+    assert rules.mana_left(s, "A") == 6 - 1                          # the Spore came free
+
+
+def test_mama_spore_puts_two_spores_into_your_hand_and_they_play():
+    s = state(turn=11, hands={"A": ["mama_spore"]})
+    rules.apply_action(s, PlaceAction("mama_spore", ("cr", "1,1")))
+    assert [u.card_id for u in s.hands["A"]] == ["spore", "spore"]
+    assert not CARDS["spore"].collectible and CARDS["spore"].cost == 1 and CARDS["spore"].base_strength == 1
+    rules.apply_action(s, PlaceAction("spore", ("cr", "1,2")))       # a token in hand plays like any card
+    assert rules.mana_left(s, "A") == 6 - 2
+
+
 def test_djinn_cost_less_for_each_of_their_count():
     s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed"]}, food={"A": 20, "B": 9})
     s.food_gained = {"A": 4, "B": 9}                              # the Food Djinn counts what was gained, not what is held

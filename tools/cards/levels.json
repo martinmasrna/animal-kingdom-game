@@ -1024,5 +1024,38 @@
       "by": "claude",
       "at": 1795273902
     }
+  },
+  "spore": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1795274270
+    }
+  },
+  "duplicating_spore": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795274270
+    }
+  },
+  "mama_spore": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795274270
+    }
   }
 }
