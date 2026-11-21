@@ -91,6 +91,15 @@ test('a mana match against the bot: Practice starts it and the bot plays its car
     const costs = await p.evaluate(() => [...document.querySelectorAll('#hand .hc')].sort((a, b) => a.offsetLeft - b.offsetLeft)
       .map(el => window.__ak().V.game.hand.find(h => String(h.iid) === el.dataset.iid).cost));
     assert.deepEqual(costs, [...costs].sort((a, b) => a - b), 'the opening hand from cheapest to dearest, left to right');
+    // a swap: the new card takes the old one's place and nothing else moves
+    const row = () => p.evaluate(() => [...document.querySelectorAll('#hand .hc')].sort((a, b) => a.offsetLeft - b.offsetLeft).map(el => el.dataset.iid));
+    const before = await row(), out = before[1];
+    await click(p, `#hand .hc[data-iid="${out}"]`);
+    assert.ok(await until(p, o => !document.querySelector(`#hand .hc[data-iid="${o}"]`), out), 'the swapped card left');
+    await wait(400);
+    const after = await row();
+    assert.deepEqual(after.filter((_, i) => i !== 1), before.filter((_, i) => i !== 1), 'the others stay where they were');
+    assert.ok(!before.includes(after[1]), 'the new card in the swapped one\'s place');
     await click(p, '#skip');
     for (let i = 0; i < 200 && !ok; i++) {
       ok = await p.evaluate(theirs);
