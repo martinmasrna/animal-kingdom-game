@@ -74,12 +74,8 @@ const coverAttrs = id => !id ? '' : CROP[id] ? ` data-strip="${id}" data-ax=".7"
 const listOf = cardsObj => Object.entries(cardsObj).flatMap(([id, n]) => Array(n).fill(id));
 const countsOf = list => list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {});
 
-// Your decks, saved on your profile (which starts with the starter decks as its own), as {id, name, list, cover}.
-function decks() {
-  const mine = X.getDecks().map(d => ({ id: d.id, name: d.name, list: listOf(d.cards), leader: d.leader || null }));
-  mine.forEach(d => d.cover = coverOf(d.list, C, d.leader));
-  return mine;
-}
+// Your decks, saved on your profile (which starts with the starter decks as its own), as {id, name, list, leader}.
+const decks = () => X.getDecks().map(d => ({ id: d.id, name: d.name, list: listOf(d.cards), leader: d.leader || null }));
 let saved = null;   // each deck's list as last saved: a save logs what changed (log.js)
 function save(all) {
   // a leader goes with its card: one taken out of the deck takes the leader with it (the leaders prototype)
@@ -199,11 +195,11 @@ function render(app, all) {
 
   const body = d => ((curveHTML(d.list))) + deckBody(d.list, C);
   const tile = d => d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}"${coverAttrs(d.cover)}><b class="nm-edit" title="Rename">${esc(d.name)}</b>
+    ? `<div class="dtile on" data-d="${d.id}"${coverAttrs(coverOf(d.list, C, d.leader))}><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${leaderRow(d)}${body(d)}`
     // a deck still short of its cards is marked with its count, as on home's chooser (Martin, 2026-10-31)
     // a deck over the rules (copies, stars) says so on its tile: open it to see what (the stars prototype)
-    : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list, C, R, d.leader) ? ' short' : ''}" data-d="${d.id}"${coverAttrs(d.cover)}><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : (iss => !iss ? '' : `<span class="left">${iss === NO_LEADER || iss === NO_LEADER_CARD ? 'No leader' : /no mana cost/.test(iss) ? 'No cost' : 'Too many'}</span>`)(deckIssue(d.list, C, R, d.leader))}</div>`;
+    : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list, C, R, d.leader) ? ' short' : ''}" data-d="${d.id}"${coverAttrs(coverOf(d.list, C, d.leader))}><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : (iss => !iss ? '' : `<span class="left">${iss === NO_LEADER || iss === NO_LEADER_CARD ? 'No leader' : /no mana cost/.test(iss) ? 'No cost' : 'Too many'}</span>`)(deckIssue(d.list, C, R, d.leader))}</div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
   const issue = open && open.list.length >= R.deckSize ? deckIssue(open.list, C, R, open.leader) : '';
@@ -287,7 +283,7 @@ function wire(app, all, open) {
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
   // A new deck starts with its leader, as in Gwent (Martin, 2026-11-17): the leader is chosen first, its card is the deck's
   // first, and the deck opens with its name ready to type. Cancelled, no deck is made.
-  const dn = $('dnew'); if (dn) dn.onclick = () => pickLeader(app, null, id => { const d = { id: Date.now().toString(36), name: 'New deck', list: [id], cover: null, leader: id };
+  const dn = $('dnew'); if (dn) dn.onclick = () => pickLeader(app, null, id => { const d = { id: Date.now().toString(36), name: 'New deck', list: [id], leader: id };
     all.push(d); st.open = d.id; st.sheet = false; st.rename = true; change(); });
   const dn2 = $('done'); if (dn2) dn2.onclick = () => { st.open = null; st.sheet = true; redo(); };
   if (!open) reorder(app, all, change);
@@ -451,7 +447,7 @@ function wireGlobal() {
     const d = decodeDeck(e.clipboardData.getData('text'), C);
     if (!d) return X.toast('That is not a deck code');
     if (decks().length >= R.decksMax) return X.toast(`${R.decksMax} decks is the most you can keep: delete one first`);
-    const all = decks(), nd = { id: Date.now().toString(36), name: d.name, list: d.list, cover: coverOf(d.list) };
+    const all = decks(), nd = { id: Date.now().toString(36), name: d.name, list: d.list };
     const can = [...new Set(d.list)].filter(id => (X.leaders || {})[id]); if (can.length === 1) nd.leader = can[0];   // the one leader it can have
     all.push(nd); st.open = nd.id; save(all);
     render(here().parentElement, all); X.toast(`Imported ${nd.name}`, true);

@@ -115,7 +115,7 @@ const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 const playable = () => { const mine = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]);
     const leader = d.leader && list.includes(d.leader) && LEADERS[d.leader] ? d.leader : null;   // every deck has one (deckIssue)
     const size = RULES ? RULES.deckSize : 30, short = Math.max(0, size - deckSize(d.cards)), fix = short || !RULES ? '' : deckIssue(list, CARDS, RULES, leader, LEADERS);
-    return { id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, short: short || (fix ? -1 : 0), fix, list, leader }; });
+    return { id: 'my:' + d.id, name: d.name, mine: true, short: short || (fix ? -1 : 0), fix, list, leader }; });
   return mine; };
 const chosenDeck = () => { const all = playable().filter(d => !d.short), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list, ...(d.leader ? { leader: d.leader } : {}) } : d.id;
