@@ -545,3 +545,12 @@ def test_the_bot_beats_random_play():
             rules.apply_action(s, bot.choose(s.view_for(p), legal, s) if p == "A" else rng.choice(legal))
         wins += s.result.winner == "A"
     assert wins >= 8
+
+
+def test_the_mana_blob_gains_2_mana_past_the_cap_too():
+    s = state(turn=2, hands={"A": ["mana_blob", "wisp_1"]})            # A's 2nd turn: 2 mana
+    rules.apply_action(s, PlaceAction("mana_blob", ("cr", "1,1")))
+    assert rules.mana_left(s, "A") == CFG.mana_blob_mana               # paid 2, gained 2
+    s = state(turn=19, hands={"A": ["mana_blob"]})
+    rules.apply_action(s, PlaceAction("mana_blob", ("cr", "1,1")))
+    assert rules.mana_left(s, "A") == 10 - 2 + CFG.mana_blob_mana and CARDS["mana_blob"].cost == 2 == CARDS["mana_blob"].base_strength

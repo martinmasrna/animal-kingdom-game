@@ -110,8 +110,8 @@ export function fitPlaques(root) {
 // The mana as ten small gold hexagons (more while a bonus raises the turn past ten): available filled, spent dimmed, not
 // yet reached outlined.
 export function pipsHTML(left, total, cap = 10) {
-  const n = Math.max(cap, total), spent = total - left;
-  return `<span class="mpips">${Array.from({ length: n }, (_, i) => `<i class="${i < spent ? 'spent' : i < total ? 'on' : 'off'}"></i>`).join('')}</span>`;
+  const n = Math.max(cap, total, left), spent = Math.max(0, total - left), on = Math.max(total, left);   // gained mana (the Mana Blob) can pass the total
+  return `<span class="mpips">${Array.from({ length: n }, (_, i) => `<i class="${i < spent ? 'spent' : i < on ? 'on' : 'off'}"></i>`).join('')}</span>`;
 }
 
 // A small gold hexagon with a number, for an ability's price beside its button (Roam, Echo, a leader's power).

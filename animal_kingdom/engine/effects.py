@@ -604,6 +604,11 @@ def _sage_card(state, unit, cr):
     state.power_discount[unit.owner] = state.power_discount.get(unit.owner, 0) + state.config.sage_card_power_discount
 
 
+def _gain_mana(state, unit, cr):
+    """The Mana Blob: "Roar: gain 2 mana." This turn's, on top of what is left, past the cap too."""
+    state.mana_spent -= state.config.mana_blob_mana
+
+
 def _raid_draw(state, unit):
     """"After it raids, draw a card.": once its raid has destroyed the food, its owner draws."""
     state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1, "by_card": unit.card_id, "by_iid": unit.iid})
@@ -641,6 +646,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "duplicating_spore": {"on_place": _duplicate},
     "assassin_legend": {"on_place": _assassin_card},
     "sage_legend": {"on_place": _sage_card},
+    "mana_blob": {"on_place": _gain_mana},
     "rhino": {"on_place": _crush("crush_max")},
     "albatross": {"on_place": _crush("crush_albatross_max")},
     "young_rhino": {"on_place": _crush("crush_young_max")},

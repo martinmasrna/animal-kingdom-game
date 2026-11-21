@@ -1221,5 +1221,16 @@
       "by": "claude",
       "at": 1795290485
     }
+  },
+  "mana_blob": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795293427
+    }
   }
 }

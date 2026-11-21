@@ -554,6 +554,16 @@
       "keywords": [
         "Flight"
       ]
+    },
+    {
+      "id": "mana_blob",
+      "name": "Mana Blob",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 2,
+      "text": "Roar: gain 2 mana.",
+      "cost": 2,
+      "keywords": []
     }
   ]
 }
