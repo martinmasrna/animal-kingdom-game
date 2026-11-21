@@ -127,6 +127,8 @@ export function plan(prev, next, cards = {}) {
         flow('food', e); s.food[e.player] += e.n;
         break;
       case 'raid':   // the food a raid destroys leaves the den in a step of its own (foodfx.js)
+        // their raid: the card shown large first, diving into your den (Martin, 2026-11-21: "it should show some animation")
+        if (e.player === them && e.card) push({ kind: 'raidin', dur: DUR.reveal, card: e.card, player: e.player, den: e.den });
         if (e.n) { s.food[e.den] -= e.n; push({ kind: 'raid', dur: DUR.raid, den: e.den, n: e.n, player: e.player }); }
         break;
       case 'draw': {

@@ -69,6 +69,10 @@
   box-shadow: 0 0 6px 2px rgba(255, 150, 40, .65), 0 0 16px 4px rgba(255, 120, 20, .3); }
 .game.mana .mden .fdot { width: calc(var(--th) * .2); height: calc(var(--th) * .2); }
 .game.mana .mden.fpulse .fdot { animation: fpulse .22s ease-out; }
+/* a den hit by a raid: a jolt and a flash of its rim (foodfx.js) */
+.game.mana .mden.hit { animation: denhit .5s cubic-bezier(.3,.7,.4,1); }
+@keyframes denhit { 0% { transform: none; } 12% { transform: translate(-7px, 3px) scale(1.04); box-shadow: inset 0 2px 8px rgba(0,0,0,.6), 0 0 0 3px rgba(255, 196, 120, .9), 0 0 28px 6px rgba(255, 150, 60, .55); }
+  30% { transform: translate(6px, -2px); } 48% { transform: translate(-4px, 1px); } 66% { transform: translate(2px, 0); } 100% { transform: none; } }
 @keyframes fpulse { 40% { transform: scale(1.35); box-shadow: 0 0 10px 4px rgba(255, 170, 60, .85), 0 0 24px 8px rgba(255, 120, 20, .45); } }
 #foodfx { position: fixed; inset: 0; pointer-events: none; z-index: 60; } #foodfx .fdot { position: absolute; }
 .game.mana .mden b { font: 600 calc(var(--th) * .34) 'Source Serif 4', Georgia, serif; color: #f1ece2; line-height: 1; }

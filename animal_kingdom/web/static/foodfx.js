@@ -29,7 +29,8 @@ export function playFood(step, before, sources) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || !step.n) return;
   const side = step.side, den = document.querySelector(`#board .mden.${side}`); if (!den) return;
   const to = centre(den.querySelector('.fdot') || den), size = Math.max(10, to.h * .8);   // into the den's own food dot, about its size
-  if (step.kind === 'raid') {   // destroyed: out of the den in a burst, fading as they go
+  if (step.kind === 'raid') {   // destroyed: the den jolts and flashes as it is hit, and the food bursts out, fading
+    den.classList.remove('hit'); void den.offsetWidth; den.classList.add('hit');
     const times = [];
     for (let i = 0; i < step.n; i++) {
       const a = (i / step.n) * Math.PI * 2 + Math.random() * .6, r = to.h * (3 + Math.random() * 2.5), delay = i * GAP * 1000;

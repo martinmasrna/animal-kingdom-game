@@ -954,6 +954,16 @@ function drawGame() {
     rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
   }
+  if (st && st.kind === 'raidin') {   // the opponent's raiding card, shown large and diving into the den it hits
+    const rv = $('reveal'), den = document.querySelector(`#board .mden.${rel(st.den)}`);
+    rv.innerHTML = manaCard(CARDS[st.card], { owner: rel(st.player), w: 190, cost: (CARDS[st.card] || {}).mana ?? null }); fitNames(rv); fitPlaques(rv);
+    const cy = VIEW.port ? 560 : 300; let tx = 0, ty = 0;
+    if (den) { const s = $('scr').getBoundingClientRect(), k = s.width / STAGE.w, r = den.getBoundingClientRect();
+      tx = (r.left + r.width / 2 - s.left) / k - STAGE.w / 2; ty = (r.top + r.height / 2 - s.top) / k - cy; }
+    rv.style.setProperty('--tx', `${tx}px`); rv.style.setProperty('--ty', `${ty}px`);
+    rv.style.setProperty('--hx', `${VIEW.port ? 184 - STAGE.w / 2 : 0}px`); rv.style.setProperty('--hy', `${5 - cy}px`);   // from their hand
+    rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
+  }
   if (st && st.kind === 'reveal') {   // the opponent's card, shown large and flown down onto its crossroad; the next step lands it
     const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
     rv.innerHTML = (manaCard(CARDS[st.card], { owner: rel(st.player), w: 190, cost: (CARDS[st.card] || {}).mana ?? null })); fitNames(rv); fitPlaques(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
