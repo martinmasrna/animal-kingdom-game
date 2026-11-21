@@ -355,7 +355,8 @@ function wire(app, all, open) {
     if (e.closest('.mtray')) {   // a piece in the tray: its card above the tray, centred on it, covering none of the tray
       pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
       pop.style.top = Math.max(8, trayTop - h - 6) + 'px'; return; }
-    pop.style.left = (inSide || r.right + 10 + w > side ? r.left - w - 10 : r.right + 10) + 'px';
+    // a strip of the deck: the card left of the whole deck column, clear of every strip's cost (Martin, 2026-11-21)
+    pop.style.left = (inSide ? e.closest('.side').getBoundingClientRect().left - w - 14 : r.right + 10 + w > side ? r.left - w - 10 : r.right + 10) + 'px';
     pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
   const root = app.querySelector('.coll');
   root.onmousemove = ev => { if (!ev.movementX && !ev.movementY) return;
