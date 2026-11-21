@@ -166,7 +166,7 @@
       "name": "Big Game Hunter",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 1,
+      "base_strength": 2,
       "keywords": [],
       "text": "Roar: remove an adjacent enemy.",
       "cost": 5
