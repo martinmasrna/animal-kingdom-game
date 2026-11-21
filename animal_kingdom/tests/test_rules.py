@@ -384,7 +384,18 @@ def test_rhino_and_albatross_remove_every_adjacent_enemy_of_five_or_less():
         rules.apply_action(s, PlaceAction(cid, ("cr", "2,2")))
         assert "1,2" not in s.board and "3,2" not in s.board and "2,3" in s.board and "3,3" in s.board
         assert "1,1" in s.board                                       # its own side untouched
-    assert CARDS["albatross"].keywords == {"Flight"} and (CARDS["albatross"].cost, CARDS["albatross"].base_strength) == (8, 5)
+    assert CARDS["albatross"].keywords == {"Flight"} and (CARDS["albatross"].cost, CARDS["albatross"].base_strength) == (8, 4)
+
+
+def test_the_young_rhino_and_albatross_remove_every_adjacent_enemy_of_three_or_less():
+    for cid in ("young_rhino", "young_albatross"):
+        s = state(turn=19, hands={"A": [cid]})
+        put(s, "1,1", "wisp_1", "A")
+        put(s, "1,2", "test_one", "B")                                # 1: removed
+        put(s, "2,3", "wisp_2", "B")                                  # 4: stays
+        rules.apply_action(s, PlaceAction(cid, ("cr", "2,2")))
+        assert "1,2" not in s.board and "2,3" in s.board
+    assert [(CARDS[c].cost, CARDS[c].base_strength) for c in ("young_rhino", "young_albatross")] == [(4, 4), (4, 2)]
 
 
 def test_djinn_cost_less_for_each_of_their_count():

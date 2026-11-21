@@ -44,6 +44,8 @@ export const CARD_NUMS = [
   "assassin_legend",
   "rhino",
   "albatross",
+  "young_rhino",
+  "young_albatross",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

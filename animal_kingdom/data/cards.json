@@ -591,9 +591,31 @@
       "name": "Albatross",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 5,
+      "base_strength": 4,
       "text": "Flight. Roar: remove all adjacent enemies with strength 5 or less.",
       "cost": 8,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "young_rhino",
+      "name": "Young Rhino",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 4,
+      "text": "Roar: remove all adjacent enemies with strength 3 or less.",
+      "cost": 4,
+      "keywords": []
+    },
+    {
+      "id": "young_albatross",
+      "name": "Young Albatross",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 2,
+      "text": "Flight. Roar: remove all adjacent enemies with strength 3 or less.",
+      "cost": 4,
       "keywords": [
         "Flight"
       ]

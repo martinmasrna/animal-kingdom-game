@@ -519,13 +519,15 @@ def _adjacent_enemy_targets(state, unit, cr, max_strength=None) -> list:
     return out
 
 
-def _crush(state, unit, cr):
-    """"Roar: remove all adjacent enemies with strength 5 or less." (the Rhino, the Albatross): every one at once, no
-    choice, so Stealth doesn't hide; a removal by an ability, so Armor holds."""
-    for nb in sorted(state.game_map.neighbors(cr)):
-        top = state.top_unit(nb)
-        if top is not None and top.owner != unit.owner and effective_strength(state, top) <= state.config.crush_max:
-            state.effect_stack.append(remove_iid_step(top.iid, by_player=unit.owner, by_card=unit.card_id))
+def _crush(limit: str):
+    """"Roar: remove all adjacent enemies with strength N or less." (the Rhinos, the Albatrosses; N the config's `limit`):
+    every one at once, no choice, so Stealth doesn't hide; a removal by an ability, so Armor holds."""
+    def roar(state, unit, cr):
+        for nb in sorted(state.game_map.neighbors(cr)):
+            top = state.top_unit(nb)
+            if top is not None and top.owner != unit.owner and effective_strength(state, top) <= getattr(state.config, limit):
+                state.effect_stack.append(remove_iid_step(top.iid, by_player=unit.owner, by_card=unit.card_id))
+    return roar
 
 
 def _remove_adjacent(state, unit, cr):
@@ -611,8 +613,10 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     **{cid: {"on_raid": _raid_draw} for cid in RAID_DRAWS},
     **{cid: {"on_place": _scout} for cid in SCOUTS},
     "duplicating_spore": {"on_place": _duplicate},
-    "rhino": {"on_place": _crush},
-    "albatross": {"on_place": _crush},
+    "rhino": {"on_place": _crush("crush_max")},
+    "albatross": {"on_place": _crush("crush_max")},
+    "young_rhino": {"on_place": _crush("crush_young_max")},
+    "young_albatross": {"on_place": _crush("crush_young_max")},
     "mama_spore": {"on_place": _mama_spore},
     **{cid: {"on_cover": _draw_if_it_removes} for cid in KILL_DRAWS},
 }
