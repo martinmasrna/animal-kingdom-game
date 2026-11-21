@@ -4,7 +4,7 @@ import random
 from itertools import combinations
 
 from animal_kingdom.decks import deck_problems
-from animal_kingdom.engine import rules
+from animal_kingdom.engine import effects, rules
 from animal_kingdom.engine.actions import SKIP, ChoiceAction, LeaderAction, PassAction, PlaceAction
 from dataclasses import replace
 
@@ -456,7 +456,32 @@ def test_the_assassin_draws_after_the_third_card_of_a_turn_only():
     for i, cr in enumerate(("1,1", "1,2", "1,3", "2,1")):
         rules.apply_action(s, PlaceAction("wisp_1", ("cr", cr)))
         assert len(s.hands["A"]) == [3, 2, 2, 1][i]                  # the third card draws one; the fourth doesn't
-    assert all(CARDS[l].cost == 5 and CARDS[l].base_strength == 10 for l in LEADERS)
+    assert {l: (CARDS[l].cost, CARDS[l].base_strength) for l in LEADERS} == {
+        "warlord_legend": (5, 10), "raider_legend": (5, 10), "sage_legend": (5, 3), "elf_legend": (5, 3), "assassin_legend": (5, 5)}
+
+
+def test_the_elfs_card_makes_its_regions_produce_one_more_while_it_stands():
+    s = state(turn=4)
+    for cr in ("1,1", "1,2", "2,2"):
+        put(s, cr, "wisp_1", "A")
+    assert rules.region_income(s, "A") == 1
+    put(s, "1,3", "elf_legend", "A")
+    assert rules.region_income(s, "A") == 1 + CFG.elf_card_region_bonus
+
+
+def test_the_assassins_card_makes_the_cards_in_your_hand_cheaper_for_good():
+    s = state(turn=19, hands={"A": ["assassin_legend", "wisp_3", "wisp_3"]})   # 10 mana
+    rules.apply_action(s, PlaceAction("assassin_legend", ("cr", "1,1")))
+    assert mana_cost(s, "wisp_3") == 2
+    s.hands["A"].append(UnitInstance("wisp_3", "A", s.new_iid()))   # drawn after: full price, the cheaper copy played first
+    rules.apply_action(s, PlaceAction("wisp_3", ("cr", "1,2")))
+    assert rules.mana_left(s, "A") == 10 - 5 - 2 and sorted(u.cost_mod for u in s.hands["A"]) == [-1, 0]
+
+
+def test_the_sages_card_makes_its_power_cheaper_for_good():
+    s = state(turn=11, hands={"A": ["sage_legend"]}, leaders={"A": SAGE})
+    rules.apply_action(s, PlaceAction("sage_legend", ("cr", "1,1")))
+    assert effects.power_cost(s, "A") == CFG.leader_power_cost - 1
 
 
 def test_the_sages_power_draws_a_card_for_three_mana_once_a_turn():

@@ -829,7 +829,16 @@
         "prev": 6
       },
       "by": "claude",
-      "at": 1795274919
+      "at": 1795290485
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795290486
     }
   },
   "flight_1": {
@@ -1268,6 +1277,46 @@
       },
       "by": "claude",
       "at": 1795285865
+    }
+  },
+  "elf_legend": {
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "by": "claude",
+      "at": 1795290485
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795290485
+    }
+  },
+  "assassin_legend": {
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "by": "claude",
+      "at": 1795290485
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795290485
     }
   }
 }

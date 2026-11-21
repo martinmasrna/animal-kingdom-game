@@ -166,8 +166,11 @@ def regions_controlled(state: GameState, player: str):
 
 
 def region_income(state: GameState, player: str) -> int:
-    """The food `player`'s regions pay at the end of their turn."""
-    return sum(r.food for r in regions_controlled(state, player))
+    """The food `player`'s regions pay at the end of their turn: each its own, and 1 more each while their Elf's card is
+    on the board ("Your regions produce 1 more food.")."""
+    elf = any(st and st[-1].owner == player and st[-1].card_id == "elf_legend" for st in state.board.values())
+    bonus = state.config.elf_card_region_bonus if elf else 0
+    return sum(r.food + bonus for r in regions_controlled(state, player))
 
 
 def _produce_food(state: GameState, player: str) -> None:

@@ -240,10 +240,10 @@
       "name": "Sage",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 10,
-      "keywords": [],
-      "text": "",
-      "cost": 5
+      "base_strength": 3,
+      "text": "Roar: reduce the cost of your hero power by 1.",
+      "cost": 5,
+      "keywords": []
     },
     {
       "id": "flight_1",
@@ -540,20 +540,20 @@
       "name": "Elf",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 10,
-      "keywords": [],
-      "text": "",
-      "cost": 5
+      "base_strength": 3,
+      "text": "Your regions produce 1 more food.",
+      "cost": 5,
+      "keywords": []
     },
     {
       "id": "assassin_legend",
       "name": "Assassin",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 10,
-      "keywords": [],
-      "text": "",
-      "cost": 5
+      "base_strength": 5,
+      "text": "Roar: reduce the cost of cards in your hand by 1.",
+      "cost": 5,
+      "keywords": []
     },
     {
       "id": "rhino",

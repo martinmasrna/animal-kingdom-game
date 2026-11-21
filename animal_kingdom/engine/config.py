@@ -27,6 +27,9 @@ class Config:
     hungry_food: int = 1                 # Hungry: the food its prey's removal gains (Martin, 2026-11-20)
     shade_growth: int = 1                # the Shades: +1 strength for each of their count
     warlord_leader_food: int = 1         # the Warlord: "When you cover an enemy, gain 1 food."
+    elf_card_region_bonus: int = 1       # the Elf's card: "Your regions produce 1 more food." (while it is on the board)
+    assassin_card_discount: int = 1      # the Assassin's card: "Roar: reduce the cost of cards in your hand by 1."
+    sage_card_power_discount: int = 1    # the Sage's card: "Roar: reduce the cost of your hero power by 1."
     elf_power_cost: int = 2              # the Elf's power: "Gain 1 food for each region you control." (Martin, 2026-11-21)
     elf_food_per_region: int = 1
     assassin_nth_card: int = 3           # the Assassin: "After you play your third card in a turn, draw a card."

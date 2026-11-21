@@ -31,29 +31,32 @@ def other_player(player: str) -> str:
 class UnitInstance:
     """One card instance: a card id, its owner and a unique instance id. The same instance moves from hand to board."""
 
-    __slots__ = ("card_id", "owner", "iid", "retaliation_used", "strength_mod")
+    __slots__ = ("card_id", "owner", "iid", "retaliation_used", "strength_mod", "cost_mod")
 
-    def __init__(self, card_id: str, owner: str, iid: int, retaliation_used: bool = False, strength_mod: int = 0):
+    def __init__(self, card_id: str, owner: str, iid: int, retaliation_used: bool = False, strength_mod: int = 0,
+                 cost_mod: int = 0):
         self.card_id = card_id
         self.owner = owner
         self.iid = iid
         self.retaliation_used = retaliation_used   # Spikes: spent on the first enemy that covers it
         self.strength_mod = strength_mod           # what effects have added to its strength, for good (the Hunters' -N)
+        self.cost_mod = cost_mod                   # what effects have added to its mana cost while in hand (the Assassin's -1)
 
     def to_dict(self) -> dict:
         return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid, "retaliation_used": self.retaliation_used,
-                "strength_mod": self.strength_mod}
+                "strength_mod": self.strength_mod, "cost_mod": self.cost_mod}
 
     @staticmethod
     def from_dict(d: dict) -> "UnitInstance":
-        return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("retaliation_used", False), d.get("strength_mod", 0))
+        return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("retaliation_used", False), d.get("strength_mod", 0),
+                            d.get("cost_mod", 0))
 
     def __repr__(self) -> str:
         return f"UnitInstance({self.card_id!r}, {self.owner!r}, {self.iid})"
 
 
 def _copy_unit(u: UnitInstance) -> UnitInstance:
-    return UnitInstance(u.card_id, u.owner, u.iid, u.retaliation_used, u.strength_mod)
+    return UnitInstance(u.card_id, u.owner, u.iid, u.retaliation_used, u.strength_mod, u.cost_mod)
 
 
 @dataclass(frozen=True)
@@ -117,7 +120,7 @@ class GameState:
                  remove_pile: list[str], food: dict[str, int], current: str, first_player: str,
                  rng: Optional[random.Random] = None, starting_decks: Optional[dict[str, tuple]] = None,
                  turn_counter: int = 0, mana_spent: int = 0, applied_this_turn: int = 0, effect_steps_this_turn: int = 0,
-                 played_this_turn: int = 0, power_used: bool = False,
+                 played_this_turn: int = 0, power_used: bool = False, power_discount: Optional[dict] = None,
                  caps: Optional[list] = None, next_iid: int = 0, effect_stack: Optional[list[dict]] = None,
                  pending: Optional[dict] = None, scheduled: Optional[list[dict]] = None, result: Optional[Result] = None,
                  pile_owners: Optional[list] = None, leaders: Optional[dict[str, dict]] = None):
@@ -140,6 +143,7 @@ class GameState:
         self.applied_this_turn = applied_this_turn   # every apply_action of the turn, choices included (Config.max_actions_per_turn)
         self.played_this_turn = played_this_turn     # the cards its player has played from hand this turn (the Assassin)
         self.power_used = power_used                 # its player has used their leader's power this turn (once a turn)
+        self.power_discount = power_discount if power_discount is not None else {"A": 0, "B": 0}   # off each player's power, for good (the Sage)
         self.effect_steps_this_turn = effect_steps_this_turn   # effect steps resolved this turn (Config.max_effect_steps_per_turn)
         self.caps: list = caps if caps is not None else []     # every turn a cap ended: {cap, player, turn, cards}
         self._next_iid = next_iid
@@ -229,6 +233,7 @@ class GameState:
         new.applied_this_turn = self.applied_this_turn
         new.played_this_turn = self.played_this_turn
         new.power_used = self.power_used
+        new.power_discount = dict(self.power_discount)
         new.effect_steps_this_turn = self.effect_steps_this_turn
         new.caps = list(self.caps)
         new._next_iid = self._next_iid
@@ -268,6 +273,7 @@ class GameState:
             "applied_this_turn": self.applied_this_turn,
             "played_this_turn": self.played_this_turn,
             "power_used": self.power_used,
+            "power_discount": dict(self.power_discount),
             "effect_steps_this_turn": self.effect_steps_this_turn,
             "caps": [dict(c) for c in self.caps],
             "next_iid": self._next_iid,
@@ -292,6 +298,7 @@ class GameState:
             turn_counter=d["turn_counter"], mana_spent=d.get("mana_spent", 0),
             applied_this_turn=d.get("applied_this_turn", 0), effect_steps_this_turn=d.get("effect_steps_this_turn", 0),
             played_this_turn=d.get("played_this_turn", 0), power_used=d.get("power_used", False),
+            power_discount=dict(d.get("power_discount") or {"A": 0, "B": 0}),
             caps=[dict(c) for c in d.get("caps", [])], next_iid=d["next_iid"],
             effect_stack=copy.deepcopy(d.get("effect_stack") or []), pending=copy.deepcopy(d.get("pending")),
             scheduled=copy.deepcopy(d.get("scheduled") or []),

@@ -19,7 +19,7 @@ from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, LeaderAction, PassAction, PlaceAction, action_from_dict
 from ..engine import leaders as L
 from ..engine.cards import load_cards
-from ..engine.effects import MAKES, leader_usable, mana_cost, power_cost
+from ..engine.effects import MAKES, leader_usable, mana_cost, power_cost, unit_cost
 from ..engine.maps import load_map
 from ..engine.state import MAP_ID, EngineError, GameState, Result, new_game, other_player
 from ..engine.strength import card_strength, effective_strength
@@ -452,7 +452,7 @@ class Match:
             "income": {p: rules.region_income(st, p) for p in "AB"},
             "winFood": st.game_map.win_food,
             "board": board,
-            "hand": [{"iid": u.iid, "id": u.card_id, "str": effective_strength(st, u), "cost": mana_cost(st, u.card_id, s)}
+            "hand": [{"iid": u.iid, "id": u.card_id, "str": effective_strength(st, u), "cost": unit_cost(st, u)}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
             "leaders": {p: v for p in "AB" if (v := leader_view(st, p))},

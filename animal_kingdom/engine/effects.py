@@ -162,20 +162,31 @@ def _mulligan_replacement(deck, blacklist):
 DJINN = {"djinn_hand": "hand", "djinn_ally": "ally", "djinn_enemy": "enemy", "djinn_region": "region"}
 
 
-def mana_cost(state: GameState, card_id: str, player: Optional[str] = None) -> int:
-    """What playing `card_id` from hand costs `player` (the current player by default): its card's cost, a Djinn's less
-    its count, never below 0."""
+def _base_cost(state: GameState, card_id: str, player: str) -> int:
     cost = state.cards[card_id].cost
-    if card_id in DJINN:
-        return max(0, cost - count(state, player or state.current, DJINN[card_id]))
-    return cost
+    return cost - count(state, player, DJINN[card_id]) if card_id in DJINN else cost
+
+
+def unit_cost(state: GameState, unit: UnitInstance) -> int:
+    """What playing this copy from hand costs: its card's cost, a Djinn's less its count, plus what effects put on the copy
+    (the Assassin's -1), never below 0."""
+    return max(0, _base_cost(state, unit.card_id, unit.owner) + unit.cost_mod)
+
+
+def mana_cost(state: GameState, card_id: str, player: Optional[str] = None) -> int:
+    """What playing `card_id` from hand costs `player` (the current player by default): its cheapest copy in their hand,
+    or the card's cost when they hold none."""
+    player = player or state.current
+    copies = [u for u in state.hands.get(player, ()) if u.card_id == card_id]
+    return min(unit_cost(state, u) for u in copies) if copies else max(0, _base_cost(state, card_id, player))
 
 
 # ============================================================ placement
 
 def playable_copy(state: GameState, player: str, card_id: str) -> Optional[UnitInstance]:
-    """The hand instance a PlaceAction for `card_id` plays: the first copy in hand."""
-    return next((u for u in state.hands[player] if u.card_id == card_id), None)
+    """The hand instance a PlaceAction for `card_id` plays: its cheapest copy in hand, the first of those."""
+    copies = [u for u in state.hands[player] if u.card_id == card_id]
+    return min(copies, key=lambda u: unit_cost(state, u)) if copies else None
 
 
 def legal_placements(state: GameState, player: str) -> list:
@@ -578,6 +589,18 @@ def _mama_spore(state, unit, cr):
     state.effect_stack.append({"op": "to_hand", "player": unit.owner, "card": SPORE, "n": state.config.mama_spores})
 
 
+def _assassin_card(state, unit, cr):
+    """The Assassin's card: "Roar: reduce the cost of cards in your hand by 1." Each card then in hand, for as long as it
+    stays there."""
+    for u in state.hands[unit.owner]:
+        u.cost_mod -= state.config.assassin_card_discount
+
+
+def _sage_card(state, unit, cr):
+    """The Sage's card: "Roar: reduce the cost of your hero power by 1." For the rest of the game."""
+    state.power_discount[unit.owner] = state.power_discount.get(unit.owner, 0) + state.config.sage_card_power_discount
+
+
 def _raid_draw(state, unit):
     """"After it raids, draw a card.": once its raid has destroyed the food, its owner draws."""
     state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1, "by_card": unit.card_id, "by_iid": unit.iid})
@@ -613,6 +636,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     **{cid: {"on_raid": _raid_draw} for cid in RAID_DRAWS},
     **{cid: {"on_place": _scout} for cid in SCOUTS},
     "duplicating_spore": {"on_place": _duplicate},
+    "assassin_legend": {"on_place": _assassin_card},
+    "sage_legend": {"on_place": _sage_card},
     "rhino": {"on_place": _crush("crush_max")},
     "albatross": {"on_place": _crush("crush_albatross_max")},
     "young_rhino": {"on_place": _crush("crush_young_max")},
@@ -638,9 +663,10 @@ def power_price(leader_id: str, config) -> int:
 
 
 def power_cost(state: GameState, player: str) -> int:
-    """What `player`'s leader's power costs."""
+    """What `player`'s leader's power costs: its price less what their Sage's card took off it, never below 0."""
     lead = state.leaders.get(player)
-    return power_price(lead["id"], state.config) if lead else state.config.leader_power_cost
+    price = power_price(lead["id"], state.config) if lead else state.config.leader_power_cost
+    return max(0, price - state.power_discount.get(player, 0))
 
 
 def leader_usable(state: GameState, player: str) -> bool:
