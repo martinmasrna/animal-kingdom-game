@@ -5,7 +5,7 @@
 import { fitNames, readSide } from './card.js';
 import { CROP, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck, deckOrder } from './deckcode.js';
-import { dd, wireDd, onHold } from './menu.js';
+import { onHold } from './menu.js';
 import { track } from './log.js';
 import { manaCard, manaPiece, fitPlaques, costChip } from './mana.js';
 import { hasFigure } from './token.js';
@@ -62,7 +62,7 @@ export const ICON = {
 // Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 
-let X, C, cards, st = { open: null, rar: null, str: '', cost: '', q: '', sheet: false }, flash = null, wired = false;
+let X, C, cards, st = { open: null, rar: null, cost: '', q: '', sheet: false }, flash = null, wired = false;
 const limit = c => R.copies[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
 // A deck's cover is its leader (Martin, 2026-11-21: "it will automatically just be your Hero"); a deck without one shows
 // its first legendary, else its first card (the play screen uses the same).
@@ -182,7 +182,7 @@ function render(app, all) {
   const q = st.q.toLowerCase();
   // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
   const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
-  const shown = cards.filter(c => (!st.rar || c.rarity === st.rar) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (true) && ((st.cost === '') || (c.mana != null && String(costKey(c.mana)) === st.cost))
+  const shown = cards.filter(c => (!st.rar || c.rarity === st.rar) && ((st.cost === '') || (c.mana != null && String(costKey(c.mana)) === st.cost))
     && (!q || (c.name + ' ' + c.text + ' ' + made(c)).toLowerCase().includes(q)))
     .sort((a, b) => ((costOf(a) - costOf(b))) || sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
@@ -194,12 +194,9 @@ function render(app, all) {
 
   // a row of costs to pick from, as Hearthstone's collection has (Martin, 2026-11-20)
   const tabs = (MANA_COSTS.map(n => `<div class="ctab${st.cost === String(n) ? ' on' : ''}" data-cost="${n}">${costChip(n)}${plus(n)}</div>`).join(''));
-  const strengths = [...Array(8).keys()].map(String).concat('8+');
+  // Heroes only: the legendaries, the cards that lead (Martin, 2026-11-21, in place of the strength and rarity menus)
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
-    ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
-    ${dd('rar', st.rar || '', [['', 'All cards'], ['legendary', 'Legendary']])}
-    ${('')}
-    ${('')}
+    <button class="slab chk${st.rar ? ' on' : ''}" id="fheroes" aria-pressed="${!!st.rar}"><i></i>Heroes only</button>
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
   const body = d => ((curveHTML(d.list))) + deckBody(d.list, C);
@@ -274,7 +271,7 @@ function wire(app, all, open) {
   const pop = document.getElementById('pop'), hidePop = () => { pop.style.display = 'none'; };
   const bk = $('back'); if (bk) bk.onclick = X.back;
   app.querySelectorAll('.fbx').forEach(b => b.onclick = X.feedback);
-  wireDd(app, (k, v) => { st[k] = k === 'rar' ? (v || null) : v; redo(); });
+  $('fheroes').onclick = () => { st.rar = st.rar ? null : 'legendary'; redo(); };
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-cost]').forEach(e => e.onclick = () => { st.cost = st.cost === e.dataset.cost ? '' : e.dataset.cost; redo(); });   // one cost at a time; again: every cost
   const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { rar: null, str: '', cost: '', q: '' }); redo(); };

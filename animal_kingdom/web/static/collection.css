@@ -189,3 +189,7 @@
 .coll .ctab { position: relative; } .coll .ctab:has(sup) { margin-right: 10px; } .coll .ctab sup { position: absolute; right: -9px; top: -5px; font: 800 15px 'Fira Sans Condensed', sans-serif; color: #f2c94c; text-shadow: 0 1px 2px #000; }
 .coll .ctab:hover { opacity: .85; }
 .coll .ctab.on { opacity: 1; transform: scale(1.12); }
+/* Heroes only: a toggle in the header's material, a box that fills gold when on */
+.coll .chead .chk { flex: none; height: 40px; padding: 0 16px 0 12px; display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; }
+.coll .chead .chk i { width: 16px; height: 16px; border-radius: 3px; border: 2px solid #c9bda8; box-sizing: border-box; }
+.coll .chead .chk.on i { background: #f2c94c; border-color: #f2c94c; box-shadow: inset 0 0 0 2px #3a3632; }

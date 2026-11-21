@@ -123,6 +123,10 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   const top = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => +t.querySelector('.mcost')?.dataset.n));
   assert.ok(top.some(n => n > 6) && top.every(n => n >= 6), 'the last tab is 6 and up');
   await click(p, '.chead .ctab[data-cost="6"]'); await wait(80);
+  await click(p, '#fheroes'); await wait(80);   // Heroes only: the legendaries alone
+  const heroes = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => t.dataset.card));
+  assert.ok(heroes.length && heroes.every(id => C[id].rarity === 'legendary'), 'Heroes only shows only legendaries');
+  await click(p, '#fheroes'); await wait(80);
   // a new deck: its leader first, then cards; the tray holds a piece per copy in cost order, a count per cost, the rest
   // empty cells; the deck rules are the mana ones (no stars)
   await click(p, '#dnew'); await p.waitForSelector('.lv'); await click(p, '.lv[data-id="warlord_legend"]');
