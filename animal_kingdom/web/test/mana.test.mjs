@@ -166,7 +166,7 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   await p.waitForSelector('.mhome');
   assert.match(await p.$eval('.mhome .dk.on', e => e.textContent), /Mana test/, 'the deck is on home, chosen');
   // the same deck in the side list (?deckview=list, kept in the browser): each strip its cost, the piece's figure, the name
-  // and the strength; two copies as two dots, no third number; no stars anywhere
+  // no strength; two copies as two dots, a legendary its gem; no stars anywhere
   await p.goto(server.url + '/?deckview=list#/collection', { waitUntil: 'networkidle0' });
   await p.evaluate(() => [...document.querySelectorAll('.dtile[data-d]')].find(e => e.textContent.includes('Mana test')).click()); await p.waitForSelector('.side .st.mst');
   const list = await p.evaluate(() => ({ strips: [...document.querySelectorAll('.side .st')].map(s => ({ id: s.dataset.card, cost: +(s.querySelector('.sc .mchip')?.dataset.n || 0),

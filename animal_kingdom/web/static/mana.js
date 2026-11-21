@@ -38,10 +38,13 @@ const box = (l, t, w, h) => `left:${k(l)};top:${k(t)};width:${k(w)};height:${k(h
 // The card's chrome, in a box WC x HC (1000 units wide): the outline, the inner border, the collar and the piece's seat.
 const U = 1000 / WC, n = v => (v * U).toFixed(1);
 const hexPts = (x, y, w, h) => `${x + w / 2},${y} ${x + w},${y + h / 4} ${x + w},${y + 3 * h / 4} ${x + w / 2},${y + h} ${x},${y + 3 * h / 4} ${x},${y + h / 4}`;
-const FRAME_SVG = `<svg class="mpl" viewBox="0 0 1000 ${n(HC)}"><defs><linearGradient id="mfr" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#474d56"/><stop offset=".55" stop-color="#363b43"/><stop offset="1" stop-color="#2b2f36"/></linearGradient><linearGradient id="mcl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#646c78"/><stop offset="1" stop-color="#2c3037"/></linearGradient></defs>`
-  + `<polygon class="mfo" points="500,0 1000,${n(YS)} 1000,${n(HC - TIP)} 500,${n(HC)} 0,${n(HC - TIP)} 0,${n(YS)}"/>`
+// Each card its own gradient ids: an id is the document's, and a url(#id) resolving to a copy inside a hidden element
+// paints nothing (the hovered card's frame went missing, Martin, 2026-11-21).
+let frames = 0;
+const frameSVG = (u = ++frames) => `<svg class="mpl" viewBox="0 0 1000 ${n(HC)}"><defs><linearGradient id="mfr${u}" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#474d56"/><stop offset=".55" stop-color="#363b43"/><stop offset="1" stop-color="#2b2f36"/></linearGradient><linearGradient id="mcl${u}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#646c78"/><stop offset="1" stop-color="#2c3037"/></linearGradient></defs>`
+  + `<polygon class="mfo" fill="url(#mfr${u})" points="500,0 1000,${n(YS)} 1000,${n(HC - TIP)} 500,${n(HC)} 0,${n(HC - TIP)} 0,${n(YS)}"/>`
   + `<polyline class="mib" points="${n(BD)},${n(OFF + LH / 4)} ${n(BD)},${n(HC - TIP - BD * SL)} 500,${n(HC - OFF)} ${n(WC - BD)},${n(HC - TIP - BD * SL)} ${n(WC - BD)},${n(OFF + LH / 4)}"/>`
-  + `<polygon fill="url(#mcl)" points="${hexPts(+n(BD), +n(OFF), +n(LW), +n(LH))}"/>`
+  + `<polygon fill="url(#mcl${u})" points="${hexPts(+n(BD), +n(OFF), +n(LW), +n(LH))}"/>`
   + `<polygon fill="#0f1215" points="${hexPts(+n(BD + (LW - 1.05) / 2), +n(-Y0 - .025 * P), +n(1.05), +n(1.05 * P))}"/></svg>`;
 // The cost: the card's own top-left corner, its upper-left vertex on the card's shoulder.
 const GH = GEM * P;
@@ -59,7 +62,7 @@ export function manaCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cl
   const piece = tokenHTML({ id: c.id, owner, str, iid: iid ?? 0 }, { [c.id]: c }, w);
   const tags = (c.tags || []).join(' · ');
   return `<div class="mcard ${owner}${cls ? ' ' + cls : ''}" style="--mw:${w}px" ${attrs}>`
-    + `<div class="plaque" style="${box(X0, Y0, WC, HC)}">${FRAME_SVG}`
+    + `<div class="plaque" style="${box(X0, Y0, WC, HC)}">${frameSVG()}`
     + `<div class="mplate" style="${box(BD, PL_T, LW, PL_H)}"><b class="pname">${esc(c.name)}</b></div>`
     + `<div class="pin" style="${box(BD + .025 * WC, BX_T, WC - 2 * BD - .05 * WC, BX_H)}">${c.text ? `<p>${rules(c.text)}</p>` : ''}</div>`
     + (tags ? `<i class="mfam" style="top:${k(HC - TIP * .62)}">${esc(tags)}</i>` : '') + '</div>'

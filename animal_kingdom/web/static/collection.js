@@ -113,15 +113,13 @@ export function collectionScreen(app, ctx) {
 // One strip: a sliver of the card; the number of copies at its end when there are two or more (the game's decklists: copies
 // left), as in Hearthstone. A strip with none left is marked gone.
 // `mana`: the mana rules' strip (mstripHTML).
-// The mana rules' strip: the cost in its gold hexagon, the piece's figure where the painting was, the name, the strength
-// in the piece's own numerals; two copies are two dots, so a row holds two numbers, not three (Martin, 2026-11-20: "it's
-// like holding three different numbers in one row"). No stars.
-const numImg = n => /^\d+$/.test(String(n)) && +n <= 20 ? `<img src="/static/hex/num/${n}.svg" alt="${n}" draggable="false">` : esc(n);
+// The mana rules' strip: the cost in its gold hexagon, the piece's figure where the painting was, the name, and on the
+// right a legendary's gem or the copies as dots; no strength (Martin, 2026-11-21: "keep only the little dots"), no stars.
 export const stripHTML = (id, cards, have) => { const c = cards[id];
   return `<div class="st mst ${c.rarity}${have ? '' : ' gone'}${have > (R.copies[c.rarity] ?? 9) || c.mana == null ? ' over' : ''}" data-card="${id}">`
     + `<span class="sc">${c.mana != null ? costChip(c.mana) : ''}</span>`
     + `<span class="hd">${hasFigure(id) ? `<img src="/static/hex/fig/${id}.webp" alt="" draggable="false">` : ''}</span>`
-    + `<span class="n">${esc(c.name)}</span><span class="ms">${numImg(c.str)}</span><span class="x">${have > 1 ? pips(have) : ''}</span></div>`; };
+    + `<span class="n">${esc(c.name)}</span><span class="x">${c.rarity === 'legendary' ? '<img class="lgem" src="/static/hex/gem.webp" alt="" draggable="false">' : have > 1 ? pips(have) : ''}</span></div>`; };
 // A deck's strips, one list, in deckOrder (the legendaries first, their gold edge says so, then every other card by strength).
 // `have(id)`: the copies a strip shows (a match's decklists: the copies left). `mana`: the mana rules' list, by cost first.
 export const stripsHTML = (ids, cards, have) => { const by = deckOrder(cards);
