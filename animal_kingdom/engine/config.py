@@ -31,6 +31,7 @@ class Config:
     assassin_nth_card: int = 3           # the Assassin: "After you play your third card in a turn, draw a card."
     raider_leader_bonus: int = 1         # the Raider: "Your raids destroy 1 more food." (Martin, 2026-11-21: "only +1")
     mama_spores: int = 2                 # Mama Spore: "Roar: put 2 Spores into your hand." (Martin, 2026-11-21)
+    crush_max: int = 5                   # the Rhino and the Albatross: "remove all adjacent enemies with strength 5 or less"
     scout_look: int = 3                  # Scout: the cards of your deck's top it looks at (the old game's Scout, Martin, 2026-11-21)
     double_raid_factor: int = 2          # "Its raids destroy double food." (Martin, 2026-11-21, his paper cards)
 

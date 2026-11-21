@@ -373,6 +373,20 @@ def test_mama_spore_puts_two_spores_into_your_hand_and_they_play():
     assert rules.mana_left(s, "A") == 6 - CARDS["mama_spore"].cost - CARDS["spore"].cost
 
 
+def test_rhino_and_albatross_remove_every_adjacent_enemy_of_five_or_less():
+    for cid in ("rhino", "albatross"):
+        s = state(turn=19, hands={"A": [cid]})                        # 10 mana
+        put(s, "1,1", "wisp_1", "A")                                  # connects 2,1 and 2,2
+        put(s, "1,2", "wisp_2", "B")                                  # 4: removed
+        put(s, "2,3", "wisp_3", "B")                                  # 6: stays
+        put(s, "3,2", "test_stealth", "B")                            # Stealth doesn't hide from "all"
+        put(s, "3,3", "test_armor", "B")                              # Armor holds
+        rules.apply_action(s, PlaceAction(cid, ("cr", "2,2")))
+        assert "1,2" not in s.board and "3,2" not in s.board and "2,3" in s.board and "3,3" in s.board
+        assert "1,1" in s.board                                       # its own side untouched
+    assert CARDS["albatross"].keywords == {"Flight"} and (CARDS["albatross"].cost, CARDS["albatross"].base_strength) == (8, 5)
+
+
 def test_djinn_cost_less_for_each_of_their_count():
     s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed"]}, food={"A": 20, "B": 9})
     s.food_gained = {"A": 4, "B": 9}                              # the Food Djinn counts what was gained, not what is held
