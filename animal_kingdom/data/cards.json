@@ -6,7 +6,7 @@
       "name": "Wisp 1",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 1,
+      "base_strength": 2,
       "keywords": [],
       "text": "",
       "cost": 1
@@ -16,7 +16,7 @@
       "name": "Wisp 2",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 2,
+      "base_strength": 4,
       "keywords": [],
       "text": "",
       "cost": 2
@@ -26,7 +26,7 @@
       "name": "Wisp 3",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 3,
+      "base_strength": 6,
       "keywords": [],
       "text": "",
       "cost": 3
@@ -36,7 +36,7 @@
       "name": "Wisp 4",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 4,
+      "base_strength": 8,
       "keywords": [],
       "text": "",
       "cost": 4
@@ -46,7 +46,7 @@
       "name": "Wisp 5",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 5,
+      "base_strength": 10,
       "keywords": [],
       "text": "",
       "cost": 5
@@ -56,7 +56,7 @@
       "name": "Wisp 6",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 6,
+      "base_strength": 12,
       "keywords": [],
       "text": "",
       "cost": 6
@@ -66,7 +66,7 @@
       "name": "Wisp 7",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 7,
+      "base_strength": 14,
       "keywords": [],
       "text": "",
       "cost": 7
@@ -76,7 +76,7 @@
       "name": "Wisp 8",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 8,
+      "base_strength": 16,
       "keywords": [],
       "text": "",
       "cost": 8
@@ -86,7 +86,7 @@
       "name": "Wisp 9",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 9,
+      "base_strength": 18,
       "keywords": [],
       "text": "",
       "cost": 9
@@ -96,7 +96,7 @@
       "name": "Wisp 10",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 10,
+      "base_strength": 20,
       "keywords": [],
       "text": "",
       "cost": 10
@@ -207,78 +207,6 @@
       "cost": 5
     },
     {
-      "id": "spiky_3",
-      "name": "Spikes 1",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 1,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "Spikes.",
-      "cost": 3
-    },
-    {
-      "id": "spiky_4",
-      "name": "Spikes 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 2,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "Spikes.",
-      "cost": 4
-    },
-    {
-      "id": "flyer_2",
-      "name": "Flight 1",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 1,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight.",
-      "cost": 2
-    },
-    {
-      "id": "flyer_5",
-      "name": "Flight 3",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 4,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight.",
-      "cost": 5
-    },
-    {
-      "id": "flyer_7",
-      "name": "Flight 4",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 6,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight.",
-      "cost": 7
-    },
-    {
-      "id": "flyer_10",
-      "name": "Flight 5",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 9,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight.",
-      "cost": 10
-    },
-    {
       "id": "hunter_3",
       "name": "Hunter 3",
       "status": "collectible",
@@ -349,440 +277,6 @@
       "cost": 5
     },
     {
-      "id": "venomous_2",
-      "name": "Poison 1",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 1,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "Poison.",
-      "cost": 2
-    },
-    {
-      "id": "venomous_3",
-      "name": "Poison 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 2,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "Poison.",
-      "cost": 3
-    },
-    {
-      "id": "venomous_4",
-      "name": "Poison 3",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 3,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "Poison.",
-      "cost": 4
-    },
-    {
-      "id": "sneaky_6",
-      "name": "Stealth 1",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 5,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "Stealth.",
-      "cost": 6
-    },
-    {
-      "id": "sneaky_7",
-      "name": "Stealth 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 6,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "Stealth.",
-      "cost": 7
-    },
-    {
-      "id": "sneaky_8",
-      "name": "Stealth 3",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 7,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "Stealth.",
-      "cost": 8
-    },
-    {
-      "id": "sneaky_10",
-      "name": "Stealth 5",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 9,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "Stealth.",
-      "cost": 10
-    },
-    {
-      "id": "armored_2",
-      "name": "Armored",
-      "status": "reserve",
-      "rarity": "common",
-      "base_strength": 1,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "Armor.",
-      "cost": 2
-    },
-    {
-      "id": "armored_3",
-      "name": "Armored",
-      "status": "reserve",
-      "rarity": "common",
-      "base_strength": 2,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "Armor.",
-      "cost": 3
-    },
-    {
-      "id": "armored_4",
-      "name": "Armored",
-      "status": "reserve",
-      "rarity": "common",
-      "base_strength": 3,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "Armor.",
-      "cost": 4
-    },
-    {
-      "id": "armored_5",
-      "name": "Armored",
-      "status": "reserve",
-      "rarity": "common",
-      "base_strength": 4,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "Armor.",
-      "cost": 5
-    },
-    {
-      "id": "armored_6",
-      "name": "Armored",
-      "status": "reserve",
-      "rarity": "common",
-      "base_strength": 5,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "Armor.",
-      "cost": 6
-    },
-    {
-      "id": "armored_7",
-      "name": "Armored",
-      "status": "reserve",
-      "rarity": "common",
-      "base_strength": 6,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "Armor.",
-      "cost": 7
-    },
-    {
-      "id": "armored_8",
-      "name": "Armored",
-      "status": "reserve",
-      "rarity": "common",
-      "base_strength": 8,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "Armor.",
-      "cost": 8
-    },
-    {
-      "id": "armored_10",
-      "name": "Armored",
-      "status": "reserve",
-      "rarity": "common",
-      "base_strength": 12,
-      "keywords": [
-        "Armor"
-      ],
-      "text": "Armor.",
-      "cost": 10
-    },
-    {
-      "id": "glutton_3",
-      "name": "Hungry 1",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 3,
-      "keywords": [
-        "Hungry"
-      ],
-      "text": "Hungry.",
-      "cost": 3
-    },
-    {
-      "id": "glutton_4",
-      "name": "Hungry 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 4,
-      "keywords": [
-        "Hungry"
-      ],
-      "text": "Hungry.",
-      "cost": 4
-    },
-    {
-      "id": "glutton_5",
-      "name": "Hungry 3",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 5,
-      "keywords": [
-        "Hungry"
-      ],
-      "text": "Hungry.",
-      "cost": 5
-    },
-    {
-      "id": "glutton_6",
-      "name": "Hungry 4",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 6,
-      "keywords": [
-        "Hungry"
-      ],
-      "text": "Hungry.",
-      "cost": 6
-    },
-    {
-      "id": "glutton_8",
-      "name": "Hungry 5",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 8,
-      "keywords": [
-        "Hungry"
-      ],
-      "text": "Hungry.",
-      "cost": 8
-    },
-    {
-      "id": "spiky_6",
-      "name": "Spikes 3",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 3,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "Spikes.",
-      "cost": 6
-    },
-    {
-      "id": "spiky_8",
-      "name": "Spikes 4",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 4,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "Spikes.",
-      "cost": 8
-    },
-    {
-      "id": "spiky_10",
-      "name": "Spikes 5",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 6,
-      "keywords": [
-        "Spikes"
-      ],
-      "text": "Spikes.",
-      "cost": 10
-    },
-    {
-      "id": "venomous_6",
-      "name": "Poison 4",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 5,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "Poison.",
-      "cost": 6
-    },
-    {
-      "id": "venomous_8",
-      "name": "Poison 5",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 7,
-      "keywords": [
-        "Poison"
-      ],
-      "text": "Poison.",
-      "cost": 8
-    },
-    {
-      "id": "scout_2",
-      "name": "Cantrip 1",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 1,
-      "keywords": [],
-      "text": "Roar: draw a card.",
-      "cost": 2
-    },
-    {
-      "id": "scout_3",
-      "name": "Cantrip 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 1,
-      "keywords": [],
-      "text": "Roar: draw a card.",
-      "cost": 3
-    },
-    {
-      "id": "scout_4",
-      "name": "Cantrip 3",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 2,
-      "keywords": [],
-      "text": "Roar: draw a card.",
-      "cost": 4
-    },
-    {
-      "id": "scout_5",
-      "name": "Cantrip 4",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 4,
-      "keywords": [],
-      "text": "Roar: draw a card.",
-      "cost": 5
-    },
-    {
-      "id": "scout_6",
-      "name": "Cantrip 5",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 5,
-      "keywords": [],
-      "text": "Roar: draw a card.",
-      "cost": 6
-    },
-    {
-      "id": "winged_scout_3",
-      "name": "Flying Cantrip 1",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 1,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight. Roar: draw a card.",
-      "cost": 3
-    },
-    {
-      "id": "winged_scout_4",
-      "name": "Flying Cantrip 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 1,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight. Roar: draw a card.",
-      "cost": 4
-    },
-    {
-      "id": "winged_scout_5",
-      "name": "Flying Cantrip 3",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 3,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight. Roar: draw a card.",
-      "cost": 5
-    },
-    {
-      "id": "winged_scout_6",
-      "name": "Flying Cantrip 4",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 4,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight. Roar: draw a card.",
-      "cost": 6
-    },
-    {
-      "id": "winged_scout_8",
-      "name": "Flying Cantrip 5",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 6,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight. Roar: draw a card.",
-      "cost": 8
-    },
-    {
-      "id": "sneaky_9",
-      "name": "Stealth 4",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 8,
-      "keywords": [
-        "Stealth"
-      ],
-      "text": "Stealth.",
-      "cost": 9
-    },
-    {
-      "id": "flyer_3",
-      "name": "Flight 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 2,
-      "keywords": [
-        "Flight"
-      ],
-      "text": "Flight.",
-      "cost": 3
-    },
-    {
       "id": "warlord_legend",
       "name": "Warlord",
       "status": "collectible",
@@ -811,6 +305,256 @@
       "keywords": [],
       "text": "",
       "cost": 5
+    },
+    {
+      "id": "wisp_0",
+      "name": "Wisp 0",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "",
+      "cost": 0
+    },
+    {
+      "id": "flight_1",
+      "name": "Flight 1",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Flight.",
+      "cost": 1,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "flight_2",
+      "name": "Flight 2",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 2,
+      "text": "Flight.",
+      "cost": 2,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "flight_3",
+      "name": "Flight 3",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 3,
+      "text": "Flight.",
+      "cost": 3,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "flight_5",
+      "name": "Flight 5",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 5,
+      "text": "Flight.",
+      "cost": 5,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "flight_7",
+      "name": "Flight 7",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 7,
+      "text": "Flight.",
+      "cost": 7,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "flight_10",
+      "name": "Flight 10",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 10,
+      "text": "Flight.",
+      "cost": 10,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "hungry_1",
+      "name": "Hungry 1",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 2,
+      "text": "Hungry.",
+      "cost": 1,
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "hungry_2",
+      "name": "Hungry 2",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 3,
+      "text": "Hungry.",
+      "cost": 2,
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "hungry_3",
+      "name": "Hungry 3",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 4,
+      "text": "Hungry.",
+      "cost": 3,
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "hungry_4",
+      "name": "Hungry 4",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 6,
+      "text": "Hungry.",
+      "cost": 4,
+      "keywords": [
+        "Hungry"
+      ]
+    },
+    {
+      "id": "spikes_1",
+      "name": "Spikes 1",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Spikes.",
+      "cost": 1,
+      "keywords": [
+        "Spikes"
+      ]
+    },
+    {
+      "id": "spikes_2",
+      "name": "Spikes 2",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 2,
+      "text": "Spikes.",
+      "cost": 2,
+      "keywords": [
+        "Spikes"
+      ]
+    },
+    {
+      "id": "spikes_3",
+      "name": "Spikes 3",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 3,
+      "text": "Spikes.",
+      "cost": 3,
+      "keywords": [
+        "Spikes"
+      ]
+    },
+    {
+      "id": "spikes_5",
+      "name": "Spikes 5",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 4,
+      "text": "Spikes.",
+      "cost": 5,
+      "keywords": [
+        "Spikes"
+      ]
+    },
+    {
+      "id": "spikes_8",
+      "name": "Spikes 8",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 5,
+      "text": "Spikes.",
+      "cost": 8,
+      "keywords": [
+        "Spikes"
+      ]
+    },
+    {
+      "id": "cantrip_2",
+      "name": "Cantrip 2",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Roar: draw a card.",
+      "cost": 2,
+      "keywords": []
+    },
+    {
+      "id": "cantrip_3",
+      "name": "Cantrip 3",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 2,
+      "text": "Roar: draw a card.",
+      "cost": 3,
+      "keywords": []
+    },
+    {
+      "id": "cantrip_4",
+      "name": "Cantrip 4",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 4,
+      "text": "Roar: draw a card.",
+      "cost": 4,
+      "keywords": []
+    },
+    {
+      "id": "death_draw_1",
+      "name": "Death Draw 1",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Death: draw a card.",
+      "cost": 1,
+      "keywords": []
+    },
+    {
+      "id": "kill_draw_2",
+      "name": "Kill Draw 2",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 2,
+      "text": "Roar: if this removes an enemy, draw a card.",
+      "cost": 2,
+      "keywords": []
+    },
+    {
+      "id": "double_raid_4",
+      "name": "Double Raid 4",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 6,
+      "text": "Its raids destroy double food.",
+      "cost": 4,
+      "keywords": []
     }
   ]
 }

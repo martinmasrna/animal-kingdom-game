@@ -51,7 +51,7 @@ def choose(v: dict, regions: list[set], costs: dict) -> dict:
 
 
 DECK = {"name": "Wisps", "leader": "warlord_legend",
-        "list": [f"wisp_{n}" for n in range(1, 11) for _ in range(2)] + ["scout_2", "scout_2", "spiky_3", "spiky_3", "warlord_legend"]}
+        "list": [f"wisp_{n}" for n in range(1, 11) for _ in range(2)] + ["cantrip_2", "cantrip_2", "spikes_3", "spikes_3", "warlord_legend"]}
 
 
 async def play(port: int) -> int:

@@ -32,7 +32,7 @@
         "prev": 2
       },
       "by": "claude",
-      "at": 1795206566
+      "at": 1795262575
     }
   },
   "wisp_2": {
@@ -68,7 +68,7 @@
         "prev": 3
       },
       "by": "claude",
-      "at": 1795206566
+      "at": 1795262575
     }
   },
   "wisp_3": {
@@ -104,7 +104,7 @@
         "prev": 4
       },
       "by": "claude",
-      "at": 1795206566
+      "at": 1795262575
     }
   },
   "wisp_4": {
@@ -140,7 +140,7 @@
         "prev": 5
       },
       "by": "claude",
-      "at": 1795206566
+      "at": 1795262575
     }
   },
   "wisp_5": {
@@ -176,7 +176,7 @@
         "prev": 6
       },
       "by": "claude",
-      "at": 1795206567
+      "at": 1795262575
     }
   },
   "wisp_6": {
@@ -212,7 +212,7 @@
         "prev": 8
       },
       "by": "claude",
-      "at": 1795206567
+      "at": 1795262575
     }
   },
   "wisp_7": {
@@ -248,7 +248,7 @@
         "prev": 10
       },
       "by": "claude",
-      "at": 1795206567
+      "at": 1795262575
     }
   },
   "wisp_8": {
@@ -284,7 +284,7 @@
         "prev": 12
       },
       "by": "claude",
-      "at": 1795206567
+      "at": 1795262575
     }
   },
   "wisp_9": {
@@ -320,7 +320,7 @@
         "prev": 15
       },
       "by": "claude",
-      "at": 1795206567
+      "at": 1795262576
     }
   },
   "wisp_10": {
@@ -356,7 +356,7 @@
         "prev": 20
       },
       "by": "claude",
-      "at": 1795206567
+      "at": 1795262576
     }
   },
   "djinn_hand": {
@@ -802,1311 +802,6 @@
       "at": 1795199418
     }
   },
-  "spiky_3": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199093
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Spiky",
-          "species": "Spiky"
-        }
-      },
-      "by": "claude",
-      "at": 1795202746
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
-      "by": "claude",
-      "at": 1795206568
-    }
-  },
-  "spiky_4": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199093
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Spiky",
-          "species": "Spiky"
-        }
-      },
-      "by": "claude",
-      "at": 1795202747
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 3
-      },
-      "by": "claude",
-      "at": 1795206568
-    }
-  },
-  "flyer_2": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199094
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Flyer",
-          "species": "Flyer"
-        }
-      },
-      "by": "claude",
-      "at": 1795201439
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
-      "by": "claude",
-      "at": 1795206569
-    }
-  },
-  "flyer_5": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199094
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Flyer",
-          "species": "Flyer"
-        }
-      },
-      "by": "claude",
-      "at": 1795202749
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795206570
-    }
-  },
-  "flyer_7": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199094
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Flyer",
-          "species": "Flyer"
-        }
-      },
-      "by": "claude",
-      "at": 1795202749
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 8
-      },
-      "by": "claude",
-      "at": 1795206570
-    }
-  },
-  "flyer_10": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199095
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Flyer",
-          "species": "Flyer"
-        }
-      },
-      "by": "claude",
-      "at": 1795202749
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 15
-      },
-      "by": "claude",
-      "at": 1795206570
-    }
-  },
-  "venomous_2": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199095
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Venomous",
-          "species": "Venomous"
-        }
-      },
-      "by": "claude",
-      "at": 1795201444
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
-      "by": "claude",
-      "at": 1795206569
-    }
-  },
-  "venomous_3": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199095
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Venomous",
-          "species": "Venomous"
-        }
-      },
-      "by": "claude",
-      "at": 1795201444
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 3
-      },
-      "by": "claude",
-      "at": 1795206569
-    }
-  },
-  "venomous_4": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199095
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Venomous",
-          "species": "Venomous"
-        }
-      },
-      "by": "claude",
-      "at": 1795201444
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
-      "by": "claude",
-      "at": 1795206569
-    }
-  },
-  "sneaky_6": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199096
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Sneaky",
-          "species": "Sneaky"
-        }
-      },
-      "by": "claude",
-      "at": 1795201445
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 6
-      },
-      "by": "claude",
-      "at": 1795206567
-    }
-  },
-  "sneaky_7": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199097
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Sneaky",
-          "species": "Sneaky"
-        }
-      },
-      "by": "claude",
-      "at": 1795201445
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 8
-      },
-      "by": "claude",
-      "at": 1795206567
-    }
-  },
-  "sneaky_8": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199097
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Sneaky",
-          "species": "Sneaky"
-        }
-      },
-      "by": "claude",
-      "at": 1795201446
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 10
-      },
-      "by": "claude",
-      "at": 1795206568
-    }
-  },
-  "sneaky_10": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199097
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Sneaky",
-          "species": "Sneaky"
-        }
-      },
-      "by": "claude",
-      "at": 1795202746
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 15
-      },
-      "by": "claude",
-      "at": 1795206568
-    }
-  },
-  "armored_2": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199097
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "out of the collection (in the reserve)",
-      "by": "claude",
-      "at": 1795199590
-    }
-  },
-  "armored_3": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199097
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "out of the collection (in the reserve)",
-      "by": "claude",
-      "at": 1795199590
-    }
-  },
-  "armored_4": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199097
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "out of the collection (in the reserve)",
-      "by": "claude",
-      "at": 1795199591
-    }
-  },
-  "armored_5": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199097
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "out of the collection (in the reserve)",
-      "by": "claude",
-      "at": 1795199591
-    }
-  },
-  "armored_6": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199098
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "out of the collection (in the reserve)",
-      "by": "claude",
-      "at": 1795199591
-    }
-  },
-  "armored_7": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199098
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "out of the collection (in the reserve)",
-      "by": "claude",
-      "at": 1795199591
-    }
-  },
-  "armored_8": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199098
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "out of the collection (in the reserve)",
-      "by": "claude",
-      "at": 1795199591
-    }
-  },
-  "armored_10": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795199098
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "out of the collection (in the reserve)",
-      "by": "claude",
-      "at": 1795199591
-    }
-  },
-  "glutton_3": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200389
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Glutton",
-          "species": "Glutton"
-        }
-      },
-      "by": "claude",
-      "at": 1795202749
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
-      "by": "claude",
-      "at": 1795206570
-    }
-  },
-  "glutton_4": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200390
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Glutton",
-          "species": "Glutton"
-        }
-      },
-      "by": "claude",
-      "at": 1795202750
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795206570
-    }
-  },
-  "glutton_5": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200390
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Glutton",
-          "species": "Glutton"
-        }
-      },
-      "by": "claude",
-      "at": 1795202750
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 6
-      },
-      "by": "claude",
-      "at": 1795206570
-    }
-  },
-  "glutton_6": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200390
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Glutton",
-          "species": "Glutton"
-        }
-      },
-      "by": "claude",
-      "at": 1795202750
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 8
-      },
-      "by": "claude",
-      "at": 1795206570
-    }
-  },
-  "glutton_8": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200391
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Glutton",
-          "species": "Glutton"
-        }
-      },
-      "by": "claude",
-      "at": 1795202750
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 12
-      },
-      "by": "claude",
-      "at": 1795206571
-    }
-  },
-  "spiky_6": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200990
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Spiky",
-          "species": "Spiky"
-        }
-      },
-      "by": "claude",
-      "at": 1795202747
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
-      "by": "claude",
-      "at": 1795206568
-    }
-  },
-  "spiky_8": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200991
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Spiky",
-          "species": "Spiky"
-        }
-      },
-      "by": "claude",
-      "at": 1795202747
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795206568
-    }
-  },
-  "spiky_10": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200991
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Spiky",
-          "species": "Spiky"
-        }
-      },
-      "by": "claude",
-      "at": 1795202747
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 7
-      },
-      "by": "claude",
-      "at": 1795206569
-    }
-  },
-  "venomous_6": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200991
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Venomous",
-          "species": "Venomous"
-        }
-      },
-      "by": "claude",
-      "at": 1795201445
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795206569
-    }
-  },
-  "venomous_8": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795200991
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Venomous",
-          "species": "Venomous"
-        }
-      },
-      "by": "claude",
-      "at": 1795201445
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 7
-      },
-      "by": "claude",
-      "at": 1795206569
-    }
-  },
-  "scout_2": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201240
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Scout",
-          "species": "Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795201439
-    }
-  },
-  "scout_3": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201240
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Scout",
-          "species": "Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795201440
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
-      "by": "claude",
-      "at": 1795206571
-    }
-  },
-  "scout_4": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201241
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Scout",
-          "species": "Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795201440
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 3
-      },
-      "by": "claude",
-      "at": 1795206571
-    }
-  },
-  "scout_5": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201241
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Scout",
-          "species": "Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795201440
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795206571
-    }
-  },
-  "scout_6": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201241
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Scout",
-          "species": "Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795201441
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 6
-      },
-      "by": "claude",
-      "at": 1795206571
-    }
-  },
-  "winged_scout_3": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201242
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Winged Scout",
-          "species": "Winged Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795201443
-    }
-  },
-  "winged_scout_4": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201243
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Winged Scout",
-          "species": "Winged Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795201443
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
-      "by": "claude",
-      "at": 1795206571
-    }
-  },
-  "winged_scout_5": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201243
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Winged Scout",
-          "species": "Winged Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795201443
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
-      "by": "claude",
-      "at": 1795206572
-    }
-  },
-  "winged_scout_6": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201243
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Winged Scout",
-          "species": "Winged Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795201443
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "by": "claude",
-      "at": 1795206572
-    }
-  },
-  "winged_scout_8": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795201244
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Winged Scout",
-          "species": "Winged Scout"
-        }
-      },
-      "by": "claude",
-      "at": 1795202752
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 8
-      },
-      "by": "claude",
-      "at": 1795206572
-    }
-  },
-  "sneaky_9": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795202745
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Sneaky",
-          "species": "Sneaky"
-        }
-      },
-      "by": "claude",
-      "at": 1795202746
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 9
-      },
-      "by": "claude",
-      "at": 1795206568
-    }
-  },
-  "flyer_3": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1795202757
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Flyer",
-          "species": "Flyer"
-        }
-      },
-      "by": "claude",
-      "at": 1795202758
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 3
-      },
-      "by": "claude",
-      "at": 1795206569
-    }
-  },
   "warlord_legend": {
     "rarity": {
       "review": {
@@ -2165,6 +860,237 @@
       },
       "by": "claude",
       "at": 1795206573
+    }
+  },
+  "flight_1": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262576
+    }
+  },
+  "flight_2": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262576
+    }
+  },
+  "flight_3": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262576
+    }
+  },
+  "flight_5": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262576
+    }
+  },
+  "flight_7": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262576
+    }
+  },
+  "flight_10": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262576
+    }
+  },
+  "hungry_1": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262576
+    }
+  },
+  "hungry_2": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262577
+    }
+  },
+  "hungry_3": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262577
+    }
+  },
+  "hungry_4": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262577
+    }
+  },
+  "spikes_1": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262577
+    }
+  },
+  "spikes_2": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262577
+    }
+  },
+  "spikes_3": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262577
+    }
+  },
+  "spikes_5": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262577
+    }
+  },
+  "spikes_8": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262577
+    }
+  },
+  "cantrip_2": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262578
+    }
+  },
+  "cantrip_3": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262578
+    }
+  },
+  "cantrip_4": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262578
+    }
+  },
+  "death_draw_1": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262578
+    }
+  },
+  "kill_draw_2": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262578
+    }
+  },
+  "double_raid_4": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795262578
     }
   }
 }

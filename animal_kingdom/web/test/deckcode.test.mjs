@@ -7,7 +7,7 @@ import { CARD_NUMS } from '../static/cardnums.js';
 
 const pool = JSON.parse(readFileSync(new URL('../../data/cards.json', import.meta.url))).cards.filter(c => c.status !== 'planned');   // a planned animal is no card yet
 const C = Object.fromEntries(pool.map(c => [c.id, { ...c, str: c.base_strength === 'dynamic' ? '*' : c.base_strength }]));
-const wisps = ['warlord_legend', ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].flatMap(n => ['wisp_' + n, 'wisp_' + n]), 'scout_2', 'scout_2', 'spiky_3', 'spiky_3'];
+const wisps = ['warlord_legend', ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].flatMap(n => ['wisp_' + n, 'wisp_' + n]), 'cantrip_2', 'cantrip_2', 'spikes_3', 'spikes_3'];
 const sorted = l => [...l].sort();
 
 test('every card has a permanent number, once', () => {

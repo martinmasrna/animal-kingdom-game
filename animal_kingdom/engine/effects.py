@@ -4,7 +4,8 @@ Effects resolve as declarative op-steps (plain dicts) on `state.effect_stack`, d
 choice surfaces as `state.pending`; the choice arrives as a normal action and resumes the paused step. Steps are plain
 data, so a position clones, saves and replays.
 
-Card behaviour: EFFECTS[card_id] -> {"on_place": fn} (a Roar), and OPS[op] -> fn(state, step) (the interpreter).
+Card behaviour: EFFECTS[card_id] -> {"on_place": fn} (a Roar), {"on_cover": fn} (when it covers an enemy), {"on_death": fn}
+(when it is removed from the board), and OPS[op] -> fn(state, step) (the interpreter).
 """
 
 from __future__ import annotations
@@ -207,7 +208,8 @@ def _raid(state: GameState, player: str, unit: UnitInstance, enemy: str, strengt
     what they have ("instead of stealing it destroys"), and is spent to the Remove Pile without landing (no Roar). A den
     emptied loses the game."""
     bonus = state.config.raider_leader_bonus if _leads(state, player, L.RAIDER) else 0
-    n = min(max(strength, 0) + bonus, state.food[enemy])
+    factor = state.config.double_raid_factor if unit.card_id in DOUBLE_RAIDERS else 1
+    n = min(max(strength, 0) * factor + bonus, state.food[enemy])
     state.emit("raid", player=player, iid=unit.iid, card=unit.card_id, den=enemy, str=strength, n=n)
     state.pile_add(unit.card_id, unit.owner)
     state.food[enemy] -= n
@@ -226,6 +228,9 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
         state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
         if onto_enemy and "Hungry" in state.cards[unit.card_id].keywords:
             state.effect_stack.append({"op": "hungry_food", "player": player, "prey": covered.iid, "by_card": unit.card_id})
+        on_cover = EFFECTS.get(unit.card_id, {}).get("on_cover")
+        if onto_enemy and on_cover:
+            on_cover(state, unit, covered)
         state.effect_stack.append({"op": "cover_remove", "cr": cr})
     if onto_enemy and _leads(state, player, L.WARLORD):
         state.effect_stack.append({"op": "gain_food", "player": player, "amount": state.config.warlord_leader_food,
@@ -289,6 +294,9 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True) -> bool:
     if not stack:
         del state.board[cr]
     state.pile_add(unit.card_id, unit.owner)
+    on_death = EFFECTS.get(unit.card_id, {}).get("on_death")
+    if on_death:
+        on_death(state, unit)
     return True
 
 
@@ -355,6 +363,13 @@ def start_of_turn(state: GameState, player: str) -> None:
 
 # ===================================================================== ops
 
+def _op_draw_if_gone(state, step):
+    """Draw once `prey` is gone from the board (it was removed), else nothing."""
+    if _find_unit(state, step["prey"])[1] is None:
+        draw_cards(state, step["player"], step["n"])
+    return None
+
+
 def _op_gain_food(state, step):
     gain_food(state, step["player"], step["amount"])
     return None
@@ -396,6 +411,7 @@ OPS: dict[str, Callable] = {
     "hungry_food": _op_hungry_food,
     "gain_food": _op_gain_food,
     "draw": _op_draw,
+    "draw_if_gone": _op_draw_if_gone,
     "remove_iid": _op_remove_iid,
     "remove_choice": _op_remove_choice,
 }
@@ -432,14 +448,30 @@ def _draw_a_card(state, unit, cr):
     state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1})
 
 
+def _death_draw(state, unit):
+    """"Death: draw a card.": when it is removed from the board, by anything, its owner draws."""
+    state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1, "by_card": unit.card_id, "by_iid": unit.iid})
+
+
+def _draw_if_it_removes(state, unit, covered):
+    """"Roar: if this removes an enemy, draw a card.": it removes an enemy by covering it, so the draw waits below the
+    cover's removal and happens only if the covered enemy is gone (Spikes removing this first leaves it standing)."""
+    state.effect_stack.append({"op": "draw_if_gone", "player": unit.owner, "prey": covered.iid, "n": 1,
+                               "by_card": unit.card_id, "by_iid": unit.iid})
+
+
 # The Hunters bite as far as their text says (Martin, 2026-11-20, his table).
 BITES = {"hunter_2": 2, "hunter_3": 3, "hunter_4": 4, "hunter_5": 5, "hunter_6": 6, "hunter_7": 7, "giant_hunter": None}
-CANTRIPS = ("scout_2", "scout_3", "scout_4", "scout_5", "scout_6",
-            "winged_scout_3", "winged_scout_4", "winged_scout_5", "winged_scout_6", "winged_scout_8")
+CANTRIPS = ("cantrip_2", "cantrip_3", "cantrip_4")
+DEATH_DRAWS = ("death_draw_1",)
+KILL_DRAWS = ("kill_draw_2",)
+DOUBLE_RAIDERS = ("double_raid_4",)
 
 EFFECTS: dict[str, dict[str, Callable]] = {
     **{cid: {"on_place": _bite(n)} for cid, n in BITES.items()},
     **{cid: {"on_place": _draw_a_card} for cid in CANTRIPS},
+    **{cid: {"on_death": _death_draw} for cid in DEATH_DRAWS},
+    **{cid: {"on_cover": _draw_if_it_removes} for cid in KILL_DRAWS},
 }
 
 

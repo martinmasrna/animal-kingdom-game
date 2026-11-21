@@ -6,6 +6,8 @@ from itertools import combinations
 from animal_kingdom.decks import deck_problems
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import SKIP, ChoiceAction, LeaderAction, PassAction, PlaceAction
+from dataclasses import replace
+
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.effects import BITES, _adjacent_enemy_targets, mana_cost
@@ -15,10 +17,14 @@ from animal_kingdom.engine.state import MAP_ID, GameState, UnitInstance, new_gam
 from animal_kingdom.engine.strength import effective_strength
 
 CARDS = load_cards()
+# Poison, Armor and Stealth are on no card right now (Martin, 2026-11-21, his paper cards); the rules keep them, tested on
+# stand-ins.
+for _kw in ("Poison", "Armor", "Stealth"):
+    CARDS[f"test_{_kw.lower()}"] = replace(CARDS["wisp_1"], id=f"test_{_kw.lower()}", keywords=frozenset({_kw}))
 CFG = Config()
 BOARD = load_map(MAP_ID)
 BASE = {"A": {"1,1", "1,2", "1,3"}, "B": {"5,1", "5,2", "5,3"}}
-DECK = [f"wisp_{n}" for n in range(1, 11) for _ in range(2)] + ["scout_2", "scout_2", "spiky_3", "spiky_3", "warlord_legend"]
+DECK = [f"wisp_{n}" for n in range(1, 11) for _ in range(2)] + ["cantrip_2", "cantrip_2", "spikes_3", "spikes_3", "warlord_legend"]
 
 
 def state(*, turn=0, current="A", hands=None, decks=None, food=None, leaders=None) -> GameState:
@@ -175,14 +181,14 @@ def _a_chain_to_b_base(s):
 
 
 def test_the_den_is_raided_only_through_its_base():
-    s = state(turn=11, hands={"A": ["wisp_6"]}, food={"A": 15, "B": 10})
+    s = state(turn=11, hands={"A": ["wisp_3"]}, food={"A": 15, "B": 10})
     _a_chain_to_b_base(s)
     assert not raids(s)
     put(s, "5,1", "wisp_1", "A")
     assert {a.target for a in raids(s)} == {("hq", "B")}
-    rules.apply_action(s, PlaceAction("wisp_6", ("hq", "B")))       # a 6: destroyed, not stolen
-    assert s.food == {"A": 15, "B": 4} and "wisp_6" in s.remove_pile
-    assert all(u.card_id != "wisp_6" for st in s.board.values() for u in st)
+    rules.apply_action(s, PlaceAction("wisp_3", ("hq", "B")))       # a 6: destroyed, not stolen
+    assert s.food == {"A": 15, "B": 4} and "wisp_3" in s.remove_pile
+    assert all(u.card_id != "wisp_3" for st in s.board.values() for u in st)
 
 
 def test_a_raid_that_empties_the_den_wins():
@@ -194,12 +200,12 @@ def test_a_raid_that_empties_the_den_wins():
 
 
 def test_a_flier_lands_anywhere_and_drops_straight_into_the_enemy_den():
-    s = state(turn=11, hands={"A": ["flyer_5", "wisp_5"]}, food={"A": 15, "B": 15})
-    assert places(s, "flyer_5") == set(BOARD.crossroads)
+    s = state(turn=11, hands={"A": ["flight_5", "wisp_5"]}, food={"A": 15, "B": 15})
+    assert places(s, "flight_5") == set(BOARD.crossroads)
     acts = rules.legal_actions(s)
-    assert PlaceAction("flyer_5", ("hq", "B")) in acts and PlaceAction("wisp_5", ("hq", "B")) not in acts
-    rules.apply_action(s, PlaceAction("flyer_5", ("hq", "B")))
-    assert s.food["B"] == 15 - CARDS["flyer_5"].base_strength
+    assert PlaceAction("flight_5", ("hq", "B")) in acts and PlaceAction("wisp_5", ("hq", "B")) not in acts
+    rules.apply_action(s, PlaceAction("flight_5", ("hq", "B")))
+    assert s.food["B"] == 15 - CARDS["flight_5"].base_strength
 
 
 # ------------------------------------------------------------------ the keywords
@@ -207,7 +213,7 @@ def test_a_flier_lands_anywhere_and_drops_straight_into_the_enemy_den():
 def test_spikes_removes_the_first_enemy_that_covers_it_and_stays():
     s = state(turn=21, hands={"A": ["wisp_3", "wisp_4"]})
     put(s, "1,1", "wisp_1", "A")
-    spikes = put(s, "2,1", "spiky_3", "B")
+    spikes = put(s, "2,1", "spikes_1", "B")
     rules.apply_action(s, PlaceAction("wisp_3", ("cr", "2,1")))
     assert s.board["2,1"] == [spikes] and spikes.retaliation_used and "wisp_3" in s.remove_pile
     rules.apply_action(s, PlaceAction("wisp_4", ("cr", "2,1")))     # spent: the next cover takes it
@@ -217,7 +223,7 @@ def test_spikes_removes_the_first_enemy_that_covers_it_and_stays():
 def test_poison_removes_its_coverer_at_the_start_of_its_owners_turn():
     s = state(turn=11, hands={"A": ["wisp_6"]})
     put(s, "1,1", "wisp_1", "A")
-    put(s, "2,1", "venomous_2", "B")
+    put(s, "2,1", "test_poison", "B")
     rules.apply_action(s, PlaceAction("wisp_6", ("cr", "2,1")))
     assert [u.card_id for u in s.board["2,1"]] == ["wisp_6"]
     rules.apply_action(s, PassAction())
@@ -227,19 +233,19 @@ def test_poison_removes_its_coverer_at_the_start_of_its_owners_turn():
 def test_armor_stops_a_bite_and_stealth_hides_from_one():
     s = state(turn=11)
     me = put(s, "1,1", "giant_hunter", "A")
-    put(s, "2,1", "armored_2", "B")
-    put(s, "2,2", "sneaky_6", "B")
+    put(s, "2,1", "test_armor", "B")
+    put(s, "2,2", "test_stealth", "B")
     assert _adjacent_enemy_targets(s, me, "1,1") == []
 
 
 def test_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
-    s = state(turn=11, hands={"A": ["glutton_3"]})            # strength 3
+    s = state(turn=11, hands={"A": ["hungry_2"]})             # strength 3
     put(s, "1,1", "wisp_1", "A")
-    put(s, "2,1", "wisp_2", "B")
-    put(s, "2,2", "wisp_3", "B")
-    assert places(s, "glutton_3") == {"2,1"} and not raids(s)
-    rules.apply_action(s, PlaceAction("glutton_3", ("cr", "2,1")))
-    assert s.food["A"] == CFG.hungry_food and "wisp_2" in s.remove_pile
+    put(s, "2,1", "wisp_1", "B")                                # strength 2
+    put(s, "2,2", "wisp_2", "B")                                # strength 4
+    assert places(s, "hungry_2") == {"2,1"} and not raids(s)
+    rules.apply_action(s, PlaceAction("hungry_2", ("cr", "2,1")))
+    assert s.food["A"] == CFG.hungry_food and "wisp_1" in s.remove_pile
 
 
 # ------------------------------------------------------------------ the cards
@@ -248,8 +254,8 @@ def test_hunters_bite_as_far_as_their_text_says():
     for cid, n in BITES.items():
         assert CARDS[cid].text == (f"Roar: Bite {n}." if n is not None else "Roar: remove an adjacent enemy.")
     s = state(turn=11, hands={"A": ["hunter_3"]})
-    put(s, "2,1", "wisp_3", "B")
-    put(s, "2,2", "wisp_4", "B")
+    put(s, "2,1", "wisp_1", "B")                                # strength 2
+    put(s, "2,2", "wisp_2", "B")                                # strength 4
     rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))
     assert s.pending["options"] == ["2,1"] and s.pending["chooser"] == "A"
     rules.apply_action(s, ChoiceAction("2,1"))
@@ -257,9 +263,46 @@ def test_hunters_bite_as_far_as_their_text_says():
 
 
 def test_a_cantrip_draws_a_card():
-    s = state(turn=11, hands={"A": ["scout_2"]})
-    rules.apply_action(s, PlaceAction("scout_2", ("cr", "1,2")))
+    s = state(turn=11, hands={"A": ["cantrip_2"]})
+    rules.apply_action(s, PlaceAction("cantrip_2", ("cr", "1,2")))
     assert [u.card_id for u in s.hands["A"]] == ["wisp_1"]
+
+
+def test_death_draw_draws_when_it_is_removed_by_anything():
+    s = state(turn=11, hands={"A": ["wisp_1"]})
+    put(s, "1,1", "wisp_1", "A")
+    put(s, "2,1", "death_draw_1", "B")
+    rules.apply_action(s, PlaceAction("wisp_1", ("cr", "2,1")))     # covered: removed by the rules
+    assert len(s.hands["B"]) == 1 and len(s.hands["A"]) == 0
+    s = state(turn=11, hands={"A": ["hunter_3"]})
+    put(s, "2,1", "death_draw_1", "B")
+    rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))
+    rules.apply_action(s, ChoiceAction("2,1"))                      # bitten: removed by an ability
+    assert len(s.hands["B"]) == 1
+
+
+def test_kill_draw_draws_only_when_it_removes_an_enemy():
+    s = state(turn=11, hands={"A": ["kill_draw_2"]})                # strength 2
+    put(s, "1,1", "wisp_0", "A")
+    put(s, "2,1", "wisp_0", "B")                                    # strength 1
+    rules.apply_action(s, PlaceAction("kill_draw_2", ("cr", "1,2")))
+    assert s.hands["A"] == []                                       # an empty tile: nothing removed
+    s.hands["A"].append(UnitInstance("kill_draw_2", "A", s.new_iid()))
+    rules.apply_action(s, PlaceAction("kill_draw_2", ("cr", "2,1")))
+    assert "wisp_0" in s.remove_pile and [u.card_id for u in s.hands["A"]] == ["wisp_1"]
+    s = state(turn=11, hands={"A": ["kill_draw_2"]})
+    put(s, "1,1", "wisp_0", "A")
+    put(s, "2,1", "spikes_1", "B")                                  # Spikes removes it first: its prey stands
+    rules.apply_action(s, PlaceAction("kill_draw_2", ("cr", "2,1")))
+    assert s.hands["A"] == [] and [u.card_id for u in s.board["2,1"]] == ["spikes_1"]
+
+
+def test_double_raid_destroys_double_its_strength():
+    s = state(turn=11, hands={"A": ["double_raid_4"]}, food={"A": 15, "B": 15})
+    for cr in ("1,1", "2,1", "3,1", "4,1", "5,1"):
+        put(s, cr, "wisp_0", "A")
+    rules.apply_action(s, PlaceAction("double_raid_4", ("hq", "B")))
+    assert s.food["B"] == 15 - 6 * CFG.double_raid_factor
 
 
 def test_djinn_cost_less_for_each_of_their_count():
@@ -292,8 +335,8 @@ def test_the_warlord_gains_a_food_for_each_cover_of_an_enemy():
 
 
 def test_the_raiders_raids_destroy_two_more():
-    s = state(turn=11, hands={"A": ["flyer_2"]}, food={"A": 15, "B": 15}, leaders={"A": RAIDER})
-    rules.apply_action(s, PlaceAction("flyer_2", ("hq", "B")))
+    s = state(turn=11, hands={"A": ["flight_1"]}, food={"A": 15, "B": 15}, leaders={"A": RAIDER})
+    rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
     assert s.food["B"] == 15 - 1 - CFG.raider_leader_bonus
 
 
@@ -312,7 +355,7 @@ def test_deck_rules():
     assert deck_problems(DECK, None) == ["a deck needs a leader"]
     assert deck_problems(DECK[:-1], "warlord_legend")
     assert any("at most 2" in p for p in deck_problems(DECK[:-2] + ["wisp_1", "warlord_legend"], "warlord_legend"))
-    assert any("collectible" in p for p in deck_problems(DECK[:-2] + ["armored_2", "warlord_legend"], "warlord_legend"))
+    assert any("collectible" in p for p in deck_problems(DECK[:-2] + ["djinn_food", "warlord_legend"], "warlord_legend"))
 
 
 def test_a_game_replays_from_its_seed_and_actions():

@@ -28,6 +28,7 @@ class Config:
     shade_growth: int = 1                # the Shades: +1 strength for each of their count
     warlord_leader_food: int = 1         # the Warlord: "When you cover an enemy, gain 1 food."
     raider_leader_bonus: int = 2         # the Raider: "Your raids destroy 2 more food."
+    double_raid_factor: int = 2          # "Its raids destroy double food." (Martin, 2026-11-21, his paper cards)
 
     # Safety caps, so a loop of effects can never hang a game.
     max_actions_per_turn: int = 30       # a turn ends after this many applied actions, choices included (Martin, 2026-11-18)
