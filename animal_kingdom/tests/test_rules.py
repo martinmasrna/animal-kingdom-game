@@ -353,14 +353,14 @@ def test_scout_takes_one_of_the_top_three_and_shuffles_the_rest_back():
     assert sorted(s.decks["A"]) == ["wisp_1", "wisp_2", "wisp_3", "wisp_5"]
 
 
-def test_duplicating_spore_places_a_spore_on_an_adjacent_empty_tile():
+def test_duplicating_spore_places_a_spore_on_an_adjacent_tile_it_could_be_placed_on():
     s = state(turn=11, hands={"A": ["duplicating_spore"]})
-    put(s, "1,2", "wisp_1", "A")                                     # taken: not offered
+    put(s, "1,2", "wisp_1", "A")                                     # yours: offered, and covered
+    put(s, "2,1", "wisp_1", "B")                                     # an enemy of 2: the Spore's 1 can't cover it
     rules.apply_action(s, PlaceAction("duplicating_spore", ("cr", "1,1")))
-    assert "1,2" not in s.pending["options"] and s.pending["options"]
-    tile = s.pending["options"][0]
-    rules.apply_action(s, ChoiceAction(tile))
-    assert [u.card_id for u in s.board[tile]] == ["spore"]
+    assert "1,2" in s.pending["options"] and "2,1" not in s.pending["options"]
+    rules.apply_action(s, ChoiceAction("1,2"))
+    assert [u.card_id for u in s.board["1,2"]] == ["spore"] and "wisp_1" in s.remove_pile
     assert rules.mana_left(s, "A") == 6 - 1                          # the Spore came free
 
 

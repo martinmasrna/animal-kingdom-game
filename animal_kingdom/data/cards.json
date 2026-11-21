@@ -542,7 +542,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 1,
-      "text": "Roar: place a Spore on an adjacent empty tile.",
+      "text": "Roar: place a Spore on an adjacent tile.",
       "cost": 1,
       "keywords": []
     },

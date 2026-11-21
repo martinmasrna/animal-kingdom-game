@@ -550,10 +550,13 @@ SPORE = "spore"   # the Spores' token: a 1-mana 1, in no deck (status reserve), 
 
 
 def _duplicate(state, unit, cr):
-    """"Roar: place a Spore on an adjacent empty tile."."""
-    empty = [nb for nb in state.game_map.neighbors(cr) if state.top_unit(nb) is None]
-    if empty:
-        state.effect_stack.append({"op": "place_token", "player": unit.owner, "card": SPORE, "options": sorted(empty)})
+    """"Roar: place a Spore on an adjacent tile.": wherever a card could be placed (Martin, 2026-11-21: "any tile, not
+    just empty"): empty, yours (covered, so removed), or an enemy the Spore is stronger than."""
+    spore = UnitInstance(SPORE, unit.owner, -1)
+    tiles = [nb for nb in state.game_map.neighbors(cr)
+             if (top := state.top_unit(nb)) is None or top.owner == unit.owner or statics.can_cover(state, spore, top)]
+    if tiles:
+        state.effect_stack.append({"op": "place_token", "player": unit.owner, "card": SPORE, "options": sorted(tiles)})
 
 
 def _mama_spore(state, unit, cr):
