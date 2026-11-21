@@ -113,12 +113,16 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   assert.ok(grid.length > 40 && grid.every(g => !g.rect && g.cost === String(C[g.id].mana)), 'every tile is the mana card with its cost');
   assert.deepEqual(grid.map(g => +g.cost), grid.map(g => +g.cost).sort((a, b) => a - b), 'the grid sorts by cost first');
   // the filter bar: a row of costs 0 to 10 in place of the animal families, no habitat or cost menu; one cost at a time, again for every cost
-  assert.deepEqual(await p.evaluate(() => [document.querySelectorAll('.chead .ctab').length, document.querySelectorAll('.chead .tab').length, !!document.querySelector('.chead [data-k="hab"], .chead [data-k="cost"]')]), [10, 0, false], 'a cost row (1 to 10), no families, no habitat or cost menu');
+  assert.deepEqual(await p.evaluate(() => [document.querySelectorAll('.chead .ctab').length, document.querySelectorAll('.chead .tab').length, !!document.querySelector('.chead [data-k="hab"], .chead [data-k="cost"]')]), [6, 0, false], 'a cost row (1 to 5 and 6+), no families, no habitat or cost menu');
   await click(p, '.chead .ctab[data-cost="3"]'); await wait(80);
   const only3 = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => t.querySelector('.mcost')?.dataset.n));
   assert.ok(only3.length > 3 && only3.every(n => n === '3'), 'one cost shows only its cards');
   await click(p, '.chead .ctab[data-cost="3"]'); await wait(80);
   assert.equal(await p.$$eval('.cgrid .tl', e => e.length), grid.length, 'the same cost again: every card');
+  await click(p, '.chead .ctab[data-cost="6"]'); await wait(80);   // 6+: every card that costs 6 or more
+  const top = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => +t.querySelector('.mcost')?.dataset.n));
+  assert.ok(top.some(n => n > 6) && top.every(n => n >= 6), 'the last tab is 6 and up');
+  await click(p, '.chead .ctab[data-cost="6"]'); await wait(80);
   // a new deck: its leader first, then cards; the tray holds a piece per copy in cost order, a count per cost, the rest
   // empty cells; the deck rules are the mana ones (no stars)
   await click(p, '#dnew'); await p.waitForSelector('.lv'); await click(p, '.lv[data-id="warlord_legend"]');

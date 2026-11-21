@@ -16,7 +16,10 @@ const RANK = { legendary: 0, common: 1 };
 let R = { deckSize: 25, copies: {} };   // until the server's arrive
 
 const costOf = c => c.mana ?? 99;   // a card with no cost sorts last
-const MANA_COSTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];   // the cost row of the mana collection
+// The cost row of the collection and the curve's bars: 1 to 5 and 6+ (Martin, 2026-11-21), the last taking every dearer card.
+const MANA_COSTS = [1, 2, 3, 4, 5, 6], TOP = 6;
+const costKey = k => Math.min(Math.max(k, 1), TOP);
+const plus = k => k === TOP ? '<sup>+</sup>' : '';
 // The open deck in the mana rules, two ways (Martin, 2026-11-20: he wanted to try the deck as board tiles, and named the side
 // list cleaned up as the other way; neither is settled): `tray`, a band of pieces under the grid (the default), or `list`,
 // the side column's strips. ?deckview=list or ?deckview=tray on the address switches, kept in the browser like ?rules.
@@ -128,13 +131,12 @@ export function deckBody(list, cards) {
   return stripsHTML(Object.keys(counts), cards, id => counts[id]);
 }
 // The deck's mana curve, as Hearthstone draws it (Martin, 2026-11-21, its "Cards/Mana Cost" chart): a gold bar per cost
-// in a dark slot, 1 to 6 and 7+ (no card costs 0), its height the cost's share of the tallest, the count above it, the cost below.
-const CURVE = [1, 2, 3, 4, 5, 6, 7];
-const curveHTML = list => { const n = CURVE.map(() => 0);
-  for (const id of list) { const k = C[id] && C[id].mana; if (k != null) n[Math.min(Math.max(k, 1), 7) - 1]++; }
+// in a dark slot, 1 to 5 and 6+, its height the cost's share of the tallest, the count above it, the cost below.
+const curveHTML = list => { const n = MANA_COSTS.map(() => 0);
+  for (const id of list) { const k = C[id] && C[id].mana; if (k != null) n[costKey(k) - 1]++; }
   const top = Math.max(1, ...n);
-  return `<div class="mcurve">${CURVE.map((k, i) => `<div class="cb${n[i] ? '' : ' zero'}"><div class="slot"><b>${n[i]}</b><i style="height:${(n[i] / top * 100).toFixed(1)}%"></i></div>`
-    + `<span class="ck">${costChip(k)}${k === 7 ? '<sup>+</sup>' : ''}</span></div>`).join('')}</div>`; };
+  return `<div class="mcurve">${MANA_COSTS.map((k, i) => `<div class="cb${n[i] ? '' : ' zero'}"><div class="slot"><b>${n[i]}</b><i style="height:${(n[i] / top * 100).toFixed(1)}%"></i></div>`
+    + `<span class="ck">${costChip(k)}${plus(k)}</span></div>`).join('')}</div>`; };
 
 // The deck as a tray of pieces (DECKVIEW 'tray'): the leader as one large piece at the left, then a cell for each of the
 // deck's cards in two interlocking rows of board tiles, every copy its own piece, filled in cost order and zig-zagging
@@ -180,7 +182,7 @@ function render(app, all) {
   const q = st.q.toLowerCase();
   // a search also matches the names of the cards a card makes: "bunny" finds the Rabbit (Martin, 2026-10-31: the token itself is never shown here, it isn't a card for a deck)
   const made = c => (c.related || []).map(id => (C[id] || {}).name || '').join(' ');
-  const shown = cards.filter(c => (!st.rar || c.rarity === st.rar) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (true) && ((st.cost === '') || String(c.mana) === st.cost)
+  const shown = cards.filter(c => (!st.rar || c.rarity === st.rar) && (st.str === '' || (st.str === '8+' ? c.str >= 8 : String(c.str) === st.str)) && (true) && ((st.cost === '') || (c.mana != null && String(costKey(c.mana)) === st.cost))
     && (!q || (c.name + ' ' + c.text + ' ' + made(c)).toLowerCase().includes(q)))
     .sort((a, b) => ((costOf(a) - costOf(b))) || sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
@@ -191,7 +193,7 @@ function render(app, all) {
       return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${(manaPiece(c, { cost: c.mana ?? null, w: 150 }))}${n && c.rarity !== 'legendary' ? `<span class="pips${n > limit(c) ? ' over' : ''}">${pips(n, Math.max(n, limit(c)))}</span>` : ''}</div>`; }).join('') + '</div>';
 
   // a row of costs to pick from, as Hearthstone's collection has (Martin, 2026-11-20)
-  const tabs = (MANA_COSTS.map(n => `<div class="ctab${st.cost === String(n) ? ' on' : ''}" data-cost="${n}">${costChip(n)}</div>`).join(''));
+  const tabs = (MANA_COSTS.map(n => `<div class="ctab${st.cost === String(n) ? ' on' : ''}" data-cost="${n}">${costChip(n)}${plus(n)}</div>`).join(''));
   const strengths = [...Array(8).keys()].map(String).concat('8+');
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
