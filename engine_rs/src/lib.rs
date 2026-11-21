@@ -6,6 +6,7 @@
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 pub mod actions;
+pub mod bots;
 pub mod cards;
 pub mod data;
 pub mod effects;

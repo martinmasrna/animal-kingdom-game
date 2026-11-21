@@ -164,12 +164,18 @@ pub fn do_placement(st: &mut State, player: Player, card: CardId, target: Target
     Ok(())
 }
 
+/// The food a raid by `player`'s `card` at `strength` destroys, before the den's own food caps it: its strength, doubled
+/// for a card whose raids destroy double, and the Raider's 1 more.
+pub fn raid_food(st: &State, player: Player, card: CardId, strength: i32) -> i32 {
+    let bonus = if st.leads(player, st.g.named.raider) { st.cfg().raider_leader_bonus } else { 0 };
+    let factor = if st.card(card).beh.double_raider { st.cfg().double_raid_factor } else { 1 };
+    strength.max(0) * factor + bonus
+}
+
 /// The den raid: an animal that enters the enemy den destroys food equal to its strength, at most what they have, and
 /// is spent to the Remove Pile without landing (no Roar). A den emptied loses the game.
 fn raid(st: &mut State, player: Player, unit: Unit, enemy: Player, strength: i32) {
-    let bonus = if st.leads(player, st.g.named.raider) { st.cfg().raider_leader_bonus } else { 0 };
-    let factor = if st.card(unit.card).beh.double_raider { st.cfg().double_raid_factor } else { 1 };
-    let n = (strength.max(0) * factor + bonus).min(st.food[enemy as usize]);
+    let n = raid_food(st, player, unit.card, strength).min(st.food[enemy as usize]);
     st.emit(Ev::Raid { player, iid: unit.iid, card: unit.card, den: enemy, strength, n });
     st.pile_add(unit.card, unit.owner);
     st.food[enemy as usize] -= n;
