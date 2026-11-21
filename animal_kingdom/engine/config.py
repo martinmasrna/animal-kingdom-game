@@ -22,7 +22,7 @@ class Config:
     first_player_opening_draw: int = 3   # Martin, 2026-11-20: "make it 3 for first and 4 for second"
     second_player_opening_draw: int = 4
     mulligan: bool = True                # a blacklist mulligan, both players at once
-    turn_draw_count: int = 1             # the free card at the start of each turn, the first player's first turn excepted
+    turn_draw_count: int = 1             # the free card at the start of each turn, the first player's first included (Martin, 2026-11-21)
 
     hungry_food: int = 1                 # Hungry: the food its prey's removal gains (Martin, 2026-11-20)
     shade_growth: int = 1                # the Shades: +1 strength for each of their count

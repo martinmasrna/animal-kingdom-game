@@ -146,6 +146,7 @@ def _op_mulligan(state, step):
         state.rng.shuffle(deck)
     if not any(st.get("op") == "mulligan" for st in state.effect_stack):   # both done: the first turn begins
         state.emit("turn_start", player=state.current, turn=state.turn_counter)
+        draw_cards(state, state.current, state.config.turn_draw_count)   # the first turn's card too (Martin, 2026-11-21)
     return None
 
 

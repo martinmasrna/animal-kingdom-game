@@ -476,6 +476,14 @@ def test_deck_rules():
     assert any("collectible" in p for p in deck_problems(DECK[:-2] + ["test_reserve", "warlord_legend"], "warlord_legend", cards=CARDS))
 
 
+def test_the_first_player_draws_on_their_first_turn_too():
+    s = new_game(DECK, DECK, 7, leaders={"A": "warlord_legend", "B": "warlord_legend"})
+    while s.pending is not None:
+        rules.apply_action(s, ChoiceAction(SKIP))                      # both keep their hands
+    first = s.current
+    assert len(s.hands[first]) == CFG.first_player_opening_draw + CFG.turn_draw_count
+
+
 def test_a_game_replays_from_its_seed_and_actions():
     rng = random.Random(3)
     s = new_game(DECK, DECK, 3, leaders={"A": "warlord_legend", "B": "warlord_legend"})

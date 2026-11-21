@@ -341,4 +341,6 @@ def new_game(deck_a: list[str], deck_b: list[str], seed: int, *, cards: Optional
             chooser = state.effect_stack[-1]["player"]
             state.pending = {"mode": "choice", "chooser": chooser, "optional": True, "kind": "mulligan",
                              "options": [u.iid for u in state.hands[chooser]]}
+    if not state.effect_stack:      # no mulligan: the first turn begins now, with its card (the mulligan's end draws it otherwise)
+        state.draw(first, config.turn_draw_count)
     return state

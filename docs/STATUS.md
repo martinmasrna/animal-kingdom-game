@@ -14,7 +14,7 @@ What the game is for, why mana, and Martin's words on the rules' shape and the b
 
 - **Board:** 19 pointy-top hex tiles in rows of 3, 4, 5, 4, 3 (`data/maps.json` `map_hex19`), your side at the bottom. Each player's row of 3 is their base, where their connection starts and where either player may place. Behind each base is its den.
 - **Mana:** on your Nth turn you have min(N, 10) mana, lost at the end of the turn. A card costs its `cost`; a leader's power costs 3. Anything an effect puts into play is free.
-- **Cards:** opening hands of 3 (first player) and 4 (second), a mulligan, one free card at the start of each turn (not the first player's first turn), no other draw.
+- **Cards:** opening hands of 3 (first player) and 4 (second), a mulligan, one free card at the start of each turn, the first player's first turn included (Martin, 2026-11-21), no other draw.
 - **Covering:** a card placed on an enemy it is stronger than covers it, and a covered card, yours or theirs, is removed.
 - **Zero strength:** an animal at 0 strength is removed, by the rules (Armor doesn't hold), each time the effects finish resolving (Martin, 2026-11-21: "make it a general rule").
 - **Food:** both start at 15; each region (three tiles) a player holds pays 1 food at the end of their turn; 30 food wins, 0 loses. A card placed or moved into the enemy den, connected through one of their base tiles, destroys food equal to its strength (at most what the den holds) and is spent.
