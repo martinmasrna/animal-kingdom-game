@@ -17,7 +17,7 @@ use std::time::Instant;
 use serde_json::{json, Value};
 
 use ak_engine::actions::{Action, Target};
-use ak_engine::bots::turn::{turn_size, turn_size_unmerged};
+use ak_engine::bots::turn::{turn_size, turn_size_unmerged, win_search};
 use ak_engine::bots::{make_bot, Bot, BotStats};
 use ak_engine::data::*;
 use ak_engine::effects;
@@ -54,7 +54,7 @@ impl Args {
         let mut opts = HashMap::new();
         while let Some(k) = it.next() {
             let key = k.strip_prefix("--").ok_or_else(|| format!("unexpected argument {k:?}"))?.to_string();
-            if key == "log-actions" || key == "swap" {
+            if key == "log-actions" || key == "swap" || key == "count-wins" {
                 opts.insert(key, "1".into());
             } else {
                 opts.insert(key, it.next().ok_or_else(|| format!("--{k} needs a value"))?);
@@ -202,6 +202,12 @@ struct GameRec {
     reason: String,
     turns: i32,
     capped: bool,
+    /// The loser's last food went to a draw from their empty deck.
+    fatigue_end: bool,
+    /// Empty draws each seat made.
+    fatigue: [i32; 2],
+    /// Turns the pilot started with a certain win in hand (no hidden card needed) and did not win in.
+    missed_wins: [u32; 2],
     food: [i32; 2],
     stats: [BotStats; 2],
     habits: [Habits; 2],
@@ -235,7 +241,8 @@ impl GameRec {
             "deal": self.deal, "deck_a": decks[self.a].name, "deck_b": decks[self.b].name, "seed": self.seed,
             "pilot_a": pilot(self.pilot_a), "pilot_b": pilot(1 - self.pilot_a), "first": pname(self.first),
             "winner": self.winner.map(pname), "winner_pilot": self.winner_pilot().map(pilot), "reason": self.reason,
-            "turns": self.turns, "capped": self.capped, "food": {"A": self.food[0], "B": self.food[1]},
+            "turns": self.turns, "capped": self.capped, "fatigue_end": self.fatigue_end, "fatigue": {"A": self.fatigue[0], "B": self.fatigue[1]},
+            "food": {"A": self.food[0], "B": self.food[1]},
             "x": stats(&self.stats[0]), "y": stats(&self.stats[1]),
         });
         for (k, h) in [("x", &self.habits[0]), ("y", &self.habits[1])] {
@@ -246,6 +253,8 @@ impl GameRec {
             v[k]["raids"] = json!(h.raids);
             v[k]["powers"] = json!(h.powers);
         }
+        v["x"]["missed_wins"] = json!(self.missed_wins[0]);
+        v["y"]["missed_wins"] = json!(self.missed_wins[1]);
         if log_actions {
             v["actions"] = Value::Array(self.actions.clone());
         }
@@ -259,7 +268,7 @@ fn bot_seed(deal_seed: u64, pilot: usize) -> u64 {
 
 /// Play one game: deck `a` in seat A against deck `b` in seat B from `seed`, the bot `specs[pilot_a]` in seat A.
 fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed: u64, specs: [&str; 2], pilot_a: usize,
-        log_actions: bool, mut watch: Option<&mut dyn FnMut(&State, Option<&Action>)>) -> Result<GameRec, String> {
+        log_actions: bool, count_wins: bool, mut watch: Option<&mut dyn FnMut(&State, Option<&Action>)>) -> Result<GameRec, String> {
     let mut st = State::new_game(g.clone(), &decks[a].cards, &decks[b].cards, seed as u128, None, [Some(decks[a].leader), Some(decks[b].leader)])?;
     // the bot of each pilot, seeded from the deal: the same bot in both of the deal's games
     let mut bots: [Box<dyn Bot>; 2] = [make_bot(specs[0], bot_seed(seed, 0))?, make_bot(specs[1], bot_seed(seed, 1))?];
@@ -267,6 +276,11 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
     let mut actions = Vec::new();
     let mut habits = [Habits::default(); 2];
     let mut applied = 0u32;
+    let mut fatigue_end = false;
+    let mut missed_wins = [0u32; 2];
+    // (the turn, its pilot) of a turn that began with a certain win in hand
+    let mut could_win: Option<(i32, usize)> = None;
+    let mut checked_turn = -1;
     if let Some(w) = watch.as_mut() {
         w(&st, None);
     }
@@ -276,6 +290,20 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
         }
         let seat = st.player_to_act();
         let pilot = if seat == 0 { pilot_a } else { 1 - pilot_a };
+        if count_wins && st.pending.is_none() && st.effect_stack.is_empty() && st.current == seat && st.turn_counter != checked_turn {
+            // the referee's own look, on the real position: a win that needs no hidden card is one the pilot could know
+            checked_turn = st.turn_counter;
+            if let Some((_, p)) = could_win.take() {
+                missed_wins[p] += 1; // the turn before began with a win and the game went on
+            }
+            if let Some(line) = win_search(&st, seat, 300_000).line {
+                could_win = Some((st.turn_counter, pilot));
+                if watch.is_some() {
+                    println!("  [a certain win this turn: {}]", line.iter().map(|a| a.to_json(g).to_string()).collect::<Vec<_>>().join(" "));
+                }
+            }
+        }
+        let fatigue_before = st.fatigue;
         let action = bots[pilot].choose(&st);
         let h = &mut habits[pilot];
         match action {
@@ -300,14 +328,27 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
         if let Some(w) = watch.as_mut() {
             w(&st, Some(&action));
         }
+        if let Some(r) = st.result {
+            if let (Some(w), true) = (r.winner, r.reason.name() == "starved") {
+                let loser = other(w) as usize;
+                fatigue_end = st.fatigue[loser] > fatigue_before[loser] && !matches!(action, Action::Place { target: Target::Den(_), .. });
+            }
+        }
         applied += 1;
         if applied > 100_000 {
             return Err(format!("deal {deal}: the game never ended"));
         }
     };
+    if let Some((turn, p)) = could_win {
+        // the last turn that began with a win: missed unless its pilot won in it
+        let won_in_it = st.turn_counter == turn && result.winner.map(|w| if w == 0 { pilot_a } else { 1 - pilot_a }) == Some(p);
+        if !won_in_it {
+            missed_wins[p] += 1;
+        }
+    }
     Ok(GameRec {
         deal, a, b, seed, pilot_a, first, winner: result.winner, reason: result.reason.name().to_string(), turns: st.turn_counter,
-        capped: !st.caps.is_empty(), food: st.food, stats: [bots[0].stats(), bots[1].stats()], habits, actions,
+        capped: !st.caps.is_empty(), fatigue_end, fatigue: st.fatigue, missed_wins, food: st.food, stats: [bots[0].stats(), bots[1].stats()], habits, actions,
     })
 }
 
@@ -347,6 +388,7 @@ fn run(args: &Args) -> Result<(), String> {
     let seeds = args.num("seeds", 20)? as usize;
     let run_seed = args.num("seed", 1)?;
     let log_actions = args.get("log-actions").is_some();
+    let count_wins = args.get("count-wins").is_some();
     let n_threads = threads(args)?;
     let name = args.get("name").unwrap_or("run").to_string();
     let dir = PathBuf::from(args.get("out").unwrap_or("results/bot_bench")).join(&name);
@@ -387,7 +429,7 @@ fn run(args: &Args) -> Result<(), String> {
                 }
                 let (deal, pilot_a) = (job / 2, job % 2);
                 let (a, b, seed) = deals[deal];
-                match play(&g, &decks, deal, a, b, seed, [x.as_str(), y.as_str()], pilot_a, log_actions, None) {
+                match play(&g, &decks, deal, a, b, seed, [x.as_str(), y.as_str()], pilot_a, log_actions, count_wins, None) {
                     Ok(rec) => {
                         let line = rec.to_json(&decks, log_actions).to_string();
                         let _ = writeln!(games_file.lock().unwrap(), "{line}");
@@ -475,7 +517,13 @@ fn run(args: &Args) -> Result<(), String> {
     let ends = reasons.iter().map(|(k, n)| format!("{k} {n}")).collect::<Vec<_>>().join(", ");
     let capped = recs.iter().filter(|r| r.capped).count();
     let avg_turns = recs.iter().map(|r| r.turns as f64).sum::<f64>() / recs.len().max(1) as f64;
-    say(format!("games ended: {ends}; {capped} games had a turn ended by a cap; {avg_turns:.1} turns a game on average (both players')"));
+    let by_fatigue = recs.iter().filter(|r| r.fatigue_end).count();
+    let tired = recs.iter().filter(|r| r.fatigue[0] + r.fatigue[1] > 0).count();
+    say(format!("games ended: {ends}; {by_fatigue} of them by fatigue (an empty deck took the loser's last food), {tired} games saw an empty draw; {capped} games had a turn ended by a cap; {avg_turns:.1} turns a game on average (both players')"));
+    if count_wins {
+        let missed = |p: usize| recs.iter().map(|r| r.missed_wins[p] as usize).sum::<usize>();
+        say(format!("turns begun with a certain win in hand and not won in: X {}, Y {}", missed(0), missed(1)));
+    }
     let mut bot_rows = Vec::new();
     for (p, spec) in [(0usize, &x), (1usize, &y)] {
         let mut t = BotStats::default();
@@ -515,7 +563,7 @@ fn run(args: &Args) -> Result<(), String> {
     }
     let summary = json!({"x_share": share, "interval": [lo, hi], "games": recs.len(), "deals": deals.len(), "decks": deck_rows,
         "x_first": x_first, "x_second": x_second, "first_player_wins": first_wins, "ended": reasons.iter().map(|(k, n)| json!([k, n])).collect::<Vec<_>>(),
-        "capped_games": capped, "avg_turns": avg_turns, "x": bot_rows[0], "y": bot_rows[1], "wall_seconds": wall});
+        "capped_games": capped, "fatigue_games": by_fatigue, "avg_turns": avg_turns, "x": bot_rows[0], "y": bot_rows[1], "wall_seconds": wall});
     std::fs::write(dir.join("summary.json"), serde_json::to_string_pretty(&summary).unwrap()).map_err(|e| e.to_string())?;
     std::fs::write(dir.join("summary.txt"), out).map_err(|e| e.to_string())?;
     // the games in deal order, so two runs of the same arguments give the same file
@@ -559,6 +607,8 @@ fn show(args: &Args) -> Result<(), String> {
     let seed = args.num("seed", 1)?;
     let pilot_a = if args.get("swap").is_some() { 1 } else { 0 };
     let specs = [x, y];
+    let dump_turn = args.get("dump").and_then(|t| t.parse::<i32>().ok());
+    let dump_file = args.get("dump-file").map(|s| s.to_string());
     println!("seat A: {} piloted by {}    seat B: {} piloted by {}    seed {seed}", decks[a].name, specs[pilot_a], decks[b].name, specs[1 - pilot_a]);
     let mut turn = -1;
     let mut watch = |st: &State, action: Option<&Action>| {
@@ -579,11 +629,21 @@ fn show(args: &Args) -> Result<(), String> {
         if st.result.is_none() && st.pending.is_none() && st.turn_counter != turn {
             turn = st.turn_counter;
             let p = st.current;
+            if dump_turn == Some(turn + 1) {
+                let path = dump_file.clone().unwrap_or_else(|| format!("turn{}.json", turn + 1));
+                match std::fs::write(&path, serde_json::to_string(&st.to_json()).unwrap()) {
+                    Ok(()) => println!("  [the position at the start of turn {} written to {path}]", turn + 1),
+                    Err(e) => println!("  [could not write {path}: {e}]"),
+                }
+            }
             println!("turn {} — {} ({} mana)  hand: {}", turn + 1, pname(p), rules::mana_left(st, p), hand_line(st, p));
         }
     };
-    let rec = play(&g, &decks, 0, a, b, seed, specs, pilot_a, false, Some(&mut watch))?;
+    let rec = play(&g, &decks, 0, a, b, seed, specs, pilot_a, false, true, Some(&mut watch))?;
     println!("winner: {} ({}), after {} turns, food A {} B {}", rec.winner.map_or("nobody", pname), rec.reason, rec.turns, rec.food[0], rec.food[1]);
+    if rec.missed_wins != [0, 0] {
+        println!("turns begun with a certain win in hand and not won in: {} {}, {} {}", specs[0], rec.missed_wins[0], specs[1], rec.missed_wins[1]);
+    }
     Ok(())
 }
 
@@ -620,7 +680,7 @@ fn turns(args: &Args) -> Result<(), String> {
                         local.push((rules::own_turn_number(st, st.current), merged, finished, cut, unmerged, cut2));
                     }
                 };
-                if let Err(e) = play(&g, &decks, job, a, b, seed, [spec.as_str(), spec.as_str()], 0, false, Some(&mut watch)) {
+                if let Err(e) = play(&g, &decks, job, a, b, seed, [spec.as_str(), spec.as_str()], 0, false, false, Some(&mut watch)) {
                     *failed.lock().unwrap() = Some(e);
                 }
                 rows.lock().unwrap().extend(local);
@@ -655,11 +715,107 @@ fn turns(args: &Args) -> Result<(), String> {
     Ok(())
 }
 
+/// What looking for a win costs: at every turn start of games the bot plays against itself, the win search's positions
+/// when a certain win exists and when none does, by how far the player is from the winning food.
+fn winstats(args: &Args) -> Result<(), String> {
+    let (g, _) = load_game(args)?;
+    let (decks, source) = load_decks(&g, args)?;
+    let spec = args.get("bot").unwrap_or("turn:budget=20000").to_string();
+    let games = args.num("games", 100)? as usize;
+    let cap = args.num("cap", 300_000)?;
+    let run_seed = args.num("seed", 1)?;
+    let n_threads = threads(args)?;
+    // (how far from the win: winning food - food - income, or the enemy's food if less; found; complete; positions)
+    let rows: Mutex<Vec<(i32, bool, bool, u64)>> = Mutex::new(Vec::new());
+    let next = AtomicUsize::new(0);
+    std::thread::scope(|scope| {
+        for _ in 0..n_threads {
+            scope.spawn(|| loop {
+                let job = next.fetch_add(1, Ordering::Relaxed);
+                if job >= games {
+                    return;
+                }
+                let (a, b) = (job % decks.len(), (job / decks.len() + job) % decks.len());
+                let seed = mix(run_seed ^ mix(0x7045 + job as u64)) >> 1;
+                let mut seen_turn = -1;
+                let mut local = Vec::new();
+                let mut watch = |st: &State, _: Option<&Action>| {
+                    if st.result.is_none() && st.pending.is_none() && st.effect_stack.is_empty() && st.turn_counter != seen_turn {
+                        seen_turn = st.turn_counter;
+                        let me = st.current;
+                        let far = (st.g.map.win_food - st.food[me as usize] - rules::region_income(st, me)).min(st.food[other(me) as usize]);
+                        let w = win_search(st, me, cap);
+                        local.push((far, w.line.is_some(), w.complete, w.positions));
+                    }
+                };
+                let _ = play(&g, &decks, job, a, b, seed, [spec.as_str(), spec.as_str()], 0, false, false, Some(&mut watch));
+                rows.lock().unwrap().extend(local);
+            });
+        }
+    });
+    let rows = rows.into_inner().unwrap();
+    println!("win search: {} turn starts from {games} games of {spec} against itself, {source}; stops at {cap} positions", rows.len());
+    println!("{:<12} {:>6} {:>6} | {:>34} | {:>40}", "food short", "turns", "wins", "positions to find one (med/p90/max)", "positions to find none (med/p90/max), cut");
+    let q = |v: &mut Vec<u64>, f: f64| -> u64 {
+        v.sort_unstable();
+        if v.is_empty() { 0 } else { v[((v.len() - 1) as f64 * f).round() as usize] }
+    };
+    for (lo, hi) in [(i32::MIN, 0), (1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (13, 15), (16, 99)] {
+        let b: Vec<_> = rows.iter().filter(|r| r.0 >= lo && r.0 <= hi).collect();
+        if b.is_empty() {
+            continue;
+        }
+        let mut found: Vec<u64> = b.iter().filter(|r| r.1).map(|r| r.3).collect();
+        let mut none: Vec<u64> = b.iter().filter(|r| !r.1).map(|r| r.3).collect();
+        let cut = b.iter().filter(|r| !r.1 && !r.2).count();
+        let label = if lo == i32::MIN { "0 or less".to_string() } else { format!("{lo}-{hi}") };
+        println!("{:<12} {:>6} {:>6} | {:>34} | {:>40}", label, b.len(), found.len(),
+            format!("{} / {} / {}", q(&mut found, 0.5), q(&mut found, 0.9), q(&mut found, 1.0)),
+            format!("{} / {} / {}, {cut} cut", q(&mut none, 0.5), q(&mut none, 0.9), q(&mut none, 1.0)));
+    }
+    Ok(())
+}
+
+/// One saved position (`show --dump TURN`): whether the player to move has a certain win this turn, and the turn a bot
+/// plays from it.
+fn position(args: &Args) -> Result<(), String> {
+    let (g, _) = load_game(args)?;
+    let path = args.get("file").ok_or("--file POSITION.json")?;
+    let raw: Value = serde_json::from_slice(&std::fs::read(path).map_err(|e| format!("{path}: {e}"))?).map_err(|e| format!("{path}: {e}"))?;
+    let mut st = State::from_json(g.clone(), &raw)?;
+    let me = st.player_to_act();
+    println!("{} to move, turn {}: food A {} B {}, income A {} B {}, {} mana", pname(me), st.turn_counter + 1, st.food[0], st.food[1],
+        rules::region_income(&st, 0), rules::region_income(&st, 1), rules::mana_left(&st, me));
+    println!("  hand: {}", hand_line(&st, me));
+    println!("  board: {}", board_line(&st));
+    let w = win_search(&st, me, args.num("cap", 300_000)?);
+    match &w.line {
+        Some(line) => println!("a certain win, found after {} positions: {}", w.positions, line.iter().map(|a| a.to_json(&g).to_string()).collect::<Vec<_>>().join(" ")),
+        None => println!("no certain win ({} positions{})", w.positions, if w.complete { ", every line followed" } else { ", stopped at the cap" }),
+    }
+    let spec = args.get("bot").unwrap_or("turn:budget=20000");
+    let mut bot = make_bot(spec, args.num("seed", 1)?)?;
+    let turn = st.turn_counter;
+    println!("{spec} plays:");
+    while st.result.is_none() && st.turn_counter == turn && st.player_to_act() == me {
+        let a = bot.choose(&st);
+        println!("    {}", a.to_json(&g));
+        rules::apply_action(&mut st, &a, true)?;
+    }
+    println!("  board: {}", board_line(&st));
+    println!("  food A {} B {}, income A {} B {}{}", st.food[0], st.food[1], rules::region_income(&st, 0), rules::region_income(&st, 1),
+        st.result.map_or(String::new(), |r| format!("; the game is over: {} wins ({})", r.winner.map_or("nobody", pname), r.reason.name())));
+    println!("  {} positions", bot.stats().positions);
+    Ok(())
+}
+
 fn main() {
     let result = Args::parse().and_then(|args| match args.cmd.as_str() {
         "run" => run(&args),
         "show" => show(&args),
         "turns" => turns(&args),
+        "winstats" => winstats(&args),
+        "position" => position(&args),
         other => Err(format!("unknown command {other:?} (run, show, turns)")),
     });
     if let Err(e) = result {

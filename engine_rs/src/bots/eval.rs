@@ -193,7 +193,7 @@ impl RaidOdds {
 }
 
 /// The food `player`'s own hand could destroy in the enemy den with `mana`, from where the position stands.
-fn hand_raid(st: &State, player: Player, mana: i32) -> i32 {
+pub fn hand_raid(st: &State, player: Player, mana: i32) -> i32 {
     let enemy = other(player);
     let reach = st.g.map.hq_front[enemy as usize] & st.connected_occupied(player) != 0;
     let mut items: SmallVec<[(i32, i32); 16]> = SmallVec::new();

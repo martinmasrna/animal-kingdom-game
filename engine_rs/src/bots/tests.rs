@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use crate::actions::Action;
 use crate::bots::key::position_key;
-use crate::bots::turn::{turn_size, turn_size_unmerged};
+use crate::bots::turn::{turn_size, turn_size_unmerged, win_search};
 use crate::bots::{make_bot, seat};
 use crate::data::*;
 use crate::rng::{CowRng, PyRandom};
@@ -201,4 +201,80 @@ fn fatigue_is_public_and_part_of_the_position() {
         assert_eq!(w.fatigue, tired.fatigue);
         assert_eq!(position_key(&w, me, false), position_key(&tired, me, false));
     }
+}
+
+/// A position saved from a game (`bot_bench show --dump TURN`). None when today's cards no longer hold one of its cards.
+fn saved(g: &Arc<Game>, text: &str) -> Option<State> {
+    State::from_json(g.clone(), &serde_json::from_str(text).unwrap()).ok()
+}
+
+/// The bot's turn from `st`: the position it leaves.
+fn play_turn(st: &State, spec: &str, seed: u64) -> State {
+    let mut st = st.clone();
+    let (me, turn) = (st.player_to_act(), st.turn_counter);
+    let mut bot = make_bot(spec, seed).unwrap();
+    while st.result.is_none() && st.turn_counter == turn && st.player_to_act() == me {
+        let action = bot.choose(&st);
+        rules::apply_action(&mut st, &action, true).unwrap();
+    }
+    st
+}
+
+#[test]
+fn a_win_in_hand_is_taken() {
+    // Two turns the whole-turn search lost its way in, each with a win that needs no hidden card:
+    // - Food Token against itself, seed 7479377187389669384, turn 8 (B on 18 food, 4 mana, A one food from winning): two
+    //   Spores fill regions, then the Elf's power and the regions' food make 30. The search kept the lines that spent
+    //   the 2 mana of the power on a card, because it ranks an unfinished turn by ending it there, and played one.
+    // - Control against Aggro, seed 5424489383026342908, turn 14 (A on 26): the Giant Hunter removes the flier standing
+    //   in four of A's regions and a Mama Spore takes its tile.
+    let g = game();
+    for (name, text) in [("elf_power_win", include_str!("positions/elf_power_win.json")), ("clear_and_fill_win", include_str!("positions/clear_and_fill_win.json"))] {
+        let Some(st) = saved(&g, text) else {
+            eprintln!("{name}: today's cards no longer hold this position; skipped");
+            continue;
+        };
+        let me = st.player_to_act();
+        let found = win_search(&st, me, 20_000);
+        assert!(found.line.is_some(), "{name}: the position holds a win");
+        let mut rng = PyRandom::seeded_u64(5);
+        for seed in 0..4 {
+            // whatever the hidden cards are
+            let real = if seed == 0 { st.clone() } else { twin(&st, me, &mut rng) };
+            let after = play_turn(&real, "turn:budget=20000", seed);
+            assert_eq!(after.result.and_then(|r| r.winner), Some(me), "{name}, seed {seed}: the bot did not take the win");
+        }
+    }
+}
+
+#[test]
+fn a_look_for_a_win_reads_nothing_hidden() {
+    // The look finds the same line in the real position and in any world dealt from the seat's knowledge, and never a
+    // line through a drawn card.
+    let g = game();
+    let mut rng = PyRandom::seeded_u64(77);
+    let mut found = 0;
+    for seed in 0..12 {
+        for (st, _) in positions(&g, 900 + seed, ["turn:budget=1500", "greedy"]) {
+            if st.pending.is_some() || !st.effect_stack.is_empty() || st.current != st.player_to_act() {
+                continue;
+            }
+            let me = st.player_to_act();
+            let a = win_search(&st, me, 3_000);
+            let b = win_search(&twin(&st, me, &mut rng), me, 3_000);
+            assert_eq!(a.line, b.line, "seed {seed}: the look read a hidden card");
+            assert_eq!(a.positions, b.positions);
+            if let Some(line) = a.line {
+                found += 1;
+                let mut c = st.clone();
+                let deck = c.decks[me as usize].len();
+                for action in &line {
+                    assert_eq!(c.decks[me as usize].len(), deck, "the line drew a card");
+                    rules::apply_action(&mut c, action, true).unwrap();
+                }
+                assert_eq!(c.result.and_then(|r| r.winner), Some(me));
+            }
+        }
+    }
+    assert!(found > 0);
 }

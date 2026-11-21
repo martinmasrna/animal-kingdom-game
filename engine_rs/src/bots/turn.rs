@@ -17,8 +17,8 @@
 
 use std::collections::{HashMap, VecDeque};
 
-use crate::actions::{Action, Target};
-use crate::bots::eval::{evaluate, greedy_evaluate, RaidOdds, Weights};
+use crate::actions::Action;
+use crate::bots::eval::{evaluate, greedy_evaluate, hand_raid, RaidOdds, Weights};
 use crate::bots::key::position_key;
 use crate::bots::seat::{self, Unseen};
 use crate::bots::{Bot, BotStats, Timer};
@@ -37,6 +37,8 @@ pub struct TurnSpec {
     pub width: usize,
     /// Sampled enemy hands behind the raid odds.
     pub samples: usize,
+    /// Positions a look for a win may make (`win_search`); 0 never looks. Unset, a sixteenth of the budget.
+    pub win: Option<u64>,
     /// Score finished turns with the shipped greedy bot's evaluation instead (`eval=greedy`): what the search alone is
     /// worth, with the evaluation held fixed.
     pub greedy_eval: bool,
@@ -45,7 +47,7 @@ pub struct TurnSpec {
 
 impl Default for TurnSpec {
     fn default() -> TurnSpec {
-        TurnSpec { budget: 20_000, worlds: 4, width: 16_384, samples: 12, greedy_eval: false, weights: Weights::default() }
+        TurnSpec { budget: 20_000, worlds: 4, width: 16_384, samples: 12, win: None, greedy_eval: false, weights: Weights::default() }
     }
 }
 
@@ -59,6 +61,7 @@ impl TurnSpec {
                 "worlds" => spec.worlds = int()?.max(1) as usize,
                 "width" => spec.width = int()?.max(1) as usize,
                 "samples" => spec.samples = int()?.max(1) as usize,
+                "win" => spec.win = Some(int()?),
                 "eval" => spec.greedy_eval = match v {
                     "greedy" => true,
                     "food" => false,
@@ -334,38 +337,119 @@ fn keep_best(states: &mut [Option<State>], ranks: &[f32], width: usize) -> usize
     width
 }
 
-/// A turn of raids alone that empties the enemy den, if the hand holds one now and no draw is needed for it.
-fn raid_win(st: &State, me: Player, left: &mut i64, positions: &mut u64, line: &mut Vec<Action>) -> bool {
-    if st.pending.is_some() || st.current != me {
-        return false;
+/// What a search for a win found.
+pub struct WinSearch {
+    /// A line of this turn, from the root, that wins the game with nothing hidden on the way.
+    pub line: Option<Vec<Action>>,
+    /// It followed every line that meets nothing hidden, so no such win exists when `line` is none.
+    pub complete: bool,
+    pub positions: u64,
+}
+
+/// Is there a turn from `root` that wins the game for `me` now, whatever the hidden cards are?
+///
+/// The rules decide what wins: a line is a win when playing it through them ends the game for `me`, by an action of
+/// the turn (food gained to the winning food, the enemy den emptied) or by ending the turn (the regions' food). The
+/// search follows the closest position first (how near `me` is to the winning food if the turn ended there, or the
+/// enemy to none), merges positions reached by different orders, keeps every position (no width), and stops at `limit`
+/// positions. A line that draws a card or looks at the deck is left out: what follows it rests on an imagined deck.
+pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
+    use std::cmp::Reverse;
+    use std::collections::{BinaryHeap, HashSet};
+    struct Node {
+        st: State,
+        parent: u32,
+        action: Action,
     }
-    for a in rules::legal_actions(st) {
-        if !matches!(a, Action::Place { target: Target::Den(_), .. }) {
-            continue;
-        }
-        if *left <= 0 {
-            return false;
-        }
-        let mut c = st.clone();
-        if rules::apply_action(&mut c, &a, false).is_err() {
-            continue;
-        }
-        *left -= 1;
-        *positions += 1;
-        if matches!(c.result, Some(r) if r.winner == Some(me)) {
-            line.push(a);
-            return true;
-        }
-        if c.result.is_some() || c.player_to_act() != me || c.decks[me as usize].len() != st.decks[me as usize].len() {
-            continue;
-        }
-        line.push(a);
-        if raid_win(&c, me, left, positions, line) {
-            return true;
-        }
-        line.pop();
+    let mut out = WinSearch { line: None, complete: false, positions: 0 };
+    if root.result.is_some() || root.player_to_act() != me {
+        out.complete = true;
+        return out;
     }
-    false
+    let root_current = root.current;
+    let win = root.g.map.win_food;
+    // How near a position is: the food short of the win if the turn ended there, less the most food one more tile
+    // would add (the regions a single empty tile completes), or the enemy's food less what the hand could raid for
+    // now, if that is less; and among equals the
+    // tiles held in regions no enemy stands in, a region two tiles in counting more than two regions one tile in. So a
+    // line that clears or fills what a region still lacks is followed before one that does neither.
+    let near = |st: &State| -> i32 {
+        let own = st.food[me as usize] + rules::region_income(st, me) - win;
+        let (mine, theirs, occ) = (st.board.own[me as usize], st.board.own[other(me) as usize], st.board.occ);
+        let mut progress = 0i32;
+        let mut one_more = [0i32; 64];
+        for r in &st.g.map.regions {
+            if r.mask & theirs == 0 {
+                let held = (r.mask & mine).count_ones() as i32;
+                progress += held * held;
+            }
+            let missing = r.mask & !mine;
+            if missing.count_ones() == 1 && missing & occ == 0 {
+                one_more[missing.trailing_zeros() as usize] += r.food;
+            }
+        }
+        let best = one_more.iter().copied().max().unwrap_or(0);
+        // the enemy's food, less what the hand's raids would destroy with the mana left, from where the board stands
+        let raid = (hand_raid(st, me, rules::mana_left(st, me)) - st.food[other(me) as usize]).min(0);
+        (own + best).min(0).max(raid) * 1000 + progress
+    };
+    let line_of = |nodes: &[Node], mut at: u32, last: Action| -> Vec<Action> {
+        let mut line = vec![last];
+        while at != 0 {
+            line.push(nodes[at as usize].action);
+            at = nodes[at as usize].parent;
+        }
+        line.reverse();
+        line
+    };
+    let mut nodes: Vec<Node> = vec![Node { st: root.clone(), parent: 0, action: Action::Pass }];
+    let mut seen: HashSet<u64> = HashSet::new();
+    seen.insert(position_key(root, me, true));
+    // the closest first; among equals the earliest made
+    let mut open: BinaryHeap<(i32, Reverse<u32>)> = BinaryHeap::new();
+    open.push((near(root), Reverse(0)));
+    while let Some((_, Reverse(at))) = open.pop() {
+        let st = nodes[at as usize].st.clone();
+        let deck = st.decks[me as usize].len();
+        // ending the turn first: where the regions' food wins it, that is the whole search
+        let mut actions: Vec<Action> = Vec::new();
+        if may_pass(&st, me) {
+            actions.push(Action::Pass);
+        }
+        actions.extend(rules::legal_actions(&st).into_iter().filter(|a| *a != Action::Pass));
+        for a in actions {
+            if out.positions >= limit {
+                return out;
+            }
+            let mut c = st.clone();
+            if rules::apply_action(&mut c, &a, false).is_err() {
+                continue;
+            }
+            out.positions += 1;
+            if let Some(r) = c.result {
+                if r.winner == Some(me) {
+                    out.line = Some(line_of(&nodes, at, a));
+                    return out;
+                }
+                continue;
+            }
+            if c.player_to_act() != me || c.current != root_current {
+                continue; // the turn ended without the win
+            }
+            if c.decks[me as usize].len() != deck || matches!(&c.pending, Some(p) if matches!(p.options, Options::Deck(_))) {
+                continue; // a card drawn or looked at: hidden
+            }
+            if seen.insert(position_key(&c, me, true)) {
+                let at_new = nodes.len() as u32;
+                // a choice waiting is half a play: followed at once, so the play is ranked by where its choices land
+                let rank = if c.pending.is_some() { i32::MAX } else { near(&c) };
+                open.push((rank, Reverse(at_new)));
+                nodes.push(Node { st: c, parent: at, action: a });
+            }
+        }
+    }
+    out.complete = true;
+    out
 }
 
 pub struct TurnBot {
@@ -376,13 +460,16 @@ pub struct TurnBot {
     /// Positions made this turn, and searches run.
     used: u64,
     searches: u32,
+    /// The newest card my hand held when I last chose, and whether to look for a win at the next search.
+    newest: i32,
+    look: bool,
     /// The rest of the line a search handed over: each action with the key of the position it expects to stand on.
     plan: VecDeque<(u64, Action)>,
 }
 
 impl TurnBot {
     pub fn new(spec: TurnSpec, seed: u64) -> TurnBot {
-        TurnBot { spec, rng: PyRandom::seeded_u64(seed), stats: BotStats::default(), turn_seen: -1, used: 0, searches: 0, plan: VecDeque::new() }
+        TurnBot { spec, rng: PyRandom::seeded_u64(seed), stats: BotStats::default(), turn_seen: -1, used: 0, searches: 0, newest: -1, look: true, plan: VecDeque::new() }
     }
 
     /// `line` from the world `root`, each action with the key of what the seat sees before it.
@@ -408,12 +495,19 @@ impl TurnBot {
         self.stats.searches += 1;
         let mut positions = 0u64;
 
-        // a win on the spot comes before any search
-        let mut line = Vec::new();
-        if raid_win(&world, me, &mut 2000, &mut positions, &mut line) {
-            self.plan = Self::keyed(&world, me, &line);
-            self.count(positions);
-            return self.plan.pop_front().map_or(Action::Pass, |(_, a)| a);
+        // a win this turn comes before any search: looked for at the turn's start, again when a card has come into
+        // the hand, and again while the last look ran out of positions before it had followed everything
+        let win_limit = self.spec.win.unwrap_or(self.spec.budget / 16);
+        if win_limit > 0 && self.look {
+            let left = self.spec.budget.saturating_sub(self.used);
+            let won = win_search(&world, me, win_limit.min(left / 2).max(1));
+            positions += won.positions;
+            if let Some(line) = won.line {
+                self.plan = Self::keyed(&world, me, &line);
+                self.count(positions);
+                return self.plan.pop_front().map_or(Action::Pass, |(_, a)| a);
+            }
+            self.look = !won.complete;
         }
 
         let allowance = (self.spec.budget.saturating_sub(self.used + positions) / 2).max(1);
@@ -495,7 +589,13 @@ impl Bot for TurnBot {
                 self.searches = 0;
                 self.plan.clear();
                 self.stats.turns += 1;
+                self.look = true;
             }
+            let newest = real.hands[me as usize].iter().map(|u| u.iid).max().unwrap_or(-1);
+            if newest > self.newest {
+                self.look = true; // a card came into my hand
+            }
+            self.newest = newest;
             let planned = match self.plan.front() {
                 Some(&(key, a)) if key == position_key(real, me, false) && legal_now(real, me, &a) => Some(a),
                 _ => None,
@@ -520,7 +620,7 @@ impl Bot for TurnBot {
     }
 
     fn spec(&self) -> String {
-        format!("turn:budget={},worlds={},width={},samples={},eval={}", self.spec.budget, self.spec.worlds, self.spec.width, self.spec.samples,
+        format!("turn:budget={},worlds={},width={},samples={},win={},eval={}", self.spec.budget, self.spec.worlds, self.spec.width, self.spec.samples, self.spec.win.unwrap_or(self.spec.budget / 16),
                 if self.spec.greedy_eval { "greedy" } else { "food" })
     }
 }
