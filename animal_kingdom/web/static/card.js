@@ -46,4 +46,5 @@ export const KEYWORDS = {
   'Spikes': 'The first time an enemy covers it, that enemy is removed.',
   'Poison': 'Whenever an enemy covers it, that enemy is removed at the start of your next turn.',
   'Hungry': 'Must be placed on top of an enemy it beats. When that enemy is removed, gain 1 food.',
+  'Scout': 'Look at the top 3 cards of your deck. Put one into your hand and shuffle the rest back.',
 };

@@ -526,6 +526,9 @@ class Match:
                 for u in st.hands[p]:
                     if u.iid == o:
                         return {"v": o, "kind": "hand", "id": u.card_id}
+        if isinstance(o, str) and o.startswith("deck:"):     # Scout: a card on top of the chooser's own deck
+            deck = st.decks[st.pending["chooser"]]
+            return {"v": o, "kind": "card", "id": deck[len(deck) - 1 - int(o.split(":")[1])]}
         return {"v": o, "kind": "other", "label": str(o)}
 
 

@@ -1013,5 +1013,16 @@
       "by": "claude",
       "at": 1795271355
     }
+  },
+  "scout_3": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795273902
+    }
   }
 }

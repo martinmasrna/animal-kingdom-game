@@ -391,6 +391,26 @@ def _op_draw_if_gone(state, step):
     return None
 
 
+def _op_scout(state, step):
+    """Scout: look at the top cards of your deck (Config.scout_look), put the one you choose into your hand and shuffle
+    the rest back. The options are "deck:K", the Kth card from the top; only the chooser sees them."""
+    deck, player = state.decks[step["player"]], step["player"]
+    n = min(state.config.scout_look, len(deck))
+    if not n:
+        return None
+    if "choice" not in step:
+        return PendingRequest("choice", player, optional=False, options=[f"deck:{k}" for k in range(n)])
+    k = int(str(step["choice"]).split(":")[1])
+    inst = UnitInstance(deck.pop(len(deck) - 1 - k), player, state.new_iid())
+    state.hands[player].append(inst)
+    state.emit("draw", player=player, cards=[[inst.iid, inst.card_id]])
+    if len(state.hands[player]) > state.config.hand_limit:          # past the hand limit it burns, as a draw does
+        state.hands[player].remove(inst); state.pile_add(inst.card_id, inst.owner)
+        state.emit("remove", zone="hand", iid=inst.iid, card=inst.card_id, owner=inst.owner)
+    state.rng.shuffle(deck)
+    return None
+
+
 def _op_gain_food(state, step):
     gain_food(state, step["player"], step["amount"])
     return None
@@ -446,6 +466,7 @@ OPS: dict[str, Callable] = {
     "gain_food": _op_gain_food,
     "draw": _op_draw,
     "draw_if_gone": _op_draw_if_gone,
+    "scout": _op_scout,
     "remove_iid": _op_remove_iid,
     "remove_choice": _op_remove_choice,
     "weaken_choice": _op_weaken_choice,
@@ -493,6 +514,11 @@ def _draw_a_card(state, unit, cr):
     state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1})
 
 
+def _scout(state, unit, cr):
+    """"Roar: Scout a card."."""
+    state.effect_stack.append({"op": "scout", "player": unit.owner})
+
+
 def _raid_draw(state, unit):
     """"After it raids, draw a card.": once its raid has destroyed the food, its owner draws."""
     state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1, "by_card": unit.card_id, "by_iid": unit.iid})
@@ -517,6 +543,7 @@ DEATH_DRAWS = ("death_draw_1",)
 KILL_DRAWS = ("kill_draw_2",)
 DOUBLE_RAIDERS = ("double_raid_2", "double_raid_4")
 RAID_DRAWS = ("raid_draw_5",)
+SCOUTS = ("scout_3",)
 
 EFFECTS: dict[str, dict[str, Callable]] = {
     **{cid: {"on_place": _weaken(n)} for cid, n in WEAKENS.items()},
@@ -524,6 +551,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     **{cid: {"on_place": _draw_a_card} for cid in CANTRIPS},
     **{cid: {"on_death": _death_draw} for cid in DEATH_DRAWS},
     **{cid: {"on_raid": _raid_draw} for cid in RAID_DRAWS},
+    **{cid: {"on_place": _scout} for cid in SCOUTS},
     **{cid: {"on_cover": _draw_if_it_removes} for cid in KILL_DRAWS},
 }
 

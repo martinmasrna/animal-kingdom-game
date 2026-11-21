@@ -344,6 +344,15 @@ def test_double_raid_destroys_double_its_strength():
         assert s.food["B"] == 15 - CARDS[cid].base_strength * CFG.double_raid_factor
 
 
+def test_scout_takes_one_of_the_top_three_and_shuffles_the_rest_back():
+    s = state(turn=11, hands={"A": ["scout_3"]}, decks={"A": ["wisp_1", "wisp_2", "wisp_3", "wisp_4", "wisp_5"]})
+    rules.apply_action(s, PlaceAction("scout_3", ("cr", "1,1")))
+    assert s.pending["chooser"] == "A" and s.pending["options"] == ["deck:0", "deck:1", "deck:2"]   # the top is the end
+    rules.apply_action(s, ChoiceAction("deck:1"))                    # the second from the top: wisp_4
+    assert [u.card_id for u in s.hands["A"]] == ["wisp_4"]
+    assert sorted(s.decks["A"]) == ["wisp_1", "wisp_2", "wisp_3", "wisp_5"]
+
+
 def test_djinn_cost_less_for_each_of_their_count():
     s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_food", "djinn_removed"]}, food={"A": 20, "B": 9})
     s.food_gained = {"A": 4, "B": 9}                              # the Food Djinn counts what was gained, not what is held

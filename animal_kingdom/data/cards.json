@@ -515,6 +515,16 @@
       "keywords": [
         "Flight"
       ]
+    },
+    {
+      "id": "scout_3",
+      "name": "Scout 3",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Roar: Scout a card.",
+      "cost": 3,
+      "keywords": []
     }
   ]
 }
