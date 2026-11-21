@@ -18,6 +18,7 @@ What the game is for, why mana, and Martin's words on the rules' shape and the b
 - **Covering:** a card placed on an enemy it is stronger than covers it, and a covered card, yours or theirs, is removed.
 - **Zero strength:** an animal at 0 strength is removed, by the rules (Armor doesn't hold), each time the effects finish resolving (Martin, 2026-11-21: "make it a general rule").
 - **Food:** both start at 15; each region (three tiles) a player holds pays 1 food at the end of their turn; 30 food wins, 0 loses. A card placed or moved into the enemy den, connected through one of their base tiles, destroys food equal to its strength (at most what the den holds) and is spent.
+- **Fatigue:** a card a player would draw from their own empty deck is not drawn and costs them food instead, 1 the first time, then 2, then 3, and so on; at 0 food they lose at once, on their own turn too. Every draw counts: the turn's free card, a card's draw, the Sage's power (usable on an empty deck for that reason), and the rest of a draw the deck runs out under. Scout on an empty deck and cards an effect puts into a hand are not draws. The loss is neither income nor a raid, so no leader reacts to it. A working rule (Martin, 2026-11-22: "we just add fatigue exactly like in hearthstone, losing energy -1, -2, -3, ...", his answer to games that stalled with both decks empty; "energy" read as food).
 - **Turns:** a turn ends when its player ends it; no turn ends or is skipped by itself.
 - **Decks:** 25 cards, 2 copies of a card, 1 of a legendary, one leader.
 

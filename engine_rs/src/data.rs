@@ -432,6 +432,9 @@ config! {
     first_player_opening_draw: i32 = 3,   // Martin, 2026-11-20: "make it 3 for first and 4 for second"
     second_player_opening_draw: i32 = 4,
     mulligan: bool = true,                // a blacklist mulligan, both players at once
+    // Fatigue (Martin, 2026-11-22: "we just add fatigue exactly like in hearthstone, losing energy -1, -2, -3, ..."): a card
+    // a player would draw from their own empty deck costs them food instead, this much more each time.
+    fatigue_step: i32 = 1,
     turn_draw_count: i32 = 1,             // the free card at the start of each turn, the first player's first included (Martin, 2026-11-21)
     hungry_food: i32 = 1,                 // Hungry: the food its prey's removal gains (Martin, 2026-11-20)
     shade_growth: i32 = 2,                // a strength that is a count: +2 for each (Martin, 2026-11-21)

@@ -76,7 +76,7 @@ def _snapshot(state: GameState) -> dict:
 
 def _effects(events: list, move: Move) -> list:
     """What a move did, read from the engine's events in order (public facts only): an enemy covered, each removal, cards
-    drawn, food from cards (a turn's region income is not the move's), what a raid destroyed."""
+    drawn, food from cards (a turn's region income is not the move's), what a raid destroyed or an empty deck cost."""
     fx = []
     for e in events:
         if e["e"] == "cover" and e["owner"] != move.seat:
@@ -85,6 +85,8 @@ def _effects(events: list, move: Move) -> list:
             fx.append({"k": "remove", "card": e["card"], "owner": e["owner"]})
         elif e["e"] == "draw":
             fx.append({"k": "draw", "seat": e["player"], "n": len(e["cards"])})
+        elif e["e"] == "food" and e["n"] < 0:   # food lost to a draw from an empty deck (fatigue)
+            fx.append({"k": "lose", "seat": e["player"], "n": -e["n"]})
         elif e["e"] == "food" and not e.get("income"):
             fx.append({"k": "food", "seat": e["player"], "n": e["n"]})
         elif e["e"] == "raid" and e["n"]:

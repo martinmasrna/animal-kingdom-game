@@ -357,6 +357,9 @@ pub struct State {
     pub power_used: bool,
     /// Off each player's leader power, for good (the Sage's card).
     pub power_discount: [i32; 2],
+    /// Fatigue: the cards each player has tried to draw from their own empty deck. The next one costs them one more
+    /// food than this.
+    pub fatigue: [i32; 2],
     pub effect_steps_this_turn: i32,
     pub caps: Vec<Cap>,
     pub next_iid: i32,
@@ -498,6 +501,7 @@ impl State {
             played_this_turn: 0,
             power_used: false,
             power_discount: [0, 0],
+            fatigue: [0, 0],
             effect_steps_this_turn: 0,
             caps: Vec::new(),
             next_iid: 0,

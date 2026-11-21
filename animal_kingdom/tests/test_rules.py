@@ -612,3 +612,56 @@ def test_the_mana_blob_gains_2_mana_past_the_cap_too():
     s = state(turn=19, hands={"A": ["mana_blob"]})
     rules.apply_action(s, PlaceAction("mana_blob", ("cr", "1,1")))
     assert rules.mana_left(s, "A") == 10 - 2 + CFG.mana_blob_mana and CARDS["mana_blob"].cost == 2 == CARDS["mana_blob"].base_strength
+
+
+# ------------------------------------------------------------------ fatigue (Martin, 2026-11-22)
+
+def test_the_turns_card_from_an_empty_deck_costs_food_instead_one_more_each_time():
+    s = state(turn=10, decks={"A": [], "B": []}, food={"A": 15, "B": 15})
+    rules.apply_action(s, PassAction())                               # B's turn starts: no card to draw
+    assert s.food == {"A": 15, "B": 14} and s.fatigue == {"A": 0, "B": 1} and not s.hands["B"]
+    rules.apply_action(s, PassAction())                               # A's
+    assert s.food == {"A": 14, "B": 14} and s.fatigue == {"A": 1, "B": 1}
+    rules.apply_action(s, PassAction())                               # B's second empty draw costs 2
+    assert s.food == {"A": 14, "B": 12} and s.fatigue == {"A": 1, "B": 2}
+    assert GameState.from_dict(s.to_dict()).fatigue == s.fatigue      # the count is part of the position
+
+
+def test_a_cards_draw_from_an_empty_deck_costs_food_too():
+    s = state(turn=10, hands={"A": ["cantrip_2"]}, decks={"A": [], "B": ["wisp_1"]}, food={"A": 15, "B": 15})
+    rules.apply_action(s, PlaceAction("cantrip_2", ("cr", "1,2")))
+    assert s.food["A"] == 14 and s.fatigue["A"] == 1 and not s.hands["A"]
+    s = state(turn=10, leaders={"A": SAGE}, decks={"A": [], "B": ["wisp_1"]}, food={"A": 15, "B": 15})
+    rules.apply_action(s, LeaderAction())                             # the Sage's power draws
+    assert s.food["A"] == 14 and s.fatigue["A"] == 1
+
+
+def test_a_draw_of_two_with_one_card_left_draws_it_and_pays_for_the_other():
+    s = state(turn=10, decks={"A": [], "B": ["wisp_1"]}, food={"A": 15, "B": 15}, config=Config(turn_draw_count=2))
+    rules.apply_action(s, PassAction())                               # B's turn: two cards, one in the deck
+    assert [u.card_id for u in s.hands["B"]] == ["wisp_1"] and s.food["B"] == 14 and s.fatigue["B"] == 1
+    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())   # B again: both draws empty, 2 then 3
+    assert s.food["B"] == 14 - 2 - 3 and s.fatigue["B"] == 3
+
+
+def test_fatigue_at_no_food_loses_at_once_on_your_own_turn_too():
+    s = state(turn=10, hands={"A": ["cantrip_2"]}, decks={"A": [], "B": ["wisp_1"]}, food={"A": 1, "B": 15})
+    rules.apply_action(s, PlaceAction("cantrip_2", ("cr", "1,2")))
+    assert s.food["A"] == 0 and s.result.winner == "B" and s.result.reason == "starved" and rules.legal_actions(s) == []
+    s = state(turn=10, decks={"A": ["wisp_1"], "B": []}, food={"A": 15, "B": 1})
+    rules.apply_action(s, PassAction())                               # B's turn starts on an empty deck with 1 food
+    assert s.food["B"] == 0 and s.result.winner == "A" and s.result.reason == "starved"
+
+
+def test_fatigue_is_not_income_and_not_a_raid_and_only_a_draw_brings_it():
+    s = state(turn=10, hands={"A": ["scout_3", "mama_spore"]}, decks={"A": [], "B": ["wisp_1"]}, food={"A": 15, "B": 15},
+              leaders={"A": WARLORD, "B": RAIDER})
+    rules.apply_action(s, PlaceAction("scout_3", ("cr", "1,1")))      # Scout on an empty deck: nothing happens
+    rules.apply_action(s, PlaceAction("mama_spore", ("cr", "1,2")))   # cards an effect puts into the hand are not draws
+    assert s.food["A"] == 15 and s.fatigue == {"A": 0, "B": 0} and len(s.hands["A"]) == CFG.mama_spores
+    rs = s._sync()
+    rs.record_events(True)
+    rs.apply_action(PassAction().to_dict()); rs.apply_action(PassAction().to_dict())    # B's turn, then A's: A's empty draw
+    lost = [e for e in rs.take_events() if e["e"] == "food" and e["n"] < 0]
+    assert lost == [{"e": "food", "player": "A", "n": -1, "fatigue": 1}]                # the food-change event, negative
+    assert rs.to_dict()["food"] == {"A": 14, "B": 15}                                   # the Raider's 1 more is a raid's

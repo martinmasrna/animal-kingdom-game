@@ -85,6 +85,7 @@ pub fn seat_view(st: &State, player: Player) -> Value {
         "opponent_hand_count": st.hands[opp].len(), "own_deck_count": st.decks[me].len(), "opponent_deck_count": st.decks[opp].len(),
         "remove_pile": st.remove_pile.iter().map(|&c| g.cards.name_of(c)).collect::<Vec<_>>(),
         "food": {"A": st.food[0], "B": st.food[1]},
+        "fatigue": {"A": st.fatigue[0], "B": st.fatigue[1]},
         "pending": st.pending.as_ref().map(|p| pending_to_json(g, p)),
         "result": st.result.map(|r| json!({"winner": r.winner.map(pname), "reason": r.reason.name()})),
     })

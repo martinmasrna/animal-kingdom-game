@@ -391,7 +391,18 @@ fn burn_over_limit(st: &mut State, player: Player, made: &[Unit]) {
     }
 }
 
-/// Draw n cards; the newest past the hand limit burn to the Remove Pile.
+/// The food `player` would lose to fatigue by drawing `n` cards now: nothing for each card their deck still holds,
+/// then one step more for each card it does not.
+pub fn fatigue_due(st: &State, player: Player, n: i32) -> i32 {
+    let p = player as usize;
+    let empty = (n.max(0) - st.decks[p].len() as i32).max(0);
+    let step = st.cfg().fatigue_step;
+    (1..=empty).map(|k| (st.fatigue[p] + k) * step).sum()
+}
+
+/// Draw n cards; the newest past the hand limit burn to the Remove Pile. Fatigue: each card the deck no longer holds
+/// is not drawn and costs the player food instead, one step more each time (1, then 2, then 3, ...); at no food they
+/// lose, whoever's turn it is.
 pub fn draw_cards(st: &mut State, player: Player, n: i32) {
     let drawn = st.draw(player, n);
     if !drawn.is_empty() {
@@ -399,6 +410,19 @@ pub fn draw_cards(st: &mut State, player: Player, n: i32) {
             st.emit(Ev::Draw { player, cards: drawn.iter().map(|u| (u.iid, u.card)).collect() });
         }
         burn_over_limit(st, player, &drawn);
+    }
+    let p = player as usize;
+    for _ in drawn.len() as i32..n.max(0) {
+        if st.result.is_some() {
+            return;
+        }
+        st.fatigue[p] += 1;
+        let lost = (st.fatigue[p] * st.cfg().fatigue_step).min(st.food[p]).max(0);
+        st.food[p] -= lost;
+        st.emit(Ev::Fatigue { player, n: lost, count: st.fatigue[p] });
+        if st.food[p] <= 0 {
+            st.result = Some(GameResult { winner: Some(other(player)), reason: Reason::Starved });
+        }
     }
 }
 
@@ -716,7 +740,7 @@ pub fn leader_usable(st: &State, player: Player) -> bool {
     if Some(lead) == st.g.named.elf {
         return count(st, player, Count::Region) > 0; // food for each region you control: none, nothing to gain
     }
-    !st.decks[player as usize].is_empty() // the Sage draws
+    true // the Sage draws: from an empty deck too, where the draw costs food (fatigue)
 }
 
 /// `player` uses their leader's power (the caller has paid for it).

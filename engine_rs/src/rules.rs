@@ -192,6 +192,9 @@ fn end_turn(st: &mut State) -> Result<(), String> {
     st.current = other(player);
     st.emit(Ev::TurnStart { player: st.current, turn: st.turn_counter });
     effects::draw_cards(st, st.current, st.cfg().turn_draw_count); // the turn's free card
+    if st.result.is_some() {
+        return Ok(()); // fatigue took their last food
+    }
     effects::start_of_turn(st, st.current);
     effects::resolve(st)?;
     if st.result.is_none() {

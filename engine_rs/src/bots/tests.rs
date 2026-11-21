@@ -186,3 +186,19 @@ fn two_orders_of_the_same_plays_are_one_position() {
     }
     assert!(smaller > 10);
 }
+
+#[test]
+fn fatigue_is_public_and_part_of_the_position() {
+    // The count of empty draws is seen by both seats: a world keeps it, and two positions that differ only in it are two.
+    let g = game();
+    let st = new_game(&g, 41);
+    let mut tired = st.clone();
+    tired.fatigue[1] = 2;
+    for me in 0..2u8 {
+        assert_ne!(position_key(&st, me, false), position_key(&tired, me, false));
+        let seen = seat::unseen(&tired, me);
+        let w = seat::world(&tired, me, &seen, &mut PyRandom::seeded_u64(9));
+        assert_eq!(w.fatigue, tired.fatigue);
+        assert_eq!(position_key(&w, me, false), position_key(&tired, me, false));
+    }
+}

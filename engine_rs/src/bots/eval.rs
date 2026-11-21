@@ -43,6 +43,8 @@ pub struct Weights {
     pub region_near: f32,
     /// A food of a region two tiles short of mine, with no enemy on it.
     pub region_far: f32,
+    /// The player whose turn comes next loses their last food to the card their empty deck cannot give them (fatigue).
+    pub starve: f32,
     /// A card in hand.
     pub hand_card: f32,
     /// A mana of its cost.
@@ -72,6 +74,7 @@ impl Default for Weights {
             strength: 1.2,
             region_near: 0.5,
             region_far: 0.1,
+            starve: 200.0,
             hand_card: 0.4,
             hand_cost: 0.0,
             mana_rank: 0.3,
@@ -94,6 +97,7 @@ impl Weights {
             "strength" => &mut self.strength,
             "region_near" => &mut self.region_near,
             "region_far" => &mut self.region_far,
+            "starve" => &mut self.starve,
             "hand_card" => &mut self.hand_card,
             "hand_cost" => &mut self.hand_cost,
             "mana_rank" => &mut self.mana_rank,
@@ -228,6 +232,17 @@ pub fn evaluate(st: &State, me: Player, w: &Weights, odds: &RaidOdds) -> f32 {
             s -= w.income_win_theirs;
         } else if food_me + inc_me >= win {
             s += w.income_win_mine;
+        }
+    }
+
+    // fatigue: the player whose turn comes next draws its card at the start of it, and an empty deck takes food instead
+    let next = other(st.current);
+    let due = effects::fatigue_due(st, next, st.cfg().turn_draw_count);
+    if due > 0 {
+        let sign = if next == me { -1.0 } else { 1.0 };
+        s += sign * w.food * due.min(st.food[next as usize]) as f32;
+        if due >= st.food[next as usize] {
+            s += sign * w.starve;
         }
     }
 

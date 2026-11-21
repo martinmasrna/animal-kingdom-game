@@ -20,6 +20,8 @@ pub enum Ev {
     /// A card burned from hand, past the hand limit.
     Burn { iid: i32, card: CardId, owner: Player },
     Food { player: Player, n: i32, income: bool },
+    /// Food lost to a draw from an empty deck: `n` food, on the player's `count`th such draw.
+    Fatigue { player: Player, n: i32, count: i32 },
     Draw { player: Player, cards: Vec<(i32, CardId)> },
     Strength { iid: i32, card: CardId, owner: Player, n: i32 },
     LeaderPower { player: Player, card: CardId },
@@ -74,6 +76,8 @@ impl Recorded {
                 }
                 m
             }
+            // a food change like any other, negative: the food-change shape, with the count of empty draws so far
+            Ev::Fatigue { player, n, count } => json!({"e": "food", "player": pname(*player), "n": -n, "fatigue": count}),
             Ev::Draw { player, cards } => json!({"e": "draw", "player": pname(*player), "cards": cards.iter().map(|(i, c)| json!([i, card(*c)])).collect::<Vec<_>>()}),
             Ev::Strength { iid, card: c, owner, n } => json!({"e": "strength", "iid": iid, "card": card(*c), "owner": pname(*owner), "n": n}),
             Ev::LeaderPower { player, card: c } => json!({"e": "leader_power", "player": pname(*player), "card": card(*c)}),
