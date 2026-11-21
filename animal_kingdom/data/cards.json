@@ -315,30 +315,6 @@
       ]
     },
     {
-      "id": "flight_7",
-      "name": "Flight 7",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 7,
-      "text": "Flight.",
-      "cost": 7,
-      "keywords": [
-        "Flight"
-      ]
-    },
-    {
-      "id": "flight_10",
-      "name": "Flight 10",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 10,
-      "text": "Flight.",
-      "cost": 10,
-      "keywords": [
-        "Flight"
-      ]
-    },
-    {
       "id": "hungry_1",
       "name": "Hungry 1",
       "status": "collectible",
@@ -512,6 +488,30 @@
       "base_strength": 5,
       "text": "Flight. After it raids, draw a card.",
       "cost": 5,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "flight_4",
+      "name": "Flight 4",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 4,
+      "text": "Flight.",
+      "cost": 4,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "flight_6",
+      "name": "Flight 6",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 6,
+      "text": "Flight.",
+      "cost": 6,
       "keywords": [
         "Flight"
       ]

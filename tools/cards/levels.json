@@ -816,28 +816,6 @@
       "at": 1795262576
     }
   },
-  "flight_7": {
-    "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": ""
-      },
-      "by": "claude",
-      "at": 1795262576
-    }
-  },
-  "flight_10": {
-    "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": ""
-      },
-      "by": "claude",
-      "at": 1795262576
-    }
-  },
   "hungry_1": {
     "effect": {
       "review": {
@@ -1012,6 +990,28 @@
       },
       "by": "claude",
       "at": 1795267857
+    }
+  },
+  "flight_4": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795271355
+    }
+  },
+  "flight_6": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795271355
     }
   }
 }

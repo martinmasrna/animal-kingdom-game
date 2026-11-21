@@ -35,6 +35,8 @@ export const CARD_NUMS = [
   "double_raid_4",
   "double_raid_2",
   "raid_draw_5",
+  "flight_4",
+  "flight_6",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

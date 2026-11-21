@@ -126,7 +126,7 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   assert.equal(await p.$('.coll .side'), null, 'an open deck is the tray, not the side column');
   assert.equal(await p.$$eval('.mtray .cell.empty', e => e.length), 24, 'the leader\'s card and 24 empty cells');
   const want = ['wisp_1', 'wisp_1', 'wisp_2', 'wisp_2', 'wisp_3', 'wisp_3', 'wisp_4', 'wisp_4', 'wisp_5', 'wisp_5', 'wisp_6', 'wisp_6', 'spikes_3', 'spikes_3', 'flight_2', 'flight_2',
-    'spikes_2', 'spikes_2', 'flight_7', 'flight_7', 'cantrip_2', 'cantrip_2', 'hungry_3', 'hungry_3'];
+    'spikes_2', 'spikes_2', 'flight_6', 'flight_6', 'cantrip_2', 'cantrip_2', 'hungry_3', 'hungry_3'];
   for (const id of want) { await click(p, `.cgrid .tl[data-card="${id}"]`); await wait(30); }
   const tray = await p.evaluate(() => ({ cells: [...document.querySelectorAll('.mtray .cell')].map(e => ({ id: e.dataset.card || null, cost: +(e.querySelector('.mcost')?.dataset.n || 0),
       x: e.getBoundingClientRect().left, y: e.getBoundingClientRect().top })),
