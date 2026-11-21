@@ -54,11 +54,11 @@ const COST_SVG = c => { const h = 100 * P * .62, w = h * 2 / 1.2;
 const COST_AT = box(X0, Y0 + YS - GH / 4, GEM, GH);
 // The piece alone (a deck tray, a shown hand) keeps the cost in the piece's own upper-left corner, sharing its two edges.
 const PIECE_COST_AT = box(0, .25 * P * (1 - .3), .3, .3 * P);
-// A leader's power's cost: the strength's drawer turned over, its top point the piece's top point and its upper edges the
-// piece's, where a legendary's gem would be (Martin, 2026-11-21: "the cost to be on top, replacing the orange gem").
-// As percentages of the piece's box, so it sits on any piece (the rail's token, a card's).
-const TOP_W = DRAWER_FRAC / P;
-export const powerCostHTML = cost => `<div class="pcost" style="left:${((1 - TOP_W) / 2 * 100).toFixed(3)}%;top:0;width:${(TOP_W * 100).toFixed(3)}%;height:${(DRAWER_FRAC / P * 100).toFixed(3)}%">${COST_SVG(cost)}</div>`;
+// A leader's power's cost: in the strength's drawer at the piece's bottom point, its bottom point the piece's and its lower
+// edges the piece's, where a card's strength sits (a leader has none to show; Martin, 2026-11-21: "on bottom, where
+// strength sits"). As percentages of the piece's box, so it sits on any piece (the rail's token, a card's).
+const DW = DRAWER_FRAC / P, DH = DRAWER_FRAC / P;   // the drawer's width (of the piece's width) and height (of its height)
+export const powerCostHTML = cost => `<div class="pcost" style="left:${((1 - DW) / 2 * 100).toFixed(3)}%;top:${((1 - DH) * 100).toFixed(3)}%;width:${(DW * 100).toFixed(3)}%;height:${(DH * 100).toFixed(3)}%">${COST_SVG(cost)}</div>`;
 // A leader's power read as a card of its own beside the leader's (as a card's tokens are): the leader's figure, what kind
 // of ability it is, its text, and a power's cost on top in place of the gem.
 export function powerCard(id, L, w = 170) {
