@@ -361,7 +361,7 @@ def test_duplicating_spore_places_a_spore_on_an_adjacent_tile_it_could_be_placed
     assert "1,2" in s.pending["options"] and "2,1" not in s.pending["options"]
     rules.apply_action(s, ChoiceAction("1,2"))
     assert [u.card_id for u in s.board["1,2"]] == ["spore"] and "wisp_1" in s.remove_pile
-    assert rules.mana_left(s, "A") == 6 - 1                          # the Spore came free
+    assert rules.mana_left(s, "A") == 6 - CARDS["duplicating_spore"].cost   # the Spore came free
 
 
 def test_mama_spore_puts_two_spores_into_your_hand_and_they_play():
@@ -370,7 +370,7 @@ def test_mama_spore_puts_two_spores_into_your_hand_and_they_play():
     assert [u.card_id for u in s.hands["A"]] == ["spore", "spore"]
     assert not CARDS["spore"].collectible and CARDS["spore"].cost == 1 and CARDS["spore"].base_strength == 1
     rules.apply_action(s, PlaceAction("spore", ("cr", "1,2")))       # a token in hand plays like any card
-    assert rules.mana_left(s, "A") == 6 - 2
+    assert rules.mana_left(s, "A") == 6 - CARDS["mama_spore"].cost - CARDS["spore"].cost
 
 
 def test_djinn_cost_less_for_each_of_their_count():
