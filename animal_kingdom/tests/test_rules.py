@@ -325,12 +325,21 @@ def test_kill_draw_draws_only_when_it_removes_an_enemy():
     assert s.hands["A"] == [] and [u.card_id for u in s.board["2,1"]] == ["spikes_1"]
 
 
+def test_raid_draw_flies_into_the_den_then_draws():
+    s = state(turn=11, hands={"A": ["raid_draw_5"]}, food={"A": 15, "B": 15})
+    assert CARDS["raid_draw_5"].keywords == {"Flight"}
+    rules.apply_action(s, PlaceAction("raid_draw_5", ("hq", "B")))   # a flier: no connection needed
+    assert s.food["B"] == 10 and [u.card_id for u in s.hands["A"]] == ["wisp_1"]
+
+
 def test_double_raid_destroys_double_its_strength():
-    s = state(turn=11, hands={"A": ["double_raid_4"]}, food={"A": 15, "B": 15})
-    for cr in ("1,1", "2,1", "3,1", "4,1", "5,1"):
-        put(s, cr, "wisp_0", "A")
-    rules.apply_action(s, PlaceAction("double_raid_4", ("hq", "B")))
-    assert s.food["B"] == 15 - 6 * CFG.double_raid_factor
+    for cid in ("double_raid_2", "double_raid_4"):
+        assert CARDS[cid].text == "Its raids destroy double food."
+        s = state(turn=11, hands={"A": [cid]}, food={"A": 15, "B": 15})
+        for cr in ("1,1", "2,1", "3,1", "4,1", "5,1"):
+            put(s, cr, "wisp_0", "A")
+        rules.apply_action(s, PlaceAction(cid, ("hq", "B")))
+        assert s.food["B"] == 15 - CARDS[cid].base_strength * CFG.double_raid_factor
 
 
 def test_djinn_cost_less_for_each_of_their_count():

@@ -33,6 +33,8 @@ export const CARD_NUMS = [
   "death_draw_1",
   "kill_draw_2",
   "double_raid_4",
+  "double_raid_2",
+  "raid_draw_5",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

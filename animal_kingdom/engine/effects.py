@@ -5,7 +5,7 @@ choice surfaces as `state.pending`; the choice arrives as a normal action and re
 data, so a position clones, saves and replays.
 
 Card behaviour: EFFECTS[card_id] -> {"on_place": fn} (a Roar), {"on_cover": fn} (when it covers an enemy), {"on_death": fn}
-(when it is removed from the board), and OPS[op] -> fn(state, step) (the interpreter).
+(when it is removed from the board), {"on_raid": fn} (after its raid), and OPS[op] -> fn(state, step) (the interpreter).
 """
 
 from __future__ import annotations
@@ -232,6 +232,9 @@ def _raid(state: GameState, player: str, unit: UnitInstance, enemy: str, strengt
     state.food[enemy] -= n
     if state.result is None and state.food[enemy] <= 0:
         state.result = Result(player, "starved")
+    on_raid = EFFECTS.get(unit.card_id, {}).get("on_raid")
+    if on_raid and state.result is None:
+        on_raid(state, unit)
 
 
 def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> None:
@@ -490,6 +493,11 @@ def _draw_a_card(state, unit, cr):
     state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1})
 
 
+def _raid_draw(state, unit):
+    """"After it raids, draw a card.": once its raid has destroyed the food, its owner draws."""
+    state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1, "by_card": unit.card_id, "by_iid": unit.iid})
+
+
 def _death_draw(state, unit):
     """"Death: draw a card.": when it is removed from the board, by anything, its owner draws."""
     state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1, "by_card": unit.card_id, "by_iid": unit.iid})
@@ -507,13 +515,15 @@ WEAKENS = {"hunter_2": 2, "hunter_3": 3, "hunter_4": 4, "hunter_5": 5, "hunter_6
 CANTRIPS = ("cantrip_2", "cantrip_3", "cantrip_4")
 DEATH_DRAWS = ("death_draw_1",)
 KILL_DRAWS = ("kill_draw_2",)
-DOUBLE_RAIDERS = ("double_raid_4",)
+DOUBLE_RAIDERS = ("double_raid_2", "double_raid_4")
+RAID_DRAWS = ("raid_draw_5",)
 
 EFFECTS: dict[str, dict[str, Callable]] = {
     **{cid: {"on_place": _weaken(n)} for cid, n in WEAKENS.items()},
     "giant_hunter": {"on_place": _remove_adjacent},
     **{cid: {"on_place": _draw_a_card} for cid in CANTRIPS},
     **{cid: {"on_death": _death_draw} for cid in DEATH_DRAWS},
+    **{cid: {"on_raid": _raid_draw} for cid in RAID_DRAWS},
     **{cid: {"on_cover": _draw_if_it_removes} for cid in KILL_DRAWS},
 }
 
