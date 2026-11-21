@@ -226,7 +226,7 @@ def do_placement(state: GameState, player: str, card_id: str, target) -> None:
     strength = effective_strength(state, unit)   # as it is played
     state.hands[player].remove(unit)
     state.played_this_turn += 1
-    if state.played_this_turn == state.config.assassin_nth_card and _leads(state, player, L.ASSASSIN):
+    if state.played_this_turn % state.config.assassin_nth_card == 0 and _leads(state, player, L.ASSASSIN):   # every third
         state.effect_stack.append({"op": "draw", "player": player, "n": 1, "by_card": L.ASSASSIN})
     kind, where = target
     if kind == "hq":

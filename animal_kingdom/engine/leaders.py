@@ -19,7 +19,7 @@ LEADERS: dict[str, tuple[str, str]] = {
     RAIDER: ("passive", "Your raids destroy 1 more food."),
     SAGE: ("power", "Draw a card."),
     ELF: ("power", "Gain 1 food for each region you control."),                  # Martin, 2026-11-21: 2 mana
-    ASSASSIN: ("passive", "After you play your third card in a turn, draw a card."),   # Martin, 2026-11-21
+    ASSASSIN: ("passive", "After every third card you play in a turn, draw a card."),  # Martin, 2026-11-21: "multiple times a turn"
 }
 
 

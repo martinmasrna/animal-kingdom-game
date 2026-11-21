@@ -451,11 +451,13 @@ def test_the_elfs_power_gains_a_food_for_each_region_for_two_mana_once_a_turn():
     assert rules.region_income(s, "A") == 3                           # its regions produce as any others
 
 
-def test_the_assassin_draws_after_the_third_card_of_a_turn_only():
-    s = state(turn=11, hands={"A": ["wisp_1", "wisp_1", "wisp_1", "wisp_1"]}, leaders={"A": ASSASSIN})
-    for i, cr in enumerate(("1,1", "1,2", "1,3", "2,1")):
+def test_the_assassin_draws_after_every_third_card_of_a_turn():
+    s = state(turn=19, hands={"A": ["wisp_1"] * 6}, leaders={"A": ASSASSIN}, decks={"A": ["wisp_1"] * 5})
+    sizes = []
+    for cr in ("1,1", "1,2", "1,3", "2,1", "2,2", "2,3"):
         rules.apply_action(s, PlaceAction("wisp_1", ("cr", cr)))
-        assert len(s.hands["A"]) == [3, 2, 2, 1][i]                  # the third card draws one; the fourth doesn't
+        sizes.append(len(s.hands["A"]))
+    assert sizes == [5, 4, 4, 3, 2, 2]                                # the 3rd and the 6th each draw one
     assert {l: (CARDS[l].cost, CARDS[l].base_strength) for l in LEADERS} == {
         "warlord_legend": (5, 10), "raider_legend": (5, 10), "sage_legend": (5, 3), "elf_legend": (5, 3), "assassin_legend": (5, 5)}
 
