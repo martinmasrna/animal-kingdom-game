@@ -22,6 +22,7 @@ CARDS = load_cards()
 for _kw in ("Poison", "Armor", "Stealth"):
     CARDS[f"test_{_kw.lower()}"] = replace(CARDS["wisp_1"], id=f"test_{_kw.lower()}", keywords=frozenset({_kw}))
 CARDS["test_reserve"] = replace(CARDS["wisp_1"], id="test_reserve", status="reserve")
+CARDS["test_one"] = replace(CARDS["wisp_1"], id="test_one", base_strength=1)   # a plain 1, for a board that needs one
 CFG = Config()
 BOARD = load_map(MAP_ID)
 BASE = {"A": {"1,1", "1,2", "1,3"}, "B": {"5,1", "5,2", "5,3"}}
@@ -254,14 +255,14 @@ def test_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
 def test_hunters_give_an_adjacent_enemy_minus_n_strength_for_good():
     for cid, n in WEAKENS.items():
         assert CARDS[cid].text == f"Roar: give an adjacent enemy -{n} strength."
-    s = state(turn=11, hands={"A": ["hunter_3", "wisp_0"]})
+    s = state(turn=11, hands={"A": ["hunter_3", "test_one"]})
     put(s, "2,1", "wisp_2", "B")                                # strength 4
     put(s, "2,2", "wisp_1", "B")
     rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))
     assert s.pending["options"] == ["2,1", "2,2"] and s.pending["chooser"] == "A"
     rules.apply_action(s, ChoiceAction("2,1"))
-    assert effective_strength(s, s.board["2,1"][0]) == 1        # stays, weaker: the wisp_0 (1) can't cover it
-    assert "2,1" not in places(s, "wisp_0")
+    assert effective_strength(s, s.board["2,1"][0]) == 1        # stays, weaker: the test_one (1) can't cover it
+    assert "2,1" not in places(s, "test_one")
 
 
 def test_an_animal_at_zero_strength_is_removed_armor_or_not():
@@ -275,10 +276,10 @@ def test_an_animal_at_zero_strength_is_removed_armor_or_not():
     rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))
     rules.apply_action(s, ChoiceAction("2,1"))
     assert "2,1" not in s.board                                 # the rules' removal: Armor doesn't hold
-    s = state(turn=11, hands={"A": ["shade_hand", "wisp_0"]})
+    s = state(turn=11, hands={"A": ["shade_hand", "test_one"]})
     rules.apply_action(s, PlaceAction("shade_hand", ("cr", "1,1")))
     assert effective_strength(s, s.board["1,1"][0]) == 1        # one card left in hand
-    rules.apply_action(s, PlaceAction("wisp_0", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("test_one", ("cr", "1,2")))
     assert "1,1" not in s.board                                 # the hand emptied: the Hand Shade is at 0, removed
 
 
@@ -311,15 +312,15 @@ def test_death_draw_draws_when_it_is_removed_by_anything():
 
 def test_kill_draw_draws_only_when_it_removes_an_enemy():
     s = state(turn=11, hands={"A": ["kill_draw_2"]})                # strength 2
-    put(s, "1,1", "wisp_0", "A")
-    put(s, "2,1", "wisp_0", "B")                                    # strength 1
+    put(s, "1,1", "test_one", "A")
+    put(s, "2,1", "test_one", "B")                                    # strength 1
     rules.apply_action(s, PlaceAction("kill_draw_2", ("cr", "1,2")))
     assert s.hands["A"] == []                                       # an empty tile: nothing removed
     s.hands["A"].append(UnitInstance("kill_draw_2", "A", s.new_iid()))
     rules.apply_action(s, PlaceAction("kill_draw_2", ("cr", "2,1")))
-    assert "wisp_0" in s.remove_pile and [u.card_id for u in s.hands["A"]] == ["wisp_1"]
+    assert "test_one" in s.remove_pile and [u.card_id for u in s.hands["A"]] == ["wisp_1"]
     s = state(turn=11, hands={"A": ["kill_draw_2"]})
-    put(s, "1,1", "wisp_0", "A")
+    put(s, "1,1", "test_one", "A")
     put(s, "2,1", "spikes_1", "B")                                  # Spikes removes it first: its prey stands
     rules.apply_action(s, PlaceAction("kill_draw_2", ("cr", "2,1")))
     assert s.hands["A"] == [] and [u.card_id for u in s.board["2,1"]] == ["spikes_1"]
@@ -337,7 +338,7 @@ def test_double_raid_destroys_double_its_strength():
         assert CARDS[cid].text == "Its raids destroy double food."
         s = state(turn=11, hands={"A": [cid]}, food={"A": 15, "B": 15})
         for cr in ("1,1", "2,1", "3,1", "4,1", "5,1"):
-            put(s, cr, "wisp_0", "A")
+            put(s, cr, "test_one", "A")
         rules.apply_action(s, PlaceAction(cid, ("hq", "B")))
         assert s.food["B"] == 15 - CARDS[cid].base_strength * CFG.double_raid_factor
 

@@ -16,7 +16,7 @@ const RANK = { legendary: 0, common: 1 };
 let R = { deckSize: 25, copies: {} };   // until the server's arrive
 
 const costOf = c => c.mana ?? 99;   // a card with no cost sorts last
-const MANA_COSTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];   // the cost row of the mana collection
+const MANA_COSTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];   // the cost row of the mana collection
 // The open deck in the mana rules, two ways (Martin, 2026-11-20: he wanted to try the deck as board tiles, and named the side
 // list cleaned up as the other way; neither is settled): `tray`, a band of pieces under the grid (the default), or `list`,
 // the side column's strips. ?deckview=list or ?deckview=tray on the address switches, kept in the browser like ?rules.
@@ -128,10 +128,10 @@ export function deckBody(list, cards) {
   return stripsHTML(Object.keys(counts), cards, id => counts[id]);
 }
 // The deck's mana curve, as Hearthstone draws it (Martin, 2026-11-21, its "Cards/Mana Cost" chart): a gold bar per cost
-// in a dark slot, 0 to 6 and 7+, its height the cost's share of the tallest, the count above it, the cost below.
-const CURVE = [0, 1, 2, 3, 4, 5, 6, 7];
+// in a dark slot, 1 to 6 and 7+ (no card costs 0), its height the cost's share of the tallest, the count above it, the cost below.
+const CURVE = [1, 2, 3, 4, 5, 6, 7];
 const curveHTML = list => { const n = CURVE.map(() => 0);
-  for (const id of list) { const k = C[id] && C[id].mana; if (k != null) n[Math.min(k, 7)]++; }
+  for (const id of list) { const k = C[id] && C[id].mana; if (k != null) n[Math.min(Math.max(k, 1), 7) - 1]++; }
   const top = Math.max(1, ...n);
   return `<div class="mcurve">${CURVE.map((k, i) => `<div class="cb${n[i] ? '' : ' zero'}"><div class="slot"><b>${n[i]}</b><i style="height:${(n[i] / top * 100).toFixed(1)}%"></i></div>`
     + `<span class="ck">${costChip(k)}${k === 7 ? '<sup>+</sup>' : ''}</span></div>`).join('')}</div>`; };

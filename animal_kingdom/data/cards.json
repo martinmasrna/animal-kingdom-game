@@ -307,16 +307,6 @@
       "cost": 5
     },
     {
-      "id": "wisp_0",
-      "name": "Wisp 0",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 1,
-      "keywords": [],
-      "text": "",
-      "cost": 0
-    },
-    {
       "id": "flight_1",
       "name": "Flight 1",
       "status": "collectible",

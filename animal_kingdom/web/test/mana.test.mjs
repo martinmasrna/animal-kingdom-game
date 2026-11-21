@@ -15,7 +15,7 @@ const seat = async () => { const ctx = await browser.createBrowserContext(), p =
   await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]); return p; };
 // A deck of the mana collection on the profile: 20 Wisps (1 to 10, two each), two Spikes 3, two Cantrip 2s and the Warlord (25, legal in the mana rules).
 const DECK = { ...Object.fromEntries([...Array(10).keys()].map(i => ['wisp_' + (i + 1), 2])), spikes_3: 2, cantrip_2: 2, warlord_legend: 1 };
-// A cheap one (nothing over 3 mana) for the matches that must get going: the Wisps 0 to 3, the cantrips, fliers, Spikes and Hungry, and the Warlord.
+// A cheap one (nothing over 3 mana) for the matches that must get going: the Wisps 1 to 3, the cantrips, fliers, Spikes and Hungry, and the Warlord.
 const CHEAP = { ...Object.fromEntries([1, 2, 3].map(i => ['wisp_' + i, 2])), cantrip_2: 2, cantrip_3: 2, flight_1: 2, flight_2: 2, flight_3: 2, spikes_2: 2, spikes_3: 2, hungry_2: 2, hungry_3: 2, warlord_legend: 1 };
 const giveDeck = async (p, id, name, cards = DECK, leader = 'warlord_legend') => {
   await p.evaluate(async (d) => { const r = await fetch('/api/me/decks', { method: 'PUT', headers: { 'X-AK-Key': localStorage.getItem('ak:key'), 'Content-Type': 'application/json' }, body: JSON.stringify([d]) }); if (!r.ok) throw new Error(await r.text()); },
@@ -113,7 +113,7 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   assert.ok(grid.length > 40 && grid.every(g => !g.rect && g.cost === String(C[g.id].mana)), 'every tile is the mana card with its cost');
   assert.deepEqual(grid.map(g => +g.cost), grid.map(g => +g.cost).sort((a, b) => a - b), 'the grid sorts by cost first');
   // the filter bar: a row of costs 0 to 10 in place of the animal families, no habitat or cost menu; one cost at a time, again for every cost
-  assert.deepEqual(await p.evaluate(() => [document.querySelectorAll('.chead .ctab').length, document.querySelectorAll('.chead .tab').length, !!document.querySelector('.chead [data-k="hab"], .chead [data-k="cost"]')]), [11, 0, false], 'a cost row, no families, no habitat or cost menu');
+  assert.deepEqual(await p.evaluate(() => [document.querySelectorAll('.chead .ctab').length, document.querySelectorAll('.chead .tab').length, !!document.querySelector('.chead [data-k="hab"], .chead [data-k="cost"]')]), [10, 0, false], 'a cost row (1 to 10), no families, no habitat or cost menu');
   await click(p, '.chead .ctab[data-cost="3"]'); await wait(80);
   const only3 = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => t.querySelector('.mcost')?.dataset.n));
   assert.ok(only3.length > 3 && only3.every(n => n === '3'), 'one cost shows only its cards');
