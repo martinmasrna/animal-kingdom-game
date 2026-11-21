@@ -228,10 +228,10 @@
     },
     {
       "id": "giant_hunter",
-      "name": "Giant Hunter",
+      "name": "Big Game Hunter",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 3,
+      "base_strength": 1,
       "keywords": [],
       "text": "Roar: remove an adjacent enemy.",
       "cost": 5

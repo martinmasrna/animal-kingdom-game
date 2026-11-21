@@ -520,7 +520,7 @@ def _adjacent_enemy_targets(state, unit, cr, max_strength=None) -> list:
 
 
 def _remove_adjacent(state, unit, cr):
-    """"Roar: remove an adjacent enemy." (the Giant Hunter)."""
+    """"Roar: remove an adjacent enemy." (the Big Game Hunter)."""
     targets = _adjacent_enemy_targets(state, unit, cr)
     if targets:
         state.effect_stack.append({"op": "remove_choice", "chooser": unit.owner, "by_card": unit.card_id,

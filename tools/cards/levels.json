@@ -817,7 +817,16 @@
         "prev": 3
       },
       "by": "claude",
-      "at": 1795263261
+      "at": 1795277356
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Giant Hunter"
+      },
+      "by": "claude",
+      "at": 1795277355
     }
   },
   "warlord_legend": {
