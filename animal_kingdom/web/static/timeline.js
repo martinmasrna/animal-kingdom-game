@@ -25,7 +25,7 @@ function culprit(board, cause, cr, causeIid) {
   return best;
 }
 
-export const DUR = { leader: 1.1, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, draw: 0.5, yourturn: 1.5 };
+export const DUR = { leader: 1.1, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, draw: 0.5, yourturn: 1.5, raid: 0.9 };
 // Food in flight: one fruit per food, 0.035 s apart, each flying 0.7 s, then the count settles.
 export const foodDur = n => Math.min(2.4, 0.7 + 0.035 * Math.max(0, n - 1) + 0.3);
 
@@ -125,6 +125,9 @@ export function plan(prev, next, cards = {}) {
         break;
       case 'food':
         flow('food', e); s.food[e.player] += e.n;
+        break;
+      case 'raid':   // the food a raid destroys leaves the den in a step of its own (foodfx.js)
+        if (e.n) { s.food[e.den] -= e.n; push({ kind: 'raid', dur: DUR.raid, den: e.den, n: e.n, player: e.player }); }
         break;
       case 'draw': {
         const n = e.cards ? e.cards.length : e.n;

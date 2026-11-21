@@ -200,7 +200,7 @@ export function renderBoard(el, M, g, cards, ui) {
     const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2, w = 2.1 * G.w, h = .62 * G.h;
     const y = ps[0][1] + (side === 'A' ? 1 : -1) * (.5 * G.h + .1 * G.h + h / 2);
     s += put(`mden ${side}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x - w / 2, y - h / 2,
-      `<img class="mfruit" src="/static/kit2/fruit.webp" alt="" draggable="false"><b>${g.food[side]}</b><i>+${(g.income || {})[side] ?? 0}</i>`, `data-hq="${side}"`, `width:${w}px;height:${h}px`);
+      `<i class="fdot"></i><b>${g.food[side]}</b><i>+${(g.income || {})[side] ?? 0}</i>`, `data-hq="${side}"`, `width:${w}px;height:${h}px`);
   }
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
   

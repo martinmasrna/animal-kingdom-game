@@ -7,6 +7,7 @@ import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } fro
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, leaderAt, resolvesIn, tokenWidth } from './board.js';
 import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo } from './mana.js';
+import { playFood } from './foodfx.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripsHTML } from './collection.js';
 import { onHold, holdEvents } from './menu.js';
@@ -493,6 +494,7 @@ function onView(prev) {
     V = PB.shown = view; ui.step = step; V.rx = Date.now() / 1000;
     showView(before);
     if (!step) return finish(view);
+    if (step.kind === 'food' || step.kind === 'raid') foodStep(step);
     const fe = step.kind === 'land' && step.cr ? flightEnd(dcr(step.cr)) : null;   // a landing waits for its card's flight (flight.js)
     clearTimeout(PB.t); PB.t = setTimeout(() => run(i + 1, view), step.dur * 1000 / (window.AK_SPEED || 1) + (fe ? Math.max(0, fe - Date.now()) : 0));   // AK_SPEED: tests only
   };
@@ -640,6 +642,24 @@ function wireTips(root) {
     tip.style.top = (e.clientY + 16 + h <= innerHeight - 8 ? e.clientY + 16 : e.clientY - 10 - h) + 'px'; });
   root.addEventListener('mouseleave', () => tip.style.display = 'none');
 }
+// A food step's dots (foodfx.js): region income from the held regions' dots, a card's food from its animals, a leader's
+// from the leader on the rail; a raid's out of the den it hit.
+function foodStep(step) {
+  const seat = step.kind === 'raid' ? step.den : step.player, side = rel(seat);
+  const before = V.game.food[seat] + (step.kind === 'raid' ? step.n : -step.n);   // this step's view already holds the new count
+  const sources = s => {
+    if (step.kind === 'food' && step.income) {
+      const dots = [...document.querySelectorAll(`#board .rdot.${s}`)], n = step.n;
+      return dots.map((el, i) => ({ el, n: Math.floor(n / dots.length) + (i < n % dots.length ? 1 : 0) })).filter(x => x.n);
+    }
+    const tiles = (step.from || []).map(f => ({ el: document.querySelector(`#board .cr[data-cr="${dcr(f.cr)}"]`), n: f.n })).filter(x => x.el);
+    if (tiles.length) return tiles;
+    const lead = document.querySelector(`#mrail .ltok[data-lead="${s}"]`);
+    return lead ? [{ el: lead, n: step.n }] : [];
+  };
+  playFood({ ...step, side }, before, sources);
+}
+
 function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
@@ -1130,8 +1150,9 @@ function drawRail(G, d) {
   };
   const m = mana[you] || { left: 0, total: 0 }, t = mana[them] || { left: 0, total: 0 }, mine = G.current === you && V.phase === 'playing';
   el.innerHTML = lead('B') + lead('A')
-    + `<div class="mmana A">${pipsHTML(m.left, m.total)}</div>`   // the pips say it all (Martin, 2026-11-20: no text where the eye can see)
-    + `<div class="mmana B">${pipsHTML(t.left, t.total)}</div>`;
+    // what is left of the turn's mana as X/N beside the crystals, as Hearthstone counts it (Martin, 2026-11-21)
+    + `<div class="mmana A"><b class="mcount">${m.left}/${m.total}</b>${pipsHTML(m.left, m.total)}</div>`
+    + `<div class="mmana B"><b class="mcount">${t.left}/${t.total}</b>${pipsHTML(t.left, t.total)}</div>`;
 }
 // The rail's leaders and decks read on hover (a leader's power, a decklist), and your leader's power is pressed there.
 function wireRail() {

@@ -64,7 +64,13 @@
 .game.mana .mden { display: flex; align-items: center; justify-content: center; gap: 10px; box-sizing: border-box; border-radius: 14px;
   background: radial-gradient(ellipse at 50% 45%, #2b2e35, #16181c 80%); border: 2px solid #3a3f48; box-shadow: inset 0 2px 8px rgba(0, 0, 0, .6); z-index: 1; }
 .game.mana .mden.A { border-color: #3d5675; } .game.mana .mden.B { border-color: #6b3530; }
-.game.mana .mden .mfruit { height: 52%; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6)); }
+/* food: a little orange glowing dot (Martin, 2026-11-21: "for now"), in the den and in flight (foodfx.js) */
+.fdot { display: block; flex: none; border-radius: 50%; background: radial-gradient(circle at 42% 38%, #fff4cf 0, #ffbe5c 30%, #f2841f 62%, #c95a0e 100%);
+  box-shadow: 0 0 6px 2px rgba(255, 150, 40, .65), 0 0 16px 4px rgba(255, 120, 20, .3); }
+.game.mana .mden .fdot { width: calc(var(--th) * .2); height: calc(var(--th) * .2); }
+.game.mana .mden.fpulse .fdot { animation: fpulse .22s ease-out; }
+@keyframes fpulse { 40% { transform: scale(1.35); box-shadow: 0 0 10px 4px rgba(255, 170, 60, .85), 0 0 24px 8px rgba(255, 120, 20, .45); } }
+#foodfx { position: fixed; inset: 0; pointer-events: none; z-index: 60; } #foodfx .fdot { position: absolute; }
 .game.mana .mden b { font: 600 calc(var(--th) * .34) 'Source Serif 4', Georgia, serif; color: #f1ece2; line-height: 1; }
 .game.mana .mden i { font: 700 18px 'Fira Sans Condensed', sans-serif; color: #f2c94c; font-style: normal; align-self: flex-end; margin-bottom: 16%; }   /* next turn's income */
 .game.mana .mden.tgt { cursor: pointer; border-color: #f2c94c; box-shadow: inset 0 2px 8px rgba(0, 0, 0, .6), 0 0 0 3px rgba(242, 201, 76, .55); }
@@ -118,7 +124,9 @@
 .game.mana .mlead .lt { font-size: 15px; color: #aab2bf; }
 .game.mana .mlead .lt .mchip { width: 22px; height: 25px; }
 .game.mana .mlead.A { left: 486px; top: 566px; } .game.mana .mlead.B { left: 538px; top: 46px; }
-.game.mana .mmana { position: absolute; font-size: 15px; }
+.game.mana .mmana { position: absolute; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+.game.mana .mmana .mcount { font: 700 22px 'Fira Sans Condensed', sans-serif; color: #fff; text-shadow: 0 1px 0 #000, 0 0 4px rgba(0, 0, 0, .9); letter-spacing: .02em; }
+.game.mana .mmana.B .mcount { font-size: 17px; }
 .game.mana .mmana.A { left: 930px; top: 648px; } .game.mana .mmana.B { left: 882px; top: 70px; }
 .game.mana .mmana .mpips i { width: 22px; height: 25.4px; } .game.mana .mmana .mpips { gap: 5px; }
 .game.mana .mmana.B .mpips i { width: 16px; height: 18.5px; } .game.mana .mmana.B .mpips { gap: 3px; }
