@@ -21,6 +21,7 @@ export const mutedInMatch = () => store('ak:chatmute') === '1';
 const setMuted = on => store('ak:chatmute', on ? '1' : '0');
 const total = () => Object.values(S.unread).reduce((a, b) => a + b, 0);
 export const hasFriends = () => !!(S.friends && S.friends.length);
+export const friendsNow = () => S.friends || [];   // the Play screen's challenge list
 
 export function initChat(c) {
   ctx = c;

@@ -14,8 +14,8 @@ import { onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { track } from './log.js';
-import { openPresence, showChallenge, confirmFriend, shareLink } from './friends.js';
-import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends } from './chat.js';
+import { openPresence, showChallenge, confirmFriend, shareLink, friendLabel } from './friends.js';
+import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends, friendsNow } from './chat.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const SKIP = '__skip__';
@@ -141,7 +141,7 @@ async function boot() {
   openPresence({ api, toast, build: checkBuild, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
   initChat({ api, toast, inMatch: () => screen === 'game' && !!V && V.phase === 'playing',
-    changed: () => { if (screen === 'game' && V) drawGame(); },   // the game's Friends button shows once you have a friend
+    changed: () => { if (screen === 'game' && V) drawGame(); drawPlayFriends(); },   // the game's Friends button shows once you have a friend
     challenge: f => challengeFriend(f) });
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
@@ -381,8 +381,9 @@ function manaHome(mode = {}) {
     <h2>Your deck</h2><div class="decks">${all.map(tile).join('') || '<p>No deck of yours is legal under these rules yet.</p>'}</div>
     ${off ? `<p class="foot">${off === 1 ? 'One deck of yours isn\'t' : `${off} decks of yours aren't`} legal in these rules: the collection says why.</p>` : ''}
     <div class="row"><button class="go" id="mgo">${mode.join ? `Join match ${esc(mode.join)}` : 'Create match'}</button><a class="sec" href="#/">Back</a></div>
-    ${mode.join ? '' : `<h2>Join a friend's match</h2><div class="row"><input id="mcode" maxlength="6" placeholder="Code" autocomplete="off"><button class="sec" id="mjoin">Join</button></div>`}
+    ${mode.join ? '' : `<div id="mfriends"></div><h2>Join a friend's match</h2><div class="row"><input id="mcode" maxlength="6" placeholder="Code" autocomplete="off"><button class="sec" id="mjoin">Join</button></div>`}
     </div></div>`;
+  drawPlayFriends();
   const $ = id => document.getElementById(id);
   app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); manaHome(mode); });
   const join = async code => {
@@ -401,6 +402,18 @@ function manaHome(mode = {}) {
   const code = $('mcode');
   if (code) { const go = () => { const c = code.value.trim().toUpperCase(); if (c) join(c); };
     code.onkeydown = e => { if (e.key === 'Enter') go(); }; $('mjoin').onclick = go; }
+}
+// Play's friends (Martin, 2026-11-21: "challenge them directly from play screen"): each online friend a Challenge with
+// the deck chosen above, as the Friends panel's; one away shows as away. None: nothing.
+function drawPlayFriends() {
+  const el = document.getElementById('mfriends'); if (!el) return;
+  const all = friendsNow(), on = all.filter(f => f.online), off = all.filter(f => !f.online);
+  const html = !all.length ? '' : `<h2>Challenge a friend</h2><div class="mfr">${[...on, ...off].map(f =>
+    `<div class="mf${f.online ? ' on' : ''}"><span class="dot${f.online ? ' on' : ''}"></span><b>${esc(friendLabel(f, all))}</b>`
+    + (f.online ? `<button class="go sm" data-chal="${f.id}">Challenge</button>` : '<small>Away</small>') + '</div>').join('')}</div>`;
+  if (el._html === html) return;
+  el.innerHTML = el._html = html;
+  el.querySelectorAll('[data-chal]').forEach(b => b.onclick = () => { const f = friendsNow().find(x => x.id === b.dataset.chal); if (f) challengeFriend(f); });
 }
 function disconnect() {  if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; }   // a step still timed would redraw the game over the next screen
 
