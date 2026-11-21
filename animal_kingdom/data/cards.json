@@ -522,7 +522,7 @@
       "rarity": "common",
       "base_strength": 1,
       "text": "Roar: place a Spore on an adjacent tile.",
-      "cost": 2,
+      "cost": 1,
       "keywords": []
     },
     {
@@ -530,7 +530,7 @@
       "name": "Mama Spore",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: put 2 Spores into your hand.",
       "cost": 2,
       "keywords": []
