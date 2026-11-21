@@ -14,7 +14,7 @@ SAGE = "sage_legend"
 # card id -> (kind, the ability as the player reads it)
 LEADERS: dict[str, tuple[str, str]] = {
     WARLORD: ("passive", "When you cover an enemy, gain 1 food."),
-    RAIDER: ("passive", "Your raids destroy 2 more food."),
+    RAIDER: ("passive", "Your raids destroy 1 more food."),
     SAGE: ("power", "Draw a card."),
 }
 

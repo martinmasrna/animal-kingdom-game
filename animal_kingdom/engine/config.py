@@ -27,7 +27,7 @@ class Config:
     hungry_food: int = 1                 # Hungry: the food its prey's removal gains (Martin, 2026-11-20)
     shade_growth: int = 1                # the Shades: +1 strength for each of their count
     warlord_leader_food: int = 1         # the Warlord: "When you cover an enemy, gain 1 food."
-    raider_leader_bonus: int = 2         # the Raider: "Your raids destroy 2 more food."
+    raider_leader_bonus: int = 1         # the Raider: "Your raids destroy 1 more food." (Martin, 2026-11-21: "only +1")
     double_raid_factor: int = 2          # "Its raids destroy double food." (Martin, 2026-11-21, his paper cards)
 
     # Safety caps, so a loop of effects can never hang a game.
