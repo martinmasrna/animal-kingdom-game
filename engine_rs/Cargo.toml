@@ -1,0 +1,27 @@
+[package]
+name = "ak_engine"
+version = "0.2.0"
+edition = "2021"
+
+[lib]
+name = "ak_engine"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { version = "0.26", features = ["extension-module"], optional = true }
+serde_json = { version = "1", features = ["preserve_order"] }   # preserve_order: the board's tiles serialise in the order they were taken
+smallvec = { version = "1", features = ["union", "const_generics"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+mimalloc = { version = "0.1", default-features = false }
+
+[features]
+default = ["python"]
+python = ["pyo3"]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "unwind"
+debug = 1

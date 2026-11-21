@@ -1,0 +1,547 @@
+//! The position: everything that changes during a game. A clone is a few flat copies and no allocation in the usual
+//! case (nothing resolving, no turn cap on record), because a bot's search clones a position for every line it imagines.
+
+use std::sync::Arc;
+
+use smallvec::SmallVec;
+
+use crate::data::*;
+use crate::events::{Ev, Events};
+use crate::rng::{CowRng, PyRandom};
+
+/// One card instance: the same instance moves from hand to board.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Unit {
+    pub card: CardId,
+    pub owner: Player,
+    /// Spikes: spent on the first enemy that covers it.
+    pub retaliation_used: bool,
+    pub iid: i32,
+    /// What effects have added to its strength, for good (the Hunters' -N).
+    pub strength_mod: i32,
+    /// What effects have added to its mana cost while in hand (the Assassin's -1).
+    pub cost_mod: i32,
+}
+
+impl Unit {
+    pub fn new(card: CardId, owner: Player, iid: i32) -> Unit {
+        Unit { card, owner, retaliation_used: false, iid, strength_mod: 0, cost_mod: 0 }
+    }
+}
+
+const NO_UNIT: Unit = Unit { card: 0, owner: 0, retaliation_used: false, iid: -1, strength_mod: 0, cost_mod: 0 };
+
+/// The board: each tile's stack of units, bottom to top; the top unit holds the tile. A stack is deeper than one only
+/// between a cover and the removal of what it covered (or for good when a turn cap dropped that removal), so the tops
+/// are a flat array and everything beneath them one short list. `order` is the order the occupied tiles were taken in,
+/// which the rules read (the animals at 0 strength are removed in it).
+#[derive(Clone, Debug)]
+pub struct Board {
+    tops: [Unit; MAX_TILES],
+    /// The occupied tiles, as bits.
+    pub occ: u64,
+    /// player -> the tiles whose top unit is theirs.
+    pub own: [u64; 2],
+    order: [Tile; MAX_TILES],
+    n_order: u8,
+    /// (tile, unit) for every unit beneath a top, each tile's bottom to top in list order.
+    buried: SmallVec<[(Tile, Unit); 4]>,
+}
+
+impl Default for Board {
+    fn default() -> Board {
+        Board { tops: [NO_UNIT; MAX_TILES], occ: 0, own: [0; 2], order: [0; MAX_TILES], n_order: 0, buried: SmallVec::new() }
+    }
+}
+
+impl Board {
+    #[inline]
+    pub fn top(&self, t: Tile) -> Option<Unit> {
+        if self.occ >> t & 1 == 1 { Some(self.tops[t as usize]) } else { None }
+    }
+
+    #[inline]
+    pub fn top_mut(&mut self, t: Tile) -> Option<&mut Unit> {
+        if self.occ >> t & 1 == 1 { Some(&mut self.tops[t as usize]) } else { None }
+    }
+
+    #[inline]
+    pub fn owner_of(&self, t: Tile) -> Option<Player> {
+        if self.own[0] >> t & 1 == 1 { Some(0) } else if self.own[1] >> t & 1 == 1 { Some(1) } else { None }
+    }
+
+    fn set_top(&mut self, t: Tile, u: Unit) {
+        self.tops[t as usize] = u;
+        self.occ |= 1 << t;
+        self.own[u.owner as usize] |= 1 << t;
+        self.own[other(u.owner) as usize] &= !(1 << t);
+    }
+
+    /// `u` lands on `t`, on top of whatever stands there.
+    pub fn push(&mut self, t: Tile, u: Unit) {
+        if self.occ >> t & 1 == 1 {
+            self.buried.push((t, self.tops[t as usize]));
+        } else {
+            self.order[self.n_order as usize] = t;
+            self.n_order += 1;
+        }
+        self.set_top(t, u);
+    }
+
+    /// The occupied tiles, in the order they were taken.
+    #[inline]
+    pub fn tiles(&self) -> &[Tile] {
+        &self.order[..self.n_order as usize]
+    }
+
+    #[inline]
+    pub fn has_buried(&self) -> bool {
+        !self.buried.is_empty()
+    }
+
+    /// The units beneath the top of `t`, bottom first.
+    pub fn buried_of(&self, t: Tile) -> SmallVec<[Unit; 4]> {
+        self.buried.iter().filter(|(bt, _)| *bt == t).map(|(_, u)| *u).collect()
+    }
+
+    /// The unit directly beneath the top of `t`.
+    pub fn under_mut(&mut self, t: Tile) -> Option<&mut Unit> {
+        self.buried.iter_mut().rev().find(|(bt, _)| *bt == t).map(|(_, u)| u)
+    }
+
+    /// The stack on `t`, bottom to top.
+    pub fn stack(&self, t: Tile) -> SmallVec<[Unit; 4]> {
+        let mut s = self.buried_of(t);
+        if let Some(u) = self.top(t) {
+            s.push(u);
+        }
+        s
+    }
+
+    pub fn depth(&self, t: Tile) -> usize {
+        if self.occ >> t & 1 == 0 {
+            return 0;
+        }
+        1 + self.buried.iter().filter(|(bt, _)| *bt == t).count()
+    }
+
+    /// Every unit on the board with its tile: tiles in the order they were taken, each stack bottom to top.
+    pub fn units(&self) -> SmallVec<[(Tile, Unit); 24]> {
+        let mut out = SmallVec::new();
+        for &t in self.tiles() {
+            if !self.buried.is_empty() {
+                for (bt, u) in &self.buried {
+                    if *bt == t {
+                        out.push((t, *u));
+                    }
+                }
+            }
+            out.push((t, self.tops[t as usize]));
+        }
+        out
+    }
+
+    pub fn find(&self, iid: i32) -> Option<(Tile, Unit)> {
+        let mut m = self.occ;
+        while m != 0 {
+            let t = m.trailing_zeros() as Tile;
+            m &= m - 1;
+            if self.tops[t as usize].iid == iid {
+                return Some((t, self.tops[t as usize]));
+            }
+        }
+        self.buried.iter().find(|(_, u)| u.iid == iid).map(|(t, u)| (*t, *u))
+    }
+
+    /// Whether the unit `iid` is anywhere on the board.
+    pub fn holds(&self, iid: i32) -> bool {
+        self.find(iid).is_some()
+    }
+
+    /// Take the unit `iid` out of the stack on `t`, wherever in it; a tile left empty is no longer taken.
+    pub fn remove(&mut self, t: Tile, iid: i32) -> Option<Unit> {
+        if self.occ >> t & 1 == 0 {
+            return None;
+        }
+        let top = self.tops[t as usize];
+        if top.iid == iid {
+            self.own[top.owner as usize] &= !(1 << t);
+            match self.buried.iter().rposition(|(bt, _)| *bt == t) {
+                Some(i) => {
+                    let (_, below) = self.buried.remove(i);
+                    self.set_top(t, below);
+                }
+                None => {
+                    self.occ &= !(1 << t);
+                    let n = self.n_order as usize;
+                    let at = self.order[..n].iter().position(|&x| x == t).expect("an occupied tile is in the order");
+                    self.order.copy_within(at + 1..n, at);
+                    self.n_order -= 1;
+                }
+            }
+            return Some(top);
+        }
+        let i = self.buried.iter().position(|(bt, u)| *bt == t && u.iid == iid)?;
+        Some(self.buried.remove(i).1)
+    }
+}
+
+/// A choice a player makes while an effect resolves, as an action carries it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Choice {
+    /// Decline an optional choice ("__skip__").
+    Skip,
+    /// A unit's instance id (the mulligan).
+    Iid(i32),
+    Tile(Tile),
+    /// "deck:K", the Kth card from the top of the chooser's deck (Scout).
+    Deck(u8),
+}
+
+pub type Tiles = SmallVec<[Tile; 6]>;
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum StepKind {
+    Mulligan { player: Player, returned: SmallVec<[CardId; 4]> },
+    CoverRemove { cr: Tile },
+    HungryFood { player: Player, prey: i32 },
+    GainFood { player: Player, amount: i32 },
+    Draw { player: Player, n: i32 },
+    DrawIfGone { player: Player, prey: i32, n: i32 },
+    Scout { player: Player },
+    PlaceToken { player: Player, card: CardId, options: Tiles },
+    ToHand { player: Player, card: CardId, n: i32 },
+    RemoveIid { iid: i32, by_player: Option<Player> },
+    RemoveChoice { chooser: Player, options: Tiles, optional: bool },
+    WeakenChoice { chooser: Player, options: Tiles, amount: i32 },
+}
+
+/// One step of an effect waiting on the stack. `by_card` and `by_iid` name the card and the very unit whose effect it is.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Step {
+    pub by_card: Option<CardId>,
+    pub by_iid: Option<i32>,
+    pub choice: Option<Choice>,
+    pub kind: StepKind,
+}
+
+impl Step {
+    pub fn new(kind: StepKind) -> Step {
+        Step { by_card: None, by_iid: None, choice: None, kind }
+    }
+
+    pub fn by(kind: StepKind, card: CardId) -> Step {
+        Step { by_card: Some(card), by_iid: None, choice: None, kind }
+    }
+
+    pub fn by_unit(kind: StepKind, u: &Unit) -> Step {
+        Step { by_card: Some(u.card), by_iid: Some(u.iid), choice: None, kind }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Options {
+    Iids(SmallVec<[i32; 12]>),
+    Tiles(Tiles),
+    /// "deck:0" .. "deck:N-1"
+    Deck(u8),
+}
+
+/// The choice the game waits on.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Pending {
+    pub chooser: Player,
+    pub optional: bool,
+    pub mulligan: bool,
+    pub options: Options,
+}
+
+/// A delayed step: Poison's removal, at the start of its owner's next turn.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Scheduled {
+    pub iid: i32,
+    pub owner: Player,
+    pub remaining: i32,
+    pub step: Step,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CapKind {
+    Actions,
+    EffectSteps,
+}
+
+impl CapKind {
+    pub fn name(self) -> &'static str {
+        match self {
+            CapKind::Actions => "actions",
+            CapKind::EffectSteps => "effect_steps",
+        }
+    }
+}
+
+/// A turn that a safety cap ended.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Cap {
+    pub cap: CapKind,
+    pub player: Player,
+    pub turn: i32,
+    pub cards: Vec<CardId>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Reason {
+    Food,
+    Starved,
+    MaxTurns,
+    Concede,
+    Timeout,
+}
+
+impl Reason {
+    pub fn name(self) -> &'static str {
+        match self {
+            Reason::Food => "food",
+            Reason::Starved => "starved",
+            Reason::MaxTurns => "max_turns",
+            Reason::Concede => "concede",
+            Reason::Timeout => "timeout",
+        }
+    }
+
+    pub fn from(s: &str) -> Result<Reason, String> {
+        Ok(match s {
+            "food" => Reason::Food,
+            "starved" => Reason::Starved,
+            "max_turns" => Reason::MaxTurns,
+            "concede" => Reason::Concede,
+            "timeout" => Reason::Timeout,
+            _ => return Err(format!("unknown result reason {s:?}")),
+        })
+    }
+}
+
+/// The game's outcome; `winner` None is a draw.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct GameResult {
+    pub winner: Option<Player>,
+    pub reason: Reason,
+}
+
+pub type Hand = SmallVec<[Unit; 12]>;
+pub type Deck = SmallVec<[CardId; 32]>;
+
+#[derive(Clone, Debug)]
+pub struct State {
+    pub g: Arc<Game>,
+    pub board: Board,
+    pub hands: [Hand; 2],
+    /// player -> their deck; the top is the end.
+    pub decks: [Deck; 2],
+    pub starting_decks: Arc<[Vec<CardId>; 2]>,
+    /// Shared and public, with each card's owner in step (255: unknown).
+    pub remove_pile: SmallVec<[CardId; 64]>,
+    pub pile_owners: SmallVec<[u8; 64]>,
+    pub leaders: [Option<CardId>; 2],
+    pub food: [i32; 2],
+    pub current: Player,
+    pub first_player: Player,
+    pub rng: CowRng,
+    pub turn_counter: i32,
+    /// This turn's mana spent so far.
+    pub mana_spent: i32,
+    /// Every action applied this turn, choices included (Config.max_actions_per_turn).
+    pub applied_this_turn: i32,
+    /// The cards its player has played from hand this turn.
+    pub played_this_turn: i32,
+    pub power_used: bool,
+    /// Off each player's leader power, for good (the Sage's card).
+    pub power_discount: [i32; 2],
+    pub effect_steps_this_turn: i32,
+    pub caps: Vec<Cap>,
+    pub next_iid: i32,
+    pub effect_stack: SmallVec<[Step; 4]>,
+    pub pending: Option<Pending>,
+    pub scheduled: SmallVec<[Scheduled; 1]>,
+    pub result: Option<GameResult>,
+    /// What happened, in order, when recording is on. Never saved; a clone starts empty.
+    pub events: Events,
+    /// The card whose effect is running, and the very unit when known: stamped on each event.
+    pub cause: Option<CardId>,
+    pub cause_iid: Option<i32>,
+}
+
+pub const NO_OWNER: u8 = 255;
+
+impl State {
+    #[inline]
+    pub fn cfg(&self) -> &Config {
+        &self.g.cfg
+    }
+
+    #[inline]
+    pub fn card(&self, c: CardId) -> &Card {
+        self.g.cards.get(c)
+    }
+
+    #[inline]
+    pub fn emit(&mut self, e: Ev) {
+        if self.events.on {
+            let cause_iid = if self.cause.is_some() { self.cause_iid } else { None };
+            self.events.push(self.cause, cause_iid, e);
+        }
+    }
+
+    pub fn pile_add(&mut self, card: CardId, owner: Player) {
+        self.remove_pile.push(card);
+        self.pile_owners.push(owner);
+    }
+
+    pub fn new_iid(&mut self) -> i32 {
+        let iid = self.next_iid;
+        self.next_iid += 1;
+        iid
+    }
+
+    /// Move up to n cards from the top of `player`'s deck into their hand; the instances drawn.
+    pub fn draw(&mut self, player: Player, n: i32) -> SmallVec<[Unit; 4]> {
+        let mut drawn = SmallVec::new();
+        let p = player as usize;
+        for _ in 0..n.max(0).min(self.decks[p].len() as i32) {
+            let card = self.decks[p].pop().unwrap();
+            let u = Unit::new(card, player, self.new_iid());
+            self.hands[p].push(u);
+            drawn.push(u);
+        }
+        drawn
+    }
+
+    /// The tiles `player` holds that are connected to their base through their own animals, as bits.
+    pub fn connected_occupied(&self, player: Player) -> u64 {
+        let own = self.board.own[player as usize];
+        let mut seen = self.g.map.hq_front[player as usize] & own;
+        let mut frontier = seen;
+        while frontier != 0 {
+            let mut next = 0u64;
+            let mut m = frontier;
+            while m != 0 {
+                let t = m.trailing_zeros() as usize;
+                m &= m - 1;
+                next |= self.g.map.nb_mask[t];
+            }
+            frontier = next & own & !seen;
+            seen |= frontier;
+        }
+        seen
+    }
+
+    /// The tiles `player` may place on without Flight: their base, and every tile held or touched by their connected
+    /// animals (`occ`).
+    pub fn connectable(&self, player: Player, occ: u64) -> u64 {
+        let mut out = self.g.map.hq_front[player as usize] | occ;
+        let mut m = occ;
+        while m != 0 {
+            let t = m.trailing_zeros() as usize;
+            m &= m - 1;
+            out |= self.g.map.nb_mask[t];
+        }
+        out
+    }
+
+    /// The seat that must act next: the pending chooser mid-resolution, else the current player.
+    pub fn player_to_act(&self) -> Player {
+        match &self.pending {
+            Some(p) => p.chooser,
+            None => self.current,
+        }
+    }
+
+    /// An independent copy with no events on record.
+    pub fn fork(&self) -> State {
+        let mut s = self.clone();
+        s.cause = None;
+        s.cause_iid = None;
+        s
+    }
+
+    pub fn leads(&self, player: Player, leader: Option<CardId>) -> bool {
+        leader.is_some() && self.leaders[player as usize] == leader
+    }
+
+    /// A fresh game: both decks shuffled, the first player by coin flip (or `first_player`), the opening hands dealt and
+    /// the mulligan waiting. `seed_abs` is the absolute value of the seed, as CPython's `random.Random(seed)` reads it.
+    pub fn new_game(g: Arc<Game>, deck_a: &[CardId], deck_b: &[CardId], seed_abs: u128, first_player: Option<Player>,
+                    leaders: [Option<CardId>; 2]) -> Result<State, String> {
+        let mut rng = PyRandom::seeded_abs(seed_abs);
+        let mut decks: [Deck; 2] = [deck_a.iter().copied().collect(), deck_b.iter().copied().collect()];
+        rng.shuffle(&mut decks[0]);
+        rng.shuffle(&mut decks[1]);
+        let coin_flip: Player = if rng.random() < 0.5 { 0 } else { 1 };
+        let first = first_player.unwrap_or(coin_flip);
+        let second = other(first);
+        let cfg = g.cfg.clone();
+        let mut st = State {
+            board: Board::default(),
+            hands: [Hand::new(), Hand::new()],
+            decks,
+            starting_decks: Arc::new([deck_a.to_vec(), deck_b.to_vec()]),
+            remove_pile: SmallVec::new(),
+            pile_owners: SmallVec::new(),
+            leaders: [None, None],
+            food: [cfg.start_food, cfg.start_food],
+            current: first,
+            first_player: first,
+            rng: CowRng::new(rng),
+            turn_counter: 0,
+            mana_spent: 0,
+            applied_this_turn: 0,
+            played_this_turn: 0,
+            power_used: false,
+            power_discount: [0, 0],
+            effect_steps_this_turn: 0,
+            caps: Vec::new(),
+            next_iid: 0,
+            effect_stack: SmallVec::new(),
+            pending: None,
+            scheduled: SmallVec::new(),
+            result: None,
+            events: Events::default(),
+            cause: None,
+            cause_iid: None,
+            g,
+        };
+        for p in 0..2u8 {
+            let Some(lid) = leaders[p as usize] else { continue };
+            if st.card(lid).beh.leader.is_none() {
+                return Err(format!("{:?} is not a leader", st.g.cards.name_of(lid)));
+            }
+            if !st.decks[p as usize].contains(&lid) {
+                return Err(format!("the leader {:?} must be in its deck", st.g.cards.name_of(lid)));
+            }
+            st.leaders[p as usize] = Some(lid);
+        }
+        st.draw(first, cfg.first_player_opening_draw);
+        st.draw(second, cfg.second_player_opening_draw);
+        if cfg.mulligan {
+            for player in [second, first] {
+                if !st.hands[player as usize].is_empty() {
+                    st.effect_stack.push(Step::new(StepKind::Mulligan { player, returned: SmallVec::new() }));
+                }
+            }
+            if let Some(top) = st.effect_stack.last() {
+                let StepKind::Mulligan { player: chooser, .. } = top.kind else { unreachable!() };
+                st.pending = Some(Pending {
+                    chooser,
+                    optional: true,
+                    mulligan: true,
+                    options: Options::Iids(st.hands[chooser as usize].iter().map(|u| u.iid).collect()),
+                });
+            }
+        }
+        if st.effect_stack.is_empty() {
+            // no mulligan: the first turn begins now, with its card (the mulligan's end draws it otherwise)
+            st.draw(first, cfg.turn_draw_count);
+        }
+        Ok(st)
+    }
+}
