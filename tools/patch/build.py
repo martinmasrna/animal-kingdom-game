@@ -45,8 +45,10 @@ def snapshot() -> dict:
     return {"cards": cards, "leaders": leaders}
 
 
-def last_snapshot() -> tuple[str, dict]:
+def last_snapshot(version: str | None = None) -> tuple[str, dict]:
+    """The snapshot the patch `version` is measured against: the newest patch before it (rebuilding one skips itself)."""
     index = json.loads((OUT / "index.json").read_text()) if (OUT / "index.json").exists() else []
+    index = [v for v in index if v != version]
     name = index[0] if index else "base"
     return name, json.loads((SNAPS / f"{name}.json").read_text())
 
@@ -95,7 +97,7 @@ def main() -> None:
     ap.add_argument("--date", default=datetime.date.today().strftime("%-d %B %Y"))
     ap.add_argument("--check", action="store_true")
     a = ap.parse_args()
-    since, was = last_snapshot()
+    since, was = last_snapshot(a.version)
     now = snapshot()
     d = diff(was, now)
     if a.check or not a.version:

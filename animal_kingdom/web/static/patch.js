@@ -21,7 +21,7 @@ function card(c) {
   return c.mana != null ? h.replace(/(<div class="mpiece[^>]*>)/, `$1${powerCostHTML(c.mana)}`) : h;
 }
 const power = L => ({ id: L.id, name: L.kind === 'power' ? 'Hero power' : 'Passive', rarity: 'common', str: null, text: L.text, kw: [], power: true, mana: L.mana });
-const pair = p => `<div class="pair">${card(p.was)}<i class="arrow"></i>${card(p.now)}</div>`;
+const pair = p => `<div class="pair" data-key="${p.now.power ? 'power:' : ''}${p.now.id}">${card(p.was)}<i class="arrow"></i>${card(p.now)}</div>`;
 const kind = p => p.was.text !== p.now.text ? 'rework' : p.was.mana !== p.now.mana ? 'mana' : 'str';
 
 export function patchHTML(P) {
@@ -31,8 +31,8 @@ export function patchHTML(P) {
   return `<h1>${esc(P.name)}</h1><div class="date">${esc(P.date)}</div>`
     + (P.rules.length ? `<h2>Rules</h2><ul class="rules">${P.rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : '')
     + (changed ? `<h2>Changed</h2>${changed}` : '')
-    + (P.added.length ? `<h2>New</h2><div class="row">${P.added.map(c => `<div>${card(c)}</div>`).join('')}</div>` : '')
-    + (P.removed.length ? `<h2>Removed</h2><div class="row">${P.removed.map(c => `<div class="gone">${card(c)}</div>`).join('')}</div>` : '');
+    + (P.added.length ? `<h2>New</h2><div class="row">${P.added.map(c => `<div data-key="${c.id}">${card(c)}</div>`).join('')}</div>` : '')
+    + (P.removed.length ? `<h2>Removed</h2><div class="row">${P.removed.map(c => `<div class="gone" data-key="${c.id}">${card(c)}</div>`).join('')}</div>` : '');
 }
 
 // The screen: one patch (the newest unless `version` names one), Back to home. Opening the newest marks it seen.

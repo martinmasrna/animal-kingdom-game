@@ -1,0 +1,61 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Patch review</title>
+<link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/menu.css"><link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/game.css"><link rel="stylesheet" href="/static/collection.css"><link rel="stylesheet" href="/static/mana.css">
+<link rel="stylesheet" href="/static/patch.css">
+<style>
+  /* the review's own controls, plain, on top of the game's screen */
+  .patch ul.rules { outline: none; }
+  .patch ul.rules li:focus-within, .patch ul.rules:focus { background: #ffffff10; }
+  [data-key] { cursor: pointer; position: relative; }
+  .note { display: block; width: 100%; box-sizing: border-box; margin-top: 18px; min-height: 64px; padding: 8px 10px; resize: vertical;
+          font: 15px/1.35 system-ui, sans-serif; color: #222; background: #fff6bf; border: 1px solid #d9c96a; border-radius: 4px; }
+  .pair .note { grid-column: 1 / -1; }
+  .patch .pair { align-items: start; } .patch .pair .arrow { margin-top: calc(var(--cw) * 1.0635 - 10px); }   /* a note under a pair grows it downward only */
+  .err { position: fixed; top: 0; left: 0; right: 0; z-index: 99; padding: 8px 16px; background: #c62828; color: #fff; font: 600 15px system-ui, sans-serif; }
+</style></head>
+<body>
+<div id="app"></div>
+<script type="module">
+import { patchHTML } from '/static/patch.js';
+import { fitPlaques } from '/static/mana.js';
+import { fitNames } from '/static/card.js';
+
+const { patch: P, review } = await (await fetch('/draft.json')).json();
+const notes = review.notes || {};
+if (!P.rules.length) P.rules = [''];   // an empty list still shows, to write the first bullet in
+const app = document.getElementById('app');
+app.innerHTML = `<div class="mscr patch"><div class="pscroll"><div class="pcol">${patchHTML(P)}</div></div></div>`;
+fitNames(app); fitPlaques(app);
+
+let timer = null;
+const save = () => { clearTimeout(timer); timer = setTimeout(async () => {
+  const rules = [...app.querySelectorAll('ul.rules li')].map(li => li.textContent);
+  const r = await fetch('/save', { method: 'POST', body: JSON.stringify({ rules, notes }) }).catch(() => null);
+  document.querySelector('.err')?.remove();
+  if (!r || !r.ok) document.body.insertAdjacentHTML('beforeend', '<div class="err">Not saved: the review server is down</div>');
+}, 300); };
+
+// the bullets: edited in place; Enter adds a bullet, an emptied one goes when saved
+const ul = app.querySelector('ul.rules');
+ul.contentEditable = 'true'; ul.spellcheck = true;
+ul.addEventListener('input', () => { if (!ul.querySelector('li')) ul.innerHTML = '<li><br></li>'; save(); });
+
+// a note on any card or pair: click it to write one; a note stays shown, yellow
+const noteBox = el => {
+  let t = el.querySelector(':scope > .note');
+  if (!t) {
+    t = document.createElement('textarea'); t.className = 'note'; t.value = notes[el.dataset.key] || '';
+    t.onclick = e => e.stopPropagation();
+    t.oninput = () => { notes[el.dataset.key] = t.value; save(); };
+    t.onblur = () => { if (!t.value.trim()) t.remove(); };
+    el.appendChild(t);
+  }
+  return t;
+};
+app.querySelectorAll('[data-key]').forEach(el => {
+  if (notes[el.dataset.key]) noteBox(el);
+  el.onclick = () => noteBox(el).focus();
+});
+</script>
+</body></html>
