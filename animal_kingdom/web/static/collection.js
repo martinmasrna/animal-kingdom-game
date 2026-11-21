@@ -16,16 +16,16 @@ const RANK = { legendary: 0, common: 1 };
 let R = { deckSize: 25, copies: {} };   // until the server's arrive
 
 const costOf = c => c.mana ?? 99;   // a card with no cost sorts last
-// The cost row of the collection and the curve's bars: 1 to 5 and 6+ (Martin, 2026-11-21), the last taking every dearer card.
-const MANA_COSTS = [1, 2, 3, 4, 5, 6], TOP = 6;
+// The cost row of the collection and the curve's bars: 1 to 6 and 7+ (Martin, 2026-11-21), the last taking every dearer card.
+const MANA_COSTS = [1, 2, 3, 4, 5, 6, 7], TOP = 7;
 const costKey = k => Math.min(Math.max(k, 1), TOP);
 const plus = k => k === TOP ? '<sup>+</sup>' : '';
 // The open deck in the mana rules, two ways (Martin, 2026-11-20: he wanted to try the deck as board tiles, and named the side
-// list cleaned up as the other way; neither is settled): `tray`, a band of pieces under the grid (the default), or `list`,
-// the side column's strips. ?deckview=list or ?deckview=tray on the address switches, kept in the browser like ?rules.
+// list cleaned up as the other way; neither is settled): `tray`, a band of pieces under the grid, or `list`, the side
+// column's strips, the default (Martin, 2026-11-21: staging to show "the same deck detail view ... on the right"). ?deckview=list or ?deckview=tray on the address switches, kept in the browser like ?rules.
 const DECKVIEW = (() => { const q = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('deckview');
-  try { if (q) localStorage.setItem('ak:deckview', q === 'list' ? 'list' : 'tray'); return localStorage.getItem('ak:deckview') === 'list' ? 'list' : 'tray'; }
-  catch { return q === 'list' ? 'list' : 'tray'; } })();
+  try { if (q) localStorage.setItem('ak:deckview', q === 'list' ? 'list' : 'tray'); return localStorage.getItem('ak:deckview') === 'tray' ? 'tray' : 'list'; }
+  catch { return q === 'tray' ? 'tray' : 'list'; } })();
 const tray = () => (DECKVIEW === 'tray');
 // A card in the grid, a pop or a dialog: the card with its cost. `w`: its width.
 const face = (c, w, opts = {}) => (manaCard(c, { cost: c.mana ?? null, w }));
@@ -129,7 +129,7 @@ export function deckBody(list, cards) {
   return stripsHTML(Object.keys(counts), cards, id => counts[id]);
 }
 // The deck's mana curve, as Hearthstone draws it (Martin, 2026-11-21, its "Cards/Mana Cost" chart): a gold bar per cost
-// in a dark slot, 1 to 5 and 6+, its height the cost's share of the tallest, the count above it, the cost below.
+// in a dark slot, 1 to 6 and 7+, its height the cost's share of the tallest, the count above it, the cost below.
 const curveHTML = list => { const n = MANA_COSTS.map(() => 0);
   for (const id of list) { const k = C[id] && C[id].mana; if (k != null) n[costKey(k) - 1]++; }
   const top = Math.max(1, ...n);
