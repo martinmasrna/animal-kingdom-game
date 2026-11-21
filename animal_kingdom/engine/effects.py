@@ -391,6 +391,19 @@ def _op_remove_iid(state, step):
     return None
 
 
+def _op_weaken_choice(state, step):
+    """The player picks the enemy a Roar gives -N strength, for good, even when there is one."""
+    if not step["options"]:
+        return None
+    if "choice" not in step:
+        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
+    top = state.top_unit(step["choice"])
+    if top is not None:
+        top.strength_mod -= step["amount"]
+        state.emit("strength", iid=top.iid, card=top.card_id, owner=top.owner, n=-step["amount"])
+    return None
+
+
 def _op_remove_choice(state, step):
     """The player picks the enemy a Roar removes, even when there is one: they click what it hits."""
     if not step["options"]:
@@ -414,6 +427,7 @@ OPS: dict[str, Callable] = {
     "draw_if_gone": _op_draw_if_gone,
     "remove_iid": _op_remove_iid,
     "remove_choice": _op_remove_choice,
+    "weaken_choice": _op_weaken_choice,
 }
 
 
@@ -433,13 +447,24 @@ def _adjacent_enemy_targets(state, unit, cr, max_strength=None) -> list:
     return out
 
 
-def _bite(n: Optional[int]):
-    """"Roar: Bite N.": remove an adjacent enemy of strength N or less (None: any adjacent enemy, the Giant Hunter's)."""
+def _remove_adjacent(state, unit, cr):
+    """"Roar: remove an adjacent enemy." (the Giant Hunter)."""
+    targets = _adjacent_enemy_targets(state, unit, cr)
+    if targets:
+        state.effect_stack.append({"op": "remove_choice", "chooser": unit.owner, "by_card": unit.card_id,
+                                   "options": targets, "optional": False})
+
+
+def _weaken(n: int):
+    """"Roar: give an adjacent enemy -N strength.": for good, never below 0; at 0 it stays. Not a removal, so Armor
+    doesn't stop it; Stealth hides from it."""
     def roar(state, unit, cr):
-        targets = _adjacent_enemy_targets(state, unit, cr, n)
+        targets = [nb for nb in state.game_map.neighbors(cr)
+                   if (top := state.top_unit(nb)) is not None and top.owner != unit.owner
+                   and statics.can_be_chosen(state, top, unit.owner)]
         if targets:
-            state.effect_stack.append({"op": "remove_choice", "chooser": unit.owner, "by_card": unit.card_id,
-                                       "options": targets, "optional": False})
+            state.effect_stack.append({"op": "weaken_choice", "chooser": unit.owner, "by_card": unit.card_id,
+                                       "options": targets, "amount": n})
     return roar
 
 
@@ -460,15 +485,16 @@ def _draw_if_it_removes(state, unit, covered):
                                "by_card": unit.card_id, "by_iid": unit.iid})
 
 
-# The Hunters bite as far as their text says (Martin, 2026-11-20, his table).
-BITES = {"hunter_2": 2, "hunter_3": 3, "hunter_4": 4, "hunter_5": 5, "hunter_6": 6, "hunter_7": 7, "giant_hunter": None}
+# The Hunters' -N, as their text says (Martin, 2026-11-21: "change Bite back").
+WEAKENS = {"hunter_2": 2, "hunter_3": 3, "hunter_4": 4, "hunter_5": 5, "hunter_6": 6, "hunter_7": 7}
 CANTRIPS = ("cantrip_2", "cantrip_3", "cantrip_4")
 DEATH_DRAWS = ("death_draw_1",)
 KILL_DRAWS = ("kill_draw_2",)
 DOUBLE_RAIDERS = ("double_raid_4",)
 
 EFFECTS: dict[str, dict[str, Callable]] = {
-    **{cid: {"on_place": _bite(n)} for cid, n in BITES.items()},
+    **{cid: {"on_place": _weaken(n)} for cid, n in WEAKENS.items()},
+    "giant_hunter": {"on_place": _remove_adjacent},
     **{cid: {"on_place": _draw_a_card} for cid in CANTRIPS},
     **{cid: {"on_death": _death_draw} for cid in DEATH_DRAWS},
     **{cid: {"on_cover": _draw_if_it_removes} for cid in KILL_DRAWS},

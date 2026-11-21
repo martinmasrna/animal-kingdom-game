@@ -1,5 +1,5 @@
-"""Strength: one number, wherever it matters (covering, a Bite's reach, a raid's food). A card's printed strength, or a
-Shade's live count; never below 0."""
+"""Strength: one number, wherever it matters (covering, a raid's food). A card's printed strength, or a
+Shade's live count, plus what effects have added to it (the Hunters' -N); never below 0."""
 
 from __future__ import annotations
 
@@ -37,4 +37,4 @@ def card_strength(state: GameState, card_id: str, owner: str) -> int:
 
 
 def effective_strength(state: GameState, unit: UnitInstance) -> int:
-    return card_strength(state, unit.card_id, unit.owner)
+    return max(0, card_strength(state, unit.card_id, unit.owner) + unit.strength_mod)

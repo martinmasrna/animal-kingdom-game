@@ -31,27 +31,29 @@ def other_player(player: str) -> str:
 class UnitInstance:
     """One card instance: a card id, its owner and a unique instance id. The same instance moves from hand to board."""
 
-    __slots__ = ("card_id", "owner", "iid", "retaliation_used")
+    __slots__ = ("card_id", "owner", "iid", "retaliation_used", "strength_mod")
 
-    def __init__(self, card_id: str, owner: str, iid: int, retaliation_used: bool = False):
+    def __init__(self, card_id: str, owner: str, iid: int, retaliation_used: bool = False, strength_mod: int = 0):
         self.card_id = card_id
         self.owner = owner
         self.iid = iid
         self.retaliation_used = retaliation_used   # Spikes: spent on the first enemy that covers it
+        self.strength_mod = strength_mod           # what effects have added to its strength, for good (the Hunters' -N)
 
     def to_dict(self) -> dict:
-        return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid, "retaliation_used": self.retaliation_used}
+        return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid, "retaliation_used": self.retaliation_used,
+                "strength_mod": self.strength_mod}
 
     @staticmethod
     def from_dict(d: dict) -> "UnitInstance":
-        return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("retaliation_used", False))
+        return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("retaliation_used", False), d.get("strength_mod", 0))
 
     def __repr__(self) -> str:
         return f"UnitInstance({self.card_id!r}, {self.owner!r}, {self.iid})"
 
 
 def _copy_unit(u: UnitInstance) -> UnitInstance:
-    return UnitInstance(u.card_id, u.owner, u.iid, u.retaliation_used)
+    return UnitInstance(u.card_id, u.owner, u.iid, u.retaliation_used, u.strength_mod)
 
 
 @dataclass(frozen=True)

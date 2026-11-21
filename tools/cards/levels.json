@@ -538,6 +538,15 @@
       },
       "by": "claude",
       "at": 1795201447
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795263082
     }
   },
   "shade_ally": {
@@ -562,6 +571,15 @@
       },
       "by": "claude",
       "at": 1795201447
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795263082
     }
   },
   "shade_enemy": {
@@ -586,6 +604,15 @@
       },
       "by": "claude",
       "at": 1795201447
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795263082
     }
   },
   "shade_food": {
@@ -611,6 +638,15 @@
       "by": "claude",
       "at": 1795201689,
       "note": "out of the collection (in the reserve)"
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795263082
     }
   },
   "shade_removed": {
@@ -635,6 +671,15 @@
       },
       "by": "claude",
       "at": 1795201448
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795263082
     }
   },
   "hunter_3": {
@@ -646,7 +691,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795203264
+      "at": 1795263081
     },
     "animal": {
       "review": {
@@ -670,7 +715,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795203264
+      "at": 1795263081
     },
     "animal": {
       "review": {
@@ -694,7 +739,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795203264
+      "at": 1795263081
     },
     "animal": {
       "review": {
@@ -718,7 +763,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795203264
+      "at": 1795263081
     },
     "animal": {
       "review": {
@@ -742,7 +787,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795203264
+      "at": 1795263081
     },
     "animal": {
       "review": {
@@ -766,7 +811,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795203264
+      "at": 1795263081
     },
     "animal": {
       "review": {
@@ -800,6 +845,15 @@
       },
       "by": "claude",
       "at": 1795199418
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795263081
     }
   },
   "warlord_legend": {

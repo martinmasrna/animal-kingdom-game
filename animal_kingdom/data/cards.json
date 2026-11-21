@@ -160,7 +160,7 @@
       "dynamic_strength": "hand_count",
       "keywords": [],
       "text": "Has +1 strength for each card in your hand.",
-      "cost": 5
+      "cost": 3
     },
     {
       "id": "shade_ally",
@@ -171,7 +171,7 @@
       "dynamic_strength": "ally_count",
       "keywords": [],
       "text": "Has +1 strength for each ally.",
-      "cost": 5
+      "cost": 3
     },
     {
       "id": "shade_enemy",
@@ -182,7 +182,7 @@
       "dynamic_strength": "enemy_count",
       "keywords": [],
       "text": "Has +1 strength for each enemy.",
-      "cost": 5
+      "cost": 3
     },
     {
       "id": "shade_food",
@@ -193,7 +193,7 @@
       "dynamic_strength": "food_count",
       "keywords": [],
       "text": "Has +1 strength for each food you have.",
-      "cost": 5
+      "cost": 3
     },
     {
       "id": "shade_removed",
@@ -204,7 +204,7 @@
       "dynamic_strength": "opp_removed_count",
       "keywords": [],
       "text": "Has +1 strength for each animal in your opponent's Remove Pile.",
-      "cost": 5
+      "cost": 3
     },
     {
       "id": "hunter_3",
@@ -212,9 +212,9 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 3,
-      "keywords": [],
-      "text": "Roar: Bite 3.",
-      "cost": 3
+      "text": "Roar: give an adjacent enemy -3 strength.",
+      "cost": 3,
+      "keywords": []
     },
     {
       "id": "hunter_5",
@@ -222,9 +222,9 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 3,
-      "keywords": [],
-      "text": "Roar: Bite 5.",
-      "cost": 4
+      "text": "Roar: give an adjacent enemy -5 strength.",
+      "cost": 4,
+      "keywords": []
     },
     {
       "id": "hunter_7",
@@ -232,9 +232,9 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 3,
-      "keywords": [],
-      "text": "Roar: Bite 7.",
-      "cost": 5
+      "text": "Roar: give an adjacent enemy -7 strength.",
+      "cost": 5,
+      "keywords": []
     },
     {
       "id": "hunter_6",
@@ -242,9 +242,9 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 2,
-      "keywords": [],
-      "text": "Roar: Bite 6.",
-      "cost": 4
+      "text": "Roar: give an adjacent enemy -6 strength.",
+      "cost": 4,
+      "keywords": []
     },
     {
       "id": "hunter_4",
@@ -252,9 +252,9 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 4,
-      "keywords": [],
-      "text": "Roar: Bite 4.",
-      "cost": 5
+      "text": "Roar: give an adjacent enemy -4 strength.",
+      "cost": 5,
+      "keywords": []
     },
     {
       "id": "hunter_2",
@@ -262,16 +262,16 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 6,
-      "keywords": [],
-      "text": "Roar: Bite 2.",
-      "cost": 6
+      "text": "Roar: give an adjacent enemy -2 strength.",
+      "cost": 6,
+      "keywords": []
     },
     {
       "id": "giant_hunter",
       "name": "Giant Hunter",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 3,
+      "base_strength": 10,
       "keywords": [],
       "text": "Roar: remove an adjacent enemy.",
       "cost": 5
