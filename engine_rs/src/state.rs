@@ -32,7 +32,7 @@ impl Unit {
 const NO_UNIT: Unit = Unit { card: 0, owner: 0, retaliation_used: false, iid: -1, strength_mod: 0, cost_mod: 0 };
 
 /// The board: each tile's stack of units, bottom to top; the top unit holds the tile. A stack is deeper than one only
-/// between a cover and the removal of what it covered (or for good when a turn cap dropped that removal), so the tops
+/// between a cover and the removal of what it covered, so the tops
 /// are a flat array and everything beneath them one short list. `order` is the order the occupied tiles were taken in,
 /// which the rules read (the animals at 0 strength are removed in it).
 #[derive(Clone, Debug)]

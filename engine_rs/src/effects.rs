@@ -340,6 +340,23 @@ fn remove_specific(st: &mut State, cr: Tile, iid: i32, by_player: Option<Player>
     true
 }
 
+/// A turn cap cut the turn's effects short: what a cover left beneath it is removed now, by the rules and with nothing
+/// set off (the effects are over), so no animal stays buried.
+pub fn remove_buried(st: &mut State) {
+    if !st.board.has_buried() {
+        return;
+    }
+    let tiles: SmallVec<[Tile; 24]> = st.board.tiles().iter().copied().collect();
+    for t in tiles {
+        let Some(top) = st.board.top(t) else { continue };
+        for u in st.board.buried_of(t) {
+            st.emit(Ev::Remove { cr: t, iid: u.iid, card: u.card, owner: u.owner, by: Some(top.owner) });
+            st.board.remove(t, u.iid);
+            st.pile_add(u.card, u.owner);
+        }
+    }
+}
+
 pub fn gain_food(st: &mut State, player: Player, amount: i32, income: bool) {
     if amount <= 0 {
         return;

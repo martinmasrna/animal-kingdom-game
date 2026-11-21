@@ -32,9 +32,9 @@ DECK = ([f"wisp_{n}" for n in range(1, 7) for _ in range(2)] + [f"flight_{n}" fo
         + ["cantrip_2", "cantrip_2", "spikes_3", "spikes_3", "warlord_legend"])
 
 
-def state(*, turn=0, current="A", hands=None, decks=None, food=None, leaders=None) -> GameState:
+def state(*, turn=0, current="A", hands=None, decks=None, food=None, leaders=None, config=CFG) -> GameState:
     """A bare position: turn_counter `turn` (A's Nth own turn is turn 2N-2), nothing pending."""
-    s = GameState(BOARD, CARDS, CFG, board={}, hands={"A": [], "B": []},
+    s = GameState(BOARD, CARDS, config, board={}, hands={"A": [], "B": []},
                   decks={p: list((decks or {}).get(p, ["wisp_1"] * 5)) for p in "AB"},
                   remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A", turn_counter=turn,
                   leaders={p: {"id": lid} for p, lid in (leaders or {}).items()})
@@ -99,6 +99,31 @@ def test_opening_hands_are_three_and_four_and_the_turn_card_comes():
         rules.apply_action(s, ChoiceAction(SKIP))
     rules.apply_action(s, PassAction())
     assert len(s.hands["B"]) == 5
+
+
+def test_a_turn_the_cap_ends_leaves_no_animal_buried():
+    # the cap ends the turn while the Hunter's Roar still waits for its target: the animal it covered goes all the same
+    s = state(turn=11, hands={"A": ["hunter_4"]}, config=CFG.sweep(max_actions_per_turn=1))
+    put(s, "1,1", "wisp_1", "B")
+    put(s, "2,1", "wisp_2", "B")
+    rules.apply_action(s, PlaceAction("hunter_4", ("cr", "1,1")))
+    assert s.current == "B" and s.pending is None and [c["cap"] for c in s.caps] == ["actions"]
+    assert [u.card_id for u in s.board["1,1"]] == ["hunter_4"] and s.remove_pile == ["wisp_1"]
+
+
+def test_the_turn_limit_ends_the_game_on_food_and_nothing_is_legal_after():
+    s = state(turn=0, food={"A": 4, "B": 3}, config=CFG.sweep(max_turns=2))
+    rules.apply_action(s, PassAction())
+    assert s.result is None
+    rules.apply_action(s, PassAction())
+    assert (s.result.winner, s.result.reason) == ("A", "max_turns") and rules.is_terminal(s) == s.result
+    assert rules.legal_actions(s) == [] and not rules.can_pass(s)
+    try:
+        rules.apply_action(s, PassAction())
+    except rules.EngineError:
+        pass
+    else:
+        raise AssertionError("an action after the game's end was accepted")
 
 
 def test_ending_turns_unplayed_never_ends_the_game():

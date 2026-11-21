@@ -16,7 +16,7 @@ use crate::state::*;
 /// says so). Empty once the game is over.
 pub fn legal_actions(st: &State) -> Vec<Action> {
     let mut out = Vec::new();
-    if st.result.is_some() {
+    if is_terminal(st).is_some() {
         return out;
     }
     if let Some(p) = &st.pending {
@@ -39,7 +39,7 @@ pub fn legal_actions(st: &State) -> Vec<Action> {
 
 /// Ending the turn is legal whenever nothing is resolving.
 pub fn can_pass(st: &State) -> bool {
-    st.result.is_none() && st.pending.is_none() && st.effect_stack.is_empty()
+    is_terminal(st).is_none() && st.pending.is_none() && st.effect_stack.is_empty()
 }
 
 /// Every play from hand the mana left pays for, and the leader's power while it pays for that.
@@ -129,7 +129,7 @@ pub fn apply_logged(st: &mut State, action: &Action, by: Option<Player>) -> Resu
 /// Apply one action (a play, the leader's power, ending the turn, or a pending choice). An Err unless it is legal; a bot
 /// applying an action it just drew from `legal_actions` passes validate = false.
 pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(), String> {
-    if st.result.is_some() {
+    if is_terminal(st).is_some() {
         return Err("cannot act: the game is over".into());
     }
     if let Action::Pass = action {
@@ -170,6 +170,7 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
         }
         st.pending = None;
         st.effect_stack.clear();
+        effects::remove_buried(st); // the cover's own removal was among what the cap dropped
         end_turn(st)?;
     }
     Ok(())
@@ -192,7 +193,11 @@ fn end_turn(st: &mut State) -> Result<(), String> {
     st.emit(Ev::TurnStart { player: st.current, turn: st.turn_counter });
     effects::draw_cards(st, st.current, st.cfg().turn_draw_count); // the turn's free card
     effects::start_of_turn(st, st.current);
-    effects::resolve(st)
+    effects::resolve(st)?;
+    if st.result.is_none() {
+        st.result = is_terminal(st); // the turn limit: the game is over, and the position says so
+    }
+    Ok(())
 }
 
 // ------------------------------------------------------------------ regions, food, the end
