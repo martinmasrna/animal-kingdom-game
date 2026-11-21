@@ -106,7 +106,7 @@
       "name": "Hand Djinn",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 8,
+      "base_strength": 10,
       "keywords": [],
       "text": "Costs 1 less for each card in your hand.",
       "cost": 10
@@ -116,7 +116,7 @@
       "name": "Ally Djinn",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 8,
+      "base_strength": 10,
       "keywords": [],
       "text": "Costs 1 less for each ally.",
       "cost": 10
@@ -126,7 +126,7 @@
       "name": "Enemy Djinn",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 8,
+      "base_strength": 10,
       "keywords": [],
       "text": "Costs 1 less for each enemy.",
       "cost": 10
@@ -146,7 +146,7 @@
       "name": "Remove Djinn",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 8,
+      "base_strength": 10,
       "keywords": [],
       "text": "Costs 1 less for each animal in your opponent's Remove Pile.",
       "cost": 10
@@ -271,7 +271,7 @@
       "name": "Giant Hunter",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 10,
+      "base_strength": 3,
       "keywords": [],
       "text": "Roar: remove an adjacent enemy.",
       "cost": 5
