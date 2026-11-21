@@ -1,0 +1,811 @@
+{
+ "cards": {
+  "wisp_1": {
+   "id": "wisp_1",
+   "name": "Wisp 1",
+   "rarity": "common",
+   "str": 2,
+   "text": "",
+   "kw": [],
+   "mana": 1,
+   "fig": [
+    400,
+    416
+   ]
+  },
+  "wisp_2": {
+   "id": "wisp_2",
+   "name": "Wisp 2",
+   "rarity": "common",
+   "str": 4,
+   "text": "",
+   "kw": [],
+   "mana": 2,
+   "fig": [
+    400,
+    416
+   ]
+  },
+  "wisp_3": {
+   "id": "wisp_3",
+   "name": "Wisp 3",
+   "rarity": "common",
+   "str": 6,
+   "text": "",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    400,
+    416
+   ]
+  },
+  "wisp_4": {
+   "id": "wisp_4",
+   "name": "Wisp 4",
+   "rarity": "common",
+   "str": 8,
+   "text": "",
+   "kw": [],
+   "mana": 4,
+   "fig": [
+    400,
+    416
+   ]
+  },
+  "wisp_5": {
+   "id": "wisp_5",
+   "name": "Wisp 5",
+   "rarity": "common",
+   "str": 10,
+   "text": "",
+   "kw": [],
+   "mana": 5,
+   "fig": [
+    400,
+    416
+   ]
+  },
+  "wisp_6": {
+   "id": "wisp_6",
+   "name": "Wisp 6",
+   "rarity": "common",
+   "str": 12,
+   "text": "",
+   "kw": [],
+   "mana": 6,
+   "fig": [
+    400,
+    416
+   ]
+  },
+  "djinn_hand": {
+   "id": "djinn_hand",
+   "name": "Hand Djinn",
+   "rarity": "common",
+   "str": 10,
+   "text": "Costs 1 less for each card in your hand.",
+   "kw": [],
+   "mana": 10,
+   "fig": [
+    400,
+    467
+   ]
+  },
+  "djinn_ally": {
+   "id": "djinn_ally",
+   "name": "Ally Djinn",
+   "rarity": "common",
+   "str": 10,
+   "text": "Costs 1 less for each ally.",
+   "kw": [],
+   "mana": 10,
+   "fig": [
+    400,
+    451
+   ]
+  },
+  "djinn_enemy": {
+   "id": "djinn_enemy",
+   "name": "Enemy Djinn",
+   "rarity": "common",
+   "str": 10,
+   "text": "Costs 1 less for each enemy.",
+   "kw": [],
+   "mana": 10,
+   "fig": [
+    400,
+    455
+   ]
+  },
+  "djinn_food": {
+   "id": "djinn_food",
+   "name": "Food Djinn",
+   "rarity": "common",
+   "str": 10,
+   "text": "Costs 1 less for each food you gained this game.",
+   "kw": [],
+   "mana": 10,
+   "fig": [
+    400,
+    451
+   ]
+  },
+  "djinn_removed": {
+   "id": "djinn_removed",
+   "name": "Remove Djinn",
+   "rarity": "common",
+   "str": 10,
+   "text": "Costs 1 less for each animal in your opponent's Remove Pile.",
+   "kw": [],
+   "mana": 10,
+   "fig": [
+    400,
+    433
+   ]
+  },
+  "shade_hand": {
+   "id": "shade_hand",
+   "name": "Hand Shade",
+   "rarity": "common",
+   "str": null,
+   "text": "Has +1 strength for each card in your hand.",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    400,
+    425
+   ]
+  },
+  "shade_ally": {
+   "id": "shade_ally",
+   "name": "Ally Shade",
+   "rarity": "common",
+   "str": null,
+   "text": "Has +1 strength for each ally.",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    400,
+    458
+   ]
+  },
+  "shade_enemy": {
+   "id": "shade_enemy",
+   "name": "Enemy Shade",
+   "rarity": "common",
+   "str": null,
+   "text": "Has +1 strength for each enemy.",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    400,
+    419
+   ]
+  },
+  "shade_food": {
+   "id": "shade_food",
+   "name": "Food Shade",
+   "rarity": "common",
+   "str": null,
+   "text": "Has +1 strength for each food you gained this game.",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    400,
+    403
+   ]
+  },
+  "shade_removed": {
+   "id": "shade_removed",
+   "name": "Remove Shade",
+   "rarity": "common",
+   "str": null,
+   "text": "Has +1 strength for each animal in your opponent's Remove Pile.",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    398,
+    459
+   ]
+  },
+  "hunter_3": {
+   "id": "hunter_3",
+   "name": "Hunter 2",
+   "rarity": "common",
+   "str": 2,
+   "text": "Roar: give an adjacent enemy -2 strength.",
+   "kw": [],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "hunter_5": {
+   "id": "hunter_5",
+   "name": "Hunter 4",
+   "rarity": "common",
+   "str": 4,
+   "text": "Roar: give an adjacent enemy -4 strength.",
+   "kw": [],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "hunter_7": {
+   "id": "hunter_7",
+   "name": "Hunter 6",
+   "rarity": "common",
+   "str": 6,
+   "text": "Roar: give an adjacent enemy -6 strength.",
+   "kw": [],
+   "mana": 6,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "hunter_6": {
+   "id": "hunter_6",
+   "name": "Hunter 5",
+   "rarity": "common",
+   "str": 5,
+   "text": "Roar: give an adjacent enemy -5 strength.",
+   "kw": [],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "hunter_4": {
+   "id": "hunter_4",
+   "name": "Hunter 3",
+   "rarity": "common",
+   "str": 3,
+   "text": "Roar: give an adjacent enemy -3 strength.",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "hunter_2": {
+   "id": "hunter_2",
+   "name": "Hunter 1",
+   "rarity": "common",
+   "str": 1,
+   "text": "Roar: give an adjacent enemy -1 strength.",
+   "kw": [],
+   "mana": 1,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "giant_hunter": {
+   "id": "giant_hunter",
+   "name": "Big Game Hunter",
+   "rarity": "common",
+   "str": 1,
+   "text": "Roar: remove an adjacent enemy.",
+   "kw": [],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "warlord_legend": {
+   "id": "warlord_legend",
+   "name": "Warlord",
+   "rarity": "legendary",
+   "str": 10,
+   "text": "",
+   "kw": [],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "raider_legend": {
+   "id": "raider_legend",
+   "name": "Raider",
+   "rarity": "legendary",
+   "str": 10,
+   "text": "",
+   "kw": [],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "sage_legend": {
+   "id": "sage_legend",
+   "name": "Sage",
+   "rarity": "legendary",
+   "str": 10,
+   "text": "",
+   "kw": [],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "flight_1": {
+   "id": "flight_1",
+   "name": "Flight 1",
+   "rarity": "common",
+   "str": 1,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 1,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "flight_2": {
+   "id": "flight_2",
+   "name": "Flight 2",
+   "rarity": "common",
+   "str": 2,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "flight_3": {
+   "id": "flight_3",
+   "name": "Flight 3",
+   "rarity": "common",
+   "str": 3,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 3,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "flight_5": {
+   "id": "flight_5",
+   "name": "Flight 5",
+   "rarity": "common",
+   "str": 5,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "hungry_1": {
+   "id": "hungry_1",
+   "name": "Hungry 1",
+   "rarity": "common",
+   "str": 2,
+   "text": "Hungry.",
+   "kw": [
+    "Hungry"
+   ],
+   "mana": 1,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "hungry_2": {
+   "id": "hungry_2",
+   "name": "Hungry 2",
+   "rarity": "common",
+   "str": 3,
+   "text": "Hungry.",
+   "kw": [
+    "Hungry"
+   ],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "hungry_3": {
+   "id": "hungry_3",
+   "name": "Hungry 3",
+   "rarity": "common",
+   "str": 4,
+   "text": "Hungry.",
+   "kw": [
+    "Hungry"
+   ],
+   "mana": 3,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "hungry_4": {
+   "id": "hungry_4",
+   "name": "Hungry 4",
+   "rarity": "common",
+   "str": 6,
+   "text": "Hungry.",
+   "kw": [
+    "Hungry"
+   ],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "spikes_1": {
+   "id": "spikes_1",
+   "name": "Spikes 1",
+   "rarity": "common",
+   "str": 1,
+   "text": "Spikes.",
+   "kw": [
+    "Spikes"
+   ],
+   "mana": 1,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "spikes_2": {
+   "id": "spikes_2",
+   "name": "Spikes 2",
+   "rarity": "common",
+   "str": 2,
+   "text": "Spikes.",
+   "kw": [
+    "Spikes"
+   ],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "spikes_3": {
+   "id": "spikes_3",
+   "name": "Spikes 3",
+   "rarity": "common",
+   "str": 3,
+   "text": "Spikes.",
+   "kw": [
+    "Spikes"
+   ],
+   "mana": 3,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "spikes_5": {
+   "id": "spikes_5",
+   "name": "Spikes 5",
+   "rarity": "common",
+   "str": 4,
+   "text": "Spikes.",
+   "kw": [
+    "Spikes"
+   ],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "cantrip_2": {
+   "id": "cantrip_2",
+   "name": "Cantrip 2",
+   "rarity": "common",
+   "str": 1,
+   "text": "Roar: draw a card.",
+   "kw": [],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "cantrip_3": {
+   "id": "cantrip_3",
+   "name": "Cantrip 3",
+   "rarity": "common",
+   "str": 2,
+   "text": "Roar: draw a card.",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "cantrip_4": {
+   "id": "cantrip_4",
+   "name": "Cantrip 4",
+   "rarity": "common",
+   "str": 4,
+   "text": "Roar: draw a card.",
+   "kw": [],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "death_draw_1": {
+   "id": "death_draw_1",
+   "name": "Death Draw 1",
+   "rarity": "common",
+   "str": 1,
+   "text": "Death: draw a card.",
+   "kw": [],
+   "mana": 1,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "kill_draw_2": {
+   "id": "kill_draw_2",
+   "name": "Kill Draw 2",
+   "rarity": "common",
+   "str": 2,
+   "text": "Roar: if this removes an enemy, draw a card.",
+   "kw": [],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "double_raid_4": {
+   "id": "double_raid_4",
+   "name": "Double Raid 4",
+   "rarity": "common",
+   "str": 6,
+   "text": "Its raids destroy double food.",
+   "kw": [],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "double_raid_2": {
+   "id": "double_raid_2",
+   "name": "Double Raid 2",
+   "rarity": "common",
+   "str": 3,
+   "text": "Its raids destroy double food.",
+   "kw": [],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "raid_draw_5": {
+   "id": "raid_draw_5",
+   "name": "Raid Draw 5",
+   "rarity": "common",
+   "str": 5,
+   "text": "Flight. After it raids, draw a card.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "flight_4": {
+   "id": "flight_4",
+   "name": "Flight 4",
+   "rarity": "common",
+   "str": 4,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "flight_6": {
+   "id": "flight_6",
+   "name": "Flight 6",
+   "rarity": "common",
+   "str": 6,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 6,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "scout_3": {
+   "id": "scout_3",
+   "name": "Scout 3",
+   "rarity": "common",
+   "str": 1,
+   "text": "Roar: Scout a card.",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "duplicating_spore": {
+   "id": "duplicating_spore",
+   "name": "Duplicating Spore",
+   "rarity": "common",
+   "str": 1,
+   "text": "Roar: place a Spore on an adjacent tile.",
+   "kw": [],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "mama_spore": {
+   "id": "mama_spore",
+   "name": "Mama Spore",
+   "rarity": "common",
+   "str": 1,
+   "text": "Roar: put 2 Spores into your hand.",
+   "kw": [],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "elf_legend": {
+   "id": "elf_legend",
+   "name": "Elf",
+   "rarity": "legendary",
+   "str": 10,
+   "text": "",
+   "kw": [],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "assassin_legend": {
+   "id": "assassin_legend",
+   "name": "Assassin",
+   "rarity": "legendary",
+   "str": 10,
+   "text": "",
+   "kw": [],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "rhino": {
+   "id": "rhino",
+   "name": "Rhino",
+   "rarity": "common",
+   "str": 8,
+   "text": "Roar: remove all adjacent enemies with strength 5 or less.",
+   "kw": [],
+   "mana": 8,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "albatross": {
+   "id": "albatross",
+   "name": "Albatross",
+   "rarity": "common",
+   "str": 4,
+   "text": "Flight. Roar: remove all adjacent enemies with strength 5 or less.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 8,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "young_rhino": {
+   "id": "young_rhino",
+   "name": "Young Rhino",
+   "rarity": "common",
+   "str": 4,
+   "text": "Roar: remove all adjacent enemies with strength 3 or less.",
+   "kw": [],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  "young_albatross": {
+   "id": "young_albatross",
+   "name": "Young Albatross",
+   "rarity": "common",
+   "str": 2,
+   "text": "Flight. Roar: remove all adjacent enemies with strength 3 or less.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  }
+ },
+ "leaders": {
+  "warlord_legend": {
+   "id": "warlord_legend",
+   "kind": "passive",
+   "text": "When you cover an enemy, gain 1 food.",
+   "mana": null
+  },
+  "raider_legend": {
+   "id": "raider_legend",
+   "kind": "passive",
+   "text": "Your raids destroy 1 more food.",
+   "mana": null
+  },
+  "sage_legend": {
+   "id": "sage_legend",
+   "kind": "power",
+   "text": "Draw a card.",
+   "mana": 3
+  },
+  "elf_legend": {
+   "id": "elf_legend",
+   "kind": "passive",
+   "text": "Your regions produce 1 more food.",
+   "mana": null
+  },
+  "assassin_legend": {
+   "id": "assassin_legend",
+   "kind": "passive",
+   "text": "After you play your third card in a turn, draw a card.",
+   "mana": null
+  }
+ }
+}

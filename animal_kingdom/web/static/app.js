@@ -9,6 +9,7 @@ import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrai
 import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo, powerCard, powerCostHTML } from './mana.js';
 import { playFood } from './foodfx.js';
 import { decodeDeck } from './deckcode.js';
+import { patchScreen, newestPatch } from './patch.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripsHTML } from './collection.js';
 import { onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
@@ -191,6 +192,7 @@ function route() {
   if (parts[0] === 'play') return manaHome({ play: true });   // Play: a deck and a friend
   if (parts[0] === 'practice') return manaHome({ practice: true });   // Practice: your deck and the bot's
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
+  if (parts[0] === 'patch') { screen = 'patch'; return patchScreen(app, { version: parts[1], back: () => { location.hash = '#/'; }, seen: v => store('ak:patch', v) }); }
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'friend' && id) { manaHome(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'deck' && parts[1]) return deckLinkScreen(parts.slice(1).join('/'));
@@ -346,8 +348,14 @@ function manaHome(mode = {}) {
     app.innerHTML = `<div class="mhome"><div class="mtop"><a class="acct" href="#/account" data-tip="Account" aria-label="Account">${TOPICON.person}</a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button></div><div class="box">
       <h1>Animal Kingdom<small>A prototype</small></h1>
       <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><a class="go" id="mprac" href="#/practice">Practice</a><a class="go" id="mcoll" href="#/collection">Collection</a></div>
+      <a class="patchlink" id="mpatch" href="#/patch" hidden></a>
       </div></div>`;
     wireChatButton(document.getElementById('hchat'));
+    newestPatch().then(v => {   // the newest patch: named under the menu, and shown once to a returning player (one with a deck)
+      const a = document.getElementById('mpatch'); if (!v || !a) return;
+      a.textContent = `Patch ${v}`; a.hidden = false;
+      if (store('ak:patch') !== v && myDecks().length && screen === 'home') location.hash = '#/patch';
+    });
     return;
   }
   const own = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));

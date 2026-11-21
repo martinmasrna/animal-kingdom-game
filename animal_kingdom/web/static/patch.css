@@ -1,0 +1,25 @@
+/* Patch notes (patch.js). Spacing in 4px steps, gaps growing outward: a pair's cards 64, rows 44, pairs 128, a subsection
+   80, a section 104. A card is 150 wide and its frame reaches 16px past its box (--fr), so the text edges sit on the
+   frames, not the boxes. One column, two pairs wide. */
+.patch { --cw: 150px; --fr: 16px; --in: 64px; --out: 128px; display: flex; flex-direction: column; }
+.patch .pscroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; }
+.patch .pcol { width: calc(4 * var(--cw) + 2 * var(--in) + var(--out) + 2 * var(--fr)); max-width: calc(100vw - 32px); margin: 0 auto; padding: 48px 0 120px; }
+.patch h1 { margin: 0; font: 700 52px/1 'Fira Sans Condensed', sans-serif; color: #f4f0e8; }
+.patch .date { margin-top: 8px; font: 500 16px 'Fira Sans Condensed', sans-serif; color: #8f8a82; }
+.patch h2 { margin: 104px 0 0; font: 700 26px/1 'Fira Sans Condensed', sans-serif; color: #f0ece4; }
+.patch h3 { margin: 80px 0 0; font: 600 16px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #b4aea4; }
+.patch h2 + h3 { margin-top: 32px; }
+.patch ul.rules { margin: 24px 0 0; padding: 0 0 0 22px; }
+.patch ul.rules li { font: 500 19px/1.4 'Fira Sans Condensed', sans-serif; color: #e8e4dc; padding-left: 4px; }
+.patch ul.rules li + li { margin-top: 8px; }
+.patch ul.rules li::marker { color: #8f8a82; }
+.patch .pairs { display: grid; grid-template-columns: repeat(2, calc(2 * var(--cw) + var(--in))); column-gap: var(--out); row-gap: 44px; margin-top: calc(20px + var(--fr)); padding: 0 var(--fr); }
+.patch .pair { display: grid; grid-template-columns: var(--cw) var(--in) var(--cw); align-items: center; }
+.patch .row { display: flex; flex-wrap: wrap; gap: 44px 56px; margin-top: calc(20px + var(--fr)); padding: 0 var(--fr); }
+.patch .arrow { justify-self: center; width: 26px; height: 20px; opacity: .55;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 20'%3E%3Cpath d='M2 10h19M14 3l8 7-8 7' fill='none' stroke='%23e9e4da' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.patch .gone .mcard { filter: grayscale(1) brightness(.75); }
+.patch .pfoot { position: fixed; right: 24px; bottom: 20px; z-index: 5; }
+@media (max-width: 960px) { .patch .pairs { grid-template-columns: calc(2 * var(--cw) + var(--in)); } }
+.mhome .patchlink { display: inline-block; margin-top: 20px; font: 600 15px 'Fira Sans Condensed', sans-serif; color: #9a958c; text-decoration: none; }
+.mhome .patchlink:hover { color: #e8e4dc; }
