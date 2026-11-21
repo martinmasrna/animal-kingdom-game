@@ -1168,8 +1168,9 @@ function drawRail(G, d) {
   const lead = side => {
     const p = side === 'A' ? you : them, L = (G.leaders || {})[p];
     const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && L.spent;   // the gold ring says when your power can be used
-    // a power's cost in the token's drawer, where a card's strength sits (Martin, 2026-11-21); used this turn, "Used" under it
-    const isPow = L && L.kind === 'power', power = isPow && L.spent ? '<span class="lused">Used</span>' : '';
+    // a power's cost in the token's drawer, where a card's strength sits (Martin, 2026-11-21); used this turn, the token
+    // dims, no label (Martin, 2026-11-21: "remove AI-slop label")
+    const isPow = L && L.kind === 'power', power = '';
     const tok = L ? `<div class="ltok${isPow ? ' pw' : ''}${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:84px">${leaderToken(L.id, side, CARDS, 84)}${isPow ? powerCostHTML(L.cost ?? cost) : ''}</div></div>` : '';
     return `<div class="mlead ${side}">${tok}<div class="lt">${power}</div></div>`;
   };
