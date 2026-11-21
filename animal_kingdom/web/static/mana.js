@@ -8,7 +8,7 @@
 // The card's box is the piece's (--mw wide, the piece at its top left); the frame reaches past it on every side, so the
 // flight and the hand's measures, made for the piece, hold. Every length is in --mw, so it draws at any size.
 import { tokenHTML, tokenWidth } from './board.js';
-import { TW, TH } from './token.js';
+import { TW, TH, DRAWER_FRAC } from './token.js';
 import { KEYWORDS } from './card.js';
 
 const P = TH / TW;                          // the piece's height, in its widths
@@ -58,9 +58,13 @@ const COST_POS = (() => { if (typeof location === 'undefined') return 'top';
   const q = new URLSearchParams(location.search).get('cost');
   try { if (q) localStorage.setItem('ak:cost', q === 'corner' ? 'corner' : 'top'); return localStorage.getItem('ak:cost') === 'corner' ? 'corner' : 'top'; }
   catch { return q === 'corner' ? 'corner' : 'top'; } })();
-const COST_AT = COST_POS === 'top' ? box(X0 + (WC - GEM) / 2, Y0 - GH * .42, GEM, GH) : box(X0, Y0 + YS - GH / 4, GEM, GH);
+// On top, the cost is the strength's drawer turned over: a hexagon as tall as the drawer, its top point the piece's top
+// point and its two upper edges along the piece's (Martin, 2026-11-21: "inside hexagon with edges and top corner exactly
+// matching"), on the full card and on the piece alike (both measured from the piece).
+const TOP_H = DRAWER_FRAC, TOP_W = TOP_H / P, COST_TOP = box((1 - TOP_W) / 2, 0, TOP_W, TOP_H);
+const COST_AT = COST_POS === 'top' ? COST_TOP : box(X0, Y0 + YS - GH / 4, GEM, GH);
 // The piece alone (a deck tray, a shown hand): on its top point, or in its own upper-left corner, sharing its two edges.
-const PIECE_COST_AT = COST_POS === 'top' ? box(.35, -.3 * P * .42, .3, .3 * P) : box(0, .25 * P * (1 - .3), .3, .3 * P);
+const PIECE_COST_AT = COST_POS === 'top' ? COST_TOP : box(0, .25 * P * (1 - .3), .3, .3 * P);
 export const costOnTop = COST_POS === 'top';
 
 // One card. `c`: the card (CARDS[id], its text already the ruleset's); `str`: the strength to show; `cost`: its mana cost,

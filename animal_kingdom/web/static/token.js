@@ -28,6 +28,8 @@ const FIG_CLIP = poly([[CX - FAR, -TH], [CX + FAR, -TH], [CX + FAR, LOW - RISE],
 // heights, a digit half the drawer) (design sandbox screen/hex/art/numerals/README.md)
 const DRAWER_H = TH - NOTCH_Y, NUM_H = .6 * DRAWER_H, NUM_W = NUM_H * 2 / 1.2, NUM_CY = TH - DRAWER_H / 2;
 const NUM_BOX = `left:${px(CX - NUM_W / 2)};top:${py(NUM_CY - NUM_H / 2)};width:${px(NUM_W)};height:${py(NUM_H)}`;
+// the drawer's height as a share of the piece's width: the cost's hexagon mirrors it at the top point (mana.js)
+export const DRAWER_FRAC = DRAWER_H / TW;
 const hex = f => `/static/hex/${f}`;
 
 export const hasFigure = id => !!FIGS[id];
