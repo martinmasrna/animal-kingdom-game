@@ -25,7 +25,8 @@ class Config:
     turn_draw_count: int = 1             # the free card at the start of each turn, the first player's first included (Martin, 2026-11-21)
 
     hungry_food: int = 1                 # Hungry: the food its prey's removal gains (Martin, 2026-11-20)
-    shade_growth: int = 1                # the Shades: +1 strength for each of their count
+    shade_growth: int = 2                # the Shades: +2 strength for each of their count (Martin, 2026-11-21)
+    combo_djinn_discount: int = 2        # the Combo Djinn: "Costs 2 less for each card you played this turn."
     warlord_leader_food: int = 1         # the Warlord: "When you cover an enemy, gain 1 food."
     elf_card_region_bonus: int = 1       # the Elf's card: "Your regions produce 1 more food." (while it is on the board)
     assassin_card_discount: int = 1      # the Assassin's card: "Roar: reduce the cost of cards in your hand by 1."

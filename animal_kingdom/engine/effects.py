@@ -159,12 +159,15 @@ def _mulligan_replacement(deck, blacklist):
 # ============================================================== mana
 
 # The Djinn: "Costs 1 less for each ...": card id -> what it counts (strength.count).
-DJINN = {"djinn_hand": "hand", "djinn_ally": "ally", "djinn_enemy": "enemy", "djinn_region": "region"}
+DJINN = {"djinn_hand": "hand", "djinn_ally": "ally", "djinn_combo": "played", "djinn_region": "region"}
 
 
 def _base_cost(state: GameState, card_id: str, player: str) -> int:
     cost = state.cards[card_id].cost
-    return cost - count(state, player, DJINN[card_id]) if card_id in DJINN else cost
+    if card_id not in DJINN:
+        return cost
+    per = state.config.combo_djinn_discount if card_id == "djinn_combo" else 1   # "Costs 2 less for each card ..."
+    return cost - per * count(state, player, DJINN[card_id])
 
 
 def unit_cost(state: GameState, unit: UnitInstance) -> int:

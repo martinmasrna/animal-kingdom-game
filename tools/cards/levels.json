@@ -281,7 +281,7 @@
       "at": 1795263261
     }
   },
-  "djinn_enemy": {
+  "djinn_combo": {
     "effect": {
       "review": {
         "prev_lv": "empty",
@@ -290,7 +290,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795196488
+      "at": 1795291399
     },
     "animal": {
       "review": {
@@ -302,7 +302,7 @@
         }
       },
       "by": "claude",
-      "at": 1795201447
+      "at": 1795291399
     },
     "strength": {
       "review": {
@@ -348,7 +348,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795196917
+      "at": 1795291399
     },
     "animal": {
       "review": {
@@ -369,7 +369,7 @@
         "prev": 5
       },
       "by": "claude",
-      "at": 1795263082
+      "at": 1795291399
     }
   },
   "shade_ally": {
@@ -381,7 +381,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795196918
+      "at": 1795291399
     },
     "animal": {
       "review": {
@@ -402,10 +402,10 @@
         "prev": 5
       },
       "by": "claude",
-      "at": 1795263082
+      "at": 1795291399
     }
   },
-  "shade_enemy": {
+  "shade_combo": {
     "effect": {
       "review": {
         "prev_lv": "empty",
@@ -414,7 +414,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795196918
+      "at": 1795291399
     },
     "animal": {
       "review": {
@@ -426,7 +426,7 @@
         }
       },
       "by": "claude",
-      "at": 1795201447
+      "at": 1795291399
     },
     "cost": {
       "review": {
@@ -435,7 +435,16 @@
         "prev": 5
       },
       "by": "claude",
-      "at": 1795263082
+      "at": 1795291399
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "enemy_count"
+      },
+      "by": "claude",
+      "at": 1795291399
     }
   },
   "shade_region": {
@@ -447,7 +456,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795285398
+      "at": 1795291399
     },
     "animal": {
       "review": {
@@ -469,7 +478,7 @@
         "prev": 5
       },
       "by": "claude",
-      "at": 1795263082
+      "at": 1795291399
     },
     "strength": {
       "review": {

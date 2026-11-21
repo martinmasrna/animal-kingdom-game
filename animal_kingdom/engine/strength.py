@@ -3,11 +3,11 @@ Shade's live count, plus what effects have added to it (the Hunters' -N); never 
 
 from __future__ import annotations
 
-from .state import EngineError, GameState, UnitInstance, other_player
+from .state import EngineError, GameState, UnitInstance
 
 # A Shade's count: "+1 strength for each card in your hand, ally, enemy, region you control". The Djinn's discounts count
 # the same things (effects.mana_cost).
-COUNTS = {"hand_count": "hand", "ally_count": "ally", "enemy_count": "enemy", "region_count": "region"}
+COUNTS = {"hand_count": "hand", "ally_count": "ally", "region_count": "region", "played_count": "played"}
 
 
 def count(state: GameState, player: str, what: str) -> int:
@@ -15,11 +15,12 @@ def count(state: GameState, player: str, what: str) -> int:
     the regions they control."""
     if what == "hand":
         return len(state.hands[player])
-    if what in ("ally", "enemy"):
-        side = player if what == "ally" else other_player(player)
-        return sum(1 for stack in state.board.values() if stack and stack[-1].owner == side)
+    if what == "ally":
+        return sum(1 for stack in state.board.values() if stack and stack[-1].owner == player)
     if what == "region":   # the regions whose every tile `player` holds (statics.regions_of, which imports this module)
         return sum(1 for r in state.game_map.regions.values() if all(state.owner_of(c) == player for c in r.corners))
+    if what == "played":   # the cards they played from hand this turn: none while it isn't their turn
+        return state.played_this_turn if state.current == player else 0
     raise EngineError(f"unknown count {what!r}")
 
 

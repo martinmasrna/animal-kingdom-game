@@ -2,8 +2,8 @@
 // never reorder or remove, or every shared deck code changes meaning. A web test checks every card in the pool has one.
 export const CARD_NUMS = [
   "wisp_1", "wisp_2", "wisp_3", "wisp_4", "wisp_5", "wisp_6", "wisp_7", "wisp_8",
-  "wisp_9", "wisp_10", "djinn_hand", "djinn_ally", "djinn_enemy", "djinn_region", "djinn_removed", "shade_hand",
-  "shade_ally", "shade_enemy", "shade_region", "shade_removed", "spiky_3", "spiky_4", "flyer_2", "flyer_5",
+  "wisp_9", "wisp_10", "djinn_hand", "djinn_ally", "djinn_combo", "djinn_region", "djinn_removed", "shade_hand",
+  "shade_ally", "shade_combo", "shade_region", "shade_removed", "spiky_3", "spiky_4", "flyer_2", "flyer_5",
   "flyer_7", "flyer_10", "hunter_3", "hunter_5", "hunter_7", "hunter_6", "hunter_4", "hunter_2",
   "giant_hunter", "venomous_2", "venomous_3", "venomous_4", "sneaky_6", "sneaky_7", "sneaky_8", "sneaky_10",
   "armored_2", "armored_3", "armored_4", "armored_5", "armored_6", "armored_7", "armored_8", "armored_10",
@@ -50,5 +50,5 @@ export const CARD_NUMS = [
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck
 // code's number now means; the server moves players' saved decks the same way (web/server.py RENAMED_IDS, kept equal by a test).
-export const SUCCESSOR = { shade_food: 'shade_region',  djinn_food: 'djinn_region', };
+export const SUCCESSOR = { shade_enemy: 'shade_combo',  djinn_enemy: 'djinn_combo',  shade_food: 'shade_region',  djinn_food: 'djinn_region', };
 

@@ -82,14 +82,14 @@
       "cost": 10
     },
     {
-      "id": "djinn_enemy",
-      "name": "Enemy Djinn",
+      "id": "djinn_combo",
+      "name": "Combo Djinn",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 10,
-      "keywords": [],
-      "text": "Costs 1 less for each enemy.",
-      "cost": 10
+      "text": "Costs 2 less for each card you played this turn.",
+      "cost": 10,
+      "keywords": []
     },
     {
       "id": "djinn_region",
@@ -108,9 +108,9 @@
       "rarity": "common",
       "base_strength": "dynamic",
       "dynamic_strength": "hand_count",
-      "keywords": [],
-      "text": "Has +1 strength for each card in your hand.",
-      "cost": 3
+      "text": "Has +2 strength for each card in your hand.",
+      "cost": 5,
+      "keywords": []
     },
     {
       "id": "shade_ally",
@@ -119,20 +119,20 @@
       "rarity": "common",
       "base_strength": "dynamic",
       "dynamic_strength": "ally_count",
-      "keywords": [],
-      "text": "Has +1 strength for each ally.",
-      "cost": 3
+      "text": "Has +2 strength for each ally.",
+      "cost": 5,
+      "keywords": []
     },
     {
-      "id": "shade_enemy",
-      "name": "Enemy Shade",
+      "id": "shade_combo",
+      "name": "Combo Shade",
       "status": "collectible",
       "rarity": "common",
       "base_strength": "dynamic",
-      "dynamic_strength": "enemy_count",
-      "keywords": [],
-      "text": "Has +1 strength for each enemy.",
-      "cost": 3
+      "dynamic_strength": "played_count",
+      "text": "Has +2 strength for each card you played this turn.",
+      "cost": 5,
+      "keywords": []
     },
     {
       "id": "shade_region",
@@ -141,8 +141,8 @@
       "rarity": "common",
       "base_strength": "dynamic",
       "dynamic_strength": "region_count",
-      "text": "Has +1 strength for each region you control.",
-      "cost": 3,
+      "text": "Has +2 strength for each region you control.",
+      "cost": 5,
       "keywords": []
     },
     {

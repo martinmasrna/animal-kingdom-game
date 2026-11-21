@@ -12,7 +12,7 @@ RARITIES = {"common", "legendary"}
 KEYWORDS = {"Flight", "Armor", "Stealth", "Spikes", "Poison", "Hungry"}
 # A dynamic strength: the Shades' "+1 for each card in your hand, ally, enemy, food of yours, animal in your opponent's
 # Remove Pile".
-DYNAMIC_STRENGTHS = {"hand_count", "ally_count", "enemy_count", "region_count"}
+DYNAMIC_STRENGTHS = {"hand_count", "ally_count", "region_count", "played_count"}
 # "collectible": a deck may hold it. "reserve": benched, out of every deck. A "planned" record is no card yet: the loader
 # skips it.
 STATUSES = {"collectible", "reserve"}

@@ -7,7 +7,7 @@ from ..engine.cards import load_cards
 
 CARDS = load_cards()
 
-RENAMED_IDS = {"shade_food": "shade_region", "djinn_food": "djinn_region", }
+RENAMED_IDS = {"shade_enemy": "shade_combo", "djinn_enemy": "djinn_combo", "shade_food": "shade_region", "djinn_food": "djinn_region", }
 
 
 def renamed(x):

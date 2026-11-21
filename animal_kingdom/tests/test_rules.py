@@ -281,7 +281,7 @@ def test_an_animal_at_zero_strength_is_removed_armor_or_not():
     assert "2,1" not in s.board                                 # the rules' removal: Armor doesn't hold
     s = state(turn=11, hands={"A": ["shade_hand", "test_one"]})
     rules.apply_action(s, PlaceAction("shade_hand", ("cr", "1,1")))
-    assert effective_strength(s, s.board["1,1"][0]) == 1        # one card left in hand
+    assert effective_strength(s, s.board["1,1"][0]) == CFG.shade_growth   # one card left in hand
     rules.apply_action(s, PlaceAction("test_one", ("cr", "1,2")))
     assert "1,1" not in s.board                                 # the hand emptied: the Hand Shade is at 0, removed
 
@@ -408,21 +408,25 @@ def test_the_young_rhino_and_albatross_remove_adjacent_enemies_up_to_three_and_t
 
 
 def test_djinn_cost_less_for_each_of_their_count():
-    s = state(hands={"A": ["djinn_hand", "djinn_ally", "djinn_enemy", "djinn_region"]})
-    for cr in ("1,1", "1,2", "2,2"):                                  # three tiles: one region of A's
+    s = state(turn=19, hands={"A": ["djinn_hand", "djinn_ally", "djinn_combo", "djinn_region", "wisp_1", "wisp_1"]})
+    for cr in ("1,1", "1,2", "2,2"):                                  # three allies, one region of A's
         put(s, cr, "wisp_1", "A")
-    put(s, "3,3", "wisp_1", "B")
-    assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_enemy", "djinn_region")} == \
-        {"djinn_hand": 6, "djinn_ally": 7, "djinn_enemy": 9, "djinn_region": 9}
-    assert mana_cost(s, "djinn_region", "B") == 10
+    assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_combo", "djinn_region")} == \
+        {"djinn_hand": 4, "djinn_ally": 7, "djinn_combo": 10, "djinn_region": 9}
+    rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,3"))); rules.apply_action(s, PlaceAction("wisp_1", ("cr", "2,3")))
+    assert mana_cost(s, "djinn_combo") == 10 - 2 * CFG.combo_djinn_discount   # two cards played this turn
+    assert mana_cost(s, "djinn_combo", "B") == 10                     # B played none: it isn't their turn
 
 
 def test_shade_strength_is_its_count():
-    s = state(hands={"A": ["wisp_1", "wisp_1", "wisp_1"]})
-    shades = {k: put(s, cr, f"shade_{k}", "A") for k, cr in (("hand", "1,1"), ("ally", "1,2"), ("enemy", "1,3"), ("region", "2,2"))}
-    put(s, "4,1", "wisp_1", "B"); put(s, "4,2", "wisp_1", "B")
+    s = state(turn=19, hands={"A": ["wisp_1", "wisp_1", "wisp_1", "shade_combo"]})
+    shades = {k: put(s, cr, f"shade_{k}", "A") for k, cr in (("hand", "1,1"), ("ally", "1,2"), ("region", "2,2"))}
     assert rules.region_income(s, "A") == 1                          # 1,1 1,2 2,2: one region
-    assert {k: effective_strength(s, u) for k, u in shades.items()} == {"hand": 3, "ally": 4, "enemy": 2, "region": 1}
+    g = CFG.shade_growth
+    assert {k: effective_strength(s, u) for k, u in shades.items()} == {"hand": 4 * g, "ally": 3 * g, "region": g}
+    rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,3")))
+    rules.apply_action(s, PlaceAction("shade_combo", ("cr", "2,3")))  # the second card this turn
+    assert effective_strength(s, s.board["2,3"][-1]) == 2 * g and all(CARDS[f"shade_{k}"].cost == 5 for k in ("hand", "ally", "region", "combo"))
 
 
 def test_the_warlord_gains_a_food_for_each_cover_of_an_enemy():
