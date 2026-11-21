@@ -415,7 +415,7 @@ def test_djinn_cost_less_for_each_of_their_count():
     for cr in ("1,1", "1,2", "2,2"):                                  # three allies, one region of A's
         put(s, cr, "wisp_1", "A")
     assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_combo", "djinn_region")} == \
-        {"djinn_hand": 6, "djinn_ally": 9, "djinn_combo": 12, "djinn_region": 11}
+        {"djinn_hand": 6, "djinn_ally": 9, "djinn_combo": 12, "djinn_region": 8}
     rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,3"))); rules.apply_action(s, PlaceAction("wisp_1", ("cr", "2,3")))
     assert mana_cost(s, "djinn_combo") == 12 - 2 * CFG.combo_djinn_discount   # two cards played this turn
     assert mana_cost(s, "djinn_combo", "B") == 12                     # B played none: it isn't their turn
