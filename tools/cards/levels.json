@@ -973,6 +973,15 @@
       },
       "by": "claude",
       "at": 1795262578
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "by": "claude",
+      "at": 1795287880
     }
   },
   "cantrip_3": {
@@ -1101,6 +1110,24 @@
       },
       "by": "claude",
       "at": 1795273902
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795287880
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Scout 3"
+      },
+      "by": "claude",
+      "at": 1795287893
     }
   },
   "spore": {

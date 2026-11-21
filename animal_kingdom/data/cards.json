@@ -394,7 +394,7 @@
       "name": "Cantrip 2",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: draw a card.",
       "cost": 2,
       "keywords": []
@@ -497,12 +497,12 @@
     },
     {
       "id": "scout_3",
-      "name": "Scout 3",
+      "name": "Scout 2",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 1,
       "text": "Roar: Scout a card.",
-      "cost": 3,
+      "cost": 2,
       "keywords": []
     },
     {
