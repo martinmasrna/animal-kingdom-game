@@ -88,8 +88,8 @@ function wirePops(root) {
     onHold(el, () => cardPop(el, el.dataset.card), () => pop.style.display = 'none');   // touch: shown while held
   });
 }
-// A deck's cover: the player's chosen one, else the collection's default.
-const coverFor = d => d.cover || coverOf(d.list, CARDS);
+// A deck's cover: its leader (collection.js coverOf).
+const coverFor = d => coverOf(d.list, CARDS, d.leader);
 // Your profile: the server knows you by the sign-in code this browser keeps (localStorage 'ak:key').
 const api = (path, opts = {}) => fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-AK-Key': store('ak:key') || '', ...(opts.headers || {}) } });
 async function loadProfile() {
@@ -246,7 +246,7 @@ function deckLinkScreen(arg) {
     const mine = myDecks();
     if (mine.length >= RULES.decksMax) return toast(`${RULES.decksMax} decks is the most you can keep: delete one first`);
     const cards = {}; d.list.forEach(id => cards[id] = (cards[id] || 0) + 1);
-    const nd = { id: Date.now().toString(36), name: d.name, cards, cover: coverOf(d.list, CARDS) };
+    const nd = { id: Date.now().toString(36), name: d.name, cards };
     saveDecks([...mine, nd]); toast(`Imported ${d.name}`, true); location.hash = '#/collection/' + nd.id;
   };
 }

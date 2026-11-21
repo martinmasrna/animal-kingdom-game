@@ -52,7 +52,6 @@ export const ICON = {
   search: svg('<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>'),
   plus: svg('<path d="M12 5v14M5 12h14"/>'),
   addfriend: svg('<circle cx="10" cy="8" r="4"/><path d="M3 20c1.2-3.5 3.8-5.5 7-5.5 1.6 0 3 .5 4.2 1.4M18 13v6M15 16h6"/>'),
-  image: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>'),
   copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'),
   trash: svg('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
 };
@@ -62,21 +61,26 @@ const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${
 
 let X, C, cards, st = { open: null, rar: null, str: '', cost: '', q: '', sheet: false }, flash = null, wired = false;
 const limit = c => R.copies[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
-// A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
-export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
+// A deck's cover is its leader (Martin, 2026-11-21: "it will automatically just be your Hero"); a deck without one shows
+// its first legendary, else its first card (the play screen uses the same).
+export const coverOf = (list, cards = C, leader = null) => (leader && cards[leader] ? leader : null)
+  || list.find(id => cards[id] && cards[id].rarity === 'legendary') || list.find(id => cards[id]) || null;
+// The cover on a deck's tile: its painting where it has one, else its figure at the tile's right end.
+const coverAttrs = id => !id ? '' : CROP[id] ? ` data-strip="${id}" data-ax=".7" style="${stripArt(id, 284, 56, .7)}"`
+  : hasFigure(id) ? ` style="background-image:url(/static/hex/fig/${id}.webp);background-repeat:no-repeat;background-size:auto 150%;background-position:right 10px top 30%"` : '';
 const listOf = cardsObj => Object.entries(cardsObj).flatMap(([id, n]) => Array(n).fill(id));
 const countsOf = list => list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {});
 
 // Your decks, saved on your profile (which starts with the starter decks as its own), as {id, name, list, cover}.
 function decks() {
-  const mine = X.getDecks().map(d => ({ id: d.id, name: d.name, list: listOf(d.cards), cover: d.cover && C[d.cover] ? d.cover : null, leader: d.leader || null }));
-  mine.forEach(d => d.cover = d.cover || (d.list.length ? coverOf(d.list) : null));
+  const mine = X.getDecks().map(d => ({ id: d.id, name: d.name, list: listOf(d.cards), leader: d.leader || null }));
+  mine.forEach(d => d.cover = coverOf(d.list, C, d.leader));
   return mine;
 }
 let saved = null;   // each deck's list as last saved: a save logs what changed (log.js)
 function save(all) {
   // a leader goes with its card: one taken out of the deck takes the leader with it (the leaders prototype)
-  X.saveDecks(all.map(d => ({ id: d.id, name: d.name, cards: countsOf(d.list), cover: d.cover, ...(d.leader && d.list.includes(d.leader) ? { leader: d.leader } : {}) })));
+  X.saveDecks(all.map(d => ({ id: d.id, name: d.name, cards: countsOf(d.list), ...(d.leader && d.list.includes(d.leader) ? { leader: d.leader } : {}) })));
   const now = Object.fromEntries(all.map(d => [d.id, [...d.list]]));
   if (saved) for (const d of all) {
     const was = saved[d.id] || [], rest = [...was], added = [];
@@ -123,10 +127,14 @@ export function deckBody(list, cards) {
   const counts = countsOf(list);
   return stripsHTML(Object.keys(counts), cards, id => counts[id]);
 }
-// The mana rules' curve: how many of the deck's cards cost 0 to 10 (a plain count, the lead session's default for the
-// prototype, not something Martin asked for).
-const curveHTML = list => { const n = {}; for (const id of list) { const k = C[id] && C[id].mana; n[k] = (n[k] || 0) + 1; }
-  return `<div class="mcurve">${MANA_COSTS.map(k => `<span class="${n[k] ? '' : 'zero'}">${costChip(k)}<b>${n[k] || 0}</b></span>`).join('')}</div>`; };
+// The deck's mana curve, as Hearthstone draws it (Martin, 2026-11-21, its "Cards/Mana Cost" chart): a gold bar per cost
+// in a dark slot, 0 to 6 and 7+, its height the cost's share of the tallest, the count above it, the cost below.
+const CURVE = [0, 1, 2, 3, 4, 5, 6, 7];
+const curveHTML = list => { const n = CURVE.map(() => 0);
+  for (const id of list) { const k = C[id] && C[id].mana; if (k != null) n[Math.min(k, 7)]++; }
+  const top = Math.max(1, ...n);
+  return `<div class="mcurve">${CURVE.map((k, i) => `<div class="cb${n[i] ? '' : ' zero'}"><div class="slot"><b>${n[i]}</b><i style="height:${(n[i] / top * 100).toFixed(1)}%"></i></div>`
+    + `<span class="ck">${costChip(k)}${k === 7 ? '<sup>+</sup>' : ''}</span></div>`).join('')}</div>`; };
 
 // The deck as a tray of pieces (DECKVIEW 'tray'): the leader as one large piece at the left, then a cell for each of the
 // deck's cards in two interlocking rows of board tiles, every copy its own piece, filled in cost order and zig-zagging
@@ -194,11 +202,11 @@ function render(app, all) {
 
   const body = d => ((curveHTML(d.list))) + deckBody(d.list, C);
   const tile = d => d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
-        <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${leaderRow(d)}${body(d)}`
+    ? `<div class="dtile on" data-d="${d.id}"${coverAttrs(d.cover)}><b class="nm-edit" title="Rename">${esc(d.name)}</b>
+        <div class="tacts"><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${leaderRow(d)}${body(d)}`
     // a deck still short of its cards is marked with its count, as on home's chooser (Martin, 2026-10-31)
     // a deck over the rules (copies, stars) says so on its tile: open it to see what (the stars prototype)
-    : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list, C, R, d.leader) ? ' short' : ''}" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : (iss => !iss ? '' : `<span class="left">${iss === NO_LEADER || iss === NO_LEADER_CARD ? 'No leader' : /no mana cost/.test(iss) ? 'No cost' : 'Too many'}</span>`)(deckIssue(d.list, C, R, d.leader))}</div>`;
+    : `<div class="dtile${d.list.length < R.deckSize || deckIssue(d.list, C, R, d.leader) ? ' short' : ''}" data-d="${d.id}"${coverAttrs(d.cover)}><b>${esc(d.name)}</b>${d.list.length < R.deckSize ? `<span class="left">${d.list.length}/${R.deckSize}</span>` : (iss => !iss ? '' : `<span class="left">${iss === NO_LEADER || iss === NO_LEADER_CARD ? 'No leader' : /no mana cost/.test(iss) ? 'No cost' : 'Too many'}</span>`)(deckIssue(d.list, C, R, d.leader))}</div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
   const issue = open && open.list.length >= R.deckSize ? deckIssue(open.list, C, R, open.leader) : '';
@@ -278,7 +286,6 @@ function wire(app, all, open) {
     inp.onblur = () => done(true); inp.onkeydown = k => { if (k.key === 'Enter') done(true); if (k.key === 'Escape') { k.stopPropagation(); done(false); } }; };
   const cp = $('dcopy'); if (cp) cp.onclick = () => navigator.clipboard.writeText(encodeDeck(open.name, open.list, C)).then(() => X.toast('Deck code copied', true), () => X.toast('Could not copy'));
   const shr = $('dshare'); if (shr) shr.onclick = () => X.share(encodeDeck(open.name, open.list, C), open.name);
-  const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, id => { open.cover = id; change(); });
   const ld = $('dlead'); if (ld) ld.onclick = () => hidePop() || pickLeader(app, open, id => { setLeader(open, id); change(); });
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
   // A new deck starts with its leader, as in Gwent (Martin, 2026-11-17): the leader is chosen first, its card is the deck's
@@ -426,13 +433,6 @@ function pickLeader(app, d, done) {
   const { m, close } = dialog(app, `<div class="dlg cov ldr"><h3>Choose a leader</h3><div class="leads">${leaderIds().map(id => `<div class="lv${id === cur ? ' on' : ''}" data-id="${id}"><div class="cv">${face(C[id], 110, { cls: 'compact' })}</div>${powerHTML(id, 96)}</div>`).join('')}</div>
     <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitAll(m);
   m.querySelectorAll('.lv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
-}
-
-function pickCover(app, d, done) {
-  const ids = [...new Set(d.list)].filter(id => CROP[id]).sort(deckOrder(C));
-  const { m, close } = dialog(app, `<div class="dlg cov"><h3>Choose a cover</h3><div class="covs">${ids.map(id => `<div class="cv${id === d.cover ? ' on' : ''}" data-id="${id}">${face(C[id], 140, { cls: 'compact' })}</div>`).join('')}</div>
-    <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitAll(m);
-  m.querySelectorAll('.cv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
 }
 
 // Screen-wide keys and paste, live only while the collection is on screen.
