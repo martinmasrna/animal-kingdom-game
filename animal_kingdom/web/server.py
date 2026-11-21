@@ -327,7 +327,7 @@ COLLECTION = set(CARDS)
 
 def profile_view(p: dict) -> dict:
     return {**p, "decks": profiles.decks(p["id"], COLLECTION, RENAMED_IDS),
-            "logins": profiles.identities(p["id"]), "providers": oauth.available()}
+            "logins": profiles.identities(p["id"]), "providers": oauth.available(), "patchSeen": profiles.patch_seen(p["id"])}
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord
@@ -425,6 +425,12 @@ async def patch_me(req):
     except ProfileError as e:
         raise web.HTTPBadRequest(text=str(e))
     return web.json_response(profile_view(p))
+
+
+async def see_patch(req):
+    """The patch notes were opened: that patch is seen, on every device of this profile."""
+    profiles.see_patch(me(req)["id"], (await guard.body(req)).get("version", ""))
+    return web.json_response({})
 
 
 async def put_decks(req):
@@ -885,6 +891,7 @@ def make_app() -> web.Application:
         web.get("/api/me", get_me),
         web.patch("/api/me", patch_me),
         web.put("/api/me/decks", put_decks),
+        web.post("/api/me/patch", see_patch),
         web.post("/api/auth/redeem", auth_redeem),
         web.post("/api/auth/{provider}", auth_start),
         web.post("/api/signout", sign_out),

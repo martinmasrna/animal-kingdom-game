@@ -5,7 +5,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { startServer, openBrowser } from './harness.mjs';
-const NEWEST = JSON.parse(readFileSync(new URL('../static/patches/index.json', import.meta.url)))[0];   // seen: the patch notes don't open over home (patch.test.mjs covers them)
+const NEWEST = JSON.parse(readFileSync(new URL('../static/patches/index.json', import.meta.url)))[0];   // the patch notes are covered in patch.test.mjs
 
 let server, browser;
 before(async () => { server = await startServer(); browser = await openBrowser(); });
@@ -13,15 +13,16 @@ after(async () => { await browser?.close(); server?.stop(); });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const until = async (page, fn, arg, ms = 10000) => { const t = Date.now(); while (Date.now() - t < ms) { if (await page.evaluate(fn, arg)) return true; await wait(100); } return false; };
 const seat = async () => { const ctx = await browser.createBrowserContext(), p = await ctx.newPage(); p.errors = [];
-  p.on('pageerror', e => p.errors.push(e.message)); await p.evaluateOnNewDocument(v => { localStorage.setItem('ak:learned', '1'); localStorage.setItem('ak:patch', v); }, NEWEST);
+  p.on('pageerror', e => p.errors.push(e.message)); await p.evaluateOnNewDocument(() => localStorage.setItem('ak:learned', '1'));
   await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]); return p; };
 // A deck of the mana collection on the profile: 12 Wisps (1 to 6, two each), Flight 1, 2, 3 and 5 two each, two Spikes 3, two Cantrip 2s and the Warlord (25, legal in the mana rules).
 const DECK = { ...Object.fromEntries([...Array(6).keys()].map(i => ['wisp_' + (i + 1), 2])), flight_1: 2, flight_2: 2, flight_3: 2, flight_5: 2, spikes_3: 2, cantrip_2: 2, warlord_legend: 1 };
 // A cheap one (nothing over 3 mana) for the matches that must get going: the Wisps 1 to 3, the cantrips, fliers, Spikes and Hungry, and the Warlord.
 const CHEAP = { ...Object.fromEntries([1, 2, 3].map(i => ['wisp_' + i, 2])), cantrip_2: 2, cantrip_3: 2, flight_1: 2, flight_2: 2, flight_3: 2, spikes_2: 2, spikes_3: 2, hungry_2: 2, hungry_3: 2, warlord_legend: 1 };
 const giveDeck = async (p, id, name, cards = DECK, leader = 'warlord_legend') => {
-  await p.evaluate(async (d) => { const r = await fetch('/api/me/decks', { method: 'PUT', headers: { 'X-AK-Key': localStorage.getItem('ak:key'), 'Content-Type': 'application/json' }, body: JSON.stringify([d]) }); if (!r.ok) throw new Error(await r.text()); },
-    { id, name, cards, leader });
+  await p.evaluate(async (d, seen) => { const r = await fetch('/api/me/decks', { method: 'PUT', headers: { 'X-AK-Key': localStorage.getItem('ak:key'), 'Content-Type': 'application/json' }, body: JSON.stringify([d]) }); if (!r.ok) throw new Error(await r.text());
+    await fetch('/api/me/patch', { method: 'POST', headers: { 'X-AK-Key': localStorage.getItem('ak:key'), 'Content-Type': 'application/json' }, body: JSON.stringify({ version: seen }) }); },   // the patch notes seen: they don't open over the test
+    { id, name, cards, leader }, NEWEST);
   await p.reload({ waitUntil: 'networkidle0' });
 };
 const click = async (p, sel) => { for (let i = 0; i < 5; i++) { try { await p.click(sel); return; } catch { await wait(150); } } throw new Error('no ' + sel); };

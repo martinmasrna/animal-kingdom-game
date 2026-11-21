@@ -45,6 +45,8 @@ CREATE TABLE IF NOT EXISTS history (
     profile TEXT NOT NULL, match TEXT NOT NULL, ended REAL NOT NULL, kind TEXT NOT NULL,
     my_deck TEXT NOT NULL, opp TEXT NOT NULL, opp_deck TEXT NOT NULL, won INTEGER NOT NULL, lost INTEGER NOT NULL,
     PRIMARY KEY (profile, match));
+CREATE TABLE IF NOT EXISTS patch_seen (
+    profile TEXT PRIMARY KEY, version TEXT NOT NULL);
 """
 
 
@@ -162,6 +164,16 @@ class Profiles:
     def get(self, pid: str) -> Optional[dict]:
         row = self.db.execute("SELECT id, name, tag FROM profiles WHERE id = ?", (pid,)).fetchone()
         return dict(row) if row else None
+
+    def patch_seen(self, pid: str) -> str:
+        """The newest patch whose notes this player has had open ('' none)."""
+        row = self.db.execute("SELECT version FROM patch_seen WHERE profile = ?", (pid,)).fetchone()
+        return row["version"] if row else ""
+
+    def see_patch(self, pid: str, version: str) -> None:
+        with self.db:
+            self.db.execute("INSERT INTO patch_seen (profile, version) VALUES (?, ?) "
+                            "ON CONFLICT (profile) DO UPDATE SET version = excluded.version", (pid, str(version)[:20]))
 
     def rename(self, pid: str, name: str) -> dict:
         """A new name keeps the tag unless someone already has that name#tag."""

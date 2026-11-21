@@ -171,7 +171,7 @@ async function boot() {
   route();
   // a new patch opens once, over whatever came up, for a returning player (one with a deck); never over a match in play
   const v = await newestPatch();
-  if (v && store('ak:patch') !== v && myDecks().length && !(screen === 'game' && V && V.phase === 'playing')) openPatch({ seen: v => store('ak:patch', v) });
+  if (v && ME.patchSeen !== v && myDecks().length && !(screen === 'game' && V && V.phase === 'playing')) openPatch({ seen: seePatch });
 }
 
 // Back into the match you're still playing (after a closed tab, a phone that dropped the page, another device): the server
@@ -195,7 +195,7 @@ function route() {
   if (parts[0] === 'play') return manaHome({ play: true });   // Play: a deck and a friend
   if (parts[0] === 'practice') return manaHome({ practice: true });   // Practice: your deck and the bot's
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
-  if (parts[0] === 'patch') { history.replaceState(null, '', '#/'); manaHome(); return openPatch({ version: parts[1], seen: v => store('ak:patch', v) }); }   // a link to the notes: home, the window over it
+  if (parts[0] === 'patch') { history.replaceState(null, '', '#/'); manaHome(); return openPatch({ version: parts[1], seen: seePatch }); }   // a link to the notes: home, the window over it
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'friend' && id) { manaHome(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'deck' && parts[1]) return deckLinkScreen(parts.slice(1).join('/'));
@@ -345,6 +345,8 @@ async function challengeFriend(f) {
 // then a match to invite a friend to, or a friend's code); Practice (#/practice) your deck and the simple bot's, both from
 // your decks (Martin, 2026-11-21: "select deck for me and my opponent"); Collection is the collection. In Play and
 // Practice: your decks that are legal under these rules; a deck of yours that isn't legal is counted under the list.
+// the patch notes were opened: seen by this profile, on every device (the server keeps it)
+const seePatch = v => { if (ME.patchSeen === v) return; ME.patchSeen = v; api('/api/me/patch', { method: 'POST', body: JSON.stringify({ version: v }) }); };
 function manaHome(mode = {}) {
   screen = 'home';
   if (!mode.play && !mode.join && !mode.practice) {
@@ -353,7 +355,7 @@ function manaHome(mode = {}) {
       <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><a class="go" id="mprac" href="#/practice">Practice</a><a class="go" id="mcoll" href="#/collection">Collection</a></div>
       </div></div>`;
     wireChatButton(document.getElementById('hchat'));
-    document.getElementById('mpatch').onclick = () => openPatch({ seen: v => store('ak:patch', v) });
+    document.getElementById('mpatch').onclick = () => openPatch({ seen: seePatch });
     return;
   }
   const own = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));
