@@ -62,7 +62,7 @@ export const powerCostHTML = cost => `<div class="pcost" style="left:${((1 - DW)
 // A leader's power read as a card of its own beside the leader's (as a card's tokens are): the leader's figure, what kind
 // of ability it is, its text, and a power's cost on top in place of the gem.
 export function powerCard(id, L, w = 170) {
-  const card = manaCard({ id, name: L.kind === 'power' ? 'Hero power' : 'Always on', text: L.text, rarity: 'common' }, { str: null, w });
+  const card = manaCard({ id, name: L.kind === 'power' ? 'Hero power' : 'Passive', text: L.text, rarity: 'common' }, { str: null, w });
   return `<div class="pwcard">${L.kind === 'power' && L.cost != null ? card.replace(/(<div class="mpiece[^>]*>)/, `$1${powerCostHTML(L.cost)}`) : card}</div>`;
 }
 

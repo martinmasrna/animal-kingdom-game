@@ -1152,7 +1152,7 @@ function startBeat(g, A, ago) {
 const endBeat = () => { const key = V && `${V.id}-${V.rematches}`;
   return ui.beat && ui.beat.key === key ? { kind: ui.beat.kind, side: ui.beat.side, ago: Date.now() - ui.beat.t0 } : null; };
 
-const LEADER_MANA = n => ({ power: `Hero power: costs ${n} mana.`, once: `Once per game: costs ${n} mana.`, passive: 'Always on.' });   // the mana rules
+const LEADER_MANA = n => ({ power: `Hero power: costs ${n} mana.`, once: `Once per game: costs ${n} mana.`, passive: 'Passive.' });   // the mana rules
 function leaderPanel(side) {
   const L = viewerGame().leaders[side]; if (!L) return '';
   const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader", kind = (LEADER_MANA(V.game.abilityCost));

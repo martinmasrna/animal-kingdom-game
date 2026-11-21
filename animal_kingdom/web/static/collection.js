@@ -407,7 +407,7 @@ function confirmDelete(app, d, done) {
 // A deck's leader: a legendary that can lead, which every deck has (Martin, 2026-11-16), chosen when the deck is made
 // (2026-11-17). Its card is in the deck while it leads: choosing another leader swaps the cards, and the leader's own strip
 // stays put. The row shows the leader with its ability; a click picks another.
-const KIND = { power: 'Hero power', once: 'Once per game', passive: 'Always on' };
+const KIND = { power: 'Hero power', once: 'Once per game', passive: 'Passive' };
 const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible');   // each ruleset its own leaders
 // In the mana rules the plate alone: the card beside it already shows the animal, and the orb is the old painting's.
 const powerHTML = (id, D = 150) => { const L = X.leaders[id];
