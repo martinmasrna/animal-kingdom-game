@@ -168,46 +168,16 @@
     },
     {
       "id": "hunter_3",
-      "name": "Hunter 3",
+      "name": "Hunter 2",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 3,
-      "text": "Roar: give an adjacent enemy -3 strength.",
-      "cost": 3,
+      "base_strength": 2,
+      "text": "Roar: give an adjacent enemy -2 strength.",
+      "cost": 2,
       "keywords": []
     },
     {
       "id": "hunter_5",
-      "name": "Hunter 5",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 5,
-      "text": "Roar: give an adjacent enemy -5 strength.",
-      "cost": 5,
-      "keywords": []
-    },
-    {
-      "id": "hunter_7",
-      "name": "Hunter 7",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 7,
-      "text": "Roar: give an adjacent enemy -7 strength.",
-      "cost": 7,
-      "keywords": []
-    },
-    {
-      "id": "hunter_6",
-      "name": "Hunter 6",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 6,
-      "text": "Roar: give an adjacent enemy -6 strength.",
-      "cost": 6,
-      "keywords": []
-    },
-    {
-      "id": "hunter_4",
       "name": "Hunter 4",
       "status": "collectible",
       "rarity": "common",
@@ -217,13 +187,43 @@
       "keywords": []
     },
     {
-      "id": "hunter_2",
-      "name": "Hunter 2",
+      "id": "hunter_7",
+      "name": "Hunter 6",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 2,
-      "text": "Roar: give an adjacent enemy -2 strength.",
-      "cost": 2,
+      "base_strength": 6,
+      "text": "Roar: give an adjacent enemy -6 strength.",
+      "cost": 6,
+      "keywords": []
+    },
+    {
+      "id": "hunter_6",
+      "name": "Hunter 5",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 5,
+      "text": "Roar: give an adjacent enemy -5 strength.",
+      "cost": 5,
+      "keywords": []
+    },
+    {
+      "id": "hunter_4",
+      "name": "Hunter 3",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 3,
+      "text": "Roar: give an adjacent enemy -3 strength.",
+      "cost": 3,
+      "keywords": []
+    },
+    {
+      "id": "hunter_2",
+      "name": "Hunter 1",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Roar: give an adjacent enemy -1 strength.",
+      "cost": 1,
       "keywords": []
     },
     {

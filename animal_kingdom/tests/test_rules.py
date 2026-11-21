@@ -256,10 +256,10 @@ def test_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
 def test_hunters_give_an_adjacent_enemy_minus_n_strength_for_good():
     for cid, n in WEAKENS.items():
         assert CARDS[cid].text == f"Roar: give an adjacent enemy -{n} strength."
-    s = state(turn=11, hands={"A": ["hunter_3", "test_one"]})
+    s = state(turn=11, hands={"A": ["hunter_4", "test_one"]})
     put(s, "2,1", "wisp_2", "B")                                # strength 4
     put(s, "2,2", "wisp_1", "B")
-    rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))
+    rules.apply_action(s, PlaceAction("hunter_4", ("cr", "1,1")))
     assert s.pending["options"] == ["2,1", "2,2"] and s.pending["chooser"] == "A"
     rules.apply_action(s, ChoiceAction("2,1"))
     assert effective_strength(s, s.board["2,1"][0]) == 1        # stays, weaker: the test_one (1) can't cover it

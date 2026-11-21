@@ -547,7 +547,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795263573
+      "at": 1795277270
     },
     "animal": {
       "review": {
@@ -559,7 +559,25 @@
         }
       },
       "by": "claude",
-      "at": 1795201446
+      "at": 1795277270
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795277270
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795277270
     }
   },
   "hunter_5": {
@@ -571,7 +589,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795263574
+      "at": 1795277271
     },
     "animal": {
       "review": {
@@ -583,7 +601,7 @@
         }
       },
       "by": "claude",
-      "at": 1795201446
+      "at": 1795277271
     },
     "cost": {
       "review": {
@@ -592,7 +610,7 @@
         "prev": 4
       },
       "by": "claude",
-      "at": 1795277079
+      "at": 1795277270
     },
     "strength": {
       "review": {
@@ -601,7 +619,7 @@
         "prev": 3
       },
       "by": "claude",
-      "at": 1795277079
+      "at": 1795277271
     }
   },
   "hunter_7": {
@@ -613,7 +631,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795263574
+      "at": 1795277271
     },
     "animal": {
       "review": {
@@ -625,7 +643,7 @@
         }
       },
       "by": "claude",
-      "at": 1795201446
+      "at": 1795277271
     },
     "cost": {
       "review": {
@@ -634,7 +652,7 @@
         "prev": 5
       },
       "by": "claude",
-      "at": 1795277079
+      "at": 1795277271
     },
     "strength": {
       "review": {
@@ -643,7 +661,7 @@
         "prev": 3
       },
       "by": "claude",
-      "at": 1795277079
+      "at": 1795277271
     }
   },
   "hunter_6": {
@@ -655,7 +673,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795263574
+      "at": 1795277271
     },
     "animal": {
       "review": {
@@ -667,7 +685,7 @@
         }
       },
       "by": "claude",
-      "at": 1795201446
+      "at": 1795277271
     },
     "cost": {
       "review": {
@@ -676,7 +694,7 @@
         "prev": 4
       },
       "by": "claude",
-      "at": 1795277079
+      "at": 1795277271
     },
     "strength": {
       "review": {
@@ -685,7 +703,7 @@
         "prev": 2
       },
       "by": "claude",
-      "at": 1795277079
+      "at": 1795277271
     }
   },
   "hunter_4": {
@@ -697,7 +715,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795263574
+      "at": 1795277270
     },
     "animal": {
       "review": {
@@ -709,7 +727,7 @@
         }
       },
       "by": "claude",
-      "at": 1795201446
+      "at": 1795277270
     },
     "cost": {
       "review": {
@@ -718,7 +736,16 @@
         "prev": 5
       },
       "by": "claude",
-      "at": 1795277079
+      "at": 1795277270
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "by": "claude",
+      "at": 1795277270
     }
   },
   "hunter_2": {
@@ -730,7 +757,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795263573
+      "at": 1795277270
     },
     "animal": {
       "review": {
@@ -742,7 +769,7 @@
         }
       },
       "by": "claude",
-      "at": 1795201446
+      "at": 1795277270
     },
     "cost": {
       "review": {
@@ -751,7 +778,7 @@
         "prev": 6
       },
       "by": "claude",
-      "at": 1795277078
+      "at": 1795277270
     },
     "strength": {
       "review": {
@@ -760,7 +787,7 @@
         "prev": 6
       },
       "by": "claude",
-      "at": 1795277078
+      "at": 1795277270
     }
   },
   "giant_hunter": {

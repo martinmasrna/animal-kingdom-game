@@ -584,8 +584,9 @@ def _draw_if_it_removes(state, unit, covered):
                                "by_card": unit.card_id, "by_iid": unit.iid})
 
 
-# The Hunters' -N, as their text says (Martin, 2026-11-21: "change Bite back").
-WEAKENS = {"hunter_2": 2, "hunter_3": 3, "hunter_4": 4, "hunter_5": 5, "hunter_6": 6, "hunter_7": 7}
+# The Hunters' -N, as their text says (Martin, 2026-11-21: "change Bite back"). Hunters 1 to 6, each a step down from
+# the ids they were made under (Martin, 2026-11-21: "move each one 1 step down"; the ids stay, so saved decks keep them).
+WEAKENS = {"hunter_2": 1, "hunter_3": 2, "hunter_4": 3, "hunter_5": 4, "hunter_6": 5, "hunter_7": 6}
 CANTRIPS = ("cantrip_2", "cantrip_3", "cantrip_4")
 DEATH_DRAWS = ("death_draw_1",)
 KILL_DRAWS = ("kill_draw_2",)
