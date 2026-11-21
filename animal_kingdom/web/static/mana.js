@@ -51,21 +51,20 @@ const GH = GEM * P;
 // The number in Martin's strength numerals (token.js numeral, static/hex/num), inked dark on the gold.
 const COST_SVG = c => { const h = 100 * P * .62, w = h * 2 / 1.2;
   return `<svg viewBox="0 0 100 ${(100 * P).toFixed(2)}"><polygon points="${hexPts(0, 0, 100, 100 * P)}"/><image class="mnum" href="/static/hex/num/${Math.max(0, Math.min(20, c))}.svg" x="${(50 - w / 2).toFixed(2)}" y="${(50 * P - h / 2).toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}"/></svg>`; };
-// Where the cost sits, a trial (Martin, 2026-11-21: "can we try moving the mana cost at the top of the cards?"): `top`, on
-// the card's apex, or `corner`, its top-left corner as before. ?cost=top or ?cost=corner on the address switches, kept in
-// the browser like ?deckview.
-const COST_POS = (() => { if (typeof location === 'undefined') return 'top';
-  const q = new URLSearchParams(location.search).get('cost');
-  try { if (q) localStorage.setItem('ak:cost', q === 'corner' ? 'corner' : 'top'); return localStorage.getItem('ak:cost') === 'corner' ? 'corner' : 'top'; }
-  catch { return q === 'corner' ? 'corner' : 'top'; } })();
-// On top, the cost is the strength's drawer turned over: a hexagon as tall as the drawer, its top point the piece's top
-// point and its two upper edges along the piece's (Martin, 2026-11-21: "inside hexagon with edges and top corner exactly
-// matching"), on the full card and on the piece alike (both measured from the piece).
-const TOP_H = DRAWER_FRAC, TOP_W = TOP_H / P, COST_TOP = box((1 - TOP_W) / 2, 0, TOP_W, TOP_H);
-const COST_AT = COST_POS === 'top' ? COST_TOP : box(X0, Y0 + YS - GH / 4, GEM, GH);
-// The piece alone (a deck tray, a shown hand): on its top point, or in its own upper-left corner, sharing its two edges.
-const PIECE_COST_AT = COST_POS === 'top' ? COST_TOP : box(0, .25 * P * (1 - .3), .3, .3 * P);
-export const costOnTop = COST_POS === 'top';
+const COST_AT = box(X0, Y0 + YS - GH / 4, GEM, GH);
+// The piece alone (a deck tray, a shown hand) keeps the cost in the piece's own upper-left corner, sharing its two edges.
+const PIECE_COST_AT = box(0, .25 * P * (1 - .3), .3, .3 * P);
+// A leader's power's cost: the strength's drawer turned over, its top point the piece's top point and its upper edges the
+// piece's, where a legendary's gem would be (Martin, 2026-11-21: "the cost to be on top, replacing the orange gem").
+// As percentages of the piece's box, so it sits on any piece (the rail's token, a card's).
+const TOP_W = DRAWER_FRAC / P;
+export const powerCostHTML = cost => `<div class="pcost" style="left:${((1 - TOP_W) / 2 * 100).toFixed(3)}%;top:0;width:${(TOP_W * 100).toFixed(3)}%;height:${(DRAWER_FRAC / P * 100).toFixed(3)}%">${COST_SVG(cost)}</div>`;
+// A leader's power read as a card of its own beside the leader's (as a card's tokens are): the leader's figure, what kind
+// of ability it is, its text, and a power's cost on top in place of the gem.
+export function powerCard(id, L, w = 170) {
+  const card = manaCard({ id, name: L.kind === 'power' ? 'Hero power' : 'Always on', text: L.text, rarity: 'common' }, { str: null, w });
+  return `<div class="pwcard">${L.kind === 'power' && L.cost != null ? card.replace(/(<div class="mpiece[^>]*>)/, `$1${powerCostHTML(L.cost)}`) : card}</div>`;
+}
 
 // One card. `c`: the card (CARDS[id], its text already the ruleset's); `str`: the strength to show; `cost`: its mana cost,
 // shown while it is in a hand (null: none, as on the board); `owner`: 'A' yours, 'B' your opponent's (viewer space); `w`:
@@ -73,7 +72,7 @@ export const costOnTop = COST_POS === 'top';
 export function manaCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cls = '', attrs = '', iid = null } = {}) {
   const piece = tokenHTML({ id: c.id, owner, str, iid: iid ?? 0 }, { [c.id]: c }, w);
   const tags = (c.tags || []).join(' · ');
-  return `<div class="mcard ${owner}${costOnTop ? ' costtop' : ''}${cls ? ' ' + cls : ''}" style="--mw:${w}px" ${attrs}>`
+  return `<div class="mcard ${owner}${cls ? ' ' + cls : ''}" style="--mw:${w}px" ${attrs}>`
     + `<div class="plaque" style="${box(X0, Y0, WC, HC)}">${frameSVG()}`
     + `<div class="mplate" style="${box(BD, PL_T, LW, PL_H)}"><b class="pname">${esc(c.name)}</b></div>`
     + `<div class="pin" style="${box(BD + .025 * WC, BX_T, WC - 2 * BD - .05 * WC, BX_H)}">${c.text ? `<p>${rules(c.text)}</p>` : ''}</div>`
@@ -85,7 +84,7 @@ export function manaCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cl
 // The piece alone, as a hand shows it under its plaque: the token with its cost hexagon (the collection's deck tray).
 // `str: null` draws no strength (a leader, as the rail draws it); `cost: null` no cost mark.
 export function manaPiece(c, { str = c.str, cost = null, owner = 'A', w = 60, cls = '', attrs = '' } = {}) {
-  return `<div class="mcard mpc ${owner}${costOnTop ? ' costtop' : ''}${cls ? ' ' + cls : ''}" style="--mw:${w}px" ${attrs}><div class="mpiece unit ${owner}" style="--tw:${w}px">${tokenHTML({ id: c.id, owner, str, iid: 0 }, { [c.id]: c }, w)}</div>`
+  return `<div class="mcard mpc ${owner}${cls ? ' ' + cls : ''}" style="--mw:${w}px" ${attrs}><div class="mpiece unit ${owner}" style="--tw:${w}px">${tokenHTML({ id: c.id, owner, str, iid: 0 }, { [c.id]: c }, w)}</div>`
     + (cost != null ? `<div class="mcost" data-n="${cost}" style="${PIECE_COST_AT}">${COST_SVG(cost)}</div>` : '') + '</div>';
 }
 

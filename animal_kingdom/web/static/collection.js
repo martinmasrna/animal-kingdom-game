@@ -7,7 +7,7 @@ import { CROP, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck, deckOrder } from './deckcode.js';
 import { onHold } from './menu.js';
 import { track } from './log.js';
-import { manaCard, manaPiece, fitPlaques, costChip } from './mana.js';
+import { manaCard, manaPiece, fitPlaques, costChip, powerCard } from './mana.js';
 import { hasFigure } from './token.js';
 
 const RANK = { legendary: 0, common: 1 };
@@ -413,7 +413,8 @@ const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id]
 const powerHTML = (id, D = 150) => { const L = X.leaders[id];
   return `<div class="hpow${(' bare')}">${('')}<div class="plate"><b>${KIND[L.kind]}</b><p>${esc(L.text)}</p></div></div>`; };
 // beside a legendary in the collection (in a match the card is just a card)
-const powerOf = c => (X.leaders || {})[c.id] && c.status === 'collectible' ? powerHTML(c.id) : '';
+// a leader's power as a card beside the leader's, as a card's tokens are (Martin, 2026-11-21)
+const powerOf = (c, w = 170) => (X.leaders || {})[c.id] && c.status === 'collectible' ? powerCard(c.id, X.leaders[c.id], w) : '';
 function setLeader(d, id) {
   if (d.leader === id) return;
   if (d.leader) { const i = d.list.indexOf(d.leader); if (i >= 0) d.list.splice(i, 1); }

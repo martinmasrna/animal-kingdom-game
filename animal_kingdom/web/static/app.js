@@ -6,7 +6,7 @@ import { plan, DUR } from './timeline.js';
 import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, leaderAt, resolvesIn, tokenWidth } from './board.js';
-import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo } from './mana.js';
+import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo, powerCard, powerCostHTML } from './mana.js';
 import { playFood } from './foodfx.js';
 import { decodeDeck } from './deckcode.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripsHTML } from './collection.js';
@@ -52,7 +52,7 @@ function cardPop(el, id, extra, place) {
   const c = CARDS[id], r = el.getBoundingClientRect();
      // the mana rules' card
   pop.className = 'pop ' + c.rarity + ((' mpop'));
-  pop.innerHTML = ((manaCard(c, { cost: c.mana ?? null, w: 200 }))) + (extra ? `<div class="ev">${extra}</div>` : '');
+  pop.innerHTML = ((manaCard(c, { cost: c.mana ?? null, w: 200 }))) + (LEADERS[id] ? powerCard(id, LEADERS[id], 170) : '') + (extra ? `<div class="ev">${extra}</div>` : '');
   pop.style.display = 'flex'; fitNames(pop); fitPlaques(pop);
   const h = pop.offsetHeight;
   const w = pop.offsetWidth;
@@ -77,7 +77,8 @@ function readOverlay(html) {
 function cardRead(id, str, seat = V && V.you, extra = '') {
   const c = CARDS[id]; if (!c) return '';
   const face = (manaCard(c, { ...(str == null ? {} : { str }), cost: c.mana ?? null, owner: seat === V.you ? 'A' : 'B', w: 230 }));   // the mana rules' card, piece, plaque and cost
-  return `<div class="rcard${(c.related || []).length ? ' wide' : ''}">${face}${extra}${readSide(c, CARDS, (r => manaCard(r, { cost: r.mana ?? null, w: 170 })))}</div>`;
+  const pw = LEADERS[id] ? powerCard(id, LEADERS[id], 170) : '';   // a leader's power beside it, as a card's tokens
+  return `<div class="rcard${(c.related || []).length || pw ? ' wide' : ''}">${face}${extra}${pw}${readSide(c, CARDS, (r => manaCard(r, { cost: r.mana ?? null, w: 170 })))}</div>`;
 }
 function readCard(id, str, seat = V && V.you) {
   const html = cardRead(id, str, seat); if (html) readOverlay(html);
@@ -1167,8 +1168,9 @@ function drawRail(G, d) {
   const lead = side => {
     const p = side === 'A' ? you : them, L = (G.leaders || {})[p];
     const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && L.spent;   // the gold ring says when your power can be used
-    const power = !L || L.kind === 'passive' ? '' : L.spent ? '<span class="lused">Used</span>' : costChip(L.cost ?? cost);
-    const tok = L ? `<div class="ltok${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:84px">${leaderToken(L.id, side, CARDS, 84)}</div></div>` : '';
+    // a power's cost on the token's top point, in place of the gem (Martin, 2026-11-21); used this turn, "Used" under it
+    const isPow = L && L.kind === 'power', power = isPow && L.spent ? '<span class="lused">Used</span>' : '';
+    const tok = L ? `<div class="ltok${isPow ? ' pw' : ''}${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:84px">${leaderToken(L.id, side, CARDS, 84)}${isPow ? powerCostHTML(L.cost ?? cost) : ''}</div></div>` : '';
     return `<div class="mlead ${side}">${tok}<div class="lt">${power}</div></div>`;
   };
   const m = mana[you] || { left: 0, total: 0 }, t = mana[them] || { left: 0, total: 0 }, mine = G.current === you && V.phase === 'playing';

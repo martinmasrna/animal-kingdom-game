@@ -21,6 +21,8 @@ from pathlib import Path
 from aiohttp import WSMsgType, web
 
 from ..engine.cards import COPY_LIMITS, load_cards
+from ..engine.config import Config
+from ..engine.effects import power_price
 from ..engine.leaders import LEADERS
 from ..engine.state import EngineError
 from ..decks import DECK_SIZE
@@ -744,7 +746,8 @@ async def pool(_req):
         # The deck rules the collection builds to (decks.py, engine/cards.py, profiles.py): the client holds none of these numbers itself.
         "rules": {"deckSize": DECK_SIZE, "copies": COPY_LIMITS, "decksMax": DECKS_MAX},
         # the cards that can lead a deck, each with its kind and its ability (engine/leaders.py)
-        "leaders": {lid: {"kind": kind, "text": text} for lid, (kind, text) in LEADERS.items()},
+        "leaders": {lid: {"kind": kind, "text": text, **({"cost": power_price(lid, Config())} if kind == "power" else {})}
+                    for lid, (kind, text) in LEADERS.items()},
     })
 
 

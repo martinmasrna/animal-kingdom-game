@@ -632,10 +632,15 @@ def _leads(state: GameState, player: str, leader_id: str) -> bool:
     return lead is not None and lead["id"] == leader_id
 
 
+def power_price(leader_id: str, config) -> int:
+    """What a leader's power costs: the Elf's its own, every other the config's."""
+    return config.elf_power_cost if leader_id == L.ELF else config.leader_power_cost
+
+
 def power_cost(state: GameState, player: str) -> int:
-    """What `player`'s leader's power costs: the Elf's its own, every other the config's."""
+    """What `player`'s leader's power costs."""
     lead = state.leaders.get(player)
-    return state.config.elf_power_cost if lead and lead["id"] == L.ELF else state.config.leader_power_cost
+    return power_price(lead["id"], state.config) if lead else state.config.leader_power_cost
 
 
 def leader_usable(state: GameState, player: str) -> bool:
