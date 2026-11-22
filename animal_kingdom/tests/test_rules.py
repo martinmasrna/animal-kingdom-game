@@ -358,7 +358,7 @@ def test_raid_draw_flies_into_the_den_then_draws():
     s = state(turn=11, hands={"A": ["raid_draw_5"]}, food={"A": 15, "B": 15})
     assert CARDS["raid_draw_5"].keywords == {"Flight"}
     rules.apply_action(s, PlaceAction("raid_draw_5", ("hq", "B")))   # a flier: no connection needed
-    assert s.food["B"] == 10 and [u.card_id for u in s.hands["A"]] == ["wisp_1"]
+    assert s.food["B"] == 14 and [u.card_id for u in s.hands["A"]] == ["wisp_1"]
 
 
 def test_double_raid_destroys_double_its_strength():
@@ -444,9 +444,9 @@ def test_djinn_cost_less_for_each_of_their_count():
 
 
 def test_burn_djinn_costs_less_for_each_food_the_opponent_lost_this_turn():
-    s = state(turn=11, hands={"A": ["raid_draw_5", "djinn_burn"], "B": ["djinn_burn"]}, food={"A": 15, "B": 15})
+    s = state(turn=11, hands={"A": ["flight_5", "djinn_burn"], "B": ["djinn_burn"]}, food={"A": 15, "B": 15})
     assert mana_cost(s, "djinn_burn") == 12
-    rules.apply_action(s, PlaceAction("raid_draw_5", ("hq", "B")))   # the raid destroys 5 of B's food
+    rules.apply_action(s, PlaceAction("flight_5", ("hq", "B")))      # the raid destroys 5 of B's food
     assert s.food["B"] == 10 and mana_cost(s, "djinn_burn") == 7
     assert mana_cost(s, "djinn_burn", "B") == 12                      # A lost none
     rules.apply_action(s, PassAction())                               # a new turn: nothing lost in it yet

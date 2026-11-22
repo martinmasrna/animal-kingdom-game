@@ -420,9 +420,9 @@
       "name": "Raid Draw 5",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 5,
+      "base_strength": 1,
       "text": "Flight. After it raids, draw a card.",
-      "cost": 5,
+      "cost": 2,
       "keywords": [
         "Flight"
       ]
