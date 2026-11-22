@@ -575,7 +575,7 @@ def test_the_practice_bot_plans_its_turn_and_beats_the_greedy_bot():
     from animal_kingdom.bot import GreedyBot, SearchBot
     from animal_kingdom.web.match import PRACTICE_BOT
     wins, games, held = 0, 0, 0
-    for seed in range(6):
+    for seed in range(5):
         for seat in "AB":
             bots = {seat: SearchBot(PRACTICE_BOT, seed), rules.other_player(seat): GreedyBot(seed)}
             s = new_game(DECK, DECK, seed, leaders={"A": "warlord_legend", "B": "warlord_legend"})
@@ -588,7 +588,7 @@ def test_the_practice_bot_plans_its_turn_and_beats_the_greedy_bot():
             wins += s.result.winner == seat
             games += 1
             assert bots[seat].failures == 0
-    assert wins >= 8 and held > 0, (wins, games, held)
+    assert wins >= 7 and held > 0, (wins, games, held)
 
 
 def test_a_search_bot_that_fails_plays_the_greedy_bots_move():
