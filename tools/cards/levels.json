@@ -1319,5 +1319,27 @@
       "by": "claude",
       "at": 1795354530
     }
+  },
+  "sky_maw_2": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795357247
+    }
+  },
+  "sky_maw_4": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795357247
+    }
   }
 }

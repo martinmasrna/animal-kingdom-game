@@ -596,6 +596,32 @@
       "text": "When you draw this, draw a card.",
       "cost": 1,
       "keywords": []
+    },
+    {
+      "id": "sky_maw_2",
+      "name": "Sky Maw 2",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 3,
+      "text": "Flight. Hungry.",
+      "cost": 2,
+      "keywords": [
+        "Flight",
+        "Hungry"
+      ]
+    },
+    {
+      "id": "sky_maw_4",
+      "name": "Sky Maw 4",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 6,
+      "text": "Flight. Hungry.",
+      "cost": 4,
+      "keywords": [
+        "Flight",
+        "Hungry"
+      ]
     }
   ]
 }

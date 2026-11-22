@@ -464,6 +464,13 @@ def test_burn_djinn_costs_less_for_each_food_the_opponent_lost_this_turn():
     assert mana_cost(s, "djinn_burn", "A") == 12
 
 
+def test_sky_maw_lands_only_on_a_weaker_enemy_anywhere_and_never_raids():
+    s = state(turn=2, hands={"A": ["sky_maw_2"]})                    # Flight. Hungry. (2 mana, 3)
+    put(s, "4,2", "wisp_1", "B")                                     # strength 2, far from A's base
+    put(s, "4,3", "wisp_2", "B")                                     # strength 4: too strong
+    assert places(s, "sky_maw_2") == {"4,2"} and not raids(s)
+
+
 def test_bird_egg_falls_into_two_flight_1():
     s = state(turn=11, hands={"A": ["wisp_1"]})
     put(s, "1,1", "bird_egg", "B")
