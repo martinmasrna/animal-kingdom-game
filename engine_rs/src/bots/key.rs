@@ -9,6 +9,7 @@
 //! 30-action cap). A position with something still resolving is keyed exactly, ids and order included.
 
 use std::fmt::Write;
+use std::hash::BuildHasherDefault;
 
 use crate::data::*;
 use crate::state::{State, Unit};
@@ -21,12 +22,19 @@ fn mix(mut x: u64) -> u64 {
     x ^ (x >> 31)
 }
 
+/// Folds values in with one multiply each (rotate, xor, multiply by an odd constant: a bijection of the running value
+/// for each value added) and mixes once at the end; a full mix for every value was a fifth of a search's time.
 struct Hasher(u64);
 
 impl Hasher {
     #[inline]
     fn add(&mut self, v: u64) {
-        self.0 = mix(self.0 ^ v);
+        self.0 = (self.0.rotate_left(26) ^ v).wrapping_mul(0x9E37_79B9_7F4A_7C15);
+    }
+
+    #[inline]
+    fn finish(&self) -> u64 {
+        mix(self.0)
     }
 }
 
@@ -125,5 +133,29 @@ pub fn position_key(st: &State, me: Player, hidden: bool) -> u64 {
         let _ = write!(h, "{:?}{:?}{:?}", st.effect_stack, st.pending, st.scheduled);
         h.add(st.next_iid as u32 as u64);
     }
-    h.0
+    h.finish()
 }
+
+/// A key is already mixed: a map or set of keys hashes it as it is.
+#[derive(Default)]
+pub struct KeyHash(u64);
+
+impl std::hash::Hasher for KeyHash {
+    #[inline]
+    fn write(&mut self, bytes: &[u8]) {
+        for &b in bytes {
+            self.0 = (self.0 << 8 | self.0 >> 56) ^ b as u64;
+        }
+    }
+    #[inline]
+    fn write_u64(&mut self, v: u64) {
+        self.0 = v;
+    }
+    #[inline]
+    fn finish(&self) -> u64 {
+        self.0
+    }
+}
+
+pub type KeyMap<V> = std::collections::HashMap<u64, V, BuildHasherDefault<KeyHash>>;
+pub type KeySet = std::collections::HashSet<u64, BuildHasherDefault<KeyHash>>;

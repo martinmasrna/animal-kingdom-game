@@ -35,7 +35,7 @@ const NO_UNIT: Unit = Unit { card: 0, owner: 0, retaliation_used: false, iid: -1
 /// between a cover and the removal of what it covered, so the tops
 /// are a flat array and everything beneath them one short list. `order` is the order the occupied tiles were taken in,
 /// which the rules read (the animals at 0 strength are removed in it).
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Board {
     tops: [Unit; MAX_TILES],
     /// The occupied tiles, as bits.
@@ -46,6 +46,14 @@ pub struct Board {
     n_order: u8,
     /// (tile, unit) for every unit beneath a top, each tile's bottom to top in list order.
     buried: SmallVec<[(Tile, Unit); 4]>,
+}
+
+/// Copied as memory: the derived clone copies a short list item by item, which a search's millions of copies feel.
+impl Clone for Board {
+    #[inline]
+    fn clone(&self) -> Board {
+        Board { tops: self.tops, occ: self.occ, own: self.own, order: self.order, n_order: self.n_order, buried: SmallVec::from_slice(&self.buried) }
+    }
 }
 
 impl Default for Board {
@@ -331,7 +339,7 @@ pub struct GameResult {
 pub type Hand = SmallVec<[Unit; 12]>;
 pub type Deck = SmallVec<[CardId; 32]>;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct State {
     pub g: Arc<Game>,
     pub board: Board,
@@ -372,6 +380,45 @@ pub struct State {
     /// The card whose effect is running, and the very unit when known: stamped on each event.
     pub cause: Option<CardId>,
     pub cause_iid: Option<i32>,
+}
+
+/// Copied as memory where it can be (the lists of plain values), for the same reason as the board; every field is named,
+/// so a new one cannot be forgotten.
+impl Clone for State {
+    #[inline]
+    fn clone(&self) -> State {
+        State {
+            g: self.g.clone(),
+            board: self.board.clone(),
+            hands: [SmallVec::from_slice(&self.hands[0]), SmallVec::from_slice(&self.hands[1])],
+            decks: [SmallVec::from_slice(&self.decks[0]), SmallVec::from_slice(&self.decks[1])],
+            starting_decks: self.starting_decks.clone(),
+            remove_pile: SmallVec::from_slice(&self.remove_pile),
+            pile_owners: SmallVec::from_slice(&self.pile_owners),
+            leaders: self.leaders,
+            food: self.food,
+            current: self.current,
+            first_player: self.first_player,
+            rng: self.rng.clone(),
+            turn_counter: self.turn_counter,
+            mana_spent: self.mana_spent,
+            applied_this_turn: self.applied_this_turn,
+            played_this_turn: self.played_this_turn,
+            power_used: self.power_used,
+            power_discount: self.power_discount,
+            fatigue: self.fatigue,
+            effect_steps_this_turn: self.effect_steps_this_turn,
+            caps: self.caps.clone(),
+            next_iid: self.next_iid,
+            effect_stack: self.effect_stack.clone(),
+            pending: self.pending.clone(),
+            scheduled: self.scheduled.clone(),
+            result: self.result,
+            events: self.events.clone(),
+            cause: self.cause,
+            cause_iid: self.cause_iid,
+        }
+    }
 }
 
 pub const NO_OWNER: u8 = 255;
