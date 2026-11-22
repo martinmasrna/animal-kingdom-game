@@ -45,7 +45,7 @@ export async function openPatch({ version, seen, closed } = {}) {
   if (!P) return;
   const el = document.createElement('div'); el.id = 'patchpop'; el.className = 'patchpop';
   const tabs = list.length > 1 ? `<div class="ptabs">${list.map(x => `<button class="ptab" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>` : '';
-  el.innerHTML = `<div class="mscr patch pwin"><div class="pscroll"><div class="pcol"></div></div>${tabs}`
+  el.innerHTML = `<div class="mscr patch pwin">${tabs}<div class="pscroll"><div class="pcol"></div></div>`
     + `<button class="pclose" aria-label="Close"></button></div>`;
   document.body.appendChild(el);
   const col = el.querySelector('.pcol');
