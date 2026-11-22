@@ -38,27 +38,8 @@ let last = null;                      // the latest flight's { cr, end }, kept a
 const quadOut = t => 1 - (1 - t) * (1 - t);
 const clamp = (v, m) => Math.max(-m, Math.min(m, v));
 
-// Fly from the card `from` (a .card element on screen) to the crossroad element `target`. `html`: the card to fly, in full
-// (cardHTML), else `from` itself; `id`: its card; `cr`: the crossroad's key, which the board asks about (inFlight, flightEnd);
-// `before`: the units there before the play, shown until the cut; `onArrive(covered)`: redraws the board. Returns false
-// when it can't fly (no art, reduced motion), and the play looks as it always did.
-// Off on live (Martin, 2026-11-12: live plays without it while he compares); on staging and localhost.
-export const FLIGHT = globalThis.location?.hostname !== 'animal-kingdom.fly.dev';
-
-// `start`: the pose of a card held in the pointer's grip (carry.js release()), which it flies on from, without the pop out of
-// the hand: a held card is already over its crossroad, so its flight is the short settle into place.
-// `geo`: another card form's measures (the mana ruleset's card, mana.js: the piece over a plaque), { end: its width over its
-// place, up: its piece's centre above its own centre in card widths, rear, hit: its widths reared up and as it hits }.
-export function fly(from, target, id, cr, before, onArrive, html = null, start = null, geo = null) {
-  if (!FLIGHT || (!from && !start) || !target || !hasArt(id) || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-  const CARD_END = geo ? geo.end : CARD_W, PIC_UP = geo ? geo.up : PIC_C, REAR_W = geo ? geo.rear : REAR_C, HIT_W = geo ? geo.hit : HIT_C;
-  const stage = document.getElementById('stage'), k = stage.getBoundingClientRect().width / stage.offsetWidth;
-  const C = start ? null : from.getBoundingClientRect(), t = target.getBoundingClientRect();
-  const w = start ? start.w : from.offsetWidth, h = start ? start.h : from.offsetHeight;   // the card's own size (the full card has the same outline)
-  const x0 = start ? start.x : C.left + C.width / 2, y0 = start ? start.y : C.top + C.height / 2, s0 = start ? start.s : C.width / w, s1 = CARD_END * k / w;
-  const x1 = t.left + t.width / 2, y1 = t.top + t.height / 2 - LIFT * k + PIC_UP * CARD_END * k;   // its painting over the piece's
-
-  done();
+// The card's own layer over the page, for a flight: `html` (the card in full) or a copy of `from`, at the card's size.
+function layer(from, html, w, h) {
   const el = document.createElement('div'); el.className = 'flight';
   const fc = document.createElement('div'); fc.className = 'fcard';
   fc.style.cssText = `width:${w}px;height:${h}px;left:${-w / 2}px;top:${-h / 2}px`;
@@ -66,15 +47,21 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
   const card = fc.firstElementChild; card.style.cssText += `;--w:${w}px;width:${w}px;height:${h}px;`;
   el.appendChild(fc); document.body.appendChild(el);
   if (html) fitNames(fc);
+  return { el, fc, card };
+}
+const poser = k => (x, y, s, rx, ry, rz) => ({ transform: `translate(${x}px,${y}px) perspective(${900 * k}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${s})` });
 
+// The way there, from (x0, y0) at scale s0 to (x1, y1) at s1 (screen pixels; k the stage's scale): the throw out of the hand,
+// or, for a card held in the grip (`start`), the short settle from where the grip left it. Its keyframes and length, every
+// card that leaves the hand (fly() to a crossroad, dive() into a den) taking the same path.
+function travel(card, k, x0, y0, s0, x1, y1, s1, start) {
   // The path: a quadratic curve bending off the straight line (it swings out, then comes in) and a little up (it is thrown,
   // not slid), sampled densely in time with the measured ease-out. The card tilts in 3D with its speed: it banks toward
   // where it is going, its leading edge dipping, and rocks just past level as it stops.
   const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1, side = dx >= 0 ? 1 : -1;
   const cx = x0 + dx * .45 + (-dy / len) * side * Math.min(80, len * .18) * k, cy = y0 + dy * .45 - 30 * k;
   const at = u => [(1 - u) * (1 - u) * x0 + 2 * (1 - u) * u * cx + u * u * x1, (1 - u) * (1 - u) * y0 + 2 * (1 - u) * u * cy + u * u * y1];
-  const pose = (x, y, s, rx, ry, rz) => ({ transform: `translate(${x}px,${y}px) perspective(${900 * k}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${s})` });
-  const speed = window.AK_SPEED || 1;
+  const pose = poser(k), speed = window.AK_SPEED || 1;
   let dur, frames;
   if (start) {   // held: it settles from where the grip left it, its tilt easing out as it stops (a little longer the farther)
     // (Impact: no settle of its own when it is already there, the rear-up starts at once; a still beat reads as a pause)
@@ -100,6 +87,33 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
       px = x; py = y;
     }
   }
+  return { dur, frames };
+}
+
+// Fly from the card `from` (a .card element on screen) to the crossroad element `target`. `html`: the card to fly, in full
+// (cardHTML), else `from` itself; `id`: its card; `cr`: the crossroad's key, which the board asks about (inFlight, flightEnd);
+// `before`: the units there before the play, shown until the cut; `onArrive(covered)`: redraws the board. Returns false
+// when it can't fly (no art, reduced motion), and the play looks as it always did.
+// Off on live (Martin, 2026-11-12: live plays without it while he compares); on staging and localhost.
+export const FLIGHT = globalThis.location?.hostname !== 'animal-kingdom.fly.dev';
+
+// `start`: the pose of a card held in the pointer's grip (carry.js release()), which it flies on from, without the pop out of
+// the hand: a held card is already over its crossroad, so its flight is the short settle into place.
+// `geo`: another card form's measures (the mana ruleset's card, mana.js: the piece over a plaque), { end: its width over its
+// place, up: its piece's centre above its own centre in card widths, rear, hit: its widths reared up and as it hits }.
+export function fly(from, target, id, cr, before, onArrive, html = null, start = null, geo = null) {
+  if (!FLIGHT || (!from && !start) || !target || !hasArt(id) || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  const CARD_END = geo ? geo.end : CARD_W, PIC_UP = geo ? geo.up : PIC_C, REAR_W = geo ? geo.rear : REAR_C, HIT_W = geo ? geo.hit : HIT_C;
+  const stage = document.getElementById('stage'), k = stage.getBoundingClientRect().width / stage.offsetWidth;
+  const C = start ? null : from.getBoundingClientRect(), t = target.getBoundingClientRect();
+  const w = start ? start.w : from.offsetWidth, h = start ? start.h : from.offsetHeight;   // the card's own size (the full card has the same outline)
+  const x0 = start ? start.x : C.left + C.width / 2, y0 = start ? start.y : C.top + C.height / 2, s0 = start ? start.s : C.width / w, s1 = CARD_END * k / w;
+  const x1 = t.left + t.width / 2, y1 = t.top + t.height / 2 - LIFT * k + PIC_UP * CARD_END * k;   // its painting over the piece's
+
+  done();
+  const { el, fc, card } = layer(from, html, w, h);
+  const pose = poser(k), speed = window.AK_SPEED || 1;
+  let { dur, frames } = travel(card, k, x0, y0, s0, x1, y1, s1, start);
   const me = cur = { cr, el, arrived: false, onArrive, before: before || [] };
   const cx0 = t.left + t.width / 2, cy0 = t.top + t.height / 2;
   let cutAt;
@@ -168,3 +182,25 @@ export function flightEnd(cr) {
 export function landed(cr) { if (cur && cur.cr === cr && cur.arrived) done(); }
 export function flying() { return cur ? cur.cr : null; }
 function done() { if (!cur) return; clearTimeout(cur.giveUp); cur.el.remove(); cur = null; }
+
+// A raid from the hand: the card takes the same way out of the hand (or on from the grip, `start`) to the den's ball
+// `target` (its .core), arriving at the ball's size, and goes into it; the food it destroys then leaves the den
+// (foodfx.js, in the view's own steps). Returns false when it can't fly (reduced motion), as fly() does.
+export function dive(from, target, html = null, start = null) {
+  if (!FLIGHT || (!from && !start) || !target || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  const stage = document.getElementById('stage'), k = stage.getBoundingClientRect().width / stage.offsetWidth;
+  const C = start ? null : from.getBoundingClientRect(), t = target.getBoundingClientRect();
+  const w = start ? start.w : from.offsetWidth, h = start ? start.h : from.offsetHeight;
+  const x0 = start ? start.x : C.left + C.width / 2, y0 = start ? start.y : C.top + C.height / 2, s0 = start ? start.s : C.width / w;
+  const x1 = t.left + t.width / 2, y1 = t.top + t.height / 2, s1 = t.width / w;
+  const { el, fc, card } = layer(from, html, w, h);
+  const { dur, frames } = travel(card, k, x0, y0, s0, x1, y1, s1, start);
+  const into = DIVE_MS / (window.AK_SPEED || 1), T = dur + into;
+  frames.forEach(f => { f.offset *= dur / T; });
+  frames.push({ ...poser(k)(x1, y1, s1 * .2, 0, 0, 0), offset: 1 });   // into the light
+  fc.animate(frames, { duration: T, fill: 'forwards' });
+  el.animate([{ opacity: 1, offset: 0 }, { opacity: 1, offset: dur / T, easing: 'ease-in' }, { opacity: 0, offset: 1 }], { duration: T, fill: 'forwards' })
+    .finished.then(() => el.remove(), () => el.remove());
+  return true;
+}
+const DIVE_MS = 160;   // from the ball's size into it

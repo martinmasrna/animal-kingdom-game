@@ -190,8 +190,12 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
 // `g` is a viewer-space game { board, food, income, winFood }. `ui`: { rings: [cr] legal targets, hqRing (the enemy den can
 // be taken), preview: {cr, id, str} (the selected card under the pointer), anim: the previous view's { board, food, income,
 // fx, fromStones } when this view follows one (so what changed animates; static/timeline.js plays one step per view), else null }.
+// Where the board stands on the stage, for what is placed around it (app.js drawRail): each base row's left and right
+// edges and its middle's height, and the board's right edge, all as the tilted board shows them.
+export const RAIL = { A: null, B: null, right: 0 };
 export function renderBoard(el, M, g, cards, ui) {
   setRows(M);
+  { const G = hexGeo(); RAIL.right = Math.max(...M.crossroads.map(cr => { const [x, y] = at(...cr.split(',').map(Number)); return project(x + G.w / 2, y)[0]; })); }
   const bases = { A: new Set((ui.bases || {}).A || []), B: new Set((ui.bases || {}).B || []) };   // the mana board's bases, viewer space
   const A = ui.anim, rings = new Set(ui.rings || []), roamable = new Set(ui.roamable || []), fire = new Set(ui.fire || []);   // fire: the animals whose own effect this step is   // your animals that can roam now
   // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)
@@ -227,13 +231,16 @@ export function renderBoard(el, M, g, cards, ui) {
     const ps = [...bases[side]].map(cr => at(...cr.split(',').map(Number)));
     if (!ps.length) continue;
     const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2;
+    { const l = project(Math.min(...ps.map(p => p[0])) - G.w / 2, ps[0][1]), r = project(Math.max(...ps.map(p => p[0])) + G.w / 2, ps[0][1]);
+      RAIL[side] = { l: l[0], r: r[0], y: l[1] }; }
     const y = ps[0][1] + (side === 'A' ? DEN_AT.A : -DEN_AT.B) * G.h;
-    // the trails: from each base tile's far tip to the den's spot, so the way in reads (Martin, 2026-11-22)
-    // they meet the ball on its side toward the board: theirs floats up from its spot, so they end at the spot; yours floats
-    // up toward the board, so they end at its top (a height on the screen is 1/cos(tilt) as long on the board's plane)
-    const d = side === 'A' ? 1 : -1, D = denD(g.food[side], denK(y)), ey = side === 'A' ? y - (D * .8 + 6) / Math.cos(TILT.deg * Math.PI / 180) : y;
-    s += `<svg class="mtrails">${ps.map(([px, py]) => { const ty = py + d * G.h / 2, ex = x + (px - x) * .18;
-      return `<path d="M ${px} ${ty} C ${px} ${ty + (ey - ty) * .55}, ${ex} ${ey - d * 12}, ${ex} ${ey}"/>`; }).join('')}</svg>`;
+    // the trails: from each base tile's far tip into the ball, so the way in reads (Martin, 2026-11-22), in the ball's own
+    // light (mana.css .mtrails). Each runs to the ball's centre, which floats its lift above the spot (a height on the screen
+    // is 1/cos(tilt) as long on the board's plane), and the ball, standing in front, covers its end: they meet its rim
+    // whatever its size, arriving along the line from its centre
+    const d = side === 'A' ? 1 : -1, D = denD(g.food[side], denK(y)), ey = y - (D / 2 + 6) / Math.cos(TILT.deg * Math.PI / 180);
+    s += `<svg class="mtrails">${ps.map(([px, py]) => { const ty = py + d * G.h / 2;
+      return `<path d="M ${px} ${ty} C ${px} ${ty + (ey - ty) * .45}, ${x + (px - x) * .35} ${ey + (ty - ey) * .35}, ${x} ${ey}"/>`; }).join('')}</svg>`;
     s += put(`mden ${side}${g.food[side] > 0 ? '' : ' none'}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x, y, denBall(g.food[side], (g.income || {})[side] ?? 0), `data-hq="${side}" data-k="${denK(y).toFixed(4)}"`, denSize(g.food[side], denK(y)));
   }
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
@@ -295,5 +302,5 @@ export function renderBoard(el, M, g, cards, ui) {
 // reached (its own painting), a power that can't be used now greyed, one you can press now ringed as an animal you can act
 // with is. Where it stands on the stage: LEADER_AT.
 export const LEADER_AT = { A: [178, 650], B: [1110, 78] }, LEADER_PORT = { A: [70, 1300], B: [650, 140] };
-export const leaderAt = side => (VIEW.port ? LEADER_PORT : LEADER_AT)[side];
+export const leaderAt = side => VIEW.port ? LEADER_PORT[side] : RAIL[side] ? [RAIL[side].l - 24 - 42, RAIL[side].y] : LEADER_AT[side];   // where app.js drawRail stands it
 

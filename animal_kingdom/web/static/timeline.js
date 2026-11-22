@@ -131,6 +131,8 @@ export function plan(prev, next, cards = {}) {
         flow('food', e); s.food[e.player] += e.n;
         break;
       case 'raid':   // the food a raid destroys leaves the den in a step of its own (foodfx.js)
+        // the raider leaves its hand as a played card does ('place'), before anything of its raid shows
+        if (e.from_hand) { s.handCount[e.player] = Math.max(0, s.handCount[e.player] - 1); if (e.player === you) s.hand = s.hand.filter(h => h.iid !== e.iid); }
         // their raid: the card shown large first, diving into your den (Martin, 2026-11-21: "it should show some animation")
         if (e.player === them && e.card) push({ kind: 'raidin', dur: DUR.reveal, card: e.card, player: e.player, den: e.den });
         if (e.n) { s.food[e.den] -= e.n; push({ kind: 'raid', dur: DUR.raid, den: e.den, n: e.n, player: e.player }); }

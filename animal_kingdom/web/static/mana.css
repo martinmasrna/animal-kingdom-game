@@ -100,7 +100,9 @@
 @keyframes fpulse { 40% { scale: 1.08; filter: brightness(1.25); } }
 #foodfx { position: fixed; inset: 0; pointer-events: none; z-index: 60; } #foodfx .fdot { position: absolute; }
 .game.mana .mtrails { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; z-index: 1; }
-.game.mana .mtrails path { fill: none; stroke: #7a6650; stroke-width: 3.5; stroke-linecap: round; }
+/* the trails into each den, in its ball's light: the halo's orange, softly glowing as the ball does (Martin, 2026-11-22) */
+.game.mana .mtrails { filter: drop-shadow(0 0 2px rgba(255, 160, 50, .9)) drop-shadow(0 0 7px rgba(255, 130, 30, .5)); }
+.game.mana .mtrails path { fill: none; stroke: #ffb35c; stroke-width: 3; stroke-linecap: round; }
 .game.mana .rdot { color: inherit; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #565c66; box-shadow: 0 0 0 2px #1f2228; z-index: 4; pointer-events: none; }
 .game.mana .rdot.A { background: #5aa2f0; } .game.mana .rdot.B { background: #e05a4c; }
 .game.mana .cr.unit:hover { z-index: 5; }
@@ -148,9 +150,12 @@
 .game.mana .mlead .ltok.can { cursor: pointer; }
 .game.mana .mlead .ltok.can::after { content: ''; position: absolute; inset: -5px; clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 5%, 4.5% 27.5%, 4.5% 72.5%, 50% 95%, 95.5% 72.5%, 95.5% 27.5%, 50% 5%); background: #f2c94c; }
 .game.mana .mlead .ltok.can:hover { filter: brightness(1.15); }
-.game.mana .mlead .lt { font-size: 15px; color: #aab2bf; }
-.game.mana .mlead .lt .mchip { width: 22px; height: 25px; }
-.game.mana .mlead.A { left: 486px; top: 566px; } .game.mana .mlead.B { left: 538px; top: 46px; }
+/* each deck: its face-down cards (the team's empty token) piled, the count in the top one's drawer (app.js drawRail) */
+.game.mana .mdeck { position: absolute; width: 84px; height: 97px; cursor: pointer; }
+.game.mana .mdeck .unit { position: absolute; inset: 0; }
+.game.mana .mdeck .unit .tkbase { filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .55)); }
+.game.mana .mdeck .unit.empty { opacity: .35; }
+.game.mana .mdeck:hover { filter: brightness(1.15); }
 .game.mana .mmana { position: absolute; font-size: 15px; display: flex; align-items: center; gap: 10px; }
 .game.mana .mmana .mcount { font: 700 22px 'Fira Sans Condensed', sans-serif; color: #fff; text-shadow: 0 1px 0 #000, 0 0 4px rgba(0, 0, 0, .9); letter-spacing: .02em; }
 .game.mana .mmana.B .mcount { font-size: 17px; }

@@ -3,15 +3,16 @@
 import { fitStrips } from './art.js';
 import { fitNames, readSide } from './card.js';
 import { plan, DUR } from './timeline.js';
-import { fly, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
+import { fly, dive, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, leaderAt, resolvesIn, tokenWidth } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, leaderAt, resolvesIn, tokenWidth, RAIL } from './board.js';
 import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo, powerCard, powerCostHTML } from './mana.js';
 import { playFood } from './foodfx.js';
 import { decodeDeck } from './deckcode.js';
 import { openPatch, newestPatch } from './patch.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripsHTML } from './collection.js';
 import { onHold, holdEvents } from './menu.js';
+import { tokenBase, numeral } from './token.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { track } from './log.js';
@@ -696,7 +697,6 @@ function gameScreen() {
       <div class="abs menu chatbtn" id="chatbtn" data-tip="Friends">${ICON_FRIENDS}${chatBadge()}</div>
       <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/></svg></div>
       <div class="abs hand" id="hand"></div>
-      <div class="abs deck" id="deck"></div>
       <div class="abs tbtn" id="tbtn"></div>
       <div class="abs waiting" id="waiting"></div>
       <div class="abs prompt" id="choicebar"></div>
@@ -719,17 +719,11 @@ function gameScreen() {
     ask.onclick = e => { e.stopPropagation(); if (e.target === ask) ask.classList.remove('on'); };
     $('keep').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); };
     $('concede').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); send({ t: 'concede' }); };
-    // The series opens the history, the opponent's hand their decklist; hovering your deck shows yours.
+    // The series opens the history; the decks (drawRail) open their lists.
     const toggle = k => e => { e.stopPropagation(); ui.panel = ui.panel === k ? null : k; showPanel(); };
-    $('series').onclick = toggle('hist'); $('opphand').onclick = toggle('theirs'); $('pilebtn').onclick = toggle('pile');
-    $('deck').onmouseenter = () => { if (matchMedia('(hover: none)').matches) return; ui.panel = 'mine'; showPanel(); };   // touch: held instead (below)
-    $('deck').onmouseleave = () => { if (ui.panel === 'mine') { ui.panel = null; showPanel(); } };
+    $('series').onclick = toggle('hist'); $('pilebtn').onclick = toggle('pile');
     app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
     $('scr').addEventListener('click', () => { if (ui.panel) { ui.panel = null; showPanel(); } });
-    // touch reads your deck as it reads a card: hold it, or tap it when a tap would draw nothing
-    const myList = () => { ui.panel = 'mine'; showPanel(); };
-    onHold($('deck'), myList);
-    $('deck').onclick = e => { e.stopPropagation(); if (touch()) myList(); };
     $('tbtn').onclick = e => { e.stopPropagation(); if (canEnd(lastDecision)) { sfx('endturn'); act({ kind: 'pass' }); } };
     $('sndbtn').dataset.tip = 'Settings';
     $('sndbtn').innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
@@ -859,7 +853,7 @@ function drawGame() {
     // fetched (a Kitten, a Young Stag) came from no deck, so it rises into its place instead (Martin, 2026-10-31: flying in
     // from the deck "just looks weird")
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = false;
-    const from = drawn ? `${made ? '' : `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
+    const from = drawn ? `${made ? '' : `--fx:${deckX() + DECK_W / 2 - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
     const html = manaCard(c, { str: h.str, cost: h.cost, w: cw, iid: h.iid });
     return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${html}</div>`;
   }).join('');
@@ -897,7 +891,6 @@ function drawGame() {
   }));
   ungrip();
 
-  $('deck').className = 'abs deck num'; $('deck').innerHTML = '';
   const tb = $('tbtn');
   const pips = '';
   if (playing && G.current === you) {
@@ -991,7 +984,6 @@ function drawGame() {
 
 // Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
 // deck's and End turn's centre tops.
-const PL = () => ({ hand: 590, handC: 532, handW: 560, deck: [1299, 606], end: [1439, 664] });
 
 // The history strip and both decklists, shared by both game screens.
 // One move in small: a draw is its count on the team's boss (as a held payout); a placement the unit, as on the board.
@@ -1166,41 +1158,58 @@ function leaderPanel(side) {
   const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader", kind = (LEADER_MANA(V.game.abilityCost));
   return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${kind[L.kind] || ''}</p><p>${L.text}</p>`;
 }
-// The mana rules' controls around the dens (mana.css; Martin, 2026-11-20, the den layout): each side's leader small, left
-// of its den, with its power's price; your mana and End turn (#tbtn, its own element) right of your den, their mana right
-// of theirs. Food is in the dens (board.js). Their mana while it isn't their turn is their next turn's, unspent.
+// The mana rules' controls around the board (mana.css; Martin, 2026-11-20, the den layout), placed from where the board
+// stands (board.js RAIL), so none of them lies on it: each side's leader left of its base row, with its power's price; each
+// side's deck right of the board level with its base row, a pile of its face-down cards (their tokens, empty) as thick as
+// the cards left in it, with the count, a click showing its list beside it; your mana and End turn (#tbtn, its own element)
+// right of your den, their mana right of theirs. Food is in the dens (board.js). Their mana while it isn't their turn is
+// their next turn's, unspent.
+const LEAD_W = 84, LEAD_H = 97, DECK_W = 84, DECK_H = 97, RAIL_GAP = 24;
+const deckX = () => RAIL.right + RAIL_GAP * 2;   // the decks' left edge
 function drawRail(G, d) {
   const el = document.getElementById('mrail'); if (!el) return;
   if ((!G)) { el.innerHTML = ''; return; }
   const you = V.you, them = opp(), mana = G.mana || {}, cost = G.abilityCost;
   const lead = side => {
-    const p = side === 'A' ? you : them, L = (G.leaders || {})[p];
+    const p = side === 'A' ? you : them, L = (G.leaders || {})[p], R = RAIL[side];
     const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && L.spent;   // the gold ring says when your power can be used
     // a power's cost in the token's drawer, where a card's strength sits (Martin, 2026-11-21); used this turn, the token
     // dims, no label (Martin, 2026-11-21: "remove AI-slop label")
-    const isPow = L && L.kind === 'power', power = '';
-    const tok = L ? `<div class="ltok${isPow ? ' pw' : ''}${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:84px">${leaderToken(L.id, side, CARDS, 84)}${isPow ? powerCostHTML(L.cost ?? cost) : ''}</div></div>` : '';
-    return `<div class="mlead ${side}">${tok}<div class="lt">${power}</div></div>`;
+    const isPow = L && L.kind === 'power';
+    const tok = L ? `<div class="ltok${isPow ? ' pw' : ''}${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:${LEAD_W}px">${leaderToken(L.id, side, CARDS, LEAD_W)}${isPow ? powerCostHTML(L.cost ?? cost) : ''}</div></div>` : '';
+    return `<div class="mlead ${side}" style="left:${R.l - RAIL_GAP - LEAD_W}px;top:${R.y - LEAD_H / 2}px">${tok}</div>`;
   };
-  const m = mana[you] || { left: 0, total: 0 }, t = mana[them] || { left: 0, total: 0 }, mine = G.current === you && V.phase === 'playing';
-  el.innerHTML = lead('B') + lead('A')
+  // a deck: one token a few cards, so it thins as it is drawn; empty, the bare slot
+  const deck = side => {
+    const n = (G.deckCount || {})[side === 'A' ? you : them] ?? 0, layers = n ? Math.min(7, Math.ceil(n / 4)) : 0, R = RAIL[side];
+    // each card under the top one a step darker, so the pile's edges read (its shadow side)
+    const tok = (i, top) => `<div class="unit ${side}" style="--tw:${DECK_W}px;transform:translateY(${-i * 4}px)"><img class="tkbase" src="${tokenBase(side)}" alt="" draggable="false"${top ? '' : ` style="filter:brightness(${(.45 + .35 * i / layers).toFixed(2)}) drop-shadow(0 2px 1px rgba(0,0,0,.55))"`}>${top ? numeral(n) : ''}</div>`;
+    const pile = layers ? Array.from({ length: layers }, (_, i) => tok(i, i === layers - 1)).join('') : `<div class="unit ${side} empty" style="--tw:${DECK_W}px"><img class="tkbase" src="${tokenBase(side)}" alt="" draggable="false">${numeral(0)}</div>`;
+    return `<div class="mdeck ${side}" data-deck="${side}" style="left:${deckX()}px;top:${R.y - DECK_H / 2}px">${pile}</div>`;
+  };
+  const m = mana[you] || { left: 0, total: 0 }, t = mana[them] || { left: 0, total: 0 };
+  el.innerHTML = lead('B') + lead('A') + deck('B') + deck('A')
     // what is left of the turn's mana as X/N right of the crystals (Martin, 2026-11-21)
     + `<div class="mmana A">${pipsHTML(m.left, m.total)}<b class="mcount">${m.left}/${m.total}</b></div>`
     + `<div class="mmana B">${pipsHTML(t.left, t.total)}<b class="mcount">${t.left}/${t.total}</b></div>`;
+  // a deck's list opens beside it, toward the screen's edge
+  for (const [side, id] of [['A', 'mine'], ['B', 'theirs']]) { const p = document.getElementById(id);
+    p.style.left = `${deckX() + DECK_W + RAIL_GAP}px`; p.style.right = 'auto'; p.style.margin = '0';
+    if (side === 'B') { p.style.top = `${RAIL.B.y - DECK_H / 2}px`; p.style.bottom = 'auto'; }
+    else { p.style.top = 'auto'; p.style.bottom = `${800 - (RAIL.A.y + DECK_H / 2)}px`; } }
 }
-// The rail's leaders and decks read on hover (a leader's power, a decklist), and your leader's power is pressed there.
+// The rail's leaders read on hover (a leader's power) and your leader's power is pressed there; a deck shows its list on a click.
 function wireRail() {
   const rail = document.getElementById('mrail'); if (!rail || rail.wired) return; rail.wired = true;
   const hide = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
   rail.addEventListener('mouseover', e => {
-    const lead = e.target.closest('[data-lead]'), deck = e.target.closest('[data-deck]');
+    const lead = e.target.closest('[data-lead]');
     if (lead && !touch()) { pop.className = 'pop' + ((' mpop')); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
       const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.max(10, r.left - w - 12) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
     hide();
-    if (deck && !touch()) { const k = deck.dataset.deck === 'A' ? 'mine' : 'theirs'; if (ui.panel !== k) { ui.panel = k; showPanel(); } }
   });
-  rail.addEventListener('mouseout', e => { if (!rail.contains(e.relatedTarget)) { hide(); if (ui.panel === 'mine' || ui.panel === 'theirs') { ui.panel = null; showPanel(); } } });
+  rail.addEventListener('mouseout', e => { if (!rail.contains(e.relatedTarget)) hide(); });
   rail.addEventListener('click', e => {
     const lead = e.target.closest('[data-lead]'), d = lastDecision; e.stopPropagation();
     if (lead && lead.dataset.lead === 'A') { const L = viewerGame().leaders.A;
@@ -1231,18 +1240,22 @@ function drawLast(G) {
     r.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; pop.className = 'pop'; };
   });
 }
-// Place the picked card on crossroad `cr` (its element `g`): it flies there from the hand, or settles from the grip, and turns
-// into the piece (flight.js); the hand closes up behind it.
-function placeAt(g, cr) {
-  const iid = selCopy().iid, start = ui.carry === iid ? release() : null; ui.carry = null;
-  // in full, text and all, as the opponent's; the mana rules' card as it sat in the hand (its plaque fades as the piece goes)
-  const flew = fly(start ? null : document.querySelector(`#hand .hc[data-iid="${iid}"] ${('.mcard')}`), g, ui.sel, cr, viewerGame().board[cr], landNow,
-    (manaCard(CARDS[ui.sel], { str: selCopy().str, cost: selCopy().cost, w: 100 })), start, (flightGeo()));
-  act(placeAction(['cr', dcr(cr)]));
-  { clearTimeout(stackTimer); stackCr = cr; manaHover(null); }   // the piece landing under the pointer isn't read until the pointer moves on
-  if (flew) { ui.flyIid = iid; drawGame();
-    setTimeout(() => { if (ui.flyIid === iid && screen === 'game') { ui.flyIid = null; drawGame(); } }, 5000); }   // a refused play: the card is back
+// Play the picked card from the hand to `target` (['cr', crossroad] or ['hq', den]; `el`, its element on the board): it
+// leaves the hand at once, for good, and goes there, flying to a crossroad to turn into the piece (flight.js fly()), or
+// diving into the den's ball (dive()); the hand closes up behind it and keeps it out until the server's view says where it
+// went (showView), or, a play refused, gives it back.
+function play(target, el) {
+  const c = selCopy(), start = ui.carry === c.iid ? release() : null; ui.carry = null;
+  const from = start ? null : document.querySelector(`#hand .hc[data-iid="${c.iid}"] .mcard`);
+  const html = manaCard(CARDS[ui.sel], { str: c.str, cost: c.cost, w: 100 });
+  if (target[0] === 'cr') fly(from, el, ui.sel, target[1], viewerGame().board[target[1]], landNow, html, start, flightGeo());
+  else dive(from, el.querySelector('.core') || el, html, start);
+  act(placeAction(target[0] === 'cr' ? ['cr', dcr(target[1])] : target));
+  if (target[0] === 'cr') { clearTimeout(stackTimer); stackCr = target[1]; manaHover(null); }   // the piece landing under the pointer isn't read until the pointer moves on
+  ui.flyIid = c.iid; drawGame();
+  setTimeout(() => { if (ui.flyIid === c.iid && screen === 'game') { ui.flyIid = null; drawGame(); } }, 5000);   // a refused play: the card is back
 }
+const denTarget = d => ui.sel && selPlaces(d).find(t => t[0] === 'hq');   // the den the picked card may raid
 
 // The drag (carry.js): a press on a playable card that moves picks it up; its release places it or puts it back.
 addEventListener('pointermove', e => {
@@ -1260,8 +1273,8 @@ addEventListener('pointerup', e => {
   ui.dragging = false; ui.dragEnd = Date.now();
   const at = document.elementFromPoint(e.clientX, e.clientY), d = lastDecision;
   const g = at && at.closest('#board [data-cr]'), hq = at && at.closest('#board [data-hq]');
-  if (g && d && d.mine && d.rings.includes(g.dataset.cr)) return placeAt(g, g.dataset.cr);
-  if (hq && d && d.mine && ui.sel) { const t = selPlaces(d).find(t => t[0] === 'hq'); if (t) return act(placeAction(t)); }
+  if (g && d && d.mine && d.rings.includes(g.dataset.cr)) return play(['cr', g.dataset.cr], g);
+  if (hq && d && d.mine && denTarget(d)) return play(denTarget(d), hq);
   ui.sel = null; drawGame();   // let go anywhere else: back into the hand
 });
 
@@ -1282,11 +1295,11 @@ function wireBoard() {
     if (!d || !d.mine) { const g = touch() && e.target.closest('[data-cr]'); if (g) readStack(g.dataset.cr); return; }   // off your turn a tap only reads
     const hq = e.target.closest('[data-hq]');
     if (hq && d.pend && d.pend.mode === 'choice' && d.hqRing) return act({ kind: 'choice', choice: 'den' });
-    if (hq && ui.sel) { const t = selPlaces(d).find(t => t[0] === 'hq'); if (t) return act(placeAction(t)); }
+    if (hq && denTarget(d)) return play(denTarget(d), hq);
     const g = e.target.closest('[data-cr]'); if (!g) return;
     const cr = g.dataset.cr;
     if (cr in d.crChoice) return act({ kind: 'choice', choice: d.crChoice[cr] });
-    if (ui.sel && d.rings.includes(cr)) return placeAt(g, cr);
+    if (ui.sel && d.rings.includes(cr)) return play(['cr', cr], g);
     if (ui.roam) { ui.roam = null; return drawGame(); }
     if (touch() && !ui.sel) readStack(cr);
   });

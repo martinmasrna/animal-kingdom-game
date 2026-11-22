@@ -63,7 +63,7 @@ impl Recorded {
             Ev::Mulligan { player, returned, drawn } => json!({"e": "mulligan", "player": pname(*player), "returned": returned, "drawn": [drawn.0, card(drawn.1)]}),
             Ev::TurnCapped { cap, player, turn, cards } => json!({"e": "turn_capped", "cap": cap.name(), "player": pname(*player), "turn": turn,
                 "cards": cards.iter().map(|c| card(*c)).collect::<Vec<_>>()}),
-            Ev::Raid { player, iid, card: c, den, strength, n } => json!({"e": "raid", "player": pname(*player), "iid": iid, "card": card(*c), "den": pname(*den), "str": strength, "n": n}),
+            Ev::Raid { player, iid, card: c, den, strength, n } => json!({"e": "raid", "player": pname(*player), "iid": iid, "card": card(*c), "den": pname(*den), "str": strength, "n": n, "from_hand": true}),
             Ev::Place { player, iid, card: c, cr } => json!({"e": "place", "player": pname(*player), "iid": iid, "card": card(*c), "cr": tile(*cr), "from_hand": true}),
             Ev::Cover { cr, iid, card: c, owner, by } => json!({"e": "cover", "cr": tile(*cr), "iid": iid, "card": card(*c), "owner": pname(*owner), "by": by}),
             Ev::Poisoned { iid, card: c, owner, by } => json!({"e": "poisoned", "iid": iid, "card": card(*c), "owner": pname(*owner), "by": by}),
