@@ -54,7 +54,7 @@ impl Args {
         let mut opts = HashMap::new();
         while let Some(k) = it.next() {
             let key = k.strip_prefix("--").ok_or_else(|| format!("unexpected argument {k:?}"))?.to_string();
-            if key == "log-actions" || key == "swap" || key == "count-wins" {
+            if key == "log-actions" || key == "swap" || key == "count-wins" || key == "write" {
                 opts.insert(key, "1".into());
             } else {
                 opts.insert(key, it.next().ok_or_else(|| format!("--{k} needs a value"))?);
@@ -534,6 +534,7 @@ fn run(args: &Args) -> Result<(), String> {
             t.turns += s.turns;
             t.positions += s.positions;
             t.nanos += s.nanos;
+            t.max_nanos = t.max_nanos.max(s.max_nanos);
             t.searches += s.searches;
             t.turns_cut += s.turns_cut;
             t.turns_hidden += s.turns_hidden;
@@ -541,15 +542,20 @@ fn run(args: &Args) -> Result<(), String> {
             t.replies += s.replies;
             t.reply_turns += s.reply_turns;
             t.repicks += s.repicks;
+            for k in 0..4 {
+                t.pick_rank[k] += s.pick_rank[k];
+            }
             t.max_turn_positions = t.max_turn_positions.max(s.max_turn_positions);
         }
         let turns = (t.turns as f64).max(1.0);
-        say(format!("{} {spec}: {:.0} positions and {:.2} ms a turn (most in one turn {}), {:.2} searches a turn; {} of turns cut short of a full search, {} met a draw",
-            if p == 0 { "X" } else { "Y" }, t.positions as f64 / turns, t.nanos as f64 / 1e6 / turns, t.max_turn_positions, t.searches as f64 / turns,
+        say(format!("{} {spec}: {:.0} positions and {:.2} ms a turn (most in one turn {}; the slowest choice {:.0} ms), {:.2} searches a turn; {} of turns cut short of a full search, {} met a draw",
+            if p == 0 { "X" } else { "Y" }, t.positions as f64 / turns, t.nanos as f64 / 1e6 / turns, t.max_turn_positions, t.max_nanos as f64 / 1e6, t.searches as f64 / turns,
             pct(t.turns_cut as f64 / turns), pct(t.turns_hidden as f64 / turns)));
         if t.reply_turns > 0 {
             say(format!("  the reply level was asked in {} of its turns ({:.1} reply searches each) and chose another turn than its own search's best in {} of those",
                 pct(t.reply_turns as f64 / turns), t.replies as f64 / t.reply_turns as f64, pct(t.repicks as f64 / t.reply_turns as f64)));
+            let r = |k: usize| pct(t.pick_rank[k] as f64 / t.reply_turns as f64);
+            say(format!("  the turn it chose was its own search's first in {}, second to fourth in {}, fifth to twelfth in {}, further down in {}", r(0), r(1), r(2), r(3)));
         }
         let mut h = Habits::default();
         for r in &recs {
@@ -661,7 +667,7 @@ fn show(args: &Args) -> Result<(), String> {
 fn turns(args: &Args) -> Result<(), String> {
     let (g, _) = load_game(args)?;
     let (decks, source) = load_decks(&g, args)?;
-    let spec = args.get("bot").unwrap_or("turn:budget=20000").to_string();
+    let spec = args.get("bot").unwrap_or("turn:budget=20000,mull=2").to_string();
     let games = args.num("games", 20)? as usize;
     let cap = args.num("cap", 3_000_000)?;
     let run_seed = args.num("seed", 1)?;
@@ -729,7 +735,7 @@ fn turns(args: &Args) -> Result<(), String> {
 fn winstats(args: &Args) -> Result<(), String> {
     let (g, _) = load_game(args)?;
     let (decks, source) = load_decks(&g, args)?;
-    let spec = args.get("bot").unwrap_or("turn:budget=20000").to_string();
+    let spec = args.get("bot").unwrap_or("turn:budget=20000,mull=2").to_string();
     let games = args.num("games", 100)? as usize;
     let cap = args.num("cap", 300_000)?;
     let run_seed = args.num("seed", 1)?;
@@ -791,7 +797,7 @@ fn evalfit(args: &Args) -> Result<(), String> {
     use ak_engine::bots::eval::{evaluate, RaidOdds, Weights};
     let (g, _) = load_game(args)?;
     let (decks, source) = load_decks(&g, args)?;
-    let spec = args.get("bot").unwrap_or("turn:budget=20000").to_string();
+    let spec = args.get("bot").unwrap_or("turn:budget=20000,mull=2").to_string();
     let games = args.num("games", 1000)? as usize;
     let run_seed = args.num("seed", 1)?;
     let n_threads = threads(args)?;
@@ -855,6 +861,297 @@ fn evalfit(args: &Args) -> Result<(), String> {
     Ok(())
 }
 
+/// Fit the race evaluation's weights to who won (`bots/race.rs`), the established way (Texel's tuning): positions from
+/// games a bot plays against itself, each finished turn read as numbers from both seats and labelled with the game's
+/// winner, and the weights that make 1 / (1 + exp(-weights · numbers)) predict the label best (a logistic regression,
+/// held lightly to the weights it starts from so a number that barely ever moves keeps its weight). A weight that comes
+/// out against its number's meaning (`race::SIGNS`) is held at 0 and the rest fitted again.
+///
+///   bot_bench fit [--bot SPEC] [--games N] [--random-decks N] [--explore P] [--zero NAME,NAME] [--write]
+///
+/// The games are played by `--bot`, by default the hand-set evaluation's turn bot, which does not read the weights being
+/// fitted: a fit is one step from a fixed source, never a round fed by the last one.
+///
+/// The decks are Martin's and `--random-decks` random legal ones, so the weights are not about five decks. `--explore P`
+/// plays that share of the turns at random, which puts positions in the data the bot would never choose (the numbers
+/// then move apart from the bot's own habits). `--write` saves the weights to `engine_rs/src/bots/race_weights.json`,
+/// which the next build compiles in. A better fit is not better play: `run` decides.
+fn fit(args: &Args) -> Result<(), String> {
+    use ak_engine::bots::eval::RaidOdds;
+    use ak_engine::bots::race::{self, RaceWeights, FEATURES, N_FEAT};
+    use ak_engine::bots::seat;
+    let (g, _) = load_game(args)?;
+    let mut decks = decks_from_file(&g, args.get("decks").unwrap_or("tools/bot_bench/martin_decks.json"))?;
+    let n_random = args.num("random-decks", 20)? as usize;
+    decks.extend(random_decks(&g, n_random, args.num("deck-seed", 7)?));
+    let spec = args.get("bot").unwrap_or("turn:budget=20000,mull=2").to_string();
+    make_bot(&spec, 0)?;
+    let games = args.num("games", 24_000)? as usize;
+    let run_seed = args.num("seed", 1)?;
+    let explore: f64 = args.get("explore").map_or(Ok(0.1), |v| v.parse().map_err(|_| format!("--explore {v:?} is not a number")))?;
+    let l2: f64 = args.get("l2").map_or(Ok(1e-3), |v| v.parse().map_err(|_| format!("--l2 {v:?} is not a number")))?;
+    let zero: Vec<&str> = args.get("zero").map_or(Vec::new(), |z| z.split(',').filter(|n| !n.is_empty()).collect());
+    for name in &zero {
+        if !FEATURES.iter().any(|f| f.0 == *name) {
+            return Err(format!("--zero: no number named {name:?}"));
+        }
+    }
+    let n_threads = threads(args)?;
+    eprintln!("fit: {games} games of {spec} against itself, {} decks ({n_random} random), {:.0}% of turns at random, {n_threads} threads", decks.len(), 100.0 * explore);
+
+    // (the numbers, whether the side that had just moved won, the game, that side's deck and the other's)
+    type Row = ([f32; N_FEAT], bool, u32, u8, u8);
+    let rows: Mutex<Vec<Row>> = Mutex::new(Vec::new());
+    let next = AtomicUsize::new(0);
+    let failed: Mutex<Option<String>> = Mutex::new(None);
+    std::thread::scope(|scope| {
+        for _ in 0..n_threads {
+            scope.spawn(|| loop {
+                let job = next.fetch_add(1, Ordering::Relaxed);
+                if job >= games || failed.lock().unwrap().is_some() {
+                    return;
+                }
+                let seed = mix(run_seed ^ mix(0xF17 + job as u64)) >> 1;
+                let mut rng = PyRandom::seeded_u64(mix(seed ^ 0xD1CE));
+                let (a, b) = (rng.randbelow(decks.len()), rng.randbelow(decks.len()));
+                let mut one = || -> Result<Vec<Row>, String> {
+                    let mut st = State::new_game(g.clone(), &decks[a].cards, &decks[b].cards, seed as u128, None, [Some(decks[a].leader), Some(decks[b].leader)])?;
+                    let mut bots: [Box<dyn Bot>; 2] = [make_bot(&spec, bot_seed(seed, 0))?, make_bot(&spec, bot_seed(seed, 1))?];
+                    let mut local: Vec<([f32; N_FEAT], Player)> = Vec::new();
+                    let (mut turn, mut random_turn, mut applied) = (-1, false, 0u32);
+                    let result = loop {
+                        if let Some(r) = rules::is_terminal(&st) {
+                            break r;
+                        }
+                        let seat_now = st.player_to_act();
+                        let mulligan = st.pending.as_ref().map_or(false, |p| p.mulligan);
+                        if !mulligan && st.current == seat_now && st.turn_counter != turn {
+                            turn = st.turn_counter;
+                            random_turn = rng.random() < explore;
+                        }
+                        let action = if random_turn && !mulligan {
+                            let mut legal: Vec<Action> = rules::legal_actions(&st).into_iter().filter(|a| *a != Action::Pass).collect();
+                            if rules::can_pass(&st) && (legal.is_empty() || rng.random() < 0.3) {
+                                legal = vec![Action::Pass];
+                            }
+                            if legal.is_empty() { Action::Pass } else { legal[rng.randbelow(legal.len())] }
+                        } else {
+                            bots[seat_now as usize].choose(&st)
+                        };
+                        let before = if action == Action::Pass { Some(st.clone()) } else { None };
+                        rules::apply_action(&mut st, &action, true).map_err(|e| format!("game {job}: {e}"))?;
+                        if let Some(before) = before {
+                            if !race::decided(&st) && st.pending.is_none() {
+                                let (m, n) = (seat_now, st.current);
+                                // each seat's odds as its search would have them: M's from before its turn ended, N's now
+                                let odds_m = RaidOdds::sample(&before, m, &seat::unseen(&before, m), 12, &mut rng);
+                                let odds_n = RaidOdds::sample(&st, n, &seat::unseen(&st, n), 12, &mut rng);
+                                local.push((race::features(&st, m, &odds_m), m));
+                                local.push((race::features(&st, n, &odds_n), m));
+                            }
+                        }
+                        applied += 1;
+                        if applied > 100_000 {
+                            return Err(format!("game {job}: it never ended"));
+                        }
+                    };
+                    Ok(match result.winner {
+                        Some(w) => local.into_iter().map(|(x, m)| {
+                            let (dm, dn) = if m == 0 { (a, b) } else { (b, a) };
+                            (x, m == w, job as u32, dm as u8, dn as u8)
+                        }).collect(),
+                        None => Vec::new(),
+                    })
+                };
+                match one() {
+                    Ok(r) => rows.lock().unwrap().extend(r),
+                    Err(e) => *failed.lock().unwrap() = Some(e),
+                }
+            });
+        }
+    });
+    if let Some(e) = failed.into_inner().unwrap() {
+        return Err(e);
+    }
+    let mut rows = rows.into_inner().unwrap();
+    rows.sort_by(|a, b| a.2.cmp(&b.2)); // the threads' order must not show
+    let (train, test): (Vec<&Row>, Vec<&Row>) = rows.iter().partition(|r| r.2 % 5 != 0);
+    if train.is_empty() || test.is_empty() {
+        return Err("fit: no positions".into());
+    }
+
+    // The weights, then one number a deck: how strong the deck is by itself. Fitted with the rest and thrown away, so
+    // that a number which only tells the decks apart (the fliers in a pool) is not paid for the deck's own strength.
+    let prior = RaceWeights::prior();
+    let dim = N_FEAT + decks.len();
+    let mut w0 = vec![0.0f64; dim];
+    for i in 0..N_FEAT {
+        w0[i] = if zero.contains(&FEATURES[i].0) { 0.0 } else { (prior.w[i] / prior.scale) as f64 };
+    }
+    let n = train.len() as f64;
+    let mean: Vec<f64> = (0..N_FEAT).map(|i| train.iter().map(|r| r.0[i] as f64).sum::<f64>() / n).collect();
+    let sd: Vec<f64> = (0..N_FEAT).map(|i| (train.iter().map(|r| (r.0[i] as f64 - mean[i]).powi(2)).sum::<f64>() / n).sqrt()).collect();
+    // a row as (index, value) pairs over the weights and the decks
+    let pairs = |r: &Row, live: &[bool], out: &mut Vec<(usize, f64)>| {
+        out.clear();
+        for i in 0..N_FEAT {
+            if live[i] && r.0[i] != 0.0 {
+                out.push((i, r.0[i] as f64));
+            }
+        }
+        if r.3 != r.4 {
+            out.push((N_FEAT + r.3 as usize, 1.0));
+            out.push((N_FEAT + r.4 as usize, -1.0));
+        }
+    };
+    let all_live = vec![true; N_FEAT];
+    let loss = |w: &[f64], set: &[&Row], with_decks: bool| -> (f64, f64) {
+        let (mut ll, mut right) = (0.0, 0.0);
+        let mut x = Vec::new();
+        for r in set {
+            pairs(r, &all_live, &mut x);
+            let z: f64 = x.iter().filter(|(i, _)| with_decks || *i < N_FEAT).map(|&(i, v)| w[i] * v).sum();
+            let p = (1.0 / (1.0 + (-z).exp())).clamp(1e-9, 1.0 - 1e-9);
+            ll -= if r.1 { p.ln() } else { (1.0 - p).ln() };
+            right += ((p > 0.5) == r.1) as u8 as f64;
+        }
+        (ll / set.len() as f64, right / set.len() as f64)
+    };
+    // Newton's method on the log-loss plus the pull to the starting weights; a number named in --zero stays out
+    let mut live: Vec<bool> = (0..N_FEAT).map(|i| !zero.contains(&FEATURES[i].0) && (sd[i] > 0.0 || i == 0)).collect();
+    let pull: Vec<f64> = (0..dim).map(|i| l2 * n * if i == 0 { 0.0 } else if i < N_FEAT { sd[i] * sd[i] } else { 0.1 }).collect();
+    let mut w = w0.clone();
+    for i in 0..N_FEAT {
+        if !live[i] {
+            w[i] = 0.0;
+        }
+    }
+    let d = dim;
+    let mut x = Vec::new();
+    let mut against: Vec<&str> = Vec::new();
+    'fit: loop {
+    for _ in 0..30 {
+        let mut grad = vec![0.0f64; d];
+        let mut hess = vec![0.0f64; d * d];
+        for r in &train {
+            pairs(r, &live, &mut x);
+            let z: f64 = x.iter().map(|&(i, v)| w[i] * v).sum();
+            let p = 1.0 / (1.0 + (-z).exp());
+            let (err, v) = (p - r.1 as u8 as f64, (p * (1.0 - p)).max(1e-9));
+            for (k, &(i, xi)) in x.iter().enumerate() {
+                grad[i] += err * xi;
+                for &(j, xj) in &x[k..] {
+                    hess[i * d + j] += v * xi * xj;
+                }
+            }
+        }
+        for a in 0..d {
+            grad[a] += pull[a] * (w[a] - w0[a]);
+            hess[a * d + a] += pull[a] + 1e-9;
+            for b in 0..a {
+                hess[a * d + b] = hess[b * d + a];
+            }
+        }
+        // solve hess · step = grad (Gaussian elimination, the largest pivot first); a weight that is out has no row
+        let mut m = hess.clone();
+        let mut rhs = grad.clone();
+        for a in 0..N_FEAT {
+            if !live[a] {
+                for k in 0..d {
+                    m[a * d + k] = 0.0;
+                    m[k * d + a] = 0.0;
+                }
+                m[a * d + a] = 1.0;
+                rhs[a] = 0.0;
+            }
+        }
+        for col in 0..d {
+            let piv = (col..d).max_by(|&a, &b| m[a * d + col].abs().partial_cmp(&m[b * d + col].abs()).unwrap()).unwrap();
+            if m[piv * d + col].abs() < 1e-12 {
+                continue;
+            }
+            if piv != col {
+                for k in 0..d {
+                    m.swap(col * d + k, piv * d + k);
+                }
+                rhs.swap(col, piv);
+            }
+            for row in col + 1..d {
+                let f = m[row * d + col] / m[col * d + col];
+                if f != 0.0 {
+                    for k in col..d {
+                        m[row * d + k] -= f * m[col * d + k];
+                    }
+                    rhs[row] -= f * rhs[col];
+                }
+            }
+        }
+        let mut step = vec![0.0f64; d];
+        for row in (0..d).rev() {
+            let mut v = rhs[row];
+            for k in row + 1..d {
+                v -= m[row * d + k] * step[k];
+            }
+            step[row] = if m[row * d + row].abs() < 1e-12 { 0.0 } else { v / m[row * d + row] };
+        }
+        let mut moved = 0.0f64;
+        for i in 0..d {
+            w[i] -= step[i];
+            moved = moved.max(step[i].abs() * if i < N_FEAT { sd[i].max(1e-6) } else { 1.0 });
+        }
+        if moved < 1e-7 {
+            break;
+        }
+    }
+    // a weight against its number's meaning goes out, the most wrong first, and the rest are fitted again
+    let worst = (0..N_FEAT).filter(|&i| live[i] && race::SIGNS[i] != 0 && w[i] * (race::SIGNS[i] as f64) < 0.0)
+        .max_by(|&a, &b| (w[a].abs() * sd[a]).partial_cmp(&(w[b].abs() * sd[b])).unwrap());
+    match worst {
+        Some(i) => {
+            live[i] = false;
+            w[i] = 0.0;
+            against.push(FEATURES[i].0);
+        }
+        None => break 'fit,
+    }
+    }
+
+    // the scale the hand-set evaluation had, so that the decided values (a win, their win by pay) stay where they were
+    let scale = prior.scale as f64;
+    let ((l_prior, a_prior), (l_fit, a_fit), (l_train, _)) = (loss(&w0, &test, false), loss(&w, &test, false), loss(&w, &train, false));
+    println!("{} finished turns read from both seats ({} rows) in {games} games; every fifth game held out", rows.len() / 2, rows.len());
+    println!("log-loss on the held-out games: {:.4} with the starting weights, {:.4} fitted (on the fitted games {:.4}; a coin 0.6931)", l_prior, l_fit, l_train);
+    println!("the held-out winner called right: {} with the starting weights, {} fitted", pct(a_prior), pct(a_fit));
+    if !against.is_empty() {
+        println!("kept at 0, fitted against their meaning: {}", against.join(", "));
+    }
+    println!("chance of winning = 1 / (1 + exp(-score / {:.0})):", scale);
+    println!("{:<14} {:>9} {:>9} {:>9} {:>9} {:>9}", "number", "mean", "spread", "start", "fitted", "per spread");
+    for i in 0..N_FEAT {
+        println!("{:<14} {:>9.3} {:>9.3} {:>9.2} {:>9.2} {:>9.2}", FEATURES[i].0, mean[i], sd[i], prior.w[i] / prior.scale * scale as f32, w[i] * scale, w[i] * sd[i]);
+    }
+    let spec_part: Vec<String> = (0..N_FEAT).map(|i| format!("r.{}={:.3}", FEATURES[i].0, w[i] * scale)).collect();
+    println!("as a spec: eval=race,r.scale={:.3},{}", scale, spec_part.join(","));
+    let old = RaceWeights::default();
+    let old_part: Vec<String> = (0..N_FEAT).map(|i| format!("r.{}={:.3}", FEATURES[i].0, old.w[i])).collect();
+    println!("the weights this build plays, as a spec: eval=race,r.scale={:.3},{}", old.scale, old_part.join(","));
+    if args.get("write").is_some() {
+        let path = args.get("out").unwrap_or("engine_rs/src/bots/race_weights.json");
+        let mut weights = serde_json::Map::new();
+        for i in 0..N_FEAT {
+            weights.insert(FEATURES[i].0.to_string(), json!(((w[i] * scale) * 1000.0).round() / 1000.0));
+        }
+        let doc = json!({
+            "fitted": format!("bot_bench fit: {games} games of {spec} against itself, {} decks ({n_random} random), {:.0}% of turns at random, seed {run_seed}; held-out log-loss {:.4}", decks.len(), 100.0 * explore, l_fit),
+            "scale": (scale * 1000.0).round() / 1000.0,
+            "weights": weights,
+        });
+        std::fs::write(path, serde_json::to_string_pretty(&doc).unwrap() + "\n").map_err(|e| format!("{path}: {e}"))?;
+        println!("written to {path}: the next build plays with them");
+    }
+    Ok(())
+}
+
 /// One saved position (`show --dump TURN`): whether the player to move has a certain win this turn, and the turn a bot
 /// plays from it.
 fn position(args: &Args) -> Result<(), String> {
@@ -896,6 +1193,7 @@ fn main() {
         "winstats" => winstats(&args),
         "position" => position(&args),
         "evalfit" => evalfit(&args),
+        "fit" => fit(&args),
         other => Err(format!("unknown command {other:?} (run, show, turns)")),
     });
     if let Err(e) = result {

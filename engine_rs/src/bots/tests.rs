@@ -129,8 +129,9 @@ fn a_bot_chooses_from_what_its_seat_sees_only() {
         for (i, (st, _)) in positions(&g, 100 + seed, ["turn:budget=3000", "greedy"]).into_iter().enumerate() {
             let me = st.player_to_act();
             let other_deal = twin(&st, me, &mut rng);
-            // the last two ask the reply level: the opponent's hands it imagines are dealt from what the seat can count
-            for spec in ["greedy", "turn:budget=3000", "turn:budget=300,worlds=2", "turn:budget=8000,reply=3,hands=2", "turn:budget=8000,reply=2,hands=3,spread=1"] {
+            // the reply level's specs and the race evaluation's: the opponent's hands it imagines are dealt from what the seat can count
+            for spec in ["greedy", "turn:budget=3000", "turn:budget=300,worlds=2", "turn:budget=8000,reply=3,hands=2", "turn:budget=8000,reply=2,hands=3,spread=1",
+                         "turn:budget=3000,eval=race,mull=2", "turn:budget=8000,reply=3,hands=2,eval=race"] {
                 let a = make_bot(spec, 77 + i as u64).unwrap().choose(&st);
                 let b = make_bot(spec, 77 + i as u64).unwrap().choose(&other_deal);
                 assert_eq!(a, b, "seed {seed}, action {i}: {spec} read a hidden card");

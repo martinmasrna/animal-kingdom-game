@@ -6,6 +6,7 @@
 
 use smallvec::SmallVec;
 
+use crate::bots::race::{MAX_M, MAX_S};
 use crate::bots::seat::Unseen;
 use crate::data::*;
 use crate::effects;
@@ -123,6 +124,11 @@ fn raids(st: &State, card: CardId, reach: bool) -> bool {
 /// The most food a set of (cost, food) raids destroys for `mana`.
 fn best_raids(items: &[(i32, i32)], mana: i32) -> i32 {
     let cap = mana.clamp(0, 31) as usize;
+    raids_by_mana(items, cap)[cap]
+}
+
+/// The most food a set of (cost, food) raids destroys, for every mana up to `cap`.
+fn raids_by_mana(items: &[(i32, i32)], cap: usize) -> [i32; 32] {
     let mut best = [0i32; 32];
     for &(cost, food) in items {
         let cost = cost.max(0) as usize;
@@ -133,7 +139,7 @@ fn best_raids(items: &[(i32, i32)], mana: i32) -> i32 {
             best[m] = best[m].max(best[m - cost] + food);
         }
     }
-    best[cap]
+    best
 }
 
 /// What the opponent's unseen hand could destroy in my den on their next turn, over sampled hands: for each sample the
@@ -145,6 +151,18 @@ pub struct RaidOdds {
     pub fly: SmallVec<[i32; 16]>,
     /// The average cost of a card in their unseen pool.
     pub avg_cost: f32,
+    /// The same hands read for the race evaluation (`race`), by the mana they would have (0 to 12). The share of them
+    /// holding a card they can pay for that is stronger than s (`cover_g`: any such card; `cover_f`: one that flies),
+    /// and one that may take an empty tile (`any_g`, `any_f`).
+    pub cover_g: [[f32; MAX_S]; MAX_M],
+    pub cover_f: [[f32; MAX_S]; MAX_M],
+    pub any_g: [f32; MAX_M],
+    pub any_f: [f32; MAX_M],
+    /// Each hand's most food destroyed in my den, with a connected animal on my base and by its fliers alone.
+    pub raid_reach: [SmallVec<[i16; 16]>; MAX_M],
+    pub raid_fly: [SmallVec<[i16; 16]>; MAX_M],
+    /// How many cards the hands held.
+    pub cards: f32,
 }
 
 impl RaidOdds {
@@ -192,6 +210,44 @@ impl RaidOdds {
             }
             odds.reach.push(best_raids(&all, mana));
             odds.fly.push(best_raids(&fly, mana));
+
+            // the same hand for the race evaluation, by mana
+            odds.cards += held.len() as f32;
+            let (by_reach, by_fly) = (raids_by_mana(&all, MAX_M - 1), raids_by_mana(&fly, MAX_M - 1));
+            let (mut max_g, mut max_f) = ([-1i32; MAX_M], [-1i32; MAX_M]);
+            let (mut any_g, mut any_f) = ([false; MAX_M], [false; MAX_M]);
+            for u in &held {
+                let c = st.card(u.card);
+                let (cost, s) = (effects::unit_cost(st, u).max(0) as usize, effects::effective_strength(st, u));
+                for m in cost..MAX_M {
+                    max_g[m] = max_g[m].max(s);
+                    any_g[m] |= !c.has(HUNGRY);
+                    if c.has(FLIGHT) {
+                        max_f[m] = max_f[m].max(s);
+                        any_f[m] |= !c.has(HUNGRY);
+                    }
+                }
+            }
+            for m in 0..MAX_M {
+                odds.raid_reach[m].push(by_reach[m].min(i16::MAX as i32) as i16);
+                odds.raid_fly[m].push(by_fly[m].min(i16::MAX as i32) as i16);
+                odds.any_g[m] += any_g[m] as u8 as f32;
+                odds.any_f[m] += any_f[m] as u8 as f32;
+                for s in 0..MAX_S {
+                    odds.cover_g[m][s] += (max_g[m] > s as i32) as u8 as f32;
+                    odds.cover_f[m][s] += (max_f[m] > s as i32) as u8 as f32;
+                }
+            }
+        }
+        let n = samples.max(1) as f32;
+        odds.cards /= n;
+        for m in 0..MAX_M {
+            odds.any_g[m] /= n;
+            odds.any_f[m] /= n;
+            for s in 0..MAX_S {
+                odds.cover_g[m][s] /= n;
+                odds.cover_f[m][s] /= n;
+            }
         }
         odds
     }

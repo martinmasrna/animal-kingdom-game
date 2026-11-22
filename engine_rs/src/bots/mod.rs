@@ -14,6 +14,7 @@ use crate::state::State;
 pub mod eval;
 pub mod greedy;
 pub mod key;
+pub mod race;
 pub mod seat;
 pub mod turn;
 
@@ -27,6 +28,8 @@ pub struct BotStats {
     /// Positions it made on the way (every action applied to a copy).
     pub positions: u64,
     pub nanos: u64,
+    /// The longest one choice took.
+    pub max_nanos: u64,
     /// Searches run (a turn has one, or more when a draw or a cut search makes it look again).
     pub searches: u64,
     /// Turns whose first search stopped short of every whole turn (the width cap or the budget cut it).
@@ -41,6 +44,9 @@ pub struct BotStats {
     /// own turn's search liked best.
     pub reply_turns: u64,
     pub repicks: u64,
+    /// Where the turn the reply level chose stood in my own search's order: first, second to fourth, fifth to twelfth,
+    /// further down.
+    pub pick_rank: [u64; 4],
 }
 
 pub trait Bot: Send {
@@ -79,7 +85,9 @@ impl Timer {
     }
 
     pub fn stop(self, stats: &mut BotStats) {
-        stats.nanos += self.0.elapsed().as_nanos() as u64;
+        let ns = self.0.elapsed().as_nanos() as u64;
+        stats.nanos += ns;
+        stats.max_nanos = stats.max_nanos.max(ns);
         stats.decisions += 1;
     }
 }

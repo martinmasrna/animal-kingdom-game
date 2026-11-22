@@ -23,17 +23,18 @@
 //! they have one and otherwise plays the turn their own search likes best, and the turn's score is the mean of the
 //! bot's chance of winning from where that leaves it.
 
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 
 use crate::actions::Action;
 use crate::bots::eval::{evaluate, greedy_evaluate, hand_raid, RaidOdds, Weights, WIN};
-use crate::bots::key::position_key;
+use crate::bots::key::{position_key, KeyMap, KeySet};
+use crate::bots::race::{self, RaceWeights};
 use crate::bots::seat::{self, Unseen};
 use crate::bots::{Bot, BotStats, Timer};
 use crate::data::*;
 use crate::rng::PyRandom;
 use crate::rules;
-use crate::state::{Choice, Options, State};
+use crate::state::{Choice, Options, Pending, State};
 
 #[derive(Clone, Debug)]
 pub struct TurnSpec {
@@ -52,6 +53,9 @@ pub struct TurnSpec {
     pub reply: usize,
     /// Of those turns, at most this many that play the same cards on other tiles; 0: the K best whatever they play.
     pub per: usize,
+    /// The mulligan: return, one at a time, the card in the opening hand that costs most, while it costs more than this
+    /// (each is replaced by a card off the deck before the next is weighed); 0 keeps every hand.
+    pub mull: i32,
     /// Hands the opponent may hold that each of those turns is scored against.
     pub hands: usize,
     /// Of a search's positions, the share (in hundredths) that plans my own turn; the rest is the replies'.
@@ -60,25 +64,46 @@ pub struct TurnSpec {
     pub spread: bool,
     /// The evaluation as a chance of winning: 1 / (1 + exp(-(score ± tempo) / scale)), the tempo taken off the player who
     /// has just moved (`bot_bench evalfit` fits both).
-    pub scale: f32,
-    pub tempo: f32,
+    /// Unset: 15 and 10 for the hand-set evaluation; the fitted scale and no tempo for the race evaluation, whose
+    /// weights hold the tempo.
+    pub scale: Option<f32>,
+    pub tempo: Option<f32>,
     /// Above 0: score a turn by the mean of the raw evaluation after the reply instead, a game won or lost counting as
     /// this much. The way the old game's bot averaged; kept to measure it against the chance of winning.
     pub decisive: f32,
-    /// Score finished turns with the shipped greedy bot's evaluation instead (`eval=greedy`): what the search alone is
-    /// worth, with the evaluation held fixed.
-    pub greedy_eval: bool,
+    /// What scores a finished turn.
+    pub eval: Eval,
     pub weights: Weights,
+    pub race: RaceWeights,
+}
+
+/// The evaluations a finished turn can be scored with.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Eval {
+    /// The hand-set evaluation (`eval`), weights `w.NAME`.
+    Food,
+    /// The race evaluation (`race`), weights fitted to who won; `r.NAME` sets one.
+    Race,
+    /// The shipped greedy bot's evaluation: what the search alone is worth, with the evaluation held fixed.
+    Greedy,
 }
 
 impl Default for TurnSpec {
     fn default() -> TurnSpec {
-        TurnSpec { budget: 20_000, worlds: 4, width: 16_384, samples: 12, win: None, reply: 0, per: 0, hands: 3, own: 25, spread: false, scale: 15.0,
-                   tempo: 10.0, decisive: 0.0, greedy_eval: false, weights: Weights::default() }
+        TurnSpec { budget: 20_000, worlds: 4, width: 16_384, samples: 12, win: None, reply: 0, per: 0, mull: 0, hands: 3, own: 25, spread: false, scale: None,
+                   tempo: None, decisive: 0.0, eval: Eval::Food, weights: Weights::default(), race: RaceWeights::default() }
     }
 }
 
 impl TurnSpec {
+    /// The evaluation as a chance of winning: (scale, tempo).
+    pub fn curve(&self) -> (f32, f32) {
+        match self.eval {
+            Eval::Race => (self.scale.unwrap_or(self.race.scale), self.tempo.unwrap_or(0.0)),
+            _ => (self.scale.unwrap_or(15.0), self.tempo.unwrap_or(10.0)),
+        }
+    }
+
     pub fn parse(settings: &[(&str, &str)]) -> Result<TurnSpec, String> {
         let mut spec = TurnSpec::default();
         for &(k, v) in settings {
@@ -91,21 +116,29 @@ impl TurnSpec {
                 "win" => spec.win = Some(int()?),
                 "reply" => spec.reply = int()? as usize,
                 "per" => spec.per = int()? as usize,
+                "mull" => spec.mull = int()? as i32,
                 "hands" => spec.hands = int()?.max(1) as usize,
                 "own" => spec.own = int()?.clamp(1, 99),
                 "spread" => spec.spread = int()? != 0,
-                "scale" => spec.scale = v.parse::<f32>().ok().filter(|x| *x > 0.0).ok_or_else(|| format!("bot spec: {k}={v:?} is not a positive number"))?,
-                "tempo" => spec.tempo = v.parse::<f32>().map_err(|_| format!("bot spec: {k}={v:?} is not a number"))?,
+                "scale" => spec.scale = Some(v.parse::<f32>().ok().filter(|x| *x > 0.0).ok_or_else(|| format!("bot spec: {k}={v:?} is not a positive number"))?),
+                "tempo" => spec.tempo = Some(v.parse::<f32>().map_err(|_| format!("bot spec: {k}={v:?} is not a number"))?),
                 "decisive" => spec.decisive = v.parse::<f32>().map_err(|_| format!("bot spec: {k}={v:?} is not a number"))?,
-                "eval" => spec.greedy_eval = match v {
-                    "greedy" => true,
-                    "food" => false,
-                    _ => return Err(format!("bot spec: eval={v:?} (food, greedy)")),
+                "eval" => spec.eval = match v {
+                    "greedy" => Eval::Greedy,
+                    "food" => Eval::Food,
+                    "race" => Eval::Race,
+                    _ => return Err(format!("bot spec: eval={v:?} (food, race, greedy)")),
                 },
-                _ => match k.strip_prefix("w.") {
-                    Some(name) => spec.weights.set(name, v.parse::<f32>().map_err(|_| format!("bot spec: {k}={v:?} is not a number"))?)?,
-                    None => return Err(format!("bot spec: turn has no setting {k:?}")),
-                },
+                _ => {
+                    let num = || v.parse::<f32>().map_err(|_| format!("bot spec: {k}={v:?} is not a number"));
+                    if let Some(name) = k.strip_prefix("w.") {
+                        spec.weights.set(name, num()?)?;
+                    } else if let Some(name) = k.strip_prefix("r.") {
+                        spec.race.set(name, num()?)?;
+                    } else {
+                        return Err(format!("bot spec: turn has no setting {k:?}"));
+                    }
+                }
             }
         }
         Ok(spec)
@@ -205,7 +238,8 @@ struct Ctx<'a> {
     w: &'a Weights,
     odds: &'a RaidOdds,
     max_width: usize,
-    greedy_eval: bool,
+    kind: Eval,
+    race: &'a RaceWeights,
     /// How many of the best finished turns a search keeps as whole lines (for the reply level); 0 keeps only the best.
     keep: usize,
     /// Of those, at most this many that play the same cards (on other tiles); 0: no such limit.
@@ -229,7 +263,11 @@ impl Ctx<'_> {
 impl Ctx<'_> {
     #[inline]
     fn eval(&self, st: &State) -> f32 {
-        if self.greedy_eval { greedy_evaluate(st, self.me) as f32 } else { evaluate(st, self.me, self.w, self.odds) }
+        match self.kind {
+            Eval::Food => evaluate(st, self.me, self.w, self.odds),
+            Eval::Race => race::evaluate(st, self.me, self.race, self.odds),
+            Eval::Greedy => greedy_evaluate(st, self.me) as f32,
+        }
     }
 }
 
@@ -313,7 +351,7 @@ impl WorldSearch {
             let mut next_states: Vec<Option<State>> = Vec::new();
             let mut next_metas: Vec<Meta> = Vec::new();
             let mut ranks: Vec<f32> = Vec::new();
-            let mut index: HashMap<u64, u32> = HashMap::new();
+            let mut index: KeyMap<u32> = KeyMap::default();
             let mut layer_edges: Vec<Edge> = Vec::new();
             let mut live = 0usize;
             for i in 0..cur.len() {
@@ -503,7 +541,7 @@ pub struct WinSearch {
 /// positions. A line that draws a card or looks at the deck is left out: what follows it rests on an imagined deck.
 pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
     use std::cmp::Reverse;
-    use std::collections::{BinaryHeap, HashSet};
+    use std::collections::BinaryHeap;
     struct Node {
         st: State,
         parent: u32,
@@ -551,7 +589,7 @@ pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
         line
     };
     let mut nodes: Vec<Node> = vec![Node { st: root.clone(), parent: 0, action: Action::Pass }];
-    let mut seen: HashSet<u64> = HashSet::new();
+    let mut seen: KeySet = KeySet::default();
     seen.insert(position_key(root, me, true));
     // the closest first; among equals the earliest made
     let mut open: BinaryHeap<(i32, Reverse<u32>)> = BinaryHeap::new();
@@ -664,7 +702,7 @@ impl TurnBot {
         }
         let can_draw = !world.decks[me as usize].is_empty();
         let k = if can_draw { self.spec.worlds.max(1) as u64 } else { 1 };
-        let ctx = Ctx { me, w: &self.spec.weights, odds: &odds, max_width: self.spec.width, greedy_eval: self.spec.greedy_eval, keep: 0, per: 0 };
+        let ctx = Ctx { me, w: &self.spec.weights, odds: &odds, max_width: self.spec.width, kind: self.spec.eval, race: &self.spec.race, keep: 0, per: 0 };
         let mut s0 = WorldSearch::new(world, me);
         s0.run(&ctx, (allowance / k).max(1));
         if !s0.hidden && k > 1 {
@@ -724,7 +762,7 @@ impl TurnBot {
                            mut positions: u64, first: bool) -> Action {
         let opp = other(me);
         let spec = self.spec.clone();
-        let ctx = Ctx { me, w: &spec.weights, odds, max_width: spec.width, greedy_eval: spec.greedy_eval, keep: spec.reply, per: spec.per };
+        let ctx = Ctx { me, w: &spec.weights, odds, max_width: spec.width, kind: spec.eval, race: &spec.race, keep: spec.reply, per: spec.per };
         let mut s0 = WorldSearch::new(world, me);
         s0.run(&ctx, (allowance * spec.own / 100).max(1));
         positions += s0.positions;
@@ -804,13 +842,14 @@ impl TurnBot {
         let mut to_come = (cands.len() * worlds) as u64;
         // what the opponent can count of my hidden cards, for the raids their own evaluation fears
         let odds_opp = RaidOdds::sample(&s0.root, opp, &seat::unseen(&s0.root, opp), spec.samples, &mut self.rng);
-        let ctx_opp = Ctx { me: opp, w: &spec.weights, odds: &odds_opp, max_width: spec.width, greedy_eval: spec.greedy_eval, keep: 0, per: 0 };
+        let ctx_opp = Ctx { me: opp, w: &spec.weights, odds: &odds_opp, max_width: spec.width, kind: spec.eval, race: &spec.race, keep: 0, per: 0 };
+        let (scale, tempo) = spec.curve();
         let chance = |st: &State, e: f32| -> f32 {
             if spec.decisive > 0.0 {
                 return e.clamp(-spec.decisive, spec.decisive);
             }
-            let tempo = if st.current == me { spec.tempo } else { -spec.tempo };
-            1.0 / (1.0 + (-(e + tempo) / spec.scale).exp())
+            let tempo = if st.current == me { tempo } else { -tempo };
+            1.0 / (1.0 + (-(e + tempo) / scale).exp())
         };
         // a game decided, as a score: won, lost, drawn
         let decided = |winner: Option<Player>| -> f32 {
@@ -886,6 +925,7 @@ impl TurnBot {
         if first {
             self.stats.reply_turns += 1;
             self.stats.repicks += (best != 0) as u64;
+            self.stats.pick_rank[match best { 0 => 0, 1..=3 => 1, 4..=11 => 2, _ => 3 }] += 1;
         }
         self.count(positions);
         let Some(pick) = cands.get(best) else { return fallback(&s0) };
@@ -904,6 +944,24 @@ impl TurnBot {
     }
 }
 
+impl TurnBot {
+    /// The mulligan choice (`TurnSpec::mull`): it reads only the seat's own hand.
+    fn mulligan(&self, real: &State, me: Player) -> Action {
+        if self.spec.mull > 0 {
+            let offered = match &real.pending {
+                Some(Pending { options: Options::Iids(ids), .. }) => ids.clone(),
+                _ => Default::default(),
+            };
+            let dearest = real.hands[me as usize].iter().filter(|u| offered.contains(&u.iid)).map(|u| (crate::effects::unit_cost(real, u), u.iid))
+                .filter(|&(cost, _)| cost > self.spec.mull).max_by_key(|&(cost, iid)| (cost, std::cmp::Reverse(iid)));
+            if let Some((_, iid)) = dearest {
+                return Action::Choice(Choice::Iid(iid));
+            }
+        }
+        Action::Choice(Choice::Skip) // the rest of the opening hand is kept
+    }
+}
+
 fn legal_now(st: &State, me: Player, a: &Action) -> bool {
     match a {
         Action::Pass => may_pass(st, me),
@@ -916,7 +974,7 @@ impl Bot for TurnBot {
         let timer = Timer::start();
         let me = real.player_to_act();
         let action = if real.pending.as_ref().map_or(false, |p| p.mulligan) {
-            Action::Choice(Choice::Skip) // it keeps its opening hand
+            self.mulligan(real, me)
         } else {
             if real.current == me && real.turn_counter != self.turn_seen {
                 self.turn_seen = real.turn_counter;
@@ -956,10 +1014,13 @@ impl Bot for TurnBot {
 
     fn spec(&self) -> String {
         let mut s = format!("turn:budget={},worlds={},width={},samples={},win={},eval={}", self.spec.budget, self.spec.worlds, self.spec.width, self.spec.samples,
-                            self.spec.win.unwrap_or(self.spec.budget / 16), if self.spec.greedy_eval { "greedy" } else { "food" });
+                            self.spec.win.unwrap_or(self.spec.budget / 16), match self.spec.eval { Eval::Food => "food", Eval::Race => "race", Eval::Greedy => "greedy" });
+        if self.spec.mull > 0 {
+            s.push_str(&format!(",mull={}", self.spec.mull));
+        }
         if self.spec.reply > 0 {
             s.push_str(&format!(",reply={},per={},hands={},own={},spread={},scale={},tempo={}", self.spec.reply, self.spec.per, self.spec.hands, self.spec.own, self.spec.spread as u8,
-                                self.spec.scale, self.spec.tempo));
+                                self.spec.curve().0, self.spec.curve().1));
         }
         s
     }
@@ -971,11 +1032,11 @@ pub fn turn_size(root: &State, cap: u64) -> (u64, u64, bool) {
     let me = root.player_to_act();
     let root_current = root.current;
     let mut positions = 0u64;
-    let mut ends: std::collections::HashSet<u64> = std::collections::HashSet::new();
+    let mut ends: KeySet = KeySet::default();
     let mut cur: Vec<State> = vec![root.clone()];
     while !cur.is_empty() {
         let mut next: Vec<State> = Vec::new();
-        let mut index: std::collections::HashSet<u64> = std::collections::HashSet::new();
+        let mut index: KeySet = KeySet::default();
         for st in &cur {
             let mut actions = rules::legal_actions(st);
             if may_pass(st, me) && !actions.contains(&Action::Pass) {
