@@ -417,7 +417,7 @@
     },
     {
       "id": "raid_draw_5",
-      "name": "Raid Draw 5",
+      "name": "Raid Draw",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 1,

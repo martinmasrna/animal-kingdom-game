@@ -1016,6 +1016,15 @@
       },
       "by": "claude",
       "at": 1795354988
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Raid Draw 5"
+      },
+      "by": "claude",
+      "at": 1795355310
     }
   },
   "flight_4": {
