@@ -1312,7 +1312,7 @@ function manaHover(cr) {
   const el = document.getElementById('mhover'); if (!el) return;
   const st = cr && V && V.game && viewerGame().board[cr];
   if (!st || !st.length) { el.classList.remove('on'); el.innerHTML = ''; return; }
-  const top = st[st.length - 1], under = st.slice(0, -1).reverse(), [x, y] = crossroadAt(cr), w = Math.round(tokenWidth() * 1.3), ph = w * 624 / 540;
+  const top = st[st.length - 1], under = st.slice(0, -1).reverse(), [x, y] = crossroadAt(cr), w = Math.round(Math.min(tokenWidth(), 120) * 1.3), ph = w * 624 / 540;   // the card's size, not the tile's: the square board's larger tiles don't enlarge it
   const side = top.owner === 'W' ? 'W' : top.owner;
   const notes = [top.timer ? resolvesIn(top.timer) : '', under.length ? `Covers ${under.map(u => `${(CARDS[u.id] || {}).name || u.id} (${u.str})`).join(', ')}` : ''].filter(Boolean);
   el.innerHTML = `<div class="abs" style="left:${x - w / 2}px;top:${y - ph / 2}px">${manaCard(CARDS[top.id], { str: top.str, cost: CARDS[top.id].mana ?? null, owner: side, w, iid: top.iid })}`
