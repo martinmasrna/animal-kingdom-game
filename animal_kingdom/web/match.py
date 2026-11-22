@@ -22,9 +22,10 @@ from ..game import (CARDS, LEADERS, MAKES, MAP_ID, SKIP, ChoiceAction, EngineErr
 
 log = logging.getLogger(__name__)
 # The Practice opponent, as a bot spec of the engine (engine_rs/src/bots/; tools/bot_bench/README.md has the specs and
-# how each measures): the whole-turn search with the reply level, 200,000 positions a turn (about 60 ms a turn on the
-# Mac, a quarter of a second at most). The greedy bot plays any move this one fails on (animal_kingdom/bot.py).
-PRACTICE_BOT = "turn:budget=200000,reply=12,per=2"
+# how each measures): the whole-turn search with the reply level, 200,000 positions a turn, scored by the race
+# evaluation, sending back every opening card that costs more than 2 (about 30 ms a turn on the Mac; the slowest choice in
+# 100 games took an eighth of a second). The greedy bot plays any move this one fails on (animal_kingdom/bot.py).
+PRACTICE_BOT = "turn:budget=200000,reply=12,per=2,eval=race,mull=2"
 ASKS = {"mulligan": "mulligan"}   # what a pending choice asks, by the step asking: the mulligan; anything else is "effect"
 # The turn clock, for matches between two people: whoever must act gets a free window each time the decision comes to
 # them (unused time is lost), then spends their bank for the game. At zero, the engine acts for them.

@@ -22,20 +22,54 @@ A bot's budget is a count of positions it may make in a turn, never a clock, and
 - `turns --games 20`: how large a turn is by turn number, with equal positions merged and with nothing merged.
 - `winstats --games 300`: what the look for a win costs, by how far the player is from the winning food.
 - `evalfit --games 2000`: the evaluation against who won, as a fitted curve (the reply level's `scale` and `tempo`).
+- `fit [--games 24000] [--seed S] [--write]`: the race evaluation's weights fitted to who won; `--write` saves them to `engine_rs/src/bots/race_weights.json`, which the next build compiles in. See "Refitting the race evaluation" below.
 
 ## The bots
 
 - `greedy`: the bot the game shipped with, one action at a time. The fixed baseline.
-- `turn`: plans its whole turn and scores only finished turns. `turn:budget=20000` sets the positions a turn may make; `worlds=4` the imagined decks a first action is averaged over when the turn can draw; `width=16384` the most unfinished positions a layer keeps; `win=N` the positions a look for a win this turn may make before any search (a sixteenth of the budget unless set, 0 never looks); `w.NAME=V` one weight of the evaluation (`engine_rs/src/bots/eval.rs`); `eval=greedy` scores finished turns with the shipped bot's evaluation instead, which measures the search with the evaluation held fixed.
-- `turn` with `reply=K`: the reply level. The K best finished turns are each played out in `hands=3` hands the opponent may hold; the opponent takes a win if they have one and otherwise plays the turn their own search likes best; a turn's score is the mean of the bot's chance of winning from where the reply leaves it. `per=N` keeps at most N of the K turns that play the same cards on other tiles, so the K differ in what they play (0: the K best whatever they play). `own=25` is the share, in hundredths, of a search's positions that plans the bot's own turn; the replies split the rest evenly, and with fewer than 500 positions each the bot asks about fewer turns, then in fewer hands. `scale=15`, `tempo=10` turn the evaluation into a chance of winning; `decisive=D` scores by the mean of the raw evaluation with a decided game at ±D instead; `spread=1` deals the imagined hands spread over the costs of the opponent's unseen cards.
+- `turn`: plans its whole turn and scores only finished turns. `turn:budget=20000` sets the positions a turn may make; `worlds=4` the imagined decks a first action is averaged over when the turn can draw; `width=16384` the most unfinished positions a layer keeps; `win=N` the positions a look for a win this turn may make before any search (a sixteenth of the budget unless set, 0 never looks); `w.NAME=V` one weight of the evaluation (`engine_rs/src/bots/eval.rs`); `eval=greedy` scores finished turns with the shipped bot's evaluation instead, which measures the search with the evaluation held fixed; `eval=race` with the race evaluation (`engine_rs/src/bots/race.rs`), its weights from `race_weights.json` and `r.NAME=V` setting one; `mull=T` sends back, one at a time, the opening card that costs most while it costs more than T (0: keeps every hand).
+- `turn` with `reply=K`: the reply level. The K best finished turns are each played out in `hands=3` hands the opponent may hold; the opponent takes a win if they have one and otherwise plays the turn their own search likes best; a turn's score is the mean of the bot's chance of winning from where the reply leaves it. `per=N` keeps at most N of the K turns that play the same cards on other tiles, so the K differ in what they play (0: the K best whatever they play). `own=25` is the share, in hundredths, of a search's positions that plans the bot's own turn; the replies split the rest evenly, and with fewer than 500 positions each the bot asks about fewer turns, then in fewer hands. `scale=15`, `tempo=10` turn the evaluation into a chance of winning; `decisive=D` scores by the mean of the raw evaluation with a decided game at ±D instead; `spread=1` deals the imagined hands spread over the costs of the opponent's unseen cards. A run prints where the turn the reply level chose stood in the bot's own search's order.
 
-Practice plays `web/match.py` `PRACTICE_BOT`.
+Practice plays `web/match.py` `PRACTICE_BOT`: `turn:budget=200000,reply=12,per=2,eval=race,mull=2`.
 
-Tests: `cd engine_rs && cargo test --release --no-default-features --lib bots` (a bot's choice does not change when the hidden cards are dealt another way, with the reply level too; a world holds exactly the cards the seat can count; the look for a win reads nothing hidden; a win in hand is taken in two positions saved from games; a seeded game replays).
+## The race evaluation
+
+The position as a race to the winning food: 31 numbers read from the side that has just moved against the side about to move (`race.rs` `features!` names and explains each), all from quantities the rules compute: food and the regions' pay, the pay a side's next card could move on its best tiles (the chance its hand, or a hand dealt from the opponent's unseen cards, holds a card it can pay for that is strong enough or flies), animals that card could cover, raids and the chance a raid empties the den, how near each side's pay brings it to the winning food, animals, strength, cards in hand, tiles cut off from their base. Each number has a sign it must have by its meaning (`SIGNS`); the score is their weighted sum in food, and a decided game stays at the old evaluation's ±1000.
+
+Its weights are fitted to who won (Texel's tuning): 24,000 games of `turn:budget=20000,mull=2` against itself on Martin's five decks and 20 random ones, a tenth of the turns played at random, every finished turn read from both seats and labelled with the winner, a logistic regression held lightly to the hand-set weights, every fifth game held out. The games are played by the hand-set evaluation's bot, which does not read the weights being fitted, so a fit is one step from a fixed source and never a round fed by the last one. A weight that comes out against its number's meaning is held at 0 and the rest fitted again (today: raids either way, the room to place, the chance of the opponent's den emptying, M's own next card, N's animals at risk); those numbers read coincidences of the games, such as a deck that both holds fliers and loses.
+
+### Refitting the race evaluation
+
+After a change to the cards, from the game folder:
+
+```
+tools/bot_bench/bench.sh fit --write
+tools/bot_bench/bench.sh run --x turn:budget=20000,mull=2,eval=race --y turn:budget=20000,mull=2,OLD --seeds 60 --name refit
+```
+
+The first takes about four minutes on six cores, writes `race_weights.json` and prints the weights it replaces as a spec (`the weights this build plays, as a spec:`); that line, for OLD, makes the second the gate: the new weights (compiled in by the run's build) against the old. Keep the new file if it is not worse; a fit's log-loss says nothing about play. Then the confirmation at Practice's budget with the reply level, against `turn:budget=200000,reply=12,per=2` on fresh seeds and on random decks.
+
+What the fit is worth and how far it can be trusted. Fits from different games (other seeds, the race bot's own games instead of the hand-set bot's, 12,000 or 24,000 games, the four numbers added for multi-card turns) all play within a point of each other at 20,000 positions (49.4% to 50.5%, 3,000 games each, intervals about ±0.9), though single weights wander between them: food, `need` and `close_*` all carry the food lead and trade weight among themselves (food 0.28 to 0.97). A second fitting round once scored 49.1% (47.9 to 50.3) against the first; read against this spread, that is most likely the same spread and not a round going wrong. Around the fit, the weights of cards in hand, animals and strength each moved to about half and about one and a half times play the same or a point worse (3,000 games each); strength at twice its weight was the one at +1 (51.0%).
+
+Tests: `cd engine_rs && cargo test --release --no-default-features --lib bots` (a bot's choice does not change when the hidden cards are dealt another way, with the reply level, the race evaluation and the mulligan too; a world holds exactly the cards the seat can count; the look for a win reads nothing hidden; a win in hand is taken in two positions saved from games; a seeded game replays).
 
 ## Where the bots stand (2026-11-22, Martin's five decks, 2,000 games a line unless said; with the fatigue rule)
 
-`v1` is `turn` with no reply level, `v2` is `turn:reply=12,per=2`, each at the budget named.
+`v1` is `turn` with no reply level, `v2` is `turn:reply=12,per=2`, each at the budget named; `v3` is `v2` with `eval=race,mull=2` (Practice). Seed 1 is the runs' default, 11 a fresh one; the random decks are 8 (deck seed 1), 16 deals a pairing, 2,048 games.
+
+| X | Y | seeds | X wins | 95% interval |
+|---|---|---|---|---|
+| v3 200,000 | v2 200,000 | 1 | 67.7% | 66.0 to 69.4 |
+| v3 200,000 | v2 200,000 | 11 | 66.3% | 64.6 to 68.1 |
+| v3 200,000 | v2 200,000 | random decks | 65.4% | 63.7 to 67.1 |
+| v3 200,000 | v1 200,000 | 1 | 69.7% | 67.9 to 71.5 |
+| v3 200,000 | v1 200,000 | 11 | 70.2% | 68.4 to 71.9 |
+| v3 200,000 | v1 200,000 | random decks | 69.8% | 68.1 to 71.4 |
+| v3 200,000 | `greedy` | 1 | 86.1% | 84.7 to 87.4 |
+| v3 200,000 | `greedy` | 11 | 87.0% | 85.6 to 88.3 |
+| v3 200,000 | `greedy` | random decks | 84.9% | 83.5 to 86.3 |
+| v2 200,000 with `eval=race` | v2 200,000 | 11 | 53.2% | 51.8 to 54.6 |
+| v2 200,000 with `mull=2` | v2 200,000 | 11 | 60.3% | 58.5 to 62.1 |
 
 | X | Y | X wins | 95% interval |
 |---|---|---|---|
@@ -45,7 +79,7 @@ Tests: `cd engine_rs && cargo test --release --no-default-features --lib bots` (
 | v2 200,000 | v1 200,000 | 55.0% | 53.8 to 56.3 |
 | v2 2,000,000 | v1 2,000,000 (600 games) | 53.8% | 51.5 to 56.1 |
 | v2 2,000,000 | v2 200,000 (600 games) | 52.0% | 49.7 to 54.3 |
-| v2 200,000 (Practice) | v1 20,000 | 55.8% | 54.4 to 57.1 |
+| v2 200,000 | v1 20,000 | 55.8% | 54.4 to 57.1 |
 | v1 20,000 | v1 20,000 with `win=0` | 49.6% | 48.7 to 50.5 |
 
 The reply level's settings, each against `turn:budget=200000,reply=6` (six turns whatever they play, three hands):
@@ -80,6 +114,14 @@ Raids. `w.raid=R` adds R to the value of a food the opponent's den lacks. Agains
 
 Only Aggro raids at all (0.72 a game at `w.raid=2`, 2.11 at 4; the other four decks under 0.15), and the more it is made to raid the more it loses. As these bots play, an animal's body on the board is worth more than its strength off the enemy's food.
 
-Speed and time (the Mac, one core): about 900,000 positions a second. v1 at 20,000 uses 2,900 positions and 3.4 ms a turn; v2 at 20,000 uses 7,000 and 8 ms, at 200,000 52,000 and 60 ms (the largest turn 198,707 positions, about a quarter of a second), at 2,000,000 347,000 and 0.4 s (the largest 1,962,989, a little over 2 s). Where v2's time goes at 2,000,000 (a 30-second sample): copying positions 47%, the position key 18%, applying actions 11%, the search's own tables and ranking 10%, the evaluation 7.5%, listing legal actions 3%, dealing hands 2%, the look for a win under 1%.
+The mulligan. Keeping every opening hand was the largest single loss in the bot's play. `mull=T` against the same race bot keeping every hand, at 20,000 positions (3,000 games each): `mull=2` 62.2% (60.7 to 63.6), `mull=3` 61.5%, `mull=4` 57.6%, `mull=5` 53.8%, `mull=6` 52.4%; `mull=1` against `mull=2` 47.0%. At Practice's budget the mulligan alone is worth 10 points against v2, the race evaluation alone 3, both together 16.
+
+The reply level's candidates. Asked about 48 turns instead of 12 (`reply=48,per=0`, 600,000 positions, 200 games), the reply level picks a turn its own search ranked below twelfth in 9.3% of turns with the hand-set evaluation and 8.7% with the race evaluation, fifth to twelfth in 12 to 14%. So the race evaluation, which prices the opponent's next card on the open and weakly held tiles, did not move the turns the reply favours into the twelve; and asking about more turns has never played better (`reply=24` 50.2%), so the turns it favours from further down are mostly the luck of three imagined hands, not stopping plays missed. Adding as candidates the turns that leave the opponent least food to stand at after their next turn (the race evaluation's own estimate) lost: three of them in the twelve, 48.1% (46.3 to 49.9, 1,000 games).
+
+What did not work. Scoring the reply level's leaves by four games played out to the end by the shipped greedy evaluation, mixed with the evaluation: 45.0% (42.9 to 47.1), the playouts too weak to say anything. Four numbers for turns of several cards (the third to sixth best tiles, how near the pay of the three best tiles brings a side to the winning food): fitted, they play the same (50.4%).
+
+What the new bot still does (40 of its losses against v2, each a seat v2 won in the same deal, against 40 of v2's losses the same way): one opponent card removing three or more of its animals at once 29 times (v2: 4), nearly always an area removal over a cluster of cheap animals the mulligan keeps; the opponent gaining 10 or more food in one turn in 7 games (v2: 2); its own turns ending with no region held in 53% of its turns from its fourth (v2: 44%); a key tile held by a 1 or 2 strength body that one cover flips. It raids more when the opponent is near the winning food (7 raids in 25 such turns, v2: 2 in 31). It began no turn with a certain win it did not take in 1,000 games with `--count-wins`.
+
+Speed and time (the Mac, one core, 100 games on one thread): about 1.7 million positions a second. v2 at 200,000 uses 51,000 positions and 25 ms a turn, the slowest choice 86 ms; v3 54,000 and 31 ms, the slowest 122 ms (the race evaluation costs about a fifth more than the hand-set one). A position's copy takes about 100 ns and its key 66 ns; before they were made cheaper (170 and 220 ns) a 30-second sample of v2 at 2,000,000 put copying at 47% of the time and the key at 18%, and the change made the turn bots 1.46 to 1.56 times faster, playing the same seeded games. Not profiled again since.
 
 The games: about 12 turns for both players together, the player who goes first wins about 62%. No game in any run above reached the 400-turn limit. Between two v2 bots 25 to 40 games of 2,000 end by fatigue (an empty deck taking the loser's last food), every one of them Control against Control, and the longest game is 47 turns; against `greedy`, none.
