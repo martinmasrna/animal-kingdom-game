@@ -372,14 +372,14 @@ def test_raid_draw_flies_into_the_den_then_draws():
     assert s.food["B"] == 14 and [u.card_id for u in s.hands["A"]] == ["wisp_1"]
 
 
-def test_double_raid_destroys_double_its_strength():
-    for cid in ("double_raid_2", "double_raid_4"):
-        assert CARDS[cid].text == "Its raids destroy double food."
-        s = state(turn=11, hands={"A": [cid]}, food={"A": 15, "B": 15})
-        for cr in ("1,1", "2,1", "3,1", "4,1", "5,1"):
-            put(s, cr, "test_one", "A")
-        rules.apply_action(s, PlaceAction(cid, ("hq", "B")))
-        assert s.food["B"] == 15 - CARDS[cid].base_strength * CFG.double_raid_factor
+def test_leeroy_raids_at_double_strength():
+    cid = "raider_legend"
+    assert CARDS[cid].name == "Leeroy" and CARDS[cid].text == "Double strength when raiding."
+    s = state(turn=11, hands={"A": [cid]}, food={"A": 15, "B": 15})
+    for cr in ("1,1", "2,1", "3,1", "4,1", "5,1"):
+        put(s, cr, "test_one", "A")
+    rules.apply_action(s, PlaceAction(cid, ("hq", "B")))
+    assert s.food["B"] == 15 - CARDS[cid].base_strength * CFG.double_raid_factor
 
 
 def test_scout_takes_one_of_the_top_three_and_shuffles_the_rest_back():
@@ -530,7 +530,7 @@ def test_the_assassin_draws_after_every_third_card_of_a_turn():
         sizes.append(len(s.hands["A"]))
     assert sizes == [5, 4, 4, 3, 2, 2]                                # the 3rd and the 6th each draw one
     assert {l: (CARDS[l].cost, CARDS[l].base_strength) for l in LEADERS} == {
-        "warlord_legend": (7, 7), "raider_legend": (5, 10), "sage_legend": (5, 3), "elf_legend": (5, 3), "assassin_legend": (5, 5)}
+        "warlord_legend": (7, 7), "raider_legend": (3, 5), "sage_legend": (5, 3), "elf_legend": (5, 3), "assassin_legend": (5, 5)}
 
 
 def test_the_elfs_card_makes_its_regions_produce_one_more_while_it_stands():

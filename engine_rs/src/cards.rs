@@ -151,7 +151,7 @@ pub fn behaviour(id: &str) -> Behaviour {
         "raid_draw_5" => Some(OnRaid::Draw),
         _ => None,
     };
-    b.double_raider = matches!(id, "double_raid_2" | "double_raid_4");
+    b.double_raider = id == RAIDER;                  // Leeroy: "Double strength when raiding." (Martin, 2026-11-22)
     b.djinn = match id {
         "djinn_hand" => Some(Count::Hand),
         "djinn_ally" => Some(Count::Ally),

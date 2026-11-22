@@ -739,7 +739,34 @@
         "prev": 6
       },
       "by": "claude",
-      "at": 1795274919
+      "at": 1795358576
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Raider"
+      },
+      "by": "claude",
+      "at": 1795358576
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795358576
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795358576
     }
   },
   "sage_legend": {
@@ -979,28 +1006,6 @@
       },
       "by": "claude",
       "at": 1795262578
-    }
-  },
-  "double_raid_4": {
-    "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": ""
-      },
-      "by": "claude",
-      "at": 1795262578
-    }
-  },
-  "double_raid_2": {
-    "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": ""
-      },
-      "by": "claude",
-      "at": 1795267796
     }
   },
   "raid_draw_5": {

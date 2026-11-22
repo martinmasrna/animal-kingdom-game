@@ -185,13 +185,13 @@
     },
     {
       "id": "raider_legend",
-      "name": "Raider",
+      "name": "Leeroy",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 10,
-      "keywords": [],
-      "text": "",
-      "cost": 5
+      "base_strength": 5,
+      "text": "Double strength when raiding.",
+      "cost": 3,
+      "keywords": []
     },
     {
       "id": "sage_legend",
@@ -370,26 +370,6 @@
       "rarity": "common",
       "base_strength": 2,
       "text": "Roar: if this removes an enemy, draw a card.",
-      "cost": 2,
-      "keywords": []
-    },
-    {
-      "id": "double_raid_4",
-      "name": "Double Raid 4",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 6,
-      "text": "Its raids destroy double food.",
-      "cost": 4,
-      "keywords": []
-    },
-    {
-      "id": "double_raid_2",
-      "name": "Double Raid 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 3,
-      "text": "Its raids destroy double food.",
       "cost": 2,
       "keywords": []
     },

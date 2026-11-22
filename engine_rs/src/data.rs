@@ -460,7 +460,7 @@ config! {
     crush_young_max: i32 = 3,             // the Young Rhino: "... with strength 3 or less" (Martin, 2026-11-21)
     crush_young_albatross_max: i32 = 2,   // the Young Albatross: "... with strength 2 or less" (Martin, 2026-11-21)
     scout_look: i32 = 3,                  // Scout: the cards of your deck's top it looks at (Martin, 2026-11-21)
-    double_raid_factor: i32 = 2,          // "Its raids destroy double food." (Martin, 2026-11-21, his paper cards)
+    double_raid_factor: i32 = 2,          // Leeroy: "Double strength when raiding." (Martin, 2026-11-22)
     // Safety caps, so a loop of effects can never hang a game.
     max_actions_per_turn: i32 = 30,       // a turn ends after this many applied actions, choices included (Martin, 2026-11-18)
     max_effect_steps_per_turn: i32 = 1000,
