@@ -97,7 +97,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 10,
-      "text": "Costs 2 less for each region you control.",
+      "text": "Costs 3 less for each region you control.",
       "cost": 12,
       "keywords": []
     },

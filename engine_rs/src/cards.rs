@@ -20,7 +20,7 @@ pub const LEADERS: [(&str, &str); 5] = [
     (WARLORD, "When you cover an enemy, gain 1 food."),
     (RAIDER, "Your raids destroy 1 more food."),
     (SAGE, "Draw a card."),
-    (ELF, "Gain 1 food for each region you control."),                       // Martin, 2026-11-21: 2 mana
+    (ELF, "Gain 2 food for each region you control."),                       // Martin, 2026-11-21: 2 mana; 2 food, 2026-11-22
     (ASSASSIN, "After every third card you play in a turn, draw a card."),    // Martin, 2026-11-21: "multiple times a turn"
 ];
 

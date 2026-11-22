@@ -442,14 +442,14 @@ config! {
     hungry_food: i32 = 1,                 // Hungry: the food its prey's removal gains (Martin, 2026-11-20)
     shade_growth: i32 = 2,                // a strength that is a count: +2 for each (Martin, 2026-11-21)
     combo_djinn_discount: i32 = 2,        // the Combo Djinn: "Costs 2 less for each card you played this turn."
-    region_djinn_discount: i32 = 2,       // the Region Djinn: "Costs 2 less for each region you control." (Martin, 2026-11-21)
+    region_djinn_discount: i32 = 3,       // the Region Djinn: "Costs 3 less for each region you control." (Martin, 2026-11-22)
     warlord_leader_food: i32 = 1,         // the Warlord: "When you cover an enemy, gain 1 food."
     elf_card_region_bonus: i32 = 1,       // the Elf's card: "Your regions produce 1 more food." (while it is on the board)
     assassin_card_discount: i32 = 1,      // the Assassin's card: "Roar: reduce the cost of cards in your hand by 1."
     mana_blob_mana: i32 = 2,              // the Mana Blob: "Roar: gain 2 mana." (Martin, 2026-11-21)
     sage_card_power_discount: i32 = 1,    // the Sage's card: "Roar: reduce the cost of your hero power by 1."
     elf_power_cost: i32 = 2,              // the Elf's power: "Gain 1 food for each region you control." (Martin, 2026-11-21)
-    elf_food_per_region: i32 = 1,
+    elf_food_per_region: i32 = 2,         // the Elf's power: "Gain 2 food for each region you control." (Martin, 2026-11-22)
     assassin_nth_card: i32 = 3,           // the Assassin: "After every third card you play in a turn, draw a card."
     raider_leader_bonus: i32 = 1,         // the Raider: "Your raids destroy 1 more food." (Martin, 2026-11-21: "only +1")
     mama_spores: i32 = 2,                 // Mama Spore: "Roar: put 2 Spores into your hand." (Martin, 2026-11-21)
