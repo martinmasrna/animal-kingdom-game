@@ -5,7 +5,7 @@ import { fitNames, readSide } from './card.js';
 import { plan, DUR } from './timeline.js';
 import { fly, dive, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, leaderAt, resolvesIn, tokenWidth, RAIL } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, leaderAt, resolvesIn, tokenWidth, RAIL, railX } from './board.js';
 import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo, powerCard, powerCostHTML } from './mana.js';
 import { playFood } from './foodfx.js';
 import { decodeDeck } from './deckcode.js';
@@ -692,8 +692,6 @@ function gameScreen() {
       <div class="abs ledge"></div>
       <div id="board"></div>
       <div class="abs menu snd" id="sndbtn"></div><div class="panel setp" id="setp"></div>
-      <div class="abs menu hs" id="series" data-tip="History"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg></div>
-      <div class="abs menu" id="pilebtn" data-tip="Remove Pile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-4.4 0-7.5 3-7.5 7 0 2.4 1.1 4.2 3 5.2V19h9v-3.8c1.9-1 3-2.8 3-5.2 0-4-3.1-7-7.5-7z"/><circle cx="9" cy="11" r="1.5"/><circle cx="15" cy="11" r="1.5"/><path d="M10.5 19v2M13.5 19v2"/></svg></div><div class="pmodal" id="pilep"></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu fb" id="fbbtn" data-tip="Send feedback"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
       <div class="abs menu chatbtn" id="chatbtn" data-tip="Friends">${ICON_FRIENDS}${chatBadge()}</div>
@@ -705,7 +703,6 @@ function gameScreen() {
       <div class="abs opts" id="opts"></div>
       <div class="abs reveal" id="reveal"></div>
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
-      <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
       <div class="abs mrail" id="mrail"></div><div class="abs mlast" id="mlast"></div><div class="abs mhover" id="mhover"></div>
       <div class="endov" id="endov"></div>
       <div class="endov" id="concov"><div class="endbox ask"><b>Concede this game?</b>
@@ -721,9 +718,8 @@ function gameScreen() {
     ask.onclick = e => { e.stopPropagation(); if (e.target === ask) ask.classList.remove('on'); };
     $('keep').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); };
     $('concede').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); send({ t: 'concede' }); };
-    // The series opens the history; the decks (drawRail) open their lists.
+    // The decks (drawRail) open their lists.
     const toggle = k => e => { e.stopPropagation(); ui.panel = ui.panel === k ? null : k; showPanel(); };
-    $('series').onclick = toggle('hist'); $('pilebtn').onclick = toggle('pile');
     app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
     $('scr').addEventListener('click', () => { if (ui.panel) { ui.panel = null; showPanel(); } });
     $('tbtn').onclick = e => { e.stopPropagation(); if (canEnd(lastDecision)) { sfx('endturn'); act({ kind: 'pass' }); } };
@@ -801,19 +797,16 @@ function drawGame() {
   if ($('scr').classList.contains('rp') !== false) { $('scr').classList.toggle('rp', false); fitStage(false); }   // a replay: upright its controls take a row under the stage
   $('menubtn').style.display = playing && V.id ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
-  { const n = [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length, w = VIEW.port ? 88 : 52;
-    $('series').style.right = 16 + w * n + 'px'; $('pilebtn').style.right = 16 + w * (n + 1) + 'px';
-    $('sndbtn').style.right = 16 + w * (n + 2) + 'px'; $('chatbtn').style.right = 16 + w * (n + 3) + 'px'; }   // the Remove Pile left of History; Friends, left of sound
-  $('chatbtn').style.display = V.id && hasFriends() ? '' : 'none';   // a real match or replay, once you have a friend   // sound, left of History   // History, left of feedback and the flag
-  ['menubtn', 'fbbtn', 'series', 'pilebtn', 'sndbtn', 'chatbtn'].forEach(id => { $(id).style.left = ''; });
-  ['menubtn', 'fbbtn', 'series', 'pilebtn', 'sndbtn', 'chatbtn'].filter(id => $(id).style.display !== 'none').forEach((id, i) => { $(id).style.left = 16 + 52 * i + 'px'; });   // the mana screen: a plain row at the top left
+  $('chatbtn').style.display = V.id && hasFriends() ? '' : 'none';   // a real match or replay, once you have a friend
+  // the controls: one row at the top right (Martin, 2026-11-22), the flag at the corner, then feedback, sound, Friends
+  ['menubtn', 'fbbtn', 'sndbtn', 'chatbtn'].filter(id => $(id).style.display !== 'none').forEach((id, i) => { $(id).style.right = 16 + 52 * i + 'px'; });
   $('menubtn').dataset.tip = ('Concede');
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = ('<path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/>');
   if (!playing) $('concov').classList.remove('on');
 
   // Top left: the turn (a match is one game while there is one map); it opens the history.
-  drawHistory(G); drawLists(G); showPanel();
+  drawLists(G); showPanel();
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
   turnCue(playing && G.current === you);   // the card shown, flown down, landed and its dust settled
@@ -840,7 +833,7 @@ function drawGame() {
     held.sort((x, y) => order.indexOf(x.iid) - order.indexOf(y.iid));
   }
   // the mana screen: a row of pieces under the board (the full cards, large, while the opening hands are chosen)
-  const n = held.length, cw = (mull ? 176 : 100), gap = (mull ? 18 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0),
+  const n = held.length, cw = (mull ? 176 : 100), gap = (mull ? 64 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0),
     x0 = ((STAGE.w / 2)) - (n * cw + (n - 1) * gap) / 2;
   const hand = $('hand'); hand.classList.toggle('mull', mull); hand.classList.toggle('free', (!!(d.pend && d.pend.mode !== 'choice' && !mull)));   // a free play: the costs step back
   let drawnK = 0;
@@ -987,62 +980,16 @@ function drawGame() {
 // Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
 // deck's and End turn's centre tops.
 
-// The history strip and both decklists, shared by both game screens.
-// One move in small: a draw is its count on the team's boss (as a held payout); a placement the unit, as on the board.
-function histItem(m, i) {
-  const side = rel(m.seat), t = side === 'A' ? 'a' : 'b';
-  if (m.kind === 'draw') { const dr = m.fx.find(f => f.k === 'draw' && f.seat === m.seat); return `<div class="hi draw ${side}" data-h="${i}">${chalk('+' + (dr ? dr.n : 0))}</div>`; }
-  return `<div class="hi unit ${side}" data-h="${i}"><div class="face" style="${portrait(m.card, 32)}"></div><img src="/static/kit2/rim_${t}.webp" alt="" draggable="false"></div>`;
-}
-// Hovering a move says what it did; in a replay, clicking it goes to that move.
-function wireHist(root, G) {
-  root.querySelectorAll('[data-h]').forEach(el => {
-    const m = G.history[el.dataset.h];
-    el.onmouseenter = () => { if (m.kind === 'place' || m.kind === 'roam' || m.kind === 'act' || m.kind === 'leader') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
-    el.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
-    
-  });
-}
-function drawHistory(G) {
-  const hist = document.getElementById('hist');
-  let hs = '', lastT = null;
-  G.history.forEach((m, i) => {
-    if (m.round !== lastT) { hs += `<div class="t">Turn ${m.round}</div>`; lastT = m.round; }
-    hs += histItem(m, i);
-  });
-  hist.innerHTML = hs; hist.scrollTop = hist.scrollHeight;
-  wireHist(hist, G);
-  const removed = document.getElementById('removed');
-  removed.innerHTML = `Removed <b>${G.removed.length}</b>`;
-}
 function drawLists(G) {
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0), you = V.you, them = opp();
   const mine = document.getElementById('mine'), theirs = document.getElementById('theirs');
   mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>`;
   theirs.innerHTML = `<h4>Opponent's cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
   wirePops(mine); wirePops(theirs); fitStrips(mine); fitStrips(theirs);
-  drawPile(G);
-}
-// The Remove Pile, from its button beside History: a dialog in full focus (Gwent's graveyard), every removed card in full
-// at its strength now (a Python grows there too), yours then your opponent's, the latest first. Escape, ×, or a click beside it closes.
-function drawPile(G) {
-  const side = (who, label) => {
-    const cs = (G.pile || []).filter(c => c.owner === who).reverse();
-    return `<div class="t">${label}<span class="n">${cs.length}</span></div>` + (cs.length
-      ? `<div class="pgrid">${cs.map(c => `<div class="pc ${CARDS[c.id].rarity}">${manaCard(CARDS[c.id], { str: c.str, cost: CARDS[c.id].mana, w: 150 })}</div>`).join('')}</div>`
-      : '<div class="nil">Nothing removed yet</div>');
-  };
-  const el = document.getElementById('pilep');
-  el.innerHTML = `<div class="pbox"><h4>Remove Pile<span class="n">${(G.pile || []).length}</span><span class="x" id="pclose">×</span></h4>`
-    + `<div class="pbody">${side(V.you, 'You')}${side(opp(), 'Your opponent')}</div></div>`;
-  const close = e => { e.stopPropagation(); ui.panel = null; showPanel(); };
-  el.onclick = e => e.target === el ? close(e) : e.stopPropagation();
-  document.getElementById('pclose').onclick = close;
 }
 function showPanel() {
-     // the tutorial never opens the decklists or the history: nothing it teaches, and they give away its deal
-  for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp'], ['set', 'setp'], ['pile', 'pilep']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
-  if (ui.panel === 'hist') { const h = document.getElementById('hist'); h.scrollTop = h.scrollHeight; }
+     // the tutorial never opens the decklists: nothing it teaches, and they give away its deal
+  for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['set', 'setp']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
 }
 // The stage keeps its design size (STAGE) and scales to fit the window. The painted ground under it is one painting wider
 // and taller than any window (21:9 to 4:3), scaled with the stage, so the window shows more savanna, never bars.
@@ -1160,14 +1107,14 @@ function leaderPanel(side) {
   const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader", kind = (LEADER_MANA(V.game.abilityCost));
   return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${kind[L.kind] || ''}</p><p>${L.text}</p>`;
 }
-// The mana rules' controls around the board (mana.css; Martin, 2026-11-20, the den layout), placed from where the board
-// stands (board.js RAIL), so none of them lies on it: each side's leader left of its base row, with its power's price; each
-// side's deck right of the board level with its base row, a pile of its face-down cards (their tokens, empty) as thick as
-// the cards left in it, with the count, a click showing its list beside it; your mana and End turn (#tbtn, its own element)
-// right of your den, their mana right of theirs. Food is in the dens (board.js). Their mana while it isn't their turn is
-// their next turn's, unspent.
-const LEAD_W = 84, LEAD_H = 97, DECK_W = 84, DECK_H = 97, RAIL_GAP = 24;
-const deckX = () => RAIL.right + RAIL_GAP * 2;   // the decks' left edge
+// The mana rules' controls in one column right of the board (Martin, 2026-11-22: leaders and decks on the right, End turn
+// in the middle, as Hearthstone keeps it), placed from where the board stands (board.js RAIL), so none of them lies on it:
+// each side's leader and deck side by side level with its base row (the deck a pile of its face-down cards, the team's
+// empty token, as thick as what is left, with the count; a click shows its list), its mana beyond them (theirs above,
+// yours below), End turn between the two. Food is in the dens (board.js).
+const LEAD_W = 84, LEAD_H = 97, DECK_W = 84, DECK_H = 97, RAIL_GAP = 16, COL_W = LEAD_W + RAIL_GAP + DECK_W;
+const colX = railX;   // the column's left edge
+const deckX = () => colX() + LEAD_W + RAIL_GAP;
 function drawRail(G, d) {
   const el = document.getElementById('mrail'); if (!el) return;
   if ((!G)) { el.innerHTML = ''; return; }
@@ -1179,7 +1126,7 @@ function drawRail(G, d) {
     // dims, no label (Martin, 2026-11-21: "remove AI-slop label")
     const isPow = L && L.kind === 'power';
     const tok = L ? `<div class="ltok${isPow ? ' pw' : ''}${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:${LEAD_W}px">${leaderToken(L.id, side, CARDS, LEAD_W)}${isPow ? powerCostHTML(L.cost ?? cost) : ''}</div></div>` : '';
-    return `<div class="mlead ${side}" style="left:${R.l - RAIL_GAP - LEAD_W}px;top:${R.y - LEAD_H / 2}px">${tok}</div>`;
+    return `<div class="mlead ${side}" style="left:${colX()}px;top:${R.y - LEAD_H / 2}px">${tok}</div>`;
   };
   // a deck: one token a few cards, so it thins as it is drawn; empty, the bare slot
   const deck = side => {
@@ -1190,13 +1137,17 @@ function drawRail(G, d) {
     return `<div class="mdeck ${side}" data-deck="${side}" style="left:${deckX()}px;top:${R.y - DECK_H / 2}px">${pile}</div>`;
   };
   const m = mana[you] || { left: 0, total: 0 }, t = mana[them] || { left: 0, total: 0 };
+  // what is left of the turn's mana as X/N right of the crystals (Martin, 2026-11-21): theirs above their leader, yours below yours
   el.innerHTML = lead('B') + lead('A') + deck('B') + deck('A')
-    // what is left of the turn's mana as X/N right of the crystals (Martin, 2026-11-21)
-    + `<div class="mmana A">${pipsHTML(m.left, m.total)}<b class="mcount">${m.left}/${m.total}</b></div>`
-    + `<div class="mmana B">${pipsHTML(t.left, t.total)}<b class="mcount">${t.left}/${t.total}</b></div>`;
-  // a deck's list opens beside it, toward the screen's edge
+    + `<div class="mmana A" style="left:${colX()}px;top:${RAIL.A.y + LEAD_H / 2 + 14}px">${pipsHTML(m.left, m.total)}<b class="mcount">${m.left}/${m.total}</b></div>`
+    + `<div class="mmana B" style="left:${colX()}px;top:${RAIL.B.y - LEAD_H / 2 - 34}px">${pipsHTML(t.left, t.total)}<b class="mcount">${t.left}/${t.total}</b></div>`;
+  // End turn in the middle, between the two rows; what the screen waits on under it
+  const mid = (RAIL.A.y + RAIL.B.y) / 2, tb = document.getElementById('tbtn'), wt = document.getElementById('waiting');
+  Object.assign(tb.style, { left: `${colX()}px`, top: `${mid - 28}px`, width: `${COL_W}px` });
+  if (wt) Object.assign(wt.style, { left: `${colX()}px`, top: `${mid + 38}px`, width: `${COL_W}px` });
+  // a deck's list opens at the screen's right edge, level with its deck
   for (const [side, id] of [['A', 'mine'], ['B', 'theirs']]) { const p = document.getElementById(id);
-    p.style.left = `${deckX() + DECK_W + RAIL_GAP}px`; p.style.right = 'auto'; p.style.margin = '0';
+    p.style.left = 'auto'; p.style.right = '16px'; p.style.margin = '0';
     if (side === 'B') { p.style.top = `${RAIL.B.y - DECK_H / 2}px`; p.style.bottom = 'auto'; }
     else { p.style.top = 'auto'; p.style.bottom = `${800 - (RAIL.A.y + DECK_H / 2)}px`; } }
 }

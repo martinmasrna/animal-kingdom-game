@@ -144,12 +144,14 @@
 .game.mana .hc.sel .mcard, .game.mana .hc.pick .mcard { filter: drop-shadow(0 0 2px #f4efe6) drop-shadow(0 0 4px #f4efe6); }
 .game.mana .hc.ready .mcard { filter: drop-shadow(0 0 2px var(--ready)) drop-shadow(0 0 7px var(--ready)); }
 /* the opening hand: the full cards, large, over the board */
+/* the mulligan: the screen behind it dimmed, past the stage's edges too, its cards and question over the veil */
+.game.mana .hand.mull::before { content: ''; position: absolute; inset: -100vmax; background: rgba(10, 8, 6, .72); pointer-events: none; }
 .game.mana .hand.mull .hc { top: 268px; width: 176px; height: 374px; transition: transform .16s; }
 .game.mana .hand.mull .hc .mcard { --mw: 176px; }
 .game.mana .hand.mull .hc:hover { transform: translateY(-8px); }
 .game.mana .hand.mull .hc.pick .mcard { filter: none; }
 .game.mana .hand.mull .hc.pick:hover .mcard { filter: drop-shadow(0 0 3px #f4efe6) drop-shadow(0 0 6px #f4efe6); }
-.game.mana .prompt.mull { left: 50%; top: 64px; width: 520px; margin-left: -260px; text-align: center; transform: none; }
+.game.mana .prompt.mull { left: 50%; top: 64px; width: 520px; margin-left: -260px; text-align: center; transform: none; z-index: 60; }   /* over the veil, with the cards */
 .game.mana .prompt.mull .btns { justify-content: center; }
 
 /* the controls around the dens (app.js drawRail): the layer covers the stage, its parts placed by the tilted board's dens
@@ -199,9 +201,8 @@
 .game.mana .mlast .row small { display: block; font-size: 12px; color: var(--ink2); }
 
 /* the small controls, plain, in a row at the top left */
-.game.mana .menu { right: auto !important; top: 10px; translate: calc(-1 * var(--side, 0px)) calc(-1 * var(--above, 0px)); background: var(--slab); border: 0; border-radius: 10px; box-shadow: var(--slab-sh); color: var(--ink); }
+.game.mana .menu { left: auto; top: 10px; translate: var(--side, 0px) calc(-1 * var(--above, 0px)); background: var(--slab); border: 0; border-radius: 10px; box-shadow: var(--slab-sh); color: var(--ink); }
 .game.mana .menu:hover { filter: brightness(1.2); }
-.game.mana .panel.histp { left: 16px; right: auto; top: 62px; translate: calc(-1 * var(--side, 0px)) calc(-1 * var(--above, 0px)); }
 .game.mana .panel.mine { right: 330px; bottom: auto; top: 380px; }
 .game.mana .panel.theirs { left: auto; right: 330px; margin: 0; top: 30px; }
 
@@ -322,7 +323,7 @@
 .game.mana .pmodal .pbox { background: var(--granite); border: 0; box-shadow: var(--granite-sh); }
 .readov:has(.mcard) .zside .kw { background: var(--granite); box-shadow: var(--granite-sh); border: 0; }
 .pop.mpop .ev, .pop.mpop .ev.lead { background: none; border: 0; color: var(--ink2); }
-body:has(.game.mana) .chatp.inmatch { left: 16px; right: auto; }
+body:has(.game.mana) .chatp.inmatch { left: auto; right: 16px; }
 
 .game.mana .hand.free .mcost { opacity: .3; }
 /* the end of a game and the concede question, plain */

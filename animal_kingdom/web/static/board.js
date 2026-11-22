@@ -302,5 +302,7 @@ export function renderBoard(el, M, g, cards, ui) {
 // reached (its own painting), a power that can't be used now greyed, one you can press now ringed as an animal you can act
 // with is. Where it stands on the stage: LEADER_AT.
 export const LEADER_AT = { A: [178, 650], B: [1110, 78] }, LEADER_PORT = { A: [70, 1300], B: [650, 140] };
-export const leaderAt = side => VIEW.port ? LEADER_PORT[side] : RAIL[side] ? [RAIL[side].l - 24 - 42, RAIL[side].y] : LEADER_AT[side];   // where app.js drawRail stands it
+// The column right of the board that app.js drawRail fills (the leaders and decks, End turn): its left edge on the stage.
+export const railX = () => RAIL.right + 48;
+export const leaderAt = side => VIEW.port ? LEADER_PORT[side] : RAIL[side] ? [railX() + 42, RAIL[side].y] : LEADER_AT[side];   // where drawRail stands it
 
