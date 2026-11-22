@@ -58,6 +58,8 @@ pub enum Count {
     Ally,
     Region,
     Played,
+    /// The food the opponent lost this turn (the Burn Djinn).
+    EnemyFoodLost,
 }
 
 pub const KEYWORDS: [(&str, u8); 6] = [("Flight", FLIGHT), ("Armor", ARMOR), ("Stealth", STEALTH), ("Spikes", SPIKES), ("Poison", POISON), ("Hungry", HUNGRY)];
@@ -167,6 +169,7 @@ impl Card {
             Count::Ally => "ally_count",
             Count::Region => "region_count",
             Count::Played => "played_count",
+            Count::EnemyFoodLost => "enemy_food_lost",
         });
         let mut o = serde_json::json!({
             "id": self.id, "name": self.name, "status": if self.collectible { "collectible" } else { "reserve" },

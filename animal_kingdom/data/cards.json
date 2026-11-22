@@ -564,6 +564,16 @@
       "text": "Roar: gain 2 mana.",
       "cost": 2,
       "keywords": []
+    },
+    {
+      "id": "djinn_burn",
+      "name": "Burn Djinn",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 10,
+      "text": "Costs 1 less for each food your opponent lost this turn.",
+      "cost": 12,
+      "keywords": []
     }
   ]
 }

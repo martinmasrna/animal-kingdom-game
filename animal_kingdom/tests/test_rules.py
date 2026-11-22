@@ -443,6 +443,16 @@ def test_djinn_cost_less_for_each_of_their_count():
     assert mana_cost(s, "djinn_combo", "B") == 12                     # B played none: it isn't their turn
 
 
+def test_burn_djinn_costs_less_for_each_food_the_opponent_lost_this_turn():
+    s = state(turn=11, hands={"A": ["raid_draw_5", "djinn_burn"], "B": ["djinn_burn"]}, food={"A": 15, "B": 15})
+    assert mana_cost(s, "djinn_burn") == 12
+    rules.apply_action(s, PlaceAction("raid_draw_5", ("hq", "B")))   # the raid destroys 5 of B's food
+    assert s.food["B"] == 10 and mana_cost(s, "djinn_burn") == 7
+    assert mana_cost(s, "djinn_burn", "B") == 12                      # A lost none
+    rules.apply_action(s, PassAction())                               # a new turn: nothing lost in it yet
+    assert mana_cost(s, "djinn_burn", "A") == 12
+
+
 def test_a_dynamic_strength_is_its_count():
     s = state(turn=19, hands={"A": ["wisp_1", "wisp_1", "wisp_1", "test_played_count"]})
     shades = {k: put(s, cr, f"test_{k}_count", "A") for k, cr in (("hand", "1,1"), ("ally", "1,2"), ("region", "2,2"))}

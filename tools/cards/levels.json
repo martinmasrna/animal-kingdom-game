@@ -1232,5 +1232,16 @@
       "by": "claude",
       "at": 1795293427
     }
+  },
+  "djinn_burn": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795349463
+    }
   }
 }

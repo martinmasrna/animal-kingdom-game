@@ -187,6 +187,7 @@ fn end_turn(st: &mut State) -> Result<(), String> {
     st.mana_spent = 0;
     st.applied_this_turn = 0;
     st.played_this_turn = 0;
+    st.food_lost = [0, 0];
     st.power_used = false;
     st.effect_steps_this_turn = 0;
     st.current = other(player);

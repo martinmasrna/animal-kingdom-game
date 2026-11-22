@@ -14,7 +14,7 @@ use crate::state::*;
 // ================================================================== strength, counts, cost
 
 /// `player`'s count of `what`: cards in their hand, their animals on the board (top units), the regions they control,
-/// the cards they played from hand this turn (none while it isn't their turn).
+/// the cards they played from hand this turn (none while it isn't their turn), the food their opponent lost this turn.
 pub fn count(st: &State, player: Player, what: Count) -> i32 {
     match what {
         Count::Hand => st.hands[player as usize].len() as i32,
@@ -24,6 +24,7 @@ pub fn count(st: &State, player: Player, what: Count) -> i32 {
             st.g.map.regions.iter().filter(|r| r.mask & own == r.mask).count() as i32
         }
         Count::Played => if st.current == player { st.played_this_turn } else { 0 },
+        Count::EnemyFoodLost => st.food_lost[other(player) as usize],
     }
 }
 
@@ -179,6 +180,7 @@ fn raid(st: &mut State, player: Player, unit: Unit, enemy: Player, strength: i32
     st.emit(Ev::Raid { player, iid: unit.iid, card: unit.card, den: enemy, strength, n });
     st.pile_add(unit.card, unit.owner);
     st.food[enemy as usize] -= n;
+    st.food_lost[enemy as usize] += n;
     if st.result.is_none() && st.food[enemy as usize] <= 0 {
         st.result = Some(GameResult { winner: Some(player), reason: Reason::Starved });
     }
@@ -419,6 +421,7 @@ pub fn draw_cards(st: &mut State, player: Player, n: i32) {
         st.fatigue[p] += 1;
         let lost = (st.fatigue[p] * st.cfg().fatigue_step).min(st.food[p]).max(0);
         st.food[p] -= lost;
+        st.food_lost[p] += lost;
         st.emit(Ev::Fatigue { player, n: lost, count: st.fatigue[p] });
         if st.food[p] <= 0 {
             st.result = Some(GameResult { winner: Some(other(player)), reason: Reason::Starved });

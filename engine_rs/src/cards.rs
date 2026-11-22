@@ -148,6 +148,7 @@ pub fn behaviour(id: &str) -> Behaviour {
         "djinn_ally" => Some(Count::Ally),
         "djinn_combo" => Some(Count::Played),
         "djinn_region" => Some(Count::Region),
+        "djinn_burn" => Some(Count::EnemyFoodLost),
         _ => None,
     };
     b.leader = match id {

@@ -368,7 +368,7 @@ class GameState:
                  rng: Optional[dict] = None, starting_decks: Optional[dict] = None,
                  turn_counter: int = 0, mana_spent: int = 0, applied_this_turn: int = 0, effect_steps_this_turn: int = 0,
                  played_this_turn: int = 0, power_used: bool = False, power_discount: Optional[dict] = None,
-                 fatigue: Optional[dict] = None,
+                 fatigue: Optional[dict] = None, food_lost: Optional[dict] = None,
                  caps: Optional[list] = None, next_iid: int = 0, effect_stack: Optional[list[dict]] = None,
                  pending: Optional[dict] = None, scheduled: Optional[list[dict]] = None, result: Optional[Result] = None,
                  pile_owners: Optional[list] = None, leaders: Optional[dict[str, dict]] = None):
@@ -393,6 +393,7 @@ class GameState:
         self.power_used = power_used                 # its player has used their leader's power this turn (once a turn)
         self.power_discount = power_discount if power_discount is not None else {"A": 0, "B": 0}   # off each player's power, for good (the Sage)
         self.fatigue = fatigue if fatigue is not None else {"A": 0, "B": 0}   # the cards each player tried to draw from their empty deck; the next costs one more food
+        self.food_lost = food_lost if food_lost is not None else {"A": 0, "B": 0}   # the food each player has lost this turn (the Burn Djinn)
         self.effect_steps_this_turn = effect_steps_this_turn
         self.caps: list = caps if caps is not None else []     # every turn a cap ended: {cap, player, turn, cards}
         self._next_iid = next_iid
@@ -445,6 +446,7 @@ class GameState:
             "power_used": self.power_used,
             "power_discount": dict(self.power_discount),
             "fatigue": dict(self.fatigue),
+            "food_lost": dict(self.food_lost),
             "effect_steps_this_turn": self.effect_steps_this_turn,
             "caps": [dict(c) for c in self.caps],
             "next_iid": self._next_iid,
@@ -508,6 +510,7 @@ class GameState:
         self.played_this_turn, self.power_used = d["played_this_turn"], d["power_used"]
         self.power_discount.update(d["power_discount"])
         self.fatigue.update(d["fatigue"])
+        self.food_lost.update(d.get("food_lost", {"A": 0, "B": 0}))
         self.effect_steps_this_turn, self._next_iid = d["effect_steps_this_turn"], d["next_iid"]
         self.caps[:] = d["caps"]
         self.effect_stack[:] = d["effect_stack"]
