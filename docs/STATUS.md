@@ -12,7 +12,7 @@ What the game is for, why mana, and Martin's words on the rules' shape and the b
 
 ## The rules as they play
 
-- **Board:** 19 pointy-top hex tiles in rows of 3, 4, 5, 4, 3 (`data/maps.json` `map_hex19`), your side at the bottom. Each player's row of 3 is their base, where their connection starts and where either player may place. Behind each base is its den.
+- **Board:** two maps in `data/maps.json`, picked with `AK_MAP`, your side at the bottom on both; which one the game keeps is open (Martin's reasons: `design.md`). Staging plays `map_sq16`: 16 square tiles, 4 by 4, neighbours across a side only, a region every 2 by 2 block (9). `./play` without `AK_MAP` plays `map_hex19`: 19 pointy-top hex tiles in rows of 3, 4, 5, 4, 3, a region every three mutually adjacent tiles (24). Each player's nearest row is their base, where their connection starts and where either player may place. Behind each base is its den.
 - **Mana:** on your Nth turn you have min(N, 10) mana, lost at the end of the turn. A card costs its `cost`; a leader's power costs 3 (the Elf's 2) and can be used once a turn (Martin, 2026-11-21). Anything an effect puts into play is free.
 - **Cards:** opening hands of 3 (first player) and 4 (second), a mulligan, one free card at the start of each turn, the first player's first turn included (Martin, 2026-11-21), no other draw.
 - **Covering:** a card placed on an enemy it is stronger than covers it, and a covered card, yours or theirs, is removed.
