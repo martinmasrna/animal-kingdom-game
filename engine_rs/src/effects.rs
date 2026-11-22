@@ -55,6 +55,12 @@ pub fn can_be_removed(st: &State, u: &Unit) -> bool {
     !st.card(u.card).has(ARMOR)
 }
 
+/// Spikes, for `u` standing on `cr`: its own, or an adjacent ally's "Adjacent allies have Spikes." (the Porcupine).
+pub fn has_spikes(st: &State, u: &Unit, cr: Tile) -> bool {
+    st.card(u.card).has(SPIKES)
+        || st.g.map.neighbors[cr as usize].iter().any(|&nb| st.board.top(nb).map_or(false, |t| t.owner == u.owner && st.card(t.card).beh.spikes_aura))
+}
+
 /// Stealth: an enemy's ability can't choose it.
 #[inline]
 pub fn can_be_chosen(st: &State, u: &Unit, by_player: Player) -> bool {
@@ -218,7 +224,7 @@ fn land_unit(st: &mut State, player: Player, unit: Unit, cr: Tile) {
     }
     if onto_enemy {
         let cov = covered.unwrap();
-        if st.card(cov.card).has(SPIKES) {
+        if has_spikes(st, &cov, cr) {
             // Spikes: the first time an enemy covers it, that enemy is removed. Once per animal.
             if !cov.retaliation_used {
                 st.board.under_mut(cr).expect("the covered animal is beneath the top").retaliation_used = true;

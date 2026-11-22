@@ -94,12 +94,13 @@ pub fn seat_view(st: &State, player: Player) -> Value {
 /// How the unit `iid` stands, on the board or in a hand: its strength, its cost from hand, and the marks a board piece
 /// shows: "hidden" (the enemy can't choose it: Stealth), "spikes" until spent, "poison", "armor" (no ability removes it).
 pub fn unit_view(st: &State, iid: i32) -> Option<Value> {
-    let u = st.board.find(iid).map(|(_, u)| u).or_else(|| st.hands.iter().flatten().find(|u| u.iid == iid).copied())?;
+    let on = st.board.find(iid);
+    let u = on.map(|(_, u)| u).or_else(|| st.hands.iter().flatten().find(|u| u.iid == iid).copied())?;
     let card = st.card(u.card);
     Some(json!({
         "str": effects::effective_strength(st, &u), "cost": effects::unit_cost(st, &u),
         "hidden": !effects::can_be_chosen(st, &u, other(u.owner)),
-        "spikes": card.has(SPIKES) && !u.retaliation_used,
+        "spikes": on.map_or(card.has(SPIKES), |(cr, _)| effects::has_spikes(st, &u, cr)) && !u.retaliation_used,
         "poison": card.has(POISON),
         "armor": !effects::can_be_removed(st, &u),
     }))

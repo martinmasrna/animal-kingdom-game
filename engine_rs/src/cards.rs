@@ -102,6 +102,8 @@ pub struct Behaviour {
     pub on_death: Option<OnDeath>,
     /// "When you draw this, draw a card." (the Golden Egg)
     pub draw_on_draw: bool,
+    /// "Adjacent allies have Spikes." while it is on the board (the Porcupine)
+    pub spikes_aura: bool,
     pub on_raid: Option<OnRaid>,
     /// "Its raids destroy double food."
     pub double_raider: bool,
@@ -167,5 +169,6 @@ pub fn behaviour(id: &str) -> Behaviour {
     };
     b.region_bonus = id == ELF;
     b.draw_on_draw = id == "golden_egg";
+    b.spikes_aura = id == "porcupine";
     b
 }

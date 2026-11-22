@@ -590,6 +590,18 @@
       "keywords": [
         "Hungry"
       ]
+    },
+    {
+      "id": "porcupine",
+      "name": "Porcupine",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 2,
+      "text": "Spikes. Adjacent allies have Spikes.",
+      "cost": 4,
+      "keywords": [
+        "Spikes"
+      ]
     }
   ]
 }

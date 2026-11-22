@@ -250,6 +250,18 @@ def test_spikes_removes_the_first_enemy_that_covers_it_and_stays():
     assert [u.card_id for u in s.board["2,1"]] == ["wisp_4"]
 
 
+def test_the_porcupine_gives_adjacent_allies_spikes():
+    s = state(turn=21, hands={"A": ["wisp_3", "wisp_4"]})
+    put(s, "1,1", "wisp_1", "A")
+    ally = put(s, "2,1", "wisp_1", "B")
+    put(s, "3,1", "porcupine", "B")                                  # adjacent to 2,1
+    put(s, "1,2", "wisp_1", "B")                                     # not adjacent to the Porcupine
+    rules.apply_action(s, PlaceAction("wisp_3", ("cr", "2,1")))
+    assert s.board["2,1"] == [ally] and "wisp_3" in s.remove_pile    # its Spikes removed the coverer
+    rules.apply_action(s, PlaceAction("wisp_4", ("cr", "1,2")))
+    assert [u.card_id for u in s.board["1,2"]] == ["wisp_4"]         # no Spikes out of its reach
+
+
 def test_poison_removes_its_coverer_at_the_start_of_its_owners_turn():
     s = state(turn=11, hands={"A": ["wisp_6"]})
     put(s, "1,1", "wisp_1", "A")
