@@ -42,3 +42,4 @@ What the game is for, why mana, and Martin's words on the rules' shape and the b
 2. Every number above: the curve, the taxes, the food numbers, the hand sizes, the leader powers' price.
 3. What the cards and the world are, once the game's shape holds.
 4. The match screen and the phone layout, from the reactions of 2026-11-20 (phone first, food in the centre as the one win condition, the leader as scenery, the hand bottom centre).
+5. Parked ideas, each with its note: the creature builder, a tool in which Martin builds creatures from parts and sliders ([`creature-builder.md`](creature-builder.md)).
