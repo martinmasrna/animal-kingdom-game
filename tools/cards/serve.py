@@ -1,7 +1,9 @@
 """The card table's server: the page, the game's static files (so cards draw as the game draws them), and a small API
 that reads and writes the card data through hq.py. Martin's edits come in as by="martin"; Claude edits from the command
 line (hq.py) instead, so the page polls and shows them as they land. Martin's edits are committed and pushed by
-themselves once he stops editing for QUIET seconds; Claude commits its own.
+themselves once he stops editing for QUIET seconds; Claude commits its own. /board is the card board: every collectible
+card as the game draws it on a table to pan, zoom, pile, snap and bin, following the card data as it changes; its layout
+is saved to board.json beside this file.
 
     ./cards                 # http://localhost:8002
     ./cards --port 8003 --no-open
@@ -41,6 +43,29 @@ async def state(_req):
     data = hq.load()
     data["pool"] = pool()
     return web.json_response(data, headers={"Cache-Control": "no-store"})
+
+
+BOARD = HERE / "board.json"   # Martin's layout on the card board (/board): his own, not the game's, so not in git
+
+
+async def board_page(_req):
+    return web.FileResponse(HERE / "board.html", headers={"Cache-Control": "no-store"})
+
+
+async def board_get(_req):
+    """The collectible cards, fresh, and the saved layout."""
+    ids = {c["id"] for c in json.loads(hq.CARDS.read_text())["cards"] if c.get("status") == "collectible"}
+    layout = json.loads(BOARD.read_text()) if BOARD.exists() else None
+    return web.json_response({"cards": [c for c in pool() if c["id"] in ids], "layout": layout, "stamp": hq.stamp()},
+                             headers={"Cache-Control": "no-store"})
+
+
+async def board_put(req):
+    body = await req.json()
+    tmp = BOARD.with_suffix(".tmp")
+    tmp.write_text(json.dumps(body, separators=(",", ":")))
+    tmp.replace(BOARD)
+    return web.json_response({"ok": True})
 
 
 async def stamp(_req):
@@ -94,6 +119,9 @@ def make_app() -> web.Application:
         web.get("/", index),
         web.get("/api/state", state),
         web.get("/api/stamp", stamp),
+        web.get("/board", board_page),
+        web.get("/api/board", board_get),
+        web.post("/api/board", board_put),
         web.post("/api/value", _act(lambda b: hq.set_value(b["id"], b["col"], b["value"], "martin"),
                                     lambda b: f"{b['id']} {b['col']}: {b['value']}")),
         web.post("/api/level", _act(lambda b: hq.set_level(b["id"], b["col"], b["lv"], "martin", b.get("note")),

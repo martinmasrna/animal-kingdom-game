@@ -1,0 +1,594 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Card Board</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='6' width='13' height='19' rx='2' fill='%23333'/><rect x='17' y='6' width='13' height='19' rx='2' fill='%23e8c547'/></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/game.css"><link rel="stylesheet" href="/static/mana.css">
+<style>
+/* layout: the Card Board — a fixed toolbar over an endless table you pan and zoom; piles are labelled patches on it */
+:root {
+  --table:#e6e4df; --bar:#fafaf8; --barline:#d6d3cc; --btn:#fff; --btnline:#cfccc5; --btnhover:#f1f0ec;
+  --ink:#222; --muted:#6d6a64; --pile:rgba(255,255,255,.55); --pile-line:#c4c1ba; --hot:#2f7de1; --danger:#d93025;
+  --card:#fbfaf7; --cardline:#d6d1c5; --gem:#2f6fb0; --atk:#b98a1c; --hp:#b4372f;
+  --r-F:#b9b6ae; --r-C:#9a978f; --r-R:#2f7fd6; --r-E:#8b46c9; --r-L:#e08a12;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --table:#232321; --bar:#1b1b1a; --barline:#383735; --btn:#2a2a28; --btnline:#45443f; --btnhover:#34332f;
+  --ink:#ebe8e1; --muted:#9c978c; --pile:rgba(255,255,255,.04); --pile-line:#55534d; --hot:#4a90e8;
+  --card:#2e2d2a; --cardline:#45433e; --gem:#4f8fd0; --atk:#d6a63a; --hp:#d4564d; color-scheme:dark } }
+:root[data-theme="dark"] {
+  --table:#232321; --bar:#1b1b1a; --barline:#383735; --btn:#2a2a28; --btnline:#45443f; --btnhover:#34332f;
+  --ink:#ebe8e1; --muted:#9c978c; --pile:rgba(255,255,255,.04); --pile-line:#55534d; --hot:#4a90e8;
+  --card:#2e2d2a; --cardline:#45433e; --gem:#4f8fd0; --atk:#d6a63a; --hp:#d4564d; color-scheme:dark }
+* { box-sizing:border-box; }
+html, body { height:100%; }
+body { background:var(--table); color:var(--ink); font:14px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden; user-select:none; -webkit-user-select:none; }
+.top { position:fixed; left:0; right:0; top:env(safe-area-inset-top,0px); height:44px; z-index:10; display:flex; align-items:center; gap:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); background:var(--bar); border-bottom:1px solid var(--barline); }
+body::before { content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:11; background:var(--bar); }
+.top button { border:1px solid var(--btnline); background:var(--btn); border-radius:5px; padding:5px 11px; font:500 13px system-ui,sans-serif; color:var(--ink); cursor:pointer; white-space:nowrap; }
+.top button:hover { background:var(--btnhover); }
+.top button:disabled { opacity:.4; cursor:default; }
+.top input { width:220px; min-width:80px; flex:0 1 220px; border:1px solid var(--btnline); background:var(--btn); color:var(--ink); border-radius:5px; padding:5px 9px; font:13px system-ui,sans-serif; }
+.top .sp { flex:1; }
+.top .count { color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+button:focus-visible, input:focus-visible { outline:2px solid var(--hot); outline-offset:2px; }
+#view { position:fixed; left:0; right:0; top:calc(44px + env(safe-area-inset-top,0px)); bottom:0; overflow:hidden; touch-action:none; }
+#view.panning { cursor:grabbing; }
+#world { position:absolute; left:0; top:0; transform-origin:0 0; }
+
+/* a card: the game's own (static/mana.js manaCard), in a box as big as its outline */
+.it { position:absolute; left:0; top:0; z-index:2; width:var(--cw); height:var(--ch); }
+.it .mcard { position:absolute; left:var(--ox); top:var(--oy); }
+.it.sel::after { content:""; position:absolute; inset:-4px; border:6px solid var(--hot); border-radius:14px; pointer-events:none; z-index:5; }
+.it.dim { opacity:.18; }
+.it.drag { z-index:50; }
+.it.hidden { display:none; }
+.it:hover { z-index:8; }
+.bin { position:absolute; top:22%; right:6px; z-index:6; width:34px; height:34px; padding:0; border:0; border-radius:8px; display:none; place-items:center;
+  background:rgba(20,20,18,.72); color:#fff; cursor:pointer; }
+.it:hover .bin { display:grid; }
+.it.drag .bin { display:none; }
+.bin:hover { background:var(--danger); }
+.bin svg { width:19px; height:19px; }
+
+.pile { position:absolute; left:0; top:0; z-index:1; background:var(--pile); border:2px dashed var(--pile-line); border-radius:14px; }
+.pile.hot { border-color:var(--hot); border-style:solid; }
+.pile.sel { outline:6px solid var(--hot); outline-offset:4px; }
+/* the header's text keeps a readable screen size at any zoom */
+.pile .ph { --s:min(1, calc(1 / 3.6 / var(--z, 1))); position:absolute; left:0; right:0; top:0; height:92px; display:flex; align-items:center; gap:calc(40px * var(--s)); padding:0 16px; cursor:grab; }
+.pile .nm { font:700 calc(60px * var(--s))/1.1 system-ui,sans-serif; outline:none; white-space:nowrap; flex:none; min-width:20px; cursor:text; }
+.pile .ct { font:400 calc(54px * var(--s))/1.1 system-ui,sans-serif; color:var(--muted); flex:none; }
+.pile .nm[contenteditable="true"] { background:var(--btn); padding:2px 4px; border-radius:4px; }
+.pile .ph .gap { flex:1; }
+.pile .ph button { font:500 calc(46px * var(--s))/1.2 system-ui,sans-serif; border:1px solid var(--pile-line); background:var(--btn); border-radius:calc(12px * var(--s));
+  padding:calc(6px * var(--s)) calc(22px * var(--s)); color:var(--ink); cursor:pointer; visibility:hidden; flex:none; display:inline-flex; align-items:center; }
+.pile .ph button:hover { background:var(--btnhover); }
+.pile .ph:hover button, .pile .ph.open button { visibility:visible; }
+.pile .ph button svg { width:1.15em; height:1.15em; }
+.pile .pal { display:none; gap:calc(12px * var(--s)); align-items:center; }
+.pile .ph.open .pal { display:flex; }
+.pile .pal button { width:1.6em; height:1.6em; padding:0; border-radius:50%; }
+.pile .rs { position:absolute; right:-8px; top:92px; bottom:0; width:16px; cursor:ew-resize; }
+.pile.stacked .rs { display:none; }
+.pile .ghost { position:absolute; width:var(--cw); height:var(--ch); border-radius:22px; background:var(--cardline); box-shadow:0 0 0 2px var(--table); }
+.ins { position:absolute; z-index:40; width:8px; height:var(--ch); background:var(--hot); border-radius:4px; display:none; }
+.marq { position:fixed; z-index:20; border:1px solid var(--hot); background:rgba(47,125,225,.12); display:none; pointer-events:none; }
+#peek { position:fixed; z-index:30; pointer-events:none; display:none; }
+#peek .mcard { position:absolute; }
+#sync { color:var(--danger); }
+</style></head><body>
+
+<div class="top">
+  <button id="newpile" type="button">+ New pile</button>
+  <input id="q" type="search" placeholder="Find a card" aria-label="Find a card">
+  <button id="fit" type="button">Fit</button>
+  <button id="snap" type="button" title="Line up the picked cards on the table into a grid">Snap to grid</button>
+  <span class="sp"></span>
+  <span id="sync"></span>
+  <span class="count" id="count"></span>
+  <button id="restore" type="button">Restore removed</button>
+  <button id="reset" type="button">Reset</button>
+</div>
+<div id="view"><div id="world"><div class="ins" id="ins"></div></div></div>
+<div class="marq" id="marq"></div>
+<div id="peek"></div>
+
+<script>
+let manaCard, fitPlaques;   // the game's card (static/mana.js), loaded at the start
+const PW = 150;   // the card's piece width; the card itself is a fifth wider
+let W = 185, H = 300;
+const G = 14, PAD = 16, HEAD = 92, CAMKEY = 'card-board-cam';
+const $ = s => document.querySelector(s);
+const TINT = { none:'', red:'#f6d6d1', orange:'#f9e1c6', yellow:'#f5ecb7', green:'#d7ebcf', blue:'#d4e3f5', purple:'#e4d9f2', grey:'#d9d7d2' };
+const svg = b => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${b}</svg>`;
+const ICON = {
+  stack: svg('<rect x="7" y="3" width="12" height="15" rx="2"/><path d="M5 6v13a2 2 0 0 0 2 2h9"/>'),
+  spread: svg('<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="9" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),
+  tint: svg('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/>'),
+  bin: svg('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
+};
+const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+let DATA = [], CARDS = {}, stampSeen = 0;
+// The table's order: by cost, then rarity, then name.
+const RORD = { legendary: 0, rare: 1, common: 2 };
+function setData(list) {
+  DATA = [...list].sort((a, b) => a.mana - b.mana || (RORD[a.rarity] ?? 3) - (RORD[b.rarity] ?? 3) || a.name.localeCompare(b.name));
+  CARDS = Object.fromEntries(DATA.map(c => [c.id, c]));
+}
+const ids = () => DATA.map(c => c.id);
+const view = $('#view'), world = $('#world');
+let B, cam = { x: 40, y: 30, z: 0.3 };
+let sel = new Set(), psel = new Set(), undo = [], redo = [];
+const els = {}, pileEls = {};
+
+// ---------- the arrangement ----------
+// A pile holds rows of cards (p.rows), each as long as he likes; p.cols is the pile's least width. While cards are dragged
+// over a pile it grows one spare column and one spare row, so a card can start a new row or lengthen the longest one.
+const flat = p => p.rows.flat();
+const pileOf = id => B.piles.find(p => p.rows.some(r => r.includes(id)));
+let overPile = null;
+const pileSize = p => {
+  if (p.stacked) return { w: PAD * 2 + 2 * W + G, h: HEAD + H + PAD + 12 };
+  const spare = overPile === p.id ? 1 : 0;
+  const cols = Math.max(p.cols, ...p.rows.map(r => r.length + spare)), rows = Math.max(1, p.rows.length + spare);
+  return { w: PAD * 2 + cols * W + (cols - 1) * G, h: HEAD + rows * H + (rows - 1) * G + PAD };
+};
+const slotRC = (p, r, c) => ({ x: p.x + PAD + c * (W + G), y: p.y + HEAD + r * (H + G) });
+function slot(p, id) {
+  if (p.stacked) return { x: p.x + PAD, y: p.y + HEAD + 12 };
+  const r = p.rows.findIndex(row => row.includes(id));
+  return slotRC(p, r, p.rows[r].indexOf(id));
+}
+const posOf = id => { const p = pileOf(id); return p ? slot(p, id) : B.cards[id]; };
+// rows from cards lying loose: those whose tops are within half a card of each other share a row, left to right
+function rowsOf(ids) {
+  const pts = ids.map(id => ({ id, ...posOf(id) })).sort((a, b) => a.y - b.y), rows = [];
+  for (const q of pts) { const r = rows[rows.length - 1]; if (r && q.y - r[0].y < H / 2) r.push(q); else rows.push([q]); }
+  return rows.map(r => r.sort((a, b) => a.x - b.x).map(q => q.id));
+}
+const gone = id => B.gone.includes(id);
+
+// the column count that makes n cards a block closest to 4:3 landscape
+function cols43(n) {
+  let cols = 1, best = Infinity;
+  for (let c = 1; c <= n; c++) { const d = Math.abs(Math.log((c * (W + G) - G) / (Math.ceil(n / c) * (H + G) - G) / (4 / 3))); if (d < best) { best = d; cols = c; } }
+  return cols;
+}
+// Cards with no place yet (all of them at the start, a new card later) go under everything, a 4:3 block in the table's order.
+function placeNew() {
+  const homeless = ids().filter(id => !B.cards[id] && !pileOf(id) && !gone(id));
+  if (!homeless.length) return false;
+  const bs = [];
+  for (const id of ids()) { const q = posOf(id); if (q && !gone(id) && !homeless.includes(id)) bs.push([q.x, q.y, W, H]); }
+  for (const p of B.piles) { const s = pileSize(p); bs.push([p.x, p.y, s.w, s.h]); }
+  const y = bs.length ? Math.max(...bs.map(([, y, , h]) => y + h + G * 6)) : 0, x = bs.length ? Math.min(...bs.map(b => b[0])) : 0;
+  const cols = cols43(homeless.length);
+  homeless.forEach((id, i) => B.cards[id] = { x: x + (i % cols) * (W + G), y: y + Math.floor(i / cols) * (H + G) });
+  return true;
+}
+
+// ---------- drawing ----------
+function setCam() { world.style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.z})`; world.style.setProperty('--z', cam.z); try { localStorage.setItem(CAMKEY, JSON.stringify(cam)); } catch (e) {} }
+const cardHTML = (c, w = PW) => manaCard(c, { cost: c.mana ?? null, w });
+const sig = c => JSON.stringify(c);
+function buildCard(c) {
+  let el = els[c.id];
+  if (!el) { el = els[c.id] = world.appendChild(document.createElement('div')); el.className = 'it'; el.dataset.id = c.id; }
+  if (el.dataset.sig === sig(c)) return;
+  el.dataset.sig = sig(c);
+  el.innerHTML = cardHTML(c) + `<button class="bin" type="button" title="Remove from the table" aria-label="Remove ${esc(c.name)}">${ICON.bin}</button>`;
+}
+function buildCards() {
+  for (const id of Object.keys(els)) if (!CARDS[id]) { els[id].remove(); delete els[id]; }
+  DATA.forEach(buildCard);
+  fitPlaques(world);
+}
+// the card's outline, measured once: the box a card takes on the table
+function measure() {
+  const probe = document.body.appendChild(document.createElement('div'));
+  probe.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
+  probe.innerHTML = cardHTML({ id: '_', name: '', text: '', rarity: 'common', str: 1, mana: 1 });
+  const m = probe.querySelector('.mcard').getBoundingClientRect(), p = probe.querySelector('.plaque').getBoundingClientRect();
+  probe.remove();
+  W = Math.round(p.width); H = Math.round(p.height);
+  const st = document.documentElement.style;
+  st.setProperty('--cw', W + 'px'); st.setProperty('--ch', H + 'px');
+  st.setProperty('--ox', (m.left - p.left) + 'px'); st.setProperty('--oy', (m.top - p.top) + 'px');
+}
+function draw() {
+  for (const id of Object.keys(pileEls)) if (!B.piles.find(p => p.id === id)) { pileEls[id].remove(); delete pileEls[id]; }
+  for (const p of B.piles) {
+    let el = pileEls[p.id];
+    if (!el) {
+      el = pileEls[p.id] = world.insertBefore(document.createElement('div'), world.firstChild);
+      el.className = 'pile'; el.dataset.pile = p.id;
+      el.innerHTML = `<div class="ph"><span class="nm"></span><span class="ct"></span><span class="gap"></span><span class="pal">${Object.entries(TINT).map(([k, c]) => `<button data-tint="${k}" title="${k}" style="background:${c || 'var(--btn)'}"></button>`).join('')}</span><button data-act="tint" title="Colour">${ICON.tint}</button><button data-act="stack"></button><button data-act="del" title="Remove the pile; its cards stay on the table">×</button></div><div class="rs"></div>`;
+    }
+    const s = pileSize(p);
+    el.style.transform = `translate(${p.x}px,${p.y}px)`; el.style.width = s.w + 'px'; el.style.height = s.h + 'px';
+    el.classList.toggle('stacked', !!p.stacked); el.classList.toggle('sel', psel.has(p.id));
+    const nm = el.querySelector('.nm'); if (nm.getAttribute('contenteditable') !== 'true') nm.textContent = p.name;
+    el.querySelector('.ct').textContent = flat(p).length;
+    const sb = el.querySelector('[data-act="stack"]'); sb.innerHTML = p.stacked ? ICON.spread : ICON.stack; sb.title = p.stacked ? 'Spread out' : 'Stack up';
+    el.style.background = TINT[p.tint] ? `color-mix(in srgb, ${TINT[p.tint]} 70%, transparent)` : '';
+    el.querySelectorAll('.ghost').forEach(g => g.remove());
+    if (p.stacked && flat(p).length > 1) for (const o of [2, 1].slice(0, flat(p).length - 1))
+      el.insertAdjacentHTML('beforeend', `<div class="ghost" style="left:${PAD + o * 6 - 2}px;top:${HEAD + 12 - o * 6 + 2}px"></div>`);
+  }
+  for (const id of ids()) {
+    const el = els[id], q = posOf(id), p = pileOf(id);
+    el.style.display = gone(id) || !q ? 'none' : '';
+    if (!q) continue;
+    el.style.transform = `translate(${q.x}px,${q.y}px)`;
+    el.classList.toggle('hidden', !!(p && p.stacked && flat(p)[0] !== id));
+    el.classList.toggle('sel', sel.has(id));
+  }
+  const n = B.gone.length;
+  $('#count').textContent = `${DATA.length - n} of ${DATA.length} cards`;
+  $('#restore').disabled = !n; $('#restore').textContent = n ? `Restore removed (${n})` : 'Restore removed';
+  $('#snap').disabled = [...sel].filter(id => B.cards[id]).length < 2;
+  search();
+}
+
+// ---------- saving (tools/cards/board.json, through the card server) ----------
+const snap = () => JSON.stringify(B);
+let saveT = null;
+function save() { clearTimeout(saveT); saveT = setTimeout(push, 300); }
+async function push() {
+  saveT = null;
+  try { const r = await fetch('/api/board', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: snap() }); if (!r.ok) throw 0; offline(false); }
+  catch (e) { offline(true); saveT = setTimeout(push, 3000); }
+}
+addEventListener('beforeunload', () => { if (saveT) { clearTimeout(saveT); navigator.sendBeacon('/api/board', new Blob([snap()], { type: 'application/json' })); } });
+function changed(before) { undo.push(before); if (undo.length > 200) undo.shift(); redo = []; draw(); save(); }
+function restore(s) { B = JSON.parse(s); tidy(); sel.clear(); psel.clear(); draw(); save(); }
+const fresh = () => ({ cards: {}, piles: [], gone: [] });
+// the layout keeps only cards the game still has; a card new to the game takes a place
+function tidy() {
+  B.cards ||= {}; B.piles ||= []; B.gone ||= [];
+  for (const id of Object.keys(B.cards)) if (!CARDS[id]) delete B.cards[id];
+  for (const p of B.piles) p.rows = p.rows.map(r => r.filter(id => CARDS[id])).filter(r => r.length);
+  B.gone = B.gone.filter(id => CARDS[id]);
+  return placeNew();
+}
+function offline(bad) { $('#sync').textContent = bad ? 'The card server is not running: ./cards' : ''; }
+// cards changed through the card table or hq.py show up here within a few seconds
+setInterval(async () => {
+  if (!B || document.hidden || act) return;
+  try {
+    const { stamp } = await (await fetch('/api/stamp')).json(); offline(false);
+    if (stamp === stampSeen) return;
+    const d = await (await fetch('/api/board')).json();
+    stampSeen = d.stamp; setData(d.cards); buildCards();
+    const before = snap(); if (tidy()) save(); if (snap() !== before) save();
+    draw();
+  } catch (e) { offline(true); }
+}, 2500);
+
+// ---------- camera ----------
+const toWorld = (cx, cy) => { const r = view.getBoundingClientRect(); return { x: (cx - r.left - cam.x) / cam.z, y: (cy - r.top - cam.y) / cam.z }; };
+function zoomAt(cx, cy, f) {
+  const r = view.getBoundingClientRect(), z = Math.min(2, Math.max(0.05, cam.z * f));
+  const wx = (cx - r.left - cam.x) / cam.z, wy = (cy - r.top - cam.y) / cam.z;
+  cam = { x: cx - r.left - wx * z, y: cy - r.top - wy * z, z }; setCam();
+}
+function fit() {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const add = (x, y, w, h) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + w); y1 = Math.max(y1, y + h); };
+  for (const id of ids()) { const q = posOf(id); if (q && !gone(id)) add(q.x, q.y, W, H); }
+  for (const p of B.piles) { const s = pileSize(p); add(p.x, p.y, s.w, s.h); }
+  if (x0 === Infinity) return;
+  const r = view.getBoundingClientRect(), m = 24, z = Math.min((r.width - m * 2) / (x1 - x0), (r.height - m * 2) / (y1 - y0), 1);
+  cam = { z, x: m - x0 * z + ((r.width - m * 2) - (x1 - x0) * z) / 2, y: m - y0 * z }; setCam();
+}
+view.addEventListener('wheel', e => {
+  e.preventDefault(); hidePeek();
+  zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.002)));   // as on Miro: scrolling zooms (ctrl: a pinch)
+}, { passive: false });
+
+// ---------- dropping ----------
+function pileAt(w) {
+  for (let i = B.piles.length - 1; i >= 0; i--) {
+    const p = B.piles[i], s = pileSize(p);
+    if (w.x >= p.x && w.x <= p.x + s.w && w.y >= p.y && w.y <= p.y + s.h) return p;
+  }
+  return null;
+}
+// where in a pile the pointer would drop: a row (one past the last starts a new row) and a place in it
+function insertAt(p, w, moving) {
+  if (p.stacked) return { r: 0, c: 0 };
+  const r = Math.max(0, Math.min(p.rows.length, Math.floor((w.y - p.y - HEAD + G / 2) / (H + G))));
+  const len = r < p.rows.length ? p.rows[r].filter(id => !moving.has(id)).length : 0;
+  return { r, c: Math.max(0, Math.min(len, Math.round((w.x - p.x - PAD) / (W + G)))) };
+}
+function showIns(p, at) {
+  const ins = $('#ins');
+  if (!p || p.stacked) { ins.style.display = 'none'; return; }
+  const q = slotRC(p, at.r, at.c);
+  ins.style.display = 'block'; ins.style.transform = `translate(${q.x - G / 2 - 4}px,${q.y}px)`;
+}
+// the moving cards out of every pile; rows left empty go
+function lift(moving) {   // in place, so a row keeps being the same row
+  for (const p of B.piles) { for (const r of p.rows) for (let i = r.length - 1; i >= 0; i--) if (moving.has(r[i])) r.splice(i, 1); p.rows = p.rows.filter(r => r.length); }
+}
+
+// ---------- pointer ----------
+let act = null, spaceDown = false;
+view.addEventListener('pointerdown', e => {
+  if (!e.target.closest('.ph.open')) document.querySelectorAll('.ph.open').forEach(h => h.classList.remove('open'));
+  hidePeek();
+  const t = e.target, w = toWorld(e.clientX, e.clientY);
+  const nm = t.closest('.nm');
+  if (nm && nm.getAttribute('contenteditable') === 'true') return;
+  // a drag on empty table selects; the right or middle button, or Space held, drags the table
+  if (e.button === 1 || e.button === 2 || spaceDown) { act = { kind: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y }; view.classList.add('panning'); }
+  else if (t.closest('button')) return;
+  else if (t.closest('.rs')) { const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile); act = { kind: 'cols', p, before: snap(), x0: w.x, c0: p.cols }; }
+  else if (t.closest('.ph')) {
+    const p = B.piles.find(p => p.id === t.closest('.pile').dataset.pile);
+    if (e.shiftKey) { psel.has(p.id) ? psel.delete(p.id) : psel.add(p.id); draw(); return; }
+    const fr = !psel.has(p.id);
+    if (fr) { psel = new Set([p.id]); sel.clear(); draw(); }
+    const piles = B.piles.filter(q => psel.has(q.id)), loose = [...sel].filter(id => B.cards[id]);
+    act = { kind: 'pile', p, piles, loose, before: snap(), w0: w, moved: false, name: !!nm, fresh: fr,
+      start: piles.map(q => [q.x, q.y]), cstart: loose.map(id => ({ ...B.cards[id] })) };
+  }
+  else if (t.closest('.it')) {
+    const id = t.closest('.it').dataset.id;
+    if (e.shiftKey) { sel.has(id) ? sel.delete(id) : sel.add(id); draw(); return; }
+    const fr = !sel.has(id);
+    if (fr) { sel = new Set([id]); psel.clear(); draw(); }
+    const ids = [...sel].filter(i => posOf(i) && !els[i].classList.contains('hidden') || i === id);
+    const p = pileOf(id), up = p && p.stacked ? flat(p) : ids;   // a stacked pile lifts whole from its top card
+    act = { kind: 'cards', id, ids: up, w0: w, start: Object.fromEntries(up.map(i => [i, { ...posOf(i) }])), before: snap(), moved: false, fresh: fr };
+  } else {
+    if (!e.shiftKey) { sel.clear(); psel.clear(); draw(); }
+    act = { kind: 'marq', sx: e.clientX, sy: e.clientY, base: new Set(sel), pbase: new Set(psel) };
+  }
+  view.setPointerCapture(e.pointerId);
+});
+view.addEventListener('pointermove', e => {
+  if (!act) return peekMove(e);
+  const w = toWorld(e.clientX, e.clientY);
+  if (act.kind === 'pan') { cam.x = act.cx + e.clientX - act.sx; cam.y = act.cy + e.clientY - act.sy; setCam(); }
+  else if (act.kind === 'pile') {
+    const dx = w.x - act.w0.x, dy = w.y - act.w0.y; if (!act.moved && Math.hypot(dx, dy) * cam.z < 3) return;
+    act.moved = true;
+    act.piles.forEach((q, i) => { q.x = Math.round(act.start[i][0] + dx); q.y = Math.round(act.start[i][1] + dy); });
+    act.loose.forEach((id, i) => B.cards[id] = { x: Math.round(act.cstart[i].x + dx), y: Math.round(act.cstart[i].y + dy) });
+    draw();
+  } else if (act.kind === 'cols') {
+    const c = Math.max(1, Math.min(30, act.c0 + Math.round((w.x - act.x0) / (W + G)))); if (c !== act.p.cols) { act.p.cols = c; draw(); }
+  } else if (act.kind === 'cards') {
+    const dx = w.x - act.w0.x, dy = w.y - act.w0.y; if (!act.moved && Math.hypot(dx, dy) * cam.z < 3) return;
+    if (!act.moved) { act.moved = true; act.ids.forEach(i => els[i].classList.add('drag')); }
+    for (const i of act.ids) els[i].style.transform = `translate(${act.start[i].x + dx}px,${act.start[i].y + dy}px)`;
+    const moving = new Set(act.ids), from = pileOf(act.id);
+    let p = pileAt(w); if (p && from && from.stacked && p === from) p = null;
+    if ((p && p.id) !== overPile) { overPile = p && p.id; draw(); for (const i of act.ids) els[i].style.transform = `translate(${act.start[i].x + dx}px,${act.start[i].y + dy}px)`; }
+    for (const q of B.piles) pileEls[q.id].classList.toggle('hot', q === p);
+    showIns(p, p ? insertAt(p, w, moving) : null);
+  } else if (act.kind === 'marq') {
+    const x0 = Math.min(act.sx, e.clientX), y0 = Math.min(act.sy, e.clientY), x1 = Math.max(act.sx, e.clientX), y1 = Math.max(act.sy, e.clientY);
+    Object.assign($('#marq').style, { display: 'block', left: x0 + 'px', top: y0 + 'px', width: x1 - x0 + 'px', height: y1 - y0 + 'px' });
+    const a = toWorld(x0, y0), b = toWorld(x1, y1);
+    // a pile the box holds whole is picked as a pile; otherwise the cards it touches
+    psel = new Set(act.pbase);
+    for (const p of B.piles) { const z = pileSize(p); if (p.x >= a.x && p.y >= a.y && p.x + z.w <= b.x && p.y + z.h <= b.y) psel.add(p.id); }
+    for (const p of B.piles) pileEls[p.id].classList.toggle('sel', psel.has(p.id));
+    sel = new Set(act.base);
+    for (const id of ids()) {
+      const q = posOf(id); if (!q || gone(id) || els[id].classList.contains('hidden')) continue;
+      const own = pileOf(id); if (own && psel.has(own.id)) continue;
+      if (q.x < b.x && q.x + W > a.x && q.y < b.y && q.y + H > a.y) sel.add(id);
+    }
+    for (const id of Object.keys(els)) els[id].classList.toggle('sel', sel.has(id));
+  }
+});
+function endAct(e) {
+  const a = act; act = null; view.classList.remove('panning'); $('#marq').style.display = 'none'; $('#ins').style.display = 'none';
+  if (!a) return;
+  if (a.kind === 'marq') draw();
+  if (a.kind === 'pile' && a.moved) changed(a.before);
+  else if (a.kind === 'pile' && a.name) rename(a.p);   // a click on the name renames; a drag moves the pile
+  else if (a.kind === 'pile' && !a.fresh) { psel = new Set([a.p.id]); sel.clear(); draw(); }
+  else if (a.kind === 'cols' && a.p.cols !== a.c0) changed(a.before);
+  else if (a.kind === 'cards') {
+    a.ids.forEach(i => els[i].classList.remove('drag'));
+    for (const q of B.piles) pileEls[q.id].classList.remove('hot');
+    if (!a.moved) { if (!a.fresh && !e.shiftKey) { sel = new Set([a.id]); draw(); } return; }
+    const w = toWorld(e.clientX, e.clientY), dx = w.x - a.w0.x, dy = w.y - a.w0.y;
+    const from = pileOf(a.id), moving = new Set(a.ids), target = pileAt(w);   // measured with the spare row and column still there
+    overPile = null;
+    if (from && from.stacked && (target === from || !target)) {   // a whole stack dragged by its top card moves the pile
+      if (!target) { from.x = Math.round(from.x + dx); from.y = Math.round(from.y + dy); changed(a.before); } else draw();
+      return;
+    }
+    const order = a.ids.slice().sort((p, q) => a.start[p].y - a.start[q].y || a.start[p].x - a.start[q].x);
+    if (target && !target.stacked) {
+      const { r, c } = insertAt(target, w, moving);
+      // the cards go in where the bar showed: a row's place counts the cards still in it, a new row goes after the last
+      const marker = r < target.rows.length ? target.rows[r] : null;
+      lift(moving);
+      for (const i of a.ids) delete B.cards[i];
+      const row = marker && target.rows.includes(marker) ? marker : null;
+      if (row) row.splice(Math.min(c, row.length), 0, ...order);
+      else if (marker) target.rows.splice(Math.min(r, target.rows.length), 0, order);   // its row emptied out: the cards take its place
+      else target.rows.push(order);
+    } else if (target) {   // onto a stacked pile: on top
+      lift(moving); for (const i of a.ids) delete B.cards[i];
+      if (target.rows.length) target.rows[0].unshift(...order); else target.rows.push(order);
+    } else {
+      lift(moving);
+      for (const i of a.ids) B.cards[i] = { x: Math.round(a.start[i].x + dx), y: Math.round(a.start[i].y + dy) };
+    }
+    changed(a.before);
+  }
+}
+view.addEventListener('pointerup', endAct);
+view.addEventListener('pointercancel', endAct);
+view.addEventListener('contextmenu', e => e.preventDefault());
+
+// ---------- removing ----------
+function removeCards(ids) {
+  const before = snap();
+  lift(new Set(ids));
+  for (const id of ids) { delete B.cards[id]; if (!gone(id)) B.gone.push(id); sel.delete(id); }
+  changed(before);
+}
+world.addEventListener('click', e => {
+  const bin = e.target.closest('.bin'); if (!bin) return;
+  const id = bin.closest('.it').dataset.id;
+  removeCards(sel.has(id) ? [...sel] : [id]);   // the bin on a picked card removes every picked card
+});
+$('#restore').onclick = () => { const before = snap(); B.gone = []; placeNew(); changed(before); };
+let armT;
+$('#reset').onclick = e => {   // two clicks: the first arms it
+  const b = e.currentTarget;
+  if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Click again: back to the start'; b.style.color = 'var(--danger)'; clearTimeout(armT); armT = setTimeout(disarm, 3000); return; }
+  disarm(); const before = snap(); B = fresh(); placeNew(); sel.clear(); psel.clear(); changed(before); fit();
+};
+function disarm() { const b = $('#reset'); delete b.dataset.arm; b.textContent = 'Reset'; b.style.color = ''; }
+
+// ---------- piles ----------
+let pileN = 0;
+const newId = () => 'p' + Date.now().toString(36) + (pileN++);
+$('#newpile').onclick = () => {
+  // the picked cards keep their rows as they lay
+  const before = snap(), cards = [...sel], rows = rowsOf(cards);
+  const r = view.getBoundingClientRect(), mid = toWorld(r.left + r.width / 2, r.top + r.height / 2);
+  const ax = cards.length ? Math.min(...cards.map(id => posOf(id).x)) : mid.x - 2 * (W + G);
+  const ay = cards.length ? Math.min(...cards.map(id => posOf(id).y)) : mid.y - H / 2;
+  lift(sel);
+  for (const id of cards) delete B.cards[id];
+  const p = { id: newId(), name: 'New pile', x: 0, y: 0, cols: 4, stacked: false, rows };
+  const s = pileSize(p);
+  [p.x, p.y] = freeSpot(ax, ay, s.w, s.h, G * 2);
+  B.piles.push(p); sel.clear(); psel.clear(); changed(before);
+  intoView(p.x, p.y, s.w, s.h);
+  rename(p);
+};
+// the nearest spot of free table to (ax, ay) for something w by h, keeping a margin m from everything else
+function freeSpot(ax, ay, w, h, m) {
+  const boxes = [...Object.entries(B.cards).filter(([id]) => !gone(id)).map(([, q]) => [q.x, q.y, W, H]),
+    ...B.piles.map(q => { const z = pileSize(q); return [q.x, q.y, z.w, z.h]; })];
+  const free = (x, y) => boxes.every(([bx, by, bw, bh]) => x + w + m <= bx || bx + bw + m <= x || y + h + m <= by || by + bh + m <= y);
+  const step = (W + G) / 2, spots = [];
+  for (let i = -60; i <= 60; i++) for (let j = -60; j <= 60; j++) spots.push([ax + i * step, ay + j * step]);
+  spots.sort((u, v) => Math.hypot(u[0] - ax, u[1] - ay) - Math.hypot(v[0] - ax, v[1] - ay));
+  const [x, y] = spots.find(([x, y]) => free(x, y)) || [ax, ay];
+  return [Math.round(x), Math.round(y)];
+}
+function intoView(x, y, w, h) {
+  const r = view.getBoundingClientRect(), a = toWorld(r.left, r.top), b = toWorld(r.right, r.bottom);
+  if (w * cam.z > r.width || h * cam.z > r.height) fit();
+  else if (x < a.x || y < a.y || x + w > b.x || y + h > b.y) { cam.x = r.width / 2 - (x + w / 2) * cam.z; cam.y = r.height / 2 - (y + h / 2) * cam.z; setCam(); }
+}
+function rename(p) {
+  const nm = pileEls[p.id].querySelector('.nm');
+  nm.setAttribute('contenteditable', 'true'); nm.focus();
+  const range = document.createRange(); range.selectNodeContents(nm); getSelection().removeAllRanges(); getSelection().addRange(range);
+  const done = keep => {
+    nm.removeEventListener('blur', onBlur); nm.removeEventListener('keydown', onKey); nm.setAttribute('contenteditable', 'false');
+    const v = nm.textContent.trim();
+    if (keep && v && v !== p.name) { const before = snap(); p.name = v; changed(before); } else draw();
+  };
+  const onBlur = () => done(true);
+  const onKey = e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); done(true); } if (e.key === 'Escape') done(false); };
+  nm.addEventListener('blur', onBlur); nm.addEventListener('keydown', onKey);
+}
+world.addEventListener('click', e => {
+  const b = e.target.closest('.ph button'); if (!b) return;
+  const p = B.piles.find(p => p.id === b.closest('.pile').dataset.pile), before = snap();
+  if (b.dataset.act === 'tint') { b.closest('.ph').classList.toggle('open'); return; }
+  if (b.dataset.tint) { b.closest('.ph').classList.remove('open'); if ((p.tint || 'none') !== b.dataset.tint) { p.tint = b.dataset.tint; changed(before); } return; }
+  if (b.dataset.act === 'stack') { p.stacked = !p.stacked; changed(before); }
+  if (b.dataset.act === 'del') {   // its cards stay where they lay
+    flat(p).forEach(id => B.cards[id] = { ...slot(p, id) });
+    B.piles = B.piles.filter(q => q !== p); changed(before);
+  }
+});
+
+// ---------- find ----------
+function search() {
+  const q = $('#q').value.trim().toLowerCase();
+  for (const c of Object.values(CARDS)) {
+    const hit = !q || [c.name, c.text || '', c.rarity].some(s => s.toLowerCase().includes(q));
+    els[c.id].classList.toggle('dim', !hit);
+  }
+}
+$('#q').addEventListener('input', search);
+$('#q').addEventListener('keydown', e => {   // Enter picks up every card found
+  e.stopPropagation();
+  if (e.key === 'Enter' && $('#q').value.trim()) { sel = new Set(ids().filter(id => !gone(id) && !els[id].classList.contains('dim'))); draw(); $('#q').blur(); }
+  if (e.key === 'Escape') { $('#q').value = ''; search(); $('#q').blur(); }
+});
+
+// ---------- reading a card large, while zoomed out ----------
+let peekT = null, peekId = null;
+function peekMove(e) {
+  const it = e.target.closest?.('.it');
+  const id = it && cam.z * W < 250 ? it.dataset.id : null;
+  if (id !== peekId) { hidePeek(); peekId = id; if (id) peekT = setTimeout(() => showPeek(id, e), 350); }
+  else if (id && $('#peek').style.display === 'block') placePeek(e);
+}
+const PEEK = 1.7;
+function showPeek(id, e) {
+  const pk = $('#peek');
+  pk.innerHTML = cardHTML(CARDS[id], PW * PEEK);
+  pk.style.width = W * PEEK + 'px'; pk.style.height = H * PEEK + 'px';
+  const m = pk.querySelector('.mcard'), ox = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ox')), oy = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--oy'));
+  m.style.left = ox * PEEK + 'px'; m.style.top = oy * PEEK + 'px';
+  pk.style.display = 'block'; fitPlaques(pk); placePeek(e);
+}
+function placePeek(e) {
+  const pk = $('#peek'), w = W * PEEK, h = H * PEEK, gap = 24;
+  pk.style.left = (e.clientX + gap + w < innerWidth ? e.clientX + gap : e.clientX - gap - w) + 'px';
+  pk.style.top = Math.max(52, Math.min(innerHeight - h - 8, e.clientY - h / 2)) + 'px';
+}
+function hidePeek() { clearTimeout(peekT); $('#peek').style.display = 'none'; }
+view.addEventListener('pointerleave', () => { hidePeek(); peekId = null; });
+
+// ---------- keys ----------
+addEventListener('keydown', e => {
+  if (e.target.closest?.('input, textarea, [contenteditable="true"]')) return;
+  if (e.code === 'Space') { spaceDown = true; e.preventDefault(); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+    e.preventDefault();
+    const [from, to] = e.shiftKey ? [redo, undo] : [undo, redo];
+    if (from.length) { to.push(snap()); restore(from.pop()); }
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); $('#q').focus(); }
+  if (e.key === 'Escape') { sel.clear(); psel.clear(); draw(); }
+  if ((e.key === 'Backspace' || e.key === 'Delete') && sel.size) { e.preventDefault(); removeCards([...sel]); }
+});
+addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
+$('#fit').onclick = fit;
+
+// ---------- snap to grid ----------
+// The picked cards lying on the table line up from their top-left corner, in reading order, into a block about 4:3 wide.
+$('#snap').onclick = () => {
+  const ids = [...sel].filter(id => B.cards[id]);
+  if (ids.length < 2) return;
+  const before = snap(), n = ids.length, SX = W + G, SY = H + G;
+  const pts = ids.map(id => ({ id, ...B.cards[id] })).sort((a, b) => a.y - b.y);
+  const rows = []; for (const p of pts) { const r = rows[rows.length - 1]; if (r && p.y - r[0].y < H / 2) r.push(p); else rows.push([p]); }
+  const order = rows.flatMap(r => r.sort((a, b) => a.x - b.x));
+  const x0 = Math.min(...pts.map(p => p.x)), y0 = Math.min(...pts.map(p => p.y));
+  // the column count whose block comes closest to 4:3 landscape
+  const cols = cols43(n);
+  order.forEach((p, i) => B.cards[p.id] = { x: Math.round(x0 + (i % cols) * SX), y: Math.round(y0 + Math.floor(i / cols) * SY) });
+  changed(before);
+};
+
+// ---------- start ----------
+(async () => {
+({ manaCard, fitPlaques } = await import('/static/mana.js'));
+measure();
+const d0 = await (await fetch('/api/board')).json();
+stampSeen = d0.stamp; setData(d0.cards); buildCards();
+B = d0.layout || fresh(); if (tidy() || !d0.layout) save(); draw();
+let saved = null; try { saved = JSON.parse(localStorage.getItem(CAMKEY)); } catch (e) {}
+if (saved && saved.z) { cam = saved; setCam(); } else fit();
+})();
+</script>
+</body></html>

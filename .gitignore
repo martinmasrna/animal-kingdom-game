@@ -12,3 +12,4 @@ results/*
 !results/human_games/
 # local Claude Code settings
 .claude/settings.local.json
+tools/cards/board.json
