@@ -50,10 +50,13 @@ const setRows = M => { if (!M || !M.crossroads) return; const n = {};
 // landscape: the board the stage's full height under the opponent's hand (to y 66), right of the middle so your hand has
 // the ground beside its foot (app.js PL); upright: between the dens' ridges. The mana board stands in the middle column,
 // as tall as the stage allows between the opponent's hand and yours.
+// LOOK TRIAL (Martin, 2026-11-22): the board in square tiles, a unit standing on its square, switched in the match (app.js)
+export const squareLook = () => typeof document !== 'undefined' && document.documentElement.dataset.look === 'square';
+const rowStep = g => squareLook() ? g.w : HEX.dy * g.h;   // a row's step up the board: a square's side, or the hexagons' interlock
 const hexGeo = () => { const g = ({ w: 120, x: STAGE.w / 2, top: 41 }); g.h = g.w * TH / TW; return g; };
 export const tokenWidth = () => hexGeo().w;
 const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
-  return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * HEX.dy * g.h]; };
+  return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * rowStep(g)]; };
 const at = (c, r) => { return hexAt(c, r);
   if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
   const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
@@ -64,7 +67,7 @@ const at = (c, r) => { return hexAt(c, r);
 // outside the board (a card flying to its crossroad). TILT.deg is the board's lean away from you (90 minus the camera's
 // elevation); STAND, how tall a standing animal is, in token widths.
 export const TILT = { deg: 40, persp: 1400 }, STAND = .66;
-const tiltOrigin = () => { const g = hexGeo(); return [g.x, g.top + g.h / 2 + (HEX.last - 1) / 2 * HEX.dy * g.h]; };
+const tiltOrigin = () => { const g = hexGeo(); return [g.x, g.top + g.h / 2 + (HEX.last - 1) / 2 * rowStep(g)]; };
 export function project(x, y) {
   if ((!TILT.deg)) return [x, y];
   const [ox, oy] = tiltOrigin(), t = TILT.deg * Math.PI / 180, dy = y - oy, k = TILT.persp / (TILT.persp - dy * Math.sin(t));
@@ -176,7 +179,7 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
     return `<div class="tkwin"><div class="ring${hasArt(u.id) ? '' : ' noart'}" style="left:${(80 / TW * 100).toFixed(2)}%;top:${(92.6 / TH * 100).toFixed(2)}%;width:${D}px;height:${D}px;${portrait(u.id, D)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div></div>`; })();
   const venom = k => !has('Poison') ? '' : k === 'tint' ? `<div class="kwl venom tint tkw">${img(kit('kwl_vapour_tint.webp'))}</div>`
     : `<div class="kwl venom fumes tkw">${img(kit('kwl_vapour_fumes.webp'), 'base')}<div class="vmask"><div class="flow v1" style="${ph(2, 14)}"></div></div></div>`;
-  return peek + img(tokenBase(u.owner), `tkbase${u.owner === 'W' ? ' wild' : ''}`) +
+  return peek + (squareLook() && !tw ? `<i class="sqbase ${u.owner}"></i>` : img(tokenBase(u.owner), `tkbase${u.owner === 'W' ? ' wild' : ''}`)) +
     (has('Spikes') ? img(kit('kwl_thorns.webp'), 'kwl thorns') : '') +
     (has('Armor') ? img(armorShell(u.owner), 'rimimg hex tkarmor') : '') +
     `<div class="tkanimal${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}">${win}</div>` +
@@ -243,7 +246,7 @@ export function renderBoard(el, M, g, cards, ui) {
     // is 1/cos(tilt) as long on the board's plane), and the ball, standing in front, covers its end: they meet its rim
     // whatever its size, arriving along the line from its centre
     const d = side === 'A' ? 1 : -1, D = denD(g.food[side], denK(y)), ey = y - (D / 2 + 6) / Math.cos(TILT.deg * Math.PI / 180);
-    s += `<svg class="mtrails">${ps.map(([px, py]) => { const ty = py + d * G.h / 2;
+    s += `<svg class="mtrails">${ps.map(([px, py]) => { const ty = py + d * (squareLook() ? G.w : G.h) / 2;
       return `<path d="M ${px} ${ty} C ${px} ${ty + (ey - ty) * .45}, ${x + (px - x) * .35} ${ey + (ty - ey) * .35}, ${x} ${ey}"/>`; }).join('')}</svg>`;
     s += put(`mden ${side}${g.food[side] > 0 ? '' : ' none'}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x, y, denBall(g.food[side], (g.income || {})[side] ?? 0), `data-hq="${side}" data-k="${denK(y).toFixed(4)}"`, denSize(g.food[side], denK(y)));
   }
