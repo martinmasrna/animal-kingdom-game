@@ -264,37 +264,13 @@
       ]
     },
     {
-      "id": "hungry_2",
-      "name": "Hungry 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 3,
-      "text": "Hungry.",
-      "cost": 2,
-      "keywords": [
-        "Hungry"
-      ]
-    },
-    {
       "id": "hungry_3",
       "name": "Hungry 3",
       "status": "collectible",
       "rarity": "common",
-      "base_strength": 4,
+      "base_strength": 5,
       "text": "Hungry.",
       "cost": 3,
-      "keywords": [
-        "Hungry"
-      ]
-    },
-    {
-      "id": "hungry_4",
-      "name": "Hungry 4",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 6,
-      "text": "Hungry.",
-      "cost": 4,
       "keywords": [
         "Hungry"
       ]
@@ -620,6 +596,18 @@
       "cost": 4,
       "keywords": [
         "Flight",
+        "Hungry"
+      ]
+    },
+    {
+      "id": "hungry_5",
+      "name": "Hungry 5",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 8,
+      "text": "Hungry.",
+      "cost": 5,
+      "keywords": [
         "Hungry"
       ]
     }

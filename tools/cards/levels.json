@@ -826,17 +826,6 @@
       "at": 1795262576
     }
   },
-  "hungry_2": {
-    "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": ""
-      },
-      "by": "claude",
-      "at": 1795262577
-    }
-  },
   "hungry_3": {
     "effect": {
       "review": {
@@ -846,17 +835,15 @@
       },
       "by": "claude",
       "at": 1795262577
-    }
-  },
-  "hungry_4": {
-    "effect": {
+    },
+    "strength": {
       "review": {
         "prev_lv": "draft",
         "prev_note": "",
-        "prev": ""
+        "prev": 4
       },
       "by": "claude",
-      "at": 1795262577
+      "at": 1795357774
     }
   },
   "spikes_1": {
@@ -1340,6 +1327,17 @@
       },
       "by": "claude",
       "at": 1795357247
+    }
+  },
+  "hungry_5": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795357774
     }
   }
 }

@@ -269,12 +269,12 @@ def test_armor_stops_a_bite_and_stealth_hides_from_one():
 
 
 def test_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
-    s = state(turn=11, hands={"A": ["hungry_2"]})             # strength 3
+    s = state(turn=11, hands={"A": ["hungry_3"]})             # strength 5
     put(s, "1,1", "wisp_1", "A")
     put(s, "2,1", "wisp_1", "B")                                # strength 2
-    put(s, "2,2", "wisp_2", "B")                                # strength 4
-    assert places(s, "hungry_2") == {"2,1"} and not raids(s)
-    rules.apply_action(s, PlaceAction("hungry_2", ("cr", "2,1")))
+    put(s, "2,2", "wisp_3", "B")                                # strength 6
+    assert places(s, "hungry_3") == {"2,1"} and not raids(s)
+    rules.apply_action(s, PlaceAction("hungry_3", ("cr", "2,1")))
     assert s.food["A"] == CFG.hungry_food and "wisp_1" in s.remove_pile
 
 
