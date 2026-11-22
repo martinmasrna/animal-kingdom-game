@@ -288,18 +288,6 @@
       ]
     },
     {
-      "id": "spikes_2",
-      "name": "Spikes 2",
-      "status": "collectible",
-      "rarity": "common",
-      "base_strength": 2,
-      "text": "Spikes.",
-      "cost": 2,
-      "keywords": [
-        "Spikes"
-      ]
-    },
-    {
       "id": "spikes_3",
       "name": "Spikes 3",
       "status": "collectible",
