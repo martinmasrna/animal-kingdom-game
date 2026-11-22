@@ -351,9 +351,9 @@ const seePatch = v => { if (ME.patchSeen === v) return; ME.patchSeen = v; api('/
 function manaHome(mode = {}) {
   screen = 'home';
   if (!mode.play && !mode.join && !mode.practice) {
-    app.innerHTML = `<div class="mhome"><div class="mtop"><button class="acct pnbtn" id="mpatch">Patch Notes</button><a class="acct" href="#/account" data-tip="Account" aria-label="Account">${TOPICON.person}</a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button></div><div class="box">
+    app.innerHTML = `<div class="mhome"><div class="mtop"><button class="acct pnbtn" id="mpatch">Patch Notes</button><a class="acct" href="#/account" data-tip="Account" aria-label="Account">${TOPICON.person}</a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button></div><div class="box front">
       <h1>Animal Kingdom<small>A prototype</small></h1>
-      <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><a class="go" id="mprac" href="#/practice">Practice</a><a class="go" id="mcoll" href="#/collection">Collection</a></div>
+      <div class="mmenu"><a class="go" id="mplay" href="#/play">Play</a><a class="go sub" id="mprac" href="#/practice">Practice</a><a class="go sub" id="mcoll" href="#/collection">Collection</a></div>
       </div></div>`;
     wireChatButton(document.getElementById('hchat'));
     document.getElementById('mpatch').onclick = () => openPatch({ seen: seePatch });
@@ -364,11 +364,13 @@ function manaHome(mode = {}) {
   const all = [...mine], chosen = all.find(d => d.id === store('ak:deck')) || all[0];   // your legal decks only: the pool's animal decks are no mana decks (2026-11-20)
   const leaderName = d => { const ls = d.leader ? [d.leader] : [...new Set(d.list || [])].filter(id => LEADERS[id]);   // a pool deck: the one card in it that can lead
     return ls.length === 1 && CARDS[ls[0]] ? CARDS[ls[0]].name.split(':')[0] : ''; };
-  const tile = d => `<button class="dk${chosen && d.id === chosen.id ? ' on' : ''}" data-deck="${d.id}">${esc(d.name)}${leaderName(d) ? `<small>${esc(leaderName(d))}</small>` : ''}</button>`;
+  // a deck: its leader's token beside its name, in the side's colour
+  const face = (d, side) => `${d.leader && CARDS[d.leader] ? `<div class="tokpiece" style="--tw:44px">${leaderToken(d.leader, side, CARDS, 44)}</div>` : ''}<span>${esc(d.name)}${leaderName(d) ? `<small>${esc(leaderName(d))}</small>` : ''}</span>`;
+  const tile = d => `<button class="dk${chosen && d.id === chosen.id ? ' on' : ''}" data-deck="${d.id}">${face(d, 'A')}</button>`;
   const spec = d => d.mine ? { name: d.name, list: d.list, leader: d.leader } : d.id;
   if (mode.practice) {   // your deck in blue, the bot's in red (the teams' colours); the bot's starts as yours
     const rival = all.find(d => d.id === store('ak:botdeck')) || chosen;
-    const otile = d => `<button class="dk opp${rival && d.id === rival.id ? ' on' : ''}" data-opp="${d.id}">${esc(d.name)}${leaderName(d) ? `<small>${esc(leaderName(d))}</small>` : ''}</button>`;
+    const otile = d => `<button class="dk opp${rival && d.id === rival.id ? ' on' : ''}" data-opp="${d.id}">${face(d, 'B')}</button>`;
     app.innerHTML = `<div class="mhome"><div class="box">
       <h1>Practice<small>Your deck against the bot's</small></h1>
       <h2>Your deck</h2><div class="decks">${all.map(tile).join('') || '<p>No deck of yours is legal under these rules yet.</p>'}</div>

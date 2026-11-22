@@ -243,12 +243,9 @@ body:has(> #app > .mhome, > #app > .mscr.sets) .ftab { display: flex; }   /* whe
 .pop .ev { padding: 8px 12px; border: 0; border-radius: 8px; font: 500 15px/1.3 'Fira Sans Condensed', sans-serif; color: #e8e0d2; background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto;
   box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 4px 10px rgba(0,0,0,.6); }
 
-/* The key art follows the viewer's clock: dawn 5-9, day 9-17, dusk 17-20, night otherwise (route() sets data-tod). */
-:root { --keyart: url(/static/kit2/keyart_night.webp); }
-/* A window taller than wide (a phone held upright) gets the key art painted upright (design sandbox home-art/r3/). */
-@media (orientation: portrait) {
-  :root { --keyart: url(/static/kit2/keyart_port_night.webp); }
-}
+/* Behind the lobby and a match's opening: the menus' night ground (menu.css), as everywhere else. The old key art painted
+   Earth animals, and the game's cards are not those (Martin, 2026-11-20). */
+:root { --keyart: url(/static/kit2/coll_ground.webp); }
 
 /* Upright (a phone held up): home keeps the painting's left group (the whole fight needs a painting made upright), the
    pieces take the width; the profile stacks its account over the history. */
