@@ -132,6 +132,34 @@ async def _view(ws):
             return d["view"]
 
 
+def test_the_bots_mulligan_swaps_never_wait_on_a_screen_that_cannot_see_them(quiet, monkeypatch):
+    """A seat's view carries none of the other seat's mulligan swaps, so its screen can never report them played out:
+    the bot goes on at once after a swap, never after BOT_WAIT_MAX (six seconds a card it returned)."""
+    swaps, bot_move = [], Match.bot_move
+
+    def swapping(self):   # the bot returns two cards, then plays as it would
+        if self.mulliganing() and len(swaps) < 2:
+            swaps.append(next(a for a in rules.legal_actions(self.state) if getattr(a, "choice", rules.SKIP) != rules.SKIP))
+            return swaps[-1]
+        return bot_move(self)
+    monkeypatch.setattr(Match, "bot_move", swapping)
+
+    async def body():
+        async with TestClient(TestServer(server.make_app())) as c:
+            p = await (await c.post("/api/profile", json={})).json()
+            m = await (await c.post("/api/match", json={"deck": DECK, "bot": True}, headers={"X-AK-Key": p["code"]})).json()
+            ws = await c.ws_connect(f"/ws/{m['id']}?token={m['token']}")
+            match, t0, kept = server.hub.matches[m["id"]], time.time(), False
+            while match.phase != "playing" or match.mulliganing():
+                view = await _view(ws)
+                g = view["game"]
+                if g and not kept and g["decision"] == "mulligan" and g["toAct"] == view["you"]:
+                    await ws.send_json({"t": "act", "action": {"kind": "choice", "choice": rules.SKIP}})
+                    kept = True
+            return time.time() - t0
+    assert asyncio.run(body()) < 3.0 and len(swaps) == 2
+
+
 async def _act_until(ws, view, rng, done):
     """Play the socket's seat with random legal moves until done(view)."""
     from animal_kingdom.game import SKIP

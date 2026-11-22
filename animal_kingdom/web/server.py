@@ -257,7 +257,7 @@ class Hub:
         t0 = time.time()
         while time.time() - t0 < BOT_WAIT_MAX:
             watchers = {seat for _, seat in self.sockets.get(match.id, ()) if not match.seats[seat].is_bot}
-            if all(match.played.get(w, 0) >= match.seq for w in watchers):
+            if all(match.played.get(w, 0) >= match.shown_seq(w) for w in watchers):   # not match.seq: a seat never sees the other's mulligan swaps
                 return
             await asyncio.sleep(0.05)
 

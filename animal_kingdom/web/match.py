@@ -76,6 +76,11 @@ def _snapshot(state: GameState) -> dict:
             "food": dict(state.food), "turn": state.turn_counter}
 
 
+def _shown(e: dict, s: str) -> bool:
+    """Whether seat `s`'s view carries the event: every one but the other seat's mulligan swaps."""
+    return not (e["e"] == "mulligan" and e["player"] != s)
+
+
 def _effects(events: list, move: Move) -> list:
     """What a move did, read from the engine's events in order (public facts only): an enemy covered, each removal, cards
     drawn, food from cards (a turn's region income is not the move's), what a raid destroyed or an empty deck cost."""
@@ -225,6 +230,10 @@ class Match:
             e["seq"] = self.seq
         self.events = (self.events + new)[-EVENTS_KEPT:]
         return new
+
+    def shown_seq(self, s: str) -> int:
+        """The last event seat `s`'s view carries: what its screen can have played out (server._watched)."""
+        return next((e["seq"] for e in reversed(self.events) if _shown(e, s)), 0)
 
     def mulliganing(self) -> bool:
         """The opening mulligans are under way (both at once, on one shared clock window)."""
@@ -470,7 +479,7 @@ class Match:
             "pile": [{"id": c, "owner": o, "str": card_strength(st, c, o or s)} for c, o in zip(st.remove_pile, st.pile_owners)],
             "result": st.result.to_dict() if st.result else None,
             "history": [m.public() for m in self.history],
-            "events": [public_event(e, s) for e in self.events if not (e["e"] == "mulligan" and e["player"] != s)],
+            "events": [public_event(e, s) for e in self.events if _shown(e, s)],
             "mana": {p: {"left": game.mana_left(st, p), "total": game.mana_total(st, p)} for p in "AB"},
             "abilityCost": st.config.leader_power_cost,
             "bases": {p: sorted(t) for p, t in st.game_map.hq_connects.items()},
