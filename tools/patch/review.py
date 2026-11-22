@@ -76,5 +76,7 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     mimetypes.add_type("text/javascript", ".js"); mimetypes.add_type("image/webp", ".webp"); mimetypes.add_type("image/svg+xml", ".svg")
-    print(f"reviewing Patch {VERSION}: http://localhost:8004/")
-    ThreadingHTTPServer(("127.0.0.1", 8004), Handler).serve_forever()
+    import os
+    port = int(os.environ.get("AK_REVIEW_PORT", 8004))   # another port while an old review still holds 8004
+    print(f"reviewing Patch {VERSION}: http://localhost:{port}/")
+    ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()

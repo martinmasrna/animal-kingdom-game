@@ -8,6 +8,10 @@ primary_region = "fra"
 [build]
   dockerfile = "Dockerfile"
 
+# the board staging plays: the 4x4 square (Martin, 2026-11-22); the code's default and live stay on the hex board
+[env]
+  AK_MAP = "map_sq16"
+
 [http_service]
   internal_port = 8080
   force_https = true

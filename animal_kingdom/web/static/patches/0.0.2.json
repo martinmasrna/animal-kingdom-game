@@ -1,0 +1,354 @@
+{
+ "version": "0.0.2",
+ "name": "Patch 0.0.2",
+ "date": "22 November 2026",
+ "rules": [
+  "The board is now a 4x4 square instead of hexagons. Tiles are next to each other only across a side, not diagonally.",
+  "Your base is your whole bottom row of 4 tiles.",
+  "A region is any 2x2 block of tiles, 9 on the board."
+ ],
+ "powers": [
+  {
+   "was": {
+    "id": "elf_legend",
+    "kind": "power",
+    "text": "Gain 1 food for each region you control.",
+    "mana": 2
+   },
+   "now": {
+    "id": "elf_legend",
+    "kind": "power",
+    "text": "Gain 2 food for each region you control.",
+    "mana": 2
+   }
+  }
+ ],
+ "changed": [
+  {
+   "was": {
+    "id": "raid_draw_5",
+    "name": "Raid Draw 5",
+    "rarity": "common",
+    "str": 5,
+    "text": "Flight. After it raids, draw a card.",
+    "kw": [
+     "Flight"
+    ],
+    "mana": 5,
+    "fig": [
+     400,
+     400
+    ]
+   },
+   "now": {
+    "id": "raid_draw_5",
+    "name": "Raid Draw",
+    "rarity": "common",
+    "str": 1,
+    "text": "Flight. After it raids, draw a card.",
+    "kw": [
+     "Flight"
+    ],
+    "mana": 2,
+    "fig": [
+     400,
+     400
+    ]
+   }
+  },
+  {
+   "was": {
+    "id": "hungry_3",
+    "name": "Hungry 3",
+    "rarity": "common",
+    "str": 4,
+    "text": "Hungry.",
+    "kw": [
+     "Hungry"
+    ],
+    "mana": 3,
+    "fig": [
+     400,
+     400
+    ]
+   },
+   "now": {
+    "id": "hungry_3",
+    "name": "Hungry 3",
+    "rarity": "common",
+    "str": 5,
+    "text": "Hungry.",
+    "kw": [
+     "Hungry"
+    ],
+    "mana": 3,
+    "fig": [
+     400,
+     400
+    ]
+   }
+  },
+  {
+   "was": {
+    "id": "raider_legend",
+    "name": "Raider",
+    "rarity": "legendary",
+    "str": 10,
+    "text": "",
+    "kw": [],
+    "mana": 5,
+    "fig": [
+     400,
+     400
+    ]
+   },
+   "now": {
+    "id": "raider_legend",
+    "name": "Leeroy",
+    "rarity": "legendary",
+    "str": 5,
+    "text": "Double strength when raiding.",
+    "kw": [],
+    "mana": 3,
+    "fig": [
+     400,
+     400
+    ]
+   }
+  },
+  {
+   "was": {
+    "id": "warlord_legend",
+    "name": "Warlord",
+    "rarity": "legendary",
+    "str": 10,
+    "text": "",
+    "kw": [],
+    "mana": 5,
+    "fig": [
+     400,
+     400
+    ]
+   },
+   "now": {
+    "id": "warlord_legend",
+    "name": "Gorrak One-Eye",
+    "rarity": "legendary",
+    "str": 7,
+    "text": "Hungry. Roar: give an adjacent enemy -7 strength.",
+    "kw": [
+     "Hungry"
+    ],
+    "mana": 7,
+    "fig": [
+     400,
+     342
+    ]
+   }
+  },
+  {
+   "was": {
+    "id": "djinn_region",
+    "name": "Region Djinn",
+    "rarity": "common",
+    "str": 10,
+    "text": "Costs 2 less for each region you control.",
+    "kw": [],
+    "mana": 12,
+    "fig": [
+     400,
+     451
+    ]
+   },
+   "now": {
+    "id": "djinn_region",
+    "name": "Region Djinn",
+    "rarity": "common",
+    "str": 10,
+    "text": "Costs 3 less for each region you control.",
+    "kw": [],
+    "mana": 12,
+    "fig": [
+     400,
+     451
+    ]
+   }
+  }
+ ],
+ "added": [
+  {
+   "id": "bird_egg",
+   "name": "Bird Egg",
+   "rarity": "common",
+   "str": 1,
+   "text": "Fall: add two [Flight 1] to your hand.",
+   "kw": [],
+   "mana": 1,
+   "fig": [
+    400,
+    436
+   ]
+  },
+  {
+   "id": "golden_egg",
+   "name": "Golden Egg",
+   "rarity": "common",
+   "str": 1,
+   "text": "When you draw this, draw a card.",
+   "kw": [],
+   "mana": 1,
+   "fig": [
+    400,
+    493
+   ]
+  },
+  {
+   "id": "sky_maw_2",
+   "name": "Sky Maw 2",
+   "rarity": "common",
+   "str": 3,
+   "text": "Flight. Hungry.",
+   "kw": [
+    "Flight",
+    "Hungry"
+   ],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "porcupine",
+   "name": "Porcupine",
+   "rarity": "common",
+   "str": 2,
+   "text": "Spikes. Adjacent allies have Spikes.",
+   "kw": [
+    "Spikes"
+   ],
+   "mana": 4,
+   "fig": [
+    400,
+    339
+   ]
+  },
+  {
+   "id": "sky_maw_4",
+   "name": "Sky Maw 4",
+   "rarity": "common",
+   "str": 6,
+   "text": "Flight. Hungry.",
+   "kw": [
+    "Flight",
+    "Hungry"
+   ],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "hungry_5",
+   "name": "Hungry 5",
+   "rarity": "common",
+   "str": 8,
+   "text": "Hungry.",
+   "kw": [
+    "Hungry"
+   ],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "djinn_burn",
+   "name": "Burn Djinn",
+   "rarity": "common",
+   "str": 10,
+   "text": "Costs 1 less for each food your opponent lost this turn.",
+   "kw": [],
+   "mana": 12,
+   "fig": [
+    400,
+    400
+   ]
+  }
+ ],
+ "removed": [
+  {
+   "id": "double_raid_2",
+   "name": "Double Raid 2",
+   "rarity": "common",
+   "str": 3,
+   "text": "Its raids destroy double food.",
+   "kw": [],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "hungry_2",
+   "name": "Hungry 2",
+   "rarity": "common",
+   "str": 3,
+   "text": "Hungry.",
+   "kw": [
+    "Hungry"
+   ],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "spikes_2",
+   "name": "Spikes 2",
+   "rarity": "common",
+   "str": 2,
+   "text": "Spikes.",
+   "kw": [
+    "Spikes"
+   ],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "double_raid_4",
+   "name": "Double Raid 4",
+   "rarity": "common",
+   "str": 6,
+   "text": "Its raids destroy double food.",
+   "kw": [],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "hungry_4",
+   "name": "Hungry 4",
+   "rarity": "common",
+   "str": 6,
+   "text": "Hungry.",
+   "kw": [
+    "Hungry"
+   ],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  }
+ ]
+}

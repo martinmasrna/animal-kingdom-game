@@ -35,22 +35,30 @@ export function patchHTML(P) {
     + (P.removed.length ? `<h2>Removed</h2><div class="row">${P.removed.map(c => `<div class="gone" data-key="${c.id}">${card(c)}</div>`).join('')}</div>` : '');
 }
 
-// The window: one patch (the newest unless `version` names one) over whatever is on screen; ×, Escape or a click
-// outside closes it. Opening the newest marks it seen.
+// The window: one patch (the newest unless `version` names one) over whatever is on screen, with a tab for each patch
+// (newest first) that shows that one in its place; ×, Escape or a click outside closes it. Seeing the newest marks it seen.
+const patchOf = v => fetch(`/static/patches/${v}.json`).then(r => r.ok ? r.json() : null).catch(() => null);
 export async function openPatch({ version, seen, closed } = {}) {
   if (document.getElementById('patchpop')) return;
   const list = await patches(), v = version && list.includes(version) ? version : list[0];
-  const P = v && await fetch(`/static/patches/${v}.json`).then(r => r.ok ? r.json() : null).catch(() => null);
+  const P = v && await patchOf(v);
   if (!P) return;
   const el = document.createElement('div'); el.id = 'patchpop'; el.className = 'patchpop';
-  el.innerHTML = `<div class="mscr patch pwin"><div class="pscroll"><div class="pcol">${patchHTML(P)}</div></div>`
+  const tabs = list.length > 1 ? `<div class="ptabs">${list.map(x => `<button class="ptab" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>` : '';
+  el.innerHTML = `<div class="mscr patch pwin"><div class="pscroll"><div class="pcol"></div></div>${tabs}`
     + `<button class="pclose" aria-label="Close"></button></div>`;
   document.body.appendChild(el);
-  fitNames(el); fitPlaques(el);
+  const col = el.querySelector('.pcol');
+  const show = (x, Q) => {
+    col.innerHTML = patchHTML(Q); fitNames(col); fitPlaques(col); el.querySelector('.pscroll').scrollTop = 0;
+    el.querySelectorAll('.ptab').forEach(b => b.classList.toggle('on', b.dataset.v === x));
+    if (x === list[0]) seen && seen(x);
+  };
+  show(v, P);
+  el.querySelectorAll('.ptab').forEach(b => b.onclick = async () => { const Q = await patchOf(b.dataset.v); if (Q && document.body.contains(el)) show(b.dataset.v, Q); });
   const close = () => { el.remove(); removeEventListener('keydown', key); closed && closed(); };
   const key = e => { if (e.key === 'Escape') close(); };
   addEventListener('keydown', key);
   el.onclick = e => { if (e.target === el) close(); };
   el.querySelector('.pclose').onclick = close;
-  if (v === list[0]) seen && seen(v);
 }
