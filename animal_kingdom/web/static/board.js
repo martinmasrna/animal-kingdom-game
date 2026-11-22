@@ -41,14 +41,19 @@ const PORT_AT = { cols: [150, 352, 550], rows: [1037, 853, 660, 469, 271],
 // The mana ruleset's board (map_hex19, the prototype of 2026-11-20): the same tokens in rows of 3, 4, 5, 4, 3, each player's
 // row of 3 their base, no dens; "row,col" with row 1 your base at the bottom. HEX.mana draws it plainly (game.css .mana):
 // no ground painting, no dens, a dot on each region's shared corner instead of the stone, the leaders on the screen's rail.
-const HEX = { cols: [3, 4, 5, 4, 3], last: 5 };   // the board: rows of 3, 4, 5, 4, 3 tiles
+const HEX = { cols: [3, 4, 5, 4, 3], last: 5, dy: .75 };   // the board: rows of 3, 4, 5, 4, 3 tiles
+// any other map (the 4x4 test board, AK_MAP=map_sq16): its rows as the map lists them; rows all as long are a square grid
+const setRows = M => { if (!M || !M.crossroads) return; const n = {};
+  for (const cr of M.crossroads) { const r = +cr.split(',')[0]; n[r] = (n[r] || 0) + 1; }
+  HEX.last = Math.max(...Object.keys(n).map(Number)); HEX.cols = Array.from({ length: HEX.last }, (_, i) => n[i + 1] || 0);
+  HEX.dy = HEX.cols.every(k => k === HEX.cols[0]) ? 1 : .75; };
 // landscape: the board the stage's full height under the opponent's hand (to y 66), right of the middle so your hand has
 // the ground beside its foot (app.js PL); upright: between the dens' ridges. The mana board stands in the middle column,
 // as tall as the stage allows between the opponent's hand and yours.
 const hexGeo = () => { const g = ({ w: 120, x: STAGE.w / 2, top: 41 }); g.h = g.w * TH / TW; return g; };
 export const tokenWidth = () => hexGeo().w;
 const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
-  return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * .75 * g.h]; };
+  return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * HEX.dy * g.h]; };
 const at = (c, r) => { return hexAt(c, r);
   if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
   const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
@@ -59,7 +64,7 @@ const at = (c, r) => { return hexAt(c, r);
 // outside the board (a card flying to its crossroad). TILT.deg is the board's lean away from you (90 minus the camera's
 // elevation); STAND, how tall a standing animal is, in token widths.
 export const TILT = { deg: 40, persp: 1400 }, STAND = .66;
-const tiltOrigin = () => { const g = hexGeo(); return [g.x, g.top + g.h / 2 + 2 * .75 * g.h]; };
+const tiltOrigin = () => { const g = hexGeo(); return [g.x, g.top + g.h / 2 + (HEX.last - 1) / 2 * HEX.dy * g.h]; };
 export function project(x, y) {
   if ((!TILT.deg)) return [x, y];
   const [ox, oy] = tiltOrigin(), t = TILT.deg * Math.PI / 180, dy = y - oy, k = TILT.persp / (TILT.persp - dy * Math.sin(t));
@@ -186,6 +191,7 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
 // be taken), preview: {cr, id, str} (the selected card under the pointer), anim: the previous view's { board, food, income,
 // fx, fromStones } when this view follows one (so what changed animates; static/timeline.js plays one step per view), else null }.
 export function renderBoard(el, M, g, cards, ui) {
+  setRows(M);
   const bases = { A: new Set((ui.bases || {}).A || []), B: new Set((ui.bases || {}).B || []) };   // the mana board's bases, viewer space
   const A = ui.anim, rings = new Set(ui.rings || []), roamable = new Set(ui.roamable || []), fire = new Set(ui.fire || []);   // fire: the animals whose own effect this step is   // your animals that can roam now
   // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)

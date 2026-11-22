@@ -10,6 +10,7 @@ each question it hands that data to the engine (`_sync`), and after each move it
 from __future__ import annotations
 
 import json
+import os
 import random
 from dataclasses import dataclass, field
 from importlib import resources
@@ -197,7 +198,7 @@ def validate_card_record(rec: dict) -> None:
 
 
 _MAPS_TEXT = json.dumps(load_bundled_json("maps.json"))
-MAP_ID = "map_hex19"
+MAP_ID = os.environ.get("AK_MAP", "map_hex19")   # AK_MAP=map_sq16 plays the 4x4 test board
 _engines: dict[tuple, "ak_engine.Engine"] = {}
 
 
