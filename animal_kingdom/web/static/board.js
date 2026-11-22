@@ -46,12 +46,13 @@ const HEX = { cols: [3, 4, 5, 4, 3], last: 5, dy: .75 };   // the board: rows of
 const setRows = M => { if (!M || !M.crossroads) return; const n = {};
   for (const cr of M.crossroads) { const r = +cr.split(',')[0]; n[r] = (n[r] || 0) + 1; }
   HEX.last = Math.max(...Object.keys(n).map(Number)); HEX.cols = Array.from({ length: HEX.last }, (_, i) => n[i + 1] || 0);
-  HEX.dy = HEX.cols.every(k => k === HEX.cols[0]) ? 1 : .75; };
+  HEX.square = HEX.cols.every(k => k === HEX.cols[0]); HEX.dy = HEX.square ? 1 : .75; };
 // landscape: the board the stage's full height under the opponent's hand (to y 66), right of the middle so your hand has
 // the ground beside its foot (app.js PL); upright: between the dens' ridges. The mana board stands in the middle column,
 // as tall as the stage allows between the opponent's hand and yours.
-// LOOK TRIAL (Martin, 2026-11-22): the board in square tiles, a unit standing on its square, switched in the match (app.js)
-export const squareLook = () => typeof document !== 'undefined' && document.documentElement.dataset.look === 'square';
+// A square board (every row as long: the 4x4) is drawn in square tiles, a unit standing straight on its square in its team's
+// colour; a hex board in hexagons, a unit on its token (Martin, 2026-11-22: the square look, made the default)
+export const squareLook = () => HEX.square;
 const rowStep = g => squareLook() ? g.w : HEX.dy * g.h;   // a row's step up the board: a square's side, or the hexagons' interlock
 const hexGeo = () => { const g = ({ w: 120, x: STAGE.w / 2, top: 41 }); g.h = g.w * TH / TW; return g; };
 export const tokenWidth = () => hexGeo().w;
@@ -199,7 +200,7 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
 // the board's left and right edges.
 export const RAIL = { A: null, B: null, flat: null };
 export function renderBoard(el, M, g, cards, ui) {
-  setRows(M);
+  setRows(M); el.classList.toggle('sq', squareLook());   // mana.css #board.sq: the square look
   { const G = hexGeo(), fl = M.crossroads.map(cr => at(...cr.split(',').map(Number)));
     RAIL.flat = { L: Math.min(...fl.map(([x]) => x)) - G.w / 2, R: Math.max(...fl.map(([x]) => x)) + G.w / 2 }; }
   const bases = { A: new Set((ui.bases || {}).A || []), B: new Set((ui.bases || {}).B || []) };   // the mana board's bases, viewer space

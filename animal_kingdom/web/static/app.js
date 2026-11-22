@@ -702,7 +702,7 @@ function gameScreen() {
       <div class="abs opts" id="opts"></div>
       <div class="abs reveal" id="reveal"></div>
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
-      <div class="abs looksw" id="looksw"></div><div class="abs mlast" id="mlast"></div><div class="abs mhover" id="mhover"></div>
+      <div class="abs mlast" id="mlast"></div><div class="abs mhover" id="mhover"></div>
       <div class="endov" id="endov"></div>
       <div class="endov" id="concov"><div class="endbox ask"><b>Concede this game?</b>
         <div class="btns"><button class="slab" id="keep">Keep playing</button><button class="play danger" id="concede">Concede</button></div></div></div></div></div>`;
@@ -1127,17 +1127,7 @@ const spot = ({ left, top, scale }, origin = '50% 50%') => `left:${Math.round(le
 const onStage = el => { const st = document.getElementById('stage'), S = st.getBoundingClientRect(), k = S.width / st.offsetWidth, r = el.getBoundingClientRect();
   return [(r.left + r.width / 2 - S.left) / k, (r.top + r.height / 2 - S.top) / k]; };
 const BACK = { id: '__back', name: '', text: '', rarity: 'common' };   // a card face down: its outline and frame, nothing on it
-// LOOK TRIAL: the board's look, hex or square, switched by the pill at the bottom left (kept per browser)
-const LOOK_KEY = 'ak:look';
-function setLook() { let v = 'hex'; try { v = localStorage.getItem(LOOK_KEY) || 'hex'; } catch { /* none */ } document.documentElement.dataset.look = v; return v; }
-setLook();
-function drawLookSwitch() {
-  const el = document.getElementById('looksw'); if (!el) return;
-  const v = setLook(); el.innerHTML = `Board <b data-look="hex" class="${v === 'hex' ? 'on' : ''}">hex</b><b data-look="square" class="${v === 'square' ? 'on' : ''}">square</b>`;
-  el.onclick = e => { const b = e.target.closest('[data-look]'); if (!b) return; e.stopPropagation(); try { localStorage.setItem(LOOK_KEY, b.dataset.look); } catch { /* none */ } setLook(); drawGame(); };
-}
 function drawRail(G, d) {
-  drawLookSwitch();
   const el = document.getElementById('mplanep'); if (!el) return;
   if ((!G)) { el.innerHTML = ''; return; }
   const you = V.you, them = opp(), mana = G.mana || {}, cost = G.abilityCost;

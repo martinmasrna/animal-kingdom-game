@@ -378,18 +378,15 @@ body:has(.game.mana) .chatp.inmatch { left: auto; right: 16px; }
 .pcost polygon { fill: #f2c94c; stroke: #2a2006; stroke-width: 5; stroke-linejoin: round; }
 .pwcard { flex: none; margin-left: 46px; align-self: center; }   /* a card's frame reaches past its box: room enough beside the leader's */
 
-/* LOOK TRIAL (Martin, 2026-11-22): the board in square tiles, switched by the pill at the bottom left (app.js setLook) */
-.game.mana .looksw { left: 16px; bottom: 16px; top: auto; display: flex; align-items: center; gap: 6px; padding: 6px 8px 6px 12px; border-radius: 10px; background: var(--slab); box-shadow: var(--slab-sh); color: var(--ink2); font: 600 14px 'Fira Sans Condensed', sans-serif; z-index: 40; }
-.game.mana .looksw b { padding: 4px 10px; border-radius: 7px; cursor: pointer; color: var(--ink); }
-.game.mana .looksw b.on { background: var(--loud); color: #fff; }
-html[data-look=square] .game.hexb #board .cr:not(.leader), html[data-look=square] .game.kit.hexb #board .cr.unit:not(.leader) { height: var(--tw); margin-top: calc(var(--tw) / -2); }
+/* the square look (board.js squareLook: a board of equal rows): square tiles, a unit standing straight on its square in its
+   team's colour (the token frames' hues), its strength on the square (Martin, 2026-11-22) */
+.game.hexb #board.sq .cr:not(.leader), .game.kit.hexb #board.sq .cr.unit:not(.leader) { height: var(--tw); margin-top: calc(var(--tw) / -2); }
 /* an empty square: the sand painting cut square, a little inside its place */
-html[data-look=square] .game.kit.hexb .cr.clear { background: url(/static/hex/slot.webp) center / 170% auto no-repeat; border-radius: 12px; scale: .94; }
-/* a unit: its square in its team's colour (the token frames' hues), the animal standing on it, its strength on the square */
-html[data-look=square] .game.hexb #board .unit .sqbase { position: absolute; inset: 3%; border-radius: 12px; pointer-events: none; box-shadow: inset 0 2px 0 rgba(255,255,255,.14), inset 0 -3px 0 rgba(0,0,0,.25), 0 2px 4px rgba(0,0,0,.35); }
-html[data-look=square] .game.hexb #board .unit .sqbase.A { background: linear-gradient(180deg, #5d7896, #45607f); }
-html[data-look=square] .game.hexb #board .unit .sqbase.B { background: linear-gradient(180deg, #8a554a, #6b3d34); }
-html[data-look=square] .game.hexb #board .unit .tkpeek { display: none; }
-html[data-look=square] .game.mana #board .mstand { bottom: 30%; }
+.game.kit.hexb #board.sq .cr.clear { background: url(/static/hex/slot.webp) center / 170% auto no-repeat; border-radius: 12px; scale: .94; }
+.game.hexb #board.sq .unit .sqbase { position: absolute; inset: 3%; border-radius: 12px; pointer-events: none; box-shadow: inset 0 2px 0 rgba(255,255,255,.14), inset 0 -3px 0 rgba(0,0,0,.25), 0 2px 4px rgba(0,0,0,.35); }
+.game.hexb #board.sq .unit .sqbase.A { background: linear-gradient(180deg, #5d7896, #45607f); }
+.game.hexb #board.sq .unit .sqbase.B { background: linear-gradient(180deg, #8a554a, #6b3d34); }
+.game.hexb #board.sq .unit .tkpeek { display: none; }
+.game.mana #board.sq .mstand { bottom: 30%; }
 /* a unit's strength on the board, a size up from the token's drawer (Martin, 2026-11-22: "keep it below, just make it slightly bigger") */
 .game.hexb #board .unit .boss.tknum { transform: scale(1.3); transform-origin: 50% 60%; }
