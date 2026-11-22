@@ -5,7 +5,7 @@ import { fitNames, readSide } from './card.js';
 import { plan, DUR } from './timeline.js';
 import { fly, dive, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, leaderAt, resolvesIn, tokenWidth, RAIL, railX } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, resolvesIn, tokenWidth, RAIL, perspK } from './board.js';
 import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo, powerCard, powerCostHTML } from './mana.js';
 import { playFood } from './foodfx.js';
 import { decodeDeck } from './deckcode.js';
@@ -679,7 +679,7 @@ function foodStep(step) {
     }
     const tiles = (step.from || []).map(f => ({ el: document.querySelector(`#board .cr[data-cr="${dcr(f.cr)}"]`), n: f.n })).filter(x => x.el);
     if (tiles.length) return tiles;
-    const lead = document.querySelector(`#mrail .ltok[data-lead="${s}"]`);
+    const lead = document.querySelector(`#mplane .ltok[data-lead="${s}"]`);
     return lead ? [{ el: lead, n: step.n }] : [];
   };
   playFood({ ...step, side }, before, sources);
@@ -691,19 +691,18 @@ function gameScreen() {
     app.innerHTML = `<div class="game kit${(' hexb')}${(' mana')}" id="scr"><div id="world"><img src="${plateSrc()}" alt="" draggable="false"></div><div id="stage">
       <div class="abs ledge"></div>
       <div id="board"></div>
+      <div class="abs mplane" id="mplane"><div id="mplanep"></div><div class="abs tbtn" id="tbtn"></div><div class="abs waiting" id="waiting"></div></div>
       <div class="abs menu snd" id="sndbtn"></div><div class="panel setp" id="setp"></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu fb" id="fbbtn" data-tip="Send feedback"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
       <div class="abs menu chatbtn" id="chatbtn" data-tip="Friends">${ICON_FRIENDS}${chatBadge()}</div>
       <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/></svg></div>
       <div class="abs hand" id="hand"></div>
-      <div class="abs tbtn" id="tbtn"></div>
-      <div class="abs waiting" id="waiting"></div>
       <div class="abs prompt" id="choicebar"></div>
       <div class="abs opts" id="opts"></div>
       <div class="abs reveal" id="reveal"></div>
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
-      <div class="abs mrail" id="mrail"></div><div class="abs mlast" id="mlast"></div><div class="abs mhover" id="mhover"></div>
+      <div class="abs mlast" id="mlast"></div><div class="abs mhover" id="mhover"></div>
       <div class="endov" id="endov"></div>
       <div class="endov" id="concov"><div class="endbox ask"><b>Concede this game?</b>
         <div class="btns"><button class="slab" id="keep">Keep playing</button><button class="play danger" id="concede">Concede</button></div></div></div></div></div>`;
@@ -848,7 +847,7 @@ function drawGame() {
     // fetched (a Kitten, a Young Stag) came from no deck, so it rises into its place instead (Martin, 2026-10-31: flying in
     // from the deck "just looks weird")
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = false;
-    const from = drawn ? `${made ? '' : `--fx:${deckX() + DECK_W / 2 - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
+    const from = drawn ? `${made ? '' : `--fx:${(document.querySelector('#mplane .mdeck.A') ? onStage(document.querySelector('#mplane .mdeck.A'))[0] : STAGE.w) - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
     const html = manaCard(c, { str: h.str, cost: h.cost, w: cw, iid: h.iid });
     return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${html}</div>`;
   }).join('');
@@ -946,7 +945,7 @@ function drawGame() {
   if (A) A.fx = st ? []
     : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
   if (st && st.kind === 'leader') {   // a leader's power used: the leader's card shown large, shrinking into its place by the den
-    const [tx, ty] = leaderAt(rel(st.player)), rv = $('reveal');
+    const lt = document.querySelector(`#mplane .ltok[data-lead="${rel(st.player)}"]`), [tx, ty] = lt ? onStage(lt) : [STAGE.w / 2, 300], rv = $('reveal');
     rv.innerHTML = ((manaCard({ ...CARDS[st.card], text: ((G.leaders || {})[st.player] || {}).text || CARDS[st.card].text }, { owner: rel(st.player), w: 190, str: null }))) + '<div class="actlbl">Leader</div>'; fitNames(rv); fitPlaques(rv);
     rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
@@ -1107,53 +1106,64 @@ function leaderPanel(side) {
   const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader", kind = (LEADER_MANA(V.game.abilityCost));
   return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${kind[L.kind] || ''}</p><p>${L.text}</p>`;
 }
-// The mana rules' controls in one column right of the board (Martin, 2026-11-22: leaders and decks on the right, End turn
-// in the middle, as Hearthstone keeps it), placed from where the board stands (board.js RAIL), so none of them lies on it:
-// each side's leader and deck side by side level with its base row (the deck a pile of its face-down cards, the team's
-// empty token, as thick as what is left, with the count; a click shows its list), its mana beyond them (theirs above,
-// yours below), End turn between the two. Food is in the dens (board.js).
-const LEAD_W = 84, LEAD_H = 97, DECK_W = 84, DECK_H = 97, RAIL_GAP = 16, COL_W = LEAD_W + RAIL_GAP + DECK_W;
-const colX = railX;   // the column's left edge
-const deckX = () => colX() + LEAD_W + RAIL_GAP;
+// The mana rules' pieces beside the board (Martin, 2026-11-22: his arrangement from the layout trial, made symmetric): each
+// side's leader, deck and mana, and End turn, laid on the table with the board (#mplane, given its tilt by board.js), placed
+// in the board's own plane and mirrored about its centre line, so the far side differs only by perspective, half of which
+// is evened out (true perspective made theirs read as tucked away, full compensation as giants: Martin's pick, 50%). Right of
+// the board, as distances from its right edge and its centre line in that plane: End turn on the midline; each deck beyond
+// it (full cards face down, as thick as what is left, the count in the middle; a click shows its list); each leader nearer
+// the board past its deck; each side's mana by the board's corner, only the crystals earned (as Hearthstone). Theirs mirror yours.
+const LEAD_W = 84, LEAD_H = 97, TB_W = 184, TB_H = 56, MANA_H = 27, DECK_W = 70, DECK_H = DECK_W * 2.127, EVEN = .5;
+const SIDE = { lead: { x: 19, y: 326, s: 1.34, w: LEAD_W, h: LEAD_H }, deck: { x: 130, y: 132, s: 1.06, w: DECK_W, h: DECK_H }, mana: { x: 65, y: 404, s: 1, w: 0, h: MANA_H } };
+const TB_X = 140;
+// a piece's place in the board's plane: its left and top, and its scale (its own size, less half the perspective's)
+const midline = () => (RAIL.A.fy + RAIL.B.fy) / 2;
+function railSpot(key, side) {
+  const p = SIDE[key], x = RAIL.flat.R + p.x, y = midline() + (side === 'A' ? p.y : -p.y);
+  return { left: key === 'mana' ? x : x - p.w / 2, top: y - p.h / 2, scale: p.s / Math.pow(perspK(y), EVEN) };
+}
+const spot = ({ left, top, scale }, origin = '50% 50%') => `left:${Math.round(left)}px;top:${Math.round(top)}px;transform:scale(${scale.toFixed(4)});transform-origin:${origin}`;
+// where a piece shows on the stage (the hand's drawn card slides from your deck; a leader's power flies to its leader)
+const onStage = el => { const st = document.getElementById('stage'), S = st.getBoundingClientRect(), k = S.width / st.offsetWidth, r = el.getBoundingClientRect();
+  return [(r.left + r.width / 2 - S.left) / k, (r.top + r.height / 2 - S.top) / k]; };
+const BACK = { id: '__back', name: '', text: '', rarity: 'common' };   // a card face down: its outline and frame, nothing on it
 function drawRail(G, d) {
-  const el = document.getElementById('mrail'); if (!el) return;
+  const el = document.getElementById('mplanep'); if (!el) return;
   if ((!G)) { el.innerHTML = ''; return; }
   const you = V.you, them = opp(), mana = G.mana || {}, cost = G.abilityCost;
   const lead = side => {
-    const p = side === 'A' ? you : them, L = (G.leaders || {})[p], R = RAIL[side];
+    const p = side === 'A' ? you : them, L = (G.leaders || {})[p];
     const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && L.spent;   // the gold ring says when your power can be used
     // a power's cost in the token's drawer, where a card's strength sits (Martin, 2026-11-21); used this turn, the token
     // dims, no label (Martin, 2026-11-21: "remove AI-slop label")
     const isPow = L && L.kind === 'power';
     const tok = L ? `<div class="ltok${isPow ? ' pw' : ''}${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:${LEAD_W}px">${leaderToken(L.id, side, CARDS, LEAD_W)}${isPow ? powerCostHTML(L.cost ?? cost) : ''}</div></div>` : '';
-    return `<div class="mlead ${side}" style="left:${colX()}px;top:${R.y - LEAD_H / 2}px">${tok}</div>`;
+    return `<div class="mlead ${side}" style="${spot(railSpot('lead', side))}">${tok}</div>`;
   };
-  // a deck: one token a few cards, so it thins as it is drawn; empty, the bare slot
+  // the deck: its cards face down, each under the top one a step darker so the pile's edges read, as thick as what is left
   const deck = side => {
-    const n = (G.deckCount || {})[side === 'A' ? you : them] ?? 0, layers = n ? Math.min(7, Math.ceil(n / 4)) : 0, R = RAIL[side];
-    // each card under the top one a step darker, so the pile's edges read (its shadow side)
-    const tok = (i, top) => `<div class="unit ${side}" style="--tw:${DECK_W}px;transform:translateY(${-i * 4}px)"><img class="tkbase" src="${tokenBase(side)}" alt="" draggable="false"${top ? '' : ` style="filter:brightness(${(.45 + .35 * i / layers).toFixed(2)}) drop-shadow(0 2px 1px rgba(0,0,0,.55))"`}>${top ? numeral(n) : ''}</div>`;
-    const pile = layers ? Array.from({ length: layers }, (_, i) => tok(i, i === layers - 1)).join('') : `<div class="unit ${side} empty" style="--tw:${DECK_W}px"><img class="tkbase" src="${tokenBase(side)}" alt="" draggable="false">${numeral(0)}</div>`;
-    return `<div class="mdeck ${side}" data-deck="${side}" style="left:${deckX()}px;top:${R.y - DECK_H / 2}px">${pile}</div>`;
+    const n = (G.deckCount || {})[side === 'A' ? you : them] ?? 0, layers = Math.max(1, Math.min(7, Math.ceil(n / 4)));
+    const card = (i, top) => `<div class="dcard" style="transform:translateY(${-i * 4}px)${top ? '' : `;filter:brightness(${(.45 + .35 * i / layers).toFixed(2)})`}">${manaCard(BACK, { owner: side, w: DECK_W, str: null, cost: null })}</div>`;
+    return `<div class="mdeck ${side}${n ? '' : ' empty'}" data-deck="${side}" style="${spot(railSpot('deck', side))};width:${DECK_W}px;height:${DECK_H}px">`
+      + Array.from({ length: layers }, (_, i) => card(i, i === layers - 1)).join('') + `<b class="dkn" style="transform:translateY(${-(layers - 1) * 4}px)">${n}</b></div>`;
   };
-  const m = mana[you] || { left: 0, total: 0 }, t = mana[them] || { left: 0, total: 0 };
-  // what is left of the turn's mana as X/N right of the crystals (Martin, 2026-11-21): theirs above their leader, yours below yours
-  el.innerHTML = lead('B') + lead('A') + deck('B') + deck('A')
-    + `<div class="mmana A" style="left:${colX()}px;top:${RAIL.A.y + LEAD_H / 2 + 14}px">${pipsHTML(m.left, m.total)}<b class="mcount">${m.left}/${m.total}</b></div>`
-    + `<div class="mmana B" style="left:${colX()}px;top:${RAIL.B.y - LEAD_H / 2 - 34}px">${pipsHTML(t.left, t.total)}<b class="mcount">${t.left}/${t.total}</b></div>`;
-  // End turn in the middle, between the two rows; what the screen waits on under it
-  const mid = (RAIL.A.y + RAIL.B.y) / 2, tb = document.getElementById('tbtn'), wt = document.getElementById('waiting');
-  Object.assign(tb.style, { left: `${colX()}px`, top: `${mid - 28}px`, width: `${COL_W}px` });
-  if (wt) Object.assign(wt.style, { left: `${colX()}px`, top: `${mid + 38}px`, width: `${COL_W}px` });
+  // what is left of the turn's mana as X/N right of the crystals (Martin, 2026-11-21)
+  const manaRow = (side, m) => `<div class="mmana ${side}" style="${spot(railSpot('mana', side), '0 50%')}">${pipsHTML(m.left, m.total, 0)}<b class="mcount">${m.left}/${m.total}</b></div>`;
+  el.innerHTML = lead('B') + lead('A') + deck('B') + deck('A') + manaRow('A', mana[you] || { left: 0, total: 0 }) + manaRow('B', mana[them] || { left: 0, total: 0 });
+  // End turn on the midline; what the screen waits on under it
+  const y = midline(), sc = 1 / Math.pow(perspK(y), EVEN), tb = document.getElementById('tbtn'), wt = document.getElementById('waiting');
+  Object.assign(tb.style, { left: `${RAIL.flat.R + TB_X - TB_W / 2}px`, top: `${y - TB_H / 2}px`, width: `${TB_W}px`, transform: `scale(${sc.toFixed(4)})`, transformOrigin: '50% 50%' });
+  if (wt) Object.assign(wt.style, { left: `${RAIL.flat.R + TB_X - TB_W / 2}px`, top: `${y + TB_H / 2 + 10}px`, width: `${TB_W}px` });
   // a deck's list opens at the screen's right edge, level with its deck
-  for (const [side, id] of [['A', 'mine'], ['B', 'theirs']]) { const p = document.getElementById(id);
-    p.style.left = 'auto'; p.style.right = '16px'; p.style.margin = '0';
-    if (side === 'B') { p.style.top = `${RAIL.B.y - DECK_H / 2}px`; p.style.bottom = 'auto'; }
-    else { p.style.top = 'auto'; p.style.bottom = `${800 - (RAIL.A.y + DECK_H / 2)}px`; } }
+  for (const [side, id] of [['A', 'mine'], ['B', 'theirs']]) { const pn = document.getElementById(id), dk = el.querySelector(`.mdeck.${side}`);
+    const r = dk.getBoundingClientRect(), st = document.getElementById('stage'), S = st.getBoundingClientRect(), k = S.width / st.offsetWidth;
+    pn.style.left = 'auto'; pn.style.right = '16px'; pn.style.margin = '0';
+    if (side === 'B') { pn.style.top = `${Math.max(16, (r.top - S.top) / k)}px`; pn.style.bottom = 'auto'; }
+    else { pn.style.top = 'auto'; pn.style.bottom = `${Math.max(16, 800 - (r.bottom - S.top) / k)}px`; } }
 }
 // The rail's leaders read on hover (a leader's power) and your leader's power is pressed there; a deck shows its list on a click.
 function wireRail() {
-  const rail = document.getElementById('mrail'); if (!rail || rail.wired) return; rail.wired = true;
+  const rail = document.getElementById('mplane'); if (!rail || rail.wired) return; rail.wired = true;
   const hide = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
   rail.addEventListener('mouseover', e => {
     const lead = e.target.closest('[data-lead]');

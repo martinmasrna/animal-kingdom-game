@@ -96,6 +96,8 @@ const DEN_D = [.3, .75], DEN_AT = { A: 1.3, B: .7 };
 // k: how much the tilt's perspective scales the den's spot (project()); the ball is drawn 1/k as large there, so equal food
 // shows as equal balls on the screen, near or far.
 const denD = (n, k = 1) => tokenWidth() * (DEN_D[0] + (DEN_D[1] - DEN_D[0]) * Math.sqrt(Math.min(Math.max(n, 0), 30) / 30)) / k;
+// how much the tilt's perspective scales a board point at flat height y on the screen (a far one less than 1, a near one more)
+export const perspK = y => denK(y);
 const denK = y => { if (!TILT.deg) return 1; const [, oy] = tiltOrigin(); return TILT.persp / (TILT.persp - (y - oy) * Math.sin(TILT.deg * Math.PI / 180)); };
 const denSize = (n, k) => { const D = denD(n, k); return `--d:${D.toFixed(1)}px;--lift:${(D / 2 + 6).toFixed(1)}px`; };
 const inkNum = n => { n = Math.max(0, Math.round(n)); const m = f => `--m:url(/static/hex/num/${f}.svg)`;
@@ -190,12 +192,13 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
 // `g` is a viewer-space game { board, food, income, winFood }. `ui`: { rings: [cr] legal targets, hqRing (the enemy den can
 // be taken), preview: {cr, id, str} (the selected card under the pointer), anim: the previous view's { board, food, income,
 // fx, fromStones } when this view follows one (so what changed animates; static/timeline.js plays one step per view), else null }.
-// Where the board stands on the stage, for what is placed around it (app.js drawRail): each base row's left and right
-// edges and its middle's height, and the board's right edge, all as the tilted board shows them.
-export const RAIL = { A: null, B: null, right: 0 };
+// Where the board lies in its own plane, for what app.js drawRail lays on the table beside it: each base row's height and
+// the board's left and right edges.
+export const RAIL = { A: null, B: null, flat: null };
 export function renderBoard(el, M, g, cards, ui) {
   setRows(M);
-  { const G = hexGeo(); RAIL.right = Math.max(...M.crossroads.map(cr => { const [x, y] = at(...cr.split(',').map(Number)); return project(x + G.w / 2, y)[0]; })); }
+  { const G = hexGeo(), fl = M.crossroads.map(cr => at(...cr.split(',').map(Number)));
+    RAIL.flat = { L: Math.min(...fl.map(([x]) => x)) - G.w / 2, R: Math.max(...fl.map(([x]) => x)) + G.w / 2 }; }
   const bases = { A: new Set((ui.bases || {}).A || []), B: new Set((ui.bases || {}).B || []) };   // the mana board's bases, viewer space
   const A = ui.anim, rings = new Set(ui.rings || []), roamable = new Set(ui.roamable || []), fire = new Set(ui.fire || []);   // fire: the animals whose own effect this step is   // your animals that can roam now
   // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)
@@ -215,6 +218,8 @@ export function renderBoard(el, M, g, cards, ui) {
   { const g = hexGeo(); el.style.setProperty('--tw', `${g.w}px`); el.style.setProperty('--th', `${g.h}px`); el.style.setProperty('--tkwin', WINDOW); }
   { const [ox, oy] = tiltOrigin();   // the tilt: the board turns about its middle; what stands on it turns back upright
     el.style.transformOrigin = `${ox}px ${oy}px`; el.style.transform = TILT.deg ? `perspective(${TILT.persp}px) rotateX(${TILT.deg}deg)` : '';
+    const pl = document.getElementById('mplane');   // the pieces laid on the table beside the board: the same tilt (app.js drawRail)
+    if (pl) { pl.style.transformOrigin = el.style.transformOrigin; pl.style.transform = el.style.transform; }
     el.style.setProperty('--tilt', `${TILT.deg}deg`); }
 
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
@@ -231,8 +236,7 @@ export function renderBoard(el, M, g, cards, ui) {
     const ps = [...bases[side]].map(cr => at(...cr.split(',').map(Number)));
     if (!ps.length) continue;
     const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2;
-    { const l = project(Math.min(...ps.map(p => p[0])) - G.w / 2, ps[0][1]), r = project(Math.max(...ps.map(p => p[0])) + G.w / 2, ps[0][1]);
-      RAIL[side] = { l: l[0], r: r[0], y: l[1] }; }
+    RAIL[side] = { fy: ps[0][1] };
     const y = ps[0][1] + (side === 'A' ? DEN_AT.A : -DEN_AT.B) * G.h;
     // the trails: from each base tile's far tip into the ball, so the way in reads (Martin, 2026-11-22), in the ball's own
     // light (mana.css .mtrails). Each runs to the ball's centre, which floats its lift above the spot (a height on the screen
@@ -295,14 +299,3 @@ export function renderBoard(el, M, g, cards, ui) {
     requestAnimationFrame(step);
   });
 }
-
-// The leaders prototype: each player's leader beside their den, a portrait under the team rim, a size up from an animal's
-// (yours at the foot of your den, your opponent's at the head of theirs, as Hearthstone's two heroes). What it says is its
-// state, never a hint: Queen Adira's number on the boss with her progress to the next as pips, Xanthe as the stage she has
-// reached (its own painting), a power that can't be used now greyed, one you can press now ringed as an animal you can act
-// with is. Where it stands on the stage: LEADER_AT.
-export const LEADER_AT = { A: [178, 650], B: [1110, 78] }, LEADER_PORT = { A: [70, 1300], B: [650, 140] };
-// The column right of the board that app.js drawRail fills (the leaders and decks, End turn): its left edge on the stage.
-export const railX = () => RAIL.right + 48;
-export const leaderAt = side => VIEW.port ? LEADER_PORT[side] : RAIL[side] ? [railX() + 42, RAIL[side].y] : LEADER_AT[side];   // where drawRail stands it
-

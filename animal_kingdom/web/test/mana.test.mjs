@@ -56,7 +56,7 @@ test('a mana friend match: home, the opening hands, the rail, a dimmed card and 
     dens: document.querySelectorAll('#board .dentile, #board .pit, #board .dcount').length,
     hand: window.__ak().V.game.hand.map(h => ({ iid: h.iid, cost: h.cost, dim: document.querySelector(`#hand .hc[data-iid="${h.iid}"]`).classList.contains('dim'),
       can: !!(window.__ak().V.game.legal.place[h.id]) })) }));
-  assert.deepEqual([look.pips, look.on], [10, look.left], 'the mana left, of ten');
+  assert.deepEqual([look.pips, look.on], [1, look.left], 'the crystals earned (turn 1: one), the mana left lit (Martin, 2026-11-22: only the earned crystals show)');
   assert.deepEqual([look.dots, look.baseA, look.baseB, look.dens], [24, 3, 3, 0]);
   for (const h of look.hand) assert.equal(h.dim, !h.can, `card ${h.iid} (cost ${h.cost}) dimmed exactly when it can't be played`);
   const play = look.hand.find(h => h.can);

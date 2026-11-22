@@ -154,10 +154,9 @@
 .game.mana .prompt.mull { left: 50%; top: 64px; width: 520px; margin-left: -260px; text-align: center; transform: none; z-index: 60; }   /* over the veil, with the cards */
 .game.mana .prompt.mull .btns { justify-content: center; }
 
-/* the controls around the dens (app.js drawRail): the layer covers the stage, its parts placed by the tilted board's dens
-   (board.js TILT, 120 px tiles: your den about x 607 to 905, y 572 to 670; theirs about x 647 to 865, y 52 to 140) */
-.game.mana .mrail { left: 0; top: 0; width: 1512px; height: 800px; pointer-events: none; font-family: 'Fira Sans Condensed', sans-serif; color: #c8ced8; }
-.game.mana .mrail > * { pointer-events: auto; }
+/* the pieces beside the board (app.js drawRail): laid on the table, a layer the size of the board's given its tilt (board.js) */
+.game.mana .mplane { left: 0; top: 0; width: 1512px; height: 800px; pointer-events: none; transform-style: flat; font-family: 'Fira Sans Condensed', sans-serif; color: #c8ced8; }
+.game.mana .mplane > *, .game.mana #mplanep > * { pointer-events: auto; }
 .game.mana .mlead { position: absolute; display: flex; align-items: center; gap: 8px; }
 .game.mana .mlead .ltok { position: relative; width: 84px; height: 97px; flex: none; }
 .game.mana .mlead .ltok .unit { position: absolute; inset: 0; --tw: 84px; }
@@ -165,18 +164,17 @@
 .game.mana .mlead .ltok.can { cursor: pointer; }
 .game.mana .mlead .ltok.can::after { content: ''; position: absolute; inset: -5px; clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 5%, 4.5% 27.5%, 4.5% 72.5%, 50% 95%, 95.5% 72.5%, 95.5% 27.5%, 50% 5%); background: #f2c94c; }
 .game.mana .mlead .ltok.can:hover { filter: brightness(1.15); }
-/* each deck: its face-down cards (the team's empty token) piled, the count in the top one's drawer (app.js drawRail) */
-.game.mana .mdeck { position: absolute; width: 84px; height: 97px; cursor: pointer; }
-.game.mana .mdeck .unit { position: absolute; inset: 0; }
-.game.mana .mdeck .unit .tkbase { filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .55)); }
-.game.mana .mdeck .unit.empty { opacity: .35; }
+/* each deck: full cards face down (the card's outline and frame, nothing on it) piled, the count in the middle (app.js drawRail) */
+.game.mana .mdeck { position: absolute; cursor: pointer; }
+.game.mana .mdeck .dcard { position: absolute; left: 0; top: 0; }
+.game.mana .mdeck .mcard .mplate, .game.mana .mdeck .mcard .pin, .game.mana .mdeck .mcard .ring { display: none; }
+.game.mana .mdeck .dkn { position: absolute; left: 0; right: 0; top: 50%; margin-top: -.6em; text-align: center; font: 700 30px/1.2 'Fira Sans Condensed', sans-serif; color: #f4f0e8;
+  text-shadow: 0 2px 3px rgba(0,0,0,.6); pointer-events: none; }
+.game.mana .mdeck.empty { opacity: .35; }
 .game.mana .mdeck:hover { filter: brightness(1.15); }
 .game.mana .mmana { position: absolute; font-size: 15px; display: flex; align-items: center; gap: 10px; }
 .game.mana .mmana .mcount { font: 700 22px 'Fira Sans Condensed', sans-serif; color: #fff; text-shadow: 0 1px 0 #000, 0 0 4px rgba(0, 0, 0, .9); letter-spacing: .02em; }
-.game.mana .mmana.B .mcount { font-size: 17px; }
-.game.mana .mmana.A { left: 930px; top: 648px; } .game.mana .mmana.B { left: 882px; top: 70px; }
 .game.mana .mmana .mpips i { width: 22px; height: 25.4px; } .game.mana .mmana .mpips { gap: 5px; }
-.game.mana .mmana.B .mpips i { width: 16px; height: 18.5px; } .game.mana .mmana.B .mpips { gap: 3px; }
 .game.mana .mmana .mpips i.off::after { inset: 2.5px; }
 .game.mana .mmana div { margin-top: 5px; }
 /* End turn, right of your den */
