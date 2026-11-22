@@ -2,8 +2,9 @@
 that reads and writes the card data through hq.py. Martin's edits come in as by="martin"; Claude edits from the command
 line (hq.py) instead, so the page polls and shows them as they land. Martin's edits are committed and pushed by
 themselves once he stops editing for QUIET seconds; Claude commits its own. /board is the card board: every collectible
-card as the game draws it on a table to pan, zoom, pile, snap and bin, following the card data as it changes; its layout
-is saved to board.json beside this file.
+card as the game draws it, and each leader's power, on a table to pan, zoom, pile, snap and bin; a card's mana, strength
+and text are edited there through the same /api/value; it follows the card data as it changes; its layout is saved to
+board.json beside this file.
 
     ./cards                 # http://localhost:8002
     ./cards --port 8003 --no-open
@@ -22,7 +23,7 @@ from aiohttp import web
 
 sys.path.insert(0, str(Path(__file__).parent))
 import hq  # noqa: E402
-from animal_kingdom.game import PLANNED  # noqa: E402
+from animal_kingdom.game import LEADERS, PLANNED, power_price  # noqa: E402
 
 HERE = Path(__file__).parent
 STATIC = hq.ROOT / "animal_kingdom" / "web" / "static"
@@ -56,7 +57,10 @@ async def board_get(_req):
     """The collectible cards, fresh, and the saved layout."""
     ids = {c["id"] for c in json.loads(hq.CARDS.read_text())["cards"] if c.get("status") == "collectible"}
     layout = json.loads(BOARD.read_text()) if BOARD.exists() else None
-    return web.json_response({"cards": [c for c in pool() if c["id"] in ids], "layout": layout, "stamp": hq.stamp()},
+    # each leader's power as the collection shows it beside its card (game.LEADERS: the engine's, fixed while this runs)
+    powers = [{"id": lid, "kind": kind, "text": text, **({"cost": power_price(lid)} if kind == "power" else {})}
+              for lid, (kind, text) in LEADERS.items() if lid in ids]
+    return web.json_response({"cards": [c for c in pool() if c["id"] in ids], "powers": powers, "layout": layout, "stamp": hq.stamp()},
                              headers={"Cache-Control": "no-store"})
 
 

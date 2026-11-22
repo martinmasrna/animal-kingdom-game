@@ -75,6 +75,15 @@ button:focus-visible, input:focus-visible { outline:2px solid var(--hot); outlin
 #peek { position:fixed; z-index:30; pointer-events:none; display:none; }
 #peek .mcard { position:absolute; }
 #sync { color:var(--danger); }
+.it .pwcard { margin:0; }
+#ed { position:fixed; z-index:35; width:300px; display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px; background:var(--bar); color:var(--ink);
+  border:1px solid var(--barline); border-radius:8px; box-shadow:0 8px 28px rgba(0,0,0,.3); font:13px system-ui,sans-serif; }
+#ed[hidden] { display:none; }
+#ed h4 { grid-column:1 / -1; margin:0; font:600 15px system-ui,sans-serif; }
+#ed label { display:grid; gap:4px; color:var(--muted); }
+#ed label.tx { grid-column:1 / -1; }
+#ed input, #ed textarea { width:100%; min-width:0; font:15px system-ui,sans-serif; color:var(--ink); background:var(--btn); border:1px solid var(--btnline); border-radius:5px; padding:5px 8px; resize:vertical; }
+#toast { position:fixed; z-index:60; left:50%; bottom:20px; transform:translateX(-50%); background:var(--danger); color:#fff; padding:6px 14px; border-radius:6px; max-width:80vw; }
 </style></head><body>
 
 <div class="top">
@@ -91,9 +100,15 @@ button:focus-visible, input:focus-visible { outline:2px solid var(--hot); outlin
 <div id="view"><div id="world"><div class="ins" id="ins"></div></div></div>
 <div class="marq" id="marq"></div>
 <div id="peek"></div>
+<div id="ed" hidden><h4></h4>
+  <label>Mana <input type="number" min="0" data-col="cost"></label>
+  <label>Strength <input type="number" min="0" data-col="strength"></label>
+  <label class="tx">Text <textarea rows="4" data-col="effect"></textarea></label>
+</div>
+<div id="toast" hidden></div>
 
 <script>
-let manaCard, fitPlaques;   // the game's card (static/mana.js), loaded at the start
+let manaCard, fitPlaques, powerCard;   // the game's card (static/mana.js), loaded at the start
 const PW = 150;   // the card's piece width; the card itself is a fifth wider
 let W = 185, H = 300;
 const G = 14, PAD = 16, HEAD = 92, CAMKEY = 'card-board-cam';
@@ -110,8 +125,11 @@ const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 let DATA = [], CARDS = {}, stampSeen = 0;
 // The table's order: by cost, then rarity, then name.
 const RORD = { legendary: 0, rare: 1, common: 2 };
-function setData(list) {
-  DATA = [...list].sort((a, b) => a.mana - b.mana || (RORD[a.rarity] ?? 3) - (RORD[b.rarity] ?? 3) || a.name.localeCompare(b.name));
+// A leader's power is an item of its own, right after its leader's card.
+function setData(list, powers = []) {
+  const sorted = [...list].sort((a, b) => a.mana - b.mana || (RORD[a.rarity] ?? 3) - (RORD[b.rarity] ?? 3) || a.name.localeCompare(b.name));
+  const pw = Object.fromEntries(powers.map(L => [L.id, { ...L, id: 'power:' + L.id, leader: L.id, power: true, name: L.kind === 'power' ? 'Hero power' : 'Passive' }]));
+  DATA = sorted.flatMap(c => pw[c.id] ? [c, pw[c.id]] : [c]);
   CARDS = Object.fromEntries(DATA.map(c => [c.id, c]));
 }
 const ids = () => DATA.map(c => c.id);
@@ -168,7 +186,7 @@ function placeNew() {
 
 // ---------- drawing ----------
 function setCam() { world.style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.z})`; world.style.setProperty('--z', cam.z); try { localStorage.setItem(CAMKEY, JSON.stringify(cam)); } catch (e) {} }
-const cardHTML = (c, w = PW) => manaCard(c, { cost: c.mana ?? null, w });
+const cardHTML = (c, w = PW) => c.power ? powerCard(c.leader, c, w) : manaCard(c, { cost: c.mana ?? null, w });
 const sig = c => JSON.stringify(c);
 function buildCard(c) {
   let el = els[c.id];
@@ -257,12 +275,15 @@ setInterval(async () => {
   try {
     const { stamp } = await (await fetch('/api/stamp')).json(); offline(false);
     if (stamp === stampSeen) return;
-    const d = await (await fetch('/api/board')).json();
-    stampSeen = d.stamp; setData(d.cards); buildCards();
-    const before = snap(); if (tidy()) save(); if (snap() !== before) save();
-    draw();
+    await refresh();
   } catch (e) { offline(true); }
 }, 2500);
+async function refresh() {
+  const d = await (await fetch('/api/board')).json();
+  stampSeen = d.stamp; setData(d.cards, d.powers); buildCards();
+  const before = snap(); tidy(); if (snap() !== before) save();
+  draw(); if (edId) fillEd();
+}
 
 // ---------- camera ----------
 const toWorld = (cx, cy) => { const r = view.getBoundingClientRect(); return { x: (cx - r.left - cam.x) / cam.z, y: (cy - r.top - cam.y) / cam.z }; };
@@ -281,7 +302,7 @@ function fit() {
   cam = { z, x: m - x0 * z + ((r.width - m * 2) - (x1 - x0) * z) / 2, y: m - y0 * z }; setCam();
 }
 view.addEventListener('wheel', e => {
-  e.preventDefault(); hidePeek();
+  e.preventDefault(); hidePeek(); if (edId) { document.activeElement?.blur(); closeEd(); }
   zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.002)));   // as on Miro: scrolling zooms (ctrl: a pinch)
 }, { passive: false });
 
@@ -512,7 +533,7 @@ world.addEventListener('click', e => {
 function search() {
   const q = $('#q').value.trim().toLowerCase();
   for (const c of Object.values(CARDS)) {
-    const hit = !q || [c.name, c.text || '', c.rarity].some(s => s.toLowerCase().includes(q));
+    const hit = !q || [c.name, c.text || '', c.rarity || ''].some(s => s.toLowerCase().includes(q));
     els[c.id].classList.toggle('dim', !hit);
   }
 }
@@ -548,6 +569,46 @@ function placePeek(e) {
 function hidePeek() { clearTimeout(peekT); $('#peek').style.display = 'none'; }
 view.addEventListener('pointerleave', () => { hidePeek(); peekId = null; });
 
+// ---------- editing a card: double-click it ----------
+// Mana, strength and text, written through the card table (hq.py) as Martin's edits; the card redraws as they land.
+let edId = null;
+const ed = $('#ed');
+view.addEventListener('dblclick', e => {   // the table holds the pointer while it's down, so the card is found by where it is
+  const it = document.elementFromPoint(e.clientX, e.clientY)?.closest('.it'); if (!it || CARDS[it.dataset.id].power) return;
+  edId = it.dataset.id; fillEd(true); hidePeek();
+  const r = it.getBoundingClientRect(), w = 300;
+  ed.style.left = (r.right + 12 + w < innerWidth ? r.right + 12 : Math.max(8, r.left - 12 - w)) + 'px';
+  ed.style.top = Math.max(52, Math.min(innerHeight - 330, r.top)) + 'px';
+  ed.hidden = false; ed.querySelector('[data-col="cost"]').select();
+});
+function fillEd(all) {
+  const c = CARDS[edId]; if (!c) return closeEd();
+  ed.querySelector('h4').textContent = c.name;
+  for (const [col, v] of [['cost', c.mana], ['strength', c.str], ['effect', c.text || '']]) {
+    const f = ed.querySelector(`[data-col="${col}"]`);
+    if (all || document.activeElement !== f) f.value = v;
+  }
+}
+function closeEd() { edId = null; ed.hidden = true; }
+async function commit(f) {
+  const c = CARDS[edId]; if (!c) return;
+  const col = f.dataset.col, now = { cost: c.mana, strength: c.str, effect: c.text || '' }[col];
+  const value = col === 'effect' ? f.value.trim() : f.value;
+  if (String(value) === String(now)) return;
+  const r = await fetch('/api/value', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: c.id, col, value }) });
+  if (!r.ok) { toast(await r.text()); f.value = now; return; }
+  await refresh();
+}
+ed.addEventListener('change', e => { if (e.target.dataset.col) commit(e.target); });
+ed.addEventListener('keydown', e => {
+  e.stopPropagation();
+  if (e.key === 'Enter' && e.target.tagName === 'TEXTAREA') { e.preventDefault(); e.target.blur(); }
+  if (e.key === 'Escape') { e.target.blur(); closeEd(); }
+});
+view.addEventListener('pointerdown', () => { if (edId) { document.activeElement?.blur(); closeEd(); } }, true);
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 4000); }
+
 // ---------- keys ----------
 addEventListener('keydown', e => {
   if (e.target.closest?.('input, textarea, [contenteditable="true"]')) return;
@@ -558,7 +619,7 @@ addEventListener('keydown', e => {
     if (from.length) { to.push(snap()); restore(from.pop()); }
   }
   if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); $('#q').focus(); }
-  if (e.key === 'Escape') { sel.clear(); psel.clear(); draw(); }
+  if (e.key === 'Escape') { closeEd(); sel.clear(); psel.clear(); draw(); }
   if ((e.key === 'Backspace' || e.key === 'Delete') && sel.size) { e.preventDefault(); removeCards([...sel]); }
 });
 addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
@@ -582,10 +643,10 @@ $('#snap').onclick = () => {
 
 // ---------- start ----------
 (async () => {
-({ manaCard, fitPlaques } = await import('/static/mana.js'));
+({ manaCard, fitPlaques, powerCard } = await import('/static/mana.js'));
 measure();
 const d0 = await (await fetch('/api/board')).json();
-stampSeen = d0.stamp; setData(d0.cards); buildCards();
+stampSeen = d0.stamp; setData(d0.cards, d0.powers); buildCards();
 B = d0.layout || fresh(); if (tidy() || !d0.layout) save(); draw();
 let saved = null; try { saved = JSON.parse(localStorage.getItem(CAMKEY)); } catch (e) {}
 if (saved && saved.z) { cam = saved; setCam(); } else fit();
