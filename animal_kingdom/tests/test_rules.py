@@ -453,6 +453,20 @@ def test_burn_djinn_costs_less_for_each_food_the_opponent_lost_this_turn():
     assert mana_cost(s, "djinn_burn", "A") == 12
 
 
+def test_bird_egg_falls_into_two_flight_1():
+    s = state(turn=11, hands={"A": ["wisp_1"]})
+    put(s, "1,1", "bird_egg", "B")
+    rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1")))      # covered: it falls from the board
+    resolve_choices(s)
+    assert [u.card_id for u in s.hands["B"]] == ["flight_1", "flight_1"]
+
+
+def test_golden_egg_draws_a_card_when_drawn():
+    s = state(turn=11, decks={"A": ["wisp_1"] * 3, "B": ["wisp_2", "wisp_3", "golden_egg"]})
+    rules.apply_action(s, PassAction())                               # B's turn card is the egg: it draws the next
+    assert [u.card_id for u in s.hands["B"]] == ["golden_egg", "wisp_3"]
+
+
 def test_a_dynamic_strength_is_its_count():
     s = state(turn=19, hands={"A": ["wisp_1", "wisp_1", "wisp_1", "test_played_count"]})
     shades = {k: put(s, cr, f"test_{k}_count", "A") for k, cr in (("hand", "1,1"), ("ally", "1,2"), ("region", "2,2"))}

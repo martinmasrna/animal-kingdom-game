@@ -343,6 +343,12 @@ fn remove_specific(st: &mut State, cr: Tile, iid: i32, by_player: Option<Player>
     match st.card(unit.card).beh.on_death {
         // "Death: draw a card.": when it is removed from the board, by anything, its owner draws
         Some(OnDeath::Draw) => st.effect_stack.push(Step::by_unit(StepKind::Draw { player: unit.owner, n: 1 }, &unit)),
+        // "Fall: add two [Flight 1] to your hand.": when it is removed from the board, by anything
+        Some(OnDeath::Hatch) => {
+            if let Some(f) = st.g.named.flight_1 {
+                st.effect_stack.push(Step::by_unit(StepKind::ToHand { player: unit.owner, card: f, n: st.cfg().bird_egg_flights }, &unit));
+            }
+        }
         None => {}
     }
     true
@@ -412,6 +418,11 @@ pub fn draw_cards(st: &mut State, player: Player, n: i32) {
             st.emit(Ev::Draw { player, cards: drawn.iter().map(|u| (u.iid, u.card)).collect() });
         }
         burn_over_limit(st, player, &drawn);
+        // the Golden Egg: "When you draw this, draw a card." (one burned past the hand limit was drawn all the same)
+        let eggs = drawn.iter().filter(|u| st.card(u.card).beh.draw_on_draw).count() as i32;
+        if eggs > 0 {
+            draw_cards(st, player, eggs * st.cfg().golden_egg_draws);
+        }
     }
     let p = player as usize;
     for _ in drawn.len() as i32..n.max(0) {

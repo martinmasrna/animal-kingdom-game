@@ -11,6 +11,8 @@ pub const ELF: &str = "elf_legend";
 pub const ASSASSIN: &str = "assassin_legend";
 /// The Spores' token: in no deck, made by the Duplicating Spore and Mama Spore.
 pub const SPORE: &str = "spore";
+/// The Flight 1, which the Bird Egg hatches.
+pub const FLIGHT_1: &str = "flight_1";
 
 /// Every leader, in the order the game lists them, with its ability as the player reads it. Whether an ability is a power
 /// or a passive is in `behaviour`.
@@ -27,6 +29,7 @@ pub const LEADERS: [(&str, &str); 5] = [
 pub fn makes(id: &str) -> &'static [&'static str] {
     match id {
         "duplicating_spore" | "mama_spore" => &[SPORE],
+        "bird_egg" => &[FLIGHT_1],
         _ => &[],
     }
 }
@@ -75,6 +78,8 @@ pub enum OnCover {
 pub enum OnDeath {
     /// "Death: draw a card."
     Draw,
+    /// "Fall: add two [Flight 1] to your hand." (the Bird Egg)
+    Hatch,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -95,6 +100,8 @@ pub struct Behaviour {
     pub on_place: Option<Roar>,
     pub on_cover: Option<OnCover>,
     pub on_death: Option<OnDeath>,
+    /// "When you draw this, draw a card." (the Golden Egg)
+    pub draw_on_draw: bool,
     pub on_raid: Option<OnRaid>,
     /// "Its raids destroy double food."
     pub double_raider: bool,
@@ -136,6 +143,7 @@ pub fn behaviour(id: &str) -> Behaviour {
     };
     b.on_death = match id {
         "death_draw_1" => Some(OnDeath::Draw),
+        "bird_egg" => Some(OnDeath::Hatch),
         _ => None,
     };
     b.on_raid = match id {
@@ -157,5 +165,6 @@ pub fn behaviour(id: &str) -> Behaviour {
         _ => None,
     };
     b.region_bonus = id == ELF;
+    b.draw_on_draw = id == "golden_egg";
     b
 }

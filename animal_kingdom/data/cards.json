@@ -574,6 +574,26 @@
       "text": "Costs 1 less for each food your opponent lost this turn.",
       "cost": 12,
       "keywords": []
+    },
+    {
+      "id": "bird_egg",
+      "name": "Bird Egg",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Fall: add two [Flight 1] to your hand.",
+      "cost": 1,
+      "keywords": []
+    },
+    {
+      "id": "golden_egg",
+      "name": "Golden Egg",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "When you draw this, draw a card.",
+      "cost": 1,
+      "keywords": []
     }
   ]
 }

@@ -453,6 +453,8 @@ config! {
     assassin_nth_card: i32 = 3,           // the Assassin: "After every third card you play in a turn, draw a card."
     raider_leader_bonus: i32 = 1,         // the Raider: "Your raids destroy 1 more food." (Martin, 2026-11-21: "only +1")
     mama_spores: i32 = 2,                 // Mama Spore: "Roar: put 2 Spores into your hand." (Martin, 2026-11-21)
+    bird_egg_flights: i32 = 2,            // the Bird Egg: "Fall: add two [Flight 1] to your hand." (Martin, 2026-11-22)
+    golden_egg_draws: i32 = 1,            // the Golden Egg: "When you draw this, draw a card." (Martin, 2026-11-22)
     crush_max: i32 = 5,                   // the Rhino: "remove all adjacent enemies with strength 5 or less"
     crush_albatross_max: i32 = 4,         // the Albatross: "... with strength 4 or less" (Martin, 2026-11-21)
     crush_young_max: i32 = 3,             // the Young Rhino: "... with strength 3 or less" (Martin, 2026-11-21)
@@ -481,6 +483,7 @@ pub struct Named {
     pub elf: Option<CardId>,
     pub assassin: Option<CardId>,
     pub spore: Option<CardId>,
+    pub flight_1: Option<CardId>,
 }
 
 #[derive(Debug)]
@@ -500,6 +503,7 @@ impl Game {
             elf: cards.id_of(crate::cards::ELF),
             assassin: cards.id_of(crate::cards::ASSASSIN),
             spore: cards.id_of(crate::cards::SPORE),
+            flight_1: cards.id_of(crate::cards::FLIGHT_1),
         };
         Game { cards, map, cfg, named }
     }

@@ -1243,5 +1243,27 @@
       "by": "claude",
       "at": 1795349463
     }
+  },
+  "bird_egg": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795354530
+    }
+  },
+  "golden_egg": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795354530
+    }
   }
 }
