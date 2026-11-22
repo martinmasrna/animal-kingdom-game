@@ -21,6 +21,9 @@ pub const WIN: f32 = 1000.0;
 pub struct Weights {
     /// A food of lead.
     pub food: f32,
+    /// More for a food the opponent's den lacks, on top of `food`: what a raid (the one thing that destroys their food)
+    /// is worth beyond the lead it makes. The dial of the raid question; 0 is the evaluation as scanned.
+    pub raid: f32,
     /// A food of income lead, each turn: how many turns a board's income is expected to last.
     pub income: f32,
     /// A food the opponent's hand could destroy in my den on their next turn.
@@ -63,6 +66,7 @@ impl Default for Weights {
     fn default() -> Weights {
         Weights {
             food: 1.0,
+            raid: 0.0,
             income: 2.5,
             threat_theirs: 0.6,
             lethal_theirs: 25.0,
@@ -86,6 +90,7 @@ impl Weights {
     pub fn set(&mut self, name: &str, v: f32) -> Result<(), String> {
         let slot = match name {
             "food" => &mut self.food,
+            "raid" => &mut self.raid,
             "income" => &mut self.income,
             "threat_theirs" => &mut self.threat_theirs,
             "lethal_theirs" => &mut self.lethal_theirs,
@@ -219,7 +224,7 @@ pub fn evaluate(st: &State, me: Player, w: &Weights, odds: &RaidOdds) -> f32 {
     let (food_me, food_opp) = (st.food[m], st.food[o]);
     let (inc_me, inc_opp) = (rules::region_income(st, me), rules::region_income(st, opp));
     let win = st.g.map.win_food;
-    let mut s = w.food * (food_me - food_opp) as f32 + w.income * (inc_me - inc_opp) as f32;
+    let mut s = w.food * (food_me - food_opp) as f32 - w.raid * food_opp as f32 + w.income * (inc_me - inc_opp) as f32;
 
     // the food race: whose regions pay them over the line first
     let my_turn = st.current == me;
