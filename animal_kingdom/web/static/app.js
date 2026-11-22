@@ -967,7 +967,7 @@ function drawGame() {
     const rv = $('reveal'), den = document.querySelector(`#board .mden.${rel(st.den)}`);
     rv.innerHTML = manaCard(CARDS[st.card], { owner: rel(st.player), w: 190, cost: (CARDS[st.card] || {}).mana ?? null }); fitNames(rv); fitPlaques(rv);
     const cy = VIEW.port ? 560 : 300; let tx = 0, ty = 0;
-    if (den) { const s = $('scr').getBoundingClientRect(), k = s.width / STAGE.w, r = den.getBoundingClientRect();
+    if (den) { const s = $('scr').getBoundingClientRect(), k = s.width / STAGE.w, r = (den.querySelector('.core') || den).getBoundingClientRect();
       tx = (r.left + r.width / 2 - s.left) / k - STAGE.w / 2; ty = (r.top + r.height / 2 - s.top) / k - cy; }
     rv.style.setProperty('--tx', `${tx}px`); rv.style.setProperty('--ty', `${ty}px`);
     rv.style.setProperty('--hx', `${VIEW.port ? 184 - STAGE.w / 2 : 0}px`); rv.style.setProperty('--hy', `${5 - cy}px`);   // from their hand

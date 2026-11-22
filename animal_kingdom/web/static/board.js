@@ -83,6 +83,28 @@ const reducedMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(pr
 
 const put = (cls, x, y, html = '', attrs = '', style = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px;${style}" ${attrs}>${html}</div>`;
 
+// A den: its food as a ball of light (mana.css .mden). Its area grows with the food, so the diameter goes with the square
+// root, from DEN_D[0] token widths at 0 to DEN_D[1] at the 30 that wins; it floats over its spot, DEN_AT token heights past
+// the middle of its base row (yours further: nearer the camera, it would cover your base row). The count and next turn's
+// income are the board's numerals (static/hex/num, set as token.js numeral sets numbers over 20), inked on the light.
+const DEN_D = [.3, .75], DEN_AT = { A: 1.3, B: .7 };
+// k: how much the tilt's perspective scales the den's spot (project()); the ball is drawn 1/k as large there, so equal food
+// shows as equal balls on the screen, near or far.
+const denD = (n, k = 1) => tokenWidth() * (DEN_D[0] + (DEN_D[1] - DEN_D[0]) * Math.sqrt(Math.min(Math.max(n, 0), 30) / 30)) / k;
+const denK = y => { if (!TILT.deg) return 1; const [, oy] = tiltOrigin(); return TILT.persp / (TILT.persp - (y - oy) * Math.sin(TILT.deg * Math.PI / 180)); };
+const denSize = (n, k) => { const D = denD(n, k); return `--d:${D.toFixed(1)}px;--lift:${(D / 2 + 6).toFixed(1)}px`; };
+const inkNum = n => { n = Math.max(0, Math.round(n)); const m = f => `--m:url(/static/hex/num/${f}.svg)`;
+  return n <= 20 ? `<i style="${m(n)}"></i>` : String(n).slice(-2).split('').map((f, i) => `<i style="${m(f)};left:${i ? 17.5 : -17.5}%;right:${i ? -17.5 : 17.5}%;scale:.96"></i>`).join(''); };
+const denCount = n => `<b class="dnum">${inkNum(n)}</b>`;
+const denBall = (n, inc) => `<div class="up"><i class="pool"></i><i class="shade"></i><div class="float"><i class="halo"></i><i class="core"></i><i class="spec"></i>`
+  + denCount(n) + (inc > 0 ? `<em class="dinc"><svg viewBox="-0.3 -0.6 0.6 1.2"><path d="M-0.21 0H0.21M0 -0.21V0.21"/></svg><span>${inkNum(Math.min(inc, 20))}</span></em>` : '') + `</div></div>`;
+// A den's count stepping as food lands or leaves (foodfx.js): the number and the ball's size follow it.
+export function setDenFood(den, n) {
+  const b = den.querySelector('.dnum'); if (b) b.innerHTML = inkNum(n);
+  const D = denD(n, +den.dataset.k || 1); den.style.setProperty('--d', `${D.toFixed(1)}px`); den.style.setProperty('--lift', `${(D / 2 + 6).toFixed(1)}px`);
+  den.classList.toggle('none', n <= 0);
+}
+
 // A round crop of the card art, D stage pixels across, in a box `box` pixels across (a larger box shows more of the
 // painting around the same crop, at the same zoom: the hexagonal portrait of an animal with Armor).
 // It never runs past the painting's edge: the crop slides inward first, and zooms in only when the painting is narrower
@@ -192,15 +214,15 @@ export function renderBoard(el, M, g, cards, ui) {
     s += put(`stone pboss ${h ? h.owner : ''}${reg.c.every((v, i) => shownAt && v === shownAt[i]) ? ' shown' : ''}`, x, y, chalk('+' + pays(reg, h)));
   }
 
-  // the mana board's dens (Martin, 2026-11-20): a chamber behind each base row holding that side's food, the one thing a
-  // raid takes and the only way to win; the enemy's is a target (data-hq) while an animal could raid it
+  // the mana board's dens (Martin, 2026-11-22, design/screen/den/props "light"): each side's food is a ball of light floating
+  // past its base row, the one thing a raid takes and the only way to win; the enemy's is a target (data-hq) while an
+  // animal could raid it. Its spot is on the board, the ball stands upright over it, as the animals do.
   for (const side of ['A', 'B']) {
     const ps = [...bases[side]].map(cr => at(...cr.split(',').map(Number)));
     if (!ps.length) continue;
-    const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2, w = 2.1 * G.w, h = .62 * G.h;
-    const y = ps[0][1] + (side === 'A' ? 1 : -1) * (.5 * G.h + .1 * G.h + h / 2);
-    s += put(`mden ${side}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x - w / 2, y - h / 2,
-      `<i class="fdot"></i><b>${g.food[side]}</b><i>+${(g.income || {})[side] ?? 0}</i>`, `data-hq="${side}"`, `width:${w}px;height:${h}px`);
+    const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2;
+    const y = ps[0][1] + (side === 'A' ? DEN_AT.A : -DEN_AT.B) * G.h;
+    s += put(`mden ${side}${g.food[side] > 0 ? '' : ' none'}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x, y, denBall(g.food[side], (g.income || {})[side] ?? 0), `data-hq="${side}" data-k="${denK(y).toFixed(4)}"`, denSize(g.food[side], denK(y)));
   }
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
   

@@ -5,6 +5,8 @@
 // Food a raid destroys bursts out of the den and fades. The dots live in a layer over the whole screen, placed from where
 // each thing is drawn (the board is tilted; the leaders are off it), so they need no geometry of their own.
 
+import { setDenFood } from './board.js';
+
 export const FLY = 0.7, GAP = 0.035;   // seconds: one dot's flight, and between two leaving (timeline.js foodDur matches)
 
 const centre = el => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, h: r.height }; };
@@ -13,14 +15,14 @@ const host = () => { if (!layer || !layer.isConnected) { layer = document.create
 const dot = (x, y, size) => { const d = document.createElement('i'); d.className = 'fdot fly';
   d.style.cssText = `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px`; host().appendChild(d); return d; };
 
-// The den's count shows `from` and steps one food at a time towards `to` as `times` (ms from now) come due.
+// The den's count shows `from` and steps one food at a time towards `to` as `times` (ms from now) come due; the ball's size follows.
 function tick(den, from, to, times) {
-  const b = den && den.querySelector('b'); if (!b) return;
-  b.textContent = from;
+  if (!den) return;
+  setDenFood(den, from);
   const dir = Math.sign(to - from);
-  times.forEach((t, i) => setTimeout(() => { if (!b.isConnected) return; b.textContent = from + dir * (i + 1);
+  times.forEach((t, i) => setTimeout(() => { if (!den.isConnected) return; setDenFood(den, from + dir * (i + 1));
     den.classList.remove('fpulse'); void den.offsetWidth; den.classList.add('fpulse'); }, t));
-  setTimeout(() => { if (b.isConnected) b.textContent = to; }, (times[times.length - 1] || 0) + 30);
+  setTimeout(() => { if (den.isConnected) setDenFood(den, to); }, (times[times.length - 1] || 0) + 30);
 }
 
 // `step`: the timeline's food step ({ player, n, income, from }) or raid step ({ den, n }), sides already the viewer's
@@ -28,7 +30,7 @@ function tick(den, from, to, times) {
 export function playFood(step, before, sources) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || !step.n) return;
   const side = step.side, den = document.querySelector(`#board .mden.${side}`); if (!den) return;
-  const to = centre(den.querySelector('.fdot') || den), size = Math.max(10, to.h * .8);   // into the den's own food dot, about its size
+  const to = centre(den.querySelector('.core') || den), size = Math.max(10, Math.min(24, to.h * .3));   // into the den's ball of light
   if (step.kind === 'raid') {   // destroyed: the den jolts and flashes as it is hit, and the food bursts out, fading
     den.classList.remove('hit'); void den.offsetWidth; den.classList.add('hit');
     const times = [];
