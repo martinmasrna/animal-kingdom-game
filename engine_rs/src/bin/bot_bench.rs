@@ -281,6 +281,7 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
     // (the turn, its pilot) of a turn that began with a certain win in hand
     let mut could_win: Option<(i32, usize)> = None;
     let mut checked_turn = -1;
+    let mut last_turn = 0; // the turn the game's last action was made in
     if let Some(w) = watch.as_mut() {
         w(&st, None);
     }
@@ -304,6 +305,7 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
             }
         }
         let fatigue_before = st.fatigue;
+        last_turn = st.turn_counter;
         let action = bots[pilot].choose(&st);
         let h = &mut habits[pilot];
         match action {
@@ -341,7 +343,7 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
     };
     if let Some((turn, p)) = could_win {
         // the last turn that began with a win: missed unless its pilot won in it
-        let won_in_it = st.turn_counter == turn && result.winner.map(|w| if w == 0 { pilot_a } else { 1 - pilot_a }) == Some(p);
+        let won_in_it = last_turn == turn && result.winner.map(|w| if w == 0 { pilot_a } else { 1 - pilot_a }) == Some(p);
         if !won_in_it {
             missed_wins[p] += 1;
         }
@@ -536,12 +538,19 @@ fn run(args: &Args) -> Result<(), String> {
             t.turns_cut += s.turns_cut;
             t.turns_hidden += s.turns_hidden;
             t.decisions += s.decisions;
+            t.replies += s.replies;
+            t.reply_turns += s.reply_turns;
+            t.repicks += s.repicks;
             t.max_turn_positions = t.max_turn_positions.max(s.max_turn_positions);
         }
         let turns = (t.turns as f64).max(1.0);
         say(format!("{} {spec}: {:.0} positions and {:.2} ms a turn (most in one turn {}), {:.2} searches a turn; {} of turns cut short of a full search, {} met a draw",
             if p == 0 { "X" } else { "Y" }, t.positions as f64 / turns, t.nanos as f64 / 1e6 / turns, t.max_turn_positions, t.searches as f64 / turns,
             pct(t.turns_cut as f64 / turns), pct(t.turns_hidden as f64 / turns)));
+        if t.reply_turns > 0 {
+            say(format!("  the reply level was asked in {} of its turns ({:.1} reply searches each) and chose another turn than its own search's best in {} of those",
+                pct(t.reply_turns as f64 / turns), t.replies as f64 / t.reply_turns as f64, pct(t.repicks as f64 / t.reply_turns as f64)));
+        }
         let mut h = Habits::default();
         for r in &recs {
             let x = &r.habits[p];
@@ -776,6 +785,76 @@ fn winstats(args: &Args) -> Result<(), String> {
     Ok(())
 }
 
+/// How the evaluation reads as a chance of winning: over games the bot plays against itself, every finished turn's
+/// score (for the player who ended it) against who won, a logistic curve fitted to it, and the share won by score.
+fn evalfit(args: &Args) -> Result<(), String> {
+    use ak_engine::bots::eval::{evaluate, RaidOdds, Weights};
+    let (g, _) = load_game(args)?;
+    let (decks, source) = load_decks(&g, args)?;
+    let spec = args.get("bot").unwrap_or("turn:budget=20000").to_string();
+    let games = args.num("games", 1000)? as usize;
+    let run_seed = args.num("seed", 1)?;
+    let n_threads = threads(args)?;
+    let rows: Mutex<Vec<(f32, bool)>> = Mutex::new(Vec::new());
+    let next = AtomicUsize::new(0);
+    std::thread::scope(|scope| {
+        for _ in 0..n_threads {
+            scope.spawn(|| loop {
+                let job = next.fetch_add(1, Ordering::Relaxed);
+                if job >= games {
+                    return;
+                }
+                let (a, b) = (job % decks.len(), (job / decks.len()) % decks.len());
+                let seed = mix(run_seed ^ mix(0xE7A1 + job as u64)) >> 1;
+                let mut local: Vec<(f32, Player)> = Vec::new();
+                let (w, odds) = (Weights::default(), RaidOdds::default());
+                let mut watch = |st: &State, action: Option<&Action>| {
+                    if matches!(action, Some(Action::Pass)) && st.result.is_none() {
+                        let mover = other(st.current);
+                        local.push((evaluate(st, mover, &w, &odds), mover));
+                    }
+                };
+                if let Ok(rec) = play(&g, &decks, job, a, b, seed, [spec.as_str(), spec.as_str()], 0, false, false, Some(&mut watch)) {
+                    if let Some(winner) = rec.winner {
+                        rows.lock().unwrap().extend(local.into_iter().map(|(e, p)| (e, p == winner)));
+                    }
+                }
+            });
+        }
+    });
+    let rows = rows.into_inner().unwrap();
+    let ll = |s: f32, b: f32| -> f64 {
+        rows.iter().map(|&(e, won)| {
+            let p = (1.0 / (1.0 + (-((e - b) / s) as f64).exp())).clamp(1e-9, 1.0 - 1e-9);
+            if won { p.ln() } else { (1.0 - p).ln() }
+        }).sum::<f64>() / rows.len() as f64
+    };
+    let mut best = (f64::NEG_INFINITY, 0.0f32, 0.0f32);
+    for si in 2..=120 {
+        for bi in -20..=20 {
+            let (s, b) = (si as f32, bi as f32);
+            let v = ll(s, b);
+            if v > best.0 {
+                best = (v, s, b);
+            }
+        }
+    }
+    println!("evaluation against the result: {} finished turns from {games} games of {spec} against itself, {source}", rows.len());
+    println!("chance of winning = 1 / (1 + exp(-(score - {}) / {})); log-loss {:.4} (a coin: 0.6931)", best.2, best.1, -best.0);
+    println!("{:<14} {:>7} {:>8} {:>8}", "score", "turns", "won", "curve");
+    for (lo, hi) in [(-999, -40), (-40, -25), (-25, -15), (-15, -8), (-8, -3), (-3, 3), (3, 8), (8, 15), (15, 25), (25, 40), (40, 999)] {
+        let b: Vec<_> = rows.iter().filter(|r| r.0 >= lo as f32 && r.0 < hi as f32).collect();
+        if b.is_empty() {
+            continue;
+        }
+        let won = b.iter().filter(|r| r.1).count() as f64 / b.len() as f64;
+        let mean = b.iter().map(|r| r.0 as f64).sum::<f64>() / b.len() as f64;
+        let p = 1.0 / (1.0 + (-((mean - best.2 as f64) / best.1 as f64)).exp());
+        println!("{:<14} {:>7} {:>8} {:>8}", format!("{lo} to {hi}"), b.len(), pct(won), pct(p));
+    }
+    Ok(())
+}
+
 /// One saved position (`show --dump TURN`): whether the player to move has a certain win this turn, and the turn a bot
 /// plays from it.
 fn position(args: &Args) -> Result<(), String> {
@@ -816,6 +895,7 @@ fn main() {
         "turns" => turns(&args),
         "winstats" => winstats(&args),
         "position" => position(&args),
+        "evalfit" => evalfit(&args),
         other => Err(format!("unknown command {other:?} (run, show, turns)")),
     });
     if let Err(e) = result {

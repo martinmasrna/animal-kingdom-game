@@ -35,6 +35,12 @@ pub struct BotStats {
     pub turns_hidden: u64,
     /// The most positions one turn took.
     pub max_turn_positions: u64,
+    /// Reply searches run (the opponent's turn, searched after one of my candidate turns in one imagined hand).
+    pub replies: u64,
+    /// Turns whose first search asked the reply level, and those of them where it chose another turn than the one my
+    /// own turn's search liked best.
+    pub reply_turns: u64,
+    pub repicks: u64,
 }
 
 pub trait Bot: Send {

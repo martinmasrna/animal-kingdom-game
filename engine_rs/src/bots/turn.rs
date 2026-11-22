@@ -18,7 +18,7 @@
 use std::collections::{HashMap, VecDeque};
 
 use crate::actions::Action;
-use crate::bots::eval::{evaluate, greedy_evaluate, hand_raid, RaidOdds, Weights};
+use crate::bots::eval::{evaluate, greedy_evaluate, hand_raid, RaidOdds, Weights, WIN};
 use crate::bots::key::position_key;
 use crate::bots::seat::{self, Unseen};
 use crate::bots::{Bot, BotStats, Timer};
@@ -39,6 +39,22 @@ pub struct TurnSpec {
     pub samples: usize,
     /// Positions a look for a win may make (`win_search`); 0 never looks. Unset, a sixteenth of the budget.
     pub win: Option<u64>,
+    /// The reply level: how many of my best finished turns are scored against the opponent's reply; 0 scores a turn where
+    /// it ends, with no reply.
+    pub reply: usize,
+    /// Hands the opponent may hold that each of those turns is scored against.
+    pub hands: usize,
+    /// Of a search's positions, the share (in hundredths) that plans my own turn; the rest is the replies'.
+    pub own: u64,
+    /// Deal the opponent's imagined hands spread over their cards' costs (`seat::redeal`).
+    pub spread: bool,
+    /// The evaluation as a chance of winning: 1 / (1 + exp(-(score ± tempo) / scale)), the tempo taken off the player who
+    /// has just moved (`bot_bench evalfit` fits both).
+    pub scale: f32,
+    pub tempo: f32,
+    /// Above 0: score a turn by the mean of the raw evaluation after the reply instead, a game won or lost counting as
+    /// this much. The way the old game's bot averaged; kept to measure it against the chance of winning.
+    pub decisive: f32,
     /// Score finished turns with the shipped greedy bot's evaluation instead (`eval=greedy`): what the search alone is
     /// worth, with the evaluation held fixed.
     pub greedy_eval: bool,
@@ -47,7 +63,8 @@ pub struct TurnSpec {
 
 impl Default for TurnSpec {
     fn default() -> TurnSpec {
-        TurnSpec { budget: 20_000, worlds: 4, width: 16_384, samples: 12, win: None, greedy_eval: false, weights: Weights::default() }
+        TurnSpec { budget: 20_000, worlds: 4, width: 16_384, samples: 12, win: None, reply: 0, hands: 3, own: 25, spread: false, scale: 15.0,
+                   tempo: 10.0, decisive: 0.0, greedy_eval: false, weights: Weights::default() }
     }
 }
 
@@ -62,6 +79,13 @@ impl TurnSpec {
                 "width" => spec.width = int()?.max(1) as usize,
                 "samples" => spec.samples = int()?.max(1) as usize,
                 "win" => spec.win = Some(int()?),
+                "reply" => spec.reply = int()? as usize,
+                "hands" => spec.hands = int()?.max(1) as usize,
+                "own" => spec.own = int()?.clamp(1, 99),
+                "spread" => spec.spread = int()? != 0,
+                "scale" => spec.scale = v.parse::<f32>().ok().filter(|x| *x > 0.0).ok_or_else(|| format!("bot spec: {k}={v:?} is not a positive number"))?,
+                "tempo" => spec.tempo = v.parse::<f32>().map_err(|_| format!("bot spec: {k}={v:?} is not a number"))?,
+                "decisive" => spec.decisive = v.parse::<f32>().map_err(|_| format!("bot spec: {k}={v:?} is not a number"))?,
                 "eval" => spec.greedy_eval = match v {
                     "greedy" => true,
                     "food" => false,
@@ -82,6 +106,8 @@ const LEAF: u32 = u32::MAX;
 const NO_EDGE: u32 = u32::MAX;
 const PASS_EDGE: u32 = u32::MAX - 1;
 const FIRST_WIDTH: usize = 16;
+/// The fewest positions a reply search is worth running on.
+const MIN_REPLY: u64 = 500;
 
 /// A position of one layer: the best finished turn at or below it, and where that goes.
 #[derive(Clone, Copy)]
@@ -90,6 +116,29 @@ struct Meta {
     best_edge: u32,
     e0: u32,
     e1: u32,
+    /// The position of the layer above it was first reached from, and by which action.
+    parent: u32,
+    via: Action,
+}
+
+impl Meta {
+    fn new(best: f32, parent: u32, via: Action) -> Meta {
+        Meta { best, best_edge: if best > NEG { PASS_EDGE } else { NO_EDGE }, e0: 0, e1: 0, parent, via }
+    }
+}
+
+/// A finished turn found by a pass: its score, the position it ends from (layer, index), and the action that ends it
+/// (none: ending the turn there).
+type Finished = (f32, u32, u32, Option<Action>);
+
+/// Keep `item` among the `k` best-scored.
+fn keep_top(top: &mut Vec<Finished>, k: usize, item: Finished) {
+    if k == 0 || (top.len() == k && item.0 <= top[k - 1].0) {
+        return;
+    }
+    let at = top.iter().position(|t| item.0 > t.0).unwrap_or(top.len());
+    top.insert(at, item);
+    top.truncate(k);
 }
 
 #[derive(Clone, Copy)]
@@ -106,6 +155,8 @@ struct Ctx<'a> {
     odds: &'a RaidOdds,
     max_width: usize,
     greedy_eval: bool,
+    /// How many of the best finished turns a search keeps as whole lines (for the reply level); 0 keeps only the best.
+    keep: usize,
 }
 
 impl Ctx<'_> {
@@ -123,6 +174,8 @@ struct WorldSearch {
     /// The best line found, as actions from the root.
     line: Vec<Action>,
     line_value: f32,
+    /// The best finished turns found, best first: each its score and its whole line (`Ctx::keep` of them).
+    turns: Vec<(f32, Vec<Action>)>,
     /// A draw or a look at the deck happened somewhere in the search: its values rest on an imagined deck.
     hidden: bool,
     /// A pass followed every line to the end of the turn.
@@ -143,7 +196,7 @@ impl WorldSearch {
             actions.push(Action::Pass);
         }
         let values = vec![NEG; actions.len()];
-        WorldSearch { root, actions, values, line: Vec::new(), line_value: NEG, hidden: false, exhaustive: false, positions: 0,
+        WorldSearch { root, actions, values, line: Vec::new(), line_value: NEG, turns: Vec::new(), hidden: false, exhaustive: false, positions: 0,
                       next_width: FIRST_WIDTH, last_cost: 0 }
     }
 
@@ -181,7 +234,11 @@ impl WorldSearch {
 
         let root = self.root.clone();
         let root_best = if may_pass(&root, me) { self.pass_value(ctx, &root) } else { NEG };
-        metas.push(vec![Meta { best: root_best, best_edge: if root_best > NEG { PASS_EDGE } else { NO_EDGE }, e0: 0, e1: 0 }]);
+        let mut top: Vec<Finished> = Vec::new();
+        if root_best > NEG {
+            keep_top(&mut top, ctx.keep, (root_best, 0, 0, None));
+        }
+        metas.push(vec![Meta::new(root_best, u32::MAX, Action::Pass)]);
         let mut cur: Vec<Option<State>> = vec![Some(root)];
 
         loop {
@@ -217,7 +274,9 @@ impl WorldSearch {
                         self.hidden = true;
                     }
                     if ended(&c) {
-                        layer_edges.push(Edge { action: a, child: LEAF, value: ctx.eval(&c) });
+                        let v = ctx.eval(&c);
+                        keep_top(&mut top, ctx.keep, (v, depth as u32, i as u32, Some(a)));
+                        layer_edges.push(Edge { action: a, child: LEAF, value: v });
                         continue;
                     }
                     let key = position_key(&c, me, true);
@@ -228,12 +287,15 @@ impl WorldSearch {
                             let quiet = c.pending.is_none() && c.effect_stack.is_empty();
                             if quiet {
                                 let v = self.pass_value(ctx, &c);
-                                next_metas.push(Meta { best: v, best_edge: if v > NEG { PASS_EDGE } else { NO_EDGE }, e0: 0, e1: 0 });
+                                if v > NEG {
+                                    keep_top(&mut top, ctx.keep, (v, depth as u32 + 1, at, None));
+                                }
+                                next_metas.push(Meta::new(v, i as u32, a));
                                 ranks.push(v + ctx.w.mana_rank * rules::mana_left(&c, me) as f32);
                                 live += 1;
                             } else {
                                 // a choice is waiting: never dropped by the width
-                                next_metas.push(Meta { best: NEG, best_edge: NO_EDGE, e0: 0, e1: 0 });
+                                next_metas.push(Meta::new(NEG, i as u32, a));
                                 ranks.push(f32::INFINITY);
                             }
                             next_states.push(Some(c));
@@ -316,6 +378,24 @@ impl WorldSearch {
                 }
             }
         }
+        // the best finished turns as whole lines, with those of the passes before
+        for (v, d, i, last) in top {
+            let mut line = vec![last.unwrap_or(Action::Pass)];
+            let (mut d, mut i) = (d as usize, i as usize);
+            while d > 0 {
+                let m = metas[d][i];
+                line.push(m.via);
+                i = m.parent as usize;
+                d -= 1;
+            }
+            line.reverse();
+            match self.turns.iter_mut().find(|t| t.1 == line) {
+                Some(t) => t.0 = t.0.max(v),
+                None => self.turns.push((v, line)),
+            }
+        }
+        self.turns.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+        self.turns.truncate(ctx.keep);
         if !cut && !truncated {
             self.exhaustive = true;
         }
@@ -511,9 +591,12 @@ impl TurnBot {
         }
 
         let allowance = (self.spec.budget.saturating_sub(self.used + positions) / 2).max(1);
+        if self.spec.reply > 0 {
+            return self.search_with_replies(me, &seen, world, &odds, allowance, positions, first);
+        }
         let can_draw = !world.decks[me as usize].is_empty();
         let k = if can_draw { self.spec.worlds.max(1) as u64 } else { 1 };
-        let ctx = Ctx { me, w: &self.spec.weights, odds: &odds, max_width: self.spec.width, greedy_eval: self.spec.greedy_eval };
+        let ctx = Ctx { me, w: &self.spec.weights, odds: &odds, max_width: self.spec.width, greedy_eval: self.spec.greedy_eval, keep: 0 };
         let mut s0 = WorldSearch::new(world, me);
         s0.run(&ctx, (allowance / k).max(1));
         if !s0.hidden && k > 1 {
@@ -557,6 +640,190 @@ impl TurnBot {
         self.plan.clear();
         if !s0.hidden && s0.exhaustive && s0.line.first() == Some(&action) {
             self.plan = Self::keyed(&s0.root, me, &s0.line);
+            self.plan.pop_front();
+        }
+        action
+    }
+
+    /// The search with the reply level. My own turn is planned in one world on `own` hundredths of `allowance`; its
+    /// best `reply` finished turns are then each played out in `hands` worlds (the same world with the opponent's hidden
+    /// cards dealt afresh), where the opponent takes a win if they have one and otherwise plays the turn their own
+    /// search likes best, and the turn's score is the mean, over those worlds, of my chance of winning from where their
+    /// reply leaves me. What is left of `allowance` after my own turn is split evenly over the replies. A turn that wins
+    /// outright is played without asking.
+    #[allow(clippy::too_many_arguments)]
+    fn search_with_replies(&mut self, me: Player, seen: &Unseen, world: State, odds: &RaidOdds, allowance: u64,
+                           mut positions: u64, first: bool) -> Action {
+        let opp = other(me);
+        let spec = self.spec.clone();
+        let ctx = Ctx { me, w: &spec.weights, odds, max_width: spec.width, greedy_eval: spec.greedy_eval, keep: spec.reply };
+        let mut s0 = WorldSearch::new(world, me);
+        s0.run(&ctx, (allowance * spec.own / 100).max(1));
+        positions += s0.positions;
+        if first {
+            self.stats.turns_cut += !s0.exhaustive as u64;
+            self.stats.turns_hidden += s0.hidden as u64;
+        }
+        let fallback = |s0: &WorldSearch| -> Action {
+            let mut best = 0usize;
+            for (i, v) in s0.values.iter().enumerate() {
+                if *v > s0.values[best] {
+                    best = i;
+                }
+            }
+            s0.actions.get(best).copied().unwrap_or(Action::Pass)
+        };
+        self.plan.clear();
+        if s0.turns.len() < 2 || s0.line_value >= WIN {
+            // one turn to play, or a win found: nothing to ask the reply
+            let action = s0.line.first().copied().unwrap_or_else(|| fallback(&s0));
+            if !s0.hidden && s0.line.first() == Some(&action) {
+                self.plan = Self::keyed(&s0.root, me, &s0.line);
+                self.plan.pop_front();
+            }
+            self.count(positions);
+            return action;
+        }
+
+        // my candidate turns, each where it ends in the search's own world; two that end on one position are one
+        struct Cand {
+            line: Vec<Action>,
+            hidden: bool,
+            sum: f32,
+            n: u32,
+        }
+        let mut cands: Vec<Cand> = Vec::new();
+        let mut ends: Vec<u64> = Vec::new();
+        for (_, line) in &s0.turns {
+            let mut st = s0.root.clone();
+            let deck = st.decks[me as usize].len();
+            let (mut hidden, mut legal) = (false, true);
+            for a in line {
+                if rules::apply_action(&mut st, a, false).is_err() {
+                    legal = false;
+                    break;
+                }
+                positions += 1;
+                hidden |= st.decks[me as usize].len() != deck || matches!(&st.pending, Some(p) if matches!(p.options, Options::Deck(_)));
+            }
+            let key = position_key(&st, me, true);
+            if legal && !ends.contains(&key) {
+                ends.push(key);
+                cands.push(Cand { line: line.clone(), hidden, sum: 0.0, n: 0 });
+            }
+        }
+        // A reply is worth asking only with enough positions to follow the opponent's turn some way (MIN_REPLY): where
+        // the search has too few left for every turn in every hand, it asks about fewer turns, then in fewer hands,
+        // and with too few for two turns in one hand it plays its own search's best.
+        let limit = positions - s0.positions + allowance;
+        let affordable = (limit.saturating_sub(positions) / MIN_REPLY) as usize;
+        let mut worlds = spec.hands.max(1);
+        if cands.len() * worlds > affordable {
+            cands.truncate((affordable / worlds).max(2).min(cands.len()));
+            worlds = (affordable / cands.len().max(1)).clamp(1, worlds);
+        }
+        if cands.len() < 2 || cands.len() * worlds > affordable {
+            let action = s0.line.first().copied().unwrap_or_else(|| fallback(&s0));
+            if !s0.hidden && s0.line.first() == Some(&action) {
+                self.plan = Self::keyed(&s0.root, me, &s0.line);
+                self.plan.pop_front();
+            }
+            self.count(positions);
+            return action;
+        }
+        // each reply gets an even share of what is left when its turn comes, so one that runs over is paid for by those
+        // after it
+        let mut to_come = (cands.len() * worlds) as u64;
+        // what the opponent can count of my hidden cards, for the raids their own evaluation fears
+        let odds_opp = RaidOdds::sample(&s0.root, opp, &seat::unseen(&s0.root, opp), spec.samples, &mut self.rng);
+        let ctx_opp = Ctx { me: opp, w: &spec.weights, odds: &odds_opp, max_width: spec.width, greedy_eval: spec.greedy_eval, keep: 0 };
+        let chance = |st: &State, e: f32| -> f32 {
+            if spec.decisive > 0.0 {
+                return e.clamp(-spec.decisive, spec.decisive);
+            }
+            let tempo = if st.current == me { spec.tempo } else { -spec.tempo };
+            1.0 / (1.0 + (-(e + tempo) / spec.scale).exp())
+        };
+        // a game decided, as a score: won, lost, drawn
+        let decided = |winner: Option<Player>| -> f32 {
+            let (won, lost) = if spec.decisive > 0.0 { (spec.decisive, -spec.decisive) } else { (1.0, 0.0) };
+            match winner {
+                Some(p) if p == me => won,
+                Some(_) => lost,
+                None => (won + lost) / 2.0,
+            }
+        };
+        for h in 0..worlds {
+            let mut w = s0.root.clone();
+            if h > 0 {
+                seat::redeal(&mut w, me, seen, &mut self.rng, spec.spread);
+            }
+            for c in cands.iter_mut() {
+                let mut st = w.clone();
+                let mut legal = true;
+                for a in &c.line {
+                    if rules::apply_action(&mut st, a, false).is_err() {
+                        legal = false;
+                        break;
+                    }
+                    positions += 1;
+                }
+                if !legal {
+                    continue;
+                }
+                let p = if let Some(r) = st.result {
+                    decided(r.winner)
+                } else if st.player_to_act() != opp {
+                    chance(&st, ctx.eval(&st)) // my turn did not end (a choice still waiting): scored as it stands
+                } else {
+                    // their win, if they have one; else the turn their own search likes best
+                    let each = (limit.saturating_sub(positions) / to_come.max(1)).max(1);
+                    let look = win_search(&st, opp, (each / 8).max(1));
+                    positions += look.positions;
+                    if look.line.is_some() {
+                        decided(Some(opp))
+                    } else {
+                        let mut reply = WorldSearch::new(st.clone(), opp);
+                        reply.run(&ctx_opp, each.saturating_sub(look.positions).max(1));
+                        positions += reply.positions;
+                        self.stats.replies += 1;
+                        for a in &reply.line {
+                            if rules::apply_action(&mut st, a, false).is_err() {
+                                break;
+                            }
+                            positions += 1;
+                        }
+                        if st.result.is_none() && may_pass(&st, opp) {
+                            let _ = rules::apply_action(&mut st, &Action::Pass, false); // a reply the budget cut short still ends
+                            positions += 1;
+                        }
+                        match st.result {
+                            Some(r) => decided(r.winner),
+                            None => chance(&st, ctx.eval(&st)),
+                        }
+                    }
+                };
+                c.sum += p;
+                c.n += 1;
+                to_come = to_come.saturating_sub(1);
+            }
+        }
+        let mut best = 0usize;
+        for (i, c) in cands.iter().enumerate() {
+            let mean = |c: &Cand| if c.n > 0 { c.sum / c.n as f32 } else { NEG };
+            if mean(c) > mean(&cands[best]) {
+                best = i;
+            }
+        }
+        if first {
+            self.stats.reply_turns += 1;
+            self.stats.repicks += (best != 0) as u64;
+        }
+        self.count(positions);
+        let Some(pick) = cands.get(best) else { return fallback(&s0) };
+        let action = pick.line.first().copied().unwrap_or(Action::Pass);
+        if !pick.hidden {
+            self.plan = Self::keyed(&s0.root, me, &pick.line);
             self.plan.pop_front();
         }
         action
@@ -620,8 +887,13 @@ impl Bot for TurnBot {
     }
 
     fn spec(&self) -> String {
-        format!("turn:budget={},worlds={},width={},samples={},win={},eval={}", self.spec.budget, self.spec.worlds, self.spec.width, self.spec.samples, self.spec.win.unwrap_or(self.spec.budget / 16),
-                if self.spec.greedy_eval { "greedy" } else { "food" })
+        let mut s = format!("turn:budget={},worlds={},width={},samples={},win={},eval={}", self.spec.budget, self.spec.worlds, self.spec.width, self.spec.samples,
+                            self.spec.win.unwrap_or(self.spec.budget / 16), if self.spec.greedy_eval { "greedy" } else { "food" });
+        if self.spec.reply > 0 {
+            s.push_str(&format!(",reply={},hands={},own={},spread={},scale={},tempo={}", self.spec.reply, self.spec.hands, self.spec.own, self.spec.spread as u8,
+                                self.spec.scale, self.spec.tempo));
+        }
+        s
     }
 }
 

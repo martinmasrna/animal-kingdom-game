@@ -64,7 +64,7 @@ pub fn unseen(real: &State, me: Player) -> Unseen {
 pub fn world(real: &State, me: Player, seen: &Unseen, rng: &mut PyRandom) -> State {
     let mut w = real.fork();
     w.events.on = false;
-    let (m, o) = (me as usize, other(me) as usize);
+    let m = me as usize;
     // my deck: I know what is in it, never its order
     let looking = match &w.pending {
         Some(p) if p.chooser == me => match p.options {
@@ -76,18 +76,38 @@ pub fn world(real: &State, me: Player, seen: &Unseen, rng: &mut PyRandom) -> Sta
     let below = w.decks[m].len() - looking.min(w.decks[m].len());
     w.decks[m][..below].sort_unstable();
     rng.shuffle(&mut w.decks[m][..below]);
-    // their hand and deck
+    redeal(&mut w, me, seen, rng, false);
+    w
+}
+
+/// Deal `me`'s opponent afresh in the world `w`: their unknown hand cards and their deck from their unseen pool, and a
+/// random stream of its own. `me`'s own deck stays as `w` has it. `spread`: the hand is dealt one card from each of as
+/// many equal runs of the pool in order of cost as it has unknown cards, so every dealt hand holds cheap and dear cards
+/// in the pool's proportions; plain, it is a shuffle.
+pub fn redeal(w: &mut State, me: Player, seen: &Unseen, rng: &mut PyRandom, spread: bool) {
+    let o = other(me) as usize;
     let mut pool = seen.pool.clone();
-    rng.shuffle(&mut pool);
-    let mut next = pool.into_iter();
-    for &slot in &seen.unknown_slots {
-        if let Some(card) = next.next() {
-            w.hands[o][slot].card = card;
+    let slots = seen.unknown_slots.len().min(pool.len());
+    let mut hand: Vec<CardId> = Vec::with_capacity(slots);
+    if spread && slots > 0 {
+        pool.sort_by_key(|&c| (w.card(c).cost, c));
+        // one card from each run, taken from the last run back so the indices before it stay put
+        let n = pool.len();
+        for run in (0..slots).rev() {
+            let (lo, hi) = (run * n / slots, (run + 1) * n / slots);
+            hand.push(pool.remove(lo + rng.randbelow((hi - lo).max(1))));
         }
+        rng.shuffle(&mut hand);
+        rng.shuffle(&mut pool);
+    } else {
+        rng.shuffle(&mut pool);
+        hand.extend(pool.drain(..slots));
+    }
+    for (&slot, card) in seen.unknown_slots.iter().zip(hand) {
+        w.hands[o][slot].card = card;
     }
     let n = w.decks[o].len();
     w.decks[o].clear();
-    w.decks[o].extend(next.take(n));
+    w.decks[o].extend(pool.into_iter().take(n));
     w.rng = CowRng::new(PyRandom::seeded_u64(rng.getrandbits(64)));
-    w
 }
