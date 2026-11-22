@@ -34,6 +34,10 @@ His words of 2026-11-22, a brainstorm "for the future", not a plan. Agents feed 
 - **Humanish and animalish:** his working theory that people file a character as one or the other; "maybe the mix is the best".
 - **The art:** the tilted board stays ("ever since we tried the tilted look, I just think it's the better of the two"); a played card's creature "is going to jump out of the card and is going to be on board". Real 3D models only "if we're doing actual world building". On generated art: "I'm always going to have that feeling that we're producing like AI slop". What works for him: "you creating like a custom tool where you hand me a few knobs to turn is like the best workflow we've had so far"; and for creatures, a tool like Spore's creator: "I don't have to actually paint ... I just click around and slide some ... sliders".
 
+## Factions, colours or classes (open; Martin undecided)
+
+His words of 2026-11-22: "whether like colors, factions, or classes, whatever, it's the same thing gameplay wise. Whether we should have them or not"; "I'm kind of undecided ... I could see both of them working very well if executed well". Decks already get identity from heroes, "which I want to keep in the game", so this "would be more like adding second layer on top". For: "stronger flavor and world building, and just more depth in terms of deck building"; "it actually gives you rules you can use for generating like new cards or new creatures"; it limits what a player must consider, though "it's really just double-edged sword" (he liked five-colour decks most). Against: "it's simpler, easier to balance, less cards to develop, less art to make"; "we need to balance like classes against each other" on top of heroes. On colours with coloured mana: "too obviously copying magic". A form he likes: as Magic's Commander, "each hero has like either one color or two colors". "I still think the gameplay should have precedence."
+
 ## The board and the screen
 
 - **Decided:** the board runs bottom to top on every device, your side at the bottom (2026-11-17); blue you, red opponent, one measured hue each (2026-11-18).
