@@ -1129,16 +1129,12 @@ const onStage = el => { const st = document.getElementById('stage'), S = st.getB
 const BACK = { id: '__back', name: '', text: '', rarity: 'common' };   // a card face down: its outline and frame, nothing on it
 // LOOK TRIAL: the board's look, hex or square, switched by the pill at the bottom left (kept per browser)
 const LOOK_KEY = 'ak:look';
-function setLook() { let v = 'hex', st = 'square'; try { v = localStorage.getItem(LOOK_KEY) || 'hex'; st = localStorage.getItem('ak:str') || 'square'; } catch { /* none */ }
-  document.documentElement.dataset.look = v; document.documentElement.dataset.str = st; return v; }
+function setLook() { let v = 'hex'; try { v = localStorage.getItem(LOOK_KEY) || 'hex'; } catch { /* none */ } document.documentElement.dataset.look = v; return v; }
 setLook();
 function drawLookSwitch() {
   const el = document.getElementById('looksw'); if (!el) return;
-  const v = setLook(), st = document.documentElement.dataset.str;
-  el.innerHTML = `Board <b data-look="hex" class="${v === 'hex' ? 'on' : ''}">hex</b><b data-look="square" class="${v === 'square' ? 'on' : ''}">square</b>`
-    + (v === 'square' ? `<span class="sep"></span>Strength <b data-str="square" class="${st !== 'above' ? 'on' : ''}">square</b><b data-str="above" class="${st === 'above' ? 'on' : ''}">above</b>` : '');
-  el.onclick = e => { const b = e.target.closest('[data-look],[data-str]'); if (!b) return; e.stopPropagation();
-    try { if (b.dataset.look) localStorage.setItem(LOOK_KEY, b.dataset.look); else localStorage.setItem('ak:str', b.dataset.str); } catch { /* none */ } setLook(); drawGame(); };
+  const v = setLook(); el.innerHTML = `Board <b data-look="hex" class="${v === 'hex' ? 'on' : ''}">hex</b><b data-look="square" class="${v === 'square' ? 'on' : ''}">square</b>`;
+  el.onclick = e => { const b = e.target.closest('[data-look]'); if (!b) return; e.stopPropagation(); try { localStorage.setItem(LOOK_KEY, b.dataset.look); } catch { /* none */ } setLook(); drawGame(); };
 }
 function drawRail(G, d) {
   drawLookSwitch();

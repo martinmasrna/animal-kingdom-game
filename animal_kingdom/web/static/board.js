@@ -51,8 +51,6 @@ const setRows = M => { if (!M || !M.crossroads) return; const n = {};
 // the ground beside its foot (app.js PL); upright: between the dens' ridges. The mana board stands in the middle column,
 // as tall as the stage allows between the opponent's hand and yours.
 // LOOK TRIAL (Martin, 2026-11-22): the board in square tiles, a unit standing on its square, switched in the match (app.js)
-// and the strength floating above a unit's head (as a health bar over a champion in League of Legends), square look only
-export const strAbove = () => squareLook() && document.documentElement.dataset.str === 'above';
 export const squareLook = () => typeof document !== 'undefined' && document.documentElement.dataset.look === 'square';
 const rowStep = g => squareLook() ? g.w : HEX.dy * g.h;   // a row's step up the board: a square's side, or the hexagons' interlock
 const hexGeo = () => { const g = ({ w: 120, x: STAGE.w / 2, top: 41 }); g.h = g.w * TH / TW; return g; };
@@ -186,11 +184,10 @@ function hexUnit(u, under, cards, fire = false, tw = null) {
     (has('Armor') ? img(armorShell(u.owner), 'rimimg hex tkarmor') : '') +
     `<div class="tkanimal${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}">${win}</div>` +
     venom('tint') + (has('Stealth') ? `<div class="kwl mist tkw"><div class="flow m2" style="${ph(1, 70)}"></div><div class="flow m1" style="${ph(0, 25)}"></div></div>` : '') + venom('fumes') +
-    (u.str == null || (stand && strAbove()) ? '' : numeral(u.str)) +
+    (u.str == null ? '' : numeral(u.str)) +
     // a legendary of the mana prototype: a painted gold gem on the top tip (Martin, 2026-11-20, a placeholder mark)
     (c && c.rarity === 'legendary' ? img('/static/hex/gem.webp', 'tkgem', 'position:absolute;left:40%;top:-4%;width:20%;z-index:4;pointer-events:none') : '') +
     (stand ? (([fw, fh]) => `<img class="mstand" src="/static/hex/fig/${u.id}.webp" alt="" draggable="false" style="height:${STAND * g.w}px;width:${STAND * g.w * fw / fh}px">`)(FIG_DIMS(u.id)) : '') +
-    (stand && strAbove() && u.str != null ? `<div class="ststr ${u.owner}" style="--fh:${STAND * g.w}px">${numeral(u.str)}</div>` : '') +
     (u.timer ? `<div class="timer" style="${TK_TIMER}" data-tip="${resolvesIn(u.timer)}">${chalk(u.timer)}</div>` : '') +
     (u.guarded ? '<div class="gname">Can\'t be covered</div>' : '');
 }
