@@ -59,8 +59,8 @@
 .game.mana #stage { background: #1f2228; }
 .game.mana .ledge, .game.mana .deck { display: none !important; }
 /* the board: plain tiles, a dot on each region's corner; past each base row its den (board.js mden, Martin 2026-11-22):
-   that side's food as a ball of light floating over its spot, its area growing with the food; it breathes, and while an
-   animal could raid it the enemy's breathes quicker and takes the tiles' cream ring. The spot is on the tilted board; .up
+   that side's food as a ball of light floating over its spot, its area growing with the food; while an animal could raid
+   it the enemy's takes the tiles' cream ring. Thin trails run to its spot from its base row's far tips (board.js). The spot is on the tilted board; .up
    stands back upright about it (as .mstand does), with the ball's shadow and the light it casts drawn in the same layer
    (on the board's plane they would cut through the upright glow). .up is given a real box: a 0x0 layer clips in Chrome. */
 .game.mana .mden { width: 0; height: 0; z-index: 3; transform-style: preserve-3d; }
@@ -68,8 +68,8 @@
   transform-origin: 50% 75%; transform: rotateX(calc(-1 * var(--tilt))); pointer-events: none; }
 .game.mana .mden .up > i { position: absolute; left: 50%; top: 75%; transform: translate(-50%, -50%); border-radius: 50%; }
 .game.mana .mden .pool { width: calc(var(--d) * 2.6); height: calc(var(--d) * 2); background: radial-gradient(closest-side, rgba(255, 150, 40, .4), rgba(255, 120, 20, .13) 55%, rgba(255, 110, 0, 0)); }
-.game.mana .mden .shade { width: calc(var(--d) * .85); height: calc(var(--d) * .65); background: radial-gradient(closest-side, rgba(10, 6, 2, .6), rgba(10, 6, 2, .25) 60%, rgba(0, 0, 0, 0)); animation: dshade 2.8s ease-in-out infinite; }
-.game.mana .mden .float { position: absolute; inset: 0; transform-origin: 50% calc(75% - var(--lift)); animation: dbob 2.8s ease-in-out infinite; }
+.game.mana .mden .shade { width: calc(var(--d) * .85); height: calc(var(--d) * .65); background: radial-gradient(closest-side, rgba(10, 6, 2, .6), rgba(10, 6, 2, .25) 60%, rgba(0, 0, 0, 0)); }
+.game.mana .mden .float { position: absolute; inset: 0; transform-origin: 50% calc(75% - var(--lift)); }
 .game.mana .mden .float > * { position: absolute; left: 50%; top: calc(75% - var(--lift)); transform: translate(-50%, -50%); }
 .game.mana .mden .halo { width: calc(var(--d) * 2.2); height: calc(var(--d) * 2.2); border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 175, 70, .42), rgba(255, 130, 30, .12) 55%, rgba(255, 120, 20, 0)); }
 .game.mana .mden .core { width: var(--d); height: var(--d); border-radius: 50%; pointer-events: auto;
@@ -90,9 +90,6 @@
 .game.mana .mden.none .dnum > i, .game.mana .mden.none .dinc span > i { background: #f2a65a; } .game.mana .mden.none .dinc svg { stroke: #f2a65a; }
 .game.mana .mden.tgt .core { cursor: pointer; box-shadow: 0 0 0 4px rgba(20, 22, 26, .9), 0 0 0 8px var(--act, #efe6d4),
   inset calc(var(--d) * -.07) calc(var(--d) * -.09) calc(var(--d) * .16) rgba(110, 38, 0, .45), 0 0 calc(var(--d) * .5) calc(var(--d) * .15) rgba(255, 160, 50, .7); }
-.game.mana .mden.tgt .float, .game.mana .mden.tgt .shade { animation-duration: 1.4s; }
-@keyframes dbob { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-5px) scale(1.04); } }
-@keyframes dshade { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 50% { transform: translate(-50%, -50%) scale(.9); opacity: .8; } }
 /* food: a little orange glowing dot (Martin, 2026-11-21: "for now") in flight (foodfx.js); the ball gulps as each lands */
 .fdot { display: block; flex: none; border-radius: 50%; background: radial-gradient(circle at 42% 38%, #fff4cf 0, #ffbe5c 30%, #f2841f 62%, #c95a0e 100%);
   box-shadow: 0 0 6px 2px rgba(255, 150, 40, .65), 0 0 16px 4px rgba(255, 120, 20, .3); }
@@ -102,6 +99,8 @@
 @keyframes denhit { 0% { translate: 0 0; } 12% { translate: -7px 3px; scale: 1.06; filter: brightness(1.35); } 30% { translate: 6px -2px; } 48% { translate: -4px 1px; } 66% { translate: 2px 0; } 100% { translate: 0 0; } }
 @keyframes fpulse { 40% { scale: 1.08; filter: brightness(1.25); } }
 #foodfx { position: fixed; inset: 0; pointer-events: none; z-index: 60; } #foodfx .fdot { position: absolute; }
+.game.mana .mtrails { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; z-index: 1; }
+.game.mana .mtrails path { fill: none; stroke: #7a6650; stroke-width: 3.5; stroke-linecap: round; }
 .game.mana .rdot { color: inherit; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #565c66; box-shadow: 0 0 0 2px #1f2228; z-index: 4; pointer-events: none; }
 .game.mana .rdot.A { background: #5aa2f0; } .game.mana .rdot.B { background: #e05a4c; }
 .game.mana .cr.unit:hover { z-index: 5; }

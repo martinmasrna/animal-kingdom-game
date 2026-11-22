@@ -222,6 +222,12 @@ export function renderBoard(el, M, g, cards, ui) {
     if (!ps.length) continue;
     const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2;
     const y = ps[0][1] + (side === 'A' ? DEN_AT.A : -DEN_AT.B) * G.h;
+    // the trails: from each base tile's far tip to the den's spot, so the way in reads (Martin, 2026-11-22)
+    // they meet the ball on its side toward the board: theirs floats up from its spot, so they end at the spot; yours floats
+    // up toward the board, so they end at its top (a height on the screen is 1/cos(tilt) as long on the board's plane)
+    const d = side === 'A' ? 1 : -1, D = denD(g.food[side], denK(y)), ey = side === 'A' ? y - (D * .8 + 6) / Math.cos(TILT.deg * Math.PI / 180) : y;
+    s += `<svg class="mtrails">${ps.map(([px, py]) => { const ty = py + d * G.h / 2, ex = x + (px - x) * .18;
+      return `<path d="M ${px} ${ty} C ${px} ${ty + (ey - ty) * .55}, ${ex} ${ey - d * 12}, ${ex} ${ey}"/>`; }).join('')}</svg>`;
     s += put(`mden ${side}${g.food[side] > 0 ? '' : ' none'}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x, y, denBall(g.food[side], (g.income || {})[side] ?? 0), `data-hq="${side}" data-k="${denK(y).toFixed(4)}"`, denSize(g.food[side], denK(y)));
   }
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)
