@@ -6,6 +6,7 @@ access log."""
 import asyncio
 import json
 import logging
+import time
 from animal_kingdom.tests._helpers import DECK, SLUG  # noqa: F401
 
 import pytest
@@ -17,7 +18,7 @@ from animal_kingdom.web import custom_decks, guard, server
 @pytest.fixture
 def app(monkeypatch, tmp_path):
     monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
-    monkeypatch.setenv("AK_BOT_PAUSE", "0")
+    monkeypatch.setattr(server, "BOT_PAUSE", {k: 0 for k in server.BOT_PAUSE})   # read at import: the env comes too late here
     monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "web_decks.json")
     monkeypatch.setattr(guard, "limiter", guard.Limiter())
     return server.make_app
@@ -83,11 +84,19 @@ def test_a_name_can_carry_no_tag_and_no_invisible_or_direction_changing_characte
     assert len(long) <= 20
 
 
-async def _bot_match(c):
+async def _bot_match(c, timeout=20.0):
+    """A Practice match on a socket, at the moment it waits on the person: the bot's own opening moves (its mulligan, when
+    it is asked first) are played, saved and read off the socket, however long they took."""
     m = await (await c.post("/api/match", json={"deck": DECK, "bot": True})).json()
     ws = await c.ws_connect(f"/ws/{m['id']}?token={m['token']}")
     assert json.loads((await ws.receive()).data)["t"] == "build"
     view = json.loads((await ws.receive()).data)["view"]
+    match, t0 = server.hub.matches[m["id"]], time.time()
+    while (match.to_act() is not None and match.seats[match.to_act()].is_bot) or not getattr(server.hub.bot_tasks.get(match.id), "done", lambda: True)():
+        assert time.time() - t0 < timeout, "the bot never handed the turn over"
+        await asyncio.sleep(0.02)
+    while view["version"] != match.version:
+        view = (await _until(ws, lambda d: d["t"] == "view"))["view"]
     return m, ws, view
 
 
@@ -127,7 +136,6 @@ def test_a_socket_message_that_changes_nothing_saves_and_pushes_nothing(app, mon
 
     async def body(c):
         m, ws, view = await _bot_match(c)
-        await asyncio.sleep(0.5)                     # the bot's own mulligan is done: the match waits on the player
         monkeypatch.setattr(server.hub, "save", lambda match: saves.append(match.id))
         for _ in range(40):
             await ws.send_json({"t": "ready"})      # a no-op once the match has started
