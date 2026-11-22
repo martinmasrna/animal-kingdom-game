@@ -73,7 +73,7 @@
 .game.mana .ledge, .game.mana .deck { display: none !important; }
 /* the board: plain tiles, a dot on each region's corner; past each base row its den (board.js mden, Martin 2026-11-22):
    that side's food as a ball of light in its team's colour floating over its spot (Martin, 2026-11-22: "blue/red based on
-   the team"), its area growing with the food; while an animal could raid it the enemy's takes the tiles' cream ring. Thin trails run to its spot from its base row's far tips (board.js). The spot is on the tilted board; .up
+   the team"), its area growing with the food; while an animal could raid it the enemy's takes the tiles' cream ring. While a side has a way into the enemy den, its circuit of lines runs from its ball to its base row and from the enemy's base row into the enemy's ball (board.js). The spot is on the tilted board; .up
    stands back upright about it (as .mstand does), with the ball's shadow and the light it casts drawn in the same layer
    (on the board's plane they would cut through the upright glow). .up is given a real box: a 0x0 layer clips in Chrome. */
 /* each team's light: the ball from its hot middle to its rim (--c0..--c6), its glow and its shade as rgb triplets, the ink of its count */
@@ -117,9 +117,9 @@
 @keyframes fpulse { 40% { scale: 1.08; filter: brightness(1.25); } }
 #foodfx { position: fixed; inset: 0; pointer-events: none; z-index: 60; } #foodfx .fdot { position: absolute; }
 .game.mana .mtrails { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; z-index: 1; }
-/* the trails into each den, in its ball's light: its team's colour, softly glowing as the ball does (Martin, 2026-11-22) */
+/* a side's circuit, in its ball's light: its team's colour, softly glowing as the ball does (Martin, 2026-11-22) */
 .game.mana .mtrails { filter: drop-shadow(0 0 2px rgba(var(--glow), .9)) drop-shadow(0 0 7px rgba(var(--glow), .5)); }
-.game.mana .mtrails path { fill: none; stroke: var(--lit); stroke-width: 3; stroke-linecap: round; }
+.game.mana .mtrails path { fill: none; stroke: var(--lit); stroke-width: 4; stroke-linecap: round; }
 .game.mana .rdot { color: inherit; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #6e6458; box-shadow: 0 0 0 2px #1b1814; z-index: 4; pointer-events: none; }
 .game.mana .rdot.A { background: #5aa2f0; } .game.mana .rdot.B { background: #e05a4c; }
 .game.mana .cr.unit:hover { z-index: 5; }

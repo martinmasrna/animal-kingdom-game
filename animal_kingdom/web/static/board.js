@@ -242,19 +242,33 @@ export function renderBoard(el, M, g, cards, ui) {
   // the mana board's dens (Martin, 2026-11-22, design/screen/den/props "light"): each side's food is a ball of light floating
   // past its base row, the one thing a raid takes and the only way to win; the enemy's is a target (data-hq) while an
   // animal could raid it. Its spot is on the board, the ball stands upright over it, as the animals do.
+  // A side has a way into the enemy den while one of its pieces stands on an enemy base tile connected back to its own base
+  // through its own pieces (the engine's rule: effects.rs reach_den, state.rs connected_occupied; a tile is held by its top
+  // piece's owner). `way[side]`: the tiles that side's connection grows to from its own base. M.edges are the engine's, and
+  // both maps are their own mirror across the middle row, so they hold in viewer space too.
+  const holder = cr => { const st = g.board[cr] || []; return st.length ? st[st.length - 1].owner : null; };
+  const way = {}, open = {};
+  for (const who of ['A', 'B']) { const c = way[who] = new Set([...bases[who]].filter(cr => holder(cr) === who));
+    for (let grew = true; grew;) { grew = false; for (const [a, b] of M.edges || []) for (const [u, v] of [[a, b], [b, a]]) if (c.has(u) && !c.has(v) && holder(v) === who) { c.add(v); grew = true; } } }
+  for (const who of ['A', 'B']) open[who] = [...bases[who === 'A' ? 'B' : 'A']].some(cr => way[who].has(cr));
   for (const side of ['A', 'B']) {
-    const ps = [...bases[side]].map(cr => at(...cr.split(',').map(Number)));
+    const pcr = [...bases[side]], ps = pcr.map(cr => at(...cr.split(',').map(Number)));
     if (!ps.length) continue;
     const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2;
     RAIL[side] = { fy: ps[0][1] };
     const DA = squareLook() ? DEN_AT_SQ : DEN_AT, y = ps[0][1] + (side === 'A' ? DA.A : -DA.B) * G.h;
-    // the trails: from each base tile's far tip into the ball, so the way in reads (Martin, 2026-11-22), in the ball's own
-    // light (mana.css .mtrails). Each runs to the ball's centre, which floats its lift above the spot (a height on the screen
-    // is 1/cos(tilt) as long on the board's plane), and the ball, standing in front, covers its end: they meet its rim
-    // whatever its size, arriving along the line from its centre
+    // the circuit (Martin, 2026-11-22, design/screen/square/lines "circuit": "the full circuit, only when connected"): no line
+    // at rest; while a side has a way in, a line in its colour (mana.css .mtrails) runs from its own ball to each of its base
+    // tiles its connection starts from, and from each enemy base tile it reaches into the enemy's ball. A piece on the far
+    // row connected to nothing draws none, nor does a Flight raid. A line leaves a base tile's far tip and runs to the
+    // ball's centre, which floats its lift above the spot (a height on the screen is 1/cos(tilt) as long on the board's
+    // plane), and the ball, standing in front, covers its end: they meet its rim whatever its size, arriving along the line
+    // from its centre
     const d = side === 'A' ? 1 : -1, D = denD(g.food[side], denK(y)), ey = y - (D / 2 + 6) / Math.cos(TILT.deg * Math.PI / 180);
-    s += `<svg class="mtrails ${side}">${ps.map(([px, py]) => { const ty = py + d * (squareLook() ? G.w : G.h) / 2;
-      return `<path d="M ${px} ${ty} C ${px} ${ty + (ey - ty) * .45}, ${x + (px - x) * .35} ${ey + (ty - ey) * .35}, ${x} ${ey}"/>`; }).join('')}</svg>`;
+    const lines = (who, on) => { const ls = ps.filter((_, i) => on && way[who].has(pcr[i])).map(([px, py]) => { const ty = py + d * (squareLook() ? G.w : G.h) / 2;
+      return `<path d="M ${px} ${ty} C ${px} ${ty + (ey - ty) * .45}, ${x + (px - x) * .35} ${ey + (ty - ey) * .35}, ${x} ${ey}"/>`; });
+      return ls.length ? `<svg class="mtrails ${who}">${ls.join('')}</svg>` : ''; };
+    s += lines(side, open[side]) + lines(side === 'A' ? 'B' : 'A', true);   // this side's own roots; the enemy's way into this den
     s += put(`mden ${side}${g.food[side] > 0 ? '' : ' none'}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x, y, denBall(g.food[side], (g.income || {})[side] ?? 0), `data-hq="${side}" data-k="${denK(y).toFixed(4)}"`, denSize(g.food[side], denK(y)));
   }
   // the hex board's tips: each den's own tile, where it is entered (its mouth; the gem and the pits stay on the ridge)

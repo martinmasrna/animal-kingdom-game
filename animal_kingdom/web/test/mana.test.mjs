@@ -125,6 +125,34 @@ test('a mana match against the bot: Practice starts it and the bot plays its car
   assert.deepEqual(p.errors, []);
 });
 
+test('the food lines: none at rest; a side connected from its base row to the enemy\'s draws its circuit; a loose piece on the far row draws none', async () => {
+  const p = await seat();
+  await p.goto(server.url + '/', { waitUntil: 'networkidle0' }); await giveDeck(p, 'w1', 'Cheap', CHEAP);
+  await click(p, '#mprac'); await p.waitForSelector('.mhome [data-opp].on'); await click(p, '#mgo');
+  assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
+  await click(p, '#skip');
+  assert.ok(await until(p, () => { const a = window.__ak(); return a.V.game.decision === 'yours' && !a.PB.busy; }), 'my turn');
+  const lines = () => ({ A: document.querySelectorAll('#board .mtrails.A path').length, B: document.querySelectorAll('#board .mtrails.B path').length });
+  assert.deepEqual(await p.evaluate(lines), { A: 0, B: 0 }, 'no lines at the start of a match');
+  // a view with the board replaced: `chain` my pieces on the shortest path from my base row to theirs (M.edges), else one
+  // of mine alone on their base row
+  const show = chain => p.evaluate(async chain => { const a = window.__ak(), V = a.V, G = V.game, me = V.you, them = me === 'A' ? 'B' : 'A';
+    const { map } = await (await fetch('/api/pool')).json(), nb = {};
+    for (const [u, v] of map.edges) { (nb[u] = nb[u] || []).push(v); (nb[v] = nb[v] || []).push(u); }
+    const from = new Map(G.bases[me].map(t => [t, null])), q = [...G.bases[me]];
+    let end = null; while (q.length && !end) { const t = q.shift(); if (G.bases[them].includes(t)) end = t; else for (const v of nb[t] || []) if (!from.has(v)) { from.set(v, t); q.push(v); } }
+    const tiles = chain ? [] : [G.bases[them][0]]; if (chain) for (let t = end; t; t = from.get(t)) tiles.push(t);
+    const board = Object.fromEntries(tiles.map((t, i) => [t, [{ iid: 900 + i, id: 'wisp_1', owner: me, str: 2 }]]));
+    window.__ak.feed({ ...V, game: { ...G, board } }); return tiles.length; }, chain);
+  assert.ok(await show(true) >= 2);
+  assert.ok(await until(p, () => document.querySelectorAll('#board .mtrails path').length > 0), 'the circuit is drawn');
+  // a shortest chain stands on one tile of each base row: a line from my ball to my base tile, one from theirs into their ball, in my colour
+  assert.deepEqual(await p.evaluate(lines), { A: 2, B: 0 }, 'my circuit, and none of theirs');
+  await show(false); await wait(300);
+  assert.deepEqual(await p.evaluate(lines), { A: 0, B: 0 }, 'a piece on their base row connected to nothing draws no line');
+  assert.deepEqual(p.errors, []);
+});
+
 test('the collection in the mana rules: the mana card with its cost, sorted by cost, the deck as a tray of pieces, the mana deck rules, and the deck on home', async () => {
   const p = await seat();
   await p.goto(server.url + '/?deckview=tray', { waitUntil: 'networkidle0' });
