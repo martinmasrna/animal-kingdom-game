@@ -226,6 +226,13 @@ struct Habits {
     cards: u32,
     raids: u32,
     powers: u32,
+    /// Opponent's actions that removed three or more of its animals at once.
+    swept: u32,
+    /// Opponent's turns that gained it 10 or more food.
+    burst: u32,
+    /// Its own turns from its fourth on, and those it ended holding no region.
+    late: u32,
+    bare: u32,
 }
 
 impl GameRec {
@@ -252,6 +259,7 @@ impl GameRec {
             v[k]["cards"] = json!(h.cards);
             v[k]["raids"] = json!(h.raids);
             v[k]["powers"] = json!(h.powers);
+            v[k]["swept"] = json!(h.swept);
         }
         v["x"]["missed_wins"] = json!(self.missed_wins[0]);
         v["y"]["missed_wins"] = json!(self.missed_wins[1]);
@@ -275,6 +283,7 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
     let first = st.first_player;
     let mut actions = Vec::new();
     let mut habits = [Habits::default(); 2];
+    let mut turn_food = (-1, 0); // the turn, and the food its player started it with
     let mut applied = 0u32;
     let mut fatigue_end = false;
     let mut missed_wins = [0u32; 2];
@@ -305,6 +314,9 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
             }
         }
         let fatigue_before = st.fatigue;
+        if st.pending.is_none() && st.turn_counter != turn_food.0 {
+            turn_food = (st.turn_counter, st.food[st.current as usize]);
+        }
         last_turn = st.turn_counter;
         let action = bots[pilot].choose(&st);
         let h = &mut habits[pilot];
@@ -322,8 +334,22 @@ fn play(g: &Arc<Game>, decks: &[DeckList], deal: usize, a: usize, b: usize, seed
             Action::Leader => h.powers += 1,
             Action::Choice(_) => {}
         }
+        let victim = other(seat);
+        let before = st.board.own[victim as usize].count_ones();
         rules::apply_action(&mut st, &action, true)
             .map_err(|e| format!("deal {deal} ({} v {}, seed {seed}): {} chose {}: {e}", decks[a].name, decks[b].name, specs[pilot], action.to_json(g)))?;
+        if before >= st.board.own[victim as usize].count_ones() + 3 {
+            habits[1 - pilot].swept += 1;
+        }
+        if action == Action::Pass {
+            if st.food[seat as usize] >= turn_food.1 + 10 && turn_food.0 == last_turn {
+                habits[1 - pilot].burst += 1;
+            }
+            if rules::own_turn_number(&st, seat) >= 5 {
+                habits[pilot].late += 1;
+                habits[pilot].bare += (rules::region_income(&st, seat) == 0) as u32;
+            }
+        }
         if log_actions {
             actions.push(action.to_json(g));
         }
@@ -566,11 +592,15 @@ fn run(args: &Args) -> Result<(), String> {
             h.cards += x.cards;
             h.raids += x.raids;
             h.powers += x.powers;
+            h.swept += x.swept;
+            h.burst += x.burst;
+            h.late += x.late;
+            h.bare += x.bare;
         }
         let ended = (h.turns as f64).max(1.0);
         let n_games = recs.len().max(1) as f64;
-        say(format!("  it plays {:.2} cards a turn and leaves {:.2} mana unspent; ends {} of its turns with a play still legal; {:.2} raids and {:.2} leader powers a game",
-            h.cards as f64 / ended, h.unspent as f64 / ended, pct(h.held as f64 / ended), h.raids as f64 / n_games, h.powers as f64 / n_games));
+        say(format!("  it plays {:.2} cards a turn and leaves {:.2} mana unspent; ends {} of its turns with a play still legal; {:.2} raids and {:.2} leader powers a game; one enemy action removed three or more of its animals {:.3} times a game, the enemy gained 10 or more food in one of its turns {:.3} times a game, and from its fourth turn it ended {} of its turns holding no region",
+            h.cards as f64 / ended, h.unspent as f64 / ended, pct(h.held as f64 / ended), h.raids as f64 / n_games, h.powers as f64 / n_games, h.swept as f64 / n_games, h.burst as f64 / n_games, pct(h.bare as f64 / (h.late as f64).max(1.0))));
         bot_rows.push(json!({"spec": spec, "cards_per_turn": h.cards as f64 / ended, "unspent_mana_per_turn": h.unspent as f64 / ended,
             "turns_held": h.held as f64 / ended, "raids_per_game": h.raids as f64 / n_games, "powers_per_game": h.powers as f64 / n_games, "positions_per_turn": t.positions as f64 / turns, "ms_per_turn": t.nanos as f64 / 1e6 / turns,
             "max_turn_positions": t.max_turn_positions, "searches_per_turn": t.searches as f64 / turns,
