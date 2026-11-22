@@ -391,5 +391,5 @@ html[data-look=square] .game.hexb #board .unit .sqbase.A { background: linear-gr
 html[data-look=square] .game.hexb #board .unit .sqbase.B { background: linear-gradient(180deg, #8a554a, #6b3d34); }
 html[data-look=square] .game.hexb #board .unit .tkpeek { display: none; }
 html[data-look=square] .game.mana #board .mstand { bottom: 30%; }
-/* the strength on the square, a size up from the token's drawer (Martin, 2026-11-22: "keep it below, just make it slightly bigger") */
-html[data-look=square] .game.hexb #board .unit .boss.tknum { transform: scale(1.3); transform-origin: 50% 60%; }
+/* a unit's strength on the board, a size up from the token's drawer (Martin, 2026-11-22: "keep it below, just make it slightly bigger") */
+.game.hexb #board .unit .boss.tknum { transform: scale(1.3); transform-origin: 50% 60%; }
