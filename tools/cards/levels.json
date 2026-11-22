@@ -692,7 +692,34 @@
         "prev": 6
       },
       "by": "claude",
-      "at": 1795274919
+      "at": 1795356759
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Warlord"
+      },
+      "by": "claude",
+      "at": 1795356759
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795356759
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795356759
     }
   },
   "raider_legend": {

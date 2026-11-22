@@ -123,6 +123,7 @@ pub fn behaviour(id: &str) -> Behaviour {
         "hunter_5" => Some(Roar::Weaken(4)),
         "hunter_6" => Some(Roar::Weaken(5)),
         "hunter_7" => Some(Roar::Weaken(6)),
+        WARLORD => Some(Roar::Weaken(7)),                // Gorrak One-Eye (Martin, 2026-11-22)
         "giant_hunter" => Some(Roar::RemoveAdjacent),
         "cantrip_2" | "cantrip_3" | "cantrip_4" => Some(Roar::Draw),
         "scout_3" => Some(Roar::Scout),

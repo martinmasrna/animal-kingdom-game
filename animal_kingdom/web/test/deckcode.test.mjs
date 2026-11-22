@@ -24,7 +24,7 @@ test('a deck survives its code, and the code is short', () => {
 });
 
 test('a readable list works without the code line (typed by hand or by an agent)', () => {
-  const d = decodeDeck('### Agent wisps\n2x Wisp 3\n2x (1) Wisp 1\n1x Warlord\nnonsense line', C);
+  const d = decodeDeck('### Agent wisps\n2x Wisp 3\n2x (1) Wisp 1\n1x Gorrak One-Eye\nnonsense line', C);
   assert.equal(d.name, 'Agent wisps'); assert.deepEqual(sorted(d.list), sorted(['wisp_3', 'wisp_3', 'wisp_1', 'wisp_1', 'warlord_legend']));
 });
 

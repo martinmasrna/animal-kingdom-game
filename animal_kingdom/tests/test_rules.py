@@ -282,7 +282,7 @@ def test_hungry_lands_only_on_an_enemy_it_beats_and_its_kill_feeds():
 
 def test_hunters_give_an_adjacent_enemy_minus_n_strength_for_good():
     for cid, n in WEAKENS.items():
-        assert CARDS[cid].text == f"Roar: give an adjacent enemy -{n} strength."
+        assert CARDS[cid].text.endswith(f"Roar: give an adjacent enemy -{n} strength.")
     s = state(turn=11, hands={"A": ["hunter_4", "test_one"]})
     put(s, "2,1", "wisp_2", "B")                                # strength 4
     put(s, "2,2", "wisp_1", "B")
@@ -291,6 +291,17 @@ def test_hunters_give_an_adjacent_enemy_minus_n_strength_for_good():
     rules.apply_action(s, ChoiceAction("2,1"))
     assert effective_strength(s, s.board["2,1"][0]) == 1        # stays, weaker: the test_one (1) can't cover it
     assert "2,1" not in places(s, "test_one")
+
+
+def test_gorrak_one_eye_is_hungry_and_bites_an_adjacent_enemy_for_7():
+    assert CARDS["warlord_legend"].name == "Gorrak One-Eye" and CARDS["warlord_legend"].keywords == {"Hungry"}
+    s = state(turn=12, hands={"A": ["warlord_legend"]})
+    assert places(s, "warlord_legend") == set()                 # Hungry: nothing to eat
+    put(s, "1,1", "wisp_1", "B")
+    put(s, "2,1", "wisp_3", "B")                                # strength 6
+    rules.apply_action(s, PlaceAction("warlord_legend", ("cr", "1,1")))
+    resolve_choices(s)
+    assert s.board["1,1"][-1].card_id == "warlord_legend" and "2,1" not in s.board
 
 
 def test_an_animal_at_zero_strength_is_removed_armor_or_not():
@@ -512,7 +523,7 @@ def test_the_assassin_draws_after_every_third_card_of_a_turn():
         sizes.append(len(s.hands["A"]))
     assert sizes == [5, 4, 4, 3, 2, 2]                                # the 3rd and the 6th each draw one
     assert {l: (CARDS[l].cost, CARDS[l].base_strength) for l in LEADERS} == {
-        "warlord_legend": (5, 10), "raider_legend": (5, 10), "sage_legend": (5, 3), "elf_legend": (5, 3), "assassin_legend": (5, 5)}
+        "warlord_legend": (7, 7), "raider_legend": (5, 10), "sage_legend": (5, 3), "elf_legend": (5, 3), "assassin_legend": (5, 5)}
 
 
 def test_the_elfs_card_makes_its_regions_produce_one_more_while_it_stands():

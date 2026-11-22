@@ -173,13 +173,15 @@
     },
     {
       "id": "warlord_legend",
-      "name": "Warlord",
+      "name": "Gorrak One-Eye",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 10,
-      "keywords": [],
-      "text": "",
-      "cost": 5
+      "base_strength": 7,
+      "text": "Hungry. Roar: give an adjacent enemy -7 strength.",
+      "cost": 7,
+      "keywords": [
+        "Hungry"
+      ]
     },
     {
       "id": "raider_legend",
