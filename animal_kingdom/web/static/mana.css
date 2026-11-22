@@ -121,7 +121,7 @@
 .game.mana .cr.unit:hover { z-index: 5; }
 /* the tilted board (board.js TILT): the board lies back, each animal stands up out of its token, facing you */
 .game.mana #board, .game.mana #board .cr.unit { transform-style: preserve-3d; }
-.game.mana #board .mstand { position: absolute; left: 50%; bottom: 46%; transform-origin: 50% 100%; transform: translateX(-50%) rotateX(calc(-1 * var(--tilt)));
+.game.mana #board .mstand { position: absolute; left: 50%; bottom: 26%; transform-origin: 50% 100%; transform: translateX(-50%) rotateX(calc(-1 * var(--tilt)));
   z-index: 4; pointer-events: none; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .45)); }
 
 /* the opponent's hand: small backs peeking over the top edge */
