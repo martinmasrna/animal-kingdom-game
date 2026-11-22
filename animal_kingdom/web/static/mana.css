@@ -72,40 +72,44 @@
 .game.mana #stage { background: transparent; }
 .game.mana .ledge, .game.mana .deck { display: none !important; }
 /* the board: plain tiles, a dot on each region's corner; past each base row its den (board.js mden, Martin 2026-11-22):
-   that side's food as a ball of light floating over its spot, its area growing with the food; while an animal could raid
-   it the enemy's takes the tiles' cream ring. Thin trails run to its spot from its base row's far tips (board.js). The spot is on the tilted board; .up
+   that side's food as a ball of light in its team's colour floating over its spot (Martin, 2026-11-22: "blue/red based on
+   the team"), its area growing with the food; while an animal could raid it the enemy's takes the tiles' cream ring. Thin trails run to its spot from its base row's far tips (board.js). The spot is on the tilted board; .up
    stands back upright about it (as .mstand does), with the ball's shadow and the light it casts drawn in the same layer
    (on the board's plane they would cut through the upright glow). .up is given a real box: a 0x0 layer clips in Chrome. */
+/* each team's light: the ball from its hot middle to its rim (--c0..--c6), its glow and its shade as rgb triplets, the ink of its count */
+.game.mana .mden.A, .fdot.A, .game.mana .mtrails.A { --c0: #fbfdff; --c1: #dcedff; --c2: #a9d2ff; --c3: #6aaef4; --c4: #3a88dc; --c5: #1f62b6; --c6: #123f80; --glow: 90, 162, 240; --shade: 8, 30, 70; --dink: #0a2146; --dink2: #174a8c; --lit: #9ccbff; }
+.game.mana .mden.B, .fdot.B, .game.mana .mtrails.B { --c0: #fffaf7; --c1: #ffe1d8; --c2: #ffb5a3; --c3: #f6826c; --c4: #e0513a; --c5: #b93320; --c6: #81200f; --glow: 240, 104, 80; --shade: 70, 14, 4; --dink: #3d0b05; --dink2: #8a2414; --lit: #ffa693; }
 .game.mana .mden { width: 0; height: 0; z-index: 3; transform-style: preserve-3d; }
 .game.mana .mden .up { position: absolute; left: calc(var(--d) * -2); top: calc(var(--d) * -3); width: calc(var(--d) * 4); height: calc(var(--d) * 4);
   transform-origin: 50% 75%; transform: rotateX(calc(-1 * var(--tilt))); pointer-events: none; }
 .game.mana .mden .up > i { position: absolute; left: 50%; top: 75%; transform: translate(-50%, -50%); border-radius: 50%; }
-.game.mana .mden .pool { width: calc(var(--d) * 2.6); height: calc(var(--d) * 2); background: radial-gradient(closest-side, rgba(255, 150, 40, .4), rgba(255, 120, 20, .13) 55%, rgba(255, 110, 0, 0)); }
+.game.mana .mden .pool { width: calc(var(--d) * 2.6); height: calc(var(--d) * 2); background: radial-gradient(closest-side, rgba(var(--glow), .4), rgba(var(--glow), .13) 55%, rgba(var(--glow), 0)); }
 .game.mana .mden .shade { width: calc(var(--d) * .85); height: calc(var(--d) * .65); background: radial-gradient(closest-side, rgba(10, 6, 2, .6), rgba(10, 6, 2, .25) 60%, rgba(0, 0, 0, 0)); }
 .game.mana .mden .float { position: absolute; inset: 0; transform-origin: 50% calc(75% - var(--lift)); }
 .game.mana .mden .float > * { position: absolute; left: 50%; top: calc(75% - var(--lift)); transform: translate(-50%, -50%); }
-.game.mana .mden .halo { width: calc(var(--d) * 2.2); height: calc(var(--d) * 2.2); border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 175, 70, .42), rgba(255, 130, 30, .12) 55%, rgba(255, 120, 20, 0)); }
+.game.mana .mden .halo { width: calc(var(--d) * 2.2); height: calc(var(--d) * 2.2); border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--glow), .42), rgba(var(--glow), .12) 55%, rgba(var(--glow), 0)); }
 .game.mana .mden .core { width: var(--d); height: var(--d); border-radius: 50%; pointer-events: auto;
-  background: radial-gradient(circle at 37% 31%, #fffef6 0, #fff2c8 9%, #ffd37c 24%, #ffae40 44%, #f28b22 63%, #d06612 82%, #9a4207 100%);
-  box-shadow: inset calc(var(--d) * -.07) calc(var(--d) * -.09) calc(var(--d) * .16) rgba(110, 38, 0, .45), inset calc(var(--d) * .05) calc(var(--d) * .04) calc(var(--d) * .1) rgba(255, 255, 235, .35),
-    0 0 calc(var(--d) * .3) calc(var(--d) * .08) rgba(255, 160, 50, .6), 0 0 calc(var(--d) * .9) calc(var(--d) * .1) rgba(255, 130, 30, .22); }
+  background: radial-gradient(circle at 37% 31%, var(--c0) 0, var(--c1) 9%, var(--c2) 24%, var(--c3) 44%, var(--c4) 63%, var(--c5) 82%, var(--c6) 100%);
+  box-shadow: inset calc(var(--d) * -.07) calc(var(--d) * -.09) calc(var(--d) * .16) rgba(var(--shade), .45), inset calc(var(--d) * .05) calc(var(--d) * .04) calc(var(--d) * .1) rgba(255, 255, 245, .35),
+    0 0 calc(var(--d) * .3) calc(var(--d) * .08) rgba(var(--glow), .6), 0 0 calc(var(--d) * .9) calc(var(--d) * .1) rgba(var(--glow), .22); }
 .game.mana .mden .spec { width: calc(var(--d) * .26); height: calc(var(--d) * .16); margin: calc(var(--d) * -.27) 0 0 calc(var(--d) * -.17); border-radius: 50%;
   background: radial-gradient(closest-side, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0)); transform: translate(-50%, -50%) rotate(-30deg); }
 /* the count and "+N" in the board's numerals, inked through the numeral as a mask; a number over 20 is two digits set as token.js sets them */
 .game.mana .mden .dnum { width: calc(var(--d) * .6); height: calc(var(--d) * .36); }
-.game.mana .mden .dnum > i, .game.mana .mden .dinc span > i { position: absolute; inset: 0; background: #3b1702; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+.game.mana .mden .dnum > i, .game.mana .mden .dinc span > i { position: absolute; inset: 0; background: var(--dink); -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
 .game.mana .mden .dinc { display: flex; align-items: center; height: calc(var(--d) * .15); margin-top: calc(var(--d) * .27); }
-.game.mana .mden .dinc svg { height: 100%; flex: none; fill: none; stroke: #6b3608; stroke-width: .14; stroke-linecap: round; }
+.game.mana .mden .dinc svg { height: 100%; flex: none; fill: none; stroke: var(--dink2); stroke-width: .14; stroke-linecap: round; }
 .game.mana .mden .dinc span { position: relative; height: 100%; width: calc(var(--d) * .25); margin-left: calc(var(--d) * -.08); }
-.game.mana .mden .dinc span > i { background: #6b3608; }
-.game.mana .mden.none .core { background: radial-gradient(circle at 37% 31%, #4a3524 0, #2a1f17 60%, #17120e 100%); box-shadow: inset 0 0 8px rgba(255, 140, 40, .3); }
+.game.mana .mden .dinc span > i { background: var(--dink2); }
+.game.mana .mden.none .core { background: radial-gradient(circle at 37% 31%, #3a3632 0, #24211e 60%, #151311 100%); box-shadow: inset 0 0 8px rgba(var(--glow), .35); }
 .game.mana .mden.none .halo, .game.mana .mden.none .pool, .game.mana .mden.none .spec { display: none; }
-.game.mana .mden.none .dnum > i, .game.mana .mden.none .dinc span > i { background: #f2a65a; } .game.mana .mden.none .dinc svg { stroke: #f2a65a; }
+.game.mana .mden.none .dnum > i, .game.mana .mden.none .dinc span > i { background: var(--lit); } .game.mana .mden.none .dinc svg { stroke: var(--lit); }
 .game.mana .mden.tgt .core { cursor: pointer; box-shadow: 0 0 0 4px rgba(20, 22, 26, .9), 0 0 0 8px var(--act, #efe6d4),
-  inset calc(var(--d) * -.07) calc(var(--d) * -.09) calc(var(--d) * .16) rgba(110, 38, 0, .45), 0 0 calc(var(--d) * .5) calc(var(--d) * .15) rgba(255, 160, 50, .7); }
-/* food: a little orange glowing dot (Martin, 2026-11-21: "for now") in flight (foodfx.js); the ball gulps as each lands */
-.fdot { display: block; flex: none; border-radius: 50%; background: radial-gradient(circle at 42% 38%, #fff4cf 0, #ffbe5c 30%, #f2841f 62%, #c95a0e 100%);
-  box-shadow: 0 0 6px 2px rgba(255, 150, 40, .65), 0 0 16px 4px rgba(255, 120, 20, .3); }
+  inset calc(var(--d) * -.07) calc(var(--d) * -.09) calc(var(--d) * .16) rgba(var(--shade), .45), 0 0 calc(var(--d) * .5) calc(var(--d) * .15) rgba(var(--glow), .7); }
+/* food: a little glowing dot in flight (foodfx.js), in the colour of the team whose food it is (Martin, 2026-11-22: "should
+   come in the color of the team"); the ball gulps as each lands */
+.fdot { display: block; flex: none; border-radius: 50%; background: radial-gradient(circle at 42% 38%, var(--c0) 0, var(--c2) 30%, var(--c4) 62%, var(--c5) 100%);
+  box-shadow: 0 0 6px 2px rgba(var(--glow), .65), 0 0 16px 4px rgba(var(--glow), .3); }
 .game.mana .mden.fpulse .core { animation: fpulse .22s ease-out; }
 /* a den hit by a raid: the ball jolts and flares (foodfx.js) */
 .game.mana .mden.hit .core { animation: denhit .5s cubic-bezier(.3, .7, .4, 1); }
@@ -113,9 +117,9 @@
 @keyframes fpulse { 40% { scale: 1.08; filter: brightness(1.25); } }
 #foodfx { position: fixed; inset: 0; pointer-events: none; z-index: 60; } #foodfx .fdot { position: absolute; }
 .game.mana .mtrails { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; z-index: 1; }
-/* the trails into each den, in its ball's light: the halo's orange, softly glowing as the ball does (Martin, 2026-11-22) */
-.game.mana .mtrails { filter: drop-shadow(0 0 2px rgba(255, 160, 50, .9)) drop-shadow(0 0 7px rgba(255, 130, 30, .5)); }
-.game.mana .mtrails path { fill: none; stroke: #ffb35c; stroke-width: 3; stroke-linecap: round; }
+/* the trails into each den, in its ball's light: its team's colour, softly glowing as the ball does (Martin, 2026-11-22) */
+.game.mana .mtrails { filter: drop-shadow(0 0 2px rgba(var(--glow), .9)) drop-shadow(0 0 7px rgba(var(--glow), .5)); }
+.game.mana .mtrails path { fill: none; stroke: var(--lit); stroke-width: 3; stroke-linecap: round; }
 .game.mana .rdot { color: inherit; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #6e6458; box-shadow: 0 0 0 2px #1b1814; z-index: 4; pointer-events: none; }
 .game.mana .rdot.A { background: #5aa2f0; } .game.mana .rdot.B { background: #e05a4c; }
 .game.mana .cr.unit:hover { z-index: 5; }
@@ -378,15 +382,61 @@ body:has(.game.mana) .chatp.inmatch { left: auto; right: 16px; }
 .pcost polygon { fill: #f2c94c; stroke: #2a2006; stroke-width: 5; stroke-linejoin: round; }
 .pwcard { flex: none; margin-left: 46px; align-self: center; }   /* a card's frame reaches past its box: room enough beside the leader's */
 
-/* the square look (board.js squareLook: a board of equal rows): square tiles, a unit standing straight on its square in its
-   team's colour (the token frames' hues), its strength on the square (Martin, 2026-11-22) */
+/* the square board's look (board.js squareLook: a board of equal rows; Martin, 2026-11-22). A tile is a square with 12% of
+   its side cut off each corner (his pick on a slider), one of sixteen painted tiles (static/sq/tile_n.webp, a 4 by 4 sheet;
+   the design sandbox's screen/kit/sqtile/export.py), its near side painted under it, a joint's width inside its place. A
+   creature stands on its tile, which takes its team's colour (tile_a, tile_b: the same sixteen, stained), its strength on
+   the tile. Where four tiles meet their cuts leave a hole, and the region's stone lies in it: grey, or its holder's gem. */
 .game.hexb #board.sq .cr:not(.leader), .game.kit.hexb #board.sq .cr.unit:not(.leader) { height: var(--tw); margin-top: calc(var(--tw) / -2); }
-/* an empty square: the sand painting cut square, a little inside its place */
-.game.kit.hexb #board.sq .cr.clear { background: url(/static/hex/slot.webp) center / 170% auto no-repeat; border-radius: 12px; scale: .94; }
-.game.hexb #board.sq .unit .sqbase { position: absolute; inset: 3%; border-radius: 12px; pointer-events: none; box-shadow: inset 0 2px 0 rgba(255,255,255,.14), inset 0 -3px 0 rgba(0,0,0,.25), 0 2px 4px rgba(0,0,0,.35); }
-.game.hexb #board.sq .unit .sqbase.A { background: linear-gradient(180deg, #5d7896, #45607f); }
-.game.hexb #board.sq .unit .sqbase.B { background: linear-gradient(180deg, #8a554a, #6b3d34); }
+.game.kit.hexb #board.sq .cr.clear { background: none; filter: none; }
+#board.sq .cr.clear::before, #board.sq .cr.unit::before, #board.sq .unit .sqbase { content: ''; position: absolute; left: 1.6%; top: 1.6%; width: 96.8%; height: calc(96.8% * 311 / 300); pointer-events: none;
+  background: url(/static/sq/tile_n.webp) var(--tvx, 0%) var(--tvy, 0%) / 400% 400% no-repeat; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .45)); }
+#board.sq .unit .sqbase { filter: none; }
+#board.sq .unit .sqbase.A { background-image: url(/static/sq/tile_a.webp); }
+#board.sq .unit .sqbase.B { background-image: url(/static/sq/tile_b.webp); }
+#board.sq .tv0 { --tvx: 0%; --tvy: 0%; }
+#board.sq .tv1 { --tvx: 33.33%; --tvy: 0%; }
+#board.sq .tv2 { --tvx: 66.67%; --tvy: 0%; }
+#board.sq .tv3 { --tvx: 100%; --tvy: 0%; }
+#board.sq .tv4 { --tvx: 0%; --tvy: 33.33%; }
+#board.sq .tv5 { --tvx: 33.33%; --tvy: 33.33%; }
+#board.sq .tv6 { --tvx: 66.67%; --tvy: 33.33%; }
+#board.sq .tv7 { --tvx: 100%; --tvy: 33.33%; }
+#board.sq .tv8 { --tvx: 0%; --tvy: 66.67%; }
+#board.sq .tv9 { --tvx: 33.33%; --tvy: 66.67%; }
+#board.sq .tv10 { --tvx: 66.67%; --tvy: 66.67%; }
+#board.sq .tv11 { --tvx: 100%; --tvy: 66.67%; }
+#board.sq .tv12 { --tvx: 0%; --tvy: 100%; }
+#board.sq .tv13 { --tvx: 33.33%; --tvy: 100%; }
+#board.sq .tv14 { --tvx: 66.67%; --tvy: 100%; }
+#board.sq .tv15 { --tvx: 100%; --tvy: 100%; }
+/* a creature landing, striking: the tile stays where it lies and the creature moves (game.css moves the whole piece, as a
+   token should). As it touches down its tile takes the colour and its strength shows (--fd: when a card flown from the
+   hand lands) */
+#board.sq .cr.unit.land, #board.sq .cr.unit.flown, #board.sq .cr.unit.strike { animation: none; }
+#board.sq .cr.unit.land .mstand { animation: sqland .36s cubic-bezier(.3,.7,.4,1.15) backwards; }
+#board.sq .cr.unit.flown .mstand { animation: sqlandf .6s var(--fd, 0ms) backwards; }
+:root[data-turn="impact"] #board.sq .cr.unit.flown .mstand { animation: sqlandi .28s var(--fd, 0ms) backwards; }
+#board.sq .cr.unit.strike .mstand { animation: strike .55s cubic-bezier(.3,.7,.4,1) both; }
+#board.sq .cr.unit.land .sqbase, #board.sq .cr.unit.flown .sqbase, #board.sq .cr.unit.land .tknum, #board.sq .cr.unit.flown .tknum { animation: sqtint .4s var(--fd, 0ms) ease-out backwards; }
+@keyframes sqtint { from { opacity: 0; } }
+@keyframes sqland { 0% { translate: 0 -30px; scale: 1.2; opacity: 0; } 30% { opacity: 1; } 78% { translate: 0 1px; scale: .98; } }
+@keyframes sqlandf { 0% { translate: 0 -12px; scale: 1.12; animation-timing-function: linear; } 40% { translate: 0 -12px; scale: 1.12; animation-timing-function: cubic-bezier(.5,0,1,.55); }
+  68% { translate: 0 0; scale: 1.04 .93; animation-timing-function: cubic-bezier(.3,.6,.4,1); } 84% { scale: .985 1.02; } }
+@keyframes sqlandi { 0% { scale: 1.06; animation-timing-function: cubic-bezier(.3,.6,.4,1); } 28% { scale: 1.05 .9; animation-timing-function: cubic-bezier(.3,.6,.4,1.4); } }
+/* a card held over a tile it may take: the tile stays, its colour and the creature shown faintly */
+#board.sq .cr.unit.ghost { opacity: 1; }
+#board.sq .cr.unit.ghost .sqbase { opacity: .78; } #board.sq .cr.unit.ghost .mstand, #board.sq .cr.unit.ghost .tknum { opacity: .8; }
+/* a creature leaving the board leaves its tile */
+.game.hexb #board.sq .leave .sqbase { display: none; }
 .game.hexb #board.sq .unit .tkpeek { display: none; }
-.game.mana #board.sq .mstand { bottom: 30%; }
+.game.mana #board.sq .mstand { bottom: 31%; }
+/* where a card may go, what may roam: the tile's own outline */
+.game.hexb #board.sq .cr.tgt::after, .game.hexb #board.sq .cr.roamable::after, .game.hexb #board.sq .cr.roamsel::after { inset: 1.6%; clip-path: polygon(evenodd, 12% 0%, 88% 0%, 100% 12%, 100% 88%, 88% 100%, 12% 100%, 0% 88%, 0% 12%, 12% 0%, 15.8% 5%, 84.2% 5%, 95% 15.8%, 95% 84.2%, 84.2% 95%, 15.8% 95%, 5% 84.2%, 5% 15.8%, 15.8% 5%); }
+/* a region's stone: a square stud on its point in the hole its four tiles' cuts leave (board.js draws it as the dot) */
+.game.mana #board.sq .rdot { width: calc(var(--tw) * .132); height: calc(var(--tw) * .132); margin: calc(var(--tw) * -.066) 0 0 calc(var(--tw) * -.066); border-radius: 0; rotate: 45deg;
+  background: url(/static/sq/stone_n.webp) center / 100% 100% no-repeat; box-shadow: none; filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, .6)); }
+.game.mana #board.sq .rdot.A { background-image: url(/static/sq/stone_a.webp); filter: drop-shadow(0 0 5px rgba(90, 162, 240, .85)); }
+.game.mana #board.sq .rdot.B { background-image: url(/static/sq/stone_b.webp); filter: drop-shadow(0 0 5px rgba(240, 104, 80, .85)); }
 /* a unit's strength on the board, a size up from the token's drawer (Martin, 2026-11-22: "keep it below, just make it slightly bigger") */
 .game.hexb #board .unit .boss.tknum { transform: scale(1.3); transform-origin: 50% 60%; }

@@ -53,8 +53,13 @@ const setRows = M => { if (!M || !M.crossroads) return; const n = {};
 // A square board (every row as long: the 4x4) is drawn in square tiles, a unit standing straight on its square in its team's
 // colour; a hex board in hexagons, a unit on its token (Martin, 2026-11-22: the square look, made the default)
 export const squareLook = () => HEX.square;
+// Each square tile is one of sixteen painted tiles (static/sq, mana.css .tv0 to .tv15), the same one whoever holds it, so a
+// tile keeps its own marks when it takes a team's colour.
+const tileVar = (c, r) => squareLook() ? ` tv${((c - 1) * HEX.cols[0] + r - 1) * 7 % 16}` : '';
 const rowStep = g => squareLook() ? g.w : HEX.dy * g.h;   // a row's step up the board: a square's side, or the hexagons' interlock
-const hexGeo = () => { const g = ({ w: 120, x: STAGE.w / 2, top: 41 }); g.h = g.w * TH / TW; return g; };
+// The square board's tiles are 144 wide (Martin, 2026-11-22: "the board can afford to get bigger now that it's squares"), a
+// tile as tall as it is wide; the hex board's tokens 120.
+const hexGeo = () => { const sq = squareLook(), g = ({ w: sq ? 144 : 120, x: STAGE.w / 2, top: sq ? 36 : 41 }); g.h = sq ? g.w : g.w * TH / TW; return g; };
 export const tokenWidth = () => hexGeo().w;
 const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
   return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * rowStep(g)]; };
@@ -92,14 +97,15 @@ const reducedMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(pr
 
 const put = (cls, x, y, html = '', attrs = '', style = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px;${style}" ${attrs}>${html}</div>`;
 
-// A den: its food as a ball of light (mana.css .mden). Its area grows with the food, so the diameter goes with the square
-// root, from DEN_D[0] token widths at 0 to DEN_D[1] at the 30 that wins; it floats over its spot, DEN_AT token heights past
-// the middle of its base row (yours further: nearer the camera, it would cover your base row). The count and next turn's
+// A den: its food as a ball of light in its team's colour (mana.css .mden). Its area grows with the food, so the diameter
+// goes with the square root, from DEN_D[0] of DEN_W at 0 to DEN_D[1] at the 30 that wins (DEN_W is the hex token's width:
+// the ball keeps its size on the square board's larger tiles); it floats over its spot, DEN_AT tile heights past the middle
+// of its base row (yours further: nearer the camera, it would cover your base row; DEN_AT_SQ on the square board). The count and next turn's
 // income are the board's numerals (static/hex/num, set as token.js numeral sets numbers over 20), inked on the light.
-const DEN_D = [.3, .75], DEN_AT = { A: 1.3, B: .7 };
+const DEN_D = [.3, .75], DEN_W = 120, DEN_AT = { A: 1.3, B: .7 }, DEN_AT_SQ = { A: 1.16, B: .81 };
 // k: how much the tilt's perspective scales the den's spot (project()); the ball is drawn 1/k as large there, so equal food
 // shows as equal balls on the screen, near or far.
-const denD = (n, k = 1) => tokenWidth() * (DEN_D[0] + (DEN_D[1] - DEN_D[0]) * Math.sqrt(Math.min(Math.max(n, 0), 30) / 30)) / k;
+const denD = (n, k = 1) => DEN_W * (DEN_D[0] + (DEN_D[1] - DEN_D[0]) * Math.sqrt(Math.min(Math.max(n, 0), 30) / 30)) / k;
 // how much the tilt's perspective scales a board point at flat height y on the screen (a far one less than 1, a near one more)
 export const perspK = y => denK(y);
 const denK = y => { if (!TILT.deg) return 1; const [, oy] = tiltOrigin(); return TILT.persp / (TILT.persp - (y - oy) * Math.sin(TILT.deg * Math.PI / 180)); };
@@ -241,13 +247,13 @@ export function renderBoard(el, M, g, cards, ui) {
     if (!ps.length) continue;
     const G = hexGeo(), x = (Math.min(...ps.map(p => p[0])) + Math.max(...ps.map(p => p[0]))) / 2;
     RAIL[side] = { fy: ps[0][1] };
-    const y = ps[0][1] + (side === 'A' ? DEN_AT.A : -DEN_AT.B) * G.h;
+    const DA = squareLook() ? DEN_AT_SQ : DEN_AT, y = ps[0][1] + (side === 'A' ? DA.A : -DA.B) * G.h;
     // the trails: from each base tile's far tip into the ball, so the way in reads (Martin, 2026-11-22), in the ball's own
     // light (mana.css .mtrails). Each runs to the ball's centre, which floats its lift above the spot (a height on the screen
     // is 1/cos(tilt) as long on the board's plane), and the ball, standing in front, covers its end: they meet its rim
     // whatever its size, arriving along the line from its centre
     const d = side === 'A' ? 1 : -1, D = denD(g.food[side], denK(y)), ey = y - (D / 2 + 6) / Math.cos(TILT.deg * Math.PI / 180);
-    s += `<svg class="mtrails">${ps.map(([px, py]) => { const ty = py + d * (squareLook() ? G.w : G.h) / 2;
+    s += `<svg class="mtrails ${side}">${ps.map(([px, py]) => { const ty = py + d * (squareLook() ? G.w : G.h) / 2;
       return `<path d="M ${px} ${ty} C ${px} ${ty + (ey - ty) * .45}, ${x + (px - x) * .35} ${ey + (ty - ey) * .35}, ${x} ${ey}"/>`; }).join('')}</svg>`;
     s += put(`mden ${side}${g.food[side] > 0 ? '' : ' none'}${side === 'B' && ui.hqRing ? ' tgt' : ''}`, x, y, denBall(g.food[side], (g.income || {})[side] ?? 0), `data-hq="${side}" data-k="${denK(y).toFixed(4)}"`, denSize(g.food[side], denK(y)));
   }
@@ -258,7 +264,7 @@ export function renderBoard(el, M, g, cards, ui) {
   for (const [c, r] of CRS) {
     // an animal that roamed into the den stands only in its mouth, not also where it came from
     const cr = key(c, r), st = (g.board[cr] || []), [x, y] = at(c, r);
-    const cls = (bases.A.has(cr) ? ' base A' : bases.B.has(cr) ? ' base B' : '') + (rings.has(cr) ? ' tgt' : '') + (roamable.has(cr) ? (ui.roamFrom === cr ? ' roamsel' : ' roamable') : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');
+    const tv = tileVar(c, r), cls = tv + (bases.A.has(cr) ? ' base A' : bases.B.has(cr) ? ' base B' : '') + (rings.has(cr) ? ' tgt' : '') + (roamable.has(cr) ? (ui.roamFrom === cr ? ' roamsel' : ' roamable') : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');
     const pv = ui.preview && ui.preview.cr === cr ? ui.preview : null;
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }
@@ -271,8 +277,8 @@ export function renderBoard(el, M, g, cards, ui) {
     // in its place (--fd: when it touched down, from this step's start; negative once that is past, so it never replays)
     const was = inFlight(cr);
     if (was) {
-      s += was.length ? put(`cr unit ${was[was.length - 1].owner}`, x, y, unit(was[was.length - 1], was.slice(0, -1).reverse(), cards), `data-cr="${cr}" data-card="${was[was.length - 1].id}"`)
-        : put('cr clear', x, y, '', `data-cr="${cr}"`);
+      s += was.length ? put(`cr unit ${was[was.length - 1].owner}${tv}`, x, y, unit(was[was.length - 1], was.slice(0, -1).reverse(), cards), `data-cr="${cr}" data-card="${was[was.length - 1].id}"`)
+        : put(`cr clear${tv}`, x, y, '', `data-cr="${cr}"`);
       continue; }
     const fe = flightEnd(cr), flown = fe ? `--fd:${Math.round(fe - (Date.now() - (ui.ago || 0)))}ms` : '';
     s += put(`cr unit ${u.owner}${cls}${flown ? ' flown' : ''}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards, fire.has(cr)), `data-cr="${cr}" data-card="${u.id}"`, [strike, flown].filter(Boolean).join(';'));

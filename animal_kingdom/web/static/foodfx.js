@@ -1,5 +1,5 @@
-// Food in motion (Martin, 2026-11-21: "nice little animations ... the food can be represented by little orange glowing
-// dots for now"), as the old game flew its fruit: one dot per food, leaving 35 ms apart and taking 0.7 s on a low arc, the
+// Food in motion (Martin, 2026-11-21: "nice little animations"; 2026-11-22: each dot in the colour of the team whose food
+// it is), as the old game flew its fruit: one dot per food, leaving 35 ms apart and taking 0.7 s on a low arc, the
 // den's count ticking up as each lands. Food gained flies into its side's den from where it came: a region's income from
 // the dots of the regions held, a card's food from the animals whose doing it is, a leader's from the leader on the rail.
 // Food a raid destroys bursts out of the den and fades. The dots live in a layer over the whole screen, placed from where
@@ -12,7 +12,7 @@ export const FLY = 0.7, GAP = 0.035;   // seconds: one dot's flight, and between
 const centre = el => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, h: r.height }; };
 let layer = null;
 const host = () => { if (!layer || !layer.isConnected) { layer = document.createElement('div'); layer.id = 'foodfx'; document.body.appendChild(layer); } return layer; };
-const dot = (x, y, size) => { const d = document.createElement('i'); d.className = 'fdot fly';
+const dot = (x, y, size, side) => { const d = document.createElement('i'); d.className = `fdot fly ${side}`;
   d.style.cssText = `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px`; host().appendChild(d); return d; };
 
 // The den's count shows `from` and steps one food at a time towards `to` as `times` (ms from now) come due; the ball's size follows.
@@ -36,7 +36,7 @@ export function playFood(step, before, sources) {
     const times = [];
     for (let i = 0; i < step.n; i++) {
       const a = (i / step.n) * Math.PI * 2 + Math.random() * .6, r = to.h * (3 + Math.random() * 2.5), delay = i * GAP * 1000;
-      const d = dot(to.x, to.y, size);
+      const d = dot(to.x, to.y, size, side);
       d.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(a) * r}px,${Math.sin(a) * r * .7}px) scale(.4)`, opacity: 0 }],
         { duration: 600, delay, easing: 'cubic-bezier(.2,.7,.4,1)', fill: 'both' }).finished.then(() => d.remove());
       times.push(delay);
@@ -52,7 +52,7 @@ export function playFood(step, before, sources) {
     const p = centre(s.el);
     for (let j = 0; j < s.n; j++, k++) {
       const delay = k * GAP * 1000, dx = to.x - p.x + (k % 3 - 1) * size * .6, dy = to.y - p.y, lift = -Math.min(120, Math.hypot(dx, dy) * .35);
-      const d = dot(p.x, p.y, size);
+      const d = dot(p.x, p.y, size, side);
       d.animate([{ transform: 'translate(0,0) scale(.6)', opacity: 0 },
                  { transform: `translate(${dx * .5}px,${dy * .5 + lift}px) scale(1.1)`, opacity: 1, offset: .5 },
                  { transform: `translate(${dx}px,${dy}px) scale(.8)`, opacity: 1 }],
