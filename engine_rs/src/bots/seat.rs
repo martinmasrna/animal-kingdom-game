@@ -12,8 +12,8 @@ use crate::state::{Options, State};
 /// The hidden cards of the opponent as the seat can count them.
 #[derive(Clone, Debug)]
 pub struct Unseen {
-    /// The opponent's cards that are in their hand or deck, as a sorted multiset: their decklist less every card of
-    /// theirs the seat has seen leave it (on the board, in the Remove Pile).
+    /// The opponent's cards that are in their hand or deck, as a sorted multiset: their decklist and the cards effects
+    /// made into their hand, less every card of theirs the seat can see (on the board, in the Remove Pile, made in hand).
     pub pool: Vec<CardId>,
     /// The opponent's hand slots whose card the seat cannot know.
     pub unknown_slots: Vec<usize>,
@@ -21,12 +21,12 @@ pub struct Unseen {
 
 /// The opponent's unseen cards from `me`'s seat.
 ///
-/// A card in their hand that their decklist does not hold was made by an effect both players watched (a token put
-/// into the hand), so it is known; every other hand card is unknown.
+/// A card an effect made into their hand (the Bird Egg's Flight 1s, Mama Spore's Spores) both players watched arrive,
+/// so it is known; every other hand card is unknown.
 pub fn unseen(real: &State, me: Player) -> Unseen {
     let opp = other(me);
-    let list = &real.starting_decks[opp as usize];
-    let mut pool: Vec<CardId> = list.clone();
+    let mut pool: Vec<CardId> = real.starting_decks[opp as usize].clone();
+    pool.extend(real.made[opp as usize].iter().copied());
     pool.sort_unstable();
     let mut take = |card: CardId| {
         if let Ok(i) = pool.binary_search(&card) {
@@ -43,18 +43,15 @@ pub fn unseen(real: &State, me: Player) -> Unseen {
             take(card);
         }
     }
-    let unknown_slots: Vec<usize> = real.hands[opp as usize].iter().enumerate()
-        .filter(|(_, u)| list.contains(&u.card)).map(|(i, _)| i).collect();
-    // The pool is exactly their unknown hand cards and their deck. If an effect ever breaks that count (a copy of a
-    // deck card made into a hand), keep the sizes right: trim, or pad from the decklist.
-    let need = unknown_slots.len() + real.decks[opp as usize].len();
-    pool.truncate(need);
-    let mut i = 0;
-    while pool.len() < need && !list.is_empty() {
-        pool.push(list[i % list.len()]);
-        i += 1;
+    let mut unknown_slots: Vec<usize> = Vec::new();
+    for (i, u) in real.hands[opp as usize].iter().enumerate() {
+        if u.made {
+            take(u.card);
+        } else {
+            unknown_slots.push(i);
+        }
     }
-    pool.sort_unstable();
+    debug_assert_eq!(pool.len(), unknown_slots.len() + real.decks[opp as usize].len(), "the unseen pool is their hidden cards");
     Unseen { pool, unknown_slots }
 }
 

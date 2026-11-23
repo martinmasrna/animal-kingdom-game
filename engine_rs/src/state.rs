@@ -21,15 +21,17 @@ pub struct Unit {
     pub strength_mod: i32,
     /// What effects have added to its mana cost while in hand (the Assassin's -1).
     pub cost_mod: i32,
+    /// Made into its owner's hand by an effect both players watched (the Bird Egg's Flight 1s): known to the opponent.
+    pub made: bool,
 }
 
 impl Unit {
     pub fn new(card: CardId, owner: Player, iid: i32) -> Unit {
-        Unit { card, owner, retaliation_used: false, iid, strength_mod: 0, cost_mod: 0 }
+        Unit { card, owner, retaliation_used: false, iid, strength_mod: 0, cost_mod: 0, made: false }
     }
 }
 
-const NO_UNIT: Unit = Unit { card: 0, owner: 0, retaliation_used: false, iid: -1, strength_mod: 0, cost_mod: 0 };
+const NO_UNIT: Unit = Unit { card: 0, owner: 0, retaliation_used: false, iid: -1, strength_mod: 0, cost_mod: 0, made: false };
 
 /// The board: each tile's stack of units, bottom to top; the top unit holds the tile. A stack is deeper than one only
 /// between a cover and the removal of what it covered, so the tops
@@ -391,6 +393,9 @@ pub struct State {
     /// Shared and public, with each card's owner in step (255: unknown).
     pub remove_pile: SmallVec<[CardId; 64]>,
     pub pile_owners: SmallVec<[u8; 64]>,
+    /// player -> every card an effect made into their hand, in the order made: public, so their hidden cards are
+    /// their decklist and these, less what both players have seen.
+    pub made: [SmallVec<[CardId; 4]>; 2],
     pub leaders: [Option<CardId>; 2],
     pub food: [i32; 2],
     pub current: Player,
@@ -440,6 +445,7 @@ impl Clone for State {
             starting_decks: self.starting_decks.clone(),
             remove_pile: SmallVec::from_slice(&self.remove_pile),
             pile_owners: SmallVec::from_slice(&self.pile_owners),
+            made: [SmallVec::from_slice(&self.made[0]), SmallVec::from_slice(&self.made[1])],
             leaders: self.leaders,
             food: self.food,
             current: self.current,
@@ -484,6 +490,8 @@ impl Clone for State {
         }
         copy_list(&mut self.remove_pile, &src.remove_pile);
         copy_list(&mut self.pile_owners, &src.pile_owners);
+        copy_list(&mut self.made[0], &src.made[0]);
+        copy_list(&mut self.made[1], &src.made[1]);
         self.leaders = src.leaders;
         self.food = src.food;
         self.current = src.current;
@@ -636,6 +644,7 @@ impl State {
             starting_decks: Arc::new([deck_a.to_vec(), deck_b.to_vec()]),
             remove_pile: SmallVec::new(),
             pile_owners: SmallVec::new(),
+            made: [SmallVec::new(), SmallVec::new()],
             leaders: [None, None],
             food: [cfg.start_food, cfg.start_food],
             current: first,

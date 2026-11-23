@@ -715,8 +715,9 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
             let (player, card, n) = (*player, *card, *n);
             let mut made: SmallVec<[Unit; 4]> = SmallVec::new();
             for _ in 0..n {
-                let inst = Unit::new(card, player, st.new_iid());
+                let inst = Unit { made: true, ..Unit::new(card, player, st.new_iid()) };
                 st.hands[player as usize].push(inst);
+                st.made[player as usize].push(card);
                 made.push(inst);
             }
             if st.events.on {

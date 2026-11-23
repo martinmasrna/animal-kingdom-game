@@ -310,24 +310,26 @@ def load_map(map_id: str = MAP_ID) -> GameMap:
 class UnitInstance:
     """One card instance: a card id, its owner and a unique instance id. The same instance moves from hand to board."""
 
-    __slots__ = ("card_id", "owner", "iid", "retaliation_used", "strength_mod", "cost_mod")
+    __slots__ = ("card_id", "owner", "iid", "retaliation_used", "strength_mod", "cost_mod", "made")
 
     def __init__(self, card_id: str, owner: str, iid: int, retaliation_used: bool = False, strength_mod: int = 0,
-                 cost_mod: int = 0):
+                 cost_mod: int = 0, made: bool = False):
         self.card_id = card_id
         self.owner = owner
         self.iid = iid
         self.retaliation_used = retaliation_used   # Spikes: spent on the first enemy that covers it
         self.strength_mod = strength_mod           # what effects have added to its strength, for good (the Hunters' -N)
         self.cost_mod = cost_mod                   # what effects have added to its mana cost while in hand (the Assassin's -1)
+        self.made = made                           # made into its owner's hand by an effect both players watched
 
     def to_dict(self) -> dict:
         return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid, "retaliation_used": self.retaliation_used,
-                "strength_mod": self.strength_mod, "cost_mod": self.cost_mod}
+                "strength_mod": self.strength_mod, "cost_mod": self.cost_mod, "made": self.made}
 
     def _take(self, d: dict) -> "UnitInstance":
         self.card_id, self.owner, self.iid = d["card_id"], d["owner"], d["iid"]
         self.retaliation_used, self.strength_mod, self.cost_mod = d.get("retaliation_used", False), d.get("strength_mod", 0), d.get("cost_mod", 0)
+        self.made = d.get("made", False)
         return self
 
     @staticmethod
@@ -379,6 +381,7 @@ class GameState:
         self.hands = hands                 # player -> list of UnitInstance
         self.decks = decks                 # player -> list of card ids (the top is the end)
         self.starting_decks = starting_decks if starting_decks is not None else {"A": (), "B": ()}
+        self.made = {"A": [], "B": []}     # player -> every card an effect made into their hand (public)
         self.remove_pile = remove_pile     # shared and public
         self.pile_owners = pile_owners if pile_owners is not None else [None] * len(remove_pile)   # in step with remove_pile
         self.leaders = leaders if leaders is not None else {}   # player -> {"id": card id}
@@ -433,6 +436,7 @@ class GameState:
             "hands": {p: [u.to_dict() for u in h] for p, h in self.hands.items()},
             "decks": {p: list(d) for p, d in self.decks.items()},
             "starting_decks": {p: list(d) for p, d in self.starting_decks.items()},
+            "made": {p: list(m) for p, m in self.made.items()},
             "remove_pile": list(self.remove_pile),
             "pile_owners": list(self.pile_owners),
             "leaders": {p: dict(lead) for p, lead in sorted(self.leaders.items())},
@@ -502,6 +506,7 @@ class GameState:
             self.hands.setdefault(p, [])[:] = [unit(x) for x in d["hands"][p]]
             self.decks.setdefault(p, [])[:] = d["decks"][p]
         self.starting_decks = {p: tuple(dk) for p, dk in d["starting_decks"].items()}
+        self.made = {p: list(m) for p, m in d.get("made", {"A": [], "B": []}).items()}
         self.remove_pile[:] = d["remove_pile"]
         self.pile_owners[:] = d["pile_owners"]
         self.leaders.clear()

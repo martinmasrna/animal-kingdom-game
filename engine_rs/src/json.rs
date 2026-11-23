@@ -14,7 +14,7 @@ use crate::state::*;
 
 fn unit_to_json(g: &Game, u: &Unit) -> Value {
     json!({"card_id": g.cards.name_of(u.card), "owner": pname(u.owner), "iid": u.iid, "retaliation_used": u.retaliation_used,
-           "strength_mod": u.strength_mod, "cost_mod": u.cost_mod})
+           "strength_mod": u.strength_mod, "cost_mod": u.cost_mod, "made": u.made})
 }
 
 fn unit_from_json(g: &Game, v: &Value) -> Result<Unit, String> {
@@ -25,6 +25,7 @@ fn unit_from_json(g: &Game, v: &Value) -> Result<Unit, String> {
         retaliation_used: v["retaliation_used"].as_bool().unwrap_or(false),
         strength_mod: v["strength_mod"].as_i64().unwrap_or(0) as i32,
         cost_mod: v["cost_mod"].as_i64().unwrap_or(0) as i32,
+        made: v["made"].as_bool().unwrap_or(false),
     })
 }
 
@@ -220,6 +221,7 @@ impl State {
             "decks": ab(&|p| cards_to_json(g, &self.decks[p])),
             "starting_decks": ab(&|p| cards_to_json(g, &self.starting_decks[p])),
             "remove_pile": cards_to_json(g, &self.remove_pile),
+            "made": ab(&|p| cards_to_json(g, &self.made[p])),
             "pile_owners": self.pile_owners.iter().map(|&o| if o == NO_OWNER { Value::Null } else { Value::from(pname(o)) }).collect::<Vec<_>>(),
             "leaders": leaders,
             "food": ab(&|p| self.food[p].into()),
@@ -262,6 +264,10 @@ impl State {
         let pile_owners: SmallVec<[u8; 64]> = match d.get("pile_owners").and_then(|v| v.as_array()) {
             Some(a) => a.iter().map(|o| o.as_str().and_then(|s| player_from(s).ok()).unwrap_or(NO_OWNER)).collect(),
             None => remove_pile.iter().map(|_| NO_OWNER).collect(),
+        };
+        let made = match d.get("made") {
+            Some(v) if v.is_object() => pair(v, |x| cards_from_json(gr, x))?,
+            _ => [SmallVec::new(), SmallVec::new()], // a position saved before it was kept
         };
         let mut leaders = [None, None];
         if let Some(m) = d.get("leaders").and_then(|v| v.as_object()) {
@@ -332,6 +338,7 @@ impl State {
             starting_decks: Arc::new(starting),
             remove_pile,
             pile_owners,
+            made,
             leaders,
             food: [int(&d["food"]["A"]), int(&d["food"]["B"])],
             current: player_of(&d["current"])?,
