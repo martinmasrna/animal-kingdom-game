@@ -790,3 +790,12 @@ def test_a_leaders_passive_says_when_it_fires():
     rules.apply_action(s, PassAction())
     kinds = [e["e"] for e in s.events[n:]]
     assert kinds.index("leader_trigger") < kinds.index("food")
+
+
+def test_a_golden_egg_taken_by_scout_is_drawn_and_draws_a_card():
+    s = state(turn=11, hands={"A": ["scout_3"]}, decks={"A": ["wisp_1", "wisp_2", "golden_egg", "wisp_4"]})   # the top is the end
+    rules.apply_action(s, PlaceAction("scout_3", ("cr", "1,1")))
+    assert s.pending["options"] == ["deck:0", "deck:1", "deck:2"]
+    rules.apply_action(s, ChoiceAction("deck:1"))                    # the Golden Egg
+    hand = sorted(u.card_id for u in s.hands["A"])
+    assert len(hand) == 2 and "golden_egg" in hand and len(s.decks["A"]) == 2

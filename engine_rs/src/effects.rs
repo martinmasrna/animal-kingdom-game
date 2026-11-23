@@ -676,7 +676,8 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
             Ok(None)
         }
         StepKind::Scout { player } => {
-            // Look at the top cards of your deck, put the one you choose into your hand and shuffle the rest back.
+            // Look at the top cards of your deck, draw the one you choose and shuffle the rest back: a draw, so a Golden
+            // Egg drawn this way draws a card, from the deck shuffled.
             let player = *player;
             let p = player as usize;
             let n = (st.cfg().scout_look.max(0) as usize).min(st.decks[p].len());
@@ -700,6 +701,9 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
                 st.emit(Ev::Burn { iid: inst.iid, card: inst.card, owner: inst.owner });
             }
             st.rng.shuffle(&mut st.decks[p]);
+            if st.card(card).beh.draw_on_draw {
+                draw_cards(st, player, st.cfg().golden_egg_draws);
+            }
             Ok(None)
         }
         StepKind::PlaceToken { player, card, options } => {
