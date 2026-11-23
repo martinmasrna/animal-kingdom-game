@@ -1,0 +1,138 @@
+{
+ "version": "0.0.3",
+ "name": "Patch 0.0.3",
+ "date": "23 November 2026",
+ "rules": [],
+ "powers": [
+  {
+   "was": {
+    "id": "elf_legend",
+    "kind": "power",
+    "text": "Gain 2 food for each region you control.",
+    "mana": 2
+   },
+   "now": {
+    "id": "elf_legend",
+    "kind": "passive",
+    "text": "Your regions produce 1 more food.",
+    "mana": null
+   }
+  }
+ ],
+ "changed": [
+  {
+   "was": {
+    "id": "duplicating_spore",
+    "name": "Duplicating Spore",
+    "rarity": "common",
+    "str": 1,
+    "text": "Roar: place a Spore on an adjacent tile.",
+    "kw": [],
+    "mana": 1,
+    "fig": [
+     400,
+     400
+    ]
+   },
+   "now": {
+    "id": "duplicating_spore",
+    "name": "Duplicating Spore",
+    "rarity": "common",
+    "str": 1,
+    "text": "Roar: place a Spore on a random adjacent empty crossroad.",
+    "kw": [],
+    "mana": 1,
+    "fig": [
+     400,
+     400
+    ]
+   }
+  },
+  {
+   "was": {
+    "id": "elf_legend",
+    "name": "Elf",
+    "rarity": "legendary",
+    "str": 3,
+    "text": "Your regions produce 1 more food.",
+    "kw": [],
+    "mana": 5,
+    "fig": [
+     400,
+     400
+    ]
+   },
+   "now": {
+    "id": "elf_legend",
+    "name": "Elf",
+    "rarity": "legendary",
+    "str": 3,
+    "text": "Roar: gain 2 food for each region you control.",
+    "kw": [],
+    "mana": 3,
+    "fig": [
+     400,
+     400
+    ]
+   }
+  },
+  {
+   "was": {
+    "id": "djinn_burn",
+    "name": "Burn Djinn",
+    "rarity": "common",
+    "str": 10,
+    "text": "Costs 1 less for each food your opponent lost this turn.",
+    "kw": [],
+    "mana": 12,
+    "fig": [
+     400,
+     400
+    ]
+   },
+   "now": {
+    "id": "djinn_burn",
+    "name": "Burn Djinn",
+    "rarity": "common",
+    "str": 10,
+    "text": "Costs 1 less for each food your opponent lost this game.",
+    "kw": [],
+    "mana": 12,
+    "fig": [
+     400,
+     400
+    ]
+   }
+  },
+  {
+   "was": {
+    "id": "djinn_region",
+    "name": "Region Djinn",
+    "rarity": "common",
+    "str": 10,
+    "text": "Costs 3 less for each region you control.",
+    "kw": [],
+    "mana": 12,
+    "fig": [
+     400,
+     451
+    ]
+   },
+   "now": {
+    "id": "djinn_region",
+    "name": "Food Djinn",
+    "rarity": "common",
+    "str": 10,
+    "text": "Costs 1 less for each food your regions produced this game.",
+    "kw": [],
+    "mana": 12,
+    "fig": [
+     400,
+     451
+    ]
+   }
+  }
+ ],
+ "added": [],
+ "removed": []
+}
