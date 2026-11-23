@@ -186,6 +186,9 @@ fn end_turn(st: &mut State) -> Result<(), String> {
     let player = st.current;
     st.emit(Ev::TurnEnd { player });
     let income = region_income(st, player);
+    if income > 0 && st.leads(player, st.g.named.elf) && st.cfg().elf_region_bonus != 0 {
+        st.emit(Ev::LeaderTrigger { player, card: st.g.named.elf.unwrap() });
+    }
     st.food_produced[player as usize] += income;
     effects::gain_food(st, player, income, true);
     if st.result.is_some() {

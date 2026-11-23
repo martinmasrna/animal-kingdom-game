@@ -1001,6 +1001,10 @@ function drawGame() {
   const st = ui.step;   // what this step shows (static/timeline.js); a view without events just shows what changed
   if (A) A.fx = st ? []
     : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
+  if (st && st.kind === 'trigger') {   // a leader's passive fires: its token flashes in place
+    const lt = document.querySelector(`#mplane .ltok[data-lead="${rel(st.player)}"]`);
+    if (lt) { lt.classList.remove('fire'); void lt.offsetWidth; lt.classList.add('fire'); }
+  }
   if (st && st.kind === 'leader') {   // a leader's power used: the leader's card shown large, shrinking into its place by the den
     const lt = document.querySelector(`#mplane .ltok[data-lead="${rel(st.player)}"]`), [tx, ty] = lt ? onStage(lt) : [STAGE.w / 2, 300], rv = $('reveal');
     rv.innerHTML = ((manaCard({ ...CARDS[st.card], text: ((G.leaders || {})[st.player] || {}).text || CARDS[st.card].text }, { owner: rel(st.player), w: 190, str: null }))) + '<div class="actlbl">Leader</div>'; fitNames(rv); fitPlaques(rv);

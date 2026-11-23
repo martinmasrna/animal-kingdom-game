@@ -39,3 +39,15 @@ test("their chosen target plays as an aim step from its source, before the effec
   const mine = plan(prev, base([...prev.game.events, aim('A', 2), hit(3)], prev.game.board)).filter(s => s.step);
   assert.deepEqual(mine.map(s => s.step.kind), []);
 });
+
+test("a leader's passive firing plays as a trigger step before what it does (Martin, 2026-11-24: the Assassin's draw went by unseen)", () => {
+  const raider = { iid: 7, id: 'flight_1', str: 1 }, drawn = { iid: 9, id: 'wisp_1', str: 2 };
+  const prev = view([raider], { A: 1, B: 4 }, 15, [{ seq: 1, e: 'turn_start', player: 'A' }]);
+  const next = view([drawn], { A: 1, B: 4 }, 14, [...prev.game.events,
+    { seq: 2, e: 'raid', player: 'A', iid: 7, card: 'flight_1', den: 'B', str: 1, n: 1, from_hand: true },
+    { seq: 3, e: 'leader_trigger', player: 'A', card: 'assassin_legend' },
+    { seq: 4, e: 'draw', player: 'A', cards: [[9, 'wisp_1']] }]);
+  const kinds = plan(prev, next).filter(s => s.step).map(s => s.step.kind);
+  assert.deepEqual(kinds.slice(kinds.indexOf('trigger')), ['trigger', 'draw']);
+  assert.equal(plan(prev, next).find(s => s.step && s.step.kind === 'trigger').step.player, 'A');
+});

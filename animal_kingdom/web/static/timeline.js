@@ -25,7 +25,7 @@ function culprit(board, cause, cr, causeIid) {
   return best;
 }
 
-export const DUR = { leader: 1.1, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, draw: 0.5, yourturn: 1.5, raid: 0.9, aim: 0.55 };
+export const DUR = { leader: 1.1, trigger: 0.6, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, draw: 0.5, yourturn: 1.5, raid: 0.9, aim: 0.55 };
 // Food in flight: one fruit per food, 0.035 s apart, each flying 0.7 s, then the count settles.
 export const foodDur = n => Math.min(2.4, 0.7 + 0.035 * Math.max(0, n - 1) + 0.3);
 
@@ -105,6 +105,9 @@ export function plan(prev, next, cards = {}) {
       case 'aim':   // the opponent chose the piece their effect acts on: their arrow points at it (aim.js) before the effect shows
         // `from`: the source's crossroad (the unit whose Roar it is); none when a leader's power aims, which comes from the leader
         if (e.player === them) push({ kind: 'aim', dur: DUR.aim, cr: e.cr, from: at(e.cause_iid), player: e.player, card: e.cause });
+        break;
+      case 'leader_trigger':   // a leader's passive fires: the leader flashes, just before what it does shows
+        push({ kind: 'trigger', dur: DUR.trigger, player: e.player });
         break;
       case 'leader_power':   // a leader's power used: its card shown, shrinking into its place by the den
         push({ kind: 'leader', dur: DUR.leader, card: e.card, player: e.player });

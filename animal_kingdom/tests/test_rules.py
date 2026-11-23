@@ -758,3 +758,27 @@ def test_fatigue_is_not_income_and_not_a_raid_and_only_a_draw_brings_it():
     lost = [e for e in rs.take_events() if e["e"] == "food" and e["n"] < 0]
     assert lost == [{"e": "food", "player": "A", "n": -1, "fatigue": 1}]                # the food-change event, negative
     assert rs.to_dict()["food"] == {"A": 14, "B": 15}                                   # the Raider's 1 more is a raid's
+
+
+def test_a_leaders_passive_says_when_it_fires():
+    # the Assassin: just before the draw its third card brings, a raid's included
+    s = state(turn=19, hands={"A": ["wisp_1", "wisp_1", "flight_1"]}, leaders={"A": ASSASSIN}, decks={"A": ["wisp_1"] * 5}, food={"A": 15, "B": 15})
+    rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1"))); rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,2")))
+    assert not [e for e in s.events if e["e"] == "leader_trigger"]
+    n = len(s.events)
+    rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
+    kinds = [e["e"] for e in s.events[n:]]
+    assert kinds.index("raid") < kinds.index("leader_trigger") == kinds.index("draw") - 1
+    # the Raider: just before the raid it adds to
+    s = state(turn=11, hands={"A": ["flight_1"]}, leaders={"A": RAIDER}, food={"A": 15, "B": 15})
+    rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
+    kinds = [e["e"] for e in s.events]
+    assert kinds.index("leader_trigger") == kinds.index("raid") - 1
+    # the Elf: at the end of a turn its regions produce in, before the food
+    s = state(turn=10, leaders={"A": ELF})
+    for cr in ("1,1", "1,2", "2,2"):
+        put(s, cr, "wisp_1", "A")
+    n = len(s.events)
+    rules.apply_action(s, PassAction())
+    kinds = [e["e"] for e in s.events[n:]]
+    assert kinds.index("leader_trigger") < kinds.index("food")

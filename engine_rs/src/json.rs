@@ -73,6 +73,11 @@ pub fn step_to_json(g: &Game, s: &Step) -> Value {
             put("player", pname(*player).into());
             put("amount", (*amount).into());
         }
+        StepKind::LeaderTrigger { player, card } => {
+            put("op", "leader_trigger".into());
+            put("player", pname(*player).into());
+            put("card", g.cards.name_of(*card).into());
+        }
         StepKind::Draw { player, n } => {
             put("op", "draw".into());
             put("player", pname(*player).into());
@@ -140,6 +145,7 @@ pub fn step_from_json(g: &Game, v: &Value) -> Result<Step, String> {
         "cover_remove" => StepKind::CoverRemove { cr: g.map.tile_of(v["cr"].as_str().unwrap_or("")).ok_or("cover_remove: unknown tile")? },
         "hungry_food" => StepKind::HungryFood { player: player_of(&v["player"])?, prey: int(&v["prey"]) },
         "gain_food" => StepKind::GainFood { player: player_of(&v["player"])?, amount: int(&v["amount"]) },
+        "leader_trigger" => StepKind::LeaderTrigger { player: player_of(&v["player"])?, card: card(&v["card"])? },
         "draw" => StepKind::Draw { player: player_of(&v["player"])?, n: int(&v["n"]) },
         "draw_if_gone" => StepKind::DrawIfGone { player: player_of(&v["player"])?, prey: int(&v["prey"]), n: int(&v["n"]) },
         "scout" => StepKind::Scout { player: player_of(&v["player"])? },

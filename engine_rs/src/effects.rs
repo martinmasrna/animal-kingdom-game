@@ -174,7 +174,9 @@ pub fn do_placement(st: &mut State, player: Player, card: CardId, target: Target
     let nth = st.cfg().assassin_nth_card;
     if nth != 0 && st.played_this_turn % nth == 0 && st.leads(player, st.g.named.assassin) {
         // the Assassin: every third card played in a turn draws
-        st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, st.g.named.assassin.unwrap()));
+        let lead = st.g.named.assassin.unwrap();
+        st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, lead));
+        st.effect_stack.push(Step::by(StepKind::LeaderTrigger { player, card: lead }, lead));
     }
     match target {
         Target::Den(enemy) => raid(st, player, unit, enemy, strength),
@@ -195,6 +197,9 @@ pub fn raid_food(st: &State, player: Player, card: CardId, strength: i32) -> i32
 /// is spent to the Remove Pile without landing (no Roar). A den emptied loses the game.
 fn raid(st: &mut State, player: Player, unit: Unit, enemy: Player, strength: i32) {
     let n = raid_food(st, player, unit.card, strength).min(st.food[enemy as usize]);
+    if st.leads(player, st.g.named.raider) && st.cfg().raider_leader_bonus != 0 {
+        st.emit(Ev::LeaderTrigger { player, card: st.g.named.raider.unwrap() });
+    }
     st.emit(Ev::Raid { player, iid: unit.iid, card: unit.card, den: enemy, strength, n });
     st.pile_add(unit.card, unit.owner);
     st.food[enemy as usize] -= n;
@@ -232,7 +237,9 @@ fn land_unit(st: &mut State, player: Player, unit: Unit, cr: Tile) {
         st.effect_stack.push(Step::new(StepKind::CoverRemove { cr }));
     }
     if onto_enemy && st.leads(player, st.g.named.warlord) {
-        st.effect_stack.push(Step::by(StepKind::GainFood { player, amount: st.cfg().warlord_leader_food }, st.g.named.warlord.unwrap()));
+        let lead = st.g.named.warlord.unwrap();
+        st.effect_stack.push(Step::by(StepKind::GainFood { player, amount: st.cfg().warlord_leader_food }, lead));
+        st.effect_stack.push(Step::by(StepKind::LeaderTrigger { player, card: lead }, lead));
     }
     if onto_enemy {
         let cov = covered.unwrap();
@@ -650,6 +657,11 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
             if !st.board.holds(*prey) {
                 gain_food(st, *player, st.cfg().hungry_food, false);
             }
+            Ok(None)
+        }
+        StepKind::LeaderTrigger { player, card } => {
+            let (player, card) = (*player, *card);
+            st.emit(Ev::LeaderTrigger { player, card });
             Ok(None)
         }
         StepKind::GainFood { player, amount } => {

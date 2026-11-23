@@ -257,6 +257,8 @@ pub enum StepKind {
     CoverRemove { cr: Tile },
     HungryFood { player: Player, prey: i32 },
     GainFood { player: Player, amount: i32 },
+    /// A leader's passive fires: its event, on the stack just above what it does.
+    LeaderTrigger { player: Player, card: CardId },
     Draw { player: Player, n: i32 },
     DrawIfGone { player: Player, prey: i32, n: i32 },
     Scout { player: Player },

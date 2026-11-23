@@ -168,6 +168,11 @@
 .game.mana .mlead .ltok.can { cursor: pointer; }
 .game.mana .mlead .ltok.can::after { content: ''; position: absolute; inset: -5px; clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 5%, 4.5% 27.5%, 4.5% 72.5%, 50% 95%, 95.5% 72.5%, 95.5% 27.5%, 50% 5%); background: #f2c94c; }
 .game.mana .mlead .ltok.can:hover { filter: brightness(1.15); }
+/* a leader's passive fires (timeline 'trigger'): a pop and a gold flash, as a card whose effect goes off */
+.game.mana .mlead .ltok.fire { animation: ltokfire .6s ease-out; }
+.game.mana .mlead .ltok.fire::before { content: ''; position: absolute; inset: -8px; border-radius: 14px; pointer-events: none; animation: ltokring .6s ease-out forwards; }
+@keyframes ltokfire { 0% { transform: scale(1); filter: brightness(1); } 30% { transform: scale(1.14); filter: brightness(1.6) drop-shadow(0 0 14px #f2c94c); } 100% { transform: scale(1); filter: brightness(1); } }
+@keyframes ltokring { 0% { box-shadow: 0 0 0 0 rgba(242, 201, 76, .9); } 100% { box-shadow: 0 0 0 18px rgba(242, 201, 76, 0); } }
 /* each deck: full cards face down (the card's outline and frame, nothing on it) piled, the count in the middle (app.js drawRail) */
 .game.mana .mdeck { position: absolute; cursor: pointer; }
 .game.mana .mdeck .dcard { position: absolute; left: 0; top: 0; }
