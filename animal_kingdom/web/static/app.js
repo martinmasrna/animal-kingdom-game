@@ -797,25 +797,25 @@ addEventListener('visibilitychange', () => { if (!document.hidden && screen === 
 // The upright screen's measures (stage px; mana.css .game.port): the controls' size (40 CSS px and more on any phone), the
 // opponent's hand left of them along the top edge, and your hand's places along the bottom.
 const PORT_BTN = 80, OPP_PORT = n => { const w = STAGE.w - 32 - n * (PORT_BTN + 8); return { x: 16 + w / 2, w }; };
-// Your hand upright: one straight row of up to seven cards across the stage's width; eight to ten cards in two rows, the
-// first half behind, raised so its cards' tops (both numbers, the creature) show over the row in front (a phone is too narrow
-// for ten cards a thumb can take in one row). The opening hand: its cards large, in a row above the middle.
+// Your hand upright: one straight row of up to seven cards across the stage's width; the eighth to tenth stand in a row
+// behind it, raised so their tops (both numbers, the creature) show over the row in front (a phone is too narrow for ten
+// cards a thumb can take in one row). The opening hand: its cards large, in a row above the middle.
 // A card shown to be read upright (the opening hand, a choice's cards) is PORT_READ wide, two to a row: its rules at 11 CSS px.
 const PORT_READ = 290;
-const PORT_HAND = { bottom: 1266, span: 688, gap: 10, one: 7, max: 120, two: 104, lift: .56 };
+const PORT_HAND = { bottom: 1266, span: 688, gap: 10, one: 7, max: 120, lift: .62 };
 function portHand(n, mull) {
   const P = PORT_HAND, mid = STAGE.w / 2;
   if (mull) { const g = 44, cw = PORT_READ, ch = cw * 1.38, rowOf = i => i < 2 ? 0 : 1, inRow = r => Math.min(2, n - 2 * r);
     return { cw, gap: g, at: i => { const r = rowOf(i), k = inRow(r), x0 = mid - (k * cw + (k - 1) * g) / 2;
       return { left: x0 + (i - 2 * r) * (cw + g), top: 400 + r * (ch + 24) }; } }; }
-  // Two rows are laid like bricks (Martin, 2026-11-23): each front card centred under the gap between two back ones, so a
-  // finger finds each card's own face; the back row holds the first half (the longer one when it is odd), the front row
-  // starts half a step in.
-  const rows = n > P.one ? 2 : 1, back = rows === 2 ? Math.ceil(n / 2) : n, front = n - back;
-  const cw = Math.min(rows === 2 ? P.two : P.max, Math.floor((P.span - (back - 1) * P.gap) / Math.max(1, back))), ch = cw * 1.38, step = cw + P.gap;
-  const x0 = mid - (Math.max(back, rows === 2 ? front + .5 : 0) * step - P.gap) / 2;
-  return { cw, gap: P.gap, at: i => { const f = rows === 2 && i >= back;
-    return { left: x0 + (f ? (i - back + .5) * step : i * step), top: P.bottom - ch - (rows === 2 && !f ? ch * P.lift : 0), bk: rows === 2 && !f }; } };
+  // The front row holds up to P.one cards and never changes when more arrive (Martin, 2026-11-23: "a fixed amount of card
+  // that fit into one row, say 7, and beyond that the cards go on second row"). The cards past it stand in a row behind,
+  // raised, laid like bricks: each over a gap of the front row, filling from the second gap rightward, so no card moves
+  // when one more comes.
+  const front = Math.min(n, P.one), cw = Math.min(P.max, Math.floor((P.span - (front - 1) * P.gap) / Math.max(1, front))), ch = cw * 1.38, step = cw + P.gap;
+  const x0 = mid - (front * step - P.gap) / 2;
+  return { cw, gap: P.gap, at: i => { const bk = i >= P.one;
+    return { left: x0 + (bk ? (i - P.one + 1.5) * step : i * step), top: P.bottom - ch - (bk ? ch * P.lift : 0), bk }; } };
 }
 function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
@@ -889,7 +889,7 @@ function drawGame() {
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = false;
     const pos = cardAt(i), from = drawn ? `${made ? '' : `--fx:${(document.querySelector('#mplane .mdeck.A') ? onStage(document.querySelector('#mplane .mdeck.A'))[0] : STAGE.w) - (pos.left + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
     const html = manaCard(c, { str: h.str, cost: h.cost, w: cw, iid: h.iid });
-    return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}${pos.bk ? ' bk' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${pos.left}px;${pos.top == null ? '' : `top:${pos.top}px;`}z-index:${i + 1};${from}">${html}</div>`;
+    return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}${pos.bk ? ' bk' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${pos.left}px;${pos.top == null ? '' : `top:${pos.top}px;`}z-index:${pos.bk ? 0 : i + 1};${from}">${html}</div>`;
   }).join('');
   fitNames(hand); fitPlaques(hand);
   // a card that left (played, discarded) or came: the others slide to their new places rather than jump
