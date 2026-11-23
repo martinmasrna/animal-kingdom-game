@@ -6,7 +6,7 @@ Is one bot stronger than another? `bench.sh` plays them against each other and s
 tools/bot_bench/bench.sh run --x turn:budget=200000,reply=12,per=2 --y turn:budget=200000 --seeds 40 --name my-run
 ```
 
-X is the bot under test, Y the one it is measured against. The decks are Martin's five (`martin_decks.json`: Aggro, Control, Midrange, Food Token, Combo Token); every ordered pairing is played, mirrors included, `--seeds` deals each (40 gives 1,000 deals, 2,000 games). Every deal is played twice with the pilots swapped: same decks, same seats, same shuffle. So neither a strong deck nor a lucky draw can favour a bot, and 50% means the two are equal. The number to read is X's share of the games with its 95% interval, a deal's two games counting as one observation.
+X is the bot under test, Y the one it is measured against. The decks are the premade ones, Martin's five (`animal_kingdom/data/decks.json`: Aggro, Control, Midrange, Food Token, Combo Token; the ranked bots play the same file, web/pool.py); every ordered pairing is played, mirrors included, `--seeds` deals each (40 gives 1,000 deals, 2,000 games). Every deal is played twice with the pilots swapped: same decks, same seats, same shuffle. So neither a strong deck nor a lucky draw can favour a bot, and 50% means the two are equal. The number to read is X's share of the games with its 95% interval, a deal's two games counting as one observation.
 
 A bot's budget is a count of positions it may make in a turn, never a clock, and every bot is seeded from the deal. A run with the same arguments on the same commit plays the same games, on any machine, under any load. Milliseconds are reported and never used; read them from a run on a quiet machine.
 

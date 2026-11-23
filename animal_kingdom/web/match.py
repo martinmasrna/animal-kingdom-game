@@ -26,6 +26,12 @@ log = logging.getLogger(__name__)
 # evaluation, sending back every opening card that costs more than 2 (about 30 ms a turn on the Mac; the slowest choice in
 # 100 games took an eighth of a second). The greedy bot plays any move this one fails on (animal_kingdom/bot.py).
 PRACTICE_BOT = "turn:budget=200000,reply=12,per=2,eval=race,mull=2"
+# The ranked bots, weakest first (web/ladder.py LEVELS; each is rated with each deck by tools/ladder/seed.py). Level 5 is
+# the Practice opponent. 4 and 3 are the same bot with less search: 20,000 positions a turn and no look at the reply,
+# then one action at a time. 2 searches like 3 but judges a position with the shipped greedy bot's evaluation, and 1 is
+# that greedy bot itself: less search alone spans about 200 rating points, these two carry the ladder 250 further down.
+BOT_LEVELS = {"1": "greedy", "2": "turn:budget=1,eval=greedy", "3": "turn:budget=1,eval=race,mull=2",
+              "4": "turn:budget=20000,eval=race,mull=2", "5": PRACTICE_BOT}
 ASKS = {"mulligan": "mulligan", "place_token": "place"}   # what a pending choice asks, by the step asking: the mulligan, a tile to put a token on; anything else is "effect"
 # The turn clock, for matches between two people: whoever must act gets a free window each time the decision comes to
 # them (unused time is lost), then spends their bank for the game. At zero, the engine acts for them.
@@ -47,10 +53,19 @@ class Seat:
     deck: Optional[str] = None
     ready: bool = False
     profile: Optional[str] = None    # the player's profile id, when they have one
+    level: Optional[str] = None      # a ranked bot's level (BOT_LEVELS); a bot without one is the Practice opponent
+    ladder: Optional[str] = None     # on the ladder (a ranked match): a person's profile id, or a bot's ladder id
+    rating: Optional[str] = None     # a ranked match: the seat's rating as shown when it opened ("1781", "1500?"); a person's
+                                     # only in the top league
+    league: Optional[str] = None     # a ranked match: a person's league when it opened ("Gold 2"); bots have none
 
     @property
     def is_bot(self) -> bool:
         return self.bot
+
+    @property
+    def spec(self) -> str:
+        return BOT_LEVELS.get(self.level, PRACTICE_BOT)
 
 
 @dataclass
@@ -152,6 +167,8 @@ class Match:
         self.rematch_offer: Optional[str] = None     # between two people: the seat that offered a rematch
         self.rematch_declined: Optional[str] = None  # ...and the seat that declined it
         self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
+        self.rating_change: dict = {}    # a ranked match, once rated: seat -> its rating before and after (server.rate_match)
+        self.tier_change: dict = {}      # ...and a person's league after it, with the line that says what the game did
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
 
@@ -180,7 +197,7 @@ class Match:
         decks = {p: self.seats[p].deck for p in "AB"}
         self.state = new_game(load_deck(decks["A"]), load_deck(decks["B"]), seed, first_player=first,
                               leaders={p: DECK_LEADERS.get(d) for p, d in decks.items()})
-        self.bots = {s: SearchBot(PRACTICE_BOT, seed + i) for i, (s, seat) in enumerate(self.seats.items()) if seat.is_bot}
+        self.bots = {s: SearchBot(seat.spec, seed + i) for i, (s, seat) in enumerate(self.seats.items()) if seat.is_bot}
         self.history, self.events, self.seq, self.result = [], [], 0, None
         self.phase = "playing"
         self.clock = None if any(seat.is_bot for seat in self.seats.values()) else \
@@ -192,10 +209,16 @@ class Match:
         """Two people: a rematch is an offer the other accepts or declines."""
         return "B" in self.seats and not any(s.is_bot for s in self.seats.values())
 
+    def ranked(self) -> bool:
+        """Both seats are on the ladder: the result is rated, and the next game is a new match against whoever is near."""
+        return "B" in self.seats and all(s.ladder for s in self.seats.values())
+
     def offer_rematch(self, s: str) -> None:
         """A seat's Rematch: against a bot it starts one; between two people it offers one, and the other's accepts."""
         if self.phase != "match_over":
             raise EngineError("the match is still on")
+        if self.ranked():
+            raise EngineError("a ranked match has no rematch")
         if not self.friendly() or self.rematch_offer == other_player(s):
             self.rematch()
         elif self.rematch_declined is not None:
@@ -401,6 +424,7 @@ class Match:
                 "actions": self.actions, "action_times": self.action_times, "started_at": self.started_at,
                 "created": self.created.isoformat(), "version": self.version, "rematches": self.rematches,
                 "clock": self.clock, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
+                "rating_change": self.rating_change, "tier_change": self.tier_change,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [asdict(m) for m in self.history], "events": self.events, "seq": self.seq}
 
@@ -413,6 +437,7 @@ class Match:
         m.actions, m.action_times, m.started_at = d["actions"], d["action_times"], d["started_at"]
         m.version, m.rematches = d["version"] + 1, d["rematches"]
         m.rematch_offer, m.rematch_declined = d["rematch_offer"], d["rematch_declined"]
+        m.rating_change, m.tier_change = d.get("rating_change") or {}, d.get("tier_change") or {}
         m.clock = d["clock"]
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's
@@ -421,7 +446,7 @@ class Match:
         m.history = [Move(**h) for h in d["history"]]
         m.events, m.seq = d["events"], d["seq"]
         if m.state is not None and m.seed is not None:
-            m.bots = {s: SearchBot(PRACTICE_BOT, m.seed + i) for i, (s, seat) in enumerate(m.seats.items()) if seat.is_bot}
+            m.bots = {s: SearchBot(seat.spec, m.seed + i) for i, (s, seat) in enumerate(m.seats.items()) if seat.is_bot}
         return m
 
     # ----------------------------------------------------------------- views
@@ -430,14 +455,20 @@ class Match:
             "id": self.id, "you": s, "phase": self.phase, "version": self.version,
             # a seat's deck by name only for you or a bot: a person's deck name is theirs (their list is open, by rule)
             "seats": {p: {"name": seat.name, "bot": seat.is_bot, "ready": seat.ready,
+                          **({"rating": seat.rating} if seat.rating else {}), **({"league": seat.league} if seat.league else {}),
                           **({"deck": seat.deck, "deckName": DECK_NAMES.get(seat.deck, seat.deck)} if p == s or seat.is_bot else {})}
                       for p, seat in self.seats.items()},
+            "ranked": self.ranked(),
             "result": self.result and {k: self.result[k] for k in ("winner", "reason", "turns")},
             "lists": {p: dict(Counter(load_deck(seat.deck))) for p, seat in self.seats.items() if seat.deck},
             "game": None,
         }
         if self.rematch_offer or self.rematch_declined:
             v["rematch"] = {"offer": self.rematch_offer, "declined": self.rematch_declined}
+        if s in self.rating_change:   # a ranked match just rated: your rating before and after
+            v["rating"] = self.rating_change[s]
+        if s in self.tier_change:     # ...and what it did to your league
+            v["league"] = self.tier_change[s]
         if self.state is not None:
             v["game"] = self._game_view(s, other_player(s))
         return v

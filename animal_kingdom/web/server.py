@@ -12,6 +12,7 @@ import asyncio
 import json
 import logging
 import os
+import random
 import secrets
 import subprocess
 import time
@@ -21,8 +22,11 @@ from pathlib import Path
 from aiohttp import WSMsgType, web
 
 from ..game import CARDS, COPY_LIMITS, LEADERS, Config, EngineError, power_price
-from ..decks import DECK_SIZE
+from ..decks import DECK_LEADERS, DECK_SIZE
 from . import custom_decks, events, feedback, guard, oauth
+from . import ladder as ranking
+from . import pool as bot_pool
+from . import tiers as tiers_mod
 from .chat import Chat, ChatError
 from .friends import FriendError, Friends
 from .match import DECK_NAMES, Match, Seat, card_pool, map_info
@@ -325,7 +329,29 @@ COLLECTION = set(CARDS)
 
 def profile_view(p: dict) -> dict:
     return {**p, "decks": profiles.decks(p["id"], COLLECTION, RENAMED_IDS),
-            "logins": profiles.identities(p["id"]), "providers": oauth.available(), "patchSeen": profiles.patch_seen(p["id"])}
+            "logins": profiles.identities(p["id"]), "providers": oauth.available(), "patchSeen": profiles.patch_seen(p["id"]),
+            **standing(p["id"])}
+
+
+def league_of(pid: str) -> dict:
+    """A person's league as the client shows it (web/tiers.py): its name, its division, the wins in it, the streak; in the
+    top league the rating instead."""
+    return tiers_mod.view(tiers.get(pid), ladder.get(pid).shown())
+
+
+def person_key(lid: str, r: ranking.Rating) -> float:
+    """Where a person sorts among the bots on the one leaderboard: by league and wins below the top, by rating in it."""
+    return tiers_mod.sort_key(tiers.get(lid), r.rating)
+
+
+def standing(pid: str) -> dict:
+    """Where you stand, for home: your league, and once you have played a rated game your place on the leaderboard
+    (people and bots, sorted as the leaderboard sorts them)."""
+    out, r = {"league": league_of(pid)}, ladder.get(pid)
+    if r.games <= 0:
+        return out
+    key = person_key(pid, r)
+    return {**out, "rank": 1 + sum(1 for lid, x in ladder.table() if lid != pid and (x.rating if lid.startswith("bot:") else person_key(lid, x)) > key)}
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord
@@ -474,15 +500,20 @@ async def send_feedback(req):
 
 
 def record_match(match: Match, record: dict) -> None:
-    """A finished game: its log, and a line in each person's match history (deploy/deploy.sh players reads it)."""
+    """A finished game: its log, its rating when it was ranked, and a line in each person's match history
+    (deploy/deploy.sh players reads it)."""
     save_game(match, record)
+    try:
+        rate_match(match)
+    except Exception:
+        log.exception("could not rate match %s", match.id)
     r = match.result
     for p, seat in match.seats.items():
         if not seat.profile or seat.is_bot:
             continue
         other = match.seats["B" if p == "A" else "A"]
         try:
-            profiles.record(seat.profile, f"{match.id}-{match.rematches}", kind="bot" if other.is_bot else "friend",
+            profiles.record(seat.profile, f"{match.id}-{match.rematches}", kind="ranked" if match.ranked() else "bot" if other.is_bot else "friend",
                             my_deck=DECK_NAMES.get(seat.deck, seat.deck), opp="Bot" if other.is_bot else other.name,
                             opp_deck=DECK_NAMES.get(other.deck, other.deck) if other.is_bot else "",   # a person's deck name is theirs
                             won=int(r["winner"] == p), lost=int(r["winner"] not in (p, None)))
@@ -495,6 +526,85 @@ def _open(match: Match) -> None:
     hub.matches[match.id] = match
     hub.save(match)
     hub.kick_bot(match)
+
+
+# ----------------------------------------------------------------- ranked (web/ladder.py, web/tiers.py, web/pool.py)
+ladder: ranking.Ladder = None    # everyone's rating, people and bots
+tiers: tiers_mod.Tiers = None    # each person's league and the wins in it
+
+
+def ladder_name(lid: str) -> str:
+    """A bot by its deck and the band its rating sits in, never its level ("Control (Expert Bot)"); a person by name."""
+    bot = ranking.parse_bot(lid)
+    if bot:
+        return f"{DECK_NAMES.get(bot[1], bot[1])} ({ranking.rung_of(ladder.get(lid).rating)} Bot)"
+    p = profiles.get(lid)
+    return display(p) if p else "?"
+
+
+async def join_ranked(req):
+    """A ranked match with your deck, at once: against a bot from your league's band of ratings (web/tiers.py), and in
+    the top league the bot nearest your rating. Never the deck you just met while the pool has another."""
+    p, body = me(req), await guard.body(req)
+    guard.limit("ranked", p["id"])
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    if not ladder.bots():
+        raise web.HTTPConflict(text="No bot has a legal deck to play right now")
+    slug = {name: s for s, name in DECK_NAMES.items() if s in ladder.decks}
+    avoid = {slug[d] for d in profiles.last_opp_decks(p["id"], "ranked", min(ranking.RECENT_DECKS, len(ladder.decks) - 1)) if d in slug}
+    lg, r = tiers.get(p["id"]).league, ladder.get(p["id"]).rating
+    bid = ladder.bot_in(*tiers_mod.band(lg), random, avoid) if lg != tiers_mod.TOP else None
+    bid = bid or ladder.nearest_bot(r if lg == tiers_mod.TOP else tiers_mod.par(lg) + 50, random, avoid=avoid)
+    level, bot_deck = ranking.parse_bot(bid)
+    mid, token = hub.new_id(), secrets.token_urlsafe(12)
+    you = Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"])
+    # the match states both sides as they stand going in: your league (the number only in the top league), the bot's rating
+    mine = league_of(p["id"])
+    you.league, you.rating = mine["label"], mine["rating"] if mine["top"] else None
+    match = Match(mid, you)
+    match.join(Seat(secrets.token_urlsafe(12), ladder_name(bid), bot=True, deck=bot_deck, level=level, ladder=bid,
+                    rating=ladder.get(bid).shown()))
+    _open(match)
+    return web.json_response({"id": mid, "token": token, "seat": "A"})
+
+
+def rate_match(match: Match) -> None:
+    """A ranked match's result moves both ratings and each person's league (a draw moves nothing)."""
+    if not match.ranked() or match.rating_change or not match.result or match.result["winner"] is None:
+        return
+    lids = {p: match.seats[p].ladder for p in "AB"}
+    win = lids[match.result["winner"]]
+    lose = next(lid for lid in lids.values() if lid != win)
+    before = {p: ladder.get(lid) for p, lid in lids.items()}
+    ladder.result(win, lose)
+    for p, lid in lids.items():
+        after = ladder.get(lid)
+        if not lid.startswith("bot:"):   # bots have no league
+            ch = tiers.result(lid, lid == win)
+            match.tier_change[p] = {"line": ch.line(after.shown()), **tiers_mod.view(ch.after, after.shown())}
+        # the change between the numbers shown, so "1502 → 1490 (−12)" always adds up
+        match.rating_change[p] = {"before": before[p].shown(), "after": after.shown(), "delta": round(after.rating) - round(before[p].rating)}
+    match.version += 1
+
+
+async def leaderboard(req):
+    """Everyone on the ladder, best first: people from their first rated game, with their league (the number only in the
+    top league), and the bots one row per level and deck, each with its rating and its deck's leader."""
+    p = profile_of(req)
+    rows = []
+    for lid, r in ladder.table():
+        bot = ranking.parse_bot(lid)
+        if bot:
+            rows.append((r.rating, {"name": ladder_name(lid), "rating": r.shown(), "bot": True, "you": False,
+                                    "leader": DECK_LEADERS.get(bot[1])}))
+        else:
+            lg = league_of(lid)
+            rows.append((person_key(lid, r), {"name": ladder_name(lid), "rating": r.shown() if lg["top"] else None, "league": lg,
+                                              "bot": False, "you": bool(p and lid == p["id"])}))
+    return web.json_response({"rows": [row for _, row in sorted(rows, key=lambda x: -x[0])]})
 
 
 # ----------------------------------------------------------------- friends and challenges (web/friends.py)
@@ -910,6 +1020,8 @@ def make_app() -> web.Application:
         web.delete("/api/challenge", challenge_cancel),
         web.post("/api/challenge/{id}/answer", challenge_answer),
         web.get("/ws/presence", presence_socket),
+        web.post("/api/ranked", join_ranked),
+        web.get("/api/leaderboard", leaderboard),
         web.post("/api/match", create_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),
@@ -924,6 +1036,18 @@ def make_app() -> web.Application:
         friends = Friends(profiles.db)
         chat = Chat(profiles.db)
         custom_decks.load()
+        global ladder, tiers
+        decks = bot_pool.load()      # the premade decks today's cards allow: each bot level with each is a player on the ladder
+        ladder = ranking.Ladder(profiles.db, [d["slug"] for d in decks])
+        rows = bot_pool.ratings(decks)
+        fresh = ladder.set_bots(rows)
+        unmeasured = sorted(lid for lid, row in rows.items() if ":level:" in row[2])
+        log.info("the ladder: %d decks, %d bots, %d set from the seed", len(decks), len(rows), len(fresh))
+        if unmeasured:   # after a card change, or on another map than the seed's
+            log.info("%d bots stand on their level's rating, not measured with what they play with now (tools/ladder/seed.py measures them): %s",
+                     len(unmeasured), ", ".join(unmeasured))
+        tiers = tiers_mod.Tiers(profiles.db)
+        tiers.migrate({lid: r for lid, r in ladder.table() if not lid.startswith("bot:")})
         hub.load()
         for match in hub.matches.values():
             hub.kick_bot(match)

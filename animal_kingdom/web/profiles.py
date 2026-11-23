@@ -221,8 +221,13 @@ class Profiles:
         return self.decks(pid)
 
     # ------------------------------------------------------------- history
+    def last_opp_decks(self, pid: str, kind: str, n: int) -> list[str]:
+        """The opponents' decks, by name, in `pid`'s last `n` matches of a kind, newest first."""
+        return [r[0] for r in self.db.execute("SELECT opp_deck FROM history WHERE profile = ? AND kind = ? ORDER BY ended DESC LIMIT ?",
+                                              (pid, kind, max(0, n)))]
+
     def record(self, pid: str, match: str, *, kind: str, my_deck: str, opp: str, opp_deck: str, won: int, lost: int) -> None:
-        """A finished match in `pid`'s history (`kind`: "bot" or "friend"); deploy/deploy.sh players reads it."""
+        """A finished match in `pid`'s history (`kind`: "ranked", "bot" or "friend"); deploy/deploy.sh players reads it."""
         with self.db:
             self.db.execute("INSERT OR REPLACE INTO history (profile, match, ended, kind, my_deck, opp, opp_deck, won, lost) "
                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (pid, match, time.time(), kind, my_deck, opp, opp_deck, won, lost))

@@ -181,7 +181,7 @@ fn load_decks(g: &Game, args: &Args) -> Result<(Vec<DeckList>, String), String> 
         let seed = args.num("deck-seed", 1)?;
         return Ok((random_decks(g, n, seed), format!("{n} random decks, deck seed {seed}")));
     }
-    let path = args.get("decks").unwrap_or("tools/bot_bench/martin_decks.json");
+    let path = args.get("decks").unwrap_or("animal_kingdom/data/decks.json");
     Ok((decks_from_file(g, path)?, path.to_string()))
 }
 
@@ -911,7 +911,7 @@ fn fit(args: &Args) -> Result<(), String> {
     use ak_engine::bots::race::{self, RaceWeights, FEATURES, N_FEAT};
     use ak_engine::bots::seat;
     let (g, _) = load_game(args)?;
-    let mut decks = decks_from_file(&g, args.get("decks").unwrap_or("tools/bot_bench/martin_decks.json"))?;
+    let mut decks = decks_from_file(&g, args.get("decks").unwrap_or("animal_kingdom/data/decks.json"))?;
     let n_random = args.num("random-decks", 20)? as usize;
     decks.extend(random_decks(&g, n_random, args.num("deck-seed", 7)?));
     let spec = args.get("bot").unwrap_or("turn:budget=20000,mull=2").to_string();
