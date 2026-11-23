@@ -524,3 +524,58 @@ html.sqlook .game.mana .mlast .row .mini { height: 40px; }
 .pcost.rcm { left: 50%; bottom: -8%; width: 34%; aspect-ratio: 1; transform: translateX(-50%); display: grid; place-items: center; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
 .pcost.rcm i { position: absolute; inset: 0; background: var(--rc-cost); clip-path: polygon(50% 0, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%); }
 .pcost.rcm svg { position: relative; width: var(--rc-dg); height: auto; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; } .pcost.rcm .dgi { stroke: #ece3cd; } .pcost.rcm .dgo { stroke: #14110e; }
+
+/* ---------------------------------------------------------------- the upright match (a phone held upright, the square board)
+   app.js fitStage turns it on for a window taller than wide on the square board (#scr.port; board.js setView): a 720 x 1280
+   stage, about half size on a phone, so a control is 80 stage px to be 40 CSS px and more, and a word 22 to be 11. Top to
+   bottom: the opponent's hand along the top edge with the controls right of it; the opponent's row (leader and mana left,
+   deck right) level with their food ball; the board, tilted back less than on a desktop; your row level with your ball
+   (leader and mana left, deck and End turn right, under the thumb); your hand along the bottom edge (app.js portHand). The
+   edge pieces follow the window's edges (--above), the rows follow the balls (app.js portRail). */
+.game.port #stage { width: 720px; height: 1280px; }
+.game.port .menu { top: 8px; width: 80px; height: 80px; border-radius: 14px; }
+.game.port .menu svg { width: 38px; height: 38px; }
+.game.port .menu .cbadge { scale: 1.6; }
+/* your hand: its bottom edge on the window's, clear of a phone's home bar; a finger drags a card from it (app.js) */
+.game.port .hand { translate: 0 calc(var(--above, 0px) - env(safe-area-inset-bottom, 0px) / var(--k, 1)); }
+.game.port .hand.mull { translate: none; }
+.game.port #hand .hc { touch-action: none; }
+html.sqlook .game.mana.port #hand.mull .hc { width: var(--cw); height: calc(var(--cw) * 1.38); }
+.game.mana.port .prompt.mull { top: 100px; width: 640px; margin-left: -320px; padding: 26px 28px; }
+.game.mana.port .prompt.mull b { font-size: 36px; } .game.mana.port .prompt.mull p { font-size: 26px; }
+/* the rows beside the balls: the leaders a size up, the mana's crystals in rows of five, the counts large enough to read */
+.game.port .mlead { scale: 1.143; transform-origin: 0 0; }
+.game.port .mmana { flex-direction: column; align-items: flex-start; gap: 4px; }
+.game.port .mmana .mpips { display: grid; grid-template-columns: repeat(5, auto); gap: 4px; }
+.game.port .mmana .mpips i { width: 20px; height: 23px; }
+.game.port .mmana .mcount { font-size: 30px; line-height: 1; }
+.game.port .mmana div { margin-top: 0; }
+.game.port .mdeck .dkn { font-size: 32px; }
+.game.mana.port .tbtn { height: 80px; border-radius: 16px; font-size: 30px; gap: 8px; }
+.game.mana.port .tbtn.B { padding: 0 8px; font-size: 24px; line-height: 1.05; white-space: normal; text-align: center; }
+.game.mana.port .tbtn .clock b, .game.mana.port .tbtn.B .clock b { font-size: 22px; }
+.game.mana.port .waiting { font-size: 22px; }
+.game.mana.port .waiting .slab { height: 80px; padding: 0 24px; font-size: 26px; }
+/* the last plays: the newest three in the opponent's row, right of their ball, newest first (app.js drawLast sets its top) */
+.game.mana.port .mlast { left: 404px; width: 234px; display: flex; gap: 0; }
+.game.mana.port .mlast .row { width: 78px; height: 80px; justify-content: center; }
+html.sqlook .game.mana.port .mlast .row .mini { width: 64px; height: 64px; }
+/* a choice: its card and rule across the top, under the controls; Skip a thumb's size */
+.game.mana.port .prompt:not(.mull) { top: 100px; left: 16px; right: 16px; max-width: none; white-space: normal; padding: 14px 20px; }
+.game.mana.port .prompt:not(.mull) .line { flex-wrap: wrap; gap: 6px 14px; }
+.game.mana.port .prompt:not(.mull) b { font-size: 30px; } .game.mana.port .prompt:not(.mull) p { font-size: 26px; }
+.game.mana.port .prompt .skip, .game.mana.port .prompt:not(.mull) .line .skip { height: 80px; padding: 0 28px; font-size: 28px; }
+.game.mana.port .opts { top: 300px; gap: 24px 44px; }   /* each card's marks overhang it: room enough that none meets the next */
+.game.mana.port .reveal, .game.mana.port .yourturn { top: 560px; }
+.game.mana.port .yourturn b { font-size: 56px; }
+/* the panels and the end of a game, read and tapped on a phone */
+.game.port .panel.setp { top: 100px; scale: 1.5; transform-origin: top right; }
+.game.port .panel.mine, .game.port .panel.theirs { scale: 1.5; max-height: 440px; }
+.game.port .panel.mine { transform-origin: bottom right; } .game.port .panel.theirs { transform-origin: top right; }
+.game.port .endbox { scale: 1.4; }
+.game.port .endbox .btns > * { height: 58px; }
+/* touch: a tapped card keeps its place and its face (a phone's tap leaves :hover on it), only the picked one rises */
+@media (hover: none) {
+  html.sqlook .game.mana #hand .hc:hover:not(.shown):not(.sel) { transform: none; }
+  html.sqlook .game.mana #hand .hc:hover:not(.shown) .rc { --open: 0; }
+}

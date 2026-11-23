@@ -5,7 +5,7 @@ import { fitNames, readSide } from './card.js';
 import { plan, DUR } from './timeline.js';
 import { fly, dive, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, carryOver, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, resolvesIn, tokenWidth, RAIL, perspK, learnMap, squareLook } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, resolvesIn, tokenWidth, RAIL, perspK, learnMap, squareLook, crAt } from './board.js';
 import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo, powerCard, powerCostHTML } from './mana.js';
 import { playFood } from './foodfx.js';
 import { decodeDeck } from './deckcode.js';
@@ -484,10 +484,14 @@ const act = action => { if (action.kind === 'place' && ui.carry != null) { relea
 // The hand's grip (carry.js): with a mouse, a card picked (clicked, or dragged out) leaves the hand and hangs over the pointer
 // until it is placed or put back (Martin, 2026-11-13: drag and drop, or click to pick up and click to place, as Hearthstone).
 // A card with no painting yet is carried like any other; let go over a crossroad, it lands there without the flight (flight.js turns the painting into the piece).
-const canGrip = id => FLIGHT && !touch() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-function grip(el, id, iid) {
+// A finger drags a card out of the hand too (a tap picks it, as before): the card then hangs FINGER CSS px above the finger,
+// where it can be seen, and what it is over is what the finger would place it on.
+const canGrip = (id, drag = false) => FLIGHT && (drag || !touch()) && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FINGER = 64;
+const liftOf = e => e && e.pointerType && e.pointerType !== 'mouse' ? FINGER : 0;
+function grip(el, id, iid, lift = 0) {
   const h = (V.game.hand || []).find(h => h.iid === iid);
-  carry(el.querySelector('.mcard'), manaCard(CARDS[id], { str: h ? h.str : undefined, cost: h ? h.cost : null, w: el.querySelector('.mcard').offsetWidth }), flightGeo()); ui.carry = iid;   // its piece on the pointer
+  carry(el.querySelector('.mcard'), manaCard(CARDS[id], { str: h ? h.str : undefined, cost: h ? h.cost : null, w: el.querySelector('.mcard').offsetWidth }), flightGeo(), lift); ui.carry = iid;   // its piece on the pointer
 }
 // A card let go of without being placed goes back to its place in the hand, which opens for it as it comes.
 function ungrip() {
@@ -785,6 +789,26 @@ function keepAwake(on) {
 }
 addEventListener('visibilitychange', () => { if (!document.hidden && screen === 'game' && V && V.phase === 'playing') keepAwake(true); });   // the lock lapses while hidden
 
+// The upright screen's measures (stage px; mana.css .game.port): the controls' size (40 CSS px and more on any phone), the
+// opponent's hand left of them along the top edge, and your hand's places along the bottom.
+const PORT_BTN = 80, OPP_PORT = { x: 184, w: 336 };
+// Your hand upright: one straight row of up to seven cards across the stage's width; eight to ten cards in two rows, the
+// first half behind, raised so its cards' tops (both numbers, the creature) show over the row in front (a phone is too narrow
+// for ten cards a thumb can take in one row). The opening hand: its cards large, in a row above the middle.
+// A card shown to be read upright (the opening hand, a choice's cards) is PORT_READ wide, two to a row: its rules at 11 CSS px.
+const PORT_READ = 290;
+const PORT_HAND = { bottom: 1266, span: 688, gap: 10, one: 7, max: 120, two: 104, lift: .56 };
+function portHand(n, mull) {
+  const P = PORT_HAND, mid = STAGE.w / 2;
+  if (mull) { const g = 44, cw = PORT_READ, ch = cw * 1.38, rowOf = i => i < 2 ? 0 : 1, inRow = r => Math.min(2, n - 2 * r);
+    return { cw, gap: g, at: i => { const r = rowOf(i), k = inRow(r), x0 = mid - (k * cw + (k - 1) * g) / 2;
+      return { left: x0 + (i - 2 * r) * (cw + g), top: 400 + r * (ch + 24) }; } }; }
+  const rows = n > P.one ? 2 : 1, per = Math.ceil(n / rows), back = rows === 2 ? per : n;
+  const cw = Math.min(rows === 2 ? P.two : P.max, Math.floor((P.span - (per - 1) * P.gap) / Math.max(1, per))), ch = cw * 1.38;
+  const rowX = k => mid - (k * cw + (k - 1) * P.gap) / 2;
+  return { cw, gap: P.gap, at: i => { const front = rows === 2 && i >= back, j = front ? i - back : i, k = front ? n - back : back;
+    return { left: rowX(k) + j * (cw + P.gap), top: P.bottom - ch - (rows === 2 && !front ? ch * P.lift : 0) }; } };
+}
 function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
@@ -793,12 +817,11 @@ function drawGame() {
   const mull = (G.decision === 'mulligan');   // the mana rules' screen (mana.css); its opening hand shown in full
   $('scr').classList.toggle('mana', true);
   drawIntro();
-  if ($('scr').classList.contains('rp') !== false) { $('scr').classList.toggle('rp', false); fitStage(false); }   // a replay: upright its controls take a row under the stage
   $('menubtn').style.display = playing && V.id ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
   $('chatbtn').style.display = V.id && hasFriends() ? '' : 'none';   // a real match or replay, once you have a friend
   // the controls: one row at the top right (Martin, 2026-11-22), the flag at the corner, then feedback, sound, Friends
-  ['menubtn', 'fbbtn', 'sndbtn', 'chatbtn'].filter(id => $(id).style.display !== 'none').forEach((id, i) => { $(id).style.right = 16 + 52 * i + 'px'; });
+  ['menubtn', 'fbbtn', 'sndbtn', 'chatbtn'].filter(id => $(id).style.display !== 'none').forEach((id, i) => { $(id).style.right = 16 + (VIEW.port ? PORT_BTN + 8 : 52) * i + 'px'; });
   $('menubtn').dataset.tip = ('Concede');
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = ('<path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/>');
@@ -810,7 +833,9 @@ function drawGame() {
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
   turnCue(playing && G.current === you);   // the card shown, flown down, landed and its dust settled
   // The opponent's hand: one small back each, centred across the board from yours.
-  const nb = G.handCount[them], step = 50, bx0 = STAGE.w / 2 - (46 + (nb - 1) * step) / 2;
+  // Upright they share the top edge with the controls: left of them, closer together as they grow.
+  const nb = G.handCount[them], ox = VIEW.port ? OPP_PORT : null, step = ox ? Math.min(50, (ox.w - 46) / Math.max(1, nb - 1)) : 50,
+    bx0 = (ox ? ox.x : STAGE.w / 2) - (46 + (nb - 1) * step) / 2;
   const A = ui.anim, oppDrew = A ? Math.max(0, nb - A.oppHand) : 0;   // their new cards slide down into their hand
   const slot = i => `${i >= nb - oppDrew ? ' drawn' : ''}" style="left:${bx0 + i * step}px;animation-delay:${(i - (nb - oppDrew)) * 0.12}s`;
   $('opphand').innerHTML = Array.from({ length: nb }, (_, i) => `<div class="abs back${slot(i)}"></div>`).join('');
@@ -834,9 +859,11 @@ function drawGame() {
   // the mana screen: a row of pieces under the board (the full cards, large, while the opening hands are chosen)
   // The square board's card is read at rest by both its numbers, so its hand never overlaps: past seven cards they narrow
   // to fit (mana.css html.sqlook .hc, which reads --cw and --hs, the scale that reads a hovered card at 200 px)
-  const sq = squareLook(), n = held.length, cw = (mull ? 176 : sq ? Math.min(100, Math.floor((800 - (n - 1) * 12) / Math.max(1, n))) : 100),
-    gap = (mull ? 64 : sq ? 12 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0),
+  const sq = squareLook(), n = held.length, up = VIEW.port ? portHand(n, mull) : null,
+    cw = up ? up.cw : (mull ? 176 : sq ? Math.min(100, Math.floor((800 - (n - 1) * 12) / Math.max(1, n))) : 100),
+    gap = up ? up.gap : (mull ? 64 : sq ? 12 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0),
     x0 = ((STAGE.w / 2)) - (n * cw + (n - 1) * gap) / 2;
+  const cardAt = i => up ? up.at(i) : { left: x0 + i * (cw + gap), top: null };
   const hand = $('hand'); hand.classList.toggle('mull', mull); hand.style.setProperty('--cw', cw + 'px'); hand.style.setProperty('--hs', (200 / cw).toFixed(4)); hand.classList.toggle('free', (!!(d.pend && d.pend.mode !== 'choice' && !mull)));   // a free play: the costs step back
   let drawnK = 0;
   const was = new Map([...hand.querySelectorAll('.hc')].map(el => [el.dataset.iid, el.offsetLeft]));   // where each card stood
@@ -850,9 +877,9 @@ function drawGame() {
     // fetched (a Kitten, a Young Stag) came from no deck, so it rises into its place instead (Martin, 2026-10-31: flying in
     // from the deck "just looks weird")
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, made = false;
-    const from = drawn ? `${made ? '' : `--fx:${(document.querySelector('#mplane .mdeck.A') ? onStage(document.querySelector('#mplane .mdeck.A'))[0] : STAGE.w) - (x0 + i * (cw + gap) + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
+    const pos = cardAt(i), from = drawn ? `${made ? '' : `--fx:${(document.querySelector('#mplane .mdeck.A') ? onStage(document.querySelector('#mplane .mdeck.A'))[0] : STAGE.w) - (pos.left + cw / 2)}px;`}animation-delay:${(drawn - 1) * 0.14}s;` : '';
     const html = manaCard(c, { str: h.str, cost: h.cost, w: cw, iid: h.iid });
-    return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${html}</div>`;
+    return `<div class="hc ${cls}${drawn ? (made ? ' made' : ' drawn') : ''}${h.iid === ui.back ? ' away' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${pos.left}px;${pos.top == null ? '' : `top:${pos.top}px;`}z-index:${i + 1};${from}">${html}</div>`;
   }).join('');
   fitNames(hand); fitPlaques(hand);
   // a card that left (played, discarded) or came: the others slide to their new places rather than jump
@@ -866,7 +893,7 @@ function drawGame() {
     let t = null;
     const read = () => { const h = (V.game.hand || []).find(h => String(h.iid) === el.dataset.iid); readCard(el.dataset.id, h && h.str); };
     el.onpointerdown = () => delete el.dataset.held;   // each press starts unheld
-    holdEvents(el, () => { clearTimeout(t); t = setTimeout(() => { el.dataset.held = '1'; read(); }, 350); }, () => clearTimeout(t), () => clearTimeout(t));
+    holdEvents(el, () => { clearTimeout(t); t = setTimeout(() => { if (ui.dragging) return; el.dataset.held = '1'; read(); }, 350); }, () => clearTimeout(t), () => clearTimeout(t));
     el.oncontextmenu = e => { e.preventDefault(); if (!document.querySelector('.readov')) read(); };   // right-click, or a long press sent as one
   });
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
@@ -883,8 +910,8 @@ function drawGame() {
   });
   // a press dragged out of the hand picks the card up; its release over a crossroad places it, anywhere else puts it back
   hand.querySelectorAll('.hc.can').forEach(el => el.addEventListener('pointerdown', e => {
-    if (e.pointerType !== 'mouse' || e.button !== 0 || !canGrip(el.dataset.id)) return;
-    ui.press = { x: e.clientX, y: e.clientY, el, id: el.dataset.id, iid: Number(el.dataset.iid) };
+    if ((e.pointerType === 'mouse' && e.button !== 0) || !canGrip(el.dataset.id, true)) return;
+    ui.press = { x: e.clientX, y: e.clientY, el, id: el.dataset.id, iid: Number(el.dataset.iid), lift: liftOf(e) };
   }));
   ungrip();
 
@@ -903,7 +930,7 @@ function drawGame() {
     const k = d.pend.returned;
     // a player's first real match says what the mulligan is for, in plain words (the tutorial skips it); later ones, the short rule
     const first = !store('ak:mullseen');
-    const how = ('Click a card to swap it for another from your deck. No copy of a card you swap can come back.');
+    const how = `${touch() ? 'Tap' : 'Click'} a card to swap it for another from your deck. No copy of a card you swap can come back.`;
     bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + ((`<p>${how}</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`));
     bar.classList.add('on');
     if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); store('ak:mullseen', '1'); act({ kind: 'choice', choice: SKIP }); };
@@ -921,7 +948,8 @@ function drawGame() {
     bar.innerHTML = `<div class="line">${src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${peek}${skip}</div>` + (other ? `<div class="btns">${other}</div>` : '');
     bar.classList.add('on');
     if (d.cardOpts.length) {
-      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${(manaCard(c, { ...(o.str == null ? {} : { str: o.str }), cost: o.cost ?? c.mana ?? null, w: 170 }))}</div>`; }).join('');
+      const ow = VIEW.port ? (d.cardOpts.length > 4 ? 200 : PORT_READ) : 170;   // upright: read-sized, two to a row
+      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}" style="${VIEW.port ? `width:${ow}px;height:${Math.round(ow * 1.38)}px` : ''}">${(manaCard(c, { ...(o.str == null ? {} : { str: o.str }), cost: o.cost ?? c.mana ?? null, w: ow }))}</div>`; }).join('');
       opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); opts.classList.toggle('many', d.cardOpts.length > 6); fitNames(opts); fitPlaques(opts);
       $('optpeek').onclick = e => { e.stopPropagation(); ui.optsHidden = !ui.optsHidden; drawGame(); };
       opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });
@@ -993,28 +1021,20 @@ function showPanel() {
      // the tutorial never opens the decklists: nothing it teaches, and they give away its deal
   for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['set', 'setp']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
 }
-// The stage keeps its design size (STAGE) and scales to fit the window. The painted ground under it is one painting wider
-// and taller than any window (21:9 to 4:3), scaled with the stage, so the window shows more savanna, never bars.
+// The stage keeps its design size (STAGE) and scales to fit the window; the pieces at its edges (hands, corners) follow
+// the window's edges (--above, --side: the room past the stage, in stage px), so a window of another shape widens the
+// ground between them, never leaves them floating.
 function fitStage(redraw = true) {
   const st = document.getElementById('stage'); if (!st) return;
-  // a window taller than wide gets the upright layout (board.js setView); turning the phone redraws the screen
-  const port = innerHeight > innerWidth && false, flip = port !== VIEW.port;   // the mana rules' screen is the desktop one, scaled, on any window
+  // a window taller than wide on the square board gets the upright screen (board.js setView, mana.css .game.port); turning
+  // the phone redraws it. The hex board keeps the wide screen, scaled, on any window.
+  const port = innerHeight > innerWidth && squareLook(), flip = port !== VIEW.port;
   setView(port); document.getElementById('scr').classList.toggle('port', port);
-  // upright, a replay keeps a row under the stage for its controls (game.css .port .rbar): the stage fits the window less it,
-  // with 60 stage px of savanna kept above and below (about what a phone shows in play), so the hand, which sits at the edge,
-  // stays clear of your den: the board comes out a little smaller
-  const rp = port && 0 ? 56 : 0, H = innerHeight - rp;
-  const k = Math.min(innerWidth / STAGE.w, H / (STAGE.h + (rp ? 120 : 0))), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
+  const k = Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
   st.style.transform = t; document.getElementById('world').style.transform = t;
-  st.style.top = document.getElementById('world').style.top = rp ? `calc(50% - ${rp / 2}px)` : '';
-  st.style.setProperty('--rp', `${rp / k}px`);
-  const plate = document.querySelector('#world img'), src = plateSrc();
-  if (!plate.src.endsWith(src)) plate.src = src;
-  // the savanna around the stage, in stage px: the pieces at the screen's edges (hands, corners, deck, End turn) sit at the
-  // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating
-  st.style.setProperty('--above', `${Math.max(0, (H / k - STAGE.h) / 2)}px`);
+  st.style.setProperty('--above', `${Math.max(0, (innerHeight / k - STAGE.h) / 2)}px`);
   st.style.setProperty('--side', `${Math.max(0, (innerWidth / k - STAGE.w) / 2)}px`);
-  st.style.setProperty('--k', k);   // the stage's scale: a phone held sideways shows it at half size
+  st.style.setProperty('--k', k);   // the stage's scale: upright on a phone, about half
   if (flip && redraw && V && V.game) drawGame();
 }
 
@@ -1155,6 +1175,7 @@ function drawRail(G, d) {
   // what is left of the turn's mana as X/N right of the crystals (Martin, 2026-11-21)
   const manaRow = (side, m) => `<div class="mmana ${side}" style="${spot(railSpot('mana', side), '0 50%')}">${pipsHTML(m.left, m.total, 0)}<b class="mcount">${m.left}/${m.total}</b></div>`;
   el.innerHTML = lead('B') + lead('A') + deck('B') + deck('A') + manaRow('A', mana[you] || { left: 0, total: 0 }) + manaRow('B', mana[them] || { left: 0, total: 0 });
+  if (VIEW.port) return portRail(el);
   // End turn on the midline; what the screen waits on under it
   const y = midline(), sc = 1 / Math.pow(perspK(y), EVEN), tb = document.getElementById('tbtn'), wt = document.getElementById('waiting');
   Object.assign(tb.style, { left: `${RAIL.flat.R + TB_X - TB_W / 2}px`, top: `${y - TB_H / 2}px`, width: `${TB_W}px`, transform: `scale(${sc.toFixed(4)})`, transformOrigin: '50% 50%' });
@@ -1165,6 +1186,26 @@ function drawRail(G, d) {
     pn.style.left = 'auto'; pn.style.right = '16px'; pn.style.margin = '0';
     if (side === 'B') { pn.style.top = `${Math.max(16, (r.top - S.top) / k)}px`; pn.style.bottom = 'auto'; }
     else { pn.style.top = 'auto'; pn.style.bottom = `${Math.max(16, 800 - (r.bottom - S.top) / k)}px`; } }
+}
+// Upright (mana.css .game.port) the same pieces lie flat in a row level with each side's food ball, the ball between them:
+// the leader at the left edge, its mana beside it; on the right, the deck, and yours ends in End turn at the right edge,
+// under your thumb. Each row follows its ball, so it holds wherever the board's camera puts it.
+const PR = { edge: 16, lead: 96, deck: 70, tb: 172, tbh: 80, gap: 12 };
+function portRail(el) {
+  const ball = s => { const b = document.querySelector(`#board .mden.${s} .core`); return b ? onStage(b)[1] : s === 'A' ? 990 : 200; };
+  const W = STAGE.w, at = (q, left, top) => { const e = el.querySelector(q); if (e) Object.assign(e.style, { left: `${Math.round(left)}px`, top: `${Math.round(top)}px`, transform: 'none' }); };
+  for (const s of ['A', 'B']) {
+    const y = ball(s), dh = PR.deck * 1.38;
+    at(`.mlead.${s}`, PR.edge, y - PR.lead / 2);
+    at(`.mmana.${s}`, PR.edge + PR.lead + PR.gap, y - 30);
+    at(`.mdeck.${s}`, s === 'A' ? W - PR.edge - PR.tb - PR.gap - PR.deck : W - 8 - PR.deck, y - dh / 2);   // theirs leaves the last plays their room (.mlast)
+  }
+  const y = ball('A'), tb = document.getElementById('tbtn'), wt = document.getElementById('waiting');
+  Object.assign(tb.style, { left: `${W - PR.edge - PR.tb}px`, top: `${Math.round(y - PR.tbh / 2)}px`, width: `${PR.tb}px`, transform: 'none' });
+  if (wt) Object.assign(wt.style, { left: `${W - PR.edge - PR.tb - 60}px`, top: `${Math.round(y + PR.tbh / 2 + 6)}px`, width: `${PR.tb + 60}px` });
+  // a deck's list opens across the middle of the screen, under the opponent's row or over yours
+  for (const [side, id] of [['A', 'mine'], ['B', 'theirs']]) { const pn = document.getElementById(id);
+    Object.assign(pn.style, { left: 'auto', right: `${PR.edge}px`, margin: '0', top: side === 'B' ? `${Math.round(ball('B') + 60)}px` : 'auto', bottom: side === 'A' ? `${Math.round(STAGE.h - ball('A') + 60)}px` : 'auto' }); }
 }
 // The rail's leaders read on hover (a leader's power) and your leader's power is pressed there; a deck shows its list on a click.
 function wireRail() {
@@ -1196,9 +1237,12 @@ function drawLast(G) {
   const items = G.history.map((m, i) => ({ t: turnOf(m), m, i })).concat((ui.skips || []).filter(k => k.key === key).map(k => ({ t: k.turn, skip: k.seat })));
   items.sort((a, b) => a.t - b.t);
   // the piece in its team's rim says who, the board says what: no words beside it (Martin, 2026-11-20); hover reads the card
-  const row = x => x.skip ? '' : `<div class="row" data-h="${x.i}"><div class="mini">${x.m.card ? `<div class="unit ${rel(x.m.seat)}" style="--tw:40px">${leaderToken(x.m.card, rel(x.m.seat), CARDS, 40)}</div>` : ''}</div></div>`;
-  const last = items.slice(-6).reverse();
+  // upright: the newest three in the opponent's row, right of their ball, each a thumb's size (mana.css .game.port .mlast)
+  const mw = VIEW.port ? 64 : 40;
+  const row = x => x.skip ? '' : `<div class="row" data-h="${x.i}"><div class="mini">${x.m.card ? `<div class="unit ${rel(x.m.seat)}" style="--tw:${mw}px">${leaderToken(x.m.card, rel(x.m.seat), CARDS, mw)}</div>` : ''}</div></div>`;
+  const last = items.filter(x => !VIEW.port || !x.skip).slice(VIEW.port ? -3 : -6).reverse();
   el.innerHTML = last.map(row).join('');
+  if (VIEW.port) { const b = document.querySelector('#board .mden.B .core'); el.style.top = b ? `${Math.round(onStage(b)[1] - 40)}px` : ''; } else el.style.top = '';
   el.querySelectorAll('[data-h]').forEach(r => {
     const m = G.history[r.dataset.h];
     r.onmouseenter = () => { if (!m.card || !CARDS[m.card]) return;
@@ -1206,6 +1250,7 @@ function drawLast(G) {
       pop.style.minHeight = '0'; pop.style.display = 'flex'; fitPlaques(pop);
       const b = r.getBoundingClientRect(); pop.style.left = (b.right + 12) + 'px'; pop.style.top = Math.max(8, Math.min(b.top - 120, innerHeight - pop.offsetHeight - 10)) + 'px'; };
     r.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; pop.className = 'pop'; };
+    r.onclick = () => { if (touch() && m.card && CARDS[m.card]) readOverlay(cardRead(m.card, null, m.seat) + `<div class="tm">${esc(moveLine(m))}</div>`); };   // touch: a tap reads the play
   });
 }
 // Play the picked card from the hand to `target` (['cr', crossroad] or ['hq', den]; `el`, its element on the board): it
@@ -1227,25 +1272,42 @@ const denTarget = d => ui.sel && selPlaces(d).find(t => t[0] === 'hq');   // the
 
 // The drag (carry.js): a press on a playable card that moves picks it up; its release places it or puts it back.
 addEventListener('pointermove', e => {
+  if (ui.dragging && ui.dragLift != null && screen === 'game') {   // a finger has no hover: the tile under the held card is found here
+    const g = tileAt(e.clientX, e.clientY - ui.dragLift), cr = g ? g.dataset.cr : null;
+    if (cr !== ui.hover) { const was = ui.hover, shows = c => !!(c && lastDecision && lastDecision.rings.includes(c)); ui.hover = cr; if (shows(was) || shows(cr)) drawBoard(); }
+    return; }
   const p = ui.press; if (!p || ui.dragging) return;
   if (!(e.buttons & 1)) { ui.press = null; return; }
   if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < 6 || screen !== 'game') return;
-  ui.press = null; ui.dragging = true; sfx('pick');
+  ui.press = null; ui.dragging = true; ui.dragLift = p.lift || null; sfx('pick');
   if (ui.carry != null) { release(); ui.carry = null; }
-  if (!(ui.sel === p.id && ui.selIid === p.iid && carrying())) grip(p.el, p.id, p.iid);
+  if (!(ui.sel === p.id && ui.selIid === p.iid && carrying())) grip(p.el, p.id, p.iid, p.lift);
   ui.sel = p.id; ui.selIid = p.iid; ui.roam = null; ui.hover = null; drawGame();
 });
 addEventListener('pointerup', e => {
   ui.press = null;
   if (!ui.dragging) return;
-  ui.dragging = false; ui.dragEnd = Date.now();
-  const at = document.elementFromPoint(e.clientX, e.clientY), d = lastDecision;
-  const g = at && at.closest('#board [data-cr]'), hq = at && at.closest('#board [data-hq]');
+  const lift = ui.dragLift || 0; ui.dragging = false; ui.dragLift = null; ui.dragEnd = Date.now();
+  const at = document.elementFromPoint(e.clientX, e.clientY - lift), d = lastDecision;
+  const g = (at && at.closest('#board [data-cr]')) || (lift ? tileAt(e.clientX, e.clientY - lift) : null), hq = at && at.closest('#board [data-hq]');
   if (g && d && d.mine && d.rings.includes(g.dataset.cr)) return play(['cr', g.dataset.cr], g);
   if (hq && d && d.mine && denTarget(d)) return play(denTarget(d), hq);
   ui.sel = null; drawGame();   // let go anywhere else: back into the hand
 });
 
+// What on the board a press is on: a touch on the tilted board can arrive at the board itself rather than the tile under
+// the finger, so the tile is then found at the press's point.
+// A finger on the tilted board can find the board itself under it rather than a tile (hit testing in its 3D plane), so a
+// tile is then found from the board's own geometry (board.js crAt).
+function tileAt(x, y) {
+  const at = document.elementFromPoint(x, y), hit = at && at.closest('#board [data-cr]'); if (hit) return hit;
+  const st = document.getElementById('stage'), S = st.getBoundingClientRect(), k = S.width / st.offsetWidth, cr = crAt((x - S.left) / k, (y - S.top) / k);
+  return cr ? document.querySelector(`#board [data-cr="${cr}"]`) : null;
+}
+const onBoard = (e, sel) => { const t = e.target.closest(sel); if (t) return t; const p = e.touches ? e.touches[0] : e;
+  if (!p || p.clientX == null) return null;
+  if (sel === '[data-cr]') return tileAt(p.clientX, p.clientY);
+  const at = document.elementFromPoint(p.clientX, p.clientY); return at ? at.closest('#board ' + sel) : null; };
 function wireBoard() {
   const board = document.getElementById('board');
   board.addEventListener('click', e => {
@@ -1260,11 +1322,11 @@ function wireBoard() {
       if (touch()) readOverlay(leaderPanel(lead.dataset.lead));
       return; }
     const d = lastDecision;
-    if (!d || !d.mine) { const g = touch() && e.target.closest('[data-cr]'); if (g) readStack(g.dataset.cr); return; }   // off your turn a tap only reads
-    const hq = e.target.closest('[data-hq]');
+    if (!d || !d.mine) { const g = touch() && onBoard(e, '[data-cr]'); if (g) readStack(g.dataset.cr); return; }   // off your turn a tap only reads
+    const hq = onBoard(e, '[data-hq]');
     if (hq && d.pend && d.pend.mode === 'choice' && d.hqRing) return act({ kind: 'choice', choice: 'den' });
     if (hq && denTarget(d)) return play(denTarget(d), hq);
-    const g = e.target.closest('[data-cr]'); if (!g) return;
+    const g = onBoard(e, '[data-cr]'); if (!g) return;
     const cr = g.dataset.cr;
     if (cr in d.crChoice) return act({ kind: 'choice', choice: d.crChoice[cr] });
     if (ui.sel && d.rings.includes(cr)) return play(['cr', cr], g);
@@ -1288,7 +1350,7 @@ function wireBoard() {
   });
   // touch: holding a piece reads its stack; so does tapping one when the tap would do nothing else
   let holdT = null, held = false;
-  holdEvents(board, e => { held = false; clearTimeout(holdT); const g = e.target.closest('[data-cr]'); if (!g) return;
+  holdEvents(board, e => { held = false; clearTimeout(holdT); const g = onBoard(e, '[data-cr]'); if (!g) return;
     holdT = setTimeout(() => { held = true; readStack(g.dataset.cr); }, 350); }, () => clearTimeout(holdT), () => clearTimeout(holdT));
   board.addEventListener('click', e => { if (held) { held = false; e.stopImmediatePropagation(); } }, true);   // a hold's lift does nothing else
   board.addEventListener('mouseleave', () => { showStack(null, null); if (ui.hover) { ui.hover = null; if (ui.sel) drawBoard(); } });

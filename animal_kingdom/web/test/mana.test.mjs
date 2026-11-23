@@ -265,3 +265,32 @@ test('on the square board every card is the rectangular one, its cost and streng
     assert.deepEqual(p.errors, []);
   } finally { await p.browserContext().close(); sq.stop(); }
 });
+
+// A phone held upright on the square board gets the upright match screen (app.js fitStage, mana.css .game.port): every card
+// of the hand and End turn on screen and a thumb's size (40 CSS px and more), on a short phone and a tall one; a wide window
+// keeps the desktop screen.
+test('upright on the square board: the phone layout, its hand and End turn on screen and thumb-sized', async () => {
+  const sq = await startServer({ AK_MAP: 'map_sq16' }), p = await seat();
+  try {
+    await p.goto(sq.url + '/', { waitUntil: 'networkidle0' }); await giveDeck(p, 'w1', 'Cheap', CHEAP);
+    await p.setViewport({ width: 390, height: 664, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
+    await p.goto(sq.url + '/', { waitUntil: 'networkidle0' }); await click(p, '#mprac'); await p.waitForSelector('.mhome [data-deck].on');
+    for (let i = 0; i < 20 && !(await p.evaluate(() => location.hash.startsWith('#/m/'))); i++) { await click(p, '#mgo').catch(() => {}); await wait(300); }
+    assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
+    await click(p, '#skip'); assert.ok(await until(p, () => window.__ak().V.game.decision === 'yours' && !window.__ak().PB.busy, null, 30000));
+    for (const [w, h] of [[390, 664], [430, 850]]) {
+      await p.setViewport({ width: w, height: h, deviceScaleFactor: 1, isMobile: true, hasTouch: true }); await wait(400);
+      const m = await p.evaluate(() => { const box = e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
+        return { port: document.getElementById('scr').classList.contains('port'), cards: [...document.querySelectorAll('#hand .hc')].map(box), end: box(document.getElementById('tbtn')), W: innerWidth, H: innerHeight }; });
+      assert.ok(m.port, `upright at ${w} x ${h}`);
+      assert.ok(m.cards.length >= 3, 'a hand');
+      for (const b of [...m.cards, m.end]) {
+        assert.ok(b.l >= 0 && b.t >= 0 && b.r <= m.W && b.b <= m.H, `on screen at ${w} x ${h}: ${JSON.stringify(b)}`);
+        assert.ok(b.w >= 40 && b.h >= 40, `a thumb's size at ${w} x ${h}: ${JSON.stringify(b)}`);
+      }
+    }
+    await p.setViewport({ width: 1512, height: 800, deviceScaleFactor: 1, isMobile: true, hasTouch: true }); await wait(400);
+    assert.ok(!(await p.evaluate(() => document.getElementById('scr').classList.contains('port'))), 'a wide window keeps the desktop screen');
+    assert.deepEqual(p.errors, []);
+  } finally { await p.browserContext().close(); sq.stop(); }
+});

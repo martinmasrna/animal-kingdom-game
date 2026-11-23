@@ -10,27 +10,17 @@ import { FIGS } from './hex/figs.js';
 const FIG_DIMS = id => FIGS[id] || [400, 420];
 
 export const STAGE = { w: 1512, h: 800 };
-// A window taller than wide (a phone held upright) gets its own board: a painting made upright (kit2/plate_port.webp,
-// your den at the bottom, you attack upward) on a tall stage, with its own measured places for everything (PORT_AT);
-// nothing is turned. setView picks the layout; every place below reads it.
-export const LAND = { w: 1512, h: 800 }, PORT = { w: 720, h: 1440 };
+// A window taller than wide (a phone held upright) on the square board gets its own stage, 720 x 1280, and its own camera:
+// the board larger and tilted back less (a phone has the height a desktop window lacks), the pieces beside it laid out
+// flat around it (app.js drawRail, mana.css .game.port). setView picks the layout; every place below reads it. The hex
+// board keeps the wide screen on any window.
+export const LAND = { w: 1512, h: 800 }, PORT = { w: 720, h: 1280 };
 export const VIEW = { port: false };
-export function setView(port) { Object.assign(STAGE, port ? PORT : LAND); VIEW.port = port; }
+export function setView(port) { Object.assign(STAGE, port ? PORT : LAND); VIEW.port = port; TILT.deg = port ? PORT_TILT : 40; }
 const key = (c, r) => `${c},${r}`;
 const kit = f => `/static/kit2/${f}`;
 const team = side => (side === 'A' ? 'a' : side === 'W' ? 'n' : 'b');   // n: the neutral paint of a Wild animal
 
-// Where things are painted on the plate (measured in plate pixels, 1672 wide), converted to stage pixels.
-const PX = x => x / 1.10582, PY = y => y / 1.10582 - 25;
-const CLEARINGS = [[282.3, 225.4], [558.4, 224.0], [831.6, 223.5], [1112.7, 222.8], [1382.6, 223.7],
-  [288.2, 401.2], [559.6, 398.5], [834.1, 399.7], [1110.5, 396.6], [1384.7, 399.6],
-  [288.1, 568.2], [557.0, 576.0], [835.9, 575.8], [1111.0, 572.9], [1379.8, 576.2]];
-// Upright (stage px on the 720x1440 stage, measured on plate_port; the design sandbox's screen/kit/plate/port/): the
-// clearings three across (row r left to right) and five up (column c from your den), each den's ridge across the top or
-// bottom with its ten pits filling left to right toward the crown boulder at its right end, the cave mouth mid-ridge.
-const PORT_AT = { cols: [150, 352, 550], rows: [1037, 853, 660, 469, 271],
-  pits: { A: { x: [172, 544], y: 1208 }, B: { x: [172, 544], y: 98 } },
-  crown: { A: [600, 1208], B: [600, 98] }, mouth: { A: [386, 1177], B: [356, 124] } };
 // The hex board (Martin's diamond, 2026-11-16; data/maps.json map_hex): pointy-top tokens touching in rows 1-2-3-4-3-2-1
 // from the top, your den the bottom tip and your opponent's the top tip on every device (Martin, 2026-11-17: "bottom to
 // top 100%"), the 14 between them the crossroads. The map names a crossroad "column,row", column 1..5 from your den and
@@ -62,13 +52,14 @@ const tileVar = (c, r) => squareLook() ? ` tv${((c - 1) * HEX.cols[0] + r - 1) *
 const rowStep = g => squareLook() ? g.w : HEX.dy * g.h;   // a row's step up the board: a square's side, or the hexagons' interlock
 // The square board's tiles are 144 wide (Martin, 2026-11-22: "the board can afford to get bigger now that it's squares"), a
 // tile as tall as it is wide; the hex board's tokens 120.
-const hexGeo = () => { const sq = squareLook(), g = ({ w: sq ? 144 : 120, x: STAGE.w / 2, top: sq ? 36 : 41 }); g.h = sq ? g.w : g.w * TH / TW; return g; };
+// Upright the tiles are 152 (4 across fill the stage's width less its sides once the near row's perspective widens them),
+// the board's top PORT_TOP down the stage, under the opponent's row.
+const PORT_W = 152, PORT_TOP = 236;
+const hexGeo = () => { const sq = squareLook(), up = VIEW.port && sq, g = ({ w: up ? PORT_W : sq ? 144 : 120, x: STAGE.w / 2, top: up ? PORT_TOP : sq ? 36 : 41 }); g.h = sq ? g.w : g.w * TH / TW; return g; };
 export const tokenWidth = () => hexGeo().w;
 const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
   return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * rowStep(g)]; };
-const at = (c, r) => { return hexAt(c, r);
-  if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
-  const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
+const at = hexAt;
 // A crossroad's centre on the stage, for anything that travels to it.
 // The mana board lies tilted on the screen, seen at an angle (Martin, 2026-11-20: on a short desktop window the tilt gives
 // the height back), its animals standing up out of their tokens. The board's drawing stays flat (at); the browser tilts
@@ -76,6 +67,7 @@ const at = (c, r) => { return hexAt(c, r);
 // outside the board (a card flying to its crossroad). TILT.deg is the board's lean away from you (90 minus the camera's
 // elevation); STAND, how tall a standing animal is, in token widths.
 export const TILT = { deg: 40, persp: 1400 }, STAND = .66;
+const PORT_TILT = 24;   // upright: the board seen from higher up, so it stands taller on the phone
 const tiltOrigin = () => { const g = hexGeo(); return [g.x, g.top + g.h / 2 + (HEX.last - 1) / 2 * rowStep(g)]; };
 export function project(x, y) {
   if ((!TILT.deg)) return [x, y];
@@ -83,6 +75,15 @@ export function project(x, y) {
   return [ox + (x - ox) * k, oy + dy * Math.cos(t) * k];
 }
 export const crossroadAt = cr => project(...at(...cr.split(',').map(Number)));
+// The tile under a point on the stage (the inverse of project()): its crossroad, or null between and beyond the tiles.
+export function crAt(sx, sy) {
+  const [ox, oy] = tiltOrigin(), t = TILT.deg * Math.PI / 180, P = TILT.persp, Y = sy - oy;
+  const dy = TILT.deg ? Y * P / (Math.cos(t) * P + Y * Math.sin(t)) : Y, k = TILT.deg ? P / (P - dy * Math.sin(t)) : 1;
+  const x = ox + (sx - ox) / k, y = oy + dy, g = hexGeo();
+  for (let c = 1; c <= HEX.last; c++) for (let r = 1; r <= HEX.cols[c - 1]; r++) { const [cx, cy] = at(c, r);
+    if (Math.abs(x - cx) <= g.w / 2 && Math.abs(y - cy) <= g.h / 2) return key(c, r); }
+  return null;
+}
 
 // Numbers are painted digits: chalk on a boss (strength, payouts), bold numerals in the den's gem. Every count animates
 // through all digits, so they load up front (a digit fetched mid-count shows as a gap).
@@ -105,10 +106,10 @@ const put = (cls, x, y, html = '', attrs = '', style = '') => `<div class="abs $
 // the ball keeps its size on the square board's larger tiles); it floats over its spot, DEN_AT tile heights past the middle
 // of its base row (yours further: nearer the camera, it would cover your base row; DEN_AT_SQ on the square board). The count and next turn's
 // income are the board's numerals (static/hex/num, set as token.js numeral sets numbers over 20), inked on the light.
-const DEN_D = [.3, .75], DEN_W = 120, DEN_AT = { A: 1.3, B: .7 }, DEN_AT_SQ = { A: 1.16, B: .81 };
+const DEN_D = [.3, .75], DEN_W = 120, DEN_W_PORT = 144, DEN_AT = { A: 1.3, B: .7 }, DEN_AT_SQ = { A: 1.16, B: .81 };
 // k: how much the tilt's perspective scales the den's spot (project()); the ball is drawn 1/k as large there, so equal food
 // shows as equal balls on the screen, near or far.
-const denD = (n, k = 1) => DEN_W * (DEN_D[0] + (DEN_D[1] - DEN_D[0]) * Math.sqrt(Math.min(Math.max(n, 0), 30) / 30)) / k;
+const denD = (n, k = 1) => (VIEW.port ? DEN_W_PORT : DEN_W) * (DEN_D[0] + (DEN_D[1] - DEN_D[0]) * Math.sqrt(Math.min(Math.max(n, 0), 30) / 30)) / k;
 // how much the tilt's perspective scales a board point at flat height y on the screen (a far one less than 1, a near one more)
 export const perspK = y => denK(y);
 const denK = y => { if (!TILT.deg) return 1; const [, oy] = tiltOrigin(); return TILT.persp / (TILT.persp - (y - oy) * Math.sin(TILT.deg * Math.PI / 180)); };
@@ -232,7 +233,7 @@ export function renderBoard(el, M, g, cards, ui) {
   { const [ox, oy] = tiltOrigin();   // the tilt: the board turns about its middle; what stands on it turns back upright
     el.style.transformOrigin = `${ox}px ${oy}px`; el.style.transform = TILT.deg ? `perspective(${TILT.persp}px) rotateX(${TILT.deg}deg)` : '';
     const pl = document.getElementById('mplane');   // the pieces laid on the table beside the board: the same tilt (app.js drawRail)
-    if (pl) { pl.style.transformOrigin = el.style.transformOrigin; pl.style.transform = el.style.transform; }
+    if (pl) { pl.style.transformOrigin = el.style.transformOrigin; pl.style.transform = VIEW.port ? '' : el.style.transform; }   // upright they lie flat around the board (app.js drawRail)
     el.style.setProperty('--tilt', `${TILT.deg}deg`); }
 
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.

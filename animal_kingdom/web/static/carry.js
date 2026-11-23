@@ -16,8 +16,9 @@ const clamp = (v, m) => Math.max(-m, Math.min(m, v));
 const pose = c => `translate(${c.x}px,${c.y}px) perspective(${900 * c.k}px) rotateX(${c.rx}deg) rotateY(${c.ry}deg) rotateZ(${c.rz}deg) scale(${c.s})`;
 
 // Pick up the hand's card `from` (its .card element), shown as `html` (the full card).
-// `geo`: another card form's measures (fly()'s), so its piece hangs on the pointer.
-export function carry(from, html, geo = null) {
+// `geo`: another card form's measures (fly()'s), so its piece hangs on the pointer. `lift`: CSS px it hangs above the
+// pointer (a finger's, so the card shows above it).
+export function carry(from, html, geo = null, lift = 0) {
   drop();
   const stage = document.getElementById('stage'), k = stage.getBoundingClientRect().width / stage.offsetWidth;
   const r = from.getBoundingClientRect(), w = from.offsetWidth, h = from.offsetHeight;
@@ -27,7 +28,7 @@ export function carry(from, html, geo = null) {
   fc.innerHTML = html; el.appendChild(fc); document.body.appendChild(el);
   const card = fc.firstElementChild; card.style.cssText += `;--w:${w}px;width:${w}px;height:${h}px;`;
   fitNames(fc);
-  C = { geo, el, fc, w, h, k, x: r.left + r.width / 2, y: r.top + r.height / 2, s: r.width / w, rx: 0, ry: 0, rz: 0, t: performance.now(), over: null };
+  C = { geo, lift, el, fc, w, h, k, x: r.left + r.width / 2, y: r.top + r.height / 2, s: r.width / w, rx: 0, ry: 0, rz: 0, t: performance.now(), over: null };
   document.documentElement.classList.add('carrying');
   fc.style.transform = pose(C);
   const me = C;
@@ -38,7 +39,7 @@ export function carry(from, html, geo = null) {
     // crossroad, "a disconnect between where my cursor is and where the card is"), so what it covers is where it goes
     const end = me.geo ? me.geo.end : CARD_END, up = me.geo ? me.geo.up : PIC_UP, o = me.over;
     // over a tile it may take (carryOver), the card has become its creature standing there: settled on the tile, upright
-    const ts = o ? o.s : HELD * end * k / w, tx = o ? o.x : px, ty = o ? o.y : py - LIFT * k + up * HELD * end * k;
+    const ts = o ? o.s : HELD * end * k / w, tx = o ? o.x : px, ty = o ? o.y : py - me.lift - LIFT * k + up * HELD * end * k;
     const f = 1 - Math.exp(-dt / 26), x = me.x + (tx - me.x) * f, y = me.y + (ty - me.y) * f;
     const vx = (x - me.x) / dt, vy = (y - me.y) / dt;   // px per ms
     me.x = x; me.y = y; me.s += (ts - me.s) * (1 - Math.exp(-dt / 40));

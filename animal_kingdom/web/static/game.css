@@ -473,31 +473,7 @@
 .game.kit .unit .buried.seen .fill { position: absolute; inset: 14px; border-radius: 50%; }
 .game.kit .unit .buried.seen.A .fill { background: var(--Adk); } .game.kit .unit .buried.seen.B .fill { background: var(--Bdk); } .game.kit .unit .buried.seen.W .fill { background: #4a443b; }
 
-/* Upright (a window taller than wide, board.js setView): its own tall stage and its own painting (kit2/plate_port.webp:
-   1260x2524 plate px at 0.723 stage px each), every piece placed on it upright (board.js
-   PORT_AT). The opponent's cards along the top, your hand along the bottom, ending in your deck and End turn. On a phone
-   the stage shows at about half size, so what is read or tapped grows to stay a thumb's size. */
-.game.port { background: #5d4829; }   /* the ground's dark earth, past the painting's end on the tallest phones */
-.game.port #stage, .game.port #world { width: 720px; height: 1440px; }
-.game.port #world img { left: -95.5px; top: -237.4px; width: 911px; height: 1824.9px; }   /* 45 px above centre (both dens clear of both hands), 200 plate px of savanna beyond each end */
-.game.port .hand { top: 1230px; }
-.game.port .ledge { left: 588px; top: 1222px; width: 132px; height: 218px; background-image: url(/static/kit2/ledge_port.webp); }   /* upright, its own rock painted to this corner (design sandbox screen/kit/ledge/port/) */
-.game.port.kit .deck { left: 606px; top: 1238px; width: 98px; height: 128px; font-size: 22px; }   /* the deck over End turn, at the right end of the hand's row */
-.game.port.kit .tbtn { left: 600px; top: 1372px; width: 110px; height: 62px; font-size: 19px; gap: 3px; }
-.game.port .waiting { left: auto; right: 16px; top: 1390px; }
-     
-.game.port .menu { top: 4px; width: 80px; height: 80px; border-radius: 14px; }   /* 44 CSS px on a phone: a thumb's size */ .game.port .menu svg { width: 40px; height: 40px; }
-.game.port .menu.fb { right: 104px; } .game.port .menu.fb.alone { right: 16px; }
-.game.port .panel.histp, .game.port .panel.setp { top: 96px; scale: 1.5; transform-origin: top right; }   /* below the thumb-sized buttons, read on a phone */
-.game.port .prompt:not(.mull) { top: 6px; left: 16px; transform: none; width: 242px; max-width: 242px; white-space: normal; padding: 12px 16px; }   /* top left beside the buttons: the opponent's gem stays in sight */ .game.port .prompt:not(.mull) b { font-size: 28px; } .game.port .prompt:not(.mull) p { font-size: 26px; }
-.game.port .prompt:not(.mull) .line { flex-wrap: wrap; } .game.port .prompt:not(.mull) .line .skip { height: 52px; font-size: 22px; }
-.game.port .prompt.mull { top: 520px; width: 520px; margin-left: -260px; } .game.port .prompt.mull b { font-size: 34px; } .game.port .prompt.mull p { font-size: 26px; } .game.port .prompt .skip { height: 56px; font-size: 24px; }
-.game.port .opts { top: 250px; bottom: 300px; left: 16px; right: 16px; flex-wrap: wrap; align-content: center; }   /* upright: the offered cards wrap into rows, never wider than the phone */
 .game .opts.many .hc { width: 140px; height: 205px; } .game .opts.many .hc .card { --w: 140px; }   /* more than six: smaller (nine in one row on PC; four to a row upright) */
-.game.port .reveal { top: 560px; }
-.game.port .pit { scale: .72; }   /* ten to a ridge, 41 stage px apart */
-.game.port .endbox { scale: 1.5; max-width: 440px; text-align: center; }
-.game.port .endbox .btns > * { height: 50px; }   /* 1.5 x 50 on the upright stage: 40 px on a phone (48 came to 39; phone walkthrough finding 22) */   /* the end of a game and the concede question, read on a phone */
 /* Touch (no hover): a tap only picks a card (it rises, the board stays clear); pressing and holding shows it large to read. */
 @media (hover: none) {
   .game .hc:hover { transform: none; } .game .hc:hover .card .ctext { display: none; }
@@ -515,22 +491,6 @@
 .game:not(.port).rp .rbar { right: auto; left: 1222px; top: 640px; width: 274px; flex-wrap: wrap; justify-content: space-between; row-gap: 12px; translate: var(--side, 0px) var(--above, 0px); }
 .game:not(.port).rp .rbar .track { order: 5; width: 100%; height: 32px; } .game:not(.port).rp .rbar .track::after { top: 12px; } .game:not(.port).rp .rbar .track b { top: 9px; }
 .game:not(.port).rp .rbar .out { margin-left: 0; padding: 0 12px; }
-/* Upright, a replay's controls are one row under the whole stage, the window's full width (Martin, 2026-11-05: the board
-   shorter, the controls full width). fitStage fits the stage into the window less this row (--rp, stage px), so on a tall
-   phone the row takes the savanna's margin and on a short one the stage shrinks to make room. Sizes are screen px over
-   --k: every control 40 px or more on any phone. */
-.game.port .rbar { left: calc(-1 * var(--side, 0px)); right: auto; top: calc(1440px + var(--above, 0px)); width: calc(720px + 2 * var(--side, 0px)); height: var(--rp, 0px);
-  box-sizing: border-box; padding: 0 calc(8px / var(--k, 1)); flex-wrap: nowrap; justify-content: center; gap: calc(4px / var(--k, 1)); translate: none; }
-.game.port .rbar > * { order: 0; flex: none; }
-.game.port .rbar .slab { width: calc(40px / var(--k, 1)); height: calc(40px / var(--k, 1)); } .game.port .rbar .slab svg { width: calc(18px / var(--k, 1)); height: calc(18px / var(--k, 1)); }
-.game.port .rbar .track { flex: 1 1 0; width: auto; min-width: 0; height: calc(40px / var(--k, 1)); }
-.game.port .rbar .track::after { top: calc(50% - 4px); } .game.port .rbar .track b { top: calc(50% - 7px); }
-.game.port .rbar .take, .game.port .rbar .out { width: auto; padding: 0 calc(7px / var(--k, 1)); margin-left: 0; font-size: calc(13px / var(--k, 1)); line-height: 1.05; }
-.game.port .rbar .take { max-width: calc(64px / var(--k, 1)); white-space: normal; text-align: center; }   /* "Play from here" on two lines */
-.game.port .clock { font-size: 24px; } .game.port .tbtn.B .clock { font-size: 22px; }   /* a timed match's clock, read on a phone */
-.game.port .prompt .skip, .game.port .prompt:not(.mull) .line .skip { height: 80px; padding: 0 28px; font-size: 30px; }   /* Skip and Keep hand, thumb-sized */
-.game.port .tbtn:not(.A):not(.B) { display: none; }   /* no game running (See the board): the empty stone leaves the corner to Back to results */
-.game.port .waiting:has(.slab) { top: 1356px; } .game.port .waiting .slab { height: 72px; padding: 0 20px; font-size: 24px; }
 
 /* The versus moment at a match's start: the key art dimmed, the two decks' cover cards meeting from either side. */
 .game .intro { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 64px; pointer-events: none;
@@ -546,7 +506,6 @@
 @keyframes introL { from { transform: translateX(-60vw); } } @keyframes introR { from { transform: translateX(60vw); } }
 .game .intro .ivs { font: 800 80px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 20px rgba(0,0,0,.8); animation: introVs .4s ease .55s both; }
 @keyframes introVs { from { opacity: 0; transform: scale(1.6); } }
-.game.port .hc.peek, .game.port .hc.peek:hover { translate: var(--peekx, 0px) 0; }   /* a card read large stays on screen */
 
 /* Your turn begins: the tablet lifts and glows once. */
 .game.kit .tbtn.A.yours { animation: yourturn .9s cubic-bezier(.3,.7,.4,1); }
@@ -563,6 +522,7 @@
 @media (orientation: portrait) {
   .game .intro { flex-direction: column-reverse; gap: 14px; }
   .game .intro .iobj, .game .intro .card { --w: 190px; } .game .intro .iside { gap: 8px; }   /* the gem's digits stay legible */
+  .game .intro .mcard { --mw: min(190px, calc((90vh - 90px) / 2.76)) !important; }   /* both cards and the vs in a phone's height */
   .game .intro .ivs { font-size: 52px; }
   .game .intro .iside.A { animation-name: introD; } .game .intro .iside.B { animation-name: introU; }
 }
@@ -738,4 +698,3 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game.hexb .mouth { width: var(--tw); height: var(--th); margin: calc(var(--th) / -2) 0 0 calc(var(--tw) / -2); border-radius: 0; z-index: 2; }
 .game.hexb .mouth.tgt::after { inset: 0; border: 0; border-radius: 0; background: var(--act);
   clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 6%, 5.5% 28%, 5.5% 72%, 50% 94%, 94.5% 72%, 94.5% 28%, 50% 6%); }
-.game.port.hexb #world img { object-fit: cover; }   /* upright, the hex board's ground is the middle of its wide painting */
