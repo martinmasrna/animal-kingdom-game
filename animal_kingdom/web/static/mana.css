@@ -371,6 +371,7 @@ body:has(.game.mana) .chatp.inmatch { left: auto; right: 16px; }
 /* the leader's power in the mana rules: the plate alone (no painted orb) */
 .hpow.bare .plate { margin-top: 0; padding-top: 12px; }
 .coll .lrow .lpc { flex: none; width: 50px; }
+.coll .lrow .lpc.lfig img { display: block; width: 50px; height: 50px; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,.6)); }   /* the square board's leader: its creature, a card's name being unreadable at this size */
 
 /* ---------------------------------------------------------------- the mana rules' deck strip (collection.js mstripHTML) */
 :is(.mscr, .game) .st.mst .hd { position: relative; flex: none; align-self: stretch; width: 34px; margin: 0 8px 0 2px; overflow: hidden; }
@@ -496,8 +497,12 @@ html.sqlook .game.mana .reveal .mcard { top: -131px; }
 /* the opponent's hand: small backs, the deck's back, peeking over the top edge */
 html.sqlook .game.mana .opphand .back { top: -40px; height: 63px; clip-path: none; border-radius: 3px; background: var(--rc-frame); }
 html.sqlook .game.mana .opphand .back::after { inset: 1px; clip-path: none; border-radius: 2px; background: #6a2a24; }
-/* the collection on the square board: a grid tile and a dialog's card are the card at the column's width, the marks room above */
-.coll :is(.tl, .cv) .mcard.rc { --mw: 100cqw !important; margin: 0; }
+/* the collection on the square board: each card sits inside its cell with room on every side for its two overhanging marks
+   and its creature's head, and the cells have gutters, so no mark ever meets a neighbour's (Martin, 2026-11-23: "too clutter
+   with the big cards"); seven to a row at 1512, three on a phone */
+.coll :is(.tl, .cv) .mcard.rc { --mw: 84cqw !important; margin: 9cqw auto 0; }
+.coll .crow:has(.mcard.rc) { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px 22px; }
+@media (orientation: portrait) { .coll .crow:has(.mcard.rc) { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px 10px; } }
 html.sqlook .pop { overflow: visible; }   /* the card's marks and its creature's head reach past its box */
 /* held over a tile it may take (carry.js carryOver), the card is its creature standing there: the frame, ground, panel, name
    and marks fade (and come back as it leaves), the board's preview gives the tile its colour and the strength, its own
@@ -506,3 +511,16 @@ html.sqlook .pop { overflow: visible; }   /* the card's marks and its creature's
 .flight.over .fcard > .rc :is(.rbg, .rtxt, .rnm, .mcost, .mstr), .flight.over .fcard > .rc .rface::before, .flight.over .fcard > .rc .rwin::after { opacity: 0; }
 .flight.over .fcard > .rc .rwin { overflow: visible; } .flight.over .fcard > .rc .rfig.out { display: none; }
 html.carrying #board.sq .cr.unit.ghost .mstand { visibility: hidden; }
+/* the square board's pieces off the board (mana.js sqPiece): the rail's leaders, the last plays, a deck's leader; the board's own
+   tile in the team's colour with the creature standing on it, square boxes for them, a square ring for a power that can be used,
+   and a power's price as a card's cost mark on the tile's foot, where the board shows strength */
+.sqtok { position: absolute; left: 1.6%; top: 1.6%; width: 96.8%; height: calc(96.8% * 311 / 300); background: url(/static/sq/tile_a.webp) 33.33% 33.33% / 400% 400% no-repeat; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); pointer-events: none; }
+.sqtok.B { background-image: url(/static/sq/tile_b.webp); }
+.sqfig { position: absolute; left: 50%; bottom: 31%; height: 66%; width: auto; max-width: none; transform: translateX(-50%); filter: drop-shadow(0 2px 2px rgba(0,0,0,.45)); pointer-events: none; }
+html.sqlook .tokpiece { height: var(--tw); }
+html.sqlook .game.mana .mlead .ltok { height: 84px; }
+html.sqlook .game.mana .mlead .ltok.can::after { clip-path: none; inset: -6px; border-radius: 12px; background: none; box-shadow: 0 0 0 4px #f2c94c; }
+html.sqlook .game.mana .mlast .row .mini { height: 40px; }
+.pcost.rcm { left: 50%; bottom: -8%; width: 34%; aspect-ratio: 1; transform: translateX(-50%); display: grid; place-items: center; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.pcost.rcm i { position: absolute; inset: 0; background: var(--rc-cost); clip-path: polygon(50% 0, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%); }
+.pcost.rcm svg { position: relative; width: var(--rc-dg); height: auto; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; } .pcost.rcm .dgi { stroke: #ece3cd; } .pcost.rcm .dgo { stroke: #14110e; }

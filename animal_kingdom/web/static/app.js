@@ -1119,7 +1119,7 @@ function leaderPanel(side) {
 // it (full cards face down, as thick as what is left, the count in the middle; a click shows its list); each leader nearer
 // the board past its deck; each side's mana by the board's corner, only the crystals earned (as Hearthstone). Theirs mirror yours.
 const LEAD_W = 84, LEAD_H = 97, TB_W = 184, TB_H = 56, MANA_H = 27, DECK_W = 70, EVEN = .5;
-const SIDE = { lead: { x: 19, y: 326, s: 1.34, w: LEAD_W, h: LEAD_H }, deck: { x: 130, y: 132, s: 1.06, w: DECK_W, get h() { return DECK_W * (squareLook() ? 1.38 : 2.127); } }, mana: { x: 65, y: 404, s: 1, w: 0, h: MANA_H } };
+const SIDE = { lead: { x: 19, y: 326, s: 1.34, w: LEAD_W, get h() { return squareLook() ? LEAD_W : LEAD_H; } }, deck: { x: 130, y: 132, s: 1.06, w: DECK_W, get h() { return DECK_W * (squareLook() ? 1.38 : 2.127); } }, mana: { x: 65, y: 404, s: 1, w: 0, h: MANA_H } };
 const TB_X = 140;
 // a piece's place in the board's plane: its left and top, and its scale (its own size, less half the perspective's)
 const midline = () => (RAIL.A.fy + RAIL.B.fy) / 2;

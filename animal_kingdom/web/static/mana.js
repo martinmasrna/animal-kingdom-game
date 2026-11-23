@@ -61,7 +61,7 @@ const PIECE_COST_AT = box(0, .25 * P * (1 - .3), .3, .3 * P);
 // edges the piece's, where a card's strength sits (a leader has none to show; Martin, 2026-11-21: "on bottom, where
 // strength sits"). As percentages of the piece's box, so it sits on any piece (the rail's token, a card's).
 const DW = DRAWER_FRAC / P, DH = DRAWER_FRAC / P;   // the drawer's width (of the piece's width) and height (of its height)
-export const powerCostHTML = cost => `<div class="pcost" style="left:${((1 - DW) / 2 * 100).toFixed(3)}%;top:${((1 - DH) * 100).toFixed(3)}%;width:${(DW * 100).toFixed(3)}%;height:${(DH * 100).toFixed(3)}%">${COST_SVG(cost)}</div>`;
+export const powerCostHTML = cost => squareLook() ? `<div class="pcost rcm"><i></i>${digits(cost)}</div>` : `<div class="pcost" style="left:${((1 - DW) / 2 * 100).toFixed(3)}%;top:${((1 - DH) * 100).toFixed(3)}%;width:${(DW * 100).toFixed(3)}%;height:${(DH * 100).toFixed(3)}%">${COST_SVG(cost)}</div>`;
 // A leader's power read as a card of its own beside the leader's (as a card's tokens are): the leader's figure, what kind
 // of ability it is, its text, and a power's cost on top in place of the gem.
 export function powerCard(id, L, w = 170) {
@@ -126,6 +126,7 @@ export const costChip = n => `<span class="mchip" data-n="${n}">${COST_SVG(n)}</
 
 // The leader on the rail: its token, no strength (it is not on the board), dimmed while its power can't be used.
 export function leaderToken(id, owner, cards, w) {
+  if (squareLook()) return sqPiece(id, owner);
   return tokenHTML({ id, owner, str: null, iid: 0 }, cards, w);
 }
 
@@ -172,3 +173,7 @@ function rectCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cls = '',
     + (cost != null ? `<div class="mcost" data-n="${cost}"><i></i>${digits(cost)}</div>` : '')
     + (str != null ? `<div class="mstr" data-n="${str}"><i></i>${digits(str)}</div>` : '') + '</div>';
 }
+
+// A piece of the square board outside the board (the rail's leader, the last plays, a deck's leader on Play and Practice):
+// its creature standing on a tile in its team's colour, as the board draws it (mana.css .sqtok).
+const sqPiece = (id, owner) => `<i class="sqtok ${owner}"></i>` + (FIGS[id] ? `<img class="sqfig" src="/static/hex/fig/${id}.webp" alt="" draggable="false" style="aspect-ratio:${FIGS[id][0]}/${FIGS[id][1]}">` : '');

@@ -423,7 +423,7 @@ function setLeader(d, id) {
 }
 function leaderRow(d) {
   const id = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null, L = id && X.leaders[id];
-  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? ((`<div class="lpc">${manaPiece(C[id], { str: null, w: 50 })}</div>`)) : `<div class="lmed empty"></div>`}`
+  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? (squareLook() ? `<div class="lpc lfig"><img src="/static/hex/fig/${id}.webp" alt="" draggable="false"></div>` : `<div class="lpc">${manaPiece(C[id], { str: null, w: 50 })}</div>`) : `<div class="lmed empty"></div>`}`
     + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${KIND[L.kind]}. ${esc(L.text)}</span>` : `<b>No leader</b><span>Choose a leader for this deck</span>`}</div></div>`;
 }
 // `d`: the deck whose leader changes, or null for a new deck.
