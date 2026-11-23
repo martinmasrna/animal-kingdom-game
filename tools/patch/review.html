@@ -20,8 +20,10 @@
 import { patchHTML } from '/static/patch.js';
 import { fitPlaques } from '/static/mana.js';
 import { fitNames } from '/static/card.js';
+import { learnMap } from '/static/board.js';
 
-const { patch: P, review } = await (await fetch('/draft.json')).json();
+const { patch: P, review, map } = await (await fetch('/draft.json')).json();
+learnMap(map);   // the square board's card where AK_MAP plays it
 const notes = review.notes || {};
 if (!P.rules.length) P.rules = [''];   // an empty list still shows, to write the first bullet in
 const app = document.getElementById('app');

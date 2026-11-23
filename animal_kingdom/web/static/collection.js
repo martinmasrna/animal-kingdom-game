@@ -9,6 +9,7 @@ import { onHold } from './menu.js';
 import { track } from './log.js';
 import { manaCard, manaPiece, fitPlaques, costChip, powerCard } from './mana.js';
 import { hasFigure } from './token.js';
+import { squareLook } from './board.js';
 
 const RANK = { legendary: 0, common: 1 };
 // The deck rules come from the server (/api/pool's rules: decks.py, engine/cards.py and web/profiles.py hold the numbers): the
@@ -139,15 +140,18 @@ const curveHTML = list => { const n = MANA_COSTS.map(() => 0);
 // after the last run, so the tray shows how full the deck is. Every measure is in the piece's width `w`, chosen for the
 // window: as wide as fits 25 cells and six cracks across, and no taller than the window can spare.
 const SIDE_W = 250, PAD = 24, GAP = 22, PH = 1.15556;   // the controls' width; the tray's edges; between its parts; a piece's height
+// On the square board the cells are its cards, a brick wall rather than a comb: each row a card's height (and room for the
+// marks over its top) below the last, the gap wide enough that two marks never touch, and smaller, so the tray stays as tall.
 export function trayGeo(W, H, n = 25, cracks = 6) {
-  const most = Math.max(48, Math.min(84, H * .085));
+  const sq = squareLook(), ph = sq ? 1.38 : PH, sp = sq ? .12 : .06, most = Math.max(48, Math.min(84, H * .085)) * (sq ? .75 : 1);
   let w = most;
-  for (let k = 0; k < 4; k++) w = Math.min(most, (W - 2 * PAD - 1.75 * w - 2 * GAP - SIDE_W) / ((n - 1) * .53 + 1 + .4 * cracks));
+  for (let k = 0; k < 4; k++) w = Math.min(most, (W - 2 * PAD - 1.75 * w - 2 * GAP - SIDE_W) / ((n - 1) * (.47 + sp) + 1 + .4 * cracks));
   w = Math.floor(w);
-  const h = w * PH, gap = Math.max(2, Math.round(w * .06));
-  return { w, h, p: w + gap, dy: .75 * h + gap * .866, crack: Math.round(w * .4), lead: Math.round(1.75 * w) };
+  const h = w * ph, gap = Math.max(2, Math.round(w * sp));
+  return { w, h, p: w + gap, dy: sq ? h + gap : .75 * h + gap * .866, crack: Math.round(w * .4), lead: Math.round(1.75 * w), ph };
 }
 const HEX_SVG = `<svg viewBox="0 0 100 ${100 * PH}" preserveAspectRatio="none"><polygon vector-effect="non-scaling-stroke" points="50,1 99,${25 * PH} 99,${75 * PH} 50,${100 * PH - 1} 1,${75 * PH} 1,${25 * PH}"/></svg>`;
+const RECT_SVG = '<svg viewBox="0 0 100 138" preserveAspectRatio="none"><rect vector-effect="non-scaling-stroke" x="1" y="1" width="98" height="136" rx="7"/></svg>';   // an empty place for a card of the square board
 function trayHTML(d) {
   const leader = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null;
   const by = deckOrder(C), ids = [...d.list].filter(id => C[id]).sort((a, b) => costOf(C[a]) - costOf(C[b]) || by(a, b));
@@ -160,12 +164,12 @@ function trayHTML(d) {
   runs.forEach((r, ri) => { if (ri) x0 += g.crack; const first = i;
     for (const id of r.ids) { const at = `left:${(i * g.p / 2 + x0).toFixed(1)}px;top:${(i % 2 * g.dy).toFixed(1)}px;width:${g.w}px;height:${g.h.toFixed(1)}px`;
       cells += id ? `<div class="cell${id === leader ? ' lcopy' : ''}${over(id) ? ' over' : ''}" data-card="${id}" style="${at}">${manaPiece(C[id], { cost: C[id].mana ?? null, w: g.w })}</div>`
-        : `<div class="cell empty" style="${at}">${HEX_SVG}</div>`;
+        : `<div class="cell empty" style="${at}">${squareLook() ? RECT_SVG : HEX_SVG}</div>`;
       i++; }
     });   // no count under a cost's run: the pieces are there to count (Martin, 2026-11-20)
   const combW = (i - 1) * g.p / 2 + x0 + g.w, combH = g.dy + g.h;
   const lead = leader ? `<div class="tlead" id="dlead" data-card="${leader}" style="width:${g.lead}px">${manaPiece(C[leader], { str: null, w: g.lead })}</div>`
-    : `<div class="tlead none" id="dlead" style="width:${g.lead}px;height:${(g.lead * PH).toFixed(1)}px">${HEX_SVG}<span>Choose a leader</span></div>`;
+    : `<div class="tlead none" id="dlead" style="width:${g.lead}px;height:${(g.lead * g.ph).toFixed(1)}px">${squareLook() ? RECT_SVG : HEX_SVG}<span>Choose a leader</span></div>`;
   return `<div class="tleads" style="height:${combH.toFixed(1)}px">${lead}</div><div class="comb" style="width:${combW.toFixed(1)}px;height:${(combH + 26).toFixed(1)}px">${cells}${counts}</div>`;
 }
 

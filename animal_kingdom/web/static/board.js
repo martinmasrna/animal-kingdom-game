@@ -46,7 +46,10 @@ const HEX = { cols: [3, 4, 5, 4, 3], last: 5, dy: .75 };   // the board: rows of
 const setRows = M => { if (!M || !M.crossroads) return; const n = {};
   for (const cr of M.crossroads) { const r = +cr.split(',')[0]; n[r] = (n[r] || 0) + 1; }
   HEX.last = Math.max(...Object.keys(n).map(Number)); HEX.cols = Array.from({ length: HEX.last }, (_, i) => n[i + 1] || 0);
-  HEX.square = HEX.cols.every(k => k === HEX.cols[0]); HEX.dy = HEX.square ? 1 : .75; };
+  HEX.square = HEX.cols.every(k => k === HEX.cols[0]); HEX.dy = HEX.square ? 1 : .75;
+  if (globalThis.document) document.documentElement.classList.toggle('sqlook', HEX.square); };   // mana.css html.sqlook: the square board's card, on every screen
+// The map as the client learns it at load (app.js boot, the card table), so a screen outside a match draws the right card.
+export const learnMap = setRows;
 // landscape: the board the stage's full height under the opponent's hand (to y 66), right of the middle so your hand has
 // the ground beside its foot (app.js PL); upright: between the dens' ridges. The mana board stands in the middle column,
 // as tall as the stage allows between the opponent's hand and yours.

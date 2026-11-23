@@ -346,7 +346,7 @@ body:has(.game.mana) .chatp.inmatch { left: auto; right: 16px; }
 .coll .mtray .tlead { position: relative; cursor: pointer; transition: transform .1s; }
 .coll .mtray .tlead:hover { transform: translateY(-3px); }
 .coll .mtray .tlead.none svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.coll .mtray .tlead.none polygon { fill: rgba(0,0,0,.25); stroke: #e6c46a; stroke-width: 1.5px; stroke-dasharray: 5 4; }
+.coll .mtray .tlead.none :is(polygon, rect) { fill: rgba(0,0,0,.25); stroke: #e6c46a; stroke-width: 1.5px; stroke-dasharray: 5 4; }
 .coll .mtray .tlead.none span { position: absolute; inset: 0; display: grid; place-items: center; padding: 0 18%; text-align: center; font: 600 15px/1.2 'Fira Sans Condensed', sans-serif; color: #e6c46a; }
 .coll .mtray .comb { position: relative; flex: none; }
 .coll .mtray .cell { position: absolute; cursor: pointer; transition: transform .1s; }
@@ -354,7 +354,7 @@ body:has(.game.mana) .chatp.inmatch { left: auto; right: 16px; }
 .coll .mtray .cell.empty { cursor: default; }
 .coll .mtray .cell.over .mcard { filter: drop-shadow(0 0 2px #ff8a78) drop-shadow(0 0 5px #ff8a78); }   /* a copy past its limit */
 .coll .mtray .cell.empty svg { width: 100%; height: 100%; display: block; }
-.coll .mtray .cell.empty polygon { fill: rgba(0,0,0,.28); stroke: rgba(240,232,218,.22); stroke-width: 1.5px; }
+.coll .mtray .cell.empty :is(polygon, rect) { fill: rgba(0,0,0,.28); stroke: rgba(240,232,218,.22); stroke-width: 1.5px; }
 @keyframes trayIn { 0% { transform: translateY(-10px) scale(1.15); filter: drop-shadow(0 0 6px #fff) brightness(1.3); } 100% { transform: none; filter: none; } }
 .coll .mtray .cell.flash .mcard { animation: trayIn .45s ease-out; }
 
@@ -440,3 +440,61 @@ body:has(.game.mana) .chatp.inmatch { left: auto; right: 16px; }
 .game.mana #board.sq .rdot.B { background-image: url(/static/sq/stone_b.webp); filter: drop-shadow(0 0 5px rgba(240, 104, 80, .85)); }
 /* a unit's strength on the board, a size up from the token's drawer (Martin, 2026-11-22: "keep it below, just make it slightly bigger") */
 .game.hexb #board .unit .boss.tknum { transform: scale(1.3); transform-origin: 50% 60%; }
+
+/* ---------------------------------------------------------------- the square board's card (mana.js rectCard, html.sqlook)
+   Martin's card from design/screen/square/card/tune (2026-11-23). Every length in --mw, the card's width; the tuned values
+   are the --rc-* properties mana.js CARD_LOOK sets. Each surface is one rule a painting can replace: the frame (.rface::before),
+   the ground behind the creature (.rbg), the light panel (.rtxt), the two marks (.mcost i, .mstr i). --open (0 at rest, 1
+   read) moves the panel, the name and the creature together. */
+.mcard.rc, .mcard.rc.mpc { height: calc(var(--mw) * 1.38); --open: 0; --ink: #1b1b1b; }
+.rc .rface { position: absolute; inset: 0; border-radius: calc(var(--mw) * .07); clip-path: inset(-40% -25% 0 -25% round 0 0 calc(var(--mw) * .07) calc(var(--mw) * .07)); }   /* open above its top edge for the creature's head, closed at its foot */
+.rc .rface::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--rc-frame); }
+.rc.legendary .rface::before { background: #f2f2f2; }
+.rc .rwin { position: absolute; inset: calc(var(--mw) * var(--rc-bd)); border-radius: calc(var(--mw) * (.07 - var(--rc-bd) * .6)); overflow: hidden; }
+.rc .rbg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 34%, #7c7c7c, #555 58%, #333); }
+.rc .rwin::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,0) 22%, rgba(0,0,0,0) 62%, rgba(0,0,0,.7) 97%); }
+.rc .rfig { position: absolute; max-width: none; height: calc(var(--mw) * 1.02); width: calc(var(--mw) * 1.02 * var(--a)); left: calc(var(--mw) * (.5 - .51 * var(--a))); top: calc(var(--mw) * .14);
+  transform-origin: 50% 100%; transform: translateY(calc(var(--mw) * -.34 * var(--open))) scale(calc(1 - .18 * var(--open))); transition: transform .2s cubic-bezier(.3,.7,.4,1); pointer-events: none; }
+.rc .rwin .rfig { left: calc(var(--mw) * (.5 - var(--rc-bd) - .51 * var(--a))); top: calc(var(--mw) * (.14 - var(--rc-bd))); }
+.rc .rfig.out { clip-path: inset(0 0 72% 0); }
+.rc .rtxt { position: absolute; left: calc(var(--mw) * var(--rc-bd)); right: calc(var(--mw) * var(--rc-bd)); bottom: calc(var(--mw) * var(--rc-bd)); height: calc(var(--mw) * .6); box-sizing: border-box; padding: calc(var(--mw) * .2) calc(var(--mw) * .07) calc(var(--mw) * .03);
+  display: flex; align-items: center; justify-content: center; text-align: center; background: #d9d9d9;
+  border-radius: 50% 50% calc(var(--mw) * .05) calc(var(--mw) * .05) / calc(var(--mw) * .1) calc(var(--mw) * .1) calc(var(--mw) * .05) calc(var(--mw) * .05);
+  transform: translateY(calc(106% * (1 - var(--open)))); transition: transform .2s cubic-bezier(.3,.7,.4,1); }
+.rc .rtxt p { margin: 0; font: 500 calc(var(--mw) * .08)/1.2 'Fira Sans Condensed', sans-serif; color: var(--ink); } .rc .rtxt p b { font-weight: 700; }
+.rc .rnm { position: absolute; z-index: 3; left: calc(var(--mw) * .09); right: calc(var(--mw) * .09); bottom: calc(var(--mw) * (.07 + .35 * var(--open))); height: calc(var(--mw) * .15); display: grid; place-items: center; transition: bottom .2s cubic-bezier(.3,.7,.4,1); }
+.rc .rnm b { font: 600 calc(var(--mw) * .125)/1 'Barlow Condensed', sans-serif; letter-spacing: 0; padding: 0; white-space: nowrap; color: color-mix(in srgb, var(--ink) calc(var(--open) * 100%), #f2f2f2);
+  text-shadow: 0 calc(var(--mw) * .012) calc(var(--mw) * .02) rgb(0 0 0 / calc(1 - var(--open))), 0 0 calc(var(--mw) * .05) rgb(0 0 0 / calc(.8 - .8 * var(--open))); }
+/* read: wherever a card is shown to be read (a hovered or shown hand card, the opening hand, a read, a pop, the opponent's
+   card played, a hovered piece's card, a choice, the patch notes, a leader's power, the collection's zoom) */
+:is(.hc:hover, .hc.shown, .hand.mull, .readov, .pop, .reveal, .mhover, .opts, .patch, .pwcard, .zbox, .rel) .rc:not(.notext), .rc.open:not(.notext) { --open: 1; }
+/* the two marks: cost a hexagon on the top-left corner, strength a tile with cut corners on the top-right; both overhanging, mirrored; the digits Martin's numerals, cream, as strokes (mana.js digits) */
+.mcard.rc :is(.mcost, .mstr) { position: absolute; z-index: 5; top: calc(var(--mw) * var(--rc-my) * -1); width: calc(var(--mw) * var(--rc-ns)); height: auto; aspect-ratio: 1; display: grid; place-items: center; pointer-events: none;
+  filter: drop-shadow(0 calc(var(--mw) * .015) calc(var(--mw) * .02) rgba(0,0,0,.5)); }
+.mcard.rc .mcost { left: calc(var(--mw) * var(--rc-mx) * -1); } .mcard.rc .mstr { right: calc(var(--mw) * var(--rc-mx) * -1); }
+.mcard.rc :is(.mcost, .mstr) i { position: absolute; inset: 0; }
+.mcard.rc .mcost i { background: var(--rc-cost); clip-path: polygon(50% 0, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%); }
+.mcard.rc .mstr i { background: var(--rc-str); clip-path: polygon(var(--rc-cut) 0, calc(100% - var(--rc-cut)) 0, 100% var(--rc-cut), 100% calc(100% - var(--rc-cut)), calc(100% - var(--rc-cut)) 100%, var(--rc-cut) 100%, 0 calc(100% - var(--rc-cut)), 0 var(--rc-cut)); }
+.mcard.rc :is(.mcost, .mstr) svg { position: relative; width: var(--rc-dg); height: auto; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.mcard.rc .dgo { stroke: #14110e; } .mcard.rc .dgi { stroke: #ece3cd; }
+/* face down (a deck, the opponent's hand): the frame, and inside it the team's colour, flat */
+.rc.rback .rface::after { content: ''; position: absolute; inset: calc(var(--mw) * var(--rc-bd)); border-radius: calc(var(--mw) * (.07 - var(--rc-bd) * .6)); background: #2b4a70; }
+.rc.rback.B .rface::after { background: #6a2a24; }
+@media (prefers-reduced-motion: reduce) { .rc :is(.rfig, .rtxt, .rnm) { transition: none; } }
+/* in flight from the hand to its tile: everything but the creature goes, and the creature comes out of the card onto the board */
+.flight:not(.carry) .fcard > .rc :is(.rbg, .rtxt, .rnm, .mcost, .mstr), .flight:not(.carry) .fcard > .rc .rface::before, .flight:not(.carry) .fcard > .rc .rwin::after { animation: plaquefade .22s ease-out both; }
+.flight:not(.carry) .fcard > .rc .rwin { overflow: visible; } .flight:not(.carry) .fcard > .rc .rfig.out { display: none; }
+/* the match on the square board: the hand a straight row of whole cards, cost and strength showing on every one (Martin,
+   2026-11-23: "both need to be visible"; app.js sets --cw, their width, and --hs, the scale a hovered one is read at) */
+html.sqlook .game.mana .hc { width: var(--cw, 100px); height: calc(var(--cw, 100px) * 1.38); top: calc(802px - var(--cw, 100px) * 1.38); }
+html.sqlook .game.mana .hc:hover, html.sqlook .game.mana .hc.shown { transform: translateY(-12px) scale(var(--hs, 2)); }
+html.sqlook .game.mana .hand.mull .hc { top: 300px; width: 176px; height: 243px; }
+html.sqlook .game.mana .hand.mull .hc:hover { transform: translateY(-8px); }
+html.sqlook .game.mana .opts .hc { height: 235px; }
+html.sqlook .game.mana .reveal .mcard { top: -131px; }
+/* the opponent's hand: small backs, the deck's back, peeking over the top edge */
+html.sqlook .game.mana .opphand .back { top: -40px; height: 63px; clip-path: none; border-radius: 3px; background: var(--rc-frame); }
+html.sqlook .game.mana .opphand .back::after { inset: 1px; clip-path: none; border-radius: 2px; background: #6a2a24; }
+/* the collection on the square board: a grid tile and a dialog's card are the card at the column's width, the marks room above */
+.coll :is(.tl, .cv) .mcard.rc { --mw: 100cqw !important; margin: 0; }
+html.sqlook .pop { overflow: visible; }   /* the card's marks and its creature's head reach past its box */

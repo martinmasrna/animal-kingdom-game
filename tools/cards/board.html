@@ -76,6 +76,7 @@ button:focus-visible, input:focus-visible { outline:2px solid var(--hot); outlin
 #peek .mcard { position:absolute; }
 #sync { color:var(--danger); }
 .it .pwcard { margin:0; }
+#peek .rc:not(.notext) { --open:1; }   /* the square board's card, peeked, is read: its rules up */
 #ed { position:fixed; z-index:35; width:300px; display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px; background:var(--bar); color:var(--ink);
   border:1px solid var(--barline); border-radius:8px; box-shadow:0 8px 28px rgba(0,0,0,.3); font:13px system-ui,sans-serif; }
 #ed[hidden] { display:none; }
@@ -205,7 +206,7 @@ function measure() {
   const probe = document.body.appendChild(document.createElement('div'));
   probe.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
   probe.innerHTML = cardHTML({ id: '_', name: '', text: '', rarity: 'common', str: 1, mana: 1 });
-  const m = probe.querySelector('.mcard').getBoundingClientRect(), p = probe.querySelector('.plaque').getBoundingClientRect();
+  const m = probe.querySelector('.mcard').getBoundingClientRect(), p = (probe.querySelector('.plaque') || probe.querySelector('.mcard')).getBoundingClientRect();   // the square board's card is its own outline
   probe.remove();
   W = Math.round(p.width); H = Math.round(p.height);
   const st = document.documentElement.style;
@@ -644,8 +645,9 @@ $('#snap').onclick = () => {
 // ---------- start ----------
 (async () => {
 ({ manaCard, fitPlaques, powerCard } = await import('/static/mana.js'));
-measure();
 const d0 = await (await fetch('/api/board')).json();
+(await import('/static/board.js')).learnMap(d0.map);   // the cards in the look of the board AK_MAP picks
+measure();
 stampSeen = d0.stamp; setData(d0.cards, d0.powers); buildCards();
 B = d0.layout || fresh(); if (tidy() || !d0.layout) save(); draw();
 let saved = null; try { saved = JSON.parse(localStorage.getItem(CAMKEY)); } catch (e) {}

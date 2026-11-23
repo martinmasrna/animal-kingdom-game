@@ -60,7 +60,8 @@ async def board_get(_req):
     # each leader's power as the collection shows it beside its card (game.LEADERS: the engine's, fixed while this runs)
     powers = [{"id": lid, "kind": kind, "text": text, **({"cost": power_price(lid)} if kind == "power" else {})}
               for lid, (kind, text) in LEADERS.items() if lid in ids]
-    return web.json_response({"cards": [c for c in pool() if c["id"] in ids], "powers": powers, "layout": layout, "stamp": hq.stamp()},
+    from animal_kingdom.web.match import map_info   # the board AK_MAP picks, so the cards draw in its look
+    return web.json_response({"cards": [c for c in pool() if c["id"] in ids], "powers": powers, "layout": layout, "stamp": hq.stamp(), "map": map_info()},
                              headers={"Cache-Control": "no-store"})
 
 

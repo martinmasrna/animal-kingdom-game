@@ -7,9 +7,11 @@
 // upper-left and left edges lie on the card's outline (Martin's pick on 2026-11-20 from the card-layout mockups: "agree").
 // The card's box is the piece's (--mw wide, the piece at its top left); the frame reaches past it on every side, so the
 // flight and the hand's measures, made for the piece, hold. Every length is in --mw, so it draws at any size.
-import { tokenHTML, tokenWidth } from './board.js';
+import { tokenHTML, tokenWidth, squareLook } from './board.js';
 import { TW, TH, DRAWER_FRAC } from './token.js';
 import { KEYWORDS } from './card.js';
+import { FIGS } from './hex/figs.js';
+import { NUMS } from './hex/nums.js';
 
 const P = TH / TW;                          // the piece's height, in its widths
 const LW = 1.11, LH = LW * P;               // the collar round the piece
@@ -27,7 +29,8 @@ export const CARD_H = HC + Y0;              // the card's box below the piece's 
 const GEM = .27 * WC;                       // the cost hexagon's width
 // The flight's and the grip's measures for this card (flight.js fly, carry.js carry): over its place the card is as wide as
 // a board token, its piece's centre above the card's centre by half the card less half the piece.
-export const flightGeo = () => { const w = tokenWidth(); return { end: w, up: (CARD_H - P) / 2, rear: w * 1.14, hit: w * .96 }; };
+// The square board's card: over its tile its creature is the standing figure's size, and its picture's centre above the tile's.
+export const flightGeo = () => { const w = tokenWidth(); if (squareLook()) return { end: w * RC_END, up: RC_UP, rear: w * RC_END * 1.14, hit: w * RC_END * .96 }; return { end: w, up: (CARD_H - P) / 2, rear: w * 1.14, hit: w * .96 }; };
 
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const KW = new RegExp(`\\b(${Object.keys(KEYWORDS).join('|')})\\b( \\d+)?[:.]?`, 'g');
@@ -62,6 +65,7 @@ export const powerCostHTML = cost => `<div class="pcost" style="left:${((1 - DW)
 // A leader's power read as a card of its own beside the leader's (as a card's tokens are): the leader's figure, what kind
 // of ability it is, its text, and a power's cost on top in place of the gem.
 export function powerCard(id, L, w = 170) {
+  if (squareLook()) return `<div class="pwcard">${rectCard({ id, name: L.kind === 'power' ? 'Hero power' : 'Passive', text: L.text, rarity: 'common' }, { str: null, cost: L.kind === 'power' ? L.cost ?? null : null, w })}</div>`;
   const card = manaCard({ id, name: L.kind === 'power' ? 'Hero power' : 'Passive', text: L.text, rarity: 'common' }, { str: null, w });
   return `<div class="pwcard">${L.kind === 'power' && L.cost != null ? card.replace(/(<div class="mpiece[^>]*>)/, `$1${powerCostHTML(L.cost)}`) : card}</div>`;
 }
@@ -70,6 +74,7 @@ export function powerCard(id, L, w = 170) {
 // shown while it is in a hand (null: none, as on the board); `owner`: 'A' yours, 'B' your opponent's (viewer space); `w`:
 // the piece's width in stage px (the card reaches a fifth past it); `cls`, `attrs`: extra classes and attributes on the card.
 export function manaCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cls = '', attrs = '', iid = null } = {}) {
+  if (squareLook()) return rectCard(c, { str, cost, owner, w, cls, attrs });
   const piece = tokenHTML({ id: c.id, owner, str, iid: iid ?? 0 }, { [c.id]: c }, w);
   const tags = (c.tags || []).join(' · ');
   return `<div class="mcard ${owner}${cls ? ' ' + cls : ''}" style="--mw:${w}px" ${attrs}>`
@@ -84,6 +89,7 @@ export function manaCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cl
 // The piece alone, as a hand shows it under its plaque: the token with its cost hexagon (the collection's deck tray).
 // `str: null` draws no strength (a leader, as the rail draws it); `cost: null` no cost mark.
 export function manaPiece(c, { str = c.str, cost = null, owner = 'A', w = 60, cls = '', attrs = '' } = {}) {
+  if (squareLook()) return rectCard(c, { str, cost, owner, w, cls, attrs });   // the square board's card is all picture at rest: it is its own piece
   return `<div class="mcard mpc ${owner}${cls ? ' ' + cls : ''}" style="--mw:${w}px" ${attrs}><div class="mpiece unit ${owner}" style="--tw:${w}px">${tokenHTML({ id: c.id, owner, str, iid: 0 }, { [c.id]: c }, w)}</div>`
     + (cost != null ? `<div class="mcost" data-n="${cost}" style="${PIECE_COST_AT}">${COST_SVG(cost)}</div>` : '') + '</div>';
 }
@@ -91,19 +97,20 @@ export function manaPiece(c, { str = c.str, cost = null, owner = 'A', w = 60, cl
 // A long rule sets smaller until it fits its plaque (as card.js fitNames does for the rectangular card).
 export function fitPlaques(root) {
   if (typeof document !== 'undefined' && document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => fitPlaques(root));   // measured again in the card's own face once it has loaded
-  for (const p of root.querySelectorAll('.mcard .pin p')) {
+  for (const p of root.querySelectorAll('.mcard .pin p, .rc .rtxt p')) {
     p.style.fontSize = '';
-    const pin = p.parentElement, room = pin.clientHeight - 4;   // the text's own height: a centred box hides overflow above it from scrollHeight
+    const pin = p.parentElement, cs = getComputedStyle(pin), room = pin.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 4;   // the text's own height: a centred box hides overflow above it from scrollHeight
     if (room <= 0 || p.offsetHeight <= room) continue;
     let hi = 1, lo = .55;   // a share of the card's own size (mana.css .pin p), so a card resized after the fit stays fitted
-    const fits = f => { p.style.fontSize = `calc(var(--mw) * ${(.096 * f).toFixed(4)})`; return p.offsetHeight <= room; };
+    const base = p.closest('.rc') ? .08 : .096;
+    const fits = f => { p.style.fontSize = `calc(var(--mw) * ${(base * f).toFixed(4)})`; return p.offsetHeight <= room; };
     for (let i = 0; i < 7; i++) { const mid = (lo + hi) / 2; if (fits(mid)) lo = mid; else hi = mid; }
     fits(lo);
   }
-  for (const b of root.querySelectorAll('.mcard .mplate .pname')) {   // a long name narrows to its plate, as a share of the card's size
+  for (const b of root.querySelectorAll('.mcard .mplate .pname, .rc .rnm .pname')) {   // a long name narrows to its plate, as a share of the card's size
     b.style.fontSize = '';
     const room = b.parentElement.clientWidth * .94, wd = b.scrollWidth;
-    if (room > 0 && wd > room) b.style.fontSize = `calc(var(--mw) * ${(.14 * room / wd).toFixed(4)})`;
+    if (room > 0 && wd > room) b.style.fontSize = `calc(var(--mw) * ${((b.closest('.rc') ? .125 : .14) * room / wd).toFixed(4)})`;
   }
 }
 
@@ -120,4 +127,45 @@ export const costChip = n => `<span class="mchip" data-n="${n}">${COST_SVG(n)}</
 // The leader on the rail: its token, no strength (it is not on the board), dimmed while its power can't be used.
 export function leaderToken(id, owner, cards, w) {
   return tokenHTML({ id, owner, str: null, iid: 0 }, cards, w);
+}
+
+// ---------------------------------------------------------------- the square board's card
+// The card Martin settled for the square board in its tuning tool (design/screen/square/card/tune, 2026-11-23: "let's go
+// with what we have now"; html.sqlook, board.js squareLook): a portrait rectangle 1.38 widths tall in one grey hairline (a
+// legendary's near white), all picture at rest, the creature's head free to rise over the top edge, the name bare on its
+// foot. Read, a light panel rises inside it with the rules, the name moves to the panel's seam in ink and the creature
+// steps back and up (mana.css .rc, --open); a card with no text never opens. The cost is a hexagon on the top-left corner,
+// the strength a tile with cut corners on the top-right, both overhanging; both digits Martin's numerals, drawn here as
+// strokes so their weight and outline can be set. Every length is a share of the card's width, --mw.
+// CARD_LOOK: the tool's dials, under its own keys and units, so the JSON its Copy button gives pastes straight in (the hand
+// keys it also gives are the tool's, unused here). Lengths in % of the card's width; digitSize in % of its mark;
+// digitWeight in % of the numerals' own stroke; costEdge the digits' dark outline (0: none); borderLight the border's grey
+// as lightness; costColor and strColor the two marks. Martin's values of 2026-11-23.
+export const CARD_LOOK = {"markOut":5,"markUp":6.5,"markSize":30,"digitSize":109,"digitWeight":130,"costEdge":0,"tileCut":15,"border":2,"borderLight":50,"costColor":"#1f5fae","strColor":"#7a2f24"};
+if (globalThis.document) { const L = CARD_LOOK, st = document.documentElement.style, set = (k, v) => st.setProperty('--rc-' + k, v);
+  set('mx', L.markOut / 100); set('my', L.markUp / 100); set('ns', L.markSize / 100); set('dg', L.digitSize + '%'); set('cut', L.tileCut + '%');
+  set('bd', L.border / 100); set('frame', `hsl(0 0% ${L.borderLight}%)`); set('cost', L.costColor); set('str', L.strColor); }
+// Over its tile in flight (flightGeo): the card at the width that makes its creature the standing figure's height (board.js
+// STAND), the card's centre this many of its widths below the tile's centre (above, negative) so the creature stands where the figure will.
+const RC_END = .62, RC_UP = -.2;
+// A number in Martin's numerals as strokes (static/hex/nums.js): the cream stroke over, when costEdge is set, the same
+// stroke wider and dark. Past 20 (rare) two of them side by side.
+function digits(n) {
+  n = Math.max(0, Math.round(n));
+  const L = CARD_LOOK, k = L.digitWeight / 100, e = L.costEdge * 200 / (L.markSize * L.digitSize);   // the outline in the drawing's own units
+  const g = (ps, c, x, t = '') => `<g class="${c}"${t}>${ps.map(([d, w]) => `<path d="${d}" stroke-width="${(w * k + x).toFixed(4)}"/>`).join('')}</g>`;
+  const one = (m, t) => (e ? g(NUMS[m], 'dgo', 2 * e, t) : '') + g(NUMS[m], 'dgi', 0, t);
+  const body = n <= 20 ? one(n) : one(Math.floor(n / 10) % 10, ' transform="translate(-.3 0) scale(.8)"') + one(n % 10, ' transform="translate(.3 0) scale(.8)"');
+  return `<svg viewBox="-1 -.6 2 1.2" role="img" aria-label="${n}">${body}</svg>`;
+}
+// One card. The options are manaCard's; `w` is the card's own width. A face-down card (id '__back': a deck) is its frame alone.
+function rectCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cls = '', attrs = '' } = {}) {
+  const head = k => `<div class="mcard rc ${owner}${k}${cls ? ' ' + cls : ''}" style="--mw:${w}px;--a:${FIGS[c.id] ? (FIGS[c.id][0] / FIGS[c.id][1]).toFixed(4) : 1}" ${attrs}>`;
+  if (c.id === '__back') return head(' rback') + '<div class="rface"></div></div>';
+  const fig = k => FIGS[c.id] ? `<img class="rfig${k}" src="/static/hex/fig/${c.id}.webp" alt="" draggable="false">` : '';
+  return head(`${c.rarity === 'legendary' ? ' legendary' : ''}${c.text ? '' : ' notext'}`)
+    + `<div class="rface"><div class="rwin"><i class="rbg"></i>${fig('')}</div>${fig(' out')}`
+    + (c.text ? `<div class="rtxt"><p>${rules(c.text)}</p></div>` : '') + `<div class="rnm"><b class="pname">${esc(c.name)}</b></div></div>`
+    + (cost != null ? `<div class="mcost" data-n="${cost}"><i></i>${digits(cost)}</div>` : '')
+    + (str != null ? `<div class="mstr" data-n="${str}"><i></i>${digits(str)}</div>` : '') + '</div>';
 }

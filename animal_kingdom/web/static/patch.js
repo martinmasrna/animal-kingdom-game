@@ -4,6 +4,7 @@
 import { manaCard, powerCostHTML, fitPlaques } from './mana.js';
 import { fitNames } from './card.js';
 import { FIGS } from './hex/figs.js';
+import { squareLook } from './board.js';
 
 let INDEX = null;   // the patches' versions, newest first
 export async function patches() {
@@ -16,7 +17,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const W = 150;
 function card(c) {
   if (c.fig && !FIGS[c.id]) FIGS[c.id] = c.fig;   // a removed card: its figure is kept, its size travels with the patch
-  if (!c.power) return manaCard({ ...c, tags: [] }, { cost: c.mana, w: W, str: c.str });
+  if (!c.power || squareLook()) return manaCard({ ...c, tags: [] }, { cost: c.mana ?? null, w: W, str: c.power ? null : c.str });   // the square board's card wears a power's mana as any card's cost
   const h = manaCard({ ...c, tags: [] }, { cost: null, w: W, str: null });   // a hero power: its mana in the drawer, as in the game
   return c.mana != null ? h.replace(/(<div class="mpiece[^>]*>)/, `$1${powerCostHTML(c.mana)}`) : h;
 }

@@ -32,7 +32,8 @@ def draft() -> dict:
     review = json.loads(REVIEW.read_text()) if REVIEW.exists() else {"notes": {}}
     import datetime
     return {"patch": {"version": VERSION, "name": f"Patch {VERSION}", "date": datetime.date.today().strftime("%-d %B %Y"),
-                      "rules": rules, **build.diff(was, build.snapshot())}, "review": review}
+                      "rules": rules, **build.diff(was, build.snapshot())}, "review": review,
+            "map": __import__("animal_kingdom.web.match", fromlist=["map_info"]).map_info()}   # the board AK_MAP picks: its card is the one drawn
 
 
 def save(body: dict) -> None:

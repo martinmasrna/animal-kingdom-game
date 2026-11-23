@@ -5,7 +5,7 @@ import { fitNames, readSide } from './card.js';
 import { plan, DUR } from './timeline.js';
 import { fly, dive, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
 import { carry, carrying, release, drop as carryDrop } from './carry.js';
-import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, resolvesIn, tokenWidth, RAIL, perspK } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, resolvesIn, tokenWidth, RAIL, perspK, learnMap, squareLook } from './board.js';
 import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo, powerCard, powerCostHTML } from './mana.js';
 import { playFood } from './foodfx.js';
 import { decodeDeck } from './deckcode.js';
@@ -134,7 +134,7 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; BUILD = p.build; RULES = p.rules; LEADERS = p.leaders;
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; BUILD = p.build; RULES = p.rules; LEADERS = p.leaders; learnMap(MAP);
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
   // Feedback while the game is in testing: a tab on the screen's edge where the edge is free (home, News, Settings: app.css shows
@@ -487,7 +487,7 @@ const act = action => { if (action.kind === 'place' && ui.carry != null) { relea
 const canGrip = id => FLIGHT && !touch() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
 function grip(el, id, iid) {
   const h = (V.game.hand || []).find(h => h.iid === iid);
-  carry(el.querySelector('.mcard'), manaCard(CARDS[id], { str: h ? h.str : undefined, cost: h ? h.cost : null, w: 100 }), flightGeo()); ui.carry = iid;   // its piece on the pointer
+  carry(el.querySelector('.mcard'), manaCard(CARDS[id], { str: h ? h.str : undefined, cost: h ? h.cost : null, w: el.querySelector('.mcard').offsetWidth }), flightGeo()); ui.carry = iid;   // its piece on the pointer
 }
 // A card let go of without being placed goes back to its place in the hand, which opens for it as it comes.
 function ungrip() {
@@ -832,9 +832,12 @@ function drawGame() {
     held.sort((x, y) => order.indexOf(x.iid) - order.indexOf(y.iid));
   }
   // the mana screen: a row of pieces under the board (the full cards, large, while the opening hands are chosen)
-  const n = held.length, cw = (mull ? 176 : 100), gap = (mull ? 64 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0),
+  // The square board's card is read at rest by both its numbers, so its hand never overlaps: past seven cards they narrow
+  // to fit (mana.css html.sqlook .hc, which reads --cw and --hs, the scale that reads a hovered card at 200 px)
+  const sq = squareLook(), n = held.length, cw = (mull ? 176 : sq ? Math.min(100, Math.floor((800 - (n - 1) * 12) / Math.max(1, n))) : 100),
+    gap = (mull ? 64 : sq ? 12 : n > 1 ? Math.min(12, (760 - n * cw) / (n - 1)) : 0),
     x0 = ((STAGE.w / 2)) - (n * cw + (n - 1) * gap) / 2;
-  const hand = $('hand'); hand.classList.toggle('mull', mull); hand.classList.toggle('free', (!!(d.pend && d.pend.mode !== 'choice' && !mull)));   // a free play: the costs step back
+  const hand = $('hand'); hand.classList.toggle('mull', mull); hand.style.setProperty('--cw', cw + 'px'); hand.style.setProperty('--hs', (200 / cw).toFixed(4)); hand.classList.toggle('free', (!!(d.pend && d.pend.mode !== 'choice' && !mull)));   // a free play: the costs step back
   let drawnK = 0;
   const was = new Map([...hand.querySelectorAll('.hc')].map(el => [el.dataset.iid, el.offsetLeft]));   // where each card stood
   hand.innerHTML = held.map((h, i) => {
@@ -1113,8 +1116,8 @@ function leaderPanel(side) {
 // the board, as distances from its right edge and its centre line in that plane: End turn on the midline; each deck beyond
 // it (full cards face down, as thick as what is left, the count in the middle; a click shows its list); each leader nearer
 // the board past its deck; each side's mana by the board's corner, only the crystals earned (as Hearthstone). Theirs mirror yours.
-const LEAD_W = 84, LEAD_H = 97, TB_W = 184, TB_H = 56, MANA_H = 27, DECK_W = 70, DECK_H = DECK_W * 2.127, EVEN = .5;
-const SIDE = { lead: { x: 19, y: 326, s: 1.34, w: LEAD_W, h: LEAD_H }, deck: { x: 130, y: 132, s: 1.06, w: DECK_W, h: DECK_H }, mana: { x: 65, y: 404, s: 1, w: 0, h: MANA_H } };
+const LEAD_W = 84, LEAD_H = 97, TB_W = 184, TB_H = 56, MANA_H = 27, DECK_W = 70, EVEN = .5;
+const SIDE = { lead: { x: 19, y: 326, s: 1.34, w: LEAD_W, h: LEAD_H }, deck: { x: 130, y: 132, s: 1.06, w: DECK_W, get h() { return DECK_W * (squareLook() ? 1.38 : 2.127); } }, mana: { x: 65, y: 404, s: 1, w: 0, h: MANA_H } };
 const TB_X = 140;
 // a piece's place in the board's plane: its left and top, and its scale (its own size, less half the perspective's)
 const midline = () => (RAIL.A.fy + RAIL.B.fy) / 2;
@@ -1144,7 +1147,7 @@ function drawRail(G, d) {
   const deck = side => {
     const n = (G.deckCount || {})[side === 'A' ? you : them] ?? 0, layers = Math.max(1, Math.min(7, Math.ceil(n / 4)));
     const card = (i, top) => `<div class="dcard" style="transform:translateY(${-i * 4}px)${top ? '' : `;filter:brightness(${(.45 + .35 * i / layers).toFixed(2)})`}">${manaCard(BACK, { owner: side, w: DECK_W, str: null, cost: null })}</div>`;
-    return `<div class="mdeck ${side}${n ? '' : ' empty'}" data-deck="${side}" style="${spot(railSpot('deck', side))};width:${DECK_W}px;height:${DECK_H}px">`
+    return `<div class="mdeck ${side}${n ? '' : ' empty'}" data-deck="${side}" style="${spot(railSpot('deck', side))};width:${DECK_W}px;height:${SIDE.deck.h}px">`
       + Array.from({ length: layers }, (_, i) => card(i, i === layers - 1)).join('') + `<b class="dkn" style="transform:translateY(${-(layers - 1) * 4}px)">${n}</b></div>`;
   };
   // what is left of the turn's mana as X/N right of the crystals (Martin, 2026-11-21)
@@ -1210,7 +1213,7 @@ function drawLast(G) {
 function play(target, el) {
   const c = selCopy(), start = ui.carry === c.iid ? release() : null; ui.carry = null;
   const from = start ? null : document.querySelector(`#hand .hc[data-iid="${c.iid}"] .mcard`);
-  const html = manaCard(CARDS[ui.sel], { str: c.str, cost: c.cost, w: 100 });
+  const html = manaCard(CARDS[ui.sel], { str: c.str, cost: c.cost, w: from ? from.offsetWidth : start ? start.w : 100 });
   if (target[0] === 'cr') fly(from, el, ui.sel, target[1], viewerGame().board[target[1]], landNow, html, start, flightGeo());
   else dive(from, el.querySelector('.core') || el, html, start);
   act(placeAction(target[0] === 'cr' ? ['cr', dcr(target[1])] : target));
@@ -1315,7 +1318,11 @@ function manaHover(cr) {
   const top = st[st.length - 1], under = st.slice(0, -1).reverse(), [x, y] = crossroadAt(cr), w = Math.round(Math.min(tokenWidth(), 120) * 1.3), ph = w * 624 / 540;   // the card's size, not the tile's: the square board's larger tiles don't enlarge it
   const side = top.owner === 'W' ? 'W' : top.owner;
   const notes = [top.timer ? resolvesIn(top.timer) : '', under.length ? `Covers ${under.map(u => `${(CARDS[u.id] || {}).name || u.id} (${u.str})`).join(', ')}` : ''].filter(Boolean);
-  el.innerHTML = `<div class="abs" style="left:${x - w / 2}px;top:${y - ph / 2}px">${manaCard(CARDS[top.id], { str: top.str, cost: CARDS[top.id].mana ?? null, owner: side, w, iid: top.iid })}`
+  // the square board's card, read, left of the board level with its piece, the board itself left in sight; what it covers under it
+  if (squareLook()) { const W = 190, H = W * 1.38, lx = RAIL.flat.L - tokenWidth() * .95 - W, ty = Math.max(24, Math.min(y - H / 2, 640 - H));
+    el.innerHTML = `<div class="abs" style="left:${lx}px;top:${ty}px">${manaCard(CARDS[top.id], { str: top.str, cost: CARDS[top.id].mana ?? null, owner: side, w: W })}`
+      + (notes.length ? `<div class="under" style="left:0;top:${H + 12}px">${notes.map(esc).join('<br>')}</div>` : '') + '</div>';
+  } else el.innerHTML = `<div class="abs" style="left:${x - w / 2}px;top:${y - ph / 2}px">${manaCard(CARDS[top.id], { str: top.str, cost: CARDS[top.id].mana ?? null, owner: side, w, iid: top.iid })}`
     + (notes.length ? `<div class="under" style="left:${w + 10}px;top:${ph * .3}px">${notes.map(esc).join('<br>')}</div>` : '') + '</div>';
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); fitPlaques(el);   // measured once shown (hidden, it has no height)
 }

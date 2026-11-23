@@ -237,3 +237,24 @@ test('the tray fits the window: a deck of 25 at 1280 x 720, 1512 x 800 and 1920 
   for (const g of r) { assert.ok(g.used <= g.W, `${g.W} x ${g.H}: ${g.used} px wide`); assert.ok(g.w >= 48, `${g.W}: pieces ${g.w} px`); assert.ok(g.tall <= .26 * g.H, `${g.W} x ${g.H}: ${g.tall} px tall`); }
 });
 
+
+// The square board (AK_MAP=map_sq16) draws its own card everywhere, learned from the map at load: the collection, outside any
+// match, shows it with both numbers, and so does the opening hand.
+test('on the square board every card is the rectangular one, its cost and strength showing', async () => {
+  const sq = await startServer({ AK_MAP: 'map_sq16' }), p = await seat();
+  try {
+    await p.goto(sq.url + '/', { waitUntil: 'networkidle0' }); await giveDeck(p, 'w1', 'Cheap', CHEAP);
+    await p.goto(sq.url + '/#/collection', { waitUntil: 'networkidle0' }); await p.waitForSelector('.coll .cgrid .tl .mcard');
+    const tiles = await p.evaluate(() => { const C = window.__ak.cards(); return [...document.querySelectorAll('.cgrid .tl')].map(t => ({ rc: !!t.querySelector('.mcard.rc'), hex: !!t.querySelector('.mpiece'),
+      cost: t.querySelector('.mcost')?.dataset.n, str: t.querySelector('.mstr')?.dataset.n, want: [String(C[t.dataset.card].mana), String(C[t.dataset.card].str)] })); });
+    assert.ok(tiles.length > 10 && tiles.every(t => t.rc && !t.hex), 'the collection draws the rectangular card');
+    for (const t of tiles) assert.deepEqual([t.cost, t.str], t.want);
+    await p.goto(sq.url + '/', { waitUntil: 'networkidle0' }); await click(p, '#mprac'); await p.waitForSelector('.mhome [data-deck].on');
+    for (let i = 0; i < 20 && !(await p.evaluate(() => location.hash.startsWith('#/m/'))); i++) { await click(p, '#mgo').catch(() => {}); await wait(300); }
+    assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull .hc .mcard.rc .mstr')), 'the opening hand in the rectangular card');
+    const hand = await p.evaluate(() => window.__ak().V.game.hand.map(h => { const el = document.querySelector(`#hand .hc[data-iid="${h.iid}"]`);
+      return [String(h.cost), el.querySelector('.mcost')?.dataset.n, String(h.str), el.querySelector('.mstr')?.dataset.n]; }));
+    for (const [c, cs, s, ss] of hand) { assert.equal(cs, c); assert.equal(ss, s); }
+    assert.deepEqual(p.errors, []);
+  } finally { await p.browserContext().close(); sq.stop(); }
+});
