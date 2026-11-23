@@ -30,14 +30,16 @@ pub fn count(st: &State, player: Player, what: Count) -> i32 {
     }
 }
 
-/// The strength a unit of `card` has for `owner` now: on the board, or as it would be played from hand.
+/// The strength a unit of `card` has for `owner` now: on the board, or as it would be played from hand. The Warlord
+/// leading adds to a Hungry card's, in hand and on the board.
 #[inline]
 pub fn card_strength(st: &State, card: CardId, owner: Player) -> i32 {
     let c = st.card(card);
-    match c.base_strength {
+    let base = match c.base_strength {
         Some(v) => v,
         None => (st.cfg().shade_growth * count(st, owner, c.dynamic.expect("a dynamic card names its count"))).max(0),
-    }
+    };
+    if c.has(HUNGRY) && st.leads(owner, st.g.named.warlord) { base + st.cfg().warlord_hungry_bonus } else { base }
 }
 
 #[inline]
@@ -235,11 +237,6 @@ fn land_unit(st: &mut State, player: Player, unit: Unit, cr: Tile) {
             }
         }
         st.effect_stack.push(Step::new(StepKind::CoverRemove { cr }));
-    }
-    if onto_enemy && st.leads(player, st.g.named.warlord) {
-        let lead = st.g.named.warlord.unwrap();
-        st.effect_stack.push(Step::by(StepKind::GainFood { player, amount: st.cfg().warlord_leader_food }, lead));
-        st.effect_stack.push(Step::by(StepKind::LeaderTrigger { player, card: lead }, lead));
     }
     if onto_enemy {
         let cov = covered.unwrap();

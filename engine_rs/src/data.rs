@@ -451,7 +451,7 @@ config! {
     hungry_food: i32 = 1,                 // Hungry: the food its prey's removal gains (Martin, 2026-11-20)
     shade_growth: i32 = 2,                // a strength that is a count: +2 for each (Martin, 2026-11-21)
     combo_djinn_discount: i32 = 2,        // the Combo Djinn: "Costs 2 less for each card you played this turn."
-    warlord_leader_food: i32 = 1,         // the Warlord: "When you cover an enemy, gain 1 food."
+    warlord_hungry_bonus: i32 = 2,        // the Warlord: "Your Hungry cards have +2 strength." (Martin, 2026-11-24)
     elf_region_bonus: i32 = 1,            // the Elf: "Your regions produce 1 more food." (Martin, 2026-11-23)
     assassin_card_discount: i32 = 1,      // the Assassin's card: "Roar: reduce the cost of cards in your hand by 1."
     mana_blob_mana: i32 = 2,              // the Mana Blob: "Roar: gain 2 mana." (Martin, 2026-11-21)

@@ -17,7 +17,7 @@ pub const FLIGHT_1: &str = "flight_1";
 /// Every leader, in the order the game lists them, with its ability as the player reads it. Whether an ability is a power
 /// or a passive is in `behaviour`.
 pub const LEADERS: [(&str, &str); 5] = [
-    (WARLORD, "When you cover an enemy, gain 1 food."),
+    (WARLORD, "Your Hungry cards have +2 strength."),                          // Martin, 2026-11-24: "from hand" too
     (RAIDER, "Your raids destroy 1 more food."),
     (SAGE, "Draw a card."),
     (ELF, "Your regions produce 1 more food."),                               // Martin, 2026-11-23: the card's and the power's texts swapped

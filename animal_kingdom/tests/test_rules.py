@@ -550,12 +550,20 @@ def test_a_dynamic_strength_is_its_count():
     assert effective_strength(s, s.board["2,3"][-1]) == 2 * g
 
 
-def test_the_warlord_gains_a_food_for_each_cover_of_an_enemy():
-    s = state(turn=11, hands={"A": ["wisp_5"]}, leaders={"A": WARLORD})
-    put(s, "1,1", "wisp_1", "A")
-    put(s, "2,1", "wisp_1", "B")
-    rules.apply_action(s, PlaceAction("wisp_5", ("cr", "2,1")))
-    assert s.food["A"] == CFG.warlord_leader_food
+def test_the_warlords_hungry_cards_have_two_more_strength_in_hand_and_on_the_board():
+    assert LEADERS[WARLORD] == ("passive", "Your Hungry cards have +2 strength.")
+    b = CFG.warlord_hungry_bonus
+    for leader, bonus in ((WARLORD, b), (SAGE, 0)):
+        s = state(turn=11, hands={"A": ["hungry_3"]}, leaders={"A": leader}, food={"A": 15, "B": 15})
+        put(s, "1,1", "wisp_1", "A")
+        put(s, "2,1", "wisp_3", "B")                                  # 6: only a Hungry 3 with the bonus eats it
+        put(s, "1,2", "hungry_1", "A")
+        assert effective_strength(s, s.board["1,2"][-1]) == CARDS["hungry_1"].base_strength + bonus   # on the board
+        assert places(s, "hungry_3") == ({"2,1"} if bonus else set())                                 # from hand
+    s = state(turn=11, hands={"A": ["hungry_3"]}, leaders={"A": WARLORD}, food={"A": 15, "B": 15})
+    put(s, "1,1", "wisp_1", "A"); put(s, "2,1", "wisp_3", "B")
+    rules.apply_action(s, PlaceAction("hungry_3", ("cr", "2,1")))
+    assert s.board["2,1"][-1].card_id == "hungry_3" and s.food["A"] == 15 + CFG.hungry_food   # it eats, and Hungry feeds
 
 
 def test_the_raiders_raids_destroy_two_more():
