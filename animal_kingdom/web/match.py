@@ -55,9 +55,6 @@ class Seat:
     profile: Optional[str] = None    # the player's profile id, when they have one
     level: Optional[str] = None      # a ranked bot's level (BOT_LEVELS); a bot without one is the Practice opponent
     ladder: Optional[str] = None     # on the ladder (a ranked match): a person's profile id, or a bot's ladder id
-    rating: Optional[str] = None     # a ranked match: the seat's rating as shown when it opened ("1781", "1500?"); a person's
-                                     # only in the top league
-    league: Optional[str] = None     # a ranked match: a person's league when it opened ("Gold 2"); bots have none
 
     @property
     def is_bot(self) -> bool:
@@ -455,7 +452,6 @@ class Match:
             "id": self.id, "you": s, "phase": self.phase, "version": self.version,
             # a seat's deck by name only for you or a bot: a person's deck name is theirs (their list is open, by rule)
             "seats": {p: {"name": seat.name, "bot": seat.is_bot, "ready": seat.ready,
-                          **({"rating": seat.rating} if seat.rating else {}), **({"league": seat.league} if seat.league else {}),
                           **({"deck": seat.deck, "deckName": DECK_NAMES.get(seat.deck, seat.deck)} if p == s or seat.is_bot else {})}
                       for p, seat in self.seats.items()},
             "ranked": self.ranked(),

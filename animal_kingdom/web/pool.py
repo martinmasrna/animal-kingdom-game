@@ -5,7 +5,7 @@ out of the pool until its list is mended, and comes back by itself when it is.
 
 A bot is one level (web/match.py BOT_LEVELS) with one deck. Its rating is measured: `tools/ladder/seed.py` plays every
 bot against every other and writes `web/ladder_seed.json`, each rating beside a print of what it was measured with (the
-level's bot, the map, the rules' numbers, the deck's list and every card in it as the engine reads it). A rating whose
+level's bot, the map, the rules' numbers, the deck's list, its leader's ability and every card in it as the engine reads it). A rating whose
 print no longer matches was measured with other cards: the bot then stands on its level's rating (the mean of that level
 over the decks measured, which a deck's cards do not move) with a wider uncertainty, so it counts for less and finds its
 place faster, until the seed is measured again. The numbers a card change does not reach stay as they are.
@@ -58,7 +58,8 @@ def measured_with(level: str, deck: dict, map_id: str = game.MAP_ID, cards: Opti
         c = cards[cid]
         seen[cid] = [c.rarity, c.base_strength, c.cost, sorted(c.keywords), c.dynamic_strength, c.text, list(c.makes), c.weaken]
         todo += c.makes
-    what = [BOT_LEVELS[level], map_id, sorted(game.Config().as_dict().items()), deck["leader"], sorted(deck["cards"]), sorted(seen.items())]
+    what = [BOT_LEVELS[level], map_id, sorted(game.Config().as_dict().items()), deck["leader"], game.LEADERS.get(deck["leader"]),
+            sorted(deck["cards"]), sorted(seen.items())]
     return hashlib.sha1(json.dumps(what).encode()).hexdigest()[:12]
 
 

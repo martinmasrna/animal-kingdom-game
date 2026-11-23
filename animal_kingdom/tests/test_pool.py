@@ -29,10 +29,12 @@ def test_a_deck_a_card_change_made_illegal_is_out_of_the_pool():
     assert pool.legal([WISPS, OTHER], cards=uncollectible) == [WISPS]
 
 
-def test_every_premade_deck_in_the_pool_is_legal_and_named():
-    decks = pool.load()
-    assert all(not game.deck_problems(d["cards"], d["leader"]) for d in decks)
+def test_the_pools_decks_can_be_played_under_their_own_slugs_and_names():
+    from animal_kingdom.decks import DECK_LEADERS, load_deck
+    from animal_kingdom.web.match import DECK_NAMES
     assert len({d["slug"] for d in pool.premade()}) == len(pool.premade()), "two premade decks share a slug"
+    for d in pool.load():
+        assert (load_deck(d["slug"]), DECK_LEADERS[d["slug"]], DECK_NAMES[d["slug"]]) == (d["cards"], d["leader"], d["name"])
 
 
 def _seed():

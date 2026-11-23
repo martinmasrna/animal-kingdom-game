@@ -210,9 +210,11 @@ function route() {
   manaHome();
   if (standingStale) freshStanding().then(() => { if (screen === 'home' && !location.hash.slice(2)) manaHome(); });
 }
-// Where you stand (your league, your place) is the profile's: asked again once a ranked game has ended.
+// Where you stand (your league, your place) is the profile's: asked again once a ranked game has ended. Only asked:
+// an answer that fails (a server restarting) leaves the profile as it is, to be asked again on the next screen.
 let standingStale = false;
-const freshStanding = async () => { if (standingStale) { standingStale = false; await loadProfile(); } };
+const freshStanding = async () => { if (!standingStale) return;
+  const r = await api('/api/me').catch(() => null); if (r && r.ok) { ME = await r.json(); standingStale = false; } };
 const enterMatch = m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; };
 
 // ------------------------------------------------------------------ home: where a match starts

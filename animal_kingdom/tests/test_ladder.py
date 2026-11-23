@@ -184,12 +184,8 @@ def test_ranked_is_a_match_at_once_against_a_bot_from_your_league(monkeypatch, t
         # league 1 plays the bots rated under 1100; when none is, the bot nearest the league: the weakest level
         level, deck = parse_bot(bot.ladder)
         assert bot.is_bot and bot.level == level == "1" and bot.deck == deck and bot.spec == "greedy"
-        # the match states both sides as they stood going in: a person below the top league their league and no
-        # number, a bot the rating of its own leaderboard row, and its name the band that rating sits in
-        seats = match.view("A")["seats"]
-        assert match.view("A")["ranked"] and seats["A"]["league"] == "Wood 3" and "rating" not in seats["A"]
-        assert seats["B"]["rating"] == server.ladder.get(bot.ladder).shown() and "league" not in seats["B"]
-        assert bot.name.endswith(f"({ladder.rung_of(server.ladder.get(bot.ladder).rating)} Bot)")
+        # the view says the match is ranked, and the bot's name the band its rating sits in
+        assert match.view("A")["ranked"] and bot.name.endswith(f"({ladder.rung_of(server.ladder.get(bot.ladder).rating)} Bot)")
         with pytest.raises(Exception, match="no rematch"):
             match.phase = "match_over"; match.offer_rematch("A")
     _served(monkeypatch, tmp_path, body)

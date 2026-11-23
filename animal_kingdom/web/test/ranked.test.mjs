@@ -61,8 +61,8 @@ test('Play ranked: straight into a rated match against a bot, its end says your 
   await p.click('#rkgo'); await inMatch(p);
   let V = await view(p);
   const first = V.id;
-  assert.ok(V.ranked && V.seats.B.bot && / Bot\)$/.test(V.seats.B.name) && /^\d+$/.test(V.seats.B.rating), 'a bot from the ladder, its rating stated');
-  assert.deepEqual([V.seats.A.league, V.seats.A.rating, V.seats.A.deckName], ['Wood 3', undefined, 'Warlord deck']);
+  assert.ok(V.ranked && V.seats.B.bot && / Bot\)$/.test(V.seats.B.name), 'a bot from the ladder');
+  assert.equal(V.seats.A.deckName, 'Warlord deck');
   // conceded, a loss: the end shows your league (nothing to lose at no wins in the bottom league), no number below the
   // top league, and Play again in a rematch's place
   await concede(p); await p.waitForSelector('#rkend', { timeout: 30000 });

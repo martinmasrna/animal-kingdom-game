@@ -3,8 +3,9 @@
 Every ranked game updates both sides at once (one game is one rating period, as Lichess does). A rating is a number,
 its uncertainty (rd) and its volatility. New players start at 1500 with a wide uncertainty, so a few games place them;
 the bots start where bot-vs-bot games put them (tools/ladder/seed.py, web/pool.py) with a narrow one, so they move slowly
-and keep the scale steady. Players see only the number, with a "?" after it for their first PROVISIONAL games (Martin,
-2026-10-01). Draws don't count.
+and keep the scale steady. A rating is shown as the number alone, with a "?" after it for the first PROVISIONAL games
+(Martin, 2026-10-01); a person sees their own only in the top league, their league below it (web/tiers.py). Draws
+don't count.
 
 Glicko-2 as published: Glickman, "Example of the Glicko-2 system" (2013).
 """
@@ -23,11 +24,10 @@ START_VOL = 0.06
 BOT_RD = 60.0           # a seeded bot's uncertainty: it moves, slowly
 UNMEASURED_RD = 110.0   # a bot on its level's rating, its deck not measured with today's cards (web/pool.py): it counts for less and moves faster
 PROVISIONAL = 10        # games before the "?" goes
-MATCH_WINDOW = 75.0     # how far from a person's rating a bot opponent is drawn (web/server.join_ranked)
+MATCH_WINDOW = 75.0     # how far from a rating a bot opponent is drawn (nearest_bot)
 RECENT_DECKS = 4        # the decks of a person's last bot games are not offered again (variety)
 # A bot is named by the band its own rating sits in, never by its level ("Control (Expert Bot)"; Martin, 2026-10-20), and
-# the leaderboard lists the bots one row per level and deck. A person's row shows the rating alone: a band word beside a
-# rating is noise (Martin).
+# the leaderboard lists the bots one row per level and deck. A person is never given a band word.
 RUNGS = (("Beginner", 0), ("Intermediate", 1300), ("Advanced", 1500), ("Expert", 1700), ("Legendary", 1900))   # name, floor
 
 

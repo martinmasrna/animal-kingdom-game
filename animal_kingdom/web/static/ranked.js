@@ -23,12 +23,18 @@ export function rankedHome({ me, decks, chosen, cards, picking }) {
     ${lg ? `<a class="rkstand" id="rkstand" href="#/ladder">${standing(lg)}${me.rank ? `<span class="rkplace">#${me.rank}</span>` : ''}</a>` : ''}</div>`;
 }
 
-// Start a ranked match with `deck` (a deck spec): the server answers with the match, at once.
+// Start a ranked match with `deck` (a deck spec): the server answers with the match, at once. One at a time: a second
+// click while the first is on its way starts nothing.
+let starting = false;
 export async function playRanked({ api, toast, deck, enter }) {
   if (!deck) return toast('Build a legal deck in the Collection first: 25 cards and a leader');
-  const r = await api('/api/ranked', { method: 'POST', body: JSON.stringify({ deck }) });
-  if (!r.ok) return toast(await r.text());
-  enter(await r.json());
+  if (starting) return;
+  starting = true;
+  try {
+    const r = await api('/api/ranked', { method: 'POST', body: JSON.stringify({ deck }) });
+    if (!r.ok) return toast(await r.text());
+    enter(await r.json());
+  } finally { starting = false; }
 }
 
 // The leaderboard: everyone on the ladder, best first. A bot's row is its deck's leader, its name and its rating; a

@@ -1,5 +1,5 @@
 {
- "version": "2026-11-23 39f85686",
+ "version": "2026-11-23 6c628abb",
  "map": "map_sq16",
  "games": 1800,
  "levels": {
@@ -27,43 +27,43 @@
  "ratings": {
   "bot:1:control": {
    "rating": 1233.8,
-   "with": "79c604e3f666"
+   "with": "b1729c9f09de"
   },
   "bot:2:control": {
    "rating": 1435.5,
-   "with": "def7fc477e18"
+   "with": "2220f9c0bebc"
   },
   "bot:3:control": {
    "rating": 1615.5,
-   "with": "9cd7e7bb8918"
+   "with": "af510c774d0f"
   },
   "bot:4:control": {
    "rating": 1601.9,
-   "with": "ae328a6195d8"
+   "with": "3214cb66983d"
   },
   "bot:5:control": {
    "rating": 1732.7,
-   "with": "a9803b39bdd0"
+   "with": "eeffb3f43598"
   },
   "bot:1:combo_token": {
    "rating": 1312.0,
-   "with": "6d135472b1cb"
+   "with": "0e1525ae9202"
   },
   "bot:2:combo_token": {
    "rating": 1312.0,
-   "with": "6b6b6afaf90c"
+   "with": "07f0c4968926"
   },
   "bot:3:combo_token": {
    "rating": 1395.2,
-   "with": "a096a1332305"
+   "with": "34b94b95fdd9"
   },
   "bot:4:combo_token": {
    "rating": 1631.5,
-   "with": "319569479fbc"
+   "with": "cc4e7c981054"
   },
   "bot:5:combo_token": {
    "rating": 1730.0,
-   "with": "abcf0b119e0e"
+   "with": "037f3d26f889"
   }
  }
 }

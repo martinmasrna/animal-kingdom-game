@@ -560,13 +560,8 @@ async def join_ranked(req):
     bid = bid or ladder.nearest_bot(r if lg == tiers_mod.TOP else tiers_mod.par(lg) + 50, random, avoid=avoid)
     level, bot_deck = ranking.parse_bot(bid)
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
-    you = Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"])
-    # the match states both sides as they stand going in: your league (the number only in the top league), the bot's rating
-    mine = league_of(p["id"])
-    you.league, you.rating = mine["label"], mine["rating"] if mine["top"] else None
-    match = Match(mid, you)
-    match.join(Seat(secrets.token_urlsafe(12), ladder_name(bid), bot=True, deck=bot_deck, level=level, ladder=bid,
-                    rating=ladder.get(bid).shown()))
+    match = Match(mid, Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"]))
+    match.join(Seat(secrets.token_urlsafe(12), ladder_name(bid), bot=True, deck=bot_deck, level=level, ladder=bid))
     _open(match)
     return web.json_response({"id": mid, "token": token, "seat": "A"})
 
@@ -1041,7 +1036,7 @@ def make_app() -> web.Application:
         ladder = ranking.Ladder(profiles.db, [d["slug"] for d in decks])
         rows = bot_pool.ratings(decks)
         fresh = ladder.set_bots(rows)
-        unmeasured = sorted(lid for lid, row in rows.items() if ":level:" in row[2])
+        unmeasured = sorted(lid for lid, row in rows.items() if row[1] == ranking.UNMEASURED_RD)
         log.info("the ladder: %d decks, %d bots, %d set from the seed", len(decks), len(rows), len(fresh))
         if unmeasured:   # after a card change, or on another map than the seed's
             log.info("%d bots stand on their level's rating, not measured with what they play with now (tools/ladder/seed.py measures them): %s",
