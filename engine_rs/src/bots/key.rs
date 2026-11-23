@@ -8,8 +8,7 @@
 //! tiles were taken in (read only to order removals at 0 strength) and the count of actions applied (read only by the
 //! 30-action cap). A position with something still resolving is keyed exactly, ids and order included.
 
-use std::fmt::Write;
-use std::hash::BuildHasherDefault;
+use std::hash::{BuildHasherDefault, Hash};
 
 use crate::data::*;
 use crate::state::{State, Unit};
@@ -38,16 +37,55 @@ impl Hasher {
     }
 }
 
-impl Write for Hasher {
-    fn write_str(&mut self, s: &str) -> std::fmt::Result {
-        for chunk in s.as_bytes().chunks(8) {
+/// The steps still resolving, the choice waited on and the timers are hashed field by field (`#[derive(Hash)]`), each
+/// integer folded in as one value.
+impl std::hash::Hasher for Hasher {
+    #[inline]
+    fn write(&mut self, bytes: &[u8]) {
+        self.write_bytes(bytes);
+    }
+    #[inline]
+    fn write_u8(&mut self, v: u8) {
+        self.add(v as u64 | 1 << 62);
+    }
+    #[inline]
+    fn write_u16(&mut self, v: u16) {
+        self.add(v as u64 | 2 << 60);
+    }
+    #[inline]
+    fn write_u32(&mut self, v: u32) {
+        self.add(v as u64 | 3 << 58);
+    }
+    #[inline]
+    fn write_u64(&mut self, v: u64) {
+        self.add(v);
+    }
+    #[inline]
+    fn write_usize(&mut self, v: usize) {
+        self.add(v as u64 ^ 0x5A5A_0000_0000_0000);
+    }
+    #[inline]
+    fn write_i32(&mut self, v: i32) {
+        self.write_u32(v as u32);
+    }
+    #[inline]
+    fn write_isize(&mut self, v: isize) {
+        self.write_usize(v as usize);
+    }
+    fn finish(&self) -> u64 {
+        Hasher::finish(self)
+    }
+}
+
+impl Hasher {
+    fn write_bytes(&mut self, bytes: &[u8]) {
+        for chunk in bytes.chunks(8) {
             let mut v = 0u64;
             for (i, &b) in chunk.iter().enumerate() {
                 v |= (b as u64) << (8 * i);
             }
             self.add(v ^ ((chunk.len() as u64) << 60));
         }
-        Ok(())
     }
 }
 
@@ -65,10 +103,11 @@ pub fn position_key(st: &State, me: Player, hidden: bool) -> u64 {
     let mut h = Hasher(0x5EED);
     let quiet = st.pending.is_none() && st.effect_stack.is_empty();
     let n = st.g.map.n_tiles() as Tile;
-    for t in 0..n {
-        if let Some(u) = st.board.top(t) {
-            h.add((t as u64) << 56 ^ unit_bits(&u));
-        }
+    let mut occ = st.board.occ;
+    while occ != 0 {
+        let t = occ.trailing_zeros() as Tile;
+        occ &= occ - 1;
+        h.add((t as u64) << 56 ^ unit_bits(&st.board.top(t).unwrap()));
     }
     if st.board.has_buried() {
         let mut sum = 0u64;
@@ -93,8 +132,13 @@ pub fn position_key(st: &State, me: Player, hidden: bool) -> u64 {
         let deck = &st.decks[p as usize];
         h.add(deck.len() as u64);
         if mine && hidden {
-            for &c in deck.iter() {
-                h.add(c as u64);
+            // the order matters: four cards a fold (the length is keyed above)
+            for chunk in deck.chunks(4) {
+                let mut v = 0u64;
+                for (i, &c) in chunk.iter().enumerate() {
+                    v |= (c as u64) << (16 * i);
+                }
+                h.add(v);
             }
         }
         h.add(st.food[p as usize] as u32 as u64);
@@ -130,7 +174,9 @@ pub fn position_key(st: &State, me: Player, hidden: bool) -> u64 {
         for u in &st.hands[me as usize] {
             h.add(u.iid as u32 as u64);
         }
-        let _ = write!(h, "{:?}{:?}{:?}", st.effect_stack, st.pending, st.scheduled);
+        st.effect_stack.hash(&mut h);
+        st.pending.hash(&mut h);
+        st.scheduled.hash(&mut h);
         h.add(st.next_iid as u32 as u64);
     }
     h.finish()

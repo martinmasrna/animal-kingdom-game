@@ -370,6 +370,12 @@ impl GameMap {
     pub fn n_tiles(&self) -> usize {
         self.tiles.len()
     }
+
+    /// Every tile, as bits.
+    #[inline]
+    pub fn all_tiles(&self) -> u64 {
+        if self.tiles.len() >= 64 { u64::MAX } else { (1u64 << self.tiles.len()) - 1 }
+    }
 }
 
 macro_rules! config {

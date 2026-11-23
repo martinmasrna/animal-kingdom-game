@@ -119,23 +119,34 @@ pub fn legal_placements(st: &State, player: Player, left: i32, out: &mut Vec<Act
     let enemy = other(player);
     let reach_den = st.g.map.hq_front[enemy as usize] & occ != 0;
     let connectable = st.connectable(player, occ);
-    let n_tiles = st.g.map.n_tiles() as Tile;
+    let all = st.g.map.all_tiles();
     let hand = &st.hands[player as usize];
-    let mut ids: SmallVec<[CardId; 12]> = hand.iter().map(|u| u.card).collect();
-    ids.sort_unstable();
-    ids.dedup();
-    for card in ids {
-        let placer = hand[playable_copy(st, player, card).unwrap()];
-        if unit_cost(st, &placer) > left {
+    // each distinct card with the copy a placement plays (`playable_copy`: the cheapest, the first of those), in id order
+    let mut copies: SmallVec<[(CardId, i32, usize); 12]> = SmallVec::new();
+    for (i, u) in hand.iter().enumerate() {
+        let cost = unit_cost(st, u);
+        match copies.iter_mut().find(|c| c.0 == u.card) {
+            Some(c) => {
+                if cost < c.1 {
+                    *c = (u.card, cost, i);
+                }
+            }
+            None => copies.push((u.card, cost, i)),
+        }
+    }
+    copies.sort_unstable_by_key(|c| c.0);
+    for (card, cost, i) in copies {
+        let placer = hand[i];
+        if cost > left {
             continue;
         }
         let c = st.card(card);
         let (hungry, flight) = (c.has(HUNGRY), c.has(FLIGHT));
         let strength = effective_strength(st, &placer);
-        for t in 0..n_tiles {
-            if !(flight || connectable >> t & 1 == 1) {
-                continue;
-            }
+        let mut tiles = if flight { all } else { connectable & all };
+        while tiles != 0 {
+            let t = tiles.trailing_zeros() as Tile;
+            tiles &= tiles - 1;
             let ok = match st.board.top(t) {
                 None => !hungry,
                 Some(top) if top.owner == player => !hungry,
@@ -482,6 +493,17 @@ pub fn resolve(st: &mut State) -> Result<(), String> {
 
 /// The rule: an animal at 0 strength is removed, by the rules, so Armor doesn't hold. Whether any was.
 fn remove_the_weak(st: &mut State) -> bool {
+    // nearly always none is: say so without listing the board in order
+    let mut m = st.board.occ;
+    let mut any = false;
+    while m != 0 && !any {
+        let t = m.trailing_zeros() as Tile;
+        m &= m - 1;
+        any = effective_strength(st, &st.board.top(t).unwrap()) <= 0;
+    }
+    if !any && !st.board.buried_units().any(|u| effective_strength(st, u) <= 0) {
+        return false;
+    }
     let weak: SmallVec<[(Tile, i32); 4]> = st.board.units().iter().filter(|(_, u)| effective_strength(st, u) <= 0).map(|(t, u)| (*t, u.iid)).collect();
     for &(cr, iid) in &weak {
         remove_specific(st, cr, iid, None, false);

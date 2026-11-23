@@ -10,7 +10,7 @@ use crate::events::{Ev, Events};
 use crate::rng::{CowRng, PyRandom};
 
 /// One card instance: the same instance moves from hand to board.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Unit {
     pub card: CardId,
     pub owner: Player,
@@ -53,6 +53,41 @@ impl Clone for Board {
     #[inline]
     fn clone(&self) -> Board {
         Board { tops: self.tops, occ: self.occ, own: self.own, order: self.order, n_order: self.n_order, buried: SmallVec::from_slice(&self.buried) }
+    }
+
+    /// Into a board already made: the taken order and the list beneath only as long as they are.
+    #[inline]
+    fn clone_from(&mut self, src: &Board) {
+        // a top is read only while its tile is occupied: the slots past the highest occupied tile need no copy
+        let k = 64 - src.occ.leading_zeros() as usize;
+        if k <= 16 {
+            // a fixed-size copy, done inline: the square board's every tile, and most positions of larger ones
+            self.tops[..16].copy_from_slice(&src.tops[..16]);
+        } else {
+            self.tops[..k].copy_from_slice(&src.tops[..k]);
+        }
+        self.occ = src.occ;
+        self.own = src.own;
+        let n = src.n_order as usize;
+        self.order[..n].copy_from_slice(&src.order[..n]);
+        self.n_order = src.n_order;
+        copy_list(&mut self.buried, &src.buried);
+    }
+}
+
+/// `dst` made equal to `src`, copying only the items it holds and keeping `dst`'s own buffer.
+#[inline]
+fn copy_list<A: smallvec::Array>(dst: &mut SmallVec<A>, src: &SmallVec<A>)
+where
+    A::Item: Copy,
+{
+    let n = src.len();
+    dst.clear();
+    dst.reserve(n);
+    // SAFETY: `dst` holds room for `n` items after the reserve, the two lists are distinct, and the items are Copy.
+    unsafe {
+        std::ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), n);
+        dst.set_len(n);
     }
 }
 
@@ -105,6 +140,12 @@ impl Board {
     #[inline]
     pub fn has_buried(&self) -> bool {
         !self.buried.is_empty()
+    }
+
+    /// Every unit beneath a top, in no particular order.
+    #[inline]
+    pub fn buried_units(&self) -> impl Iterator<Item = &Unit> {
+        self.buried.iter().map(|(_, u)| u)
     }
 
     /// The units beneath the top of `t`, bottom first.
@@ -195,7 +236,7 @@ impl Board {
 }
 
 /// A choice a player makes while an effect resolves, as an action carries it.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Choice {
     /// Decline an optional choice ("__skip__").
     Skip,
@@ -208,7 +249,7 @@ pub enum Choice {
 
 pub type Tiles = SmallVec<[Tile; 6]>;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum StepKind {
     Mulligan { player: Player, returned: SmallVec<[CardId; 4]> },
     CoverRemove { cr: Tile },
@@ -225,7 +266,7 @@ pub enum StepKind {
 }
 
 /// One step of an effect waiting on the stack. `by_card` and `by_iid` name the card and the very unit whose effect it is.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Step {
     pub by_card: Option<CardId>,
     pub by_iid: Option<i32>,
@@ -247,7 +288,7 @@ impl Step {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Options {
     Iids(SmallVec<[i32; 12]>),
     Tiles(Tiles),
@@ -256,7 +297,7 @@ pub enum Options {
 }
 
 /// The choice the game waits on.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Pending {
     pub chooser: Player,
     pub optional: bool,
@@ -265,7 +306,7 @@ pub struct Pending {
 }
 
 /// A delayed step: Poison's removal, at the start of its owner's next turn.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Scheduled {
     pub iid: i32,
     pub owner: Player,
@@ -421,6 +462,57 @@ impl Clone for State {
             cause: self.cause,
             cause_iid: self.cause_iid,
         }
+    }
+
+    /// Into a position already made, the same as a fresh clone: what a search does for every line it follows, reusing
+    /// one position's memory for the next. Lists copy only what they hold, and a shared part (the game, the starting
+    /// decks, the generator) is not touched when both already share it.
+    fn clone_from(&mut self, src: &State) {
+        if !Arc::ptr_eq(&self.g, &src.g) {
+            self.g = src.g.clone();
+        }
+        self.board.clone_from(&src.board);
+        for p in 0..2 {
+            copy_list(&mut self.hands[p], &src.hands[p]);
+            copy_list(&mut self.decks[p], &src.decks[p]);
+        }
+        if !Arc::ptr_eq(&self.starting_decks, &src.starting_decks) {
+            self.starting_decks = src.starting_decks.clone();
+        }
+        copy_list(&mut self.remove_pile, &src.remove_pile);
+        copy_list(&mut self.pile_owners, &src.pile_owners);
+        self.leaders = src.leaders;
+        self.food = src.food;
+        self.current = src.current;
+        self.first_player = src.first_player;
+        self.rng.clone_from(&src.rng);
+        self.turn_counter = src.turn_counter;
+        self.mana_spent = src.mana_spent;
+        self.applied_this_turn = src.applied_this_turn;
+        self.played_this_turn = src.played_this_turn;
+        self.power_used = src.power_used;
+        self.power_discount = src.power_discount;
+        self.fatigue = src.fatigue;
+        self.food_lost = src.food_lost;
+        self.effect_steps_this_turn = src.effect_steps_this_turn;
+        if !(self.caps.is_empty() && src.caps.is_empty()) {
+            self.caps.clone_from(&src.caps);
+        }
+        self.next_iid = src.next_iid;
+        if !(self.effect_stack.is_empty() && src.effect_stack.is_empty()) {
+            self.effect_stack.clone_from(&src.effect_stack);
+        }
+        if self.pending.is_some() || src.pending.is_some() {
+            self.pending.clone_from(&src.pending);
+        }
+        if !(self.scheduled.is_empty() && src.scheduled.is_empty()) {
+            self.scheduled.clone_from(&src.scheduled);
+        }
+        self.result = src.result;
+        self.events.on = src.events.on; // a clone starts with no events on record
+        self.events.list.clear();
+        self.cause = src.cause;
+        self.cause_iid = src.cause_iid;
     }
 }
 

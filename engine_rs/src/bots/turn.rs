@@ -288,6 +288,10 @@ struct WorldSearch {
     positions: u64,
     next_width: usize,
     last_cost: u64,
+    /// Positions the search is done with, whose memory the next line it follows reuses.
+    spare: Vec<Box<State>>,
+    /// The legal actions of the position being followed, in a list reused for each.
+    legal: Vec<Action>,
 }
 
 fn may_pass(st: &State, me: Player) -> bool {
@@ -302,7 +306,13 @@ impl WorldSearch {
         }
         let values = vec![NEG; actions.len()];
         WorldSearch { root, actions, values, line: Vec::new(), line_value: NEG, turns: Vec::new(), hidden: false, exhaustive: false, positions: 0,
-                      next_width: FIRST_WIDTH, last_cost: 0 }
+                      next_width: FIRST_WIDTH, last_cost: 0, spare: Vec::new(), legal: Vec::new() }
+    }
+
+    /// A copy of `st`, in the memory of a position the search is done with when there is one.
+    #[inline]
+    fn copy(&mut self, st: &State) -> Box<State> {
+        copy_into(&mut self.spare, st)
     }
 
     /// Widen pass by pass until one follows everything, the width cap is reached, or the next pass would not fit under
@@ -321,12 +331,14 @@ impl WorldSearch {
 
     /// The value of ending the turn at the quiet position `st`.
     fn pass_value(&mut self, ctx: &Ctx, st: &State) -> f32 {
-        let mut p = st.clone();
+        let mut p = self.copy(st);
         self.positions += 1;
-        match rules::apply_action(&mut p, &Action::Pass, false) {
+        let v = match rules::apply_action(&mut p, &Action::Pass, false) {
             Ok(()) => ctx.eval(&p),
             Err(_) => NEG,
-        }
+        };
+        self.spare.push(p);
+        v
     }
 
     fn pass(&mut self, ctx: &Ctx, width: usize, limit: u64) {
@@ -344,35 +356,39 @@ impl WorldSearch {
             top.keep(ctx.per_set(), 0, (root_best, 0, 0, None));
         }
         metas.push(vec![Meta::new(root_best, u32::MAX, Action::Pass, 0)]);
-        let mut cur: Vec<Option<State>> = vec![Some(root)];
+        // boxed: a layer's positions are moved and its list grown without copying the positions themselves
+        let mut cur: Vec<Option<Box<State>>> = vec![Some(Box::new(root))];
 
         loop {
             let depth = metas.len() - 1;
-            let mut next_states: Vec<Option<State>> = Vec::new();
+            let mut next_states: Vec<Option<Box<State>>> = Vec::new();
             let mut next_metas: Vec<Meta> = Vec::new();
             let mut ranks: Vec<f32> = Vec::new();
             let mut index: KeyMap<u32> = KeyMap::default();
             let mut layer_edges: Vec<Edge> = Vec::new();
             let mut live = 0usize;
             for i in 0..cur.len() {
-                let Some(st) = cur[i].take() else { continue };
+                let Some(st) = cur[i].as_deref() else { continue };
                 if depth > 0 && self.positions >= limit {
                     // out of budget: the turn ends here in this pass (a position with a choice waiting is scored as it stands)
                     truncated = true;
                     if metas[depth][i].best == NEG {
-                        metas[depth][i].best = ctx.eval(&st);
+                        metas[depth][i].best = ctx.eval(st);
                     }
                     continue;
                 }
                 let e0 = layer_edges.len() as u32;
                 let deck = st.decks[me as usize].len();
                 let plays = metas[depth][i].plays;
-                for a in rules::legal_actions(&st) {
+                let mut legal = std::mem::take(&mut self.legal);
+                rules::legal_actions_into(st, &mut legal);
+                for &a in &legal {
                     if a == Action::Pass {
                         continue;
                     }
-                    let mut c = st.clone();
+                    let mut c = self.copy(st);
                     if rules::apply_action(&mut c, &a, false).is_err() {
+                        self.spare.push(c);
                         continue;
                     }
                     self.positions += 1;
@@ -383,11 +399,15 @@ impl WorldSearch {
                         let v = ctx.eval(&c);
                         top.keep(ctx.per_set(), ctx.set_of(played(plays, &a)), (v, depth as u32, i as u32, Some(a)));
                         layer_edges.push(Edge { action: a, child: LEAF, value: v });
+                        self.spare.push(c);
                         continue;
                     }
                     let key = position_key(&c, me, true);
                     let child = match index.get(&key) {
-                        Some(&at) => at,
+                        Some(&at) => {
+                            self.spare.push(c);
+                            at
+                        }
                         None => {
                             let at = next_metas.len() as u32;
                             let quiet = c.pending.is_none() && c.effect_stack.is_empty();
@@ -411,10 +431,11 @@ impl WorldSearch {
                     };
                     layer_edges.push(Edge { action: a, child, value: 0.0 });
                 }
+                self.legal = legal;
                 metas[depth][i].e0 = e0;
                 metas[depth][i].e1 = layer_edges.len() as u32;
                 if live > 2 * width {
-                    live = keep_best(&mut next_states, &ranks, width);
+                    live = keep_best(&mut next_states, &ranks, width, &mut self.spare);
                     cut = true;
                 }
             }
@@ -423,12 +444,14 @@ impl WorldSearch {
                 break;
             }
             if live > width {
-                keep_best(&mut next_states, &ranks, width);
+                keep_best(&mut next_states, &ranks, width, &mut self.spare);
                 cut = true;
             }
             metas.push(next_metas);
+            self.spare.extend(cur.drain(..).flatten());
             cur = next_states;
         }
+        self.spare.extend(cur.drain(..).flatten());
 
         // each position takes the best finished turn below it
         for d in (0..metas.len()).rev() {
@@ -510,17 +533,30 @@ impl WorldSearch {
 
 /// Drop all but the `width` best-ranked positions still to follow; a position with a choice waiting (rank infinite) is
 /// kept. How many ranked positions are left.
-fn keep_best(states: &mut [Option<State>], ranks: &[f32], width: usize) -> usize {
+fn keep_best(states: &mut [Option<Box<State>>], ranks: &[f32], width: usize, spare: &mut Vec<Box<State>>) -> usize {
     let mut live: Vec<(f32, usize)> = states.iter().enumerate()
         .filter(|(i, s)| s.is_some() && ranks[*i].is_finite()).map(|(i, _)| (ranks[i], i)).collect();
     if live.len() <= width {
         return live.len();
     }
-    live.sort_unstable_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal).then(a.1.cmp(&b.1)));
+    // the order is total (ties go to the earlier position), so selecting the best `width` keeps what a full sort would
+    live.select_nth_unstable_by(width, |a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal).then(a.1.cmp(&b.1)));
     for &(_, i) in &live[width..] {
-        states[i] = None;
+        spare.extend(states[i].take());
     }
     width
+}
+
+/// A copy of `st`, in the memory of a spare position when there is one.
+#[inline]
+fn copy_into(spare: &mut Vec<Box<State>>, st: &State) -> Box<State> {
+    match spare.pop() {
+        Some(mut b) => {
+            (*b).clone_from(st);
+            b
+        }
+        None => Box::new(st.clone()),
+    }
 }
 
 /// What a search for a win found.
@@ -543,7 +579,8 @@ pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
     use std::cmp::Reverse;
     use std::collections::BinaryHeap;
     struct Node {
-        st: State,
+        /// Taken when the node is followed: nothing reads it after.
+        st: Option<Box<State>>,
         parent: u32,
         action: Action,
     }
@@ -588,14 +625,15 @@ pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
         line.reverse();
         line
     };
-    let mut nodes: Vec<Node> = vec![Node { st: root.clone(), parent: 0, action: Action::Pass }];
+    let mut nodes: Vec<Node> = vec![Node { st: Some(Box::new(root.clone())), parent: 0, action: Action::Pass }];
     let mut seen: KeySet = KeySet::default();
     seen.insert(position_key(root, me, true));
     // the closest first; among equals the earliest made
     let mut open: BinaryHeap<(i32, Reverse<u32>)> = BinaryHeap::new();
+    let mut spare: Vec<Box<State>> = Vec::new();
     open.push((near(root), Reverse(0)));
     while let Some((_, Reverse(at))) = open.pop() {
-        let st = nodes[at as usize].st.clone();
+        let st = nodes[at as usize].st.take().expect("a node is followed once");
         let deck = st.decks[me as usize].len();
         // ending the turn first: where the regions' food wins it, that is the whole search
         let mut actions: Vec<Action> = Vec::new();
@@ -607,8 +645,9 @@ pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
             if out.positions >= limit {
                 return out;
             }
-            let mut c = st.clone();
+            let mut c = copy_into(&mut spare, &st);
             if rules::apply_action(&mut c, &a, false).is_err() {
+                spare.push(c);
                 continue;
             }
             out.positions += 1;
@@ -617,22 +656,28 @@ pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
                     out.line = Some(line_of(&nodes, at, a));
                     return out;
                 }
+                spare.push(c);
                 continue;
             }
             if c.player_to_act() != me || c.current != root_current {
+                spare.push(c);
                 continue; // the turn ended without the win
             }
             if c.decks[me as usize].len() != deck || matches!(&c.pending, Some(p) if matches!(p.options, Options::Deck(_))) {
+                spare.push(c);
                 continue; // a card drawn or looked at: hidden
             }
-            if seen.insert(position_key(&c, me, true)) {
+            if !seen.insert(position_key(&c, me, true)) {
+                spare.push(c);
+            } else {
                 let at_new = nodes.len() as u32;
                 // a choice waiting is half a play: followed at once, so the play is ranked by where its choices land
                 let rank = if c.pending.is_some() { i32::MAX } else { near(&c) };
                 open.push((rank, Reverse(at_new)));
-                nodes.push(Node { st: c, parent: at, action: a });
+                nodes.push(Node { st: Some(c), parent: at, action: a });
             }
         }
+        spare.push(st);
     }
     out.complete = true;
     out

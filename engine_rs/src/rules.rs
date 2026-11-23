@@ -16,8 +16,15 @@ use crate::state::*;
 /// says so). Empty once the game is over.
 pub fn legal_actions(st: &State) -> Vec<Action> {
     let mut out = Vec::new();
+    legal_actions_into(st, &mut out);
+    out
+}
+
+/// The same, into `out` (cleared first): a search reuses one list for every position it follows.
+pub fn legal_actions_into(st: &State, out: &mut Vec<Action>) {
+    out.clear();
     if is_terminal(st).is_some() {
-        return out;
+        return;
     }
     if let Some(p) = &st.pending {
         match &p.options {
@@ -28,13 +35,12 @@ pub fn legal_actions(st: &State) -> Vec<Action> {
         if p.optional {
             out.push(Action::Choice(Choice::Skip));
         }
-        return out;
+        return;
     }
-    plays(st, st.current, &mut out);
+    plays(st, st.current, out);
     if out.is_empty() {
         out.push(Action::Pass);
     }
-    out
 }
 
 /// Ending the turn is legal whenever nothing is resolving.
@@ -210,7 +216,14 @@ fn end_turn(st: &mut State) -> Result<(), String> {
 /// "Your regions produce 1 more food." (the Elf's) is theirs on the board.
 pub fn region_income(st: &State, player: Player) -> i32 {
     let own = st.board.own[player as usize];
-    if own == 0 {
+    let (mut food, mut held) = (0, 0);
+    for r in &st.g.map.regions {
+        if r.mask & own == r.mask {
+            food += r.food;
+            held += 1;
+        }
+    }
+    if held == 0 {
         return 0;
     }
     let mut bonus = 0;
@@ -223,7 +236,7 @@ pub fn region_income(st: &State, player: Player) -> i32 {
             break;
         }
     }
-    st.g.map.regions.iter().filter(|r| r.mask & own == r.mask).map(|r| r.food + bonus).sum()
+    food + bonus * held
 }
 
 /// The game's result if it is over (the turn limit ends it on food).

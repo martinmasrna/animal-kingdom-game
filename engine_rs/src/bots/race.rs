@@ -13,7 +13,7 @@
 
 use std::sync::OnceLock;
 
-use crate::bots::eval::{hand_raid, RaidOdds, WIN};
+use crate::bots::eval::{hand_raid_from, RaidOdds, WIN};
 use crate::data::*;
 use crate::effects;
 use crate::rules;
@@ -140,7 +140,8 @@ impl Default for RaceWeights {
 
 /// What a side's next turn can put on a tile: the chance it holds a card it can pay for that is stronger than s (`g`
 /// any such card, `f` one that flies and so lands anywhere), and one that may take an empty tile.
-struct Cover {
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct Cover {
     g: [f32; MAX_S],
     f: [f32; MAX_S],
     any_g: f32,
@@ -171,9 +172,20 @@ fn cover_of_hand(st: &State, player: Player, mana: i32) -> Cover {
     cov
 }
 
-/// From the hands the opponent may hold (`odds`), with `mana`, when they will hold `cards`.
+/// From the hands the opponent may hold (`odds`), with `mana`, when they will hold `cards`. The same few are asked for
+/// all through a search, so each is worked out once (`RaidOdds::covers`).
 fn cover_of_odds(odds: &RaidOdds, mana: i32, cards: f32) -> Cover {
     let m = mana.clamp(0, MAX_M as i32 - 1) as usize;
+    let key = (m as u32, cards.to_bits());
+    if let Some(c) = odds.covers.borrow().iter().find(|c| c.0 == key) {
+        return c.1;
+    }
+    let cov = cover_of_odds_now(odds, m, cards);
+    odds.covers.borrow_mut().push((key, cov));
+    cov
+}
+
+fn cover_of_odds_now(odds: &RaidOdds, m: usize, cards: f32) -> Cover {
     let mut cov = Cover { g: odds.cover_g[m], f: odds.cover_f[m], any_g: odds.any_g[m], any_f: odds.any_f[m] };
     if odds.cards > 0.0 && (cards - odds.cards).abs() > 0.5 {
         // the odds were counted over hands of another size: one card in `odds.cards` misses with the same chance
@@ -189,6 +201,11 @@ fn cover_of_odds(odds: &RaidOdds, mana: i32, cards: f32) -> Cover {
 /// The position as numbers, from the side that has just moved (M, the one not to move) against the side to move (N).
 /// `me` is the seat reading it: its own hand it reads as held, the opponent's through `odds`.
 pub fn features(st: &State, me: Player, odds: &RaidOdds) -> [f32; N_FEAT] {
+    features_inc(st, me, odds).0
+}
+
+/// The numbers, and N's regions' pay (which `evaluate` reads again).
+fn features_inc(st: &State, me: Player, odds: &RaidOdds) -> ([f32; N_FEAT], i32) {
     let mut x = [0.0f32; N_FEAT];
     let n = st.current;
     let m = other(n);
@@ -196,10 +213,11 @@ pub fn features(st: &State, me: Player, odds: &RaidOdds) -> [f32; N_FEAT] {
     let map = &st.g.map;
     let win = map.win_food as f32;
     let food = [st.food[m as usize] as f32, st.food[n as usize] as f32];
-    let inc = [rules::region_income(st, m) as f32, rules::region_income(st, n) as f32];
+    let inc_n = rules::region_income(st, n);
+    let inc = [rules::region_income(st, m) as f32, inc_n as f32];
     let own = [st.board.own[m as usize], st.board.own[n as usize]];
     let occ = st.board.occ;
-    let n_tiles = map.n_tiles();
+    let all = map.all_tiles();
 
     // the animals
     let mut strength_at = [0u8; MAX_TILES];
@@ -275,11 +293,11 @@ pub fn features(st: &State, me: Player, odds: &RaidOdds) -> [f32; N_FEAT] {
                 list[i] = v;
             }
         };
-        for t in 0..n_tiles {
+        let mut ts = !own[a] & all;
+        while ts != 0 {
+            let t = ts.trailing_zeros() as usize;
+            ts &= ts - 1;
             let bit = 1u64 << t;
-            if own[a] & bit != 0 {
-                continue;
-            }
             let ground = reach[a] & bit != 0;
             let (v, mine) = if occ & bit == 0 {
                 let p = if ground { cov.any_g } else { cov.any_f };
@@ -305,7 +323,7 @@ pub fn features(st: &State, me: Player, odds: &RaidOdds) -> [f32; N_FEAT] {
         let d = 1 - a;
         let through = map.hq_front[pl[d] as usize] & conn[a] != 0;
         if pl[a] == me {
-            let v = hand_raid(st, me, mana[a]) as f32;
+            let v = hand_raid_from(st, me, mana[a], conn[a]) as f32;
             raid[a] = v.min(food[d]);
             lethal[a] = (v >= food[d]) as u8 as f32;
         } else {
@@ -357,7 +375,7 @@ pub fn features(st: &State, me: Player, odds: &RaidOdds) -> [f32; N_FEAT] {
     x[F::cut_off as usize] = cut(0) - cut(1);
     x[F::bodies_race as usize] = (bodies[0] - bodies[1]) * turns_left;
     x[F::strength_race as usize] = (strength[0] - strength[1]) * turns_left;
-    x
+    (x, inc_n)
 }
 
 /// Is the position one the weights do not score: over, or N's regions pay it to the winning food as it stands?
@@ -376,13 +394,13 @@ pub fn evaluate(st: &State, me: Player, w: &RaceWeights, odds: &RaidOdds) -> f32
     }
     let n = st.current;
     let m = other(n);
-    let x = features(st, me, odds);
+    let (x, inc_n) = features_inc(st, me, odds);
     let mut e = 0.0f32;
     for i in 0..N_FEAT {
         e += w.w[i] * x[i];
     }
     // N's regions pay it over the line when it ends the turn
-    if st.food[n as usize] + rules::region_income(st, n) >= st.g.map.win_food {
+    if st.food[n as usize] + inc_n >= st.g.map.win_food {
         e -= if n == me { 0.9 * WIN } else { w.their_win };
     }
     // fatigue: M draws at the start of its next turn, and an empty deck takes food instead

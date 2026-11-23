@@ -14,10 +14,14 @@ use crate::rules;
 use crate::state::{Options, State};
 
 fn game() -> Arc<Game> {
+    game_on("map_hex19")
+}
+
+fn game_on(map_id: &str) -> Arc<Game> {
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("..").join("animal_kingdom").join("data");
     let read = |name: &str| -> serde_json::Value { serde_json::from_slice(&std::fs::read(dir.join(name)).unwrap()).unwrap() };
     let maps = read("maps.json");
-    let map = maps["maps"].as_array().unwrap().iter().find(|m| m["id"] == "map_hex19").unwrap();
+    let map = maps["maps"].as_array().unwrap().iter().find(|m| m["id"] == map_id).unwrap();
     Arc::new(Game::new(Cards::from_json(&read(&format!("{}.json", "cards"))).unwrap(), GameMap::from_json(map).unwrap(), Config::default()))
 }
 
@@ -280,4 +284,112 @@ fn a_look_for_a_win_reads_nothing_hidden() {
         }
     }
     assert!(found > 0);
+}
+
+// ------------------------------------------------------------------ the fast paths against what they replaced
+
+/// Positions of random games on both maps, every action legal at random (choices and mid-resolution positions included).
+fn random_positions(games: u64) -> Vec<State> {
+    let mut out = Vec::new();
+    for map in ["map_sq16", "map_hex19"] {
+        let g = game_on(map);
+        let mut rng = PyRandom::seeded_u64(77);
+        for seed in 0..games {
+            let mut st = new_game(&g, 900 + seed);
+            let mut n = 0;
+            while rules::is_terminal(&st).is_none() && n < 400 {
+                out.push(st.clone());
+                let legal = rules::legal_actions(&st);
+                let a = if rules::can_pass(&st) && rng.random() < 0.15 { Action::Pass } else { legal[rng.randbelow(legal.len())] };
+                rules::apply_action(&mut st, &a, true).unwrap();
+                n += 1;
+            }
+        }
+    }
+    out
+}
+
+#[test]
+fn a_copy_into_a_used_position_is_a_fresh_copy() {
+    // `clone_from` (the search reuses a position's memory for the next line) leaves exactly what `clone` makes, whatever
+    // the position held before: compared as saved, by key from both seats, and played on with the same actions.
+    let pos = random_positions(12);
+    let mut used = Box::new(pos[pos.len() / 2].clone());
+    let mut rng = PyRandom::seeded_u64(5);
+    for (i, st) in pos.iter().enumerate() {
+        (*used).clone_from(st);
+        let fresh = st.clone();
+        assert_eq!(used.to_json(), fresh.to_json(), "position {i}");
+        for p in 0..2 {
+            assert_eq!(position_key(&used, p, true), position_key(&fresh, p, true), "position {i}");
+        }
+        let (mut a, mut b) = ((*used).clone(), fresh);
+        for _ in 0..3 {
+            if rules::is_terminal(&a).is_some() {
+                break;
+            }
+            let legal = rules::legal_actions(&a);
+            assert_eq!(legal, rules::legal_actions(&b));
+            let act = legal[rng.randbelow(legal.len())];
+            assert_eq!(rules::apply_action(&mut a, &act, false).is_ok(), rules::apply_action(&mut b, &act, false).is_ok());
+            assert_eq!(a.to_json(), b.to_json(), "position {i} after {act:?}");
+        }
+    }
+}
+
+#[test]
+fn placements_are_listed_as_before() {
+    // The placements are found in one pass over the hand; before, each distinct card asked `playable_copy`. Same list,
+    // same order.
+    use crate::actions::Target;
+    use crate::effects::{effective_strength, playable_copy, unit_cost};
+    fn before(st: &State, player: Player, left: i32) -> Vec<Action> {
+        let mut out = Vec::new();
+        let occ = st.connected_occupied(player);
+        let enemy = other(player);
+        let reach_den = st.g.map.hq_front[enemy as usize] & occ != 0;
+        let connectable = st.connectable(player, occ);
+        let hand = &st.hands[player as usize];
+        let mut ids: Vec<CardId> = hand.iter().map(|u| u.card).collect();
+        ids.sort_unstable();
+        ids.dedup();
+        for card in ids {
+            let placer = hand[playable_copy(st, player, card).unwrap()];
+            if unit_cost(st, &placer) > left {
+                continue;
+            }
+            let c = st.card(card);
+            let (hungry, flight) = (c.has(HUNGRY), c.has(FLIGHT));
+            let strength = effective_strength(st, &placer);
+            for t in 0..st.g.map.n_tiles() as Tile {
+                if !(flight || connectable >> t & 1 == 1) {
+                    continue;
+                }
+                let ok = match st.board.top(t) {
+                    None => !hungry,
+                    Some(top) if top.owner == player => !hungry,
+                    Some(top) => strength > effective_strength(st, &top),
+                };
+                if ok {
+                    out.push(Action::Place { card, target: Target::Tile(t) });
+                }
+            }
+            if (reach_den || flight) && !hungry {
+                out.push(Action::Place { card, target: Target::Den(enemy) });
+            }
+        }
+        out
+    }
+    let mut checked = 0;
+    for st in random_positions(12) {
+        for player in 0..2 {
+            for left in [0, 3, rules::mana_left(&st, player), 20] {
+                let mut now = Vec::new();
+                crate::effects::legal_placements(&st, player, left, &mut now);
+                assert_eq!(now, before(&st, player, left));
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 1000);
 }

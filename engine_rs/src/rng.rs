@@ -269,8 +269,23 @@ mod tests {
 /// The state's generator behind a copy-on-write handle: the search clones a position for every line it imagines and
 /// almost none of those lines draw or shuffle, so a clone shares the 2.5 KB Mersenne state and the first mutation
 /// (any `&mut` method through `DerefMut`) copies it. Same numbers, same order, as the bare generator.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct CowRng(std::sync::Arc<PyRandom>);
+
+impl Clone for CowRng {
+    #[inline]
+    fn clone(&self) -> CowRng {
+        CowRng(self.0.clone())
+    }
+
+    /// No reference count is touched when both already share one generator.
+    #[inline]
+    fn clone_from(&mut self, src: &CowRng) {
+        if !std::sync::Arc::ptr_eq(&self.0, &src.0) {
+            self.0 = src.0.clone();
+        }
+    }
+}
 
 impl CowRng {
     pub fn new(r: PyRandom) -> CowRng {

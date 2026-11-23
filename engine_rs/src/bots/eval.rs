@@ -163,6 +163,8 @@ pub struct RaidOdds {
     pub raid_fly: [SmallVec<[i16; 16]>; MAX_M],
     /// How many cards the hands held.
     pub cards: f32,
+    /// What the race evaluation has read from these odds so far, by (mana, cards): its cover odds (`race::Cover`).
+    pub(crate) covers: std::cell::RefCell<SmallVec<[((u32, u32), crate::bots::race::Cover); 4]>>,
 }
 
 impl RaidOdds {
@@ -255,8 +257,13 @@ impl RaidOdds {
 
 /// The food `player`'s own hand could destroy in the enemy den with `mana`, from where the position stands.
 pub fn hand_raid(st: &State, player: Player, mana: i32) -> i32 {
+    hand_raid_from(st, player, mana, st.connected_occupied(player))
+}
+
+/// The same, given `player`'s connected tiles (`State::connected_occupied`).
+pub fn hand_raid_from(st: &State, player: Player, mana: i32, connected: u64) -> i32 {
     let enemy = other(player);
-    let reach = st.g.map.hq_front[enemy as usize] & st.connected_occupied(player) != 0;
+    let reach = st.g.map.hq_front[enemy as usize] & connected != 0;
     let mut items: SmallVec<[(i32, i32); 16]> = SmallVec::new();
     for u in &st.hands[player as usize] {
         if raids(st, u.card, reach) {
