@@ -4,7 +4,7 @@
    stylesheet (collection.css) or below. */
 .mscr { position: fixed; inset: 0; background: #171513 url(/static/kit2/coll_ground.webp) center / cover; color: #d8d4cc; font-family: 'Fira Sans Condensed', sans-serif; }
 .mscr button { font: inherit; }
-html.kb .mscr { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phone's keyboard is up: the screen ends at its top (app.js) */
+html.kb .mscr, html.kb .fbov { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phone's keyboard is up: the screen ends at its top (app.js) */
 
 /* The column: the den's granite, casting a soft shadow on the ground; its foot holds the actions. */
 .mscr .side { display: flex; flex-direction: column; min-height: 0; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: -6px 0 14px rgba(0,0,0,.45); }
@@ -194,6 +194,7 @@ html { touch-action: manipulation; }
 .mscr .dtile.on b { right: 140px; }
 /* Feedback over a phone's keyboard (a short window): the box starts at the top and scrolls. */
 @media (max-height: 500px) { .fbov { align-items: flex-start; overflow-y: auto; padding: 8px 0; } .fbbox textarea.field { height: 90px; } }
+html.kb .fbov { box-sizing: border-box; align-items: flex-start; overflow-y: auto; padding: 8px 0; } html.kb .fbbox textarea.field { height: 90px; }   /* the same with the keyboard up */
 
 /* A phone held sideways: the game plays upright on a phone, so it asks to be turned (index.html). Tablets and computers are wide enough. */
 .turnphone { display: none; }
@@ -284,6 +285,7 @@ html { touch-action: manipulation; }
 @media (max-width: 700px) {
   .chatp, .chatp.inmatch { inset: 0; top: 0; width: auto; height: auto; max-height: none; border-radius: 0; padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
   .chatt { left: 12px; right: 12px !important; max-width: none; }
+  html.kb .chatp { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* the keyboard is up: the conversation ends at its top */
 }
 @media (max-width: 440px) { .home .top .backbtn.lab { width: 48px; padding: 0; } .home .top .backbtn.lab span { display: none; } }   /* a phone: Collection is its icon, as the gear is, so Friends fits */
 .chatopen .ftab { display: none !important; }   /* the panel holds the right edge */

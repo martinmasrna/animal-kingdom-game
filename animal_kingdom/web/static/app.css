@@ -383,6 +383,10 @@ body:has(> #app > .mhome, > #app > .mscr.sets) .ftab { display: flex; }   /* whe
   
    
 .ladder .dlink { margin: 8px 0 14px; }
+/* a deck link on a phone: the list clear of the screen's edges, its two actions thumb-sized slabs */
+@media (max-width: 700px) { .ladder .hbody:has(.dlink) { padding-left: 12px; padding-right: 12px; } .ladder .hbody:has(.dlink) > p { display: flex; gap: 10px; }
+  .ladder .hbody:has(.dlink) > p .slab { height: 44px; padding: 0 18px; display: inline-flex; align-items: center; text-decoration: none; }
+  .ladder .hhead:has(+ .hbody .dlink) .lback { width: 40px; height: 40px; } .ladder .hhead:has(+ .hbody .dlink) .lback::before { left: 16px; top: 14px; } }
 /* Account (app.js accountScreen): name, sign-in with Google or Discord, the sign-in code. */
 .sets .sect { margin-bottom: 22px; }
 .sets .namerow { display: flex; align-items: center; gap: 8px; }
