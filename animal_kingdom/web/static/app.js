@@ -797,25 +797,25 @@ addEventListener('visibilitychange', () => { if (!document.hidden && screen === 
 // The upright screen's measures (stage px; mana.css .game.port): the controls' size (40 CSS px and more on any phone), the
 // opponent's hand left of them along the top edge, and your hand's places along the bottom.
 const PORT_BTN = 80, OPP_PORT = n => { const w = STAGE.w - 32 - n * (PORT_BTN + 8); return { x: 16 + w / 2, w }; };
-// Your hand upright: one straight row of up to seven cards across the stage's width; the eighth to tenth stand in a row
+// Your hand upright: one straight row of up to six cards across the stage's width; the seventh to tenth stand in a row
 // behind it, raised so their tops (both numbers, the creature) show over the row in front (a phone is too narrow for ten
 // cards a thumb can take in one row). The opening hand: its cards large, in a row above the middle.
 // A card shown to be read upright (the opening hand, a choice's cards) is PORT_READ wide, two to a row: its rules at 11 CSS px.
 const PORT_READ = 290;
-const PORT_HAND = { bottom: 1266, span: 688, gap: 10, one: 7, max: 120, lift: .62 };
+const PORT_HAND = { bottom: 1266, span: 688, gap: 10, one: 6, max: 120, lift: .56 };
 function portHand(n, mull) {
   const P = PORT_HAND, mid = STAGE.w / 2;
   if (mull) { const g = 44, cw = PORT_READ, ch = cw * 1.38, rowOf = i => i < 2 ? 0 : 1, inRow = r => Math.min(2, n - 2 * r);
     return { cw, gap: g, at: i => { const r = rowOf(i), k = inRow(r), x0 = mid - (k * cw + (k - 1) * g) / 2;
       return { left: x0 + (i - 2 * r) * (cw + g), top: 400 + r * (ch + 24) }; } }; }
   // The front row holds up to P.one cards and never changes when more arrive (Martin, 2026-11-23: "a fixed amount of card
-  // that fit into one row, say 7, and beyond that the cards go on second row"). The cards past it stand in a row behind,
-  // raised, laid like bricks: each over a gap of the front row, filling from the second gap rightward, so no card moves
+  // that fit into one row, say 7, and beyond that the cards go on second row"; then "maybe it's better to make it 6"). The cards past it stand in a row behind,
+  // raised, laid like bricks: each over a gap of the front row, filling the gaps from the left (the row centred when the hand is full), so no card moves
   // when one more comes.
   const front = Math.min(n, P.one), cw = Math.min(P.max, Math.floor((P.span - (front - 1) * P.gap) / Math.max(1, front))), ch = cw * 1.38, step = cw + P.gap;
   const x0 = mid - (front * step - P.gap) / 2;
   return { cw, gap: P.gap, at: i => { const bk = i >= P.one;
-    return { left: x0 + (bk ? (i - P.one + 1.5) * step : i * step), top: P.bottom - ch - (bk ? ch * P.lift : 0), bk }; } };
+    return { left: x0 + (bk ? (i - P.one + .5 + Math.floor((2 * P.one - 11) / 2)) * step : i * step), top: P.bottom - ch - (bk ? ch * P.lift : 0), bk }; } };
 }
 function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
