@@ -14,7 +14,8 @@ use crate::state::*;
 // ================================================================== strength, counts, cost
 
 /// `player`'s count of `what`: cards in their hand, their animals on the board (top units), the regions they control,
-/// the cards they played from hand this turn (none while it isn't their turn), the food their opponent lost this turn.
+/// the cards they played from hand this turn (none while it isn't their turn), the food their opponent lost this game,
+/// the food their regions produced this game.
 pub fn count(st: &State, player: Player, what: Count) -> i32 {
     match what {
         Count::Hand => st.hands[player as usize].len() as i32,
@@ -25,6 +26,7 @@ pub fn count(st: &State, player: Player, what: Count) -> i32 {
         }
         Count::Played => if st.current == player { st.played_this_turn } else { 0 },
         Count::EnemyFoodLost => st.food_lost[other(player) as usize],
+        Count::FoodProduced => st.food_produced[player as usize],
     }
 }
 
@@ -74,7 +76,6 @@ fn base_cost(st: &State, card: CardId, player: Player) -> i32 {
         Some(what) => {
             let per = match what {
                 Count::Played => st.cfg().combo_djinn_discount,
-                Count::Region => st.cfg().region_djinn_discount,
                 _ => 1,
             };
             c.cost - per * count(st, player, what)
@@ -314,16 +315,18 @@ fn run_roar(st: &mut State, roar: Roar, unit: &Unit, cr: Tile) {
         Roar::Draw => st.effect_stack.push(Step::new(StepKind::Draw { player: owner, n: 1 })),
         Roar::Scout => st.effect_stack.push(Step::new(StepKind::Scout { player: owner })),
         Roar::Duplicate => {
-            // a Spore on an adjacent tile, wherever a card could be placed: empty, yours, or an enemy the Spore is
-            // stronger than
+            // a Spore on an adjacent empty crossroad the game picks, none when there is none
             let Some(spore_card) = st.g.named.spore else { return };
-            let spore = Unit::new(spore_card, owner, -1);
-            let tiles: Tiles = st.g.map.neighbors[cr as usize].iter().copied()
-                .filter(|&nb| st.board.top(nb).map_or(true, |top| top.owner == owner || can_cover(st, &spore, &top)))
-                .collect();
+            let tiles: Tiles = st.g.map.neighbors[cr as usize].iter().copied().filter(|&nb| st.board.top(nb).is_none()).collect();
             if !tiles.is_empty() {
-                st.effect_stack.push(Step::new(StepKind::PlaceToken { player: owner, card: spore_card, options: tiles }));
+                let t = tiles[st.rng.randbelow(tiles.len())];
+                let spore = Unit::new(spore_card, owner, st.new_iid());
+                land_unit(st, owner, spore, t);
             }
+        }
+        Roar::ElfCard => {
+            let amount = st.cfg().elf_food_per_region * count(st, owner, Count::Region);
+            st.effect_stack.push(Step::by(StepKind::GainFood { player: owner, amount }, unit.card));
         }
         Roar::MamaSpore => {
             let Some(spore_card) = st.g.named.spore else { return };
@@ -772,14 +775,9 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
 
 // ================================================================== leaders
 
-fn power_price(st: &State, leader: Option<CardId>) -> i32 {
-    // the Elf's power has its own price, every other the config's
-    if leader.is_some() && leader == st.g.named.elf { st.cfg().elf_power_cost } else { st.cfg().leader_power_cost }
-}
-
-/// What `player`'s leader's power costs: its price less what their Sage's card took off it, never below 0.
+/// What `player`'s leader's power costs: the config's price less what their Sage's card took off it, never below 0.
 pub fn power_cost(st: &State, player: Player) -> i32 {
-    (power_price(st, st.leaders[player as usize]) - st.power_discount[player as usize]).max(0)
+    (st.cfg().leader_power_cost - st.power_discount[player as usize]).max(0)
 }
 
 /// Whether `player`'s leader has a power that would do something now, not used yet this turn; the caller checks the mana.
@@ -787,9 +785,6 @@ pub fn leader_usable(st: &State, player: Player) -> bool {
     let Some(lead) = st.leaders[player as usize] else { return false };
     if st.card(lead).beh.leader != Some(LeaderKind::Power) || st.power_used {
         return false;
-    }
-    if Some(lead) == st.g.named.elf {
-        return count(st, player, Count::Region) > 0; // food for each region you control: none, nothing to gain
     }
     true // the Sage draws: from an empty deck too, where the draw costs food (fatigue)
 }
@@ -801,10 +796,6 @@ pub fn do_leader(st: &mut State, player: Player) -> Result<(), String> {
     st.power_used = true;
     if Some(lead) == st.g.named.sage {
         st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, lead));
-    } else if Some(lead) == st.g.named.elf {
-        // "Gain 1 food for each region you control."
-        let amount = st.cfg().elf_food_per_region * count(st, player, Count::Region);
-        st.effect_stack.push(Step::by(StepKind::GainFood { player, amount }, lead));
     } else {
         return Err(format!("{:?} has no power to use", st.g.cards.name_of(lead)));
     }

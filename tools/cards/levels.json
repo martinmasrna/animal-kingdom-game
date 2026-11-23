@@ -350,7 +350,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1795361610
+      "at": 1795473880
     },
     "animal": {
       "review": {
@@ -362,7 +362,7 @@
         }
       },
       "by": "claude",
-      "at": 1795285398,
+      "at": 1795473880,
       "note": "into the collection"
     },
     "cost": {
@@ -1105,7 +1105,7 @@
         "prev": ""
       },
       "by": "claude",
-      "at": 1795274473
+      "at": 1795473881
     },
     "cost": {
       "review": {
@@ -1234,7 +1234,16 @@
         "prev": ""
       },
       "by": "claude",
-      "at": 1795290485
+      "at": 1795473881
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "by": "claude",
+      "at": 1795473881
     }
   },
   "assassin_legend": {
@@ -1276,7 +1285,7 @@
         "prev": ""
       },
       "by": "claude",
-      "at": 1795349463
+      "at": 1795473880
     }
   },
   "bird_egg": {

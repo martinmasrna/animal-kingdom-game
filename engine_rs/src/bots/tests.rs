@@ -229,14 +229,11 @@ fn play_turn(st: &State, spec: &str, seed: u64) -> State {
 
 #[test]
 fn a_win_in_hand_is_taken() {
-    // Two turns the whole-turn search lost its way in, each with a win that needs no hidden card:
-    // - Food Token against itself, seed 7479377187389669384, turn 8 (B on 18 food, 4 mana, A one food from winning): two
-    //   Spores fill regions, then the Elf's power and the regions' food make 30. The search kept the lines that spent
-    //   the 2 mana of the power on a card, because it ranks an unfinished turn by ending it there, and played one.
-    // - Control against Aggro, seed 5424489383026342908, turn 14 (A on 26): the Giant Hunter removes the flier standing
-    //   in four of A's regions and a Mama Spore takes its tile.
+    // A turn the whole-turn search lost its way in, with a win that needs no hidden card: Control against Aggro, seed
+    // 5424489383026342908, turn 14 (A on 26): the Giant Hunter removes the flier standing in four of A's regions and a
+    // Mama Spore takes its tile.
     let g = game();
-    for (name, text) in [("elf_power_win", include_str!("positions/elf_power_win.json")), ("clear_and_fill_win", include_str!("positions/clear_and_fill_win.json"))] {
+    for (name, text) in [("clear_and_fill_win", include_str!("positions/clear_and_fill_win.json"))] {
         let Some(st) = saved(&g, text) else {
             eprintln!("{name}: today's cards no longer hold this position; skipped");
             continue;

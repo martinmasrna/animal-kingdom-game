@@ -574,7 +574,8 @@ pub struct WinSearch {
 /// the turn (food gained to the winning food, the enemy den emptied) or by ending the turn (the regions' food). The
 /// search follows the closest position first (how near `me` is to the winning food if the turn ended there, or the
 /// enemy to none), merges positions reached by different orders, keeps every position (no width), and stops at `limit`
-/// positions. A line that draws a card or looks at the deck is left out: what follows it rests on an imagined deck.
+/// positions. A line that draws a card, looks at the deck or leaves something to chance is left out: what follows it
+/// rests on an imagined deck or an imagined roll.
 pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
     use std::cmp::Reverse;
     use std::collections::BinaryHeap;
@@ -663,9 +664,10 @@ pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
                 spare.push(c);
                 continue; // the turn ended without the win
             }
-            if c.decks[me as usize].len() != deck || matches!(&c.pending, Some(p) if matches!(p.options, Options::Deck(_))) {
+            if c.decks[me as usize].len() != deck || matches!(&c.pending, Some(p) if matches!(p.options, Options::Deck(_)))
+                || !c.rng.same_stream(&st.rng) {
                 spare.push(c);
-                continue; // a card drawn or looked at: hidden
+                continue; // a card drawn or looked at, or a random pick (the Duplicating Spore's tile): hidden
             }
             if !seen.insert(position_key(&c, me, true)) {
                 spare.push(c);

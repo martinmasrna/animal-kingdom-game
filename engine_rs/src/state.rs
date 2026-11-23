@@ -409,8 +409,10 @@ pub struct State {
     /// Fatigue: the cards each player has tried to draw from their own empty deck. The next one costs them one more
     /// food than this.
     pub fatigue: [i32; 2],
-    /// The food each player has lost this turn, to raids and fatigue (the Burn Djinn).
+    /// The food each player has lost this game, to raids and fatigue (the Burn Djinn).
     pub food_lost: [i32; 2],
+    /// The food each player's regions have produced this game (the Food Djinn).
+    pub food_produced: [i32; 2],
     pub effect_steps_this_turn: i32,
     pub caps: Vec<Cap>,
     pub next_iid: i32,
@@ -451,6 +453,7 @@ impl Clone for State {
             power_discount: self.power_discount,
             fatigue: self.fatigue,
             food_lost: self.food_lost,
+            food_produced: self.food_produced,
             effect_steps_this_turn: self.effect_steps_this_turn,
             caps: self.caps.clone(),
             next_iid: self.next_iid,
@@ -494,6 +497,7 @@ impl Clone for State {
         self.power_discount = src.power_discount;
         self.fatigue = src.fatigue;
         self.food_lost = src.food_lost;
+        self.food_produced = src.food_produced;
         self.effect_steps_this_turn = src.effect_steps_this_turn;
         if !(self.caps.is_empty() && src.caps.is_empty()) {
             self.caps.clone_from(&src.caps);
@@ -645,6 +649,7 @@ impl State {
             power_discount: [0, 0],
             fatigue: [0, 0],
             food_lost: [0, 0],
+            food_produced: [0, 0],
             effect_steps_this_turn: 0,
             caps: Vec::new(),
             next_iid: 0,

@@ -93,11 +93,11 @@
     },
     {
       "id": "djinn_region",
-      "name": "Region Djinn",
+      "name": "Food Djinn",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 10,
-      "text": "Costs 3 less for each region you control.",
+      "text": "Costs 1 less for each food your regions produced this game.",
       "cost": 12,
       "keywords": []
     },
@@ -423,7 +423,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 1,
-      "text": "Roar: place a Spore on an adjacent tile.",
+      "text": "Roar: place a Spore on a random adjacent empty crossroad.",
       "cost": 1,
       "keywords": []
     },
@@ -443,8 +443,8 @@
       "status": "collectible",
       "rarity": "legendary",
       "base_strength": 3,
-      "text": "Your regions produce 1 more food.",
-      "cost": 5,
+      "text": "Roar: gain 2 food for each region you control.",
+      "cost": 3,
       "keywords": []
     },
     {
@@ -517,7 +517,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 10,
-      "text": "Costs 1 less for each food your opponent lost this turn.",
+      "text": "Costs 1 less for each food your opponent lost this game.",
       "cost": 12,
       "keywords": []
     },

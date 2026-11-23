@@ -419,15 +419,29 @@ def test_scout_takes_one_of_the_top_three_and_shuffles_the_rest_back():
     assert sorted(s.decks["A"]) == ["wisp_1", "wisp_2", "wisp_3", "wisp_5"]
 
 
-def test_duplicating_spore_places_a_spore_on_an_adjacent_tile_it_could_be_placed_on():
+def test_duplicating_spore_places_a_spore_on_a_random_adjacent_empty_crossroad():
+    around = sorted(BOARD.neighbors("2,2"))                          # 1,1 among them, which connects 2,2
+    empty, taken = [cr for cr in around if cr != "1,1"][:2], [cr for cr in around if cr != "1,1"][2:]
+    landed = set()
+    for seed in range(12):
+        s = state(turn=11, hands={"A": ["duplicating_spore"]})
+        s._rng = new_game(["wisp_1"] * 25, ["wisp_1"] * 25, seed)._rng
+        put(s, "1,1", "wisp_1", "A")
+        for cr in taken:
+            put(s, cr, "wisp_1", "B" if cr == taken[-1] else "A")   # yours or an enemy's: never covered
+        rules.apply_action(s, PlaceAction("duplicating_spore", ("cr", "2,2")))
+        assert s.pending is None                                      # no choice: the game picks
+        spores = [cr for cr in around if [u.card_id for u in s.board.get(cr, [])] == ["spore"]]
+        assert len(spores) == 1 and spores[0] in empty
+        landed.add(spores[0])
+        assert rules.mana_left(s, "A") == 6 - CARDS["duplicating_spore"].cost   # the Spore came free
+    assert landed == set(empty)                                       # either empty one
     s = state(turn=11, hands={"A": ["duplicating_spore"]})
-    put(s, "1,2", "wisp_1", "A")                                     # yours: offered, and covered
-    put(s, "2,1", "wisp_1", "B")                                     # an enemy of 2: the Spore's 1 can't cover it
-    rules.apply_action(s, PlaceAction("duplicating_spore", ("cr", "1,1")))
-    assert "1,2" in s.pending["options"] and "2,1" not in s.pending["options"]
-    rules.apply_action(s, ChoiceAction("1,2"))
-    assert [u.card_id for u in s.board["1,2"]] == ["spore"] and "wisp_1" in s.remove_pile
-    assert rules.mana_left(s, "A") == 6 - CARDS["duplicating_spore"].cost   # the Spore came free
+    put(s, "1,1", "wisp_1", "A")
+    for cr in around:
+        put(s, cr, "wisp_1", "A")
+    rules.apply_action(s, PlaceAction("duplicating_spore", ("cr", "2,2")))
+    assert "spore" not in [u.card_id for st in s.board.values() for u in st]   # none empty: no Spore
 
 
 def test_mama_spore_puts_two_spores_into_your_hand_and_they_play():
@@ -476,20 +490,32 @@ def test_djinn_cost_less_for_each_of_their_count():
     for cr in ("1,1", "1,2", "2,2"):                                  # three allies, one region of A's
         put(s, cr, "wisp_1", "A")
     assert {cid: mana_cost(s, cid) for cid in ("djinn_hand", "djinn_ally", "djinn_combo", "djinn_region")} == \
-        {"djinn_hand": 6, "djinn_ally": 9, "djinn_combo": 12, "djinn_region": 12 - CFG.region_djinn_discount}
+        {"djinn_hand": 6, "djinn_ally": 9, "djinn_combo": 12, "djinn_region": 12}   # no food produced yet
     rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,3"))); rules.apply_action(s, PlaceAction("wisp_1", ("cr", "2,3")))
     assert mana_cost(s, "djinn_combo") == 12 - 2 * CFG.combo_djinn_discount   # two cards played this turn
     assert mana_cost(s, "djinn_combo", "B") == 12                     # B played none: it isn't their turn
 
 
-def test_burn_djinn_costs_less_for_each_food_the_opponent_lost_this_turn():
+def test_food_djinn_costs_less_for_each_food_your_regions_produced_this_game():
+    s = state(turn=11, hands={"A": ["djinn_region"]}, food={"A": 5, "B": 5}, leaders={"A": ELF})
+    for cr in ("1,1", "1,2", "2,2"):                                  # one region, its food 1, and 1 more from the Elf
+        put(s, cr, "wisp_1", "A")
+    assert mana_cost(s, "djinn_region") == 12
+    rules.apply_action(s, PassAction())                               # A's regions produce 2
+    rules.apply_action(s, PassAction())
+    assert s.food_produced == {"A": 2, "B": 0} and mana_cost(s, "djinn_region") == 10
+    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
+    assert mana_cost(s, "djinn_region") == 8                          # it adds up over the game
+
+
+def test_burn_djinn_costs_less_for_each_food_the_opponent_lost_this_game():
     s = state(turn=11, hands={"A": ["flight_5", "djinn_burn"], "B": ["djinn_burn"]}, food={"A": 15, "B": 15})
     assert mana_cost(s, "djinn_burn") == 12
     rules.apply_action(s, PlaceAction("flight_5", ("hq", "B")))      # the raid destroys 5 of B's food
     assert s.food["B"] == 10 and mana_cost(s, "djinn_burn") == 7
     assert mana_cost(s, "djinn_burn", "B") == 12                      # A lost none
-    rules.apply_action(s, PassAction())                               # a new turn: nothing lost in it yet
-    assert mana_cost(s, "djinn_burn", "A") == 12
+    rules.apply_action(s, PassAction())                               # a new turn: what was lost still counts
+    assert mana_cost(s, "djinn_burn", "A") == 7
 
 
 def test_sky_maw_lands_only_on_a_weaker_enemy_anywhere_and_never_raids():
@@ -538,16 +564,13 @@ def test_the_raiders_raids_destroy_two_more():
     assert s.food["B"] == 15 - 1 - CFG.raider_leader_bonus
 
 
-def test_the_elfs_power_gains_a_food_for_each_region_for_two_mana_once_a_turn():
-    s = state(turn=10, food={"A": 15, "B": 15}, leaders={"A": ELF})  # 6 mana
-    assert LEADERS[ELF][0] == "power"
-    assert LeaderAction() not in rules.legal_actions(s)               # no region: nothing to gain
-    for cr in ("1,1", "1,2", "2,2", "1,3", "2,3"):                    # three regions (1,2 2,2 2,3 is one too)
-        put(s, cr, "wisp_1", "A")
-    rules.apply_action(s, LeaderAction())
-    assert s.food["A"] == 15 + 3 * CFG.elf_food_per_region and rules.mana_left(s, "A") == 6 - CFG.elf_power_cost
-    assert LeaderAction() not in rules.legal_actions(s)               # once a turn
-    assert rules.region_income(s, "A") == 3                           # its regions produce as any others
+def test_the_elf_leader_makes_your_regions_produce_one_more_food():
+    assert LEADERS[ELF] == ("passive", "Your regions produce 1 more food.")
+    for leader, income in ((ELF, 3 * (1 + CFG.elf_region_bonus)), (SAGE, 3)):
+        s = state(turn=10, leaders={"A": leader})
+        for cr in ("1,1", "1,2", "2,2", "1,3", "2,3"):                # three regions (1,2 2,2 2,3 is one too)
+            put(s, cr, "wisp_1", "A")
+        assert rules.region_income(s, "A") == income and LeaderAction() not in rules.legal_actions(s) or leader == SAGE
 
 
 def test_the_assassin_draws_after_every_third_card_of_a_turn():
@@ -558,16 +581,16 @@ def test_the_assassin_draws_after_every_third_card_of_a_turn():
         sizes.append(len(s.hands["A"]))
     assert sizes == [5, 4, 4, 3, 2, 2]                                # the 3rd and the 6th each draw one
     assert {l: (CARDS[l].cost, CARDS[l].base_strength) for l in LEADERS} == {
-        "warlord_legend": (7, 7), "raider_legend": (3, 5), "sage_legend": (5, 3), "elf_legend": (5, 3), "assassin_legend": (5, 5)}
+        "warlord_legend": (7, 7), "raider_legend": (3, 5), "sage_legend": (5, 3), "elf_legend": (3, 3), "assassin_legend": (5, 5)}
 
 
-def test_the_elfs_card_makes_its_regions_produce_one_more_while_it_stands():
-    s = state(turn=4)
-    for cr in ("1,1", "1,2", "2,2"):
+def test_the_elfs_card_gains_two_food_for_each_region_you_control():
+    s = state(turn=10, hands={"A": ["elf_legend"]}, food={"A": 15, "B": 15})
+    for cr in ("1,1", "1,2", "2,2", "1,3"):                           # 1,1 1,2 2,2 and 1,2 1,3 2,2: two regions
         put(s, cr, "wisp_1", "A")
-    assert rules.region_income(s, "A") == 1
-    put(s, "1,3", "elf_legend", "A")
-    assert rules.region_income(s, "A") == 1 + CFG.elf_card_region_bonus
+    rules.apply_action(s, PlaceAction("elf_legend", ("cr", "2,3")))   # and 1,2 2,2 2,3: three
+    assert s.food["A"] == 15 + 3 * CFG.elf_food_per_region
+    assert rules.region_income(s, "A") == 3                           # on the board it adds nothing
 
 
 def test_the_assassins_card_makes_the_cards_in_your_hand_cheaper_for_good():

@@ -185,7 +185,9 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
 fn end_turn(st: &mut State) -> Result<(), String> {
     let player = st.current;
     st.emit(Ev::TurnEnd { player });
-    effects::gain_food(st, player, region_income(st, player), true);
+    let income = region_income(st, player);
+    st.food_produced[player as usize] += income;
+    effects::gain_food(st, player, income, true);
     if st.result.is_some() {
         return Ok(());
     }
@@ -193,7 +195,6 @@ fn end_turn(st: &mut State) -> Result<(), String> {
     st.mana_spent = 0;
     st.applied_this_turn = 0;
     st.played_this_turn = 0;
-    st.food_lost = [0, 0];
     st.power_used = false;
     st.effect_steps_this_turn = 0;
     st.current = other(player);
@@ -212,8 +213,8 @@ fn end_turn(st: &mut State) -> Result<(), String> {
 
 // ------------------------------------------------------------------ regions, food, the end
 
-/// The food `player`'s regions pay at the end of their turn: each its own, and 1 more each while a card that says
-/// "Your regions produce 1 more food." (the Elf's) is theirs on the board.
+/// The food `player`'s regions pay at the end of their turn: each its own, and 1 more each when their leader is the Elf
+/// ("Your regions produce 1 more food.").
 pub fn region_income(st: &State, player: Player) -> i32 {
     let own = st.board.own[player as usize];
     let (mut food, mut held) = (0, 0);
@@ -226,16 +227,8 @@ pub fn region_income(st: &State, player: Player) -> i32 {
     if held == 0 {
         return 0;
     }
-    let mut bonus = 0;
-    let mut m = own;
-    while m != 0 {
-        let t = m.trailing_zeros() as Tile;
-        m &= m - 1;
-        if st.card(st.board.top(t).unwrap().card).beh.region_bonus {
-            bonus = st.cfg().elf_card_region_bonus;
-            break;
-        }
-    }
+    let elf = st.g.named.elf.is_some() && st.leaders[player as usize] == st.g.named.elf;
+    let bonus = if elf { st.cfg().elf_region_bonus } else { 0 };
     food + bonus * held
 }
 

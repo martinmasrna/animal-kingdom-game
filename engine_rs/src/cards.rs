@@ -20,7 +20,7 @@ pub const LEADERS: [(&str, &str); 5] = [
     (WARLORD, "When you cover an enemy, gain 1 food."),
     (RAIDER, "Your raids destroy 1 more food."),
     (SAGE, "Draw a card."),
-    (ELF, "Gain 2 food for each region you control."),                       // Martin, 2026-11-21: 2 mana; 2 food, 2026-11-22
+    (ELF, "Your regions produce 1 more food."),                               // Martin, 2026-11-23: the card's and the power's texts swapped
     (ASSASSIN, "After every third card you play in a turn, draw a card."),    // Martin, 2026-11-21: "multiple times a turn"
 ];
 
@@ -56,8 +56,10 @@ pub enum Roar {
     Draw,
     /// "Roar: Scout a card."
     Scout,
-    /// "Roar: place a Spore on an adjacent tile."
+    /// "Roar: place a Spore on a random adjacent empty crossroad."
     Duplicate,
+    /// "Roar: gain 2 food for each region you control." (the Elf's card)
+    ElfCard,
     /// "Roar: put 2 Spores into your hand."
     MamaSpore,
     /// "Roar: reduce the cost of cards in your hand by 1."
@@ -111,8 +113,6 @@ pub struct Behaviour {
     pub djinn: Option<Count>,
     /// Some when the card may lead a deck.
     pub leader: Option<LeaderKind>,
-    /// "Your regions produce 1 more food." while it is on the board (the Elf's card).
-    pub region_bonus: bool,
 }
 
 pub fn behaviour(id: &str) -> Behaviour {
@@ -132,6 +132,7 @@ pub fn behaviour(id: &str) -> Behaviour {
         "duplicating_spore" => Some(Roar::Duplicate),
         "assassin_legend" => Some(Roar::AssassinCard),
         "sage_legend" => Some(Roar::SageCard),
+        ELF => Some(Roar::ElfCard),
         "mana_blob" => Some(Roar::GainMana),
         "rhino" => Some(Roar::Crush(CrushLimit::Rhino)),
         "albatross" => Some(Roar::Crush(CrushLimit::Albatross)),
@@ -158,16 +159,15 @@ pub fn behaviour(id: &str) -> Behaviour {
         "djinn_hand" => Some(Count::Hand),
         "djinn_ally" => Some(Count::Ally),
         "djinn_combo" => Some(Count::Played),
-        "djinn_region" => Some(Count::Region),
+        "djinn_region" => Some(Count::FoodProduced),
         "djinn_burn" => Some(Count::EnemyFoodLost),
         _ => None,
     };
     b.leader = match id {
-        WARLORD | RAIDER | ASSASSIN => Some(LeaderKind::Passive),
-        SAGE | ELF => Some(LeaderKind::Power),
+        WARLORD | RAIDER | ASSASSIN | ELF => Some(LeaderKind::Passive),
+        SAGE => Some(LeaderKind::Power),
         _ => None,
     };
-    b.region_bonus = id == ELF;
     b.draw_on_draw = id == "golden_egg";
     b.spikes_aura = id == "porcupine";
     b

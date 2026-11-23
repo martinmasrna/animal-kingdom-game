@@ -291,6 +291,12 @@ impl CowRng {
     pub fn new(r: PyRandom) -> CowRng {
         CowRng(std::sync::Arc::new(r))
     }
+
+    /// Whether two copies still share one stream: false once either has drawn from it since they were copied.
+    #[inline]
+    pub fn same_stream(&self, other: &CowRng) -> bool {
+        std::sync::Arc::ptr_eq(&self.0, &other.0)
+    }
 }
 
 impl From<PyRandom> for CowRng {

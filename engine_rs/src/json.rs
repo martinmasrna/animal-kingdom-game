@@ -234,6 +234,7 @@ impl State {
             "power_discount": ab(&|p| self.power_discount[p].into()),
             "fatigue": ab(&|p| self.fatigue[p].into()),
             "food_lost": ab(&|p| self.food_lost[p].into()),
+            "food_produced": ab(&|p| self.food_produced[p].into()),
             "effect_steps_this_turn": self.effect_steps_this_turn,
             "caps": self.caps.iter().map(|c| json!({"cap": c.cap.name(), "player": pname(c.player), "turn": c.turn, "cards": cards_to_json(g, &c.cards)})).collect::<Vec<_>>(),
             "next_iid": self.next_iid,
@@ -319,6 +320,10 @@ impl State {
             Some(v) if v.is_object() => [int(&v["A"]), int(&v["B"])],
             _ => [0, 0], // a position saved before the Burn Djinn
         };
+        let food_produced = match d.get("food_produced") {
+            Some(v) if v.is_object() => [int(&v["A"]), int(&v["B"])],
+            _ => [0, 0], // a position saved before the Food Djinn
+        };
         let geti = |k: &str| d.get(k).map(int).unwrap_or(0);
         Ok(State {
             board,
@@ -340,6 +345,7 @@ impl State {
             power_discount: discount,
             fatigue,
             food_lost,
+            food_produced,
             effect_steps_this_turn: geti("effect_steps_this_turn"),
             caps,
             next_iid: geti("next_iid"),
