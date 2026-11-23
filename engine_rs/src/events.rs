@@ -25,6 +25,9 @@ pub enum Ev {
     Draw { player: Player, cards: Vec<(i32, CardId)> },
     Strength { iid: i32, card: CardId, owner: Player, n: i32 },
     LeaderPower { player: Player, card: CardId },
+    /// A player chose the piece an effect acts on (a Roar's "an adjacent enemy"): its cause is the source. Recorded just
+    /// before the effect, so a screen can point from the source to the target first.
+    Aim { player: Player, cr: Tile, iid: i32, card: CardId },
 }
 
 #[derive(Debug)]
@@ -81,6 +84,7 @@ impl Recorded {
             Ev::Draw { player, cards } => json!({"e": "draw", "player": pname(*player), "cards": cards.iter().map(|(i, c)| json!([i, card(*c)])).collect::<Vec<_>>()}),
             Ev::Strength { iid, card: c, owner, n } => json!({"e": "strength", "iid": iid, "card": card(*c), "owner": pname(*owner), "n": n}),
             Ev::LeaderPower { player, card: c } => json!({"e": "leader_power", "player": pname(*player), "card": card(*c)}),
+            Ev::Aim { player, cr, iid, card: c } => json!({"e": "aim", "player": pname(*player), "cr": tile(*cr), "iid": iid, "card": card(*c)}),
         };
         let m: &mut Map<String, Value> = v.as_object_mut().unwrap();
         if let Some(c) = self.cause {

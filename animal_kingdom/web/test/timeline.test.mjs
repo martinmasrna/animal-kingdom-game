@@ -25,3 +25,17 @@ test("their raid from the hand takes a card off their hand's count as it plays",
     { seq: 2, e: 'raid', player: 'A', iid: 9, card: 'flight_2', den: 'B', str: 2, n: 2, from_hand: true }]), you: 'B' };
   for (const { view: v, step } of plan(prev, next)) if (step) assert.equal(v.game.handCount.A, 3);
 });
+
+test("their chosen target plays as an aim step from its source, before the effect; your own plays none (you aimed it)", () => {
+  const hunter = { iid: 5, id: 'hunter_5', owner: 'B', str: 4 }, prey = { iid: 6, id: 'wisp_3', owner: 'A', str: 6 };
+  const base = (events, board) => ({ ...view([], { A: 3, B: 3 }, 15, events), game: { ...view([], { A: 3, B: 3 }, 15, events).game, board } });
+  const prev = base([{ seq: 1, e: 'turn_start', player: 'B' }], { '3,2': [hunter], '2,2': [prey] });
+  const aim = (player, seq) => ({ seq, e: 'aim', player, cr: '2,2', iid: 6, card: 'wisp_3', cause: 'hunter_5', cause_iid: 5 });
+  const hit = seq => ({ seq, e: 'strength', iid: 6, card: 'wisp_3', owner: 'A', n: -4, cause: 'hunter_5', cause_iid: 5 });
+  const theirs = plan(prev, base([...prev.game.events, aim('B', 2), hit(3)], { '3,2': [hunter], '2,2': [{ ...prey, str: 2 }] })).filter(s => s.step);
+  assert.deepEqual(theirs.map(s => s.step.kind), ['aim']);
+  assert.deepEqual([theirs[0].step.from, theirs[0].step.cr, theirs[0].step.player], ['3,2', '2,2', 'B']);
+  assert.equal(theirs[0].view.game.board['2,2'][0].str, 6, 'the arrow shows before the effect');
+  const mine = plan(prev, base([...prev.game.events, aim('A', 2), hit(3)], prev.game.board)).filter(s => s.step);
+  assert.deepEqual(mine.map(s => s.step.kind), []);
+});

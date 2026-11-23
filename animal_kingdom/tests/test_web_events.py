@@ -43,3 +43,21 @@ def test_a_client_batch_keeps_only_well_formed_events():
                                            {"kind": "big", "data": {"x": "y" * 5000}}, "not an event"])
     assert kept == 1
     assert _rows(db) == [("c_screen", {"route": "/"})]
+
+
+def test_a_target_prompt_names_its_source_unit_and_the_other_seat_sees_the_aim():
+    """The target arrow (static/aim.js) starts at the very unit asking (`sourceIid`) and plays the opponent's choice from
+    the engine's `aim` event, before the effect."""
+    from animal_kingdom.game import PlaceAction
+    from animal_kingdom.tests.test_rules import put, state
+    m = Match("AIM", Seat("ta", "A", deck=SLUG))
+    m.join(Seat("tb", "B", deck=SLUG))
+    m._start_game()
+    m.state = state(turn=11, hands={"A": ["hunter_4"]})
+    put(m.state, "2,1", "wisp_6", "B")
+    m.act("A", PlaceAction("hunter_4", ("cr", "1,1")))
+    pending = m.view("A")["game"]["pending"]
+    assert (pending["kind"], pending["source"], pending["sourceIid"]) == ("effect", "hunter_4", m.state.board["1,1"][-1].iid)
+    m.act("A", ChoiceAction("2,1"))
+    seen = [(e["e"], e.get("cause"), e.get("cr")) for e in m.view("B")["game"]["events"]][-2:]
+    assert seen == [("aim", "hunter_4", "2,1"), ("strength", "hunter_4", None)]

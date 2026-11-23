@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 # evaluation, sending back every opening card that costs more than 2 (about 30 ms a turn on the Mac; the slowest choice in
 # 100 games took an eighth of a second). The greedy bot plays any move this one fails on (animal_kingdom/bot.py).
 PRACTICE_BOT = "turn:budget=200000,reply=12,per=2,eval=race,mull=2"
-ASKS = {"mulligan": "mulligan"}   # what a pending choice asks, by the step asking: the mulligan; anything else is "effect"
+ASKS = {"mulligan": "mulligan", "place_token": "place"}   # what a pending choice asks, by the step asking: the mulligan, a tile to put a token on; anything else is "effect"
 # The turn clock, for matches between two people: whoever must act gets a free window each time the decision comes to
 # them (unused time is lost), then spends their bank for the game. At zero, the engine acts for them.
 CLOCK_FREE = 30.0
@@ -472,9 +472,12 @@ class Match:
             "leaders": {p: v for p in "AB" if (v := leader_view(st, p))},
             "deckCount": {p: len(st.decks[p]) for p in "AB"},
             "deckLeft": dict(Counter(st.decks[s])),
-            # what the opponent may still hold: their deck, their hand, and the cards their mulligan set aside
-            "unseen": dict(Counter(st.decks[opp]) + Counter(u.card_id for u in st.hands[opp])
-                           + Counter(c for step in st.effect_stack if step.get("player") == opp for c in step.get("returned", ()))),
+            # the cards of the opponent's deck list you have not seen yet: in their deck, in their hand, or set aside by
+            # their mulligan. A card made during the game (a Spore) is not of the list, so it is not counted,
+            # and made copies of a listed card (Bird Egg's Flight 1) never raise its count past the list's.
+            "unseen": {c: min(n, st.starting_decks[opp].count(c)) for c, n in (Counter(st.decks[opp]) + Counter(u.card_id for u in st.hands[opp])
+                           + Counter(c for step in st.effect_stack if step.get("player") == opp for c in step.get("returned", ()))).items()
+                       if c in st.starting_decks[opp]},
             "removed": list(st.remove_pile),
             "pile": [{"id": c, "owner": o, "str": card_strength(st, c, o or s)} for c, o in zip(st.remove_pile, st.pile_owners)],
             "result": st.result.to_dict() if st.result else None,
@@ -521,6 +524,7 @@ class Match:
         p = st.pending
         step = st.effect_stack[-1] if st.effect_stack else {}
         pending = {"mode": p["mode"], "optional": bool(p.get("optional")), "source": self._source(),
+                   "sourceIid": step.get("by_iid"),   # the very unit asking (a target arrow starts at it); none for a leader's power
                    "kind": ASKS.get(step.get("op"), "effect"),
                    "returned": len(step.get("returned", ())) if step.get("op") == "mulligan" else 0,
                    "cap": game.mulligan_cap(st, step["player"]) if step.get("op") == "mulligan" else 0,

@@ -342,6 +342,22 @@ def test_the_giant_hunter_removes_any_adjacent_enemy():
     assert "2,1" not in s.board
 
 
+def test_a_chosen_target_is_an_aim_event_from_its_source_before_the_effect():
+    for card, kind in (("hunter_4", "strength"), ("giant_hunter", "remove")):
+        s = state(turn=11, hands={"A": [card]})
+        put(s, "2,1", "wisp_6", "B")
+        rs = s._sync()
+        rs.record_events(True)
+        rs.apply_action(PlaceAction(card, ("cr", "1,1")).to_dict())
+        source = rs.to_dict()["board"]["1,1"][-1]["iid"]
+        rs.take_events()
+        rs.apply_action(ChoiceAction("2,1").to_dict())
+        ev = rs.take_events()
+        aim = ev[0]
+        assert aim["e"] == "aim" and aim["cr"] == "2,1" and aim["player"] == "A" and aim["card"] == "wisp_6"
+        assert aim["cause"] == card and aim["cause_iid"] == source and ev[1]["e"] == kind
+
+
 def test_a_cantrip_draws_a_card():
     s = state(turn=11, hands={"A": ["cantrip_2"]})
     rules.apply_action(s, PlaceAction("cantrip_2", ("cr", "1,2")))

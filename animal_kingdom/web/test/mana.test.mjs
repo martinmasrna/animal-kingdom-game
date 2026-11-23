@@ -294,3 +294,38 @@ test('upright on the square board: the phone layout, its hand and End turn on sc
     assert.deepEqual(p.errors, []);
   } finally { await p.browserContext().close(); sq.stop(); }
 });
+
+// The target arrow (static/aim.js): asked to choose the enemy a Roar acts on, an arrow runs from the unit whose Roar it is
+// to the pointer, settling on a legal target; once the target is chosen it is gone.
+test('the target arrow: during a target prompt it starts at the source and settles on the target; after the choice it is gone', async () => {
+  const sq = await startServer({ AK_MAP: 'map_sq16' }), p = await seat();
+  try {
+    await p.goto(sq.url + '/', { waitUntil: 'networkidle0' }); await giveDeck(p, 'w1', 'Cheap', CHEAP);
+    await click(p, '#mprac'); await p.waitForSelector('.mhome [data-deck].on');
+    for (let i = 0; i < 20 && !(await p.evaluate(() => location.hash.startsWith('#/m/'))); i++) { await click(p, '#mgo').catch(() => {}); await wait(300); }
+    assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
+    await click(p, '#skip'); assert.ok(await until(p, () => window.__ak().V.game.decision === 'yours' && !window.__ak().PB.busy, null, 30000));
+    // your Hunter on 2,2 has just roared: the enemy on 3,2 or the one on 2,3 (a crafted view, fed twice so nothing lands)
+    await p.evaluate(() => { const V = window.__ak().V, me = V.you, them = me === 'A' ? 'B' : 'A';
+      const board = { '2,2': [{ iid: 901, id: 'hunter_5', owner: me, str: 4 }], '3,2': [{ iid: 902, id: 'wisp_3', owner: them, str: 6 }], '2,3': [{ iid: 903, id: 'wisp_2', owner: them, str: 4 }] };
+      const v = { ...V, game: { ...V.game, board, decision: 'your_choice', legal: { place: {}, leader: false },
+        pending: { mode: 'choice', kind: 'effect', source: 'hunter_5', sourceIid: 901, optional: false, options: ['3,2', '2,3'].map(c => ({ kind: 'cr', cr: c, v: c })) } } };
+      window.__ak.feed(v); window.__ak.feed(v); });
+    await wait(300);
+    const at = sel => p.evaluate(sel => { const r = document.querySelector(sel).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, sel);
+    const me = await p.evaluate(() => window.__ak().V.you), flip = c => me === 'A' ? c : `${5 - +c.split(',')[0]},${c.split(',')[1]}`;   // the board's columns turn for seat B
+    assert.equal(await p.evaluate(() => document.getElementById('choicebar').classList.contains('on')), false, 'no prompt: the arrow and the rings say it');
+    const [tx, ty] = await at(`#board .cr[data-cr="${flip('3,2')}"] .mstand`);
+    await p.mouse.move(tx - 40, ty + 60); await p.mouse.move(tx, ty, { steps: 5 }); await wait(200);
+    const arrow = await p.evaluate(sel => { const a = document.getElementById('aim'), st = document.getElementById('stage'), S = st.getBoundingClientRect(), k = S.width / st.offsetWidth;
+      const r = document.querySelector(sel).getBoundingClientRect(), stg = (x, y) => [(x - S.left) / k, (y - S.top) / k];
+      return { n: a ? a.querySelectorAll('polygon').length : 0, from: a && a.dataset.from && a.dataset.from.split(',').map(Number), fig: [...stg(r.left, r.top), ...stg(r.right, r.bottom)] }; },
+      `#board .cr[data-cr="${flip('2,2')}"] .mstand`);
+    assert.ok(arrow.n >= 3, 'the arrow is drawn: blocks and a head');
+    const [x, y] = arrow.from, [l, t, r, b] = arrow.fig;
+    assert.ok(x >= l && x <= r && y >= t && y <= b, `it starts on the Hunter's body: ${arrow.from} in ${arrow.fig.map(Math.round)}`);
+    await p.mouse.click(tx, ty); await wait(100);
+    assert.equal(await p.evaluate(() => document.querySelectorAll('#aim polygon').length), 0, 'chosen: the arrow is gone');
+    assert.deepEqual(p.errors, []);
+  } finally { await p.browserContext().close(); sq.stop(); }
+});

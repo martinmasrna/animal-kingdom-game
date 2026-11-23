@@ -543,6 +543,13 @@ pub fn stack_cards(st: &State, extra: Option<CardId>) -> Vec<CardId> {
     st.effect_stack.iter().filter_map(|s| s.by_card).chain(extra).collect()
 }
 
+/// The `aim` event: `chooser` picked the piece on `t` for the effect now resolving (its cause is the source).
+fn aim(st: &mut State, chooser: Player, t: Tile) {
+    if let Some(top) = st.board.top(t) {
+        st.emit(Ev::Aim { player: chooser, cr: t, iid: top.iid, card: top.card });
+    }
+}
+
 fn choice_pending(chooser: Player, optional: bool, options: &Tiles) -> Option<Pending> {
     Some(Pending { chooser, optional, mulligan: false, options: Options::Tiles(options.clone()) })
 }
@@ -708,6 +715,7 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
                 None => Ok(choice_pending(*chooser, false, options)),
                 Some(Choice::Tile(t)) => {
                     let amount = *amount;
+                    aim(st, *chooser, t);
                     if let Some(top) = st.board.top_mut(t) {
                         top.strength_mod -= amount;
                         let top = *top;
@@ -728,6 +736,7 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
                 Some(Choice::Skip) => Ok(None),
                 Some(Choice::Tile(t)) => {
                     let chooser = *chooser;
+                    aim(st, chooser, t);
                     if let Some(top) = st.board.top(t) {
                         remove_specific(st, t, top.iid, Some(chooser), true);
                     }
