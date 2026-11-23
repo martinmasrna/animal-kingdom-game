@@ -255,6 +255,13 @@ test('on the square board every card is the rectangular one, its cost and streng
     const hand = await p.evaluate(() => window.__ak().V.game.hand.map(h => { const el = document.querySelector(`#hand .hc[data-iid="${h.iid}"]`);
       return [String(h.cost), el.querySelector('.mcost')?.dataset.n, String(h.str), el.querySelector('.mstr')?.dataset.n]; }));
     for (const [c, cs, s, ss] of hand) { assert.equal(cs, c); assert.equal(ss, s); }
+    // a choice of cards (Scout) lays them out over the board, on screen: the hand's own placing once took them below it (2026-11-23)
+    await click(p, '#skip'); assert.ok(await until(p, () => window.__ak().V.game.decision === 'yours' && !window.__ak().PB.busy, null, 30000));
+    await p.evaluate(() => { const V = window.__ak().V; window.__ak.feed({ ...V, game: { ...V.game, pending: { mode: 'choice', kind: 'scout', source: 'scout_3',
+      options: ['wisp_1', 'flight_2', 'cantrip_3'].map((id, i) => ({ kind: 'card', id, v: i })) } } }); });
+    assert.ok(await until(p, () => document.querySelectorAll('#opts.on .hc').length === 3), 'three cards offered');
+    const boxes = await p.evaluate(() => [...document.querySelectorAll('#opts .hc')].map(e => { const r = e.getBoundingClientRect(); return [r.top, r.bottom, r.width, innerHeight]; }));
+    for (const [t, b, w, H] of boxes) assert.ok(t >= 0 && b <= H && w > 100, `an offered card on screen: ${t}-${b}`);
     assert.deepEqual(p.errors, []);
   } finally { await p.browserContext().close(); sq.stop(); }
 });

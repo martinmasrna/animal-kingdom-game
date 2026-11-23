@@ -474,7 +474,8 @@ body:has(.game.mana) .chatp.inmatch { left: auto; right: 16px; }
 .mcard.rc .mcost { left: calc(var(--mw) * var(--rc-mx) * -1); } .mcard.rc .mstr { right: calc(var(--mw) * var(--rc-mx) * -1); }
 .mcard.rc :is(.mcost, .mstr) i { position: absolute; inset: 0; }
 .mcard.rc .mcost i { background: var(--rc-cost); clip-path: polygon(50% 0, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%); }
-.mcard.rc .mstr i { background: var(--rc-str); clip-path: polygon(var(--rc-cut) 0, calc(100% - var(--rc-cut)) 0, 100% var(--rc-cut), 100% calc(100% - var(--rc-cut)), calc(100% - var(--rc-cut)) 100%, var(--rc-cut) 100%, 0 calc(100% - var(--rc-cut)), 0 var(--rc-cut)); }
+.mcard.rc .mstr::before { content: ''; position: absolute; inset: 0; background: var(--rc-frame); clip-path: polygon(var(--rc-cut) 0, calc(100% - var(--rc-cut)) 0, 100% var(--rc-cut), 100% calc(100% - var(--rc-cut)), calc(100% - var(--rc-cut)) 100%, var(--rc-cut) 100%, 0 calc(100% - var(--rc-cut)), 0 var(--rc-cut)); }   /* its edge, in the border's grey, so a dark tile holds on a dark creature */
+.mcard.rc .mstr i { inset: calc(var(--mw) * var(--rc-se, 0)); background: var(--rc-str); clip-path: polygon(var(--rc-cut) 0, calc(100% - var(--rc-cut)) 0, 100% var(--rc-cut), 100% calc(100% - var(--rc-cut)), calc(100% - var(--rc-cut)) 100%, var(--rc-cut) 100%, 0 calc(100% - var(--rc-cut)), 0 var(--rc-cut)); }
 .mcard.rc :is(.mcost, .mstr) svg { position: relative; width: var(--rc-dg); height: auto; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .mcard.rc .dgo { stroke: #14110e; } .mcard.rc .dgi { stroke: #ece3cd; }
 /* face down (a deck, the opponent's hand): the frame, and inside it the team's colour, flat */
@@ -486,10 +487,10 @@ body:has(.game.mana) .chatp.inmatch { left: auto; right: 16px; }
 .flight:not(.carry) .fcard > .rc .rwin { overflow: visible; } .flight:not(.carry) .fcard > .rc .rfig.out { display: none; }
 /* the match on the square board: the hand a straight row of whole cards, cost and strength showing on every one (Martin,
    2026-11-23: "both need to be visible"; app.js sets --cw, their width, and --hs, the scale a hovered one is read at) */
-html.sqlook .game.mana .hc { width: var(--cw, 100px); height: calc(var(--cw, 100px) * 1.38); top: calc(802px - var(--cw, 100px) * 1.38); }
-html.sqlook .game.mana .hc:hover, html.sqlook .game.mana .hc.shown { transform: translateY(-12px) scale(var(--hs, 2)); }
-html.sqlook .game.mana .hand.mull .hc { top: 300px; width: 176px; height: 243px; }
-html.sqlook .game.mana .hand.mull .hc:hover { transform: translateY(-8px); }
+html.sqlook .game.mana #hand .hc { width: var(--cw, 100px); height: calc(var(--cw, 100px) * 1.38); top: calc(802px - var(--cw, 100px) * 1.38); }   /* the hand's only: a choice's cards (.opts) are .hc too */
+html.sqlook .game.mana #hand .hc:is(:hover, .shown):not(.sel) { transform: translateY(-12px) scale(var(--hs, 2)); }
+html.sqlook .game.mana #hand.mull .hc { top: 300px; width: 176px; height: 243px; }
+html.sqlook .game.mana #hand.mull .hc:hover { transform: translateY(-8px); }
 html.sqlook .game.mana .opts .hc { height: 235px; }
 html.sqlook .game.mana .reveal .mcard { top: -131px; }
 /* the opponent's hand: small backs, the deck's back, peeking over the top edge */
@@ -498,3 +499,10 @@ html.sqlook .game.mana .opphand .back::after { inset: 1px; clip-path: none; bord
 /* the collection on the square board: a grid tile and a dialog's card are the card at the column's width, the marks room above */
 .coll :is(.tl, .cv) .mcard.rc { --mw: 100cqw !important; margin: 0; }
 html.sqlook .pop { overflow: visible; }   /* the card's marks and its creature's head reach past its box */
+/* held over a tile it may take (carry.js carryOver), the card is its creature standing there: the frame, ground, panel, name
+   and marks fade (and come back as it leaves), the board's preview gives the tile its colour and the strength, its own
+   creature hidden (html.carrying) so there is one creature, the card's */
+.flight .fcard > .rc :is(.rbg, .rnm, .mcost, .mstr), .flight .fcard > .rc .rface::before, .flight .fcard > .rc .rwin::after { transition: opacity .14s ease-out; }
+.flight.over .fcard > .rc :is(.rbg, .rtxt, .rnm, .mcost, .mstr), .flight.over .fcard > .rc .rface::before, .flight.over .fcard > .rc .rwin::after { opacity: 0; }
+.flight.over .fcard > .rc .rwin { overflow: visible; } .flight.over .fcard > .rc .rfig.out { display: none; }
+html.carrying #board.sq .cr.unit.ghost .mstand { visibility: hidden; }

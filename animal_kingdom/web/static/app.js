@@ -4,7 +4,7 @@ import { fitStrips } from './art.js';
 import { fitNames, readSide } from './card.js';
 import { plan, DUR } from './timeline.js';
 import { fly, dive, landed as flightLanded, flying, flightEnd, FLIGHT, HIT_DELAY } from './flight.js';
-import { carry, carrying, release, drop as carryDrop } from './carry.js';
+import { carry, carrying, carryOver, release, drop as carryDrop } from './carry.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, chalk, portrait, resolvesIn, tokenWidth, RAIL, perspK, learnMap, squareLook } from './board.js';
 import { manaCard, fitPlaques, pipsHTML, costChip, leaderToken, flightGeo, powerCard, powerCostHTML } from './mana.js';
 import { playFood } from './foodfx.js';
@@ -1080,6 +1080,8 @@ function drawBoard(d) {
     beat: endBeat(), current: V.phase === 'playing' ? rel(V.game.current) : null });
   draw();
   if (startBeat(g, A, ago)) draw();
+  // the square board's held card over a tile it may take becomes the creature standing there, where the preview's figure is
+  if (squareLook() && carrying()) { const m = preview && document.querySelector(`#board .cr.ghost[data-cr="${preview.cr}"] .mstand`); carryOver(m ? m.getBoundingClientRect() : null); }
   const fc = flying(); if (fc && document.querySelector(`#board .cr.flown[data-cr="${fc}"]`)) flightLanded(fc);   // the piece is landing: the card's flight is over
 }
 
@@ -1275,11 +1277,14 @@ function wireBoard() {
       const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.min(r.right + 10, innerWidth - w - 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
     if (!lead && pop.querySelector('.ev.lead')) { pop.style.display = 'none'; pop.style.minHeight = ''; }
-    const g = e.target.closest('[data-cr]'), cr = g ? g.dataset.cr : null;
+    // A redraw replaces the tile under a still pointer, and the next move's mouseover can come from the board itself: the
+    // tile is then the one under the pointer, not none (it was the flicker of a held card over a tile, Martin, 2026-11-23).
+    const g = e.target.closest('[data-cr]') || document.elementFromPoint(e.clientX, e.clientY)?.closest('#board [data-cr]'), cr = g ? g.dataset.cr : null;
     showStack(g, cr);
     if (cr === ui.hover) return;
+    const was = ui.hover, shows = c => !!(c && lastDecision && lastDecision.rings.includes(c));
     ui.hover = cr;
-    if (ui.sel) drawBoard();
+    if (ui.sel && (shows(was) || shows(cr))) drawBoard();   // only when the preview moves: a tile that shows none needs no redraw
   });
   // touch: holding a piece reads its stack; so does tapping one when the tap would do nothing else
   let holdT = null, held = false;

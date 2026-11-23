@@ -140,11 +140,14 @@ export function leaderToken(id, owner, cards, w) {
 // CARD_LOOK: the tool's dials, under its own keys and units, so the JSON its Copy button gives pastes straight in (the hand
 // keys it also gives are the tool's, unused here). Lengths in % of the card's width; digitSize in % of its mark;
 // digitWeight in % of the numerals' own stroke; costEdge the digits' dark outline (0: none); borderLight the border's grey
-// as lightness; costColor and strColor the two marks. Martin's values of 2026-11-23.
-export const CARD_LOOK = {"markOut":5,"markUp":6.5,"markSize":30,"digitSize":109,"digitWeight":130,"costEdge":0,"tileCut":15,"border":2,"borderLight":50,"costColor":"#1f5fae","strColor":"#7a2f24"};
+// as lightness; costColor and strColor the two marks; strEdge the strength tile's edge in the border's grey, in % of the
+// card's width (0: none). Martin's values of 2026-11-23, but the marks' colours: blue and red are the teams' and nothing
+// else's, gold is mana's (the rail's pips), so the cost is a deeper amber of the pips' gold and the strength one dark stone
+// on every card (Martin, 2026-11-23, on a strength in the team's colour: "I don't see a reason it should be blue on your card").
+export const CARD_LOOK = {"markOut":5,"markUp":6.5,"markSize":30,"digitSize":109,"digitWeight":130,"costEdge":0,"tileCut":15,"border":2,"borderLight":50,"costColor":"#b77a12","strColor":"#2a2622","strEdge":2};
 if (globalThis.document) { const L = CARD_LOOK, st = document.documentElement.style, set = (k, v) => st.setProperty('--rc-' + k, v);
   set('mx', L.markOut / 100); set('my', L.markUp / 100); set('ns', L.markSize / 100); set('dg', L.digitSize + '%'); set('cut', L.tileCut + '%');
-  set('bd', L.border / 100); set('frame', `hsl(0 0% ${L.borderLight}%)`); set('cost', L.costColor); set('str', L.strColor); }
+  set('bd', L.border / 100); set('frame', `hsl(0 0% ${L.borderLight}%)`); set('cost', L.costColor); set('str', L.strColor); set('se', (L.strEdge || 0) / 100); }
 // Over its tile in flight (flightGeo): the card at the width that makes its creature the standing figure's height (board.js
 // STAND), the card's centre this many of its widths below the tile's centre (above, negative) so the creature stands where the figure will.
 const RC_END = .62, RC_UP = -.2;

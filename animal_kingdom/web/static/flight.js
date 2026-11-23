@@ -112,6 +112,7 @@ export function fly(from, target, id, cr, before, onArrive, html = null, start =
 
   done();
   const { el, fc, card } = layer(from, html, w, h);
+  if (start && start.over) el.classList.add('over');   // let go as its creature on the tile (carry.js carryOver): it flies on as the creature
   const pose = poser(k), speed = window.AK_SPEED || 1;
   let { dur, frames } = travel(card, k, x0, y0, s0, x1, y1, s1, start);
   const me = cur = { cr, el, arrived: false, onArrive, before: before || [] };
