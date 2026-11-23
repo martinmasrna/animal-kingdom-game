@@ -153,9 +153,9 @@ test('the food lines: none at rest; a side connected from its base row to the en
   assert.deepEqual(p.errors, []);
 });
 
-test('the collection in the mana rules: the mana card with its cost, sorted by cost, the deck as a tray of pieces, the mana deck rules, and the deck on home', async () => {
+test('the collection in the mana rules: the mana card with its cost, sorted by cost, the deck in the side list, the mana deck rules, and the deck on home', async () => {
   const p = await seat();
-  await p.goto(server.url + '/?deckview=tray', { waitUntil: 'networkidle0' });
+  await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
   await click(p, '#mcoll');
   await p.waitForSelector('.coll .cgrid .tl .mcard');
   const grid = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => ({ id: t.dataset.card, cost: t.querySelector('.mcost')?.dataset.n, rect: !!t.querySelector('.card') })));
@@ -177,64 +177,31 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   const heroes = await p.evaluate(() => [...document.querySelectorAll('.cgrid .tl')].map(t => t.dataset.card));
   assert.ok(heroes.length && heroes.every(id => C[id].rarity === 'legendary'), 'Heroes only shows only legendaries');
   await click(p, '#fheroes'); await wait(80);
-  // a new deck: its leader first, then cards; the tray holds a piece per copy in cost order, a count per cost, the rest
-  // empty cells; the deck rules are the mana ones (no stars)
+  // a new deck: its leader first, then cards; the side list holds a strip per card in cost order: its cost, the piece's
+  // figure, the name, no strength; two copies as two dots; the deck rules are the mana ones (no stars)
   await click(p, '#dnew'); await p.waitForSelector('.lv'); await click(p, '.lv[data-id="warlord_legend"]');
   await p.keyboard.type('Mana test'); await p.keyboard.press('Enter');
-  assert.equal(await p.$('.coll .side'), null, 'an open deck is the tray, not the side column');
-  assert.equal(await p.$$eval('.mtray .cell.empty', e => e.length), 24, 'the leader\'s card and 24 empty cells');
+  await p.waitForSelector('.side .st.mst');
   const want = ['wisp_1', 'wisp_1', 'wisp_2', 'wisp_2', 'wisp_3', 'wisp_3', 'wisp_4', 'wisp_4', 'wisp_5', 'wisp_5', 'wisp_6', 'wisp_6', 'spikes_3', 'spikes_3', 'flight_2', 'flight_2',
     'spikes_1', 'spikes_1', 'flight_6', 'flight_6', 'cantrip_2', 'cantrip_2', 'hungry_3', 'hungry_3'];
   for (const id of want) { await click(p, `.cgrid .tl[data-card="${id}"]`); await wait(30); }
-  const tray = await p.evaluate(() => ({ cells: [...document.querySelectorAll('.mtray .cell')].map(e => ({ id: e.dataset.card || null, cost: +(e.querySelector('.mcost')?.dataset.n || 0),
-      x: e.getBoundingClientRect().left, y: e.getBoundingClientRect().top })),
-    counts: [...document.querySelectorAll('.mtray .rcount')].map(b => +b.textContent), leader: document.querySelector('.mtray .tlead')?.dataset.card,
-    stars: !!document.querySelector('#fstars, .coll .lvs'), play: document.querySelector('#play').textContent, ok: !document.querySelector('#play').disabled,
-    count: document.querySelector('.mtray .fcount b').textContent, name: document.querySelector('.mtray .tname b').textContent }));
   const all = [...want, 'warlord_legend'];
-  assert.equal(tray.cells.length, 25); assert.ok(tray.cells.every(c => c.id), 'every cell filled');
-  assert.deepEqual(tray.cells.map(c => c.id).sort(), [...all].sort(), 'a piece per copy');
-  assert.deepEqual(tray.cells.map(c => c.cost), tray.cells.map(c => C[c.id].mana).sort((a, b) => a - b), 'in cost order, each with its cost');
-  // two rows, interlocking: cell i in row i % 2, each half a piece right of the one before it, and wider gaps between costs
-  const ys = [...new Set(tray.cells.map(c => Math.round(c.y)))]; assert.equal(ys.length, 2, 'two rows');
-  tray.cells.forEach((c, i) => assert.equal(Math.round(c.y), Math.min(...ys) + (i % 2) * (Math.max(...ys) - Math.min(...ys))));
-  const steps = tray.cells.slice(1).map((c, i) => c.x - tray.cells[i].x), split = tray.cells.slice(1).map((c, i) => c.cost !== tray.cells[i].cost);
-  assert.ok(Math.min(...steps.filter((d, i) => split[i])) > Math.max(...steps.filter((d, i) => !split[i])) + 10, 'the costs are parted by a crack');
-  assert.deepEqual([tray.leader, tray.stars, tray.count, tray.name], ['warlord_legend', false, '25/25', 'Mana test']);
-  assert.deepEqual([tray.ok, tray.play], [true, 'Play this deck']);
-  // hovering a piece shows its card above the tray; clicking it takes that copy out and leaves an empty cell
-  const trayTop = await p.$eval('.mtray', e => e.getBoundingClientRect().top);
-  const piece = await p.$('.mtray .cell[data-card="wisp_3"]'), b = await piece.boundingBox();
-  await p.mouse.move(b.x + 4, b.y + 4); await p.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
-  const pop = await p.evaluate(() => { const e = document.getElementById('pop'); return { on: e.style.display !== 'none', bottom: e.getBoundingClientRect().bottom, name: e.querySelector('.pname')?.textContent }; });
-  assert.ok(pop.on && pop.bottom <= trayTop && pop.name === C.wisp_3.name, 'the full card, clear of the tray');
-  await piece.click(); await wait(50);
-  assert.deepEqual(await p.evaluate(() => [document.querySelectorAll('.mtray .cell[data-card="wisp_3"]').length, document.querySelectorAll('.mtray .cell.empty').length,
-    document.querySelector('.mtray .fcount b').textContent]), [1, 1, '24/25']);
+  const list = await p.evaluate(() => ({ strips: [...document.querySelectorAll('.side .st')].map(s => ({ id: s.dataset.card, cost: +(s.querySelector('.sc .mchip')?.dataset.n || 0),
+      fig: !!s.querySelector('.hd img'), dots: s.querySelectorAll('.x i').length, x: s.querySelector('.x').textContent })), stars: !!document.querySelector('.coll .lvs, #fstars'),
+    play: document.querySelector('#play').textContent, ok: !document.querySelector('#play').disabled,
+    count: document.querySelector('.side .fcount b').textContent, name: document.querySelector('.side .dtile.on .nm-edit').textContent }));
+  assert.equal(list.stars, false, 'no stars');
+  assert.deepEqual(list.strips.map(s => s.cost), list.strips.map(s => C[s.id].mana).sort((a, b) => a - b), 'the list by cost');
+  assert.deepEqual(list.strips.map(s => [s.id, s.fig, s.x, s.dots]), list.strips.map(s => [s.id, true, '', all.filter(id => id === s.id).length > 1 ? 2 : 0]), 'figure, and two dots for a pair');
+  assert.deepEqual([list.count, list.name, list.ok, list.play], ['25/25', 'Mana test', true, 'Play this deck']);
+  // clicking a strip takes one copy out
+  await click(p, '.side .st[data-card="wisp_3"]'); await wait(50);
+  assert.deepEqual(await p.evaluate(() => [document.querySelectorAll('.side .st[data-card="wisp_3"] .x i').length, document.querySelector('.side .fcount b').textContent]), [0, '24/25']);
   await click(p, '.cgrid .tl[data-card="wisp_3"]'); await wait(50);
   await click(p, '#play');
   await p.waitForSelector('.mhome');
   assert.match(await p.$eval('.mhome .dk.on', e => e.textContent), /Mana test/, 'the deck is on home, chosen');
-  // the same deck in the side list (?deckview=list, kept in the browser): each strip its cost, the piece's figure, the name
-  // no strength; two copies as two dots, a legendary its gem; no stars anywhere
-  await p.goto(server.url + '/?deckview=list#/collection', { waitUntil: 'networkidle0' });
-  await p.evaluate(() => [...document.querySelectorAll('.dtile[data-d]')].find(e => e.textContent.includes('Mana test')).click()); await p.waitForSelector('.side .st.mst');
-  const list = await p.evaluate(() => ({ strips: [...document.querySelectorAll('.side .st')].map(s => ({ id: s.dataset.card, cost: +(s.querySelector('.sc .mchip')?.dataset.n || 0),
-      fig: !!s.querySelector('.hd img'), dots: s.querySelectorAll('.x i').length, x: s.querySelector('.x').textContent })), stars: !!document.querySelector('.coll .lvs, #fstars'), tray: !!document.querySelector('.mtray') }));
-  assert.equal(list.tray, false); assert.equal(list.stars, false, 'no stars');
-  assert.deepEqual(list.strips.map(s => s.cost), list.strips.map(s => C[s.id].mana).sort((a, b) => a - b), 'the list by cost');
-  assert.deepEqual(list.strips.map(s => [s.id, s.fig, s.x, s.dots]), list.strips.map(s => [s.id, true, '', all.filter(id => id === s.id).length > 1 ? 2 : 0]), 'figure, and two dots for a pair');
-  await p.goto(server.url + '/?deckview=tray#/collection', { waitUntil: 'networkidle0' });
   assert.deepEqual(p.errors, []);
-});
-
-test('the tray fits the window: a deck of 25 at 1280 x 720, 1512 x 800 and 1920 x 1080', async () => {
-  const p = await seat();
-  await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
-  const r = await p.evaluate(async () => { const { trayGeo } = await import('/static/collection.js');
-    return [[1280, 720], [1512, 800], [1920, 1080]].map(([W, H]) => { const g = trayGeo(W, H);
-      return { W, H, w: g.w, used: 24 + g.lead + 22 + (24 * g.p / 2 + 6 * g.crack + g.w) + 22 + 250 + 24, tall: g.dy + g.h + 26 + 18 }; }); });
-  for (const g of r) { assert.ok(g.used <= g.W, `${g.W} x ${g.H}: ${g.used} px wide`); assert.ok(g.w >= 48, `${g.W}: pieces ${g.w} px`); assert.ok(g.tall <= .26 * g.H, `${g.W} x ${g.H}: ${g.tall} px tall`); }
 });
 
 

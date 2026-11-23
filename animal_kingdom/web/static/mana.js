@@ -55,7 +55,7 @@ const GH = GEM * P;
 const COST_SVG = c => { const h = 100 * P * .62, w = h * 2 / 1.2;
   return `<svg viewBox="0 0 100 ${(100 * P).toFixed(2)}"><filter id="mink"><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .88 0"/></filter><polygon points="${hexPts(0, 0, 100, 100 * P)}"/><image class="mnum" filter="url(#mink)" href="/static/hex/num/${Math.max(0, Math.min(20, c))}.svg" x="${(50 - w / 2).toFixed(2)}" y="${(50 * P - h / 2).toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}"/></svg>`; };
 const COST_AT = box(X0, Y0 + YS - GH / 4, GEM, GH);
-// The piece alone (a deck tray, a shown hand) keeps the cost in the piece's own upper-left corner, sharing its two edges.
+// The piece alone (the collection's grid, a shown hand) keeps the cost in the piece's own upper-left corner, sharing its two edges.
 const PIECE_COST_AT = box(0, .25 * P * (1 - .3), .3, .3 * P);
 // A leader's power's cost: in the strength's drawer at the piece's bottom point, its bottom point the piece's and its lower
 // edges the piece's, where a card's strength sits (a leader has none to show; Martin, 2026-11-21: "on bottom, where
@@ -86,7 +86,7 @@ export function manaCard(c, { str = c.str, cost = null, owner = 'A', w = 100, cl
     + (cost != null ? `<div class="mcost" data-n="${cost}" style="${COST_AT}">${COST_SVG(cost)}</div>` : '') + '</div>';
 }
 
-// The piece alone, as a hand shows it under its plaque: the token with its cost hexagon (the collection's deck tray).
+// The piece alone, as a hand shows it under its plaque: the token with its cost hexagon (the collection's grid).
 // `str: null` draws no strength (a leader, as the rail draws it); `cost: null` no cost mark.
 export function manaPiece(c, { str = c.str, cost = null, owner = 'A', w = 60, cls = '', attrs = '' } = {}) {
   if (squareLook()) return rectCard(c, { str, cost, owner, w, cls, attrs });   // the square board's card is all picture at rest: it is its own piece

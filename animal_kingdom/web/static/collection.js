@@ -21,13 +21,6 @@ const costOf = c => c.mana ?? 99;   // a card with no cost sorts last
 const MANA_COSTS = [1, 2, 3, 4, 5, 6, 7], TOP = 7;
 const costKey = k => Math.min(Math.max(k, 1), TOP);
 const plus = k => k === TOP ? '<sup>+</sup>' : '';
-// The open deck in the mana rules, two ways (Martin, 2026-11-20: he wanted to try the deck as board tiles, and named the side
-// list cleaned up as the other way; neither is settled): `tray`, a band of pieces under the grid, or `list`, the side
-// column's strips, the default (Martin, 2026-11-21: staging to show "the same deck detail view ... on the right"). ?deckview=list or ?deckview=tray on the address switches, kept in the browser like ?rules.
-const DECKVIEW = (() => { const q = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('deckview');
-  try { if (q) localStorage.setItem('ak:deckview', q === 'list' ? 'list' : 'tray'); return localStorage.getItem('ak:deckview') === 'tray' ? 'tray' : 'list'; }
-  catch { return q === 'tray' ? 'tray' : 'list'; } })();
-const tray = () => (DECKVIEW === 'tray');
 // A card in the grid, a pop or a dialog: the card with its cost. `w`: its width.
 const face = (c, w, opts = {}) => (manaCard(c, { cost: c.mana ?? null, w }));
 const fitAll = el => { fitNames(el); fitPlaques(el); };
@@ -133,46 +126,6 @@ const curveHTML = list => { const n = MANA_COSTS.map(() => 0);
   return `<div class="mcurve">${MANA_COSTS.map((k, i) => `<div class="cb${n[i] ? '' : ' zero'}"><div class="slot"><b>${n[i]}</b><i style="height:${(n[i] / top * 100).toFixed(1)}%"></i></div>`
     + `<span class="ck">${costChip(k)}${plus(k)}</span></div>`).join('')}</div>`; };
 
-// The deck as a tray of pieces (DECKVIEW 'tray'): the leader as one large piece at the left, then a cell for each of the
-// deck's cards in two interlocking rows of board tiles, every copy its own piece, filled in cost order and zig-zagging
-// between the rows (cell i in row i % 2), so each cost is a run of pieces; a crack the width of .4 of a piece parts one
-// cost from the next, and a count under each run says how many it holds. The cells not yet filled are empty outlines
-// after the last run, so the tray shows how full the deck is. Every measure is in the piece's width `w`, chosen for the
-// window: as wide as fits 25 cells and six cracks across, and no taller than the window can spare.
-const SIDE_W = 250, PAD = 24, GAP = 22, PH = 1.15556;   // the controls' width; the tray's edges; between its parts; a piece's height
-// On the square board the cells are its cards, a brick wall rather than a comb: each row a card's height (and room for the
-// marks over its top) below the last, the gap wide enough that two marks never touch, and smaller, so the tray stays as tall.
-export function trayGeo(W, H, n = 25, cracks = 6) {
-  const sq = squareLook(), ph = sq ? 1.38 : PH, sp = sq ? .12 : .06, most = Math.max(48, Math.min(84, H * .085)) * (sq ? .75 : 1);
-  let w = most;
-  for (let k = 0; k < 4; k++) w = Math.min(most, (W - 2 * PAD - 1.75 * w - 2 * GAP - SIDE_W) / ((n - 1) * (.47 + sp) + 1 + .4 * cracks));
-  w = Math.floor(w);
-  const h = w * ph, gap = Math.max(2, Math.round(w * sp));
-  return { w, h, p: w + gap, dy: sq ? h + gap : .75 * h + gap * .866, crack: Math.round(w * .4), lead: Math.round(1.75 * w), ph };
-}
-const HEX_SVG = `<svg viewBox="0 0 100 ${100 * PH}" preserveAspectRatio="none"><polygon vector-effect="non-scaling-stroke" points="50,1 99,${25 * PH} 99,${75 * PH} 50,${100 * PH - 1} 1,${75 * PH} 1,${25 * PH}"/></svg>`;
-const RECT_SVG = '<svg viewBox="0 0 100 138" preserveAspectRatio="none"><rect vector-effect="non-scaling-stroke" x="1" y="1" width="98" height="136" rx="7"/></svg>';   // an empty place for a card of the square board
-function trayHTML(d) {
-  const leader = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null;
-  const by = deckOrder(C), ids = [...d.list].filter(id => C[id]).sort((a, b) => costOf(C[a]) - costOf(C[b]) || by(a, b));
-  const n = Math.max(R.deckSize, ids.length), runs = [];
-  for (const id of ids) { const k = costOf(C[id]); if (!runs.length || runs.at(-1).k !== k) runs.push({ k, ids: [] }); runs.at(-1).ids.push(id); }
-  if (ids.length < n) runs.push({ k: null, ids: Array(n - ids.length).fill(null) });
-  const g = trayGeo(innerWidth, innerHeight, n);   // room for every crack, so the pieces keep their size as the deck fills
-  let i = 0, x0 = 0, cells = '', counts = '';
-  const seen = {}, over = id => (seen[id] = (seen[id] || 0) + 1) > (R.copies[C[id].rarity] ?? 9) || (false);   // a copy past its limit, or a card the rules refuse: marked
-  runs.forEach((r, ri) => { if (ri) x0 += g.crack; const first = i;
-    for (const id of r.ids) { const at = `left:${(i * g.p / 2 + x0).toFixed(1)}px;top:${(i % 2 * g.dy).toFixed(1)}px;width:${g.w}px;height:${g.h.toFixed(1)}px`;
-      cells += id ? `<div class="cell${id === leader ? ' lcopy' : ''}${over(id) ? ' over' : ''}" data-card="${id}" style="${at}">${manaPiece(C[id], { cost: C[id].mana ?? null, w: g.w })}</div>`
-        : `<div class="cell empty" style="${at}">${squareLook() ? RECT_SVG : HEX_SVG}</div>`;
-      i++; }
-    });   // no count under a cost's run: the pieces are there to count (Martin, 2026-11-20)
-  const combW = (i - 1) * g.p / 2 + x0 + g.w, combH = g.dy + g.h;
-  const lead = leader ? `<div class="tlead" id="dlead" data-card="${leader}" style="width:${g.lead}px">${manaPiece(C[leader], { str: null, w: g.lead })}</div>`
-    : `<div class="tlead none" id="dlead" style="width:${g.lead}px;height:${(g.lead * g.ph).toFixed(1)}px">${squareLook() ? RECT_SVG : HEX_SVG}<span>Choose a leader</span></div>`;
-  return `<div class="tleads" style="height:${combH.toFixed(1)}px">${lead}</div><div class="comb" style="width:${combW.toFixed(1)}px;height:${(combH + 26).toFixed(1)}px">${cells}${counts}</div>`;
-}
-
 function render(app, all) {
   const keep = [...app.querySelectorAll('.clist, .cgrid')].map(e => e.scrollTop);
   if (st.was !== !!st.open) keep[1] = 0; st.was = !!st.open;   // switching list and deck starts the column at its top
@@ -214,14 +167,7 @@ function render(app, all) {
     : `<div class="clist">${all.map(tile).join('')}${all.length < R.decksMax ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${R.decksMax}</b><span>Decks</span></div>${FB}<button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
-  // The tray (mana rules, a deck open): the deck under the grid, its name, count, Play and Done at its right end; the side
-  // column is for choosing a deck only.
-  const ctl = open && `<div class="tside"><div class="tname"><b class="nm-edit" title="Rename">${esc(open.name)}</b><span class="tacts"><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic txt" id="dshare" data-tip="Copy a link to this deck">Share</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></span></div>
-      <button class="play" id="play"${open.list.length === R.deckSize && !issue ? '' : ' disabled'}>${issue || 'Play this deck'}</button>
-      <div class="frow"><div class="fcount"><span class="fc"><b>${open.list.length}/${R.deckSize}</b><span>Cards</span></span></div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`;
-  app.innerHTML = open && tray()
-    ? `<div class="coll mscr trayed">${head}<div class="cgrid">${grid}</div><div class="mtray">${trayHTML(open)}${ctl}</div><div class="modal" id="cmodal"></div></div>`
-    : `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side${st.sheet ? ' up' : ''}"><button class="grip" id="grip" aria-label="Decks"></button>${column}</div><div class="modal" id="cmodal"></div></div>`;
+  app.innerHTML = `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side${st.sheet ? ' up' : ''}"><button class="grip" id="grip" aria-label="Decks"></button>${column}</div><div class="modal" id="cmodal"></div></div>`;
   lazyArt(app.querySelector('.cgrid'));
   fitStrips(app);   // the deck tiles are as wide as the column (upright, the window)
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
@@ -334,27 +280,23 @@ function wire(app, all, open) {
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
     onHold(e, () => { hidePop(); zoom(app, C[e.dataset.card]); });   // touch: hold to read it large
   });
-  app.querySelectorAll('.side [data-card], .mtray .cell[data-card]').forEach(e => { e.onclick = () => {
+  app.querySelectorAll('.side [data-card]').forEach(e => { e.onclick = () => {
       if (e.dataset.card === open.leader) return X.toast(`${C[open.leader].name.split(':')[0]} leads this deck: choose another leader to take the card out`);
       open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); };
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
     onHold(e, () => { hidePop(); zoom(app, C[e.dataset.card]); }); });
-  const fl = flash && [...app.querySelectorAll(`.side .st[data-card="${flash}"], .mtray .cell[data-card="${flash}"]`)].at(-1); flash = null;
-  if (fl) { if (fl.closest('.side')) fl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); fl.classList.add('flash'); }
-  const tl = app.querySelector('.mtray .tlead'); if (tl && tl.dataset.card) onHold(tl, () => { hidePop(); zoom(app, C[tl.dataset.card]); });
+  const fl = flash && [...app.querySelectorAll(`.side .st[data-card="${flash}"]`)].at(-1); flash = null;
+  if (fl) { fl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); fl.classList.add('flash'); }
 
   // Hovering a card or a strip shows the full card, beside it and clear of the deck column. Only the pointer moving opens
   // it: a scroll slides cards under a still pointer, so it closes the card and none opens until the pointer moves again
   // (the browser's own move after a scroll carries no movement).
-  const side = app.querySelector('.side')?.getBoundingClientRect().left ?? innerWidth, trayTop = app.querySelector('.mtray')?.getBoundingClientRect().top;
+  const side = app.querySelector('.side')?.getBoundingClientRect().left ?? innerWidth;
   let on = null;
   const show = e => { on = e; const r = e.getBoundingClientRect(), inSide = !!e.closest('.side');
     const pw = powerOf(C[e.dataset.card]);
     pop.className = 'pop' + (pw ? ' ldr' : '') + ((' mcoll')); pop.innerHTML = face(C[e.dataset.card], 230) + pw; pop.style.display = 'flex'; fitPlaques(pop);
     const w = pop.offsetWidth, h = pop.offsetHeight;
-    if (e.closest('.mtray')) {   // a piece in the tray: its card above the tray, centred on it, covering none of the tray
-      pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
-      pop.style.top = Math.max(8, trayTop - h - 6) + 'px'; return; }
     // a strip of the deck: the card left of the whole deck column, clear of every strip's cost (Martin, 2026-11-21)
     pop.style.left = (inSide ? e.closest('.side').getBoundingClientRect().left - w - 14 : r.right + 10 + w > side ? r.left - w - 10 : r.right + 10) + 'px';
     pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
@@ -437,9 +379,6 @@ function pickLeader(app, d, done) {
 // Screen-wide keys and paste, live only while the collection is on screen.
 function wireGlobal() {
   const here = () => document.querySelector('.coll'), typing = e => /INPUT|SELECT|TEXTAREA/.test(e.target.tagName);
-  // the tray's pieces are measured for the window: a new size draws it again
-  let rs = null;
-  addEventListener('resize', () => { clearTimeout(rs); rs = setTimeout(() => { const h = here(); if (h && h.classList.contains('trayed') && !h.querySelector('.modal.on')) render(h.parentElement, decks()); }, 120); });
   addEventListener('keydown', e => {
     if (!here() || here().querySelector('.modal.on')) return;
     if (e.key === '/' && !typing(e)) { e.preventDefault(); here().querySelector('#q').focus(); }
