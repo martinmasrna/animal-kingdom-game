@@ -362,6 +362,18 @@ fn run_roar(st: &mut State, roar: Roar, unit: &Unit, cr: Tile) {
         // this turn's mana, on top of what is left, past the cap too
         Roar::GainMana => st.mana_spent -= st.cfg().mana_blob_mana,
         Roar::Scorch => {
+            // every adjacent enemy at once, no choice, so Stealth doesn't hide it; at 0 the rule removes it
+            let burn = st.cfg().scorch_burn;
+            for i in 0..st.g.map.neighbors[cr as usize].len() {
+                let nb = st.g.map.neighbors[cr as usize][i];
+                if let Some(top) = st.board.top_mut(nb) {
+                    if top.owner != owner {
+                        top.strength_mod -= burn;
+                        let top = *top;
+                        st.emit(Ev::Strength { iid: top.iid, card: top.card, owner: top.owner, n: -burn });
+                    }
+                }
+            }
             for (i, r) in st.g.map.regions.iter().enumerate() {
                 if r.mask & (1u64 << cr) != 0 {
                     st.scorched |= 1u64 << i;

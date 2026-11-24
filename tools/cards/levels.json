@@ -1418,7 +1418,16 @@
         "prev": ""
       },
       "by": "claude",
-      "at": 1795488502
+      "at": 1795492226
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1795492226
     }
   },
   "plunderer": {

@@ -805,8 +805,8 @@ def test_a_golden_egg_taken_by_scout_is_drawn_and_draws_a_card():
     assert len(hand) == 2 and "golden_egg" in hand and len(s.decks["A"]) == 2
 
 
-def test_scorch_eats_and_its_regions_produce_no_food_for_the_rest_of_the_game():
-    assert CARDS["scorch"].keywords == {"Flight", "Hungry"} and (CARDS["scorch"].cost, CARDS["scorch"].base_strength) == (3, 5)
+def test_scorch_eats_burns_its_neighbours_and_its_regions_produce_no_food_for_the_rest_of_the_game():
+    assert CARDS["scorch"].keywords == {"Flight", "Hungry"} and (CARDS["scorch"].cost, CARDS["scorch"].base_strength) == (4, 5)
     reg = next(iter(BOARD.regions.values()))
     a, b, c = reg.corners
     s = state(turn=11, hands={"A": ["scorch"]}, food={"A": 15, "B": 15})
@@ -819,6 +819,13 @@ def test_scorch_eats_and_its_regions_produce_no_food_for_the_rest_of_the_game():
     assert rules.region_income(s, "A") == 0                            # held, and it pays nothing
     t = GameState.from_dict(s.to_dict())
     assert sorted(t.scorched) == sorted(s.scorched) and rules.region_income(t, "A") == 0
+    s = state(turn=11, hands={"A": ["scorch"]}, food={"A": 15, "B": 15})
+    put(s, a, "wisp_1", "A"); put(s, c, "wisp_1", "B")
+    around = [n for n in BOARD.neighbors(c) if n != a]
+    put(s, around[0], "wisp_2", "B"); put(s, around[1], "test_one", "B")   # 4 and 1: down to 3, and to 0 (gone)
+    rules.apply_action(s, PlaceAction("scorch", ("cr", c)))
+    assert effective_strength(s, s.board[around[0]][-1]) == CARDS["wisp_2"].base_strength - 1 and around[1] not in s.board
+    assert effective_strength(s, s.board[a][-1]) == CARDS["wisp_1"].base_strength   # its own side untouched
 
 
 def test_the_raiders_and_the_assassins_counts_show_on_their_leaders():
