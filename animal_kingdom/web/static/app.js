@@ -1249,12 +1249,12 @@ function drawBoard(d) {
   draw();
   if (startBeat(g, A, ago)) draw();
   // the square board's held card over a tile it may take becomes the creature standing there, where the preview's figure is
-  // over the enemy den while it may raid, it becomes its creature poised over the den's food, about to dive in: a card
+  // over the enemy den while it may raid, it becomes its creature in the middle of the den's food, about to take it: a card
   // shows where it goes by going there, on a tile or into the den alike (Martin, 2026-11-24, on hovering the den)
   if (squareLook() && carrying()) {
     const m = preview && document.querySelector(`#board .cr.ghost[data-cr="${preview.cr}"] .mstand`), core = ui.hoverDen && denTarget(d) && document.querySelector('#board .mden.B[data-hq] .core');
     if (m) carryOver(m.getBoundingClientRect());
-    else if (core) { const r = core.getBoundingClientRect(), s = r.width * 1.25; carryOver({ left: r.left + r.width / 2 - s / 2, top: r.top - s * .62, width: s, height: s }); }
+    else if (core) { const r = core.getBoundingClientRect(), s = r.width * 1.1; carryOver({ left: r.left + r.width / 2 - s / 2, top: r.top + r.height / 2 - s / 2, width: s, height: s }); }
     else carryOver(null);
   }
   const fc = flying(); if (fc && document.querySelector(`#board .cr.flown[data-cr="${fc}"]`)) flightLanded(fc);   // the piece is landing: the card's flight is over
