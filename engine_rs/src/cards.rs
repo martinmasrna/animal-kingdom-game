@@ -68,6 +68,8 @@ pub enum Roar {
     SageCard,
     /// "Roar: gain 2 mana."
     GainMana,
+    /// "Roar: adjacent regions produce no food for the rest of the game." (the regions its tile is part of)
+    Scorch,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -134,6 +136,7 @@ pub fn behaviour(id: &str) -> Behaviour {
         "sage_legend" => Some(Roar::SageCard),
         ELF => Some(Roar::ElfCard),
         "mana_blob" => Some(Roar::GainMana),
+        "scorch" => Some(Roar::Scorch),
         "rhino" => Some(Roar::Crush(CrushLimit::Rhino)),
         "albatross" => Some(Roar::Crush(CrushLimit::Albatross)),
         "young_rhino" => Some(Roar::Crush(CrushLimit::YoungRhino)),

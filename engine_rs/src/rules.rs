@@ -221,8 +221,9 @@ fn end_turn(st: &mut State) -> Result<(), String> {
 pub fn region_income(st: &State, player: Player) -> i32 {
     let own = st.board.own[player as usize];
     let (mut food, mut held) = (0, 0);
-    for r in &st.g.map.regions {
-        if r.mask & own == r.mask {
+    for (i, r) in st.g.map.regions.iter().enumerate() {
+        // a scorched region produces no food, the Elf's 1 more included
+        if r.mask & own == r.mask && st.scorched & (1u64 << i) == 0 {
             food += r.food;
             held += 1;
         }

@@ -1132,7 +1132,7 @@ function viewerGame() {
   const G = V.game, you = V.you, them = opp(), board = {};
   for (const [cr, st] of Object.entries(G.board)) board[dcr(cr)] = st.map(u => ({ ...u, owner: rel(u.owner) }));
   return { board, leaders: G.leaders ? { A: G.leaders[you], B: G.leaders[them] } : {}, food: { A: G.food[you], B: G.food[them] }, income: { A: G.income[you], B: G.income[them] },
-    regionFood: G.regionFood && { A: G.regionFood[you], B: G.regionFood[them] }, winFood: G.winFood };
+    regionFood: G.regionFood && { A: G.regionFood[you], B: G.regionFood[them] }, winFood: G.winFood, scorched: G.scorched || [] };
 }
 function viewerMap() {
   if (V.you === 'A') return MAP;

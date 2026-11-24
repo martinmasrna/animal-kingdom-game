@@ -344,6 +344,13 @@ fn run_roar(st: &mut State, roar: Roar, unit: &Unit, cr: Tile) {
         Roar::SageCard => st.power_discount[owner as usize] += st.cfg().sage_card_power_discount,
         // this turn's mana, on top of what is left, past the cap too
         Roar::GainMana => st.mana_spent -= st.cfg().mana_blob_mana,
+        Roar::Scorch => {
+            for (i, r) in st.g.map.regions.iter().enumerate() {
+                if r.mask & (1u64 << cr) != 0 {
+                    st.scorched |= 1u64 << i;
+                }
+            }
+        }
     }
 }
 

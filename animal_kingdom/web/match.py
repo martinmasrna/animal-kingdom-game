@@ -488,6 +488,7 @@ class Match:
             "toAct": to_act,
             "first": st.first_player,
             "canPass": game.can_pass(st),
+            "scorched": list(st.scorched),   # the regions that produce no food for the rest of the game (the Scorch)
             "clock": {"on": False} if not self.clock else (self._mulligan_clock(s) if self.mulliganing() and self.clock.get("mull_until") else
                                      {**{k: self.clock[k] for k in ("bank", "holder", "free", "since")}, "now": time.time(),
                                      "on": self.clock_deadline() is not None}),

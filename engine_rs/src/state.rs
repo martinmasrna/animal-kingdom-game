@@ -422,6 +422,8 @@ pub struct State {
     pub food_produced: [i32; 2],
     /// The raids each player has made this game (the Raider's power).
     pub raids: [i32; 2],
+    /// The regions that produce no food for the rest of the game, a bit for each in the map's order (the Scorch).
+    pub scorched: u64,
     pub effect_steps_this_turn: i32,
     pub caps: Vec<Cap>,
     pub next_iid: i32,
@@ -465,6 +467,7 @@ impl Clone for State {
             food_lost: self.food_lost,
             food_produced: self.food_produced,
             raids: self.raids,
+            scorched: self.scorched,
             effect_steps_this_turn: self.effect_steps_this_turn,
             caps: self.caps.clone(),
             next_iid: self.next_iid,
@@ -512,6 +515,7 @@ impl Clone for State {
         self.food_lost = src.food_lost;
         self.food_produced = src.food_produced;
         self.raids = src.raids;
+        self.scorched = src.scorched;
         self.effect_steps_this_turn = src.effect_steps_this_turn;
         if !(self.caps.is_empty() && src.caps.is_empty()) {
             self.caps.clone_from(&src.caps);
@@ -666,6 +670,7 @@ impl State {
             food_lost: [0, 0],
             food_produced: [0, 0],
             raids: [0, 0],
+            scorched: 0,
             effect_steps_this_turn: 0,
             caps: Vec::new(),
             next_iid: 0,

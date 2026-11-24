@@ -54,6 +54,7 @@ export const CARD_NUMS = [
   "sky_maw_4",
   "hungry_5",
   "porcupine",
+  "scorch",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

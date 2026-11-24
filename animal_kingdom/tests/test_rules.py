@@ -803,3 +803,19 @@ def test_a_golden_egg_taken_by_scout_is_drawn_and_draws_a_card():
     rules.apply_action(s, ChoiceAction("deck:1"))                    # the Golden Egg
     hand = sorted(u.card_id for u in s.hands["A"])
     assert len(hand) == 2 and "golden_egg" in hand and len(s.decks["A"]) == 2
+
+
+def test_scorch_eats_and_its_regions_produce_no_food_for_the_rest_of_the_game():
+    assert CARDS["scorch"].keywords == {"Flight", "Hungry"} and (CARDS["scorch"].cost, CARDS["scorch"].base_strength) == (3, 5)
+    reg = next(iter(BOARD.regions.values()))
+    a, b, c = reg.corners
+    s = state(turn=11, hands={"A": ["scorch"]}, food={"A": 15, "B": 15})
+    put(s, a, "wisp_1", "A"); put(s, b, "wisp_1", "A"); put(s, c, "wisp_1", "B")   # an enemy of 2 on its last tile
+    assert places(s, "scorch") == {c}                                  # Flight and Hungry: only onto an enemy it beats
+    rules.apply_action(s, PlaceAction("scorch", ("cr", c)))
+    assert s.board[c][-1].card_id == "scorch" and reg.id in s.scorched
+    others = [r for r in BOARD.regions.values() if c in r.corners]
+    assert sorted(s.scorched) == sorted(r.id for r in others)          # every region its tile is part of
+    assert rules.region_income(s, "A") == 0                            # held, and it pays nothing
+    t = GameState.from_dict(s.to_dict())
+    assert sorted(t.scorched) == sorted(s.scorched) and rules.region_income(t, "A") == 0

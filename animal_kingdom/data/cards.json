@@ -602,6 +602,19 @@
       "keywords": [
         "Flight"
       ]
+    },
+    {
+      "id": "scorch",
+      "name": "Scorch",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 5,
+      "text": "Flight. Hungry. Roar: adjacent regions produce no food for the rest of the game.",
+      "cost": 3,
+      "keywords": [
+        "Flight",
+        "Hungry"
+      ]
     }
   ]
 }

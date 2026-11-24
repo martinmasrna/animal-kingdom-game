@@ -1400,5 +1400,16 @@
       "by": "claude",
       "at": 1795486870
     }
+  },
+  "scorch": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795488502
+    }
   }
 }

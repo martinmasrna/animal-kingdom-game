@@ -239,7 +239,8 @@ export function renderBoard(el, M, g, cards, ui) {
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
   for (const reg of M.regions) {
     const [x, y] = stoneAt(reg), h = held.find(r => r.id === reg.id);
-    { s += put(`rdot${h ? ' ' + h.owner : ''}`, x, y); continue; }   // the mana board: a dot, coloured while one side holds all three
+    // the mana board: a dot, coloured while one side holds all three; burnt out once scorched (it pays nothing again)
+    { s += put((g.scorched || []).includes(reg.id) ? 'rdot x' : `rdot${h ? ' ' + h.owner : ''}`, x, y); continue; }
     s += put(`stone pboss ${h ? h.owner : ''}${reg.c.every((v, i) => shownAt && v === shownAt[i]) ? ' shown' : ''}`, x, y, chalk('+' + pays(reg, h)));
   }
 
