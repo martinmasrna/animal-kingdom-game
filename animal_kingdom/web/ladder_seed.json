@@ -1,69 +1,49 @@
 {
- "version": "2026-11-23 7e874b4c",
+ "version": "2026-11-25 2be9a938",
  "map": "map_sq16",
- "games": 900,
+ "games": 800,
  "levels": {
   "1": {
    "bot": "greedy",
-   "rating": 1280.3
+   "rating": 1318.0
   },
   "2": {
    "bot": "turn:budget=1,eval=greedy",
-   "rating": 1396.4
+   "rating": 1382.2
   },
   "3": {
    "bot": "turn:budget=1,eval=race,mull=2",
-   "rating": 1501.2
+   "rating": 1380.0
   },
   "4": {
    "bot": "turn:budget=20000,eval=race,mull=2",
-   "rating": 1628.8
+   "rating": 1661.3
   },
   "5": {
    "bot": "turn:budget=200000,reply=12,per=2,eval=race,mull=2",
-   "rating": 1693.3
+   "rating": 1758.4
   }
  },
  "ratings": {
-  "bot:1:control": {
-   "rating": 1243.5,
-   "with": "2d7cfbe072b1"
-  },
-  "bot:2:control": {
-   "rating": 1447.1,
-   "with": "3cfc3ff0870c"
-  },
-  "bot:3:control": {
-   "rating": 1572.3,
-   "with": "502ed4722a79"
-  },
-  "bot:4:control": {
-   "rating": 1611.0,
-   "with": "147538347642"
-  },
-  "bot:5:control": {
-   "rating": 1646.6,
-   "with": "b8c61f96d32e"
-  },
   "bot:1:combo_token": {
-   "rating": 1317.1,
-   "with": "32cb697cc428"
+   "rating": 1318.0,
+   "with": "63f198bd00d7"
   },
   "bot:2:combo_token": {
-   "rating": 1345.8,
-   "with": "50653e965f75"
+   "rating": 1382.2,
+   "with": "c8812b243693"
   },
   "bot:3:combo_token": {
-   "rating": 1430.1,
-   "with": "8383eba84e75"
+   "rating": 1380.0,
+   "with": "7d0394b7cec3"
   },
   "bot:4:combo_token": {
-   "rating": 1646.6,
-   "with": "15d2a2ad4712"
+   "rating": 1661.3,
+   "with": "8a575b7feff0"
   },
   "bot:5:combo_token": {
-   "rating": 1740.0,
-   "with": "5083411b1a62"
+   "rating": 1758.4,
+   "with": "a269464525b0"
   }
  }
 }

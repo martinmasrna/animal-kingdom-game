@@ -1,0 +1,204 @@
+{
+ "version": "0.0.4",
+ "name": "Patch 0.0.4",
+ "date": "25 November 2026",
+ "rules": [
+  "Scouting a card counts as drawing it, so scouting a Golden Egg draws you a card too."
+ ],
+ "powers": [
+  {
+   "was": {
+    "id": "warlord_legend",
+    "kind": "passive",
+    "text": "When you cover an enemy, gain 1 food.",
+    "mana": null
+   },
+   "now": {
+    "id": "warlord_legend",
+    "kind": "passive",
+    "text": "Your Hungry cards have +2 strength.",
+    "mana": null
+   }
+  },
+  {
+   "was": {
+    "id": "raider_legend",
+    "kind": "passive",
+    "text": "Your raids destroy 1 more food.",
+    "mana": null
+   },
+   "now": {
+    "id": "raider_legend",
+    "kind": "power",
+    "text": "At the end of your turn, if Leeroy is in your deck, he gains +1 strength. Power: swap Leeroy with the card above him in your deck; if he's on top, draw him. If he's in your hand, shuffle him into your deck instead.",
+    "mana": 1
+   }
+  }
+ ],
+ "changed": [
+  {
+   "was": {
+    "id": "bird_egg",
+    "name": "Bird Egg",
+    "rarity": "common",
+    "str": 1,
+    "text": "Fall: add two [Flight 1] to your hand.",
+    "kw": [],
+    "mana": 1,
+    "fig": [
+     400,
+     436
+    ]
+   },
+   "now": {
+    "id": "bird_egg",
+    "name": "Fireball Egg",
+    "rarity": "common",
+    "str": 1,
+    "text": "Fall: add two [Flight 1] to your hand.",
+    "kw": [],
+    "mana": 1,
+    "fig": [
+     400,
+     570
+    ]
+   }
+  },
+  {
+   "was": {
+    "id": "raider_legend",
+    "name": "Leeroy",
+    "rarity": "legendary",
+    "str": 5,
+    "text": "Double strength when raiding.",
+    "kw": [],
+    "mana": 3,
+    "fig": [
+     400,
+     400
+    ]
+   },
+   "now": {
+    "id": "raider_legend",
+    "name": "Leeroy",
+    "rarity": "legendary",
+    "str": 2,
+    "text": "Double strength when raiding.",
+    "kw": [],
+    "mana": 2,
+    "fig": [
+     400,
+     400
+    ]
+   }
+  }
+ ],
+ "added": [
+  {
+   "id": "plunderer",
+   "name": "Plunderer",
+   "rarity": "common",
+   "str": 3,
+   "text": "Whenever you raid, draw a card.",
+   "kw": [],
+   "mana": 3,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "scorch",
+   "name": "Scorch",
+   "rarity": "common",
+   "str": 5,
+   "text": "Hungry. Flight. Roar: adjacent units get -1 strength. Adjacent regions produce no food for the rest of the game.",
+   "kw": [
+    "Flight",
+    "Hungry"
+   ],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "flight_10",
+   "name": "Flight 10",
+   "rarity": "common",
+   "str": 10,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 10,
+   "fig": [
+    400,
+    400
+   ]
+  }
+ ],
+ "removed": [
+  {
+   "id": "flight_2",
+   "name": "Flight 2",
+   "rarity": "common",
+   "str": 2,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 2,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "flight_4",
+   "name": "Flight 4",
+   "rarity": "common",
+   "str": 4,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "young_albatross",
+   "name": "Young Albatross",
+   "rarity": "common",
+   "str": 2,
+   "text": "Flight. Roar: remove all adjacent enemies with strength 2 or less.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 4,
+   "fig": [
+    400,
+    400
+   ]
+  },
+  {
+   "id": "flight_5",
+   "name": "Flight 5",
+   "rarity": "common",
+   "str": 5,
+   "text": "Flight.",
+   "kw": [
+    "Flight"
+   ],
+   "mana": 5,
+   "fig": [
+    400,
+    400
+   ]
+  }
+ ]
+}
