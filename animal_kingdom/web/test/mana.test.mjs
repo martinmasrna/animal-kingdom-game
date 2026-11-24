@@ -322,3 +322,36 @@ test('a gauntlet lists two games against each other deck, and a game starts with
     assert.deepEqual(p.errors, []);
   } finally { await p.browserContext().close(); }
 });
+
+// The held card over the board (Martin, 2026-11-24: "flickering like crazy"): the tile under the mouse comes from the board's
+// geometry, so one slow pass over a tile it may take turns the card into its creature once and back once, not dozens of
+// times; and over the enemy den, a card that may raid becomes its creature over the den's food.
+test('a held card turns into its creature once per tile it passes, and over the den while it may raid', async () => {
+  const sq = await startServer({ AK_MAP: 'map_sq16' }), p = await seat();
+  try {
+    await p.setViewport({ width: 1512, height: 800 });
+    await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);   // the grip is motion: off when reduced
+    await p.goto(sq.url + '/', { waitUntil: 'networkidle0' });
+    await giveDeck(p, 'w1', 'Fly', { flight_1: 2, flight_3: 2, flight_6: 2, wisp_1: 2, wisp_2: 2, wisp_3: 2, cantrip_2: 2, cantrip_3: 2, mama_spore: 2, spikes_1: 2, spikes_3: 2, hungry_1: 2, warlord_legend: 1 });
+    await click(p, '#mprac'); await p.waitForSelector('.mhome [data-deck].on');
+    for (let i = 0; i < 20 && !(await p.evaluate(() => location.hash.startsWith('#/m/'))); i++) { await click(p, '#mgo').catch(() => {}); await wait(300); }
+    assert.ok(await until(p, () => !!document.querySelector('#skip'))); await click(p, '#skip');
+    assert.ok(await until(p, () => window.__ak().V.game.decision === 'yours' && !window.__ak().PB.busy, null, 30000));
+    await wait(1200);
+    const iid = await p.evaluate(() => { const g = window.__ak().V.game; const h = g.hand.find(c => c.id.startsWith('flight_') && c.cost <= 1) || g.hand.find(c => c.cost <= 1); return h ? h.iid : null; });
+    if (iid == null) return;   // no card this cheap dealt: nothing to hold
+    const c = await p.evaluate(i => { const r = document.querySelector(`#hand .hc[data-iid="${i}"]`).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, iid);
+    await p.mouse.move(c[0], c[1]); await p.mouse.down(); await p.mouse.up(); await wait(300);
+    await p.evaluate(() => { window.__fl = 0; new MutationObserver(() => window.__fl++).observe(document.querySelector('.flight.carry'), { attributes: true, attributeFilter: ['class'] }); });
+    const t = await p.evaluate(() => { const cr = window.__ak().d.rings[0], r = document.querySelector(`#board [data-cr="${cr}"]`).getBoundingClientRect(); return [r.left + r.width / 2, r.top, r.height]; });
+    for (let y = t[1] + t[2] + 20; y > t[1] - 60; y -= 2) { await p.mouse.move(t[0], y); await wait(6); }
+    const switches = await p.evaluate(() => window.__fl);
+    assert.ok(switches >= 1 && switches <= 4, `the card switched ${switches} times over one tile`);
+    if (await p.evaluate(() => window.__ak().V.game.hand.find(h => h.iid === window.__ak().ui.selIid)?.id.startsWith('flight_'))) {
+      const den = await p.evaluate(() => { const r = document.querySelector('#board .mden.B[data-hq] .core').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+      await p.mouse.move(den[0], den[1]); await wait(400);
+      assert.ok(await p.evaluate(() => document.querySelector('.flight.carry').classList.contains('over')), 'over the den, the flier is its creature');
+    }
+    assert.deepEqual(p.errors, []);
+  } finally { await p.browserContext().close(); sq.stop(); }
+});

@@ -1249,7 +1249,14 @@ function drawBoard(d) {
   draw();
   if (startBeat(g, A, ago)) draw();
   // the square board's held card over a tile it may take becomes the creature standing there, where the preview's figure is
-  if (squareLook() && carrying()) { const m = preview && document.querySelector(`#board .cr.ghost[data-cr="${preview.cr}"] .mstand`); carryOver(m ? m.getBoundingClientRect() : null); }
+  // over the enemy den while it may raid, it becomes its creature poised over the den's food, about to dive in: a card
+  // shows where it goes by going there, on a tile or into the den alike (Martin, 2026-11-24, on hovering the den)
+  if (squareLook() && carrying()) {
+    const m = preview && document.querySelector(`#board .cr.ghost[data-cr="${preview.cr}"] .mstand`), core = ui.hoverDen && denTarget(d) && document.querySelector('#board .mden.B[data-hq] .core');
+    if (m) carryOver(m.getBoundingClientRect());
+    else if (core) { const r = core.getBoundingClientRect(), s = r.width * 1.25; carryOver({ left: r.left + r.width / 2 - s / 2, top: r.top - s * .62, width: s, height: s }); }
+    else carryOver(null);
+  }
   const fc = flying(); if (fc && document.querySelector(`#board .cr.flown[data-cr="${fc}"]`)) flightLanded(fc);   // the piece is landing: the card's flight is over
 }
 
@@ -1460,6 +1467,32 @@ const onBoard = (e, sel) => { const t = e.target.closest(sel); if (t) return t; 
   if (!p || p.clientX == null) return null;
   if (sel === '[data-cr]') return tileAt(p.clientX, p.clientY);
   const at = document.elementFromPoint(p.clientX, p.clientY); return at ? at.closest('#board ' + sel) : null; };
+// The tile under the mouse, from the board's own geometry (board.js crAt), never from what the browser finds under the
+// pointer: on the tilted board that answer changed with every redraw beneath a still pointer, so the preview a hover drew
+// moved the hover, which redrew again (a held card flipped between the pointer and the tile 36 times in one slow pass over
+// a tile, Martin, 2026-11-24: "flickering like crazy"). From geometry, the hover is the pointer's alone.
+function crUnder(x, y) {
+  const st = document.getElementById('stage'); if (!st) return null;
+  const S = st.getBoundingClientRect(), k = S.width / st.offsetWidth;
+  return crAt((x - S.left) / k, (y - S.top) / k);
+}
+// Whether the point is over the enemy den's food ball (its circle, a little widened), from its box, not a hit test.
+function overDen(x, y) {
+  const c = document.querySelector('#board .mden.B[data-hq] .core'); if (!c) return false;
+  const r = c.getBoundingClientRect(), rad = r.width / 2 * 1.35;
+  return Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2)) <= rad;
+}
+function hoverAt(x, y) {
+  const den = !!ui.sel && overDen(x, y);
+  if (den !== !!ui.hoverDen) { ui.hoverDen = den; if (carrying()) drawBoard(); }
+  const cr = den ? null : crUnder(x, y), g = cr ? document.querySelector(`#board [data-cr="${cr}"]`) : null;
+  showStack(g, cr);
+  if (cr === ui.hover) return;
+  const was = ui.hover, shows = c => !!(c && lastDecision && lastDecision.rings.includes(c));
+  ui.hover = cr;
+  if (ui.sel && (shows(was) || shows(cr))) drawBoard();   // only when the preview moves: a tile that shows none needs no redraw
+}
+addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && screen === 'game' && !ui.dragging && document.getElementById('board')) hoverAt(e.clientX, e.clientY); }, { passive: true });
 function wireBoard() {
   const board = document.getElementById('board');
   board.addEventListener('click', e => {
@@ -1491,14 +1524,7 @@ function wireBoard() {
       const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.min(r.right + 10, innerWidth - w - 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
     if (!lead && pop.querySelector('.ev.lead')) { pop.style.display = 'none'; pop.style.minHeight = ''; }
-    // A redraw replaces the tile under a still pointer, and the next move's mouseover can come from the board itself: the
-    // tile is then the one under the pointer, not none (it was the flicker of a held card over a tile, Martin, 2026-11-23).
-    const g = e.target.closest('[data-cr]') || document.elementFromPoint(e.clientX, e.clientY)?.closest('#board [data-cr]'), cr = g ? g.dataset.cr : null;
-    showStack(g, cr);
-    if (cr === ui.hover) return;
-    const was = ui.hover, shows = c => !!(c && lastDecision && lastDecision.rings.includes(c));
-    ui.hover = cr;
-    if (ui.sel && (shows(was) || shows(cr))) drawBoard();   // only when the preview moves: a tile that shows none needs no redraw
+    hoverAt(e.clientX, e.clientY);
   });
   // a finger pressed anywhere on the board while a target is asked for: dragged, it aims the arrow (the window's pointer handlers)
   board.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' && ui.aim && !ui.aim.locked) ui.aimPress = { x: e.clientX, y: e.clientY }; });
