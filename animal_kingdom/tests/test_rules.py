@@ -575,7 +575,7 @@ def test_the_warlords_hungry_cards_have_two_more_strength_in_hand_and_on_the_boa
 
 def test_leeroy_grows_each_of_your_turns_in_the_deck_and_the_power_moves_him_up_one_or_shuffles_him_back():
     assert LEADERS[RAIDER] == ("power", "At the end of your turn, if Leeroy is in your deck, he gains +1 strength. Power: swap Leeroy "
-                                        "with the card above him in your deck. If he's in your hand, shuffle him into your deck instead.")
+                                        "with the card above him in your deck; if he's on top, draw him. If he's in your hand, shuffle him into your deck instead.")
     base = CARDS["raider_legend"].base_strength
     s = state(turn=19, hands={"A": ["wisp_1"]}, decks={"A": ["wisp_3", "raider_legend", "wisp_5", "wisp_6"], "B": ["wisp_1"] * 4},
               leaders={"A": RAIDER}, food={"A": 15, "B": 15})
@@ -587,13 +587,12 @@ def test_leeroy_grows_each_of_your_turns_in_the_deck_and_the_power_moves_him_up_
     rules.apply_action(s, PassAction())                                # B's turn end doesn't grow him
     assert s.leeroy_growth["A"] == CFG.leeroy_growth
     assert s.hands["A"][-1].card_id == "wisp_6" and s.decks["A"][-1] == "raider_legend"
-    rules.apply_action(s, LeaderAction())                              # on top, the swap does nothing, and costs all the same
-    assert s.decks["A"][-1] == "raider_legend"
-    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
+    rules.apply_action(s, LeaderAction())                              # on top, the power draws him
+    assert s.hands["A"][-1].card_id == "raider_legend" and "raider_legend" not in s.decks["A"]
     leeroy = next(u for u in s.hands["A"] if u.card_id == "raider_legend")
-    assert effective_strength(s, leeroy) == base + 2 * CFG.leeroy_growth          # drawn: he stops growing
+    assert effective_strength(s, leeroy) == base + CFG.leeroy_growth              # drawn: he stops growing
     rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
-    assert s.leeroy_growth["A"] == 2 * CFG.leeroy_growth
+    assert s.leeroy_growth["A"] == CFG.leeroy_growth
     rules.apply_action(s, LeaderAction())                              # in hand: shuffled back into the deck
     assert all(u.card_id != "raider_legend" for u in s.hands["A"]) and "raider_legend" in s.decks["A"]
     t = GameState.from_dict(s.to_dict())
@@ -885,7 +884,7 @@ def test_the_assassins_count_shows_on_its_leader():
     assert leader_view(s, "A")["count"] == {"n": 0, "of": CFG.assassin_nth_card}
     rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1")))
     assert leader_view(s, "A")["count"]["n"] == 1
-    assert leader_view(s, "B")["count"] == {"str": CARDS["raider_legend"].base_strength}   # Leeroy: his strength
+    assert "count" not in leader_view(s, "B")
 
 
 def test_the_plunderer_draws_a_card_for_each_raid_while_it_stands():

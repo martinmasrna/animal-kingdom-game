@@ -855,8 +855,7 @@ pub fn leader_usable(st: &State, player: Player) -> bool {
         return false;
     }
     if Some(lead) == st.g.named.raider {
-        // Leeroy in hand, or anywhere in the deck: on top the swap does nothing, but where he is stays hidden, from his
-        // player too, so the power can't say so
+        // Leeroy in hand, or anywhere in the deck (on top, the power draws him)
         return leeroy_at(st, player).is_some();
     }
     true // the Sage draws: from an empty deck too, where the draw costs food (fatigue)
@@ -889,11 +888,12 @@ pub fn do_leader(st: &mut State, player: Player) -> Result<(), String> {
     if Some(lead) == st.g.named.sage {
         st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, lead));
     } else if Some(lead) == st.g.named.raider {
-        // "Swap Leeroy with the card above him in your deck. If he's in your hand, shuffle him into your deck."
+        // "Swap Leeroy with the card above him in your deck (on top, draw him). If he's in your hand, shuffle him into your deck."
         let p = player as usize;
         match leeroy_at(st, player) {
             Some(Leeroy::Deck(i)) if i + 1 < st.decks[p].len() => st.decks[p].swap(i, i + 1), // the deck's top is its end
-            Some(Leeroy::Deck(_)) | None => {}
+            Some(Leeroy::Deck(_)) => st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, lead)), // on top: drawn
+            None => {}
             Some(Leeroy::Hand(i)) => {
                 let u = st.hands[p].remove(i);
                 let at = st.rng.randbelow(st.decks[p].len() + 1);

@@ -140,13 +140,10 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     usable = st.current == p and st.pending is None and st.result is None and game.mana_left(st, p) >= cost \
         and leader_usable(st, p)
     spent = kind == "power" and st.current == p and st.power_used   # once a turn: "Used" until their next
-    # what a leader counts to: the Assassin's cards this turn toward its draw; the Raider's Leeroy, his strength now (public:
-    # it is a count of his player's turns, only where he waits in the deck is hidden)
+    # what a leader counts to: the Assassin's cards this turn toward its draw
     count = None
     if lid == game.ASSASSIN and st.config.assassin_nth_card > 0:
         count = {"n": st.played_this_turn % st.config.assassin_nth_card if st.current == p else 0, "of": st.config.assassin_nth_card}
-    elif lid == game.RAIDER:
-        count = {"str": game.CARDS[game.RAIDER].base_strength + st.leeroy_growth[p]}
     return {"id": lid, "kind": kind, "text": text, "usable": usable, **({"cost": cost, "spent": spent} if kind == "power" else {}),
             **({"count": count} if count else {})}
 
