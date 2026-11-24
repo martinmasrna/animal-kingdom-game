@@ -82,7 +82,7 @@ function versus(vs, cards) {
 // ---------------------------------------------------------------- a ranked match's ending
 // Two full screens, one straight after the other, the match's own last word (Martin, 2026-11-23: the rank change "should
 // land as close to victory screen as possible, and it should be on fullscreen. It should be the highlight, the
-// culmination of the match itself"). First the verdict: your card and the word, about two seconds, nothing to press.
+// culmination of the match itself"). First the verdict: your leader's card and the word, about two seconds, nothing to press.
 // Then your rank: your standing as it was going in, and what the match did lands on it. Continue leads to the ranked
 // screen. `V`: the match's view (its `league` is your standing after, with `before`; its `rating` the change in Legend);
 // `live`: the end was seen happening (else, a finished match opened again, the last screen as it ended); `done()`: Continue.
@@ -96,7 +96,9 @@ export function finale(V, live, { cards, done }) {
   const el = document.createElement('div'); el.className = 'rkfin'; el.id = 'rkfin';
   const you = V.you, w = V.game.result.winner, word = w === null ? 'Draw' : w === you ? 'Victory' : 'Defeat';
   const lg = V.league, before = lg && lg.before, lead = V.game.leaders && V.game.leaders[you];
-  const me = { name: ((V.seats[you] || {}).name || '').split('#')[0], leader: lead && lead.id, league: before };
+  // the verdict's card is your leader's picture alone: no name, and no rank, which is the next screen's (Martin, 2026-11-24:
+  // "I shouldn't see my rank on the card, that comes after. I also don't have to see my name there")
+  const me = { name: '', leader: lead && lead.id, league: null };
   const goOn = '<button class="rkplay" id="rkcont">Continue</button>';
   const wire = () => { el.querySelector('#rkcont').onclick = () => { el.remove(); done(); }; };
   const rank = () => {   // the match's last screen

@@ -65,7 +65,8 @@ test('Ranked: home\'s door, the ranked screen, versus, a match, its two-screen e
   await p.waitForFunction(() => !document.getElementById('rkvs'), { timeout: 6000 });   // it lifts by itself
   // the ending: the verdict (your card and the word, nothing else, nothing to press), then your rank and Continue
   await concede(p); await p.waitForSelector('.rkverdict');
-  assert.deepEqual(await words(p, '#rkfin'), ['Player', '3', 'Defeat'], 'your card (your name, your league\'s mark) and the word');
+  assert.deepEqual(await words(p, '#rkfin'), ['Defeat'], 'your leader\'s picture and the word: no name, and no rank before its own screen');
+  assert.ok(await p.$('.rkverdict .rkcard img') && !(await p.$('.rkverdict .rkmark')));
   assert.equal(await p.$('#rkfin button'), null, 'the verdict has nothing to press');
   assert.equal(await p.$eval('#endov', e => e.classList.contains('on')), false, 'the match\'s own end box stays away');
   await p.waitForSelector('#rkrank', { timeout: 6000 });
@@ -108,9 +109,9 @@ test('what a match did lands on your rank: wins, a streak\'s two, a division, a 
     document.getElementById('rkfin')?.remove(); v.id = 'T' + Math.random(); v.game.result.winner = word === 'Draw' ? null : word === 'Victory' ? v.you : (v.you === 'A' ? 'B' : 'A');
     v.league = after && { ...after, before }; v.rating = rating; window.__done = 0; m.finale(v, true, { cards: a.CARDS, done: () => { window.__done++; } }); }, word, before, after, rating);
   const silver = (...a) => lg(5, 'Silver', '#c9d0d8', ...a);
-  // a win on a streak: the verdict first with your standing going in on your card, then two wins land, and the next two wait
+  // a win on a streak: the verdict first, then two wins land, and the next two wait
   await play('Victory', silver(2, 1, 2), silver(2, 3, 3));
-  assert.deepEqual(await words(p, '#rkfin'), ['Player', '2', 'Victory']);
+  assert.deepEqual(await words(p, '#rkfin'), ['Victory']);
   await p.waitForSelector('#rkrank');
   assert.deepEqual(await stand(p, '#rkrank'), { name: 'Silver 2', mark: '2', wins: 5, won: 1, ghosts: 2, delta: null }, 'it opens on the standing going in');
   await p.waitForFunction(() => document.querySelectorAll('#rkrank .rkwins i.on').length === 3, { timeout: 5000 });
@@ -135,7 +136,7 @@ test('what a match did lands on your rank: wins, a streak\'s two, a division, a 
   assert.deepEqual(await words(p, '#rkfin'), ['2056', 'Legend', '+13', 'Continue']);
   // a draw moves nothing: the verdict is the last screen and carries Continue
   await play('Draw', null, null, null);
-  assert.deepEqual(await words(p, '#rkfin'), ['Player', 'Draw', 'Continue']);
+  assert.deepEqual(await words(p, '#rkfin'), ['Draw', 'Continue']);
   await p.click('#rkcont'); assert.equal(await p.evaluate(() => window.__done), 1); assert.equal(await p.$('#rkfin'), null);
   assert.deepEqual(p.errors, []);
   await p.browserContext().close();

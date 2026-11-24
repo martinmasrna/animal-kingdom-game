@@ -68,6 +68,7 @@
 .rkverdict { --cw: min(200px, 26vh); justify-content: center; gap: 24px; }
 .rkverdict.won { background: radial-gradient(circle closest-side at 50% 42%, rgba(var(--you-rgb), .34), transparent); }   /* a round light behind your card, whatever the screen's shape */
 .rkverdict h1 { font: 700 56px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; text-shadow: 0 2px 4px rgba(0,0,0,.5); }
+.rkverdict .rkcard .rnm { display: none; }   /* the picture alone: the card's name bar stays empty here */
 .rkverdict.lost .rkcard { opacity: .6; } .rkverdict:is(.lost, .drawn) h1 { color: var(--ink2); }
 .rkverdict .rkplay { max-width: 440px; margin-top: 24px; }
 .rkrank .rkstand { flex: 1; gap: 24px; }
