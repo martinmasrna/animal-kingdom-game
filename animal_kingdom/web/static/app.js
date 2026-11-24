@@ -1311,7 +1311,9 @@ function drawRail(G, d) {
     // dims, no label (Martin, 2026-11-21: "remove AI-slop label")
     const isPow = L && L.kind === 'power';
     const tok = L ? `<div class="ltok${isPow ? ' pw' : ''}${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:${LEAD_W}px">${leaderToken(L.id, side, CARDS, LEAD_W)}${isPow ? powerCostHTML(L.cost ?? cost) : ''}</div></div>` : '';
-    return `<div class="mlead ${side}" style="${spot(railSpot('lead', side))}">${tok}</div>`;
+    // what the leader counts to (the Raider's raids, the Assassin's cards this turn): a dot filled for each counted
+    const cnt = L && L.count ? `<div class="lcount ${side}">${Array.from({ length: L.count.of }, (_, i) => `<i class="${i < L.count.n ? 'on' : ''}"></i>`).join('')}</div>` : '';
+    return `<div class="mlead ${side}" style="${spot(railSpot('lead', side))}">${tok}${cnt}</div>`;
   };
   // the deck: its cards face down, each under the top one a step darker so the pile's edges read, as thick as what is left
   const deck = side => {

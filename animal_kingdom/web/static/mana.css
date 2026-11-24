@@ -583,3 +583,10 @@ html.sqlook .game.port .panel.lastp .row .mini { position: relative; width: 72px
 .mhome .grow .gfirst { opacity: .7; }
 .mhome .gres.w { color: #7bd88f; }
 .mhome .gres.l { color: #ff7a6b; }
+
+/* what a leader counts to (the Raider's raids, the Assassin's cards this turn): a row of dots under its token, filled in
+   its team's colour for each counted, hollow for each still to go (Martin, 2026-11-24) */
+.game.mana .mlead .lcount { position: absolute; left: 0; right: 0; top: 100%; display: flex; justify-content: center; gap: 7px; margin-top: 6px; }
+.game.mana .mlead .lcount i { width: 11px; height: 11px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .55); background: rgba(0, 0, 0, .35); }
+.game.mana .mlead .lcount.A i.on { background: #5aa2f0; box-shadow: 0 0 6px rgba(90, 162, 240, .8); }
+.game.mana .mlead .lcount.B i.on { background: #e05a4c; box-shadow: 0 0 6px rgba(224, 90, 76, .8); }

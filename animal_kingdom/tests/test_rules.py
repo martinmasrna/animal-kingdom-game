@@ -819,3 +819,13 @@ def test_scorch_eats_and_its_regions_produce_no_food_for_the_rest_of_the_game():
     assert rules.region_income(s, "A") == 0                            # held, and it pays nothing
     t = GameState.from_dict(s.to_dict())
     assert sorted(t.scorched) == sorted(s.scorched) and rules.region_income(t, "A") == 0
+
+
+def test_the_raiders_and_the_assassins_counts_show_on_their_leaders():
+    from animal_kingdom.web.match import leader_view
+    s = state(turn=19, hands={"A": ["flight_1"] * 4}, leaders={"A": RAIDER, "B": ASSASSIN}, food={"A": 15, "B": 15})
+    assert leader_view(s, "A")["count"] == {"n": 0, "of": CFG.raider_power_raids}
+    for k in range(1, 5):
+        rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
+        assert leader_view(s, "A")["count"]["n"] == k % CFG.raider_power_raids   # 1, 2, then back to 0 at the third raid
+    assert leader_view(s, "B")["count"] == {"n": 0, "of": CFG.assassin_nth_card}   # not their turn: nothing played
