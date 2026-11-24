@@ -262,6 +262,29 @@ test('upright on the square board: the phone layout, its hand and End turn on sc
   } finally { await p.browserContext().close(); sq.stop(); }
 });
 
+// The 4 by 5 square board (AK_MAP=map_sq20, an experiment of 2026-11-24): its five rows fit the screens made for four, every
+// tile on screen between the two dens, on a wide window and on a phone held upright.
+test('the 4 by 5 board: twenty tiles and twelve regions, all on screen between the dens, wide and upright', async () => {
+  const sq = await startServer({ AK_MAP: 'map_sq20' }), p = await seat();
+  try {
+    await p.goto(sq.url + '/', { waitUntil: 'networkidle0' }); await giveDeck(p, 'w1', 'Cheap', CHEAP);
+    await p.goto(sq.url + '/', { waitUntil: 'networkidle0' }); await click(p, '#mprac'); await p.waitForSelector('.mhome [data-deck].on');
+    for (let i = 0; i < 20 && !(await p.evaluate(() => location.hash.startsWith('#/m/'))); i++) { await click(p, '#mgo').catch(() => {}); await wait(300); }
+    assert.ok(await until(p, () => !!document.querySelector('#scr.mana #hand.mull')), 'the opening hand');
+    await click(p, '#skip'); assert.ok(await until(p, () => window.__ak().V.game.decision === 'yours' && !window.__ak().PB.busy, null, 30000));
+    for (const [w, h] of [[1512, 800], [390, 664], [430, 850]]) {
+      await p.setViewport({ width: w, height: h, deviceScaleFactor: 1, isMobile: w < 500, hasTouch: w < 500 }); await wait(400);
+      const m = await p.evaluate(() => { const box = e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom }; }, mid = e => { const r = e.getBoundingClientRect(); return r.top + r.height / 2; };
+        return { tiles: [...document.querySelectorAll('#board .cr')].map(box), dots: document.querySelectorAll('#board .rdot').length, bases: [document.querySelectorAll('#board .cr.base.A').length, document.querySelectorAll('#board .cr.base.B').length],
+          dens: [mid(document.querySelector('#board .mden.B .core')), mid(document.querySelector('#board .mden.A .core'))], W: innerWidth, H: innerHeight }; });
+      assert.deepEqual([m.tiles.length, m.dots, m.bases], [20, 12, [4, 4]], `the board at ${w} x ${h}`);
+      for (const b of m.tiles) assert.ok(b.l >= 0 && b.t >= 0 && b.r <= m.W && b.b <= m.H, `a tile on screen at ${w} x ${h}: ${JSON.stringify(b)}`);
+      assert.ok(m.dens[0] < Math.min(...m.tiles.map(b => b.t)) + 40 && m.dens[1] > Math.max(...m.tiles.map(b => b.b)) - 40, `the dens past the board's ends at ${w} x ${h}`);
+    }
+    assert.deepEqual(p.errors, []);
+  } finally { await p.browserContext().close(); sq.stop(); }
+});
+
 // The target arrow (static/aim.js): asked to choose the enemy a Roar acts on, an arrow runs from the unit whose Roar it is
 // to the pointer, settling on a legal target; once the target is chosen it is gone.
 test('the target arrow: during a target prompt it starts at the source and settles on the target; after the choice it is gone', async () => {

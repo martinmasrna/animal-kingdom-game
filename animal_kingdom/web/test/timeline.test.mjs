@@ -26,6 +26,18 @@ test("their raid from the hand takes a card off their hand's count as it plays",
   for (const { view: v, step } of plan(prev, next)) if (step) assert.equal(v.game.handCount.A, 3);
 });
 
+test('where raids steal, the food a raid or fatigue takes lands in the other den in the same step', () => {
+  const raider = { iid: 7, id: 'flight_3', str: 3 };
+  const prev = view([raider], { A: 1, B: 4 }, 15, [{ seq: 1, e: 'turn_start', player: 'A' }]);
+  const next = view([], { A: 0, B: 4 }, 10, [...prev.game.events,
+    { seq: 2, e: 'raid', player: 'A', iid: 7, card: 'flight_3', den: 'B', str: 3, n: 3, from_hand: true, to: 'A' },
+    { seq: 3, e: 'food', player: 'B', n: -2, fatigue: 2, to: 'A' }]);
+  next.game.food.A = 20;
+  const taken = plan(prev, next).filter(s => s.step && s.step.kind === 'raid');
+  assert.deepEqual(taken.map(s => [s.step.den, s.step.to, s.step.n]), [['B', 'A', 3], ['B', 'A', 2]]);
+  assert.deepEqual(taken.map(s => s.view.game.food), [{ A: 18, B: 12 }, { A: 20, B: 10 }]);
+});
+
 test("their chosen target plays as an aim step from its source, before the effect; your own plays none (you aimed it)", () => {
   const hunter = { iid: 5, id: 'hunter_5', owner: 'B', str: 4 }, prey = { iid: 6, id: 'wisp_3', owner: 'A', str: 6 };
   const base = (events, board) => ({ ...view([], { A: 3, B: 3 }, 15, events), game: { ...view([], { A: 3, B: 3 }, 15, events).game, board } });
