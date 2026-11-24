@@ -11,7 +11,7 @@ import { playFood } from './foodfx.js';
 import { drawAim, clearAim } from './aim.js';
 import { decodeDeck } from './deckcode.js';
 import { openPatch, newestPatch } from './patch.js';
-import { rankedScreen, playRanked, finale, endFinale } from './ranked.js';
+import { rankedScreen, leaderboardScreen, playRanked, finale, endFinale } from './ranked.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripsHTML } from './collection.js';
 import { onHold, holdEvents } from './menu.js';
 import { tokenBase, numeral } from './token.js';
@@ -201,6 +201,7 @@ function route() {
   if (parts[0] === 'gauntlet' && parts[1]) return gauntletScreen(decodeURIComponent(parts[1]));   // one deck against each other deck of yours
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   if (parts[0] === 'ranked') { screen = 'ranked'; return freshStanding().then(() => { if (screen === 'ranked') rankedHome(); }); }   // where you are between ranked matches
+  if (parts[0] === 'leaderboard') { screen = 'leaderboard'; return freshStanding().then(() => { if (screen === 'leaderboard') leaderboardScreen(app, { api, me: ME }); }); }   // the leagues and who is in them
   if (parts[0] === 'patch') { history.replaceState(null, '', '#/'); manaHome(); return openPatch({ version: parts[1], seen: seePatch }); }   // a link to the notes: home, the window over it
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'friend' && id) { manaHome(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }

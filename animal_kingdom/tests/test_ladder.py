@@ -210,14 +210,19 @@ def test_a_ranked_result_moves_the_rating_the_league_and_the_leaderboard(monkeyp
         assert server.ladder.get(pid).games == 1 and server.ladder.get(bot).rating < before.rating
         server.rate_match(match)
         assert server.ladder.get(pid).games == 1, "a match is rated once"
-        # the leaderboard: the person from their first rated game, with their league and no number; the bots one row
-        # per level and deck, best first, each with its deck's leader
-        rows = (await (await c.get("/api/leaderboard", headers=h)).json())["rows"]
+        # the leaderboard: every league, and everyone best first, each with the league the client shows them in; the
+        # bots one row per level and deck, called by their band alone and standing in the league their rating falls in
+        board = await (await c.get("/api/leaderboard", headers=h)).json()
+        rows = board["rows"]
+        assert [lg["name"] for lg in board["leagues"]] == [n for n, _, _ in server.tiers_mod.LEAGUES] and board["leagues"][0]["league"] == 1
         mine = next(r for r in rows if r["you"])
-        assert mine["league"]["label"] == "Wood 3" and mine["rating"] is None
+        assert mine["league"]["label"] == "Wood 3" and mine["league"]["stars"] == 1 and "#" not in mine["name"]
         bots = [r for r in rows if r["bot"]]
-        assert len(bots) == len(ladder.LEVELS) * len(server.ladder.decks) and all(r["name"].endswith(" Bot)") and r["leader"] for r in bots)
-        assert [int(r["rating"]) for r in bots] == sorted((int(r["rating"]) for r in bots), reverse=True)
+        assert len(bots) == len(ladder.LEVELS) * len(server.ladder.decks) and all(r["name"].endswith(" Bot") and "(" not in r["name"] for r in bots)
+        assert all(r["league"]["name"] == server.tiers_mod.name(server.tiers_mod.league_of(server.ladder.get(lid).rating))
+                   for r, lid in zip(bots, sorted(server.ladder.bots(), key=lambda b: -server.ladder.get(b).rating)))
+        leagues = [r["league"]["league"] for r in rows]
+        assert leagues == sorted(leagues, reverse=True), "best first: a higher league before a lower"
         # home shows the place that row has
         me = await (await c.get("/api/me", headers=h)).json()
         assert me["rank"] == rows.index(mine) + 1 and me["league"]["stars"] == 1

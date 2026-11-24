@@ -9,7 +9,7 @@
 import { leaderToken, manaCard } from './mana.js';
 
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
-const ICON = { open: '<svg class="rkic" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg>', plus: '<svg class="rkic" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>',
+const ICON = { board: '<svg class="rkic" viewBox="0 0 24 24"><path d="M4 20v-8h5v8M9.5 20V5h5v15M15 20v-5h5v5"/></svg>', open: '<svg class="rkic" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg>', plus: '<svg class="rkic" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>',
   back: '<svg class="rkic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>' };
 
 // A standing is the server's tiers.view: {name, label, colour, top, division, stars, of, streak, rating}.
@@ -41,7 +41,7 @@ export function rankedScreen(app, { me, decks, chosen, cards, deckSize, choose, 
   const legal = decks.filter(d => !d.short), token = d => `<div class="tokpiece">${d.leader && cards[d.leader] ? leaderToken(d.leader, 'A', cards, 96) : ''}</div>`;   // its size is the plate's (ranked.css --tw)
   const plate = !chosen ? `<a class="rkdeck none" id="rkdeck" href="#/collection" aria-label="Build a deck">${ICON.plus}</a>`
     : `<button class="rkdeck" id="rkdeck"${legal.length > 1 ? '' : ' disabled'} aria-label="Your deck">${token(chosen)}<b>${esc(chosen.name)}</b>${legal.length > 1 ? ICON.open : ''}</button>`;
-  app.innerHTML = `<div class="rkscreen"><a class="rkback" href="#/" aria-label="Back">${ICON.back}</a>
+  app.innerHTML = `<div class="rkscreen"><a class="rkback" href="#/" aria-label="Back">${ICON.back}</a><a class="rkback rkdoor" id="rkboard" href="#/leaderboard" aria-label="Leaderboard">${ICON.board}</a>
     ${me && me.league ? standing(me.league) : '<div class="rkstand"></div>'}
     <div class="rkfoot">${plate}<button class="rkplay${chosen ? '' : ' off'}" id="rkgo"${chosen ? '' : ' disabled'}>Play</button></div>
     <div class="rksheet" id="rksheet" hidden><div class="rkrows">${decks.map(d => `<button class="rkdeck${chosen && d.id === chosen.id ? ' on' : ''}${d.short ? ' bad' : ''}" data-deck="${esc(d.id)}"${d.short ? ' disabled' : ''}>${token(d)}<b>${esc(d.name)}</b>${d.short > 0 ? `<small>${d.list.length}/${deckSize}</small>` : ''}</button>`).join('')}</div></div></div>`;
@@ -49,6 +49,34 @@ export function rankedScreen(app, { me, decks, chosen, cards, deckSize, choose, 
   if (chosen && legal.length > 1) deck.onclick = () => { sheet.hidden = false; };
   sheet.onclick = e => { const b = e.target.closest('[data-deck]'); if (b && !b.disabled) return choose(b.dataset.deck); if (!e.target.closest('.rkrows')) sheet.hidden = true; };
   document.getElementById('rkgo').onclick = () => play();
+}
+
+// ---------------------------------------------------------------- the leaderboard
+// One screen for where you are among the leagues and who is in them (Martin, 2026-11-24, on its mockup: "yeah looks
+// good"): every league along the top, yours chosen as it opens and marked with a dot; under it the chosen league's
+// players, best first, each their place, their name, the wins in their division as five small dots and the division,
+// in Legend their rating. Your own row is outlined, and kept at the foot when the list ends before it. No leader's
+// picture in a row ("what are the hero icons for? What is the point?"). The same layout on a wide screen ("I think it
+// looks nicer than 2 columns").
+const SHOWN = 100;   // a league's best; past them only your own row
+export async function leaderboardScreen(app, { api, me }) {
+  app.innerHTML = `<div class="rkscreen rklb"><a class="rkback" href="#/ranked" aria-label="Back">${ICON.back}</a><div class="rkstrip" id="rkstrip"></div><h1 id="rklg"></h1><div class="rklist" id="rklist"></div><div class="rkyou" id="rkyou" hidden></div></div>`;
+  const r = await api('/api/leaderboard').catch(() => null), data = r && r.ok ? await r.json() : { leagues: [], rows: [] };
+  const strip = document.getElementById('rkstrip'); if (!strip) return;   // the screen was left meanwhile
+  const mine = me && me.league ? me.league.league : 0;
+  const row = (x, n) => `<div class="rkrow${x.you ? ' you' : ''}"><span class="n">${n}</span><span class="nm">${esc(x.name).replace(/_/g, '_<wbr>')}</span><span class="st" style="--c:${esc(x.league.colour)}">`
+    + (x.league.top ? `<b>${esc(x.league.rating)}</b>` : `<i class="mini">${Array.from({ length: x.league.of }, (_, i) => `<i${i < x.league.stars ? ' class="on"' : ''}></i>`).join('')}</i>${mark(x.league)}`) + '</span></div>';
+  const show = sel => {
+    strip.innerHTML = data.leagues.map(l => `<button class="rklgb${l.league === sel ? ' on' : ''}${l.league === mine ? ' mine' : ''}" data-league="${l.league}" style="--c:${esc(l.colour)}" aria-label="${esc(l.name)}"><i></i></button>`).join('');
+    const lg = data.leagues.find(l => l.league === sel), rows = data.rows.filter(x => x.league.league === sel), at = rows.findIndex(x => x.you);
+    document.getElementById('rklg').textContent = lg ? lg.name : '';
+    document.getElementById('rklist').innerHTML = rows.slice(0, SHOWN).map((x, i) => row(x, i + 1)).join('');
+    const foot = document.getElementById('rkyou'); foot.hidden = at < SHOWN; foot.innerHTML = at >= SHOWN ? row(rows[at], (at + 1).toLocaleString('en')) : '';
+    const on = strip.querySelector('.on'); if (on) strip.scrollLeft = on.offsetLeft - (strip.clientWidth - on.offsetWidth) / 2;   // the chosen league in the middle of a row that scrolls
+    const own = document.querySelector('#rklist .you'); if (own) own.scrollIntoView({ block: 'nearest' });
+  };
+  strip.onclick = e => { const b = e.target.closest('[data-league]'); if (b) show(+b.dataset.league); };
+  show(mine || (data.leagues[0] || {}).league);
 }
 
 // Start a ranked match with `deck` (a deck spec): the server answers with the match at once, and with the two players for

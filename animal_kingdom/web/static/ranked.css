@@ -47,6 +47,29 @@
 .rkrows .rkdeck.on { background: var(--loud); box-shadow: var(--loud-sh); }
 .rkrows .rkdeck.bad { background: var(--well); box-shadow: var(--well-sh); color: var(--ink2); }
 
+/* ---- the leaderboard: every league along the top, the chosen league's players under it ---- */
+.rkback.rkdoor { left: auto; right: 16px; }   /* the ranked screen's door to it */
+.rklb { padding: 16px 0 0; }
+.rkstrip { width: 100%; flex: none; display: flex; align-items: center; gap: 12px; height: 96px; margin-top: 56px; padding: 0 16px; overflow-x: auto; scrollbar-width: none; }
+.rkstrip::-webkit-scrollbar { display: none; }
+.rklgb { flex: none; position: relative; display: flex; align-items: center; padding: 0; background: none; opacity: .55; }
+.rklgb i { width: 40px; height: 40px; border-radius: 50%; background: var(--c); box-shadow: inset 0 -3px 0 rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3), 0 2px 5px rgba(0,0,0,.5); }
+.rklgb:hover { opacity: .8; } .rklgb.on { opacity: 1; }
+.rklgb.on i { width: 64px; height: 64px; box-shadow: inset 0 -4px 0 rgba(0,0,0,.2), inset 0 2px 0 rgba(255,255,255,.3), 0 4px 10px rgba(0,0,0,.5); }
+.rklgb.mine::after { content: ""; position: absolute; left: 50%; bottom: -14px; width: 10px; height: 10px; translate: -50% 0; border-radius: 50%; background: rgb(var(--you-rgb)); }   /* where you are */
+.rklb h1 { flex: none; min-height: 34px; margin: 0 0 16px; font: 700 34px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; }
+.rklist { flex: 1; min-height: 0; width: 100%; max-width: 640px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 2px 16px 16px; }
+.rkrow { flex: none; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 12px; height: 52px; padding: 0 12px 0 4px; border-radius: 10px; background: var(--well); box-shadow: var(--well-sh); }
+.rkrow .n { text-align: right; font-weight: 600; color: var(--ink2); font-variant-numeric: tabular-nums; }
+.rkrow .nm { font-weight: 600; font-size: 18px; line-height: 1.1; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }   /* one size for every name; a long one takes a second line */
+.rkrow .st { display: flex; align-items: center; gap: 10px; }
+.rkrow .st .rkmark { --d: 28px; box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); }
+.rkrow .mini { display: flex; gap: 3px; } .rkrow .mini i { width: 7px; height: 7px; border-radius: 50%; background: rgba(240,232,218,.28); } .rkrow .mini i.on { background: var(--c); }   /* the five wins, small: the empty ones still seen */
+.rkrow .st b { font: 700 20px/1 'Fira Sans Condensed', sans-serif; font-variant-numeric: tabular-nums; }
+.rkrow.you { box-shadow: var(--well-sh), 0 0 0 2px rgb(var(--you-rgb)); }
+.rkyou { flex: none; width: 100%; max-width: 640px; padding: 12px 16px 16px; background: var(--granite); box-shadow: 0 -8px 16px rgba(0,0,0,.5); }   /* your own row, kept in sight when the list ends before it */
+.rkyou[hidden] { display: none; }
+
 /* ---- a player as one card: the game's card of their leader, their name on it, their league's mark in its corner ---- */
 .rkcard { position: relative; flex: none; width: var(--cw); height: calc(var(--cw) * 1.38); }
 .rkcard .mcard { --mw: var(--cw) !important; pointer-events: none; }
@@ -89,7 +112,11 @@
 
 /* ---- a wide screen: the standing beside the deck, the two players side by side ---- */
 @media (min-width: 900px) and (min-aspect-ratio: 1/1) {
-  .rkscreen { flex-direction: row; justify-content: center; align-items: center; gap: 96px; }
+  .rkscreen:not(.rklb) { flex-direction: row; justify-content: center; align-items: center; gap: 96px; }
+  /* the leaderboard keeps its one column: the row of leagues larger, all eleven in sight */
+  .rkstrip { justify-content: center; height: 120px; margin-top: 0; gap: 24px; overflow: visible; }
+  .rklgb i { width: 56px; height: 56px; } .rklgb.on i { width: 88px; height: 88px; }
+  .rklb h1 { font-size: 56px; min-height: 56px; margin: 4px 0 24px; }
   .rkscreen > .rkstand { flex: none; padding-top: 0; gap: 24px; }
   .rkscreen > .rkstand .rkmark { --d: min(240px, 30vh); }
   .rkscreen > .rkstand h1 { font-size: 56px; }

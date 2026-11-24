@@ -609,20 +609,21 @@ def rate_match(match: Match) -> None:
 
 
 async def leaderboard(req):
-    """Everyone on the ladder, best first: people from their first rated game, with their league (the number only in the
-    top league), and the bots one row per level and deck, each with its rating and its deck's leader."""
+    """The leaderboard: every league, bottom first, and everyone on the ladder, best first, each with their league as
+    the client shows it (its division and the wins in it; in the top league the rating). People from their first rated
+    game, and you from the start; the bots one row per level and deck, called as an opponent sees them and standing in
+    the league their rating falls in. The client shows one league's players at a time."""
     p = profile_of(req)
-    rows = []
+    rows, mine = [], p and p["id"]
     for lid, r in ladder.table():
-        bot = ranking.parse_bot(lid)
-        if bot:
-            rows.append((r.rating, {"name": ladder_name(lid), "rating": r.shown(), "bot": True, "you": False,
-                                    "leader": DECK_LEADERS.get(bot[1])}))
+        if ranking.parse_bot(lid):
+            rows.append((r.rating, {"name": opponent_name(lid), "league": bot_league(lid), "bot": True, "you": False}))
         else:
-            lg = league_of(lid)
-            rows.append((person_key(lid, r), {"name": ladder_name(lid), "rating": r.shown() if lg["top"] else None, "league": lg,
-                                              "bot": False, "you": bool(p and lid == p["id"])}))
-    return web.json_response({"rows": [row for _, row in sorted(rows, key=lambda x: -x[0])]})
+            rows.append((person_key(lid, r), {"name": ladder_name(lid).split("#")[0], "league": league_of(lid), "bot": False, "you": lid == mine}))
+    if mine and not any(row["you"] for _, row in rows):   # not yet a rated game: you still see where you start
+        rows.append((person_key(mine, ladder.get(mine)), {"name": p["name"], "league": league_of(mine), "bot": False, "you": True}))
+    leagues = [{"league": i + 1, "name": name, "colour": colour} for i, (name, _, colour) in enumerate(tiers_mod.LEAGUES)]
+    return web.json_response({"leagues": leagues, "rows": [row for _, row in sorted(rows, key=lambda x: -x[0])]})
 
 
 # ----------------------------------------------------------------- friends and challenges (web/friends.py)

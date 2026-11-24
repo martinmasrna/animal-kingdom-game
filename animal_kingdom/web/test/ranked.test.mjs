@@ -141,3 +141,37 @@ test('what a match did lands on your rank: wins, a streak\'s two, a division, a 
   assert.deepEqual(p.errors, []);
   await p.browserContext().close();
 });
+
+test('the leaderboard: every league along the top, yours chosen and marked; a league\'s players under it, you outlined; on a phone too', async () => {
+  for (const phone of [false, true]) {
+    const p = await player([deck('a', 'Control', 'sage_legend')], { phone });
+    await p.goto(`${server.url}/#/ranked`, { waitUntil: 'networkidle0' }); await p.waitForSelector('#rkboard');
+    await p.click('#rkboard'); await p.waitForSelector('.rkrow');
+    const strip = () => p.$$eval('.rklgb', els => els.map(e => [e.getAttribute('aria-label'), e.classList.contains('on'), e.classList.contains('mine')]));
+    const rows = () => p.$$eval('.rkrow', els => els.map(e => ({ n: e.querySelector('.n').textContent, name: e.querySelector('.nm').textContent, you: e.classList.contains('you'),
+      wins: e.querySelectorAll('.mini i').length, won: e.querySelectorAll('.mini i.on').length, mark: (e.querySelector('.rkmark b') || {}).textContent ?? null })));
+    assert.deepEqual((await strip()).map(s => s[0]), ['Wood', 'Bone', 'Stone', 'Copper', 'Silver', 'Gold', 'Jade', 'Sapphire', 'Ruby', 'Diamond', 'Legend']);
+    assert.deepEqual((await strip()).filter(s => s[1] || s[2]), [['Wood', true, true]], 'it opens on your own league');
+    assert.equal(await p.$eval('#rklg', e => e.textContent), 'Wood');
+    // you are on it from the start, before any rated game (the other rows are other tests' players on this server)
+    const wood = await rows(), mine = wood.filter(r => r.you);
+    assert.equal(mine.length, 1); assert.deepEqual([mine[0].name, mine[0].wins, mine[0].won, mine[0].mark], ['Player', 5, 0, '3']);
+    assert.deepEqual(wood.map(r => r.n), wood.map((_, i) => String(i + 1)), 'places count from 1');
+    assert.ok((await words(p, '.rklb')).every(w => /^(Wood|Player|\d+)$/.test(w)), 'a league\'s name, and a row\'s place, name and division: no other word');
+    // another league: the bots stand in the league their rating falls in, called by their band; your mark stays on your own
+    const board = await p.evaluate(async () => (await (await fetch('/api/leaderboard', { headers: { 'X-AK-Key': localStorage.getItem('ak:key') } })).json()));
+    const bot = board.rows.find(r => r.bot), there = board.rows.filter(r => r.league.league === bot.league.league);
+    await p.click(`[data-league="${bot.league.league}"]`); await p.waitForFunction(n => document.getElementById('rklg').textContent === n, {}, bot.league.name);
+    assert.deepEqual((await rows()).map(r => [r.n, r.name, r.you]), there.map((r, i) => [String(i + 1), r.name, false]));
+    assert.ok((await rows()).every(r => / Bot$/.test(r.name)));
+    assert.deepEqual((await strip()).filter(s => s[1] || s[2]).map(s => [s[1], s[2]]).sort(), [[false, true], [true, false]].sort());
+    await p.click('[data-league="11"]'); await p.waitForFunction(() => document.getElementById('rklg').textContent === 'Legend');
+    assert.deepEqual(await rows(), [], 'nobody in Legend yet');
+    assert.equal(await p.$eval('.rklist', e => getComputedStyle(e).backgroundImage + getComputedStyle(e).backgroundColor), 'nonergba(0, 0, 0, 0)', 'the list has no panel of its own behind it');
+    assert.ok(await p.evaluate(() => document.scrollingElement.scrollWidth <= innerWidth && [...document.querySelectorAll('.rkback, #rklg, .rklist')].every(e => { const r = e.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; })), 'it fits the width');
+    if (phone) assert.ok(await p.$eval('.rkstrip', s => { const on = s.querySelector('.on').getBoundingClientRect(); return s.scrollWidth > s.clientWidth && on.left >= 0 && on.right <= innerWidth; }), 'on a phone the row scrolls and the chosen league is in sight');
+    await p.click('.rklb .rkback'); await p.waitForSelector('#rkgo');
+    assert.deepEqual(p.errors, []);
+    await p.browserContext().close();
+  }
+});
