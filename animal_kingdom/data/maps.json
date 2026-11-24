@@ -3,7 +3,7 @@
     {
       "id": "map_hex19",
       "name": "Hex Nineteen",
-      "_comment": "The board: pointy-top hex tiles in rows of 3, 4, 5, 4, 3, named 'row,col'; row 1 is A's base, row 5 B's. Either player places on a base; its den sits just beyond it, fronting the three base tiles: an animal that enters it destroys food (the den raid). One food a region, 30 to win (Martin, 2026-11-20). A region is every three mutually adjacent tiles.",
+      "_comment": "The board: pointy-top hex tiles in rows of 3, 4, 5, 4, 3, named 'row,col'; row 1 is A's base, row 5 B's. Either player places on a base; its den sits just beyond it, fronting the three base tiles: an animal that enters it steals food (the den raid). One food a region, 30 to win (Martin, 2026-11-20). A region is every three mutually adjacent tiles.",
       "crossroads": [
         "1,1",
         "1,2",
@@ -659,8 +659,7 @@
     {
       "id": "map_sq20",
       "name": "Square Twenty",
-      "_comment": "An experiment (Martin, 2026-11-24: 'okay, I can try 4x5 when I get home'): square tiles 4 wide and 5 deep, 'row,col', neighbours across a side only; row 1 is A's base, row 5 B's, row 3 next to neither. A region is every 2 by 2 block (twelve, overlapping). Its raids steal: the food a raid takes goes to the raider's den, and fatigue's to the opponent's, so food is never destroyed here. Picked with AK_MAP=map_sq20.",
-      "raids": "steal",
+      "_comment": "An experiment (Martin, 2026-11-24: 'okay, I can try 4x5 when I get home'): square tiles 4 wide and 5 deep, 'row,col', neighbours across a side only; row 1 is A's base, row 5 B's, row 3 next to neither. A region is every 2 by 2 block (twelve, overlapping). Picked with AK_MAP=map_sq20.",
       "crossroads": [
         "1,1",
         "1,2",

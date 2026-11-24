@@ -319,7 +319,7 @@ fn features_inc(st: &State, me: Player, odds: &RaidOdds) -> ([f32; N_FEAT], i32)
     // the raids each side's next turn could make
     let mut raid = [0.0f32; 2];
     let mut lethal = [0.0f32; 2];
-    // the food a side's raids must take to end the game (less than the den holds where raids steal)
+    // the food a side's raids must take to end the game: what its own den lacks of the win, which the den raided always holds
     let need = [effects::raid_to_win(st, m) as f32, effects::raid_to_win(st, n) as f32];
     for a in 0..2 {
         let d = 1 - a;

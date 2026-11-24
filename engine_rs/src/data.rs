@@ -292,10 +292,6 @@ pub struct GameMap {
     pub hq_front: [u64; 2],
     pub regions: Vec<Region>,
     pub win_food: i32,
-    /// The map's `"raids": "steal"` (an experiment, Martin, 2026-11-24): food is never destroyed on this map, only moved.
-    /// A raid's food goes to the raider's den and fatigue's to the opponent's, so the two dens always hold at least
-    /// the food they started with, and a den emptied means the other has won. Without it a raid destroys.
-    pub steal: bool,
 }
 
 impl GameMap {
@@ -349,13 +345,8 @@ impl GameMap {
             regions.push(Region { id: rid.clone(), corners, mask, food });
         }
         let win_food = rec["win_food"].as_i64().filter(|f| *f > 0).ok_or_else(|| format!("map {id:?}: win_food must be a positive int, got {}", rec["win_food"]))? as i32;
-        let steal = match rec["raids"].as_str() {
-            None | Some("destroy") => false,
-            Some("steal") => true,
-            Some(x) => return Err(format!("map {id:?}: raids must be \"steal\" or \"destroy\", got {x:?}")),
-        };
         let name = rec["name"].as_str().unwrap_or("").to_string();
-        Ok(GameMap { id, name, edges, tiles, index, neighbors, nb_mask, hq_front, regions, win_food, steal })
+        Ok(GameMap { id, name, edges, tiles, index, neighbors, nb_mask, hq_front, regions, win_food })
     }
 
     /// The board as the client and the tools read it: its tiles, edges and regions as the map lists them, each
@@ -363,7 +354,7 @@ impl GameMap {
     pub fn to_json(&self) -> Value {
         let names = |m: u64| -> Vec<&str> { (0..self.tiles.len() as Tile).filter(|&t| m >> t & 1 == 1).map(|t| self.tile_name(t)).collect() };
         serde_json::json!({
-            "id": self.id, "name": self.name, "win_food": self.win_food, "raids": if self.steal { "steal" } else { "destroy" }, "crossroads": self.tiles,
+            "id": self.id, "name": self.name, "win_food": self.win_food, "crossroads": self.tiles,
             "edges": self.edges.iter().map(|&(a, b)| [self.tile_name(a), self.tile_name(b)]).collect::<Vec<_>>(),
             "bases": {"A": names(self.hq_front[0]), "B": names(self.hq_front[1])},
             "regions": self.regions.iter().map(|r| serde_json::json!({"id": r.id, "food": r.food, "corners": r.corners.iter().map(|&t| self.tile_name(t)).collect::<Vec<_>>()})).collect::<Vec<_>>(),
@@ -447,14 +438,18 @@ config! {
     mana_cap: i32 = 10,                   // Martin, 2026-11-20: "Mana cap at 10 of course"
     leader_power_cost: i32 = 3,
     // The food race (Martin, 2026-11-20: "both players starting at 15, you need 30 to win, and if you drop to 0 you
-    // lost"): a raid destroys food; each region a player holds pays its food at the end of their turn.
+    // lost"): each region a player holds pays its food at the end of their turn. A raid steals food (Martin, 2026-11-24,
+    // to try: "you're *stealing* the energy from your opponent, rather than just destroying it"): food is never destroyed,
+    // only made by regions and cards or moved between the dens, so while the dens start with the winning food between
+    // them, a den emptied means the other has already won.
     start_food: i32 = 15,
     hand_limit: i32 = 10,                 // past it, the newest cards drawn burn
     first_player_opening_draw: i32 = 3,   // Martin, 2026-11-20: "make it 3 for first and 4 for second"
     second_player_opening_draw: i32 = 4,
     mulligan: bool = true,                // a blacklist mulligan, both players at once
     // Fatigue (Martin, 2026-11-22: "we just add fatigue exactly like in hearthstone, losing energy -1, -2, -3, ..."): a card
-    // a player would draw from their own empty deck costs them food instead, this much more each time.
+    // a player would draw from their own empty deck costs them food instead, this much more each time; it goes to the
+    // opponent's den.
     fatigue_step: i32 = 1,
     turn_draw_count: i32 = 1,             // the free card at the start of each turn, the first player's first included (Martin, 2026-11-21)
     hungry_food: i32 = 1,                 // Hungry: the food its prey's removal gains (Martin, 2026-11-20)

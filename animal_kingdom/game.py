@@ -198,7 +198,7 @@ def validate_card_record(rec: dict) -> None:
 
 
 _MAPS_TEXT = json.dumps(load_bundled_json("maps.json"))
-MAP_ID = os.environ.get("AK_MAP", "map_hex19")   # AK_MAP=map_sq16 plays the 4x4 board, AK_MAP=map_sq20 the 4x5 whose raids steal
+MAP_ID = os.environ.get("AK_MAP", "map_hex19")   # AK_MAP=map_sq16 plays the 4x4 board, AK_MAP=map_sq20 the 4x5
 _engines: dict[tuple, "ak_engine.Engine"] = {}
 
 
@@ -270,14 +270,12 @@ class Region:
 
 class GameMap:
     """The board's geometry, as the engine reads data/maps.json: tiles ("row,col"), edges, regions of three tiles, each
-    player's base (the tiles in front of their den), the food that wins, and whether its raids steal (the food a raid
-    takes goes to the raider's den, fatigue's to the opponent's) or destroy."""
+    player's base (the tiles in front of their den), the food that wins."""
 
     def __init__(self, d: dict):
         self.id: str = d["id"]
         self.name: str = d["name"]
         self.win_food: int = d["win_food"]
-        self.raids_steal: bool = d.get("raids") == "steal"
         self.crossroads = frozenset(d["crossroads"])
         self.edges = tuple((a, b) for a, b in d["edges"])
         self.hq_connects = {p: frozenset(t) for p, t in d["bases"].items()}
