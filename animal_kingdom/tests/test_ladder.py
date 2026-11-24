@@ -184,8 +184,14 @@ def test_ranked_is_a_match_at_once_against_a_bot_from_your_league(monkeypatch, t
         # league 1 plays the bots rated under 1100; when none is, the bot nearest the league: the weakest level
         level, deck = parse_bot(bot.ladder)
         assert bot.is_bot and bot.level == level == "1" and bot.deck == deck and bot.spec == "greedy"
-        # the view says the match is ranked, and the bot's name the band its rating sits in
-        assert match.view("A")["ranked"] and bot.name.endswith(f"({ladder.rung_of(server.ladder.get(bot.ladder).rating)} Bot)")
+        # the view says the match is ranked; the bot is called by the band its rating sits in, never by its deck
+        assert match.view("A")["ranked"] and bot.name == f"{ladder.rung_of(server.ladder.get(bot.ladder).rating)} Bot"
+        # what the versus moment shows: each player's name, their deck's leader and their league (a bot's read off its rating)
+        vs = m["versus"]
+        assert vs["you"]["leader"] and vs["you"]["league"]["label"] == "Wood 3" and "#" not in vs["you"]["name"]
+        assert vs["them"]["name"] == bot.name and vs["them"]["leader"] == server.DECK_LEADERS[deck]
+        r = server.ladder.get(bot.ladder).rating
+        assert vs["them"]["league"]["name"] == server.tiers_mod.name(server.tiers_mod.league_of(r)) and 1 <= vs["them"]["league"]["division"] <= 3
         with pytest.raises(Exception, match="no rematch"):
             match.phase = "match_over"; match.offer_rematch("A")
     _served(monkeypatch, tmp_path, body)
@@ -200,6 +206,7 @@ def test_a_ranked_result_moves_the_rating_the_league_and_the_leaderboard(monkeyp
         v = match.view("A")
         assert v["rating"]["delta"] > 50 and v["rating"]["after"].endswith("?"), "a first win moves a new player a lot, even over a weak bot"
         assert v["league"]["label"] == "Wood 3" and v["league"]["stars"] == 1 and v["league"]["line"] == ""
+        assert v["league"]["before"]["label"] == "Wood 3" and v["league"]["before"]["stars"] == 0, "the standing going in, for the match's last screen"
         assert server.ladder.get(pid).games == 1 and server.ladder.get(bot).rating < before.rating
         server.rate_match(match)
         assert server.ladder.get(pid).games == 1, "a match is rated once"

@@ -533,6 +533,25 @@ ladder: ranking.Ladder = None    # everyone's rating, people and bots
 tiers: tiers_mod.Tiers = None    # each person's league and the wins in it
 
 
+def bot_league(lid: str) -> dict:
+    """A bot's league as the client shows a person's: the league its rating stands in and, read off where the rating
+    sits between that league's par and the next, a division; in the top league its rating. A bot wins no divisions: this
+    is only how strong it is, in the words a player's own standing uses."""
+    r = ladder.get(lid)
+    lg = tiers_mod.league_of(r.rating)
+    if lg == tiers_mod.TOP:
+        return tiers_mod.view(tiers_mod.Standing(lg, 0, 0, lg), r.shown())
+    share = (r.rating - tiers_mod.par(lg)) / (tiers_mod.par(lg + 1) - tiers_mod.par(lg))
+    stars = min(tiers_mod.stars_needed(lg) - 1, max(0, int(share * tiers_mod.stars_needed(lg))))
+    return tiers_mod.view(tiers_mod.Standing(lg, stars, 0, lg))
+
+
+def opponent_name(lid: str) -> str:
+    """What a bot is called to the player facing it: the band its rating sits in ("Expert Bot"). Not its deck: a deck's
+    name is its owner's (Martin, 2026-11-23: "obviously you shouldn't see your opponent's deck names")."""
+    return f"{ranking.rung_of(ladder.get(lid).rating)} Bot"
+
+
 def ladder_name(lid: str) -> str:
     """A bot by its deck and the band its rating sits in, never its level ("Control (Expert Bot)"); a person by name."""
     bot = ranking.parse_bot(lid)
@@ -561,9 +580,12 @@ async def join_ranked(req):
     level, bot_deck = ranking.parse_bot(bid)
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
     match = Match(mid, Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"]))
-    match.join(Seat(secrets.token_urlsafe(12), ladder_name(bid), bot=True, deck=bot_deck, level=level, ladder=bid))
+    match.join(Seat(secrets.token_urlsafe(12), opponent_name(bid), bot=True, deck=bot_deck, level=level, ladder=bid))
     _open(match)
-    return web.json_response({"id": mid, "token": token, "seat": "A"})
+    # the versus moment the client shows before the match: each player as their deck's leader, their name and their league
+    versus = {"you": {"name": p["name"], "leader": DECK_LEADERS.get(deck), "league": league_of(p["id"])},
+              "them": {"name": opponent_name(bid), "leader": DECK_LEADERS.get(bot_deck), "league": bot_league(bid)}}
+    return web.json_response({"id": mid, "token": token, "seat": "A", "versus": versus})
 
 
 def rate_match(match: Match) -> None:
@@ -579,7 +601,8 @@ def rate_match(match: Match) -> None:
         after = ladder.get(lid)
         if not lid.startswith("bot:"):   # bots have no league
             ch = tiers.result(lid, lid == win)
-            match.tier_change[p] = {"line": ch.line(after.shown()), **tiers_mod.view(ch.after, after.shown())}
+            # the standing going in beside the one coming out: the match's last screen plays the one into the other
+            match.tier_change[p] = {"line": ch.line(after.shown()), **tiers_mod.view(ch.after, after.shown()), "before": tiers_mod.view(ch.before, before[p].shown())}
         # the change between the numbers shown, so "1502 → 1490 (−12)" always adds up
         match.rating_change[p] = {"before": before[p].shown(), "after": after.shown(), "delta": round(after.rating) - round(before[p].rating)}
     match.version += 1
