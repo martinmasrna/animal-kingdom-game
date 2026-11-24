@@ -1,48 +1,48 @@
 {
- "version": "2026-11-25 2be9a938",
+ "version": "2026-11-25 5972ac92",
  "map": "map_sq16",
- "games": 800,
+ "games": 3000,
  "levels": {
   "1": {
    "bot": "greedy",
-   "rating": 1318.0
+   "rating": 1338.9
   },
   "2": {
    "bot": "turn:budget=1,eval=greedy",
-   "rating": 1382.2
+   "rating": 1371.4
   },
   "3": {
    "bot": "turn:budget=1,eval=race,mull=2",
-   "rating": 1380.0
+   "rating": 1388.5
   },
   "4": {
    "bot": "turn:budget=20000,eval=race,mull=2",
-   "rating": 1661.3
+   "rating": 1663.9
   },
   "5": {
    "bot": "turn:budget=200000,reply=12,per=2,eval=race,mull=2",
-   "rating": 1758.4
+   "rating": 1737.3
   }
  },
  "ratings": {
   "bot:1:combo_token": {
-   "rating": 1318.0,
+   "rating": 1338.9,
    "with": "63f198bd00d7"
   },
   "bot:2:combo_token": {
-   "rating": 1382.2,
+   "rating": 1371.4,
    "with": "c8812b243693"
   },
   "bot:3:combo_token": {
-   "rating": 1380.0,
+   "rating": 1388.5,
    "with": "7d0394b7cec3"
   },
   "bot:4:combo_token": {
-   "rating": 1661.3,
+   "rating": 1663.9,
    "with": "8a575b7feff0"
   },
   "bot:5:combo_token": {
-   "rating": 1758.4,
+   "rating": 1737.3,
    "with": "a269464525b0"
   }
  }
