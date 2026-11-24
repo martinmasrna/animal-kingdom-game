@@ -883,6 +883,8 @@ async def create_match(req):
     match = Match(mid, Seat(token, display(player) if player else guest_name(body, "You"), deck=deck,
                             profile=player and player["id"]))
     if body.get("bot"):
+        if body.get("first") in ("A", "B"):   # a gauntlet's game: who goes first is set, not a coin flip
+            match.first_choice = body["first"]
         match.join(Seat(secrets.token_urlsafe(12), "Bot", bot=True, deck=bot_deck))
     else:
         match.version += 1

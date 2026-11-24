@@ -573,3 +573,10 @@ html.sqlook .game.port .panel.lastp .row .mini { position: relative; width: 72px
 .game .aim.out { opacity: 0; transition: opacity .16s; }
 .game.mana #board { touch-action: none; }   /* a finger dragged over the board aims the arrow, never pans the page */
 @media (prefers-reduced-motion: reduce) { .game .aim .g { animation: none; } .game .aim.out { transition: none; } }
+
+/* the gauntlet (#/gauntlet/DECK): one row a game, the opponent's deck, who goes first, the result, Play */
+.mhome .glist { display: flex; flex-direction: column; gap: 6px; }
+.mhome .grow { display: grid; grid-template-columns: 1fr 130px 60px 90px; align-items: center; gap: 10px; }
+.mhome .grow .gfirst { opacity: .7; }
+.mhome .gres.w { color: #7bd88f; }
+.mhome .gres.l { color: #ff7a6b; }

@@ -296,3 +296,29 @@ test('the target arrow: during a target prompt it starts at the source and settl
     assert.deepEqual(p.errors, []);
   } finally { await p.browserContext().close(); sq.stop(); }
 });
+
+// The gauntlet (#/gauntlet/DECK): your deck against each other deck of yours, once going first and once second; a row's
+// game starts with the seat it names going first, and its result comes back to the row (Martin, 2026-11-24).
+test('a gauntlet lists two games against each other deck, and a game starts with the player it says going first', async () => {
+  const p = await seat();
+  try {
+    await p.goto(server.url + '/', { waitUntil: 'networkidle0' });
+    await p.evaluate(async (decks, seen) => { const h = { 'X-AK-Key': localStorage.getItem('ak:key'), 'Content-Type': 'application/json' };
+      await fetch('/api/me/decks', { method: 'PUT', headers: h, body: JSON.stringify(decks) });
+      await fetch('/api/me/patch', { method: 'POST', headers: h, body: JSON.stringify({ version: seen }) }); },
+      [{ id: 'g1', name: 'Mine', cards: CHEAP, leader: 'warlord_legend' }, { id: 'g2', name: 'Other', cards: DECK, leader: 'warlord_legend' }, { id: 'g3', name: 'Third', cards: CHEAP, leader: 'warlord_legend' }], NEWEST);
+    await p.goto(server.url + '/#/gauntlet/mine', { waitUntil: 'networkidle0' }); await p.reload({ waitUntil: 'networkidle0' });   // the profile's new decks
+    await p.waitForSelector('.glist .grow');
+    const rows = await p.evaluate(() => [...document.querySelectorAll('.glist .grow')].map(r => r.textContent));
+    assert.equal(rows.length, 4, 'two games against each of the two other decks');
+    for (const [i, first] of [[1, 'B'], [0, 'A']]) {
+      await p.goto(server.url + '/#/gauntlet/mine', { waitUntil: 'networkidle0' }); await p.waitForSelector('.glist .grow');
+      await p.evaluate(i => document.querySelectorAll('[data-g]')[i].click(), i);
+      assert.ok(await until(p, () => location.hash.startsWith('#/m/') && window.__ak().V && window.__ak().V.game), 'the game opens');
+      await click(p, '#skip').catch(() => {});
+      assert.ok(await until(p, () => window.__ak().V.game.decision && window.__ak().V.game.decision !== 'mulligan', null, 20000));
+      assert.equal(await p.evaluate(() => window.__ak().V.game.first), first);
+    }
+    assert.deepEqual(p.errors, []);
+  } finally { await p.browserContext().close(); }
+});

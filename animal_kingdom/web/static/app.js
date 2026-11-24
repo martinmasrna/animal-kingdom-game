@@ -197,6 +197,7 @@ function route() {
   if (parts[0] !== 'm' || id !== wsId) disconnect();
   if (parts[0] === 'play') return manaHome({ play: true });   // Play: a deck and a friend
   if (parts[0] === 'practice') return manaHome({ practice: true });   // Practice: your deck and the bot's
+  if (parts[0] === 'gauntlet' && parts[1]) return gauntletScreen(decodeURIComponent(parts[1]));   // one deck against each other deck of yours
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   if (parts[0] === 'ladder') { screen = 'ladder'; return freshStanding().then(() => { if (screen === 'ladder') leaderboardScreen(app, { api, me: ME, cards: CARDS }); }); }
   if (parts[0] === 'patch') { history.replaceState(null, '', '#/'); manaHome(); return openPatch({ version: parts[1], seen: seePatch }); }   // a link to the notes: home, the window over it
@@ -357,6 +358,40 @@ async function challengeFriend(f) {
 // your decks (Martin, 2026-11-21: "select deck for me and my opponent"); Collection is the collection. In Play and
 // Practice: your decks that are legal under these rules; a deck of yours that isn't legal is counted under the list.
 // the patch notes were opened: seen by this profile, on every device (the server keeps it)
+// A gauntlet (#/gauntlet/DECK, by its name): your deck against the bot playing each other deck of yours, twice, once going
+// first and once second (Martin, 2026-11-24). Which game is which match, and how it went, lives in this browser.
+const gauntletStore = () => { try { return JSON.parse(store('ak:gauntlet') || '{}'); } catch { return {}; } };
+function gauntletScreen(name) {
+  screen = 'home';
+  const decks = myDecks().map(d => ({ id: d.id, name: d.name, leader: d.leader, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }))
+    .filter(d => legal(d.list, d.leader));
+  const me = decks.find(d => d.name.toLowerCase() === name.toLowerCase() || d.id === name);
+  if (!me) { app.innerHTML = `<div class="mhome"><div class="box"><h1>Gauntlet</h1><p>No legal deck of yours is called ${esc(name)}.</p><div class="row"><a class="sec" href="#/">Back</a></div></div></div>`; return; }
+  const all = gauntletStore(), runs = all[me.id] || {};
+  const rows = decks.filter(d => d.id !== me.id).flatMap(o => ['A', 'B'].map(first => ({ o, first, key: `${o.id}|${first}` })));
+  const won = rows.filter(r => runs[r.key] && runs[r.key].won === true).length, played = rows.filter(r => runs[r.key] && runs[r.key].won != null).length;
+  const cell = r => { const g = runs[r.key]; return g && g.won != null ? `<b class="gres ${g.won ? 'w' : 'l'}">${g.won ? 'Won' : 'Lost'}</b>` : ''; };
+  app.innerHTML = `<div class="mhome"><div class="box">
+    <h1>Gauntlet<small>${esc(me.name)} against each of your decks, going first and second</small></h1>
+    <div class="glist">${rows.map(r => `<div class="grow"><span>${esc(r.o.name)}</span><span class="gfirst">${r.first === 'A' ? 'You go first' : 'Bot goes first'}</span>${cell(r)}<button class="slab" data-g="${r.key}">${runs[r.key] && runs[r.key].won != null ? 'Again' : 'Play'}</button></div>`).join('')}</div>
+    <p class="foot">${played ? `Won ${won} of ${played}` : 'Nothing played yet'}</p>
+    <div class="row"><button class="sec" id="greset">Reset</button><a class="sec" href="#/">Back</a></div></div></div>`;
+  app.querySelectorAll('[data-g]').forEach(el => el.onclick = async () => {
+    const r = rows.find(x => x.key === el.dataset.g), spec = d => ({ name: d.name, list: d.list, leader: d.leader });
+    const res = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: spec(me), bot_deck: spec(r.o), name: 'You', bot: true, first: r.first }) });
+    if (!res.ok) return toast(await res.text());
+    const m = await res.json(), s = gauntletStore();
+    s[me.id] = { ...(s[me.id] || {}), [r.key]: { m: m.id, won: null, name: me.name } }; store('ak:gauntlet', JSON.stringify(s));
+    setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+  });
+  document.getElementById('greset').onclick = () => { const s = gauntletStore(); delete s[me.id]; store('ak:gauntlet', JSON.stringify(s)); gauntletScreen(name); };
+}
+// The gauntlet a match belongs to, if any: its result is written there once, and the end screen leads back to it.
+function gauntletOf(id) {
+  const s = gauntletStore();
+  for (const [deck, runs] of Object.entries(s)) for (const [key, g] of Object.entries(runs)) if (g.m === id) return { s, deck, key, g };
+  return null;
+}
 const seePatch = v => { if (ME.patchSeen === v) return; ME.patchSeen = v; api('/api/me/patch', { method: 'POST', body: JSON.stringify({ version: v }) }); };
 function manaHome(mode = {}) {
   screen = 'home';
@@ -1559,8 +1594,11 @@ function drawEnd() {
     // a ranked game (ranked.js): what it did to your league, and Play again for the next match in place of a rematch
     const rk = V.ranked ? rankedEnd(V, live) : null;
     if (rk) standingStale = true;
+    const gt = gauntletOf(V.id);
+    if (gt && gt.g.won == null && w !== null) { gt.g.won = w === you; store('ak:gauntlet', JSON.stringify(gt.s)); }
+    const back = gt ? `<a class="slab" href="#/gauntlet/${encodeURIComponent(gt.g.name)}">Gauntlet</a>` : `<a class="slab" href="#/">Menu</a>`;
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${rk ? rk.html : ''}
-      ${rmLine}<div class="btns"><a class="slab" href="#/">Menu</a>${peek}${rk ? rk.button : rmBtns}</div></div>`;
+      ${rmLine}<div class="btns">${back}${peek}${rk ? rk.button : gt ? '' : rmBtns}</div></div>`;
     if (rk) rk.wire(() => playRanked({ api, toast, deck: chosenDeck() && deckSpec(chosenDeck()), enter: enterMatch }));
     const rb = document.getElementById('rematch'); if (rb) rb.onclick = () => send({ t: 'rematch' });
     const db = document.getElementById('decline'); if (db) db.onclick = () => send({ t: 'rematch_decline' });

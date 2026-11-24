@@ -151,6 +151,7 @@ class Match:
         self.phase = "lobby"             # lobby -> playing -> match_over
         self.result: Optional[dict] = None   # {winner, reason, turns, first} once the game is over
         self.last_result: Optional[dict] = None   # the previous game's, so a rematch's loser goes first
+        self.first_choice: Optional[str] = None   # the seat game 1 starts with when it is set (a gauntlet's), else a coin flip
         self.state: Optional[GameState] = None
         self.history: list[Move] = []
         self.bots: dict[str, SearchBot] = {}
@@ -188,7 +189,7 @@ class Match:
     def _start_game(self) -> None:
         # Game 1 is a coin flip; in a rematch the loser of the last game goes first. A draw keeps the first player.
         last = self.last_result
-        first = (other_player(last["winner"]) if last["winner"] else last["first"]) if last else None
+        first = (other_player(last["winner"]) if last["winner"] else last["first"]) if last else self.first_choice
         seed = self.seed = self.rng.randrange(1 << 30)
         self.actions, self.action_times, self.started_at = [], [], time.time()
         decks = {p: self.seats[p].deck for p in "AB"}
@@ -421,7 +422,7 @@ class Match:
                 "actions": self.actions, "action_times": self.action_times, "started_at": self.started_at,
                 "created": self.created.isoformat(), "version": self.version, "rematches": self.rematches,
                 "clock": self.clock, "rematch_offer": self.rematch_offer, "rematch_declined": self.rematch_declined,
-                "rating_change": self.rating_change, "tier_change": self.tier_change,
+                "rating_change": self.rating_change, "tier_change": self.tier_change, "first_choice": self.first_choice,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [asdict(m) for m in self.history], "events": self.events, "seq": self.seq}
 
@@ -435,6 +436,7 @@ class Match:
         m.version, m.rematches = d["version"] + 1, d["rematches"]
         m.rematch_offer, m.rematch_declined = d["rematch_offer"], d["rematch_declined"]
         m.rating_change, m.tier_change = d.get("rating_change") or {}, d.get("tier_change") or {}
+        m.first_choice = d.get("first_choice")
         m.clock = d["clock"]
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's
