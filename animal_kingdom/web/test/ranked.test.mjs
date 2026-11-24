@@ -74,7 +74,9 @@ test('Play ranked: straight into a rated match against a bot, its end says your 
   await p.click('#again');
   await p.waitForFunction(id => { const a = window.__ak(); return a.V && a.V.id !== id && a.V.phase === 'playing'; }, { timeout: 30000 }, first);
   V = await view(p);
-  assert.ok(V.ranked && V.seats.B.deck !== met, 'the next bot plays another deck');
+  // another deck, while today's cards leave the pool more than one (2026-11-24: the Young Albatross out left only Combo Token)
+  const decks = await p.evaluate(async () => new Set((await (await fetch('/api/leaderboard')).json()).rows.filter(r => r.bot).map(r => r.name.split(' (')[0])).size);
+  assert.ok(V.ranked && (decks < 2 || V.seats.B.deck !== met), 'the next bot plays another deck');
   await concede(p); await p.waitForSelector('#rkend', { timeout: 30000 });
   // home again: your place among the bots, from the fresh profile; the leaderboard marks your row, and lists every bot
   // with its deck's leader and its rating, best first

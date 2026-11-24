@@ -341,7 +341,10 @@ test('a held card turns into its creature once per tile it passes, and over the 
     const iid = await p.evaluate(() => { const g = window.__ak().V.game; const h = g.hand.find(c => c.id.startsWith('flight_') && c.cost <= 1) || g.hand.find(c => c.cost <= 1); return h ? h.iid : null; });
     if (iid == null) return;   // no card this cheap dealt: nothing to hold
     const c = await p.evaluate(i => { const r = document.querySelector(`#hand .hc[data-iid="${i}"]`).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, iid);
-    await p.mouse.move(c[0], c[1]); await p.mouse.down(); await p.mouse.up(); await wait(300);
+    for (let k = 0; k < 3 && !(await p.evaluate(() => !!document.querySelector('.flight.carry'))); k++) {   // picked up: it hangs on the pointer
+      await p.mouse.move(c[0], c[1]); await p.mouse.down(); await p.mouse.up(); await until(p, () => !!document.querySelector('.flight.carry'), null, 2000);
+    }
+    assert.ok(await p.evaluate(() => !!document.querySelector('.flight.carry')), 'the card is picked up');
     await p.evaluate(() => { window.__fl = 0; new MutationObserver(() => window.__fl++).observe(document.querySelector('.flight.carry'), { attributes: true, attributeFilter: ['class'] }); });
     const t = await p.evaluate(() => { const cr = window.__ak().d.rings[0], r = document.querySelector(`#board [data-cr="${cr}"]`).getBoundingClientRect(); return [r.left + r.width / 2, r.top, r.height]; });
     for (let y = t[1] + t[2] + 20; y > t[1] - 60; y -= 2) { await p.mouse.move(t[0], y); await wait(6); }
