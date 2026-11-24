@@ -40,7 +40,7 @@ pub fn card_strength(st: &State, card: CardId, owner: Player) -> i32 {
         None => (st.cfg().shade_growth * count(st, owner, c.dynamic.expect("a dynamic card names its count"))).max(0),
     };
     let base = if c.has(HUNGRY) && st.leads(owner, st.g.named.warlord) { base + st.cfg().warlord_hungry_bonus } else { base };
-    // Leeroy, while the Raider leads: grown by every enemy unit his player removed, wherever he is
+    // Leeroy, while the Raider leads: grown by every turn he waited in the deck (one copy, a legendary)
     if Some(card) == st.g.named.raider && st.leads(owner, st.g.named.raider) { base + st.leeroy_growth[owner as usize] } else { base }
 }
 
@@ -398,7 +398,6 @@ fn remove_specific(st: &mut State, cr: Tile, iid: i32, by_player: Option<Player>
     st.emit(Ev::Remove { cr, iid, card: unit.card, owner: unit.owner, by: by_player });
     st.board.remove(cr, iid);
     st.pile_add(unit.card, unit.owner);
-    feed_leeroy(st, unit.owner);
     match st.card(unit.card).beh.on_death {
         // "Death: draw a card.": when it is removed from the board, by anything, its owner draws
         Some(OnDeath::Draw) => st.effect_stack.push(Step::by_unit(StepKind::Draw { player: unit.owner, n: 1 }, &unit)),
@@ -415,15 +414,6 @@ fn remove_specific(st: &mut State, cr: Tile, iid: i32, by_player: Option<Player>
 
 /// A turn cap cut the turn's effects short: what a cover left beneath it is removed now, by the rules and with nothing
 /// set off (the effects are over), so no animal stays buried.
-/// The Raider: "Whenever you remove an enemy unit, Leeroy gains +1 strength." An enemy unit of the player whose turn it is
-/// leaving the board is that player's removal (a cover, a Roar, a drain to 0); Leeroy grows wherever he is.
-fn feed_leeroy(st: &mut State, owner: Player) {
-    let p = st.current;
-    if owner != p && st.leads(p, st.g.named.raider) {
-        st.leeroy_growth[p as usize] += st.cfg().leeroy_growth;
-    }
-}
-
 pub fn remove_buried(st: &mut State) {
     if !st.board.has_buried() {
         return;
@@ -435,7 +425,6 @@ pub fn remove_buried(st: &mut State) {
             st.emit(Ev::Remove { cr: t, iid: u.iid, card: u.card, owner: u.owner, by: Some(top.owner) });
             st.board.remove(t, u.iid);
             st.pile_add(u.card, u.owner);
-            feed_leeroy(st, u.owner);
         }
     }
 }
@@ -841,20 +830,6 @@ pub fn power_cost(st: &State, player: Player) -> i32 {
     (price - st.power_discount[player as usize]).max(0)
 }
 
-/// The enemies the Raider's power may drain: every enemy on the board it may choose (Stealth hides from it).
-fn drain_targets(st: &State, player: Player) -> Tiles {
-    let mut m = st.board.own[other(player) as usize];
-    let mut out = Tiles::new();
-    while m != 0 {
-        let t = m.trailing_zeros() as Tile;
-        m &= m - 1;
-        if st.board.top(t).map_or(false, |u| can_be_chosen(st, &u, player)) {
-            out.push(t);
-        }
-    }
-    out
-}
-
 /// Whether `player`'s leader has a power that would do something now, not used yet this turn; the caller checks the mana.
 pub fn leader_usable(st: &State, player: Player) -> bool {
     let Some(lead) = st.leaders[player as usize] else { return false };
@@ -862,9 +837,30 @@ pub fn leader_usable(st: &State, player: Player) -> bool {
         return false;
     }
     if Some(lead) == st.g.named.raider {
-        return !drain_targets(st, player).is_empty(); // an enemy to drain
+        // Leeroy in hand, or anywhere in the deck: on top the swap does nothing, but where he is stays hidden, from his
+        // player too, so the power can't say so
+        return leeroy_at(st, player).is_some();
     }
     true // the Sage draws: from an empty deck too, where the draw costs food (fatigue)
+}
+
+enum Leeroy { Hand(usize), Deck(usize) }
+
+/// Where `player`'s Leeroy is, in their hand or their deck (an index), when he is in either.
+fn leeroy_at(st: &State, player: Player) -> Option<Leeroy> {
+    let id = st.g.named.raider?;
+    let p = player as usize;
+    if let Some(i) = st.hands[p].iter().position(|u| u.card == id) {
+        return Some(Leeroy::Hand(i));
+    }
+    st.decks[p].iter().position(|&c| c == id).map(Leeroy::Deck)
+}
+
+/// The Raider: "At the end of your turn, if Leeroy is in your deck, he gains +1 strength."
+pub fn grow_leeroy(st: &mut State, player: Player) {
+    if st.leads(player, st.g.named.raider) && matches!(leeroy_at(st, player), Some(Leeroy::Deck(_))) {
+        st.leeroy_growth[player as usize] += st.cfg().leeroy_growth;
+    }
 }
 
 /// `player` uses their leader's power (the caller has paid for it).
@@ -875,9 +871,17 @@ pub fn do_leader(st: &mut State, player: Player) -> Result<(), String> {
     if Some(lead) == st.g.named.sage {
         st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, lead));
     } else if Some(lead) == st.g.named.raider {
-        // "Give an enemy unit -1 strength.": its player picks it, as a Roar's -N is picked
-        let options = drain_targets(st, player);
-        st.effect_stack.push(Step::by(StepKind::WeakenChoice { chooser: player, options, amount: st.cfg().raider_drain }, lead));
+        // "Swap Leeroy with the card above him in your deck. If he's in your hand, shuffle him into your deck."
+        let p = player as usize;
+        match leeroy_at(st, player) {
+            Some(Leeroy::Deck(i)) if i + 1 < st.decks[p].len() => st.decks[p].swap(i, i + 1), // the deck's top is its end
+            Some(Leeroy::Deck(_)) | None => {}
+            Some(Leeroy::Hand(i)) => {
+                let u = st.hands[p].remove(i);
+                let at = st.rng.randbelow(st.decks[p].len() + 1);
+                st.decks[p].insert(at, u.card);
+            }
+        }
     } else {
         return Err(format!("{:?} has no power to use", st.g.cards.name_of(lead)));
     }

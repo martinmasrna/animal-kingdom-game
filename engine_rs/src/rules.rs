@@ -190,6 +190,7 @@ fn end_turn(st: &mut State) -> Result<(), String> {
         st.emit(Ev::LeaderTrigger { player, card: st.g.named.elf.unwrap() });
     }
     st.food_produced[player as usize] += income;
+    effects::grow_leeroy(st, player);
     effects::gain_food(st, player, income, true);
     if st.result.is_some() {
         return Ok(());

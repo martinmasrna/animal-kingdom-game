@@ -459,9 +459,8 @@ config! {
     elf_food_per_region: i32 = 2,         // the Elf's card: "Roar: gain 2 food for each region you control." (Martin, 2026-11-23)
     assassin_nth_card: i32 = 3,           // the Assassin: "After every third card you play in a turn, draw a card."
     scorch_burn: i32 = 1,                 // the Scorch: "adjacent units get -1 strength" (Martin, 2026-11-24)
-    raider_power_cost: i32 = 1,           // the Raider's power: "Give an enemy unit -1 strength." (Martin, 2026-11-24: "start at 1 mana")
-    raider_drain: i32 = 1,
-    leeroy_growth: i32 = 1,               // the Raider: "Whenever you remove an enemy unit, Leeroy gains +1 strength." (Martin, 2026-11-24)
+    raider_power_cost: i32 = 1,           // the Raider's power: "Swap Leeroy with the card above him in your deck..." (Martin, 2026-11-24: "1 mana")
+    leeroy_growth: i32 = 1,               // the Raider: "At the end of your turn, if Leeroy is in your deck, he gains +1 strength." (Martin, 2026-11-24)
     mama_spores: i32 = 2,                 // Mama Spore: "Roar: put 2 Spores into your hand." (Martin, 2026-11-21)
     bird_egg_flights: i32 = 2,            // the Bird Egg: "Fall: add two [Flight 1] to your hand." (Martin, 2026-11-22)
     golden_egg_draws: i32 = 1,            // the Golden Egg: "When you draw this, draw a card." (Martin, 2026-11-22)

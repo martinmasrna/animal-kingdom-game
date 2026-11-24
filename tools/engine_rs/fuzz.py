@@ -69,7 +69,7 @@ CONFIGS = [
     {"mulligan": False},
     {"mana_cap": 30, "start_food": 40, "scout_look": 5, "assassin_nth_card": 2, "max_turns": 30},
     {"first_player_opening_draw": 6, "second_player_opening_draw": 7, "leader_power_cost": 1},
-    {"shade_growth": 1, "crush_max": 12, "double_raid_factor": 3, "raider_drain": 3, "leeroy_growth": 4, "warlord_hungry_bonus": 3, "hungry_food": 2},
+    {"shade_growth": 1, "crush_max": 12, "double_raid_factor": 3, "leeroy_growth": 4, "warlord_hungry_bonus": 3, "hungry_food": 2},
 ]
 
 _cache = {}
