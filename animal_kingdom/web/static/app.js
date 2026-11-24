@@ -740,8 +740,8 @@ function foodStep(step) {
     const lead = document.querySelector(`#mplane .ltok[data-lead="${s}"]`);
     return lead ? [{ el: lead, n: step.n }] : [];
   };
-  // stolen food (a map whose raids steal): `to`, the den it went to, and that den's count before it
-  const took = step.kind === 'raid' && step.to ? { toSide: rel(step.to), toBefore: V.game.food[step.to] - step.n } : {};
+  // a raid's or fatigue's food goes to the other den: `to`, and that den's count before it
+  const took = step.kind === 'raid' ? { toSide: rel(step.to), toBefore: V.game.food[step.to] - step.n } : {};
   playFood({ ...step, side, ...took }, before, sources);
 }
 

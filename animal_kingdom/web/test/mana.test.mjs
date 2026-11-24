@@ -262,7 +262,7 @@ test('upright on the square board: the phone layout, its hand and End turn on sc
   } finally { await p.browserContext().close(); sq.stop(); }
 });
 
-// The 4 by 5 square board (AK_MAP=map_sq20, an experiment of 2026-11-24): its five rows fit the screens made for four, every
+// The 4 by 5 square board (AK_MAP=map_sq20, to try, 2026-11-24): its five rows fit the screens made for four, every
 // tile on screen between the two dens, on a wide window and on a phone held upright.
 test('the 4 by 5 board: twenty tiles and twelve regions, all on screen between the dens, wide and upright', async () => {
   const sq = await startServer({ AK_MAP: 'map_sq20' }), p = await seat();
@@ -361,7 +361,8 @@ test('a held card turns into its creature once per tile it passes, and over the 
     assert.ok(await until(p, () => !!document.querySelector('#skip'))); await click(p, '#skip');
     assert.ok(await until(p, () => window.__ak().V.game.decision === 'yours' && !window.__ak().PB.busy, null, 30000));
     await wait(1200);
-    const iid = await p.evaluate(() => { const g = window.__ak().V.game; const h = g.hand.find(c => c.id.startsWith('flight_') && c.cost <= 1) || g.hand.find(c => c.cost <= 1); return h ? h.iid : null; });
+    const iid = await p.evaluate(() => { const g = window.__ak().V.game, can = c => c.cost <= 1 && ((g.legal.place || {})[c.id] || []).length;   // a card with a place to go: Hungry has none on an empty board, and is not picked up
+      const h = g.hand.find(c => c.id.startsWith('flight_') && can(c)) || g.hand.find(can); return h ? h.iid : null; });
     if (iid == null) return;   // no card this cheap dealt: nothing to hold
     const c = await p.evaluate(i => { const r = document.querySelector(`#hand .hc[data-iid="${i}"]`).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, iid);
     for (let k = 0; k < 3 && !(await p.evaluate(() => !!document.querySelector('.flight.carry'))); k++) {   // picked up: it hangs on the pointer

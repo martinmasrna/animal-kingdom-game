@@ -216,17 +216,24 @@ def test_the_den_is_raided_only_through_its_base():
     assert not raids(s)
     put(s, "5,1", "wisp_1", "A")
     assert {a.target for a in raids(s)} == {("hq", "B")}
-    rules.apply_action(s, PlaceAction("wisp_3", ("hq", "B")))       # a 6: destroyed, not stolen
-    assert s.food == {"A": 15, "B": 4} and "wisp_3" in s.remove_pile
+    rules.apply_action(s, PlaceAction("wisp_3", ("hq", "B")))       # a 6: stolen, B's 6 are A's now (Martin, 2026-11-24)
+    assert s.food == {"A": 21, "B": 4} and "wisp_3" in s.remove_pile
+    assert [e for e in s.events if e["e"] == "raid"][-1]["to"] == "A"
     assert all(u.card_id != "wisp_3" for st in s.board.values() for u in st)
 
 
-def test_a_raid_that_empties_the_den_wins():
+def test_a_raid_wins_once_the_raider_holds_the_winning_food_and_a_den_emptied_loses():
+    s = state(turn=11, hands={"A": ["wisp_3"]}, food={"A": 25, "B": 12})
+    _a_chain_to_b_base(s)
+    put(s, "5,1", "wisp_1", "A")
+    rules.apply_action(s, PlaceAction("wisp_3", ("hq", "B")))       # 6 of B's 12 bring A to 31
+    assert s.food == {"A": 31, "B": 6} and s.result.winner == "A" and s.result.reason == "food"
+    # a den emptied loses even where the raider is short of the winning food (no game that starts at 15 and 15 gets there)
     s = state(turn=11, hands={"A": ["wisp_6"]}, food={"A": 15, "B": 4})
     _a_chain_to_b_base(s)
     put(s, "5,1", "wisp_1", "A")
     rules.apply_action(s, PlaceAction("wisp_6", ("hq", "B")))
-    assert s.food["B"] == 0 and s.result.winner == "A" and s.result.reason == "starved"
+    assert s.food == {"A": 19, "B": 0} and s.result.winner == "A" and s.result.reason == "starved"
 
 
 def test_a_flier_lands_anywhere_and_drops_straight_into_the_enemy_den():
@@ -690,7 +697,7 @@ def test_the_practice_bot_plans_its_turn_and_beats_the_greedy_bot():
     from animal_kingdom.bot import GreedyBot, SearchBot
     from animal_kingdom.web.match import PRACTICE_BOT
     wins, games, held = 0, 0, 0
-    for seed in range(5):
+    for seed in range(12):   # with raids that steal it holds a play less often: 3 turns of 149 in these games, none in the first five seeds
         for seat in "AB":
             bots = {seat: SearchBot(PRACTICE_BOT, seed), rules.other_player(seat): GreedyBot(seed)}
             s = new_game(DECK, DECK, seed, leaders={"A": "warlord_legend", "B": "warlord_legend"})
@@ -703,7 +710,7 @@ def test_the_practice_bot_plans_its_turn_and_beats_the_greedy_bot():
             wins += s.result.winner == seat
             games += 1
             assert bots[seat].failures == 0
-    assert wins >= 7 and held > 0, (wins, games, held)
+    assert wins >= 17 and held > 0, (wins, games, held)
 
 
 def test_a_search_bot_that_fails_plays_the_greedy_bots_move():
@@ -733,12 +740,12 @@ def test_the_mana_blob_gains_2_mana_past_the_cap_too():
 
 def test_the_turns_card_from_an_empty_deck_costs_food_instead_one_more_each_time():
     s = state(turn=10, decks={"A": [], "B": []}, food={"A": 15, "B": 15})
-    rules.apply_action(s, PassAction())                               # B's turn starts: no card to draw
-    assert s.food == {"A": 15, "B": 14} and s.fatigue == {"A": 0, "B": 1} and not s.hands["B"]
-    rules.apply_action(s, PassAction())                               # A's
-    assert s.food == {"A": 14, "B": 14} and s.fatigue == {"A": 1, "B": 1}
+    rules.apply_action(s, PassAction())                               # B's turn starts: no card to draw, 1 food to A
+    assert s.food == {"A": 16, "B": 14} and s.fatigue == {"A": 0, "B": 1} and not s.hands["B"]
+    rules.apply_action(s, PassAction())                               # A's: 1 back
+    assert s.food == {"A": 15, "B": 15} and s.fatigue == {"A": 1, "B": 1}
     rules.apply_action(s, PassAction())                               # B's second empty draw costs 2
-    assert s.food == {"A": 14, "B": 12} and s.fatigue == {"A": 1, "B": 2}
+    assert s.food == {"A": 17, "B": 13} and s.fatigue == {"A": 1, "B": 2}
     assert GameState.from_dict(s.to_dict()).fatigue == s.fatigue      # the count is part of the position
 
 
@@ -755,8 +762,8 @@ def test_a_draw_of_two_with_one_card_left_draws_it_and_pays_for_the_other():
     s = state(turn=10, decks={"A": [], "B": ["wisp_1"]}, food={"A": 15, "B": 15}, config=Config(turn_draw_count=2))
     rules.apply_action(s, PassAction())                               # B's turn: two cards, one in the deck
     assert [u.card_id for u in s.hands["B"]] == ["wisp_1"] and s.food["B"] == 14 and s.fatigue["B"] == 1
-    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())   # B again: both draws empty, 2 then 3
-    assert s.food["B"] == 14 - 2 - 3 and s.fatigue["B"] == 3
+    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())   # A's two empty draws hand B 1 and 2; then B again: both draws empty, 2 then 3
+    assert s.food["B"] == 14 + 1 + 2 - 2 - 3 and s.fatigue["B"] == 3 and sum(s.food.values()) == 30
 
 
 def test_fatigue_at_no_food_loses_at_once_on_your_own_turn_too():
@@ -778,56 +785,37 @@ def test_fatigue_is_not_income_and_not_a_raid_and_only_a_draw_brings_it():
     rs.record_events(True)
     rs.apply_action(PassAction().to_dict()); rs.apply_action(PassAction().to_dict())    # B's turn, then A's: A's empty draw
     lost = [e for e in rs.take_events() if e["e"] == "food" and e["n"] < 0]
-    assert lost == [{"e": "food", "player": "A", "n": -1, "fatigue": 1}]                # the food-change event, negative
-    assert rs.to_dict()["food"] == {"A": 14, "B": 15}                                   # the Raider's 1 more is a raid's
+    assert lost == [{"e": "food", "player": "A", "n": -1, "fatigue": 1, "to": "B"}]     # the food-change event, negative, and whose den took it
+    assert rs.to_dict()["food"] == {"A": 14, "B": 16}
 
 
-# ------------------------------------------------------------------ a map whose raids steal (an experiment, Martin, 2026-11-24)
+def test_fatigues_food_can_win_the_opponent_the_game():
+    s = state(turn=10, decks={"A": ["wisp_1"], "B": []}, food={"A": 29, "B": 5})
+    rules.apply_action(s, PassAction())                               # B's empty draw hands A its 30th food
+    assert s.food == {"A": 30, "B": 4} and s.result.winner == "A" and s.result.reason == "food"
+
+
+# ------------------------------------------------------------------ the 4 by 5 square board (Martin, 2026-11-24, to try)
 
 SQ20 = load_map("map_sq20")
 
 
-def _a_column_to_b_base(s):
-    for cr in ("1,1", "2,1", "3,1", "4,1", "5,1"):
-        put(s, cr, "wisp_1", "A")
-
-
-def test_the_4_by_5_board_and_which_maps_steal():
+def test_the_4_by_5_board():
     assert len(SQ20.crossroads) == 20 and len(SQ20.regions) == 12 and SQ20.win_food == 30
     assert SQ20.hq_connects == {"A": frozenset({"1,1", "1,2", "1,3", "1,4"}), "B": frozenset({"5,1", "5,2", "5,3", "5,4"})}
     assert all(len(r.corners) == 4 for r in SQ20.regions.values())
-    assert SQ20.raids_steal and not load_map("map_sq16").raids_steal and not load_map("map_hex19").raids_steal
 
 
-def test_where_raids_steal_the_food_goes_to_the_raiders_den():
+def test_on_the_4_by_5_a_column_of_five_reaches_the_den_and_two_raids_take_all_it_holds():
     s = state(turn=19, hands={"A": ["wisp_3", "wisp_6"]}, food={"A": 15, "B": 15}, board=SQ20)
-    _a_column_to_b_base(s)
-    rules.apply_action(s, PlaceAction("wisp_3", ("hq", "B")))       # a 6: B's 6 are A's now
-    assert s.food == {"A": 21, "B": 9} and s.result is None and "wisp_3" in s.remove_pile
-    raid = [e for e in s.events if e["e"] == "raid"][-1]
-    assert raid["n"] == 6 and raid["den"] == "B" and raid["to"] == "A"
-    rules.apply_action(s, PlaceAction("wisp_6", ("hq", "B")))       # a 12 takes the 9 the den holds: A reaches 30
+    for cr in ("1,1", "2,1", "3,1", "4,1"):
+        put(s, cr, "wisp_1", "A")
+    assert not raids(s)                                               # four rows deep is not there yet
+    put(s, "5,1", "wisp_1", "A")
+    rules.apply_action(s, PlaceAction("wisp_3", ("hq", "B")))         # a 6
+    assert s.food == {"A": 21, "B": 9} and s.result is None
+    rules.apply_action(s, PlaceAction("wisp_6", ("hq", "B")))         # a 12 takes the 9 the den holds: A reaches 30
     assert s.food == {"A": 30, "B": 0} and s.result.winner == "A" and s.result.reason == "food"
-
-
-def test_where_raids_steal_a_raid_wins_as_soon_as_the_raider_holds_the_winning_food():
-    s = state(turn=11, hands={"A": ["wisp_3"]}, food={"A": 25, "B": 12}, board=SQ20)
-    _a_column_to_b_base(s)
-    rules.apply_action(s, PlaceAction("wisp_3", ("hq", "B")))
-    assert s.food == {"A": 31, "B": 6} and s.result.winner == "A" and s.result.reason == "food"
-
-
-def test_where_raids_steal_fatigue_hands_the_food_to_the_opponent_and_can_win_them_the_game():
-    s = state(turn=10, decks={"A": [], "B": []}, food={"A": 15, "B": 15}, board=SQ20)
-    rules.apply_action(s, PassAction())                               # B's turn starts on an empty deck: 1 to A
-    assert s.food == {"A": 16, "B": 14} and s.fatigue == {"A": 0, "B": 1}
-    assert [e for e in s.events if e["e"] == "food" and e["n"] < 0][-1] == {"e": "food", "player": "B", "n": -1, "fatigue": 1, "to": "A"}
-    rules.apply_action(s, PassAction())                               # A's: 1 back
-    rules.apply_action(s, PassAction())                               # B's second costs 2
-    assert s.food == {"A": 17, "B": 13} and sum(s.food.values()) == 30
-    s = state(turn=10, decks={"A": ["wisp_1"], "B": []}, food={"A": 29, "B": 5}, board=SQ20)
-    rules.apply_action(s, PassAction())
-    assert s.food == {"A": 30, "B": 4} and s.result.winner == "A" and s.result.reason == "food"
 
 
 def test_a_leaders_passive_says_when_it_fires():
