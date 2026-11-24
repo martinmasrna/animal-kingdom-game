@@ -189,32 +189,16 @@ pub fn do_placement(st: &mut State, player: Player, card: CardId, target: Target
     Ok(())
 }
 
-/// The food a raid by `player`'s `card` at `strength` takes, before the den's own food caps it: its strength, doubled
-/// for a card that raids at double strength.
+/// The food a raid by `player`'s `card` at `strength` destroys, before the den's own food caps it: its strength, doubled
+/// for a card whose raids destroy double, and the Raider's 1 more.
 pub fn raid_food(st: &State, player: Player, card: CardId, strength: i32) -> i32 {
     let _ = player;
     let factor = if st.card(card).beh.double_raider { st.cfg().double_raid_factor } else { 1 };
     strength.max(0) * factor
 }
 
-/// The food a raid by `player` must take to end the game: what `player`'s own den still lacks of the winning food, or
-/// all the enemy den holds when that is less. Fatigue's food reads the same way.
-pub fn raid_to_win(st: &State, player: Player) -> i32 {
-    st.food[other(player) as usize].min(st.g.map.win_food - st.food[player as usize])
-}
-
-/// Food moved into `player`'s den from the other (a raid's or fatigue's): no event of its own, the raid's or the
-/// fatigue's says where it went. The winning food wins.
-fn take_food(st: &mut State, player: Player, amount: i32) {
-    st.food[player as usize] += amount;
-    if st.result.is_none() && st.food[player as usize] >= st.g.map.win_food {
-        st.result = Some(GameResult { winner: Some(player), reason: Reason::Food });
-    }
-}
-
-/// The den raid: an animal that enters the enemy den steals food equal to its strength, at most what they have, for its
-/// player's den (Martin, 2026-11-24), and is spent to the Remove Pile without landing (no Roar). A den emptied loses the
-/// game.
+/// The den raid: an animal that enters the enemy den destroys food equal to its strength, at most what they have, and
+/// is spent to the Remove Pile without landing (no Roar). A den emptied loses the game.
 fn raid(st: &mut State, player: Player, unit: Unit, enemy: Player, strength: i32) {
     let n = raid_food(st, player, unit.card, strength).min(st.food[enemy as usize]);
     st.raids[player as usize] += 1;
@@ -222,7 +206,6 @@ fn raid(st: &mut State, player: Player, unit: Unit, enemy: Player, strength: i32
     st.pile_add(unit.card, unit.owner);
     st.food[enemy as usize] -= n;
     st.food_lost[enemy as usize] += n;
-    take_food(st, player, n);
     if st.result.is_none() && st.food[enemy as usize] <= 0 {
         st.result = Some(GameResult { winner: Some(player), reason: Reason::Starved });
     }
@@ -485,7 +468,7 @@ pub fn fatigue_due(st: &State, player: Player, n: i32) -> i32 {
 
 /// Draw n cards; the newest past the hand limit burn to the Remove Pile. Fatigue: each card the deck no longer holds
 /// is not drawn and costs the player food instead, one step more each time (1, then 2, then 3, ...); at no food they
-/// lose, whoever's turn it is. That food goes to the opponent's den.
+/// lose, whoever's turn it is.
 pub fn draw_cards(st: &mut State, player: Player, n: i32) {
     let drawn = st.draw(player, n);
     if !drawn.is_empty() {
@@ -509,8 +492,7 @@ pub fn draw_cards(st: &mut State, player: Player, n: i32) {
         st.food[p] -= lost;
         st.food_lost[p] += lost;
         st.emit(Ev::Fatigue { player, n: lost, count: st.fatigue[p] });
-        take_food(st, other(player), lost);
-        if st.result.is_none() && st.food[p] <= 0 {
+        if st.food[p] <= 0 {
             st.result = Some(GameResult { winner: Some(other(player)), reason: Reason::Starved });
         }
     }

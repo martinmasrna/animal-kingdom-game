@@ -309,7 +309,7 @@ pub fn evaluate(st: &State, me: Player, w: &Weights, odds: &RaidOdds) -> f32 {
     if due > 0 {
         let sign = if next == me { -1.0 } else { 1.0 };
         s += sign * w.food * due.min(st.food[next as usize]) as f32;
-        if due >= effects::raid_to_win(st, other(next)) {
+        if due >= st.food[next as usize] {
             s += sign * w.starve;
         }
     }
@@ -319,10 +319,9 @@ pub fn evaluate(st: &State, me: Player, w: &Weights, odds: &RaidOdds) -> f32 {
     let theirs = if their_reach { &odds.reach } else { &odds.fly };
     if !theirs.is_empty() {
         let (mut sum, mut lethal) = (0i32, 0i32);
-        let need = effects::raid_to_win(st, opp);
         for &v in theirs.iter() {
             sum += v.min(food_me);
-            lethal += (v >= need) as i32;
+            lethal += (v >= food_me) as i32;
         }
         let n = theirs.len() as f32;
         s -= w.threat_theirs * sum as f32 / n + w.lethal_theirs * lethal as f32 / n;
@@ -332,7 +331,7 @@ pub fn evaluate(st: &State, me: Player, w: &Weights, odds: &RaidOdds) -> f32 {
     let mana = if my_turn { rules::mana_left(st, me) } else { rules::mana_total(st, me) };
     let mine = hand_raid(st, me, mana);
     s += w.threat_mine * mine.min(food_opp) as f32;
-    if mine >= effects::raid_to_win(st, me) {
+    if mine >= food_opp {
         s += w.lethal_mine;
     }
 

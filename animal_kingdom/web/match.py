@@ -95,7 +95,7 @@ def _shown(e: dict, s: str) -> bool:
 
 def _effects(events: list, move: Move) -> list:
     """What a move did, read from the engine's events in order (public facts only): an enemy covered, each removal, cards
-    drawn, food from cards (a turn's region income is not the move's), what a raid stole or an empty deck cost."""
+    drawn, food from cards (a turn's region income is not the move's), what a raid destroyed or an empty deck cost."""
     fx = []
     for e in events:
         if e["e"] == "cover" and e["owner"] != move.seat:
@@ -106,12 +106,10 @@ def _effects(events: list, move: Move) -> list:
             fx.append({"k": "draw", "seat": e["player"], "n": len(e["cards"])})
         elif e["e"] == "food" and e["n"] < 0:   # food lost to a draw from an empty deck (fatigue)
             fx.append({"k": "lose", "seat": e["player"], "n": -e["n"]})
-            fx.append({"k": "food", "seat": e["to"], "n": -e["n"]})   # it went to the other den
         elif e["e"] == "food" and not e.get("income"):
             fx.append({"k": "food", "seat": e["player"], "n": e["n"]})
         elif e["e"] == "raid" and e["n"]:
             fx.append({"k": "lose", "seat": e["den"], "n": e["n"]})
-            fx.append({"k": "food", "seat": e["to"], "n": e["n"]})   # stolen: the raider's den took it
     merged = []   # several draws or food gains by one player in a row read as one
     for f in fx:
         if merged and f["k"] in ("draw", "food") and merged[-1]["k"] == f["k"] and merged[-1]["seat"] == f["seat"]:

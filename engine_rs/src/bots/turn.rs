@@ -613,8 +613,8 @@ pub fn win_search(root: &State, me: Player, limit: u64) -> WinSearch {
             }
         }
         let best = one_more.iter().copied().max().unwrap_or(0);
-        // the food a raid must take to win, less what the hand's raids would take with the mana left, from where the board stands
-        let raid = (hand_raid(st, me, rules::mana_left(st, me)) - crate::effects::raid_to_win(st, me)).min(0);
+        // the enemy's food, less what the hand's raids would destroy with the mana left, from where the board stands
+        let raid = (hand_raid(st, me, rules::mana_left(st, me)) - st.food[other(me) as usize]).min(0);
         (own + best).min(0).max(raid) * 1000 + progress
     };
     let line_of = |nodes: &[Node], mut at: u32, last: Action| -> Vec<Action> {

@@ -319,15 +319,13 @@ fn features_inc(st: &State, me: Player, odds: &RaidOdds) -> ([f32; N_FEAT], i32)
     // the raids each side's next turn could make
     let mut raid = [0.0f32; 2];
     let mut lethal = [0.0f32; 2];
-    // the food a side's raids must take to end the game: what its own den lacks of the win, which the den raided always holds
-    let need = [effects::raid_to_win(st, m) as f32, effects::raid_to_win(st, n) as f32];
     for a in 0..2 {
         let d = 1 - a;
         let through = map.hq_front[pl[d] as usize] & conn[a] != 0;
         if pl[a] == me {
             let v = hand_raid_from(st, me, mana[a], conn[a]) as f32;
             raid[a] = v.min(food[d]);
-            lethal[a] = (v >= need[a]) as u8 as f32;
+            lethal[a] = (v >= food[d]) as u8 as f32;
         } else {
             let table = if through { &odds.raid_reach } else { &odds.raid_fly };
             let row = &table[mana[a].clamp(0, MAX_M as i32 - 1) as usize];
@@ -335,7 +333,7 @@ fn features_inc(st: &State, me: Player, odds: &RaidOdds) -> ([f32; N_FEAT], i32)
                 let (mut sum, mut dead) = (0.0f32, 0.0f32);
                 for &v in row.iter() {
                     sum += (v as f32).min(food[d]);
-                    dead += (v as f32 >= need[a]) as u8 as f32;
+                    dead += (v as f32 >= food[d]) as u8 as f32;
                 }
                 raid[a] = sum / row.len() as f32;
                 lethal[a] = dead / row.len() as f32;
@@ -409,7 +407,7 @@ pub fn evaluate(st: &State, me: Player, w: &RaceWeights, odds: &RaidOdds) -> f32
     let due = effects::fatigue_due(st, m, st.cfg().turn_draw_count);
     if due > 0 {
         e -= w.w[F::food as usize] * due.min(st.food[m as usize]) as f32;
-        if due >= effects::raid_to_win(st, n) {
+        if due >= st.food[m as usize] {
             e -= w.starve;
         }
     }

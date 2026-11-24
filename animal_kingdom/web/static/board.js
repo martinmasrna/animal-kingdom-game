@@ -55,11 +55,7 @@ const rowStep = g => squareLook() ? g.w : HEX.dy * g.h;   // a row's step up the
 // Upright the tiles are 152 (4 across fill the stage's width less its sides once the near row's perspective widens them),
 // the board's top PORT_TOP down the stage, under the opponent's row.
 const PORT_W = 152, PORT_TOP = 236;
-// Both sizes are a board four rows deep; a deeper square board (the 4 by 5, map_sq20) keeps that depth on the stage with
-// smaller tiles, so the dens, the hands and the rail stay where they are. A stand-in until that board has a screen of its own.
-const SQ_ROWS = 4;
-const hexGeo = () => { const sq = squareLook(), up = VIEW.port && sq, fit = sq ? Math.min(1, SQ_ROWS / HEX.last) : 1,
-  g = ({ w: Math.round((up ? PORT_W : sq ? 144 : 120) * fit), x: STAGE.w / 2, top: up ? PORT_TOP : sq ? 36 : 41 }); g.h = sq ? g.w : g.w * TH / TW; return g; };
+const hexGeo = () => { const sq = squareLook(), up = VIEW.port && sq, g = ({ w: up ? PORT_W : sq ? 144 : 120, x: STAGE.w / 2, top: up ? PORT_TOP : sq ? 36 : 41 }); g.h = sq ? g.w : g.w * TH / TW; return g; };
 export const tokenWidth = () => hexGeo().w;
 const hexAt = (c, r) => { const g = hexGeo(), n = HEX.cols[c - 1];
   return [g.x + (r - 1 - (n - 1) / 2) * g.w, g.top + g.h / 2 + (HEX.last - c) * rowStep(g)]; };

@@ -198,7 +198,7 @@ def validate_card_record(rec: dict) -> None:
 
 
 _MAPS_TEXT = json.dumps(load_bundled_json("maps.json"))
-MAP_ID = os.environ.get("AK_MAP", "map_hex19")   # AK_MAP=map_sq16 plays the 4x4 board, AK_MAP=map_sq20 the 4x5
+MAP_ID = os.environ.get("AK_MAP", "map_hex19")   # AK_MAP=map_sq16 plays the 4x4 test board
 _engines: dict[tuple, "ak_engine.Engine"] = {}
 
 
