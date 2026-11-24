@@ -166,7 +166,8 @@
 .game.mana .mlead .ltok .unit { position: absolute; inset: 0; --tw: 84px; }
 .game.mana .mlead .ltok.dim { filter: grayscale(.85) brightness(.7); }   /* a once-a-game power, used */
 .game.mana .mlead .ltok.can { cursor: pointer; }
-.game.mana .mlead .ltok.can::after { content: ''; position: absolute; inset: -5px; clip-path: polygon(evenodd, 50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%, 50% 0, 50% 5%, 4.5% 27.5%, 4.5% 72.5%, 50% 95%, 95.5% 72.5%, 95.5% 27.5%, 50% 5%); background: #f2c94c; }
+/* your power reads as your hand does (Martin, 2026-11-24: no outline): dimmed while you can't use it, as an unplayable card is */
+.game.mana .mlead.A .ltok.pw:not(.can) .unit { filter: brightness(.45) saturate(.5); }
 .game.mana .mlead .ltok.can:hover { filter: brightness(1.15); }
 /* a leader's passive fires (timeline 'trigger'): a pop and a gold flash, as a card whose effect goes off */
 .game.mana .mlead .ltok.fire { animation: ltokfire .6s ease-out; }
@@ -499,7 +500,6 @@ html.carrying #board.sq .cr.unit.ghost .mstand { visibility: hidden; }
 .sqfig { position: absolute; left: 50%; bottom: 31%; height: 66%; width: auto; max-width: none; transform: translateX(-50%); filter: drop-shadow(0 2px 2px rgba(0,0,0,.45)); pointer-events: none; }
 html.sqlook .tokpiece { height: var(--tw); }
 html.sqlook .game.mana .mlead .ltok { height: 84px; }
-html.sqlook .game.mana .mlead .ltok.can::after { clip-path: none; inset: -6px; border-radius: 12px; background: none; box-shadow: 0 0 0 4px #f2c94c; }
 html.sqlook .game.mana .mlast .row .mini { height: 40px; }
 .pcost.rcm { left: 50%; bottom: -8%; width: 34%; aspect-ratio: 1; transform: translateX(-50%); display: grid; place-items: center; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
 .pcost.rcm i { position: absolute; inset: 0; background: var(--rc-cost); clip-path: polygon(50% 0, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%); }
