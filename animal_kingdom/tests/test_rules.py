@@ -32,9 +32,9 @@ DECK = ([f"wisp_{n}" for n in range(1, 7) for _ in range(2)] + [f"flight_{n}" fo
         + ["spikes_1", "spikes_1", "cantrip_2", "cantrip_2", "spikes_3", "spikes_3", "warlord_legend"])
 
 
-def state(*, turn=0, current="A", hands=None, decks=None, food=None, leaders=None, config=CFG) -> GameState:
+def state(*, turn=0, current="A", hands=None, decks=None, food=None, leaders=None, config=CFG, board=None) -> GameState:
     """A bare position: turn_counter `turn` (A's Nth own turn is turn 2N-2), nothing pending."""
-    s = GameState(BOARD, CARDS, config, board={}, hands={"A": [], "B": []},
+    s = GameState(board or BOARD, CARDS, config, board={}, hands={"A": [], "B": []},
                   decks={p: list((decks or {}).get(p, ["wisp_1"] * 5)) for p in "AB"},
                   remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A", turn_counter=turn,
                   leaders={p: {"id": lid} for p, lid in (leaders or {}).items()})
@@ -780,6 +780,54 @@ def test_fatigue_is_not_income_and_not_a_raid_and_only_a_draw_brings_it():
     lost = [e for e in rs.take_events() if e["e"] == "food" and e["n"] < 0]
     assert lost == [{"e": "food", "player": "A", "n": -1, "fatigue": 1}]                # the food-change event, negative
     assert rs.to_dict()["food"] == {"A": 14, "B": 15}                                   # the Raider's 1 more is a raid's
+
+
+# ------------------------------------------------------------------ a map whose raids steal (an experiment, Martin, 2026-11-24)
+
+SQ20 = load_map("map_sq20")
+
+
+def _a_column_to_b_base(s):
+    for cr in ("1,1", "2,1", "3,1", "4,1", "5,1"):
+        put(s, cr, "wisp_1", "A")
+
+
+def test_the_4_by_5_board_and_which_maps_steal():
+    assert len(SQ20.crossroads) == 20 and len(SQ20.regions) == 12 and SQ20.win_food == 30
+    assert SQ20.hq_connects == {"A": frozenset({"1,1", "1,2", "1,3", "1,4"}), "B": frozenset({"5,1", "5,2", "5,3", "5,4"})}
+    assert all(len(r.corners) == 4 for r in SQ20.regions.values())
+    assert SQ20.raids_steal and not load_map("map_sq16").raids_steal and not load_map("map_hex19").raids_steal
+
+
+def test_where_raids_steal_the_food_goes_to_the_raiders_den():
+    s = state(turn=19, hands={"A": ["wisp_3", "wisp_6"]}, food={"A": 15, "B": 15}, board=SQ20)
+    _a_column_to_b_base(s)
+    rules.apply_action(s, PlaceAction("wisp_3", ("hq", "B")))       # a 6: B's 6 are A's now
+    assert s.food == {"A": 21, "B": 9} and s.result is None and "wisp_3" in s.remove_pile
+    raid = [e for e in s.events if e["e"] == "raid"][-1]
+    assert raid["n"] == 6 and raid["den"] == "B" and raid["to"] == "A"
+    rules.apply_action(s, PlaceAction("wisp_6", ("hq", "B")))       # a 12 takes the 9 the den holds: A reaches 30
+    assert s.food == {"A": 30, "B": 0} and s.result.winner == "A" and s.result.reason == "food"
+
+
+def test_where_raids_steal_a_raid_wins_as_soon_as_the_raider_holds_the_winning_food():
+    s = state(turn=11, hands={"A": ["wisp_3"]}, food={"A": 25, "B": 12}, board=SQ20)
+    _a_column_to_b_base(s)
+    rules.apply_action(s, PlaceAction("wisp_3", ("hq", "B")))
+    assert s.food == {"A": 31, "B": 6} and s.result.winner == "A" and s.result.reason == "food"
+
+
+def test_where_raids_steal_fatigue_hands_the_food_to_the_opponent_and_can_win_them_the_game():
+    s = state(turn=10, decks={"A": [], "B": []}, food={"A": 15, "B": 15}, board=SQ20)
+    rules.apply_action(s, PassAction())                               # B's turn starts on an empty deck: 1 to A
+    assert s.food == {"A": 16, "B": 14} and s.fatigue == {"A": 0, "B": 1}
+    assert [e for e in s.events if e["e"] == "food" and e["n"] < 0][-1] == {"e": "food", "player": "B", "n": -1, "fatigue": 1, "to": "A"}
+    rules.apply_action(s, PassAction())                               # A's: 1 back
+    rules.apply_action(s, PassAction())                               # B's second costs 2
+    assert s.food == {"A": 17, "B": 13} and sum(s.food.values()) == 30
+    s = state(turn=10, decks={"A": ["wisp_1"], "B": []}, food={"A": 29, "B": 5}, board=SQ20)
+    rules.apply_action(s, PassAction())
+    assert s.food == {"A": 30, "B": 4} and s.result.winner == "A" and s.result.reason == "food"
 
 
 def test_a_leaders_passive_says_when_it_fires():
