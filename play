@@ -25,4 +25,9 @@ if ! "$here/engine_rs/build.sh" --if-stale; then
   echo "PLAYING ON THE LAST ENGINE THAT BUILT: rule changes since then are not in this server" >&2
 fi
 
-exec "$py" -m animal_kingdom.web.server "$@"
+# The server reads the cards, decks, maps, engine and its own code once; tools/play/watch.py restarts it when any of
+# them changes, so a card edit shows within a second. AK_NO_WATCH=1 runs it once, as before.
+if [[ "${AK_NO_WATCH:-}" == "1" ]]; then
+  exec "$py" -m animal_kingdom.web.server "$@"
+fi
+exec "$py" "$here/tools/play/watch.py" "$@"

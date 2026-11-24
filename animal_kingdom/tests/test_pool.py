@@ -9,10 +9,12 @@ from animal_kingdom import game
 from animal_kingdom.web import ladder, pool
 from animal_kingdom.web.match import BOT_LEVELS, PRACTICE_BOT
 
-LIST = [f"wisp_{n}" for n in range(1, 7) for _ in range(2)] + [f"flight_{n}" for n in range(1, 7) for _ in range(2)] + ["warlord_legend"]
+# the collectible vanilla fliers and four more, twelve cards
+FLIERS = ["spikes_1", "spikes_1", "spikes_3", "spikes_3", "cantrip_2", "cantrip_2"] + [f"flight_{n}" for n in (1, 3, 6) for _ in range(2)]
+LIST = [f"wisp_{n}" for n in range(1, 7) for _ in range(2)] + FLIERS + ["warlord_legend"]
 WISPS = {"slug": "wisps", "name": "Wisps", "leader": "warlord_legend", "cards": LIST}
 OTHER = {"slug": "other", "name": "Other", "leader": "sage_legend",
-         "cards": [f"hunter_{n}" for n in range(2, 8) for _ in range(2)] + [f"flight_{n}" for n in range(1, 7) for _ in range(2)] + ["sage_legend"]}
+         "cards": [f"hunter_{n}" for n in range(2, 8) for _ in range(2)] + FLIERS + ["sage_legend"]}
 
 
 def test_the_levels_are_the_ladders_and_each_is_a_bot_the_engine_knows():

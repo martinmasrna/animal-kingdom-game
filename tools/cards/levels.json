@@ -818,6 +818,15 @@
       },
       "by": "claude",
       "at": 1795262576
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1795486869
     }
   },
   "flight_3": {
@@ -840,6 +849,15 @@
       },
       "by": "claude",
       "at": 1795262576
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1795486869
     }
   },
   "hungry_1": {
@@ -1044,6 +1062,15 @@
       },
       "by": "claude",
       "at": 1795271355
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1795486869
     }
   },
   "flight_6": {
@@ -1297,6 +1324,15 @@
       },
       "by": "claude",
       "at": 1795354530
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Bird Egg"
+      },
+      "by": "claude",
+      "at": 1795486870
     }
   },
   "golden_egg": {
@@ -1352,6 +1388,17 @@
       },
       "by": "claude",
       "at": 1795359098
+    }
+  },
+  "flight_10": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795486870
     }
   }
 }

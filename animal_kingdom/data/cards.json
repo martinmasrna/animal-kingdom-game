@@ -218,7 +218,7 @@
     {
       "id": "flight_2",
       "name": "Flight 2",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "base_strength": 2,
       "text": "Flight.",
@@ -242,7 +242,7 @@
     {
       "id": "flight_5",
       "name": "Flight 5",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "base_strength": 5,
       "text": "Flight.",
@@ -376,7 +376,7 @@
     {
       "id": "flight_4",
       "name": "Flight 4",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "base_strength": 4,
       "text": "Flight.",
@@ -523,7 +523,7 @@
     },
     {
       "id": "bird_egg",
-      "name": "Bird Egg",
+      "name": "Fireball Egg",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 1,
@@ -589,6 +589,18 @@
       "cost": 4,
       "keywords": [
         "Spikes"
+      ]
+    },
+    {
+      "id": "flight_10",
+      "name": "Flight 10",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 10,
+      "text": "Flight.",
+      "cost": 10,
+      "keywords": [
+        "Flight"
       ]
     }
   ]

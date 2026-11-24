@@ -15,10 +15,10 @@ const until = async (page, fn, arg, ms = 10000) => { const t = Date.now(); while
 const seat = async () => { const ctx = await browser.createBrowserContext(), p = await ctx.newPage(); p.errors = [];
   p.on('pageerror', e => p.errors.push(e.message)); await p.evaluateOnNewDocument(() => localStorage.setItem('ak:learned', '1'));
   await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]); return p; };
-// A deck of the mana collection on the profile: 12 Wisps (1 to 6, two each), Flight 1, 2, 3 and 5 two each, two Spikes 3, two Cantrip 2s and the Warlord (25, legal in the mana rules).
-const DECK = { ...Object.fromEntries([...Array(6).keys()].map(i => ['wisp_' + (i + 1), 2])), flight_1: 2, flight_2: 2, flight_3: 2, flight_5: 2, spikes_3: 2, cantrip_2: 2, warlord_legend: 1 };
+// A deck of the mana collection on the profile: 12 Wisps (1 to 6, two each), Flight 1, 3, 6 and Spikes 1 two each, two Spikes 3, two Cantrip 2s and the Warlord (25, legal in the mana rules).
+const DECK = { ...Object.fromEntries([...Array(6).keys()].map(i => ['wisp_' + (i + 1), 2])), flight_1: 2, flight_3: 2, flight_6: 2, spikes_1: 2, spikes_3: 2, cantrip_2: 2, warlord_legend: 1 };
 // A cheap one (nothing over 3 mana) for the matches that must get going: the Wisps 1 to 3, the cantrips, fliers, Spikes and Hungry, and the Warlord.
-const CHEAP = { ...Object.fromEntries([1, 2, 3].map(i => ['wisp_' + i, 2])), cantrip_2: 2, cantrip_3: 2, flight_1: 2, flight_2: 2, flight_3: 2, spikes_1: 2, spikes_3: 2, hungry_1: 2, hungry_3: 2, warlord_legend: 1 };
+const CHEAP = { ...Object.fromEntries([1, 2, 3].map(i => ['wisp_' + i, 2])), cantrip_2: 2, cantrip_3: 2, flight_1: 2, sky_maw_2: 2, flight_3: 2, spikes_1: 2, spikes_3: 2, hungry_1: 2, hungry_3: 2, warlord_legend: 1 };
 const giveDeck = async (p, id, name, cards = DECK, leader = 'warlord_legend') => {
   await p.evaluate(async (d, seen) => { const r = await fetch('/api/me/decks', { method: 'PUT', headers: { 'X-AK-Key': localStorage.getItem('ak:key'), 'Content-Type': 'application/json' }, body: JSON.stringify([d]) }); if (!r.ok) throw new Error(await r.text());
     await fetch('/api/me/patch', { method: 'POST', headers: { 'X-AK-Key': localStorage.getItem('ak:key'), 'Content-Type': 'application/json' }, body: JSON.stringify({ version: seen }) }); },   // the patch notes seen: they don't open over the test
@@ -182,7 +182,7 @@ test('the collection in the mana rules: the mana card with its cost, sorted by c
   await click(p, '#dnew'); await p.waitForSelector('.lv'); await click(p, '.lv[data-id="warlord_legend"]');
   await p.keyboard.type('Mana test'); await p.keyboard.press('Enter');
   await p.waitForSelector('.side .st.mst');
-  const want = ['wisp_1', 'wisp_1', 'wisp_2', 'wisp_2', 'wisp_3', 'wisp_3', 'wisp_4', 'wisp_4', 'wisp_5', 'wisp_5', 'wisp_6', 'wisp_6', 'spikes_3', 'spikes_3', 'flight_2', 'flight_2',
+  const want = ['wisp_1', 'wisp_1', 'wisp_2', 'wisp_2', 'wisp_3', 'wisp_3', 'wisp_4', 'wisp_4', 'wisp_5', 'wisp_5', 'wisp_6', 'wisp_6', 'spikes_3', 'spikes_3', 'flight_3', 'flight_3',
     'spikes_1', 'spikes_1', 'flight_6', 'flight_6', 'cantrip_2', 'cantrip_2', 'hungry_3', 'hungry_3'];
   for (const id of want) { await click(p, `.cgrid .tl[data-card="${id}"]`); await wait(30); }
   const all = [...want, 'warlord_legend'];
@@ -225,7 +225,7 @@ test('on the square board every card is the rectangular one, its cost and streng
     // a choice of cards (Scout) lays them out over the board, on screen: the hand's own placing once took them below it (2026-11-23)
     await click(p, '#skip'); assert.ok(await until(p, () => window.__ak().V.game.decision === 'yours' && !window.__ak().PB.busy, null, 30000));
     await p.evaluate(() => { const V = window.__ak().V; window.__ak.feed({ ...V, game: { ...V.game, pending: { mode: 'choice', kind: 'scout', source: 'scout_3',
-      options: ['wisp_1', 'flight_2', 'cantrip_3'].map((id, i) => ({ kind: 'card', id, v: i })) } } }); });
+      options: ['wisp_1', 'flight_3', 'cantrip_3'].map((id, i) => ({ kind: 'card', id, v: i })) } } }); });
     assert.ok(await until(p, () => document.querySelectorAll('#opts.on .hc').length === 3), 'three cards offered');
     const boxes = await p.evaluate(() => [...document.querySelectorAll('#opts .hc')].map(e => { const r = e.getBoundingClientRect(); return [r.top, r.bottom, r.width, innerHeight]; }));
     for (const [t, b, w, H] of boxes) assert.ok(t >= 0 && b <= H && w > 100, `an offered card on screen: ${t}-${b}`);

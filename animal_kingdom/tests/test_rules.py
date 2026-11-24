@@ -28,8 +28,8 @@ for _n in ("hand", "ally", "region", "played"):
 CFG = Config()
 BOARD = load_map(MAP_ID)
 BASE = {"A": {"1,1", "1,2", "1,3"}, "B": {"5,1", "5,2", "5,3"}}
-DECK = ([f"wisp_{n}" for n in range(1, 7) for _ in range(2)] + [f"flight_{n}" for n in (1, 2, 3, 5) for _ in range(2)]
-        + ["cantrip_2", "cantrip_2", "spikes_3", "spikes_3", "warlord_legend"])
+DECK = ([f"wisp_{n}" for n in range(1, 7) for _ in range(2)] + [f"flight_{n}" for n in (1, 3, 6) for _ in range(2)]
+        + ["spikes_1", "spikes_1", "cantrip_2", "cantrip_2", "spikes_3", "spikes_3", "warlord_legend"])
 
 
 def state(*, turn=0, current="A", hands=None, decks=None, food=None, leaders=None, config=CFG) -> GameState:

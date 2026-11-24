@@ -15,7 +15,7 @@ after(async () => { await browser?.close(); server?.stop(); });
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const WISPS = Object.fromEntries([1, 2, 3, 4, 5, 6].map(i => ['wisp_' + i, 2]));
-const deck = (id, name, leader) => ({ id, name, leader, cards: { ...WISPS, flight_1: 2, flight_2: 2, flight_3: 2, flight_5: 2, spikes_3: 2, cantrip_2: 2, [leader]: 1 } });
+const deck = (id, name, leader) => ({ id, name, leader, cards: { ...WISPS, flight_1: 2, flight_3: 2, flight_6: 2, spikes_1: 2, spikes_3: 2, cantrip_2: 2, [leader]: 1 } });
 const FIVE = { league: 5, name: 'Silver', label: 'Silver 2', colour: '#c9d0d8', emblem: 'silver_2', top: false, streak: 3, best: 'Silver', division: 2, stars: 2, of: 5 };
 const TOP = { league: 11, name: 'Legend', label: 'Legend', colour: '#f4f1e8', top: true, streak: 0, best: 'Legend', rating: '2011' };
 
