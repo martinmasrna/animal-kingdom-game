@@ -21,9 +21,9 @@ pub fn leaders_json(cfg: &Config) -> Value {
     }).collect())
 }
 
-/// What a leader's power costs: the config's, for every leader.
-pub fn power_price(cfg: &Config, _leader_id: &str) -> i32 {
-    cfg.leader_power_cost
+/// What a leader's power costs: the Raider's its own, every other the config's.
+pub fn power_price(cfg: &Config, leader_id: &str) -> i32 {
+    if leader_id == crate::cards::RAIDER { cfg.raider_power_cost } else { cfg.leader_power_cost }
 }
 
 /// Why `leader` can't lead `deck`, if it can't.

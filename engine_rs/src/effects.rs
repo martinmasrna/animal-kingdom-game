@@ -190,18 +190,16 @@ pub fn do_placement(st: &mut State, player: Player, card: CardId, target: Target
 /// The food a raid by `player`'s `card` at `strength` destroys, before the den's own food caps it: its strength, doubled
 /// for a card whose raids destroy double, and the Raider's 1 more.
 pub fn raid_food(st: &State, player: Player, card: CardId, strength: i32) -> i32 {
-    let bonus = if st.leads(player, st.g.named.raider) { st.cfg().raider_leader_bonus } else { 0 };
+    let _ = player;
     let factor = if st.card(card).beh.double_raider { st.cfg().double_raid_factor } else { 1 };
-    strength.max(0) * factor + bonus
+    strength.max(0) * factor
 }
 
 /// The den raid: an animal that enters the enemy den destroys food equal to its strength, at most what they have, and
 /// is spent to the Remove Pile without landing (no Roar). A den emptied loses the game.
 fn raid(st: &mut State, player: Player, unit: Unit, enemy: Player, strength: i32) {
     let n = raid_food(st, player, unit.card, strength).min(st.food[enemy as usize]);
-    if st.leads(player, st.g.named.raider) && st.cfg().raider_leader_bonus != 0 {
-        st.emit(Ev::LeaderTrigger { player, card: st.g.named.raider.unwrap() });
-    }
+    st.raids[player as usize] += 1;
     st.emit(Ev::Raid { player, iid: unit.iid, card: unit.card, den: enemy, strength, n });
     st.pile_add(unit.card, unit.owner);
     st.food[enemy as usize] -= n;
@@ -791,7 +789,15 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
 
 /// What `player`'s leader's power costs: the config's price less what their Sage's card took off it, never below 0.
 pub fn power_cost(st: &State, player: Player) -> i32 {
-    (st.cfg().leader_power_cost - st.power_discount[player as usize]).max(0)
+    let lead = st.leaders[player as usize];
+    let price = if lead.is_some() && lead == st.g.named.raider { st.cfg().raider_power_cost } else { st.cfg().leader_power_cost };
+    (price - st.power_discount[player as usize]).max(0)
+}
+
+/// The food the Raider's power takes now: 1, and 1 more for every 3 raids its player made this game.
+pub fn raider_power_food(st: &State, player: Player) -> i32 {
+    let per = st.cfg().raider_power_raids;
+    st.cfg().raider_power_food + if per > 0 { st.raids[player as usize] / per } else { 0 }
 }
 
 /// Whether `player`'s leader has a power that would do something now, not used yet this turn; the caller checks the mana.
@@ -810,6 +816,16 @@ pub fn do_leader(st: &mut State, player: Player) -> Result<(), String> {
     st.power_used = true;
     if Some(lead) == st.g.named.sage {
         st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, lead));
+    } else if Some(lead) == st.g.named.raider {
+        // "Your opponent loses 1 food, and 1 more for every 3 raids you made this game."
+        let enemy = other(player);
+        let n = raider_power_food(st, player).min(st.food[enemy as usize]).max(0);
+        st.emit(Ev::Food { player: enemy, n: -n, income: false });
+        st.food[enemy as usize] -= n;
+        st.food_lost[enemy as usize] += n;
+        if st.food[enemy as usize] <= 0 {
+            st.result = Some(GameResult { winner: Some(player), reason: Reason::Starved });
+        }
     } else {
         return Err(format!("{:?} has no power to use", st.g.cards.name_of(lead)));
     }

@@ -566,10 +566,19 @@ def test_the_warlords_hungry_cards_have_two_more_strength_in_hand_and_on_the_boa
     assert s.board["2,1"][-1].card_id == "hungry_3" and s.food["A"] == 15 + CFG.hungry_food   # it eats, and Hungry feeds
 
 
-def test_the_raiders_raids_destroy_two_more():
-    s = state(turn=11, hands={"A": ["flight_1"]}, food={"A": 15, "B": 15}, leaders={"A": RAIDER})
+def test_the_raiders_power_takes_a_food_and_one_more_for_every_three_raids():
+    assert LEADERS[RAIDER] == ("power", "Your opponent loses 1 food, and 1 more for every 3 raids you made this game.")
+    s = state(turn=19, hands={"A": ["flight_1"] * 3}, food={"A": 15, "B": 15}, leaders={"A": RAIDER})   # 10 mana
     rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
-    assert s.food["B"] == 15 - 1 - CFG.raider_leader_bonus
+    assert s.food["B"] == 14                                          # a raid takes its strength, nothing more
+    rules.apply_action(s, LeaderAction())
+    assert s.food["B"] == 13 and rules.mana_left(s, "A") == 10 - 1 - CFG.raider_power_cost
+    assert LeaderAction() not in rules.legal_actions(s)               # once a turn
+    for _ in range(2):
+        rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
+    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
+    rules.apply_action(s, LeaderAction())                             # three raids made: 2 food
+    assert s.food["B"] == 11 - 2                                       # B holds no region: nothing came back
 
 
 def test_the_elf_leader_makes_your_regions_produce_one_more_food():
@@ -777,11 +786,6 @@ def test_a_leaders_passive_says_when_it_fires():
     rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
     kinds = [e["e"] for e in s.events[n:]]
     assert kinds.index("raid") < kinds.index("leader_trigger") == kinds.index("draw") - 1
-    # the Raider: just before the raid it adds to
-    s = state(turn=11, hands={"A": ["flight_1"]}, leaders={"A": RAIDER}, food={"A": 15, "B": 15})
-    rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
-    kinds = [e["e"] for e in s.events]
-    assert kinds.index("leader_trigger") == kinds.index("raid") - 1
     # the Elf: at the end of a turn its regions produce in, before the food
     s = state(turn=10, leaders={"A": ELF})
     for cr in ("1,1", "1,2", "2,2"):

@@ -18,7 +18,7 @@ pub const FLIGHT_1: &str = "flight_1";
 /// or a passive is in `behaviour`.
 pub const LEADERS: [(&str, &str); 5] = [
     (WARLORD, "Your Hungry cards have +2 strength."),                          // Martin, 2026-11-24: "from hand" too
-    (RAIDER, "Your raids destroy 1 more food."),
+    (RAIDER, "Your opponent loses 1 food, and 1 more for every 3 raids you made this game."),   // Martin, 2026-11-24: 2 mana, a test
     (SAGE, "Draw a card."),
     (ELF, "Your regions produce 1 more food."),                               // Martin, 2026-11-23: the card's and the power's texts swapped
     (ASSASSIN, "After every third card you play in a turn, draw a card."),    // Martin, 2026-11-21: "multiple times a turn"
@@ -164,8 +164,8 @@ pub fn behaviour(id: &str) -> Behaviour {
         _ => None,
     };
     b.leader = match id {
-        WARLORD | RAIDER | ASSASSIN | ELF => Some(LeaderKind::Passive),
-        SAGE => Some(LeaderKind::Power),
+        WARLORD | ASSASSIN | ELF => Some(LeaderKind::Passive),
+        SAGE | RAIDER => Some(LeaderKind::Power),
         _ => None,
     };
     b.draw_on_draw = id == "golden_egg";
