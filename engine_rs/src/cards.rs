@@ -68,7 +68,7 @@ pub enum Roar {
     SageCard,
     /// "Roar: gain 2 mana."
     GainMana,
-    /// "Roar: adjacent enemies get -1 strength. Adjacent regions produce no food for the rest of the game." (the regions
+    /// "Roar: adjacent units get -1 strength. Adjacent regions produce no food for the rest of the game." (the regions
     /// its tile is part of)
     Scorch,
 }

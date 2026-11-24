@@ -825,7 +825,7 @@ def test_scorch_eats_burns_its_neighbours_and_its_regions_produce_no_food_for_th
     put(s, around[0], "wisp_2", "B"); put(s, around[1], "test_one", "B")   # 4 and 1: down to 3, and to 0 (gone)
     rules.apply_action(s, PlaceAction("scorch", ("cr", c)))
     assert effective_strength(s, s.board[around[0]][-1]) == CARDS["wisp_2"].base_strength - 1 and around[1] not in s.board
-    assert effective_strength(s, s.board[a][-1]) == CARDS["wisp_1"].base_strength   # its own side untouched
+    assert effective_strength(s, s.board[a][-1]) == CARDS["wisp_1"].base_strength - 1   # its own side burns too
 
 
 def test_the_raiders_and_the_assassins_counts_show_on_their_leaders():

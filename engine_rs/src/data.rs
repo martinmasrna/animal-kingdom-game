@@ -458,7 +458,7 @@ config! {
     sage_card_power_discount: i32 = 1,    // the Sage's card: "Roar: reduce the cost of your hero power by 1."
     elf_food_per_region: i32 = 2,         // the Elf's card: "Roar: gain 2 food for each region you control." (Martin, 2026-11-23)
     assassin_nth_card: i32 = 3,           // the Assassin: "After every third card you play in a turn, draw a card."
-    scorch_burn: i32 = 1,                 // the Scorch: "adjacent enemies get -1 strength" (Martin, 2026-11-24)
+    scorch_burn: i32 = 1,                 // the Scorch: "adjacent units get -1 strength" (Martin, 2026-11-24)
     raider_power_cost: i32 = 2,           // the Raider's power: "Your opponent loses 1 food, and 1 more for every 3 raids
     raider_power_food: i32 = 1,           // you made this game." (Martin, 2026-11-24)
     raider_power_raids: i32 = 3,

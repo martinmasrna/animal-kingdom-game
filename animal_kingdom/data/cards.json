@@ -609,7 +609,7 @@
       "status": "collectible",
       "rarity": "common",
       "base_strength": 5,
-      "text": "Hungry. Flight. Roar: adjacent enemies get -1 strength. Adjacent regions produce no food for the rest of the game.",
+      "text": "Hungry. Flight. Roar: adjacent units get -1 strength. Adjacent regions produce no food for the rest of the game.",
       "cost": 4,
       "keywords": [
         "Hungry",
