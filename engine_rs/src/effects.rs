@@ -208,6 +208,23 @@ fn raid(st: &mut State, player: Player, unit: Unit, enemy: Player, strength: i32
         st.result = Some(GameResult { winner: Some(player), reason: Reason::Starved });
     }
     if st.result.is_none() {
+        // "Whenever you raid, draw a card." for each such animal of the raider's owner on the board (the Plunderer)
+        let mut m = st.board.own[player as usize];
+        let mut n = 0;
+        let mut by = None;
+        while m != 0 {
+            let t = m.trailing_zeros() as Tile;
+            m &= m - 1;
+            if let Some(top) = st.board.top(t) {
+                if st.card(top.card).beh.raid_draw_aura {
+                    n += 1;
+                    by = Some(top);
+                }
+            }
+        }
+        if let Some(b) = by {
+            st.effect_stack.push(Step::by_unit(StepKind::Draw { player, n }, &b));
+        }
         match st.card(unit.card).beh.on_raid {
             Some(OnRaid::Draw) => st.effect_stack.push(Step::by_unit(StepKind::Draw { player: unit.owner, n: 1 }, &unit)),
             None => {}

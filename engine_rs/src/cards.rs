@@ -108,6 +108,8 @@ pub struct Behaviour {
     pub draw_on_draw: bool,
     /// "Adjacent allies have Spikes." while it is on the board (the Porcupine)
     pub spikes_aura: bool,
+    /// "Whenever you raid, draw a card." while it is on the board (the Plunderer)
+    pub raid_draw_aura: bool,
     pub on_raid: Option<OnRaid>,
     /// "Its raids destroy double food."
     pub double_raider: bool,
@@ -173,5 +175,6 @@ pub fn behaviour(id: &str) -> Behaviour {
     };
     b.draw_on_draw = id == "golden_egg";
     b.spikes_aura = id == "porcupine";
+    b.raid_draw_aura = id == "plunderer";
     b
 }

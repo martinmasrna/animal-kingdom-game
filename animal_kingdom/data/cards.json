@@ -492,7 +492,7 @@
     {
       "id": "young_albatross",
       "name": "Young Albatross",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "base_strength": 2,
       "text": "Flight. Roar: remove all adjacent enemies with strength 2 or less.",
@@ -615,6 +615,16 @@
         "Flight",
         "Hungry"
       ]
+    },
+    {
+      "id": "plunderer",
+      "name": "Plunderer",
+      "status": "collectible",
+      "rarity": "common",
+      "base_strength": 3,
+      "text": "Whenever you raid, draw a card.",
+      "cost": 3,
+      "keywords": []
     }
   ]
 }

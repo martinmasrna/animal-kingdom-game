@@ -829,3 +829,18 @@ def test_the_raiders_and_the_assassins_counts_show_on_their_leaders():
         rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
         assert leader_view(s, "A")["count"]["n"] == k % CFG.raider_power_raids   # 1, 2, then back to 0 at the third raid
     assert leader_view(s, "B")["count"] == {"n": 0, "of": CFG.assassin_nth_card}   # not their turn: nothing played
+
+
+def test_the_plunderer_draws_a_card_for_each_raid_while_it_stands():
+    assert (CARDS["plunderer"].cost, CARDS["plunderer"].base_strength) == (3, 3)
+    s = state(turn=19, hands={"A": ["flight_1", "flight_1"]}, decks={"A": ["wisp_1"] * 5}, food={"A": 15, "B": 15})
+    rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
+    assert len(s.hands["A"]) == 1                                     # no Plunderer: no draw
+    put(s, "1,1", "plunderer", "A"); put(s, "1,2", "plunderer", "A")
+    rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
+    assert len(s.hands["A"]) == 2                                     # one card for each Plunderer
+    put(s, "1,1", "wisp_5", "B"); put(s, "1,2", "wisp_5", "B")        # covered: gone from the board's tops
+    s.hands["A"].append(UnitInstance("flight_1", "A", s.new_iid()))
+    n = len(s.hands["A"])
+    rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
+    assert len(s.hands["A"]) == n - 1

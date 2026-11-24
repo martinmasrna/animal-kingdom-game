@@ -1242,6 +1242,15 @@
       },
       "by": "claude",
       "at": 1795285865
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1795491839
     }
   },
   "elf_legend": {
@@ -1410,6 +1419,17 @@
       },
       "by": "claude",
       "at": 1795488502
+    }
+  },
+  "plunderer": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "by": "claude",
+      "at": 1795491863
     }
   }
 }
