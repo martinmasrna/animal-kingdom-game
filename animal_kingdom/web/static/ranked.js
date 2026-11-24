@@ -10,7 +10,7 @@ import { leaderToken, manaCard } from './mana.js';
 
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const ICON = { board: '<svg class="rkic" viewBox="0 0 24 24"><path d="M4 20v-8h5v8M9.5 20V5h5v15M15 20v-5h5v5"/></svg>', open: '<svg class="rkic" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg>', plus: '<svg class="rkic" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>',
-  back: '<svg class="rkic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>' };
+  back: '<svg class="rkic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>', x: '<svg class="rkic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>' };
 
 // A standing is the server's tiers.view: {name, label, colour, top, division, stars, of, streak, rating}.
 const mark = lg => `<div class="rkmark" style="--c:${esc(lg.colour)}"><b${lg.top ? ' class="num"' : ''}>${esc(lg.top ? lg.rating : lg.division)}</b></div>`;
@@ -36,19 +36,28 @@ function fitNames(root) {
 
 // ---------------------------------------------------------------- the ranked screen
 // `me`: your profile (its `league` is your standing); `decks`: your decks as home lists them, legal or not; `chosen`: the
-// legal one that plays; `choose(id)` keeps another and draws the screen again; `play()` starts a match with the chosen one.
-export function rankedScreen(app, { me, decks, chosen, cards, deckSize, choose, play }) {
+// legal one that plays; `choose(id)` keeps another and draws the screen again; `play(finding)` searches for a match with
+// the chosen one and calls `finding(true)` while it takes, `finding(false)` when it is over; `cancel()` stops the search.
+// While searching, Play gives way to a turning ring with the time searched and a cross that cancels, and the deck is held.
+export function rankedScreen(app, { me, decks, chosen, cards, deckSize, choose, play, cancel }) {
   const legal = decks.filter(d => !d.short), token = d => `<div class="tokpiece">${d.leader && cards[d.leader] ? leaderToken(d.leader, 'A', cards, 96) : ''}</div>`;   // its size is the plate's (ranked.css --tw)
   const plate = !chosen ? `<a class="rkdeck none" id="rkdeck" href="#/collection" aria-label="Build a deck">${ICON.plus}</a>`
     : `<button class="rkdeck" id="rkdeck"${legal.length > 1 ? '' : ' disabled'} aria-label="Your deck">${token(chosen)}<b>${esc(chosen.name)}</b>${legal.length > 1 ? ICON.open : ''}</button>`;
   app.innerHTML = `<div class="rkscreen"><a class="rkback" href="#/" aria-label="Back">${ICON.back}</a><a class="rkback rkdoor" id="rkboard" href="#/leaderboard" aria-label="Leaderboard">${ICON.board}</a>
     ${me && me.league ? standing(me.league) : '<div class="rkstand"></div>'}
-    <div class="rkfoot">${plate}<button class="rkplay${chosen ? '' : ' off'}" id="rkgo"${chosen ? '' : ' disabled'}>Play</button></div>
+    <div class="rkfoot" id="rkfoot">${plate}<button class="rkplay${chosen ? '' : ' off'}" id="rkgo"${chosen ? '' : ' disabled'}>Play</button>
+      <div class="rkfind"><div><i class="rkspin"></i><em id="rktime">0:00</em></div><button id="rkcancel" aria-label="Cancel">${ICON.x}</button></div></div>
     <div class="rksheet" id="rksheet" hidden><div class="rkrows">${decks.map(d => `<button class="rkdeck${chosen && d.id === chosen.id ? ' on' : ''}${d.short ? ' bad' : ''}" data-deck="${esc(d.id)}"${d.short ? ' disabled' : ''}>${token(d)}<b>${esc(d.name)}</b>${d.short > 0 ? `<small>${d.list.length}/${deckSize}</small>` : ''}</button>`).join('')}</div></div></div>`;
   const sheet = document.getElementById('rksheet'), deck = document.getElementById('rkdeck');
   if (chosen && legal.length > 1) deck.onclick = () => { sheet.hidden = false; };
   sheet.onclick = e => { const b = e.target.closest('[data-deck]'); if (b && !b.disabled) return choose(b.dataset.deck); if (!e.target.closest('.rkrows')) sheet.hidden = true; };
-  document.getElementById('rkgo').onclick = () => play();
+  let clock = null;
+  const finding = on => { const foot = document.getElementById('rkfoot'); clearInterval(clock); if (!foot) return;
+    foot.classList.toggle('finding', on); if (!on) return;
+    const t0 = Date.now(), time = document.getElementById('rktime'), tick = () => { const s = Math.floor((Date.now() - t0) / 1000); time.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+    tick(); clock = setInterval(() => time.isConnected ? tick() : clearInterval(clock), 500); };
+  document.getElementById('rkgo').onclick = () => play(finding);
+  document.getElementById('rkcancel').onclick = () => cancel();
 }
 
 // ---------------------------------------------------------------- the leaderboard
@@ -79,20 +88,25 @@ export async function leaderboardScreen(app, { api, me }) {
   show(mine || (data.leagues[0] || {}).league);
 }
 
-// Start a ranked match with `deck` (a deck spec): the server answers with the match at once, and with the two players for
-// the versus moment. One at a time: a second press while the first is on its way starts nothing.
+// Search for a ranked match with `deck` (a deck spec). The server answers once there is a match, a person or, when
+// nobody comes, a bot, with the two players for the versus moment; `finding` hears when the search takes longer than
+// a blink and when it ends. One at a time: a second press while the first is on its way starts nothing.
 let starting = false;
-export async function playRanked({ api, toast, deck, cards, enter }) {
+export async function playRanked({ api, toast, deck, cards, enter, finding = () => {} }) {
   if (!deck || starting) return;
   starting = true;
+  const late = setTimeout(() => finding(true), 300);
   try {
     const r = await api('/api/ranked', { method: 'POST', body: JSON.stringify({ deck }) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json();
+    if (m.cancelled) return;
     if (m.versus) versus(m.versus, cards);
     enter(m);
-  } finally { starting = false; }
+  } finally { clearTimeout(late); finding(false); starting = false; }
 }
+// Stop a search under way: the cross on the ranked screen, or leaving that screen. The server ends the search's request.
+export function leaveQueue(api) { if (starting) api('/api/ranked', { method: 'DELETE' }).catch(() => {}); }
 
 // The versus moment: over the match as it opens, the other player above and you below (side by side on a wide screen).
 // Nothing to press: it lifts by itself, and the first press sends it off and still reaches what is under it (Martin,

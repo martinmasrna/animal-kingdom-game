@@ -11,7 +11,7 @@ import { playFood } from './foodfx.js';
 import { drawAim, clearAim } from './aim.js';
 import { decodeDeck } from './deckcode.js';
 import { openPatch, newestPatch } from './patch.js';
-import { rankedScreen, leaderboardScreen, playRanked, finale, endFinale } from './ranked.js';
+import { rankedScreen, leaderboardScreen, playRanked, leaveQueue, finale, endFinale } from './ranked.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripsHTML } from './collection.js';
 import { onHold, holdEvents } from './menu.js';
 import { tokenBase, numeral } from './token.js';
@@ -194,6 +194,7 @@ function route() {
   if (!location.hash.startsWith('#/m/')) keepAwake(false);
   const tip = document.getElementById('tip'); if (tip) tip.style.display = 'none';   // the game's hover label lives on body: it must not outlive the screen
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
+  if (parts[0] !== 'ranked') leaveQueue(api);   // a search for a ranked opponent belongs to the ranked screen: leaving it stops the search
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
   if (parts[0] === 'play') return manaHome({ play: true });   // Play: a deck and a friend
@@ -222,7 +223,8 @@ const enterMatch = m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id
 function rankedHome() {
   rankedScreen(app, { me: ME, decks: playable(), chosen: chosenDeck(), cards: CARDS, deckSize: RULES ? RULES.deckSize : 30,
     choose: id => { store('ak:deck', id); rankedHome(); },
-    play: () => playRanked({ api, toast, deck: chosenDeck() && deckSpec(chosenDeck()), cards: CARDS, enter: enterMatch }) });
+    play: finding => playRanked({ api, toast, deck: chosenDeck() && deckSpec(chosenDeck()), cards: CARDS, enter: enterMatch, finding }),
+    cancel: () => leaveQueue(api) });
 }
 
 // ------------------------------------------------------------------ home: where a match starts

@@ -531,6 +531,11 @@ def _open(match: Match) -> None:
 # ----------------------------------------------------------------- ranked (web/ladder.py, web/tiers.py, web/pool.py)
 ladder: ranking.Ladder = None    # everyone's rating, people and bots
 tiers: tiers_mod.Tiers = None    # each person's league and the wins in it
+# Ranked is played between people (Martin, 2026-11-23: "let's just do it as if we had 1000s of real players already";
+# 2026-11-24: "didn't I tell you to design it for PvP from the get go?"). A bot steps in only when no person comes.
+RANKED_WAIT = float(os.environ.get("AK_RANKED_WAIT", 15))   # seconds the queue waits for a person before giving you a bot
+RATING_WINDOW = 200.0       # in the top league two people meet when their ratings are this close, and 20 wider for each second waited
+waiting: list[dict] = []    # the people searching: {pid, name, deck, league, rating, since, fut}
 
 
 def bot_league(lid: str) -> dict:
@@ -561,20 +566,61 @@ def ladder_name(lid: str) -> str:
     return display(p) if p else "?"
 
 
+def _versus(you: dict, them: dict) -> dict:
+    """The versus moment the client shows before the match: each player as their name, their deck's leader and their league."""
+    return {"you": you, "them": them}
+
+
+def _meets(entry: dict, league: int, rating: float, now: float) -> bool:
+    """Whether a person in `league` at `rating` meets one searching: below the top league the same league; in it,
+    ratings within a window that widens the longer the one searching has waited."""
+    if league != tiers_mod.TOP or entry["league"] != tiers_mod.TOP:
+        return entry["league"] == league
+    return abs(entry["rating"] - rating) <= RATING_WINDOW + 20 * (now - entry["since"])
+
+
 async def join_ranked(req):
-    """A ranked match with your deck, at once: against a bot from your league's band of ratings (web/tiers.py), and in
-    the top league the bot nearest your rating. Never the deck you just met while the pool has another."""
+    """Search for a ranked match with your deck; the answer is your match ({id, token, seat, versus}) once there is one.
+    A person from your league (in the top league, near your rating) if one is searching or starts within RANKED_WAIT
+    seconds; else a bot from your league's band of ratings (web/tiers.py; in the top league the bot nearest your
+    rating), never the deck you just met while the pool has another. With nobody else online there is no one to wait
+    for, and the bot comes at once. Cancelling (leave_ranked) answers {cancelled}."""
     p, body = me(req), await guard.body(req)
     guard.limit("ranked", p["id"])
     try:
         deck = custom_decks.resolve(body.get("deck"))
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
+    lg, r, now = tiers.get(p["id"]).league, ladder.get(p["id"]).rating, time.time()
+    mine = {"name": p["name"], "leader": DECK_LEADERS.get(deck), "league": league_of(p["id"])}
+    for w in waiting:   # someone already searching whom you meet: their match and yours
+        if w["pid"] != p["id"] and not w["fut"].done() and _meets(w, lg, r, now):
+            waiting.remove(w)
+            mid, ta, tb = hub.new_id(), secrets.token_urlsafe(12), secrets.token_urlsafe(12)
+            match = Match(mid, Seat(ta, w["name"], deck=w["deck"], profile=w["pid"], ladder=w["pid"]))
+            match.join(Seat(tb, display(p), deck=deck, profile=p["id"], ladder=p["id"]))
+            _open(match)
+            w["fut"].set_result({"id": mid, "token": ta, "seat": "A", "versus": _versus(w["card"], mine)})
+            return web.json_response({"id": mid, "token": tb, "seat": "B", "versus": _versus(mine, w["card"])})
+    others = any(pid != p["id"] and socks for pid, socks in presence.items()) or any(w["pid"] != p["id"] for w in waiting)
+    if others and RANKED_WAIT > 0:
+        entry = {"pid": p["id"], "name": display(p), "deck": deck, "league": lg, "rating": r, "since": now, "card": mine,
+                 "fut": asyncio.get_running_loop().create_future()}
+        waiting[:] = [w for w in waiting if w["pid"] != p["id"]] + [entry]   # one place in the queue per person
+        try:
+            res = await asyncio.wait_for(asyncio.shield(entry["fut"]), RANKED_WAIT)
+            return web.json_response(res or {"cancelled": True})
+        except asyncio.TimeoutError:
+            pass
+        finally:
+            if entry in waiting:
+                waiting.remove(entry)
+        if entry["fut"].done():   # met in the instant the wait ran out, or cancelled
+            return web.json_response(entry["fut"].result() or {"cancelled": True})
     if not ladder.bots():
         raise web.HTTPConflict(text="No bot has a legal deck to play right now")
     slug = {name: s for s, name in DECK_NAMES.items() if s in ladder.decks}
     avoid = {slug[d] for d in profiles.last_opp_decks(p["id"], "ranked", min(ranking.RECENT_DECKS, len(ladder.decks) - 1)) if d in slug}
-    lg, r = tiers.get(p["id"]).league, ladder.get(p["id"]).rating
     bid = ladder.bot_in(*tiers_mod.band(lg), random, avoid) if lg != tiers_mod.TOP else None
     bid = bid or ladder.nearest_bot(r if lg == tiers_mod.TOP else tiers_mod.par(lg) + 50, random, avoid=avoid)
     level, bot_deck = ranking.parse_bot(bid)
@@ -582,10 +628,19 @@ async def join_ranked(req):
     match = Match(mid, Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"]))
     match.join(Seat(secrets.token_urlsafe(12), opponent_name(bid), bot=True, deck=bot_deck, level=level, ladder=bid))
     _open(match)
-    # the versus moment the client shows before the match: each player as their deck's leader, their name and their league
-    versus = {"you": {"name": p["name"], "leader": DECK_LEADERS.get(deck), "league": league_of(p["id"])},
-              "them": {"name": opponent_name(bid), "leader": DECK_LEADERS.get(bot_deck), "league": bot_league(bid)}}
-    return web.json_response({"id": mid, "token": token, "seat": "A", "versus": versus})
+    them = {"name": opponent_name(bid), "leader": DECK_LEADERS.get(bot_deck), "league": bot_league(bid)}
+    return web.json_response({"id": mid, "token": token, "seat": "A", "versus": _versus(mine, them)})
+
+
+async def leave_ranked(req):
+    """Stop searching (Cancel, or leaving the ranked screen): said outright, since the server does not notice a browser
+    dropping its request, and a person searching meanwhile would be paired with someone gone."""
+    p = me(req)
+    for w in [w for w in waiting if w["pid"] == p["id"]]:
+        waiting.remove(w)
+        if not w["fut"].done():
+            w["fut"].set_result(None)
+    return web.json_response({})
 
 
 def rate_match(match: Match) -> None:
@@ -1042,6 +1097,7 @@ def make_app() -> web.Application:
         web.post("/api/challenge/{id}/answer", challenge_answer),
         web.get("/ws/presence", presence_socket),
         web.post("/api/ranked", join_ranked),
+        web.delete("/api/ranked", leave_ranked),
         web.get("/api/leaderboard", leaderboard),
         web.post("/api/match", create_match),
         web.post("/api/match/{id}/join", join_match),

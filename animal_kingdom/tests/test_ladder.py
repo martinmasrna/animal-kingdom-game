@@ -197,6 +197,45 @@ def test_ranked_is_a_match_at_once_against_a_bot_from_your_league(monkeypatch, t
     _served(monkeypatch, tmp_path, body)
 
 
+def test_ranked_pairs_two_people_of_one_league_and_gives_a_bot_only_when_nobody_comes(monkeypatch, tmp_path):
+    async def body(c, pid, h):
+        monkeypatch.setattr(server, "waiting", [])
+        monkeypatch.setattr(server, "presence", {})
+        b = await (await c.post("/api/profile", json={})).json()
+        hb, pb = {"X-AK-Key": b["code"]}, b["profile"]["id"]
+        search = lambda headers: asyncio.ensure_future(c.post("/api/ranked", json={"deck": DECK}, headers=headers))
+        # nobody else online: no one to wait for, the bot comes at once
+        monkeypatch.setattr(server, "RANKED_WAIT", 30)
+        m = await (await asyncio.wait_for(search(h), 2)).json()
+        assert server.hub.matches[m["id"]].seats["B"].is_bot
+        # someone else is online: you search; they start searching from the same league and you meet, each in a seat
+        # of one match, each shown the other as a name, a leader and a league
+        server.presence[pb] = {object()}
+        first = search(h)
+        await asyncio.sleep(0.05)
+        assert [w["pid"] for w in server.waiting] == [pid] and not first.done()
+        mb = await (await search(hb)).json()
+        ma = await (await first).json()
+        match = server.hub.matches[ma["id"]]
+        assert ma["id"] == mb["id"] and {ma["seat"], mb["seat"]} == {"A", "B"} and ma["token"] != mb["token"] and not server.waiting
+        assert match.ranked() and not any(s.is_bot for s in match.seats.values()) and match.clock, "two people, on the clock: one who leaves loses"
+        assert ma["versus"]["you"] == mb["versus"]["them"] and ma["versus"]["them"] == mb["versus"]["you"]
+        assert ma["versus"]["them"]["league"]["label"] == "Wood 3" and ma["versus"]["them"]["leader"] and "#" not in ma["versus"]["them"]["name"]
+        # a person from another league is not your opponent: they search past each other
+        server.tiers.put(pb, server.tiers_mod.Standing(3, 0, 0, 3), 12)
+        monkeypatch.setattr(server, "RANKED_WAIT", 0.3)
+        first, second = search(h), search(hb)
+        ma, mb = await (await first).json(), await (await second).json()
+        assert ma["id"] != mb["id"] and all(server.hub.matches[x["id"]].seats["B"].is_bot for x in (ma, mb)), "nobody came in time: a bot each"
+        # Cancel: the search answers that it was cancelled, and nobody is left to be paired with someone gone
+        monkeypatch.setattr(server, "RANKED_WAIT", 30)
+        first = search(h)
+        await asyncio.sleep(0.05)
+        await c.delete("/api/ranked", headers=h)
+        assert await (await asyncio.wait_for(first, 2)).json() == {"cancelled": True} and not server.waiting
+    _served(monkeypatch, tmp_path, body)
+
+
 def test_a_ranked_result_moves_the_rating_the_league_and_the_leaderboard(monkeypatch, tmp_path):
     async def body(c, pid, h):
         m = await (await c.post("/api/ranked", json={"deck": DECK}, headers=h)).json()

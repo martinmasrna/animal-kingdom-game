@@ -11,7 +11,7 @@ import { startServer, openBrowser } from './harness.mjs';
 const NEWEST = JSON.parse(readFileSync(new URL('../static/patches/index.json', import.meta.url)))[0];
 
 let server, browser;
-before(async () => { server = await startServer({ AK_MAP: 'map_sq16' }); browser = await openBrowser(); });
+before(async () => { server = await startServer({ AK_MAP: 'map_sq16', AK_RANKED_WAIT: '8' }); browser = await openBrowser(); });   // the search for a person: long enough for a test's second player to press Play
 after(async () => { await browser?.close(); server?.stop(); });
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -174,4 +174,35 @@ test('the leaderboard: every league along the top, yours chosen and marked; a le
     assert.deepEqual(p.errors, []);
     await p.browserContext().close();
   }
+});
+
+test('ranked is played between people: while someone else is online Play searches (a ring, the time, a cross that cancels); two who search meet, and the match ends for each on their own screens', async () => {
+  const a = await player([deck('a', 'Control', 'sage_legend')]), b = await player([deck('b', 'Warlord', 'warlord_legend')]);
+  for (const p of [a, b]) { await p.goto(`${server.url}/#/ranked`, { waitUntil: 'networkidle0' }); await p.waitForSelector('#rkgo'); }
+  await wait(600);   // both are online: each one's presence has reached the server
+  // one searches: Play gives way to the search, with no word on it, and the deck is held
+  await a.click('#rkgo'); await a.waitForSelector('#rkfoot.finding');
+  assert.deepEqual(await a.$eval('#rkfoot', f => [getComputedStyle(f.querySelector('#rkgo')).display, getComputedStyle(f.querySelector('.rkfind')).display, getComputedStyle(f.querySelector('.rkdeck')).pointerEvents]), ['none', 'flex', 'none']);
+  assert.match((await words(a, '.rkfind')).join(' '), /^\d:\d\d$/, 'the time searched, and nothing else written');
+  assert.equal(await a.$('#rkvs'), null);
+  // the cross cancels: Play is back, and nobody is left searching
+  await a.click('#rkcancel'); await a.waitForFunction(() => !document.getElementById('rkfoot').classList.contains('finding'));
+  assert.equal(await a.evaluate(() => location.hash), '#/ranked');
+  // both search: they meet, each sees the other's card, and it is one match between two people
+  await a.click('#rkgo'); await a.waitForSelector('#rkfoot.finding'); await b.click('#rkgo');
+  const them = p => p.$eval('#rkvs .rkcard.them', e => [e.querySelector('.pname').textContent, !!e.querySelector('img'), e.querySelector('.rkmark b').textContent]);
+  await a.waitForSelector('#rkvs'); await b.waitForSelector('#rkvs');
+  assert.deepEqual(await them(a), ['Player', true, '3']); assert.deepEqual(await them(b), ['Player', true, '3']);
+  await inMatch(a); await inMatch(b);
+  const [va, vb] = [await view(a), await view(b)];
+  assert.ok(va.id === vb.id && va.you !== vb.you && va.ranked && !va.seats.A.bot && !va.seats.B.bot);
+  // one gives up: a loss on their screens, a win on the other's, and the win lands on the winner's rank
+  await concede(a);
+  await a.waitForSelector('.rkverdict.lost'); await b.waitForSelector('.rkverdict.won', { timeout: 15000 });
+  await b.waitForSelector('#rkrank', { timeout: 6000 }); await b.waitForFunction(() => document.querySelectorAll('#rkrank .rkwins i.on').length === 1, { timeout: 6000 });
+  await a.waitForSelector('#rkrank', { timeout: 6000 }); assert.equal((await stand(a, '#rkrank')).won, 0);
+  await b.click('#rkcont'); await b.waitForSelector('#rkgo');
+  assert.equal((await stand(b)).won, 1, 'the ranked screen says the same');
+  assert.deepEqual(a.errors, []); assert.deepEqual(b.errors, []);
+  await a.browserContext().close(); await b.browserContext().close();
 });
