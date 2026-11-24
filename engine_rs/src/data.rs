@@ -438,14 +438,18 @@ config! {
     mana_cap: i32 = 10,                   // Martin, 2026-11-20: "Mana cap at 10 of course"
     leader_power_cost: i32 = 3,
     // The food race (Martin, 2026-11-20: "both players starting at 15, you need 30 to win, and if you drop to 0 you
-    // lost"): a raid destroys food; each region a player holds pays its food at the end of their turn.
+    // lost"): each region a player holds pays its food at the end of their turn. A raid steals food (Martin, 2026-11-24,
+    // to try: "you're *stealing* the energy from your opponent, rather than just destroying it"): food is never destroyed,
+    // only made by regions and cards or moved between the dens, so while the dens start with the winning food between
+    // them, a den emptied means the other has already won.
     start_food: i32 = 15,
     hand_limit: i32 = 10,                 // past it, the newest cards drawn burn
     first_player_opening_draw: i32 = 3,   // Martin, 2026-11-20: "make it 3 for first and 4 for second"
     second_player_opening_draw: i32 = 4,
     mulligan: bool = true,                // a blacklist mulligan, both players at once
     // Fatigue (Martin, 2026-11-22: "we just add fatigue exactly like in hearthstone, losing energy -1, -2, -3, ..."): a card
-    // a player would draw from their own empty deck costs them food instead, this much more each time.
+    // a player would draw from their own empty deck costs them food instead, this much more each time; it goes to the
+    // opponent's den.
     fatigue_step: i32 = 1,
     turn_draw_count: i32 = 1,             // the free card at the start of each turn, the first player's first included (Martin, 2026-11-21)
     hungry_food: i32 = 1,                 // Hungry: the food its prey's removal gains (Martin, 2026-11-20)

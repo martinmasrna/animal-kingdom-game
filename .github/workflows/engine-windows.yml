@@ -5,7 +5,10 @@
 # from the commit it is run on and keeps both as the run's artifact:
 #
 #   gh run download <run id> -n ak-engine-windows -D <folder>
-#   .venv/Scripts/pip.exe install --force-reinstall <folder>/ak_engine-*.whl
+#   .venv/Scripts/python.exe -m pip install --force-reinstall --no-deps <folder>/dist/ak_engine-*.whl
+#
+# (Through python -m pip: on the work PC .venv/Scripts/pip.exe exits without installing and without a word. Check with
+# `ls -la .venv/Lib/site-packages/ak_engine/` that the module's time is now.)
 #
 # Run it again whenever a pull brings a change under engine_rs/.
 name: engine for Windows

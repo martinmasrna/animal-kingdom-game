@@ -11,7 +11,7 @@ import { playFood } from './foodfx.js';
 import { drawAim, clearAim } from './aim.js';
 import { decodeDeck } from './deckcode.js';
 import { openPatch, newestPatch } from './patch.js';
-import { rankedHome, playRanked, leaderboardScreen, rankedEnd } from './ranked.js';
+import { rankedScreen, leaderboardScreen, playRanked, leaveQueue, finale, endFinale } from './ranked.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, deckIssue, stripsHTML } from './collection.js';
 import { onHold, holdEvents } from './menu.js';
 import { tokenBase, numeral } from './token.js';
@@ -190,16 +190,19 @@ async function rejoin(only) {
 function route() {
   track('screen', { route: (location.hash.slice(1) || '/').split('/').slice(0, 2).join('/'), w: innerWidth, h: innerHeight });
   pop.style.display = 'none'; stackpop.style.display = 'none';
+  endFinale();   // a ranked match's ending lies over the screen: leaving the match takes it along
   if (!location.hash.startsWith('#/m/')) keepAwake(false);
   const tip = document.getElementById('tip'); if (tip) tip.style.display = 'none';   // the game's hover label lives on body: it must not outlive the screen
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
+  if (parts[0] !== 'ranked') leaveQueue(api);   // a search for a ranked opponent belongs to the ranked screen: leaving it stops the search
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
   if (parts[0] === 'play') return manaHome({ play: true });   // Play: a deck and a friend
   if (parts[0] === 'practice') return manaHome({ practice: true });   // Practice: your deck and the bot's
   if (parts[0] === 'gauntlet' && parts[1]) return gauntletScreen(decodeURIComponent(parts[1]));   // one deck against each other deck of yours
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
-  if (parts[0] === 'ladder') { screen = 'ladder'; return freshStanding().then(() => { if (screen === 'ladder') leaderboardScreen(app, { api, me: ME, cards: CARDS }); }); }
+  if (parts[0] === 'ranked') { screen = 'ranked'; return freshStanding().then(() => { if (screen === 'ranked') rankedHome(); }); }   // where you are between ranked matches
+  if (parts[0] === 'leaderboard') { screen = 'leaderboard'; return freshStanding().then(() => { if (screen === 'leaderboard') leaderboardScreen(app, { api, me: ME }); }); }   // the leagues and who is in them
   if (parts[0] === 'patch') { history.replaceState(null, '', '#/'); manaHome(); return openPatch({ version: parts[1], seen: seePatch }); }   // a link to the notes: home, the window over it
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'friend' && id) { manaHome(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
@@ -209,14 +212,20 @@ function route() {
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : manaHome({ join: id });
   if (parts[0] === 'm' && id) return matchScreen(id);
   manaHome();
-  if (standingStale) freshStanding().then(() => { if (screen === 'home' && !location.hash.slice(2)) manaHome(); });
 }
-// Where you stand (your league, your place) is the profile's: asked again once a ranked game has ended. Only asked:
+// Where you stand (your league) is the profile's: asked again, on the ranked screen, once a ranked game has ended. Only asked:
 // an answer that fails (a server restarting) leaves the profile as it is, to be asked again on the next screen.
 let standingStale = false;
 const freshStanding = async () => { if (!standingStale) return;
   const r = await api('/api/me').catch(() => null); if (r && r.ok) { ME = await r.json(); standingStale = false; } };
 const enterMatch = m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; };
+// The ranked screen (ranked.js): your league, the deck you bring, Play. A deck chosen there is the deck Play and Practice start with too.
+function rankedHome() {
+  rankedScreen(app, { me: ME, decks: playable(), chosen: chosenDeck(), cards: CARDS, deckSize: RULES ? RULES.deckSize : 30,
+    choose: id => { store('ak:deck', id); rankedHome(); },
+    play: finding => playRanked({ api, toast, deck: chosenDeck() && deckSpec(chosenDeck()), cards: CARDS, enter: enterMatch, finding }),
+    cancel: () => leaveQueue(api) });
+}
 
 // ------------------------------------------------------------------ home: where a match starts
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
@@ -398,14 +407,10 @@ function manaHome(mode = {}) {
   if (!mode.play && !mode.join && !mode.practice) {
     app.innerHTML = `<div class="mhome"><div class="mtop"><button class="acct pnbtn" id="mpatch">Patch Notes</button><a class="acct" href="#/account" data-tip="Account" aria-label="Account">${TOPICON.person}</a><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button></div><div class="box front">
       <h1>Animal Kingdom<small>A prototype</small></h1>
-      <div class="mmenu">${rankedHome({ me: ME, decks: playable().filter(d => !d.short), chosen: chosenDeck(), cards: CARDS, picking: mode.pick })}<a class="go sub" id="mplay" href="#/play">Play</a><a class="go sub" id="mprac" href="#/practice">Practice</a><a class="go sub" id="mcoll" href="#/collection">Collection</a></div>
+      <div class="mmenu"><a class="go" id="mranked" href="#/ranked">Ranked</a><a class="go sub" id="mplay" href="#/play">Play</a><a class="go sub" id="mprac" href="#/practice">Practice</a><a class="go sub" id="mcoll" href="#/collection">Collection</a></div>
       </div></div>`;
     wireChatButton(document.getElementById('hchat'));
     document.getElementById('mpatch').onclick = () => openPatch({ seen: seePatch });
-    // Play ranked (ranked.js): straight into a rated match with the deck shown, against a bot near you
-    document.getElementById('rkgo').onclick = () => playRanked({ api, toast, deck: chosenDeck() && deckSpec(chosenDeck()), enter: enterMatch });
-    const rd = document.getElementById('rkdeck'); if (rd) rd.onclick = () => manaHome({ pick: true });
-    app.querySelectorAll('[data-rkdeck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.rkdeck); manaHome(); });
     return;
   }
   const own = myDecks().map(d => { const list = Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id));
@@ -735,7 +740,9 @@ function foodStep(step) {
     const lead = document.querySelector(`#mplane .ltok[data-lead="${s}"]`);
     return lead ? [{ el: lead, n: step.n }] : [];
   };
-  playFood({ ...step, side }, before, sources);
+  // a raid's or fatigue's food goes to the other den: `to`, and that den's count before it
+  const took = step.kind === 'raid' ? { toSide: rel(step.to), toBefore: V.game.food[step.to] - step.n } : {};
+  playFood({ ...step, side, ...took }, before, sources);
 }
 
 function gameScreen() {
@@ -1595,7 +1602,7 @@ function drawEnd() {
   const key = `${V.id}-${V.rematches}`;
   if (drawEnd.key !== key) {
     const motion = !(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
-    drawEnd.until = drawEnd.live && motion && G.result.reason !== 'concede' ? Date.now() + 900 : 0; drawEnd.key = key; drawEnd.live = false; drawEnd.since = Date.now(); }
+    drawEnd.until = drawEnd.live && motion && G.result.reason !== 'concede' ? Date.now() + 900 : 0; drawEnd.key = key; drawEnd.seen = drawEnd.live; drawEnd.live = false; drawEnd.since = Date.now(); }
   // a full den: the result waits for its beat (which waits for the move), never longer than 9 s
   if (drawEnd.until && G.result.reason === 'food' && G.result.winner !== null) {
     const b = ui.beat && ui.beat.key === key ? ui.beat : null;
@@ -1607,6 +1614,9 @@ function drawEnd() {
   const live = drawEnd.sounded !== key && drawEnd.until && w !== null;   // a game seen ending live: its sound and its entrance, once
   if (live) sfx(w === you ? 'victory' : 'defeat');
   drawEnd.sounded = key;
+  // A ranked match ends on its own two full screens (ranked.js): the verdict, then your rank; Continue leads to the ranked
+  // screen. Played through when the end was seen happening (a concession too), else its last screen as it stands.
+  if (V.ranked) { standingStale = true; ov.classList.remove('on'); return finale(V, !!drawEnd.seen, { cards: CARDS, done: () => { location.hash = '#/ranked'; } }); }
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
   const how = { food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, starved: `${w === you ? 'Your opponent' : 'You'} ran out of food`, max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
   // a den taken: the board showed it (Martin, 2026-10-17); a full den says who reached the food, as the lessons' Victory does
@@ -1620,15 +1630,11 @@ function drawEnd() {
       : rm.offer === you ? '<div class="how">Rematch offered.</div>' : rm.declined === them ? '<div class="how">Your opponent declined the rematch.</div>' : '';
     const rmBtns = rm.offer === them ? '<button class="slab" id="decline">Decline</button><button class="play" id="rematch">Rematch</button>'
       : rm.offer === you || rm.declined ? '' : '<button class="play" id="rematch">Rematch</button>';
-    // a ranked game (ranked.js): what it did to your league, and Play again for the next match in place of a rematch
-    const rk = V.ranked ? rankedEnd(V, live) : null;
-    if (rk) standingStale = true;
     const gt = gauntletOf(V.id);
     if (gt && gt.g.won == null && w !== null) { gt.g.won = w === you; store('ak:gauntlet', JSON.stringify(gt.s)); }
     const back = gt ? `<a class="slab" href="#/gauntlet/${encodeURIComponent(gt.g.name)}">Gauntlet</a>` : `<a class="slab" href="#/">Menu</a>`;
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${rk ? rk.html : ''}
-      ${rmLine}<div class="btns">${back}${peek}${rk ? rk.button : gt ? '' : rmBtns}</div></div>`;
-    if (rk) rk.wire(() => playRanked({ api, toast, deck: chosenDeck() && deckSpec(chosenDeck()), enter: enterMatch }));
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
+      ${rmLine}<div class="btns">${back}${peek}${gt ? '' : rmBtns}</div></div>`;
     const rb = document.getElementById('rematch'); if (rb) rb.onclick = () => send({ t: 'rematch' });
     const db = document.getElementById('decline'); if (db) db.onclick = () => send({ t: 'rematch_decline' });
   }
@@ -1638,7 +1644,7 @@ function drawEnd() {
   ov.classList.add('on');
 }
 
-window.__ak = () => ({ V, ui, d: lastDecision, PB });   // test hook: the headless play-through reads the view (and whether steps are playing)
+window.__ak = () => ({ V, ui, d: lastDecision, PB, CARDS });   // test hook: the headless play-through reads the view (and whether steps are playing)
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.build = checkBuild;   // test hook: a socket naming another build
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client

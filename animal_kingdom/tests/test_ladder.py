@@ -184,10 +184,55 @@ def test_ranked_is_a_match_at_once_against_a_bot_from_your_league(monkeypatch, t
         # league 1 plays the bots rated under 1100; when none is, the bot nearest the league: the weakest level
         level, deck = parse_bot(bot.ladder)
         assert bot.is_bot and bot.level == level == "1" and bot.deck == deck and bot.spec == "greedy"
-        # the view says the match is ranked, and the bot's name the band its rating sits in
-        assert match.view("A")["ranked"] and bot.name.endswith(f"({ladder.rung_of(server.ladder.get(bot.ladder).rating)} Bot)")
+        # the view says the match is ranked; the bot is called by the band its rating sits in, never by its deck
+        assert match.view("A")["ranked"] and bot.name == f"{ladder.rung_of(server.ladder.get(bot.ladder).rating)} Bot"
+        # what the versus moment shows: each player's name, their deck's leader and their league (a bot's read off its rating)
+        vs = m["versus"]
+        assert vs["you"]["leader"] and vs["you"]["league"]["label"] == "Wood 3" and "#" not in vs["you"]["name"]
+        assert vs["them"]["name"] == bot.name and vs["them"]["leader"] == server.DECK_LEADERS[deck]
+        r = server.ladder.get(bot.ladder).rating
+        assert vs["them"]["league"]["name"] == server.tiers_mod.name(server.tiers_mod.league_of(r)) and 1 <= vs["them"]["league"]["division"] <= 3
         with pytest.raises(Exception, match="no rematch"):
             match.phase = "match_over"; match.offer_rematch("A")
+    _served(monkeypatch, tmp_path, body)
+
+
+def test_ranked_pairs_two_people_of_one_league_and_gives_a_bot_only_when_nobody_comes(monkeypatch, tmp_path):
+    async def body(c, pid, h):
+        monkeypatch.setattr(server, "waiting", [])
+        monkeypatch.setattr(server, "presence", {})
+        b = await (await c.post("/api/profile", json={})).json()
+        hb, pb = {"X-AK-Key": b["code"]}, b["profile"]["id"]
+        search = lambda headers: asyncio.ensure_future(c.post("/api/ranked", json={"deck": DECK}, headers=headers))
+        # nobody else online: no one to wait for, the bot comes at once
+        monkeypatch.setattr(server, "RANKED_WAIT", 30)
+        m = await (await asyncio.wait_for(search(h), 2)).json()
+        assert server.hub.matches[m["id"]].seats["B"].is_bot
+        # someone else is online: you search; they start searching from the same league and you meet, each in a seat
+        # of one match, each shown the other as a name, a leader and a league
+        server.presence[pb] = {object()}
+        first = search(h)
+        await asyncio.sleep(0.05)
+        assert [w["pid"] for w in server.waiting] == [pid] and not first.done()
+        mb = await (await search(hb)).json()
+        ma = await (await first).json()
+        match = server.hub.matches[ma["id"]]
+        assert ma["id"] == mb["id"] and {ma["seat"], mb["seat"]} == {"A", "B"} and ma["token"] != mb["token"] and not server.waiting
+        assert match.ranked() and not any(s.is_bot for s in match.seats.values()) and match.clock, "two people, on the clock: one who leaves loses"
+        assert ma["versus"]["you"] == mb["versus"]["them"] and ma["versus"]["them"] == mb["versus"]["you"]
+        assert ma["versus"]["them"]["league"]["label"] == "Wood 3" and ma["versus"]["them"]["leader"] and "#" not in ma["versus"]["them"]["name"]
+        # a person from another league is not your opponent: they search past each other
+        server.tiers.put(pb, server.tiers_mod.Standing(3, 0, 0, 3), 12)
+        monkeypatch.setattr(server, "RANKED_WAIT", 0.3)
+        first, second = search(h), search(hb)
+        ma, mb = await (await first).json(), await (await second).json()
+        assert ma["id"] != mb["id"] and all(server.hub.matches[x["id"]].seats["B"].is_bot for x in (ma, mb)), "nobody came in time: a bot each"
+        # Cancel: the search answers that it was cancelled, and nobody is left to be paired with someone gone
+        monkeypatch.setattr(server, "RANKED_WAIT", 30)
+        first = search(h)
+        await asyncio.sleep(0.05)
+        await c.delete("/api/ranked", headers=h)
+        assert await (await asyncio.wait_for(first, 2)).json() == {"cancelled": True} and not server.waiting
     _served(monkeypatch, tmp_path, body)
 
 
@@ -200,17 +245,23 @@ def test_a_ranked_result_moves_the_rating_the_league_and_the_leaderboard(monkeyp
         v = match.view("A")
         assert v["rating"]["delta"] > 50 and v["rating"]["after"].endswith("?"), "a first win moves a new player a lot, even over a weak bot"
         assert v["league"]["label"] == "Wood 3" and v["league"]["stars"] == 1 and v["league"]["line"] == ""
+        assert v["league"]["before"]["label"] == "Wood 3" and v["league"]["before"]["stars"] == 0, "the standing going in, for the match's last screen"
         assert server.ladder.get(pid).games == 1 and server.ladder.get(bot).rating < before.rating
         server.rate_match(match)
         assert server.ladder.get(pid).games == 1, "a match is rated once"
-        # the leaderboard: the person from their first rated game, with their league and no number; the bots one row
-        # per level and deck, best first, each with its deck's leader
-        rows = (await (await c.get("/api/leaderboard", headers=h)).json())["rows"]
+        # the leaderboard: every league, and everyone best first, each with the league the client shows them in; the
+        # bots one row per level and deck, called by their band alone and standing in the league their rating falls in
+        board = await (await c.get("/api/leaderboard", headers=h)).json()
+        rows = board["rows"]
+        assert [lg["name"] for lg in board["leagues"]] == [n for n, _, _ in server.tiers_mod.LEAGUES] and board["leagues"][0]["league"] == 1
         mine = next(r for r in rows if r["you"])
-        assert mine["league"]["label"] == "Wood 3" and mine["rating"] is None
+        assert mine["league"]["label"] == "Wood 3" and mine["league"]["stars"] == 1 and "#" not in mine["name"]
         bots = [r for r in rows if r["bot"]]
-        assert len(bots) == len(ladder.LEVELS) * len(server.ladder.decks) and all(r["name"].endswith(" Bot)") and r["leader"] for r in bots)
-        assert [int(r["rating"]) for r in bots] == sorted((int(r["rating"]) for r in bots), reverse=True)
+        assert len(bots) == len(ladder.LEVELS) * len(server.ladder.decks) and all(r["name"].endswith(" Bot") and "(" not in r["name"] for r in bots)
+        assert all(r["league"]["name"] == server.tiers_mod.name(server.tiers_mod.league_of(server.ladder.get(lid).rating))
+                   for r, lid in zip(bots, sorted(server.ladder.bots(), key=lambda b: -server.ladder.get(b).rating)))
+        leagues = [r["league"]["league"] for r in rows]
+        assert leagues == sorted(leagues, reverse=True), "best first: a higher league before a lower"
         # home shows the place that row has
         me = await (await c.get("/api/me", headers=h)).json()
         assert me["rank"] == rows.index(mine) + 1 and me["league"]["stars"] == 1

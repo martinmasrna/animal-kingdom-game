@@ -1,55 +1,146 @@
-/* Ranked outside the match (ranked.js): home's block, the leaderboard, the league on a ranked game's end. The menus'
-   materials (mana.css :root), grey boxes; the league emblems are placeholders. */
+/* Ranked (ranked.js): the ranked screen, the versus moment, a ranked match's ending. A grey prototype in the menus'
+   materials (mana.css :root); lengths on a 4px scale, type 14 16 20 24 34 56 in Fira Sans Condensed as on home. Two
+   layouts: one column on an upright phone, side by side on a wide screen (.rkscreen and .rkvs, at 900px and landscape). */
+.rkscreen, .rkvs, .rkfin { --well: rgba(10,9,8,.5); --well-sh: inset 0 1px 3px rgba(0,0,0,.6); position: fixed; inset: 0; box-sizing: border-box;
+  background: var(--ground); color: var(--ink); font: 500 16px/1.2 'Fira Sans Condensed', sans-serif; -webkit-font-smoothing: antialiased; }
+:where(.rkscreen, .rkvs, .rkfin) * { box-sizing: border-box; margin: 0; }   /* :where: no weight of its own, a button's class sets its type */
+:where(.rkscreen, .rkfin) :where(button, a) { font: inherit; color: inherit; border: 0; cursor: pointer; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.rkic { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 
-/* a league: its emblem (league and division in one picture) and a pip per win in the division */
-.lgem { height: 28px; width: auto; flex: none; }
-.lgpips { display: inline-flex; gap: 4px; flex: none; }
-.lgpips s { width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; opacity: .5; }
-.lgpips s.on { background: currentColor; opacity: 1; }
+/* a league's mark: a disc in its colour holding its division's number; in Legend the rating */
+.rkmark { --d: min(176px, 22vh); width: var(--d); height: var(--d); border-radius: 50%; flex: none; display: grid; place-items: center; background: var(--c);
+  box-shadow: inset 0 calc(var(--d) / -18) 0 rgba(0,0,0,.2), inset 0 calc(var(--d) / 36) 0 rgba(255,255,255,.3), 0 4px 10px rgba(0,0,0,.5); }
+.rkmark b { font: 700 calc(var(--d) * .5)/1 'Fira Sans Condensed', sans-serif; color: rgba(20,17,14,.78); }
+.rkmark b.num { font-size: calc(var(--d) * .3); font-variant-numeric: tabular-nums; }
+/* where you stand: the mark, the league's name, the five wins of your division (in Legend, what the last match did) */
+.rkstand { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.rkstand h1 { font: 700 34px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; }
+.rkwins { display: flex; align-items: center; gap: 12px; height: 28px; }
+.rkwins i { width: 28px; height: 28px; border-radius: 50%; position: relative; background: rgba(10,9,8,.6); box-shadow: inset 0 2px 3px rgba(0,0,0,.75), 0 1px 0 rgba(255,245,230,.1); }
+.rkwins i:is(.on, .ghost)::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--c); }
+.rkwins i.on::before { box-shadow: inset 0 -2px 0 rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.35); }
+.rkwins i.ghost::before { animation: rkghost 1.2s ease-in-out infinite alternate; }   /* on a streak: the two wins the next win brings, waiting */
+.rkdelta { height: 28px; font: 700 24px/28px 'Fira Sans Condensed', sans-serif; color: var(--ink2); }
+.rkdelta.up { color: #7fd08a; }
+@keyframes rkghost { from { opacity: .12; } to { opacity: .42; } }
 
-/* home: Play ranked, the deck it plays, where you stand */
-.mhome .rk { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.mhome .rk .go { padding: 18px 28px; font-size: 24px; }
-.mhome .rk .go.off { filter: saturate(.25) brightness(.7); }   /* no legal deck yet: the line under it says what to do */
-.mhome .rkdeck, .mhome .rkstand { box-sizing: border-box; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 14px 6px 10px; border: 0; border-radius: 10px;
-  background: rgba(10,9,8,.4); box-shadow: inset 0 1px 3px rgba(0,0,0,.5); color: var(--ink); font: 600 17px 'Fira Sans Condensed', sans-serif; text-align: left; text-decoration: none; }
-.mhome button.rkdeck:not(:disabled), .mhome a.rkstand, .mhome a.rkdeck { cursor: pointer; }
-.mhome button.rkdeck:not(:disabled):hover, .mhome a.rkstand:hover, .mhome a.rkdeck:hover { filter: brightness(1.25); }
-.mhome .rkdeck > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mhome .rkdeck small { font-size: 14px; font-weight: 500; color: var(--ink2); }
-.mhome .rkdeck.none { justify-content: center; color: var(--ink2); padding: 6px 14px; }
-.mhome .rkdeck.on { background: var(--loud); box-shadow: var(--loud-sh); }
-.mhome .rkpick { display: flex; flex-direction: column; gap: 6px; }
-.mhome .rkstand { padding-left: 14px; }
-.mhome .rkstand b { font-weight: 600; }
-.mhome .rkstand .lgpips { color: var(--ink2); }
-.mhome .rkstand .rkplace, .mhome .rkstand .rnum, .mhome .rkstand .rkstreak { margin-left: auto; color: var(--ink2); font-weight: 500; font-variant-numeric: tabular-nums; }
+/* ---- the ranked screen: the standing above, the deck you bring and Play at the thumb ---- */
+.rkscreen { display: flex; flex-direction: column; align-items: center; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); overflow: hidden; }
+.rkback { position: absolute; left: 16px; top: 16px; width: 52px; height: 52px; border-radius: 10px; background: var(--slab); box-shadow: var(--slab-sh); display: grid; place-items: center; }
+.rkback:hover, .rkdeck:not(:disabled):hover, .rkplay:not(:disabled):hover { filter: brightness(1.15); }
+.rkscreen > .rkstand { flex: 1; padding-top: 52px; }
+.rkfoot { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 12px; }
+.rkdeck { --tw: 96px; display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 16px 8px 8px; border-radius: 10px; background: var(--slab); box-shadow: var(--slab-sh); text-align: left; }
+.rkdeck b { flex: 1; min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-weight: 700; font-size: 24px; }   /* a long name takes a second line */
+.rkdeck:disabled { cursor: default; }
+.rkdeck .rkic, .rkdeck small { color: var(--ink2); }
+.rkdeck small { flex: none; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rkdeck.none { height: 136px; justify-content: center; padding: 0; background: var(--well); box-shadow: none; border: 2px dashed rgba(240,232,218,.28); color: var(--ink2); }   /* no deck: an empty place that asks for one */
+.rkdeck.none .rkic { width: 40px; height: 40px; }
+.rkplay { width: 100%; height: 64px; border-radius: 10px; background: var(--loud); box-shadow: var(--loud-sh); color: #f4f8ff; text-shadow: 0 1px 2px rgba(0,0,0,.4); font: 700 24px 'Fira Sans Condensed', sans-serif; }
+.rkplay.off { opacity: .4; cursor: default; }
+/* searching for an opponent: what is happening is a recessed strip (a turning ring, the time), what you can do about it a button (the cross) */
+.rkfind { display: none; gap: 12px; height: 64px; font: 700 20px 'Fira Sans Condensed', sans-serif; }
+.rkfind div { flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px; border-radius: 10px; background: var(--well); box-shadow: var(--well-sh); }
+.rkfind em { font-style: normal; font-variant-numeric: tabular-nums; }
+.rkspin { width: 24px; height: 24px; border-radius: 50%; border: 3px solid rgba(240,232,218,.22); border-top-color: var(--ink); animation: rkspin .9s linear infinite; }
+.rkfind button { width: 64px; display: grid; place-items: center; border-radius: 10px; background: var(--slab); box-shadow: var(--slab-sh); }
+.rkfind button:hover { filter: brightness(1.15); }
+.rkfoot.finding .rkplay { display: none; } .rkfoot.finding .rkfind { display: flex; }
+.rkfoot.finding .rkdeck { opacity: .5; pointer-events: none; }
+@keyframes rkspin { to { rotate: 360deg; } }
+/* your decks: a sheet from the bottom; a press beside it closes it */
+.rksheet[hidden] { display: none; }
+.rksheet { position: absolute; inset: 0; background: rgba(8,7,6,.66); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.rkrows { width: 100%; max-width: 472px; max-height: 80%; overflow-y: auto; padding: 16px; border-radius: 16px 16px 0 0; background: var(--granite); box-shadow: var(--granite-sh); display: flex; flex-direction: column; gap: 8px; }
+.rkrows .rkdeck { --tw: 40px; flex: none; } .rkrows .rkdeck b { font-size: 20px; }
+.rkrows .rkdeck.on { background: var(--loud); box-shadow: var(--loud-sh); }
+.rkrows .rkdeck.bad { background: var(--well); box-shadow: var(--well-sh); color: var(--ink2); }
 
-/* the leaderboard */
-.mhome .rkboard { gap: 14px; }
-.mhome .rkstand.mine { min-height: 60px; font-size: 20px; }
-.mhome .rkstand.mine .lgem { height: 40px; }
-.mhome .rkrows { display: flex; flex-direction: column; gap: 4px; }
-.mhome .rkrow { display: grid; grid-template-columns: 30px 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px 0 10px; border-radius: 10px;
-  background: rgba(10,9,8,.4); box-shadow: inset 0 1px 3px rgba(0,0,0,.5); font: 600 17px 'Fira Sans Condensed', sans-serif; color: var(--ink); }
-.mhome .rkrow .n { text-align: right; color: var(--ink2); font-weight: 500; font-variant-numeric: tabular-nums; }
-.mhome .rkrow .pc { display: grid; place-items: center; }
-.mhome .rkrow .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mhome .rkrow .tg { font-style: normal; font-size: .75em; font-weight: 400; opacity: .5; margin-left: 2px; }
-.mhome .rkrow b { display: flex; align-items: center; gap: 8px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.mhome .rkrow.bot { color: var(--ink2); } .mhome .rkrow.bot b { font-weight: 600; }
-.mhome .rkrow.you { box-shadow: inset 0 0 0 2px #cfc3ad, inset 0 1px 3px rgba(0,0,0,.6); }
-.mhome .rkrow .lgpips { color: var(--ink2); }
+/* ---- the leaderboard: every league along the top, the chosen league's players under it ---- */
+.rkback.rkdoor { left: auto; right: 16px; }   /* the ranked screen's door to it */
+.rklb { padding: 16px 0 0; }
+.rkstrip { width: 100%; flex: none; display: flex; align-items: center; gap: 12px; height: 96px; margin-top: 56px; padding: 0 16px; overflow-x: auto; scrollbar-width: none; }
+.rkstrip::-webkit-scrollbar { display: none; }
+.rklgb { flex: none; position: relative; display: flex; align-items: center; padding: 0; background: none; opacity: .55; }
+.rklgb i { width: 40px; height: 40px; border-radius: 50%; background: var(--c); box-shadow: inset 0 -3px 0 rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3), 0 2px 5px rgba(0,0,0,.5); }
+.rklgb:hover { opacity: .8; } .rklgb.on { opacity: 1; }
+.rklgb.on i { width: 64px; height: 64px; box-shadow: inset 0 -4px 0 rgba(0,0,0,.2), inset 0 2px 0 rgba(255,255,255,.3), 0 4px 10px rgba(0,0,0,.5); }
+.rklgb.mine::after { content: ""; position: absolute; left: 50%; bottom: -14px; width: 10px; height: 10px; translate: -50% 0; border-radius: 50%; background: rgb(var(--you-rgb)); }   /* where you are */
+.rklb h1 { flex: none; min-height: 34px; margin: 0 0 16px; font: 700 34px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; }
+.rklist { flex: 1; min-height: 0; width: 100%; max-width: 640px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 2px 16px 16px; }
+.rkrow { flex: none; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 12px; height: 52px; padding: 0 12px 0 4px; border-radius: 10px; background: var(--well); box-shadow: var(--well-sh); }
+.rkrow .n { text-align: right; font-weight: 600; color: var(--ink2); font-variant-numeric: tabular-nums; }
+.rkrow .nm { font-weight: 600; font-size: 18px; line-height: 1.1; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }   /* one size for every name; a long one takes a second line */
+.rkrow .st { display: flex; align-items: center; gap: 10px; }
+.rkrow .st .rkmark { --d: 28px; box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); }
+.rkrow .mini { display: flex; gap: 3px; } .rkrow .mini i { width: 7px; height: 7px; border-radius: 50%; background: rgba(240,232,218,.28); } .rkrow .mini i.on { background: var(--c); }   /* the five wins, small: the empty ones still seen */
+.rkrow .st b { font: 700 20px/1 'Fira Sans Condensed', sans-serif; font-variant-numeric: tabular-nums; }
+.rkrow.you { box-shadow: var(--well-sh), 0 0 0 2px rgb(var(--you-rgb)); }
+.rkyou { flex: none; width: 100%; max-width: 640px; padding: 12px 16px 16px; background: var(--granite); box-shadow: 0 -8px 16px rgba(0,0,0,.5); }   /* your own row, kept in sight when the list ends before it */
+.rkyou[hidden] { display: none; }
 
-/* a ranked game's end: your league, what the game did to it, and in the top league the rating */
-.game .endbox .rkend { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 22px; }
-.game .endbox .rkend .lgem { height: 56px; }
-.game .endbox .rkend .lgpips s { width: 11px; height: 11px; }
-.game .endbox .rating .rd { position: absolute; left: 100%; bottom: 8px; margin-left: 10px; font: 700 22px 'Fira Sans Condensed', sans-serif; opacity: 0; transition: opacity .3s; }
-.game .endbox .rating .rd.on { opacity: 1; } .game .endbox .rating .rd.up { color: #7cc46a; } .game .endbox .rating .rd.down { color: #c9705f; }
+/* ---- a player as one card: the game's card of their leader, their name on it, their league's mark in its corner ---- */
+.rkcard { position: relative; flex: none; width: var(--cw); height: calc(var(--cw) * 1.38); }
+.rkcard .mcard { --mw: var(--cw) !important; pointer-events: none; }
+.rkcard .rkmark { --d: calc(var(--cw) * .2); position: absolute; z-index: 6; left: calc(var(--cw) * -.05); top: calc(var(--cw) * -.05); box-shadow: inset 0 calc(var(--d) / -16) 0 rgba(0,0,0,.2), 0 2px 4px rgba(0,0,0,.5); }
+.rkcard .pname { white-space: nowrap; overflow: hidden; }
+.rknocard { width: 100%; height: 100%; border-radius: 8px; background: var(--well); box-shadow: var(--well-sh); display: flex; align-items: flex-end; justify-content: center; padding: 12px; font-size: 20px; }
 
-@media (max-width: 480px) {   /* a phone held upright: the boxes take the width */
-  .mhome .box.rkboard { padding: 20px 14px 22px; }
-  .mhome .rkrow { grid-template-columns: 20px 30px minmax(0, 1fr) auto; gap: 6px; padding: 0 10px 0 4px; font-size: 15px; }
-  .mhome .rkrow .lgpips { display: none; }   /* the emblem says the league; the wins are on your own line above */
+/* ---- versus: over the match as it opens; the other player above and you below, as on the board ---- */
+.rkvs { z-index: 60; display: flex; flex-direction: column; pointer-events: none; --cw: min(240px, calc((100vh - 176px) / 2.76)); animation: rkin .25s ease-out both; }
+.rkvs.out { opacity: 0; transition: opacity .4s; }
+.rkside { flex: 1; display: flex; justify-content: center; }
+.rkside.them { align-items: flex-end; padding-bottom: 56px; background: radial-gradient(ellipse at 50% 30%, rgba(var(--them-rgb), .26), transparent 68%); }
+.rkside.you { align-items: flex-start; padding-top: 56px; background: radial-gradient(ellipse at 50% 70%, rgba(var(--you-rgb), .26), transparent 68%); }
+.rkmid { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--granite); box-shadow: var(--granite-sh); font: 700 24px/1 'Fira Sans Condensed', sans-serif; }
+
+/* ---- a ranked match's ending: the verdict, then your rank; each the whole screen ---- */
+.rkfin { z-index: 60; }
+.rkverdict, .rkrank { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); animation: rkin .3s ease-out both; }
+.rkverdict { --cw: min(200px, 26vh); justify-content: center; gap: 24px; }
+.rkverdict.won { background: radial-gradient(circle closest-side at 50% 42%, rgba(var(--you-rgb), .34), transparent); }   /* a round light behind your card, whatever the screen's shape */
+.rkverdict h1 { font: 700 56px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; text-shadow: 0 2px 4px rgba(0,0,0,.5); }
+.rkverdict .rkcard .rnm { display: none; }   /* the picture alone: the card's name bar stays empty here */
+.rkverdict.lost .rkcard { opacity: .6; } .rkverdict:is(.lost, .drawn) h1 { color: var(--ink2); }
+.rkverdict .rkplay { max-width: 440px; margin-top: 24px; }
+.rkrank .rkstand { flex: 1; gap: 24px; }
+.rkrank .rkmark { --d: min(220px, 28vh); }
+.rkrank .rkstand h1 { font-size: 56px; }
+.rkrank .rkwins { height: 32px; gap: 16px; } .rkrank .rkwins i { width: 32px; height: 32px; }
+.rkrank .rkplay { max-width: 440px; }
+.rkrank.took { background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--c) 50%, #100e0c), #100e0c 74%); }   /* a league reached: the screen is the new league's */
+/* how a result lands */
+.rkwins i.pop::before { animation: rkpop .5s cubic-bezier(.2,1.7,.4,1) both; }
+.rkwins i.pop::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 3px solid var(--c); animation: rkring .6s ease-out both; }
+.rkwins i.drop::before { animation: rkdrop .4s ease-in both; }
+.rkmark.turn { animation: rkturn .6s cubic-bezier(.2,1.5,.4,1) both; }
+.rkmark.land { animation: rkland .7s cubic-bezier(.2,1.5,.4,1) both; }
+@keyframes rkin { from { opacity: 0; } }
+@keyframes rkpop { from { scale: 0; } } @keyframes rkring { from { scale: .6; opacity: 1; } to { scale: 2.4; opacity: 0; } }
+@keyframes rkdrop { to { translate: 0 14px; opacity: 0; } } @keyframes rkturn { from { scale: .7; } } @keyframes rkland { from { scale: .3; opacity: 0; } }
+
+/* ---- a wide screen: the standing beside the deck, the two players side by side ---- */
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .rkscreen:not(.rklb) { flex-direction: row; justify-content: center; align-items: center; gap: 96px; }
+  /* the leaderboard keeps its one column: the row of leagues larger, all eleven in sight */
+  .rkstrip { justify-content: center; height: 120px; margin-top: 0; gap: 24px; overflow: visible; }
+  .rklgb i { width: 56px; height: 56px; } .rklgb.on i { width: 88px; height: 88px; }
+  .rklb h1 { font-size: 56px; min-height: 56px; margin: 4px 0 24px; }
+  .rkscreen > .rkstand { flex: none; padding-top: 0; gap: 24px; }
+  .rkscreen > .rkstand .rkmark { --d: min(240px, 30vh); }
+  .rkscreen > .rkstand h1 { font-size: 56px; }
+  .rkscreen > .rkstand .rkwins { height: 32px; gap: 16px; } .rkscreen > .rkstand .rkwins i { width: 32px; height: 32px; }
+  .rkfoot { width: 320px; gap: 16px; }
+  .rkfoot > .rkdeck:not(.none) { --tw: min(288px, 36vh); display: grid; grid-template-columns: 1fr auto; gap: 16px 12px; padding: 16px; }
+  .rkfoot > .rkdeck .tokpiece { grid-column: 1 / -1; justify-self: center; }
+  .rksheet { justify-content: center; } .rkrows { border-radius: 16px; }
+  .rkvs { flex-direction: row-reverse; --cw: min(360px, calc((100vh - 96px) / 1.38), 30vw); }
+  .rkside, .rkside.them, .rkside.you { align-items: center; padding: 16px; }
+  .rkside.them { background: radial-gradient(ellipse at 60% 50%, rgba(var(--them-rgb), .26), transparent 68%); }
+  .rkside.you { background: radial-gradient(ellipse at 40% 50%, rgba(var(--you-rgb), .26), transparent 68%); }
+  .rkmid { width: 96px; height: 96px; font-size: 34px; }
+  .rkverdict { --cw: min(264px, 34vh); } .rkverdict h1 { font-size: 96px; }
+  .rkrank { justify-content: center; gap: 48px; } .rkrank .rkstand { flex: none; } .rkrank .rkmark { --d: min(264px, 34vh); } .rkrank .rkplay { width: 320px; }
 }
+@media (prefers-reduced-motion: reduce) { :is(.rkscreen, .rkvs, .rkfin) * { animation: none !important; } }
