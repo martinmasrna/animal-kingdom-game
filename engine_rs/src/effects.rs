@@ -197,15 +197,36 @@ pub fn raid_food(st: &State, player: Player, card: CardId, strength: i32) -> i32
     strength.max(0) * factor
 }
 
+/// The food a raid by `player` must take to end the game: all the enemy den holds, or, on a map whose raids steal, what
+/// `player`'s own den still lacks of the winning food when that is less. Fatigue's food reads the same way.
+pub fn raid_to_win(st: &State, player: Player) -> i32 {
+    let den = st.food[other(player) as usize];
+    if st.g.map.steal { den.min(st.g.map.win_food - st.food[player as usize]) } else { den }
+}
+
+/// Food moved into `player`'s den from the other (a raid's or fatigue's, on a map whose raids steal): no event of its
+/// own, the raid's or the fatigue's says where it went. The winning food wins.
+fn take_food(st: &mut State, player: Player, amount: i32) {
+    st.food[player as usize] += amount;
+    if st.result.is_none() && st.food[player as usize] >= st.g.map.win_food {
+        st.result = Some(GameResult { winner: Some(player), reason: Reason::Food });
+    }
+}
+
 /// The den raid: an animal that enters the enemy den destroys food equal to its strength, at most what they have, and
-/// is spent to the Remove Pile without landing (no Roar). A den emptied loses the game.
+/// is spent to the Remove Pile without landing (no Roar). A den emptied loses the game. On a map whose raids steal the
+/// food goes to the raider's den instead.
 fn raid(st: &mut State, player: Player, unit: Unit, enemy: Player, strength: i32) {
     let n = raid_food(st, player, unit.card, strength).min(st.food[enemy as usize]);
+    let stolen = st.g.map.steal;
     st.raids[player as usize] += 1;
-    st.emit(Ev::Raid { player, iid: unit.iid, card: unit.card, den: enemy, strength, n });
+    st.emit(Ev::Raid { player, iid: unit.iid, card: unit.card, den: enemy, strength, n, stolen });
     st.pile_add(unit.card, unit.owner);
     st.food[enemy as usize] -= n;
     st.food_lost[enemy as usize] += n;
+    if stolen {
+        take_food(st, player, n);
+    }
     if st.result.is_none() && st.food[enemy as usize] <= 0 {
         st.result = Some(GameResult { winner: Some(player), reason: Reason::Starved });
     }
@@ -479,7 +500,7 @@ pub fn fatigue_due(st: &State, player: Player, n: i32) -> i32 {
 
 /// Draw n cards; the newest past the hand limit burn to the Remove Pile. Fatigue: each card the deck no longer holds
 /// is not drawn and costs the player food instead, one step more each time (1, then 2, then 3, ...); at no food they
-/// lose, whoever's turn it is.
+/// lose, whoever's turn it is. On a map whose raids steal that food goes to the opponent's den.
 pub fn draw_cards(st: &mut State, player: Player, n: i32) {
     let drawn = st.draw(player, n);
     if !drawn.is_empty() {
@@ -502,8 +523,12 @@ pub fn draw_cards(st: &mut State, player: Player, n: i32) {
         let lost = (st.fatigue[p] * st.cfg().fatigue_step).min(st.food[p]).max(0);
         st.food[p] -= lost;
         st.food_lost[p] += lost;
-        st.emit(Ev::Fatigue { player, n: lost, count: st.fatigue[p] });
-        if st.food[p] <= 0 {
+        let to = if st.g.map.steal { Some(other(player)) } else { None };
+        st.emit(Ev::Fatigue { player, n: lost, count: st.fatigue[p], to });
+        if let Some(o) = to {
+            take_food(st, o, lost);
+        }
+        if st.result.is_none() && st.food[p] <= 0 {
             st.result = Some(GameResult { winner: Some(other(player)), reason: Reason::Starved });
         }
     }

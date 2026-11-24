@@ -106,10 +106,14 @@ def _effects(events: list, move: Move) -> list:
             fx.append({"k": "draw", "seat": e["player"], "n": len(e["cards"])})
         elif e["e"] == "food" and e["n"] < 0:   # food lost to a draw from an empty deck (fatigue)
             fx.append({"k": "lose", "seat": e["player"], "n": -e["n"]})
+            if e.get("to"):   # where raids steal it went to the other den
+                fx.append({"k": "food", "seat": e["to"], "n": -e["n"]})
         elif e["e"] == "food" and not e.get("income"):
             fx.append({"k": "food", "seat": e["player"], "n": e["n"]})
         elif e["e"] == "raid" and e["n"]:
             fx.append({"k": "lose", "seat": e["den"], "n": e["n"]})
+            if e.get("to"):   # stolen: the raider's den took it
+                fx.append({"k": "food", "seat": e["to"], "n": e["n"]})
     merged = []   # several draws or food gains by one player in a row read as one
     for f in fx:
         if merged and f["k"] in ("draw", "food") and merged[-1]["k"] == f["k"] and merged[-1]["seat"] == f["seat"]:
@@ -592,7 +596,7 @@ def map_info() -> dict:
     gm = load_map(MAP_ID)
     regions = [{"id": r.id, "c": list(min(tuple(map(int, c.split(","))) for c in r.corners)), "corners": list(r.corners),
                 "food": r.food} for r in gm.regions.values()]
-    return {"id": gm.id, "name": gm.name, "winFood": gm.win_food, "crossroads": sorted(gm.crossroads),
+    return {"id": gm.id, "name": gm.name, "winFood": gm.win_food, "raidsSteal": gm.raids_steal, "crossroads": sorted(gm.crossroads),
             "cols": max(int(c.split(",")[0]) for c in gm.crossroads), "rows": max(int(c.split(",")[1]) for c in gm.crossroads),
             "edges": [list(e) for e in gm.edges], "bases": {p: sorted(t) for p, t in gm.hq_connects.items()}, "regions": regions}
 

@@ -292,6 +292,10 @@ pub struct GameMap {
     pub hq_front: [u64; 2],
     pub regions: Vec<Region>,
     pub win_food: i32,
+    /// The map's `"raids": "steal"` (an experiment, Martin, 2026-11-24): food is never destroyed on this map, only moved.
+    /// A raid's food goes to the raider's den and fatigue's to the opponent's, so the two dens always hold at least
+    /// the food they started with, and a den emptied means the other has won. Without it a raid destroys.
+    pub steal: bool,
 }
 
 impl GameMap {
@@ -345,8 +349,13 @@ impl GameMap {
             regions.push(Region { id: rid.clone(), corners, mask, food });
         }
         let win_food = rec["win_food"].as_i64().filter(|f| *f > 0).ok_or_else(|| format!("map {id:?}: win_food must be a positive int, got {}", rec["win_food"]))? as i32;
+        let steal = match rec["raids"].as_str() {
+            None | Some("destroy") => false,
+            Some("steal") => true,
+            Some(x) => return Err(format!("map {id:?}: raids must be \"steal\" or \"destroy\", got {x:?}")),
+        };
         let name = rec["name"].as_str().unwrap_or("").to_string();
-        Ok(GameMap { id, name, edges, tiles, index, neighbors, nb_mask, hq_front, regions, win_food })
+        Ok(GameMap { id, name, edges, tiles, index, neighbors, nb_mask, hq_front, regions, win_food, steal })
     }
 
     /// The board as the client and the tools read it: its tiles, edges and regions as the map lists them, each
@@ -354,7 +363,7 @@ impl GameMap {
     pub fn to_json(&self) -> Value {
         let names = |m: u64| -> Vec<&str> { (0..self.tiles.len() as Tile).filter(|&t| m >> t & 1 == 1).map(|t| self.tile_name(t)).collect() };
         serde_json::json!({
-            "id": self.id, "name": self.name, "win_food": self.win_food, "crossroads": self.tiles,
+            "id": self.id, "name": self.name, "win_food": self.win_food, "raids": if self.steal { "steal" } else { "destroy" }, "crossroads": self.tiles,
             "edges": self.edges.iter().map(|&(a, b)| [self.tile_name(a), self.tile_name(b)]).collect::<Vec<_>>(),
             "bases": {"A": names(self.hq_front[0]), "B": names(self.hq_front[1])},
             "regions": self.regions.iter().map(|r| serde_json::json!({"id": r.id, "food": r.food, "corners": r.corners.iter().map(|&t| self.tile_name(t)).collect::<Vec<_>>()})).collect::<Vec<_>>(),

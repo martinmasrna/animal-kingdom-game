@@ -12,7 +12,8 @@ pub enum Ev {
     TurnStart { player: Player, turn: i32 },
     Mulligan { player: Player, returned: i32, drawn: (i32, CardId) },
     TurnCapped { cap: CapKind, player: Player, turn: i32, cards: Vec<CardId> },
-    Raid { player: Player, iid: i32, card: CardId, den: Player, strength: i32, n: i32 },
+    /// `stolen`: the `n` food went to the raider's den (a map whose raids steal); otherwise it was destroyed.
+    Raid { player: Player, iid: i32, card: CardId, den: Player, strength: i32, n: i32, stolen: bool },
     Place { player: Player, iid: i32, card: CardId, cr: Tile },
     Cover { cr: Tile, iid: i32, card: CardId, owner: Player, by: i32 },
     Poisoned { iid: i32, card: CardId, owner: Player, by: i32 },
@@ -20,8 +21,9 @@ pub enum Ev {
     /// A card burned from hand, past the hand limit.
     Burn { iid: i32, card: CardId, owner: Player },
     Food { player: Player, n: i32, income: bool },
-    /// Food lost to a draw from an empty deck: `n` food, on the player's `count`th such draw.
-    Fatigue { player: Player, n: i32, count: i32 },
+    /// Food lost to a draw from an empty deck: `n` food, on the player's `count`th such draw. `to`: the player whose den
+    /// it went to (a map whose raids steal); none when it was destroyed.
+    Fatigue { player: Player, n: i32, count: i32, to: Option<Player> },
     Draw { player: Player, cards: Vec<(i32, CardId)> },
     Strength { iid: i32, card: CardId, owner: Player, n: i32 },
     LeaderPower { player: Player, card: CardId },
@@ -69,7 +71,13 @@ impl Recorded {
             Ev::Mulligan { player, returned, drawn } => json!({"e": "mulligan", "player": pname(*player), "returned": returned, "drawn": [drawn.0, card(drawn.1)]}),
             Ev::TurnCapped { cap, player, turn, cards } => json!({"e": "turn_capped", "cap": cap.name(), "player": pname(*player), "turn": turn,
                 "cards": cards.iter().map(|c| card(*c)).collect::<Vec<_>>()}),
-            Ev::Raid { player, iid, card: c, den, strength, n } => json!({"e": "raid", "player": pname(*player), "iid": iid, "card": card(*c), "den": pname(*den), "str": strength, "n": n, "from_hand": true}),
+            Ev::Raid { player, iid, card: c, den, strength, n, stolen } => {
+                let mut m = json!({"e": "raid", "player": pname(*player), "iid": iid, "card": card(*c), "den": pname(*den), "str": strength, "n": n, "from_hand": true});
+                if *stolen {
+                    m["to"] = Value::from(pname(*player));
+                }
+                m
+            }
             Ev::Place { player, iid, card: c, cr } => json!({"e": "place", "player": pname(*player), "iid": iid, "card": card(*c), "cr": tile(*cr), "from_hand": true}),
             Ev::Cover { cr, iid, card: c, owner, by } => json!({"e": "cover", "cr": tile(*cr), "iid": iid, "card": card(*c), "owner": pname(*owner), "by": by}),
             Ev::Poisoned { iid, card: c, owner, by } => json!({"e": "poisoned", "iid": iid, "card": card(*c), "owner": pname(*owner), "by": by}),
@@ -83,7 +91,13 @@ impl Recorded {
                 m
             }
             // a food change like any other, negative: the food-change shape, with the count of empty draws so far
-            Ev::Fatigue { player, n, count } => json!({"e": "food", "player": pname(*player), "n": -n, "fatigue": count}),
+            Ev::Fatigue { player, n, count, to } => {
+                let mut m = json!({"e": "food", "player": pname(*player), "n": -n, "fatigue": count});
+                if let Some(t) = to {
+                    m["to"] = Value::from(pname(*t));
+                }
+                m
+            }
             Ev::Draw { player, cards } => json!({"e": "draw", "player": pname(*player), "cards": cards.iter().map(|(i, c)| json!([i, card(*c)])).collect::<Vec<_>>()}),
             Ev::Strength { iid, card: c, owner, n } => json!({"e": "strength", "iid": iid, "card": card(*c), "owner": pname(*owner), "n": n}),
             Ev::LeaderPower { player, card: c } => json!({"e": "leader_power", "player": pname(*player), "card": card(*c)}),
