@@ -424,6 +424,8 @@ pub struct State {
     pub raids: [i32; 2],
     /// The regions that produce no food for the rest of the game, a bit for each in the map's order (the Scorch).
     pub scorched: u64,
+    /// What each player's Leeroy has grown by, wherever he is (the Raider: an enemy unit removed, +1).
+    pub leeroy_growth: [i32; 2],
     pub effect_steps_this_turn: i32,
     pub caps: Vec<Cap>,
     pub next_iid: i32,
@@ -468,6 +470,7 @@ impl Clone for State {
             food_produced: self.food_produced,
             raids: self.raids,
             scorched: self.scorched,
+            leeroy_growth: self.leeroy_growth,
             effect_steps_this_turn: self.effect_steps_this_turn,
             caps: self.caps.clone(),
             next_iid: self.next_iid,
@@ -516,6 +519,7 @@ impl Clone for State {
         self.food_produced = src.food_produced;
         self.raids = src.raids;
         self.scorched = src.scorched;
+        self.leeroy_growth = src.leeroy_growth;
         self.effect_steps_this_turn = src.effect_steps_this_turn;
         if !(self.caps.is_empty() && src.caps.is_empty()) {
             self.caps.clone_from(&src.caps);
@@ -671,6 +675,7 @@ impl State {
             food_produced: [0, 0],
             raids: [0, 0],
             scorched: 0,
+            leeroy_growth: [0, 0],
             effect_steps_this_turn: 0,
             caps: Vec::new(),
             next_iid: 0,

@@ -18,7 +18,7 @@ pub const FLIGHT_1: &str = "flight_1";
 /// or a passive is in `behaviour`.
 pub const LEADERS: [(&str, &str); 5] = [
     (WARLORD, "Your Hungry cards have +2 strength."),                          // Martin, 2026-11-24: "from hand" too
-    (RAIDER, "Your opponent loses 1 food, and 1 more for every 3 raids you made this game."),   // Martin, 2026-11-24: 2 mana, a test
+    (RAIDER, "Whenever you remove an enemy unit, Leeroy gains +1 strength. Power: give an enemy unit -1 strength."),   // Martin, 2026-11-24
     (SAGE, "Draw a card."),
     (ELF, "Your regions produce 1 more food."),                               // Martin, 2026-11-23: the card's and the power's texts swapped
     (ASSASSIN, "After every third card you play in a turn, draw a card."),    // Martin, 2026-11-21: "multiple times a turn"

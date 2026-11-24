@@ -188,9 +188,9 @@
       "name": "Leeroy",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 5,
+      "base_strength": 2,
       "text": "Double strength when raiding.",
-      "cost": 3,
+      "cost": 2,
       "keywords": []
     },
     {

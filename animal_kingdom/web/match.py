@@ -140,9 +140,7 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
     spent = kind == "power" and st.current == p and st.power_used   # once a turn: "Used" until their next
     # what a leader counts to: the Raider's raids toward its power's next food, the Assassin's cards this turn toward its draw
     count = None
-    if lid == game.RAIDER and st.config.raider_power_raids > 0:
-        count = {"n": st.raids[p] % st.config.raider_power_raids, "of": st.config.raider_power_raids}
-    elif lid == game.ASSASSIN and st.config.assassin_nth_card > 0:
+    if lid == game.ASSASSIN and st.config.assassin_nth_card > 0:
         count = {"n": st.played_this_turn % st.config.assassin_nth_card if st.current == p else 0, "of": st.config.assassin_nth_card}
     return {"id": lid, "kind": kind, "text": text, "usable": usable, **({"cost": cost, "spent": spent} if kind == "power" else {}),
             **({"count": count} if count else {})}

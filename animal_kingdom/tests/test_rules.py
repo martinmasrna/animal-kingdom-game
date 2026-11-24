@@ -566,19 +566,24 @@ def test_the_warlords_hungry_cards_have_two_more_strength_in_hand_and_on_the_boa
     assert s.board["2,1"][-1].card_id == "hungry_3" and s.food["A"] == 15 + CFG.hungry_food   # it eats, and Hungry feeds
 
 
-def test_the_raiders_power_takes_a_food_and_one_more_for_every_three_raids():
-    assert LEADERS[RAIDER] == ("power", "Your opponent loses 1 food, and 1 more for every 3 raids you made this game.")
-    s = state(turn=19, hands={"A": ["flight_1"] * 3}, food={"A": 15, "B": 15}, leaders={"A": RAIDER})   # 10 mana
-    rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
-    assert s.food["B"] == 14                                          # a raid takes its strength, nothing more
+def test_the_raiders_power_drains_an_enemy_and_leeroy_grows_with_every_enemy_removed_wherever_he_is():
+    assert LEADERS[RAIDER] == ("power", "Whenever you remove an enemy unit, Leeroy gains +1 strength. Power: give an enemy unit -1 strength.")
+    s = state(turn=19, hands={"A": ["raider_legend", "wisp_5"]}, decks={"A": ["raider_legend"]}, leaders={"A": RAIDER}, food={"A": 15, "B": 15})
+    base = CARDS["raider_legend"].base_strength
+    assert LeaderAction() not in rules.legal_actions(s)               # no enemy to drain
+    put(s, "1,1", "wisp_1", "A"); put(s, "2,1", "spore", "B"); put(s, "1,2", "wisp_1", "B")
     rules.apply_action(s, LeaderAction())
-    assert s.food["B"] == 13 and rules.mana_left(s, "A") == 10 - 1 - CFG.raider_power_cost
-    assert LeaderAction() not in rules.legal_actions(s)               # once a turn
-    for _ in range(2):
-        rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
-    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
-    rules.apply_action(s, LeaderAction())                             # three raids made: 2 food
-    assert s.food["B"] == 11 - 2                                       # B holds no region: nothing came back
+    assert s.pending is not None
+    rules.apply_action(s, ChoiceAction("2,1"))                        # the drained 1 is gone: a removal of Leeroy's player's
+    assert "2,1" not in s.board and rules.mana_left(s, "A") == 10 - CFG.raider_power_cost
+    assert s.leeroy_growth["A"] == CFG.leeroy_growth
+    assert effective_strength(s, s.hands["A"][0]) == base + CFG.leeroy_growth   # in hand
+    rules.apply_action(s, PlaceAction("wisp_5", ("cr", "1,2")))       # a cover removes the enemy beneath: another
+    assert s.leeroy_growth["A"] == 2 * CFG.leeroy_growth
+    t = GameState.from_dict(s.to_dict())
+    assert t.leeroy_growth == s.leeroy_growth
+    other = state(turn=19, hands={"A": ["raider_legend"]}, leaders={"A": SAGE})
+    assert effective_strength(other, other.hands["A"][0]) == base      # under another leader he doesn't grow
 
 
 def test_the_elf_leader_makes_your_regions_produce_one_more_food():
@@ -598,7 +603,7 @@ def test_the_assassin_draws_after_every_third_card_of_a_turn():
         sizes.append(len(s.hands["A"]))
     assert sizes == [5, 4, 4, 3, 2, 2]                                # the 3rd and the 6th each draw one
     assert {l: (CARDS[l].cost, CARDS[l].base_strength) for l in LEADERS} == {
-        "warlord_legend": (7, 7), "raider_legend": (3, 5), "sage_legend": (5, 3), "elf_legend": (3, 3), "assassin_legend": (5, 5)}
+        "warlord_legend": (7, 7), "raider_legend": (2, 2), "sage_legend": (5, 3), "elf_legend": (3, 3), "assassin_legend": (5, 5)}
 
 
 def test_the_elfs_card_gains_two_food_for_each_region_you_control():
@@ -828,14 +833,13 @@ def test_scorch_eats_burns_its_neighbours_and_its_regions_produce_no_food_for_th
     assert effective_strength(s, s.board[a][-1]) == CARDS["wisp_1"].base_strength - 1   # its own side burns too
 
 
-def test_the_raiders_and_the_assassins_counts_show_on_their_leaders():
+def test_the_assassins_count_shows_on_its_leader():
     from animal_kingdom.web.match import leader_view
-    s = state(turn=19, hands={"A": ["flight_1"] * 4}, leaders={"A": RAIDER, "B": ASSASSIN}, food={"A": 15, "B": 15})
-    assert leader_view(s, "A")["count"] == {"n": 0, "of": CFG.raider_power_raids}
-    for k in range(1, 5):
-        rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
-        assert leader_view(s, "A")["count"]["n"] == k % CFG.raider_power_raids   # 1, 2, then back to 0 at the third raid
-    assert leader_view(s, "B")["count"] == {"n": 0, "of": CFG.assassin_nth_card}   # not their turn: nothing played
+    s = state(turn=19, hands={"A": ["wisp_1"] * 2}, leaders={"A": ASSASSIN, "B": RAIDER})
+    assert leader_view(s, "A")["count"] == {"n": 0, "of": CFG.assassin_nth_card}
+    rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1")))
+    assert leader_view(s, "A")["count"]["n"] == 1
+    assert "count" not in leader_view(s, "B")
 
 
 def test_the_plunderer_draws_a_card_for_each_raid_while_it_stands():
