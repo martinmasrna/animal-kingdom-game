@@ -261,6 +261,10 @@ fn land_unit(st: &mut State, player: Player, unit: Unit, cr: Tile) {
             match st.card(unit.card).beh.on_cover {
                 // it removes an enemy by covering it: the draw waits below the cover's removal
                 Some(OnCover::DrawIfItRemoves) => st.effect_stack.push(Step::by_unit(StepKind::DrawIfGone { player: unit.owner, prey: cov.iid, n: 1 }, &unit)),
+                Some(OnCover::FoodForPrey) => {
+                    let amount = effective_strength(st, &cov);
+                    st.effect_stack.push(Step::by_unit(StepKind::FoodIfGone { player: unit.owner, prey: cov.iid, amount }, &unit));
+                }
                 None => {}
             }
         }
@@ -930,6 +934,12 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
         }
         StepKind::Draw { player, n } => {
             draw_cards(st, *player, *n);
+            Ok(None)
+        }
+        StepKind::FoodIfGone { player, prey, amount } => {
+            if !st.board.holds(*prey) {
+                gain_food(st, *player, *amount, false);
+            }
             Ok(None)
         }
         StepKind::DrawIfGone { player, prey, n } => {

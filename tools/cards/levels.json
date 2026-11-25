@@ -692,7 +692,8 @@
         "prev": 6
       },
       "by": "claude",
-      "at": 1795356759
+      "at": 1795608703,
+      "note": "Martin, 2026-11-25"
     },
     "animal": {
       "review": {
@@ -719,7 +720,8 @@
         "prev": ""
       },
       "by": "claude",
-      "at": 1795356759
+      "at": 1795608703,
+      "note": "Martin, 2026-11-25; Hungry kept (an agent's reading: he changed the Roar)"
     }
   },
   "raider_legend": {
@@ -1549,6 +1551,16 @@
       "note": "Martin, 2026-11-25: the nine leaders",
       "by": "claude",
       "at": 1795574228
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 8
+      },
+      "note": "Martin, 2026-11-25",
+      "by": "claude",
+      "at": 1795608703
     }
   },
   "reno_legend": {
@@ -1561,6 +1573,16 @@
       "note": "Martin, 2026-11-25: the nine leaders",
       "by": "claude",
       "at": 1795574228
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 7
+      },
+      "note": "Martin, 2026-11-25",
+      "by": "claude",
+      "at": 1795608703
     }
   },
   "pyromancer_legend": {

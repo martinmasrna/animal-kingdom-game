@@ -261,6 +261,8 @@ pub enum StepKind {
     LeaderTrigger { player: Player, card: CardId },
     Draw { player: Player, n: i32 },
     DrawIfGone { player: Player, prey: i32, n: i32 },
+    /// `player` gains `amount` food once `prey` is gone from the board.
+    FoodIfGone { player: Player, prey: i32, amount: i32 },
     /// `from`: where in the deck the cards being looked at came from (indices before any was lifted), bottom first;
     /// empty until the look begins.
     Scout { player: Player, from: SmallVec<[u8; 4]> },

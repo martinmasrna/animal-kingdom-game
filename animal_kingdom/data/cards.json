@@ -176,8 +176,8 @@
       "name": "Gorrak One-Eye",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 7,
-      "text": "Hungry. Roar: give an adjacent enemy -7 strength.",
+      "base_strength": 8,
+      "text": "Hungry. Roar: gain food equal to strength of a unit Gorrak removed.",
       "cost": 7,
       "keywords": [
         "Hungry"
@@ -633,7 +633,7 @@
       "rarity": "legendary",
       "base_strength": 8,
       "text": "Flight. Dawn: give all connected allies +1 strength.",
-      "cost": 8,
+      "cost": 6,
       "keywords": [
         "Flight"
       ]
@@ -645,7 +645,7 @@
       "rarity": "legendary",
       "base_strength": 7,
       "text": "Roar: Scout 2 cards.",
-      "cost": 7,
+      "cost": 5,
       "keywords": []
     },
     {

@@ -103,6 +103,9 @@ pub enum Roar {
 pub enum OnCover {
     /// "Roar: if this removes an enemy, draw a card."
     DrawIfItRemoves,
+    /// "Roar: gain food equal to strength of a unit Gorrak removed." (Gorrak One-Eye; Martin, 2026-11-25): the strength
+    /// the enemy he lands on had as he landed, gained once it is gone.
+    FoodForPrey,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -157,7 +160,6 @@ pub fn behaviour(id: &str) -> Behaviour {
         "hunter_5" => Some(Roar::Weaken(4)),
         "hunter_6" => Some(Roar::Weaken(5)),
         "hunter_7" => Some(Roar::Weaken(6)),
-        WARLORD => Some(Roar::Weaken(7)),                // Gorrak One-Eye (Martin, 2026-11-22)
         "giant_hunter" => Some(Roar::RemoveAdjacent),
         "cantrip_2" | "cantrip_3" | "cantrip_4" => Some(Roar::Draw),
         "scout_3" => Some(Roar::Scout),
@@ -178,6 +180,7 @@ pub fn behaviour(id: &str) -> Behaviour {
     };
     b.on_cover = match id {
         "kill_draw_2" => Some(OnCover::DrawIfItRemoves),
+        WARLORD => Some(OnCover::FoodForPrey),
         _ => None,
     };
     b.on_death = match id {

@@ -305,15 +305,21 @@ def test_hunters_give_an_adjacent_enemy_minus_n_strength_for_good():
     assert "2,1" not in places(s, "test_one")
 
 
-def test_gorrak_one_eye_is_hungry_and_bites_an_adjacent_enemy_for_7():
+def test_gorrak_one_eye_is_hungry_and_gains_food_equal_to_the_strength_of_the_enemy_he_removes():
     assert CARDS["warlord_legend"].name == "Gorrak One-Eye" and CARDS["warlord_legend"].keywords == {"Hungry"}
     s = state(turn=12, hands={"A": ["warlord_legend"]})
     assert places(s, "warlord_legend") == set()                 # Hungry: nothing to eat
-    put(s, "1,1", "wisp_1", "B")
-    put(s, "2,1", "wisp_3", "B")                                # strength 6
+    put(s, "1,1", "wisp_3", "B")                                # strength 6
+    put(s, "2,1", "wisp_1", "B")
+    food = s.food["A"]
     rules.apply_action(s, PlaceAction("warlord_legend", ("cr", "1,1")))
-    resolve_choices(s)
-    assert s.board["1,1"][-1].card_id == "warlord_legend" and "2,1" not in s.board
+    assert s.pending is None and [u.card_id for u in s.board["1,1"]] == ["warlord_legend"] and "2,1" in s.board
+    assert s.food["A"] == food + CARDS["wisp_3"].base_strength + CFG.hungry_food     # the 6 he ate, and Hungry's own
+    s = state(turn=14, hands={"A": ["warlord_legend"]})
+    put(s, "1,1", "spikes_3", "B")                              # Spikes removes him: his prey stays, so no food
+    food = s.food["A"]
+    rules.apply_action(s, PlaceAction("warlord_legend", ("cr", "1,1")))
+    assert [u.card_id for u in s.board["1,1"]] == ["spikes_3"] and s.food["A"] == food
 
 
 def test_an_animal_at_zero_strength_is_removed_armor_or_not():
@@ -568,8 +574,8 @@ def test_the_nine_leaders_and_their_cards():
     assert list(LEADERS) == [RAIDER, ELF, ANGEL, ASSASSIN, SAGE, RENO, PYROMANCER, WARLORD, MANA_EATER]
     assert all(passive and power for passive, power in LEADERS.values())
     assert {l: (CARDS[l].name, CARDS[l].cost, CARDS[l].base_strength) for l in LEADERS} == {
-        RAIDER: ("Nightmare", 2, 2), ELF: ("Mother Nature", 5, 5), ANGEL: ("Angel Warrior", 8, 8), ASSASSIN: ("Rogue", 3, 3),
-        SAGE: ("Mage", 4, 6), RENO: ("Reno", 7, 7), PYROMANCER: ("Pyromancer", 3, 3), WARLORD: ("Gorrak One-Eye", 7, 7),
+        RAIDER: ("Nightmare", 2, 2), ELF: ("Mother Nature", 5, 5), ANGEL: ("Angel Warrior", 6, 8), ASSASSIN: ("Rogue", 3, 3),
+        SAGE: ("Mage", 4, 6), RENO: ("Reno", 5, 7), PYROMANCER: ("Pyromancer", 3, 3), WARLORD: ("Gorrak One-Eye", 7, 8),
         MANA_EATER: ("Mana Eater", 10, 14)}
     assert {l: rules.power_price(l) for l in LEADERS} == {RAIDER: 1, ELF: 2, ANGEL: 1, ASSASSIN: 1, SAGE: 3, RENO: 3, PYROMANCER: 2,
                                                           WARLORD: 2, MANA_EATER: 1}
