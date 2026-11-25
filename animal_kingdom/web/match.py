@@ -134,14 +134,15 @@ def leader_view(st: GameState, p: str) -> Optional[dict]:
         return None
     lid = lead["id"]
     passive, power = LEADERS[lid]
+    power = game.power_text(st, p) or power   # as it reads now: Nightmare on top, the Pyromancer's Fireball
     cost = power_cost(st, p)
     usable = st.current == p and st.pending is None and st.result is None and game.mana_left(st, p) >= cost \
         and leader_usable(st, p)
     spent = power is not None and st.current == p and st.power_used   # once a turn: "Used" until their next
-    # what a leader counts to: the Assassin's cards this turn toward its draw
+    # what a leader counts to: the Rogue's cards this turn toward her cheaper third
     count = None
-    if lid == game.ASSASSIN and st.config.assassin_nth_card > 0:
-        count = {"n": st.played_this_turn % st.config.assassin_nth_card if st.current == p else 0, "of": st.config.assassin_nth_card}
+    if lid == game.ASSASSIN and st.config.rogue_nth_card > 0:
+        count = {"n": st.played_this_turn % st.config.rogue_nth_card if st.current == p else 0, "of": st.config.rogue_nth_card}
     return {"id": lid, "passive": passive, "power": power, "usable": usable, **({"cost": cost, "spent": spent} if power else {}),
             **({"count": count} if count else {})}
 

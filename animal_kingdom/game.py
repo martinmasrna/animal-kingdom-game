@@ -245,7 +245,10 @@ def _engine_for(cards: Optional[dict[str, Card]], config: Optional[Config], map_
 # card id -> (its passive, its power), each the text as the player reads it or None: a passive is always on, a power is
 # used for its mana once a turn
 LEADERS: dict[str, tuple[Optional[str], Optional[str]]] = {lead["id"]: (lead["passive"], lead["power"]) for lead in ENGINE.leaders()}
+# Gorrak, Nightmare, the Mage, Mother Nature and the Rogue keep the card ids they had as the Warlord, the Raider, the Sage,
+# the Elf and the Assassin
 WARLORD, RAIDER, SAGE, ELF, ASSASSIN = "warlord_legend", "raider_legend", "sage_legend", "elf_legend", "assassin_legend"
+ANGEL, RENO, PYROMANCER, MANA_EATER = "angel_legend", "reno_legend", "pyromancer_legend", "mana_eater_legend"
 
 
 def power_price(leader_id: str, config: Optional[Config] = None) -> int:
@@ -372,6 +375,7 @@ class GameState:
                  turn_counter: int = 0, mana_spent: int = 0, applied_this_turn: int = 0, effect_steps_this_turn: int = 0,
                  played_this_turn: int = 0, power_used: bool = False, power_discount: Optional[dict] = None,
                  fatigue: Optional[dict] = None, food_lost: Optional[dict] = None, food_produced: Optional[dict] = None, raids: Optional[dict] = None, scorched: Optional[list] = None, leeroy_growth: Optional[dict] = None,
+                 crystals: Optional[dict] = None, next_mana: Optional[dict] = None, power_uses: Optional[dict] = None,
                  caps: Optional[list] = None, next_iid: int = 0, effect_stack: Optional[list[dict]] = None,
                  pending: Optional[dict] = None, scheduled: Optional[list[dict]] = None, result: Optional[Result] = None,
                  pile_owners: Optional[list] = None, leaders: Optional[dict[str, dict]] = None):
@@ -400,7 +404,10 @@ class GameState:
         self.food_lost = food_lost if food_lost is not None else {"A": 0, "B": 0}   # the food each player has lost this game (the Burn Djinn)
         self.food_produced = food_produced if food_produced is not None else {"A": 0, "B": 0}   # the food each player's regions produced this game (the Food Djinn)
         self.raids = raids if raids is not None else {"A": 0, "B": 0}   # the raids each player made this game (the Raider's power)
-        self.leeroy_growth = leeroy_growth if leeroy_growth is not None else {"A": 0, "B": 0}   # what each player's Leeroy has grown by (the Raider)
+        self.leeroy_growth = leeroy_growth if leeroy_growth is not None else {"A": 0, "B": 0}   # what each player's Nightmare has grown by
+        self.crystals = crystals           # each player's mana crystals; None in a position set up by hand: the engine counts the turns begun
+        self.next_mana = next_mana if next_mana is not None else {"A": 0, "B": 0}     # mana on top of the crystals next turn (the Mana Eater's power)
+        self.power_uses = power_uses if power_uses is not None else {"A": 0, "B": 0}  # each player's leader power uses this game (the Pyromancer)
         self.scorched = scorched if scorched is not None else []   # the ids of the regions that produce no food for the rest of the game
         self.effect_steps_this_turn = effect_steps_this_turn
         self.caps: list = caps if caps is not None else []     # every turn a cap ended: {cap, player, turn, cards}
@@ -460,6 +467,9 @@ class GameState:
             "raids": dict(self.raids),
             "scorched": list(self.scorched),
             "leeroy_growth": dict(self.leeroy_growth),
+            **({"crystals": dict(self.crystals)} if self.crystals is not None else {}),
+            "next_mana": dict(self.next_mana),
+            "power_uses": dict(self.power_uses),
             "effect_steps_this_turn": self.effect_steps_this_turn,
             "caps": [dict(c) for c in self.caps],
             "next_iid": self._next_iid,
@@ -529,6 +539,9 @@ class GameState:
         self.raids.update(d.get("raids", {"A": 0, "B": 0}))
         self.scorched[:] = d.get("scorched", [])
         self.leeroy_growth.update(d.get("leeroy_growth", {"A": 0, "B": 0}))
+        self.crystals = dict(d["crystals"])
+        self.next_mana.update(d.get("next_mana", {"A": 0, "B": 0}))
+        self.power_uses.update(d.get("power_uses", {"A": 0, "B": 0}))
         self.effect_steps_this_turn, self._next_iid = d["effect_steps_this_turn"], d["next_iid"]
         self.caps[:] = d["caps"]
         self.effect_stack[:] = d["effect_stack"]
@@ -635,6 +648,11 @@ def unit_cost(state: GameState, unit: UnitInstance) -> int:
 
 def power_cost(state: GameState, player: str) -> int:
     return state._sync().power_cost(player)
+
+
+def power_text(state: GameState, player: str) -> Optional[str]:
+    """`player`'s leader's power as it reads now (Nightmare's "Draw Nightmare." on top, the Pyromancer's Fireball)."""
+    return state._sync().power_text(player)
 
 
 def leader_usable(state: GameState, player: str) -> bool:

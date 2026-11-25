@@ -30,8 +30,8 @@ pub fn count(st: &State, player: Player, what: Count) -> i32 {
     }
 }
 
-/// The strength a unit of `card` has for `owner` now: on the board, or as it would be played from hand. The Warlord
-/// leading adds to a Hungry card's, in hand and on the board.
+/// The strength a unit of `card` has for `owner` now: on the board, or as it would be played from hand. Gorrak leading
+/// adds to a Hungry card's, in hand and on the board; Nightmare carries what he has grown.
 #[inline]
 pub fn card_strength(st: &State, card: CardId, owner: Player) -> i32 {
     let c = st.card(card);
@@ -40,7 +40,7 @@ pub fn card_strength(st: &State, card: CardId, owner: Player) -> i32 {
         None => (st.cfg().shade_growth * count(st, owner, c.dynamic.expect("a dynamic card names its count"))).max(0),
     };
     let base = if c.has(HUNGRY) && st.leads(owner, st.g.named.warlord) { base + st.cfg().warlord_hungry_bonus } else { base };
-    // Leeroy, while the Raider leads: grown by every turn he waited in the deck (one copy, a legendary)
+    // Nightmare, while he leads: grown at every Dusk, wherever he is (one copy, a legendary)
     if Some(card) == st.g.named.raider && st.leads(owner, st.g.named.raider) { base + st.leeroy_growth[owner as usize] } else { base }
 }
 
@@ -75,7 +75,9 @@ pub fn can_be_chosen(st: &State, u: &Unit, by_player: Player) -> bool {
 
 fn base_cost(st: &State, card: CardId, player: Player) -> i32 {
     let c = st.card(card);
-    match c.beh.djinn {
+    // Gorrak: "Your Hungry allies cost 1 more, but gain 3 strength."
+    let tax = if c.has(HUNGRY) && st.leads(player, st.g.named.warlord) { st.cfg().warlord_hungry_tax } else { 0 };
+    tax + match c.beh.djinn {
         None => c.cost,
         Some(what) => {
             let per = match what {
@@ -87,16 +89,26 @@ fn base_cost(st: &State, card: CardId, player: Player) -> i32 {
     }
 }
 
+/// The Rogue: "Every third card you play costs 1 less.": what `player`'s next card played this turn costs less.
+pub fn rogue_discount(st: &State, player: Player) -> i32 {
+    let nth = st.cfg().rogue_nth_card;
+    if nth > 0 && st.current == player && (st.played_this_turn + 1) % nth == 0 && st.leads(player, st.g.named.assassin) {
+        st.cfg().rogue_discount
+    } else {
+        0
+    }
+}
+
 /// What playing this copy from hand costs: its card's cost, a Djinn's less its count, plus what effects put on the copy,
-/// never below 0.
+/// less the Rogue's discount, never below 0.
 pub fn unit_cost(st: &State, u: &Unit) -> i32 {
-    (base_cost(st, u.card, u.owner) + u.cost_mod).max(0)
+    (base_cost(st, u.card, u.owner) + u.cost_mod - rogue_discount(st, u.owner)).max(0)
 }
 
 /// What playing `card` from hand costs `player`: its cheapest copy in their hand, or the card's cost when they hold none.
 pub fn mana_cost(st: &State, card: CardId, player: Player) -> i32 {
     st.hands[player as usize].iter().filter(|u| u.card == card).map(|u| unit_cost(st, u)).min()
-        .unwrap_or_else(|| base_cost(st, card, player).max(0))
+        .unwrap_or_else(|| (base_cost(st, card, player) - rogue_discount(st, player)).max(0))
 }
 
 /// The hand slot a placement of `card` plays: its cheapest copy in hand, the first of those.
@@ -173,13 +185,12 @@ pub fn do_placement(st: &mut State, player: Player, card: CardId, target: Target
     };
     let unit = st.hands[player as usize][i];
     let strength = effective_strength(st, &unit); // as it is played
+    let discounted = rogue_discount(st, player) > 0;
     st.hands[player as usize].remove(i);
     st.played_this_turn += 1;
-    let nth = st.cfg().assassin_nth_card;
-    if nth != 0 && st.played_this_turn % nth == 0 && st.leads(player, st.g.named.assassin) {
-        // the Assassin: every third card played in a turn draws
+    if discounted {
+        // the Rogue's third card, paid for 1 less: her token shows it
         let lead = st.g.named.assassin.unwrap();
-        st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, lead));
         st.effect_stack.push(Step::by(StepKind::LeaderTrigger { player, card: lead }, lead));
     }
     match target {
@@ -345,22 +356,31 @@ fn run_roar(st: &mut State, roar: Roar, unit: &Unit, cr: Tile) {
                 land_unit(st, owner, spore, t);
             }
         }
-        Roar::ElfCard => {
-            let amount = st.cfg().elf_food_per_region * count(st, owner, Count::Region);
-            st.effect_stack.push(Step::by(StepKind::GainFood { player: owner, amount }, unit.card));
-        }
         Roar::MamaSpore => {
             let Some(spore_card) = st.g.named.spore else { return };
             st.effect_stack.push(Step::new(StepKind::ToHand { player: owner, card: spore_card, n: st.cfg().mama_spores }));
         }
-        Roar::AssassinCard => {
-            // each card then in hand, for as long as it stays there
-            let d = st.cfg().assassin_card_discount;
-            for u in st.hands[owner as usize].iter_mut() {
-                u.cost_mod -= d;
+        Roar::RogueCard => {
+            // "If you played 3 or more cards this turn, draw 3 cards.": itself counts
+            if st.played_this_turn >= st.cfg().rogue_card_needs {
+                st.effect_stack.push(Step::new(StepKind::Draw { player: owner, n: st.cfg().rogue_card_draws }));
             }
         }
-        Roar::SageCard => st.power_discount[owner as usize] += st.cfg().sage_card_power_discount,
+        Roar::ScoutTwice => {
+            for _ in 0..st.cfg().reno_scouts {
+                st.effect_stack.push(Step::new(StepKind::Scout { player: owner }));
+            }
+        }
+        Roar::UpgradeFireballs => upgrade_fireballs(st, owner),
+        Roar::EatCrystals => {
+            // "destroy all your mana crystals. Gain 1 food for each.": the mana they held this turn goes with them
+            let n = std::mem::take(&mut st.crystals[owner as usize]);
+            st.effect_stack.push(Step::new(StepKind::GainFood { player: owner, amount: n * st.cfg().mana_eater_food_per_crystal }));
+        }
+        Roar::DoubleFood => {
+            let amount = st.food[owner as usize];
+            st.effect_stack.push(Step::new(StepKind::GainFood { player: owner, amount }));
+        }
         // this turn's mana, on top of what is left, past the cap too
         Roar::GainMana => st.mana_spent -= st.cfg().mana_blob_mana,
         Roar::Scorch => {
@@ -372,11 +392,131 @@ fn run_roar(st: &mut State, roar: Roar, unit: &Unit, cr: Tile) {
                     top.strength_mod -= burn;
                     let top = *top;
                     st.emit(Ev::Strength { iid: top.iid, card: top.card, owner: top.owner, n: -burn });
+                    credit_if_doomed(st, unit.iid, &top);
                 }
             }
             for (i, r) in st.g.map.regions.iter().enumerate() {
                 if r.mask & (1u64 << cr) != 0 {
                     st.scorched |= 1u64 << i;
+                }
+            }
+        }
+    }
+}
+
+/// The Pyromancer's card: every Fireball in `player`'s hand a step up (Baby to Young to Adult to Elder; an Elder stays),
+/// each keeping what it cost.
+fn upgrade_fireballs(st: &mut State, player: Player) {
+    let fb = st.g.named.fireballs;
+    let p = player as usize;
+    for i in 0..st.hands[p].len() {
+        let u = st.hands[p][i];
+        let Some(step) = fb[..3].iter().position(|&f| f == Some(u.card)) else { continue };
+        let Some(next) = fb[step + 1] else { continue };
+        let cost_mod = base_cost(st, u.card, player) + u.cost_mod - base_cost(st, next, player);
+        let to = &mut st.hands[p][i];
+        to.card = next;
+        to.cost_mod = cost_mod;
+        if u.made {
+            // what both players watched made: it is the bigger one now
+            if let Some(m) = st.made[p].iter().position(|&c| c == u.card) {
+                st.made[p][m] = next;
+            }
+        }
+    }
+}
+
+// ================================================================== the Angel Warrior, the Mage
+
+/// The Angel Warrior: "After your ally removes an enemy, give it +1 strength." `remover`: the unit whose doing the
+/// removal was, if it is still on the board; `victim_owner`: whose unit went.
+fn credit_removal(st: &mut State, remover: Option<i32>, victim_owner: Player) {
+    let Some(iid) = remover else { return };
+    let Some((t, u)) = st.board.find(iid) else { return };
+    if u.owner == victim_owner || !st.leads(u.owner, st.g.named.angel) || st.board.top(t).map(|x| x.iid) != Some(iid) {
+        return;
+    }
+    let n = st.cfg().angel_removal_buff;
+    st.emit(Ev::LeaderTrigger { player: u.owner, card: st.g.named.angel.unwrap() });
+    let top = st.board.top_mut(t).unwrap();
+    top.strength_mod += n;
+    let top = *top;
+    st.emit(Ev::Strength { iid: top.iid, card: top.card, owner: top.owner, n });
+}
+
+/// An effect of the unit `remover` brought `target` to 0 strength: the rules remove it once the effects finish, and the
+/// removal is the remover's doing (the Angel Warrior's passive).
+fn credit_if_doomed(st: &mut State, remover: i32, target: &Unit) {
+    if effective_strength(st, target) <= 0 {
+        if let Some((_, r)) = st.board.find(remover) {
+            if r.owner != target.owner {
+                credit_removal(st, Some(remover), target.owner);
+            }
+        }
+    }
+}
+
+/// The Angel Warrior's card at its owner's Dawn: "give all connected allies +1 strength.", the allies in an unbroken
+/// chain of adjacent allies from it (Martin, 2026-11-25: "Connected to Angel").
+fn angel_dawn(st: &mut State, player: Player) {
+    let own = st.board.own[player as usize];
+    let mut m = own;
+    while m != 0 {
+        let t = m.trailing_zeros() as Tile;
+        m &= m - 1;
+        let Some(angel) = st.board.top(t) else { continue };
+        if !st.card(angel.card).beh.angel_dawn {
+            continue;
+        }
+        let mut seen = 1u64 << t;
+        let mut frontier = seen;
+        while frontier != 0 {
+            let mut next = 0u64;
+            let mut f = frontier;
+            while f != 0 {
+                let x = f.trailing_zeros() as usize;
+                f &= f - 1;
+                next |= st.g.map.nb_mask[x];
+            }
+            frontier = next & own & !seen;
+            seen |= frontier;
+        }
+        let n = st.cfg().angel_dawn_buff;
+        let mut allies = seen & !(1u64 << t);
+        let prev = (st.cause, st.cause_iid);
+        (st.cause, st.cause_iid) = (Some(angel.card), Some(angel.iid));
+        while allies != 0 {
+            let a = allies.trailing_zeros() as Tile;
+            allies &= allies - 1;
+            let top = st.board.top_mut(a).unwrap();
+            top.strength_mod += n;
+            let top = *top;
+            st.emit(Ev::Strength { iid: top.iid, card: top.card, owner: top.owner, n });
+        }
+        (st.cause, st.cause_iid) = prev;
+    }
+}
+
+/// The Mage's card: "If your deck is empty, transform into Mage, Transformed.", wherever it is, the moment the deck is
+/// empty; on the board it does not roar.
+pub fn transform_mages(st: &mut State) {
+    let (Some(mage), Some(into)) = (st.g.named.sage, st.g.named.mage_transformed) else { return };
+    for p in 0..2usize {
+        if !st.decks[p].is_empty() {
+            continue;
+        }
+        for u in st.hands[p].iter_mut() {
+            if u.card == mage {
+                u.card = into;
+            }
+        }
+        let mut m = st.board.own[p];
+        while m != 0 {
+            let t = m.trailing_zeros() as Tile;
+            m &= m - 1;
+            if let Some(top) = st.board.top_mut(t) {
+                if top.card == mage {
+                    top.card = into;
                 }
             }
         }
@@ -402,6 +542,10 @@ fn remove_specific(st: &mut State, cr: Tile, iid: i32, by_player: Option<Player>
         // "Death: draw a card.": when it is removed from the board, by anything, its owner draws
         Some(OnDeath::Draw) => st.effect_stack.push(Step::by_unit(StepKind::Draw { player: unit.owner, n: 1 }, &unit)),
         // "Fall: add two [Flight 1] to your hand.": when it is removed from the board, by anything
+        Some(OnDeath::GainFood) => {
+            let amount = st.cfg().delicious_food_food;
+            st.effect_stack.push(Step::by_unit(StepKind::GainFood { player: unit.owner, amount }, &unit));
+        }
         Some(OnDeath::Hatch) => {
             if let Some(f) = st.g.named.flight_1 {
                 st.effect_stack.push(Step::by_unit(StepKind::ToHand { player: unit.owner, card: f, n: st.cfg().bird_egg_flights }, &unit));
@@ -470,6 +614,24 @@ pub fn fatigue_due(st: &State, player: Player, n: i32) -> i32 {
 /// is not drawn and costs the player food instead, one step more each time (1, then 2, then 3, ...); at no food they
 /// lose, whoever's turn it is.
 pub fn draw_cards(st: &mut State, player: Player, n: i32) {
+    if n > 0 && st.leads(player, st.g.named.reno) {
+        // Reno: each "draw a card" waits on the stack and Scouts if the deck holds no duplicates by then (DrawOrScout)
+        for _ in 0..n {
+            st.effect_stack.push(Step::new(StepKind::DrawOrScout { player }));
+        }
+        return;
+    }
+    draw_plain(st, player, n);
+}
+
+/// Whether `player`'s deck holds no two copies of a card (Reno).
+pub fn no_duplicates(st: &State, player: Player) -> bool {
+    let d = &st.decks[player as usize];
+    (0..d.len()).all(|i| !d[i + 1..].contains(&d[i]))
+}
+
+/// The draw itself, whoever leads.
+fn draw_plain(st: &mut State, player: Player, n: i32) {
     let drawn = st.draw(player, n);
     if !drawn.is_empty() {
         if st.events.on {
@@ -488,6 +650,12 @@ pub fn draw_cards(st: &mut State, player: Player, n: i32) {
             return;
         }
         st.fatigue[p] += 1;
+        if st.leads(player, st.g.named.sage) {
+            // the Mage: "Fatigue gains you food instead of losing it."
+            st.emit(Ev::LeaderTrigger { player, card: st.g.named.sage.unwrap() });
+            gain_food(st, player, st.fatigue[p] * st.cfg().fatigue_step, false);
+            continue;
+        }
         let lost = (st.fatigue[p] * st.cfg().fatigue_step).min(st.food[p]).max(0);
         st.food[p] -= lost;
         st.food_lost[p] += lost;
@@ -500,6 +668,7 @@ pub fn draw_cards(st: &mut State, player: Player, n: i32) {
 
 /// Advance `player`'s timers (Poison) and push those that come due; a timer on a unit gone from the board is cancelled.
 pub fn start_of_turn(st: &mut State, player: Player) {
+    angel_dawn(st, player);
     if st.scheduled.is_empty() {
         return;
     }
@@ -526,6 +695,7 @@ pub fn start_of_turn(st: &mut State, player: Player) {
 pub fn resolve(st: &mut State) -> Result<(), String> {
     loop {
         drain(st)?;
+        transform_mages(st);
         if st.pending.is_some() || st.result.is_some() || !st.effect_stack.is_empty() || !remove_the_weak(st) {
             return Ok(());
         }
@@ -622,6 +792,37 @@ fn mulligan_replacement(deck: &[CardId], returned: &[CardId], extra: Option<Card
     (0..deck.len()).rev().find(|&i| !returned.contains(&deck[i]) && Some(deck[i]) != extra)
 }
 
+/// Scout: look at the top cards of your deck, draw the one you choose and shuffle the rest back: a draw, so a Golden Egg
+/// drawn this way draws a card, from the deck shuffled. Ok(Some) while the choice waits.
+fn scout(st: &mut State, player: Player, choice: Option<Choice>) -> Result<Option<Pending>, String> {
+    let p = player as usize;
+    let n = (st.cfg().scout_look.max(0) as usize).min(st.decks[p].len());
+    if n == 0 {
+        return Ok(None);
+    }
+    let k = match choice {
+        None => return Ok(Some(Pending { chooser: player, optional: false, mulligan: false, options: Options::Deck(n as u8) })),
+        Some(Choice::Deck(k)) if (k as usize) < st.decks[p].len() => k as usize,
+        Some(other) => return Err(format!("bad Scout choice {other:?}")),
+    };
+    let at = st.decks[p].len() - 1 - k;
+    let card = st.decks[p].remove(at);
+    let inst = Unit::new(card, player, st.new_iid());
+    st.hands[p].push(inst);
+    st.emit(Ev::Draw { player, cards: vec![(inst.iid, inst.card)] });
+    if st.hands[p].len() as i32 > st.cfg().hand_limit {
+        // past the hand limit it burns, as a draw does
+        st.hands[p].pop();
+        st.pile_add(inst.card, inst.owner);
+        st.emit(Ev::Burn { iid: inst.iid, card: inst.card, owner: inst.owner });
+    }
+    st.rng.shuffle(&mut st.decks[p]);
+    if st.card(card).beh.draw_on_draw {
+        draw_cards(st, player, st.cfg().golden_egg_draws);
+    }
+    Ok(None)
+}
+
 /// Run one step. Ok(Some) when it needs a choice first.
 fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
     match &mut step.kind {
@@ -660,9 +861,12 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
                 // a kept hand leaves the deck order (and the RNG) untouched
                 st.decks[p].extend(returned.iter().copied());
                 st.rng.shuffle(&mut st.decks[p]);
+                st.bottom_nightmare(player);
             }
             if !st.effect_stack.iter().any(|s| matches!(s.kind, StepKind::Mulligan { .. })) {
-                // both done: the first turn begins, with its card
+                // both done: the first turn begins, with its crystal and its card
+                let first = st.current;
+                st.begin_turn_mana(first);
                 st.emit(Ev::TurnStart { player: st.current, turn: st.turn_counter });
                 draw_cards(st, st.current, st.cfg().turn_draw_count);
             }
@@ -675,9 +879,11 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
             if st.board.has_buried() {
                 let under = st.board.buried_of(cr);
                 if !under.is_empty() {
-                    let top_owner = st.board.top(cr).unwrap().owner;
+                    let top = st.board.top(cr).unwrap();
                     for u in under {
-                        remove_specific(st, cr, u.iid, Some(top_owner), false);
+                        if remove_specific(st, cr, u.iid, Some(top.owner), false) && u.owner != top.owner {
+                            credit_removal(st, Some(top.iid), u.owner);
+                        }
                     }
                 }
             }
@@ -709,36 +915,18 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
             }
             Ok(None)
         }
-        StepKind::Scout { player } => {
-            // Look at the top cards of your deck, draw the one you choose and shuffle the rest back: a draw, so a Golden
-            // Egg drawn this way draws a card, from the deck shuffled.
+        StepKind::DrawOrScout { player } => {
             let player = *player;
-            let p = player as usize;
-            let n = (st.cfg().scout_look.max(0) as usize).min(st.decks[p].len());
-            if n == 0 {
+            if st.decks[player as usize].is_empty() || !no_duplicates(st, player) {
+                // an empty deck draws (fatigue) and a deck with a duplicate draws as any
+                draw_plain(st, player, 1);
                 return Ok(None);
             }
-            let k = match step.choice {
-                None => return Ok(Some(Pending { chooser: player, optional: false, mulligan: false, options: Options::Deck(n as u8) })),
-                Some(Choice::Deck(k)) if (k as usize) < st.decks[p].len() => k as usize,
-                Some(other) => return Err(format!("bad Scout choice {other:?}")),
-            };
-            let at = st.decks[p].len() - 1 - k;
-            let card = st.decks[p].remove(at);
-            let inst = Unit::new(card, player, st.new_iid());
-            st.hands[p].push(inst);
-            st.emit(Ev::Draw { player, cards: vec![(inst.iid, inst.card)] });
-            if st.hands[p].len() as i32 > st.cfg().hand_limit {
-                // past the hand limit it burns, as a draw does
-                st.hands[p].pop();
-                st.pile_add(inst.card, inst.owner);
-                st.emit(Ev::Burn { iid: inst.iid, card: inst.card, owner: inst.owner });
-            }
-            st.rng.shuffle(&mut st.decks[p]);
-            if st.card(card).beh.draw_on_draw {
-                draw_cards(st, player, st.cfg().golden_egg_draws);
-            }
-            Ok(None)
+            scout(st, player, step.choice)
+        }
+        StepKind::Scout { player } => {
+            let player = *player;
+            scout(st, player, step.choice)
         }
         StepKind::PlaceToken { player, card, options } => {
             // A token on the tile its player chooses (free, as anything an effect puts into play): it lands as a placed
@@ -760,22 +948,14 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
         StepKind::ToHand { player, card, n } => {
             // New copies of a card into a player's hand; past the hand limit they burn, as a draw does.
             let (player, card, n) = (*player, *card, *n);
-            let mut made: SmallVec<[Unit; 4]> = SmallVec::new();
-            for _ in 0..n {
-                let inst = Unit { made: true, ..Unit::new(card, player, st.new_iid()) };
-                st.hands[player as usize].push(inst);
-                st.made[player as usize].push(card);
-                made.push(inst);
-            }
-            if st.events.on {
-                st.emit(Ev::Draw { player, cards: made.iter().map(|u| (u.iid, u.card)).collect() });
-            }
-            burn_over_limit(st, player, &made);
+            make_into_hand(st, player, card, n, 0);
             Ok(None)
         }
         StepKind::RemoveIid { iid, by_player } => {
-            if let Some((cr, _)) = st.board.find(*iid) {
-                remove_specific(st, cr, *iid, *by_player, true);
+            if let Some((cr, u)) = st.board.find(*iid) {
+                if remove_specific(st, cr, *iid, *by_player, true) {
+                    credit_removal(st, step.by_iid, u.owner);
+                }
             }
             Ok(None)
         }
@@ -793,6 +973,29 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
                         top.strength_mod -= amount;
                         let top = *top;
                         st.emit(Ev::Strength { iid: top.iid, card: top.card, owner: top.owner, n: -amount });
+                        if let Some(by) = step.by_iid {
+                            credit_if_doomed(st, by, &top);
+                        }
+                    }
+                    Ok(None)
+                }
+                Some(other) => Err(format!("bad target {other:?}")),
+            }
+        }
+        StepKind::BuffChoice { chooser, options, amount } => {
+            // The player picks the ally an effect gives +N strength, for good.
+            if options.is_empty() {
+                return Ok(None);
+            }
+            match step.choice {
+                None => Ok(choice_pending(*chooser, false, options)),
+                Some(Choice::Tile(t)) => {
+                    let amount = *amount;
+                    aim(st, *chooser, t);
+                    if let Some(top) = st.board.top_mut(t) {
+                        top.strength_mod += amount;
+                        let top = *top;
+                        st.emit(Ev::Strength { iid: top.iid, card: top.card, owner: top.owner, n: amount });
                     }
                     Ok(None)
                 }
@@ -811,7 +1014,9 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
                     let chooser = *chooser;
                     aim(st, chooser, t);
                     if let Some(top) = st.board.top(t) {
-                        remove_specific(st, t, top.iid, Some(chooser), true);
+                        if remove_specific(st, t, top.iid, Some(chooser), true) {
+                            credit_removal(st, step.by_iid, top.owner);
+                        }
                     }
                     Ok(None)
                 }
@@ -823,11 +1028,24 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
 
 // ================================================================== leaders
 
-/// What `player`'s leader's power costs: the config's price less what their Sage's card took off it, never below 0.
+/// What `player`'s leader's power costs: its price, less what has been taken off it, never below 0.
 pub fn power_cost(st: &State, player: Player) -> i32 {
-    let lead = st.leaders[player as usize];
-    let price = if lead.is_some() && lead == st.g.named.raider { st.cfg().raider_power_cost } else { st.cfg().leader_power_cost };
+    let price = match st.leaders[player as usize] {
+        Some(l) => crate::view::power_price(st.cfg(), &st.card(l).id),
+        None => st.cfg().leader_power_cost,
+    };
     (price - st.power_discount[player as usize]).max(0)
+}
+
+/// Where `player`'s Nightmare is in their deck (an index; the top is the end), when he is there.
+fn nightmare_in_deck(st: &State, player: Player) -> Option<usize> {
+    let id = st.g.named.raider?;
+    st.decks[player as usize].iter().position(|&c| c == id)
+}
+
+/// Whether `player`'s Nightmare is on top of their deck: his power then draws him ("Draw Nightmare").
+pub fn nightmare_on_top(st: &State, player: Player) -> bool {
+    st.leads(player, st.g.named.raider) && st.decks[player as usize].last().copied() == st.g.named.raider && st.g.named.raider.is_some()
 }
 
 /// Whether `player`'s leader has a power that would do something now, not used yet this turn; the caller checks the mana.
@@ -836,28 +1054,35 @@ pub fn leader_usable(st: &State, player: Player) -> bool {
     if !crate::cards::has_power(&st.card(lead).id) || st.power_used {
         return false;
     }
-    if Some(lead) == st.g.named.raider {
-        // Leeroy in hand, or anywhere in the deck (on top, the power draws him)
-        return leeroy_at(st, player).is_some();
+    let n = &st.g.named;
+    if Some(lead) == n.raider {
+        return nightmare_in_deck(st, player).is_some(); // in the deck (on top, the power draws him)
     }
-    true // the Sage draws: from an empty deck too, where the draw costs food (fatigue)
+    if Some(lead) == n.angel {
+        return st.board.own[player as usize] != 0; // an ally to give +2
+    }
+    if Some(lead) == n.warlord {
+        return n.delicious_food.is_some() && st.g.map.all_tiles() & !st.board.occ != 0; // an empty crossroad
+    }
+    if Some(lead) == n.assassin {
+        return n.golem.is_some();
+    }
+    if Some(lead) == n.pyromancer {
+        return n.fireballs.iter().all(|f| f.is_some());
+    }
+    true // a draw: from an empty deck too, where it costs food (fatigue)
 }
 
-enum Leeroy { Hand(usize), Deck(usize) }
-
-/// Where `player`'s Leeroy is, in their hand or their deck (an index), when he is in either.
-fn leeroy_at(st: &State, player: Player) -> Option<Leeroy> {
-    let id = st.g.named.raider?;
-    let p = player as usize;
-    if let Some(i) = st.hands[p].iter().position(|u| u.card == id) {
-        return Some(Leeroy::Hand(i));
-    }
-    st.decks[p].iter().position(|&c| c == id).map(Leeroy::Deck)
+/// The Fireball the Pyromancer's power gives now: Baby, then a step up after every 3 uses, Elder at most.
+pub fn pyro_fireball(st: &State, player: Player) -> Option<CardId> {
+    let per = st.cfg().pyro_uses_per_upgrade.max(1);
+    let stage = (st.power_uses[player as usize] / per).clamp(0, 3) as usize;
+    st.g.named.fireballs[stage]
 }
 
-/// The Raider: "At the end of your turn, if Leeroy is in your deck, he gains +1 strength."
+/// Nightmare at Dusk: "Gain +1 strength.", wherever he is.
 pub fn grow_leeroy(st: &mut State, player: Player) {
-    if st.leads(player, st.g.named.raider) && matches!(leeroy_at(st, player), Some(Leeroy::Deck(_))) {
+    if st.leads(player, st.g.named.raider) {
         st.leeroy_growth[player as usize] += st.cfg().leeroy_growth;
     }
 }
@@ -867,23 +1092,81 @@ pub fn do_leader(st: &mut State, player: Player) -> Result<(), String> {
     let Some(lead) = st.leaders[player as usize] else { return Err(format!("{} has no leader", pname(player))) };
     st.emit(Ev::LeaderPower { player, card: lead });
     st.power_used = true;
-    if Some(lead) == st.g.named.sage {
+    let p = player as usize;
+    let g = st.g.clone();
+    let n = &g.named;
+    if Some(lead) == n.sage || Some(lead) == n.reno {
+        // "Draw a card." (Reno's passive may make it a Scout)
         st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, lead));
-    } else if Some(lead) == st.g.named.raider {
-        // "Swap Leeroy with the card above him in your deck (on top, draw him). If he's in your hand, shuffle him into your deck."
-        let p = player as usize;
-        match leeroy_at(st, player) {
-            Some(Leeroy::Deck(i)) if i + 1 < st.decks[p].len() => st.decks[p].swap(i, i + 1), // the deck's top is its end
-            Some(Leeroy::Deck(_)) => st.effect_stack.push(Step::by(StepKind::Draw { player, n: 1 }, lead)), // on top: drawn
-            None => {}
-            Some(Leeroy::Hand(i)) => {
-                let u = st.hands[p].remove(i);
-                let at = st.rng.randbelow(st.decks[p].len() + 1);
-                st.decks[p].insert(at, u.card);
+    } else if Some(lead) == n.raider {
+        // "Swap Nightmare with the card above."; on top, the power draws him
+        match nightmare_in_deck(st, player) {
+            Some(i) if i + 1 < st.decks[p].len() => st.decks[p].swap(i, i + 1), // the deck's top is its end
+            Some(_) => {
+                let drawn = st.draw(player, 1);
+                if st.events.on {
+                    st.emit(Ev::Draw { player, cards: drawn.iter().map(|u| (u.iid, u.card)).collect() });
+                }
+                burn_over_limit(st, player, &drawn);
             }
+            None => {}
         }
+    } else if Some(lead) == n.elf {
+        // "Gain 1 food for each region you control."
+        let amount = st.cfg().elf_power_food_per_region * count(st, player, Count::Region);
+        st.effect_stack.push(Step::by(StepKind::GainFood { player, amount }, lead));
+    } else if Some(lead) == n.angel {
+        // "Give an ally +2 strength."
+        let mut options = Tiles::new();
+        let mut m = st.board.own[p];
+        while m != 0 {
+            let t = m.trailing_zeros() as Tile;
+            m &= m - 1;
+            options.push(t);
+        }
+        let amount = st.cfg().angel_power_buff;
+        st.effect_stack.push(Step::by(StepKind::BuffChoice { chooser: player, options, amount }, lead));
+    } else if Some(lead) == n.assassin {
+        // "Add a 1-mana Golem to your hand. Give it +1 strength for each card played this turn."
+        let golem = n.golem.ok_or("no Golem in the card table")?;
+        let bonus = st.cfg().golem_per_card * st.played_this_turn;
+        make_into_hand(st, player, golem, 1, bonus);
+    } else if Some(lead) == n.pyromancer {
+        // "Add a Fireball to your hand.", the one this many uses have upgraded it to
+        let f = pyro_fireball(st, player).ok_or("no Fireball in the card table")?;
+        make_into_hand(st, player, f, 1, 0);
+    } else if Some(lead) == n.warlord {
+        // "Summon Delicious Food on a random empty crossroad.": the player's own, landing as an effect puts it (no Roar)
+        let food = n.delicious_food.ok_or("no Delicious Food in the card table")?;
+        let free = st.g.map.all_tiles() & !st.board.occ;
+        let tiles: Tiles = (0..64u8).filter(|&t| free >> t & 1 == 1).collect();
+        if !tiles.is_empty() {
+            let t = tiles[st.rng.randbelow(tiles.len())];
+            let unit = Unit::new(food, player, st.new_iid());
+            land_unit(st, player, unit, t);
+        }
+    } else if Some(lead) == n.mana_eater {
+        // "Next turn, gain 2 more mana."
+        st.next_mana[p] += st.cfg().mana_eater_power_mana;
     } else {
         return Err(format!("{:?} has no power to use", st.g.cards.name_of(lead)));
     }
+    st.power_uses[p] += 1;
     Ok(())
+}
+
+/// New copies of `card` into `player`'s hand, made by an effect both players watched, each with `strength_mod` for good;
+/// past the hand limit they burn, as a draw does.
+fn make_into_hand(st: &mut State, player: Player, card: CardId, n: i32, strength_mod: i32) {
+    let mut made: SmallVec<[Unit; 4]> = SmallVec::new();
+    for _ in 0..n {
+        let inst = Unit { made: true, strength_mod, ..Unit::new(card, player, st.new_iid()) };
+        st.hands[player as usize].push(inst);
+        st.made[player as usize].push(card);
+        made.push(inst);
+    }
+    if st.events.on {
+        st.emit(Ev::Draw { player, cards: made.iter().map(|u| (u.iid, u.card)).collect() });
+    }
+    burn_over_limit(st, player, &made);
 }

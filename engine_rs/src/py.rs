@@ -323,6 +323,10 @@ impl PyState {
         Ok(effects::power_cost(&self.st, seat(player)?))
     }
 
+    fn power_text(&self, player: &str) -> PyResult<Option<String>> {
+        Ok(view::power_text(&self.st, seat(player)?))
+    }
+
     fn leader_usable(&self, player: &str) -> PyResult<bool> {
         Ok(effects::leader_usable(&self.st, seat(player)?))
     }

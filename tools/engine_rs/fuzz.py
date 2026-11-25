@@ -67,7 +67,7 @@ CONFIGS = [
     {"hand_limit": 4},
     {"hand_limit": 5, "turn_draw_count": 2, "mama_spores": 4},
     {"mulligan": False},
-    {"mana_cap": 30, "start_food": 40, "scout_look": 5, "assassin_nth_card": 2, "max_turns": 30},
+    {"mana_cap": 30, "start_food": 40, "scout_look": 5, "rogue_nth_card": 2, "pyro_uses_per_upgrade": 1, "mana_eater_start_crystals": 9, "max_turns": 30},
     {"first_player_opening_draw": 6, "second_player_opening_draw": 7, "leader_power_cost": 1},
     {"shade_growth": 1, "crush_max": 12, "double_raid_factor": 3, "leeroy_growth": 4, "warlord_hungry_bonus": 3, "hungry_food": 2},
 ]

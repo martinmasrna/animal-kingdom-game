@@ -7,7 +7,7 @@ from dataclasses import replace
 
 from animal_kingdom import game as rules    # the rules, answered by the Rust engine
 from animal_kingdom.decks import deck_problems
-from animal_kingdom.game import (ASSASSIN, ELF, LEADERS, MAP_ID, RAIDER, SAGE, SKIP, WARLORD, WEAKENS, ChoiceAction, Config,
+from animal_kingdom.game import (ANGEL, ASSASSIN, ELF, LEADERS, MANA_EATER, MAP_ID, PYROMANCER, RAIDER, RENO, SAGE, SKIP, WARLORD, WEAKENS, ChoiceAction, Config,
                                  GameState, LeaderAction, PassAction, PlaceAction, UnitInstance, effective_strength,
                                  load_cards, load_map, mana_cost, new_game)
 
@@ -400,9 +400,9 @@ def test_raid_draw_flies_into_the_den_then_draws():
     assert s.food["B"] == 14 and [u.card_id for u in s.hands["A"]] == ["wisp_1"]
 
 
-def test_leeroy_raids_at_double_strength():
+def test_nightmare_raids_at_double_strength():
     cid = "raider_legend"
-    assert CARDS[cid].name == "Leeroy" and CARDS[cid].text == "Double strength when raiding."
+    assert CARDS[cid].name == "Nightmare" and CARDS[cid].text == "Double strength when raiding."
     s = state(turn=11, hands={"A": [cid]}, food={"A": 15, "B": 15})
     for cr in ("1,1", "2,1", "3,1", "4,1", "5,1"):
         put(s, cr, "test_one", "A")
@@ -550,102 +550,226 @@ def test_a_dynamic_strength_is_its_count():
     assert effective_strength(s, s.board["2,3"][-1]) == 2 * g
 
 
-def test_the_warlords_hungry_cards_have_two_more_strength_in_hand_and_on_the_board():
-    assert LEADERS[WARLORD] == ("Your Hungry cards have +2 strength.", None)
+# ------------------------------------------------------------------ the leaders (Martin's list of 2026-11-25)
+
+def test_the_nine_leaders_and_their_cards():
+    assert list(LEADERS) == [RAIDER, ELF, ANGEL, ASSASSIN, SAGE, RENO, PYROMANCER, WARLORD, MANA_EATER]
+    assert all(passive and power for passive, power in LEADERS.values())
+    assert {l: (CARDS[l].name, CARDS[l].cost, CARDS[l].base_strength) for l in LEADERS} == {
+        RAIDER: ("Nightmare", 2, 2), ELF: ("Mother Nature", 5, 5), ANGEL: ("Angel Warrior", 8, 8), ASSASSIN: ("Rogue", 3, 3),
+        SAGE: ("Mage", 4, 6), RENO: ("Reno", 7, 7), PYROMANCER: ("Pyromancer", 3, 3), WARLORD: ("Gorrak One-Eye", 7, 7),
+        MANA_EATER: ("Mana Eater", 10, 14)}
+    assert {l: rules.power_price(l) for l in LEADERS} == {RAIDER: 1, ELF: 2, ANGEL: 1, ASSASSIN: 1, SAGE: 3, RENO: 3, PYROMANCER: 2,
+                                                          WARLORD: 2, MANA_EATER: 1}
+    assert [CARDS[f].name for f in ("flight_1", "flight_3", "flight_6", "flight_10")] == ["Baby Fireball", "Young Fireball", "Adult Fireball", "Elder Fireball"]
+
+
+def test_nightmare_starts_on_the_bottom_grows_at_every_dusk_and_his_power_swaps_him_up_then_draws_him():
+    deck = DECK[:-1] + [RAIDER]
+    for seed in range(6):
+        s = new_game(deck, DECK, seed, leaders={"A": RAIDER, "B": WARLORD})
+        assert s.decks["A"][0] == RAIDER and all(u.card_id != RAIDER for u in s.hands["A"])   # the bottom is the start
+        returned = False
+        while s.pending and s.pending.get("kind") == "mulligan":
+            if s.pending["chooser"] == "A" and not returned:
+                rules.apply_action(s, ChoiceAction(s.hands["A"][0].iid)); returned = True   # one back: the deck is shuffled
+            else:
+                rules.apply_action(s, ChoiceAction(SKIP))
+        assert s.decks["A"][0] == RAIDER                                # a mulligan's shuffle leaves him there
+    base = CARDS[RAIDER].base_strength
+    s = state(turn=19, hands={"A": ["wisp_1"]}, decks={"A": ["wisp_3", RAIDER, "wisp_5", "wisp_6"], "B": ["wisp_1"] * 4},
+              leaders={"A": RAIDER}, food={"A": 15, "B": 15})
+    assert rules.power_text(s, "A") == "Swap Nightmare with the card above."
+    rules.apply_action(s, LeaderAction())                              # the deck's top is its end: he swaps with Wisp 5
+    assert s.decks["A"] == ["wisp_3", "wisp_5", RAIDER, "wisp_6"] and rules.mana_left(s, "A") == 10 - CFG.raider_power_cost
+    rules.apply_action(s, PassAction())                                # Dusk: he grows
+    assert s.leeroy_growth["A"] == CFG.leeroy_growth
+    rules.apply_action(s, PassAction())                                # B's Dusk doesn't grow him
+    assert s.leeroy_growth["A"] == CFG.leeroy_growth and s.decks["A"][-1] == RAIDER
+    assert rules.power_text(s, "A") == "Draw Nightmare." and rules.power_cost(s, "A") == CFG.raider_power_cost
+    rules.apply_action(s, LeaderAction())                              # on top, the power draws him
+    nm = next(u for u in s.hands["A"] if u.card_id == RAIDER)
+    assert LeaderAction() not in rules.legal_actions(s)
+    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
+    assert effective_strength(s, nm) == base + 2 * CFG.leeroy_growth   # he grows in hand too
+    assert not rules.leader_usable(s, "A")                             # in hand, the power has nothing to do
+    rules.apply_action(s, PlaceAction(RAIDER, ("cr", "1,1")))
+    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
+    assert effective_strength(s, s.board["1,1"][-1]) == base + 3 * CFG.leeroy_growth   # and on the board
+    assert GameState.from_dict(s.to_dict()).leeroy_growth == s.leeroy_growth
+    other = state(turn=19, decks={"A": [RAIDER]}, leaders={"A": SAGE})
+    rules.apply_action(other, PassAction())
+    assert other.leeroy_growth["A"] == 0                                # under another leader he doesn't grow
+
+
+def test_mother_nature_one_more_food_a_region_her_power_and_her_card_doubling_its_regions():
+    for leader, income in ((ELF, 3 * (1 + CFG.elf_region_bonus)), (SAGE, 3)):
+        s = state(turn=10, leaders={"A": leader})
+        for cr in ("1,1", "1,2", "2,2", "1,3", "2,3"):                # three regions (1,2 2,2 2,3 is one too)
+            put(s, cr, "wisp_1", "A")
+        assert rules.region_income(s, "A") == income
+    s = state(turn=10, leaders={"A": ELF}, food={"A": 15, "B": 15})
+    for cr in ("1,1", "1,2", "2,2"):
+        put(s, cr, "wisp_1", "A")
+    rules.apply_action(s, LeaderAction())                              # "Gain 1 food for each region you control."
+    assert s.food["A"] == 15 + CFG.elf_power_food_per_region and rules.mana_left(s, "A") == 6 - CFG.elf_power_cost
+    s = state(turn=10, leaders={"A": ELF})
+    for cr in ("1,1", "1,2", "2,2", "1,3", "2,3"):
+        put(s, cr, "wisp_1", "A")
+    s.board["1,1"][-1].card_id = ELF                                   # her card on 1,1: only the region 1,1 1,2 2,2 holds it
+    f = 1 + CFG.elf_region_bonus
+    assert rules.region_income(s, "A") == f * CFG.elf_card_region_factor + 2 * f    # +1 first, then doubled: 1 becomes 4
+    t = state(turn=10, leaders={"A": SAGE})
+    for cr in ("1,1", "1,2", "2,2"):
+        put(t, cr, "wisp_1", "A")
+    t.board["1,1"][-1].card_id = ELF
+    assert rules.region_income(t, "A") == CFG.elf_card_region_factor   # her card doubles under any leader
+
+
+def test_the_angel_warriors_power_his_passive_on_a_removal_and_his_card_at_dawn():
+    s = state(turn=19, hands={"A": ["wisp_3"]}, leaders={"A": ANGEL}, food={"A": 15, "B": 15})
+    assert not rules.leader_usable(s, "A")                             # no ally to give +2
+    put(s, "1,1", "wisp_1", "A"); put(s, "1,2", "wisp_1", "A")
+    rules.apply_action(s, LeaderAction())
+    assert sorted(s.pending["options"]) == ["1,1", "1,2"]
+    rules.apply_action(s, ChoiceAction("1,2"))
+    assert effective_strength(s, s.board["1,2"][-1]) == CARDS["wisp_1"].base_strength + CFG.angel_power_buff
+    put(s, "2,1", "wisp_1", "B")
+    rules.apply_action(s, PlaceAction("wisp_3", ("cr", "2,1")))       # it covers an enemy: removed, +1
+    assert effective_strength(s, s.board["2,1"][-1]) == CARDS["wisp_3"].base_strength + CFG.angel_removal_buff
+    assert "leader_trigger" in [e["e"] for e in s.events]
+    s = state(turn=19, hands={"A": ["hunter_3"]}, leaders={"A": ANGEL}, food={"A": 15, "B": 15})   # a Roar's removal counts too
+    put(s, "1,2", "wisp_1", "A"); put(s, "2,1", "test_one", "B")
+    rules.apply_action(s, PlaceAction("hunter_3", ("cr", "1,1")))     # -2 on an enemy of 1: the rules remove it
+    if s.pending:
+        rules.apply_action(s, ChoiceAction("2,1"))
+    assert "2,1" not in s.board and effective_strength(s, s.board["1,1"][-1]) == CARDS["hunter_3"].base_strength + CFG.angel_removal_buff
+    s = state(turn=19, current="B", leaders={"A": SAGE}, decks={"A": ["wisp_1"] * 5, "B": ["wisp_1"] * 5})
+    put(s, "1,1", ANGEL, "A"); put(s, "1,2", "wisp_1", "A"); put(s, "1,3", "wisp_1", "A"); put(s, "3,3", "wisp_1", "A")
+    rules.apply_action(s, PassAction())                                # A's Dawn
+    w = CARDS["wisp_1"].base_strength
+    assert [effective_strength(s, s.board[c][-1]) for c in ("1,2", "1,3", "3,3")] == [w + CFG.angel_dawn_buff] * 2 + [w]
+    assert effective_strength(s, s.board["1,1"][-1]) == CARDS[ANGEL].base_strength    # not himself
+
+
+def test_the_rogues_third_card_costs_less_her_golem_and_her_card():
+    s = state(turn=19, hands={"A": ["wisp_2"] * 4}, leaders={"A": ASSASSIN}, decks={"A": ["wisp_1"] * 5})
+    costs = []
+    for cr in ("1,1", "1,2", "1,3", "2,1"):
+        costs.append(mana_cost(s, "wisp_2"))
+        rules.apply_action(s, PlaceAction("wisp_2", ("cr", cr)))
+    assert costs == [2, 2, 2 - CFG.rogue_discount, 2]                  # the third
+    assert rules.mana_left(s, "A") == 10 - 8 + CFG.rogue_discount
+    rules.apply_action(s, LeaderAction())                              # four cards played: a Golem of 1 + 4
+    golem = s.hands["A"][-1]
+    assert golem.card_id == "golem" and effective_strength(s, golem) == 1 + 4 * CFG.golem_per_card and rules.unit_cost(s, golem) == 1
+    s = state(turn=19, hands={"A": ["wisp_1", "wisp_1", ASSASSIN]}, decks={"A": ["wisp_1"] * 5})
+    rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1"))); rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction(ASSASSIN, ("cr", "1,3")))       # the third: she counts herself
+    assert len(s.hands["A"]) == CFG.rogue_card_draws
+    s = state(turn=19, hands={"A": ["wisp_1", ASSASSIN]}, decks={"A": ["wisp_1"] * 5})
+    rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1"))); rules.apply_action(s, PlaceAction(ASSASSIN, ("cr", "1,3")))
+    assert len(s.hands["A"]) == 0
+
+
+def test_the_mage_draws_his_fatigue_feeds_him_and_his_card_transforms_once_the_deck_is_empty():
+    s = state(turn=10, leaders={"A": SAGE})                            # 6 mana
+    rules.apply_action(s, LeaderAction())
+    assert len(s.hands["A"]) == 1 and rules.mana_left(s, "A") == 3 and LeaderAction() not in rules.legal_actions(s)
+    s = state(turn=10, leaders={"A": SAGE}, decks={"A": [], "B": ["wisp_1"]}, food={"A": 15, "B": 15})
+    rules.apply_action(s, LeaderAction())                              # fatigue: food gained, not lost
+    assert s.food["A"] == 16 and s.fatigue["A"] == 1
+    s = state(turn=19, hands={"A": [SAGE]}, decks={"A": ["wisp_1"], "B": ["wisp_1"] * 3}, leaders={"A": RENO}, food={"A": 12, "B": 15})
+    put(s, "1,1", SAGE, "A")
+    assert s.hands["A"][0].card_id == SAGE
+    rules.apply_action(s, LeaderAction())                              # the last card: Reno Scouts it, the deck is empty
+    if s.pending:
+        rules.apply_action(s, ChoiceAction(s.pending["options"][0]))
+    assert s.decks["A"] == [] and s.hands["A"][0].card_id == "mage_transformed" and s.board["1,1"][-1].card_id == "mage_transformed"
+    assert s.food["A"] == 12                                           # on the board it transforms without a Roar
+    s = state(turn=19, hands={"A": ["mage_transformed"]}, food={"A": 12, "B": 15})
+    rules.apply_action(s, PlaceAction("mage_transformed", ("cr", "1,3")))   # "Roar: double your food."
+    assert s.food["A"] == 24
+
+
+def test_reno_scouts_his_draws_while_his_deck_holds_no_duplicates():
+    s = state(turn=10, leaders={"A": RENO}, decks={"A": ["wisp_1", "wisp_2", "wisp_3", "wisp_4"], "B": ["wisp_1"] * 3})
+    rules.apply_action(s, LeaderAction())                              # "Draw a card.": a Scout
+    assert s.pending["options"] == ["deck:0", "deck:1", "deck:2"]
+    rules.apply_action(s, ChoiceAction("deck:2"))
+    assert [u.card_id for u in s.hands["A"]] == ["wisp_2"] and len(s.decks["A"]) == 3
+    rules.apply_action(s, PassAction())
+    rules.apply_action(s, PassAction())                                # his turn's free card: a Scout too
+    assert s.pending and s.pending["chooser"] == "A" and len(s.pending["options"]) == 3
+    t = GameState.from_dict(s.to_dict())                               # waiting on the stack, saved
+    assert t.pending == s.pending
+    s = state(turn=10, leaders={"A": RENO}, decks={"A": ["wisp_1", "wisp_1", "wisp_3"], "B": ["wisp_1"] * 3})
+    rules.apply_action(s, LeaderAction())                              # a duplicate: a plain draw
+    assert s.pending is None and [u.card_id for u in s.hands["A"]] == ["wisp_3"]
+    s = state(turn=19, hands={"A": [RENO]}, decks={"A": ["wisp_1", "wisp_1", "wisp_2", "wisp_3", "wisp_4"], "B": ["wisp_1"] * 3})
+    rules.apply_action(s, PlaceAction(RENO, ("cr", "1,1")))           # "Roar: Scout 2 cards."
+    for _ in range(CFG.reno_scouts):
+        rules.apply_action(s, ChoiceAction("deck:0"))
+    assert len(s.hands["A"]) == 2 and s.pending is None
+
+
+def test_the_pyromancers_power_upgrades_after_three_uses_and_his_card_upgrades_the_fireballs_in_hand():
+    s = state(turn=19, leaders={"A": PYROMANCER}, decks={"A": ["wisp_1"] * 20, "B": ["wisp_1"] * 20}, food={"A": 15, "B": 15})
+    got, gives = [], ["flight_1"] * 3 + ["flight_3"] * 3 + ["flight_6"]
+    for i in range(7):
+        assert rules.power_text(s, "A") == f"Add a {CARDS[gives[i]].name} to your hand."
+        rules.apply_action(s, LeaderAction())
+        got.append(s.hands["A"][-1].card_id)
+        rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
+        s.hands["A"].clear()
+    assert got == gives and s.power_uses["A"] == 7
+    s = state(turn=19, hands={"A": [PYROMANCER, "flight_1", "flight_6", "flight_10", "wisp_1"]})
+    rules.apply_action(s, PlaceAction(PYROMANCER, ("cr", "1,1")))
+    assert sorted((u.card_id, rules.unit_cost(s, u)) for u in s.hands["A"]) == [
+        ("flight_10", 6), ("flight_10", 10), ("flight_3", 1), ("wisp_1", CARDS["wisp_1"].cost)]   # Baby to Young, Adult to Elder; each its cost
+    assert sorted(rules.unit_cost(s, u) for u in s.hands["A"] if u.card_id == "flight_10") == [6, 10]   # an Elder stays one
+
+
+def test_gorraks_hungry_allies_cost_one_more_and_have_three_more_strength_and_his_delicious_food():
     b = CFG.warlord_hungry_bonus
-    for leader, bonus in ((WARLORD, b), (SAGE, 0)):
+    for leader, bonus, tax in ((WARLORD, b, CFG.warlord_hungry_tax), (SAGE, 0, 0)):
         s = state(turn=11, hands={"A": ["hungry_3"]}, leaders={"A": leader}, food={"A": 15, "B": 15})
         put(s, "1,1", "wisp_1", "A")
         put(s, "2,1", "wisp_3", "B")                                  # 6: only a Hungry 3 with the bonus eats it
         put(s, "1,2", "hungry_1", "A")
         assert effective_strength(s, s.board["1,2"][-1]) == CARDS["hungry_1"].base_strength + bonus   # on the board
         assert places(s, "hungry_3") == ({"2,1"} if bonus else set())                                 # from hand
-    s = state(turn=11, hands={"A": ["hungry_3"]}, leaders={"A": WARLORD}, food={"A": 15, "B": 15})
-    put(s, "1,1", "wisp_1", "A"); put(s, "2,1", "wisp_3", "B")
-    rules.apply_action(s, PlaceAction("hungry_3", ("cr", "2,1")))
-    assert s.board["2,1"][-1].card_id == "hungry_3" and s.food["A"] == 15 + CFG.hungry_food   # it eats, and Hungry feeds
+        assert mana_cost(s, "hungry_3") == CARDS["hungry_3"].cost + tax
+    s = state(turn=11, leaders={"A": WARLORD}, food={"A": 15, "B": 15})
+    rules.apply_action(s, LeaderAction())                              # Delicious Food, his, on a random empty crossroad
+    (cr, stack), = s.board.items()
+    assert stack[-1].card_id == "delicious_food" and stack[-1].owner == "A" and rules.mana_left(s, "A") == 6 - CFG.warlord_power_cost
+    put(s, "5,3", "wisp_1", "B")
+    s.board[cr][-1].strength_mod = -1                                  # down to 0: removed, "Fall: gain 1 food."
+    rules.apply_action(s, PassAction())
+    assert cr not in s.board and s.food["A"] == 15 + CFG.delicious_food_food
 
 
-def test_leeroy_grows_each_of_your_turns_in_the_deck_and_the_power_moves_him_up_one_or_shuffles_him_back():
-    assert LEADERS[RAIDER] == ("At the end of your turn, if Leeroy is in your deck, he gains +1 strength.",
-                               "Swap Leeroy with the card above him in your deck; if he's on top, draw him. If he's in your hand, shuffle him into your deck instead.")
-    base = CARDS["raider_legend"].base_strength
-    s = state(turn=19, hands={"A": ["wisp_1"]}, decks={"A": ["wisp_3", "raider_legend", "wisp_5", "wisp_6"], "B": ["wisp_1"] * 4},
-              leaders={"A": RAIDER}, food={"A": 15, "B": 15})
-    rules.apply_action(s, LeaderAction())                              # the deck's top is its end: he swaps with Wisp 5
-    assert s.decks["A"] == ["wisp_3", "wisp_5", "raider_legend", "wisp_6"]
-    assert rules.mana_left(s, "A") == 10 - CFG.raider_power_cost
-    rules.apply_action(s, PassAction())                                # A's turn ends with him in the deck: he grows
-    assert s.leeroy_growth["A"] == CFG.leeroy_growth
-    rules.apply_action(s, PassAction())                                # B's turn end doesn't grow him
-    assert s.leeroy_growth["A"] == CFG.leeroy_growth
-    assert s.hands["A"][-1].card_id == "wisp_6" and s.decks["A"][-1] == "raider_legend"
-    rules.apply_action(s, LeaderAction())                              # on top, the power draws him
-    assert s.hands["A"][-1].card_id == "raider_legend" and "raider_legend" not in s.decks["A"]
-    leeroy = next(u for u in s.hands["A"] if u.card_id == "raider_legend")
-    assert effective_strength(s, leeroy) == base + CFG.leeroy_growth              # drawn: he stops growing
-    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
-    assert s.leeroy_growth["A"] == CFG.leeroy_growth
-    rules.apply_action(s, LeaderAction())                              # in hand: shuffled back into the deck
-    assert all(u.card_id != "raider_legend" for u in s.hands["A"]) and "raider_legend" in s.decks["A"]
-    t = GameState.from_dict(s.to_dict())
-    assert t.leeroy_growth == s.leeroy_growth
-    other = state(turn=19, decks={"A": ["raider_legend"]}, leaders={"A": SAGE})
-    rules.apply_action(other, PassAction())
-    assert other.leeroy_growth["A"] == 0                                # under another leader he doesn't grow
-
-
-def test_the_elf_leader_makes_your_regions_produce_one_more_food():
-    assert LEADERS[ELF] == ("Your regions produce 1 more food.", None)
-    for leader, income in ((ELF, 3 * (1 + CFG.elf_region_bonus)), (SAGE, 3)):
-        s = state(turn=10, leaders={"A": leader})
-        for cr in ("1,1", "1,2", "2,2", "1,3", "2,3"):                # three regions (1,2 2,2 2,3 is one too)
-            put(s, cr, "wisp_1", "A")
-        assert rules.region_income(s, "A") == income and LeaderAction() not in rules.legal_actions(s) or leader == SAGE
-
-
-def test_the_assassin_draws_after_every_third_card_of_a_turn():
-    s = state(turn=19, hands={"A": ["wisp_1"] * 6}, leaders={"A": ASSASSIN}, decks={"A": ["wisp_1"] * 5})
-    sizes = []
-    for cr in ("1,1", "1,2", "1,3", "2,1", "2,2", "2,3"):
-        rules.apply_action(s, PlaceAction("wisp_1", ("cr", cr)))
-        sizes.append(len(s.hands["A"]))
-    assert sizes == [5, 4, 4, 3, 2, 2]                                # the 3rd and the 6th each draw one
-    assert {l: (CARDS[l].cost, CARDS[l].base_strength) for l in LEADERS} == {
-        "warlord_legend": (7, 7), "raider_legend": (2, 2), "sage_legend": (5, 3), "elf_legend": (3, 3), "assassin_legend": (5, 5)}
-
-
-def test_the_elfs_card_gains_two_food_for_each_region_you_control():
-    s = state(turn=10, hands={"A": ["elf_legend"]}, food={"A": 15, "B": 15})
-    for cr in ("1,1", "1,2", "2,2", "1,3"):                           # 1,1 1,2 2,2 and 1,2 1,3 2,2: two regions
-        put(s, cr, "wisp_1", "A")
-    rules.apply_action(s, PlaceAction("elf_legend", ("cr", "2,3")))   # and 1,2 2,2 2,3: three
-    assert s.food["A"] == 15 + 3 * CFG.elf_food_per_region
-    assert rules.region_income(s, "A") == 3                           # on the board it adds nothing
-
-
-def test_the_assassins_card_makes_the_cards_in_your_hand_cheaper_for_good():
-    s = state(turn=19, hands={"A": ["assassin_legend", "wisp_3", "wisp_3"]})   # 10 mana
-    rules.apply_action(s, PlaceAction("assassin_legend", ("cr", "1,1")))
-    assert mana_cost(s, "wisp_3") == 2
-    s.hands["A"].append(UnitInstance("wisp_3", "A", s.new_iid()))   # drawn after: full price, the cheaper copy played first
-    rules.apply_action(s, PlaceAction("wisp_3", ("cr", "1,2")))
-    assert rules.mana_left(s, "A") == 10 - 5 - 2 and sorted(u.cost_mod for u in s.hands["A"]) == [-1, 0]
-
-
-def test_the_sages_card_makes_its_power_cheaper_for_good():
-    s = state(turn=11, hands={"A": ["sage_legend"]}, leaders={"A": SAGE})
-    rules.apply_action(s, PlaceAction("sage_legend", ("cr", "1,1")))
-    assert effects.power_cost(s, "A") == CFG.leader_power_cost - 1
-
-
-def test_the_sages_power_draws_a_card_for_three_mana_once_a_turn():
-    s = state(turn=10, leaders={"A": SAGE})                       # 6 mana
-    assert LEADERS[SAGE] == (None, "Draw a card.")
+def test_the_mana_eater_starts_with_no_cards_and_three_crystals_banks_mana_and_eats_his_crystals():
+    deck = DECK[:-1] + [MANA_EATER]
+    s = new_game(deck, DECK, 3, leaders={"A": MANA_EATER, "B": WARLORD}, first_player="A")
+    assert s.pending and s.pending["chooser"] == "B"                   # no hand for A, so no mulligan of his
+    rules.apply_action(s, ChoiceAction(SKIP))
+    assert len(s.hands["A"]) == 1 and rules.mana_left(s, "A") == 4     # the turn's card; 3 crystals and his first
+    assert rules.mana_left(s, "B") == 1
+    s = state(turn=18, leaders={"A": MANA_EATER})                      # his 10th turn's mana is 10 crystals
+    s.crystals = {"A": 10, "B": 9}
     rules.apply_action(s, LeaderAction())
-    assert len(s.hands["A"]) == 1 and rules.mana_left(s, "A") == 3 and LeaderAction() not in rules.legal_actions(s)
-    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())   # B's turn, then A's again
-    assert LeaderAction() in rules.legal_actions(s)
+    rules.apply_action(s, PassAction())
+    assert rules.mana_left(s, "A") == 10 + CFG.mana_eater_power_mana   # next turn: past 10
+    rules.apply_action(s, PassAction())
+    assert rules.mana_left(s, "A") == 12 and s.crystals["A"] == 10
+    s = state(turn=19, hands={"A": [MANA_EATER]}, leaders={"A": MANA_EATER}, food={"A": 10, "B": 15})
+    rules.apply_action(s, PlaceAction(MANA_EATER, ("cr", "1,1")))      # 10 crystals destroyed: 10 food
+    assert s.crystals["A"] == 0 and s.food["A"] == 20 and rules.mana_left(s, "A") == 0
+    rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
+    assert rules.mana_left(s, "A") == 1                                # and they grow back from one
+    assert GameState.from_dict(s.to_dict()).crystals == s.crystals
 
 
 def test_deck_rules():
@@ -755,8 +879,8 @@ def test_a_cards_draw_from_an_empty_deck_costs_food_too():
     s = state(turn=10, hands={"A": ["cantrip_2"]}, decks={"A": [], "B": ["wisp_1"]}, food={"A": 15, "B": 15})
     rules.apply_action(s, PlaceAction("cantrip_2", ("cr", "1,2")))
     assert s.food["A"] == 14 and s.fatigue["A"] == 1 and not s.hands["A"]
-    s = state(turn=10, leaders={"A": SAGE}, decks={"A": [], "B": ["wisp_1"]}, food={"A": 15, "B": 15})
-    rules.apply_action(s, LeaderAction())                             # the Sage's power draws
+    s = state(turn=10, leaders={"A": RENO}, decks={"A": [], "B": ["wisp_1"]}, food={"A": 15, "B": 15})
+    rules.apply_action(s, LeaderAction())                             # Reno's power draws: no card to Scout, so fatigue
     assert s.food["A"] == 14 and s.fatigue["A"] == 1
 
 
@@ -792,14 +916,13 @@ def test_fatigue_is_not_income_and_not_a_raid_and_only_a_draw_brings_it():
 
 
 def test_a_leaders_passive_says_when_it_fires():
-    # the Assassin: just before the draw its third card brings, a raid's included
+    # the Rogue: as her third card, the cheaper one, is played, a raid's included
     s = state(turn=19, hands={"A": ["wisp_1", "wisp_1", "flight_1"]}, leaders={"A": ASSASSIN}, decks={"A": ["wisp_1"] * 5}, food={"A": 15, "B": 15})
     rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1"))); rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,2")))
     assert not [e for e in s.events if e["e"] == "leader_trigger"]
     n = len(s.events)
     rules.apply_action(s, PlaceAction("flight_1", ("hq", "B")))
-    kinds = [e["e"] for e in s.events[n:]]
-    assert kinds.index("raid") < kinds.index("leader_trigger") == kinds.index("draw") - 1
+    assert "leader_trigger" in [e["e"] for e in s.events[n:]]
     # the Elf: at the end of a turn its regions produce in, before the food
     s = state(turn=10, leaders={"A": ELF})
     for cr in ("1,1", "1,2", "2,2"):
@@ -842,10 +965,10 @@ def test_scorch_eats_burns_its_neighbours_and_its_regions_produce_no_food_for_th
     assert effective_strength(s, s.board[a][-1]) == CARDS["wisp_1"].base_strength - 1   # its own side burns too
 
 
-def test_the_assassins_count_shows_on_its_leader():
+def test_the_rogues_count_shows_on_her_leader():
     from animal_kingdom.web.match import leader_view
     s = state(turn=19, hands={"A": ["wisp_1"] * 2}, leaders={"A": ASSASSIN, "B": RAIDER})
-    assert leader_view(s, "A")["count"] == {"n": 0, "of": CFG.assassin_nth_card}
+    assert leader_view(s, "A")["count"] == {"n": 0, "of": CFG.rogue_nth_card}
     rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1")))
     assert leader_view(s, "A")["count"]["n"] == 1
     assert "count" not in leader_view(s, "B")

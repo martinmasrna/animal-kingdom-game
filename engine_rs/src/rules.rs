@@ -1,6 +1,6 @@
 //! The rules: legal actions, applying an action, the turn, food and the end of the game.
 //!
-//! A turn: on a player's Nth own turn they have min(N, mana_cap) mana. They play cards from hand, each for its cost, and
+//! A turn: each player gains a mana crystal at the start of each of their turns, up to mana_cap, and has as much mana. They play cards from hand, each for its cost, and
 //! their leader's power for its price, until they end the turn (never ended for them). At its end every region they hold
 //! pays its food. The map's win_food wins; a player whose food drops to 0 loses.
 
@@ -62,15 +62,18 @@ pub fn own_turn_number(st: &State, player: Player) -> i32 {
     (st.turn_counter + if player == st.current { 0 } else { 1 }) / 2 + 1
 }
 
-/// `player`'s mana this turn if it is theirs, else at the start of their next.
+/// `player`'s mana this turn if it is theirs (their crystals), else at the start of their next (a crystal more, up to
+/// the cap, and what the Mana Eater's power put aside).
 pub fn mana_total(st: &State, player: Player) -> i32 {
-    own_turn_number(st, player).min(st.cfg().mana_cap)
+    let p = player as usize;
+    if player == st.current { st.crystals[p] } else { (st.crystals[p] + 1).min(st.cfg().mana_cap) + st.next_mana[p] }
 }
 
-/// The mana `player` has left: this turn's unspent mana, or all of their next turn's while it isn't theirs.
+/// The mana `player` has left: this turn's unspent mana (gained mana on top, crystals destroyed gone), or all of their
+/// next turn's while it isn't theirs.
 pub fn mana_left(st: &State, player: Player) -> i32 {
     let total = mana_total(st, player);
-    if player == st.current { total - st.mana_spent } else { total }
+    if player == st.current { (total - st.mana_spent).max(0) } else { total }
 }
 
 // ------------------------------------------------------------------ the mulligan, both at once
@@ -196,12 +199,12 @@ fn end_turn(st: &mut State) -> Result<(), String> {
         return Ok(());
     }
     st.turn_counter += 1;
-    st.mana_spent = 0;
     st.applied_this_turn = 0;
     st.played_this_turn = 0;
     st.power_used = false;
     st.effect_steps_this_turn = 0;
     st.current = other(player);
+    st.begin_turn_mana(st.current);
     st.emit(Ev::TurnStart { player: st.current, turn: st.turn_counter });
     effects::draw_cards(st, st.current, st.cfg().turn_draw_count); // the turn's free card
     if st.result.is_some() {
@@ -217,24 +220,32 @@ fn end_turn(st: &mut State) -> Result<(), String> {
 
 // ------------------------------------------------------------------ regions, food, the end
 
-/// The food `player`'s regions pay at the end of their turn: each its own, and 1 more each when their leader is the Elf
-/// ("Your regions produce 1 more food.").
+/// The food `player`'s regions pay at the end of their turn: each its own, 1 more each while Mother Nature leads ("Your
+/// regions produce 1 more food."), and that doubled for a region her card stands in ("Adjacent regions produce double
+/// food.", the regions its tile is part of, as the Scorch's).
 pub fn region_income(st: &State, player: Player) -> i32 {
     let own = st.board.own[player as usize];
-    let (mut food, mut held) = (0, 0);
-    for (i, r) in st.g.map.regions.iter().enumerate() {
-        // a scorched region produces no food, the Elf's 1 more included
-        if r.mask & own == r.mask && st.scorched & (1u64 << i) == 0 {
-            food += r.food;
-            held += 1;
-        }
-    }
-    if held == 0 {
-        return 0;
-    }
     let elf = st.g.named.elf.is_some() && st.leaders[player as usize] == st.g.named.elf;
     let bonus = if elf { st.cfg().elf_region_bonus } else { 0 };
-    food + bonus * held
+    // the tiles where one of their Mother Nature cards stands
+    let mut doubling = 0u64;
+    let mut m = own;
+    while m != 0 {
+        let t = m.trailing_zeros() as Tile;
+        m &= m - 1;
+        if st.board.top(t).map_or(false, |u| st.card(u.card).beh.double_regions) {
+            doubling |= 1u64 << t;
+        }
+    }
+    let mut food = 0;
+    for (i, r) in st.g.map.regions.iter().enumerate() {
+        // a scorched region produces no food, the bonus included
+        if r.mask & own == r.mask && st.scorched & (1u64 << i) == 0 {
+            let f = r.food + bonus;
+            food += if r.mask & doubling != 0 { f * st.cfg().elf_card_region_factor } else { f };
+        }
+    }
+    food
 }
 
 /// The game's result if it is over (the turn limit ends it on food).

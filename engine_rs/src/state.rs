@@ -267,6 +267,10 @@ pub enum StepKind {
     RemoveIid { iid: i32, by_player: Option<Player> },
     RemoveChoice { chooser: Player, options: Tiles, optional: bool },
     WeakenChoice { chooser: Player, options: Tiles, amount: i32 },
+    /// The player picks an ally to give +N strength, for good (the Angel Warrior's power).
+    BuffChoice { chooser: Player, options: Tiles, amount: i32 },
+    /// One "draw a card" while Reno leads: a Scout if their deck then holds no duplicates, else a draw.
+    DrawOrScout { player: Player },
 }
 
 /// One step of an effect waiting on the stack. `by_card` and `by_iid` name the card and the very unit whose effect it is.
@@ -424,8 +428,15 @@ pub struct State {
     pub raids: [i32; 2],
     /// The regions that produce no food for the rest of the game, a bit for each in the map's order (the Scorch).
     pub scorched: u64,
-    /// What each player's Leeroy has grown by, wherever he is (the Raider: an enemy unit removed, +1).
+    /// What each player's Nightmare has grown by, wherever he is ("Dusk: Gain +1 strength.").
     pub leeroy_growth: [i32; 2],
+    /// Each player's mana crystals: they gain one at the start of each of their turns, up to the cap, and have that much
+    /// mana on it (the Mana Eater starts with some; his card destroys his).
+    pub crystals: [i32; 2],
+    /// The mana each player gains on top of their crystals on their next turn (the Mana Eater's power).
+    pub next_mana: [i32; 2],
+    /// How many times each player has used their leader's power this game (the Pyromancer's upgrades).
+    pub power_uses: [i32; 2],
     pub effect_steps_this_turn: i32,
     pub caps: Vec<Cap>,
     pub next_iid: i32,
@@ -471,6 +482,9 @@ impl Clone for State {
             raids: self.raids,
             scorched: self.scorched,
             leeroy_growth: self.leeroy_growth,
+            crystals: self.crystals,
+            next_mana: self.next_mana,
+            power_uses: self.power_uses,
             effect_steps_this_turn: self.effect_steps_this_turn,
             caps: self.caps.clone(),
             next_iid: self.next_iid,
@@ -520,6 +534,9 @@ impl Clone for State {
         self.raids = src.raids;
         self.scorched = src.scorched;
         self.leeroy_growth = src.leeroy_growth;
+        self.crystals = src.crystals;
+        self.next_mana = src.next_mana;
+        self.power_uses = src.power_uses;
         self.effect_steps_this_turn = src.effect_steps_this_turn;
         if !(self.caps.is_empty() && src.caps.is_empty()) {
             self.caps.clone_from(&src.caps);
@@ -676,6 +693,9 @@ impl State {
             raids: [0, 0],
             scorched: 0,
             leeroy_growth: [0, 0],
+            crystals: [0, 0],
+            next_mana: [0, 0],
+            power_uses: [0, 0],
             effect_steps_this_turn: 0,
             caps: Vec::new(),
             next_iid: 0,
@@ -698,8 +718,17 @@ impl State {
             }
             st.leaders[p as usize] = Some(lid);
         }
-        st.draw(first, cfg.first_player_opening_draw);
-        st.draw(second, cfg.second_player_opening_draw);
+        for p in 0..2u8 {
+            // Nightmare "starts on the bottom of your deck"; the Mana Eater starts "with 0 cards but 3 empty mana crystals"
+            st.bottom_nightmare(p);
+            if st.leads(p, st.g.named.mana_eater) {
+                st.crystals[p as usize] = cfg.mana_eater_start_crystals.min(cfg.mana_cap);
+            }
+        }
+        let opening = |st: &State, p: Player, n: i32| if st.leads(p, st.g.named.mana_eater) { 0 } else { n };
+        let (n_first, n_second) = (opening(&st, first, cfg.first_player_opening_draw), opening(&st, second, cfg.second_player_opening_draw));
+        st.draw(first, n_first);
+        st.draw(second, n_second);
         if cfg.mulligan {
             for player in [second, first] {
                 if !st.hands[player as usize].is_empty() {
@@ -717,9 +746,33 @@ impl State {
             }
         }
         if st.effect_stack.is_empty() {
-            // no mulligan: the first turn begins now, with its card (the mulligan's end draws it otherwise)
+            // no mulligan: the first turn begins now, with its crystal and its card (the mulligan's end does it otherwise)
+            st.begin_turn_mana(first);
             st.draw(first, cfg.turn_draw_count);
         }
         Ok(st)
+    }
+
+    /// Nightmare to the bottom of `player`'s deck while he leads it ("Nightmare starts on the bottom of your deck."): as
+    /// the game's decks are dealt, and again after a mulligan shuffles the deck.
+    pub fn bottom_nightmare(&mut self, player: Player) {
+        let Some(n) = self.g.named.raider else { return };
+        if !self.leads(player, Some(n)) {
+            return;
+        }
+        let d = &mut self.decks[player as usize];
+        if let Some(i) = d.iter().position(|&c| c == n) {
+            let card = d.remove(i);
+            d.insert(0, card); // the top is the end
+        }
+    }
+
+    /// `player`'s turn begins: a crystal more, up to the cap, all of them full, and the mana the Mana Eater's power put
+    /// aside for this turn on top.
+    pub fn begin_turn_mana(&mut self, player: Player) {
+        let p = player as usize;
+        self.crystals[p] = (self.crystals[p] + 1).min(self.cfg().mana_cap);
+        self.mana_spent = -self.next_mana[p];
+        self.next_mana[p] = 0;
     }
 }

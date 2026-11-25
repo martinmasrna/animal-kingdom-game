@@ -433,10 +433,11 @@ impl ConfigValue for bool {
 
 // The rules' numbers in one place; the map holds the board's own (each region's food, the food that wins).
 config! {
-    // Mana: on a player's Nth own turn they have min(N, mana_cap), lost at the end of the turn. Playing a card from hand
-    // costs its card's cost; a leader's power costs leader_power_cost.
+    // Mana: each player gains a mana crystal at the start of each of their turns, up to mana_cap, and has as much mana
+    // as crystals, lost at the end of the turn (Martin, 2026-11-25: crystals as Hearthstone's; a turn's mana may pass
+    // the cap, the crystals never do). Playing a card from hand costs its card's cost; a leader's power its price below.
     mana_cap: i32 = 10,                   // Martin, 2026-11-20: "Mana cap at 10 of course"
-    leader_power_cost: i32 = 3,
+    leader_power_cost: i32 = 3,           // the Mage's and Reno's power: "Draw a card."
     // The food race (Martin, 2026-11-20: "both players starting at 15, you need 30 to win, and if you drop to 0 you
     // lost"): a raid destroys food; each region a player holds pays its food at the end of their turn.
     start_food: i32 = 15,
@@ -451,16 +452,36 @@ config! {
     hungry_food: i32 = 1,                 // Hungry: the food its prey's removal gains (Martin, 2026-11-20)
     shade_growth: i32 = 2,                // a strength that is a count: +2 for each (Martin, 2026-11-21)
     combo_djinn_discount: i32 = 2,        // the Combo Djinn: "Costs 2 less for each card you played this turn."
-    warlord_hungry_bonus: i32 = 2,        // the Warlord: "Your Hungry cards have +2 strength." (Martin, 2026-11-24)
-    elf_region_bonus: i32 = 1,            // the Elf: "Your regions produce 1 more food." (Martin, 2026-11-23)
-    assassin_card_discount: i32 = 1,      // the Assassin's card: "Roar: reduce the cost of cards in your hand by 1."
     mana_blob_mana: i32 = 2,              // the Mana Blob: "Roar: gain 2 mana." (Martin, 2026-11-21)
-    sage_card_power_discount: i32 = 1,    // the Sage's card: "Roar: reduce the cost of your hero power by 1."
-    elf_food_per_region: i32 = 2,         // the Elf's card: "Roar: gain 2 food for each region you control." (Martin, 2026-11-23)
-    assassin_nth_card: i32 = 3,           // the Assassin: "After every third card you play in a turn, draw a card."
     scorch_burn: i32 = 1,                 // the Scorch: "adjacent units get -1 strength" (Martin, 2026-11-24)
-    raider_power_cost: i32 = 1,           // the Raider's power: "Swap Leeroy with the card above him in your deck..." (Martin, 2026-11-24: "1 mana")
-    leeroy_growth: i32 = 1,               // the Raider: "At the end of your turn, if Leeroy is in your deck, he gains +1 strength." (Martin, 2026-11-24)
+    // The leaders, Martin's list of 2026-11-25: each passive's numbers, then its power's price and numbers.
+    raider_power_cost: i32 = 1,           // Nightmare's power: "Swap Nightmare with the card above."
+    leeroy_growth: i32 = 1,               // Nightmare: "Dusk: Gain +1 strength.", wherever he is
+    elf_region_bonus: i32 = 1,            // Mother Nature: "Your regions produce 1 more food."
+    elf_power_cost: i32 = 2,
+    elf_power_food_per_region: i32 = 1,   // her power: "Gain 1 food for each region you control."
+    elf_card_region_factor: i32 = 2,      // her card: "Adjacent regions produce double food." (her +1 first, then doubled)
+    angel_removal_buff: i32 = 1,          // the Angel Warrior: "After your ally removes an enemy, give it +1 strength."
+    angel_power_cost: i32 = 1,
+    angel_power_buff: i32 = 2,            // his power: "Give an ally +2 strength."
+    angel_dawn_buff: i32 = 1,             // his card: "Dawn: give all connected allies +1 strength."
+    rogue_nth_card: i32 = 3,              // the Rogue: "Every third card you play costs 1 less."
+    rogue_discount: i32 = 1,
+    rogue_power_cost: i32 = 1,
+    golem_per_card: i32 = 1,              // her power's Golem: "+1 strength for each card played this turn"
+    rogue_card_needs: i32 = 3,            // her card: "If you played 3 or more cards this turn, draw 3 cards."
+    rogue_card_draws: i32 = 3,
+    reno_scouts: i32 = 2,                 // Reno's card: "Roar: Scout 2 cards."
+    pyro_uses_per_upgrade: i32 = 3,       // the Pyromancer: "Upgrade your hero power after 3 uses."
+    pyro_power_cost: i32 = 2,             // his power: "Add a Fireball to your hand."
+    warlord_hungry_bonus: i32 = 3,        // Gorrak: "Your Hungry allies cost 1 more, but gain 3 strength." (hand and board)
+    warlord_hungry_tax: i32 = 1,
+    warlord_power_cost: i32 = 2,          // his power: "Summon Delicious Food on a random empty crossroad."
+    delicious_food_food: i32 = 1,         // Delicious Food: "Fall: gain 1 food."
+    mana_eater_start_crystals: i32 = 3,   // the Mana Eater: "Start the game with 0 cards but 3 empty mana crystals."
+    mana_eater_power_cost: i32 = 1,
+    mana_eater_power_mana: i32 = 2,       // his power: "Next turn, gain 2 more mana."
+    mana_eater_food_per_crystal: i32 = 1, // his card: "Roar: destroy all your mana crystals. Gain 1 food for each."
     mama_spores: i32 = 2,                 // Mama Spore: "Roar: put 2 Spores into your hand." (Martin, 2026-11-21)
     bird_egg_flights: i32 = 2,            // the Bird Egg: "Fall: add two [Flight 1] to your hand." (Martin, 2026-11-22)
     golden_egg_draws: i32 = 1,            // the Golden Egg: "When you draw this, draw a card." (Martin, 2026-11-22)
@@ -483,7 +504,7 @@ impl Config {
     }
 }
 
-/// The five leaders' card ids and the Spore token's, looked up once; None when the card table lacks the card.
+/// The leaders' card ids and the tokens', looked up once; None when the card table lacks the card.
 #[derive(Debug, Default)]
 pub struct Named {
     pub warlord: Option<CardId>,
@@ -491,8 +512,17 @@ pub struct Named {
     pub sage: Option<CardId>,
     pub elf: Option<CardId>,
     pub assassin: Option<CardId>,
+    pub angel: Option<CardId>,
+    pub reno: Option<CardId>,
+    pub pyromancer: Option<CardId>,
+    pub mana_eater: Option<CardId>,
     pub spore: Option<CardId>,
     pub flight_1: Option<CardId>,
+    pub golem: Option<CardId>,
+    pub mage_transformed: Option<CardId>,
+    pub delicious_food: Option<CardId>,
+    /// Baby, Young, Adult and Elder Fireball.
+    pub fireballs: [Option<CardId>; 4],
 }
 
 #[derive(Debug)]
@@ -511,8 +541,16 @@ impl Game {
             sage: cards.id_of(crate::cards::SAGE),
             elf: cards.id_of(crate::cards::ELF),
             assassin: cards.id_of(crate::cards::ASSASSIN),
+            angel: cards.id_of(crate::cards::ANGEL),
+            reno: cards.id_of(crate::cards::RENO),
+            pyromancer: cards.id_of(crate::cards::PYROMANCER),
+            mana_eater: cards.id_of(crate::cards::MANA_EATER),
             spore: cards.id_of(crate::cards::SPORE),
             flight_1: cards.id_of(crate::cards::FLIGHT_1),
+            golem: cards.id_of(crate::cards::GOLEM),
+            mage_transformed: cards.id_of(crate::cards::MAGE_TRANSFORMED),
+            delicious_food: cards.id_of(crate::cards::DELICIOUS_FOOD),
+            fireballs: crate::cards::FIREBALLS.map(|f| cards.id_of(f)),
         };
         Game { cards, map, cfg, named }
     }

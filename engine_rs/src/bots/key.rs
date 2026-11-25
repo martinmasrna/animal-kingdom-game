@@ -143,6 +143,8 @@ pub fn position_key(st: &State, me: Player, hidden: bool) -> u64 {
         }
         h.add(st.food[p as usize] as u32 as u64);
         h.add(st.power_discount[p as usize] as u32 as u64 | (st.fatigue[p as usize] as u32 as u64) << 32);
+        h.add(st.crystals[p as usize] as u32 as u64 | (st.next_mana[p as usize] as u32 as u64) << 32);
+        h.add(st.power_uses[p as usize] as u32 as u64 | (st.leeroy_growth[p as usize] as u32 as u64) << 32);
     }
     let mut pile = 0u64;
     for (i, &c) in st.remove_pile.iter().enumerate() {

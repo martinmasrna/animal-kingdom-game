@@ -122,6 +122,16 @@ pub fn step_to_json(g: &Game, s: &Step) -> Value {
             put("options", tiles_to_json(g, options));
             put("amount", (*amount).into());
         }
+        StepKind::BuffChoice { chooser, options, amount } => {
+            put("op", "buff_choice".into());
+            put("chooser", pname(*chooser).into());
+            put("options", tiles_to_json(g, options));
+            put("amount", (*amount).into());
+        }
+        StepKind::DrawOrScout { player } => {
+            put("op", "draw_or_scout".into());
+            put("player", pname(*player).into());
+        }
     }
     if let Some(c) = s.by_card {
         put("by_card", card(c));
@@ -154,6 +164,8 @@ pub fn step_from_json(g: &Game, v: &Value) -> Result<Step, String> {
         "remove_iid" => StepKind::RemoveIid { iid: int(&v["iid"]), by_player: if v["by_player"].is_null() { None } else { Some(player_of(&v["by_player"])?) } },
         "remove_choice" => StepKind::RemoveChoice { chooser: player_of(&v["chooser"])?, options: tiles_from_json(g, &v["options"])?, optional: v["optional"].as_bool().unwrap_or(false) },
         "weaken_choice" => StepKind::WeakenChoice { chooser: player_of(&v["chooser"])?, options: tiles_from_json(g, &v["options"])?, amount: int(&v["amount"]) },
+        "buff_choice" => StepKind::BuffChoice { chooser: player_of(&v["chooser"])?, options: tiles_from_json(g, &v["options"])?, amount: int(&v["amount"]) },
+        "draw_or_scout" => StepKind::DrawOrScout { player: player_of(&v["player"])? },
         other => return Err(format!("unknown effect step {other:?}")),
     };
     Ok(Step {
@@ -245,6 +257,9 @@ impl State {
             "food_produced": ab(&|p| self.food_produced[p].into()),
             "raids": ab(&|p| self.raids[p].into()),
             "leeroy_growth": ab(&|p| self.leeroy_growth[p].into()),
+            "crystals": ab(&|p| self.crystals[p].into()),
+            "next_mana": ab(&|p| self.next_mana[p].into()),
+            "power_uses": ab(&|p| self.power_uses[p].into()),
             "scorched": g.map.regions.iter().enumerate().filter(|(i, _)| self.scorched & (1u64 << i) != 0).map(|(_, r)| Value::from(r.id.clone())).collect::<Vec<_>>(),
             "effect_steps_this_turn": self.effect_steps_this_turn,
             "caps": self.caps.iter().map(|c| json!({"cap": c.cap.name(), "player": pname(c.player), "turn": c.turn, "cards": cards_to_json(g, &c.cards)})).collect::<Vec<_>>(),
@@ -351,6 +366,23 @@ impl State {
             _ => [0, 0], // a position saved before the Raider's power
         };
         let geti = |k: &str| d.get(k).map(int).unwrap_or(0);
+        let ab_or = |k: &str| match d.get(k) {
+            Some(v) if v.is_object() => [int(&v["A"]), int(&v["B"])],
+            _ => [0, 0],
+        };
+        let current = player_of(&d["current"])?;
+        let crystals = match d.get("crystals") {
+            Some(v) if v.is_object() => [int(&v["A"]), int(&v["B"])],
+            _ => {
+                // a position saved before crystals (or set up by hand): as many as the turns each player has begun, none
+                // while the mulligan is on
+                let turn = geti("turn_counter");
+                let mulligan = effect_stack.iter().any(|s: &Step| matches!(s.kind, StepKind::Mulligan { .. }));
+                let cap = g.cfg.mana_cap;
+                let begun = |p: Player| if mulligan { 0 } else { (turn + if p == current { 0 } else { 1 }) / 2 + if p == current { 1 } else { 0 } };
+                [begun(0).min(cap), begun(1).min(cap)]
+            }
+        };
         Ok(State {
             board,
             hands: pair(&d["hands"], units)?,
@@ -361,7 +393,7 @@ impl State {
             made,
             leaders,
             food: [int(&d["food"]["A"]), int(&d["food"]["B"])],
-            current: player_of(&d["current"])?,
+            current,
             first_player: player_of(&d["first_player"])?,
             rng: CowRng::new(PyRandom::from_state(&words)),
             turn_counter: geti("turn_counter"),
@@ -376,6 +408,9 @@ impl State {
             raids,
             scorched,
             leeroy_growth,
+            crystals,
+            next_mana: ab_or("next_mana"),
+            power_uses: ab_or("power_uses"),
             effect_steps_this_turn: geti("effect_steps_this_turn"),
             caps,
             next_iid: geti("next_iid"),

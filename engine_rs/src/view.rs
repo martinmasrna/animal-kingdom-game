@@ -21,9 +21,37 @@ pub fn leaders_json(cfg: &Config) -> Value {
     }).collect())
 }
 
-/// What a leader's power costs: the Raider's its own, every other the config's.
+/// What a leader's power costs before anything takes off it.
 pub fn power_price(cfg: &Config, leader_id: &str) -> i32 {
-    if leader_id == crate::cards::RAIDER { cfg.raider_power_cost } else { cfg.leader_power_cost }
+    use crate::cards::*;
+    match leader_id {
+        RAIDER => cfg.raider_power_cost,
+        ELF => cfg.elf_power_cost,
+        ANGEL => cfg.angel_power_cost,
+        ASSASSIN => cfg.rogue_power_cost,
+        PYROMANCER => cfg.pyro_power_cost,
+        WARLORD => cfg.warlord_power_cost,
+        MANA_EATER => cfg.mana_eater_power_cost,
+        _ => cfg.leader_power_cost,
+    }
+}
+
+/// `player`'s leader's power as it reads now: Nightmare's turns "Draw Nightmare." while he is on top of the deck (Martin,
+/// 2026-11-25: "once he gets on top, the hero power will switch to 1 mana \"Draw Nightmare\""); the Pyromancer's names
+/// the Fireball it gives now. None without a leader or a power.
+pub fn power_text(st: &State, player: Player) -> Option<String> {
+    let lead = st.leaders[player as usize]?;
+    let id = st.card(lead).id.as_str();
+    let text = LEADERS.iter().find(|(l, _, _)| *l == id)?.2?;
+    if lead == st.g.named.raider.unwrap_or(u16::MAX) && effects::nightmare_on_top(st, player) {
+        return Some(format!("Draw {}.", st.card(lead).name));
+    }
+    if Some(lead) == st.g.named.pyromancer {
+        if let Some(f) = effects::pyro_fireball(st, player) {
+            return Some(format!("Add a {} to your hand.", st.card(f).name));
+        }
+    }
+    Some(text.to_string())
 }
 
 /// Why `leader` can't lead `deck`, if it can't.
@@ -86,6 +114,7 @@ pub fn seat_view(st: &State, player: Player) -> Value {
         "remove_pile": st.remove_pile.iter().map(|&c| g.cards.name_of(c)).collect::<Vec<_>>(),
         "food": {"A": st.food[0], "B": st.food[1]},
         "fatigue": {"A": st.fatigue[0], "B": st.fatigue[1]},
+        "crystals": {"A": st.crystals[0], "B": st.crystals[1]},
         "pending": st.pending.as_ref().map(|p| pending_to_json(g, p)),
         "result": st.result.map(|r| json!({"winner": r.winner.map(pname), "reason": r.reason.name()})),
     })
