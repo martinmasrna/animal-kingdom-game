@@ -89,9 +89,10 @@ pub fn step_to_json(g: &Game, s: &Step) -> Value {
             put("prey", (*prey).into());
             put("n", (*n).into());
         }
-        StepKind::Scout { player } => {
+        StepKind::Scout { player, from } => {
             put("op", "scout".into());
             put("player", pname(*player).into());
+            put("from", Value::Array(from.iter().map(|&i| Value::from(i)).collect()));
         }
         StepKind::PlaceToken { player, card: c, options } => {
             put("op", "place_token".into());
@@ -134,9 +135,10 @@ pub fn step_to_json(g: &Game, s: &Step) -> Value {
             put("options", Value::Array(options.iter().map(|&i| Value::from(i)).collect()));
             put("amount", (*amount).into());
         }
-        StepKind::DrawOrScout { player } => {
+        StepKind::DrawOrScout { player, from } => {
             put("op", "draw_or_scout".into());
             put("player", pname(*player).into());
+            put("from", Value::Array(from.iter().map(|&i| Value::from(i)).collect()));
         }
     }
     if let Some(c) = s.by_card {
@@ -164,7 +166,7 @@ pub fn step_from_json(g: &Game, v: &Value) -> Result<Step, String> {
         "leader_trigger" => StepKind::LeaderTrigger { player: player_of(&v["player"])?, card: card(&v["card"])? },
         "draw" => StepKind::Draw { player: player_of(&v["player"])?, n: int(&v["n"]) },
         "draw_if_gone" => StepKind::DrawIfGone { player: player_of(&v["player"])?, prey: int(&v["prey"]), n: int(&v["n"]) },
-        "scout" => StepKind::Scout { player: player_of(&v["player"])? },
+        "scout" => StepKind::Scout { player: player_of(&v["player"])?, from: places(&v["from"]) },
         "place_token" => StepKind::PlaceToken { player: player_of(&v["player"])?, card: card(&v["card"])?, options: tiles_from_json(g, &v["options"])? },
         "to_hand" => StepKind::ToHand { player: player_of(&v["player"])?, card: card(&v["card"])?, n: int(&v["n"]) },
         "remove_iid" => StepKind::RemoveIid { iid: int(&v["iid"]), by_player: if v["by_player"].is_null() { None } else { Some(player_of(&v["by_player"])?) } },
@@ -172,7 +174,7 @@ pub fn step_from_json(g: &Game, v: &Value) -> Result<Step, String> {
         "weaken_choice" => StepKind::WeakenChoice { chooser: player_of(&v["chooser"])?, options: tiles_from_json(g, &v["options"])?, amount: int(&v["amount"]) },
         "buff_choice" => StepKind::BuffChoice { chooser: player_of(&v["chooser"])?, options: tiles_from_json(g, &v["options"])?, amount: int(&v["amount"]) },
         "hand_buff_choice" => StepKind::HandBuffChoice { chooser: player_of(&v["chooser"])?, options: v["options"].as_array().map(|a| a.iter().filter_map(|o| o.as_i64()).map(|i| i as i32).collect()).unwrap_or_default(), amount: int(&v["amount"]) },
-        "draw_or_scout" => StepKind::DrawOrScout { player: player_of(&v["player"])? },
+        "draw_or_scout" => StepKind::DrawOrScout { player: player_of(&v["player"])?, from: places(&v["from"]) },
         other => return Err(format!("unknown effect step {other:?}")),
     };
     Ok(Step {
@@ -431,4 +433,9 @@ impl State {
             g,
         })
     }
+}
+
+/// A Scout's `from`: the deck places of the cards being looked at; missing in a position saved before it existed.
+fn places(v: &Value) -> SmallVec<[u8; 4]> {
+    v.as_array().map(|a| a.iter().filter_map(|x| x.as_u64()).map(|i| i as u8).collect()).unwrap_or_default()
 }

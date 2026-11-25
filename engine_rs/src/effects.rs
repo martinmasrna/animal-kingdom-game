@@ -345,7 +345,7 @@ fn run_roar(st: &mut State, roar: Roar, unit: &Unit, cr: Tile) {
             }
         }
         Roar::Draw => st.effect_stack.push(Step::new(StepKind::Draw { player: owner, n: 1 })),
-        Roar::Scout => st.effect_stack.push(Step::new(StepKind::Scout { player: owner })),
+        Roar::Scout => st.effect_stack.push(Step::new(StepKind::Scout { player: owner, from: SmallVec::new() })),
         Roar::Duplicate => {
             // a Spore on an adjacent empty crossroad the game picks, none when there is none
             let Some(spore_card) = st.g.named.spore else { return };
@@ -368,7 +368,7 @@ fn run_roar(st: &mut State, roar: Roar, unit: &Unit, cr: Tile) {
         }
         Roar::ScoutTwice => {
             for _ in 0..st.cfg().reno_scouts {
-                st.effect_stack.push(Step::new(StepKind::Scout { player: owner }));
+                st.effect_stack.push(Step::new(StepKind::Scout { player: owner, from: SmallVec::new() }));
             }
         }
         Roar::UpgradeFireballs => upgrade_fireballs(st, owner),
@@ -617,7 +617,7 @@ pub fn draw_cards(st: &mut State, player: Player, n: i32) {
     if n > 0 && st.leads(player, st.g.named.reno) {
         // Reno: each "draw a card" waits on the stack and Scouts if the deck holds no duplicates by then (DrawOrScout)
         for _ in 0..n {
-            st.effect_stack.push(Step::new(StepKind::DrawOrScout { player }));
+            st.effect_stack.push(Step::new(StepKind::DrawOrScout { player, from: SmallVec::new() }));
         }
         return;
     }
@@ -792,21 +792,45 @@ fn mulligan_replacement(deck: &[CardId], returned: &[CardId], extra: Option<Card
     (0..deck.len()).rev().find(|&i| !returned.contains(&deck[i]) && Some(deck[i]) != extra)
 }
 
-/// Scout: look at the top cards of your deck, draw the one you choose and shuffle the rest back: a draw, so a Golden Egg
-/// drawn this way draws a card, from the deck shuffled. Ok(Some) while the choice waits.
-fn scout(st: &mut State, player: Player, choice: Option<Choice>) -> Result<Option<Pending>, String> {
+/// Scout: look at cards from random places in your deck, draw the one you choose; the rest go back where they were, so
+/// nothing else in the deck moves. A draw, so a Golden Egg drawn this way draws a card. While the choice waits the cards
+/// looked at lie on top of the deck (the first option the topmost) and `from` holds the places they came from.
+/// Ok(Some) while the choice waits.
+fn scout(st: &mut State, player: Player, choice: Option<Choice>, from: &mut SmallVec<[u8; 4]>) -> Result<Option<Pending>, String> {
     let p = player as usize;
-    let n = (st.cfg().scout_look.max(0) as usize).min(st.decks[p].len());
-    if n == 0 {
-        return Ok(None);
+    if from.is_empty() {
+        let n = (st.cfg().scout_look.max(0) as usize).min(st.decks[p].len());
+        if n == 0 {
+            return Ok(None);
+        }
+        // n different places, the deepest first
+        let mut places: Vec<usize> = (0..st.decks[p].len()).collect();
+        let mut picked: Vec<usize> = (0..n).map(|_| { let i = st.rng.randbelow(places.len()); places.remove(i) }).collect();
+        picked.sort_unstable();
+        let lifted: Vec<CardId> = picked.iter().rev().map(|&i| st.decks[p].remove(i)).collect();
+        st.decks[p].extend(lifted.into_iter().rev()); // on top in their deck order: the shallowest topmost
+        from.extend(picked.iter().map(|&i| i as u8));
     }
+    let n = from.len();
     let k = match choice {
         None => return Ok(Some(Pending { chooser: player, optional: false, mulligan: false, options: Options::Deck(n as u8) })),
-        Some(Choice::Deck(k)) if (k as usize) < st.decks[p].len() => k as usize,
+        Some(Choice::Deck(k)) if (k as usize) < n => k as usize,
         Some(other) => return Err(format!("bad Scout choice {other:?}")),
     };
-    let at = st.decks[p].len() - 1 - k;
-    let card = st.decks[p].remove(at);
+    // the looked-at cards come off the top, bottom first as `from` lists them; all but the chosen go back to their places
+    let at = st.decks[p].len() - n;
+    let shown: Vec<CardId> = st.decks[p].drain(at..).collect();
+    let taken = n - 1 - k;
+    let mut gone = 0;
+    for (i, &c) in shown.iter().enumerate() {
+        if i == taken {
+            gone = 1;
+        } else {
+            st.decks[p].insert(from[i] as usize - gone, c);
+        }
+    }
+    from.clear();
+    let card = shown[taken];
     let inst = Unit::new(card, player, st.new_iid());
     st.hands[p].push(inst);
     st.emit(Ev::Draw { player, cards: vec![(inst.iid, inst.card)] });
@@ -816,7 +840,6 @@ fn scout(st: &mut State, player: Player, choice: Option<Choice>) -> Result<Optio
         st.pile_add(inst.card, inst.owner);
         st.emit(Ev::Burn { iid: inst.iid, card: inst.card, owner: inst.owner });
     }
-    st.rng.shuffle(&mut st.decks[p]);
     if st.card(card).beh.draw_on_draw {
         draw_cards(st, player, st.cfg().golden_egg_draws);
     }
@@ -915,18 +938,18 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
             }
             Ok(None)
         }
-        StepKind::DrawOrScout { player } => {
+        StepKind::DrawOrScout { player, from } => {
             let player = *player;
-            if st.decks[player as usize].is_empty() || !no_duplicates(st, player) {
+            if from.is_empty() && (st.decks[player as usize].is_empty() || !no_duplicates(st, player)) {
                 // an empty deck draws (fatigue) and a deck with a duplicate draws as any
                 draw_plain(st, player, 1);
                 return Ok(None);
             }
-            scout(st, player, step.choice)
+            scout(st, player, step.choice, from)
         }
-        StepKind::Scout { player } => {
+        StepKind::Scout { player, from } => {
             let player = *player;
-            scout(st, player, step.choice)
+            scout(st, player, step.choice, from)
         }
         StepKind::PlaceToken { player, card, options } => {
             // A token on the tile its player chooses (free, as anything an effect puts into play): it lands as a placed
@@ -1097,9 +1120,9 @@ pub fn pyro_fireball(st: &State, player: Player) -> Option<CardId> {
     st.g.named.fireballs[stage]
 }
 
-/// Nightmare at Dusk: "Gain +1 strength.", wherever he is.
+/// Nightmare at Dusk: "if Nightmare is in your deck, gain +1 strength."
 pub fn grow_leeroy(st: &mut State, player: Player) {
-    if st.leads(player, st.g.named.raider) {
+    if st.leads(player, st.g.named.raider) && nightmare_in_deck(st, player).is_some() {
         st.leeroy_growth[player as usize] += st.cfg().leeroy_growth;
     }
 }

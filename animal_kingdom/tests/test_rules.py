@@ -410,13 +410,25 @@ def test_nightmare_raids_at_double_strength():
     assert s.food["B"] == 15 - CARDS[cid].base_strength * CFG.double_raid_factor
 
 
-def test_scout_takes_one_of_the_top_three_and_shuffles_the_rest_back():
-    s = state(turn=11, hands={"A": ["scout_3"]}, decks={"A": ["wisp_1", "wisp_2", "wisp_3", "wisp_4", "wisp_5"]})
-    rules.apply_action(s, PlaceAction("scout_3", ("cr", "1,1")))
-    assert s.pending["chooser"] == "A" and s.pending["options"] == ["deck:0", "deck:1", "deck:2"]   # the top is the end
-    rules.apply_action(s, ChoiceAction("deck:1"))                    # the second from the top: wisp_4
-    assert [u.card_id for u in s.hands["A"]] == ["wisp_4"]
-    assert sorted(s.decks["A"]) == ["wisp_1", "wisp_2", "wisp_3", "wisp_5"]
+def test_scout_takes_one_of_three_cards_from_anywhere_in_the_deck_and_the_rest_stay_where_they_were():
+    deck = [c for c in CARDS if c.startswith(("wisp_", "spikes_", "cantrip_"))][:12]
+    assert len(deck) == 12
+    shown_sets = set()
+    for seed in range(12):
+        s = state(turn=11, hands={"A": ["scout_3"]}, decks={"A": list(deck)})
+        version, internal, gauss = random.Random(seed).getstate()
+        s._rng = {"version": version, "state": list(internal), "gauss": gauss}
+        rules.apply_action(s, PlaceAction("scout_3", ("cr", "1,1")))
+        assert s.pending["chooser"] == "A" and s.pending["options"] == ["deck:0", "deck:1", "deck:2"]
+        shown = s.decks["A"][-3:]                                      # while she looks, they lie on top
+        assert sorted(s.decks["A"]) == sorted(deck)
+        t = GameState.from_dict(s.to_dict())                           # the look, saved and restored
+        for g in (s, t):
+            rules.apply_action(g, ChoiceAction("deck:1"))              # the middle one of the three
+            assert [u.card_id for u in g.hands["A"]] == [shown[1]]
+            assert g.decks["A"] == [c for c in deck if c != shown[1]]  # nothing else moved
+        shown_sets.add(tuple(shown))
+    assert len(shown_sets) > 6 and any(set(sh) != set(deck[-3:]) for sh in shown_sets)   # from anywhere, not the top
 
 
 def test_duplicating_spore_places_a_spore_on_a_random_adjacent_empty_crossroad():
@@ -591,11 +603,11 @@ def test_nightmare_starts_on_the_bottom_grows_at_every_dusk_and_his_power_swaps_
     nm = next(u for u in s.hands["A"] if u.card_id == RAIDER)
     assert LeaderAction() not in rules.legal_actions(s)
     rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
-    assert effective_strength(s, nm) == base + 2 * CFG.leeroy_growth   # he grows in hand too
+    assert effective_strength(s, nm) == base + CFG.leeroy_growth       # out of the deck, he grows no more
     assert not rules.leader_usable(s, "A")                             # in hand, the power has nothing to do
     rules.apply_action(s, PlaceAction(RAIDER, ("cr", "1,1")))
     rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
-    assert effective_strength(s, s.board["1,1"][-1]) == base + 3 * CFG.leeroy_growth   # and on the board
+    assert effective_strength(s, s.board["1,1"][-1]) == base + CFG.leeroy_growth       # nor on the board
     assert GameState.from_dict(s.to_dict()).leeroy_growth == s.leeroy_growth
     other = state(turn=19, decks={"A": [RAIDER]}, leaders={"A": SAGE})
     rules.apply_action(other, PassAction())
@@ -701,8 +713,9 @@ def test_reno_scouts_his_draws_while_his_deck_holds_no_duplicates():
     s = state(turn=10, leaders={"A": RENO}, decks={"A": ["wisp_1", "wisp_2", "wisp_3", "wisp_4"], "B": ["wisp_1"] * 3})
     rules.apply_action(s, LeaderAction())                              # "Draw a card.": a Scout
     assert s.pending["options"] == ["deck:0", "deck:1", "deck:2"]
+    third = s.decks["A"][-3]
     rules.apply_action(s, ChoiceAction("deck:2"))
-    assert [u.card_id for u in s.hands["A"]] == ["wisp_2"] and len(s.decks["A"]) == 3
+    assert [u.card_id for u in s.hands["A"]] == [third] and len(s.decks["A"]) == 3
     rules.apply_action(s, PassAction())
     rules.apply_action(s, PassAction())                                # his turn's free card: a Scout too
     assert s.pending and s.pending["chooser"] == "A" and len(s.pending["options"]) == 3
@@ -941,12 +954,12 @@ def test_a_leaders_passive_says_when_it_fires():
 
 
 def test_a_golden_egg_taken_by_scout_is_drawn_and_draws_a_card():
-    s = state(turn=11, hands={"A": ["scout_3"]}, decks={"A": ["wisp_1", "wisp_2", "golden_egg", "wisp_4"]})   # the top is the end
+    s = state(turn=11, hands={"A": ["scout_3"]}, decks={"A": ["wisp_1", "golden_egg", "wisp_4"]})
     rules.apply_action(s, PlaceAction("scout_3", ("cr", "1,1")))
     assert s.pending["options"] == ["deck:0", "deck:1", "deck:2"]
-    rules.apply_action(s, ChoiceAction("deck:1"))                    # the Golden Egg
+    rules.apply_action(s, ChoiceAction(f"deck:{2 - s.decks['A'].index('golden_egg')}"))   # the Golden Egg
     hand = sorted(u.card_id for u in s.hands["A"])
-    assert len(hand) == 2 and "golden_egg" in hand and len(s.decks["A"]) == 2
+    assert len(hand) == 2 and "golden_egg" in hand and len(s.decks["A"]) == 1
 
 
 def test_scorch_eats_burns_its_neighbours_and_its_regions_produce_no_food_for_the_rest_of_the_game():

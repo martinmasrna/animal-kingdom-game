@@ -261,7 +261,9 @@ pub enum StepKind {
     LeaderTrigger { player: Player, card: CardId },
     Draw { player: Player, n: i32 },
     DrawIfGone { player: Player, prey: i32, n: i32 },
-    Scout { player: Player },
+    /// `from`: where in the deck the cards being looked at came from (indices before any was lifted), bottom first;
+    /// empty until the look begins.
+    Scout { player: Player, from: SmallVec<[u8; 4]> },
     PlaceToken { player: Player, card: CardId, options: Tiles },
     ToHand { player: Player, card: CardId, n: i32 },
     RemoveIid { iid: i32, by_player: Option<Player> },
@@ -272,7 +274,7 @@ pub enum StepKind {
     /// The player picks a card in their hand to give +N strength, for good (the Rogue's power).
     HandBuffChoice { chooser: Player, options: SmallVec<[i32; 12]>, amount: i32 },
     /// One "draw a card" while Reno leads: a Scout if their deck then holds no duplicates, else a draw.
-    DrawOrScout { player: Player },
+    DrawOrScout { player: Player, from: SmallVec<[u8; 4]> },
 }
 
 /// One step of an effect waiting on the stack. `by_card` and `by_iid` name the card and the very unit whose effect it is.

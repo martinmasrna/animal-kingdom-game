@@ -29,7 +29,7 @@ pub const FLIGHT_1: &str = "flight_1";
 /// Mother Nature elf_legend, the Rogue assassin_legend, the Mage sage_legend, Gorrak warlord_legend). Either may be
 /// missing.
 pub const LEADERS: [(&str, Option<&str>, Option<&str>); 9] = [
-    (RAIDER, Some("Nightmare starts on the bottom of your deck. Dusk: Gain +1 strength."), Some("Swap Nightmare with the card above.")),
+    (RAIDER, Some("Nightmare starts on the bottom of your deck. Dusk: if Nightmare is in your deck, gain +1 strength."), Some("Swap Nightmare with the card above.")),
     (ELF, Some("Your regions produce 1 more food."), Some("Gain 1 food for each region you control.")),
     (ANGEL, Some("After your ally removes an enemy, give it +1 strength."), Some("Give an ally +2 strength.")),
     (ASSASSIN, Some("Every third card you play costs 1 less."), Some("Give a card in your hand +1 strength for each card you played this turn.")),

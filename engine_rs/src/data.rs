@@ -456,7 +456,7 @@ config! {
     scorch_burn: i32 = 1,                 // the Scorch: "adjacent units get -1 strength" (Martin, 2026-11-24)
     // The leaders, Martin's list of 2026-11-25: each passive's numbers, then its power's price and numbers.
     raider_power_cost: i32 = 1,           // Nightmare's power: "Swap Nightmare with the card above."
-    leeroy_growth: i32 = 1,               // Nightmare: "Dusk: Gain +1 strength.", wherever he is
+    leeroy_growth: i32 = 1,               // Nightmare: "Dusk: if Nightmare is in your deck, gain +1 strength."
     elf_region_bonus: i32 = 1,            // Mother Nature: "Your regions produce 1 more food."
     elf_power_cost: i32 = 2,
     elf_power_food_per_region: i32 = 1,   // her power: "Gain 1 food for each region you control."
