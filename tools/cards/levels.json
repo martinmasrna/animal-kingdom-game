@@ -748,7 +748,8 @@
         "prev": "Raider"
       },
       "by": "claude",
-      "at": 1795358576
+      "at": 1795574227,
+      "note": "Martin, 2026-11-25: the nine leaders"
     },
     "cost": {
       "review": {
@@ -786,7 +787,8 @@
         "prev": 6
       },
       "by": "claude",
-      "at": 1795290485
+      "at": 1795574228,
+      "note": "Martin, 2026-11-25: the nine leaders"
     },
     "effect": {
       "review": {
@@ -795,7 +797,28 @@
         "prev": ""
       },
       "by": "claude",
-      "at": 1795290486
+      "at": 1795574228,
+      "note": "Martin, 2026-11-25: the nine leaders"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Sage"
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574227
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574227
     }
   },
   "flight_1": {
@@ -807,6 +830,16 @@
       },
       "by": "claude",
       "at": 1795262576
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight 1"
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574229
     }
   },
   "flight_2": {
@@ -838,6 +871,16 @@
       },
       "by": "claude",
       "at": 1795262576
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight 3"
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574229
     }
   },
   "flight_5": {
@@ -1082,6 +1125,16 @@
       },
       "by": "claude",
       "at": 1795271355
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight 6"
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574229
     }
   },
   "scout_3": {
@@ -1261,7 +1314,8 @@
         "prev": 10
       },
       "by": "claude",
-      "at": 1795290485
+      "at": 1795574227,
+      "note": "Martin, 2026-11-25: the nine leaders"
     },
     "effect": {
       "review": {
@@ -1270,7 +1324,8 @@
         "prev": ""
       },
       "by": "claude",
-      "at": 1795473881
+      "at": 1795574227,
+      "note": "Martin, 2026-11-25: the nine leaders"
     },
     "cost": {
       "review": {
@@ -1279,7 +1334,18 @@
         "prev": 5
       },
       "by": "claude",
-      "at": 1795473881
+      "at": 1795574227,
+      "note": "Martin, 2026-11-25: the nine leaders"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Elf"
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574227
     }
   },
   "assassin_legend": {
@@ -1290,7 +1356,8 @@
         "prev": 10
       },
       "by": "claude",
-      "at": 1795290485
+      "at": 1795574227,
+      "note": "Martin, 2026-11-25: the nine leaders"
     },
     "effect": {
       "review": {
@@ -1299,7 +1366,28 @@
         "prev": ""
       },
       "by": "claude",
-      "at": 1795290485
+      "at": 1795574227,
+      "note": "Martin, 2026-11-25: the nine leaders"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Assassin"
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574227
+    },
+    "cost": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574227
     }
   },
   "mana_blob": {
@@ -1408,6 +1496,16 @@
       },
       "by": "claude",
       "at": 1795486870
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight 10"
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574229
     }
   },
   "scorch": {
@@ -1439,6 +1537,107 @@
       },
       "by": "claude",
       "at": 1795491863
+    }
+  },
+  "angel_legend": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574228
+    }
+  },
+  "reno_legend": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574228
+    }
+  },
+  "pyromancer_legend": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574228
+    }
+  },
+  "mana_eater_legend": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574228
+    }
+  },
+  "golem": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1795574228
+    }
+  },
+  "mage_transformed": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574228
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1795574228
+    }
+  },
+  "delicious_food": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-11-25: the nine leaders",
+      "by": "claude",
+      "at": 1795574229
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1795574229
     }
   }
 }

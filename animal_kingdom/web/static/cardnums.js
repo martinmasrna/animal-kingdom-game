@@ -56,6 +56,13 @@ export const CARD_NUMS = [
   "porcupine",
   "scorch",
   "plunderer",
+  "angel_legend",
+  "reno_legend",
+  "pyromancer_legend",
+  "mana_eater_legend",
+  "golem",
+  "mage_transformed",
+  "delicious_food",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

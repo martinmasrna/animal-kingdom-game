@@ -185,7 +185,7 @@
     },
     {
       "id": "raider_legend",
-      "name": "Leeroy",
+      "name": "Nightmare",
       "status": "collectible",
       "rarity": "legendary",
       "base_strength": 2,
@@ -195,17 +195,17 @@
     },
     {
       "id": "sage_legend",
-      "name": "Sage",
+      "name": "Mage",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 3,
-      "text": "Roar: reduce the cost of your hero power by 1.",
-      "cost": 5,
+      "base_strength": 6,
+      "text": "If your deck is empty, transform into Mage, Transformed.",
+      "cost": 4,
       "keywords": []
     },
     {
       "id": "flight_1",
-      "name": "Flight 1",
+      "name": "Baby Fireball",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 1,
@@ -229,7 +229,7 @@
     },
     {
       "id": "flight_3",
-      "name": "Flight 3",
+      "name": "Young Fireball",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 3,
@@ -387,7 +387,7 @@
     },
     {
       "id": "flight_6",
-      "name": "Flight 6",
+      "name": "Adult Fireball",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 6,
@@ -439,22 +439,22 @@
     },
     {
       "id": "elf_legend",
-      "name": "Elf",
+      "name": "Mother Nature",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 3,
-      "text": "Roar: gain 2 food for each region you control.",
-      "cost": 3,
+      "base_strength": 5,
+      "text": "Adjacent regions produce double food.",
+      "cost": 5,
       "keywords": []
     },
     {
       "id": "assassin_legend",
-      "name": "Assassin",
+      "name": "Rogue",
       "status": "collectible",
       "rarity": "legendary",
-      "base_strength": 5,
-      "text": "Roar: reduce the cost of cards in your hand by 1.",
-      "cost": 5,
+      "base_strength": 3,
+      "text": "Roar: If you played 3 or more cards this turn, draw 3 cards.",
+      "cost": 3,
       "keywords": []
     },
     {
@@ -593,7 +593,7 @@
     },
     {
       "id": "flight_10",
-      "name": "Flight 10",
+      "name": "Elder Fireball",
       "status": "collectible",
       "rarity": "common",
       "base_strength": 10,
@@ -624,6 +624,78 @@
       "base_strength": 3,
       "text": "Whenever you raid, draw a card.",
       "cost": 3,
+      "keywords": []
+    },
+    {
+      "id": "angel_legend",
+      "name": "Angel Warrior",
+      "status": "collectible",
+      "rarity": "legendary",
+      "base_strength": 8,
+      "text": "Flight. Dawn: give all connected allies +1 strength.",
+      "cost": 8,
+      "keywords": [
+        "Flight"
+      ]
+    },
+    {
+      "id": "reno_legend",
+      "name": "Reno",
+      "status": "collectible",
+      "rarity": "legendary",
+      "base_strength": 7,
+      "text": "Roar: Scout 2 cards.",
+      "cost": 7,
+      "keywords": []
+    },
+    {
+      "id": "pyromancer_legend",
+      "name": "Pyromancer",
+      "status": "collectible",
+      "rarity": "legendary",
+      "base_strength": 3,
+      "text": "Roar: upgrade all Fireballs in your hand. They keep their cost.",
+      "cost": 3,
+      "keywords": []
+    },
+    {
+      "id": "mana_eater_legend",
+      "name": "Mana Eater",
+      "status": "collectible",
+      "rarity": "legendary",
+      "base_strength": 14,
+      "text": "Roar: destroy all your mana crystals. Gain 1 food for each.",
+      "cost": 10,
+      "keywords": []
+    },
+    {
+      "id": "golem",
+      "name": "Golem",
+      "status": "reserve",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "",
+      "cost": 1
+    },
+    {
+      "id": "mage_transformed",
+      "name": "Mage, Transformed",
+      "status": "reserve",
+      "rarity": "common",
+      "base_strength": 12,
+      "text": "Roar: double your food.",
+      "cost": 8,
+      "keywords": []
+    },
+    {
+      "id": "delicious_food",
+      "name": "Delicious Food",
+      "status": "reserve",
+      "rarity": "common",
+      "base_strength": 1,
+      "text": "Fall: gain 1 food.",
+      "cost": 1,
       "keywords": []
     }
   ]
