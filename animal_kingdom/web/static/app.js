@@ -1286,12 +1286,12 @@ function startBeat(g, A, ago) {
 const endBeat = () => { const key = V && `${V.id}-${V.rematches}`;
   return ui.beat && ui.beat.key === key ? { kind: ui.beat.kind, side: ui.beat.side, ago: Date.now() - ui.beat.t0 } : null; };
 
-// One of a leader's two abilities read: `ab` is 'passive' or 'power'.
+// One of a leader's two abilities read, `ab` 'passive' or 'power': the leader's name and the ability's text, nothing more
+// (Martin, 2026-11-25: "remove AI-slop overlabeling on the heropowers"); whose it is and its cost are on the board.
 function leaderPanel(side, ab) {
   const L = viewerGame().leaders[side]; ab = ab || (L && L.power ? 'power' : 'passive'); if (!L || !L[ab]) return '';
-  const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader";
-  const kind = ab === 'power' ? `Hero power: costs ${L.cost ?? V.game.abilityCost} mana.` : 'Passive.';
-  return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${kind}</p><p>${L[ab]}</p>`;
+  const c = CARDS[L.id];
+  return `<b>${c ? c.name.split(':')[0] : L.id}</b><p>${L[ab]}</p>`;
 }
 // The mana rules' pieces beside the board (Martin, 2026-11-22: his arrangement from the layout trial, made symmetric): each
 // side's leader, deck and mana, and End turn, laid on the table with the board (#mplane, given its tilt by board.js), placed
