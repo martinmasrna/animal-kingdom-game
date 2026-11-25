@@ -128,6 +128,12 @@ pub fn step_to_json(g: &Game, s: &Step) -> Value {
             put("options", tiles_to_json(g, options));
             put("amount", (*amount).into());
         }
+        StepKind::HandBuffChoice { chooser, options, amount } => {
+            put("op", "hand_buff_choice".into());
+            put("chooser", pname(*chooser).into());
+            put("options", Value::Array(options.iter().map(|&i| Value::from(i)).collect()));
+            put("amount", (*amount).into());
+        }
         StepKind::DrawOrScout { player } => {
             put("op", "draw_or_scout".into());
             put("player", pname(*player).into());
@@ -165,6 +171,7 @@ pub fn step_from_json(g: &Game, v: &Value) -> Result<Step, String> {
         "remove_choice" => StepKind::RemoveChoice { chooser: player_of(&v["chooser"])?, options: tiles_from_json(g, &v["options"])?, optional: v["optional"].as_bool().unwrap_or(false) },
         "weaken_choice" => StepKind::WeakenChoice { chooser: player_of(&v["chooser"])?, options: tiles_from_json(g, &v["options"])?, amount: int(&v["amount"]) },
         "buff_choice" => StepKind::BuffChoice { chooser: player_of(&v["chooser"])?, options: tiles_from_json(g, &v["options"])?, amount: int(&v["amount"]) },
+        "hand_buff_choice" => StepKind::HandBuffChoice { chooser: player_of(&v["chooser"])?, options: v["options"].as_array().map(|a| a.iter().filter_map(|o| o.as_i64()).map(|i| i as i32).collect()).unwrap_or_default(), amount: int(&v["amount"]) },
         "draw_or_scout" => StepKind::DrawOrScout { player: player_of(&v["player"])? },
         other => return Err(format!("unknown effect step {other:?}")),
     };

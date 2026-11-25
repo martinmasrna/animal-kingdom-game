@@ -1002,6 +1002,23 @@ fn run_op(st: &mut State, step: &mut Step) -> Result<Option<Pending>, String> {
                 Some(other) => Err(format!("bad target {other:?}")),
             }
         }
+        StepKind::HandBuffChoice { chooser, options, amount } => {
+            // The player picks the card in their hand an effect gives +N strength, for good.
+            if options.is_empty() {
+                return Ok(None);
+            }
+            match step.choice {
+                None => Ok(Some(Pending { chooser: *chooser, optional: false, mulligan: false, options: Options::Iids(options.clone()) })),
+                Some(Choice::Iid(i)) => {
+                    let (c, amount) = (*chooser as usize, *amount);
+                    if let Some(u) = st.hands[c].iter_mut().find(|u| u.iid == i) {
+                        u.strength_mod += amount;
+                    }
+                    Ok(None)
+                }
+                Some(other) => Err(format!("bad target {other:?}")),
+            }
+        }
         StepKind::RemoveChoice { chooser, options, optional } => {
             // The player picks the enemy a Roar removes, even when there is one.
             if options.is_empty() {
@@ -1065,7 +1082,7 @@ pub fn leader_usable(st: &State, player: Player) -> bool {
         return n.delicious_food.is_some() && st.g.map.all_tiles() & !st.board.occ != 0; // an empty crossroad
     }
     if Some(lead) == n.assassin {
-        return n.golem.is_some();
+        return st.played_this_turn > 0 && !st.hands[player as usize].is_empty(); // a card to give it to, and something to give
     }
     if Some(lead) == n.pyromancer {
         return n.fireballs.iter().all(|f| f.is_some());
@@ -1127,10 +1144,10 @@ pub fn do_leader(st: &mut State, player: Player) -> Result<(), String> {
         let amount = st.cfg().angel_power_buff;
         st.effect_stack.push(Step::by(StepKind::BuffChoice { chooser: player, options, amount }, lead));
     } else if Some(lead) == n.assassin {
-        // "Add a 1-mana Golem to your hand. Give it +1 strength for each card played this turn."
-        let golem = n.golem.ok_or("no Golem in the card table")?;
-        let bonus = st.cfg().golem_per_card * st.played_this_turn;
-        make_into_hand(st, player, golem, 1, bonus);
+        // "Give a card in your hand +1 strength for each card you played this turn."
+        let amount = st.cfg().rogue_power_per_card * st.played_this_turn;
+        let options = st.hands[p].iter().map(|u| u.iid).collect();
+        st.effect_stack.push(Step::by(StepKind::HandBuffChoice { chooser: player, options, amount }, lead));
     } else if Some(lead) == n.pyromancer {
         // "Add a Fireball to your hand.", the one this many uses have upgraded it to
         let f = pyro_fireball(st, player).ok_or("no Fireball in the card table")?;

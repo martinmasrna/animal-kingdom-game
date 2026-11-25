@@ -269,6 +269,8 @@ pub enum StepKind {
     WeakenChoice { chooser: Player, options: Tiles, amount: i32 },
     /// The player picks an ally to give +N strength, for good (the Angel Warrior's power).
     BuffChoice { chooser: Player, options: Tiles, amount: i32 },
+    /// The player picks a card in their hand to give +N strength, for good (the Rogue's power).
+    HandBuffChoice { chooser: Player, options: SmallVec<[i32; 12]>, amount: i32 },
     /// One "draw a card" while Reno leads: a Scout if their deck then holds no duplicates, else a draw.
     DrawOrScout { player: Player },
 }

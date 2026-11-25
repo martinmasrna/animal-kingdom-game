@@ -652,17 +652,22 @@ def test_the_angel_warriors_power_his_passive_on_a_removal_and_his_card_at_dawn(
     assert effective_strength(s, s.board["1,1"][-1]) == CARDS[ANGEL].base_strength    # not himself
 
 
-def test_the_rogues_third_card_costs_less_her_golem_and_her_card():
-    s = state(turn=19, hands={"A": ["wisp_2"] * 4}, leaders={"A": ASSASSIN}, decks={"A": ["wisp_1"] * 5})
+def test_the_rogues_third_card_costs_less_her_power_and_her_card():
+    s = state(turn=19, hands={"A": ["wisp_2"] * 4 + ["wisp_3", "wisp_5"]}, leaders={"A": ASSASSIN}, decks={"A": ["wisp_1"] * 5})
     costs = []
     for cr in ("1,1", "1,2", "1,3", "2,1"):
         costs.append(mana_cost(s, "wisp_2"))
         rules.apply_action(s, PlaceAction("wisp_2", ("cr", cr)))
     assert costs == [2, 2, 2 - CFG.rogue_discount, 2]                  # the third
     assert rules.mana_left(s, "A") == 10 - 8 + CFG.rogue_discount
-    rules.apply_action(s, LeaderAction())                              # four cards played: a Golem of 1 + 4
-    golem = s.hands["A"][-1]
-    assert golem.card_id == "golem" and effective_strength(s, golem) == 1 + 4 * CFG.golem_per_card and rules.unit_cost(s, golem) == 1
+    rules.apply_action(s, LeaderAction())                              # four cards played: +4 to a card in her hand, hers to pick
+    assert s.pending["options"] == [u.iid for u in s.hands["A"]] and not s.pending["optional"]
+    rules.apply_action(s, ChoiceAction(s.hands["A"][1].iid))
+    assert [effective_strength(s, u) for u in s.hands["A"]] == [CARDS["wisp_3"].base_strength, CARDS["wisp_5"].base_strength + 4 * CFG.rogue_power_per_card]
+    assert rules.mana_left(s, "A") == 10 - 8 + CFG.rogue_discount - CFG.rogue_power_cost
+    assert not any(isinstance(a, LeaderAction) for a in rules.legal_actions(s))                 # once a turn
+    s = state(turn=19, hands={"A": ["wisp_2"]}, leaders={"A": ASSASSIN}, decks={"A": ["wisp_1"] * 5})
+    assert not any(isinstance(a, LeaderAction) for a in rules.legal_actions(s))                 # no card played yet: nothing to give
     s = state(turn=19, hands={"A": ["wisp_1", "wisp_1", ASSASSIN]}, decks={"A": ["wisp_1"] * 5})
     rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,1"))); rules.apply_action(s, PlaceAction("wisp_1", ("cr", "1,2")))
     rules.apply_action(s, PlaceAction(ASSASSIN, ("cr", "1,3")))       # the third: she counts herself

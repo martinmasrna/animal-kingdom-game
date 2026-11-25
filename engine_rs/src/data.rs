@@ -468,7 +468,7 @@ config! {
     rogue_nth_card: i32 = 3,              // the Rogue: "Every third card you play costs 1 less."
     rogue_discount: i32 = 1,
     rogue_power_cost: i32 = 1,
-    golem_per_card: i32 = 1,              // her power's Golem: "+1 strength for each card played this turn"
+    rogue_power_per_card: i32 = 1,        // her power: "+1 strength for each card you played this turn"
     rogue_card_needs: i32 = 3,            // her card: "If you played 3 or more cards this turn, draw 3 cards."
     rogue_card_draws: i32 = 3,
     reno_scouts: i32 = 2,                 // Reno's card: "Roar: Scout 2 cards."
@@ -518,7 +518,6 @@ pub struct Named {
     pub mana_eater: Option<CardId>,
     pub spore: Option<CardId>,
     pub flight_1: Option<CardId>,
-    pub golem: Option<CardId>,
     pub mage_transformed: Option<CardId>,
     pub delicious_food: Option<CardId>,
     /// Baby, Young, Adult and Elder Fireball.
@@ -547,7 +546,6 @@ impl Game {
             mana_eater: cards.id_of(crate::cards::MANA_EATER),
             spore: cards.id_of(crate::cards::SPORE),
             flight_1: cards.id_of(crate::cards::FLIGHT_1),
-            golem: cards.id_of(crate::cards::GOLEM),
             mage_transformed: cards.id_of(crate::cards::MAGE_TRANSFORMED),
             delicious_food: cards.id_of(crate::cards::DELICIOUS_FOOD),
             fireballs: crate::cards::FIREBALLS.map(|f| cards.id_of(f)),

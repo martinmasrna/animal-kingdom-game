@@ -13,8 +13,6 @@ pub const ANGEL: &str = "angel_legend";
 pub const RENO: &str = "reno_legend";
 pub const PYROMANCER: &str = "pyromancer_legend";
 pub const MANA_EATER: &str = "mana_eater_legend";
-/// The Rogue's power makes it.
-pub const GOLEM: &str = "golem";
 /// What the Mage's card becomes once its owner's deck is empty.
 pub const MAGE_TRANSFORMED: &str = "mage_transformed";
 /// Gorrak's power summons it.
@@ -34,7 +32,7 @@ pub const LEADERS: [(&str, Option<&str>, Option<&str>); 9] = [
     (RAIDER, Some("Nightmare starts on the bottom of your deck. Dusk: Gain +1 strength."), Some("Swap Nightmare with the card above.")),
     (ELF, Some("Your regions produce 1 more food."), Some("Gain 1 food for each region you control.")),
     (ANGEL, Some("After your ally removes an enemy, give it +1 strength."), Some("Give an ally +2 strength.")),
-    (ASSASSIN, Some("Every third card you play costs 1 less."), Some("Add a 1-mana Golem to your hand. Give it +1 strength for each card played this turn.")),
+    (ASSASSIN, Some("Every third card you play costs 1 less."), Some("Give a card in your hand +1 strength for each card you played this turn.")),
     (SAGE, Some("Fatigue gains you food instead of losing it."), Some("Draw a card.")),
     (RENO, Some("If your deck has no duplicates, your \"draw a card\" effects Scout instead."), Some("Draw a card.")),
     (PYROMANCER, Some("Upgrade your hero power after 3 uses."), Some("Add a Fireball to your hand.")),

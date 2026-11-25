@@ -562,6 +562,7 @@ class Match:
         pending = {"mode": p["mode"], "optional": bool(p.get("optional")), "source": self._source(),
                    "sourceIid": step.get("by_iid"),   # the very unit asking (a target arrow starts at it); none for a leader's power
                    "kind": ASKS.get(step.get("op"), "effect"),
+                   "leader": step.get("by_iid") is None and step.get("by_card") is not None and step.get("by_card") == (st.leaders.get(p["chooser"]) or {}).get("id"),   # asked by the chooser's leader's power: the prompt reads the power, not the leader's card
                    "returned": len(step.get("returned", ())) if step.get("op") == "mulligan" else 0,
                    "cap": game.mulligan_cap(st, step["player"]) if step.get("op") == "mulligan" else 0,
                    "options": [self._describe_option(o) for o in p["options"]]}

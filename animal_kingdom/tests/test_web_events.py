@@ -61,3 +61,24 @@ def test_a_target_prompt_names_its_source_unit_and_the_other_seat_sees_the_aim()
     m.act("A", ChoiceAction("2,1"))
     seen = [(e["e"], e.get("cause"), e.get("cr")) for e in m.view("B")["game"]["events"]][-2:]
     assert seen == [("aim", "hunter_4", "2,1"), ("strength", "hunter_4", None)]
+
+
+def test_the_rogues_power_asks_for_a_card_in_her_hand_and_reads_as_her_power():
+    """A pick from the hand inside a leader's power: the options are the hand's cards with their numbers (laid out in the
+    middle by the client) and the prompt is marked as the leader's, so it reads the power and not the leader's card."""
+    from animal_kingdom.game import ASSASSIN, LeaderAction, PlaceAction
+    from animal_kingdom.tests.test_rules import state
+    m = Match("ROGUE", Seat("ta", "A", deck=SLUG))
+    m.join(Seat("tb", "B", deck=SLUG))
+    m._start_game()
+    m.state = state(turn=11, hands={"A": ["wisp_1", "wisp_2", "wisp_3"]}, leaders={"A": ASSASSIN})
+    assert not m.view("A")["game"]["legal"]["leader"]                  # nothing played yet
+    m.act("A", PlaceAction("wisp_1", ("cr", "1,1")))
+    m.act("A", LeaderAction())
+    pending = m.view("A")["game"]["pending"]
+    assert (pending["kind"], pending["leader"], pending["source"], pending["optional"]) == ("effect", True, ASSASSIN, False)
+    assert [(o["kind"], o["id"]) for o in pending["options"]] == [("hand", "wisp_2"), ("hand", "wisp_3")]
+    before = {h["id"]: h["str"] for h in m.view("A")["game"]["hand"]}
+    m.act("A", ChoiceAction(pending["options"][1]["v"]))
+    after = {h["id"]: h["str"] for h in m.view("A")["game"]["hand"]}
+    assert after == {"wisp_2": before["wisp_2"], "wisp_3": before["wisp_3"] + 1} and m.view("A")["game"]["pending"] is None
