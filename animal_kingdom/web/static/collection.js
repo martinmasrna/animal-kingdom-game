@@ -7,7 +7,7 @@ import { CROP, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck, deckOrder } from './deckcode.js';
 import { onHold } from './menu.js';
 import { track } from './log.js';
-import { manaCard, manaPiece, fitPlaques, costChip, powerCard } from './mana.js';
+import { manaCard, manaPiece, fitPlaques, costChip, powerCard, leaderToken, powerCostHTML } from './mana.js';
 import { hasFigure } from './token.js';
 import { squareLook } from './board.js';
 
@@ -348,9 +348,8 @@ function confirmDelete(app, d, done) {
 }
 // A deck's leader: a legendary that can lead, which every deck has (Martin, 2026-11-16), chosen when the deck is made
 // (2026-11-17). Its card is in the deck while it leads: choosing another leader swaps the cards, and the leader's own strip
-// stays put. The row shows the leader with its ability; a click picks another.
-// a leader's abilities as one line: "Passive. ... Hero power: ..."
-const abilities = L => [L.passive && `Passive. ${L.passive}`, L.power && `Hero power: ${L.power}`].filter(Boolean).join(' ');
+// stays put. The row shows the leader's two abilities, each its icon and its text (Martin, 2026-11-25: "two icons (one for
+// passive, one for active), with only ability text next to them"); a click picks another.
 const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible');   // each ruleset its own leaders
 // In the mana rules the plate alone: the card beside it already shows the animal, and the orb is the old painting's.
 const powerHTML = (id, D = 150) => { const L = X.leaders[id];
@@ -364,10 +363,15 @@ function setLeader(d, id) {
   if (!d.list.includes(id)) d.list.push(id);
   d.leader = id;
 }
+const LIC = 40;   // an ability's icon in the deck's leader row
 function leaderRow(d) {
   const id = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null, L = id && X.leaders[id];
-  return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? (squareLook() ? `<div class="lpc lfig"><img src="/static/hex/fig/${id}.webp" alt="" draggable="false"></div>` : `<div class="lpc">${manaPiece(C[id], { str: null, w: 50 })}</div>`) : `<div class="lmed empty"></div>`}`
-    + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${esc(abilities(L))}</span>` : `<b>No leader</b><span>Choose a leader for this deck</span>`}</div></div>`;
+  if (!id) return `<div class="lrow none" id="dlead"><div class="lmed empty"></div><div class="ltx"><b>No leader</b><span>Choose a leader for this deck</span></div></div>`;
+  // the icons are the rail's two pieces: the passive the leader's own token, the power a tile holding its cost
+  const line = (icon, text) => `<div class="lab"><div class="lic unit A" style="--tw:${LIC}px">${icon}</div><span>${esc(text)}</span></div>`;
+  return `<div class="lrow ab" id="dlead">`
+    + (L.passive ? line(leaderToken(id, 'A', C, LIC), L.passive) : '')
+    + (L.power ? line(`<i class="sqtok A"></i>${powerCostHTML(L.cost)}`, L.power) : '') + '</div>';
 }
 // `d`: the deck whose leader changes, or null for a new deck.
 function pickLeader(app, d, done) {
