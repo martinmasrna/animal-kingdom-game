@@ -481,7 +481,7 @@ config! {
     mana_eater_start_crystals: i32 = 3,   // the Mana Eater: "Start the game with 0 cards but 3 empty mana crystals."
     mana_eater_power_cost: i32 = 1,
     mana_eater_power_mana: i32 = 2,       // his power: "Next turn, gain 2 more mana."
-    mana_eater_food_per_crystal: i32 = 1, // his card: "Roar: destroy all your mana crystals. Gain 1 food for each."
+    mana_eater_food_per_crystal: i32 = 1, // his card: "Hungry. Roar: destroy all your mana crystals. Gain 1 food for each."
     mama_spores: i32 = 2,                 // Mama Spore: "Roar: put 2 Spores into your hand." (Martin, 2026-11-21)
     bird_egg_flights: i32 = 2,            // the Bird Egg: "Fall: add two [Flight 1] to your hand." (Martin, 2026-11-22)
     golden_egg_draws: i32 = 1,            // the Golden Egg: "When you draw this, draw a card." (Martin, 2026-11-22)

@@ -664,9 +664,11 @@
       "status": "collectible",
       "rarity": "legendary",
       "base_strength": 14,
-      "text": "Roar: destroy all your mana crystals. Gain 1 food for each.",
+      "text": "Hungry. Roar: destroy all your mana crystals. Gain 1 food for each.",
       "cost": 10,
-      "keywords": []
+      "keywords": [
+        "Hungry"
+      ]
     },
     {
       "id": "golem",

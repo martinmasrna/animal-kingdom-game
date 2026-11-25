@@ -90,7 +90,7 @@ pub enum Roar {
     ScoutTwice,
     /// "Roar: upgrade all Fireballs in your hand. They keep their cost." (the Pyromancer's card)
     UpgradeFireballs,
-    /// "Roar: destroy all your mana crystals. Gain 1 food for each." (the Mana Eater's card)
+    /// "Hungry. Roar: destroy all your mana crystals. Gain 1 food for each." (the Mana Eater's card)
     EatCrystals,
     /// "Roar: double your food." (Mage, Transformed)
     DoubleFood,

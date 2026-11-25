@@ -765,8 +765,10 @@ def test_the_mana_eater_starts_with_no_cards_and_three_crystals_banks_mana_and_e
     rules.apply_action(s, PassAction())
     assert rules.mana_left(s, "A") == 12 and s.crystals["A"] == 10
     s = state(turn=19, hands={"A": [MANA_EATER]}, leaders={"A": MANA_EATER}, food={"A": 10, "B": 15})
-    rules.apply_action(s, PlaceAction(MANA_EATER, ("cr", "1,1")))      # 10 crystals destroyed: 10 food
-    assert s.crystals["A"] == 0 and s.food["A"] == 20 and rules.mana_left(s, "A") == 0
+    assert CARDS[MANA_EATER].keywords == {"Hungry"} and places(s, MANA_EATER) == set()
+    put(s, "1,1", "wisp_1", "B")                                       # Hungry: he lands on an enemy he beats
+    rules.apply_action(s, PlaceAction(MANA_EATER, ("cr", "1,1")))      # 10 crystals destroyed: 10 food, and his prey's
+    assert s.crystals["A"] == 0 and s.food["A"] == 20 + CFG.hungry_food and rules.mana_left(s, "A") == 0
     rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())
     assert rules.mana_left(s, "A") == 1                                # and they grow back from one
     assert GameState.from_dict(s.to_dict()).crystals == s.crystals
