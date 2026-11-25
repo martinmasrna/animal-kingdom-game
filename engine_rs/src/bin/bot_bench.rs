@@ -128,7 +128,7 @@ fn deck_problem(g: &Game, d: &DeckList) -> Option<String> {
             return Some(format!("{n} copies of {:?}", card.id));
         }
     }
-    if g.cards.get(d.leader).beh.leader.is_none() || !d.cards.contains(&d.leader) {
+    if !g.cards.get(d.leader).beh.leader || !d.cards.contains(&d.leader) {
         return Some(format!("{:?} cannot lead it", g.cards.name_of(d.leader)));
     }
     None
@@ -156,7 +156,7 @@ fn decks_from_file(g: &Game, path: &str) -> Result<Vec<DeckList>, String> {
 fn random_decks(g: &Game, n: usize, seed: u64) -> Vec<DeckList> {
     let mut rng = PyRandom::seeded_u64(mix(seed ^ 0xDEC5));
     let all: Vec<CardId> = (0..g.cards.list.len() as CardId).filter(|&c| g.cards.get(c).collectible).collect();
-    let leaders: Vec<CardId> = all.iter().copied().filter(|&c| g.cards.get(c).beh.leader.is_some()).collect();
+    let leaders: Vec<CardId> = all.iter().copied().filter(|&c| g.cards.get(c).beh.leader).collect();
     (0..n).map(|i| {
         let leader = leaders[rng.randbelow(leaders.len())];
         let mut rest: Vec<CardId> = all.iter().copied().filter(|&c| c != leader).collect();

@@ -37,8 +37,8 @@ def snapshot() -> dict:
     cards = {c.id: {"id": c.id, "name": c.name, "rarity": c.rarity, "str": None if c.is_dynamic else c.base_strength,
                     "text": c.text, "kw": sorted(c.keywords), "mana": c.cost, "fig": figs.get(c.id)}
              for c in load_cards().values() if c.status == "collectible"}
-    leaders = {lid: {"id": lid, "kind": kind, "text": text, "mana": power_price(lid, Config()) if kind == "power" else None}
-               for lid, (kind, text) in LEADERS.items()}
+    leaders = {lid: {"id": lid, "passive": passive, "power": power, "mana": power_price(lid, Config()) if power else None}
+               for lid, (passive, power) in LEADERS.items()}
     return {"cards": cards, "leaders": leaders}
 
 
@@ -59,6 +59,27 @@ def rules_of(version: str) -> list[str]:
     return [ln[2:].strip() for ln in (m.group(1) if m else "").splitlines() if ln.startswith("- ")]
 
 
+def abilities(L: dict) -> dict:
+    """A leader's passive, power and the power's mana; a snapshot before 0.0.5 held one ability ({kind, text})."""
+    if "kind" in L:
+        return {"passive": L["text"] if L["kind"] == "passive" else None, "power": L["text"] if L["kind"] == "power" else None, "mana": L["mana"]}
+    return {"passive": L["passive"], "power": L["power"], "mana": L["mana"]}
+
+
+def abilities(L: dict) -> dict:
+    """A leader's passive, power and the power's mana; a snapshot before 0.0.5 held one ability ({kind, text})."""
+    if "kind" in L:
+        return {"passive": L["text"] if L["kind"] == "passive" else None, "power": L["text"] if L["kind"] == "power" else None, "mana": L["mana"]}
+    return {"passive": L["passive"], "power": L["power"], "mana": L["mana"]}
+
+
+def abilities(L: dict) -> dict:
+    """A leader's passive, power and the power's mana; a snapshot before 0.0.5 held one ability ({kind, text})."""
+    if "kind" in L:
+        return {"passive": L["text"] if L["kind"] == "passive" else None, "power": L["text"] if L["kind"] == "power" else None, "mana": L["mana"]}
+    return {"passive": L["passive"], "power": L["power"], "mana": L["mana"]}
+
+
 def diff(was: dict, now: dict) -> dict:
     keys = ("name", "str", "text", "mana")
     changed = [{"was": was["cards"][i], "now": c} for i, c in now["cards"].items()
@@ -66,7 +87,7 @@ def diff(was: dict, now: dict) -> dict:
     added = [c for i, c in now["cards"].items() if i not in was["cards"]]
     removed = [c for i, c in was["cards"].items() if i not in now["cards"]]
     powers = [{"was": was["leaders"][i], "now": L} for i, L in now["leaders"].items()
-              if i in was["leaders"] and any(was["leaders"][i][k] != L[k] for k in ("kind", "text", "mana"))]
+              if i in was["leaders"] and abilities(was["leaders"][i]) != abilities(L)]
     key = lambda c: (c["mana"], c["name"])
     changed.sort(key=lambda p: key(p["now"])); added.sort(key=key); removed.sort(key=key)
     return {"powers": powers, "changed": changed, "added": added, "removed": removed}

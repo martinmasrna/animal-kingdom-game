@@ -737,7 +737,7 @@ function foodStep(step) {
     }
     const tiles = (step.from || []).map(f => ({ el: document.querySelector(`#board .cr[data-cr="${dcr(f.cr)}"]`), n: f.n })).filter(x => x.el);
     if (tiles.length) return tiles;
-    const lead = document.querySelector(`#mplane .ltok[data-lead="${s}"]`);
+    const lead = document.querySelector(`#mplane .ltok.pas[data-lead="${s}"]`);   // food a passive made (the Elf's)
     return lead ? [{ el: lead, n: step.n }] : [];
   };
   playFood({ ...step, side }, before, sources);
@@ -999,7 +999,7 @@ function drawGame() {
     if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); store('ak:mullseen', '1'); act({ kind: 'choice', choice: SKIP }); };
   } else if (d.pend) {   // a choice only ever reaches the screen after the steps that led to it have played
     // a choice inside your leader's power names the leader and reads its power, not its card (the leaders prototype)
-    const src = d.pend.leader && G.leaders && G.leaders[V.you] ? { name: (CARDS[d.pend.source] || {}).name, text: G.leaders[V.you].text } : d.pend.source && CARDS[d.pend.source];
+    const src = d.pend.leader && G.leaders && G.leaders[V.you] ? { name: (CARDS[d.pend.source] || {}).name, text: G.leaders[V.you].power } : d.pend.source && CARDS[d.pend.source];
     // One line at the top centre, where the eyes are: the card that asks and its rule, then Skip when it may be declined;
     // named options as slabs under it.
     const other = d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('');
@@ -1023,7 +1023,7 @@ function drawGame() {
     bar.querySelectorAll('[data-x]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.otherOpts[el.dataset.x].v }); });
     const sk = $('skip'); if (sk) sk.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
   } else if (d.mine && ui.roam === 'den' && G.legal && G.legal.leader) {   // your leader picked on a touch screen: its power and Use
-    bar.innerHTML = `<div class="line">${leaderPanel('A')}<span class="skip use" id="actuse">Use</span><span class="skip" id="actno">Cancel</span></div>`;
+    bar.innerHTML = `<div class="line">${leaderPanel('A', 'power')}<span class="skip use" id="actuse">Use</span><span class="skip" id="actno">Cancel</span></div>`;
     bar.classList.add('on');
     $('actuse').onclick = e => { e.stopPropagation(); sfx('pick'); ui.roam = null; act({ kind: 'leader' }); };
     $('actno').onclick = e => { e.stopPropagation(); ui.roam = null; drawGame(); };
@@ -1042,12 +1042,12 @@ function drawGame() {
   if (A) A.fx = st ? []
     : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
   if (st && st.kind === 'trigger') {   // a leader's passive fires: its token flashes in place
-    const lt = document.querySelector(`#mplane .ltok[data-lead="${rel(st.player)}"]`);
+    const lt = document.querySelector(`#mplane .ltok.pas[data-lead="${rel(st.player)}"]`);
     if (lt) { lt.classList.remove('fire'); void lt.offsetWidth; lt.classList.add('fire'); }
   }
-  if (st && st.kind === 'leader') {   // a leader's power used: the leader's card shown large, shrinking into its place by the den
-    const lt = document.querySelector(`#mplane .ltok[data-lead="${rel(st.player)}"]`), [tx, ty] = lt ? onStage(lt) : [STAGE.w / 2, 300], rv = $('reveal');
-    rv.innerHTML = ((manaCard({ ...CARDS[st.card], text: ((G.leaders || {})[st.player] || {}).text || CARDS[st.card].text }, { owner: rel(st.player), w: 190, str: null }))) + '<div class="actlbl">Leader</div>'; fitNames(rv); fitPlaques(rv);
+  if (st && st.kind === 'leader') {   // a leader's power used: the leader's card shown large, shrinking into its power by the den
+    const lt = document.querySelector(`#mplane .ltok.pw[data-lead="${rel(st.player)}"]`), [tx, ty] = lt ? onStage(lt) : [STAGE.w / 2, 300], rv = $('reveal');
+    rv.innerHTML = ((manaCard({ ...CARDS[st.card], text: ((G.leaders || {})[st.player] || {}).power || CARDS[st.card].text }, { owner: rel(st.player), w: 190, str: null }))) + '<div class="actlbl">Leader</div>'; fitNames(rv); fitPlaques(rv);
     rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
   }
@@ -1164,7 +1164,8 @@ function bodyAt(cr, at = .5) {
   return r && r.width ? toStage(r.left + r.width / 2, r.top + r.height * at) : crossroadAt(cr);
 }
 const TIP_AT = .64;
-const leadAt = side => { const l = document.querySelector(`#mplane .ltok[data-lead="${side}"]`); return l ? onStage(l) : null; };
+// a power's arrow starts at the power
+const leadAt = side => { const l = document.querySelector(`#mplane .ltok.pw[data-lead="${side}"]`); return l ? onStage(l) : null; };
 // what your arrow starts from now: { cr } (viewer space) or { lead: 'A' }, or null when no target is asked for
 function aimFrom(d) {
   if (!d || !d.mine || !d.pend || d.pend.mode !== 'choice' || d.pend.kind !== 'effect' || !Object.keys(d.crChoice).length) return null;
@@ -1285,11 +1286,12 @@ function startBeat(g, A, ago) {
 const endBeat = () => { const key = V && `${V.id}-${V.rematches}`;
   return ui.beat && ui.beat.key === key ? { kind: ui.beat.kind, side: ui.beat.side, ago: Date.now() - ui.beat.t0 } : null; };
 
-const LEADER_MANA = n => ({ power: `Hero power: costs ${n} mana.`, once: `Once per game: costs ${n} mana.`, passive: 'Passive.' });   // the mana rules
-function leaderPanel(side) {
-  const L = viewerGame().leaders[side]; if (!L) return '';
-  const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader", kind = (LEADER_MANA(V.game.abilityCost));
-  return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${kind[L.kind] || ''}</p><p>${L.text}</p>`;
+// One of a leader's two abilities read: `ab` is 'passive' or 'power'.
+function leaderPanel(side, ab) {
+  const L = viewerGame().leaders[side]; ab = ab || (L && L.power ? 'power' : 'passive'); if (!L || !L[ab]) return '';
+  const c = CARDS[L.id], who = side === 'A' ? 'Your leader' : "Your opponent's leader";
+  const kind = ab === 'power' ? `Hero power: costs ${L.cost ?? V.game.abilityCost} mana.` : 'Passive.';
+  return `<b>${c ? c.name.split(':')[0] : L.id}</b><p class="lk">${who}. ${kind}</p><p>${L[ab]}</p>`;
 }
 // The mana rules' pieces beside the board (Martin, 2026-11-22: his arrangement from the layout trial, made symmetric): each
 // side's leader, deck and mana, and End turn, laid on the table with the board (#mplane, given its tilt by board.js), placed
@@ -1319,13 +1321,15 @@ function drawRail(G, d) {
   const lead = side => {
     const p = side === 'A' ? you : them, L = (G.leaders || {})[p];
     const can = side === 'A' && L && L.usable && d && d.mine && !d.pend, dim = L && L.spent;   // the gold ring says when your power can be used
-    // a power's cost in the token's drawer, where a card's strength sits (Martin, 2026-11-21); used this turn, the token
-    // dims, no label (Martin, 2026-11-21: "remove AI-slop label")
-    const isPow = L && L.kind === 'power';
-    const tok = L ? `<div class="ltok${isPow ? ' pw' : ''}${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}"><div class="unit ${side}" style="--tw:${LEAD_W}px">${leaderToken(L.id, side, CARDS, LEAD_W)}${isPow ? powerCostHTML(L.cost ?? cost) : ''}</div></div>` : '';
-    // what the leader counts to (the Assassin's cards this turn): a dot filled for each counted
-    const cnt = L && L.count ? `<div class="lcount ${side}">${Array.from({ length: L.count.of }, (_, i) => `<i class="${i < L.count.n ? 'on' : ''}"></i>`).join('')}</div>` : '';
-    return `<div class="mlead ${side}" style="${spot(railSpot('lead', side))}">${tok}${cnt}</div>`;
+    // its two abilities side by side: the passive, the leader's own token, and on its right the power, a tile of the
+    // team's colour holding its cost; used this turn, the power dims, no label (Martin, 2026-11-21: "remove AI-slop label")
+    if (!L) return '';
+    // what the passive counts to (the Assassin's cards this turn): a dot filled for each counted
+    const cnt = L.count ? `<div class="lcount ${side}">${Array.from({ length: L.count.of }, (_, i) => `<i class="${i < L.count.n ? 'on' : ''}"></i>`).join('')}</div>` : '';
+    const pas = `<div class="ltok pas" data-lead="${side}" data-ab="passive"><div class="unit ${side}" style="--tw:${LEAD_W}px">${leaderToken(L.id, side, CARDS, LEAD_W)}</div>${cnt}</div>`;
+    const pow = L.power ? `<div class="ltok pw${can ? ' can' : ''}${dim ? ' dim' : ''}" data-lead="${side}" data-ab="power"><div class="unit ${side}" style="--tw:${LEAD_W}px"><i class="sqtok ${side}"></i>${powerCostHTML(L.cost ?? cost)}</div></div>` : '';
+    // the passive stays where the leader stood; the power sits on its right, away from the board
+    return `<div class="mlead ${side}" style="${spot(railSpot('lead', side), `${LEAD_W / 2}px 50%`)}">${pas}${pow}</div>`;
   };
   // the deck: its cards face down, each under the top one a step darker so the pile's edges read, as thick as what is left
   const deck = side => {
@@ -1359,7 +1363,8 @@ function portRail(el) {
   for (const s of ['A', 'B']) {
     const y = ball(s), dh = PR.deck * 1.38;
     at(`.mlead.${s}`, PR.edge, y - PR.lead / 2);
-    at(`.mmana.${s}`, PR.edge + PR.lead + PR.gap, y - 30);
+    const lw = (el.querySelector(`.mlead.${s}`)?.offsetWidth || PR.lead) * 1.143;   // the leader's row, one or two pieces (.game.port .mlead's scale)
+    at(`.mmana.${s}`, PR.edge + lw + PR.gap, y - 30);
     at(`.mdeck.${s}`, s === 'A' ? W - PR.edge - PR.tb - PR.gap - PR.deck : W - PR.edge - PR.deck, y - dh / 2);
   }
   const y = ball('A'), tb = document.getElementById('tbtn'), wt = document.getElementById('waiting');
@@ -1375,7 +1380,7 @@ function wireRail() {
   const hide = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
   rail.addEventListener('mouseover', e => {
     const lead = e.target.closest('[data-lead]');
-    if (lead && !touch()) { pop.className = 'pop' + ((' mpop')); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
+    if (lead && !touch()) { pop.className = 'pop' + ((' mpop')); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead, lead.dataset.ab)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
       const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.max(10, r.left - w - 12) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
     hide();
@@ -1383,9 +1388,9 @@ function wireRail() {
   rail.addEventListener('mouseout', e => { if (!rail.contains(e.relatedTarget)) hide(); });
   rail.addEventListener('click', e => {
     const lead = e.target.closest('[data-lead]'), d = lastDecision; e.stopPropagation();
-    if (lead && lead.dataset.lead === 'A') { const L = viewerGame().leaders.A;
+    if (lead && lead.dataset.lead === 'A' && lead.dataset.ab === 'power') { const L = viewerGame().leaders.A;
       if (L && L.usable && d && d.mine && !d.pend) { hide(); sfx('pick'); ui.roam = null; ui.sel = null; return act({ kind: 'leader' }); } }
-    if (lead && touch()) return readOverlay(leaderPanel(lead.dataset.lead));
+    if (lead && touch()) return readOverlay(leaderPanel(lead.dataset.lead, lead.dataset.ab));
     const deck = e.target.closest('[data-deck]'); if (deck) { const k = deck.dataset.deck === 'A' ? 'mine' : 'theirs'; ui.panel = ui.panel === k ? null : k; showPanel(); }
   });
 }
@@ -1525,7 +1530,7 @@ function wireBoard() {
   });
   board.addEventListener('mouseover', e => {
     const lead = e.target.closest('[data-lead]');   // a leader reads on hover: its ability as it stands
-    if (lead && !touch()) { showStack(null, null); pop.className = 'pop' + ((' mpop')); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
+    if (lead && !touch()) { showStack(null, null); pop.className = 'pop' + ((' mpop')); pop.innerHTML = `<div class="ev lead">${leaderPanel(lead.dataset.lead, lead.dataset.ab)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex';
       const r = lead.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.min(r.right + 10, innerWidth - w - 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top, innerHeight - h - 10)) + 'px'; return; }
     if (!lead && pop.querySelector('.ev.lead')) { pop.style.display = 'none'; pop.style.minHeight = ''; }

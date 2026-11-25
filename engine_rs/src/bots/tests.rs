@@ -28,7 +28,7 @@ fn game_on(map_id: &str) -> Arc<Game> {
 /// A random legal deck: a leader and two copies of random collectible cards.
 fn deck(g: &Game, rng: &mut PyRandom) -> (Vec<CardId>, CardId) {
     let all: Vec<CardId> = (0..g.cards.list.len() as CardId).filter(|&c| g.cards.get(c).collectible).collect();
-    let leaders: Vec<CardId> = all.iter().copied().filter(|&c| g.cards.get(c).beh.leader.is_some()).collect();
+    let leaders: Vec<CardId> = all.iter().copied().filter(|&c| g.cards.get(c).beh.leader).collect();
     let leader = leaders[rng.randbelow(leaders.len())];
     let mut rest: Vec<CardId> = all.into_iter().filter(|&c| c != leader).collect();
     rng.shuffle(&mut rest);

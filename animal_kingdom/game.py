@@ -242,8 +242,9 @@ def _engine_for(cards: Optional[dict[str, Card]], config: Optional[Config], map_
 
 # ------------------------------------------------------------------ leaders and decks
 
-# card id -> (kind, the ability as the player reads it): a "power" is used for its mana once a turn, a "passive" is always on
-LEADERS: dict[str, tuple[str, str]] = {lead["id"]: (lead["kind"], lead["text"]) for lead in ENGINE.leaders()}
+# card id -> (its passive, its power), each the text as the player reads it or None: a passive is always on, a power is
+# used for its mana once a turn
+LEADERS: dict[str, tuple[Optional[str], Optional[str]]] = {lead["id"]: (lead["passive"], lead["power"]) for lead in ENGINE.leaders()}
 WARLORD, RAIDER, SAGE, ELF, ASSASSIN = "warlord_legend", "raider_legend", "sage_legend", "elf_legend", "assassin_legend"
 
 

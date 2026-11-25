@@ -14,15 +14,21 @@ pub const SPORE: &str = "spore";
 /// The Flight 1, which the Bird Egg hatches.
 pub const FLIGHT_1: &str = "flight_1";
 
-/// Every leader, in the order the game lists them, with its ability as the player reads it. Whether an ability is a power
-/// or a passive is in `behaviour`.
-pub const LEADERS: [(&str, &str); 5] = [
-    (WARLORD, "Your Hungry cards have +2 strength."),                          // Martin, 2026-11-24: "from hand" too
-    (RAIDER, "At the end of your turn, if Leeroy is in your deck, he gains +1 strength. Power: swap Leeroy with the card above him in your deck; if he's on top, draw him. If he's in your hand, shuffle him into your deck instead."),   // Martin, 2026-11-24
-    (SAGE, "Draw a card."),
-    (ELF, "Your regions produce 1 more food."),                               // Martin, 2026-11-23: the card's and the power's texts swapped
-    (ASSASSIN, "After every third card you play in a turn, draw a card."),    // Martin, 2026-11-21: "multiple times a turn"
+/// Every leader, in the order the game lists them, with its two abilities as the player reads them: its passive, always
+/// on, and its power, used for its mana once a turn. Either may be missing.
+pub const LEADERS: [(&str, Option<&str>, Option<&str>); 5] = [
+    (WARLORD, Some("Your Hungry cards have +2 strength."), None),              // Martin, 2026-11-24: "from hand" too
+    (RAIDER, Some("At the end of your turn, if Leeroy is in your deck, he gains +1 strength."),
+        Some("Swap Leeroy with the card above him in your deck; if he's on top, draw him. If he's in your hand, shuffle him into your deck instead.")),   // Martin, 2026-11-24
+    (SAGE, None, Some("Draw a card.")),
+    (ELF, Some("Your regions produce 1 more food."), None),                   // Martin, 2026-11-23: the card's and the power's texts swapped
+    (ASSASSIN, Some("After every third card you play in a turn, draw a card."), None),   // Martin, 2026-11-21: "multiple times a turn"
 ];
+
+/// Whether the leader `id` has a power.
+pub fn has_power(id: &str) -> bool {
+    LEADERS.iter().any(|&(l, _, power)| l == id && power.is_some())
+}
 
 /// The cards a card makes, which a card read large shows beside it (Martin, 2026-11-21: "same way it was in the original
 /// game").
@@ -93,13 +99,6 @@ pub enum OnRaid {
     Draw,
 }
 
-/// A leader's ability: a power is used for its mana once a turn, a passive is always on.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum LeaderKind {
-    Power,
-    Passive,
-}
-
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Behaviour {
     pub on_place: Option<Roar>,
@@ -116,8 +115,8 @@ pub struct Behaviour {
     pub double_raider: bool,
     /// A Djinn: "Costs N less for each ...".
     pub djinn: Option<Count>,
-    /// Some when the card may lead a deck.
-    pub leader: Option<LeaderKind>,
+    /// Whether the card may lead a deck.
+    pub leader: bool,
 }
 
 pub fn behaviour(id: &str) -> Behaviour {
@@ -169,11 +168,7 @@ pub fn behaviour(id: &str) -> Behaviour {
         "djinn_burn" => Some(Count::EnemyFoodLost),
         _ => None,
     };
-    b.leader = match id {
-        WARLORD | ASSASSIN | ELF => Some(LeaderKind::Passive),
-        SAGE | RAIDER => Some(LeaderKind::Power),
-        _ => None,
-    };
+    b.leader = LEADERS.iter().any(|&(l, _, _)| l == id);
     b.draw_on_draw = id == "golden_egg";
     b.spikes_aura = id == "porcupine";
     b.raid_draw_aura = id == "plunderer";

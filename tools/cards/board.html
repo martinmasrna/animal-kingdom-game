@@ -129,7 +129,7 @@ const RORD = { legendary: 0, rare: 1, common: 2 };
 // A leader's power is an item of its own, right after its leader's card.
 function setData(list, powers = []) {
   const sorted = [...list].sort((a, b) => a.mana - b.mana || (RORD[a.rarity] ?? 3) - (RORD[b.rarity] ?? 3) || a.name.localeCompare(b.name));
-  const pw = Object.fromEntries(powers.map(L => [L.id, { ...L, id: 'power:' + L.id, leader: L.id, power: true, name: L.kind === 'power' ? 'Hero power' : 'Passive' }]));
+  const pw = Object.fromEntries(powers.map(L => [L.id, { ...L, id: 'power:' + L.id, leader: L.id, power: true, name: 'Leader', text: [L.passive && `Passive. ${L.passive}`, L.power && `Hero power: ${L.power}`].filter(Boolean).join(' ') }]));
   DATA = sorted.flatMap(c => pw[c.id] ? [c, pw[c.id]] : [c]);
   CARDS = Object.fromEntries(DATA.map(c => [c.id, c]));
 }

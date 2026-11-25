@@ -58,7 +58,7 @@ fn load(args: &[String]) -> Arc<Game> {
 fn decks(g: &Game) -> Vec<(CardId, Vec<CardId>)> {
     let mut rng = PyRandom::seeded_u64(mix(0xDEC5));
     let all: Vec<CardId> = (0..g.cards.list.len() as CardId).filter(|&c| g.cards.get(c).collectible).collect();
-    let leaders: Vec<CardId> = all.iter().copied().filter(|&c| g.cards.get(c).beh.leader.is_some()).collect();
+    let leaders: Vec<CardId> = all.iter().copied().filter(|&c| g.cards.get(c).beh.leader).collect();
     (0..5).map(|_| {
         let leader = leaders[rng.randbelow(leaders.len())];
         let mut rest: Vec<CardId> = all.iter().copied().filter(|&c| c != leader).collect();

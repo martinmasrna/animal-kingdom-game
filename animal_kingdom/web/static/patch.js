@@ -21,12 +21,18 @@ function card(c) {
   const h = manaCard({ ...c, tags: [] }, { cost: null, w: W, str: null });   // a hero power: its mana in the drawer, as in the game
   return c.mana != null ? h.replace(/(<div class="mpiece[^>]*>)/, `$1${powerCostHTML(c.mana)}`) : h;
 }
-const power = L => ({ id: L.id, name: L.kind === 'power' ? 'Hero power' : 'Passive', rarity: 'common', str: null, text: L.text, kw: [], power: true, mana: L.mana });
+const power = (L, name, text, mana) => ({ id: L.id, name, rarity: 'common', str: null, text, kw: [], power: true, mana });
+// a leader's change as pairs of cards, one for each ability that changed: a patch before 0.0.5 held one ability a leader
+// ({kind, text}), later ones a passive and a power, either missing
+const abilityOf = (L, k) => L.kind ? (L.kind === k ? L.text : null) : L[k];
+const powerPairs = p => [['passive', 'Passive'], ['power', 'Hero power']].map(([k, name]) => [k, name, abilityOf(p.was, k), abilityOf(p.now, k)])
+  .filter(([k, , a, b]) => a !== b || (k === 'power' && b && p.was.mana !== p.now.mana))
+  .map(([k, name, a, b]) => ({ was: power(p.was, name, a || '', k === 'power' ? p.was.mana : null), now: power(p.now, name, b || '', k === 'power' ? p.now.mana : null) }));
 const pair = p => `<div class="pair" data-key="${p.now.power ? 'power:' : ''}${p.now.id}">${card(p.was)}<i class="arrow"></i>${card(p.now)}</div>`;
 const kind = p => p.was.text !== p.now.text ? 'rework' : p.was.mana !== p.now.mana ? 'mana' : 'str';
 
 export function patchHTML(P) {
-  const groups = [['Hero powers', P.powers.map(p => ({ was: power(p.was), now: power(p.now) }))],
+  const groups = [['Hero powers', P.powers.flatMap(powerPairs)],
     ...[['rework', 'Reworked'], ['mana', 'Mana cost'], ['str', 'Strength']].map(([k, t]) => [t, P.changed.filter(p => kind(p) === k)])];
   const changed = groups.filter(([, ps]) => ps.length).map(([t, ps]) => `<h3>${t}</h3><div class="pairs">${ps.map(pair).join('')}</div>`).join('');
   return `<h1>${esc(P.name)}</h1><div class="date">${esc(P.date)}</div>`

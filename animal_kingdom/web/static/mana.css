@@ -164,7 +164,9 @@
 .game.mana .mlead { position: absolute; display: flex; align-items: center; gap: 8px; }
 .game.mana .mlead .ltok { position: relative; width: 84px; height: 97px; flex: none; }
 .game.mana .mlead .ltok .unit { position: absolute; inset: 0; --tw: 84px; }
-.game.mana .mlead .ltok.dim { filter: grayscale(.85) brightness(.7); }   /* a once-a-game power, used */
+.game.mana .mlead .ltok.dim { filter: grayscale(.85) brightness(.7); }   /* a power used this turn */
+/* the power beside the passive: a tile of the team's colour, its cost the mark in its middle (app.js drawRail) */
+.game.mana .mlead .ltok.pw .pcost.rcm { top: 50%; bottom: auto; width: 46%; transform: translate(-50%, -50%); }
 .game.mana .mlead .ltok.can { cursor: pointer; }
 /* your power reads as your hand does (Martin, 2026-11-24: no outline): dimmed while you can't use it, as an unplayable card is */
 .game.mana .mlead.A .ltok.pw:not(.can) .unit { filter: brightness(.45) saturate(.5); }

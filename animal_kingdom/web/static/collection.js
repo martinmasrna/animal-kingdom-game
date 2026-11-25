@@ -349,11 +349,12 @@ function confirmDelete(app, d, done) {
 // A deck's leader: a legendary that can lead, which every deck has (Martin, 2026-11-16), chosen when the deck is made
 // (2026-11-17). Its card is in the deck while it leads: choosing another leader swaps the cards, and the leader's own strip
 // stays put. The row shows the leader with its ability; a click picks another.
-const KIND = { power: 'Hero power', once: 'Once per game', passive: 'Passive' };
+// a leader's abilities as one line: "Passive. ... Hero power: ..."
+const abilities = L => [L.passive && `Passive. ${L.passive}`, L.power && `Hero power: ${L.power}`].filter(Boolean).join(' ');
 const leaderIds = () => Object.keys(X.leaders || {}).filter(id => C[id] && C[id].status === 'collectible');   // each ruleset its own leaders
 // In the mana rules the plate alone: the card beside it already shows the animal, and the orb is the old painting's.
 const powerHTML = (id, D = 150) => { const L = X.leaders[id];
-  return `<div class="hpow${(' bare')}">${('')}<div class="plate"><b>${KIND[L.kind]}</b><p>${esc(L.text)}</p></div></div>`; };
+  return `<div class="hpow${(' bare')}">${('')}<div class="plate">${L.passive ? `<b>Passive</b><p>${esc(L.passive)}</p>` : ''}${L.power ? `<b>Hero power</b><p>${esc(L.power)}</p>` : ''}</div></div>`; };
 // beside a legendary in the collection (in a match the card is just a card)
 // a leader's power as a card beside the leader's, as a card's tokens are (Martin, 2026-11-21)
 const powerOf = (c, w = 170) => (X.leaders || {})[c.id] && c.status === 'collectible' ? powerCard(c.id, X.leaders[c.id], w) : '';
@@ -366,7 +367,7 @@ function setLeader(d, id) {
 function leaderRow(d) {
   const id = d.leader && d.list.includes(d.leader) && (X.leaders || {})[d.leader] ? d.leader : null, L = id && X.leaders[id];
   return `<div class="lrow${id ? '' : ' none'}" id="dlead">${id ? (squareLook() ? `<div class="lpc lfig"><img src="/static/hex/fig/${id}.webp" alt="" draggable="false"></div>` : `<div class="lpc">${manaPiece(C[id], { str: null, w: 50 })}</div>`) : `<div class="lmed empty"></div>`}`
-    + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${KIND[L.kind]}. ${esc(L.text)}</span>` : `<b>No leader</b><span>Choose a leader for this deck</span>`}</div></div>`;
+    + `<div class="ltx">${id ? `<b>${esc(C[id].name.split(':')[0])}</b><span>${esc(abilities(L))}</span>` : `<b>No leader</b><span>Choose a leader for this deck</span>`}</div></div>`;
 }
 // `d`: the deck whose leader changes, or null for a new deck.
 function pickLeader(app, d, done) {

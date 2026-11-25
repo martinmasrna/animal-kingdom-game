@@ -127,22 +127,22 @@ def public_event(e: dict, viewer: str) -> dict:
 
 
 def leader_view(st: GameState, p: str) -> Optional[dict]:
-    """A player's leader as both players see it: which card, its kind, its ability, whether its power can be used now, and
-    what the power costs."""
+    """A player's leader as both players see it: which card, its passive and its power (each a text or None), whether the
+    power can be used now, and what it costs."""
     lead = st.leaders.get(p)
     if lead is None:
         return None
     lid = lead["id"]
-    kind, text = LEADERS[lid]
+    passive, power = LEADERS[lid]
     cost = power_cost(st, p)
     usable = st.current == p and st.pending is None and st.result is None and game.mana_left(st, p) >= cost \
         and leader_usable(st, p)
-    spent = kind == "power" and st.current == p and st.power_used   # once a turn: "Used" until their next
+    spent = power is not None and st.current == p and st.power_used   # once a turn: "Used" until their next
     # what a leader counts to: the Assassin's cards this turn toward its draw
     count = None
     if lid == game.ASSASSIN and st.config.assassin_nth_card > 0:
         count = {"n": st.played_this_turn % st.config.assassin_nth_card if st.current == p else 0, "of": st.config.assassin_nth_card}
-    return {"id": lid, "kind": kind, "text": text, "usable": usable, **({"cost": cost, "spent": spent} if kind == "power" else {}),
+    return {"id": lid, "passive": passive, "power": power, "usable": usable, **({"cost": cost, "spent": spent} if power else {}),
             **({"count": count} if count else {})}
 
 

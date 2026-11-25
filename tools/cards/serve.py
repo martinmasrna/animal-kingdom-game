@@ -58,8 +58,8 @@ async def board_get(_req):
     ids = {c["id"] for c in json.loads(hq.CARDS.read_text())["cards"] if c.get("status") == "collectible"}
     layout = json.loads(BOARD.read_text()) if BOARD.exists() else None
     # each leader's power as the collection shows it beside its card (game.LEADERS: the engine's, fixed while this runs)
-    powers = [{"id": lid, "kind": kind, "text": text, **({"cost": power_price(lid)} if kind == "power" else {})}
-              for lid, (kind, text) in LEADERS.items() if lid in ids]
+    powers = [{"id": lid, "passive": passive, "power": power, **({"cost": power_price(lid)} if power else {})}
+              for lid, (passive, power) in LEADERS.items() if lid in ids]
     from animal_kingdom.web.match import map_info   # the board AK_MAP picks, so the cards draw in its look
     return web.json_response({"cards": [c for c in pool() if c["id"] in ids], "powers": powers, "layout": layout, "stamp": hq.stamp(), "map": map_info()},
                              headers={"Cache-Control": "no-store"})

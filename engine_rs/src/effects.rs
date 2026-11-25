@@ -6,7 +6,7 @@
 use smallvec::SmallVec;
 
 use crate::actions::{Action, Target};
-use crate::cards::{CrushLimit, LeaderKind, OnCover, OnDeath, OnRaid, Roar};
+use crate::cards::{CrushLimit, OnCover, OnDeath, OnRaid, Roar};
 use crate::data::*;
 use crate::events::Ev;
 use crate::state::*;
@@ -833,7 +833,7 @@ pub fn power_cost(st: &State, player: Player) -> i32 {
 /// Whether `player`'s leader has a power that would do something now, not used yet this turn; the caller checks the mana.
 pub fn leader_usable(st: &State, player: Player) -> bool {
     let Some(lead) = st.leaders[player as usize] else { return false };
-    if st.card(lead).beh.leader != Some(LeaderKind::Power) || st.power_used {
+    if !crate::cards::has_power(&st.card(lead).id) || st.power_used {
         return false;
     }
     if Some(lead) == st.g.named.raider {

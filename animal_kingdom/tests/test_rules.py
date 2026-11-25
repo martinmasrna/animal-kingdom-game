@@ -551,7 +551,7 @@ def test_a_dynamic_strength_is_its_count():
 
 
 def test_the_warlords_hungry_cards_have_two_more_strength_in_hand_and_on_the_board():
-    assert LEADERS[WARLORD] == ("passive", "Your Hungry cards have +2 strength.")
+    assert LEADERS[WARLORD] == ("Your Hungry cards have +2 strength.", None)
     b = CFG.warlord_hungry_bonus
     for leader, bonus in ((WARLORD, b), (SAGE, 0)):
         s = state(turn=11, hands={"A": ["hungry_3"]}, leaders={"A": leader}, food={"A": 15, "B": 15})
@@ -567,8 +567,8 @@ def test_the_warlords_hungry_cards_have_two_more_strength_in_hand_and_on_the_boa
 
 
 def test_leeroy_grows_each_of_your_turns_in_the_deck_and_the_power_moves_him_up_one_or_shuffles_him_back():
-    assert LEADERS[RAIDER] == ("power", "At the end of your turn, if Leeroy is in your deck, he gains +1 strength. Power: swap Leeroy "
-                                        "with the card above him in your deck; if he's on top, draw him. If he's in your hand, shuffle him into your deck instead.")
+    assert LEADERS[RAIDER] == ("At the end of your turn, if Leeroy is in your deck, he gains +1 strength.",
+                               "Swap Leeroy with the card above him in your deck; if he's on top, draw him. If he's in your hand, shuffle him into your deck instead.")
     base = CARDS["raider_legend"].base_strength
     s = state(turn=19, hands={"A": ["wisp_1"]}, decks={"A": ["wisp_3", "raider_legend", "wisp_5", "wisp_6"], "B": ["wisp_1"] * 4},
               leaders={"A": RAIDER}, food={"A": 15, "B": 15})
@@ -596,7 +596,7 @@ def test_leeroy_grows_each_of_your_turns_in_the_deck_and_the_power_moves_him_up_
 
 
 def test_the_elf_leader_makes_your_regions_produce_one_more_food():
-    assert LEADERS[ELF] == ("passive", "Your regions produce 1 more food.")
+    assert LEADERS[ELF] == ("Your regions produce 1 more food.", None)
     for leader, income in ((ELF, 3 * (1 + CFG.elf_region_bonus)), (SAGE, 3)):
         s = state(turn=10, leaders={"A": leader})
         for cr in ("1,1", "1,2", "2,2", "1,3", "2,3"):                # three regions (1,2 2,2 2,3 is one too)
@@ -641,7 +641,7 @@ def test_the_sages_card_makes_its_power_cheaper_for_good():
 
 def test_the_sages_power_draws_a_card_for_three_mana_once_a_turn():
     s = state(turn=10, leaders={"A": SAGE})                       # 6 mana
-    assert LEADERS[SAGE][0] == "power"
+    assert LEADERS[SAGE] == (None, "Draw a card.")
     rules.apply_action(s, LeaderAction())
     assert len(s.hands["A"]) == 1 and rules.mana_left(s, "A") == 3 and LeaderAction() not in rules.legal_actions(s)
     rules.apply_action(s, PassAction()); rules.apply_action(s, PassAction())   # B's turn, then A's again

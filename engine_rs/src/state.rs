@@ -690,7 +690,7 @@ impl State {
         };
         for p in 0..2u8 {
             let Some(lid) = leaders[p as usize] else { continue };
-            if st.card(lid).beh.leader.is_none() {
+            if !st.card(lid).beh.leader {
                 return Err(format!("{:?} is not a leader", st.g.cards.name_of(lid)));
             }
             if !st.decks[p as usize].contains(&lid) {

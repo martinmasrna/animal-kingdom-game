@@ -3,18 +3,18 @@
 
 use serde_json::{json, Value};
 
-use crate::cards::{LeaderKind, LEADERS};
+use crate::cards::LEADERS;
 use crate::data::*;
 use crate::effects;
 use crate::json::pending_to_json;
 use crate::state::State;
 
-/// Every leader in the game's order: {"id", "kind": "power" | "passive", "text", and a power's price as "cost"}.
+/// Every leader in the game's order: {"id", "passive": its text or null, "power": its text or null, and a power's price
+/// as "cost"}.
 pub fn leaders_json(cfg: &Config) -> Value {
-    Value::Array(LEADERS.iter().map(|&(id, text)| {
-        let power = crate::cards::behaviour(id).leader == Some(LeaderKind::Power);
-        let mut o = json!({"id": id, "kind": if power { "power" } else { "passive" }, "text": text});
-        if power {
+    Value::Array(LEADERS.iter().map(|&(id, passive, power)| {
+        let mut o = json!({"id": id, "passive": passive, "power": power});
+        if power.is_some() {
             o["cost"] = Value::from(power_price(cfg, id));
         }
         o
@@ -29,7 +29,7 @@ pub fn power_price(cfg: &Config, leader_id: &str) -> i32 {
 /// Why `leader` can't lead `deck`, if it can't.
 pub fn leader_problem(leader: Option<&str>, deck: &[String]) -> Option<String> {
     let Some(id) = leader else { return Some("a deck needs a leader".into()) };
-    if crate::cards::behaviour(id).leader.is_none() {
+    if !crate::cards::behaviour(id).leader {
         return Some(format!("'{id}' is not a leader"));
     }
     if !deck.iter().any(|c| c == id) {

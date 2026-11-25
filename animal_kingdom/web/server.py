@@ -933,9 +933,9 @@ async def pool(_req):
         "build": BUILD,
         # The deck rules the collection builds to (game.py, profiles.py): the client holds none of these numbers itself.
         "rules": {"deckSize": DECK_SIZE, "copies": COPY_LIMITS, "decksMax": DECKS_MAX},
-        # the cards that can lead a deck, each with its kind and its ability (game.LEADERS)
-        "leaders": {lid: {"kind": kind, "text": text, **({"cost": power_price(lid, Config())} if kind == "power" else {})}
-                    for lid, (kind, text) in LEADERS.items()},
+        # the cards that can lead a deck, each with its passive and its power (game.LEADERS)
+        "leaders": {lid: {"passive": passive, "power": power, **({"cost": power_price(lid, Config())} if power else {})}
+                    for lid, (passive, power) in LEADERS.items()},
     })
 
 

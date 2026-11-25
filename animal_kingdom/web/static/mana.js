@@ -62,12 +62,14 @@ const PIECE_COST_AT = box(0, .25 * P * (1 - .3), .3, .3 * P);
 // strength sits"). As percentages of the piece's box, so it sits on any piece (the rail's token, a card's).
 const DW = DRAWER_FRAC / P, DH = DRAWER_FRAC / P;   // the drawer's width (of the piece's width) and height (of its height)
 export const powerCostHTML = cost => squareLook() ? `<div class="pcost rcm"><i></i>${digits(cost)}</div>` : `<div class="pcost" style="left:${((1 - DW) / 2 * 100).toFixed(3)}%;top:${((1 - DH) * 100).toFixed(3)}%;width:${(DW * 100).toFixed(3)}%;height:${(DH * 100).toFixed(3)}%">${COST_SVG(cost)}</div>`;
-// A leader's power read as a card of its own beside the leader's (as a card's tokens are): the leader's figure, what kind
-// of ability it is, its text, and a power's cost on top in place of the gem.
+// A leader's abilities read as cards of their own beside the leader's (as a card's tokens are): its passive, then its
+// power with its cost on top in place of the gem; each the leader's figure, what kind of ability it is and its text.
 export function powerCard(id, L, w = 170) {
-  if (squareLook()) return `<div class="pwcard">${rectCard({ id, name: L.kind === 'power' ? 'Hero power' : 'Passive', text: L.text, rarity: 'common' }, { str: null, cost: L.kind === 'power' ? L.cost ?? null : null, w })}</div>`;
-  const card = manaCard({ id, name: L.kind === 'power' ? 'Hero power' : 'Passive', text: L.text, rarity: 'common' }, { str: null, w });
-  return `<div class="pwcard">${L.kind === 'power' && L.cost != null ? card.replace(/(<div class="mpiece[^>]*>)/, `$1${powerCostHTML(L.cost)}`) : card}</div>`;
+  return [['passive', 'Passive', null], ['power', 'Hero power', L.cost ?? null]].filter(([k]) => L[k]).map(([k, name, cost]) => {
+    if (squareLook()) return `<div class="pwcard">${rectCard({ id, name, text: L[k], rarity: 'common' }, { str: null, cost, w })}</div>`;
+    const card = manaCard({ id, name, text: L[k], rarity: 'common' }, { str: null, w });
+    return `<div class="pwcard">${cost != null ? card.replace(/(<div class="mpiece[^>]*>)/, `$1${powerCostHTML(cost)}`) : card}</div>`;
+  }).join('');
 }
 
 // One card. `c`: the card (CARDS[id], its text already the ruleset's); `str`: the strength to show; `cost`: its mana cost,
