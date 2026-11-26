@@ -23,3 +23,11 @@ Martin's skill-chain test: from a random player, each bot is the simplest found 
 - Before the fix, nothing found beat Expert: an eight-times larger search 43%, the same search seeing every hidden card 46.5%; that search has not been rerun on the fixed bots.
 
 Control, Slots (food per unit, the game Martin found shallow): the simplest bot over 70% against Random is the greedy one (kill the biggest you can, else play your biggest unit), 82%; nothing tried beats it 70% (one-turn lookahead 55%, play-outs 41%).
+
+## The 70% chain with connection, drawing 1 (2026-11-26, `node chain.mjs`, 400 games a step)
+
+- Cluster, units next to the most of your own: beats Random 79.6% (Easy, units on random tiles, only 60.1%).
+- Normal, each play the one that most raises held regions minus his: beats Cluster 96.0%.
+- Hard, Normal that also values half-built triangles: beats Normal 84.3%.
+- Nothing found beats Hard 70%: Expert 58.0%; above Expert, the centre rule with search 22.5% and an eight-times-larger search 50.0%.
+
