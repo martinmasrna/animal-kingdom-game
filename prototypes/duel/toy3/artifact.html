@@ -728,7 +728,7 @@ function render() {
   const hand = $('hand'), n = s.p[ME].hand.length;
   if (n > 1) {
     const cw = hand.querySelector('.card').offsetWidth, room = hand.clientWidth - 24;
-    const ov = Math.min(8, (room - n * cw) / (n - 1));
+    const ov = Math.min(14, (room - n * cw) / (n - 1));
     hand.style.setProperty('--ov', ov + 'px');
   }
   const choosing = !ui.busy && !ui.over;
