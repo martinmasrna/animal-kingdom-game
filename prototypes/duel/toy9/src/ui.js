@@ -1,9 +1,9 @@
 // Toy 9 as a page: stripped-down Star Realms against the expert bot.
-import { CARD, sr } from './sr.js';
-import { makeRng, pimcTimed } from './bots.js';
+import { CARD, sr, rolloutBot } from './sr.js';
+import { makeRng } from './bots.js';
 
 const HPS = [30, 40, 50];
-const bot = pimcTimed(600, 12);
+const bot = rolloutBot(600);
 const ui = { hp: 40, g: null, s: null, me: 0, games: 0, busy: false, hist: [], rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise(r => setTimeout(r, ms));

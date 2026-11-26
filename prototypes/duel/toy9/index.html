@@ -242,6 +242,66 @@ function sr(o = {}) {
   };
 }
 
+// ---------------------------------------------------------------------------------------------
+// Bots made for this game (a skill ladder that fits a deckbuilder):
+//   rule    : buy the most expensive card you can afford, never scrap, always hit his face.
+//   plan    : a sensible strategy: scrap Scouts then Vipers; early on buy economy, later combat;
+//             Outposts at 4; always destroy his Outposts when you can, the rest at his face.
+//   rollout : for each possible decision, play the rest of the match out many times with `plan`
+//             on both sides (deck orders re-dealt from what it can see) and take the decision
+//             that wins most often. Time-boxed.
+const turnNo = (s) => Math.floor(s.ply / 2);
+function ruleBot(g, s) {
+  const ms = g.moves(s);
+  if (s.phase === 'scrap') return 'X-';
+  if (s.phase === 'buy') { const buys = ms.filter(m => m !== 'B-').sort((a, b) => CARD[b[1]].cost - CARD[a[1]].cost); return buys[0] || 'B-'; }
+  return 'A-';
+}
+function planBot(g, s) {
+  const me = s.turn, ms = g.moves(s);
+  if (s.phase === 'scrap') {
+    for (const c of ['C', 'V']) if (ms.includes('X' + c)) return 'X' + c;
+    return 'X-';
+  }
+  if (s.phase === 'buy') {
+    const all = s.hand[me].concat(s.deck[me], s.disc[me]);
+    const n = (c) => all.filter(x => x === c).length;
+    const can = (c) => ms.includes('B' + c);
+    const early = turnNo(s) < 5;
+    if (can('H')) return 'BH';
+    if (can('O') && n('O') + s.bases[me] < 2) return 'BO';
+    if (can('X') && early && n('X') < 2) return 'BX';
+    if (can('E') && early && n('E') < 3) return 'BE';
+    if (can('F')) return 'BF';
+    return 'B-';
+  }
+  if (ms.includes('AO')) return 'AO';
+  return 'A-';
+}
+function rolloutBot(ms = 300) {
+  return (g, s, rng) => {
+    const side = g.toMove(s), opts = g.moves(s);
+    if (opts.length === 1) return opts[0];
+    const deadline = Date.now() + ms;
+    const score = new Map(opts.map(m => [m, 0])), n = new Map(opts.map(m => [m, 0]));
+    let i = 0;
+    while (Date.now() < deadline || i < opts.length * 4) {
+      const m = opts[i++ % opts.length];
+      let t = g.play(g.sample(s, side, rng), m);
+      let guard = 0;
+      while (g.winner(t) === null && guard++ < 3000) t = g.play(t, planBot(g, t));
+      const w = g.winner(t);
+      const v = w === side ? 1 : w === 'draw' || w === null ? 0.5 : 0;
+      score.set(m, score.get(m) + v + 0.001 * (t.hp[side] - t.hp[1 - side]));
+      n.set(m, n.get(m) + 1);
+      if (i > 4000) break;
+    }
+    let best = opts[0], bv = -Infinity;
+    for (const m of opts) { const v = score.get(m) / Math.max(1, n.get(m)); if (v > bv) { bv = v; best = m; } }
+    return best;
+  };
+}
+
 // ---- src/bots.js
 // Generic bots for any game with this shape:
 //   init(rng) -> state, toMove(s) -> 0|1, moves(s) -> [m], play(s, m) -> new state,
@@ -373,7 +433,7 @@ function pimcTimed(ms, K, maxDepth = 30) {
 
 
 const HPS = [30, 40, 50];
-const bot = pimcTimed(600, 12);
+const bot = rolloutBot(600);
 const ui = { hp: 40, g: null, s: null, me: 0, games: 0, busy: false, hist: [], rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise(r => setTimeout(r, ms));

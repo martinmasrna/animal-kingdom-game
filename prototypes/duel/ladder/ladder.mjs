@@ -13,7 +13,8 @@ async function loadGame(name) {
   return (await import(`./games/${name}.js`)).default;
 }
 
-function makeBot(spec) {
+function makeBot(spec, g) {
+  if (g && g.bots && g.bots[spec]) return g.bots[spec];
   if (spec === 'random') return randomBot;
   if (spec === 'weak') return greedyBot;
   let m;
@@ -40,7 +41,7 @@ function playMatch(g, bots, seed) {
 if (!isMainThread) {
   const { game, a, b, seeds } = workerData;
   const g = await loadGame(game);
-  const A = makeBot(a), B = makeBot(b);
+  const A = makeBot(a, g), B = makeBot(b, g);
   const out = [];
   for (const seed of seeds) {
     const swap = seed % 2 === 1;
