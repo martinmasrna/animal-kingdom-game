@@ -34,7 +34,7 @@ export function ownTile(s, side, tile) {
 }
 
 export let GOAL = 20;
-export let DRAW = 2; // cards drawn at the start of each turn
+export let DRAW = 1; // cards drawn at the start of each turn
 export function setDraw(n) { DRAW = n; }
 export function setGoal(g) { GOAL = g; }
 export let FULL_HAND = false;

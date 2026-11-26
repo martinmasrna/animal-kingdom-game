@@ -3,7 +3,7 @@
 A shared hex board of 14 tiles in rows of 2, 3, 4, 3, 2 (Martin, 2026-11-26). A region is any three mutually adjacent tiles (16 of them); at the end of your turn you gain 1 food for each region whose three tiles all hold your units. First to 20 wins.
 
 - Placement, connection (Martin, 2026-11-26: "the most natural would be the rule where you must place units so that they are connected to your base"): a unit goes on one of your two base tiles (your nearest row) or next to one of your units that links back to a base tile through your own units, onto an empty tile or one of your own units, which it replaces. Strikes hit any enemy unit. `setConnect(false)` restores free placement, which the 70% runs below were made with unless they say otherwise.
-- Cards: 25 for both, Units costing 1 to 5 with health equal to cost (three each) and Strikes dealing their cost (1 and 2: three each, 3 and 4: two each). Hearthstone mana. Both open with 3; you draw 2 at the start of each turn (Martin, 2026-11-26, after trying 3: "let's try drawing 2 per turn"), except the first player's first turn.
+- Cards: 25 for both, Units costing 1 to 5 with health equal to cost (three each) and Strikes dealing their cost (1 and 2: three each, 3 and 4: two each). Hearthstone mana. Both open with 3; you draw 1 at the start of each turn (Martin, 2026-11-26, after trying 3 and 2: "make it draw 1 card per turn"), except the first player's first turn.
 
 Drawing 2, bot against bot, 150 games: first player 54 to 61%, about 14 turns each, both decks empty by about turn 11 each. Drawing 3: first player 57%, decks empty by about turn 8. Drawing 1: first player 34 to 39%.
 

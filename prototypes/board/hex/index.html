@@ -246,7 +246,7 @@ function ownTile(s, side, tile) {
 }
 
 let GOAL = 20;
-let DRAW = 2; // cards drawn at the start of each turn
+let DRAW = 1; // cards drawn at the start of each turn
 function setDraw(n) { DRAW = n; }
 function setGoal(g) { GOAL = g; }
 let FULL_HAND = false;
@@ -676,7 +676,7 @@ function centrePlus(R = 8, DEPTH = 10, TOPN = 6) {
 
 
 const expert = rolloutBot(6, 12, 8);
-const TALLY_KEY = 'hex-connected-tally';
+const TALLY_KEY = 'hex-connected-draw1-tally';
 
 const ME = 0, BOT = 1;
 const ui = { s: null, view: null, busy: false, over: false, sel: null, food: [0, 0], hist: [], fresh: new Set(), fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
@@ -855,7 +855,7 @@ async function saveGame(winner) {
   try {
     const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
     if (!db) return;
-    await db.collection('games').add({ ...ui.log, winner, me: ME, bot: 'expert-6-12-8', rules: 'connected', at: Date.now() });
+    await db.collection('games').add({ ...ui.log, winner, me: ME, bot: 'expert-6-12-8', rules: 'connected, draw 1', at: Date.now() });
   } catch (e) { /* the game is still played; only the record is lost */ }
 }
 function finish() {
