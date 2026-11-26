@@ -1,18 +1,13 @@
-# Lanes
+# Hex
 
-Each player owns one row of 5 tiles, facing the other's (Martin, 2026-11-26: "each player owning their own row was the idea"). A unit goes on a tile of your own row: an empty one, or one holding your own unit, which it replaces at any strength (as landing on your own unit does in the game; Martin, 2026-11-26: "you should for sure be able to play units on top of your own unit"). You draw 2 cards at the start of each turn (Martin, 2026-11-26, after trying 3: "let's try drawing 2 per turn"); both open with 3 and the first player skips the first draw. Everything else is Slots's: Hearthstone mana, 25 cards of Units (health = cost) and Strikes (damage = cost) for both.
+A shared hex board of 14 tiles in rows of 2, 3, 4, 3, 2 (Martin, 2026-11-26). A region is any three mutually adjacent tiles (16 of them); at the end of your turn you gain 1 food for each region whose three tiles all hold your units. First to 20 wins.
 
-- A region pays the side whose units in it have more total health; a tie pays nobody. At the end of your turn you gain 1 food for each region that pays you. First to 20 wins.
-- Regions are the five columns (your tile and the one facing it). `setRegionShape('block')` in `src/engine.js` makes them the four 2 by 2 blocks instead.
+- Placement, connection (Martin, 2026-11-26: "the most natural would be the rule where you must place units so that they are connected to your base"): a unit goes on one of your two base tiles (your nearest row) or next to one of your units that links back to a base tile through your own units, onto an empty tile or one of your own units, which it replaces. Strikes hit any enemy unit. `setConnect(false)` restores free placement, which the 70% runs below were made with unless they say otherwise.
+- Cards: 25 for both, Units costing 1 to 5 with health equal to cost (three each) and Strikes dealing their cost (1 and 2: three each, 3 and 4: two each). Hearthstone mana. Both open with 3; you draw 2 at the start of each turn (Martin, 2026-11-26, after trying 3: "let's try drawing 2 per turn"), except the first player's first turn.
 
-Bot against bot, 100 games each: columns at 20 food, first player 45%, about 11 turns each, no stalls; blocks at 20 food, first player 58%, about 9 turns each. 
-`node build.mjs` writes `index.html` and `artifact.html`; `node selftest.mjs` plays the bot against a greedy player, a random player and itself.
+Drawing 2, bot against bot, 150 games: first player 54 to 61%, about 14 turns each, both decks empty by about turn 11 each. Drawing 3: first player 57%, decks empty by about turn 8. Drawing 1: first player 34 to 39%.
 
-## Full Hand
-
-`node build.mjs full` writes the variant where both players start with their whole deck in hand and never draw (Martin, 2026-11-26: "not at the mercy of my draw"), to `index-full.html` and `artifact-full.html`. Identical cards show once, with their count.
-
-Bot against bot, with a little noise in the bot's choices (without noise every game is the same game): the first player wins 93 to 100%. The side to move retakes most columns and is paid for them before the other side can answer, and with every answer always in hand the lead never changes hands. Making up for going second: the coin (1 extra mana once) 93%, a head start of 1 to 3 food 98 to 100%, 5 food 88%, 8 food 43%. Columns paying at the start of their owner's turn instead (what survived the enemy turn) bring it to 71%, with games twice as long (`setScoreAt('start')`; the bot still plans for end-of-turn payment there).
+The page plays you against Expert, alternates who goes first, keeps a win count in your browser, and saves each finished game (seed, first player, every move) to the artifact's store; `node replay.mjs <dir>` replays saved games turn by turn.
 
 ## The 70% test (2026-11-26)
 
