@@ -252,7 +252,8 @@ body.playing #start { display: none; }
 .trow.gone { opacity: .3; }
 .trk .tsub { margin: 10px 0 4px; font-size: 14px; color: #9fb0c2; }
 
-.swordb { width: 46px; height: 54px; border-radius: 10px; background: linear-gradient(160deg, #c8403f, #9e2328); border: 3px solid #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: pop .4s ease-out; }
+.swordb { width: 46px; height: 54px; border-radius: 10px; background: linear-gradient(160deg, #c8403f, #9e2328); border: 3px solid #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.swordb.pop { animation: pop .4s ease-out; }
 .swordb svg { width: 24px; height: 24px; }
 .swordb span { font-weight: 900; font-size: 15px; color: #fff; }
 .trow.Sword { background: linear-gradient(90deg, rgba(158,35,40,.8), rgba(158,35,40,.3)); }
@@ -559,7 +560,7 @@ function randomTurn(s, rng) {
 const ME = 0, BOT = 1;
 const ui = {
   s: null, view: null, busy: false, over: false, showDecks: false,
-  shown: { hp: [0, 0], mana: [0, 0], block: [0, 0] }, hist: [], fresh: new Set(), popGuard: [0, 0],
+  shown: { hp: [0, 0], mana: [0, 0], block: [0, 0] }, hist: [], fresh: new Set(), popGuard: [0, 0], popSword: [0, 0],
   rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0,
 };
 const $ = (id) => document.getElementById(id);
@@ -601,7 +602,7 @@ function heroHTML(side) {
   const shield = block > 0 ? `<div class="shield${ui.popGuard[side] ? ' pop' : ''}" id="shield${side}">${shieldSVG}<span style="font-size:18px">${block}</span></div>` : '';
   let gems = '';
   for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < mana ? ' on' : ''}"></i>`;
-  const sword = p.sword ? `<div class="swordb" id="sword${side}">${ICON.sword}<span>+${p.sword}</span></div>` : '';
+  const sword = p.sword ? `<div class="swordb${ui.popSword[side] ? ' pop' : ''}" id="sword${side}">${ICON.sword}<span>+${p.sword}</span></div>` : '';
   return `<div class="left"><div class="guards">${sword}${shield}</div></div>
     <div class="mid"><div class="plate${active ? ' active' : ''}" id="plate${side}">
       <div class="hname">${mine ? 'You' : 'Opponent'}</div>
@@ -647,7 +648,7 @@ function render() {
   $('trk0').innerHTML = trackerHTML(ME);
   $('decks').classList.toggle('show', ui.showDecks);
   if (ui.showDecks) $('decks').innerHTML = `<button class="x" id="closedecks">Close</button><div class="wrap">${deckTable(BOT)}${deckTable(ME)}</div>`;
-  ui.fresh.clear(); ui.popGuard = [0, 0];
+  ui.fresh.clear(); ui.popGuard = [0, 0]; ui.popSword = [0, 0];
 }
 
 // Deck tracker: every card of the list with how many are still to come.
@@ -728,6 +729,7 @@ async function playBeats(ev, prev, next) {
       else if (e.t === 'stop') ui.shown.block[e.side] = e.block;
       else if (e.t === 'guard') { ui.shown.block[e.side] = e.block; ui.popGuard[e.side] = 1; }
       else if (e.t === 'expire') ui.shown.block[e.side] = 0;
+      else if (e.t === 'sword') ui.popSword[e.side] = 1;
       else if (e.t === 'play' || e.t === 'start') ui.shown.mana[e.side] = e.mana;
     }
     ui.view = last ? next : prev;

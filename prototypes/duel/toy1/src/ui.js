@@ -6,7 +6,7 @@ import { makeRng, botTurn } from './bot.js';
 const ME = 0, BOT = 1;
 const ui = {
   s: null, view: null, busy: false, over: false, showDecks: false,
-  shown: { hp: [0, 0], mana: [0, 0], block: [0, 0] }, hist: [], fresh: new Set(), popGuard: [0, 0],
+  shown: { hp: [0, 0], mana: [0, 0], block: [0, 0] }, hist: [], fresh: new Set(), popGuard: [0, 0], popSword: [0, 0],
   rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0,
 };
 const $ = (id) => document.getElementById(id);
@@ -48,7 +48,7 @@ function heroHTML(side) {
   const shield = block > 0 ? `<div class="shield${ui.popGuard[side] ? ' pop' : ''}" id="shield${side}">${shieldSVG}<span style="font-size:18px">${block}</span></div>` : '';
   let gems = '';
   for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < mana ? ' on' : ''}"></i>`;
-  const sword = p.sword ? `<div class="swordb" id="sword${side}">${ICON.sword}<span>+${p.sword}</span></div>` : '';
+  const sword = p.sword ? `<div class="swordb${ui.popSword[side] ? ' pop' : ''}" id="sword${side}">${ICON.sword}<span>+${p.sword}</span></div>` : '';
   return `<div class="left"><div class="guards">${sword}${shield}</div></div>
     <div class="mid"><div class="plate${active ? ' active' : ''}" id="plate${side}">
       <div class="hname">${mine ? 'You' : 'Opponent'}</div>
@@ -94,7 +94,7 @@ function render() {
   $('trk0').innerHTML = trackerHTML(ME);
   $('decks').classList.toggle('show', ui.showDecks);
   if (ui.showDecks) $('decks').innerHTML = `<button class="x" id="closedecks">Close</button><div class="wrap">${deckTable(BOT)}${deckTable(ME)}</div>`;
-  ui.fresh.clear(); ui.popGuard = [0, 0];
+  ui.fresh.clear(); ui.popGuard = [0, 0]; ui.popSword = [0, 0];
 }
 
 // Deck tracker: every card of the list with how many are still to come.
@@ -175,6 +175,7 @@ async function playBeats(ev, prev, next) {
       else if (e.t === 'stop') ui.shown.block[e.side] = e.block;
       else if (e.t === 'guard') { ui.shown.block[e.side] = e.block; ui.popGuard[e.side] = 1; }
       else if (e.t === 'expire') ui.shown.block[e.side] = 0;
+      else if (e.t === 'sword') ui.popSword[e.side] = 1;
       else if (e.t === 'play' || e.t === 'start') ui.shown.mana[e.side] = e.mana;
     }
     ui.view = last ? next : prev;
