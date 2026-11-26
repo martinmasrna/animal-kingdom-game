@@ -1,7 +1,7 @@
 // Board Toy 1 as a game screen. Drives the engine through its transitions; each
 // play or turn change is animated from the state before and the state after.
 
-import { CARDS, TILES, COLS, GOAL, MAX_MANA, REGIONS, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
+import { CARDS, TILES, COLS, GOAL, MAX_MANA, REGIONS, FULL_HAND, setFullHand, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
 import { makeRng, botTurn } from './bot.js';
 
 const ME = 0, BOT = 1;
@@ -26,7 +26,7 @@ function resHTML(side) {
   let gems = '';
   for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < p.mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
   const food = `<div class="food s${side}${!ui.over && ui.view.turn === side ? ' active' : ''}${ui.fx['food' + side] ? ' bump' : ''}" id="food${side}"><b>${ui.food[side]}</b><small>/${GOAL}</small></div>`;
-  return `${food}<div class="stack"><div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div><div class="pile s${side}">${p.deck.length}</div></div>`;
+  return `${food}<div class="stack"><div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div>${FULL_HAND ? '' : `<div class="pile s${side}">${p.deck.length}</div>`}</div>`;
 }
 function histHTML(h) {
   const chip = h.food ? `<span class="chip coin"></span>` : `<span class="chip ${CARDS[h.card].kind} s${h.side}">${CARDS[h.card].n}</span>`;
@@ -59,19 +59,22 @@ function boardHTML() {
 
 function handHTML() {
   const s = ui.view, p = s.p[ME];
-  const order = p.hand.map((_, i) => i).sort((a, b) => {
-    const A = CARDS[p.hand[a]], B = CARDS[p.hand[b]];
+  const counts = {};
+  for (const id of p.hand) counts[id] = (counts[id] || 0) + 1;
+  const ids = Object.keys(counts).sort((a, b) => {
+    const A = CARDS[a], B = CARDS[b];
     return (A.kind === B.kind ? 0 : A.kind === 'Unit' ? -1 : 1) || A.cost - B.cost;
   });
   const myTurn = !ui.busy && !ui.over && s.turn === ME;
-  let selShown = false;
-  return order.map(i => {
-    const id = p.hand[i];
+  const newest = p.hand[p.hand.length - 1];
+  return ids.map(id => {
     const ok = myTurn && canPlay(s, id);
     let cls = ok ? 'ok' : (myTurn ? 'no' : '');
-    if (ok && ui.sel === id && !selShown) { cls += ' sel'; selShown = true; }
-    if (ui.fresh.has(i)) cls += ' drawn';
-    return cardHTML(id, ME, { cls, attrs: `data-card="${id}"${ok ? '' : ' disabled'}` });
+    if (ok && ui.sel === id) cls += ' sel';
+    if (ui.fresh.size && id === newest) cls += ' drawn';
+    if (counts[id] > 1) cls += ' copies';
+    const n = counts[id] > 1 ? `<span class="count">${counts[id]}</span>` : '';
+    return cardHTML(id, ME, { cls, attrs: `data-card="${id}"${ok ? '' : ' disabled'}` }).replace('</button>', n + '</button>');
   }).join('');
 }
 
@@ -232,4 +235,5 @@ document.addEventListener('click', (e) => {
   }
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ui.sel) { ui.sel = null; render(); } });
+/*BOOT*/
 startMatch();

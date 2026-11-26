@@ -9,6 +9,12 @@ export const COLS = 5, ROWS = 2, TILES = COLS * ROWS, MAX_MANA = 10, TURN_LIMIT 
 export const rowOf = (side) => side === 0 ? 1 : 0;
 export const ownTile = (side, i) => Math.floor(i / COLS) === rowOf(side);
 export let GOAL = 20;
+export let FULL_HAND = false; // both players start with their whole deck in hand
+export function setFullHand(v) { FULL_HAND = v; }
+export let SECOND_FOOD = 0, SECOND_MANA = 0; // what the second player gets for going second
+export function setSecond(food, mana) { SECOND_FOOD = food; SECOND_MANA = mana; }
+export let SCORE_AT = 'end'; // when a side's columns pay it: at the end of its turn, or at the start (what survived the enemy turn)
+export function setScoreAt(w) { SCORE_AT = w; }
 export let SKIP_FIRST_DRAW = true;
 export function setSkipFirstDraw(v) { SKIP_FIRST_DRAW = v; }
 export let SECOND_HAND = 3;
@@ -87,7 +93,10 @@ export function newMatch({ seed }) {
   const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, first: 0, winner: null, board: Array(TILES).fill(null), p: [newPlayer(), newPlayer()] };
   for (const p of s.p) shuffleInPlace(s, p.deck);
   s.first = rand(s) < 0.5 ? 0 : 1;
-  draw(s, s.first, 3); draw(s, 1 - s.first, SECOND_HAND);
+  if (FULL_HAND) for (const p of [s.first, 1 - s.first]) draw(s, p, s.p[p].deck.length);
+  else { draw(s, s.first, 3); draw(s, 1 - s.first, SECOND_HAND); }
+  s.p[1 - s.first].food = SECOND_FOOD;
+  s.p[1 - s.first].bonusMana = SECOND_MANA;
   s.turn = s.first;
   mStartTurn(s, null);
   return s;
@@ -97,8 +106,10 @@ function mStartTurn(s, ev) {
   const side = s.turn, p = s.p[side];
   s.turnNo++;
   emit(s, ev, { t: 'turn', side });
+  if (SCORE_AT === 'start' && score(s, ev)) return;
   p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
   p.mana = p.maxMana;
+  if (p.bonusMana) { p.mana += p.bonusMana; p.bonusMana = 0; }
   const drew = s.turnNo === 1 && SKIP_FIRST_DRAW ? 0 : draw(s, side, 1);
   emit(s, ev, { t: 'start', side, mana: p.mana, drew });
 }
@@ -138,14 +149,18 @@ function mPlay(s, card, tile, ev) {
     if (u.hp <= 0) { s.board[tile] = null; emit(s, ev, { t: 'die', side: u.side, tile, card: u.card }); }
   }
 }
+// Food for the side whose turn it is; true when it wins.
+function score(s, ev) {
+  const side = s.turn, p = s.p[side], regions = heldRegions(s, side);
+  if (!regions.length) return false;
+  p.food += regions.length;
+  emit(s, ev, { t: 'food', side, n: regions.length, regions, food: p.food });
+  if (p.food >= GOAL) { s.winner = side; emit(s, ev, { t: 'end', winner: side }); return true; }
+  return false;
+}
 function mEndTurn(s, ev) {
   if (s.winner !== null) throw new Error('endTurn: match over');
-  const side = s.turn, p = s.p[side], regions = heldRegions(s, side);
-  if (regions.length) {
-    p.food += regions.length;
-    emit(s, ev, { t: 'food', side, n: regions.length, regions, food: p.food });
-    if (p.food >= GOAL) { s.winner = side; emit(s, ev, { t: 'end', winner: side }); return; }
-  }
+  if (SCORE_AT === 'end' && score(s, ev)) return;
   if (s.turnNo >= TURN_LIMIT) { s.winner = 'draw'; emit(s, ev, { t: 'end', winner: 'draw' }); return; }
   s.turn = 1 - s.turn;
   mStartTurn(s, ev);

@@ -25,6 +25,7 @@ button { font: inherit; cursor: pointer; }
 #opphand { display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; }
 .back { width: 26px; height: 36px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
 .back:first-child { margin-left: 0; }
+#opphand:has(.back:nth-child(12)) .back { margin-left: -14px; } #opphand:has(.back:nth-child(12)) .back:first-child { margin-left: 0; }
 #menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; }
 #menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
 
@@ -82,6 +83,9 @@ button { font: inherit; cursor: pointer; }
 #hand .card.sel { transform: translateY(-16px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8), 0 6px 12px rgba(0,0,0,.5); }
 #hand .card:disabled { cursor: default; }
 #hand .card.no { filter: brightness(.62) saturate(.6); }
+.card .count { position: absolute; right: -9px; bottom: -9px; min-width: 28px; height: 28px; padding: 0 6px; border-radius: 14px; background: #1b2430; border: 2px solid #fff; color: #fff; font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+#hand .card.copies { box-shadow: 4px -4px 0 -1px #d5c39f, 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.copies.ok { box-shadow: 4px -4px 0 -1px #d5c39f, 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
 #hand .card.drawn { animation: drawin .45s ease-out; }
 @keyframes drawin { from { transform: translateY(-60px) scale(.6); opacity: 0; } }
 
@@ -160,7 +164,9 @@ button { font: inherit; cursor: pointer; }
   #boardwrap { grid-row: 2; grid-column: 1 / -1; width: 100%; justify-self: center; align-self: center; }
   #res0 { grid-row: 3; }
   .res .stack, #res1 .stack { flex-direction: row; align-items: center; gap: 10px; }
-  #turnbox { position: absolute; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(var(--cardh) + 80px); z-index: 6; }
+  #table { position: relative; }
+  #turnbox { position: absolute; right: 0; bottom: 6px; z-index: 6; }
+  #res0 { padding-right: 130px; }
   #board { gap: 5px; padding: 6px; aspect-ratio: 5 / 2.6; }
   .mark { width: 22px; height: 22px; border-width: 2px; }
   .unit .hp { font-size: 28px; }
@@ -171,7 +177,8 @@ button { font: inherit; cursor: pointer; }
   #endturn { width: auto; min-height: 40px; padding: 0 14px; font-size: 15px; }
   .card .nm { font-size: 12px; } .card .tx { display: none; }
   .cgem { width: 22px; height: 22px; font-size: 13px; top: -6px; left: -6px; }
-  #hand { gap: 5px; padding-top: 10px; }
+  #hand { gap: 10px 8px; padding-top: 10px; flex-wrap: wrap; }
+  .card .count { min-width: 22px; height: 22px; font-size: 12px; right: -6px; bottom: -6px; }
   #spot .card { --cardw: 120px; --cardh: 160px; }
 }
 
@@ -212,6 +219,12 @@ const COLS = 5, ROWS = 2, TILES = COLS * ROWS, MAX_MANA = 10, TURN_LIMIT = 80;
 const rowOf = (side) => side === 0 ? 1 : 0;
 const ownTile = (side, i) => Math.floor(i / COLS) === rowOf(side);
 let GOAL = 20;
+let FULL_HAND = false; // both players start with their whole deck in hand
+function setFullHand(v) { FULL_HAND = v; }
+let SECOND_FOOD = 0, SECOND_MANA = 0; // what the second player gets for going second
+function setSecond(food, mana) { SECOND_FOOD = food; SECOND_MANA = mana; }
+let SCORE_AT = 'end'; // when a side's columns pay it: at the end of its turn, or at the start (what survived the enemy turn)
+function setScoreAt(w) { SCORE_AT = w; }
 let SKIP_FIRST_DRAW = true;
 function setSkipFirstDraw(v) { SKIP_FIRST_DRAW = v; }
 let SECOND_HAND = 3;
@@ -290,7 +303,10 @@ function newMatch({ seed }) {
   const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, first: 0, winner: null, board: Array(TILES).fill(null), p: [newPlayer(), newPlayer()] };
   for (const p of s.p) shuffleInPlace(s, p.deck);
   s.first = rand(s) < 0.5 ? 0 : 1;
-  draw(s, s.first, 3); draw(s, 1 - s.first, SECOND_HAND);
+  if (FULL_HAND) for (const p of [s.first, 1 - s.first]) draw(s, p, s.p[p].deck.length);
+  else { draw(s, s.first, 3); draw(s, 1 - s.first, SECOND_HAND); }
+  s.p[1 - s.first].food = SECOND_FOOD;
+  s.p[1 - s.first].bonusMana = SECOND_MANA;
   s.turn = s.first;
   mStartTurn(s, null);
   return s;
@@ -300,8 +316,10 @@ function mStartTurn(s, ev) {
   const side = s.turn, p = s.p[side];
   s.turnNo++;
   emit(s, ev, { t: 'turn', side });
+  if (SCORE_AT === 'start' && score(s, ev)) return;
   p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
   p.mana = p.maxMana;
+  if (p.bonusMana) { p.mana += p.bonusMana; p.bonusMana = 0; }
   const drew = s.turnNo === 1 && SKIP_FIRST_DRAW ? 0 : draw(s, side, 1);
   emit(s, ev, { t: 'start', side, mana: p.mana, drew });
 }
@@ -341,14 +359,18 @@ function mPlay(s, card, tile, ev) {
     if (u.hp <= 0) { s.board[tile] = null; emit(s, ev, { t: 'die', side: u.side, tile, card: u.card }); }
   }
 }
+// Food for the side whose turn it is; true when it wins.
+function score(s, ev) {
+  const side = s.turn, p = s.p[side], regions = heldRegions(s, side);
+  if (!regions.length) return false;
+  p.food += regions.length;
+  emit(s, ev, { t: 'food', side, n: regions.length, regions, food: p.food });
+  if (p.food >= GOAL) { s.winner = side; emit(s, ev, { t: 'end', winner: side }); return true; }
+  return false;
+}
 function mEndTurn(s, ev) {
   if (s.winner !== null) throw new Error('endTurn: match over');
-  const side = s.turn, p = s.p[side], regions = heldRegions(s, side);
-  if (regions.length) {
-    p.food += regions.length;
-    emit(s, ev, { t: 'food', side, n: regions.length, regions, food: p.food });
-    if (p.food >= GOAL) { s.winner = side; emit(s, ev, { t: 'end', winner: side }); return; }
-  }
+  if (SCORE_AT === 'end' && score(s, ev)) return;
   if (s.turnNo >= TURN_LIMIT) { s.winner = 'draw'; emit(s, ev, { t: 'end', winner: 'draw' }); return; }
   s.turn = 1 - s.turn;
   mStartTurn(s, ev);
@@ -482,21 +504,28 @@ function lookahead(t, me, hands) {
   return v / hands.length;
 }
 
-function botTurn(s, rng = Math.random, K = 5) {
+const TOP = 40;
+function botTurn(s, rng = Math.random, K = 5, noise = 0) {
   const me = s.turn, P = s.p[me], O = s.p[1 - me];
   const unseen = O.hand.concat(O.deck); // the pool he might hold: used only as a pool
   const n = Math.min(unseen.length, O.hand.length + (O.deck.length ? 1 : 0));
+  if (n === unseen.length) K = 1; // he holds every card he has not played: nothing to sample
   const hands = [];
   for (let k = 0; k < K; k++) {
     const pool = unseen.slice();
     for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = pool[i]; pool[i] = pool[j]; pool[j] = x; }
     hands.push(pool.slice(0, n));
   }
-  let best = [], bestV = -Infinity;
+  // judge every set on the spot, then look ahead from the best few
+  const cands = [];
   for (const set of cardSets(P.hand, P.mana)) {
     const r = placeSet(s, set);
-    if (!r) continue;
-    const v = lookahead(r.t, me, hands) - 0.001 * r.moves.length;
+    if (r) cands.push({ r, v0: evaluate(r.t, me) });
+  }
+  cands.sort((a, b) => b.v0 - a.v0);
+  let best = [], bestV = -Infinity;
+  for (const { r } of cands.slice(0, TOP)) {
+    const v = lookahead(r.t, me, hands) - 0.001 * r.moves.length + noise * rng();
     if (v > bestV) { bestV = v; best = r.moves; }
   }
   return best;
@@ -542,7 +571,7 @@ function resHTML(side) {
   let gems = '';
   for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < p.mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
   const food = `<div class="food s${side}${!ui.over && ui.view.turn === side ? ' active' : ''}${ui.fx['food' + side] ? ' bump' : ''}" id="food${side}"><b>${ui.food[side]}</b><small>/${GOAL}</small></div>`;
-  return `${food}<div class="stack"><div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div><div class="pile s${side}">${p.deck.length}</div></div>`;
+  return `${food}<div class="stack"><div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div>${FULL_HAND ? '' : `<div class="pile s${side}">${p.deck.length}</div>`}</div>`;
 }
 function histHTML(h) {
   const chip = h.food ? `<span class="chip coin"></span>` : `<span class="chip ${CARDS[h.card].kind} s${h.side}">${CARDS[h.card].n}</span>`;
@@ -575,19 +604,22 @@ function boardHTML() {
 
 function handHTML() {
   const s = ui.view, p = s.p[ME];
-  const order = p.hand.map((_, i) => i).sort((a, b) => {
-    const A = CARDS[p.hand[a]], B = CARDS[p.hand[b]];
+  const counts = {};
+  for (const id of p.hand) counts[id] = (counts[id] || 0) + 1;
+  const ids = Object.keys(counts).sort((a, b) => {
+    const A = CARDS[a], B = CARDS[b];
     return (A.kind === B.kind ? 0 : A.kind === 'Unit' ? -1 : 1) || A.cost - B.cost;
   });
   const myTurn = !ui.busy && !ui.over && s.turn === ME;
-  let selShown = false;
-  return order.map(i => {
-    const id = p.hand[i];
+  const newest = p.hand[p.hand.length - 1];
+  return ids.map(id => {
     const ok = myTurn && canPlay(s, id);
     let cls = ok ? 'ok' : (myTurn ? 'no' : '');
-    if (ok && ui.sel === id && !selShown) { cls += ' sel'; selShown = true; }
-    if (ui.fresh.has(i)) cls += ' drawn';
-    return cardHTML(id, ME, { cls, attrs: `data-card="${id}"${ok ? '' : ' disabled'}` });
+    if (ok && ui.sel === id) cls += ' sel';
+    if (ui.fresh.size && id === newest) cls += ' drawn';
+    if (counts[id] > 1) cls += ' copies';
+    const n = counts[id] > 1 ? `<span class="count">${counts[id]}</span>` : '';
+    return cardHTML(id, ME, { cls, attrs: `data-card="${id}"${ok ? '' : ' disabled'}` }).replace('</button>', n + '</button>');
   }).join('');
 }
 
@@ -748,6 +780,7 @@ document.addEventListener('click', (e) => {
   }
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ui.sel) { ui.sel = null; render(); } });
+
 startMatch();
 
 })();

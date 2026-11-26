@@ -116,21 +116,28 @@ function lookahead(t, me, hands) {
   return v / hands.length;
 }
 
-export function botTurn(s, rng = Math.random, K = 5) {
+const TOP = 40;
+export function botTurn(s, rng = Math.random, K = 5, noise = 0) {
   const me = s.turn, P = s.p[me], O = s.p[1 - me];
   const unseen = O.hand.concat(O.deck); // the pool he might hold: used only as a pool
   const n = Math.min(unseen.length, O.hand.length + (O.deck.length ? 1 : 0));
+  if (n === unseen.length) K = 1; // he holds every card he has not played: nothing to sample
   const hands = [];
   for (let k = 0; k < K; k++) {
     const pool = unseen.slice();
     for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = pool[i]; pool[i] = pool[j]; pool[j] = x; }
     hands.push(pool.slice(0, n));
   }
-  let best = [], bestV = -Infinity;
+  // judge every set on the spot, then look ahead from the best few
+  const cands = [];
   for (const set of cardSets(P.hand, P.mana)) {
     const r = placeSet(s, set);
-    if (!r) continue;
-    const v = lookahead(r.t, me, hands) - 0.001 * r.moves.length;
+    if (r) cands.push({ r, v0: evaluate(r.t, me) });
+  }
+  cands.sort((a, b) => b.v0 - a.v0);
+  let best = [], bestV = -Infinity;
+  for (const { r } of cands.slice(0, TOP)) {
+    const v = lookahead(r.t, me, hands) - 0.001 * r.moves.length + noise * rng();
     if (v > bestV) { bestV = v; best = r.moves; }
   }
   return best;

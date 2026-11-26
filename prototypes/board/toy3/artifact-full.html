@@ -1,0 +1,781 @@
+<title>Board Toy 3, Full Hand</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #2a3340; --table: #3b4a5c; --table2: #34424f; --ink: #1b1b1b; --paper: #fbf7ee; --mute: #6b6457;
+  --mana: #3d8bf2; --gold: #f2b632; --ok: #5fdc6f;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86; --strike: #e0673f; --strike2: #b8452a;
+  --cardw: 112px; --cardh: 150px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game {
+  position: relative; height: 100%; max-width: 1300px; margin: 0 auto;
+  display: grid; grid-template-rows: 40px minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); row-gap: 6px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+}
+#opphand { display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; }
+.back { width: 26px; height: 36px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
+.back:first-child { margin-left: 0; }
+#opphand:has(.back:nth-child(12)) .back { margin-left: -14px; } #opphand:has(.back:nth-child(12)) .back:first-child { margin-left: 0; }
+#menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+
+/* ---------------- table: plates | board | turn */
+#table { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; min-height: 0; align-items: stretch; }
+#left { display: flex; flex-direction: column; justify-content: center; align-items: flex-end; padding: 6px 0; min-height: 0; }
+#right { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 6px 0; }
+#boardwrap { width: min(820px, 58vw); align-self: center; display: flex; align-items: center; justify-content: center; }
+#board { width: 100%; aspect-ratio: 5 / 2.3; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: 1fr auto 1fr; gap: 6px 10px; padding: 12px;
+  border-radius: 18px; background: radial-gradient(ellipse at center, var(--table), var(--table2)); box-shadow: inset 0 0 30px rgba(0,0,0,.35); }
+.tile { position: relative; border-radius: 12px; background: rgba(0,0,0,.18); border: 2px solid rgba(255,255,255,.06); padding: 6px; display: flex; }
+.mark { justify-self: center; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #9aa5b1, #5b6672); border: 3px solid rgba(255,255,255,.25); box-shadow: 0 2px 6px rgba(0,0,0,.4); transition: background .25s, border-color .25s; }
+.mark.m0 { background: radial-gradient(circle at 35% 30%, #8cc2ff, var(--me2)); border-color: #fff; box-shadow: 0 0 12px rgba(61,127,214,.8); }
+.mark.m1 { background: radial-gradient(circle at 35% 30%, #c9a6f0, var(--him2)); border-color: #fff; box-shadow: 0 0 12px rgba(138,98,184,.8); }
+.mark.pop { animation: pop .4s ease-out; }
+.tile.can { border-color: var(--ok); background: rgba(95,220,111,.12); box-shadow: 0 0 12px rgba(95,220,111,.35); cursor: pointer; }
+.tile.can:hover { background: rgba(95,220,111,.25); }
+.tile.aim { cursor: pointer; }
+.tile.aim .unit { box-shadow: 0 0 0 3px var(--gold), 0 0 16px rgba(242,182,50,.8); }
+.tile.aim:hover .unit { transform: scale(1.04); }
+
+/* a unit on the board */
+.unit { flex: 1; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; transition: transform .1s;
+  border: 3px solid rgba(255,255,255,.85); box-shadow: 0 4px 8px rgba(0,0,0,.4); }
+.unit.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); }
+.unit.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.unit .hp { position: relative; font-size: 46px; font-weight: 900; text-shadow: 0 2px 3px rgba(0,0,0,.4); line-height: 1; }
+.unit .hp.hurt { color: #ffb19e; }
+.unit.new { animation: pop .4s ease-out; }
+.unit.shake { animation: shake .35s; }
+.unit.dying { animation: die .45s ease-in forwards; }
+.unit.scored { animation: glow .6s ease-out; }
+@keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(2px); } }
+@keyframes die { to { transform: scale(.4) rotate(-8deg); opacity: 0; } }
+@keyframes glow { 40% { box-shadow: 0 0 0 4px var(--gold), 0 0 22px rgba(242,182,50,.9); } }
+
+/* ---------------- cards */
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; text-align: left;
+  background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; }
+.card .art { margin: 4px 4px 0; border-radius: 6px; flex: 0 0 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; overflow: hidden; }
+.card.Unit.s0 .art { background: linear-gradient(160deg, var(--me), var(--me2)); }
+.card.Unit.s1 .art { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.card.Strike .art { background: linear-gradient(160deg, #f08a5d, var(--strike2)); }
+.card .big { position: relative; font-size: calc(var(--cardw) * .36); font-weight: 900; text-shadow: 0 2px 3px rgba(0,0,0,.35); line-height: 1; }
+.card .nm { font-weight: 800; font-size: calc(var(--cardw) * .14); padding: 5px 8px 0; }
+.card .tx { font-size: calc(var(--cardw) * .115); padding: 1px 8px; color: #3a352c; line-height: 1.15; }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+
+#hand { display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 12px 0 2px; min-height: calc(var(--cardh) + 16px); }
+#hand .card { transition: transform .12s, box-shadow .12s; }
+#hand .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok:hover { transform: translateY(-8px); }
+#hand .card.sel { transform: translateY(-16px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8), 0 6px 12px rgba(0,0,0,.5); }
+#hand .card:disabled { cursor: default; }
+#hand .card.no { filter: brightness(.62) saturate(.6); }
+.card .count { position: absolute; right: -9px; bottom: -9px; min-width: 28px; height: 28px; padding: 0 6px; border-radius: 14px; background: #1b2430; border: 2px solid #fff; color: #fff; font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+#hand .card.copies { box-shadow: 4px -4px 0 -1px #d5c39f, 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.copies.ok { box-shadow: 4px -4px 0 -1px #d5c39f, 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.drawn { animation: drawin .45s ease-out; }
+@keyframes drawin { from { transform: translateY(-60px) scale(.6); opacity: 0; } }
+
+/* ---------------- spotlight, floaters, banner, game over */
+#spot { position: absolute; left: 50%; top: 40%; z-index: 20; pointer-events: none; }
+#spot .card { --cardw: 160px; --cardh: 214px; position: absolute; left: calc(var(--cardw) / -2); top: calc(var(--cardh) / -2); box-shadow: 0 14px 40px rgba(0,0,0,.6); animation: fromtop .32s cubic-bezier(.2,.8,.3,1.1); }
+#spot .card.out { animation: spotout .2s ease-in forwards; }
+@keyframes fromtop { from { transform: translateY(-240px) scale(.4); opacity: .2; } }
+@keyframes spotout { to { transform: scale(.5); opacity: 0; } }
+
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 34px; text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 10px rgba(0,0,0,.4); transform: translate(-50%, -50%); animation: floatup 1.1s ease-out forwards; white-space: nowrap; }
+.float.dmg { color: #ff6a4d; font-size: 44px; }
+.float.gain { color: #ffd36b; font-size: 26px; }
+.float.gainbig { color: #ffd36b; font-size: 38px; }
+@keyframes floatup { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -110%) scale(1); } }
+
+#banner { position: absolute; left: 0; right: 0; top: 45%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 44px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+
+/* ---------------- food, mana, deck */
+.food { width: 84px; height: 84px; border-radius: 50%; flex: 0 0 auto;
+  background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); border: 4px solid #fff; color: #2a1d00;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; box-shadow: 0 3px 8px rgba(0,0,0,.4); }
+.food.s0 { border-color: var(--me); } .food.s1 { border-color: var(--him); }
+.food.active { box-shadow: 0 0 0 4px rgba(242,182,50,.5), 0 0 18px rgba(242,182,50,.6); }
+.food b { font-size: 34px; font-weight: 900; }
+.food small { font-size: 13px; font-weight: 700; opacity: .65; margin-top: 2px; }
+.food.bump { animation: bump .4s ease-out; }
+@keyframes bump { 40% { transform: scale(1.18); } }
+.res { display: flex; align-items: center; gap: 14px; }
+.stack { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+#res1 .stack { flex-direction: column-reverse; }
+.mana { display: flex; align-items: center; gap: 3px; }
+.gemc { width: 14px; height: 18px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: #1d2a38; }
+.gemc.on { background: linear-gradient(180deg, #8cc2ff, var(--mana)); }
+.gemc.off { opacity: .4; }
+.manatxt { font-weight: 800; font-size: 18px; margin-right: 8px; color: #bcd9ff; min-width: 40px; }
+.pile { width: 34px; height: 46px; border-radius: 5px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px;
+  box-shadow: 2px 2px 0 rgba(0,0,0,.3), 4px 4px 0 rgba(0,0,0,.2); }
+.pile.s0 { background: linear-gradient(135deg, var(--me), var(--me2)); } .pile.s1 { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
+
+/* ---------------- history */
+#history { flex: 0 1 auto; max-height: 100%; min-height: 0; width: 120px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; }
+.hist { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
+.chip { width: 26px; height: 30px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; flex: 0 0 auto; }
+.chip.Unit.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); } .chip.Unit.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.chip.Strike { background: linear-gradient(160deg, #f08a5d, var(--strike2)); }
+.chip.coin { width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); border: 2px solid #fff; }
+.ho { font-weight: 800; font-size: 16px; }
+.ho.dmg { color: #ff8a70; } .ho.kill { color: #ff6a4d; } .ho.gain { color: #ffd36b; }
+
+/* ---------------- turn */
+#endturn { width: 140px; min-height: 54px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; box-shadow: 0 3px 0 #a8770d; }
+#endturn.done { background: var(--ok); box-shadow: 0 3px 0 #2c8a3a, 0 0 14px rgba(95,220,111,.7); color: #08300f; }
+#endturn:disabled { background: #56616d; color: #8e98a3; box-shadow: none; cursor: default; }
+
+/* ---------------- phone */
+@media (max-width: 760px) {
+  :root { --cardw: 70px; --cardh: 96px; }
+  #game { grid-template-rows: 34px minmax(0, 1fr) auto; }
+  #menu { top: 3px; } #menu button { min-height: 24px; padding: 2px 10px; font-size: 13px; }
+  .back { width: 18px; height: 26px; }
+  #opphand { justify-content: flex-start; padding-top: 4px; }
+  #table { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px; }
+  #left, #right { display: contents; }
+  #history { display: none; }
+  #res1 { grid-row: 1; }
+  #boardwrap { grid-row: 2; grid-column: 1 / -1; width: 100%; justify-self: center; align-self: center; }
+  #res0 { grid-row: 3; }
+  .res .stack, #res1 .stack { flex-direction: row; align-items: center; gap: 10px; }
+  #table { position: relative; }
+  #turnbox { position: absolute; right: 0; bottom: 6px; z-index: 6; }
+  #res0 { padding-right: 130px; }
+  #board { gap: 5px; padding: 6px; aspect-ratio: 5 / 2.6; }
+  .mark { width: 22px; height: 22px; border-width: 2px; }
+  .unit .hp { font-size: 28px; }
+  .food { width: 54px; height: 54px; border-width: 3px; } .food b { font-size: 22px; } .food small { font-size: 11px; }
+  .gemc { width: 9px; height: 13px; }
+  .manatxt { font-size: 15px; min-width: 0; margin-right: 4px; }
+  .pile { width: 26px; height: 34px; font-size: 13px; }
+  #endturn { width: auto; min-height: 40px; padding: 0 14px; font-size: 15px; }
+  .card .nm { font-size: 12px; } .card .tx { display: none; }
+  .cgem { width: 22px; height: 22px; font-size: 13px; top: -6px; left: -6px; }
+  #hand { gap: 10px 8px; padding-top: 10px; flex-wrap: wrap; }
+  .card .count { min-width: 22px; height: 22px; font-size: 12px; right: -6px; bottom: -6px; }
+  #spot .card { --cardw: 120px; --cardh: 160px; }
+}
+
+</style>
+
+<div id="game">
+  <div id="opphand"></div>
+  <div id="menu"><button id="newmatch">Restart</button></div>
+  <div id="table">
+    <div id="left">
+      <div id="history"></div>
+    </div>
+    <div id="boardwrap"><div id="board"></div></div>
+    <div id="right">
+      <div id="res1" class="res"></div>
+      <div id="turnbox"></div>
+      <div id="res0" class="res"></div>
+    </div>
+  </div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// Board Toy 3: each player owns one row of 5 tiles, facing the other's. Hearthstone
+// mana, one shared deck list of two kinds of card: Unit (placed on an empty tile of
+// your own row or onto one of your units, which it replaces; its strength is its health) and Strike (deal N damage to an enemy unit).
+// A region pays, at the end of your turn, 1 food if your units in it have more total
+// health than his; first to GOAL wins. Regions are the columns, or the 2 by 2 blocks.
+
+const COLS = 5, ROWS = 2, TILES = COLS * ROWS, MAX_MANA = 10, TURN_LIMIT = 80;
+// row 0 belongs to side 1 (top), row 1 to side 0 (bottom)
+const rowOf = (side) => side === 0 ? 1 : 0;
+const ownTile = (side, i) => Math.floor(i / COLS) === rowOf(side);
+let GOAL = 20;
+let FULL_HAND = false; // both players start with their whole deck in hand
+function setFullHand(v) { FULL_HAND = v; }
+let SECOND_FOOD = 0, SECOND_MANA = 0; // what the second player gets for going second
+function setSecond(food, mana) { SECOND_FOOD = food; SECOND_MANA = mana; }
+let SCORE_AT = 'end'; // when a side's columns pay it: at the end of its turn, or at the start (what survived the enemy turn)
+function setScoreAt(w) { SCORE_AT = w; }
+let SKIP_FIRST_DRAW = true;
+function setSkipFirstDraw(v) { SKIP_FIRST_DRAW = v; }
+let SECOND_HAND = 3;
+function setSecondHand(n) { SECOND_HAND = n; }
+function setGoal(g) { GOAL = g; }
+
+const REGIONS = [];
+let REGION_SHAPE = 'column';
+function setRegionShape(shape) {
+  REGION_SHAPE = shape; REGIONS.length = 0;
+  if (shape === 'column') for (let c = 0; c < COLS; c++) REGIONS.push([c, COLS + c]);
+  else for (let c = 0; c < COLS - 1; c++) REGIONS.push([c, c + 1, COLS + c, COLS + c + 1]);
+}
+setRegionShape('column');
+function regionPower(s, rg) {
+  const p = [0, 0];
+  for (const i of rg) { const u = s.board[i]; if (u) p[u.side] += u.hp; }
+  return p;
+}
+function heldRegions(s, side) {
+  const out = [];
+  REGIONS.forEach((rg, k) => { const p = regionPower(s, rg); if (p[side] > p[1 - side]) out.push(k); });
+  return out;
+}
+
+const CARDS = {};
+let DECK = {};
+// cfg: { unitHp(cost), strikeDmg(cost), units: {cost: copies}, strikes: {cost: copies} }
+function configure(cfg) {
+  for (const k of Object.keys(CARDS)) delete CARDS[k];
+  DECK = {};
+  for (const [c, k] of Object.entries(cfg.units)) { const id = 'U' + c; CARDS[id] = { id, kind: 'Unit', cost: +c, n: cfg.unitHp(+c) }; DECK[id] = k; }
+  for (const [c, k] of Object.entries(cfg.strikes)) { const id = 'S' + c; CARDS[id] = { id, kind: 'Strike', cost: +c, n: cfg.strikeDmg(+c) }; DECK[id] = k; }
+}
+const DEFAULT = {
+  unitHp: c => c, strikeDmg: c => c,
+  units: { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3 },
+  strikes: { 1: 3, 2: 3, 3: 2, 4: 2 },
+};
+configure(DEFAULT);
+
+function deckList() {
+  const out = [];
+  for (const [id, k] of Object.entries(DECK)) for (let i = 0; i < k; i++) out.push(id);
+  return out;
+}
+
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; }
+  return a;
+}
+
+function newPlayer() { return { food: 0, mana: 0, maxMana: 0, hand: [], deck: deckList(), played: [] }; }
+function clone(s) {
+  return {
+    ...s,
+    board: s.board.map(u => u && { ...u }),
+    p: s.p.map(p => ({ ...p, hand: p.hand.slice(), deck: p.deck.slice(), played: p.played.slice() })),
+  };
+}
+function emit(s, ev, e) { if (ev) { e.round = s.turnNo; ev.push(e); } }
+function draw(s, side, n) {
+  const p = s.p[side]; let d = 0;
+  for (let i = 0; i < n && p.deck.length; i++) { p.hand.push(p.deck.shift()); d++; }
+  return d;
+}
+function unitsOf(s, side) { let n = 0; for (const u of s.board) if (u && u.side === side) n++; return n; }
+
+function newMatch({ seed }) {
+  const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, first: 0, winner: null, board: Array(TILES).fill(null), p: [newPlayer(), newPlayer()] };
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (FULL_HAND) for (const p of [s.first, 1 - s.first]) draw(s, p, s.p[p].deck.length);
+  else { draw(s, s.first, 3); draw(s, 1 - s.first, SECOND_HAND); }
+  s.p[1 - s.first].food = SECOND_FOOD;
+  s.p[1 - s.first].bonusMana = SECOND_MANA;
+  s.turn = s.first;
+  mStartTurn(s, null);
+  return s;
+}
+
+function mStartTurn(s, ev) {
+  const side = s.turn, p = s.p[side];
+  s.turnNo++;
+  emit(s, ev, { t: 'turn', side });
+  if (SCORE_AT === 'start' && score(s, ev)) return;
+  p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
+  p.mana = p.maxMana;
+  if (p.bonusMana) { p.mana += p.bonusMana; p.bonusMana = 0; }
+  const drew = s.turnNo === 1 && SKIP_FIRST_DRAW ? 0 : draw(s, side, 1);
+  emit(s, ev, { t: 'start', side, mana: p.mana, drew });
+}
+
+// A move is { card, tile }: a Unit onto an empty tile, a Strike onto a tile holding an enemy unit.
+function canPlay(s, card, tile) {
+  if (s.winner !== null || !CARDS[card]) return false;
+  const p = s.p[s.turn], c = CARDS[card];
+  if (!p.hand.includes(card) || c.cost > p.mana) return false;
+  if (tile === undefined) return c.kind === 'Unit' || s.board.some(u => u && u.side !== s.turn);
+  const u = s.board[tile];
+  return c.kind === 'Unit' ? ownTile(s.turn, tile) && (u === null || u.side === s.turn) : !!u && u.side !== s.turn;
+}
+function targets(s, card) {
+  const out = [];
+  for (let i = 0; i < TILES; i++) if (canPlay(s, card, i)) out.push(i);
+  return out;
+}
+
+function mPlay(s, card, tile, ev) {
+  if (!canPlay(s, card, tile)) throw new Error('play: illegal ' + card + '@' + tile);
+  const side = s.turn, p = s.p[side], c = CARDS[card];
+  p.mana -= c.cost;
+  p.hand.splice(p.hand.indexOf(card), 1);
+  p.played.push(card);
+  emit(s, ev, { t: 'play', side, card, tile, mana: p.mana });
+  if (c.kind === 'Unit') {
+    const old = s.board[tile];
+    if (old) emit(s, ev, { t: 'replace', side, tile, card: old.card });
+    s.board[tile] = { side, card, hp: c.n, max: c.n };
+    emit(s, ev, { t: 'place', side, tile });
+  } else {
+    const u = s.board[tile];
+    const dmg = Math.min(u.hp, c.n);
+    u.hp -= c.n;
+    emit(s, ev, { t: 'hit', side: u.side, tile, dmg: c.n, hp: Math.max(0, u.hp) });
+    if (u.hp <= 0) { s.board[tile] = null; emit(s, ev, { t: 'die', side: u.side, tile, card: u.card }); }
+  }
+}
+// Food for the side whose turn it is; true when it wins.
+function score(s, ev) {
+  const side = s.turn, p = s.p[side], regions = heldRegions(s, side);
+  if (!regions.length) return false;
+  p.food += regions.length;
+  emit(s, ev, { t: 'food', side, n: regions.length, regions, food: p.food });
+  if (p.food >= GOAL) { s.winner = side; emit(s, ev, { t: 'end', winner: side }); return true; }
+  return false;
+}
+function mEndTurn(s, ev) {
+  if (s.winner !== null) throw new Error('endTurn: match over');
+  if (SCORE_AT === 'end' && score(s, ev)) return;
+  if (s.turnNo >= TURN_LIMIT) { s.winner = 'draw'; emit(s, ev, { t: 'end', winner: 'draw' }); return; }
+  s.turn = 1 - s.turn;
+  mStartTurn(s, ev);
+}
+
+function playAction(s, card, tile, ev) { const t = clone(s); mPlay(t, card, tile, ev); return t; }
+function endTurn(s, ev) { const t = clone(s); mEndTurn(t, ev); return t; }
+function _play(t, card, tile) { mPlay(t, card, tile, null); return t; }
+
+function deckSummary(s, side) {
+  const p = s.p[side], cnt = (a) => a.reduce((m, x) => (m[x] = (m[x] || 0) + 1, m), {});
+  const pl = cnt(p.played), d = cnt(p.deck);
+  return Object.entries(DECK).map(([id, total]) => ({ id, total, played: pl[id] || 0, inDeck: d[id] || 0, unseen: total - (pl[id] || 0) }));
+}
+
+// ---- src/bot.js
+// The Board Toy 3 bot. Position is judged region by region: a region only one side
+// stands in is worth more the more of its four tiles that side holds; a region both
+// sides stand in is worth nothing to either. A turn is built card by card, each card
+// on its best tile by that judgement; the bot tries every affordable set of cards and
+// keeps the one whose position is best after the opponent's likely reply (a greedy
+// reply from hands sampled out of the cards he has not played). It never reads his
+// hand or either deck.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// value of a region by how many of its tiles the only side in it holds (index 0..4)
+const W = { reg: [0, 0.1, 0.5, 1.4, 3.2], maj: 2, margin: 0.15, hp: 0.15, hand: 0.6 };
+
+function evaluate(s, me) {
+  const P = s.p[me], O = s.p[1 - me];
+  let v = P.food - O.food;
+  for (const rg of REGIONS) {
+    const p = regionPower(s, rg), d = p[me] - p[1 - me];
+    v += Math.sign(d) * W.maj + W.margin * Math.max(-4, Math.min(4, d));
+  }
+  for (const u of s.board) if (u) v += (u.side === me ? 1 : -1) * W.hp * Math.min(u.hp, 5);
+  v += W.hand * (P.hand.length - O.hand.length);
+  return v;
+}
+
+function legalMoves(t, me) {
+  const P = t.p[me], out = [];
+  for (const id of new Set(P.hand)) {
+    if (CARDS[id].cost > P.mana) continue;
+    for (let i = 0; i < TILES; i++) {
+      const u = t.board[i];
+      if (CARDS[id].kind === 'Unit' ? ownTile(me, i) && (!u || u.side === me) : u && u.side !== me) out.push({ card: id, tile: i });
+    }
+  }
+  return out;
+}
+
+// Play one move at a time, always the one that most improves the position; stop when none does.
+function greedyTurn(s) {
+  const me = s.turn, moves = [];
+  let t = clone(s), cur = evaluate(t, me);
+  for (;;) {
+    let best = null, bestV = cur;
+    for (const m of legalMoves(t, me)) {
+      const t2 = clone(t); _play(t2, m.card, m.tile);
+      const v = evaluate(t2, me) + W.hand; // judge the board, not the card leaving hand
+      if (v > bestV + 1e-9) { bestV = v; best = { m, t2 }; }
+    }
+    if (!best) return moves;
+    moves.push(best.m); t = best.t2; cur = evaluate(t, me);
+  }
+}
+
+// Every distinct affordable set of cards from hand.
+function cardSets(hand, mana) {
+  const counts = {};
+  for (const id of hand) counts[id] = (counts[id] || 0) + 1;
+  const ids = Object.keys(counts), out = [];
+  (function rec(i, left, cards) {
+    if (i === ids.length) { out.push(cards.slice()); return; }
+    const c = CARDS[ids[i]];
+    for (let k = 0; k <= counts[ids[i]] && k * c.cost <= left; k++) {
+      for (let j = 0; j < k; j++) cards.push(ids[i]);
+      rec(i + 1, left - k * c.cost, cards);
+      cards.length -= k;
+    }
+  })(0, mana, []);
+  return out;
+}
+
+// Place a set: strikes first, biggest first, then units, biggest first; each on its best tile.
+function placeSet(s, set) {
+  const me = s.turn;
+  const order = set.slice().sort((a, b) => (CARDS[a].kind === CARDS[b].kind ? CARDS[b].n - CARDS[a].n : CARDS[a].kind === 'Strike' ? -1 : 1));
+  let t = clone(s); const moves = [];
+  for (const id of order) {
+    let best = null, bestV = -Infinity;
+    for (let i = 0; i < TILES; i++) {
+      const u = t.board[i];
+      if (!(CARDS[id].kind === 'Unit' ? ownTile(me, i) && (!u || u.side === me) : u && u.side !== me)) continue;
+      const t2 = clone(t); _play(t2, id, i);
+      const v = evaluate(t2, me);
+      if (v > bestV) { bestV = v; best = { m: { card: id, tile: i }, t2 }; }
+    }
+    if (!best) return null;
+    moves.push(best.m); t = best.t2;
+  }
+  return { t, moves };
+}
+
+function lookahead(t, me, hands) {
+  const myFood = t.p[me].food + heldRegions(t, me).length;
+  if (myFood >= GOAL) return 1000 + myFood;
+  let v = 0;
+  for (const hand of hands) {
+    const r = clone(t), O = r.p[1 - me];
+    r.p[me].food = myFood;
+    O.maxMana = Math.min(10, O.maxMana + 1); O.mana = O.maxMana;
+    O.hand = hand.slice();
+    r.turn = 1 - me;
+    for (const m of greedyTurn(r)) _play(r, m.card, m.tile);
+    O.food += heldRegions(r, 1 - me).length;
+    r.turn = me;
+    v += O.food >= GOAL ? -1000 : evaluate(r, me);
+  }
+  return v / hands.length;
+}
+
+const TOP = 40;
+function botTurn(s, rng = Math.random, K = 5, noise = 0) {
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  const unseen = O.hand.concat(O.deck); // the pool he might hold: used only as a pool
+  const n = Math.min(unseen.length, O.hand.length + (O.deck.length ? 1 : 0));
+  if (n === unseen.length) K = 1; // he holds every card he has not played: nothing to sample
+  const hands = [];
+  for (let k = 0; k < K; k++) {
+    const pool = unseen.slice();
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = pool[i]; pool[i] = pool[j]; pool[j] = x; }
+    hands.push(pool.slice(0, n));
+  }
+  // judge every set on the spot, then look ahead from the best few
+  const cands = [];
+  for (const set of cardSets(P.hand, P.mana)) {
+    const r = placeSet(s, set);
+    if (r) cands.push({ r, v0: evaluate(r.t, me) });
+  }
+  cands.sort((a, b) => b.v0 - a.v0);
+  let best = [], bestV = -Infinity;
+  for (const { r } of cands.slice(0, TOP)) {
+    const v = lookahead(r.t, me, hands) - 0.001 * r.moves.length + noise * rng();
+    if (v > bestV) { bestV = v; best = r.moves; }
+  }
+  return best;
+}
+
+function randomTurn(s, rng) {
+  const me = s.turn, moves = [];
+  let t = clone(s);
+  for (let n = 0; n < 20; n++) {
+    const opts = legalMoves(t, me);
+    if (!opts.length || rng() < 0.15) return moves;
+    const m = opts[Math.floor(rng() * opts.length)];
+    _play(t, m.card, m.tile); moves.push(m);
+  }
+  return moves;
+}
+
+// ---- src/ui.js
+// Board Toy 1 as a game screen. Drives the engine through its transitions; each
+// play or turn change is animated from the state before and the state after.
+
+
+
+const ME = 0, BOT = 1;
+const ui = { s: null, view: null, busy: false, over: false, sel: null, food: [0, 0], hist: [], fresh: new Set(), fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+
+function cardHTML(id, side, { cls = '', attrs = '' } = {}) {
+  const c = CARDS[id];
+  return `<button class="card ${c.kind} s${side} ${cls}" ${attrs}>
+    <span class="cgem">${c.cost}</span>
+    <div class="art"><span class="big">${c.n}</span></div>
+    <div class="nm">${c.kind}</div>
+    ${c.kind === 'Strike' ? `<div class="tx">Deal ${c.n} damage to an enemy unit.</div>` : ''}
+  </button>`;
+}
+
+// ------------------------------------------------------------------ rendering
+function resHTML(side) {
+  const p = ui.view.p[side];
+  let gems = '';
+  for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < p.mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
+  const food = `<div class="food s${side}${!ui.over && ui.view.turn === side ? ' active' : ''}${ui.fx['food' + side] ? ' bump' : ''}" id="food${side}"><b>${ui.food[side]}</b><small>/${GOAL}</small></div>`;
+  return `${food}<div class="stack"><div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div>${FULL_HAND ? '' : `<div class="pile s${side}">${p.deck.length}</div>`}</div>`;
+}
+function histHTML(h) {
+  const chip = h.food ? `<span class="chip coin"></span>` : `<span class="chip ${CARDS[h.card].kind} s${h.side}">${CARDS[h.card].n}</span>`;
+  return `<div class="hist s${h.side}">${chip}<span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`;
+}
+
+function boardHTML() {
+  const s = ui.view, myTurn = !ui.busy && !ui.over && s.turn === ME;
+  const live = ui.sel && myTurn ? new Set(targets(s, ui.sel)) : new Set();
+  const kind = ui.sel && CARDS[ui.sel].kind;
+  let h = '';
+  const win = {};
+  for (const side of [0, 1]) for (const k of heldRegions(s, side)) win[k] = side;
+  for (let i = 0; i < TILES; i++) {
+    if (i === COLS) for (let k = 0; k < REGIONS.length; k++) h += `<div class="mark${win[k] === undefined ? '' : ' m' + win[k]}${ui.fx['m' + k] ? ' pop' : ''}" id="mark${k}"></div>`;
+    const u = s.board[i], t = live.has(i);
+    const cls = t ? (kind === 'Unit' ? ' can' : ' aim') : '';
+    let inner = '';
+    if (u) {
+      const fx = ui.fx['t' + i] || '';
+      inner = `<div class="unit s${u.side} ${fx}" id="u${i}"><span class="hp${u.hp < u.max ? ' hurt' : ''}">${u.hp}</span></div>`;
+    } else if (ui.fx['dead' + i]) {
+      const d = ui.fx['dead' + i];
+      inner = `<div class="unit s${d.side} dying" id="u${i}"><span class="hp hurt">0</span></div>`;
+    }
+    h += `<div class="tile${cls}" id="tile${i}" data-tile="${i}">${inner}</div>`;
+  }
+  return h;
+}
+
+function handHTML() {
+  const s = ui.view, p = s.p[ME];
+  const counts = {};
+  for (const id of p.hand) counts[id] = (counts[id] || 0) + 1;
+  const ids = Object.keys(counts).sort((a, b) => {
+    const A = CARDS[a], B = CARDS[b];
+    return (A.kind === B.kind ? 0 : A.kind === 'Unit' ? -1 : 1) || A.cost - B.cost;
+  });
+  const myTurn = !ui.busy && !ui.over && s.turn === ME;
+  const newest = p.hand[p.hand.length - 1];
+  return ids.map(id => {
+    const ok = myTurn && canPlay(s, id);
+    let cls = ok ? 'ok' : (myTurn ? 'no' : '');
+    if (ok && ui.sel === id) cls += ' sel';
+    if (ui.fresh.size && id === newest) cls += ' drawn';
+    if (counts[id] > 1) cls += ' copies';
+    const n = counts[id] > 1 ? `<span class="count">${counts[id]}</span>` : '';
+    return cardHTML(id, ME, { cls, attrs: `data-card="${id}"${ok ? '' : ' disabled'}` }).replace('</button>', n + '</button>');
+  }).join('');
+}
+
+function render() {
+  const s = ui.view;
+  const own = REGIONS.map((_, k) => heldRegions(s, 0).includes(k) ? 0 : heldRegions(s, 1).includes(k) ? 1 : -1);
+  if (ui.own) own.forEach((o, k) => { if (o !== ui.own[k] && o >= 0) ui.fx['m' + k] = 1; });
+  ui.own = own;
+  $('opphand').innerHTML = '<i class="back"></i>'.repeat(s.p[BOT].hand.length);
+  for (const side of [0, 1]) {
+    $('res' + side).innerHTML = resHTML(side);
+  }
+  $('board').innerHTML = boardHTML();
+  $('hand').innerHTML = handHTML();
+  const myTurn = !ui.over && s.turn === ME;
+  const canAct = myTurn && !ui.busy && s.p[ME].hand.some(id => canPlay(s, id));
+  $('turnbox').innerHTML = `<button id="endturn" class="${myTurn && !canAct ? 'done' : ''}"${myTurn && !ui.busy ? '' : ' disabled'}>End turn</button>`;
+  $('history').innerHTML = ui.hist.filter(h => !h.sep).slice(-14).map(histHTML).join('');
+  ui.fresh.clear(); ui.fx = {};
+}
+
+// ------------------------------------------------------------------ effects
+function centerOf(el) {
+  const a = $('game').getBoundingClientRect(), r = el.getBoundingClientRect();
+  return { x: r.left - a.left + r.width / 2, y: r.top - a.top + r.height / 2 };
+}
+function floater(el, text, cls, dy = 0) {
+  if (!el) return;
+  const c = centerOf(el), f = document.createElement('div');
+  f.className = 'float ' + cls; f.textContent = text;
+  f.style.left = c.x + 'px'; f.style.top = (c.y + dy) + 'px';
+  $('game').appendChild(f);
+  setTimeout(() => f.remove(), 1200);
+}
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+async function spotlight(card, side) {
+  const t = centerOf($('board'));
+  $('spot').style.left = t.x + 'px'; $('spot').style.top = t.y + 'px';
+  $('spot').innerHTML = cardHTML(card, side);
+  await wait(750);
+  const c = $('spot').querySelector('.card'); if (c) c.classList.add('out');
+  await wait(180);
+  $('spot').innerHTML = '';
+}
+
+// ------------------------------------------------------------------ playback
+async function apply(fn) {
+  const prev = ui.s, ev = [];
+  const next = fn(prev, ev);
+  ui.s = next;
+  for (const e of ev) {
+    if (e.t === 'turn') {
+      ui.view = next; ui.sel = null;
+      ui.hist.push({ sep: 1, side: e.side });
+      render();
+      if (e.side === ME) { banner('Your turn'); await wait(650); } else await wait(300);
+    } else if (e.t === 'food') {
+      for (const k of e.regions) for (const i of REGIONS[k]) if (prev.board[i] && prev.board[i].side === e.side) ui.fx['t' + i] = 'scored';
+      ui.food[e.side] = e.food; ui.fx['food' + e.side] = 1;
+      render();
+      for (const k of e.regions) floater($('mark' + k), '+1', 'gain', -20);
+      floater($('food' + e.side), '+' + e.n, 'gainbig', -46);
+      ui.hist.push({ side: e.side, food: 1, out: '+' + e.n, cls: 'gain' });
+      await wait(750);
+    } else if (e.t === 'play') {
+      if (e.side === BOT || CARDS[e.card].kind === 'Strike') await spotlight(e.card, e.side);
+    } else if (e.t === 'place') {
+      ui.view = next; ui.fx['t' + e.tile] = 'new';
+      ui.hist.push({ side: e.side, card: ev.find(x => x.t === 'play').card });
+      render();
+    } else if (e.t === 'hit') {
+      const died = ev.some(x => x.t === 'die');
+      ui.view = next;
+      if (died) ui.fx['dead' + e.tile] = { side: e.side };
+      else ui.fx['t' + e.tile] = 'shake';
+      ui.hist.push({ side: 1 - e.side, card: ev.find(x => x.t === 'play').card, out: died ? '✕' : '−' + e.dmg, cls: died ? 'kill' : 'dmg' });
+      render();
+      floater($('tile' + e.tile), '−' + e.dmg, 'dmg');
+      await wait(died ? 450 : 250);
+      if (died) render();
+    } else if (e.t === 'start') {
+      ui.view = next;
+      if (e.drew && e.side === ME) ui.fresh.add(next.p[ME].hand.length - 1);
+      render();
+    }
+  }
+  ui.view = next;
+  ui.food = [next.p[0].food, next.p[1].food];
+  if (next.winner !== null) finish();
+  render();
+}
+
+function finish() {
+  ui.over = true;
+  const w = ui.s.winner;
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+// ------------------------------------------------------------------ flow
+async function startMatch() {
+  const tok = ++ui.token;
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0 });
+  ui.view = ui.s; ui.over = false; ui.hist = []; ui.sel = null; ui.food = [0, 0];
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  ui.hist.push({ sep: 1, side: ui.s.first });
+  if (ui.s.first === ME) banner('Your turn');
+  await wait(900);
+  if (tok !== ui.token) return;
+  if (ui.s.turn === BOT) await botMove(tok);
+  else { ui.busy = false; render(); }
+}
+
+async function botMove(tok) {
+  ui.busy = true; render();
+  await wait(450);
+  const moves = botTurn(ui.s, ui.rng);
+  for (const m of moves) {
+    if (tok !== ui.token || ui.over) return;
+    await wait(200);
+    await apply((s, ev) => playAction(s, m.card, m.tile, ev));
+  }
+  if (tok !== ui.token || ui.over) return;
+  await wait(350);
+  await apply((s, ev) => endTurn(s, ev));
+  if (tok !== ui.token || ui.over) return;
+  ui.busy = false; render();
+}
+
+async function myPlay(card, tile) {
+  if (ui.busy || ui.over || ui.s.turn !== ME || !canPlay(ui.s, card, tile)) return;
+  ui.busy = true; ui.sel = null;
+  await apply((s, ev) => playAction(s, card, tile, ev));
+  ui.busy = false; render();
+}
+
+async function myEndTurn() {
+  if (ui.busy || ui.over || ui.s.turn !== ME) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel = null; render();
+  await apply((s, ev) => endTurn(s, ev));
+  if (tok !== ui.token || ui.over) return;
+  await botMove(tok);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  const tile = e.target.closest('.tile');
+  if (tile && ui.sel) { myPlay(ui.sel, +tile.dataset.tile); return; }
+  const t = e.target.closest('button');
+  if (!t || t.disabled) { if (ui.sel) { ui.sel = null; render(); } return; }
+  if (t.dataset.card) { ui.sel = ui.sel === t.dataset.card ? null : t.dataset.card; render(); return; }
+  switch (t.id) {
+    case 'rematch': case 'newmatch': startMatch(); return;
+    case 'endturn': myEndTurn(); return;
+  }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ui.sel) { ui.sel = null; render(); } });
+setFullHand(true);
+startMatch();
+
+})();
+</script>

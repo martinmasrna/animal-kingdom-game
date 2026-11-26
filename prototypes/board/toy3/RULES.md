@@ -7,3 +7,9 @@ Each player owns one row of 5 tiles, facing the other's (Martin, 2026-11-26: "ea
 
 Bot against bot, 100 games each: columns at 20 food, first player 45%, about 11 turns each, no stalls; blocks at 20 food, first player 58%, about 9 turns each. 
 `node build.mjs` writes `index.html` and `artifact.html`; `node selftest.mjs` plays the bot against a greedy player, a random player and itself.
+
+## Full Hand
+
+`node build.mjs full` writes the variant where both players start with their whole deck in hand and never draw (Martin, 2026-11-26: "not at the mercy of my draw"), to `index-full.html` and `artifact-full.html`. Identical cards show once, with their count.
+
+Bot against bot, with a little noise in the bot's choices (without noise every game is the same game): the first player wins 93 to 100%. The side to move retakes most columns and is paid for them before the other side can answer, and with every answer always in hand the lead never changes hands. Making up for going second: the coin (1 extra mana once) 93%, a head start of 1 to 3 food 98 to 100%, 5 food 88%, 8 food 43%. Columns paying at the start of their owner's turn instead (what survived the enemy turn) bring it to 71%, with games twice as long (`setScoreAt('start')`; the bot still plans for end-of-turn payment there).

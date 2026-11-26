@@ -17,6 +17,7 @@ button { font: inherit; cursor: pointer; }
 #opphand { display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; }
 .back { width: 26px; height: 36px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
 .back:first-child { margin-left: 0; }
+#opphand:has(.back:nth-child(12)) .back { margin-left: -14px; } #opphand:has(.back:nth-child(12)) .back:first-child { margin-left: 0; }
 #menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; }
 #menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
 
@@ -74,6 +75,9 @@ button { font: inherit; cursor: pointer; }
 #hand .card.sel { transform: translateY(-16px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8), 0 6px 12px rgba(0,0,0,.5); }
 #hand .card:disabled { cursor: default; }
 #hand .card.no { filter: brightness(.62) saturate(.6); }
+.card .count { position: absolute; right: -9px; bottom: -9px; min-width: 28px; height: 28px; padding: 0 6px; border-radius: 14px; background: #1b2430; border: 2px solid #fff; color: #fff; font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+#hand .card.copies { box-shadow: 4px -4px 0 -1px #d5c39f, 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.copies.ok { box-shadow: 4px -4px 0 -1px #d5c39f, 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
 #hand .card.drawn { animation: drawin .45s ease-out; }
 @keyframes drawin { from { transform: translateY(-60px) scale(.6); opacity: 0; } }
 
@@ -152,7 +156,9 @@ button { font: inherit; cursor: pointer; }
   #boardwrap { grid-row: 2; grid-column: 1 / -1; width: 100%; justify-self: center; align-self: center; }
   #res0 { grid-row: 3; }
   .res .stack, #res1 .stack { flex-direction: row; align-items: center; gap: 10px; }
-  #turnbox { position: absolute; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(var(--cardh) + 80px); z-index: 6; }
+  #table { position: relative; }
+  #turnbox { position: absolute; right: 0; bottom: 6px; z-index: 6; }
+  #res0 { padding-right: 130px; }
   #board { gap: 5px; padding: 6px; aspect-ratio: 5 / 2.6; }
   .mark { width: 22px; height: 22px; border-width: 2px; }
   .unit .hp { font-size: 28px; }
@@ -163,6 +169,7 @@ button { font: inherit; cursor: pointer; }
   #endturn { width: auto; min-height: 40px; padding: 0 14px; font-size: 15px; }
   .card .nm { font-size: 12px; } .card .tx { display: none; }
   .cgem { width: 22px; height: 22px; font-size: 13px; top: -6px; left: -6px; }
-  #hand { gap: 5px; padding-top: 10px; }
+  #hand { gap: 10px 8px; padding-top: 10px; flex-wrap: wrap; }
+  .card .count { min-width: 22px; height: 22px; font-size: 12px; right: -6px; bottom: -6px; }
   #spot .card { --cardw: 120px; --cardh: 160px; }
 }
