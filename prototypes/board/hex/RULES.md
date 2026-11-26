@@ -23,6 +23,8 @@ Martin's skill-chain test: from a random player, each bot is the simplest found 
 - Normal, each play the one that most raises held regions minus his: beats Cluster 85%.
 - Hard, Normal that also values half-built triangles (`greedyTurn`): beats Normal 96%.
 - Expert, Hard's turn unless twelve play-outs per candidate, eight turns deep with Hard on both sides, clearly prefer another (`rolloutBot(6, 12, 8)`): beats Hard 83%.
+- Centre+, Martin's centre rule (`centreBot`: every triangle holds one of the four centre tiles 3, 6, 7, 10, so hold them all, save strikes for them, refill with the strongest unit) with play-outs on top (`centrePlus()`): beats Expert 70.9% (400 games). The rule alone beats Expert 62.6%. Martin found it by hand and beat Expert 5-1 with it (2026-11-26), and called the game boring once he had it: the board's whole blocking set is four adjacent tiles that also pay 2 food a turn, so the top of the chain is one recipe.
+- On 3-4-5-4-3 every triangle is touched by 6 tiles; of the 18 such sets only one is connected and none holds a whole triangle, so a lock there denies but does not pay.
 - Before the fix, nothing found beat Expert: an eight-times larger search 43%, the same search seeing every hidden card 46.5%; that search has not been rerun on the fixed bots.
 
 Control, Slots (food per unit, the game Martin found shallow): the simplest bot over 70% against Random is the greedy one (kill the biggest you can, else play your biggest unit), 82%; nothing tried beats it 70% (one-turn lookahead 55%, play-outs 41%).
