@@ -311,12 +311,12 @@ body.playing #start { display: none; }
 "use strict";
 // ---- src/engine.js
 // Toy 3: rounds of blind simultaneous commitment, resolved all at once by speed.
-// Each round: both draw 3 and gain 6 energy (start 10, cap 10, unspent kept). Both
+// Each round: both draw 1 and gain 6 energy (start 10, cap 10, unspent kept). Both
 // choose any cards they can afford in secret; then everything is revealed and
 // resolves fastest first. Pure from the outside: transitions clone the state.
 
 const HP = 30, MAX_E = 10, ROUND_LIMIT = 30;
-let GAIN = 6, DRAW = 3, GUARD_RATE = 2, STRIKES_FIRST = true, CARRY = true;
+let GAIN = 6, DRAW = 1, GUARD_RATE = 2, STRIKES_FIRST = true, CARRY = true;
 function setRules(r) { if (r.gain != null) GAIN = r.gain; if (r.draw != null) DRAW = r.draw; if (r.strikesFirst != null) STRIKES_FIRST = r.strikesFirst; if (r.carry != null) CARRY = r.carry; if (r.guardRate != null) { GUARD_RATE = r.guardRate; buildCards(); } }
 
 // Speed: lower resolves sooner (Martin, 2026-11-26). A strike or guard costing c has speed c.
@@ -327,7 +327,8 @@ function buildCards() {
   CARDS.SW = { id: 'SW', kind: 'Sword', cost: 3, n: 2, speed: 2 };
 }
 buildCards();
-const DECK = { S2: 3, S3: 3, S4: 3, S5: 3, S6: 3, G1: 3, G2: 3, G3: 3, G4: 3, SW: 3 };
+// One copy of each card, no Sword (Martin, 2026-11-26).
+const DECK = { S1: 1, S2: 1, S3: 1, S4: 1, S5: 1, S6: 1, G1: 1, G2: 1, G3: 1, G4: 1 };
 
 function deckList() {
   const out = [];
@@ -350,9 +351,14 @@ function clonePlayer(p) { return { ...p, hand: p.hand.slice(), deck: p.deck.slic
 function clone(s) { return { ...s, p: [clonePlayer(s.p[0]), clonePlayer(s.p[1])] }; }
 
 function emit(s, ev, e) { if (ev) { e.round = s.round; ev.push(e); } }
+// When the deck is empty, the cards already played are shuffled back in.
 function draw(s, side, n) {
   const p = s.p[side]; let d = 0;
-  for (let i = 0; i < n && p.deck.length; i++) { p.hand.push(p.deck.shift()); d++; }
+  for (let i = 0; i < n; i++) {
+    if (!p.deck.length && p.played.length) { p.deck = shuffleInPlace(s, p.played); p.played = []; p.reshuffled = (p.reshuffled || 0) + 1; }
+    if (!p.deck.length) break;
+    p.hand.push(p.deck.shift()); d++;
+  }
   return d;
 }
 function strikeDmg(p, id) { return CARDS[id].n + p.sword; }
