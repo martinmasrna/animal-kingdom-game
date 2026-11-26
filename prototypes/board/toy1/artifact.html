@@ -25,7 +25,7 @@ button { font: inherit; cursor: pointer; }
 
 /* ---------------- table: plates | board | turn */
 #table { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; min-height: 0; align-items: stretch; }
-#left { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; gap: 14px; padding: 6px 0; min-height: 0; }
+#left { display: flex; flex-direction: column; justify-content: center; align-items: flex-end; padding: 6px 0; min-height: 0; }
 #right { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 6px 0; }
 #boardwrap { height: 100%; aspect-ratio: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
 #board { width: 100%; height: 100%; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; padding: 10px;
@@ -110,7 +110,8 @@ button { font: inherit; cursor: pointer; }
 .food.bump { animation: bump .4s ease-out; }
 @keyframes bump { 40% { transform: scale(1.18); } }
 .res { display: flex; align-items: center; gap: 14px; }
-#res1 { flex-direction: column-reverse; align-items: flex-start; gap: 8px; } #res0 { flex-direction: column; align-items: flex-start; gap: 8px; }
+.stack { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+#res1 .stack { flex-direction: column-reverse; }
 .mana { display: flex; align-items: center; gap: 3px; }
 .gemc { width: 14px; height: 18px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: #1d2a38; }
 .gemc.on { background: linear-gradient(180deg, #8cc2ff, var(--mana)); }
@@ -121,7 +122,7 @@ button { font: inherit; cursor: pointer; }
 .pile.s0 { background: linear-gradient(135deg, var(--me), var(--me2)); } .pile.s1 { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
 
 /* ---------------- history */
-#history { flex: 1 1 auto; min-height: 0; width: 120px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; }
+#history { flex: 0 1 auto; max-height: 100%; min-height: 0; width: 120px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; }
 .hist { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; }
 .hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
 .chip { width: 26px; height: 30px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; flex: 0 0 auto; }
@@ -130,8 +131,6 @@ button { font: inherit; cursor: pointer; }
 .chip.coin { width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); border: 2px solid #fff; }
 .ho { font-weight: 800; font-size: 16px; }
 .ho.dmg { color: #ff8a70; } .ho.kill { color: #ff6a4d; } .ho.gain { color: #ffd36b; }
-.hsep { height: 2px; margin: 5px 0 1px; border-radius: 1px; opacity: .6; }
-.hsep.s0 { background: var(--me); } .hsep.s1 { background: var(--him); }
 
 /* ---------------- turn */
 #endturn { width: 140px; min-height: 54px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; box-shadow: 0 3px 0 #a8770d; }
@@ -145,13 +144,13 @@ button { font: inherit; cursor: pointer; }
   #menu { top: 3px; } #menu button { min-height: 24px; padding: 2px 10px; font-size: 13px; }
   .back { width: 18px; height: 26px; }
   #opphand { justify-content: flex-start; padding-top: 4px; }
-  #table { grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px 12px; }
+  #table { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px; }
   #left, #right { display: contents; }
   #history { display: none; }
-  #food1 { grid-row: 1; grid-column: 1; } #res1 { grid-row: 1; grid-column: 2; }
+  #res1 { grid-row: 1; }
   #boardwrap { grid-row: 2; grid-column: 1 / -1; height: auto; width: 100%; max-height: 100%; max-width: 100%; justify-self: center; align-self: center; }
-  #food0 { grid-row: 3; grid-column: 1; } #res0 { grid-row: 3; grid-column: 2; }
-  #res1, #res0 { flex-direction: row; align-items: center; justify-content: flex-end; gap: 10px; }
+  #res0 { grid-row: 3; }
+  .res .stack, #res1 .stack { flex-direction: row; align-items: center; gap: 10px; }
   #turnbox { position: absolute; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(var(--cardh) + 80px); z-index: 6; }
   #board { gap: 5px; padding: 6px; }
   .unit .hp { font-size: 28px; }
@@ -173,9 +172,7 @@ button { font: inherit; cursor: pointer; }
   <div id="menu"><button id="newmatch">Restart</button></div>
   <div id="table">
     <div id="left">
-      <div id="food1" class="food s1"></div>
       <div id="history"></div>
-      <div id="food0" class="food s0"></div>
     </div>
     <div id="boardwrap"><div id="board"></div></div>
     <div id="right">
@@ -536,10 +533,10 @@ function resHTML(side) {
   const p = ui.view.p[side];
   let gems = '';
   for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < p.mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
-  return `<div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div><div class="pile s${side}">${p.deck.length}</div>`;
+  const food = `<div class="food s${side}${!ui.over && ui.view.turn === side ? ' active' : ''}${ui.fx['food' + side] ? ' bump' : ''}" id="food${side}"><b>${ui.food[side]}</b><small>/${GOAL}</small></div>`;
+  return `${food}<div class="stack"><div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div><div class="pile s${side}">${p.deck.length}</div></div>`;
 }
 function histHTML(h) {
-  if (h.sep) return `<div class="hsep s${h.side}"></div>`;
   const chip = h.food ? `<span class="chip coin"></span>` : `<span class="chip ${CARDS[h.card].kind} s${h.side}">${CARDS[h.card].n}</span>`;
   return `<div class="hist s${h.side}">${chip}<span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`;
 }
@@ -588,17 +585,13 @@ function render() {
   $('opphand').innerHTML = '<i class="back"></i>'.repeat(s.p[BOT].hand.length);
   for (const side of [0, 1]) {
     $('res' + side).innerHTML = resHTML(side);
-    const f = $('food' + side);
-    f.innerHTML = `<b>${ui.food[side]}</b><small>/${GOAL}</small>`;
-    f.classList.toggle('active', !ui.over && s.turn === side);
-    f.classList.toggle('bump', !!ui.fx['food' + side]);
   }
   $('board').innerHTML = boardHTML();
   $('hand').innerHTML = handHTML();
   const myTurn = !ui.over && s.turn === ME;
   const canAct = myTurn && !ui.busy && s.p[ME].hand.some(id => canPlay(s, id));
   $('turnbox').innerHTML = `<button id="endturn" class="${myTurn && !canAct ? 'done' : ''}"${myTurn && !ui.busy ? '' : ' disabled'}>End turn</button>`;
-  $('history').innerHTML = ui.hist.slice(-14).map(histHTML).join('');
+  $('history').innerHTML = ui.hist.filter(h => !h.sep).slice(-14).map(histHTML).join('');
   ui.fresh.clear(); ui.fx = {};
 }
 

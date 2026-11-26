@@ -25,10 +25,10 @@ function resHTML(side) {
   const p = ui.view.p[side];
   let gems = '';
   for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < p.mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
-  return `<div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div><div class="pile s${side}">${p.deck.length}</div>`;
+  const food = `<div class="food s${side}${!ui.over && ui.view.turn === side ? ' active' : ''}${ui.fx['food' + side] ? ' bump' : ''}" id="food${side}"><b>${ui.food[side]}</b><small>/${GOAL}</small></div>`;
+  return `${food}<div class="stack"><div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div><div class="pile s${side}">${p.deck.length}</div></div>`;
 }
 function histHTML(h) {
-  if (h.sep) return `<div class="hsep s${h.side}"></div>`;
   const chip = h.food ? `<span class="chip coin"></span>` : `<span class="chip ${CARDS[h.card].kind} s${h.side}">${CARDS[h.card].n}</span>`;
   return `<div class="hist s${h.side}">${chip}<span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`;
 }
@@ -77,17 +77,13 @@ function render() {
   $('opphand').innerHTML = '<i class="back"></i>'.repeat(s.p[BOT].hand.length);
   for (const side of [0, 1]) {
     $('res' + side).innerHTML = resHTML(side);
-    const f = $('food' + side);
-    f.innerHTML = `<b>${ui.food[side]}</b><small>/${GOAL}</small>`;
-    f.classList.toggle('active', !ui.over && s.turn === side);
-    f.classList.toggle('bump', !!ui.fx['food' + side]);
   }
   $('board').innerHTML = boardHTML();
   $('hand').innerHTML = handHTML();
   const myTurn = !ui.over && s.turn === ME;
   const canAct = myTurn && !ui.busy && s.p[ME].hand.some(id => canPlay(s, id));
   $('turnbox').innerHTML = `<button id="endturn" class="${myTurn && !canAct ? 'done' : ''}"${myTurn && !ui.busy ? '' : ' disabled'}>End turn</button>`;
-  $('history').innerHTML = ui.hist.slice(-14).map(histHTML).join('');
+  $('history').innerHTML = ui.hist.filter(h => !h.sep).slice(-14).map(histHTML).join('');
   ui.fresh.clear(); ui.fx = {};
 }
 
