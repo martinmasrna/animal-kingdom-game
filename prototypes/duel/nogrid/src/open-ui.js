@@ -135,7 +135,7 @@ function render() {
     <button id="endturn" class="${myTurn && !canAct ? 'done' : ''}"${myTurn && !ui.busy ? '' : ' disabled'}>${myTurn ? 'End turn' : 'His turn'}</button>`;
   $('history').innerHTML = ui.hist.slice(-14).map(h => h.sep
     ? `<div class="hist sep">${h.sep}</div>`
-    : `<div class="hist s${h.side}"><span class="hn">${h.card}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`).join('');
+    : `<div class="hist s${h.side}" data-card="${h.name || h.card}"><span class="hn">${h.card}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`).join('');
   $('decks').classList.toggle('show', ui.showDecks);
   if (ui.showDecks) $('decks').innerHTML = `<button class="x" id="closedecks">Close</button><div class="wrap">${deckTable(BOT)}${deckTable(ME)}</div>`;
   ui.fresh.clear(); ui.freshWind.clear(); ui.freshGuard = [0, 0];
@@ -259,7 +259,7 @@ async function playBeats(ev, prev, next) {
     for (const side of [0, 1]) if (dmgTo[side]) { floater(side, '−' + dmgTo[side], 'dmg'); shake(side); out = '−' + dmgTo[side]; cls = 'dmg'; }
     if (b.card) {
       // the played card goes before any "broken" line it caused
-      const entry = { side: b.side, card: (b.lands ? '⏳ ' : '') + b.card, out, cls };
+      const entry = { side: b.side, name: b.card, card: (b.lands ? '⏳ ' : '') + b.card, out, cls };
       const brokeAt = ui.hist.length - b.evs.filter(e => e.t === 'cancel').length;
       ui.hist.splice(brokeAt, 0, entry);
       render();
@@ -335,6 +335,18 @@ async function myEndTurn() {
 }
 
 // ------------------------------------------------------------------ input
+// hovering (or tapping) a history line shows that card beside the list
+function peek(e) {
+  const h = e.target.closest && e.target.closest('.hist[data-card]');
+  const box = $('peek');
+  if (!h || !CARDS[h.dataset.card]) { box.innerHTML = ''; return; }
+  const g = $('game').getBoundingClientRect(), r = h.getBoundingClientRect();
+  box.innerHTML = cardHTML(h.dataset.card);
+  box.style.left = (r.right - g.left + 12) + 'px';
+  box.style.top = Math.max(8, Math.min(r.top - g.top - 60, g.height - 250)) + 'px';
+}
+document.addEventListener('mouseover', peek);
+document.addEventListener('mouseout', (e) => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('.hist')) $('peek').innerHTML = ''; });
 document.addEventListener('click', (e) => {
   const t = e.target.closest('button');
   if (!t || t.disabled) return;

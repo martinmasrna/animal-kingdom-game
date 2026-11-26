@@ -161,7 +161,9 @@ body.playing #start { display: none; }
 
 /* ---------------- history */
 #history { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); top: 52px; bottom: 190px; width: 150px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; pointer-events: none; }
-.hist { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; background: rgba(0,0,0,.25); font-size: 14px; border-left: 4px solid; }
+#peek { position: absolute; z-index: 35; pointer-events: none; }
+#peek .card { --cardw: 160px; --cardh: 224px; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+.hist { pointer-events: auto; cursor: default;  display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; background: rgba(0,0,0,.25); font-size: 14px; border-left: 4px solid; }
 .hist.s0 { border-color: #7fb4ff; } .hist.s1 { border-color: #c9b6e6; }
 .hist .hn { font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hist .ho { font-weight: 800; }
