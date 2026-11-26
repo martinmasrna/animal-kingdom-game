@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Duel Toy 7</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #2a3340; --table: #3b4a5c; --paper: #fbf7ee; --ink: #1b1b1b;
+  --me: #4f8fe8; --him: #e0673f; --dmg: #ff6a4d; --gold: #f2b632;
+  --F: #6c9bd1; --B: #8a7cc0; --S: #d2483c; --G: #5f7891;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#app { height: 100%; display: grid; grid-template-columns: 200px minmax(0, 1fr) 200px; gap: 16px; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); }
+#game { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px; min-height: 0; }
+
+/* hands */
+.hand { display: flex; justify-content: center; gap: 14px; }
+.card { position: relative; width: 120px; height: 150px; border-radius: 12px; border: 3px solid #d5c39f; background: var(--paper); color: var(--ink); padding: 0; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,.4); transition: transform .12s, opacity .25s, filter .25s; }
+.card .art { margin: 5px 5px 0; height: 66px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; color: #fff; }
+.card .art svg { width: 38px; height: 38px; }
+.card .art b { font-size: 34px; font-weight: 900; text-shadow: 0 2px 3px rgba(0,0,0,.35); }
+.card .nm { font-weight: 800; font-size: 16px; padding: 5px 8px 0; text-align: left; }
+.card .tx { font-size: 13px; padding: 2px 8px; text-align: left; color: #3a352c; line-height: 1.2; }
+.card.F .art { background: var(--F); } .card.B .art { background: var(--B); } .card.S .art { background: var(--S); } .card.G .art { background: var(--G); }
+.card.spent { opacity: .28; filter: grayscale(1); }
+#myhand .card.ok { border-color: #5fdc6f; box-shadow: 0 0 12px rgba(95,220,111,.6), 0 4px 10px rgba(0,0,0,.4); }
+#myhand .card.ok:hover { transform: translateY(-8px); }
+#myhand .card:disabled { cursor: default; }
+#opphand .card { width: 100px; height: 126px; }
+#opphand .card .art { height: 52px; }
+#opphand .card .tx { display: none; }
+.card.played { animation: played .5s ease-out; }
+@keyframes played { 0% { transform: scale(1.12); box-shadow: 0 0 24px rgba(242,182,50,.9); } }
+
+/* the line */
+#arena { display: flex; align-items: center; justify-content: center; min-height: 0; }
+#line { position: relative; width: min(760px, 100%); height: 170px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.cell { border-radius: 14px; background: var(--table); box-shadow: inset 0 0 20px rgba(0,0,0,.35); }
+.fighter { position: absolute; top: 50%; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; color: #fff; text-shadow: 0 2px 3px rgba(0,0,0,.4); border: 5px solid #fff; transition: left .35s cubic-bezier(.3,.8,.3,1); box-shadow: 0 6px 16px rgba(0,0,0,.5); }
+.fighter.me { background: radial-gradient(circle at 35% 30%, #8cbcff, var(--me)); }
+.fighter.him { background: radial-gradient(circle at 35% 30%, #ffb08a, var(--him)); }
+.fighter.turn { box-shadow: 0 0 0 6px rgba(242,182,50,.55), 0 6px 16px rgba(0,0,0,.5); }
+.fighter .shield { position: absolute; top: -18px; right: -14px; width: 44px; height: 50px; }
+.fighter.hit { animation: hit .35s; }
+@keyframes hit { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-4px); } }
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 40px; transform: translate(-50%, -50%); animation: floatup 1.1s ease-out forwards; text-shadow: 0 2px 0 rgba(0,0,0,.5); white-space: nowrap; }
+.float.dmg { color: var(--dmg); } .float.block { color: #dfe9f3; font-size: 28px; } .float.miss { color: #9fb0c2; font-size: 26px; }
+@keyframes floatup { 0% { opacity: 0; transform: translate(-50%, -20%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -60%) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -130%); } }
+.think { position: absolute; left: 50%; bottom: -34px; transform: translateX(-50%); display: flex; gap: 6px; }
+.think i { width: 9px; height: 9px; border-radius: 50%; background: #cfd6de; animation: dot 1s infinite; }
+.think i:nth-child(2) { animation-delay: .15s; } .think i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
+
+/* sides */
+#history { display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; min-height: 0; }
+.hist { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 6px; background: rgba(0,0,0,.25); font-size: 14px; border-left: 4px solid; }
+.hist.me { border-color: var(--me); } .hist.him { border-color: var(--him); }
+.hist .hn { font-weight: 700; flex: 1; } .hist .ho { font-weight: 800; }
+.ho.dmg { color: #ff8a70; } .ho.block { color: #c6d4e2; } .ho.miss { color: #8d9aa8; }
+#side { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+#levels { display: flex; flex-direction: column; gap: 6px; }
+#levels button, #restart { min-height: 40px; border-radius: 8px; border: 2px solid #5b6a7a; background: transparent; color: #dfe5eb; font-weight: 700; }
+#levels button.on { background: #fff; color: var(--ink); border-color: #fff; }
+
+#over { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+
+/* Toy 7 */
+.card.S .art { background: var(--S); } .card.P .art { background: #8a6bc9; }
+#opphand { min-height: 60px; align-items: center; }
+.back { display: inline-block; width: 40px; height: 56px; border-radius: 6px; background: linear-gradient(135deg, #7a5b9e, #4b3770); border: 2px solid #c9b6e6; margin: 0 4px; }
+#board { position: relative; width: min(760px, 100%); display: flex; flex-direction: column; gap: 40px; }
+.row { display: flex; align-items: center; gap: 24px; justify-content: center; min-height: 120px; }
+.hero { position: relative; width: 112px; height: 112px; border-radius: 50%; font-size: 40px; font-weight: 900; color: #fff; text-shadow: 0 2px 3px rgba(0,0,0,.4); border: 5px solid #fff; padding: 0; box-shadow: 0 6px 16px rgba(0,0,0,.5); }
+.hero.me { background: radial-gradient(circle at 35% 30%, #8cbcff, var(--me)); }
+.hero.him { background: radial-gradient(circle at 35% 30%, #ffb08a, var(--him)); }
+.hero.turn { box-shadow: 0 0 0 6px rgba(242,182,50,.55), 0 6px 16px rgba(0,0,0,.5); }
+.hero:disabled { cursor: default; color: #fff; }
+.hero.hit { animation: hit .35s; }
+.target { cursor: pointer !important; outline: 4px solid #ff6a4d; outline-offset: 4px; animation: aim 1s infinite alternate; }
+@keyframes aim { to { outline-color: rgba(255,106,77,.35); } }
+.powers { display: flex; gap: 10px; min-width: 240px; }
+.power { width: 56px; height: 56px; border-radius: 12px; border: 3px solid #fff; background: linear-gradient(160deg, #a58ae0, #6c4fb0); padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,.4); }
+.power svg { width: 100%; height: 100%; }
+.power:disabled { cursor: default; }
+.power.pop { animation: pop .4s ease-out; }
+@keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); } }
+.card.picked { transform: translateY(-14px); border-color: #ff6a4d; }
+#piles { display: flex; flex-direction: column; justify-content: space-between; flex: 1; padding: 40px 0; }
+.pile-row { display: flex; gap: 10px; justify-content: center; }
+.pc { display: flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 8px; font-weight: 900; font-size: 18px; }
+.pc svg { width: 20px; height: 20px; }
+.pc.S { background: rgba(210,72,60,.5); } .pc.P { background: rgba(138,107,201,.55); }
+.pile-row.him { border-left: 4px solid var(--him); padding-left: 8px; } .pile-row.me { border-left: 4px solid var(--me); padding-left: 8px; }
+.ho.gold { color: #ffd36b; }
+.hist.sep { height: 0; padding: 0; margin: 3px 0; border: 0; border-top: 1px solid rgba(255,255,255,.12); background: none; }
+
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="history"></aside>
+  <main id="game">
+    <div id="opphand" class="hand"></div>
+    <div id="arena"><div id="board"></div></div>
+    <div id="myhand" class="hand"></div>
+  </main>
+  <aside id="side"><button id="restart">Restart</button><div id="piles"></div></aside>
+  <div id="over"></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/minimal.js
+// The smallest deck duel (Toy 7). Two heroes, 10 health. A deck of 6: 3 Strike, 3 Invest.
+// Alternate turns. Each turn: draw 2 (reshuffle the discard into an empty deck), play one,
+// discard the other. Strike: 1 damage, +1 for each of your Investments on the table.
+// Invest: put an Investment on the table; it stays for the rest of the fight.
+// Variant `target`: a Strike may hit one of his Investments instead of him; it is destroyed.
+function shuffle(rng, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+const lcg = (s) => () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x80000000);
+
+function minimal(o = {}) {
+  const HP = o.hp ?? 10, DRAW = o.draw ?? 2, PLAYS = o.plays ?? 1, DECK = o.deck ?? { S: 3, I: 3 };
+  const list = []; for (const [c, k] of Object.entries(DECK)) for (let i = 0; i < k; i++) list.push(c);
+  const clone = (s) => ({ ...s, hp: s.hp.slice(), inv: s.inv.slice(), hand: s.hand.map(h => h.slice()), deck: s.deck.map(d => d.slice()), disc: s.disc.map(d => d.slice()) });
+  function draw(s, side, n) {
+    const r = lcg(s.seed = (s.seed * 1103515245 + 12345) & 0x7fffffff);
+    for (let i = 0; i < n; i++) {
+      if (!s.deck[side].length) { s.deck[side] = shuffle(r, s.disc[side]); s.disc[side] = []; }
+      if (s.deck[side].length) s.hand[side].push(s.deck[side].shift());
+    }
+  }
+  return {
+    init(rng) {
+      const s = { left: PLAYS, hp: [HP, HP], inv: [0, 0], hand: [[], []], deck: [shuffle(rng, list.slice()), shuffle(rng, list.slice())], disc: [[], []], turn: 0, ply: 0, seed: Math.floor(rng() * 2 ** 31) };
+      draw(s, 0, DRAW);
+      return s;
+    },
+    toMove: (s) => s.turn,
+    moves(s) {
+      const me = s.turn, out = [];
+      for (const c of new Set(s.hand[me])) {
+        if (c === 'S') { out.push('S'); if (o.target && s.inv[1 - me] > 0) out.push('S>I'); }
+        else out.push(c);
+      }
+      return out;
+    },
+    play(s, m) {
+      const t = clone(s), me = t.turn, op = 1 - me;
+      const c = m[0];
+      if (m === 'S') t.hp[op] -= 1 + t.inv[me];
+      else if (m === 'S>I') t.inv[op] -= 1;
+      else if (c === 'I') t.inv[me] += 1;
+      t.hand[me].splice(t.hand[me].indexOf(c), 1);
+      t.disc[me].push(c);
+      t.left--; t.ply++;
+      if (t.left > 0 && t.hand[me].length) return t;          // more plays this turn
+      t.disc[me].push(...t.hand[me]); t.hand[me] = [];        // the rest is discarded
+      t.turn = op; t.left = PLAYS;
+      draw(t, op, DRAW);
+      return t;
+    },
+    winner(s) { if (s.hp[0] <= 0) return 1; if (s.hp[1] <= 0) return 0; if (s.ply >= 200) return 'draw'; return null; },
+    evaluate(s, side) { return (s.hp[side] - s.hp[1 - side]) + (o.invWeight ?? 1.5) * (s.inv[side] - s.inv[1 - side]); },
+    sample(s, side, rng) {
+      const t = clone(s), op = 1 - side;
+      t.deck[side] = shuffle(rng, t.deck[side]);
+      const pool = shuffle(rng, t.hand[op].concat(t.deck[op]));
+      t.hand[op] = pool.slice(0, t.hand[op].length); t.deck[op] = pool.slice(t.hand[op].length);
+      t.seed = Math.floor(rng() * 2 ** 31);
+      return t;
+    },
+  };
+}
+
+// The version that held on the bot ladder: Strike may hit an Investment, draw 3, play 1, 20 health.
+const GAME = minimal({ target: true, draw: 3, hp: 20 });
+
+// ---- src/bots.js
+// Generic bots for any game with this shape:
+//   init(rng) -> state, toMove(s) -> 0|1, moves(s) -> [m], play(s, m) -> new state,
+//   winner(s) -> null | 0 | 1 | 'draw', evaluate(s, side) -> number (side's view).
+// The same four bots play every candidate game, so only the game changes.
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffled(rng, a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; }
+  return a;
+}
+
+const WIN = 1e6;
+function terminalValue(g, s, side, depthLeft) {
+  const w = g.winner(s);
+  if (w === null) return null;
+  if (w === 'draw') return 0;
+  return (w === side ? WIN : -WIN) + (w === side ? depthLeft : -depthLeft); // prefer quick wins, slow losses
+}
+
+function randomBot(g, s, rng) { const m = g.moves(s); return m[Math.floor(rng() * m.length)]; }
+
+// Weak: one move ahead, by the evaluation.
+function greedyBot(g, s, rng) {
+  const side = g.toMove(s);
+  let best = null, bv = -Infinity;
+  for (const m of shuffled(rng, g.moves(s))) {
+    const t = g.play(s, m);
+    const tv = terminalValue(g, t, side, 0);
+    const v = tv !== null ? tv : g.evaluate(t, side);
+    if (v > bv) { bv = v; best = m; }
+  }
+  return best;
+}
+
+// Minimax with alpha-beta to a fixed number of plies, by the evaluation at the leaves.
+function search(g, s, side, depth, alpha, beta, deadline) {
+  const tv = terminalValue(g, s, side, depth);
+  if (tv !== null) return tv;
+  if (depth === 0) return g.evaluate(s, side);
+  if (deadline && Date.now() > deadline) throw TIMEOUT;
+  const mine = g.toMove(s) === side;
+  const ms = g.moves(s);
+  if (mine) {
+    let v = -Infinity;
+    for (const m of ms) { v = Math.max(v, search(g, g.play(s, m), side, depth - 1, alpha, beta, deadline)); alpha = Math.max(alpha, v); if (alpha >= beta) break; }
+    return v;
+  }
+  let v = Infinity;
+  for (const m of ms) { v = Math.min(v, search(g, g.play(s, m), side, depth - 1, alpha, beta, deadline)); beta = Math.min(beta, v); if (alpha >= beta) break; }
+  return v;
+}
+const TIMEOUT = new Error('timeout');
+
+function rootSearch(g, s, rng, depth, deadline, order) {
+  const side = g.toMove(s);
+  const ms = order || shuffled(rng, g.moves(s));
+  let best = ms[0], bv = -Infinity;
+  const vals = [];
+  for (const m of ms) {
+    const v = search(g, g.play(s, m), side, depth - 1, bv === -Infinity ? -Infinity : bv - 1e-9, Infinity, deadline);
+    vals.push([m, v]);
+    if (v > bv) { bv = v; best = m; }
+  }
+  return { best, bv, vals };
+}
+
+function depthBot(depth) {
+  return (g, s, rng) => rootSearch(g, s, rng, depth, 0).best;
+}
+
+// Expert: iterative deepening until the time budget runs out (or maxDepth).
+function timedBot(ms, maxDepth = 40) {
+  return (g, s, rng) => {
+    const deadline = Date.now() + ms;
+    let best = randomBot(g, s, rng), order = shuffled(rng, g.moves(s));
+    for (let d = 1; d <= maxDepth; d++) {
+      try {
+        const r = rootSearch(g, s, rng, d, deadline, order);
+        best = r.best;
+        // search the best moves first next time; keep random order among equals
+        order = r.vals.sort((a, b) => b[1] - a[1]).map(x => x[0]);
+        if (Math.abs(r.bv) >= WIN - 1000) break;
+      } catch (e) { if (e !== TIMEOUT) throw e; break; }
+    }
+    return best;
+  };
+}
+
+// Hidden information: perfect-information search on K sampled worlds that match what the
+// bot can see (g.sample), averaged per move. It never looks at the real hidden cards.
+function pimcValues(g, s, rng, K, depth, deadline) {
+  const side = g.toMove(s);
+  const ms = shuffled(rng, g.moves(s));
+  const worlds = Array.from({ length: K }, () => g.sample(s, side, rng));
+  const vals = ms.map(m => {
+    let v = 0;
+    for (const w of worlds) v += search(g, g.play(w, m), side, depth - 1, -Infinity, Infinity, deadline) / K;
+    return [m, v];
+  });
+  return vals;
+}
+function pimcBot(K, depth) {
+  return (g, s, rng) => { const v = pimcValues(g, s, rng, K, depth, 0); return v.reduce((a, b) => (b[1] > a[1] ? b : a))[0]; };
+}
+function pimcTimed(ms, K, maxDepth = 30) {
+  return (g, s, rng) => {
+    const deadline = Date.now() + ms;
+    let best = randomBot(g, s, rng);
+    for (let d = 1; d <= maxDepth; d++) {
+      try { const v = pimcValues(g, s, rng, K, d, deadline); best = v.reduce((a, b) => (b[1] > a[1] ? b : a))[0]; }
+      catch (e) { if (e !== TIMEOUT) throw e; break; }
+    }
+    return best;
+  };
+}
+
+// ---- src/ui.js
+// Toy 7 as a page: you against the expert bot. Draw 3, play 1. Strike hits him or one of his Powers.
+
+
+const g = GAME;
+const bot = pimcTimed(1200, 16);
+const ui = { s: null, me: 0, games: 0, busy: false, aiming: false, hist: [], rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0, pop: [-1, -1] };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+const DECK = { S: 3, I: 3 };
+
+const ICON = {
+  S: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M14.5 2.5 21.5 2.5 21.5 9.5 10 21l-2-2-2.6 2.6-2.8-2.8L5.2 16.2l-2-2Z"/></svg>',
+  I: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2l3 7h7l-5.5 4.5 2 7.5L12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>',
+};
+const NAME = { S: 'Strike', I: 'Power' };
+
+function cardHTML(c, { cls = '', attrs = '', dmg = 1 } = {}) {
+  const tx = c === 'S' ? `Deal ${dmg} to him, or destroy one of his Powers.` : 'Stays on the table. Your Strikes deal 1 more.';
+  return `<button class="card ${c === 'S' ? 'S' : 'P'} ${cls}" ${attrs}><div class="art">${ICON[c]}${c === 'S' ? `<b>${dmg}</b>` : '<b>+1</b>'}</div><div class="nm">${NAME[c]}</div><div class="tx">${tx}</div></button>`;
+}
+function powersHTML(side, n) {
+  const target = ui.aiming && side !== ui.me;
+  let out = '';
+  for (let i = 0; i < n; i++) out += `<button class="power${target ? ' target' : ''}${ui.pop[side] === i ? ' pop' : ''}" data-power="${side}"${target ? '' : ' disabled'}>${ICON.I}</button>`;
+  return out;
+}
+function pileHTML(side) {
+  // what is still to come before the next reshuffle: yours exactly, his as everything he has not played
+  const s = ui.s, p = side === ui.me;
+  const left = { S: 0, I: 0 };
+  if (p) for (const c of s.deck[side]) left[c]++;
+  else { left.S = DECK.S; left.I = DECK.I; for (const c of s.disc[side]) left[c]--; }
+  const row = (c) => `<span class="pc ${c === 'S' ? 'S' : 'P'}">${ICON[c]}<b>${left[c]}</b></span>`;
+  return `<div class="pile-row ${p ? 'me' : 'him'}">${row('S')}${row('I')}</div>`;
+}
+
+function render() {
+  const s = ui.s, me = ui.me, him = 1 - me;
+  const myTurn = !ui.busy && g.winner(s) === null && s.turn === me;
+  const dmg = 1 + s.inv[me];
+  $('myhand').innerHTML = (s.turn === me ? s.hand[me] : []).map((c, i) => cardHTML(c, { dmg, cls: (myTurn ? 'ok' : '') + (ui.aiming && c === 'S' && i === ui.aimIdx ? ' picked' : ''), attrs: `data-i="${i}"${myTurn ? '' : ' disabled'}` })).join('');
+  $('opphand').innerHTML = s.turn === him ? '<i class="back"></i>'.repeat(s.hand[him].length) : '';
+  const row = (side) => {
+    const target = ui.aiming && side === him;
+    return `<div class="row ${side === me ? 'mine' : 'his'}">
+      <button class="hero ${side === me ? 'me' : 'him'}${s.turn === side && g.winner(s) === null ? ' turn' : ''}${target ? ' target' : ''}" id="h${side}" data-hero="${side}"${target ? '' : ' disabled'}>${Math.max(0, s.hp[side])}</button>
+      <div class="powers">${powersHTML(side, s.inv[side])}</div></div>`;
+  };
+  $('board').innerHTML = row(him) + row(me);
+  $('history').innerHTML = ui.hist.slice(-22).map(h => h.sep ? '<div class="hist sep"></div>' : `<div class="hist ${h.who}"><span class="hn">${h.name}</span><span class="ho ${h.cls}">${h.out}</span></div>`).join('');
+  $('piles').innerHTML = pileHTML(him) + pileHTML(me);
+  ui.pop = [-1, -1];
+}
+
+function floatAt(el, text, cls) {
+  if (!el) return;
+  const a = $('board').getBoundingClientRect(), r = el.getBoundingClientRect();
+  const f = document.createElement('div');
+  f.className = 'float ' + cls; f.textContent = text;
+  f.style.left = (r.left - a.left + r.width / 2) + 'px'; f.style.top = (r.top - a.top) + 'px';
+  $('board').appendChild(f);
+  setTimeout(() => f.remove(), 1200);
+}
+
+function apply(m) {
+  const prev = ui.s, side = prev.turn, op = 1 - side;
+  const next = g.play(prev, m);
+  ui.s = next;
+  const who = side === ui.me ? 'me' : 'him';
+  if (m === 'S') ui.hist.push({ who, name: 'Strike', out: '−' + (prev.hp[op] - next.hp[op]), cls: 'dmg' });
+  else if (m === 'S>I') ui.hist.push({ who, name: 'Strike', out: 'Power down', cls: 'block' });
+  else { ui.hist.push({ who, name: 'Power', out: '+1', cls: 'gold' }); ui.pop[side] = next.inv[side] - 1; }
+  if (next.turn !== side) ui.hist.push({ sep: true });
+  render();
+  if (m === 'S') { const h = $('h' + op); floatAt(h, '−' + (prev.hp[op] - next.hp[op]), 'dmg'); h.classList.add('hit'); }
+  if (m === 'S>I') floatAt($('h' + op), 'Power destroyed', 'block');
+  if (g.winner(next) !== null) finish();
+}
+
+function finish() {
+  const w = g.winner(ui.s);
+  const t = w === 'draw' ? ['Draw', ''] : w === ui.me ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="again">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+async function botTurn() {
+  const tok = ui.token;
+  while (g.winner(ui.s) === null && ui.s.turn !== ui.me) {
+    ui.busy = true; render();
+    await wait(450);
+    const m = bot(g, ui.s, ui.rng);
+    if (tok !== ui.token) return;
+    ui.busy = false;
+    apply(m);
+    await wait(500);
+  }
+  ui.busy = false; render();
+}
+
+function start() {
+  ui.token++;
+  ui.me = ui.games++ % 2; // who goes first alternates
+  ui.s = g.init(ui.rng); ui.hist = []; ui.busy = false; ui.aiming = false;
+  $('over').classList.remove('show');
+  render();
+  if (ui.s.turn !== ui.me) setTimeout(botTurn, 500);
+}
+
+document.addEventListener('click', async (e) => {
+  const t = e.target.closest('button');
+  if (!t) { if (ui.aiming) { ui.aiming = false; render(); } return; }
+  if (t.id === 'restart' || t.id === 'again') { start(); return; }
+  if (t.disabled || ui.busy) return;
+  const s = ui.s;
+  if (t.dataset.i !== undefined) {
+    const c = s.hand[ui.me][+t.dataset.i];
+    if (c === 'I') { ui.aiming = false; apply('I'); await wait(300); botTurn(); return; }
+    if (s.inv[1 - ui.me] > 0) { ui.aiming = !ui.aiming; ui.aimIdx = +t.dataset.i; render(); return; } // choose a target
+    apply('S'); await wait(300); botTurn(); return;
+  }
+  if (ui.aiming && t.dataset.hero !== undefined) { ui.aiming = false; apply('S'); await wait(300); botTurn(); return; }
+  if (ui.aiming && t.dataset.power !== undefined) { ui.aiming = false; apply('S>I'); await wait(300); botTurn(); return; }
+});
+start();
+
+})();
+</script>
+</body>
+</html>
