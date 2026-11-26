@@ -16,7 +16,7 @@ for (let a = 0; a < TILES; a++) for (let b = a + 1; b < TILES; b++) for (let c =
 export const ownTile = () => true;
 
 export let GOAL = 20;
-export let DRAW = 3; // cards drawn at the start of each turn
+export let DRAW = 2; // cards drawn at the start of each turn
 export function setDraw(n) { DRAW = n; }
 export function setGoal(g) { GOAL = g; }
 export let FULL_HAND = false;
