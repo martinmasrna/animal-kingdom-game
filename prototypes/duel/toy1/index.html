@@ -236,11 +236,33 @@ body.playing #start { display: none; }
 #start { display: none !important; }
 #menu #showdecks { display: inline-block; }
 
+/* deck trackers, left (his) and right (yours), on wide screens */
+.trk { display: none; }
+@media (min-width: 1100px) {
+  #app { display: grid; grid-template-columns: 220px minmax(0, 1fr) 220px; }
+  #game { max-width: none; width: 100%; }
+  .trk { display: flex; flex-direction: column; gap: 3px; padding: 12px 10px; min-height: 0; overflow-y: auto; }
+  #trk1 { padding-left: max(12px, env(safe-area-inset-left, 0px)); }
+  #trk0 { padding-right: max(12px, env(safe-area-inset-right, 0px)); }
+  #menu #showdecks { display: none; }
+}
+.trk h3 { margin: 0 0 6px; font-size: 16px; color: #dfe5eb; display: flex; justify-content: space-between; align-items: baseline; }
+.trk h3 small { font-size: 14px; font-weight: 500; color: #9fb0c2; }
+.trow { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 8px 0 4px; border-radius: 6px; font-size: 15px; font-weight: 700; color: #fff; }
+.trow.Strike { background: linear-gradient(90deg, rgba(224,103,63,.55), rgba(224,103,63,.18)); }
+.trow.Guard { background: linear-gradient(90deg, rgba(95,120,145,.75), rgba(95,120,145,.25)); }
+.trow .tg { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex: 0 0 auto; }
+.trow .tn { flex: 1; }
+.trow .tc { color: #ffd36b; font-variant-numeric: tabular-nums; }
+.trow.gone { opacity: .3; }
+.trk .tsub { margin: 10px 0 4px; font-size: 14px; color: #9fb0c2; }
+
 </style>
 </head>
 <body>
 <div id="app">
   <div id="start"></div>
+  <aside id="trk1" class="trk"></aside>
   <div id="game">
     <div id="opphand"></div>
     <div id="menu"><button id="showdecks">Decks</button><button id="newmatch">Restart</button></div>
@@ -260,6 +282,7 @@ body.playing #start { display: none; }
     <div id="over"></div>
     <div id="decks"></div>
   </div>
+  <aside id="trk0" class="trk"></aside>
 </div>
 <script>
 (function () {
@@ -271,14 +294,12 @@ body.playing #start { display: none; }
 
 const HP = 30, MAX_MANA = 10, TURN_LIMIT = 80;
 // Energy: both start full at 10; unspent energy is kept; each turn you regain REGEN, never above 10.
-let REGEN = 5;
+let REGEN = 4;
 function setRegen(r) { REGEN = r; }
 
-// Placeholder numbers. A Strike costing c deals c+1; a Guard costing c absorbs 2c.
-// Guards get the better rate on purpose: a guard is worth only what he actually
-// swings into it, so at an equal rate a strike would always be at least as good.
+// A Strike deals what it costs; a Guard absorbs twice what it costs (Martin, 2026-11-26).
 const CARDS = {};
-for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c + 1 };
+for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c };
 for (let c = 1; c <= 4; c++) CARDS['G' + c] = { id: 'G' + c, kind: 'Guard', cost: c, n: 2 * c };
 const DECK = { S1: 3, S2: 3, S3: 3, S4: 3, S5: 3, S6: 3, G1: 3, G2: 3, G3: 3, G4: 3 };
 
@@ -565,9 +586,23 @@ function render() {
   $('history').innerHTML = ui.hist.slice(-16).map(h => h.sep
     ? `<div class="hist sep">${h.sep}</div>`
     : `<div class="hist s${h.side}" data-card="${h.card}"><span class="hn">${NAME[CARDS[h.card].kind]} ${CARDS[h.card].n}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`).join('');
+  $('trk1').innerHTML = trackerHTML(BOT);
+  $('trk0').innerHTML = trackerHTML(ME);
   $('decks').classList.toggle('show', ui.showDecks);
   if (ui.showDecks) $('decks').innerHTML = `<button class="x" id="closedecks">Close</button><div class="wrap">${deckTable(BOT)}${deckTable(ME)}</div>`;
   ui.fresh.clear(); ui.popGuard = [0, 0];
+}
+
+// Deck tracker: every card of the list with how many are still to come.
+// Yours: still in your deck. His: not yet played (in his hand or his deck).
+function trackerHTML(side) {
+  const s = ui.view, mine = side === ME, p = s.p[side];
+  const rows = deckSummary(s, side).map(r => {
+    const c = CARDS[r.id], left = mine ? r.inDeck : r.unseen;
+    return `<div class="trow ${c.kind}${left ? '' : ' gone'}"><span class="tg">${c.cost}</span><span class="tn">${NAME[c.kind]} ${c.n}</span><span class="tc">×${left}</span></div>`;
+  }).join('');
+  const total = mine ? p.deck.length : p.deck.length + p.hand.length;
+  return `<h3>${mine ? 'Your deck' : 'His deck'}<small>${total} ${mine ? 'left' : 'unplayed'}</small></h3>${rows}`;
 }
 
 function deckTable(side) {

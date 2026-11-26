@@ -4,14 +4,12 @@
 
 export const HP = 30, MAX_MANA = 10, TURN_LIMIT = 80;
 // Energy: both start full at 10; unspent energy is kept; each turn you regain REGEN, never above 10.
-export let REGEN = 5;
+export let REGEN = 4;
 export function setRegen(r) { REGEN = r; }
 
-// Placeholder numbers. A Strike costing c deals c+1; a Guard costing c absorbs 2c.
-// Guards get the better rate on purpose: a guard is worth only what he actually
-// swings into it, so at an equal rate a strike would always be at least as good.
+// A Strike deals what it costs; a Guard absorbs twice what it costs (Martin, 2026-11-26).
 export const CARDS = {};
-for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c + 1 };
+for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c };
 for (let c = 1; c <= 4; c++) CARDS['G' + c] = { id: 'G' + c, kind: 'Guard', cost: c, n: 2 * c };
 export const DECK = { S1: 3, S2: 3, S3: 3, S4: 3, S5: 3, S6: 3, G1: 3, G2: 3, G3: 3, G4: 3 };
 

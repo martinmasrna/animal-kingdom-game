@@ -79,9 +79,23 @@ function render() {
   $('history').innerHTML = ui.hist.slice(-16).map(h => h.sep
     ? `<div class="hist sep">${h.sep}</div>`
     : `<div class="hist s${h.side}" data-card="${h.card}"><span class="hn">${NAME[CARDS[h.card].kind]} ${CARDS[h.card].n}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`).join('');
+  $('trk1').innerHTML = trackerHTML(BOT);
+  $('trk0').innerHTML = trackerHTML(ME);
   $('decks').classList.toggle('show', ui.showDecks);
   if (ui.showDecks) $('decks').innerHTML = `<button class="x" id="closedecks">Close</button><div class="wrap">${deckTable(BOT)}${deckTable(ME)}</div>`;
   ui.fresh.clear(); ui.popGuard = [0, 0];
+}
+
+// Deck tracker: every card of the list with how many are still to come.
+// Yours: still in your deck. His: not yet played (in his hand or his deck).
+function trackerHTML(side) {
+  const s = ui.view, mine = side === ME, p = s.p[side];
+  const rows = deckSummary(s, side).map(r => {
+    const c = CARDS[r.id], left = mine ? r.inDeck : r.unseen;
+    return `<div class="trow ${c.kind}${left ? '' : ' gone'}"><span class="tg">${c.cost}</span><span class="tn">${NAME[c.kind]} ${c.n}</span><span class="tc">×${left}</span></div>`;
+  }).join('');
+  const total = mine ? p.deck.length : p.deck.length + p.hand.length;
+  return `<h3>${mine ? 'Your deck' : 'His deck'}<small>${total} ${mine ? 'left' : 'unplayed'}</small></h3>${rows}`;
 }
 
 function deckTable(side) {

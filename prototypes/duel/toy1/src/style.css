@@ -227,3 +227,24 @@ body.playing #start { display: none; }
 .card .tx { padding-bottom: 6px; }
 #start { display: none !important; }
 #menu #showdecks { display: inline-block; }
+
+/* deck trackers, left (his) and right (yours), on wide screens */
+.trk { display: none; }
+@media (min-width: 1100px) {
+  #app { display: grid; grid-template-columns: 220px minmax(0, 1fr) 220px; }
+  #game { max-width: none; width: 100%; }
+  .trk { display: flex; flex-direction: column; gap: 3px; padding: 12px 10px; min-height: 0; overflow-y: auto; }
+  #trk1 { padding-left: max(12px, env(safe-area-inset-left, 0px)); }
+  #trk0 { padding-right: max(12px, env(safe-area-inset-right, 0px)); }
+  #menu #showdecks { display: none; }
+}
+.trk h3 { margin: 0 0 6px; font-size: 16px; color: #dfe5eb; display: flex; justify-content: space-between; align-items: baseline; }
+.trk h3 small { font-size: 14px; font-weight: 500; color: #9fb0c2; }
+.trow { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 8px 0 4px; border-radius: 6px; font-size: 15px; font-weight: 700; color: #fff; }
+.trow.Strike { background: linear-gradient(90deg, rgba(224,103,63,.55), rgba(224,103,63,.18)); }
+.trow.Guard { background: linear-gradient(90deg, rgba(95,120,145,.75), rgba(95,120,145,.25)); }
+.trow .tg { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex: 0 0 auto; }
+.trow .tn { flex: 1; }
+.trow .tc { color: #ffd36b; font-variant-numeric: tabular-nums; }
+.trow.gone { opacity: .3; }
+.trk .tsub { margin: 10px 0 4px; font-size: 14px; color: #9fb0c2; }
