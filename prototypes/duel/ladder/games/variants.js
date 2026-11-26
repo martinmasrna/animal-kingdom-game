@@ -18,3 +18,10 @@ export const more = {
   s6: duel({ len: 4, cards: ['F', 'B', 'J', 'S', 'G'] }),
 };
 Object.assign(variants, more);
+import { hiddenDuel } from './hiddenkit.js';
+Object.assign(variants, {
+  h1: hiddenDuel({ len: 4, deck: { F: 3, B: 3, S: 3, G: 3 }, hand: 3 }),
+  h2: hiddenDuel({ len: 4, deck: { F: 3, B: 3, S: 3, G: 3 }, hand: 4 }),
+  h3: hiddenDuel({ len: 5, deck: { F: 3, B: 3, J: 3, S: 3, G: 3 }, hand: 3 }),
+  h4: hiddenDuel({ len: 4, deck: { F: 2, B: 2, S: 2, G: 2 }, hand: 3 }),
+});

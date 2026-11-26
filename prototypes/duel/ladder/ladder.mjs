@@ -3,7 +3,7 @@
 // each with sides swapped, spread over worker threads. Prints win rates and timings.
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { cpus } from 'node:os';
-import { randomBot, greedyBot, depthBot, timedBot, makeRng } from './bots.js';
+import { randomBot, greedyBot, depthBot, timedBot, pimcBot, pimcTimed, makeRng } from './bots.js';
 
 const MAX_PLIES = 400;
 
@@ -16,6 +16,9 @@ async function loadGame(name) {
 function makeBot(spec) {
   if (spec === 'random') return randomBot;
   if (spec === 'weak') return greedyBot;
+  let m;
+  if ((m = spec.match(/^p(\d+)x(\d+)$/))) return pimcBot(+m[1], +m[2]);
+  if ((m = spec.match(/^pt(\d+)k(\d+)$/))) return pimcTimed(+m[1], +m[2]);
   if (spec.startsWith('d')) return depthBot(+spec.slice(1));
   if (spec.startsWith('t')) return timedBot(+spec.slice(1));
   throw new Error('bot ' + spec);

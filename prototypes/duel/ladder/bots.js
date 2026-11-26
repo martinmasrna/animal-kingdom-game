@@ -94,3 +94,31 @@ export function timedBot(ms, maxDepth = 40) {
     return best;
   };
 }
+
+// Hidden information: perfect-information search on K sampled worlds that match what the
+// bot can see (g.sample), averaged per move. It never looks at the real hidden cards.
+function pimcValues(g, s, rng, K, depth, deadline) {
+  const side = g.toMove(s);
+  const ms = shuffled(rng, g.moves(s));
+  const worlds = Array.from({ length: K }, () => g.sample(s, side, rng));
+  const vals = ms.map(m => {
+    let v = 0;
+    for (const w of worlds) v += search(g, g.play(w, m), side, depth - 1, -Infinity, Infinity, deadline) / K;
+    return [m, v];
+  });
+  return vals;
+}
+export function pimcBot(K, depth) {
+  return (g, s, rng) => { const v = pimcValues(g, s, rng, K, depth, 0); return v.reduce((a, b) => (b[1] > a[1] ? b : a))[0]; };
+}
+export function pimcTimed(ms, K, maxDepth = 30) {
+  return (g, s, rng) => {
+    const deadline = Date.now() + ms;
+    let best = randomBot(g, s, rng);
+    for (let d = 1; d <= maxDepth; d++) {
+      try { const v = pimcValues(g, s, rng, K, d, deadline); best = v.reduce((a, b) => (b[1] > a[1] ? b : a))[0]; }
+      catch (e) { if (e !== TIMEOUT) throw e; break; }
+    }
+    return best;
+  };
+}
