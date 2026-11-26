@@ -319,12 +319,12 @@ const HP = 30, MAX_E = 10, ROUND_LIMIT = 30;
 let GAIN = 6, DRAW = 3, GUARD_RATE = 2, STRIKES_FIRST = true, CARRY = true;
 function setRules(r) { if (r.gain != null) GAIN = r.gain; if (r.draw != null) DRAW = r.draw; if (r.strikesFirst != null) STRIKES_FIRST = r.strikesFirst; if (r.carry != null) CARRY = r.carry; if (r.guardRate != null) { GUARD_RATE = r.guardRate; buildCards(); } }
 
-// Speed: higher resolves sooner. A strike or guard costing c has speed 7 - c.
+// Speed: lower resolves sooner (Martin, 2026-11-26). A strike or guard costing c has speed c.
 const CARDS = {};
 function buildCards() {
-  for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c, speed: 7 - c };
-  for (let c = 1; c <= 4; c++) CARDS['G' + c] = { id: 'G' + c, kind: 'Guard', cost: c, n: Math.max(1, Math.round(GUARD_RATE * c)), speed: 7 - c };
-  CARDS.SW = { id: 'SW', kind: 'Sword', cost: 3, n: 2, speed: 5 };
+  for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c, speed: c };
+  for (let c = 1; c <= 4; c++) CARDS['G' + c] = { id: 'G' + c, kind: 'Guard', cost: c, n: Math.max(1, Math.round(GUARD_RATE * c)), speed: c };
+  CARDS.SW = { id: 'SW', kind: 'Sword', cost: 3, n: 2, speed: 2 };
 }
 buildCards();
 const DECK = { S2: 3, S3: 3, S4: 3, S5: 3, S6: 3, G1: 3, G2: 3, G3: 3, G4: 3, SW: 3 };
@@ -410,7 +410,7 @@ function mCommit(s, choices, ev) {
 // before that speed's strikes land; strikes of one speed land together.
 function mResolve(s, ev) {
   emit(s, ev, { t: 'resolve' });
-  for (let sp = 6; sp >= 1 && s.winner === null; sp--) {
+  for (let sp = 1; sp <= 6 && s.winner === null; sp++) {
     const at = [0, 1].map(i => s.p[i].line.filter(id => CARDS[id].speed === sp));
     if (!at[0].length && !at[1].length) continue;
     emit(s, ev, { t: 'step', speed: sp });
@@ -638,7 +638,7 @@ const shieldSVG = '<svg viewBox="0 0 46 54"><path d="M23 2 43 9v15c0 13-9 22-20 
 // ------------------------------------------------------------------ cards
 function cardHTML(id, { cls = '', attrs = '', owner = null } = {}) {
   const c = CARDS[id];
-  const spd = `<span class="spd">⚡${c.speed}</span>`;
+  const spd = `<span class="spd">⏱${c.speed}</span>`;
   if (c.kind === 'Sword') return `<button class="card k-Heavy ${cls}" ${attrs}>
     <span class="cgem">${c.cost}</span>${spd}
     <div class="art"><span class="big">+${c.n}</span>${ICON.sword}</div>
@@ -766,7 +766,7 @@ async function playRound(prev, next, ev) {
   // reveal: both lines go on the table, fastest first
   const rev = ev.filter(e => e.t === 'reveal');
   for (const e of rev) {
-    ui.lines[e.side] = e.cards.slice().sort((a, b) => CARDS[b].speed - CARDS[a].speed);
+    ui.lines[e.side] = e.cards.slice().sort((a, b) => CARDS[a].speed - CARDS[b].speed);
     ui.shown.mana[e.side] = e.mana;
   }
   ui.view = prev; ui.view = { ...prev, p: prev.p.map((p, i) => ({ ...p, hand: p.hand.filter((_, k) => true) })) };

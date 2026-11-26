@@ -7,12 +7,12 @@ export const HP = 30, MAX_E = 10, ROUND_LIMIT = 30;
 export let GAIN = 6, DRAW = 3, GUARD_RATE = 2, STRIKES_FIRST = true, CARRY = true;
 export function setRules(r) { if (r.gain != null) GAIN = r.gain; if (r.draw != null) DRAW = r.draw; if (r.strikesFirst != null) STRIKES_FIRST = r.strikesFirst; if (r.carry != null) CARRY = r.carry; if (r.guardRate != null) { GUARD_RATE = r.guardRate; buildCards(); } }
 
-// Speed: higher resolves sooner. A strike or guard costing c has speed 7 - c.
+// Speed: lower resolves sooner (Martin, 2026-11-26). A strike or guard costing c has speed c.
 export const CARDS = {};
 function buildCards() {
-  for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c, speed: 7 - c };
-  for (let c = 1; c <= 4; c++) CARDS['G' + c] = { id: 'G' + c, kind: 'Guard', cost: c, n: Math.max(1, Math.round(GUARD_RATE * c)), speed: 7 - c };
-  CARDS.SW = { id: 'SW', kind: 'Sword', cost: 3, n: 2, speed: 5 };
+  for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c, speed: c };
+  for (let c = 1; c <= 4; c++) CARDS['G' + c] = { id: 'G' + c, kind: 'Guard', cost: c, n: Math.max(1, Math.round(GUARD_RATE * c)), speed: c };
+  CARDS.SW = { id: 'SW', kind: 'Sword', cost: 3, n: 2, speed: 2 };
 }
 buildCards();
 export const DECK = { S2: 3, S3: 3, S4: 3, S5: 3, S6: 3, G1: 3, G2: 3, G3: 3, G4: 3, SW: 3 };
@@ -98,7 +98,7 @@ function mCommit(s, choices, ev) {
 // before that speed's strikes land; strikes of one speed land together.
 function mResolve(s, ev) {
   emit(s, ev, { t: 'resolve' });
-  for (let sp = 6; sp >= 1 && s.winner === null; sp--) {
+  for (let sp = 1; sp <= 6 && s.winner === null; sp++) {
     const at = [0, 1].map(i => s.p[i].line.filter(id => CARDS[id].speed === sp));
     if (!at[0].length && !at[1].length) continue;
     emit(s, ev, { t: 'step', speed: sp });
