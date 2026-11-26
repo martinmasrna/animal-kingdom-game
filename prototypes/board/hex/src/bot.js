@@ -193,3 +193,72 @@ export function rolloutBot(TOPN, R, DEPTH) {
     return bv > gw + 0.2 * R ? best.moves : g.moves;
   };
 }
+
+// Centre: Martin's pattern (2026-11-26: "as long as you hold all 4 center tiles, your opponent can
+// never get points. So you just save all the removal only for middle 4 tiles, and always put unit
+// there after you've cleared it, as strong as you can"). Every triangle on this board holds one of
+// the four centre tiles, so holding them all denies every region and pays the two centre triangles.
+export const CENTRE = [3, 6, 7, 10];
+export function centreBot(s) {
+  const me = s.turn, t = clone(s), moves = [];
+  const P = t.p[me];
+  const play = (card, tile) => { _play(t, card, tile); moves.push({ card, tile }); };
+  const units = () => [...new Set(P.hand)].filter(id => CARDS[id].kind === 'Unit' && CARDS[id].cost <= P.mana).sort((a, b) => CARDS[b].n - CARDS[a].n);
+  for (let guard = 0; guard < 20; guard++) {
+    const empty = CENTRE.filter(i => !t.board[i]);
+    // an empty centre tile takes the biggest unit I can afford
+    if (empty.length && units().length) { play(units()[0], empty[0]); continue; }
+    // his centre units, biggest first: the cheapest set of strikes that kills one, if a unit can follow it in
+    const foes = CENTRE.filter(i => t.board[i] && t.board[i].side !== me).sort((a, b) => t.board[b].hp - t.board[a].hp);
+    const strikes = P.hand.filter(id => CARDS[id].kind === 'Strike');
+    const unitCosts = P.hand.filter(id => CARDS[id].kind === 'Unit').map(id => CARDS[id].cost);
+    const follow = unitCosts.length ? Math.min(...unitCosts) : 0;
+    let did = false;
+    for (const i of foes) {
+      let best = null;
+      for (let mask = 1; mask < (1 << strikes.length); mask++) {
+        let cost = 0, dmg = 0; const pick = [];
+        for (let k = 0; k < strikes.length; k++) if (mask & (1 << k)) { cost += CARDS[strikes[k]].cost; dmg += CARDS[strikes[k]].n; pick.push(strikes[k]); }
+        if (dmg >= t.board[i].hp && cost + follow <= P.mana && (!best || cost < best.cost)) best = { cost, pick };
+      }
+      if (best) { for (const id of best.pick.sort((x, y) => CARDS[y].n - CARDS[x].n)) if (t.board[i]) play(id, i); did = true; break; }
+    }
+    if (did) continue;
+    // my weakest centre unit, if a bigger one can land on it
+    const mine = CENTRE.filter(i => t.board[i] && t.board[i].side === me).sort((a, b) => t.board[a].hp - t.board[b].hp);
+    if (mine.length && units().length && CARDS[units()[0]].n > t.board[mine[0]].hp) { play(units()[0], mine[0]); continue; }
+    break;
+  }
+  // the rest of the mana as Hard would spend it, with the strikes kept for the centre
+  const kept = P.hand.filter(id => CARDS[id].kind === 'Strike');
+  P.hand = P.hand.filter(id => CARDS[id].kind !== 'Strike');
+  for (const m of greedyTurn(t)) play(m.card, m.tile);
+  P.hand.push(...kept);
+  return moves;
+}
+// Centre+: candidate turns are the centre rule's own and each first play finished by it; each is played
+// out R times DEPTH turns ahead with the centre rule on both sides (hidden cards reshuffled); the centre
+// rule's turn stands unless the play-outs clearly prefer another.
+export function centrePlus(R = 8, DEPTH = 10, TOPN = 6) {
+  return function (s, rng) {
+    const me = s.turn, cands = [];
+    const add = (moves) => { const t = clone(s); for (const m of moves) _play(t, m.card, m.tile); cands.push({ moves, t, v: evaluate(t, me) }); };
+    add(centreBot(s)); const base = cands[0];
+    for (const m of legalAll(s)) { const t = clone(s); _play(t, m.card, m.tile); add([m, ...centreBot(t)]); }
+    const top = [base, ...cands.slice(1).sort((a, b) => b.v - a.v).slice(0, TOPN - 1)];
+    let best = base, bw = -Infinity, baseW = 0;
+    for (const c of top) {
+      let w = 0;
+      for (let r = 0; r < R; r++) {
+        let t = clone(c.t); const O = t.p[1 - me];
+        const pool = shuffle(O.hand.concat(O.deck), rng); O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length); shuffle(t.p[me].deck, rng);
+        t = endTurn(t);
+        for (let d = 0; t.winner === null && d < DEPTH; d++) { for (const m of centreBot(t)) t = playAction(t, m.card, m.tile); if (t.winner !== null) break; t = endTurn(t); }
+        if (t.winner === me) w += 1; else if (t.winner === null) w += (t.p[me].food - t.p[1 - me].food) > 0 ? 0.75 : 0.25;
+      }
+      if (c === base) baseW = w;
+      if (w > bw) { bw = w; best = c; }
+    }
+    return bw > baseW + 0.2 * R ? best.moves : base.moves;
+  };
+}

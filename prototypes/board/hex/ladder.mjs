@@ -1,7 +1,7 @@
 // node ladder.mjs [games]: the 70% test. Each bot is the simplest found that beats the one
 // below it in at least 70% of games (both seats, same deals for both). Prints every step.
 import { newMatch, playAction, endTurn, clone, _play, CARDS, TILES, REGIONS, heldRegions, canPlay } from './src/engine.js';
-import { makeRng, evaluate, greedyTurn, rolloutBot } from './src/bot.js';
+import { makeRng, evaluate, greedyTurn, rolloutBot, centreBot, centrePlus } from './src/bot.js';
 
 const N = +(process.argv[2] || 400);
 
@@ -59,7 +59,7 @@ function normalBot(s, rng) {
 const hardBot = (s) => greedyTurn(s);
 const expertBot = rolloutBot(6, 12, 8);
 
-export const BOTS = { random: randomBot, easy: easyBot, cluster: clusterBot, normal: normalBot, hard: hardBot, expert: expertBot };
+export const BOTS = { random: randomBot, easy: easyBot, cluster: clusterBot, normal: normalBot, hard: hardBot, expert: expertBot, centre: centreBot, centrePlus: centrePlus() };
 
 export function rate(a, b, n = N, seed0 = 5000) {
   let wa = 0, draws = 0;
