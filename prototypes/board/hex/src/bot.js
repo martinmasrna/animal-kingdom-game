@@ -6,7 +6,7 @@
 // reply from hands sampled out of the cards he has not played). It never reads his
 // hand or either deck.
 
-import { CARDS, TILES, GOAL, REGIONS, clone, _play, heldRegions, regionPower, ownTile } from './engine.js';
+import { CARDS, TILES, GOAL, REGIONS, clone, _play, heldRegions, regionPower, ownTile, canPlay, endTurn, playAction } from './engine.js';
 
 export function makeRng(seed) {
   let a = (seed >>> 0) || 0x9e3779b9;
@@ -153,4 +153,40 @@ export function randomTurn(s, rng) {
     _play(t, m.card, m.tile); moves.push(m);
   }
   return moves;
+}
+
+// Expert: candidate turns (Hard's own, and each first play finished the way Hard would), the best
+// TOPN by Hard's judgement each played out R times DEPTH turns ahead with Hard on both sides; only
+// cards neither player can see are reshuffled for a play-out. Keeps the turn that wins most.
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const legalAll = (t) => { const out = []; for (const id of new Set(t.p[t.turn].hand)) for (let i = 0; i < TILES; i++) if (canPlay(t, id, i)) out.push({ card: id, tile: i }); return out; };
+export function rolloutBot(TOPN, R, DEPTH) {
+  return function (s, rng) {
+    const me = s.turn, cands = new Map();
+    const add = (moves) => {
+      const t = clone(s); for (const m of moves) _play(t, m.card, m.tile);
+      const key = t.board.map(u => u ? u.side + ':' + u.hp : '-').join(',') + '|' + t.p[me].hand.slice().sort().join(',');
+      if (!cands.has(key)) cands.set(key, { moves, t, v: evaluate(t, me) });
+    };
+    add(greedyTurn(s)); add([]);
+    for (const m of legalAll(s)) { const t = clone(s); _play(t, m.card, m.tile); add([m, ...greedyTurn(t)]); }
+    const top = [...cands.values()].sort((a, b) => b.v - a.v).slice(0, TOPN);
+    if (top.length === 1) return top[0].moves;
+    let best = top[0], bv = -Infinity;
+    for (const c of top) {
+      let w = 0;
+      for (let r = 0; r < R; r++) {
+        let t = clone(c.t); const O = t.p[1 - me];
+        const pool = shuffle(O.hand.concat(O.deck), rng); O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length);
+        shuffle(t.p[me].deck, rng);
+        t = endTurn(t); let d = 0;
+        while (t.winner === null && d < DEPTH) { for (const m of greedyTurn(t)) t = playAction(t, m.card, m.tile); if (t.winner !== null) break; t = endTurn(t); d++; }
+        if (t.winner === me) w += 1;
+        else if (t.winner === null) { const e = evaluate(t, me) + (t.p[me].food - t.p[1 - me].food); w += e > 0 ? 0.75 : e < 0 ? 0.25 : 0.5; }
+        else if (t.winner === 'draw') w += 0.5;
+      }
+      if (w > bv) { bv = w; best = c; }
+    }
+    return best.moves;
+  };
 }

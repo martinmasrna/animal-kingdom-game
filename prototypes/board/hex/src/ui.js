@@ -2,7 +2,9 @@
 // play or turn change is animated from the state before and the state after.
 
 import { CARDS, TILES, POS, GOAL, MAX_MANA, REGIONS, FULL_HAND, setFullHand, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
-import { makeRng, botTurn } from './bot.js';
+import { makeRng, rolloutBot } from './bot.js';
+const expert = rolloutBot(6, 4, 8);
+const TALLY_KEY = 'hex-tally';
 
 const ME = 0, BOT = 1;
 const ui = { s: null, view: null, busy: false, over: false, sel: null, food: [0, 0], hist: [], fresh: new Set(), fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
@@ -86,6 +88,7 @@ function handHTML() {
 
 function render() {
   const s = ui.view;
+  $('tally').innerHTML = tallyHTML();
   const own = REGIONS.map((_, k) => heldRegions(s, 0).includes(k) ? 0 : heldRegions(s, 1).includes(k) ? 1 : -1);
   if (ui.own) own.forEach((o, k) => { if (o !== ui.own[k] && o >= 0) ui.fx['m' + k] = 1; });
   ui.own = own;
@@ -176,15 +179,21 @@ async function apply(fn) {
 function finish() {
   ui.over = true;
   const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
   const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
   $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
   $('over').classList.add('show');
 }
 
 // ------------------------------------------------------------------ flow
+// wins at this page, kept in this browser: [mine, the bot's]; who goes first alternates by it
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+function tallyHTML() { const t = loadTally(); return `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`; }
 async function startMatch() {
   const tok = ++ui.token;
-  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0 });
+  const tally = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (tally[0] + tally[1]) % 2 === 0 ? ME : BOT });
   ui.view = ui.s; ui.over = false; ui.hist = []; ui.sel = null; ui.food = [0, 0];
   $('over').classList.remove('show');
   ui.busy = true; render();
@@ -199,7 +208,7 @@ async function startMatch() {
 async function botMove(tok) {
   ui.busy = true; render();
   await wait(450);
-  const moves = botTurn(ui.s, ui.rng);
+  const moves = expert(ui.s, ui.rng);
   for (const m of moves) {
     if (tok !== ui.token || ui.over) return;
     await wait(200);

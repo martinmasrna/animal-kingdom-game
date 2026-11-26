@@ -1,7 +1,7 @@
 // node ladder.mjs [games]: the 70% test. Each bot is the simplest found that beats the one
 // below it in at least 70% of games (both seats, same deals for both). Prints every step.
 import { newMatch, playAction, endTurn, clone, _play, CARDS, TILES, REGIONS, heldRegions, canPlay } from './src/engine.js';
-import { makeRng, evaluate, greedyTurn } from './src/bot.js';
+import { makeRng, evaluate, greedyTurn, rolloutBot } from './src/bot.js';
 
 const N = +(process.argv[2] || 400);
 
@@ -57,40 +57,6 @@ function normalBot(s, rng) {
 }
 // Hard: the region-potential greedy (partial triangles count, health counts a little).
 const hardBot = (s) => greedyTurn(s);
-// Expert: candidate turns (Hard's own, and each first play finished the way Hard would), the best
-// TOPN by Hard's judgement each played out R times DEPTH turns ahead with Hard on both sides; only
-// cards neither player can see are reshuffled for a play-out. Keeps the turn that wins most.
-function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-export function rolloutBot(TOPN, R, DEPTH) {
-  return function (s, rng) {
-    const me = s.turn, cands = new Map();
-    const add = (moves) => {
-      const t = clone(s); for (const m of moves) _play(t, m.card, m.tile);
-      const key = t.board.map(u => u ? u.side + ':' + u.hp : '-').join(',') + '|' + t.p[me].hand.slice().sort().join(',');
-      if (!cands.has(key)) cands.set(key, { moves, t, v: evaluate(t, me) });
-    };
-    add(greedyTurn(s)); add([]);
-    for (const m of legal(s)) { const t = clone(s); _play(t, m.card, m.tile); add([m, ...greedyTurn(t)]); }
-    const top = [...cands.values()].sort((a, b) => b.v - a.v).slice(0, TOPN);
-    if (top.length === 1) return top[0].moves;
-    let best = top[0], bv = -Infinity;
-    for (const c of top) {
-      let w = 0;
-      for (let r = 0; r < R; r++) {
-        let t = clone(c.t); const O = t.p[1 - me];
-        const pool = shuffle(O.hand.concat(O.deck), rng); O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length);
-        shuffle(t.p[me].deck, rng);
-        t = endTurn(t); let d = 0;
-        while (t.winner === null && d < DEPTH) { for (const m of greedyTurn(t)) t = playAction(t, m.card, m.tile); if (t.winner !== null) break; t = endTurn(t); d++; }
-        if (t.winner === me) w += 1;
-        else if (t.winner === null) { const e = evaluate(t, me) + (t.p[me].food - t.p[1 - me].food); w += e > 0 ? 0.75 : e < 0 ? 0.25 : 0.5; }
-        else if (t.winner === 'draw') w += 0.5;
-      }
-      if (w > bv) { bv = w; best = c; }
-    }
-    return best.moves;
-  };
-}
 const expertBot = rolloutBot(6, 4, 8);
 
 export const BOTS = { random: randomBot, easy: easyBot, cluster: clusterBot, normal: normalBot, hard: hardBot, expert: expertBot };

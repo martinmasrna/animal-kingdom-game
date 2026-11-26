@@ -13,3 +13,7 @@ A card duel with only text-less minions and damage spells, on the usual rules of
 - Greedy, each action the one that most improves health, board and hand (`greedyBot`): beats Face 74%.
 - Expert, play-outs with Greedy on both sides (`rolloutBot(6, 4, 8)`, the same search as Hex's Expert): beats Greedy 71%.
 - An eight-times larger search beats Expert 58.5%: the chain stops there. Games last about 7 to 9 turns each.
+
+## The page
+
+`node build.mjs` writes `index.html` and `artifact.html`: you against Expert. Who goes first alternates from game to game, and the two numbers by Restart count your wins and Expert's, kept in your browser. Hex's page keeps the same count against its own Expert.

@@ -45,10 +45,11 @@ function draw(s, side, ev) {
   p.fatigue++; p.hp -= p.fatigue; emit(s, ev, { t: 'fatigue', side, n: p.fatigue, hp: p.hp });
 }
 
-export function newMatch({ seed }) {
+export function newMatch({ seed, first }) {
   const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, first: 0, winner: null, p: [newPlayer(), newPlayer()] };
   for (const p of s.p) shuffleInPlace(s, p.deck);
   s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
   for (let i = 0; i < 3; i++) draw(s, s.first, null);
   for (let i = 0; i < 4; i++) draw(s, 1 - s.first, null);
   if (COIN) s.p[1 - s.first].hand.push('COIN');

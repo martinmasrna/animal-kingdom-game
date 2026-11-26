@@ -21,7 +21,7 @@ button { font: inherit; cursor: pointer; }
 .back { width: 26px; height: 36px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
 .back:first-child { margin-left: 0; }
 #opphand:has(.back:nth-child(12)) .back { margin-left: -14px; } #opphand:has(.back:nth-child(12)) .back:first-child { margin-left: 0; }
-#menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; }
+#menu { display: flex; align-items: center; gap: 12px; position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; }
 #menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
 
 /* ---------------- table: plates | board | turn */
@@ -174,11 +174,15 @@ button { font: inherit; cursor: pointer; }
   #spot .card { --cardw: 120px; --cardh: 160px; }
 }
 
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 18px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
 </style>
 
 <div id="game">
   <div id="opphand"></div>
-  <div id="menu"><button id="newmatch">Restart</button></div>
+  <div id="menu"><span id="tally"></span><button id="newmatch">Restart</button></div>
   <div id="table">
     <div id="left">
       <div id="history"></div>
@@ -287,10 +291,11 @@ function draw(s, side, n) {
 }
 function unitsOf(s, side) { let n = 0; for (const u of s.board) if (u && u.side === side) n++; return n; }
 
-function newMatch({ seed }) {
+function newMatch({ seed, first }) {
   const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, first: 0, winner: null, board: Array(TILES).fill(null), p: [newPlayer(), newPlayer()] };
   for (const p of s.p) shuffleInPlace(s, p.deck);
   s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
   if (FULL_HAND) for (const p of [s.first, 1 - s.first]) draw(s, p, s.p[p].deck.length);
   else { draw(s, s.first, 3); draw(s, 1 - s.first, SECOND_HAND); }
   s.p[1 - s.first].food = SECOND_FOOD;
@@ -531,11 +536,50 @@ function randomTurn(s, rng) {
   return moves;
 }
 
+// Expert: candidate turns (Hard's own, and each first play finished the way Hard would), the best
+// TOPN by Hard's judgement each played out R times DEPTH turns ahead with Hard on both sides; only
+// cards neither player can see are reshuffled for a play-out. Keeps the turn that wins most.
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const legalAll = (t) => { const out = []; for (const id of new Set(t.p[t.turn].hand)) for (let i = 0; i < TILES; i++) if (canPlay(t, id, i)) out.push({ card: id, tile: i }); return out; };
+function rolloutBot(TOPN, R, DEPTH) {
+  return function (s, rng) {
+    const me = s.turn, cands = new Map();
+    const add = (moves) => {
+      const t = clone(s); for (const m of moves) _play(t, m.card, m.tile);
+      const key = t.board.map(u => u ? u.side + ':' + u.hp : '-').join(',') + '|' + t.p[me].hand.slice().sort().join(',');
+      if (!cands.has(key)) cands.set(key, { moves, t, v: evaluate(t, me) });
+    };
+    add(greedyTurn(s)); add([]);
+    for (const m of legalAll(s)) { const t = clone(s); _play(t, m.card, m.tile); add([m, ...greedyTurn(t)]); }
+    const top = [...cands.values()].sort((a, b) => b.v - a.v).slice(0, TOPN);
+    if (top.length === 1) return top[0].moves;
+    let best = top[0], bv = -Infinity;
+    for (const c of top) {
+      let w = 0;
+      for (let r = 0; r < R; r++) {
+        let t = clone(c.t); const O = t.p[1 - me];
+        const pool = shuffle(O.hand.concat(O.deck), rng); O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length);
+        shuffle(t.p[me].deck, rng);
+        t = endTurn(t); let d = 0;
+        while (t.winner === null && d < DEPTH) { for (const m of greedyTurn(t)) t = playAction(t, m.card, m.tile); if (t.winner !== null) break; t = endTurn(t); d++; }
+        if (t.winner === me) w += 1;
+        else if (t.winner === null) { const e = evaluate(t, me) + (t.p[me].food - t.p[1 - me].food); w += e > 0 ? 0.75 : e < 0 ? 0.25 : 0.5; }
+        else if (t.winner === 'draw') w += 0.5;
+      }
+      if (w > bv) { bv = w; best = c; }
+    }
+    return best.moves;
+  };
+}
+
 // ---- src/ui.js
 // Slots as a game screen. Drives the engine through its transitions; each
 // play or turn change is animated from the state before and the state after.
 
 
+
+const expert = rolloutBot(6, 4, 8);
+const TALLY_KEY = 'hex-tally';
 
 const ME = 0, BOT = 1;
 const ui = { s: null, view: null, busy: false, over: false, sel: null, food: [0, 0], hist: [], fresh: new Set(), fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
@@ -619,6 +663,7 @@ function handHTML() {
 
 function render() {
   const s = ui.view;
+  $('tally').innerHTML = tallyHTML();
   const own = REGIONS.map((_, k) => heldRegions(s, 0).includes(k) ? 0 : heldRegions(s, 1).includes(k) ? 1 : -1);
   if (ui.own) own.forEach((o, k) => { if (o !== ui.own[k] && o >= 0) ui.fx['m' + k] = 1; });
   ui.own = own;
@@ -709,15 +754,21 @@ async function apply(fn) {
 function finish() {
   ui.over = true;
   const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
   const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
   $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
   $('over').classList.add('show');
 }
 
 // ------------------------------------------------------------------ flow
+// wins at this page, kept in this browser: [mine, the bot's]; who goes first alternates by it
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+function tallyHTML() { const t = loadTally(); return `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`; }
 async function startMatch() {
   const tok = ++ui.token;
-  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0 });
+  const tally = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (tally[0] + tally[1]) % 2 === 0 ? ME : BOT });
   ui.view = ui.s; ui.over = false; ui.hist = []; ui.sel = null; ui.food = [0, 0];
   $('over').classList.remove('show');
   ui.busy = true; render();
@@ -732,7 +783,7 @@ async function startMatch() {
 async function botMove(tok) {
   ui.busy = true; render();
   await wait(450);
-  const moves = botTurn(ui.s, ui.rng);
+  const moves = expert(ui.s, ui.rng);
   for (const m of moves) {
     if (tok !== ui.token || ui.over) return;
     await wait(200);

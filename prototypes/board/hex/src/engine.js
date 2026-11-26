@@ -86,10 +86,11 @@ function draw(s, side, n) {
 }
 export function unitsOf(s, side) { let n = 0; for (const u of s.board) if (u && u.side === side) n++; return n; }
 
-export function newMatch({ seed }) {
+export function newMatch({ seed, first }) {
   const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, first: 0, winner: null, board: Array(TILES).fill(null), p: [newPlayer(), newPlayer()] };
   for (const p of s.p) shuffleInPlace(s, p.deck);
   s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
   if (FULL_HAND) for (const p of [s.first, 1 - s.first]) draw(s, p, s.p[p].deck.length);
   else { draw(s, s.first, 3); draw(s, 1 - s.first, SECOND_HAND); }
   s.p[1 - s.first].food = SECOND_FOOD;
