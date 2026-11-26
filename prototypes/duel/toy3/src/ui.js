@@ -104,13 +104,6 @@ function render() {
   $('wind1').innerHTML = lineHTML(BOT);
   $('wind0').innerHTML = lineHTML(ME);
   $('hand').innerHTML = handHTML();
-  // overlap the hand when it is wider than the room it has
-  const hand = $('hand'), n = s.p[ME].hand.length;
-  if (n > 1) {
-    const cw = hand.querySelector('.card').offsetWidth, room = hand.clientWidth - 24;
-    const ov = Math.min(14, (room - n * cw) / (n - 1));
-    hand.style.setProperty('--ov', ov + 'px');
-  }
   const choosing = !ui.busy && !ui.over;
   $('turnbox').innerHTML = `<button id="go" class="${choosing ? 'ready' : ''}"${choosing ? '' : ' disabled'}>Go</button>`;
   $('history').innerHTML = ui.hist.slice(-18).map(h => h.sep

@@ -274,5 +274,5 @@ body.playing #start { display: none; }
 .hist.sep { height: 0; padding: 0; margin: 4px 0; border-top: 1px solid rgba(255,255,255,.15); background: none; }
 @media (max-width: 760px) { .card.inline { --cardw: 58px; --cardh: 82px; } .spd { min-width: 26px; height: 22px; font-size: 13px; top: -7px; right: -7px; } }
 #hand { flex-wrap: nowrap !important; gap: 0 !important; }
-#hand .card + .card { margin-left: var(--ov, 8px); }
+#hand .card + .card { margin-left: 14px; }
 #hand .card.sel, #hand .card.ok:hover { z-index: 3; }
