@@ -1,10 +1,10 @@
 // Slots as a game screen. Drives the engine through its transitions; each
 // play or turn change is animated from the state before and the state after.
 
-import { CARDS, TILES, POS, BASE, GOAL, MAX_MANA, REGIONS, FULL_HAND, setFullHand, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
+import { CARDS, TILES, POS, ROW_LENGTHS, BASE, GOAL, MAX_MANA, REGIONS, FULL_HAND, setFullHand, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
 import { makeRng, rolloutBot } from './bot.js';
 const expert = rolloutBot(6, 12, 8);
-const TALLY_KEY = 'hex-connected-draw1-tally';
+const TALLY_KEY = 'hex19-tally';
 
 const ME = 0, BOT = 1;
 const ui = { s: null, view: null, busy: false, over: false, sel: null, food: [0, 0], hist: [], fresh: new Set(), fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
@@ -36,10 +36,15 @@ function histHTML(h) {
 }
 
 // tile and marker places, in percent of the board: four tile widths across, the hex 1.1547 times as tall as wide
-const TW = 25, ROWSTEP = 18.75;
-const tileBox = (i) => ({ left: (POS[i].x + 1.5) * TW, top: POS[i].r * ROWSTEP });
+// the board is MAXLEN tile widths across and H hex heights tall (rows overlap by a quarter)
+const MAXLEN = Math.max(...ROW_LENGTHS), H = (ROW_LENGTHS.length - 1) * 0.75 + 1;
+const TW = 100 / MAXLEN, TH = 100 / H, ROWSTEP = 75 / H;
+const tileBox = (i) => ({ left: (POS[i].x + (MAXLEN - 1) / 2) * TW, top: POS[i].r * ROWSTEP });
+document.documentElement.style.setProperty('--board-aspect', `${MAXLEN} / ${(H * 1.1547).toFixed(4)}`);
+document.documentElement.style.setProperty('--tile-w', TW + '%');
+document.documentElement.style.setProperty('--tile-h', TH + '%');
 const markAt = (rg) => {
-  const cs = rg.map(i => { const b = tileBox(i); return { x: b.left + TW / 2, y: b.top + TW / 2 }; });
+  const cs = rg.map(i => { const b = tileBox(i); return { x: b.left + TW / 2, y: b.top + TH / 2 }; });
   return { x: cs.reduce((a, c) => a + c.x, 0) / 3, y: cs.reduce((a, c) => a + c.y, 0) / 3 };
 };
 
@@ -183,7 +188,7 @@ async function saveGame(winner) {
   try {
     const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
     if (!db) return;
-    await db.collection('games').add({ ...ui.log, winner, me: ME, bot: 'expert-6-12-8', rules: 'connected, draw 1', at: Date.now() });
+    await db.collection('games').add({ ...ui.log, winner, me: ME, bot: 'expert-6-12-8', rules: '3-4-5-4-3, connected, draw 2', at: Date.now() });
   } catch (e) { /* the game is still played; only the record is lost */ }
 }
 function finish() {

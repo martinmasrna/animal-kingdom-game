@@ -4,7 +4,7 @@
 // to an enemy unit). A region is any three mutually adjacent tiles; at the end of your turn
 // you gain 1 food for each region whose three tiles all hold your units. First to GOAL wins.
 
-export const ROW_LENGTHS = [2, 3, 4, 3, 2];
+export const ROW_LENGTHS = [3, 4, 5, 4, 3]; // Martin, 2026-11-26: "switch to 3-4-5-4-3 board" (was 2-3-4-3-2)
 // each tile's place: row, and x in tile widths from the board's centre line
 export const POS = [];
 ROW_LENGTHS.forEach((n, r) => { for (let i = 0; i < n; i++) POS.push({ r, x: i - (n - 1) / 2 }); });
@@ -16,7 +16,8 @@ for (let a = 0; a < TILES; a++) for (let b = a + 1; b < TILES; b++) for (let c =
 // Connection (Martin, 2026-11-26): a unit goes on one of your two base tiles (your nearest row), or
 // next to one of your units that links back to a base tile through your own units. Side 0 plays from
 // the bottom row, side 1 from the top.
-export const BASE = [[TILES - 2, TILES - 1], [0, 1]];
+const LAST = ROW_LENGTHS[ROW_LENGTHS.length - 1];
+export const BASE = [[...Array(LAST).keys()].map(k => TILES - LAST + k), [...Array(ROW_LENGTHS[0]).keys()]];
 export const NEIGH = Array.from({ length: TILES }, (_, a) => [...Array(TILES).keys()].filter(b => b !== a && adj(a, b)));
 export let CONNECT = true;
 export function setConnect(v) { CONNECT = v; }
@@ -34,7 +35,7 @@ export function ownTile(s, side, tile) {
 }
 
 export let GOAL = 20;
-export let DRAW = 1; // cards drawn at the start of each turn
+export let DRAW = 2; // cards drawn at the start of each turn
 export function setDraw(n) { DRAW = n; }
 export function setGoal(g) { GOAL = g; }
 export let FULL_HAND = false;
@@ -66,8 +67,9 @@ export function configure(cfg) {
 }
 export const DEFAULT = {
   unitHp: c => c, strikeDmg: c => c,
-  units: { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3 },
-  strikes: { 1: 3, 2: 3, 3: 2, 4: 2 },
+  // 30 cards for the 19-tile board (25 on 14 tiles), the same 60/40 split of units and strikes
+  units: { 1: 4, 2: 4, 3: 4, 4: 3, 5: 3 },
+  strikes: { 1: 4, 2: 4, 3: 2, 4: 2 },
 };
 configure(DEFAULT);
 
