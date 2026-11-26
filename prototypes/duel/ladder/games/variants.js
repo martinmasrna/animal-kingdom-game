@@ -43,3 +43,5 @@ Object.assign(variants, {
   t8b: train({ deck: { S: 2, T: 2, X: 2 } }),
   t8ab: train({ draw: 4, plays: 2, deck: { S: 2, T: 2, X: 2 } }),
 });
+import { sr } from './sr.js';
+Object.assign(variants, { sr30: sr({ hp: 30 }), sr40: sr({ hp: 40 }), sr50: sr({ hp: 50 }) });

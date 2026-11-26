@@ -5,7 +5,7 @@ import { Worker, isMainThread, parentPort, workerData } from 'node:worker_thread
 import { cpus } from 'node:os';
 import { randomBot, greedyBot, depthBot, timedBot, pimcBot, pimcTimed, makeRng } from './bots.js';
 
-const MAX_PLIES = 400;
+const MAX_PLIES = 3000;
 
 async function loadGame(name) {
   const { variants } = await import('./games/variants.js');
