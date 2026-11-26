@@ -16,6 +16,8 @@ for (let a = 0; a < TILES; a++) for (let b = a + 1; b < TILES; b++) for (let c =
 export const ownTile = () => true;
 
 export let GOAL = 20;
+export let DRAW = 3; // cards drawn at the start of each turn
+export function setDraw(n) { DRAW = n; }
 export function setGoal(g) { GOAL = g; }
 export let FULL_HAND = false;
 export function setFullHand(v) { FULL_HAND = v; }
@@ -105,7 +107,7 @@ function mStartTurn(s, ev) {
   p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
   p.mana = p.maxMana;
   if (p.bonusMana) { p.mana += p.bonusMana; p.bonusMana = 0; }
-  const drew = (SKIP_FIRST_DRAW === 'both' ? s.turnNo <= 2 : s.turnNo === 1 && SKIP_FIRST_DRAW) ? 0 : draw(s, side, 1);
+  const drew = (SKIP_FIRST_DRAW === 'both' ? s.turnNo <= 2 : s.turnNo === 1 && SKIP_FIRST_DRAW) ? 0 : draw(s, side, DRAW);
   emit(s, ev, { t: 'start', side, mana: p.mana, drew });
 }
 
