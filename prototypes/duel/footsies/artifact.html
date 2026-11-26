@@ -1,0 +1,371 @@
+<title>Duel Toy 5</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #2a3340; --table: #3b4a5c; --paper: #fbf7ee; --ink: #1b1b1b;
+  --me: #4f8fe8; --him: #e0673f; --dmg: #ff6a4d; --gold: #f2b632;
+  --F: #6c9bd1; --B: #8a7cc0; --S: #d2483c; --G: #5f7891;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#app { height: 100%; display: grid; grid-template-columns: 200px minmax(0, 1fr) 200px; gap: 16px; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); }
+#game { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px; min-height: 0; }
+
+/* hands */
+.hand { display: flex; justify-content: center; gap: 14px; }
+.card { position: relative; width: 120px; height: 150px; border-radius: 12px; border: 3px solid #d5c39f; background: var(--paper); color: var(--ink); padding: 0; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,.4); transition: transform .12s, opacity .25s, filter .25s; }
+.card .art { margin: 5px 5px 0; height: 66px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; color: #fff; }
+.card .art svg { width: 38px; height: 38px; }
+.card .art b { font-size: 34px; font-weight: 900; text-shadow: 0 2px 3px rgba(0,0,0,.35); }
+.card .nm { font-weight: 800; font-size: 16px; padding: 5px 8px 0; text-align: left; }
+.card .tx { font-size: 13px; padding: 2px 8px; text-align: left; color: #3a352c; line-height: 1.2; }
+.card.F .art { background: var(--F); } .card.B .art { background: var(--B); } .card.S .art { background: var(--S); } .card.G .art { background: var(--G); }
+.card.spent { opacity: .28; filter: grayscale(1); }
+#myhand .card.ok { border-color: #5fdc6f; box-shadow: 0 0 12px rgba(95,220,111,.6), 0 4px 10px rgba(0,0,0,.4); }
+#myhand .card.ok:hover { transform: translateY(-8px); }
+#myhand .card:disabled { cursor: default; }
+#opphand .card { width: 100px; height: 126px; }
+#opphand .card .art { height: 52px; }
+#opphand .card .tx { display: none; }
+.card.played { animation: played .5s ease-out; }
+@keyframes played { 0% { transform: scale(1.12); box-shadow: 0 0 24px rgba(242,182,50,.9); } }
+
+/* the line */
+#arena { display: flex; align-items: center; justify-content: center; min-height: 0; }
+#line { position: relative; width: min(760px, 100%); height: 170px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.cell { border-radius: 14px; background: var(--table); box-shadow: inset 0 0 20px rgba(0,0,0,.35); }
+.fighter { position: absolute; top: 50%; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; color: #fff; text-shadow: 0 2px 3px rgba(0,0,0,.4); border: 5px solid #fff; transition: left .35s cubic-bezier(.3,.8,.3,1); box-shadow: 0 6px 16px rgba(0,0,0,.5); }
+.fighter.me { background: radial-gradient(circle at 35% 30%, #8cbcff, var(--me)); }
+.fighter.him { background: radial-gradient(circle at 35% 30%, #ffb08a, var(--him)); }
+.fighter.turn { box-shadow: 0 0 0 6px rgba(242,182,50,.55), 0 6px 16px rgba(0,0,0,.5); }
+.fighter .shield { position: absolute; top: -18px; right: -14px; width: 44px; height: 50px; }
+.fighter.hit { animation: hit .35s; }
+@keyframes hit { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-4px); } }
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 40px; transform: translate(-50%, -50%); animation: floatup 1.1s ease-out forwards; text-shadow: 0 2px 0 rgba(0,0,0,.5); white-space: nowrap; }
+.float.dmg { color: var(--dmg); } .float.block { color: #dfe9f3; font-size: 28px; } .float.miss { color: #9fb0c2; font-size: 26px; }
+@keyframes floatup { 0% { opacity: 0; transform: translate(-50%, -20%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -60%) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -130%); } }
+.think { position: absolute; left: 50%; bottom: -34px; transform: translateX(-50%); display: flex; gap: 6px; }
+.think i { width: 9px; height: 9px; border-radius: 50%; background: #cfd6de; animation: dot 1s infinite; }
+.think i:nth-child(2) { animation-delay: .15s; } .think i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
+
+/* sides */
+#history { display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; min-height: 0; }
+.hist { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 6px; background: rgba(0,0,0,.25); font-size: 14px; border-left: 4px solid; }
+.hist.me { border-color: var(--me); } .hist.him { border-color: var(--him); }
+.hist .hn { font-weight: 700; flex: 1; } .hist .ho { font-weight: 800; }
+.ho.dmg { color: #ff8a70; } .ho.block { color: #c6d4e2; } .ho.miss { color: #8d9aa8; }
+#side { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+#levels { display: flex; flex-direction: column; gap: 6px; }
+#levels button, #restart { min-height: 40px; border-radius: 8px; border: 2px solid #5b6a7a; background: transparent; color: #dfe5eb; font-weight: 700; }
+#levels button.on { background: #fff; color: var(--ink); border-color: #fff; }
+
+#over { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+
+</style>
+
+<div id="app">
+  <aside id="history"></aside>
+  <main id="game">
+    <div id="opphand" class="hand"></div>
+    <div id="arena"><div id="line"></div></div>
+    <div id="myhand" class="hand"></div>
+  </main>
+  <aside id="side">
+    <div id="levels"></div>
+    <button id="restart">Restart</button>
+  </aside>
+  <div id="over"></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/game.js
+// A family of perfect-information duels. Two fighters on a line, alternate turns,
+// everything visible, no luck. Each player holds the same set of moves; a move played
+// is spent until all are spent, then all come back ("cycle"). Parameters pick the variant.
+//
+// Moves (any subset):
+//   F  forward 1 (not into the other fighter)
+//   B  back 1 (not off the line)
+//   J  jab: J dmg at distance <= 2
+//   S  strike: S dmg at distance 1; stopped by a raised guard
+//   G  guard: until your next turn, the next strike against you is stopped
+//   P  push: at distance 1, the other fighter is pushed back 1 (2 if pushPower); into the wall = 1 damage
+function duel(o) {
+  const L = o.len ?? 5, HP = o.hp ?? 10, CARDS = o.cards ?? ['F', 'B', 'J', 'S'];
+  const J = o.jab ?? 1, S = o.strike ?? 3;
+  const FULL = (1 << CARDS.length) - 1;
+  const start = o.start ?? [0, L - 1];
+  return {
+    name: o.name,
+    init() { return { pos: start.slice(), hp: [HP, HP], hand: [FULL, FULL], guard: [0, 0], turn: 0, ply: 0 }; },
+    toMove: (s) => s.turn,
+    moves(s) { const out = []; for (let i = 0; i < CARDS.length; i++) if (s.hand[s.turn] & (1 << i)) out.push(i); return out; },
+    play(s, m) {
+      const me = s.turn, op = 1 - me;
+      const pos = s.pos.slice(), hp = s.hp.slice(), hand = s.hand.slice(), guard = s.guard.slice();
+      guard[me] = 0; // my guard lasted until my turn
+      const dir = pos[op] > pos[me] ? 1 : -1, dist = Math.abs(pos[op] - pos[me]);
+      const c = CARDS[m];
+      if (c === 'F' && dist > 1) pos[me] += dir;
+      else if (c === 'B') { const n = pos[me] - dir; if (n >= 0 && n < L) pos[me] = n; }
+      else if (c === 'J' && dist <= 2) hp[op] -= J;
+      else if (c === 'S' && dist === 1) { if (guard[op]) guard[op] = 0; else hp[op] -= S; }
+      else if (c === 'G') guard[me] = 1;
+      else if (c === 'P' && dist === 1) {
+        for (let k = 0; k < (o.pushPower ?? 1); k++) { const n = pos[op] + dir; if (n < 0 || n >= L) { hp[op] -= 1; break; } pos[op] = n; }
+      }
+      hand[me] &= ~(1 << m);
+      if (!hand[me]) hand[me] = FULL;
+      return { pos, hp, hand, guard, turn: op, ply: s.ply + 1 };
+    },
+    winner(s) { if (s.hp[0] <= 0) return 1; if (s.hp[1] <= 0) return 0; if (s.ply >= (o.maxPly ?? 200)) return o.timeoutWinner ? (s.hp[0] === s.hp[1] ? 'draw' : s.hp[0] > s.hp[1] ? 0 : 1) : 'draw'; return null; },
+    evaluate(s, side) { return 10 * (s.hp[side] - s.hp[1 - side]); },
+  };
+}
+
+// The game that passed the bot ladder (variant s5): a line of 4 cells, 10 health,
+// four moves: Forward, Back, Strike (3 damage at distance 1, stopped by a guard), Guard.
+const GAME = duel({ name: 'Footsies', len: 4, cards: ['F', 'B', 'S', 'G'] });
+
+// ---- src/bots.js
+// Generic bots for any game with this shape:
+//   init(rng) -> state, toMove(s) -> 0|1, moves(s) -> [m], play(s, m) -> new state,
+//   winner(s) -> null | 0 | 1 | 'draw', evaluate(s, side) -> number (side's view).
+// The same four bots play every candidate game, so only the game changes.
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffled(rng, a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; }
+  return a;
+}
+
+const WIN = 1e6;
+function terminalValue(g, s, side, depthLeft) {
+  const w = g.winner(s);
+  if (w === null) return null;
+  if (w === 'draw') return 0;
+  return (w === side ? WIN : -WIN) + (w === side ? depthLeft : -depthLeft); // prefer quick wins, slow losses
+}
+
+function randomBot(g, s, rng) { const m = g.moves(s); return m[Math.floor(rng() * m.length)]; }
+
+// Weak: one move ahead, by the evaluation.
+function greedyBot(g, s, rng) {
+  const side = g.toMove(s);
+  let best = null, bv = -Infinity;
+  for (const m of shuffled(rng, g.moves(s))) {
+    const t = g.play(s, m);
+    const tv = terminalValue(g, t, side, 0);
+    const v = tv !== null ? tv : g.evaluate(t, side);
+    if (v > bv) { bv = v; best = m; }
+  }
+  return best;
+}
+
+// Minimax with alpha-beta to a fixed number of plies, by the evaluation at the leaves.
+function search(g, s, side, depth, alpha, beta, deadline) {
+  const tv = terminalValue(g, s, side, depth);
+  if (tv !== null) return tv;
+  if (depth === 0) return g.evaluate(s, side);
+  if (deadline && Date.now() > deadline) throw TIMEOUT;
+  const mine = g.toMove(s) === side;
+  const ms = g.moves(s);
+  if (mine) {
+    let v = -Infinity;
+    for (const m of ms) { v = Math.max(v, search(g, g.play(s, m), side, depth - 1, alpha, beta, deadline)); alpha = Math.max(alpha, v); if (alpha >= beta) break; }
+    return v;
+  }
+  let v = Infinity;
+  for (const m of ms) { v = Math.min(v, search(g, g.play(s, m), side, depth - 1, alpha, beta, deadline)); beta = Math.min(beta, v); if (alpha >= beta) break; }
+  return v;
+}
+const TIMEOUT = new Error('timeout');
+
+function rootSearch(g, s, rng, depth, deadline, order) {
+  const side = g.toMove(s);
+  const ms = order || shuffled(rng, g.moves(s));
+  let best = ms[0], bv = -Infinity;
+  const vals = [];
+  for (const m of ms) {
+    const v = search(g, g.play(s, m), side, depth - 1, bv === -Infinity ? -Infinity : bv - 1e-9, Infinity, deadline);
+    vals.push([m, v]);
+    if (v > bv) { bv = v; best = m; }
+  }
+  return { best, bv, vals };
+}
+
+function depthBot(depth) {
+  return (g, s, rng) => rootSearch(g, s, rng, depth, 0).best;
+}
+
+// Expert: iterative deepening until the time budget runs out (or maxDepth).
+function timedBot(ms, maxDepth = 40) {
+  return (g, s, rng) => {
+    const deadline = Date.now() + ms;
+    let best = randomBot(g, s, rng), order = shuffled(rng, g.moves(s));
+    for (let d = 1; d <= maxDepth; d++) {
+      try {
+        const r = rootSearch(g, s, rng, d, deadline, order);
+        best = r.best;
+        // search the best moves first next time; keep random order among equals
+        order = r.vals.sort((a, b) => b[1] - a[1]).map(x => x[0]);
+        if (Math.abs(r.bv) >= WIN - 1000) break;
+      } catch (e) { if (e !== TIMEOUT) throw e; break; }
+    }
+    return best;
+  };
+}
+
+// ---- src/ui.js
+// The ladder game as a page: you against the bot at the level you pick.
+
+
+const g = GAME, L = 4;
+const CARDS = ['F', 'B', 'S', 'G'];
+const LEVELS = { Weak: greedyBot, Normal: depthBot(4), Expert: timedBot(1500) };
+const ui = { s: null, me: 0, level: 'Expert', busy: false, hist: [], played: [-1, -1], rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0, wins: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+const ICON = {
+  F: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M4 10h10V5l7 7-7 7v-5H4z"/></svg>',
+  B: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M20 10H10V5l-7 7 7 7v-5h10z"/></svg>',
+  S: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M14.5 2.5 21.5 2.5 21.5 9.5 10 21l-2-2-2.6 2.6-2.8-2.8L5.2 16.2l-2-2Z"/></svg>',
+  G: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2 20 5v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5Z"/></svg>',
+};
+const FACE = {
+  F: ['Forward', 'Step 1 closer.'],
+  B: ['Back', 'Step 1 away.'],
+  S: ['Strike', '3 damage when next to him. A guard stops it.'],
+  G: ['Guard', 'Stops his next strike, until your next turn.'],
+};
+const shieldSVG = '<svg class="shield" viewBox="0 0 46 54"><path d="M23 2 43 9v15c0 13-9 22-20 28C12 46 3 37 3 24V9Z" fill="#5f7891" stroke="#fff" stroke-width="3"/></svg>';
+
+function cardHTML(i, { cls = '', attrs = '' } = {}) {
+  const c = CARDS[i];
+  return `<button class="card ${c} ${cls}" ${attrs}><div class="art">${ICON[c]}${c === 'S' ? '<b>3</b>' : ''}</div><div class="nm">${FACE[c][0]}</div><div class="tx">${FACE[c][1]}</div></button>`;
+}
+
+const disp = (p) => (ui.me === 0 ? p : L - 1 - p);
+function render() {
+  const s = ui.s, me = ui.me, him = 1 - me;
+  const myTurn = !ui.busy && g.winner(s) === null && s.turn === me;
+  $('myhand').innerHTML = CARDS.map((c, i) => {
+    const have = s.hand[me] & (1 << i);
+    const cls = (have ? (myTurn ? 'ok' : '') : 'spent') + (ui.played[me] === i ? ' played' : '');
+    return cardHTML(i, { cls, attrs: `data-m="${i}"${myTurn && have ? '' : ' disabled'}` });
+  }).join('');
+  $('opphand').innerHTML = CARDS.map((c, i) => cardHTML(i, { cls: (s.hand[him] & (1 << i) ? '' : 'spent') + (ui.played[him] === i ? ' played' : ''), attrs: 'disabled' })).join('');
+  let line = '';
+  for (let k = 0; k < L; k++) line += '<div class="cell"></div>';
+  for (const side of [me, him]) {
+    const left = ((disp(s.pos[side]) + 0.5) / L) * 100;
+    const turn = g.winner(s) === null && s.turn === side ? ' turn' : '';
+    line += `<div class="fighter ${side === me ? 'me' : 'him'}${turn}" id="f${side}" style="left:${left}%">${Math.max(0, s.hp[side])}${s.guard[side] ? shieldSVG : ''}${side === him && ui.busy && s.turn === him ? '<div class="think"><i></i><i></i><i></i></div>' : ''}</div>`;
+  }
+  $('line').innerHTML = line;
+  $('history').innerHTML = ui.hist.slice(-20).map(h => `<div class="hist ${h.who}"><span class="hn">${FACE[CARDS[h.m]][0]}</span><span class="ho ${h.cls}">${h.out}</span></div>`).join('');
+  $('levels').innerHTML = Object.keys(LEVELS).map(l => `<button data-level="${l}" class="${l === ui.level ? 'on' : ''}">${l}</button>`).join('');
+}
+
+function floatAt(side, text, cls) {
+  const f = $('f' + side); if (!f) return;
+  const a = $('line').getBoundingClientRect(), r = f.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'float ' + cls; el.textContent = text;
+  el.style.left = (r.left - a.left + r.width / 2) + 'px'; el.style.top = (r.top - a.top - 10) + 'px';
+  $('line').appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+// Play move m for the side to move; show what it did.
+function apply(m) {
+  const prev = ui.s, side = prev.turn, op = 1 - side;
+  const next = g.play(prev, m);
+  ui.s = next; ui.played = [-1, -1]; ui.played[side] = m;
+  const c = CARDS[m];
+  let out = '', cls = '';
+  const dmg = prev.hp[op] - next.hp[op];
+  if (c === 'S') {
+    if (dmg > 0) { out = '−' + dmg; cls = 'dmg'; }
+    else if (prev.guard[op] && !next.guard[op] && Math.abs(prev.pos[0] - prev.pos[1]) === 1) { out = 'blocked'; cls = 'block'; }
+    else { out = 'miss'; cls = 'miss'; }
+  }
+  ui.hist.push({ who: side === ui.me ? 'me' : 'him', m, out, cls });
+  render();
+  if (c === 'S') {
+    if (cls === 'dmg') { floatAt(op, out, 'dmg'); const f = $('f' + op); f.classList.add('hit'); }
+    else floatAt(op, out === 'blocked' ? 'Blocked' : 'Miss', cls);
+  }
+  if (g.winner(next) !== null) finish();
+}
+
+function finish() {
+  const w = g.winner(ui.s);
+  const t = w === 'draw' ? ['Draw', ''] : w === ui.me ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="again">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+async function botMove(tok) {
+  ui.busy = true; render();
+  await wait(350);
+  if (tok !== ui.token) return;
+  const t0 = Date.now();
+  const m = LEVELS[ui.level](g, ui.s, ui.rng);
+  await wait(Math.max(0, 500 - (Date.now() - t0)));
+  if (tok !== ui.token) return;
+  ui.busy = false;
+  apply(m);
+}
+
+async function step() {
+  const tok = ui.token;
+  if (g.winner(ui.s) !== null) return;
+  if (ui.s.turn !== ui.me) { await botMove(tok); if (tok !== ui.token) return; render(); }
+}
+
+function start() {
+  ui.token++;
+  ui.me = ui.wins++ % 2 === 0 ? 0 : 1; // sides swap every match, so who moves first alternates
+  ui.s = g.init(ui.rng); ui.hist = []; ui.played = [-1, -1]; ui.busy = false;
+  $('over').classList.remove('show');
+  render();
+  setTimeout(step, 400);
+}
+
+document.addEventListener('click', async (e) => {
+  const t = e.target.closest('button');
+  if (!t || t.disabled) return;
+  if (t.dataset.m !== undefined) {
+    if (ui.busy || ui.s.turn !== ui.me || g.winner(ui.s) !== null) return;
+    apply(+t.dataset.m);
+    await wait(250);
+    step();
+    return;
+  }
+  if (t.dataset.level) { ui.level = t.dataset.level; render(); return; }
+  if (t.id === 'restart' || t.id === 'again') start();
+});
+start();
+
+})();
+</script>
