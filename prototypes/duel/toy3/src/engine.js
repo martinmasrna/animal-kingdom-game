@@ -1,10 +1,10 @@
 // Toy 3: rounds of blind simultaneous commitment, resolved all at once by speed.
-// Each round: both draw 1 and gain 6 energy (start 10, cap 10, unspent kept). Both
+// Each round: both draw 1 and gain 3 energy (start 10, cap 10, unspent kept). Both
 // choose any cards they can afford in secret; then everything is revealed and
 // resolves fastest first. Pure from the outside: transitions clone the state.
 
 export const HP = 30, MAX_E = 10, ROUND_LIMIT = 30;
-export let GAIN = 6, DRAW = 1, GUARD_RATE = 2, STRIKES_FIRST = true, CARRY = true;
+export let GAIN = 3, DRAW = 1, GUARD_RATE = 2, STRIKES_FIRST = true, CARRY = true;
 export function setRules(r) { if (r.gain != null) GAIN = r.gain; if (r.draw != null) DRAW = r.draw; if (r.strikesFirst != null) STRIKES_FIRST = r.strikesFirst; if (r.carry != null) CARRY = r.carry; if (r.guardRate != null) { GUARD_RATE = r.guardRate; buildCards(); } }
 
 // Speed: lower resolves sooner (Martin, 2026-11-26). A strike or guard costing c has speed c.

@@ -276,3 +276,6 @@ body.playing #start { display: none; }
 #hand { flex-wrap: nowrap !important; gap: 0 !important; }
 #hand .card + .card { margin-left: 14px; }
 #hand .card.sel, #hand .card.ok:hover { z-index: 3; }
+
+/* speed: the same circle as the cost gem, in yellow */
+.spd { width: 30px; height: 30px; min-width: 0; padding: 0; border-radius: 50%; top: -9px; right: -9px; background: radial-gradient(circle at 35% 30%, #ffe28a, #d79a12); border: 2px solid #fff; color: #2a1d00; font-size: 16px; text-shadow: none; }

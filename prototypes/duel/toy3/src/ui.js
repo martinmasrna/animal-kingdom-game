@@ -24,7 +24,7 @@ const shieldSVG = '<svg viewBox="0 0 46 54"><path d="M23 2 43 9v15c0 13-9 22-20 
 // ------------------------------------------------------------------ cards
 function cardHTML(id, { cls = '', attrs = '', owner = null } = {}) {
   const c = CARDS[id];
-  const spd = `<span class="spd">⏱${c.speed}</span>`;
+  const spd = `<span class="spd">${c.speed}</span>`;
   if (c.kind === 'Sword') return `<button class="card k-Heavy ${cls}" ${attrs}>
     <span class="cgem">${c.cost}</span>${spd}
     <div class="art"><span class="big">+${c.n}</span>${ICON.sword}</div>

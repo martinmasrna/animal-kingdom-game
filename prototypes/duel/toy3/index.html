@@ -285,6 +285,9 @@ body.playing #start { display: none; }
 #hand .card + .card { margin-left: 14px; }
 #hand .card.sel, #hand .card.ok:hover { z-index: 3; }
 
+/* speed: the same circle as the cost gem, in yellow */
+.spd { width: 30px; height: 30px; min-width: 0; padding: 0; border-radius: 50%; top: -9px; right: -9px; background: radial-gradient(circle at 35% 30%, #ffe28a, #d79a12); border: 2px solid #fff; color: #2a1d00; font-size: 16px; text-shadow: none; }
+
 </style>
 </head>
 <body>
@@ -317,12 +320,12 @@ body.playing #start { display: none; }
 "use strict";
 // ---- src/engine.js
 // Toy 3: rounds of blind simultaneous commitment, resolved all at once by speed.
-// Each round: both draw 1 and gain 6 energy (start 10, cap 10, unspent kept). Both
+// Each round: both draw 1 and gain 3 energy (start 10, cap 10, unspent kept). Both
 // choose any cards they can afford in secret; then everything is revealed and
 // resolves fastest first. Pure from the outside: transitions clone the state.
 
 const HP = 30, MAX_E = 10, ROUND_LIMIT = 30;
-let GAIN = 6, DRAW = 1, GUARD_RATE = 2, STRIKES_FIRST = true, CARRY = true;
+let GAIN = 3, DRAW = 1, GUARD_RATE = 2, STRIKES_FIRST = true, CARRY = true;
 function setRules(r) { if (r.gain != null) GAIN = r.gain; if (r.draw != null) DRAW = r.draw; if (r.strikesFirst != null) STRIKES_FIRST = r.strikesFirst; if (r.carry != null) CARRY = r.carry; if (r.guardRate != null) { GUARD_RATE = r.guardRate; buildCards(); } }
 
 // Speed: lower resolves sooner (Martin, 2026-11-26). A strike or guard costing c has speed c.
@@ -650,7 +653,7 @@ const shieldSVG = '<svg viewBox="0 0 46 54"><path d="M23 2 43 9v15c0 13-9 22-20 
 // ------------------------------------------------------------------ cards
 function cardHTML(id, { cls = '', attrs = '', owner = null } = {}) {
   const c = CARDS[id];
-  const spd = `<span class="spd">⏱${c.speed}</span>`;
+  const spd = `<span class="spd">${c.speed}</span>`;
   if (c.kind === 'Sword') return `<button class="card k-Heavy ${cls}" ${attrs}>
     <span class="cgem">${c.cost}</span>${spd}
     <div class="art"><span class="big">+${c.n}</span>${ICON.sword}</div>
