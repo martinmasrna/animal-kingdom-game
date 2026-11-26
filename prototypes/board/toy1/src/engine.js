@@ -1,6 +1,6 @@
 // Board Toy 1: the smallest board game. A shared 4 by 4 board, Hearthstone mana,
 // one shared deck list of two kinds of card: Unit (placed on an empty tile, its
-// strength is its health) and Strike (deal N damage to an enemy unit). At the start
+// strength is its health) and Strike (deal N damage to an enemy unit). At the end
 // of your turn you gain 1 food for each of your units on the board; first to GOAL wins.
 // Pure from the outside: transitions clone the state.
 
@@ -71,13 +71,6 @@ function mStartTurn(s, ev) {
   const side = s.turn, p = s.p[side];
   s.turnNo++;
   emit(s, ev, { t: 'turn', side });
-  const tiles = [];
-  s.board.forEach((u, i) => { if (u && u.side === side) tiles.push(i); });
-  if (tiles.length) {
-    p.food += tiles.length;
-    emit(s, ev, { t: 'food', side, n: tiles.length, tiles, food: p.food });
-    if (p.food >= GOAL) { s.winner = side; emit(s, ev, { t: 'end', winner: side }); return; }
-  }
   p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
   p.mana = p.maxMana;
   const drew = draw(s, side, 1);
@@ -119,6 +112,13 @@ function mPlay(s, card, tile, ev) {
 }
 function mEndTurn(s, ev) {
   if (s.winner !== null) throw new Error('endTurn: match over');
+  const side = s.turn, p = s.p[side], tiles = [];
+  s.board.forEach((u, i) => { if (u && u.side === side) tiles.push(i); });
+  if (tiles.length) {
+    p.food += tiles.length;
+    emit(s, ev, { t: 'food', side, n: tiles.length, tiles, food: p.food });
+    if (p.food >= GOAL) { s.winner = side; emit(s, ev, { t: 'end', winner: side }); return; }
+  }
   if (s.turnNo >= TURN_LIMIT) { s.winner = 'draw'; emit(s, ev, { t: 'end', winner: 'draw' }); return; }
   s.turn = 1 - s.turn;
   mStartTurn(s, ev);

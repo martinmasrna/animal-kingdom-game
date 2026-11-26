@@ -2,7 +2,7 @@
 // Strike; tiles carry no geometry, so a unit goes on any empty tile and enemy
 // units with the same health are the same target. The bot tries every affordable
 // set and every distinct way to aim its strikes, and keeps the plan whose position
-// scores best after the opponent's next food. It never reads his hand or either deck.
+// scores best after the opponent's reply. It never reads his hand or either deck.
 
 import { CARDS, TILES, GOAL, clone, _play } from './engine.js';
 
@@ -17,23 +17,6 @@ export function makeRng(seed) {
 }
 
 export const W = { unit: 2.2, hp: 0.2, hpCap: 4, hand: 0.6 };
-
-// Position value for `me`, judged after the opponent's next food.
-export function evaluate(s, me) {
-  const P = s.p[me], O = s.p[1 - me];
-  let mine = 0, his = 0, v = 0;
-  for (const u of s.board) {
-    if (!u) continue;
-    const val = W.unit + W.hp * Math.min(u.hp, W.hpCap);
-    if (u.side === me) { mine++; v += val; } else { his++; v -= val; }
-  }
-  const hisFood = O.food + his;
-  if (hisFood >= GOAL) return -1000 + (P.food - hisFood);
-  v += P.food - hisFood;
-  v += W.hand * (P.hand.length - O.hand.length);
-  if (P.food + mine >= GOAL) v += 3;
-  return v;
-}
 
 // Every distinct affordable set of cards from hand.
 function cardSets(hand, mana) {
@@ -87,30 +70,31 @@ function plansFor(s, set, cb) {
   })(clone(s), 0, []);
 }
 
-// After my plan: the opponent scores, then replies (a greedy reply from a hand sampled
-// out of the cards he has not played), then I score. Averaged over K sampled hands.
+// After my plan I score my units; then the opponent replies (a greedy reply from a hand
+// sampled out of the cards he has not played) and scores his. Averaged over K sampled hands.
 function lookahead(t, me, hands) {
-  if (t.p[1 - me].food + countUnits(t, 1 - me) >= GOAL) return -1000;
+  const P = t.p[me];
+  const myFood = P.food + countUnits(t, me);
+  if (myFood >= GOAL) return 1000 + myFood;
   let v = 0;
   for (const hand of hands) {
     const r = clone(t), O = r.p[1 - me];
-    O.food += countUnits(r, 1 - me);
+    r.p[me].food = myFood;
     O.maxMana = Math.min(10, O.maxMana + 1); O.mana = O.maxMana;
     O.hand = hand.slice();
     r.turn = 1 - me;
     for (const m of greedyTurn(r)) _play(r, m.card, m.tile);
+    O.food += countUnits(r, 1 - me);
     r.turn = me;
-    v += evaluate2(r, me);
+    v += O.food >= GOAL ? -1000 : evaluate(r, me);
   }
   return v / hands.length;
 }
 function countUnits(s, side) { let n = 0; for (const u of s.board) if (u && u.side === side) n++; return n; }
-// Judged at the start of my next turn, after my food.
-function evaluate2(s, me) {
+// Position value for `me` at the start of my next turn.
+export function evaluate(s, me) {
   const P = s.p[me], O = s.p[1 - me];
-  const mine = countUnits(s, me);
-  if (P.food + mine >= GOAL) return 500 + P.food + mine - O.food;
-  let v = P.food + mine - O.food;
+  let v = P.food - O.food;
   for (const u of s.board) if (u) v += (u.side === me ? 1 : -1) * (W.unit + W.hp * Math.min(u.hp, W.hpCap));
   v += W.hand * (P.hand.length - O.hand.length);
   return v;
