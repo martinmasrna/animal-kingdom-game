@@ -11,7 +11,20 @@ export function setRegen(r) { REGEN = r; }
 export const CARDS = {};
 for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c };
 for (let c = 1; c <= 4; c++) CARDS['G' + c] = { id: 'G' + c, kind: 'Guard', cost: c, n: 2 * c };
+// Investments under test, each costing 3, three copies replacing the three Strike 1s:
+//   Whetstone: your strikes deal 1 more for the rest of the match (stacks, nothing removes it).
+//   Sword: while you hold it your strikes deal 2 more; you drop it when a strike gets through your guard.
+//   Training: you regain 1 more energy each turn for the rest of the match (stacks).
+CARDS.W = { id: 'W', kind: 'Whetstone', cost: 3, n: 1 };
+CARDS.SW = { id: 'SW', kind: 'Sword', cost: 3, n: 2 };
+CARDS.T = { id: 'T', kind: 'Training', cost: 3, n: 1 };
 export const DECK = { S1: 3, S2: 3, S3: 3, S4: 3, S5: 3, S6: 3, G1: 3, G2: 3, G3: 3, G4: 3 };
+export let VARIANT = null;
+export function setVariant(v) {
+  VARIANT = v;
+  for (const k of ['W', 'SW', 'T']) delete DECK[k];
+  if (v) { delete DECK.S1; DECK[v] = 3; } else DECK.S1 = 3;
+}
 
 export function deckList() {
   const out = [];
@@ -30,7 +43,9 @@ function shuffleInPlace(s, a) {
   return a;
 }
 
-function newPlayer() { return { hp: HP, maxHp: HP, mana: MAX_MANA, turns: 0, block: 0, hand: [], deck: deckList(), played: [] }; }
+function newPlayer() { return { hp: HP, maxHp: HP, mana: MAX_MANA, turns: 0, block: 0, edge: 0, sword: 0, regenUp: 0, hand: [], deck: deckList(), played: [] }; }
+// damage a strike of this player deals
+export function strikeDmg(p, id) { return CARDS[id].n + p.edge + p.sword; }
 function clonePlayer(p) { return { ...p, hand: p.hand.slice(), deck: p.deck.slice(), played: p.played.slice() }; }
 export function clone(s) { return { ...s, p: [clonePlayer(s.p[0]), clonePlayer(s.p[1])] }; }
 
@@ -58,7 +73,7 @@ function mStartTurn(s, ev) {
   if (p.block) emit(s, ev, { t: 'expire', side, n: p.block });
   p.block = 0;
   const before = p.mana;
-  if (p.turns > 0) p.mana = Math.min(MAX_MANA, p.mana + REGEN);
+  if (p.turns > 0) p.mana = Math.min(MAX_MANA, p.mana + REGEN + p.regenUp);
   p.turns++;
   const drew = draw(s, side, 1);
   emit(s, ev, { t: 'start', side, mana: p.mana, gain: p.mana - before, drew });
@@ -76,6 +91,7 @@ function checkWin(s, ev) {
 export function canPlay(s, id) {
   if (s.winner !== null || !CARDS[id]) return false;
   const p = s.p[s.turn];
+  if (CARDS[id].kind === 'Sword' && p.sword) return false;
   return p.hand.includes(id) && CARDS[id].cost <= p.mana;
 }
 export function legalActions(s) {
@@ -91,12 +107,22 @@ function mPlay(s, id, ev) {
   p.played.push(id);
   emit(s, ev, { t: 'play', side, card: id, mana: p.mana });
   if (c.kind === 'Strike') {
-    const absorbed = Math.min(o.block, c.n);
+    const total = strikeDmg(p, id);
+    const absorbed = Math.min(o.block, total);
     o.block -= absorbed;
     if (absorbed) emit(s, ev, { t: 'stop', side: 1 - side, n: absorbed, block: o.block });
-    const dmg = c.n - absorbed;
-    if (dmg) { o.hp -= dmg; emit(s, ev, { t: 'hit', side, dmg }); }
+    const dmg = total - absorbed;
+    if (dmg) {
+      o.hp -= dmg; emit(s, ev, { t: 'hit', side, dmg });
+      if (o.sword) { o.sword = 0; emit(s, ev, { t: 'drop', side: 1 - side }); }
+    }
     checkWin(s, ev);
+  } else if (c.kind === 'Whetstone') {
+    p.edge += c.n; emit(s, ev, { t: 'edge', side, total: p.edge });
+  } else if (c.kind === 'Sword') {
+    p.sword = c.n; emit(s, ev, { t: 'sword', side });
+  } else if (c.kind === 'Training') {
+    p.regenUp += c.n; emit(s, ev, { t: 'train', side, total: REGEN + p.regenUp });
   } else {
     p.block += c.n;
     emit(s, ev, { t: 'guard', side, n: c.n, block: p.block });

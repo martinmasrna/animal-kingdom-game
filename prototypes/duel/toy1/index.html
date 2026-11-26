@@ -257,6 +257,12 @@ body.playing #start { display: none; }
 .trow.gone { opacity: .3; }
 .trk .tsub { margin: 10px 0 4px; font-size: 14px; color: #9fb0c2; }
 
+.swordb { width: 46px; height: 54px; border-radius: 10px; background: linear-gradient(160deg, #c8403f, #9e2328); border: 3px solid #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: pop .4s ease-out; }
+.swordb svg { width: 24px; height: 24px; }
+.swordb span { font-weight: 900; font-size: 15px; color: #fff; }
+.trow.Sword { background: linear-gradient(90deg, rgba(158,35,40,.8), rgba(158,35,40,.3)); }
+.ho.gold { color: #ffd36b; }
+
 </style>
 </head>
 <body>
@@ -301,7 +307,20 @@ function setRegen(r) { REGEN = r; }
 const CARDS = {};
 for (let c = 1; c <= 6; c++) CARDS['S' + c] = { id: 'S' + c, kind: 'Strike', cost: c, n: c };
 for (let c = 1; c <= 4; c++) CARDS['G' + c] = { id: 'G' + c, kind: 'Guard', cost: c, n: 2 * c };
+// Investments under test, each costing 3, three copies replacing the three Strike 1s:
+//   Whetstone: your strikes deal 1 more for the rest of the match (stacks, nothing removes it).
+//   Sword: while you hold it your strikes deal 2 more; you drop it when a strike gets through your guard.
+//   Training: you regain 1 more energy each turn for the rest of the match (stacks).
+CARDS.W = { id: 'W', kind: 'Whetstone', cost: 3, n: 1 };
+CARDS.SW = { id: 'SW', kind: 'Sword', cost: 3, n: 2 };
+CARDS.T = { id: 'T', kind: 'Training', cost: 3, n: 1 };
 const DECK = { S1: 3, S2: 3, S3: 3, S4: 3, S5: 3, S6: 3, G1: 3, G2: 3, G3: 3, G4: 3 };
+let VARIANT = null;
+function setVariant(v) {
+  VARIANT = v;
+  for (const k of ['W', 'SW', 'T']) delete DECK[k];
+  if (v) { delete DECK.S1; DECK[v] = 3; } else DECK.S1 = 3;
+}
 
 function deckList() {
   const out = [];
@@ -320,7 +339,9 @@ function shuffleInPlace(s, a) {
   return a;
 }
 
-function newPlayer() { return { hp: HP, maxHp: HP, mana: MAX_MANA, turns: 0, block: 0, hand: [], deck: deckList(), played: [] }; }
+function newPlayer() { return { hp: HP, maxHp: HP, mana: MAX_MANA, turns: 0, block: 0, edge: 0, sword: 0, regenUp: 0, hand: [], deck: deckList(), played: [] }; }
+// damage a strike of this player deals
+function strikeDmg(p, id) { return CARDS[id].n + p.edge + p.sword; }
 function clonePlayer(p) { return { ...p, hand: p.hand.slice(), deck: p.deck.slice(), played: p.played.slice() }; }
 function clone(s) { return { ...s, p: [clonePlayer(s.p[0]), clonePlayer(s.p[1])] }; }
 
@@ -348,7 +369,7 @@ function mStartTurn(s, ev) {
   if (p.block) emit(s, ev, { t: 'expire', side, n: p.block });
   p.block = 0;
   const before = p.mana;
-  if (p.turns > 0) p.mana = Math.min(MAX_MANA, p.mana + REGEN);
+  if (p.turns > 0) p.mana = Math.min(MAX_MANA, p.mana + REGEN + p.regenUp);
   p.turns++;
   const drew = draw(s, side, 1);
   emit(s, ev, { t: 'start', side, mana: p.mana, gain: p.mana - before, drew });
@@ -366,6 +387,7 @@ function checkWin(s, ev) {
 function canPlay(s, id) {
   if (s.winner !== null || !CARDS[id]) return false;
   const p = s.p[s.turn];
+  if (CARDS[id].kind === 'Sword' && p.sword) return false;
   return p.hand.includes(id) && CARDS[id].cost <= p.mana;
 }
 function legalActions(s) {
@@ -381,12 +403,22 @@ function mPlay(s, id, ev) {
   p.played.push(id);
   emit(s, ev, { t: 'play', side, card: id, mana: p.mana });
   if (c.kind === 'Strike') {
-    const absorbed = Math.min(o.block, c.n);
+    const total = strikeDmg(p, id);
+    const absorbed = Math.min(o.block, total);
     o.block -= absorbed;
     if (absorbed) emit(s, ev, { t: 'stop', side: 1 - side, n: absorbed, block: o.block });
-    const dmg = c.n - absorbed;
-    if (dmg) { o.hp -= dmg; emit(s, ev, { t: 'hit', side, dmg }); }
+    const dmg = total - absorbed;
+    if (dmg) {
+      o.hp -= dmg; emit(s, ev, { t: 'hit', side, dmg });
+      if (o.sword) { o.sword = 0; emit(s, ev, { t: 'drop', side: 1 - side }); }
+    }
     checkWin(s, ev);
+  } else if (c.kind === 'Whetstone') {
+    p.edge += c.n; emit(s, ev, { t: 'edge', side, total: p.edge });
+  } else if (c.kind === 'Sword') {
+    p.sword = c.n; emit(s, ev, { t: 'sword', side });
+  } else if (c.kind === 'Training') {
+    p.regenUp += c.n; emit(s, ev, { t: 'train', side, total: REGEN + p.regenUp });
   } else {
     p.block += c.n;
     emit(s, ev, { t: 'guard', side, n: c.n, block: p.block });
@@ -412,10 +444,10 @@ function deckSummary(s, side) {
 }
 
 // ---- src/bot.js
-// The Toy 1 bot. A turn is just a set of cards (order never matters: strikes
-// hit his block first, guards only add to your own), so the bot picks the set
-// whose worst case over the opponent's best reply is best, averaged over hands
-// the opponent could hold. It never reads his hand or either deck order.
+// The Toy 1 bot. A turn is a set of cards; the bot plays investments first, then
+// strikes, then guards, so only the set matters. It picks the set whose worst case
+// over the opponent's best reply is best, averaged over hands the opponent could
+// hold. It never reads his hand or either deck order.
 
 function makeRng(seed) {
   let a = (seed >>> 0) || 0x9e3779b9;
@@ -427,60 +459,82 @@ function makeRng(seed) {
   };
 }
 
-// Every distinct affordable set of cards from a hand: { str, grd, n, cards }.
-function turnSets(hand, mana) {
+// Every distinct affordable set of cards: strike count and sum, guard sum, investments.
+function turnSets(hand, mana, holdsSword = false) {
   const counts = {};
   for (const id of hand) counts[id] = (counts[id] || 0) + 1;
   const ids = Object.keys(counts);
   const out = [];
-  const total = mana;
-  (function rec(i, mana, str, grd, cards) {
-    const spent = total - mana;
-    if (i === ids.length) { out.push({ str, grd, n: cards.length, cost: spent, cards: cards.slice() }); return; }
+  (function rec(i, left, acc, cards) {
+    if (i === ids.length) { out.push({ ...acc, n: cards.length, cost: mana - left, cards: cards.slice() }); return; }
     const c = CARDS[ids[i]];
-    for (let k = 0; k <= counts[ids[i]]; k++) {
-      if (k * c.cost > mana) break;
+    let max = counts[ids[i]];
+    if (c.kind === 'Sword') max = holdsSword ? 0 : Math.min(max, 1);
+    for (let k = 0; k <= max; k++) {
+      if (k * c.cost > left) break;
       for (let j = 0; j < k; j++) cards.push(ids[i]);
-      rec(i + 1, mana - k * c.cost, str + (c.kind === 'Strike' ? k * c.n : 0), grd + (c.kind === 'Guard' ? k * c.n : 0), cards);
+      const a = { ...acc };
+      if (c.kind === 'Strike') { a.sc += k; a.ss += k * c.n; }
+      else if (c.kind === 'Guard') a.grd += k * c.n;
+      else if (c.kind === 'Whetstone') a.edge += k * c.n;
+      else if (c.kind === 'Sword') a.sword += k * c.n;
+      else if (c.kind === 'Training') a.train += k * c.n;
+      rec(i + 1, left - k * c.cost, a, cards);
       cards.length -= k;
     }
-  })(0, mana, 0, 0, []);
+  })(0, mana, { sc: 0, ss: 0, grd: 0, edge: 0, sword: 0, train: 0 }, []);
   return out;
 }
 
-const W = { block: 0.6, hand: 0.4, energy: 0.35 };
+const W = { block: 0.6, hand: 0.4, energy: 0.35, edge: 5, sword: 3, train: 3 };
+const ORDER = { Whetstone: 0, Sword: 0, Training: 0, Strike: 1, Guard: 2 };
 
-// Choose the bot's whole turn. Returns the list of cards to play (maybe empty).
-function botTurn(s, rng, K = 8) {
+function botTurn(s, rng, K = 8, noInvest = false) {
   const me = s.turn, P = s.p[me], O = s.p[1 - me];
-  const mine = turnSets(P.hand, P.mana);
+  let mine = turnSets(P.hand, P.mana, P.sword > 0);
+  if (noInvest) mine = mine.filter(S => !S.edge && !S.sword && !S.train);
   const unseen = [];
   const left = { ...DECK };
   for (const id of O.played) left[id]--;
   for (const [id, k] of Object.entries(left)) for (let i = 0; i < k; i++) unseen.push(id);
-  const oppMana = Math.min(MAX_MANA, O.mana + REGEN);
+  const oppMana = Math.min(MAX_MANA, O.mana + REGEN + O.regenUp);
+  const oppHandNext = O.hand.length + (O.deck.length ? 1 : 0);
   const replies = [];
   for (let k = 0; k < K; k++) {
     const pool = unseen.slice();
     for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = pool[i]; pool[i] = pool[j]; pool[j] = x; }
-    replies.push(turnSets(pool.slice(0, Math.min(pool.length, O.hand.length + (O.deck.length ? 1 : 0))), oppMana));
+    replies.push(turnSets(pool.slice(0, Math.min(pool.length, oppHandNext)), oppMana, O.sword > 0));
   }
-  const oppHandNext = O.hand.length + (O.deck.length ? 1 : 0);
   let best = null, bestV = -Infinity;
   for (const S of mine) {
-    const oppHp = O.hp - Math.max(0, S.str - O.block);
+    const myEdge = P.edge + S.edge, mySwordNow = P.sword || S.sword;
+    const myDmg = S.ss + S.sc * (myEdge + mySwordNow);
+    const through = Math.max(0, myDmg - O.block);
+    const oppHp = O.hp - through;
+    const oppSword = through > 0 ? 0 : O.sword;
     let v;
     if (oppHp <= 0) v = 1000 - S.n * 0.01;
     else {
       v = 0;
-      const myBlock = S.grd;
+      const myBlock = S.grd, myTrain = P.regenUp + S.train;
+      const myEnergy = Math.min(MAX_MANA, P.mana - S.cost + REGEN + myTrain);
       for (const T of replies) {
         let worst = Infinity;
         for (const R of T) {
-          const myHp = P.hp - Math.max(0, R.str - myBlock);
-          const val = myHp <= 0 ? -1000
-            : (myHp - oppHp) - W.block * R.grd + W.hand * ((P.hand.length - S.n) - (oppHandNext - R.n))
-              + W.energy * (Math.min(MAX_MANA, P.mana - S.cost + REGEN) - Math.min(MAX_MANA, oppMana - R.cost + REGEN));
+          const hisEdge = O.edge + R.edge, hisSword = oppSword || R.sword;
+          const hisDmg = R.ss + R.sc * (hisEdge + hisSword);
+          const hit = Math.max(0, hisDmg - myBlock);
+          const myHp = P.hp - hit;
+          let val;
+          if (myHp <= 0) val = -1000;
+          else {
+            const keepSword = hit > 0 ? 0 : mySwordNow;
+            const hisTrain = O.regenUp + R.train;
+            val = (myHp - oppHp) - W.block * R.grd
+              + W.hand * ((P.hand.length - S.n) - (oppHandNext - R.n))
+              + W.energy * (myEnergy - Math.min(MAX_MANA, oppMana - R.cost + REGEN + hisTrain))
+              + W.edge * (myEdge - hisEdge) + W.sword * (keepSword - hisSword) + W.train * (myTrain - hisTrain);
+          }
           if (val < worst) worst = val;
         }
         v += worst / K;
@@ -488,21 +542,19 @@ function botTurn(s, rng, K = 8) {
     }
     if (v > bestV + 1e-9) { bestV = v; best = S; }
   }
-  // strikes biggest first, then guards: the order changes nothing but reads well
-  return best.cards.slice().sort((a, b) => (CARDS[a].kind === CARDS[b].kind ? CARDS[b].n - CARDS[a].n : CARDS[a].kind === 'Strike' ? -1 : 1));
+  return best.cards.slice().sort((a, b) => ORDER[CARDS[a].kind] - ORDER[CARDS[b].kind] || CARDS[b].n - CARDS[a].n);
 }
 
-// Baselines for measuring the bot.
 function greedyTurn(s) {
   const P = s.p[s.turn];
   let bestSet = null;
-  for (const S of turnSets(P.hand, P.mana)) if (!bestSet || S.str > bestSet.str || (S.str === bestSet.str && S.grd > bestSet.grd)) bestSet = S;
-  return bestSet.cards;
+  for (const S of turnSets(P.hand, P.mana, P.sword > 0)) if (!bestSet || S.ss > bestSet.ss || (S.ss === bestSet.ss && S.grd > bestSet.grd)) bestSet = S;
+  return bestSet.cards.slice().sort((a, b) => ORDER[CARDS[a].kind] - ORDER[CARDS[b].kind]);
 }
 function randomTurn(s, rng) {
   const P = s.p[s.turn];
-  const sets = turnSets(P.hand, P.mana);
-  return sets[Math.floor(rng() * sets.length)].cards;
+  const sets = turnSets(P.hand, P.mana, P.sword > 0);
+  return sets[Math.floor(rng() * sets.length)].cards.slice().sort((a, b) => ORDER[CARDS[a].kind] - ORDER[CARDS[b].kind]);
 }
 
 // ---- src/ui.js
@@ -518,7 +570,9 @@ const ui = {
 };
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
-const NAME = { Strike: 'Strike', Guard: 'Guard' };
+setVariant('SW');
+const NAME = { Strike: 'Strike', Guard: 'Guard', Sword: 'Sword', Whetstone: 'Whetstone', Training: 'Training' };
+const label = (id) => CARDS[id].kind === 'Strike' || CARDS[id].kind === 'Guard' ? NAME[CARDS[id].kind] + ' ' + CARDS[id].n : NAME[CARDS[id].kind];
 
 const ICON = {
   sword: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M14.5 2.5 21.5 2.5 21.5 9.5 10 21l-2-2-2.6 2.6-2.8-2.8L5.2 16.2l-2-2Z" opacity=".95"/></svg>',
@@ -527,14 +581,21 @@ const ICON = {
 const shieldSVG = '<svg viewBox="0 0 46 54"><path d="M23 2 43 9v15c0 13-9 22-20 28C12 46 3 37 3 24V9Z" fill="#5f7891" stroke="#fff" stroke-width="3"/></svg>';
 
 // ------------------------------------------------------------------ cards
-function cardHTML(id, { cls = '', attrs = '' } = {}) {
+function cardHTML(id, { cls = '', attrs = '', owner = null } = {}) {
   const c = CARDS[id];
+  if (c.kind === 'Sword') return `<button class="card k-Heavy ${cls}" ${attrs}>
+    <span class="cgem">${c.cost}</span>
+    <div class="art"><span class="big">+${c.n}</span>${ICON.sword}</div>
+    <div class="nm">Sword</div>
+    <div class="tx">Your strikes deal ${c.n} more. Dropped when you're hit.</div>
+    <div class="sp"> </div></button>`;
   const strike = c.kind === 'Strike';
+  const dmg = strike && owner ? strikeDmg(owner, id) : c.n;
   return `<button class="card k-${strike ? 'Light' : 'Defence'} ${cls}" ${attrs}>
     <span class="cgem">${c.cost}</span>
-    <div class="art"><span class="big">${c.n}</span>${strike ? ICON.sword : ICON.shield}</div>
+    <div class="art"><span class="big${dmg > c.n ? ' up' : ''}">${dmg}</span>${strike ? ICON.sword : ICON.shield}</div>
     <div class="nm">${NAME[c.kind]}</div>
-    <div class="tx">${strike ? `Deal ${c.n} damage.` : `Absorb ${c.n} damage until your next turn.`}</div>
+    <div class="tx">${strike ? `Deal ${dmg} damage.` : `Absorb ${c.n} damage until your next turn.`}</div>
     <div class="sp"> </div></button>`;
 }
 
@@ -546,7 +607,8 @@ function heroHTML(side) {
   const shield = block > 0 ? `<div class="shield${ui.popGuard[side] ? ' pop' : ''}" id="shield${side}">${shieldSVG}<span style="font-size:18px">${block}</span></div>` : '';
   let gems = '';
   for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < mana ? ' on' : ''}"></i>`;
-  return `<div class="left"><div class="guards">${shield}</div></div>
+  const sword = p.sword ? `<div class="swordb" id="sword${side}">${ICON.sword}<span>+${p.sword}</span></div>` : '';
+  return `<div class="left"><div class="guards">${sword}${shield}</div></div>
     <div class="mid"><div class="plate${active ? ' active' : ''}" id="plate${side}">
       <div class="hname">${mine ? 'You' : 'Opponent'}</div>
       <div class="hp${hp <= 8 ? ' low' : ''}">${hp}</div>
@@ -561,7 +623,8 @@ function handHTML() {
   const s = ui.view, p = s.p[ME];
   const order = p.hand.map((n, i) => i).sort((a, b) => {
     const A = CARDS[p.hand[a]], B = CARDS[p.hand[b]];
-    return (A.kind === B.kind ? 0 : A.kind === 'Strike' ? -1 : 1) || A.cost - B.cost;
+    const R = { Sword: 0, Strike: 1, Guard: 2 };
+    return (R[A.kind] - R[B.kind]) || A.cost - B.cost;
   });
   const myTurn = !ui.busy && !ui.over && s.turn === ME;
   return order.map(i => {
@@ -569,7 +632,7 @@ function handHTML() {
     const ok = myTurn && canPlay(s, id);
     let cls = ok ? 'ok' : (myTurn ? 'no' : '');
     if (ui.fresh.has(i)) cls += ' drawn';
-    return cardHTML(id, { cls, attrs: `data-play="${id}"${ok ? '' : ' disabled'}` });
+    return cardHTML(id, { cls, owner: p, attrs: `data-play="${id}"${ok ? '' : ' disabled'}` });
   }).join('');
 }
 
@@ -585,7 +648,7 @@ function render() {
   $('turnbox').innerHTML = `<button id="endturn" class="${myTurn && !canAct ? 'done' : ''}"${myTurn && !ui.busy ? '' : ' disabled'}>${myTurn ? 'End turn' : 'His turn'}</button>`;
   $('history').innerHTML = ui.hist.slice(-16).map(h => h.sep
     ? `<div class="hist sep">${h.sep}</div>`
-    : `<div class="hist s${h.side}" data-card="${h.card}"><span class="hn">${NAME[CARDS[h.card].kind]} ${CARDS[h.card].n}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`).join('');
+    : `<div class="hist s${h.side}" data-card="${h.card}"><span class="hn">${label(h.card)}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`).join('');
   $('trk1').innerHTML = trackerHTML(BOT);
   $('trk0').innerHTML = trackerHTML(ME);
   $('decks').classList.toggle('show', ui.showDecks);
@@ -599,7 +662,7 @@ function trackerHTML(side) {
   const s = ui.view, mine = side === ME, p = s.p[side];
   const rows = deckSummary(s, side).map(r => {
     const c = CARDS[r.id], left = mine ? r.inDeck : r.unseen;
-    return `<div class="trow ${c.kind}${left ? '' : ' gone'}"><span class="tg">${c.cost}</span><span class="tn">${NAME[c.kind]} ${c.n}</span><span class="tc">×${left}</span></div>`;
+    return `<div class="trow ${c.kind}${left ? '' : ' gone'}"><span class="tg">${c.cost}</span><span class="tn">${label(r.id)}</span><span class="tc">×${left}</span></div>`;
   }).join('');
   const total = mine ? p.deck.length : p.deck.length + p.hand.length;
   return `<h3>${mine ? 'Your deck' : 'His deck'}<small>${total} ${mine ? 'left' : 'unplayed'}</small></h3>${rows}`;
@@ -609,7 +672,7 @@ function deckTable(side) {
   const s = ui.s, mine = side === ME;
   const rows = deckSummary(s, side).map(r => {
     const c = CARDS[r.id], left = mine ? r.inDeck : r.unseen;
-    return `<tr><td>${NAME[c.kind]} ${c.n}</td><td>${c.cost}</td><td>${r.total}</td><td class="${r.played ? '' : 'z'}">${r.played}</td><td class="${left ? '' : 'z'}"><b>${left}</b></td></tr>`;
+    return `<tr><td>${label(r.id)}</td><td>${c.cost}</td><td>${r.total}</td><td class="${r.played ? '' : 'z'}">${r.played}</td><td class="${left ? '' : 'z'}"><b>${left}</b></td></tr>`;
   }).join('');
   return `<div><h3>${mine ? 'Your deck' : 'His deck'}</h3><p>Both decks are the same list.</p>
     <table><thead><tr><th>Card</th><th>Cost</th><th>In list</th><th>Played</th><th>${mine ? 'In deck' : 'Not seen'}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
@@ -639,7 +702,7 @@ function banner(text) {
 async function spotlight(card, side) {
   const t = centerOf($('table'));
   $('spot').style.left = t.x + 'px'; $('spot').style.top = t.y + 'px';
-  $('spot').innerHTML = cardHTML(card, { cls: `from${side}` });
+  $('spot').innerHTML = cardHTML(card, { cls: `from${side}`, owner: ui.view.p[side] });
   await wait(side === ME ? 380 : 800);
   const c = $('spot').querySelector('.card'); if (c) c.classList.add('out');
   await wait(200);
@@ -679,9 +742,15 @@ async function playBeats(ev, prev, next) {
     for (const e of b.evs) {
       if (e.t === 'stop') { floater(e.side, 'Absorbed ' + e.n, 'block', 'plate', -24); out = 'absorbed'; cls = 'block'; }
       if (e.t === 'guard') { out = '+' + e.n + ' ⛨'; cls = 'block'; }
+      if (e.t === 'sword') { out = '+2'; cls = 'gold'; }
+      if (e.t === 'drop') floater(e.side, 'Sword dropped', 'warn', 'plate', 40);
     }
     for (const side of [0, 1]) if (dmgTo[side]) { floater(side, '−' + dmgTo[side], 'dmg'); shake(side); out = (out === 'absorbed' ? 'part, ' : '') + '−' + dmgTo[side]; cls = 'dmg'; }
-    if (b.card) { ui.hist.push({ side: b.side, card: b.card, out, cls }); render(); }
+    if (b.card) {
+      ui.hist.push({ side: b.side, card: b.card, out, cls });
+      for (const e of b.evs) if (e.t === 'drop') ui.hist.push({ side: e.side, card: 'SW', out: 'dropped', cls: 'warn' });
+      render();
+    }
     if (b.card) await wait(b.side === ME ? 300 : 550);
   }
 }

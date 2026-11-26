@@ -1,6 +1,6 @@
 // Toy 1 as a game screen. Drives the engine through its exported transitions;
 // what the player sees comes from engine events, played back one beat at a time.
-import { CARDS, DECK, MAX_MANA, REGEN, newMatch, playAction, endTurn, canPlay, deckSummary } from './engine.js';
+import { CARDS, DECK, MAX_MANA, REGEN, setVariant, strikeDmg, newMatch, playAction, endTurn, canPlay, deckSummary } from './engine.js';
 import { makeRng, botTurn } from './bot.js';
 
 const ME = 0, BOT = 1;
@@ -11,7 +11,9 @@ const ui = {
 };
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
-const NAME = { Strike: 'Strike', Guard: 'Guard' };
+setVariant('SW');
+const NAME = { Strike: 'Strike', Guard: 'Guard', Sword: 'Sword', Whetstone: 'Whetstone', Training: 'Training' };
+const label = (id) => CARDS[id].kind === 'Strike' || CARDS[id].kind === 'Guard' ? NAME[CARDS[id].kind] + ' ' + CARDS[id].n : NAME[CARDS[id].kind];
 
 const ICON = {
   sword: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M14.5 2.5 21.5 2.5 21.5 9.5 10 21l-2-2-2.6 2.6-2.8-2.8L5.2 16.2l-2-2Z" opacity=".95"/></svg>',
@@ -20,14 +22,21 @@ const ICON = {
 const shieldSVG = '<svg viewBox="0 0 46 54"><path d="M23 2 43 9v15c0 13-9 22-20 28C12 46 3 37 3 24V9Z" fill="#5f7891" stroke="#fff" stroke-width="3"/></svg>';
 
 // ------------------------------------------------------------------ cards
-function cardHTML(id, { cls = '', attrs = '' } = {}) {
+function cardHTML(id, { cls = '', attrs = '', owner = null } = {}) {
   const c = CARDS[id];
+  if (c.kind === 'Sword') return `<button class="card k-Heavy ${cls}" ${attrs}>
+    <span class="cgem">${c.cost}</span>
+    <div class="art"><span class="big">+${c.n}</span>${ICON.sword}</div>
+    <div class="nm">Sword</div>
+    <div class="tx">Your strikes deal ${c.n} more. Dropped when you're hit.</div>
+    <div class="sp"> </div></button>`;
   const strike = c.kind === 'Strike';
+  const dmg = strike && owner ? strikeDmg(owner, id) : c.n;
   return `<button class="card k-${strike ? 'Light' : 'Defence'} ${cls}" ${attrs}>
     <span class="cgem">${c.cost}</span>
-    <div class="art"><span class="big">${c.n}</span>${strike ? ICON.sword : ICON.shield}</div>
+    <div class="art"><span class="big${dmg > c.n ? ' up' : ''}">${dmg}</span>${strike ? ICON.sword : ICON.shield}</div>
     <div class="nm">${NAME[c.kind]}</div>
-    <div class="tx">${strike ? `Deal ${c.n} damage.` : `Absorb ${c.n} damage until your next turn.`}</div>
+    <div class="tx">${strike ? `Deal ${dmg} damage.` : `Absorb ${c.n} damage until your next turn.`}</div>
     <div class="sp"> </div></button>`;
 }
 
@@ -39,7 +48,8 @@ function heroHTML(side) {
   const shield = block > 0 ? `<div class="shield${ui.popGuard[side] ? ' pop' : ''}" id="shield${side}">${shieldSVG}<span style="font-size:18px">${block}</span></div>` : '';
   let gems = '';
   for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < mana ? ' on' : ''}"></i>`;
-  return `<div class="left"><div class="guards">${shield}</div></div>
+  const sword = p.sword ? `<div class="swordb" id="sword${side}">${ICON.sword}<span>+${p.sword}</span></div>` : '';
+  return `<div class="left"><div class="guards">${sword}${shield}</div></div>
     <div class="mid"><div class="plate${active ? ' active' : ''}" id="plate${side}">
       <div class="hname">${mine ? 'You' : 'Opponent'}</div>
       <div class="hp${hp <= 8 ? ' low' : ''}">${hp}</div>
@@ -54,7 +64,8 @@ function handHTML() {
   const s = ui.view, p = s.p[ME];
   const order = p.hand.map((n, i) => i).sort((a, b) => {
     const A = CARDS[p.hand[a]], B = CARDS[p.hand[b]];
-    return (A.kind === B.kind ? 0 : A.kind === 'Strike' ? -1 : 1) || A.cost - B.cost;
+    const R = { Sword: 0, Strike: 1, Guard: 2 };
+    return (R[A.kind] - R[B.kind]) || A.cost - B.cost;
   });
   const myTurn = !ui.busy && !ui.over && s.turn === ME;
   return order.map(i => {
@@ -62,7 +73,7 @@ function handHTML() {
     const ok = myTurn && canPlay(s, id);
     let cls = ok ? 'ok' : (myTurn ? 'no' : '');
     if (ui.fresh.has(i)) cls += ' drawn';
-    return cardHTML(id, { cls, attrs: `data-play="${id}"${ok ? '' : ' disabled'}` });
+    return cardHTML(id, { cls, owner: p, attrs: `data-play="${id}"${ok ? '' : ' disabled'}` });
   }).join('');
 }
 
@@ -78,7 +89,7 @@ function render() {
   $('turnbox').innerHTML = `<button id="endturn" class="${myTurn && !canAct ? 'done' : ''}"${myTurn && !ui.busy ? '' : ' disabled'}>${myTurn ? 'End turn' : 'His turn'}</button>`;
   $('history').innerHTML = ui.hist.slice(-16).map(h => h.sep
     ? `<div class="hist sep">${h.sep}</div>`
-    : `<div class="hist s${h.side}" data-card="${h.card}"><span class="hn">${NAME[CARDS[h.card].kind]} ${CARDS[h.card].n}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`).join('');
+    : `<div class="hist s${h.side}" data-card="${h.card}"><span class="hn">${label(h.card)}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`).join('');
   $('trk1').innerHTML = trackerHTML(BOT);
   $('trk0').innerHTML = trackerHTML(ME);
   $('decks').classList.toggle('show', ui.showDecks);
@@ -92,7 +103,7 @@ function trackerHTML(side) {
   const s = ui.view, mine = side === ME, p = s.p[side];
   const rows = deckSummary(s, side).map(r => {
     const c = CARDS[r.id], left = mine ? r.inDeck : r.unseen;
-    return `<div class="trow ${c.kind}${left ? '' : ' gone'}"><span class="tg">${c.cost}</span><span class="tn">${NAME[c.kind]} ${c.n}</span><span class="tc">×${left}</span></div>`;
+    return `<div class="trow ${c.kind}${left ? '' : ' gone'}"><span class="tg">${c.cost}</span><span class="tn">${label(r.id)}</span><span class="tc">×${left}</span></div>`;
   }).join('');
   const total = mine ? p.deck.length : p.deck.length + p.hand.length;
   return `<h3>${mine ? 'Your deck' : 'His deck'}<small>${total} ${mine ? 'left' : 'unplayed'}</small></h3>${rows}`;
@@ -102,7 +113,7 @@ function deckTable(side) {
   const s = ui.s, mine = side === ME;
   const rows = deckSummary(s, side).map(r => {
     const c = CARDS[r.id], left = mine ? r.inDeck : r.unseen;
-    return `<tr><td>${NAME[c.kind]} ${c.n}</td><td>${c.cost}</td><td>${r.total}</td><td class="${r.played ? '' : 'z'}">${r.played}</td><td class="${left ? '' : 'z'}"><b>${left}</b></td></tr>`;
+    return `<tr><td>${label(r.id)}</td><td>${c.cost}</td><td>${r.total}</td><td class="${r.played ? '' : 'z'}">${r.played}</td><td class="${left ? '' : 'z'}"><b>${left}</b></td></tr>`;
   }).join('');
   return `<div><h3>${mine ? 'Your deck' : 'His deck'}</h3><p>Both decks are the same list.</p>
     <table><thead><tr><th>Card</th><th>Cost</th><th>In list</th><th>Played</th><th>${mine ? 'In deck' : 'Not seen'}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
@@ -132,7 +143,7 @@ function banner(text) {
 async function spotlight(card, side) {
   const t = centerOf($('table'));
   $('spot').style.left = t.x + 'px'; $('spot').style.top = t.y + 'px';
-  $('spot').innerHTML = cardHTML(card, { cls: `from${side}` });
+  $('spot').innerHTML = cardHTML(card, { cls: `from${side}`, owner: ui.view.p[side] });
   await wait(side === ME ? 380 : 800);
   const c = $('spot').querySelector('.card'); if (c) c.classList.add('out');
   await wait(200);
@@ -172,9 +183,15 @@ async function playBeats(ev, prev, next) {
     for (const e of b.evs) {
       if (e.t === 'stop') { floater(e.side, 'Absorbed ' + e.n, 'block', 'plate', -24); out = 'absorbed'; cls = 'block'; }
       if (e.t === 'guard') { out = '+' + e.n + ' ⛨'; cls = 'block'; }
+      if (e.t === 'sword') { out = '+2'; cls = 'gold'; }
+      if (e.t === 'drop') floater(e.side, 'Sword dropped', 'warn', 'plate', 40);
     }
     for (const side of [0, 1]) if (dmgTo[side]) { floater(side, '−' + dmgTo[side], 'dmg'); shake(side); out = (out === 'absorbed' ? 'part, ' : '') + '−' + dmgTo[side]; cls = 'dmg'; }
-    if (b.card) { ui.hist.push({ side: b.side, card: b.card, out, cls }); render(); }
+    if (b.card) {
+      ui.hist.push({ side: b.side, card: b.card, out, cls });
+      for (const e of b.evs) if (e.t === 'drop') ui.hist.push({ side: e.side, card: 'SW', out: 'dropped', cls: 'warn' });
+      render();
+    }
     if (b.card) await wait(b.side === ME ? 300 : 550);
   }
 }

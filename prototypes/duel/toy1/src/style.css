@@ -248,3 +248,9 @@ body.playing #start { display: none; }
 .trow .tc { color: #ffd36b; font-variant-numeric: tabular-nums; }
 .trow.gone { opacity: .3; }
 .trk .tsub { margin: 10px 0 4px; font-size: 14px; color: #9fb0c2; }
+
+.swordb { width: 46px; height: 54px; border-radius: 10px; background: linear-gradient(160deg, #c8403f, #9e2328); border: 3px solid #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: pop .4s ease-out; }
+.swordb svg { width: 24px; height: 24px; }
+.swordb span { font-weight: 900; font-size: 15px; color: #fff; }
+.trow.Sword { background: linear-gradient(90deg, rgba(158,35,40,.8), rgba(158,35,40,.3)); }
+.ho.gold { color: #ffd36b; }
