@@ -16,13 +16,13 @@ Bot against bot, with a little noise in the bot's choices (without noise every g
 
 ## The 70% test (2026-11-26)
 
-Martin's skill-chain test: from a random player, each bot is the simplest found that beats the one below it in at least 70% of games (`node ladder.mjs`, 400 games a pairing, both seats on the same deals). On this toy, drawing 2:
+Martin's skill-chain test: from a random player, each bot is the simplest found that beats the one below it in at least 70% of games (`node ladder.mjs`, 400 games a pairing, both seats on the same deals). Every bot first passes `node sanity.mjs` (close the winning triangle, no chip damage for nothing, break his winning triangle). On this toy, drawing 2, after the fix of 2026-11-26 (a played card counts as spent; Expert keeps Hard's turn unless its play-outs clearly prefer another):
 
 - Easy, units on random empty tiles and never a strike: beats Random 77%.
 - Cluster, each unit next to the most of your own: beats Easy 78%.
 - Normal, each play the one that most raises held regions minus his: beats Cluster 85%.
 - Hard, Normal that also values half-built triangles (`greedyTurn`): beats Normal 96%.
-- Expert, the best of six candidate turns by four play-outs eight turns deep with Hard on both sides (`rolloutBot(6, 4, 8)`): beats Hard 80.5%.
-- Nothing found beats Expert: an eight-times larger search 43%, the same search seeing every hidden card 46.5%. Hidden cards are not what stops it; this family of search has hit its own ceiling, which is not proof the game has.
+- Expert, Hard's turn unless twelve play-outs per candidate, eight turns deep with Hard on both sides, clearly prefer another (`rolloutBot(6, 12, 8)`): beats Hard 83%.
+- Before the fix, nothing found beat Expert: an eight-times larger search 43%, the same search seeing every hidden card 46.5%; that search has not been rerun on the fixed bots.
 
 Control, Slots (food per unit, the game Martin found shallow): the simplest bot over 70% against Random is the greedy one (kill the biggest you can, else play your biggest unit), 82%; nothing tried beats it 70% (one-turn lookahead 55%, play-outs 41%).
