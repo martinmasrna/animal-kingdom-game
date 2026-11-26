@@ -128,7 +128,7 @@ An attack names its target tiles on the enemy area when it is chosen. It hits on
 | Lunge | Melee | One whole row (all three tiles). |
 | Flurry | Melee | Two different tiles of the enemy front column, one hit of 2 on each. |
 | Smash | Melee | A 2 by 2 block anywhere in the enemy area. |
-| Haymaker | Melee | The whole enemy area. |
+| Haymaker | Melee | The whole enemy front and middle columns. |
 
 Two ranged cards exist only in this version:
 
@@ -137,7 +137,9 @@ Two ranged cards exist only in this version:
 | Bolt | 2 | Normal | Light attack, ranged | 3 damage to one tile anywhere. |
 | Blast | 5 | Slow | Heavy attack, ranged | 7 damage to one whole row. |
 
-Decks in this version: each deck swaps 1 Slash and 1 Flurry for 2 Bolt, and 1 Smash for 1 Blast.
+Decks in this version: each deck swaps 1 Slash and 1 Flurry for 2 Bolt, and 1 Smash for 1 Blast. Heavy also swaps 1 Haymaker for 1 Slash, and Quick 1 Meditate for 1 Smash.
+
+Health in this version: Heavy 26, Quick 34. With position in play Heavy's big attacks are worth far more than in the other two versions, and it took these numbers and the two extra swaps to bring bot matches between the heroes near even.
 
 ### Fatigue (this version only)
 

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Grid Duel</title>
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="start">
+  <h1>Duel: Grid</h1>
+  <div class="pick"><h2>You play</h2><div class="opts" id="pickMe"></div></div>
+  <div class="pick"><h2>He plays</h2><div class="opts" id="pickOp"></div></div>
+  <button class="big" id="btnStart">Start</button>
+</div>
+<div id="game" class="hidden">
+  <div id="bar">
+    <span class="round" id="roundLbl"></span>
+    <button id="btnDecks">Decks</button>
+    <button id="btnLog">Log</button>
+    <button id="btnNew">New match</button>
+  </div>
+  <div id="cols">
+    <div id="leftcol"><div class="panel" id="decksDesk"></div></div>
+    <div id="center">
+      <div class="side op"><div class="grid" id="gridOp"></div><div class="stats r" id="statsOp"></div></div>
+      <div id="midline"></div>
+      <div class="side me"><div class="grid" id="gridMe"></div><div class="stats b" id="statsMe"></div></div>
+      <div class="lanes"><span>left</span><span>centre</span><span>right</span></div>
+      <div id="tray"></div>
+      <div id="hand"></div>
+    </div>
+    <div id="rightcol"><div class="panel" id="logDesk"></div></div>
+  </div>
+</div>
+<div class="overlay hidden" id="decksOv"><div class="sheet"><div class="head">Deck lists<button class="small" data-close="decksOv">Close</button></div><div class="body" id="decksPhone"></div></div></div>
+<div class="overlay hidden" id="logOv"><div class="sheet"><div class="head">Log<button class="small" data-close="logOv">Close</button></div><div class="body" id="logPhone"></div></div></div>
+<div class="overlay hidden" id="endov"><div class="sheet"><div class="res" id="endRes"></div><div class="row"><button class="big" data-act="rematch">Rematch</button><button class="big" data-act="new">New match</button></div><button class="small" id="btnEndLog">See the board and log</button></div></div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

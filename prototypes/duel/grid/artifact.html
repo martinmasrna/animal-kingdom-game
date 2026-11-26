@@ -1,0 +1,1359 @@
+<title>Grid Duel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root { color-scheme: light;
+  --blue: #1d4ed8; --blue-soft: rgba(29, 78, 216, .22); --blue-strong: rgba(29, 78, 216, .5);
+  --red: #c81e1e; --red-soft: rgba(200, 30, 30, .2); --red-strong: rgba(200, 30, 30, .5);
+  --bg: #d9d9d9; --panel: #efefef; --tile: #fafafa; --line: #9a9a9a; --ink: #111; --mute: #444; --warn: #b45309;
+  --tile-size: 58px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 15px/1.3 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.hidden { display: none !important; }
+
+/* start */
+#start { max-width: 560px; margin: 0 auto; padding-top: 24px; padding-bottom: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+#start h1 { font-size: 22px; margin: 0 0 16px; }
+.pick { margin: 0 0 18px; }
+.pick h2 { font-size: 16px; margin: 0 0 8px; }
+.pick .opts { display: flex; gap: 8px; }
+.opt { flex: 1; text-align: left; background: var(--panel); border: 2px solid var(--line); border-radius: 6px; padding: 10px; }
+.opt b { display: block; font-size: 17px; }
+.opt.on.me { border-color: var(--blue); box-shadow: inset 0 0 0 2px var(--blue); }
+.opt.on.op { border-color: var(--red); box-shadow: inset 0 0 0 2px var(--red); }
+.big { background: #222; color: #fff; border: 0; border-radius: 6px; padding: 12px 20px; font-size: 17px; font-weight: 600; }
+
+/* game frame */
+#game { height: 100%; display: flex; flex-direction: column; }
+#bar { display: flex; align-items: center; gap: 6px; padding-top: 6px; padding-bottom: 6px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: #c8c8c8; border-bottom: 1px solid var(--line); flex: none; }
+#bar .round { font-weight: 700; margin-right: auto; }
+#bar button, .small { background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 5px 10px; font-size: 14px; }
+#cols { flex: 1; display: flex; min-height: 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+#center { flex: 1; display: flex; flex-direction: column; min-width: 0; padding: 6px 0 8px; gap: 4px; max-width: 640px; margin: 0 auto; }
+#leftcol, #rightcol { display: none; }
+
+.side { display: flex; gap: 10px; align-items: stretch; }
+.grid { display: grid; grid-template-columns: repeat(3, var(--tile-size)); grid-template-rows: repeat(3, var(--tile-size)); gap: 3px; flex: none; }
+.tile { position: relative; background: var(--tile); border: 1px solid var(--line); border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; }
+.tile.front { border-width: 2px; }
+.op .tile.front { border-bottom-color: #555; }
+.me .tile.front { border-top-color: #555; }
+.tile.aim { outline: 2px dashed #777; outline-offset: -5px; }
+.tile.stepok { outline: 2px dashed var(--blue); outline-offset: -5px; }
+.tile.t1 { background-color: var(--blue-soft); }
+.tile.t2 { background-image: repeating-linear-gradient(45deg, var(--blue-strong) 0 5px, transparent 5px 11px); }
+.tile.r1 { background-color: var(--red-soft); }
+.tile.r2 { background-image: repeating-linear-gradient(45deg, var(--red-strong) 0 5px, transparent 5px 11px); }
+.tile.flash-b { animation: flashB .7s ease-out; background-color: var(--blue-strong); }
+.tile.flash-r { animation: flashR .7s ease-out; background-color: var(--red-strong); }
+@keyframes flashB { 0% { background-color: var(--blue); } 100% { background-color: var(--blue-strong); } }
+@keyframes flashR { 0% { background-color: var(--red); } 100% { background-color: var(--red-strong); } }
+.badges { position: absolute; top: 2px; left: 3px; display: flex; gap: 2px; }
+.badge { font-size: 14px; font-weight: 700; line-height: 1; padding: 2px 4px; border-radius: 3px; color: #fff; }
+.badge.b { background: var(--blue); } .badge.r { background: var(--red); }
+.tok { width: 70%; height: 70%; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: #fff; }
+.tok.b { background: var(--blue); } .tok.r { background: var(--red); }
+.tok.ghost { background: transparent; border: 3px dashed; }
+.tok.ghost.b { color: var(--blue); border-color: var(--blue); } .tok.ghost.r { color: var(--red); border-color: var(--red); }
+.mark { position: absolute; bottom: 2px; left: 0; right: 0; text-align: center; font-weight: 800; font-size: 14px; pointer-events: none; }
+.mark span { background: #fff; border: 1px solid #333; border-radius: 3px; padding: 0 3px; }
+.mark.hit span { background: #111; color: #fff; }
+.mark.heal span { background: #e6f4e6; }
+.lanes { display: grid; grid-template-columns: repeat(3, var(--tile-size)); gap: 3px; font-size: 14px; color: var(--mute); text-align: center; }
+
+.stats { flex: 1; min-width: 0; background: var(--panel); border-left: 5px solid; border-radius: 4px; padding: 5px 8px; font-size: 14px; display: flex; flex-direction: column; justify-content: center; gap: 1px; }
+.stats.b { border-color: var(--blue); } .stats.r { border-color: var(--red); }
+.stats .who { font-weight: 700; font-size: 15px; }
+.stats .who.b { color: var(--blue); } .stats .who.r { color: var(--red); }
+.hpbar { height: 6px; background: #ccc; border-radius: 3px; overflow: hidden; margin: 1px 0 2px; }
+.hpbar i { display: block; height: 100%; }
+.stats .guard { font-weight: 700; }
+.stats .known { color: var(--mute); }
+.stats .fat { color: var(--red); font-weight: 700; }
+
+#midline { min-height: 34px; display: flex; align-items: center; border-top: 3px solid #555; border-bottom: 3px solid #555; padding: 2px 6px; font-size: 14px; font-weight: 600; background: #e7e7e7; cursor: default; }
+#midline.playing { cursor: pointer; background: #fff8dc; }
+
+/* tray */
+#tray { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; min-height: 40px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; border: 2px solid var(--blue); border-radius: 5px; background: #fff; padding: 3px 4px 3px 6px; font-size: 14px; max-width: 100%; }
+.chip.active { box-shadow: 0 0 0 2px #111; }
+.chip.warn { border-color: var(--warn); background: #fff1e0; }
+.chip .wtxt { color: var(--warn); font-weight: 700; }
+.chip .x { border: 0; background: #ddd; border-radius: 3px; padding: 0 6px; font-weight: 700; }
+.chip .num { background: var(--blue); color: #fff; border-radius: 3px; padding: 0 4px; font-weight: 700; font-size: 14px; }
+.chip.incomplete { border-style: dashed; }
+#cost { font-weight: 700; margin-left: auto; white-space: nowrap; }
+#commit { background: var(--blue); color: #fff; border: 0; border-radius: 6px; padding: 8px 16px; font-weight: 700; font-size: 16px; }
+#commit:disabled { background: #999; }
+#skip { background: #333; color: #fff; border: 0; border-radius: 6px; padding: 8px 14px; font-weight: 700; margin-left: auto; }
+
+/* hand */
+#hand { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; flex: none; }
+.card { flex: none; width: 112px; min-height: 112px; text-align: left; background: #fff; border: 2px solid #777; border-radius: 6px; padding: 4px 6px; display: flex; flex-direction: column; gap: 2px; position: relative; }
+.card.basic { background: #f2f2f2; border-style: dashed; }
+.card .nm { font-weight: 700; font-size: 15px; display: flex; justify-content: space-between; }
+.card .cost { background: #222; color: #fff; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex: none; }
+.card .meta { font-size: 14px; color: var(--mute); }
+.card .fx { font-size: 14px; line-height: 1.2; }
+.card .foot { margin-top: auto; display: flex; align-items: flex-end; gap: 5px; font-size: 14px; }
+.card .cnt { margin-left: auto; font-weight: 700; font-size: 14px; }
+.card.sel { border-color: var(--blue); box-shadow: inset 0 0 0 2px var(--blue); }
+.card:disabled { opacity: .42; cursor: default; }
+.card.sel:disabled { opacity: 1; }
+.mini { display: grid; grid-template-columns: repeat(3, 10px); grid-template-rows: repeat(3, 10px); gap: 1px; flex: none; }
+.mini i { background: #e2e2e2; border: 1px solid #bbb; }
+.mini i.can { background: #c9c9c9; }
+.mini i.ex { background: #333; border-color: #333; }
+.mini i.fr { border-bottom: 2px solid #555; }
+
+/* panels */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; overflow: auto; }
+.panel h3 { margin: 4px 0 6px; font-size: 15px; }
+.panel h3.b { color: var(--blue); } .panel h3.r { color: var(--red); }
+table.dl { border-collapse: collapse; width: 100%; font-size: 14px; margin-bottom: 10px; }
+table.dl th, table.dl td { padding: 2px 3px; text-align: right; border-bottom: 1px solid #d6d6d6; }
+table.dl th:first-child, table.dl td:first-child { text-align: left; }
+table.dl td.zero { color: #999; }
+.passive { font-size: 14px; margin: 0 0 6px; }
+#log { font-size: 14px; }
+#log .rh { font-weight: 700; margin-top: 6px; }
+#log .ln { padding: 1px 0; }
+#log .ln.you { color: var(--blue); } #log .ln.him { color: var(--red); }
+#log .ln.end { font-weight: 800; color: #000; }
+
+.overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); display: flex; align-items: flex-start; justify-content: center; z-index: 10;
+  padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#endov { align-items: center; }
+.overlay .sheet { background: var(--panel); border-radius: 8px; width: 100%; max-width: 520px; max-height: calc(100% - 10px); display: flex; flex-direction: column; overflow: hidden; }
+.sheet .head { display: flex; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--line); font-weight: 700; }
+.sheet .head button { margin-left: auto; }
+.sheet .body { overflow: auto; padding: 8px 10px; }
+#endov .sheet { padding: 20px; align-items: center; gap: 14px; text-align: center; }
+#endov .res { font-size: 26px; font-weight: 800; }
+#endov .row { display: flex; gap: 10px; }
+
+/* desktop */
+@media (min-width: 1000px) {
+  :root { --tile-size: 72px; }
+  #leftcol, #rightcol { display: flex; flex-direction: column; width: 360px; flex: none; padding: 8px 0; min-height: 0; }
+  #leftcol { margin-right: 12px; } #rightcol { margin-left: 12px; }
+  #leftcol .panel, #rightcol .panel { flex: 1; }
+  #center { max-width: 700px; }
+  #btnLog, #btnDecks { display: none; }
+  .card { width: 122px; }
+}
+@media (min-width: 1000px) and (max-height: 760px) { :root { --tile-size: 62px; } .card { min-height: 112px; } }
+@media (max-width: 380px) { :root { --tile-size: 54px; } .card { width: 106px; } }
+@media (max-width: 999px) and (max-height: 730px) { :root { --tile-size: 50px; } }
+
+</style>
+<div id="start">
+  <h1>Duel: Grid</h1>
+  <div class="pick"><h2>You play</h2><div class="opts" id="pickMe"></div></div>
+  <div class="pick"><h2>He plays</h2><div class="opts" id="pickOp"></div></div>
+  <button class="big" id="btnStart">Start</button>
+</div>
+<div id="game" class="hidden">
+  <div id="bar">
+    <span class="round" id="roundLbl"></span>
+    <button id="btnDecks">Decks</button>
+    <button id="btnLog">Log</button>
+    <button id="btnNew">New match</button>
+  </div>
+  <div id="cols">
+    <div id="leftcol"><div class="panel" id="decksDesk"></div></div>
+    <div id="center">
+      <div class="side op"><div class="grid" id="gridOp"></div><div class="stats r" id="statsOp"></div></div>
+      <div id="midline"></div>
+      <div class="side me"><div class="grid" id="gridMe"></div><div class="stats b" id="statsMe"></div></div>
+      <div class="lanes"><span>left</span><span>centre</span><span>right</span></div>
+      <div id="tray"></div>
+      <div id="hand"></div>
+    </div>
+    <div id="rightcol"><div class="panel" id="logDesk"></div></div>
+  </div>
+</div>
+<div class="overlay hidden" id="decksOv"><div class="sheet"><div class="head">Deck lists<button class="small" data-close="decksOv">Close</button></div><div class="body" id="decksPhone"></div></div></div>
+<div class="overlay hidden" id="logOv"><div class="sheet"><div class="head">Log<button class="small" data-close="logOv">Close</button></div><div class="body" id="logPhone"></div></div></div>
+<div class="overlay hidden" id="endov"><div class="sheet"><div class="res" id="endRes"></div><div class="row"><button class="big" data-act="rematch">Rematch</button><button class="big" data-act="new">New match</button></div><button class="small" id="btnEndLog">See the board and log</button></div></div>
+<script>
+"use strict";
+(() => {
+// ---- engine.js
+// Duel: Grid. Pure rules engine: state in, state out. No DOM, no globals, no Math.random.
+// Tiles of one hero's area: t = col * 3 + row. col 0 front, 1 middle, 2 back. row 0, 1, 2 are the three lanes.
+
+const HEROES = {
+  Heavy: { hp: 26, regen: 3, passive: 'Unstoppable', passiveText: 'Damage of 2 or less never cancels your cards.' },
+  Quick: { hp: 34, regen: 4, passive: 'Light feet', passiveText: 'Your first Fast action each round costs 1 less.' },
+};
+
+const MANA_CAP = 10;
+const BASICS = ['Jab', 'Block'];
+
+// kind: light | heavy | defence | setup
+const CARDS = {
+  Jab:      { cost: 1, speed: 'fast',   kind: 'light',   dmg: 2,  melee: true,  basic: true, text: '2 dmg to one front tile' },
+  Block:    { cost: 1, speed: 'fast',   kind: 'defence', guard: 'block', basic: true, text: 'Guard: stops the first Light hit' },
+  Slash:    { cost: 2, speed: 'normal', kind: 'light',   dmg: 4,  melee: true,  text: '4 dmg to the whole front column' },
+  Lunge:    { cost: 3, speed: 'fast',   kind: 'light',   dmg: 4,  melee: true,  text: '4 dmg to one whole lane' },
+  Flurry:   { cost: 3, speed: 'normal', kind: 'light',   dmg: 2,  melee: true,  hits: 2, text: '2 dmg to each of two front tiles' },
+  Smash:    { cost: 4, speed: 'slow',   kind: 'heavy',   dmg: 8,  melee: true,  text: '8 dmg to any 2x2 block' },
+  Haymaker: { cost: 6, speed: 'slow',   kind: 'heavy',   dmg: 12, melee: true,  text: '12 dmg to his front and middle columns' },
+  Bolt:     { cost: 2, speed: 'normal', kind: 'light',   dmg: 3,  melee: false, text: '3 dmg to any one tile' },
+  Blast:    { cost: 5, speed: 'slow',   kind: 'heavy',   dmg: 7,  melee: false, text: '7 dmg to one whole lane' },
+  Parry:    { cost: 2, speed: 'fast',   kind: 'defence', guard: 'parry', text: 'Guard: stops the first Light hit, attacker takes 3' },
+  Brace:    { cost: 2, speed: 'fast',   kind: 'defence', guard: 'brace', text: 'Guard: stops every Light hit' },
+  Meditate: { cost: 0, speed: 'slow',   kind: 'setup',   text: 'Gain 3 mana' },
+  Bandage:  { cost: 2, speed: 'slow',   kind: 'setup',   text: 'Heal 5' },
+  Sharpen:  { cost: 3, speed: 'slow',   kind: 'setup',   text: 'Your hits deal +1 for the match' },
+  Study:    { cost: 2, speed: 'normal', kind: 'setup',   text: 'Draw 2 cards' },
+};
+
+// Grid version decks: base lists with 1 Slash and 1 Flurry swapped for 2 Bolt, and 1 Smash for 1 Blast;
+// then Heavy swaps 1 Haymaker for 1 Slash, and Quick 1 Meditate for 1 Smash.
+const DECKS = {
+  Heavy: { Slash: 2, Lunge: 1, Flurry: 1, Bolt: 2, Smash: 2, Blast: 1, Haymaker: 2, Parry: 2, Brace: 2, Meditate: 1, Bandage: 2, Sharpen: 1, Study: 1 },
+  Quick: { Slash: 2, Lunge: 3, Flurry: 2, Bolt: 2, Smash: 2, Blast: 1, Parry: 3, Brace: 1, Meditate: 1, Bandage: 1, Sharpen: 1, Study: 1 },
+};
+const CARD_ORDER = ['Jab', 'Block', 'Slash', 'Lunge', 'Flurry', 'Bolt', 'Smash', 'Blast', 'Haymaker', 'Parry', 'Brace', 'Meditate', 'Bandage', 'Sharpen', 'Study'];
+
+const SPEEDS = ['fast', 'normal', 'slow'];
+const isAttack = (card) => CARDS[card].kind === 'light' || CARDS[card].kind === 'heavy';
+
+const colOf = (t) => (t / 3) | 0;
+const rowOf = (t) => t % 3;
+const tileOf = (col, row) => col * 3 + row;
+const maskOf = (tiles) => tiles.reduce((m, t) => m | (1 << t), 0);
+const tilesOf = (mask) => { const r = []; for (let t = 0; t < 9; t++) if ((mask >> t) & 1) r.push(t); return r; };
+const popcount = (m) => { let c = 0; while (m) { m &= m - 1; c++; } return c; };
+
+// Every legal target shape of each attack, as tile bitmasks on the enemy area.
+const S = (...tiles) => maskOf(tiles);
+const SHAPES = {
+  Jab:      [S(0), S(1), S(2)],
+  Slash:    [S(0, 1, 2)],
+  Lunge:    [S(0, 3, 6), S(1, 4, 7), S(2, 5, 8)],
+  Flurry:   [S(0, 1), S(0, 2), S(1, 2)],
+  Smash:    [S(0, 1, 3, 4), S(1, 2, 4, 5), S(3, 4, 6, 7), S(4, 5, 7, 8)],
+  Haymaker: [S(0, 1, 2, 3, 4, 5)],
+  Bolt:     [S(0), S(1), S(2), S(3), S(4), S(5), S(6), S(7), S(8)],
+  Blast:    [S(0, 3, 6), S(1, 4, 7), S(2, 5, 8)],
+};
+
+const NEIGHBOURS = [];
+for (let t = 0; t < 9; t++) {
+  const c = colOf(t), r = rowOf(t), n = [];
+  if (c > 0) n.push(tileOf(c - 1, r));
+  if (c < 2) n.push(tileOf(c + 1, r));
+  if (r > 0) n.push(tileOf(c, r - 1));
+  if (r < 2) n.push(tileOf(c, r + 1));
+  NEIGHBOURS.push(n);
+}
+const START_TILE = tileOf(1, 1);
+
+// ---------- seeded random ----------
+// mulberry32; the state is a uint32 carried in an object so callers can thread it.
+function makeRng(seed) {
+  let a = seed >>> 0;
+  const next = () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  next.state = () => a;
+  return next;
+}
+function shuffle(arr, rng) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = (rng() * (i + 1)) | 0;
+    const x = arr[i]; arr[i] = arr[j]; arr[j] = x;
+  }
+  return arr;
+}
+function deckList(hero) {
+  const out = [];
+  for (const c of CARD_ORDER) for (let i = 0; i < (DECKS[hero][c] || 0); i++) out.push(c);
+  return out;
+}
+
+// ---------- state ----------
+function newPlayer(hero, rng) {
+  const deck = shuffle(deckList(hero), rng);
+  const hand = deck.splice(0, 4);
+  return { hero, hp: HEROES[hero].hp, maxHp: HEROES[hero].hp, regen: HEROES[hero].regen, mana: MANA_CAP,
+    deck, hand, discard: [], known: [], sharpen: 0, pos: START_TILE, fatigue: 0 };
+}
+
+function newMatch(hero0, hero1, seed) {
+  const rng = makeRng(seed);
+  const p = [newPlayer(hero0, rng), newPlayer(hero1, rng)];
+  return { round: 0, over: false, winner: null, p };
+}
+
+function clonePlayer(q) {
+  return { hero: q.hero, hp: q.hp, maxHp: q.maxHp, regen: q.regen, mana: q.mana, deck: q.deck.slice(), hand: q.hand.slice(),
+    discard: q.discard.slice(), known: q.known.slice(), sharpen: q.sharpen, pos: q.pos, fatigue: q.fatigue };
+}
+function cloneState(s) {
+  return { round: s.round, over: s.over, winner: s.winner, p: [clonePlayer(s.p[0]), clonePlayer(s.p[1])] };
+}
+
+function removeOne(arr, x) { const i = arr.indexOf(x); if (i >= 0) { arr.splice(i, 1); return true; } return false; }
+function drawCards(q, n) { for (let i = 0; i < n && q.deck.length; i++) q.hand.push(q.deck.shift()); }
+
+// Start of a round: both regain mana and draw 1. A hero with an empty deck takes fatigue instead: 1, then 2, then 3...
+// s.fatigueTaken records what each hero took this round (0 if he drew).
+function startRound(state) {
+  const s = cloneState(state);
+  s.round++;
+  s.fatigueTaken = [0, 0];
+  s.p.forEach((q, side) => {
+    q.mana = Math.min(MANA_CAP, q.mana + q.regen);
+    if (q.deck.length) drawCards(q, 1);
+    else { q.fatigue++; q.hp -= q.fatigue; s.fatigueTaken[side] = q.fatigue; }
+  });
+  const dead0 = s.p[0].hp <= 0, dead1 = s.p[1].hp <= 0;
+  if (dead0 || dead1) { s.over = true; s.winner = dead0 && dead1 ? 'draw' : dead0 ? 1 : 0; }
+  return s;
+}
+
+// ---------- choices ----------
+// choice = { actions: [{ card, tiles }], step: null | destination tile }.  tiles is a bitmask (0 for non-attacks).
+function choiceCost(hero, actions) {
+  let cost = 0, discounted = hero !== 'Quick';
+  for (const a of actions) {
+    let c = CARDS[a.card].cost;
+    if (!discounted && CARDS[a.card].speed === 'fast') { c = Math.max(0, c - 1); discounted = true; }
+    cost += c;
+  }
+  return cost;
+}
+
+// Returns null when legal, else a reason.
+function checkChoice(state, side, choice) {
+  const q = state.p[side];
+  if (!choice || !Array.isArray(choice.actions)) return 'no choice';
+  if (choice.actions.length > 2) return 'more than 2 actions';
+  const hand = q.hand.slice();
+  const usedBasic = {};
+  for (const a of choice.actions) {
+    const C = CARDS[a.card];
+    if (!C) return 'unknown card ' + a.card;
+    if (C.basic) { if (usedBasic[a.card]) return a.card + ' used twice'; usedBasic[a.card] = true; }
+    else if (!removeOne(hand, a.card)) return a.card + ' not in hand';
+    if (isAttack(a.card)) { if (!SHAPES[a.card].includes(a.tiles)) return 'illegal target for ' + a.card; }
+    else if (a.tiles) return a.card + ' takes no target';
+  }
+  if (choiceCost(q.hero, choice.actions) > q.mana) return 'not enough mana';
+  if (choice.step != null && !NEIGHBOURS[q.pos].includes(choice.step)) return 'illegal step';
+  return null;
+}
+
+// Where the attacker stands when an action of this speed resolves.
+function posAtSpeed(pos, step, speed) { return speed === 'fast' || step == null ? pos : step; }
+
+// ---------- resolution ----------
+function snap(s) {
+  return s.p.map((q) => ({ hp: q.hp, mana: q.mana, pos: q.pos, sharpen: q.sharpen, hand: q.hand.length, deck: q.deck.length }));
+}
+
+// resolveRound(state, [choice0, choice1], { log }) -> { state, events }
+// Order: reveal and pay, Fast, both steps, Normal, Slow. Within a step everything is simultaneous.
+function resolveRound(state, choices, opts) {
+  const log = !opts || opts.log !== false;
+  const s = cloneState(state);
+  const ev = log ? [] : null;
+  const round = s.round;
+  for (let side = 0; side < 2; side++) {
+    const err = checkChoice(s, side, choices[side]);
+    if (err) throw new Error('illegal choice for side ' + side + ': ' + err);
+  }
+  const startPos = [s.p[0].pos, s.p[1].pos];
+  const acts = [[], []];
+  for (let side = 0; side < 2; side++) {
+    const q = s.p[side], ch = choices[side];
+    const cost = choiceCost(q.hero, ch.actions);
+    q.mana -= cost;
+    for (const a of ch.actions) {
+      const C = CARDS[a.card];
+      if (!C.basic) { removeOne(q.hand, a.card); removeOne(q.known, a.card); }
+      acts[side].push({ card: a.card, tiles: a.tiles || 0, speed: C.speed, status: 'pending' });
+    }
+    if (ev) ev.push({ k: 'reveal', round, side, actions: ch.actions.map((a) => ({ card: a.card, tiles: a.tiles || 0 })), step: ch.step == null ? null : ch.step, from: q.pos, cost });
+  }
+  if (ev) ev.push({ k: 'phase', round, ph: 'reveal', snap: snap(s) });
+  const guards = [[], []];
+
+  const finish = (side, a) => { a.status = 'done'; if (!CARDS[a.card].basic) s.p[side].discard.push(a.card); };
+
+  for (const ph of ['fast', 'step', 'normal', 'slow']) {
+    if (ph === 'step') {
+      for (let side = 0; side < 2; side++) {
+        const st = choices[side].step;
+        if (st != null) {
+          if (ev) ev.push({ k: 'step', round, ph, side, from: s.p[side].pos, to: st });
+          s.p[side].pos = st;
+        }
+      }
+      if (ev) ev.push({ k: 'phase', round, ph, snap: snap(s) });
+      continue;
+    }
+    const dmg = [0, 0], attackHits = [[], []], heal = [0, 0], sharpenAdd = [0, 0], meditate = [0, 0], draw = [0, 0];
+    // guards go up first, so they meet attacks of the same step
+    for (let side = 0; side < 2; side++) for (const a of acts[side]) {
+      if (a.speed !== ph || a.status !== 'pending' || CARDS[a.card].kind !== 'defence') continue;
+      guards[side].push({ type: CARDS[a.card].guard, card: a.card, used: false });
+      finish(side, a);
+      if (ev) ev.push({ k: 'guard', round, ph, side, card: a.card });
+    }
+    // attacks, each attacker's in the order played
+    for (let side = 0; side < 2; side++) {
+      const P = s.p[side], D = s.p[1 - side], d = 1 - side;
+      for (const a of acts[side]) {
+        if (a.speed !== ph || a.status !== 'pending' || !isAttack(a.card)) continue;
+        const C = CARDS[a.card];
+        finish(side, a);
+        if (C.melee && colOf(P.pos) !== 0) {
+          if (ev) ev.push({ k: 'attack', round, ph, side, card: a.card, tiles: a.tiles, outcome: 'nothing', at: D.pos, from: P.pos });
+          continue;
+        }
+        const hitMasks = C.hits === 2 ? tilesOf(a.tiles).map((t) => 1 << t) : [a.tiles];
+        let result = null;
+        for (const m of hitMasks) {
+          if (!((m >> D.pos) & 1)) continue;
+          if (C.kind === 'light') {
+            const g = guards[d].find((x) => !x.used);
+            if (g) {
+              if (g.type !== 'brace') g.used = true;
+              if (g.type === 'parry') dmg[side] += 3;
+              result = { outcome: 'blocked', guard: g.card, reflect: g.type === 'parry' ? 3 : 0 };
+              continue;
+            }
+          }
+          const amount = C.dmg + P.sharpen;
+          dmg[d] += amount;
+          attackHits[d].push(amount);
+          result = { outcome: 'hit', amount };
+        }
+        if (!result) result = { outcome: 'miss', reason: ((a.tiles >> startPos[d]) & 1) ? 'moved' : 'never' };
+        if (ev) ev.push({ k: 'attack', round, ph, side, card: a.card, tiles: a.tiles, at: D.pos, from: P.pos, startAt: startPos[d], ...result });
+      }
+    }
+    // setup cards of this step
+    for (let side = 0; side < 2; side++) for (const a of acts[side]) {
+      if (a.speed !== ph || a.status !== 'pending') continue;
+      finish(side, a);
+      if (a.card === 'Study') draw[side] += 2;
+      else if (a.card === 'Meditate') meditate[side] += 3;
+      else if (a.card === 'Bandage') heal[side] += 5;
+      else if (a.card === 'Sharpen') sharpenAdd[side] += 1;
+    }
+    // apply everything of the step together: damage, then healing for a hero still standing
+    for (let side = 0; side < 2; side++) {
+      const q = s.p[side];
+      q.hp -= dmg[side];
+      if (heal[side] && q.hp > 0) {
+        const before = q.hp;
+        q.hp = Math.min(q.maxHp, q.hp + heal[side]);
+        if (ev) ev.push({ k: 'setup', round, ph, side, card: 'Bandage', value: q.hp - before });
+      } else if (heal[side] && ev) ev.push({ k: 'setup', round, ph, side, card: 'Bandage', value: 0 });
+      if (meditate[side]) {
+        const before = q.mana;
+        q.mana = Math.min(MANA_CAP, q.mana + meditate[side]);
+        if (ev) ev.push({ k: 'setup', round, ph, side, card: 'Meditate', value: q.mana - before });
+      }
+      if (draw[side]) {
+        const before = q.hand.length;
+        drawCards(q, draw[side]);
+        if (ev) ev.push({ k: 'setup', round, ph, side, card: 'Study', value: q.hand.length - before });
+      }
+      if (sharpenAdd[side]) {
+        q.sharpen += sharpenAdd[side];
+        if (ev) ev.push({ k: 'setup', round, ph, side, card: 'Sharpen', value: q.sharpen });
+      }
+    }
+    // cancelling: damage from an attack cancels this hero's unresolved Slow cards (only later steps are affected)
+    if (ph !== 'slow') {
+      for (let side = 0; side < 2; side++) {
+        const q = s.p[side];
+        const cancels = attackHits[side].some((x) => x > 0 && !(q.hero === 'Heavy' && x <= 2));
+        if (!cancels) continue;
+        for (const a of acts[side]) {
+          if (a.speed !== 'slow' || a.status !== 'pending') continue;
+          a.status = 'cancelled';
+          q.hand.push(a.card); q.known.push(a.card);
+          if (ev) ev.push({ k: 'cancel', round, ph, side, card: a.card });
+        }
+      }
+    }
+    if (ev) ev.push({ k: 'phase', round, ph, snap: snap(s) });
+    const dead0 = s.p[0].hp <= 0, dead1 = s.p[1].hp <= 0;
+    if (dead0 || dead1) {
+      s.over = true;
+      s.winner = dead0 && dead1 ? 'draw' : dead0 ? 1 : 0;
+      // anything still pending never resolves; played cards are spent
+      for (let side = 0; side < 2; side++) for (const a of acts[side]) if (a.status === 'pending') finish(side, a);
+      if (ev) ev.push({ k: 'end', round, ph, winner: s.winner });
+      break;
+    }
+  }
+  return { state: s, events: ev };
+}
+
+// ---------- full legal choice enumeration (used by the random player and by tests) ----------
+function actionSets(q) {
+  const opts = BASICS.slice();
+  for (const c of q.hand) if (!opts.includes(c)) opts.push(c);
+  const sets = [[]];
+  for (let i = 0; i < opts.length; i++) {
+    sets.push([opts[i]]);
+    for (let j = i; j < opts.length; j++) {
+      if (i === j && (CARDS[opts[i]].basic || q.hand.filter((x) => x === opts[i]).length < 2)) continue;
+      sets.push([opts[i], opts[j]]);
+    }
+  }
+  return sets.filter((set) => choiceCost(q.hero, set.map((card) => ({ card }))) <= q.mana);
+}
+
+function allLegalChoices(state, side) {
+  const q = state.p[side];
+  const steps = [null, ...NEIGHBOURS[q.pos]];
+  const out = [];
+  for (const set of actionSets(q)) {
+    let combos = [[]];
+    for (const card of set) {
+      const masks = isAttack(card) ? SHAPES[card] : [0];
+      const next = [];
+      for (const c of combos) for (const m of masks) next.push([...c, { card, tiles: m }]);
+      combos = next;
+    }
+    for (const actions of combos) for (const step of steps) out.push({ actions, step });
+  }
+  return out;
+}
+
+// ---- bot.js
+// Duel: Grid. The bot. It sees only public information: it builds a public view first and works from that alone.
+
+const BOT_PARAMS = { samples: 8, botCap: 44, oppCap: 30, iterations: 400, minProb: 0.02, eps: 0.15 };
+
+// What a hero at `side` may know. The opponent's hand and both deck orders are gone.
+function publicView(state, side) {
+  const me = state.p[side], op = state.p[1 - side];
+  return {
+    round: state.round, side,
+    me: { hero: me.hero, hp: me.hp, maxHp: me.maxHp, regen: me.regen, mana: me.mana, sharpen: me.sharpen, pos: me.pos, fatigue: me.fatigue,
+      hand: me.hand.slice(), deckCards: me.deck.slice().sort(), discard: me.discard.slice(), known: me.known.slice() },
+    op: { hero: op.hero, hp: op.hp, maxHp: op.maxHp, regen: op.regen, mana: op.mana, sharpen: op.sharpen, pos: op.pos, fatigue: op.fatigue,
+      handCount: op.hand.length, deckCount: op.deck.length, discard: op.discard.slice(), known: op.known.slice() },
+  };
+}
+
+// The cards of a hero's list not yet seen (not played for good, not known to be in hand).
+function unseenCards(hero, discard, known) {
+  const left = { ...DECKS[hero] };
+  for (const c of discard) left[c]--;
+  for (const c of known) left[c]--;
+  const out = [];
+  for (const c of CARD_ORDER) for (let i = 0; i < (left[c] || 0); i++) out.push(c);
+  return out;
+}
+
+// One full state consistent with the view: the opponent's unknown hand and both decks drawn at random.
+function sampleState(view, rng) {
+  const unseen = shuffle(unseenCards(view.op.hero, view.op.discard, view.op.known), rng);
+  const unknownHand = view.op.handCount - view.op.known.length;
+  const opHand = view.op.known.concat(unseen.slice(0, unknownHand));
+  const opDeck = unseen.slice(unknownHand);
+  const me = { hero: view.me.hero, hp: view.me.hp, maxHp: view.me.maxHp, regen: view.me.regen, mana: view.me.mana, deck: shuffle(view.me.deckCards.slice(), rng),
+    hand: view.me.hand.slice(), discard: view.me.discard.slice(), known: view.me.known.slice(), sharpen: view.me.sharpen, pos: view.me.pos, fatigue: view.me.fatigue };
+  const op = { hero: view.op.hero, hp: view.op.hp, maxHp: view.op.maxHp, regen: view.op.regen, mana: view.op.mana, deck: opDeck,
+    hand: opHand, discard: view.op.discard.slice(), known: view.op.known.slice(), sharpen: view.op.sharpen, pos: view.op.pos, fatigue: view.op.fatigue };
+  const p = view.side === 0 ? [me, op] : [op, me];
+  return { round: view.round, over: false, winner: null, p };
+}
+
+// ---------- evaluation ----------
+const OFFENCE = [1, 0.55, 0];      // being able to use melee next round, by column
+const EXPOSURE = [1, 0.6, 0.15];   // how much of the enemy's damage can reach you, by column
+const EVAL = { hpScale: 14, mana: 0.35, hand: 1, sharpen: 2.2, offence: 1.2, trailOffence: 0.25, exposure: 0.9, room: 0.15, fatigue: 1 };
+const HAND_VALUE = Array.from({ length: 31 }, (_, n) => 3.2 * (1 - Math.pow(0.72, n)));
+function evaluate(s, side) {
+  if (s.over) {
+    if (s.winner === 'draw') return 0;
+    return s.winner === side ? 1000 + s.p[side].hp : -1000 - s.p[1 - side].hp;
+  }
+  const a = s.p[side], b = s.p[1 - side];
+  const W = EVAL;
+  const diff = a.hp - b.hp;
+  // health first; with hpScale set, a curve that makes the trailing hero take risks and the leader avoid them
+  let v = W.hpScale ? W.hpScale * Math.tanh(diff / W.hpScale) : diff;
+  // mana that would overflow the cap at the next regain is worth nothing; extra cards in a big hand are worth less
+  v += W.mana * (Math.min(a.mana, MANA_CAP - a.regen) - Math.min(b.mana, MANA_CAP - b.regen));
+  v += W.hand * (HAND_VALUE[Math.min(a.hand.length, 30)] - HAND_VALUE[Math.min(b.hand.length, 30)]);
+  v += W.sharpen * (a.sharpen - b.sharpen);
+  // position: reach for the next round's melee, weighted up for whoever is behind on health
+  const offA = W.offence + W.trailOffence * Math.max(0, -diff), offB = W.offence + W.trailOffence * Math.max(0, diff);
+  v += offA * OFFENCE[colOf(a.pos)] - offB * OFFENCE[colOf(b.pos)];
+  v -= W.exposure * (EXPOSURE[colOf(a.pos)] - EXPOSURE[colOf(b.pos)]);
+  v += W.room * (NEIGHBOURS[a.pos].length - NEIGHBOURS[b.pos].length);
+  // fatigue: the damage an empty deck will deal at the start of the next round
+  v += W.fatigue * ((b.deck.length ? 0 : b.fatigue + 1) - (a.deck.length ? 0 : a.fatigue + 1));
+  return v;
+}
+
+// ---------- candidate choices ----------
+// Attacks in a canonical order: guards Parry, Block, Brace; attacks weakest first (so a guard eats the smaller hit).
+const GUARD_RANK = { Parry: 0, Block: 1, Brace: 2 };
+function canonicalOrder(actions) {
+  return actions.slice().sort((x, y) => {
+    const cx = CARDS[x.card], cy = CARDS[y.card];
+    if (cx.kind === 'defence' && cy.kind === 'defence') return GUARD_RANK[x.card] - GUARD_RANK[y.card];
+    if (isAttack(x.card) && isAttack(y.card)) return cx.dmg * (cx.hits || 1) - cy.dmg * (cy.hits || 1);
+    return 0;
+  });
+}
+
+// Target options for one attack: shapes that can hit a tile the enemy may stand on, deduplicated and undominated.
+function targetOptions(card, speed, enemyPos) {
+  if (speed === 'fast') {
+    const m = SHAPES[card].find((x) => (x >> enemyPos) & 1);
+    return m === undefined ? [] : [m];
+  }
+  let E = 1 << enemyPos;
+  for (const n of NEIGHBOURS[enemyPos]) E |= 1 << n;
+  const byCover = new Map();
+  for (const m of SHAPES[card]) { const c = m & E; if (c && !byCover.has(c)) byCover.set(c, m); }
+  const covers = [...byCover.keys()];
+  const out = [];
+  for (const c of covers) if (!covers.some((o) => o !== c && (o & c) === c)) out.push(byCover.get(c));
+  return out;
+}
+
+function quickScore(q, enemy, choice) {
+  let v = 0;
+  let E = 1 << enemy.pos; for (const n of NEIGHBOURS[enemy.pos]) E |= 1 << n;
+  const nE = popcount(E);
+  for (const a of choice.actions) {
+    const C = CARDS[a.card];
+    v -= 0.35 * C.cost + (C.basic ? 0 : 0.9);
+    if (isAttack(a.card)) {
+      const per = C.dmg + q.sharpen;
+      const cover = C.speed === 'fast' ? 1 : popcount(a.tiles & E) / nE;
+      let d = per * cover * (C.hits === 2 && C.speed !== 'fast' ? 1 : 1);
+      if (C.kind === 'light') d *= 0.85;
+      if (C.speed === 'slow') d *= 0.75;
+      v += d;
+    } else if (C.kind === 'defence') v += a.card === 'Parry' ? 2.6 : a.card === 'Brace' ? 2.2 : 1.3;
+    else if (a.card === 'Meditate') v += 0.35 * Math.min(3, MANA_CAP - q.mana);
+    else if (a.card === 'Bandage') v += 0.9 * Math.min(5, q.maxHp - q.hp);
+    else if (a.card === 'Sharpen') v += 3.2;
+    else if (a.card === 'Study') v += 2.2;
+  }
+  const dest = choice.step == null ? q.pos : choice.step;
+  v += 1.2 * OFFENCE[colOf(dest)] - 0.9 * EXPOSURE[colOf(dest)];
+  return v;
+}
+
+// Candidate choices for `side` in a full state, pruned of waste, capped with diversity across steps.
+function candidates(s, side, cap) {
+  const q = s.p[side], enemy = s.p[1 - side];
+  const steps = [null, ...NEIGHBOURS[q.pos]];
+  const all = [];
+  for (const set of actionSets(q)) {
+    // waste: healing at full health, studying an empty deck, meditating into a full pool, two copies of one guard
+    if (set.includes('Bandage') && q.hp >= q.maxHp) continue;
+    if (set.includes('Study') && q.deck.length === 0) continue;
+    if (set.includes('Meditate')) {
+      const paid = q.mana - choiceCost(q.hero, set.map((card) => ({ card })));
+      if (Math.min(MANA_CAP, paid + 3 + q.regen) <= Math.min(MANA_CAP, paid + q.regen)) continue;
+    }
+    if (set.length === 2 && CARDS[set[0]].kind === 'defence' && CARDS[set[1]].kind === 'defence' && (set[0] === 'Brace' || set[1] === 'Brace')) continue;
+    for (const step of steps) {
+      let combos = [[]], ok = true;
+      for (const card of set) {
+        const C = CARDS[card];
+        if (!isAttack(card)) { combos = combos.map((c) => [...c, { card, tiles: 0 }]); continue; }
+        if (C.melee && colOf(posAtSpeed(q.pos, step, C.speed)) !== 0) { ok = false; break; }
+        const opts = targetOptions(card, C.speed, enemy.pos);
+        if (!opts.length) { ok = false; break; }
+        const next = [];
+        for (const c of combos) for (const m of opts) next.push([...c, { card, tiles: m }]);
+        combos = next;
+      }
+      if (!ok) continue;
+      const seen = new Set();
+      for (const actions of combos) {
+        const ca = canonicalOrder(actions);
+        const key = ca.map((a) => a.card + a.tiles).sort().join('|');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        all.push({ choice: { actions: ca, step }, setKey: set.join('+'), step, score: 0 });
+      }
+    }
+  }
+  for (const c of all) c.score = quickScore(q, enemy, c.choice);
+  // keep the best per step destination, at most 3 targetings of one action set per step, always the empty set
+  const groups = new Map();
+  for (const c of all) { const k = String(c.step); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(c); }
+  const per = Math.max(3, Math.ceil(cap / groups.size));
+  const out = [];
+  for (const g of groups.values()) {
+    g.sort((x, y) => y.score - x.score);
+    const perSet = new Map();
+    let taken = 0;
+    for (const c of g) {
+      if (c.setKey === '') { out.push(c.choice); continue; }
+      const n = perSet.get(c.setKey) || 0;
+      if (n >= 3 || taken >= per) continue;
+      perSet.set(c.setKey, n + 1); taken++;
+      out.push(c.choice);
+    }
+  }
+  return out;
+}
+
+// ---------- solving the simultaneous round ----------
+function rmStrategy(R, out) {
+  let sum = 0;
+  for (let i = 0; i < R.length; i++) sum += R[i] > 0 ? R[i] : 0;
+  if (sum <= 0) { const u = 1 / R.length; for (let i = 0; i < R.length; i++) out[i] = u; }
+  else for (let i = 0; i < R.length; i++) out[i] = R[i] > 0 ? R[i] / sum : 0;
+  return out;
+}
+
+// Bayesian zero-sum game: the bot has one strategy; each sampled opponent hand plays its own. Regret matching+.
+// eps: weight of the uniform opponent in the bot's own payoff, so among equally safe options it prefers the one that
+// gains most against a player who errs (Jab into a guard that might not come).
+function solve(mats, nB, iterations, eps = 0) {
+  const S = mats.length;
+  const rowMean = new Float64Array(nB);
+  for (const m of mats) for (let i = 0; i < nB; i++) { let a = 0; for (let j = 0; j < m.nO; j++) a += m.A[i * m.nO + j]; rowMean[i] += a / m.nO / S; }
+  const Rb = new Float64Array(nB), x = new Float64Array(nB), avg = new Float64Array(nB), u = new Float64Array(nB);
+  const Ro = mats.map((m) => new Float64Array(m.nO)), y = mats.map((m) => new Float64Array(m.nO));
+  for (let t = 1; t <= iterations; t++) {
+    rmStrategy(Rb, x);
+    for (let s = 0; s < S; s++) rmStrategy(Ro[s], y[s]);
+    u.fill(0);
+    for (let s = 0; s < S; s++) {
+      const A = mats[s].A, nO = mats[s].nO, ys = y[s];
+      for (let i = 0; i < nB; i++) { let acc = 0; const row = i * nO; for (let j = 0; j < nO; j++) acc += A[row + j] * ys[j]; u[i] += acc / S; }
+    }
+    if (eps) for (let i = 0; i < nB; i++) u[i] = (1 - eps) * u[i] + eps * rowMean[i];
+    let ub = 0; for (let i = 0; i < nB; i++) ub += x[i] * u[i];
+    for (let i = 0; i < nB; i++) { Rb[i] = Math.max(0, Rb[i] + u[i] - ub); avg[i] += t * x[i]; }
+    for (let s = 0; s < S; s++) {
+      const A = mats[s].A, nO = mats[s].nO, R = Ro[s], ys = y[s];
+      const v = new Float64Array(nO);
+      for (let i = 0; i < nB; i++) { const xi = x[i]; if (!xi) continue; const row = i * nO; for (let j = 0; j < nO; j++) v[j] -= xi * A[row + j]; }
+      let vb = 0; for (let j = 0; j < nO; j++) vb += ys[j] * v[j];
+      for (let j = 0; j < nO; j++) R[j] = Math.max(0, R[j] + v[j] - vb);
+    }
+  }
+  let sum = 0; for (let i = 0; i < nB; i++) sum += avg[i];
+  for (let i = 0; i < nB; i++) avg[i] /= sum;
+  return avg;
+}
+
+// The bot's choice for `side`. It reads only publicView(state, side). rng: () => [0, 1).
+function botChoose(state, side, rng, params) {
+  const P = { ...BOT_PARAMS, ...(params || {}) };
+  const view = publicView(state, side);
+  const samples = [];
+  for (let i = 0; i < P.samples; i++) samples.push(sampleState(view, rng));
+  const mine = candidates(samples[0], side, P.botCap);   // the bot's own options do not depend on the sample
+  const mats = samples.map((s) => {
+    const theirs = candidates(s, 1 - side, P.oppCap);
+    const A = new Float64Array(mine.length * theirs.length);
+    for (let i = 0; i < mine.length; i++) for (let j = 0; j < theirs.length; j++) {
+      const ch = side === 0 ? [mine[i], theirs[j]] : [theirs[j], mine[i]];
+      A[i * theirs.length + j] = evaluate(resolveRound(s, ch, { log: false }).state, side);
+    }
+    return { A, nO: theirs.length };
+  });
+  const strat = solve(mats, mine.length, P.iterations, P.eps);
+  let total = 0;
+  for (let i = 0; i < strat.length; i++) { if (strat[i] < P.minProb) strat[i] = 0; total += strat[i]; }
+  let r = rng() * total, pick = 0;
+  for (let i = 0; i < strat.length; i++) { r -= strat[i]; if (r <= 0 && strat[i] > 0) { pick = i; break; } pick = strat[i] > 0 ? i : pick; }
+  return { choice: mine[pick], strategy: strat, options: mine };
+}
+
+// ---------- reference opponents for the self-test ----------
+function randomChoose(state, side, rng) {
+  const all = allLegalChoices(state, side);
+  return all[(rng() * all.length) | 0];
+}
+
+// Stays in (or walks to) the front column and plays the highest-damage affordable attacks at the enemy's tile.
+function greedyChoose(state, side) {
+  const q = state.p[side], enemy = state.p[1 - side];
+  const step = colOf(q.pos) === 0 ? null : q.pos - 3;
+  let best = { actions: [], step }, bestDmg = 0;
+  for (const set of actionSets(q)) {
+    let dmg = 0; const actions = []; let ok = set.length > 0;
+    for (const card of set) {
+      const C = CARDS[card];
+      if (!isAttack(card)) { ok = false; break; }
+      if (C.melee && colOf(posAtSpeed(q.pos, step, C.speed)) !== 0) { ok = false; break; }
+      const m = SHAPES[card].find((x) => (x >> enemy.pos) & 1);
+      if (m === undefined) { ok = false; break; }
+      actions.push({ card, tiles: m });
+      dmg += C.dmg;
+    }
+    if (ok && dmg > bestDmg) { bestDmg = dmg; best = { actions: canonicalOrder(actions), step }; }
+  }
+  return best;
+}
+
+// ---- ui.js
+// Duel: Grid. The page. The player is side 0 (blue), the bot side 1 (red).
+// Uses the engine and the bot through their exported functions only.
+
+
+const ME = 0, OP = 1;
+const COLS = ['front', 'middle', 'back'];
+const LANES = ['left', 'centre', 'right'];
+const SPEED_NAME = { fast: 'Fast', normal: 'Normal', slow: 'Slow' };
+const KIND_NAME = { light: 'Light', heavy: 'Heavy', defence: 'Defence', setup: 'Setup' };
+const BEAT_MS = /[?#&]fast\b/.test(location.href) ? 30 : 700;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const tileName = (t) => `${COLS[colOf(t)]}-${LANES[rowOf(t)]}`;
+
+const app = {
+  settings: { me: 'Heavy', op: 'Quick' },
+  state: null, mode: 'start',
+  sel: null, botChoice: null, botTimer: null,
+  log: [], play: null, rng: null, errors: [],
+};
+window.__duel = app;   // for the automated page check
+app.render = () => render();
+
+// ---------------------------------------------------------------- describing things
+function describeTarget(card, mask) {
+  if (mask == null) return 'tap his area';
+  const ts = tilesOf(mask);
+  switch (card) {
+    case 'Jab': case 'Bolt': return tileName(ts[0]);
+    case 'Slash': return 'his front column';
+    case 'Haymaker': return 'his front + middle';
+    case 'Lunge': return `${LANES[rowOf(ts[0])]} lane`;
+    case 'Blast': return `${LANES[rowOf(ts[0])]} lane`;
+    case 'Flurry': return ts.map(tileName).join(' + ');
+    case 'Smash': { const rows = [...new Set(ts.map(rowOf))], cols = [...new Set(ts.map(colOf))]; return `${cols.map((c) => COLS[c]).join('+')}, ${rows.map((r) => LANES[r]).join('+')}`; }
+  }
+  return '';
+}
+function stepWord(from, to) {
+  if (to == null) return null;
+  const dc = colOf(to) - colOf(from), dr = rowOf(to) - rowOf(from);
+  return dc < 0 ? 'forward' : dc > 0 ? 'back' : dr < 0 ? 'left' : 'right';
+}
+const who = (side) => (side === ME ? 'you' : 'he');
+const whose = (side) => (side === ME ? 'your' : 'his');
+const whom = (side) => (side === ME ? 'you' : 'him');
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function actionText(a) {
+  return isAttack(a.card) ? `${a.card} (${describeTarget(a.card, a.tiles)})` : a.card;
+}
+
+function eventText(e) {
+  const P = SPEED_NAME[e.ph] ? SPEED_NAME[e.ph] + ': ' : '';
+  const s = e.side;
+  switch (e.k) {
+    case 'reveal': {
+      const acts = e.actions.length ? e.actions.map(actionText).join(', ') : 'no actions';
+      const st = e.step == null ? 'no step' : `step ${stepWord(e.from, e.step)}`;
+      return `${s === ME ? 'You play' : 'He plays'} ${acts}; ${st}. Mana spent: ${e.cost}.`;
+    }
+    case 'guard': return `${P}${who(s)} raise${s === ME ? '' : 's'} ${e.card}.`;
+    case 'step': return `${cap(who(s))} step${s === ME ? '' : 's'} ${stepWord(e.from, e.to)} to ${tileName(e.to)}.`;
+    case 'attack': {
+      const d = 1 - s;
+      if (e.outcome === 'hit') return `${P}${whose(s)} ${e.card} hits ${whom(d)} on ${tileName(e.at)} for ${e.amount}.`;
+      if (e.outcome === 'blocked') return `${P}${whose(s)} ${e.card} is stopped by ${whose(d)} ${e.guard}${e.reflect ? `; ${who(s)} take${s === ME ? '' : 's'} ${e.reflect}` : ''}.`;
+      if (e.outcome === 'nothing') return `${P}${whose(s)} ${e.card} does nothing: ${who(s)} ${s === ME ? 'are' : 'is'} not in ${whose(s)} front column.`;
+      if (e.reason === 'moved') return `${P}${whose(s)} ${e.card} misses: ${who(d)} stepped from ${tileName(e.startAt)} to ${tileName(e.at)}.`;
+      return `${P}${whose(s)} ${e.card} misses: ${who(d)} ${d === ME ? 'are' : 'is'} on ${tileName(e.at)}.`;
+    }
+    case 'setup': {
+      if (e.card === 'Meditate') return `${P}${who(s)} meditate${s === ME ? '' : 's'}: +${e.value} mana.`;
+      if (e.card === 'Bandage') return `${P}${who(s)} bandage${s === ME ? '' : 's'}: +${e.value} health.`;
+      if (e.card === 'Study') return `${P}${who(s)} stud${s === ME ? 'y' : 'ies'}: ${e.value} card${e.value === 1 ? '' : 's'} drawn.`;
+      if (e.card === 'Sharpen') return `${P}${who(s)} sharpen${s === ME ? '' : 's'}: ${whose(s)} hits now deal +${e.value}.`;
+      return '';
+    }
+    case 'cancel': return `${P}${whose(s)} ${e.card} is cancelled and returns to ${whose(s)} hand.`;
+    case 'end': return e.winner === 'draw' ? 'Both fall in the same step: draw.' : e.winner === ME ? 'He falls. You win.' : 'You fall. He wins.';
+  }
+  return '';
+}
+const capFirst = (t) => (/^(Fast|Normal|Slow): /.test(t) ? t : t.charAt(0).toUpperCase() + t.slice(1));
+
+// ---------------------------------------------------------------- start screen
+function heroOpt(h, cls, on) {
+  const H = HEROES[h];
+  return `<button class="opt ${cls}${on ? ' on' : ''}" data-hero="${h}" data-for="${cls}"><b>${h}</b>Health ${H.hp}, +${H.regen} mana a round<br>${H.passive}: ${H.passiveText}</button>`;
+}
+function renderStart() {
+  $('pickMe').innerHTML = ['Heavy', 'Quick'].map((h) => heroOpt(h, 'me', app.settings.me === h)).join('');
+  $('pickOp').innerHTML = ['Heavy', 'Quick'].map((h) => heroOpt(h, 'op', app.settings.op === h)).join('');
+}
+
+function showScreen(name) {
+  $('start').classList.toggle('hidden', name !== 'start');
+  $('game').classList.toggle('hidden', name === 'start');
+}
+
+// ---------------------------------------------------------------- match flow
+function newGame() {
+  clearTimers();
+  const seed = (Date.now() ^ (Math.random() * 4294967296)) >>> 0;
+  app.rng = makeRng(seed ^ 0x9e3779b9);
+  app.state = newMatch(app.settings.me, app.settings.op, seed);
+  app.log = [];
+  app.play = null;
+  $('endov').classList.add('hidden');
+  showScreen('game');
+  beginRound();
+}
+
+function goStart() {
+  clearTimers(); app.play = null; app.mode = 'start'; $('endov').classList.add('hidden'); renderStart(); showScreen('start');
+}
+
+function clearTimers() {
+  if (app.botTimer) clearTimeout(app.botTimer);
+  if (app.play && app.play.timer) clearTimeout(app.play.timer);
+  app.botTimer = null;
+}
+
+function beginRound() {
+  app.state = startRound(app.state);
+  app.sel = { actions: [], step: null, active: null };
+  app.botChoice = null;
+  app.log.push({ rh: true, text: `Round ${app.state.round}` });
+  app.state.fatigueTaken.forEach((n, side) => {
+    if (n) app.log.push({ side, text: side === ME ? `Your deck is empty: you take ${n}.` : `His deck is empty: he takes ${n}.` });
+  });
+  if (app.state.over) {
+    const w = app.state.winner;
+    app.log.push({ end: true, text: w === 'draw' ? 'Both fall to fatigue: draw.' : w === ME ? 'He falls. You win.' : 'You fall. He wins.' });
+    return showEnd();
+  }
+  app.mode = 'choose';
+  render();
+  // the bot decides now, from public information only, before the player has chosen anything
+  const st = app.state;
+  app.botTimer = setTimeout(() => { app.botTimer = null; if (app.state === st) app.botChoice = botChoose(st, OP, app.rng).choice; }, 40);
+}
+
+// ---------------------------------------------------------------- selection
+function selChoice() {
+  return { actions: app.sel.actions.map((a) => ({ card: a.card, tiles: isAttack(a.card) ? a.tiles : 0 })), step: app.sel.step };
+}
+function selCost(actions) { return choiceCost(app.state.p[ME].hero, actions.map((a) => ({ card: a.card }))); }
+
+function countSelected(card) { return app.sel.actions.filter((a) => a.card === card).length; }
+function countInHand(card) { return CARDS[card].basic ? 1 : app.state.p[ME].hand.filter((c) => c === card).length; }
+
+function canAdd(card) {
+  if (app.sel.actions.length >= 2) return false;
+  if (countSelected(card) >= countInHand(card)) return false;
+  return selCost([...app.sel.actions, { card }]) <= app.state.p[ME].mana;
+}
+
+function defaultTarget(card) {
+  const pos = app.state.p[OP].pos;
+  if (card === 'Flurry') return { tiles: null, partial: colOf(pos) === 0 ? 1 << pos : 0 };
+  const m = SHAPES[card].find((x) => (x >> pos) & 1);
+  return { tiles: m === undefined ? (SHAPES[card].length === 1 ? SHAPES[card][0] : null) : m, partial: 0 };
+}
+
+function addAction(card) {
+  if (!canAdd(card)) return;
+  const a = { card, tiles: 0, partial: 0 };
+  if (isAttack(card)) Object.assign(a, defaultTarget(card));
+  app.sel.actions.push(a);
+  app.sel.active = isAttack(card) ? app.sel.actions.length - 1 : app.sel.active;
+  render();
+}
+function removeAction(i) {
+  app.sel.actions.splice(i, 1);
+  if (app.sel.active === i) app.sel.active = null;
+  else if (app.sel.active > i) app.sel.active--;
+  if (app.sel.active == null) { const j = app.sel.actions.findIndex((a) => isAttack(a.card)); app.sel.active = j >= 0 ? j : null; }
+  render();
+}
+function tapEnemyTile(t) {
+  const i = app.sel.active;
+  if (i == null) return;
+  const a = app.sel.actions[i];
+  if (!a || !isAttack(a.card)) return;
+  if (a.card === 'Flurry') {
+    if (colOf(t) !== 0) return;
+    let m = a.tiles != null ? a.tiles : a.partial;
+    if ((m >> t) & 1) m &= ~(1 << t);
+    else if (popcount(m) >= 2) m = 1 << t;
+    else m |= 1 << t;
+    if (popcount(m) === 2) { a.tiles = m; a.partial = 0; } else { a.tiles = null; a.partial = m; }
+  } else {
+    const cands = SHAPES[a.card].filter((m) => (m >> t) & 1);
+    if (!cands.length) return;
+    const k = cands.indexOf(a.tiles);
+    a.tiles = k >= 0 ? cands[(k + 1) % cands.length] : cands[0];
+  }
+  render();
+}
+function tapOwnTile(t) {
+  const pos = app.state.p[ME].pos;
+  if (t === pos || t === app.sel.step) app.sel.step = null;
+  else if (NEIGHBOURS[pos].includes(t)) app.sel.step = t;
+  render();
+}
+function meleeWarning(a) {
+  const C = CARDS[a.card];
+  if (!isAttack(a.card) || !C.melee) return false;
+  return colOf(posAtSpeed(app.state.p[ME].pos, app.sel.step, C.speed)) !== 0;
+}
+function commitReady() {
+  if (app.mode !== 'choose') return false;
+  if (app.sel.actions.some((a) => isAttack(a.card) && a.tiles == null)) return false;
+  return checkChoice(app.state, ME, selChoice()) === null;
+}
+
+function commit() {
+  if (!commitReady()) return;
+  if (app.botTimer) { clearTimeout(app.botTimer); app.botTimer = null; }
+  if (!app.botChoice) app.botChoice = botChoose(app.state, OP, app.rng).choice;
+  const mine = { actions: canonicalOrder(selChoice().actions), step: app.sel.step };
+  const before = app.state;
+  const res = resolveRound(before, [mine, app.botChoice]);
+  startPlayback(before, res);
+}
+
+// ---------------------------------------------------------------- playback
+function snapOf(s) { return s.p.map((q) => ({ hp: q.hp, mana: q.mana, pos: q.pos, sharpen: q.sharpen, hand: q.hand.length, deck: q.deck.length })); }
+
+function buildBeats(events) {
+  const beats = [];
+  for (const e of events) {
+    if (e.k === 'phase') { if (beats.length) beats[beats.length - 1].snaps.push(e.snap); continue; }
+    const last = beats[beats.length - 1];
+    if (last && (e.k === 'reveal' || e.k === 'step') && last.events[0].k === e.k) { last.events.push(e); continue; }
+    beats.push({ events: [e], snaps: [] });
+  }
+  return beats;
+}
+
+function startPlayback(before, res) {
+  app.mode = 'play';
+  app.play = { before, res, beats: buildBeats(res.events), i: -1, timer: null, snap: snapOf(before), marks: [{}, {}], targets: null, ghosts: [null, null], guards: [[], []], caption: '' };
+  nextBeat();
+}
+
+function nextBeat() {
+  const pl = app.play;
+  if (!pl) return;
+  if (pl.timer) { clearTimeout(pl.timer); pl.timer = null; }
+  pl.i++;
+  if (pl.i >= pl.beats.length) return finishPlayback();
+  const b = pl.beats[pl.i];
+  pl.marks = [{}, {}];
+  pl.flash = [{}, {}];
+  const lines = [];
+  for (const e of b.events) {
+    const text = capFirst(eventText(e));
+    if (text) lines.push(text);
+    if (e.k === 'reveal') {
+      // show both choices on the board: each side's targets on the other's area, steps as ghosts
+      if (!pl.targets) pl.targets = [[], []];
+      pl.targets[1 - e.side] = e.actions.filter((a) => isAttack(a.card)).map((a) => a.tiles);
+      pl.ghosts[e.side] = e.step;
+    } else if (e.k === 'step') {
+      pl.ghosts[e.side] = null;
+    } else if (e.k === 'guard') {
+      pl.guards[e.side].push(e.card);
+    } else if (e.k === 'attack') {
+      const d = 1 - e.side;
+      for (const t of tilesOf(e.tiles)) pl.flash[d][t] = e.side === ME ? 'flash-b' : 'flash-r';
+      if (e.outcome === 'hit') pl.marks[d][e.at] = { cls: 'hit', text: `-${e.amount}` };
+      else if (e.outcome === 'blocked') { pl.marks[d][e.at] = { cls: '', text: 'blocked' }; if (e.reflect) pl.marks[e.side][e.from] = { cls: 'hit', text: `-${e.reflect}` }; }
+      else if (e.outcome === 'miss') pl.marks[d][e.at] = { cls: '', text: 'miss' };
+      else pl.marks[e.side][e.from] = { cls: '', text: 'no reach' };
+    } else if (e.k === 'setup') {
+      const txt = e.card === 'Meditate' ? `+${e.value} mana` : e.card === 'Bandage' ? `+${e.value}` : e.card === 'Study' ? `+${e.value} cards` : `sharpen ${e.value}`;
+      pl.marks[e.side][pl.snap[e.side].pos] = { cls: 'heal', text: txt };
+    } else if (e.k === 'cancel') {
+      pl.marks[e.side][pl.snap[e.side].pos] = { cls: '', text: 'cancelled' };
+    }
+    if (e.k !== 'reveal') pl.targets = e.k === 'attack' ? null : pl.targets;
+  }
+  for (const sn of b.snaps) pl.snap = sn;
+  pl.caption = lines.join(' ');
+  for (const t of lines) app.log.push({ text: t, side: b.events[0].side, end: b.events[0].k === 'end' });
+  render();
+  const dur = b.events[0].k === 'reveal' ? BEAT_MS * 2 : BEAT_MS;
+  pl.timer = setTimeout(nextBeat, dur);
+}
+
+function skipPlayback() {
+  const pl = app.play;
+  if (!pl) return;
+  while (pl.i < pl.beats.length - 1) {
+    pl.i++;
+    const b = pl.beats[pl.i];
+    for (const e of b.events) { const t = capFirst(eventText(e)); if (t) app.log.push({ text: t, side: e.side, end: e.k === 'end' }); }
+  }
+  finishPlayback();
+}
+
+function finishPlayback() {
+  const pl = app.play;
+  if (pl.timer) clearTimeout(pl.timer);
+  app.state = pl.res.state;
+  app.play = null;
+  if (app.state.over) return showEnd();
+  beginRound();
+}
+
+function showEnd() {
+  app.mode = 'over';
+  render();
+  const w = app.state.winner;
+  $('endRes').textContent = w === 'draw' ? 'Draw' : w === ME ? 'You win' : 'He wins';
+  $('endov').classList.remove('hidden');
+}
+
+// ---------------------------------------------------------------- rendering
+function view() {
+  if (app.play) return { snap: app.play.snap, play: app.play };
+  return { snap: snapOf(app.state), play: null };
+}
+
+function renderGrid(side) {
+  const v = view(), pl = v.play;
+  const pos = v.snap[side].pos;
+  const order = side === OP ? [2, 1, 0] : [0, 1, 2];    // opponent's front is at the bottom, mine at the top
+  const choosing = app.mode === 'choose';
+  const active = choosing && app.sel.active != null ? app.sel.actions[app.sel.active] : null;
+  let html = '';
+  for (const c of order) for (let r = 0; r < 3; r++) {
+    const t = tileOf(c, r);
+    const cls = ['tile'];
+    if (c === 0) cls.push('front');
+    const badges = [];
+    let tok = '', mark = '';
+    if (pos === t) tok = `<div class="tok ${side === ME ? 'b' : 'r'}">${app.state.p[side].hero[0]}</div>`;
+    if (choosing && side === OP) {
+      app.sel.actions.forEach((a, i) => {
+        const m = a.tiles != null ? a.tiles : a.partial;
+        if (isAttack(a.card) && m && ((m >> t) & 1)) { cls.push(i === 0 ? 't1' : 't2'); badges.push(`<span class="badge b">${i + 1}</span>`); }
+      });
+      if (active && isAttack(active.card) && SHAPES[active.card].some((m) => (m >> t) & 1)) cls.push('aim');
+    }
+    if (choosing && side === ME) {
+      if (app.sel.step === t) tok = `<div class="tok ghost b">${app.state.p[ME].hero[0]}</div>`;
+      else if (NEIGHBOURS[app.state.p[ME].pos].includes(t)) cls.push('stepok');
+    }
+    if (pl) {
+      if (pl.targets) pl.targets[side].forEach((m, i) => {
+        if ((m >> t) & 1) { cls.push(side === ME ? (i === 0 ? 'r1' : 'r2') : (i === 0 ? 't1' : 't2')); badges.push(`<span class="badge ${side === ME ? 'r' : 'b'}">${i + 1}</span>`); }
+      });
+      if (pl.ghosts[side] === t && pos !== t) tok = `<div class="tok ghost ${side === ME ? 'b' : 'r'}">${app.state.p[side].hero[0]}</div>`;
+      if (pl.flash && pl.flash[side][t]) cls.push(pl.flash[side][t]);
+      const mk = pl.marks[side][t];
+      if (mk) mark = `<div class="mark ${mk.cls}"><span>${esc(mk.text)}</span></div>`;
+    }
+    html += `<button class="${cls.join(' ')}" data-area="${side}" data-t="${t}" aria-label="${tileName(t)}"><div class="badges">${badges.join('')}</div>${tok}${mark}</button>`;
+  }
+  return html;
+}
+
+function renderStats(side) {
+  const v = view(), sn = v.snap[side], q = app.state.p[side];
+  const color = side === ME ? 'b' : 'r';
+  const pct = Math.max(0, sn.hp) / q.maxHp * 100;
+  const guards = v.play ? v.play.guards[side] : [];
+  const known = side === OP && q.known.length ? `<div class="known">Known in hand: ${q.known.join(', ')}</div>` : '';
+  return `<div class="who ${color}">${side === ME ? 'You' : 'He'}: ${q.hero}</div>
+    <div>Health <b>${sn.hp}</b>/${q.maxHp}</div><div class="hpbar"><i style="width:${pct}%;background:var(--${side === ME ? 'blue' : 'red'})"></i></div>
+    <div>Mana <b>${sn.mana}</b>/10 <span class="known">+${q.regen}/round</span></div>
+    <div>Hand <b>${sn.hand}</b> &middot; Deck <b>${sn.deck}</b>${sn.deck === 0 ? ` &middot; <span class="fat">fatigue next ${q.fatigue + 1}</span>` : ''}</div>
+    <div>Sharpen <b>+${sn.sharpen}</b></div>
+    ${guards.length ? `<div class="guard">Guard: ${guards.join(', ')}</div>` : ''}${known}`;
+}
+
+function miniDiagram(card) {
+  if (!isAttack(card)) return '';
+  const shapes = SHAPES[card];
+  const union = shapes.reduce((a, b) => a | b, 0);
+  const pick = { Jab: shapes[1], Bolt: shapes[4], Lunge: shapes[1], Blast: shapes[1], Flurry: shapes[0], Smash: shapes[0] }[card] ?? shapes[0];
+  let h = '<div class="mini">';
+  for (const c of [2, 1, 0]) for (let r = 0; r < 3; r++) {
+    const t = tileOf(c, r);
+    const cls = ((pick >> t) & 1) ? 'ex' : ((union >> t) & 1) ? 'can' : '';
+    h += `<i class="${cls}${c === 0 ? ' fr' : ''}"></i>`;
+  }
+  return h + '</div>';
+}
+
+function cardHtml(card, n, selected, enabled) {
+  const C = CARDS[card];
+  const reach = isAttack(card) ? (C.melee ? 'Melee' : 'Ranged') : '';
+  let cost = C.cost;
+  return `<button class="card${C.basic ? ' basic' : ''}${selected ? ' sel' : ''}" data-card="${card}" ${enabled ? '' : 'disabled'}>
+    <div class="nm"><span>${card}</span><span class="cost">${cost}</span></div>
+    <div class="meta">${SPEED_NAME[C.speed]} &middot; ${KIND_NAME[C.kind]}${C.basic ? ' &middot; basic' : ''}</div>
+    <div class="fx">${esc(C.text)}</div>
+    <div class="foot">${miniDiagram(card)}<span>${reach}</span><span class="cnt">${!C.basic && n > 1 ? `x${n}` : ''}</span></div></button>`;
+}
+
+function renderHand() {
+  const q = app.state.p[ME];
+  const choosing = app.mode === 'choose';
+  const counts = {};
+  for (const c of q.hand) counts[c] = (counts[c] || 0) + 1;
+  const list = [...BASICS, ...CARD_ORDER.filter((c) => counts[c])];
+  return list.map((c) => {
+    const sel = choosing && countSelected(c) > 0;
+    const full = sel && countSelected(c) >= countInHand(c);
+    const enabled = choosing && (canAdd(c) || full);
+    return cardHtml(c, counts[c] || 1, sel, enabled);
+  }).join('');
+}
+
+function renderTray() {
+  if (app.mode === 'play') return `<span>${app.play ? 'Revealing' : ''}</span><button id="skip">Skip</button>`;
+  if (app.mode === 'over') return `<button class="big" data-act="rematch">Rematch</button><button class="small" data-act="new">New match</button>`;
+  if (app.mode !== 'choose') return '';
+  const q = app.state.p[ME];
+  const chips = app.sel.actions.map((a, i) => {
+    const warn = meleeWarning(a);
+    const incomplete = isAttack(a.card) && a.tiles == null;
+    const tgt = isAttack(a.card) ? ` &rarr; ${esc(describeTarget(a.card, a.tiles))}` : '';
+    return `<span class="chip${app.sel.active === i ? ' active' : ''}${warn ? ' warn' : ''}${incomplete ? ' incomplete' : ''}" data-chip="${i}">
+      <span class="num">${i + 1}</span><span>${a.card}${tgt}${warn ? ` <span class="wtxt">does nothing: not in front</span>` : ''}</span>
+      <button class="x" data-remove="${i}" aria-label="remove">&times;</button></span>`;
+  });
+  if (app.sel.step != null) chips.push(`<span class="chip" data-stepchip="1"><span>Step ${stepWord(q.pos, app.sel.step)}</span><button class="x" data-clearstep="1" aria-label="remove">&times;</button></span>`);
+  const cost = selCost(app.sel.actions);
+  return chips.join('') + `<span id="cost">Cost ${cost}/${q.mana}</span><button id="commit" ${commitReady() ? '' : 'disabled'}>Commit</button>`;
+}
+
+function deckTable(side) {
+  const q = app.state.p[side];
+  const list = DECKS[q.hero];
+  const played = {}, known = {}, inHand = {};
+  for (const c of q.discard) played[c] = (played[c] || 0) + 1;
+  for (const c of q.known) known[c] = (known[c] || 0) + 1;
+  for (const c of q.hand) inHand[c] = (inHand[c] || 0) + 1;
+  const td = (n) => `<td class="${n ? '' : 'zero'}">${n}</td>`;
+  let rows = '';
+  for (const c of CARD_ORDER) {
+    if (!list[c]) continue;
+    const pl = played[c] || 0;
+    if (side === ME) rows += `<tr><td>${c}</td><td>${CARDS[c].cost}</td>${td(list[c])}${td(pl)}${td(inHand[c] || 0)}${td(list[c] - pl - (inHand[c] || 0))}</tr>`;
+    else rows += `<tr><td>${c}</td><td>${CARDS[c].cost}</td>${td(list[c])}${td(pl)}${td(known[c] || 0)}${td(list[c] - pl - (known[c] || 0))}</tr>`;
+  }
+  const head = side === ME ? '<th>Card</th><th>Cost</th><th>Copies</th><th>Played</th><th>In hand</th><th>In deck</th>'
+    : '<th>Card</th><th>Cost</th><th>Copies</th><th>Played</th><th>Known</th><th>Unseen</th>';
+  const H = HEROES[q.hero];
+  return `<h3 class="${side === ME ? 'b' : 'r'}">${side === ME ? 'Your' : 'His'} deck: ${q.hero}</h3>
+    <p class="passive">${H.passive}: ${H.passiveText}</p>
+    <table class="dl"><tr>${head}</tr>${rows}</table>`;
+}
+function renderDecks() { return deckTable(OP) + deckTable(ME); }
+
+function renderLog() {
+  return app.log.map((l) => l.rh ? `<div class="rh">${esc(l.text)}</div>`
+    : `<div class="ln${l.end ? ' end' : l.side === ME ? ' you' : l.side === OP ? ' him' : ''}">${esc(l.text)}</div>`).join('');
+}
+
+function render() {
+  if (!app.state) return;
+  $('roundLbl').textContent = `Round ${app.state.round}`;
+  $('gridOp').innerHTML = renderGrid(OP);
+  $('gridMe').innerHTML = renderGrid(ME);
+  $('statsOp').innerHTML = renderStats(OP);
+  $('statsMe').innerHTML = renderStats(ME);
+  const mid = $('midline');
+  mid.textContent = app.play ? app.play.caption : app.mode === 'over' ? (app.state.winner === 'draw' ? 'Draw.' : app.state.winner === ME ? 'You win.' : 'He wins.') : '';
+  mid.classList.toggle('playing', !!app.play);
+  $('tray').innerHTML = renderTray();
+  $('hand').innerHTML = renderHand();
+  const decks = renderDecks(), log = renderLog();
+  for (const id of ['decksDesk', 'decksPhone']) $(id).innerHTML = decks;
+  for (const id of ['logDesk', 'logPhone']) {
+    const el = $(id);
+    const atEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
+    el.innerHTML = id === 'logDesk' ? '<h3>Log</h3><div id="log">' + log + '</div>' : '<div id="log2">' + log + '</div>';
+    if (atEnd || app.play) el.scrollTop = el.scrollHeight;
+  }
+  const lp = $('logOv').querySelector('.body'); if (lp) lp.scrollTop = lp.scrollHeight;
+}
+
+// ---------------------------------------------------------------- input
+document.addEventListener('click', (ev) => {
+  const el = ev.target.closest('button, [data-chip], #midline, .grid');
+  if (!el) return;
+  try { onClick(el, ev); } catch (err) { app.errors.push(String(err && err.stack || err)); throw err; }
+});
+
+function onClick(el, ev) {
+  if (el.dataset.close) { $(el.dataset.close).classList.add('hidden'); return; }
+  if (el.dataset.act === 'rematch') { newGame(); return; }
+  if (el.dataset.act === 'new') { goStart(); return; }
+  if (el.dataset.hero) { app.settings[el.dataset.for] = el.dataset.hero; renderStart(); return; }
+  switch (el.id) {
+    case 'btnStart': newGame(); return;
+    case 'btnNew': goStart(); return;
+    case 'btnDecks': $('decksOv').classList.remove('hidden'); return;
+    case 'btnLog': case 'btnEndLog':
+      $('endov').classList.add('hidden');
+      if (el.id === 'btnLog' || window.innerWidth < 1000) { $('logOv').classList.remove('hidden'); const b = $('logPhone'); b.scrollTop = b.scrollHeight; }
+      return;
+    case 'commit': commit(); return;
+    case 'skip': skipPlayback(); return;
+  }
+  if (app.mode === 'play') {
+    // a tap anywhere on the board or the centre line moves the reveal on
+    if (el.id === 'midline' || el.classList.contains('tile') || el.classList.contains('grid')) nextBeat();
+    return;
+  }
+  if (app.mode !== 'choose') return;
+  if (el.dataset.remove != null) { ev.stopPropagation(); removeAction(+el.dataset.remove); return; }
+  if (el.dataset.clearstep) { app.sel.step = null; render(); return; }
+  if (el.dataset.chip != null) { const i = +el.dataset.chip; if (isAttack(app.sel.actions[i].card)) { app.sel.active = i; render(); } return; }
+  if (el.dataset.card) {
+    const c = el.dataset.card;
+    if (canAdd(c)) addAction(c);
+    else if (countSelected(c)) { let k = -1; app.sel.actions.forEach((a, i) => { if (a.card === c) k = i; }); removeAction(k); }
+    return;
+  }
+  if (el.dataset.t != null) {
+    const t = +el.dataset.t, side = +el.dataset.area;
+    if (side === OP) tapEnemyTile(t); else tapOwnTile(t);
+  }
+}
+
+// a mouse wheel scrolls the hand sideways
+document.getElementById('hand').addEventListener('wheel', (ev) => {
+  const h = ev.currentTarget;
+  if (Math.abs(ev.deltaY) > Math.abs(ev.deltaX) && h.scrollWidth > h.clientWidth) { h.scrollLeft += ev.deltaY; ev.preventDefault(); }
+}, { passive: false });
+
+window.addEventListener('error', (e) => app.errors.push(String(e.message)));
+renderStart();
+
+})();
+</script>
