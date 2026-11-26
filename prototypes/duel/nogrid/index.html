@@ -1,0 +1,1230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hidden and Open Duel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #d6d6d6; --panel: #f3f3f3; --card: #ffffff; --ink: #111; --mute: #4a4a4a; --line: #8a8a8a;
+  --blue: #1a56b8; --blue-bg: #dde8fb; --red: #b0241b; --red-bg: #fbe1de; --dis: #bdbdbd;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); }
+body { font: 15px/1.3 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; overflow: hidden; }
+button { font: inherit; color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 8px 12px; cursor: pointer; min-height: 40px; }
+button:disabled { cursor: default; }
+button.primary { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 600; }
+button.primary:disabled { background: var(--dis); border-color: var(--dis); }
+
+/* start screen */
+body[data-screen="game"] #start, body[data-screen="start"] #game { display: none; }
+#start { max-width: 440px; margin: 0 auto; padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+#start h1 { margin: 0 0 18px; font-size: 26px; }
+.grp { margin-bottom: 14px; }
+.lbl { font-weight: 600; margin-bottom: 6px; }
+.seg { display: flex; gap: 8px; }
+.seg button { flex: 1; }
+.seg button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.heroes { color: var(--mute); font-size: 14px; }
+button.big { width: 100%; min-height: 52px; font-size: 18px; margin-top: 8px; }
+
+/* game: phone first */
+#game {
+  height: 100%; max-width: 600px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 6px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(60px, 1fr) auto auto auto;
+  grid-template-areas: "head" "opp" "arena" "log" "me" "hand" "ctrl";
+}
+#head { grid-area: head; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 6px; font-weight: 600; }
+#head .hbtn { display: flex; gap: 6px; }
+#head button { min-height: 36px; padding: 4px 10px; font-size: 14px; }
+.hero { border-radius: 8px; padding: 6px 10px; border: 2px solid; }
+#opp { grid-area: opp; background: var(--red-bg); border-color: var(--red); }
+#me { grid-area: me; background: var(--blue-bg); border-color: var(--blue); }
+.hrow { display: flex; align-items: baseline; gap: 12px; }
+.hname { font-weight: 700; flex: 1; }
+.opp .hname { color: var(--red); } .me .hname { color: var(--blue); }
+.hp b, .mana b { font-size: 20px; }
+.bar { height: 5px; background: rgba(0,0,0,.15); border-radius: 3px; margin: 3px 0 4px; overflow: hidden; }
+.bar i { display: block; height: 100%; }
+.opp .bar i { background: var(--red); } .me .bar i { background: var(--blue); }
+.hrow2 { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; align-items: center; }
+.chip { font-weight: 600; padding: 0 6px; border-radius: 4px; background: rgba(255,255,255,.75); border: 1px solid var(--line); }
+.chip.wind { border-color: var(--ink); }
+
+#arena { grid-area: arena; background: var(--panel); border-radius: 8px; padding: 6px 10px; font-size: 14px; }
+.steps { display: flex; gap: 6px; margin-bottom: 4px; color: var(--mute); }
+.steps span { padding: 0 6px; border-radius: 4px; }
+.steps span:first-child { padding-left: 0; font-weight: 600; color: var(--ink); }
+.steps span.on { background: var(--ink); color: #fff; }
+.steps span.past { text-decoration: line-through; }
+.acts { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 28px; }
+.who { width: 2.6em; font-weight: 700; }
+.acts.opp .who { color: var(--red); } .acts.me .who { color: var(--blue); }
+.act { padding: 2px 8px; border-radius: 4px; border: 1.5px solid var(--line); background: var(--card); font-weight: 600; }
+.act small { font-weight: 400; margin-left: 5px; font-size: 14px; color: var(--mute); }
+.act.done { background: #e6e6e6; }
+.act.cxl { text-decoration: line-through; color: var(--mute); }
+.acts.opp .act.pend { border-color: var(--red); } .acts.me .act.pend { border-color: var(--blue); }
+.none { color: var(--mute); }
+
+#log { grid-area: log; overflow-y: auto; contain: size; background: var(--card); border-radius: 8px; padding: 6px 10px; font-size: 14px; border: 1px solid #bbb; -webkit-overflow-scrolling: touch; }
+.ll { padding: 1px 0; }
+.ll.sep { font-weight: 700; margin-top: 6px; border-top: 1px solid #ddd; padding-top: 4px; }
+.ll.me { color: var(--blue); } .ll.opp { color: var(--red); } .ll.warn { font-weight: 600; }
+
+#hand { grid-area: hand; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; max-height: 40vh; overflow-y: auto; grid-auto-rows: max-content; }
+.card { text-align: left; display: flex; flex-direction: column; gap: 1px; padding: 5px 6px; min-height: 64px; background: var(--card); border: 2px solid var(--line); border-radius: 7px; }
+.card.basic { border-style: dashed; background: #f7f7f7; }
+.card.sel { border-color: var(--blue); background: var(--blue-bg); box-shadow: inset 0 0 0 1px var(--blue); }
+.card:disabled { color: #8c8c8c; border-color: #c7c7c7; background: #ececec; }
+.card:disabled .cs, .card:disabled .ce { color: #8c8c8c; }
+.ct { display: flex; justify-content: space-between; gap: 4px; width: 100%; }
+.cn { font-weight: 700; }
+.cc { font-weight: 700; min-width: 1.6em; text-align: center; border-radius: 10px; background: var(--ink); color: #fff; padding: 0 5px; }
+.card:disabled .cc { background: #9a9a9a; }
+.was { color: var(--mute); margin-left: auto; margin-right: 4px; font-size: 14px; }
+.card:disabled .was { color: #8c8c8c; }
+.ord { display: inline-block; background: var(--blue); color: #fff; border-radius: 8px; padding: 0 5px; font-size: 14px; }
+.cs { font-size: 14px; color: var(--mute); }
+.ce { font-size: 14px; }
+
+#ctrl { grid-area: ctrl; display: flex; gap: 8px; align-items: center; justify-content: flex-end; padding-bottom: max(8px, env(safe-area-inset-bottom)); min-height: 52px; }
+#ctrl .hint { flex: 1; color: var(--mute); }
+#ctrl #commit, #ctrl #endturn { min-width: 150px; min-height: 44px; }
+#ctrl .result { flex: 1; font-size: 20px; font-weight: 700; }
+.result.me { color: var(--blue); } .result.opp { color: var(--red); }
+.pulse { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+#decks { display: none; position: fixed; inset: 0; z-index: 10; background: var(--panel); overflow-y: auto; padding: max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+#decks.open { display: block; }
+.closer { float: right; }
+#decks h3 { margin: 6px 0 2px; font-size: 16px; }
+#decks h3.opp { color: var(--red); } #decks h3.me { color: var(--blue); }
+.passive { margin: 0 0 6px; font-size: 14px; color: var(--mute); }
+#decks table { border-collapse: collapse; width: 100%; font-size: 14px; margin-bottom: 10px; }
+#decks th, #decks td { border-bottom: 1px solid #ccc; padding: 3px 4px; text-align: right; }
+#decks th:first-child, #decks td:first-child, #decks th:nth-child(3), #decks td:nth-child(3) { text-align: left; }
+#decks th { font-weight: 600; vertical-align: bottom; }
+
+
+/* desktop: log left, game centre, deck lists right */
+@media (min-width: 1100px) {
+  #game {
+    max-width: 1500px; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+    grid-template-columns: 360px minmax(0, 1fr) 400px;
+    grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "head head head" "log opp decks" "log arena decks" "log me decks" "log hand decks" "log ctrl decks";
+    column-gap: 14px;
+  }
+  #showdecks { display: none; }
+  #decks, #decks.open { grid-area: decks; display: block; position: static; contain: size; margin-bottom: 10px; padding: 6px 12px; border-radius: 8px; overflow-y: auto; min-height: 0; }
+  .closer { display: none; }
+  #log { margin-bottom: 10px; }
+  #hand { grid-template-columns: repeat(4, minmax(0, 1fr)); max-height: none; align-content: start; }
+  .card { min-height: 78px; padding: 7px 9px; }
+}
+
+</style>
+</head>
+<body data-screen="start">
+<div id="start"></div>
+<div id="game">
+  <header id="head"><span id="title"></span><span class="hbtn"><button id="showdecks">Decks</button><button id="newmatch">New match</button></span></header>
+  <section id="opp" class="hero opp"></section>
+  <section id="arena"></section>
+  <section id="log"></section>
+  <section id="me" class="hero me"></section>
+  <section id="hand"></section>
+  <section id="ctrl"></section>
+  <aside id="decks"></aside>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// Rules engine for the Duel prototype, versions Hidden and Open (RULES.md).
+// Pure from the outside: every exported transition clones the state, changes the
+// clone and returns it. Randomness comes only from state.seed. Events (for the
+// log) are pushed into an optional array; the state never holds the log.
+
+const SPEEDS = ['Fast', 'Normal', 'Slow'];
+const BASICS = ['Jab', 'Block'];
+const MANA_CAP = 10;
+const ROUND_LIMIT = 60;
+
+const HEROES = {
+  Heavy: { hp: 31, regen: 3, passive: 'Unstoppable: damage of 2 or less never cancels his cards.' },
+  Quick: { hp: 28, regen: 4, passive: 'Light feet: his first Fast action each turn costs 1 less.' },
+};
+
+// kind: Light | Heavy | Defence | Setup
+const CARDS = {
+  Jab: { cost: 1, speed: 'Fast', kind: 'Light', dmg: 2, hits: 1, basic: true, text: '2 damage.' },
+  Block: { cost: 1, speed: 'Fast', kind: 'Defence', basic: true, text: 'Stops the first Light hit.' },
+  Slash: { cost: 2, speed: 'Normal', kind: 'Light', dmg: 4, hits: 1, text: '4 damage.' },
+  Lunge: { cost: 3, speed: 'Fast', kind: 'Light', dmg: 4, hits: 1, text: '4 damage.' },
+  Flurry: { cost: 3, speed: 'Normal', kind: 'Light', dmg: 2, hits: 2, text: 'Two hits of 2.' },
+  Smash: { cost: 4, speed: 'Slow', kind: 'Heavy', dmg: 8, hits: 1, text: '8 damage.' },
+  Haymaker: { cost: 6, speed: 'Slow', kind: 'Heavy', dmg: 12, hits: 1, text: '12 damage.' },
+  Parry: { cost: 2, speed: 'Fast', kind: 'Defence', text: 'Stops the first Light hit; attacker takes 3.' },
+  Brace: { cost: 2, speed: 'Fast', kind: 'Defence', text: 'Stops every Light hit.' },
+  Meditate: { cost: 0, speed: 'Slow', kind: 'Setup', text: 'Gain 3 mana.' },
+  Bandage: { cost: 2, speed: 'Slow', kind: 'Setup', text: 'Heal 5.' },
+  Sharpen: { cost: 3, speed: 'Slow', kind: 'Setup', text: 'All your hits deal 1 more, for good.' },
+  Study: { cost: 2, speed: 'Normal', kind: 'Setup', text: 'Draw 2 cards.' },
+};
+const KIND_LABEL = { Light: 'Light attack', Heavy: 'Heavy attack', Defence: 'Defence', Setup: 'Setup' };
+
+const DECKS = {
+  Heavy: { Slash: 2, Lunge: 1, Flurry: 2, Smash: 3, Haymaker: 3, Parry: 2, Brace: 2, Meditate: 1, Bandage: 2, Sharpen: 1, Study: 1 },
+  Quick: { Slash: 3, Lunge: 3, Flurry: 3, Smash: 2, Parry: 3, Brace: 1, Meditate: 2, Bandage: 1, Sharpen: 1, Study: 1 },
+};
+
+function isAttack(name) { const k = CARDS[name].kind; return k === 'Light' || k === 'Heavy'; }
+
+function deckList(hero) {
+  const out = [];
+  for (const [n, c] of Object.entries(DECKS[hero])) for (let i = 0; i < c; i++) out.push(n);
+  return out;
+}
+
+// ---------- randomness (mulberry32 on state.seed) ----------
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; }
+  return a;
+}
+
+// ---------- state ----------
+function newPlayer(hero) {
+  const h = HEROES[hero];
+  return {
+    hero, hp: h.hp, maxHp: h.hp, regen: h.regen, mana: MANA_CAP,
+    hand: [], deck: deckList(hero), discard: [], known: [],
+    guards: [], winding: [], committed: [], lastRound: [],
+    sharpen: 0, actions: 0, usedBasics: [], fastUsed: false, turns: 0,
+  };
+}
+function clonePlayer(p) {
+  return {
+    ...p, hand: p.hand.slice(), deck: p.deck.slice(), discard: p.discard.slice(), known: p.known.slice(),
+    guards: p.guards.map(g => ({ ...g })), winding: p.winding.slice(),
+    committed: p.committed.map(a => ({ ...a })), lastRound: p.lastRound,
+    usedBasics: p.usedBasics.slice(),
+  };
+}
+function clone(s) { return { ...s, p: [clonePlayer(s.p[0]), clonePlayer(s.p[1])] }; }
+
+function emit(s, ev, e) {
+  if (!ev) return;
+  e.round = s.round;
+  if (s.version === 'hidden' && s.stepIdx >= 0) e.step = SPEEDS[s.stepIdx];
+  ev.push(e);
+}
+
+function removeOne(arr, name) { const i = arr.indexOf(name); if (i >= 0) { arr.splice(i, 1); return true; } return false; }
+
+function mDraw(s, side, n) {
+  const p = s.p[side]; let drawn = 0;
+  for (let i = 0; i < n; i++) { if (!p.deck.length) break; p.hand.push(p.deck.shift()); drawn++; }
+  return drawn;
+}
+
+function checkWin(s, ev) {
+  if (s.winner !== null) return true;
+  const a = s.p[0].hp <= 0, b = s.p[1].hp <= 0;
+  if (!a && !b) return false;
+  s.winner = a && b ? 'draw' : a ? 1 : 0;
+  emit(s, ev, { t: 'end', winner: s.winner });
+  return true;
+}
+
+// Damage of one attack hit cancels the defender's unresolved Slow cards,
+// except damage of 2 or less against Heavy (Unstoppable).
+function hitCancels(defender, dmg) { return dmg > 0 && !(defender.hero === 'Heavy' && dmg <= 2); }
+
+// Cost of taking `names` in order, given whether a Fast action was already taken this turn.
+function seqCost(p, names, fastUsed = p.fastUsed) {
+  let total = 0, fast = fastUsed;
+  for (const n of names) {
+    let c = CARDS[n].cost;
+    if (CARDS[n].speed === 'Fast' && !fast) { fast = true; if (p.hero === 'Quick') c = Math.max(0, c - 1); }
+    total += c;
+  }
+  return total;
+}
+
+function countNames(arr) { const m = {}; for (const n of arr) m[n] = (m[n] || 0) + 1; return m; }
+
+function newMatch({ version, heroes, seed }) {
+  const s = {
+    version, seed: (seed >>> 0) || 1, round: 0, turnNo: 0, turn: 0, first: 0,
+    winner: null, stepIdx: -1, p: [newPlayer(heroes[0]), newPlayer(heroes[1])],
+  };
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  mDraw(s, 0, 4); mDraw(s, 1, 4);
+  if (version === 'open') {
+    s.first = rand(s) < 0.5 ? 0 : 1;
+    mDraw(s, 1 - s.first, 1);
+    s.turn = s.first;
+    mStartTurn(s, null);
+  } else {
+    mStartRound(s, null);
+  }
+  return s;
+}
+// Events of the opening (first round / first turn start), for the log.
+function openingEvents(s) {
+  const ev = [];
+  if (s.version === 'open') {
+    ev.push({ t: 'first', side: s.first, round: s.round });
+    ev.push({ t: 'turn', side: s.turn, n: s.turnNo, round: s.round });
+    ev.push({ t: 'start', side: s.turn, gain: 0, mana: s.p[s.turn].mana, drew: 1, round: s.round });
+  } else {
+    ev.push({ t: 'round', round: 1 });
+    for (const i of [0, 1]) ev.push({ t: 'start', side: i, gain: 0, mana: s.p[i].mana, drew: 1, round: 1 });
+  }
+  return ev;
+}
+
+// =====================================================================
+// Version 1: Hidden
+// =====================================================================
+
+function mStartRound(s, ev) {
+  s.round++;
+  emit(s, ev, { t: 'round' });
+  for (const i of [0, 1]) {
+    const p = s.p[i];
+    const before = p.mana;
+    p.mana = Math.min(MANA_CAP, p.mana + p.regen);
+    const drew = mDraw(s, i, 1);
+    p.guards = []; p.committed = []; p.fastUsed = false; p.actions = 0; p.usedBasics = [];
+    emit(s, ev, { t: 'start', side: i, gain: p.mana - before, mana: p.mana, drew });
+  }
+}
+
+function validSet(s, side, names) {
+  if (!Array.isArray(names) || names.length > 2) return false;
+  const p = s.p[side];
+  const need = {};
+  for (const n of names) {
+    if (!CARDS[n]) return false;
+    if (CARDS[n].basic) { if (need[n]) return false; need[n] = 1; continue; }
+    need[n] = (need[n] || 0) + 1;
+  }
+  const have = countNames(p.hand);
+  for (const n in need) if (!CARDS[n].basic && (have[n] || 0) < need[n]) return false;
+  return seqCost(p, names, false) <= p.mana;
+}
+
+function sameCat(a, b) {
+  const ka = CARDS[a].kind, kb = CARDS[b].kind;
+  return CARDS[a].speed === CARDS[b].speed && ((ka === 'Light' && kb === 'Light') || (ka === 'Defence' && kb === 'Defence'));
+}
+
+// Every legal choice for a round: nothing, one action, or two. Order is kept only
+// where it can change the outcome (two Light attacks or two guards of the same speed).
+function legalSets(s, side) {
+  const p = s.p[side];
+  const counts = countNames(p.hand);
+  const opts = Object.keys(counts).sort().concat(BASICS);
+  const res = [[]];
+  for (let i = 0; i < opts.length; i++) {
+    const a = opts[i];
+    if (!validSet(s, side, [a])) continue;
+    res.push([a]);
+    if (!CARDS[a].basic && counts[a] >= 2 && validSet(s, side, [a, a])) res.push([a, a]);
+    for (let j = i + 1; j < opts.length; j++) {
+      const b = opts[j];
+      if (!validSet(s, side, [a, b])) continue;
+      res.push([a, b]);
+      if (sameCat(a, b)) res.push([b, a]);
+    }
+  }
+  return res;
+}
+
+function mCommit(s, choices, ev) {
+  if (s.version !== 'hidden' || s.winner !== null || s.stepIdx >= 0) throw new Error('commit: not choosing');
+  for (const i of [0, 1]) if (!validSet(s, i, choices[i])) throw new Error('commit: illegal set for side ' + i + ': ' + JSON.stringify(choices[i]));
+  for (const i of [0, 1]) {
+    const p = s.p[i];
+    p.mana -= seqCost(p, choices[i], false);
+    for (const n of choices[i]) if (!CARDS[n].basic) { removeOne(p.hand, n); removeOne(p.known, n); }
+    p.committed = choices[i].map(n => ({ name: n, status: 'pending' }));
+    p.actions = choices[i].length;
+    emit(s, ev, { t: 'reveal', side: i, acts: choices[i].slice(), mana: p.mana });
+  }
+  s.stepIdx = 0;
+}
+
+function mResolveStep(s, ev) {
+  if (s.stepIdx < 0) throw new Error('resolveStep: nothing to resolve');
+  const speed = SPEEDS[s.stepIdx];
+  const acts = [0, 1].map(i => s.p[i].committed.filter(a => a.status === 'pending' && CARDS[a.name].speed === speed));
+  // 1. guards of this step go up first, so they face this step's attacks too
+  for (const i of [0, 1]) for (const a of acts[i]) if (CARDS[a.name].kind === 'Defence') {
+    s.p[i].guards.push({ type: a.name, used: false });
+    emit(s, ev, { t: 'guard', side: i, card: a.name });
+  }
+  // 2. all hits of the step, worked out against the state at the start of the step
+  const dmg = [0, 0], heal = [0, 0], cancelling = [false, false];
+  for (const i of [0, 1]) {
+    const att = s.p[i], j = 1 - i, def = s.p[j];
+    for (const a of acts[i]) {
+      const c = CARDS[a.name];
+      if (c.kind !== 'Light' && c.kind !== 'Heavy') continue;
+      for (let h = 0; h < c.hits; h++) {
+        const d = c.dmg + att.sharpen;
+        if (c.kind === 'Light') {
+          const g = def.guards.find(g => g.type === 'Brace' || !g.used);
+          if (g) {
+            if (g.type !== 'Brace') g.used = true;
+            emit(s, ev, { t: 'stop', side: j, guard: g.type, card: a.name, hit: h, hits: c.hits });
+            if (g.type === 'Parry') { dmg[i] += 3; emit(s, ev, { t: 'parry', side: j, dmg: 3 }); }
+            continue;
+          }
+        }
+        dmg[j] += d;
+        if (hitCancels(def, d)) cancelling[j] = true;
+        emit(s, ev, { t: 'hit', side: i, card: a.name, dmg: d, hit: h, hits: c.hits });
+      }
+    }
+  }
+  // 3. setups of this step
+  const mana = [0, 0], sharpen = [0, 0], draws = [0, 0];
+  for (const i of [0, 1]) for (const a of acts[i]) {
+    const n = a.name;
+    if (n === 'Meditate') mana[i] += 3;
+    else if (n === 'Bandage') heal[i] += 5;
+    else if (n === 'Sharpen') sharpen[i] += 1;
+    else if (n === 'Study') draws[i] += 2;
+  }
+  // 4. apply everything together
+  for (const i of [0, 1]) {
+    const p = s.p[i];
+    const hpBefore = p.hp;
+    p.hp = Math.min(p.maxHp, p.hp - dmg[i] + heal[i]);
+    if (heal[i]) emit(s, ev, { t: 'heal', side: i, amount: Math.max(0, Math.min(p.maxHp, hpBefore - dmg[i] + heal[i]) - (hpBefore - dmg[i])), hp: p.hp });
+    if (mana[i]) { const b = p.mana; p.mana = Math.min(MANA_CAP, p.mana + mana[i]); emit(s, ev, { t: 'meditate', side: i, amount: p.mana - b, mana: p.mana }); }
+    if (sharpen[i]) { p.sharpen += sharpen[i]; emit(s, ev, { t: 'sharpen', side: i, total: p.sharpen }); }
+    if (draws[i]) { const d = mDraw(s, i, draws[i]); emit(s, ev, { t: 'study', side: i, drew: d }); }
+    for (const a of acts[i]) a.status = 'done';
+  }
+  // 5. cancelling: only later steps are affected
+  for (const i of [0, 1]) if (cancelling[i]) {
+    const p = s.p[i];
+    for (const a of p.committed) if (a.status === 'pending' && CARDS[a.name].speed === 'Slow') {
+      a.status = 'cancelled';
+      p.hand.push(a.name); p.known.push(a.name);
+      emit(s, ev, { t: 'cancel', side: i, card: a.name });
+    }
+  }
+  const over = checkWin(s, ev);
+  s.stepIdx++;
+  if (over || s.stepIdx >= SPEEDS.length) mFinishRound(s, ev);
+}
+
+function mFinishRound(s, ev) {
+  for (const p of s.p) {
+    for (const a of p.committed) if (a.status !== 'cancelled' && !CARDS[a.name].basic) p.discard.push(a.name);
+    p.lastRound = p.committed;
+    p.committed = [];
+    p.guards = [];
+  }
+  s.stepIdx = -1;
+  if (s.winner === null) mStartRound(s, ev);
+}
+
+function commitRound(s, choices, ev) { const t = clone(s); mCommit(t, choices, ev); return t; }
+function resolveStep(s, ev) { const t = clone(s); mResolveStep(t, ev); return t; }
+function playRound(s, choices, ev) {
+  const t = clone(s); mCommit(t, choices, ev);
+  while (t.stepIdx >= 0) mResolveStep(t, ev);
+  return t;
+}
+// in-place variants for search (callers pass their own clone)
+function _playRoundInPlace(t, choices) { mCommit(t, choices, null); while (t.stepIdx >= 0) mResolveStep(t, null); return t; }
+
+// =====================================================================
+// Version 2: Open
+// =====================================================================
+
+function mStartTurn(s, ev) {
+  const side = s.turn, p = s.p[side];
+  s.turnNo++; s.round = s.turnNo; p.turns++;
+  emit(s, ev, { t: 'turn', side, n: s.turnNo });
+  p.guards = [];
+  while (p.winding.length && s.winner === null) {
+    const n = p.winding.shift();
+    emit(s, ev, { t: 'unwind', side, card: n });
+    mResolveOpen(s, side, n, ev);
+    p.discard.push(n);
+  }
+  if (s.winner !== null) return;
+  const before = p.mana;
+  p.mana = Math.min(MANA_CAP, p.mana + p.regen);
+  const drew = mDraw(s, side, 1);
+  p.actions = 0; p.usedBasics = []; p.fastUsed = false;
+  emit(s, ev, { t: 'start', side, gain: p.mana - before, mana: p.mana, drew });
+}
+
+function mResolveOpen(s, side, name, ev) {
+  const c = CARDS[name], p = s.p[side], o = s.p[1 - side];
+  if (c.kind === 'Light' || c.kind === 'Heavy') {
+    for (let h = 0; h < c.hits && s.winner === null; h++) {
+      const d = c.dmg + p.sharpen;
+      if (c.kind === 'Light') {
+        const g = o.guards.find(g => g.type === 'Brace' || !g.used);
+        if (g) {
+          if (g.type !== 'Brace') g.used = true;
+          emit(s, ev, { t: 'stop', side: 1 - side, guard: g.type, card: name, hit: h, hits: c.hits });
+          if (g.type === 'Parry') { p.hp -= 3; emit(s, ev, { t: 'parry', side: 1 - side, dmg: 3 }); checkWin(s, ev); }
+          continue;
+        }
+      }
+      o.hp -= d;
+      emit(s, ev, { t: 'hit', side, card: name, dmg: d, hit: h, hits: c.hits });
+      if (hitCancels(o, d) && o.winding.length) {
+        for (const w of o.winding) { o.hand.push(w); o.known.push(w); emit(s, ev, { t: 'cancel', side: 1 - side, card: w }); }
+        o.winding = [];
+      }
+      checkWin(s, ev);
+    }
+  } else if (c.kind === 'Defence') {
+    p.guards.push({ type: name, used: false });
+    emit(s, ev, { t: 'guard', side, card: name });
+  } else if (name === 'Meditate') {
+    const b = p.mana; p.mana = Math.min(MANA_CAP, p.mana + 3);
+    emit(s, ev, { t: 'meditate', side, amount: p.mana - b, mana: p.mana });
+  } else if (name === 'Bandage') {
+    const b = p.hp; p.hp = Math.min(p.maxHp, p.hp + 5);
+    emit(s, ev, { t: 'heal', side, amount: p.hp - b, hp: p.hp });
+  } else if (name === 'Sharpen') {
+    p.sharpen++; emit(s, ev, { t: 'sharpen', side, total: p.sharpen });
+  } else if (name === 'Study') {
+    const d = mDraw(s, side, 2); emit(s, ev, { t: 'study', side, drew: d });
+  }
+}
+
+function canPlay(s, name) {
+  if (s.version !== 'open' || s.winner !== null) return false;
+  const p = s.p[s.turn];
+  if (p.actions >= 2 || !CARDS[name]) return false;
+  if (CARDS[name].basic) { if (p.usedBasics.includes(name)) return false; }
+  else if (!p.hand.includes(name)) return false;
+  return seqCost(p, [name]) <= p.mana;
+}
+function openLegalActions(s) {
+  if (s.version !== 'open' || s.winner !== null) return [];
+  const p = s.p[s.turn];
+  if (p.actions >= 2) return [];
+  const opts = Object.keys(countNames(p.hand)).sort().concat(BASICS);
+  return opts.filter(n => canPlay(s, n));
+}
+
+function mPlay(s, name, ev) {
+  if (!canPlay(s, name)) throw new Error('playAction: illegal ' + name);
+  const side = s.turn, p = s.p[side], c = CARDS[name];
+  p.mana -= seqCost(p, [name]);
+  if (c.speed === 'Fast') p.fastUsed = true;
+  p.actions++;
+  if (c.basic) p.usedBasics.push(name); else { removeOne(p.hand, name); removeOne(p.known, name); }
+  emit(s, ev, { t: 'play', side, card: name, mana: p.mana });
+  if (c.speed === 'Slow') { p.winding.push(name); emit(s, ev, { t: 'wind', side, card: name }); return; }
+  mResolveOpen(s, side, name, ev);
+  if (!c.basic) p.discard.push(name);
+}
+function mEndTurn(s, ev) {
+  if (s.version !== 'open' || s.winner !== null) throw new Error('endTurn: match over');
+  s.turn = 1 - s.turn;
+  mStartTurn(s, ev);
+}
+
+function playAction(s, name, ev) { const t = clone(s); mPlay(t, name, ev); return t; }
+function endTurn(s, ev) { const t = clone(s); mEndTurn(t, ev); return t; }
+function _playInPlace(t, name) { mPlay(t, name, null); return t; }
+function _endTurnInPlace(t) { mEndTurn(t, null); return t; }
+
+// =====================================================================
+// Public information and invariants
+// =====================================================================
+
+// Cards of `side` that are face up: resolved, winding, or committed this round (not cancelled).
+function playedCards(s, side) {
+  const p = s.p[side];
+  const out = p.discard.concat(p.winding);
+  for (const a of p.committed) if (a.status !== 'cancelled' && !CARDS[a.name].basic) out.push(a.name);
+  return out;
+}
+
+// Per card of a list: total copies, played so far, known in hand, unseen.
+function deckSummary(s, side) {
+  const p = s.p[side];
+  const played = countNames(playedCards(s, side)), known = countNames(p.known);
+  const inHand = countNames(p.hand), inDeck = countNames(p.deck);
+  return Object.entries(DECKS[p.hero]).map(([name, total]) => ({
+    name, total, played: played[name] || 0, known: known[name] || 0,
+    unseen: total - (played[name] || 0) - (known[name] || 0),
+    inHand: inHand[name] || 0, inDeck: inDeck[name] || 0,
+  }));
+}
+
+function checkInvariants(s) {
+  const errs = [];
+  for (const i of [0, 1]) {
+    const p = s.p[i];
+    const tag = 'side ' + i + ': ';
+    if (!(p.hp <= p.maxHp)) errs.push(tag + 'hp above max ' + p.hp);
+    if (!Number.isInteger(p.mana) || p.mana < 0 || p.mana > MANA_CAP) errs.push(tag + 'mana out of range ' + p.mana);
+    if (p.actions > 2) errs.push(tag + 'more than 2 actions');
+    if (p.sharpen < 0) errs.push(tag + 'negative sharpen');
+    const all = countNames(p.hand.concat(p.deck, playedCards(s, i)));
+    const want = DECKS[p.hero];
+    for (const n of new Set(Object.keys(all).concat(Object.keys(want)))) if ((all[n] || 0) !== (want[n] || 0)) errs.push(tag + 'card count of ' + n + ' is ' + (all[n] || 0) + ', list has ' + (want[n] || 0));
+    const hand = countNames(p.hand), known = countNames(p.known);
+    for (const n in known) if ((hand[n] || 0) < known[n]) errs.push(tag + 'known card not in hand ' + n);
+    for (const g of p.guards) if (!['Block', 'Parry', 'Brace'].includes(g.type)) errs.push(tag + 'bad guard');
+    if (s.version === 'hidden' && p.winding.length) errs.push(tag + 'winding in Hidden');
+    if (s.version === 'open' && s.winner === null && i === s.turn && p.winding.length > p.actions) errs.push(tag + 'winding cards older than this turn');
+  }
+  if (s.winner === null && (s.p[0].hp <= 0 || s.p[1].hp <= 0)) errs.push('a hero is at 0 but the match goes on');
+  return errs;
+}
+
+// ---- src/bot.js
+// The bot. It only ever works from publicView(): the opponent's hand, both deck
+// orders and the seed are blanked before any search, so it cannot peek.
+
+const BOT_DEFAULTS = { hiddenSamples: 6, hiddenIters: 300, hiddenBudget: 16000, openSamples: 8, purify: 0.03 };
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(rng, a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; }
+  return a;
+}
+
+// What `side` is allowed to know. Hidden parts become null.
+function publicView(s, side) {
+  const v = clone(s);
+  const me = v.p[side], op = v.p[1 - side];
+  v.seed = 0;
+  op.hand = op.known.slice().concat(new Array(op.hand.length - op.known.length).fill(null));
+  op.deck = new Array(op.deck.length).fill(null);
+  me.deck = me.deck.slice().sort(); // contents are known (list minus seen cards), order is not
+  return v;
+}
+
+// Cards of `q` the viewer has not seen: list minus face-up cards minus known hand cards.
+function unseenPool(v, q) {
+  const p = v.p[q];
+  const left = { ...DECKS[p.hero] };
+  for (const n of playedCards(v, q)) left[n]--;
+  for (const n of p.known) left[n]--;
+  const out = [];
+  for (const [n, c] of Object.entries(left)) for (let i = 0; i < c; i++) out.push(n);
+  return out;
+}
+
+// One complete world consistent with the view: the opponent's unknown hand cards and
+// both deck orders are drawn at random.
+function sampleWorld(v, side, rng) {
+  const w = clone(v);
+  const op = w.p[1 - side], me = w.p[side];
+  const pool = shuffle(rng, unseenPool(v, 1 - side));
+  const unknown = op.hand.length - op.known.length;
+  if (pool.length !== unknown + op.deck.length) throw new Error('sampleWorld: pool size mismatch');
+  op.hand = op.known.concat(pool.slice(0, unknown));
+  op.deck = pool.slice(unknown);
+  me.deck = shuffle(rng, me.deck.slice());
+  w.seed = Math.floor(rng() * 4294967296) | 0;
+  return w;
+}
+
+// ---------- evaluation ----------
+const WIN = 1000;
+function windValue(p, name) {
+  const c = CARDS[name];
+  if (c.kind === 'Heavy') return 0.6 * (c.dmg + p.sharpen);
+  if (name === 'Bandage') return 0.6 * Math.min(5, p.maxHp - p.hp);
+  if (name === 'Sharpen') return 2;
+  if (name === 'Meditate') return 0.5;
+  return 0;
+}
+function sideValue(p) {
+  const h = p.hand.length; // cards in hand matter less once there are plenty
+  let v = p.hp * 1.0 + p.mana * 0.35 + 0.8 * Math.min(h, 4) + 0.2 * Math.max(0, h - 4) + p.sharpen * 2.5;
+  if (p.hp <= 8) v -= (9 - p.hp) * 0.5; // being in lethal range costs extra
+  for (const g of p.guards) v += g.type === 'Brace' ? 2 : g.used ? 0 : 1.5;
+  for (const n of p.winding) v += windValue(p, n);
+  return v;
+}
+// Open: the most damage the side to move can deal right now with Fast and Normal
+// attacks (Slow ones only wind up), against the guards the other side has up.
+function immediateDamage(s) {
+  const p = s.p[s.turn], o = s.p[1 - s.turn];
+  const opts = [...new Set(p.hand)].filter(n => CARDS[n].kind === 'Light' || (CARDS[n].kind === 'Heavy' && CARDS[n].speed !== 'Slow'));
+  if (!p.usedBasics.includes('Jab')) opts.push('Jab');
+  const dealt = (seq) => {
+    const guards = o.guards.map(g => ({ ...g }));
+    let d = 0;
+    for (const n of seq) {
+      const c = CARDS[n];
+      for (let h = 0; h < c.hits; h++) {
+        if (c.kind === 'Light') { const g = guards.find(g => g.type === 'Brace' || !g.used); if (g) { if (g.type !== 'Brace') g.used = true; continue; } }
+        d += c.dmg + p.sharpen;
+      }
+    }
+    return d;
+  };
+  let best = 0;
+  const left = 2 - p.actions;
+  for (let i = 0; i < opts.length; i++) {
+    if (left >= 1 && seqCost(p, [opts[i]]) <= p.mana) best = Math.max(best, dealt([opts[i]]));
+    if (left < 2) continue;
+    for (let j = 0; j < opts.length; j++) {
+      if (i === j && (opts[i] === 'Jab' || p.hand.filter(n => n === opts[i]).length < 2)) continue;
+      const q = [opts[i], opts[j]];
+      if (seqCost(p, q) <= p.mana) best = Math.max(best, dealt(q));
+    }
+  }
+  return best;
+}
+const LETHAL = 25;
+function evaluate(s, side) {
+  if (s.winner !== null) return s.winner === 'draw' ? 0 : s.winner === side ? WIN : -WIN;
+  let v = sideValue(s.p[side]) - sideValue(s.p[1 - side]);
+  // in Open, a kill already on the table for the side to move is nearly a win
+  if (s.version === 'open' && immediateDamage(s) >= s.p[1 - s.turn].hp) v += s.turn === side ? LETHAL : -LETHAL;
+  return v;
+}
+
+// =====================================================================
+// Hidden: a simultaneous game per round, solved by regret matching
+// =====================================================================
+
+function keyOf(set) { return set.join('+'); }
+
+function payoffMatrix(world, side, rows, cols) {
+  const R = rows.length, C = cols.length, A = new Float64Array(R * C);
+  const choices = [null, null];
+  for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+    choices[side] = rows[r]; choices[1 - side] = cols[c];
+    const t = _playRoundInPlace(clone(world), choices);
+    A[r * C + c] = evaluate(t, side);
+  }
+  return A;
+}
+
+function rmStrategy(reg, out) {
+  let sum = 0;
+  for (let i = 0; i < reg.length; i++) sum += reg[i] > 0 ? reg[i] : 0;
+  if (sum <= 0) { out.fill(1 / reg.length); return out; }
+  for (let i = 0; i < reg.length; i++) out[i] = reg[i] > 0 ? reg[i] / sum : 0;
+  return out;
+}
+
+// Bot (rows) against a player whose hand is one of K sampled hands; the player has
+// his own strategy per sampled hand (he knows his hand). Payoff averaged over hands.
+function solveBayesian(mats, R, Cs, iters) {
+  const K = mats.length;
+  const rReg = new Float64Array(R), rSum = new Float64Array(R), x = new Float64Array(R), u = new Float64Array(R);
+  const cReg = Cs.map(C => new Float64Array(C)), ys = Cs.map(C => new Float64Array(C)), v = Cs.map(C => new Float64Array(C));
+  for (let it = 1; it <= iters; it++) {
+    rmStrategy(rReg, x);
+    for (let k = 0; k < K; k++) rmStrategy(cReg[k], ys[k]);
+    u.fill(0);
+    for (let k = 0; k < K; k++) {
+      const A = mats[k], C = Cs[k], y = ys[k], vk = v[k];
+      vk.fill(0);
+      for (let r = 0; r < R; r++) {
+        let acc = 0; const base = r * C, xr = x[r];
+        for (let c = 0; c < C; c++) { const a = A[base + c]; acc += a * y[c]; vk[c] -= xr * a; }
+        u[r] += acc / K;
+      }
+      let ev = 0; for (let c = 0; c < C; c++) ev += y[c] * vk[c];
+      const reg = cReg[k];
+      for (let c = 0; c < C; c++) { const n = reg[c] + vk[c] - ev; reg[c] = n > 0 ? n : 0; }
+    }
+    let ev = 0; for (let r = 0; r < R; r++) ev += x[r] * u[r];
+    for (let r = 0; r < R; r++) { const n = rReg[r] + u[r] - ev; rReg[r] = n > 0 ? n : 0; rSum[r] += it * x[r]; }
+  }
+  let tot = 0; for (let r = 0; r < R; r++) tot += rSum[r];
+  return Array.from(rSum, a => a / tot);
+}
+
+// Choose the bot's set for this round. Returns { choice, strategy: [{set, p}] }.
+function botHiddenDetail(s, side, rng, opt = BOT_DEFAULTS) {
+  const view = publicView(s, side);
+  let rows = legalSets(view, side);
+  if (rows.length === 1) return { choice: rows[0], strategy: [{ set: rows[0], p: 1 }] };
+  let K = opt.hiddenSamples;
+  let worlds = Array.from({ length: K }, () => sampleWorld(view, side, rng));
+  let colsK = worlds.map(w => legalSets(w, 1 - side));
+  const cost = () => rows.length * colsK.reduce((a, c) => a + c.length, 0);
+  while (K > 2 && cost() > opt.hiddenBudget) { K--; worlds.pop(); colsK.pop(); }
+  if (cost() > opt.hiddenBudget) {
+    // prune: score rows and columns on the first world, keep the best of each
+    const A = payoffMatrix(worlds[0], side, rows, colsK[0]);
+    const R = rows.length, C = colsK[0].length;
+    const keep = Math.max(8, Math.floor(Math.sqrt(opt.hiddenBudget / K)));
+    const rowScore = rows.map((_, r) => { let m = Infinity, sum = 0; for (let c = 0; c < C; c++) { const a = A[r * C + c]; sum += a; if (a < m) m = a; } return sum / C + Math.max(m, -WIN / 2); });
+    const colScore = colsK[0].map((_, c) => { let m = -Infinity, sum = 0; for (let r = 0; r < R; r++) { const a = A[r * C + c]; sum += a; if (a > m) m = a; } return -(sum / R) - Math.min(m, WIN / 2); });
+    const rIdx = rows.map((_, i) => i).sort((a, b) => rowScore[b] - rowScore[a]).slice(0, keep);
+    const cKeys = new Set(colsK[0].map((_, i) => i).sort((a, b) => colScore[b] - colScore[a]).slice(0, keep).map(i => keyOf(colsK[0][i])));
+    cKeys.add('');
+    rows = rIdx.map(i => rows[i]);
+    colsK = colsK.map(cols => { const f = cols.filter(c => cKeys.has(keyOf(c))); return f.length ? f.slice(0, keep) : cols.slice(0, keep); });
+  }
+  const mats = worlds.map((w, k) => payoffMatrix(w, side, rows, colsK[k]));
+  let x = solveBayesian(mats, rows.length, colsK.map(c => c.length), opt.hiddenIters);
+  // drop the noise of the average strategy, then sample
+  let tot = 0; x = x.map(p => (p < opt.purify ? 0 : p)); for (const p of x) tot += p;
+  if (tot <= 0) { x = x.map(() => 1); tot = x.length; }
+  let r = rng() * tot, pick = 0;
+  for (let i = 0; i < x.length; i++) { r -= x[i]; if (r <= 0 && x[i] > 0) { pick = i; break; } pick = x[i] > 0 ? i : pick; }
+  const strategy = rows.map((set, i) => ({ set, p: x[i] / tot })).filter(e => e.p > 0).sort((a, b) => b.p - a.p);
+  return { choice: rows[pick], strategy };
+}
+function botHidden(s, side, rng, opt) { return botHiddenDetail(s, side, rng, opt).choice; }
+
+// =====================================================================
+// Open: search own turn, assume the opponent's best reply on sampled hands
+// =====================================================================
+
+function canonicalSecond(a, b) {
+  // [a, b] and [b, a] reach the same state unless one draws cards or the order of
+  // two Light attacks or two guards matters; keep one order otherwise.
+  if (a === 'Study' || b === 'Study') return true;
+  const ka = CARDS[a].kind, kb = CARDS[b].kind;
+  if ((ka === 'Light' && kb === 'Light') || (ka === 'Defence' && kb === 'Defence')) return true;
+  return a <= b;
+}
+
+// All states the side to move can reach by the end of its turn (sequences of its remaining actions).
+function turnLeaves(s, fn) {
+  fn(s, null);
+  if (s.winner !== null) return;
+  for (const a of openLegalActions(s)) {
+    const t = _playInPlace(clone(s), a);
+    fn(t, a);
+    if (t.winner !== null) continue;
+    for (const b of openLegalActions(t)) {
+      if (!canonicalSecond(a, b)) continue;
+      fn(_playInPlace(clone(t), b), a);
+    }
+  }
+}
+
+// Value for `side` of a state at the end of side's turn: the opponent plays his best
+// turn, then side's winding cards resolve at the start of side's next turn.
+function replyValue(t, side) {
+  if (t.winner !== null) return evaluate(t, side);
+  const o = _endTurnInPlace(clone(t));
+  if (o.winner !== null) return evaluate(o, side);
+  let best = Infinity;
+  turnLeaves(o, (u) => {
+    let val;
+    if (u.winner !== null) val = evaluate(u, side);
+    else val = evaluate(_endTurnInPlace(clone(u)), side);
+    if (val < best) best = val;
+  });
+  return best;
+}
+
+// Next action for the side to move, or null to end the turn.
+function botOpenDetail(s, rng, opt = BOT_DEFAULTS) {
+  const side = s.turn;
+  const view = publicView(s, side);
+  const first = [null].concat(openLegalActions(view));
+  if (first.length === 1) return { action: null, values: [] };
+  const K = opt.openSamples;
+  const totals = new Map(first.map(a => [a, 0]));
+  for (let k = 0; k < K; k++) {
+    const w = sampleWorld(view, side, rng);
+    const best = new Map(first.map(a => [a, -Infinity]));
+    const actsLeft = 2 - w.p[side].actions;
+    // leaf values grouped by first action of this turn
+    const consider = (t, a) => { const v = replyValue(t, side); if (v > best.get(a)) best.set(a, v); };
+    consider(w, null);
+    for (const a of first) {
+      if (a === null) continue;
+      const t = _playInPlace(clone(w), a);
+      consider(t, a);
+      if (t.winner !== null || actsLeft < 2) continue;
+      for (const b of openLegalActions(t)) consider(_playInPlace(clone(t), b), a);
+    }
+    for (const a of first) totals.set(a, totals.get(a) + best.get(a) / K);
+  }
+  let pick = null, bv = -Infinity;
+  for (const a of first) { const v = totals.get(a); if (v > bv + 1e-9) { bv = v; pick = a; } }
+  return { action: pick, values: first.map(a => ({ action: a, value: totals.get(a) })) };
+}
+function botOpenAction(s, rng, opt) { return botOpenDetail(s, rng, opt).action; }
+
+// ---- src/ui.js
+// The page. Drives the engine through its exported transitions only.
+
+
+const ME = 0, BOT = 1;
+const STEP_MS = 700, BOT_ACT_MS = 900;
+
+const ui = {
+  cfg: { version: 'hidden', me: 'Heavy', opp: 'Quick' },
+  s: null, phase: 'start', sel: [], log: [], timers: [], showDecks: false,
+  botRng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0),
+  turnActs: [[], []], // Open: actions of the current/last turn per side
+};
+
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function later(fn, ms) { const t = setTimeout(() => { ui.timers = ui.timers.filter(x => x !== t); fn(); }, ms); ui.timers.push(t); }
+function clearTimers() { for (const t of ui.timers) clearTimeout(t); ui.timers = []; }
+
+// ------------------------------------------------------------------ log text
+function listAnd(xs) { return xs.length <= 1 ? (xs[0] || '') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]; }
+function fmt(e) {
+  const Y = e.side === ME;
+  const P = Y ? 'Your' : 'His', p = Y ? 'your' : 'his', him = Y ? 'him' : 'you';
+  const hitNo = e.hits > 1 ? ` (hit ${e.hit + 1} of ${e.hits})` : '';
+  const hidden = ui.s.version === 'hidden';
+  const pre = hidden ? (e.step ? `Round ${e.round}, ${e.step}: ` : `Round ${e.round}: `) : `Turn ${e.round}: `;
+  switch (e.t) {
+    case 'round': return { sep: true, text: `Round ${e.round}` };
+    case 'turn': return { sep: true, text: `Turn ${e.round} · ${Y ? 'your' : 'his'} turn` };
+    case 'first': return { text: `${Y ? 'You go' : 'He goes'} first; ${Y ? 'he starts' : 'you start'} with one extra card.` };
+    case 'start': {
+      const drew = e.drew ? (Y ? 'draw a card' : 'draws a card') : `${Y ? 'your' : 'his'} deck is empty, no card drawn`;
+      return { text: pre + `${Y ? 'you regain' : 'he regains'} ${e.gain} mana (now ${e.mana}/10), ${drew}.` };
+    }
+    case 'reveal': return { text: pre + `${Y ? 'you play' : 'he plays'} ${e.acts.length ? listAnd(e.acts) : 'nothing'}.` };
+    case 'play': return { text: pre + `${Y ? 'you play' : 'he plays'} ${e.card}.` };
+    case 'wind': return { text: pre + `${p} ${e.card} is winding up.` };
+    case 'unwind': return { text: pre + `${p} winding ${e.card} resolves.` };
+    case 'guard': return { text: pre + `${p} ${e.card} is up.` };
+    case 'hit': return { text: pre + `${p} ${e.card}${hitNo} hits ${him} for ${e.dmg}.`, cls: Y ? 'me' : 'opp' };
+    case 'stop': return { text: pre + `${p} ${e.guard} stops ${Y ? 'his' : 'your'} ${e.card}${hitNo}.` };
+    case 'parry': return { text: pre + `${p} Parry deals 3 to ${him}.`, cls: Y ? 'me' : 'opp' };
+    case 'cancel': return { text: pre + `${p} ${e.card} is cancelled and returns to ${p} hand.`, cls: 'warn' };
+    case 'heal': return { text: pre + `${p} Bandage heals ${e.amount}.` };
+    case 'meditate': return { text: pre + `${p} Meditate gains ${e.amount} mana (now ${e.mana}/10).` };
+    case 'sharpen': return { text: pre + `${p} Sharpen: ${p} hits now deal ${e.total} more.` };
+    case 'study': return { text: pre + `${p} Study draws ${e.drew} card${e.drew === 1 ? '' : 's'}.` };
+    case 'end': return { sep: true, text: e.winner === 'draw' ? 'Draw: both heroes fall in the same step.' : e.winner === ME ? 'You win.' : 'He wins.' };
+  }
+  return { text: pre + JSON.stringify(e) };
+}
+function addEvents(ev) {
+  for (const e of ev) ui.log.push(fmt(e));
+}
+// capitalise the first word after the prefix
+function lineText(f) { return f.text.replace(/: ([a-z])/, (m, c) => ': ' + c.toUpperCase()); }
+
+// ------------------------------------------------------------------ flow
+function startMatch() {
+  clearTimers();
+  const c = ui.cfg;
+  ui.s = newMatch({ version: c.version, heroes: [c.me, c.opp], seed: (Math.random() * 4294967296) >>> 0 });
+  ui.sel = []; ui.log = []; ui.turnActs = [[], []];
+  addEvents(openingEvents(ui.s));
+  if (c.version === 'hidden') ui.phase = 'choose';
+  else if (ui.s.turn === ME) ui.phase = 'mine';
+  else { ui.phase = 'bot'; later(botStep, BOT_ACT_MS); }
+  render();
+}
+
+function selNames() { return ui.sel.map(x => (typeof x === 'number' ? ui.s.p[ME].hand[x] : x)); }
+
+function toggle(item) {
+  const i = ui.sel.indexOf(item);
+  if (i >= 0) ui.sel.splice(i, 1);
+  else {
+    const name = typeof item === 'number' ? ui.s.p[ME].hand[item] : item;
+    if (ui.sel.length >= 2 || !validSet(ui.s, ME, selNames().concat([name]))) return;
+    ui.sel.push(item);
+  }
+  render();
+}
+
+function commit() {
+  if (ui.phase !== 'choose') return;
+  const mine = selNames();
+  if (!validSet(ui.s, ME, mine)) return;
+  ui.phase = 'thinking'; render();
+  later(() => {
+    const his = botHidden(ui.s, BOT, ui.botRng); // decided without the player's choice
+    const ev = [];
+    ui.s = commitRound(ui.s, [mine, his], ev);
+    ui.sel = [];
+    addEvents(ev);
+    ui.phase = 'resolving'; render();
+    later(stepHidden, STEP_MS);
+  }, 30);
+}
+
+function stepHidden() {
+  if (ui.phase !== 'resolving') return;
+  let ev = [];
+  while (ui.s.stepIdx >= 0 && !ev.length) ui.s = resolveStep(ui.s, ev); // empty steps pass at once
+  addEvents(ev);
+  if (ui.s.winner !== null) { ui.phase = 'over'; render(); return; }
+  if (ui.s.stepIdx < 0) { ui.phase = 'choose'; render(); return; }
+  render();
+  later(stepHidden, STEP_MS);
+}
+function skipHidden() {
+  if (ui.phase !== 'resolving') return;
+  clearTimers();
+  const ev = [];
+  while (ui.s.stepIdx >= 0) ui.s = resolveStep(ui.s, ev);
+  addEvents(ev);
+  ui.phase = ui.s.winner !== null ? 'over' : 'choose';
+  render();
+}
+
+function playOpen(name) {
+  if (ui.phase !== 'mine' || !canPlay(ui.s, name)) return;
+  const ev = [];
+  ui.s = playAction(ui.s, name, ev);
+  ui.turnActs[ME].push(name);
+  addEvents(ev);
+  if (ui.s.winner !== null) ui.phase = 'over';
+  render();
+}
+function endMyTurn() {
+  if (ui.phase !== 'mine') return;
+  const ev = [];
+  ui.s = endTurn(ui.s, ev);
+  ui.turnActs[BOT] = [];
+  addEvents(ev);
+  if (ui.s.winner !== null) { ui.phase = 'over'; render(); return; }
+  ui.phase = 'bot'; render();
+  later(botStep, BOT_ACT_MS);
+}
+function botStep() {
+  if (ui.phase !== 'bot') return;
+  const a = botOpenAction(ui.s, ui.botRng);
+  const ev = [];
+  if (a !== null) {
+    ui.s = playAction(ui.s, a, ev);
+    ui.turnActs[BOT].push(a);
+    addEvents(ev);
+    if (ui.s.winner !== null) { ui.phase = 'over'; render(); return; }
+    render();
+    later(botStep, BOT_ACT_MS);
+    return;
+  }
+  ui.s = endTurn(ui.s, ev);
+  ui.turnActs[ME] = [];
+  addEvents(ev);
+  ui.phase = ui.s.winner !== null ? 'over' : 'mine';
+  render();
+}
+
+// ------------------------------------------------------------------ render
+function effectText(name, p) {
+  const c = CARDS[name];
+  const sh = p.sharpen;
+  if (sh && c.kind !== 'Defence' && c.kind !== 'Setup') return c.hits > 1 ? `Two hits of ${c.dmg}+${sh}.` : `${c.dmg}+${sh} damage.`;
+  return c.text;
+}
+function cardHTML(name, attrs, { cost, disabled, selected, order, basic }) {
+  const c = CARDS[name], p = ui.s.p[ME];
+  const was = cost < c.cost ? `<s class="was">${c.cost}</s>` : '';
+  return `<button class="card${basic ? ' basic' : ''}${selected ? ' sel' : ''}" ${attrs}${disabled ? ' disabled' : ''}>
+    <span class="ct"><span class="cn">${name}${order ? ` <span class="ord">${order}</span>` : ''}</span>${was}<span class="cc">${cost}</span></span>
+    <span class="cs">${c.speed} · ${c.kind}</span>
+    <span class="ce">${esc(effectText(name, p))}</span></button>`;
+}
+
+function heroHTML(side) {
+  const s = ui.s, p = s.p[side], mine = side === ME;
+  const chips = [];
+  if (p.sharpen) chips.push(`<span class="chip">Sharpen +${p.sharpen}</span>`);
+  const guards = p.guards.filter(g => g.type === 'Brace' || !g.used).map(g => g.type);
+  if (guards.length) chips.push(`<span class="chip guard">Guard: ${guards.join(', ')}</span>`);
+  if (p.winding.length) chips.push(`<span class="chip wind">Winding: ${p.winding.join(', ')}</span>`);
+  const pct = Math.max(0, p.hp) / p.maxHp * 100;
+  return `<div class="hrow">
+      <span class="hname">${mine ? 'You' : 'He'}: ${p.hero}</span>
+      <span class="hp"><b>${Math.max(0, p.hp)}</b>/${p.maxHp} HP</span>
+      <span class="mana"><b>${p.mana}</b>/10 mana</span>
+    </div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <div class="hrow2"><span>Hand ${p.hand.length}</span><span>Deck ${p.deck.length}</span>${chips.join('')}</div>`;
+}
+
+function actChips(side) {
+  const s = ui.s, p = s.p[side];
+  if (s.version === 'open') {
+    const acts = ui.turnActs[side];
+    if (!acts.length) return '<span class="none">nothing yet</span>';
+    return acts.map(n => `<span class="act${CARDS[n].speed === 'Slow' ? ' pend' : ''}">${n}${CARDS[n].speed === 'Slow' ? ' (winding)' : ''}</span>`).join('');
+  }
+  if (ui.phase === 'choose' || ui.phase === 'thinking') {
+    if (side === BOT) return `<span class="none">${ui.phase === 'thinking' ? 'He is choosing…' : 'Hidden until both commit'}</span>`;
+    const names = selNames();
+    return names.length ? names.map((n, i) => `<span class="act pend">${i + 1}. ${n}</span>`).join('') : '<span class="none">nothing chosen</span>';
+  }
+  const list = s.stepIdx >= 0 ? p.committed : p.lastRound;
+  if (!list.length) return '<span class="none">nothing</span>';
+  return list.map(a => `<span class="act ${a.status === 'cancelled' ? 'cxl' : a.status === 'done' ? 'done' : 'pend'}">${a.name}<small>${CARDS[a.name].speed}${a.status === 'cancelled' ? ', cancelled' : ''}</small></span>`).join('');
+}
+
+function arenaHTML() {
+  const s = ui.s;
+  let head;
+  if (s.version === 'hidden') {
+    const cur = ui.phase === 'resolving' ? s.stepIdx : -1;
+    head = `<div class="steps"><span>Round ${s.round}</span>` + SPEEDS.map((sp, i) => `<span class="${i === cur ? 'on' : i < cur ? 'past' : ''}">${sp}</span>`).join('') + '</div>';
+  } else {
+    head = `<div class="steps"><span>Turn ${s.turnNo}</span><span class="on">${s.turn === ME ? 'Your turn' : 'His turn'}</span></div>`;
+  }
+  return head + `<div class="acts opp"><span class="who">He</span>${actChips(BOT)}</div>
+    <div class="acts me"><span class="who">You</span>${actChips(ME)}</div>`;
+}
+
+function handHTML() {
+  const s = ui.s, p = s.p[ME];
+  const out = [];
+  const order = p.hand.map((n, i) => i).sort((a, b) => {
+    const ca = CARDS[p.hand[a]], cb = CARDS[p.hand[b]];
+    return SPEEDS.indexOf(ca.speed) - SPEEDS.indexOf(cb.speed) || ca.cost - cb.cost || p.hand[a].localeCompare(p.hand[b]) || a - b;
+  });
+  const items = BASICS.map(b => ({ key: b, name: b, attrs: `data-b="${b}"`, basic: true })).concat(order.map(i => ({ key: i, name: p.hand[i], attrs: `data-h="${i}"` })));
+  for (const it of items) {
+    let cost, disabled, selected = false, ord = 0;
+    if (s.version === 'hidden') {
+      const names = selNames();
+      const si = ui.sel.indexOf(it.key);
+      if (si >= 0) {
+        selected = true; ord = si + 1;
+        cost = seqCost(p, names.slice(0, si + 1), false) - seqCost(p, names.slice(0, si), false);
+        disabled = ui.phase !== 'choose';
+      } else {
+        cost = seqCost(p, names.concat([it.name]), false) - seqCost(p, names, false);
+        disabled = ui.phase !== 'choose' || ui.sel.length >= 2 || !validSet(s, ME, names.concat([it.name]));
+      }
+    } else {
+      const myTurn = s.turn === ME;
+      cost = myTurn ? seqCost(p, [it.name]) : CARDS[it.name].cost;
+      disabled = ui.phase !== 'mine' || !canPlay(s, it.name);
+    }
+    out.push(cardHTML(it.name, it.attrs, { cost, disabled, selected, order: ord, basic: it.basic }));
+  }
+  return out.join('');
+}
+
+function controlsHTML() {
+  const s = ui.s;
+  if (ui.phase === 'over') {
+    const w = s.winner === 'draw' ? 'Draw.' : s.winner === ME ? 'You win.' : 'He wins.';
+    return `<span class="result ${s.winner === ME ? 'me' : s.winner === BOT ? 'opp' : ''}">${w}</span><button id="rematch" class="primary">Rematch</button><button id="newmatch2">New match</button>`;
+  }
+  if (s.version === 'hidden') {
+    if (ui.phase === 'resolving') return `<span class="hint">Resolving… tap anywhere to skip</span>`;
+    if (ui.phase === 'thinking') return `<span class="hint">He is choosing…</span>`;
+    const names = selNames();
+    const cost = seqCost(s.p[ME], names, false);
+    return `<button id="clear"${names.length ? '' : ' disabled'}>Clear</button><button id="commit" class="primary">Commit ${names.length ? `${names.length} action${names.length > 1 ? 's' : ''} · ${cost} mana` : 'nothing'}</button>`;
+  }
+  if (ui.phase === 'bot') return `<span class="hint">His turn…</span>`;
+  const left = 2 - s.p[ME].actions;
+  return `<span class="hint">${left} action${left === 1 ? '' : 's'} left</span><button id="endturn" class="primary${left === 0 ? ' pulse' : ''}">End turn</button>`;
+}
+
+function deckTable(side) {
+  const s = ui.s, p = s.p[side], mine = side === ME;
+  const rows = deckSummary(s, side).map(r => {
+    const c = CARDS[r.name];
+    return mine
+      ? `<tr><td>${r.name}</td><td>${c.cost}</td><td>${c.speed}</td><td>${r.total}</td><td>${r.played}</td><td>${r.inHand}</td><td>${r.inDeck}</td></tr>`
+      : `<tr><td>${r.name}</td><td>${c.cost}</td><td>${c.speed}</td><td>${r.total}</td><td>${r.played}</td><td>${r.known}</td><td><b>${r.unseen}</b></td></tr>`;
+  }).join('');
+  const head = mine ? '<th>Card</th><th>Cost</th><th>Speed</th><th>List</th><th>Played</th><th>Hand</th><th>Deck</th>'
+    : '<th>Card</th><th>Cost</th><th>Speed</th><th>List</th><th>Played</th><th>Known in hand</th><th>Unseen</th>';
+  const passive = HEROES[p.hero].passive.replace(/his /, mine ? 'your ' : 'his ');
+  return `<h3 class="${mine ? 'me' : 'opp'}">${mine ? 'Your' : 'His'} list: ${p.hero}</h3><p class="passive">${esc(passive)}</p>
+    <table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function render() {
+  document.body.dataset.screen = ui.phase === 'start' ? 'start' : 'game';
+  if (ui.phase === 'start') { renderStart(); return; }
+  const s = ui.s;
+  $('title').textContent = `${s.version === 'hidden' ? 'Hidden' : 'Open'} · ${s.p[ME].hero} vs ${s.p[BOT].hero}`;
+  $('opp').innerHTML = heroHTML(BOT);
+  $('me').innerHTML = heroHTML(ME);
+  $('arena').innerHTML = arenaHTML();
+  $('hand').innerHTML = handHTML();
+  $('ctrl').innerHTML = controlsHTML();
+  $('decks').innerHTML = `<button id="closedecks" class="closer">Close</button>` + deckTable(BOT) + deckTable(ME);
+  $('decks').classList.toggle('open', ui.showDecks);
+  const log = $('log');
+  if (log.childElementCount > ui.log.length) log.innerHTML = '';
+  for (let i = log.childElementCount; i < ui.log.length; i++) {
+    const f = ui.log[i], d = document.createElement('div');
+    d.className = 'll' + (f.sep ? ' sep' : '') + (f.cls ? ' ' + f.cls : '');
+    d.textContent = lineText(f);
+    log.appendChild(d);
+  }
+  log.scrollTop = log.scrollHeight;
+}
+
+function renderStart() {
+  const c = ui.cfg;
+  const seg = (key, opts) => opts.map(([v, label]) => `<button data-cfg="${key}" data-v="${v}" class="${c[key] === v ? 'on' : ''}">${label}</button>`).join('');
+  $('start').innerHTML = `<h1>Duel</h1>
+    <div class="grp"><div class="lbl">Version</div><div class="seg">${seg('version', [['hidden', 'Hidden'], ['open', 'Open']])}</div></div>
+    <div class="grp"><div class="lbl">Your hero</div><div class="seg">${seg('me', [['Heavy', 'Heavy'], ['Quick', 'Quick']])}</div></div>
+    <div class="grp"><div class="lbl">His hero</div><div class="seg">${seg('opp', [['Heavy', 'Heavy'], ['Quick', 'Quick']])}</div></div>
+    <p class="heroes">Heavy: ${HEROES.Heavy.hp} health, ${HEROES.Heavy.regen} mana a turn. ${esc(HEROES.Heavy.passive.replace('his', 'your'))}<br>Quick: ${HEROES.Quick.hp} health, ${HEROES.Quick.regen} mana a turn. ${esc(HEROES.Quick.passive.replace('his', 'your'))}</p>
+    <button id="go" class="primary big">Start</button>`;
+}
+
+// ------------------------------------------------------------------ input
+function onClick(e) {
+  const t = e.target.closest('button');
+  if (ui.phase === 'resolving' && !(t && (t.id === 'newmatch' || t.id === 'showdecks' || t.id === 'closedecks'))) { skipHidden(); return; }
+  if (!t || t.disabled) return;
+  if (t.dataset.cfg) { ui.cfg[t.dataset.cfg] = t.dataset.v; render(); return; }
+  switch (t.id) {
+    case 'go': case 'rematch': startMatch(); return;
+    case 'newmatch': case 'newmatch2': clearTimers(); ui.phase = 'start'; ui.showDecks = false; render(); return;
+    case 'showdecks': ui.showDecks = !ui.showDecks; render(); return;
+    case 'closedecks': ui.showDecks = false; render(); return;
+    case 'commit': commit(); return;
+    case 'clear': ui.sel = []; render(); return;
+    case 'endturn': endMyTurn(); return;
+  }
+  const item = t.dataset.h !== undefined ? Number(t.dataset.h) : t.dataset.b;
+  if (item === undefined) return;
+  if (ui.s.version === 'hidden') toggle(item);
+  else playOpen(typeof item === 'number' ? ui.s.p[ME].hand[item] : item);
+}
+
+document.addEventListener('click', onClick);
+render();
+
+})();
+</script>
+</body>
+</html>

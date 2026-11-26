@@ -1,0 +1,121 @@
+:root {
+  --bg: #d6d6d6; --panel: #f3f3f3; --card: #ffffff; --ink: #111; --mute: #4a4a4a; --line: #8a8a8a;
+  --blue: #1a56b8; --blue-bg: #dde8fb; --red: #b0241b; --red-bg: #fbe1de; --dis: #bdbdbd;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); }
+body { font: 15px/1.3 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; overflow: hidden; }
+button { font: inherit; color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 8px 12px; cursor: pointer; min-height: 40px; }
+button:disabled { cursor: default; }
+button.primary { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 600; }
+button.primary:disabled { background: var(--dis); border-color: var(--dis); }
+
+/* start screen */
+body[data-screen="game"] #start, body[data-screen="start"] #game { display: none; }
+#start { max-width: 440px; margin: 0 auto; padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+#start h1 { margin: 0 0 18px; font-size: 26px; }
+.grp { margin-bottom: 14px; }
+.lbl { font-weight: 600; margin-bottom: 6px; }
+.seg { display: flex; gap: 8px; }
+.seg button { flex: 1; }
+.seg button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.heroes { color: var(--mute); font-size: 14px; }
+button.big { width: 100%; min-height: 52px; font-size: 18px; margin-top: 8px; }
+
+/* game: phone first */
+#game {
+  height: 100%; max-width: 600px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 6px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(60px, 1fr) auto auto auto;
+  grid-template-areas: "head" "opp" "arena" "log" "me" "hand" "ctrl";
+}
+#head { grid-area: head; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 6px; font-weight: 600; }
+#head .hbtn { display: flex; gap: 6px; }
+#head button { min-height: 36px; padding: 4px 10px; font-size: 14px; }
+.hero { border-radius: 8px; padding: 6px 10px; border: 2px solid; }
+#opp { grid-area: opp; background: var(--red-bg); border-color: var(--red); }
+#me { grid-area: me; background: var(--blue-bg); border-color: var(--blue); }
+.hrow { display: flex; align-items: baseline; gap: 12px; }
+.hname { font-weight: 700; flex: 1; }
+.opp .hname { color: var(--red); } .me .hname { color: var(--blue); }
+.hp b, .mana b { font-size: 20px; }
+.bar { height: 5px; background: rgba(0,0,0,.15); border-radius: 3px; margin: 3px 0 4px; overflow: hidden; }
+.bar i { display: block; height: 100%; }
+.opp .bar i { background: var(--red); } .me .bar i { background: var(--blue); }
+.hrow2 { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; align-items: center; }
+.chip { font-weight: 600; padding: 0 6px; border-radius: 4px; background: rgba(255,255,255,.75); border: 1px solid var(--line); }
+.chip.wind { border-color: var(--ink); }
+
+#arena { grid-area: arena; background: var(--panel); border-radius: 8px; padding: 6px 10px; font-size: 14px; }
+.steps { display: flex; gap: 6px; margin-bottom: 4px; color: var(--mute); }
+.steps span { padding: 0 6px; border-radius: 4px; }
+.steps span:first-child { padding-left: 0; font-weight: 600; color: var(--ink); }
+.steps span.on { background: var(--ink); color: #fff; }
+.steps span.past { text-decoration: line-through; }
+.acts { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 28px; }
+.who { width: 2.6em; font-weight: 700; }
+.acts.opp .who { color: var(--red); } .acts.me .who { color: var(--blue); }
+.act { padding: 2px 8px; border-radius: 4px; border: 1.5px solid var(--line); background: var(--card); font-weight: 600; }
+.act small { font-weight: 400; margin-left: 5px; font-size: 14px; color: var(--mute); }
+.act.done { background: #e6e6e6; }
+.act.cxl { text-decoration: line-through; color: var(--mute); }
+.acts.opp .act.pend { border-color: var(--red); } .acts.me .act.pend { border-color: var(--blue); }
+.none { color: var(--mute); }
+
+#log { grid-area: log; overflow-y: auto; contain: size; background: var(--card); border-radius: 8px; padding: 6px 10px; font-size: 14px; border: 1px solid #bbb; -webkit-overflow-scrolling: touch; }
+.ll { padding: 1px 0; }
+.ll.sep { font-weight: 700; margin-top: 6px; border-top: 1px solid #ddd; padding-top: 4px; }
+.ll.me { color: var(--blue); } .ll.opp { color: var(--red); } .ll.warn { font-weight: 600; }
+
+#hand { grid-area: hand; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; max-height: 40vh; overflow-y: auto; grid-auto-rows: max-content; }
+.card { text-align: left; display: flex; flex-direction: column; gap: 1px; padding: 5px 6px; min-height: 64px; background: var(--card); border: 2px solid var(--line); border-radius: 7px; }
+.card.basic { border-style: dashed; background: #f7f7f7; }
+.card.sel { border-color: var(--blue); background: var(--blue-bg); box-shadow: inset 0 0 0 1px var(--blue); }
+.card:disabled { color: #8c8c8c; border-color: #c7c7c7; background: #ececec; }
+.card:disabled .cs, .card:disabled .ce { color: #8c8c8c; }
+.ct { display: flex; justify-content: space-between; gap: 4px; width: 100%; }
+.cn { font-weight: 700; }
+.cc { font-weight: 700; min-width: 1.6em; text-align: center; border-radius: 10px; background: var(--ink); color: #fff; padding: 0 5px; }
+.card:disabled .cc { background: #9a9a9a; }
+.was { color: var(--mute); margin-left: auto; margin-right: 4px; font-size: 14px; }
+.card:disabled .was { color: #8c8c8c; }
+.ord { display: inline-block; background: var(--blue); color: #fff; border-radius: 8px; padding: 0 5px; font-size: 14px; }
+.cs { font-size: 14px; color: var(--mute); }
+.ce { font-size: 14px; }
+
+#ctrl { grid-area: ctrl; display: flex; gap: 8px; align-items: center; justify-content: flex-end; padding-bottom: max(8px, env(safe-area-inset-bottom)); min-height: 52px; }
+#ctrl .hint { flex: 1; color: var(--mute); }
+#ctrl #commit, #ctrl #endturn { min-width: 150px; min-height: 44px; }
+#ctrl .result { flex: 1; font-size: 20px; font-weight: 700; }
+.result.me { color: var(--blue); } .result.opp { color: var(--red); }
+.pulse { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+#decks { display: none; position: fixed; inset: 0; z-index: 10; background: var(--panel); overflow-y: auto; padding: max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+#decks.open { display: block; }
+.closer { float: right; }
+#decks h3 { margin: 6px 0 2px; font-size: 16px; }
+#decks h3.opp { color: var(--red); } #decks h3.me { color: var(--blue); }
+.passive { margin: 0 0 6px; font-size: 14px; color: var(--mute); }
+#decks table { border-collapse: collapse; width: 100%; font-size: 14px; margin-bottom: 10px; }
+#decks th, #decks td { border-bottom: 1px solid #ccc; padding: 3px 4px; text-align: right; }
+#decks th:first-child, #decks td:first-child, #decks th:nth-child(3), #decks td:nth-child(3) { text-align: left; }
+#decks th { font-weight: 600; vertical-align: bottom; }
+
+
+/* desktop: log left, game centre, deck lists right */
+@media (min-width: 1100px) {
+  #game {
+    max-width: 1500px; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+    grid-template-columns: 360px minmax(0, 1fr) 400px;
+    grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "head head head" "log opp decks" "log arena decks" "log me decks" "log hand decks" "log ctrl decks";
+    column-gap: 14px;
+  }
+  #showdecks { display: none; }
+  #decks, #decks.open { grid-area: decks; display: block; position: static; contain: size; margin-bottom: 10px; padding: 6px 12px; border-radius: 8px; overflow-y: auto; min-height: 0; }
+  .closer { display: none; }
+  #log { margin-bottom: 10px; }
+  #hand { grid-template-columns: repeat(4, minmax(0, 1fr)); max-height: none; align-content: start; }
+  .card { min-height: 78px; padding: 7px 9px; }
+}

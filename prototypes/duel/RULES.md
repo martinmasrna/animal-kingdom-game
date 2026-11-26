@@ -17,7 +17,7 @@ Two heroes. A hero at 0 health or less loses. If both reach 0 in the same step, 
 
 | | Heavy | Quick |
 |---|---|---|
-| Health | 34 | 26 |
+| Health | 31 | 28 |
 | Mana regained per turn | 3 | 4 |
 | Passive | **Unstoppable:** damage of 2 or less never cancels your cards. | **Light feet:** the first Fast action you take each turn costs 1 less (never below 0). |
 
@@ -125,10 +125,10 @@ An attack names its target tiles on the enemy area when it is chosen. It hits on
 |---|---|---|
 | Jab (basic) | Melee | One tile of the enemy front column. |
 | Slash | Melee | The whole enemy front column. |
-| Lunge | Melee | One row: its front and middle tiles. |
+| Lunge | Melee | One whole row (all three tiles). |
 | Flurry | Melee | Two different tiles of the enemy front column, one hit of 2 on each. |
-| Smash | Melee | A 2 by 2 block inside the enemy front and middle columns. |
-| Haymaker | Melee | The whole enemy front and middle columns. |
+| Smash | Melee | A 2 by 2 block anywhere in the enemy area. |
+| Haymaker | Melee | The whole enemy area. |
 
 Two ranged cards exist only in this version:
 
@@ -138,5 +138,9 @@ Two ranged cards exist only in this version:
 | Blast | 5 | Slow | Heavy attack, ranged | 7 damage to one whole row. |
 
 Decks in this version: each deck swaps 1 Slash and 1 Flurry for 2 Bolt, and 1 Smash for 1 Blast.
+
+### Fatigue (this version only)
+
+At the start of a round, a hero whose deck is empty takes damage instead of drawing: 1 the first time, 2 the next, then 3, and so on, counted per hero. If this brings both heroes to 0 in the same round the match is a draw. Without it a match with two empty decks never ends: a Block each round stops the only attack left.
 
 Guards, cancelling, mana, cards and everything else are as in Version 1.
