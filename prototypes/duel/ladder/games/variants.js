@@ -25,3 +25,14 @@ Object.assign(variants, {
   h3: hiddenDuel({ len: 5, deck: { F: 3, B: 3, J: 3, S: 3, G: 3 }, hand: 3 }),
   h4: hiddenDuel({ len: 4, deck: { F: 2, B: 2, S: 2, G: 2 }, hand: 3 }),
 });
+import { minimal } from './minimal.js';
+Object.assign(variants, {
+  m0: minimal({}),                 // investments can't be removed
+  m1: minimal({ target: true }),   // a Strike may destroy one of his investments instead
+});
+Object.assign(variants, {
+  m1d3: minimal({ target: true, draw: 3 }),
+  m1d3h20: minimal({ target: true, draw: 3, hp: 20 }),
+  m1d4p2: minimal({ target: true, draw: 4, plays: 2 }),
+  m1d4p2h20: minimal({ target: true, draw: 4, plays: 2, hp: 20 }),
+});
