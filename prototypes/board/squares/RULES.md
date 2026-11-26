@@ -1,6 +1,6 @@
 # Squares
 
-Slots with food from regions instead of bodies. A region is any 2 by 2 block of tiles: nine of them, overlapping, so a centre tile is in four, an edge tile in two, a corner in one. At the end of your turn you gain 1 food for each region that pays you. Everything else is Toy 1's.
+Slots with food from regions instead of bodies. A region is any 2 by 2 block of tiles: nine of them, overlapping, so a centre tile is in four, an edge tile in two, a corner in one. At the end of your turn you gain 1 food for each region that pays you. Everything else is Slots'.
 
 `REGION_RULE` in `src/engine.js` picks which side a region pays:
 
