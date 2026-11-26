@@ -1,6 +1,6 @@
 // Toy 1 as a game screen. Drives the engine through its exported transitions;
 // what the player sees comes from engine events, played back one beat at a time.
-import { CARDS, DECK, MAX_MANA, newMatch, playAction, endTurn, canPlay, deckSummary } from './engine.js';
+import { CARDS, DECK, MAX_MANA, REGEN, newMatch, playAction, endTurn, canPlay, deckSummary } from './engine.js';
 import { makeRng, botTurn } from './bot.js';
 
 const ME = 0, BOT = 1;
@@ -38,14 +38,14 @@ function heroHTML(side) {
   const active = !ui.over && s.turn === side;
   const shield = block > 0 ? `<div class="shield${ui.popGuard[side] ? ' pop' : ''}" id="shield${side}">${shieldSVG}<span style="font-size:18px">${block}</span></div>` : '';
   let gems = '';
-  for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
+  for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < mana ? ' on' : ''}"></i>`;
   return `<div class="left"><div class="guards">${shield}</div></div>
     <div class="mid"><div class="plate${active ? ' active' : ''}" id="plate${side}">
       <div class="hname">${mine ? 'You' : 'Opponent'}</div>
       <div class="hp${hp <= 8 ? ' low' : ''}">${hp}</div>
     </div></div>
     <div class="right">
-      <div class="mana" id="mana${side}">${gems}<span class="manatxt">${mana}<small>/${p.maxMana}</small></span></div>
+      <div class="mana" id="mana${side}">${gems}<span class="manatxt">${mana}<small> energy, +${REGEN} a turn</small></span></div>
       <div class="counts">Deck ${p.deck.length}${mine ? '' : ' · Hand ' + p.hand.length}</div>
     </div>`;
 }

@@ -264,6 +264,9 @@ body.playing #start { display: none; }
 // until your next turn). Pure from the outside: transitions clone the state.
 
 const HP = 30, MAX_MANA = 10, TURN_LIMIT = 80;
+// Energy: both start full at 10; unspent energy is kept; each turn you regain REGEN, never above 10.
+let REGEN = 5;
+function setRegen(r) { REGEN = r; }
 
 // Placeholder numbers. A Strike costing c deals c+1; a Guard costing c absorbs 2c.
 // Guards get the better rate on purpose: a guard is worth only what he actually
@@ -290,7 +293,7 @@ function shuffleInPlace(s, a) {
   return a;
 }
 
-function newPlayer() { return { hp: HP, maxHp: HP, mana: 0, maxMana: 0, block: 0, hand: [], deck: deckList(), played: [] }; }
+function newPlayer() { return { hp: HP, maxHp: HP, mana: MAX_MANA, turns: 0, block: 0, hand: [], deck: deckList(), played: [] }; }
 function clonePlayer(p) { return { ...p, hand: p.hand.slice(), deck: p.deck.slice(), played: p.played.slice() }; }
 function clone(s) { return { ...s, p: [clonePlayer(s.p[0]), clonePlayer(s.p[1])] }; }
 
@@ -317,10 +320,11 @@ function mStartTurn(s, ev) {
   emit(s, ev, { t: 'turn', side });
   if (p.block) emit(s, ev, { t: 'expire', side, n: p.block });
   p.block = 0;
-  p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
-  p.mana = p.maxMana;
+  const before = p.mana;
+  if (p.turns > 0) p.mana = Math.min(MAX_MANA, p.mana + REGEN);
+  p.turns++;
   const drew = draw(s, side, 1);
-  emit(s, ev, { t: 'start', side, mana: p.mana, drew });
+  emit(s, ev, { t: 'start', side, mana: p.mana, gain: p.mana - before, drew });
 }
 
 function checkWin(s, ev) {
@@ -402,8 +406,10 @@ function turnSets(hand, mana) {
   for (const id of hand) counts[id] = (counts[id] || 0) + 1;
   const ids = Object.keys(counts);
   const out = [];
+  const total = mana;
   (function rec(i, mana, str, grd, cards) {
-    if (i === ids.length) { out.push({ str, grd, n: cards.length, cards: cards.slice() }); return; }
+    const spent = total - mana;
+    if (i === ids.length) { out.push({ str, grd, n: cards.length, cost: spent, cards: cards.slice() }); return; }
     const c = CARDS[ids[i]];
     for (let k = 0; k <= counts[ids[i]]; k++) {
       if (k * c.cost > mana) break;
@@ -415,7 +421,7 @@ function turnSets(hand, mana) {
   return out;
 }
 
-const W = { block: 0.6, hand: 0.4 };
+const W = { block: 0.6, hand: 0.4, energy: 0.35 };
 
 // Choose the bot's whole turn. Returns the list of cards to play (maybe empty).
 function botTurn(s, rng, K = 8) {
@@ -425,7 +431,7 @@ function botTurn(s, rng, K = 8) {
   const left = { ...DECK };
   for (const id of O.played) left[id]--;
   for (const [id, k] of Object.entries(left)) for (let i = 0; i < k; i++) unseen.push(id);
-  const oppMana = Math.min(MAX_MANA, O.maxMana + 1);
+  const oppMana = Math.min(MAX_MANA, O.mana + REGEN);
   const replies = [];
   for (let k = 0; k < K; k++) {
     const pool = unseen.slice();
@@ -446,7 +452,8 @@ function botTurn(s, rng, K = 8) {
         for (const R of T) {
           const myHp = P.hp - Math.max(0, R.str - myBlock);
           const val = myHp <= 0 ? -1000
-            : (myHp - oppHp) - W.block * R.grd + W.hand * ((P.hand.length - S.n) - (oppHandNext - R.n));
+            : (myHp - oppHp) - W.block * R.grd + W.hand * ((P.hand.length - S.n) - (oppHandNext - R.n))
+              + W.energy * (Math.min(MAX_MANA, P.mana - S.cost + REGEN) - Math.min(MAX_MANA, oppMana - R.cost + REGEN));
           if (val < worst) worst = val;
         }
         v += worst / K;
@@ -511,14 +518,14 @@ function heroHTML(side) {
   const active = !ui.over && s.turn === side;
   const shield = block > 0 ? `<div class="shield${ui.popGuard[side] ? ' pop' : ''}" id="shield${side}">${shieldSVG}<span style="font-size:18px">${block}</span></div>` : '';
   let gems = '';
-  for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
+  for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < mana ? ' on' : ''}"></i>`;
   return `<div class="left"><div class="guards">${shield}</div></div>
     <div class="mid"><div class="plate${active ? ' active' : ''}" id="plate${side}">
       <div class="hname">${mine ? 'You' : 'Opponent'}</div>
       <div class="hp${hp <= 8 ? ' low' : ''}">${hp}</div>
     </div></div>
     <div class="right">
-      <div class="mana" id="mana${side}">${gems}<span class="manatxt">${mana}<small>/${p.maxMana}</small></span></div>
+      <div class="mana" id="mana${side}">${gems}<span class="manatxt">${mana}<small> energy, +${REGEN} a turn</small></span></div>
       <div class="counts">Deck ${p.deck.length}${mine ? '' : ' · Hand ' + p.hand.length}</div>
     </div>`;
 }

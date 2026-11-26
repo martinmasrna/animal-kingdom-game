@@ -1,5 +1,6 @@
 // node selftest.mjs [n]: the bot against a greedy and a random player, and against itself, both seats.
-import { newMatch, playAction, endTurn, CARDS } from './src/engine.js';
+import { newMatch, playAction, endTurn, CARDS, setRegen } from './src/engine.js';
+if (process.argv[3]) setRegen(+process.argv[3]);
 import { makeRng, botTurn, greedyTurn, randomTurn } from './src/bot.js';
 
 const N = +(process.argv[2] || 300);
@@ -32,6 +33,7 @@ function series(a, b) {
   }
   console.log(`${a} vs ${b}: ${a} ${(100 * wa / N).toFixed(1)}%, ${b} ${(100 * wb / N).toFixed(1)}%, draws ${d}; first player wins ${(100 * firstWins / N).toFixed(1)}%; avg ${(turns / N).toFixed(1)} turns; guards ${(100 * g / (g + st)).toFixed(0)}% of cards played`);
 }
+console.log('regen', process.argv[3] || 'default');
 series('bot', 'random');
 series('bot', 'greedy');
 series('greedy', 'greedy');

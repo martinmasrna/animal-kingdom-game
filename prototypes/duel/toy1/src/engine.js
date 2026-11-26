@@ -3,6 +3,9 @@
 // until your next turn). Pure from the outside: transitions clone the state.
 
 export const HP = 30, MAX_MANA = 10, TURN_LIMIT = 80;
+// Energy: both start full at 10; unspent energy is kept; each turn you regain REGEN, never above 10.
+export let REGEN = 5;
+export function setRegen(r) { REGEN = r; }
 
 // Placeholder numbers. A Strike costing c deals c+1; a Guard costing c absorbs 2c.
 // Guards get the better rate on purpose: a guard is worth only what he actually
@@ -29,7 +32,7 @@ function shuffleInPlace(s, a) {
   return a;
 }
 
-function newPlayer() { return { hp: HP, maxHp: HP, mana: 0, maxMana: 0, block: 0, hand: [], deck: deckList(), played: [] }; }
+function newPlayer() { return { hp: HP, maxHp: HP, mana: MAX_MANA, turns: 0, block: 0, hand: [], deck: deckList(), played: [] }; }
 function clonePlayer(p) { return { ...p, hand: p.hand.slice(), deck: p.deck.slice(), played: p.played.slice() }; }
 export function clone(s) { return { ...s, p: [clonePlayer(s.p[0]), clonePlayer(s.p[1])] }; }
 
@@ -56,10 +59,11 @@ function mStartTurn(s, ev) {
   emit(s, ev, { t: 'turn', side });
   if (p.block) emit(s, ev, { t: 'expire', side, n: p.block });
   p.block = 0;
-  p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
-  p.mana = p.maxMana;
+  const before = p.mana;
+  if (p.turns > 0) p.mana = Math.min(MAX_MANA, p.mana + REGEN);
+  p.turns++;
   const drew = draw(s, side, 1);
-  emit(s, ev, { t: 'start', side, mana: p.mana, drew });
+  emit(s, ev, { t: 'start', side, mana: p.mana, gain: p.mana - before, drew });
 }
 
 function checkWin(s, ev) {

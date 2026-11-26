@@ -2,7 +2,7 @@
 // hit his block first, guards only add to your own), so the bot picks the set
 // whose worst case over the opponent's best reply is best, averaged over hands
 // the opponent could hold. It never reads his hand or either deck order.
-import { CARDS, DECK, MAX_MANA } from './engine.js';
+import { CARDS, DECK, MAX_MANA, REGEN } from './engine.js';
 
 export function makeRng(seed) {
   let a = (seed >>> 0) || 0x9e3779b9;
@@ -20,8 +20,10 @@ export function turnSets(hand, mana) {
   for (const id of hand) counts[id] = (counts[id] || 0) + 1;
   const ids = Object.keys(counts);
   const out = [];
+  const total = mana;
   (function rec(i, mana, str, grd, cards) {
-    if (i === ids.length) { out.push({ str, grd, n: cards.length, cards: cards.slice() }); return; }
+    const spent = total - mana;
+    if (i === ids.length) { out.push({ str, grd, n: cards.length, cost: spent, cards: cards.slice() }); return; }
     const c = CARDS[ids[i]];
     for (let k = 0; k <= counts[ids[i]]; k++) {
       if (k * c.cost > mana) break;
@@ -33,7 +35,7 @@ export function turnSets(hand, mana) {
   return out;
 }
 
-const W = { block: 0.6, hand: 0.4 };
+const W = { block: 0.6, hand: 0.4, energy: 0.35 };
 
 // Choose the bot's whole turn. Returns the list of cards to play (maybe empty).
 export function botTurn(s, rng, K = 8) {
@@ -43,7 +45,7 @@ export function botTurn(s, rng, K = 8) {
   const left = { ...DECK };
   for (const id of O.played) left[id]--;
   for (const [id, k] of Object.entries(left)) for (let i = 0; i < k; i++) unseen.push(id);
-  const oppMana = Math.min(MAX_MANA, O.maxMana + 1);
+  const oppMana = Math.min(MAX_MANA, O.mana + REGEN);
   const replies = [];
   for (let k = 0; k < K; k++) {
     const pool = unseen.slice();
@@ -64,7 +66,8 @@ export function botTurn(s, rng, K = 8) {
         for (const R of T) {
           const myHp = P.hp - Math.max(0, R.str - myBlock);
           const val = myHp <= 0 ? -1000
-            : (myHp - oppHp) - W.block * R.grd + W.hand * ((P.hand.length - S.n) - (oppHandNext - R.n));
+            : (myHp - oppHp) - W.block * R.grd + W.hand * ((P.hand.length - S.n) - (oppHandNext - R.n))
+              + W.energy * (Math.min(MAX_MANA, P.mana - S.cost + REGEN) - Math.min(MAX_MANA, oppMana - R.cost + REGEN));
           if (val < worst) worst = val;
         }
         v += worst / K;
