@@ -3,8 +3,8 @@
 
 import { CARDS, TILES, POS, GOAL, MAX_MANA, REGIONS, FULL_HAND, setFullHand, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
 import { makeRng, rolloutBot } from './bot.js';
-const expert = rolloutBot(6, 4, 8);
-const TALLY_KEY = 'hex-tally';
+const expert = rolloutBot(6, 12, 8);
+const TALLY_KEY = 'hex-tally-2';
 
 const ME = 0, BOT = 1;
 const ui = { s: null, view: null, busy: false, over: false, sel: null, food: [0, 0], hist: [], fresh: new Set(), fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };

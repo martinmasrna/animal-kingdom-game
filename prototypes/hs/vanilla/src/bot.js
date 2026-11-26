@@ -44,24 +44,51 @@ export function faceBot(s, rng) {
   }
 }
 
-// A position's worth to `me`: health, the minions on the board, the cards in hand.
-export const W = { hp: 0.5, atk: 1, mhp: 1, card: 1.5 };
+// A position's worth to `me`: health (each point worth more once a hero is low), the minions on
+// the board, the cards in hand. A card played is a card lost: it has to buy more than it costs.
+export const W = { hp: 0.5, low: 0.5, lowAt: 12, atk: 1.5, mhp: 1, card: 2 };
+const hpWorth = (h) => W.hp * h - W.low * Math.max(0, W.lowAt - h);
 export function evaluate(s, me) {
   if (s.winner === me) return 1e4;
   if (s.winner !== null) return s.winner === 'draw' ? 0 : -1e4;
   const P = s.p[me], O = s.p[1 - me];
-  let v = W.hp * (Math.max(P.hp, 0) - Math.max(O.hp, 0));
+  let v = hpWorth(Math.max(P.hp, 0)) - hpWorth(Math.max(O.hp, 0));
   for (const m of P.board) v += W.atk * m.atk + W.mhp * m.hp;
   for (const m of O.board) v -= W.atk * m.atk + W.mhp * m.hp;
   v += W.card * (P.hand.length - O.hand.length);
   return v;
 }
-// Greedy: each step the action that most improves that worth; ends the turn when none does.
-// A card's own worth in hand is not counted as lost when it is played (it is judged by what it does).
+// Lethal: when every ready minion and every burn spell affordable this turn add up to his health
+// (nothing can block), the actions that do it: the Coin if it helps, spells at his face, attacks at his face.
+export function lethal(s) {
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  let face = 0; const out = [];
+  P.board.forEach((m, i) => { if (m.ready) { face += m.atk; out.push({ t: 'attack', from: i, to: -1 }); } });
+  if (face >= O.hp) return out;
+  const spells = P.hand.filter(id => CARDS[id].kind === 'Spell');
+  const coin = P.hand.includes('COIN') ? 1 : 0;
+  // the most burn this turn's mana buys: try every subset (a hand holds few spells)
+  let best = null;
+  for (let mask = 1; mask < (1 << spells.length); mask++) {
+    let cost = 0, dmg = 0;
+    for (let k = 0; k < spells.length; k++) if (mask & (1 << k)) { cost += CARDS[spells[k]].cost; dmg += CARDS[spells[k]].dmg; }
+    const useCoin = cost > P.mana;
+    if (cost > P.mana + coin) continue;
+    if (face + dmg >= O.hp && (!best || cost < best.cost)) best = { mask, cost, useCoin };
+  }
+  if (!best) return null;
+  const acts = best.useCoin ? [{ t: 'play', card: 'COIN' }] : [];
+  for (let k = 0; k < spells.length; k++) if (best.mask & (1 << k)) acts.push({ t: 'play', card: spells[k], target: { side: 1 - me, i: -1 } });
+  return acts.concat(out);
+}
+// Greedy: lethal when it is there; otherwise each step the action that most improves that worth,
+// and the turn ends when none does.
 export function greedyBot(s) {
+  const kill = lethal(s);
+  if (kill) return kill;
   const me = s.turn, t0 = clone(s), out = [];
   let t = t0;
-  const val = (x) => evaluate(x, me) + W.card * (s.p[me].hand.length - x.p[me].hand.length);
+  const val = (x) => evaluate(x, me);
   let cur = val(t);
   for (;;) {
     if (t.winner !== null) return out;
@@ -77,11 +104,14 @@ const play = (t, acts) => { for (const a of acts) { if (t.winner !== null) break
 // Play-out: candidate turns are Greedy's own and each first action finished the way Greedy would;
 // the best TOPN by Greedy's judgement are each played out R times DEPTH turns ahead with Greedy on
 // both sides, after reshuffling the cards the mover cannot see. Keeps the turn that wins most.
+const MARGIN = 0.2; // the share of play-outs another turn must win beyond Greedy's
 export function rolloutBot(TOPN = 6, R = 4, DEPTH = 8) {
   return function (s, rng) {
     const me = s.turn, cands = [];
-    const add = (acts) => { const t = play(clone(s), acts); cands.push({ acts, t, v: evaluate(t, me) + W.card * (s.p[me].hand.length - t.p[me].hand.length) }); };
-    add(greedyBot(s)); add([]);
+    const kill = lethal(s);
+    if (kill) return kill;
+    const add = (acts) => { const t = play(clone(s), acts); cands.push({ acts, t, v: evaluate(t, me) }); };
+    add(greedyBot(s)); cands[0].greedy = true; add([]);
     for (const a of notSelf(s)) { const t = act(s, a); add([a, ...greedyBot(t)]); }
     const seen = new Set(), top = [];
     for (const c of cands.sort((a, b) => b.v - a.v)) {
@@ -90,7 +120,10 @@ export function rolloutBot(TOPN = 6, R = 4, DEPTH = 8) {
       if (top.length >= TOPN) break;
     }
     if (top.length === 1 || top[0].t.winner === me) return top[0].acts;
-    let best = top[0], bw = -Infinity;
+    // Greedy's own turn stands unless the play-outs clearly prefer another
+    const g = top.find(c => c.greedy) || top[0];
+    let best = g, bw = -Infinity;
+    const scored = [];
     for (const c of top) {
       let w = 0;
       for (let r = 0; r < R; r++) {
@@ -102,8 +135,10 @@ export function rolloutBot(TOPN = 6, R = 4, DEPTH = 8) {
         if (t.winner === me) w += 1; else if (t.winner === 'draw') w += 0.5;
         else if (t.winner === null) { const e = evaluate(t, me); w += e > 0 ? 0.75 : e < 0 ? 0.25 : 0.5; }
       }
-      if (w > bw) { bw = w; best = c; }
+      scored.push({ c, w });
     }
-    return best.acts;
+    const gw = (scored.find(x => x.c === g) || { w: -Infinity }).w;
+    for (const x of scored) if (x.w > bw) { bw = x.w; best = x.c; }
+    return bw > gw + MARGIN * R ? best.acts : g.acts;
   };
 }

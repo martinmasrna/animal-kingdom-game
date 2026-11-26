@@ -5,8 +5,8 @@
 import { CARDS, MAX_MANA, BOARD, newMatch, act, endTurn, legalActions } from './engine.js';
 import { makeRng, rolloutBot } from './bot.js';
 
-const ME = 0, BOT = 1, TALLY_KEY = 'vanilla-hs-tally';
-const expert = rolloutBot(6, 4, 8);
+const ME = 0, BOT = 1, TALLY_KEY = 'vanilla-hs-tally-2';
+const expert = rolloutBot(6, 12, 8);
 const ui = { s: null, view: null, busy: false, over: false, sel: null, hist: [], fresh: 0, fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise(r => setTimeout(r, ms));

@@ -53,7 +53,7 @@ export function greedyTurn(s) {
     let best = null, bestV = cur;
     for (const m of legalMoves(t, me)) {
       const t2 = clone(t); _play(t2, m.card, m.tile);
-      const v = evaluate(t2, me) + W.hand; // judge the board, not the card leaving hand
+      const v = evaluate(t2, me); // a card played is a card lost: it has to buy more than it costs
       if (v > bestV + 1e-9) { bestV = v; best = { m, t2 }; }
     }
     if (!best) return moves;
@@ -168,11 +168,13 @@ export function rolloutBot(TOPN, R, DEPTH) {
       const key = t.board.map(u => u ? u.side + ':' + u.hp : '-').join(',') + '|' + t.p[me].hand.slice().sort().join(',');
       if (!cands.has(key)) cands.set(key, { moves, t, v: evaluate(t, me) });
     };
-    add(greedyTurn(s)); add([]);
+    add(greedyTurn(s)); [...cands.values()][0].greedy = true; add([]);
     for (const m of legalAll(s)) { const t = clone(s); _play(t, m.card, m.tile); add([m, ...greedyTurn(t)]); }
     const top = [...cands.values()].sort((a, b) => b.v - a.v).slice(0, TOPN);
     if (top.length === 1) return top[0].moves;
-    let best = top[0], bv = -Infinity;
+    // Hard's own turn stands unless the play-outs clearly prefer another
+    const g = top.find(c => c.greedy) || top[0];
+    let best = g, bv = -Infinity, gw = -Infinity;
     for (const c of top) {
       let w = 0;
       for (let r = 0; r < R; r++) {
@@ -185,8 +187,9 @@ export function rolloutBot(TOPN, R, DEPTH) {
         else if (t.winner === null) { const e = evaluate(t, me) + (t.p[me].food - t.p[1 - me].food); w += e > 0 ? 0.75 : e < 0 ? 0.25 : 0.5; }
         else if (t.winner === 'draw') w += 0.5;
       }
+      if (c === g) gw = w;
       if (w > bv) { bv = w; best = c; }
     }
-    return best.moves;
+    return bv > gw + 0.2 * R ? best.moves : g.moves;
   };
 }

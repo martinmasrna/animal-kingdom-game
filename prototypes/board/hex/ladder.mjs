@@ -57,7 +57,7 @@ function normalBot(s, rng) {
 }
 // Hard: the region-potential greedy (partial triangles count, health counts a little).
 const hardBot = (s) => greedyTurn(s);
-const expertBot = rolloutBot(6, 4, 8);
+const expertBot = rolloutBot(6, 12, 8);
 
 export const BOTS = { random: randomBot, easy: easyBot, cluster: clusterBot, normal: normalBot, hard: hardBot, expert: expertBot };
 

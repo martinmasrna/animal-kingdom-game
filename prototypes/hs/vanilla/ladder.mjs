@@ -4,7 +4,7 @@ import { newMatch, act, endTurn } from './src/engine.js';
 import { makeRng, randomBot, spendBot, faceBot, greedyBot, rolloutBot } from './src/bot.js';
 
 const N = +(process.argv[2] || 400);
-export const BOTS = { random: randomBot, spend: spendBot, face: faceBot, greedy: greedyBot, expert: rolloutBot(6, 4, 8) };
+export const BOTS = { random: randomBot, spend: spendBot, face: faceBot, greedy: greedyBot, expert: rolloutBot(6, 12, 8) };
 
 export function rate(a, b, n = N, seed0 = 5000) {
   let wa = 0, draws = 0, turns = 0;

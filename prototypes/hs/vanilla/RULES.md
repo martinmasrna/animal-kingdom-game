@@ -8,11 +8,12 @@ A card duel with only text-less minions and damage spells, on the usual rules of
 
 ## The 70% test (`node ladder.mjs`, 400 games a pairing, both seats on the same deals)
 
+Every bot here first passes `node sanity.mjs`: set positions a person never gets wrong (no face burn on turn 1, lethal, lethal through the Coin, a free trade). The first version did not: it counted a played card as costing nothing and never added up lethal, missed lethal and burned face on turn 1, and Martin beat it 8-2 (2026-11-26).
+
 - Spend, random actions but never at its own side and never ending the turn while it can act: beats Random 98%.
 - Face, plays what it can and sends every spell and attack at the enemy hero: beats Spend 76%.
-- Greedy, each action the one that most improves health, board and hand (`greedyBot`): beats Face 74%.
-- Expert, play-outs with Greedy on both sides (`rolloutBot(6, 4, 8)`, the same search as Hex's Expert): beats Greedy 71%.
-- An eight-times larger search beats Expert 58.5%: the chain stops there. Games last about 7 to 9 turns each.
+- Greedy, lethal when it is there, otherwise each action the one that most improves health (worth more below 12), board and hand, a played card counted as spent (`greedyBot`): beats Face 93%.
+- Expert, Greedy's turn unless twelve play-outs per candidate clearly prefer another (`rolloutBot(6, 12, 8)`): beats Greedy 68%, short of 70.
 
 ## The page
 
