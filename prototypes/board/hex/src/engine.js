@@ -13,7 +13,25 @@ const adj = (a, b) => (POS[a].r === POS[b].r && Math.abs(POS[a].x - POS[b].x) ==
 export const REGIONS = [];
 for (let a = 0; a < TILES; a++) for (let b = a + 1; b < TILES; b++) for (let c = b + 1; c < TILES; c++)
   if (adj(a, b) && adj(b, c) && adj(a, c)) REGIONS.push([a, b, c]);
-export const ownTile = () => true;
+// Connection (Martin, 2026-11-26): a unit goes on one of your two base tiles (your nearest row), or
+// next to one of your units that links back to a base tile through your own units. Side 0 plays from
+// the bottom row, side 1 from the top.
+export const BASE = [[TILES - 2, TILES - 1], [0, 1]];
+export const NEIGH = Array.from({ length: TILES }, (_, a) => [...Array(TILES).keys()].filter(b => b !== a && adj(a, b)));
+export let CONNECT = true;
+export function setConnect(v) { CONNECT = v; }
+// the tiles holding this side's units that link back to its base through its own units
+export function connected(s, side) {
+  const seen = new Set(), q = BASE[side].filter(i => s.board[i] && s.board[i].side === side);
+  for (const i of q) seen.add(i);
+  while (q.length) { const a = q.pop(); for (const b of NEIGH[a]) if (!seen.has(b) && s.board[b] && s.board[b].side === side) { seen.add(b); q.push(b); } }
+  return seen;
+}
+export function ownTile(s, side, tile) {
+  if (!CONNECT || BASE[side].includes(tile)) return true;
+  const c = connected(s, side);
+  return NEIGH[tile].some(j => c.has(j));
+}
 
 export let GOAL = 20;
 export let DRAW = 2; // cards drawn at the start of each turn
@@ -119,7 +137,7 @@ export function canPlay(s, card, tile) {
   if (!p.hand.includes(card) || c.cost > p.mana) return false;
   if (tile === undefined) return c.kind === 'Unit' || s.board.some(u => u && u.side !== s.turn);
   const u = s.board[tile];
-  return c.kind === 'Unit' ? ownTile(s.turn, tile) && (u === null || u.side === s.turn) : !!u && u.side !== s.turn;
+  return c.kind === 'Unit' ? (u === null || u.side === s.turn) && ownTile(s, s.turn, tile) : !!u && u.side !== s.turn;
 }
 export function targets(s, card) {
   const out = [];

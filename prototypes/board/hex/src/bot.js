@@ -39,7 +39,7 @@ function legalMoves(t, me) {
     if (CARDS[id].cost > P.mana) continue;
     for (let i = 0; i < TILES; i++) {
       const u = t.board[i];
-      if (CARDS[id].kind === 'Unit' ? ownTile(me, i) && (!u || u.side === me) : u && u.side !== me) out.push({ card: id, tile: i });
+      if (CARDS[id].kind === 'Unit' ? (!u || u.side === me) && ownTile(t, me, i) : u && u.side !== me) out.push({ card: id, tile: i });
     }
   }
   return out;
@@ -87,7 +87,7 @@ function placeSet(s, set) {
     let best = null, bestV = -Infinity;
     for (let i = 0; i < TILES; i++) {
       const u = t.board[i];
-      if (!(CARDS[id].kind === 'Unit' ? ownTile(me, i) && (!u || u.side === me) : u && u.side !== me)) continue;
+      if (!(CARDS[id].kind === 'Unit' ? (!u || u.side === me) && ownTile(t, me, i) : u && u.side !== me)) continue;
       const t2 = clone(t); _play(t2, id, i);
       const v = evaluate(t2, me);
       if (v > bestV) { bestV = v; best = { m: { card: id, tile: i }, t2 }; }
@@ -205,7 +205,7 @@ export function centreBot(s) {
   const play = (card, tile) => { _play(t, card, tile); moves.push({ card, tile }); };
   const units = () => [...new Set(P.hand)].filter(id => CARDS[id].kind === 'Unit' && CARDS[id].cost <= P.mana).sort((a, b) => CARDS[b].n - CARDS[a].n);
   for (let guard = 0; guard < 20; guard++) {
-    const empty = CENTRE.filter(i => !t.board[i]);
+    const empty = CENTRE.filter(i => !t.board[i] && canPlay(t, (units()[0] || 'U1'), i));
     // an empty centre tile takes the biggest unit I can afford
     if (empty.length && units().length) { play(units()[0], empty[0]); continue; }
     // his centre units, biggest first: the cheapest set of strikes that kills one, if a unit can follow it in
@@ -226,7 +226,7 @@ export function centreBot(s) {
     if (did) continue;
     // my weakest centre unit, if a bigger one can land on it
     const mine = CENTRE.filter(i => t.board[i] && t.board[i].side === me).sort((a, b) => t.board[a].hp - t.board[b].hp);
-    if (mine.length && units().length && CARDS[units()[0]].n > t.board[mine[0]].hp) { play(units()[0], mine[0]); continue; }
+    if (mine.length && units().length && CARDS[units()[0]].n > t.board[mine[0]].hp && canPlay(t, units()[0], mine[0])) { play(units()[0], mine[0]); continue; }
     break;
   }
   // the rest of the mana as Hard would spend it, with the strikes kept for the centre

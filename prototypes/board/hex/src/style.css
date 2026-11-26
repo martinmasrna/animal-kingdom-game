@@ -33,6 +33,7 @@ button { font: inherit; cursor: pointer; }
 .mark.m1 { background: radial-gradient(circle at 35% 30%, #c9a6f0, var(--him2)); border-color: #fff; box-shadow: 0 0 12px rgba(138,98,184,.8); }
 .mark.pop { animation: markpop .4s ease-out; }
 @keyframes markpop { 0% { transform: translate(-50%, -50%) scale(.3); } 70% { transform: translate(-50%, -50%) scale(1.3); } 100% { transform: translate(-50%, -50%) scale(1); } }
+.tile.base0 { background: #3a5679; } .tile.base1 { background: #554574; }
 .tile.can { background: #4c7d5c; cursor: pointer; }
 .tile.can:hover { background: #5fae74; }
 .tile.aim { cursor: pointer; background: var(--gold); }

@@ -36,6 +36,7 @@ button { font: inherit; cursor: pointer; }
 .mark.m1 { background: radial-gradient(circle at 35% 30%, #c9a6f0, var(--him2)); border-color: #fff; box-shadow: 0 0 12px rgba(138,98,184,.8); }
 .mark.pop { animation: markpop .4s ease-out; }
 @keyframes markpop { 0% { transform: translate(-50%, -50%) scale(.3); } 70% { transform: translate(-50%, -50%) scale(1.3); } 100% { transform: translate(-50%, -50%) scale(1); } }
+.tile.base0 { background: #3a5679; } .tile.base1 { background: #554574; }
 .tile.can { background: #4c7d5c; cursor: pointer; }
 .tile.can:hover { background: #5fae74; }
 .tile.aim { cursor: pointer; background: var(--gold); }
@@ -218,7 +219,25 @@ const adj = (a, b) => (POS[a].r === POS[b].r && Math.abs(POS[a].x - POS[b].x) ==
 const REGIONS = [];
 for (let a = 0; a < TILES; a++) for (let b = a + 1; b < TILES; b++) for (let c = b + 1; c < TILES; c++)
   if (adj(a, b) && adj(b, c) && adj(a, c)) REGIONS.push([a, b, c]);
-const ownTile = () => true;
+// Connection (Martin, 2026-11-26): a unit goes on one of your two base tiles (your nearest row), or
+// next to one of your units that links back to a base tile through your own units. Side 0 plays from
+// the bottom row, side 1 from the top.
+const BASE = [[TILES - 2, TILES - 1], [0, 1]];
+const NEIGH = Array.from({ length: TILES }, (_, a) => [...Array(TILES).keys()].filter(b => b !== a && adj(a, b)));
+let CONNECT = true;
+function setConnect(v) { CONNECT = v; }
+// the tiles holding this side's units that link back to its base through its own units
+function connected(s, side) {
+  const seen = new Set(), q = BASE[side].filter(i => s.board[i] && s.board[i].side === side);
+  for (const i of q) seen.add(i);
+  while (q.length) { const a = q.pop(); for (const b of NEIGH[a]) if (!seen.has(b) && s.board[b] && s.board[b].side === side) { seen.add(b); q.push(b); } }
+  return seen;
+}
+function ownTile(s, side, tile) {
+  if (!CONNECT || BASE[side].includes(tile)) return true;
+  const c = connected(s, side);
+  return NEIGH[tile].some(j => c.has(j));
+}
 
 let GOAL = 20;
 let DRAW = 2; // cards drawn at the start of each turn
@@ -324,7 +343,7 @@ function canPlay(s, card, tile) {
   if (!p.hand.includes(card) || c.cost > p.mana) return false;
   if (tile === undefined) return c.kind === 'Unit' || s.board.some(u => u && u.side !== s.turn);
   const u = s.board[tile];
-  return c.kind === 'Unit' ? ownTile(s.turn, tile) && (u === null || u.side === s.turn) : !!u && u.side !== s.turn;
+  return c.kind === 'Unit' ? (u === null || u.side === s.turn) && ownTile(s, s.turn, tile) : !!u && u.side !== s.turn;
 }
 function targets(s, card) {
   const out = [];
@@ -420,7 +439,7 @@ function legalMoves(t, me) {
     if (CARDS[id].cost > P.mana) continue;
     for (let i = 0; i < TILES; i++) {
       const u = t.board[i];
-      if (CARDS[id].kind === 'Unit' ? ownTile(me, i) && (!u || u.side === me) : u && u.side !== me) out.push({ card: id, tile: i });
+      if (CARDS[id].kind === 'Unit' ? (!u || u.side === me) && ownTile(t, me, i) : u && u.side !== me) out.push({ card: id, tile: i });
     }
   }
   return out;
@@ -468,7 +487,7 @@ function placeSet(s, set) {
     let best = null, bestV = -Infinity;
     for (let i = 0; i < TILES; i++) {
       const u = t.board[i];
-      if (!(CARDS[id].kind === 'Unit' ? ownTile(me, i) && (!u || u.side === me) : u && u.side !== me)) continue;
+      if (!(CARDS[id].kind === 'Unit' ? (!u || u.side === me) && ownTile(t, me, i) : u && u.side !== me)) continue;
       const t2 = clone(t); _play(t2, id, i);
       const v = evaluate(t2, me);
       if (v > bestV) { bestV = v; best = { m: { card: id, tile: i }, t2 }; }
@@ -575,6 +594,75 @@ function rolloutBot(TOPN, R, DEPTH) {
   };
 }
 
+// Centre: Martin's pattern (2026-11-26: "as long as you hold all 4 center tiles, your opponent can
+// never get points. So you just save all the removal only for middle 4 tiles, and always put unit
+// there after you've cleared it, as strong as you can"). Every triangle on this board holds one of
+// the four centre tiles, so holding them all denies every region and pays the two centre triangles.
+const CENTRE = [3, 6, 7, 10];
+function centreBot(s) {
+  const me = s.turn, t = clone(s), moves = [];
+  const P = t.p[me];
+  const play = (card, tile) => { _play(t, card, tile); moves.push({ card, tile }); };
+  const units = () => [...new Set(P.hand)].filter(id => CARDS[id].kind === 'Unit' && CARDS[id].cost <= P.mana).sort((a, b) => CARDS[b].n - CARDS[a].n);
+  for (let guard = 0; guard < 20; guard++) {
+    const empty = CENTRE.filter(i => !t.board[i] && canPlay(t, (units()[0] || 'U1'), i));
+    // an empty centre tile takes the biggest unit I can afford
+    if (empty.length && units().length) { play(units()[0], empty[0]); continue; }
+    // his centre units, biggest first: the cheapest set of strikes that kills one, if a unit can follow it in
+    const foes = CENTRE.filter(i => t.board[i] && t.board[i].side !== me).sort((a, b) => t.board[b].hp - t.board[a].hp);
+    const strikes = P.hand.filter(id => CARDS[id].kind === 'Strike');
+    const unitCosts = P.hand.filter(id => CARDS[id].kind === 'Unit').map(id => CARDS[id].cost);
+    const follow = unitCosts.length ? Math.min(...unitCosts) : 0;
+    let did = false;
+    for (const i of foes) {
+      let best = null;
+      for (let mask = 1; mask < (1 << strikes.length); mask++) {
+        let cost = 0, dmg = 0; const pick = [];
+        for (let k = 0; k < strikes.length; k++) if (mask & (1 << k)) { cost += CARDS[strikes[k]].cost; dmg += CARDS[strikes[k]].n; pick.push(strikes[k]); }
+        if (dmg >= t.board[i].hp && cost + follow <= P.mana && (!best || cost < best.cost)) best = { cost, pick };
+      }
+      if (best) { for (const id of best.pick.sort((x, y) => CARDS[y].n - CARDS[x].n)) if (t.board[i]) play(id, i); did = true; break; }
+    }
+    if (did) continue;
+    // my weakest centre unit, if a bigger one can land on it
+    const mine = CENTRE.filter(i => t.board[i] && t.board[i].side === me).sort((a, b) => t.board[a].hp - t.board[b].hp);
+    if (mine.length && units().length && CARDS[units()[0]].n > t.board[mine[0]].hp && canPlay(t, units()[0], mine[0])) { play(units()[0], mine[0]); continue; }
+    break;
+  }
+  // the rest of the mana as Hard would spend it, with the strikes kept for the centre
+  const kept = P.hand.filter(id => CARDS[id].kind === 'Strike');
+  P.hand = P.hand.filter(id => CARDS[id].kind !== 'Strike');
+  for (const m of greedyTurn(t)) play(m.card, m.tile);
+  P.hand.push(...kept);
+  return moves;
+}
+// Centre+: candidate turns are the centre rule's own and each first play finished by it; each is played
+// out R times DEPTH turns ahead with the centre rule on both sides (hidden cards reshuffled); the centre
+// rule's turn stands unless the play-outs clearly prefer another.
+function centrePlus(R = 8, DEPTH = 10, TOPN = 6) {
+  return function (s, rng) {
+    const me = s.turn, cands = [];
+    const add = (moves) => { const t = clone(s); for (const m of moves) _play(t, m.card, m.tile); cands.push({ moves, t, v: evaluate(t, me) }); };
+    add(centreBot(s)); const base = cands[0];
+    for (const m of legalAll(s)) { const t = clone(s); _play(t, m.card, m.tile); add([m, ...centreBot(t)]); }
+    const top = [base, ...cands.slice(1).sort((a, b) => b.v - a.v).slice(0, TOPN - 1)];
+    let best = base, bw = -Infinity, baseW = 0;
+    for (const c of top) {
+      let w = 0;
+      for (let r = 0; r < R; r++) {
+        let t = clone(c.t); const O = t.p[1 - me];
+        const pool = shuffle(O.hand.concat(O.deck), rng); O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length); shuffle(t.p[me].deck, rng);
+        t = endTurn(t);
+        for (let d = 0; t.winner === null && d < DEPTH; d++) { for (const m of centreBot(t)) t = playAction(t, m.card, m.tile); if (t.winner !== null) break; t = endTurn(t); }
+        if (t.winner === me) w += 1; else if (t.winner === null) w += (t.p[me].food - t.p[1 - me].food) > 0 ? 0.75 : 0.25;
+      }
+      if (c === base) baseW = w;
+      if (w > bw) { bw = w; best = c; }
+    }
+    return bw > baseW + 0.2 * R ? best.moves : base.moves;
+  };
+}
+
 // ---- src/ui.js
 // Slots as a game screen. Drives the engine through its transitions; each
 // play or turn change is animated from the state before and the state after.
@@ -582,7 +670,7 @@ function rolloutBot(TOPN, R, DEPTH) {
 
 
 const expert = rolloutBot(6, 12, 8);
-const TALLY_KEY = 'hex-tally-2';
+const TALLY_KEY = 'hex-connected-tally';
 
 const ME = 0, BOT = 1;
 const ui = { s: null, view: null, busy: false, over: false, sel: null, food: [0, 0], hist: [], fresh: new Set(), fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
@@ -634,7 +722,8 @@ function boardHTML() {
     let inner = '';
     if (u) inner = `<div class="unit s${u.side} ${ui.fx['t' + i] || ''}" id="u${i}"><span class="hp${u.hp < u.max ? ' hurt' : ''}">${u.hp}</span></div>`;
     else if (ui.fx['dead' + i]) inner = `<div class="unit s${ui.fx['dead' + i].side} dying" id="u${i}"><span class="hp hurt">0</span></div>`;
-    h += `<div class="tile${cls}" id="tile${i}" data-tile="${i}" style="left:${b.left}%;top:${b.top}%">${inner}</div>`;
+    const base = BASE[0].includes(i) ? ' base0' : BASE[1].includes(i) ? ' base1' : '';
+    h += `<div class="tile${cls}${base}" id="tile${i}" data-tile="${i}" style="left:${b.left}%;top:${b.top}%">${inner}</div>`;
   }
   REGIONS.forEach((rg, k) => {
     const m = markAt(rg);
@@ -760,7 +849,7 @@ async function saveGame(winner) {
   try {
     const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
     if (!db) return;
-    await db.collection('games').add({ ...ui.log, winner, me: ME, bot: 'expert-6-12-8', at: Date.now() });
+    await db.collection('games').add({ ...ui.log, winner, me: ME, bot: 'expert-6-12-8', rules: 'connected', at: Date.now() });
   } catch (e) { /* the game is still played; only the record is lost */ }
 }
 function finish() {

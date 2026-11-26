@@ -1,10 +1,10 @@
 // Slots as a game screen. Drives the engine through its transitions; each
 // play or turn change is animated from the state before and the state after.
 
-import { CARDS, TILES, POS, GOAL, MAX_MANA, REGIONS, FULL_HAND, setFullHand, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
+import { CARDS, TILES, POS, BASE, GOAL, MAX_MANA, REGIONS, FULL_HAND, setFullHand, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
 import { makeRng, rolloutBot } from './bot.js';
 const expert = rolloutBot(6, 12, 8);
-const TALLY_KEY = 'hex-tally-2';
+const TALLY_KEY = 'hex-connected-tally';
 
 const ME = 0, BOT = 1;
 const ui = { s: null, view: null, busy: false, over: false, sel: null, food: [0, 0], hist: [], fresh: new Set(), fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
@@ -56,7 +56,8 @@ function boardHTML() {
     let inner = '';
     if (u) inner = `<div class="unit s${u.side} ${ui.fx['t' + i] || ''}" id="u${i}"><span class="hp${u.hp < u.max ? ' hurt' : ''}">${u.hp}</span></div>`;
     else if (ui.fx['dead' + i]) inner = `<div class="unit s${ui.fx['dead' + i].side} dying" id="u${i}"><span class="hp hurt">0</span></div>`;
-    h += `<div class="tile${cls}" id="tile${i}" data-tile="${i}" style="left:${b.left}%;top:${b.top}%">${inner}</div>`;
+    const base = BASE[0].includes(i) ? ' base0' : BASE[1].includes(i) ? ' base1' : '';
+    h += `<div class="tile${cls}${base}" id="tile${i}" data-tile="${i}" style="left:${b.left}%;top:${b.top}%">${inner}</div>`;
   }
   REGIONS.forEach((rg, k) => {
     const m = markAt(rg);
@@ -182,7 +183,7 @@ async function saveGame(winner) {
   try {
     const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
     if (!db) return;
-    await db.collection('games').add({ ...ui.log, winner, me: ME, bot: 'expert-6-12-8', at: Date.now() });
+    await db.collection('games').add({ ...ui.log, winner, me: ME, bot: 'expert-6-12-8', rules: 'connected', at: Date.now() });
   } catch (e) { /* the game is still played; only the record is lost */ }
 }
 function finish() {
