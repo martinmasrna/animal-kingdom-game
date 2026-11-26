@@ -36,3 +36,10 @@ Object.assign(variants, {
   m1d4p2: minimal({ target: true, draw: 4, plays: 2 }),
   m1d4p2h20: minimal({ target: true, draw: 4, plays: 2, hp: 20 }),
 });
+import { train } from './train.js';
+Object.assign(variants, { t8: train({}) });
+Object.assign(variants, {
+  t8a: train({ draw: 4, plays: 2 }),
+  t8b: train({ deck: { S: 2, T: 2, X: 2 } }),
+  t8ab: train({ draw: 4, plays: 2, deck: { S: 2, T: 2, X: 2 } }),
+});
