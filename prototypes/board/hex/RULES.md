@@ -31,3 +31,9 @@ Control, Slots (food per unit, the game Martin found shallow): the simplest bot 
 - Hard, Normal that also values half-built triangles: beats Normal 84.3%.
 - Nothing found beats Hard 70%: Expert 58.0%; above Expert, the centre rule with search 22.5% and an eight-times-larger search 50.0%.
 
+
+## The same chain drawing 2 (connection on, 400 games a step)
+
+- Easy beats Random 87.3%; Cluster beats Easy only 61.5%; Normal beats Easy 94.5%.
+- Hard beats Normal 79.0%. Expert beats Hard 84.0% (drawing 1: 58.0%).
+- Nothing found beats Expert: the centre rule with search 44.3%, an eight-times-larger search 54.0% (200 games each).
