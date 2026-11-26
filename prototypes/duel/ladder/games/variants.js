@@ -47,3 +47,15 @@ import { sr, ruleBot, planBot, rolloutBot, fighterFace, fighterBase, econBot, ou
 Object.assign(variants, { sr30: sr({ hp: 30 }), sr40: sr({ hp: 40 }), sr50: sr({ hp: 50 }) });
 for (const h of [60, 80, 150, 300, 1000]) variants['sr' + h] = sr({ hp: h });
 for (const k of ['sr30', 'sr40', 'sr50', 'sr60', 'sr80', 'sr150', 'sr300', 'sr1000']) variants[k].bots = { rule: ruleBot, plan: planBot, roll: rolloutBot(300), roll30: rolloutBot(30), ffFace: fighterFace, ffBase: fighterBase, econ: econBot, outpost: outpostBot };
+import { fight } from './fight.js';
+Object.assign(variants, {
+  fWound: fight({ deck: { S: 4, C: 3, B: 3 } }),
+  fStag: fight({ deck: { S: 6, T: 4 } }),
+  fBoth: fight({ deck: { S: 4, C: 2, B: 2, T: 2 } }),
+});
+Object.assign(variants, {
+  fW30: fight({ deck: { S: 4, C: 3, B: 3 }, hp: 30, first: 1 }),
+  fW50: fight({ deck: { S: 4, C: 3, B: 3 }, hp: 50, first: 1 }),
+  fT30: fight({ deck: { S: 6, T: 4 }, hp: 30, first: 1 }),
+  fB30: fight({ deck: { S: 4, C: 2, B: 2, T: 2 }, hp: 30, first: 1 }),
+});

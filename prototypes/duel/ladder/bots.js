@@ -122,3 +122,26 @@ export function pimcTimed(ms, K, maxDepth = 30) {
     return best;
   };
 }
+
+// Expert for games without a hand-written plan: judge each option by playing the match out
+// many times with the 1-ply greedy bot on both sides, in worlds re-dealt from what it can see.
+export function rolloutGreedy(ms = 300, cap = 3000) {
+  return (g, s, rng) => {
+    const side = g.toMove(s), opts = g.moves(s);
+    if (opts.length === 1) return opts[0];
+    const deadline = Date.now() + ms;
+    const sum = new Map(opts.map(m => [m, 0])), cnt = new Map(opts.map(m => [m, 0]));
+    let i = 0;
+    while ((Date.now() < deadline || i < opts.length * 4) && i < cap) {
+      const m = opts[i++ % opts.length];
+      let t = g.play(g.sample(s, side, rng), m), k = 0;
+      while (g.winner(t) === null && k++ < 2000) t = g.play(t, greedyBot(g, t, rng));
+      const w = g.winner(t);
+      sum.set(m, sum.get(m) + (w === side ? 1 : w === 'draw' || w === null ? 0.5 : 0));
+      cnt.set(m, cnt.get(m) + 1);
+    }
+    let best = opts[0], bv = -Infinity;
+    for (const m of opts) { const v = sum.get(m) / Math.max(1, cnt.get(m)); if (v > bv) { bv = v; best = m; } }
+    return best;
+  };
+}
