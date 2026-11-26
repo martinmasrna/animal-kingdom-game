@@ -6,6 +6,10 @@
 
 export const SIZE = 4, TILES = SIZE * SIZE, MAX_MANA = 10, TURN_LIMIT = 80;
 export let GOAL = 20;
+export let SKIP_FIRST_DRAW = true;
+export function setSkipFirstDraw(v) { SKIP_FIRST_DRAW = v; }
+export let SECOND_HAND = 3;
+export function setSecondHand(n) { SECOND_HAND = n; }
 export function setGoal(g) { GOAL = g; }
 
 export const CARDS = {};
@@ -61,7 +65,7 @@ export function newMatch({ seed }) {
   const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, first: 0, winner: null, board: Array(TILES).fill(null), p: [newPlayer(), newPlayer()] };
   for (const p of s.p) shuffleInPlace(s, p.deck);
   s.first = rand(s) < 0.5 ? 0 : 1;
-  draw(s, s.first, 3); draw(s, 1 - s.first, 4);
+  draw(s, s.first, 3); draw(s, 1 - s.first, SECOND_HAND);
   s.turn = s.first;
   mStartTurn(s, null);
   return s;
@@ -73,7 +77,7 @@ function mStartTurn(s, ev) {
   emit(s, ev, { t: 'turn', side });
   p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
   p.mana = p.maxMana;
-  const drew = draw(s, side, 1);
+  const drew = s.turnNo === 1 && SKIP_FIRST_DRAW ? 0 : draw(s, side, 1);
   emit(s, ev, { t: 'start', side, mana: p.mana, drew });
 }
 
