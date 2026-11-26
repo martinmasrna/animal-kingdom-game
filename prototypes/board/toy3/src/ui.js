@@ -1,7 +1,7 @@
 // Board Toy 1 as a game screen. Drives the engine through its transitions; each
 // play or turn change is animated from the state before and the state after.
 
-import { CARDS, TILES, GOAL, MAX_MANA, REGIONS, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
+import { CARDS, TILES, COLS, GOAL, MAX_MANA, REGIONS, newMatch, playAction, endTurn, canPlay, targets, heldRegions } from './engine.js';
 import { makeRng, botTurn } from './bot.js';
 
 const ME = 0, BOT = 1;
@@ -39,8 +39,9 @@ function boardHTML() {
   const kind = ui.sel && CARDS[ui.sel].kind;
   let h = '';
   const win = {};
-  for (const side of [0, 1]) for (const k of heldRegions(s, side)) for (const i of REGIONS[k]) win[i] = side;
+  for (const side of [0, 1]) for (const k of heldRegions(s, side)) win[k] = side;
   for (let i = 0; i < TILES; i++) {
+    if (i === COLS) for (let k = 0; k < REGIONS.length; k++) h += `<div class="mark${win[k] === undefined ? '' : ' m' + win[k]}${ui.fx['m' + k] ? ' pop' : ''}" id="mark${k}"></div>`;
     const u = s.board[i], t = live.has(i);
     const cls = t ? (kind === 'Unit' ? ' can' : ' aim') : '';
     let inner = '';
@@ -51,8 +52,7 @@ function boardHTML() {
       const d = ui.fx['dead' + i];
       inner = `<div class="unit s${d.side} dying" id="u${i}"><span class="hp hurt">0</span></div>`;
     }
-    const w = win[i] === undefined ? '' : ' win' + win[i];
-    h += `<div class="tile${cls}${w}" id="tile${i}" data-tile="${i}">${inner}</div>`;
+    h += `<div class="tile${cls}" id="tile${i}" data-tile="${i}">${inner}</div>`;
   }
   return h;
 }
@@ -77,6 +77,9 @@ function handHTML() {
 
 function render() {
   const s = ui.view;
+  const own = REGIONS.map((_, k) => heldRegions(s, 0).includes(k) ? 0 : heldRegions(s, 1).includes(k) ? 1 : -1);
+  if (ui.own) own.forEach((o, k) => { if (o !== ui.own[k] && o >= 0) ui.fx['m' + k] = 1; });
+  ui.own = own;
   $('opphand').innerHTML = '<i class="back"></i>'.repeat(s.p[BOT].hand.length);
   for (const side of [0, 1]) {
     $('res' + side).innerHTML = resHTML(side);
@@ -100,15 +103,6 @@ function floater(el, text, cls, dy = 0) {
   const c = centerOf(el), f = document.createElement('div');
   f.className = 'float ' + cls; f.textContent = text;
   f.style.left = c.x + 'px'; f.style.top = (c.y + dy) + 'px';
-  $('game').appendChild(f);
-  setTimeout(() => f.remove(), 1200);
-}
-function regionFloater(rg) {
-  const cs = rg.map(i => centerOf($('tile' + i)));
-  const x = cs.reduce((a, c) => a + c.x, 0) / cs.length, y = cs.reduce((a, c) => a + c.y, 0) / cs.length;
-  const f = document.createElement('div');
-  f.className = 'float gain'; f.textContent = '+1';
-  f.style.left = x + 'px'; f.style.top = y + 'px';
   $('game').appendChild(f);
   setTimeout(() => f.remove(), 1200);
 }
@@ -138,7 +132,7 @@ async function apply(fn) {
       for (const k of e.regions) for (const i of REGIONS[k]) if (prev.board[i] && prev.board[i].side === e.side) ui.fx['t' + i] = 'scored';
       ui.food[e.side] = e.food; ui.fx['food' + e.side] = 1;
       render();
-      for (const k of e.regions) regionFloater(REGIONS[k]);
+      for (const k of e.regions) floater($('mark' + k), '+1', 'gain', -20);
       floater($('food' + e.side), '+' + e.n, 'gainbig', -46);
       ui.hist.push({ side: e.side, food: 1, out: '+' + e.n, cls: 'gain' });
       await wait(750);

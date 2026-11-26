@@ -1,6 +1,6 @@
 // Board Toy 3: each player owns one row of 5 tiles, facing the other's. Hearthstone
 // mana, one shared deck list of two kinds of card: Unit (placed on an empty tile of
-// your own row, its strength is its health) and Strike (deal N damage to an enemy unit).
+// your own row or onto one of your units, which it replaces; its strength is its health) and Strike (deal N damage to an enemy unit).
 // A region pays, at the end of your turn, 1 food if your units in it have more total
 // health than his; first to GOAL wins. Regions are the columns, or the 2 by 2 blocks.
 
@@ -108,9 +108,9 @@ export function canPlay(s, card, tile) {
   if (s.winner !== null || !CARDS[card]) return false;
   const p = s.p[s.turn], c = CARDS[card];
   if (!p.hand.includes(card) || c.cost > p.mana) return false;
-  if (tile === undefined) return c.kind === 'Unit' ? s.board.some((u, i) => u === null && ownTile(s.turn, i)) : s.board.some(u => u && u.side !== s.turn);
+  if (tile === undefined) return c.kind === 'Unit' || s.board.some(u => u && u.side !== s.turn);
   const u = s.board[tile];
-  return c.kind === 'Unit' ? u === null && ownTile(s.turn, tile) : !!u && u.side !== s.turn;
+  return c.kind === 'Unit' ? ownTile(s.turn, tile) && (u === null || u.side === s.turn) : !!u && u.side !== s.turn;
 }
 export function targets(s, card) {
   const out = [];
@@ -126,6 +126,8 @@ function mPlay(s, card, tile, ev) {
   p.played.push(card);
   emit(s, ev, { t: 'play', side, card, tile, mana: p.mana });
   if (c.kind === 'Unit') {
+    const old = s.board[tile];
+    if (old) emit(s, ev, { t: 'replace', side, tile, card: old.card });
     s.board[tile] = { side, card, hp: c.n, max: c.n };
     emit(s, ev, { t: 'place', side, tile });
   } else {

@@ -39,7 +39,7 @@ function legalMoves(t, me) {
     if (CARDS[id].cost > P.mana) continue;
     for (let i = 0; i < TILES; i++) {
       const u = t.board[i];
-      if (CARDS[id].kind === 'Unit' ? u === null && ownTile(me, i) : u && u.side !== me) out.push({ card: id, tile: i });
+      if (CARDS[id].kind === 'Unit' ? ownTile(me, i) && (!u || u.side === me) : u && u.side !== me) out.push({ card: id, tile: i });
     }
   }
   return out;
@@ -87,7 +87,7 @@ function placeSet(s, set) {
     let best = null, bestV = -Infinity;
     for (let i = 0; i < TILES; i++) {
       const u = t.board[i];
-      if (!(CARDS[id].kind === 'Unit' ? u === null && ownTile(me, i) : u && u.side !== me)) continue;
+      if (!(CARDS[id].kind === 'Unit' ? ownTile(me, i) && (!u || u.side === me) : u && u.side !== me)) continue;
       const t2 = clone(t); _play(t2, id, i);
       const v = evaluate(t2, me);
       if (v > bestV) { bestV = v; best = { m: { card: id, tile: i }, t2 }; }
