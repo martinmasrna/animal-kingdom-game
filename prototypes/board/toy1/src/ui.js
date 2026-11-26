@@ -9,7 +9,6 @@ const ui = { s: null, view: null, busy: false, over: false, sel: null, food: [0,
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-const label = (id) => (CARDS[id].kind === 'Unit' ? 'Unit ' : 'Strike ') + CARDS[id].n;
 
 function cardHTML(id, side, { cls = '', attrs = '' } = {}) {
   const c = CARDS[id];
@@ -22,14 +21,16 @@ function cardHTML(id, side, { cls = '', attrs = '' } = {}) {
 }
 
 // ------------------------------------------------------------------ rendering
-function plateHTML(side) {
-  const s = ui.view, p = s.p[side], mine = side === ME;
+function resHTML(side) {
+  const p = ui.view.p[side];
   let gems = '';
   for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < p.mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
-  return `<div class="who"><i class="dot"></i>${mine ? 'You' : 'Opponent'}</div>
-    <div class="mana">${gems}<span class="manatxt">${p.mana}/${p.maxMana}</span></div>
-    <div class="counts">Deck ${p.deck.length}${mine ? '' : ' · Hand ' + p.hand.length}</div>
-    <div class="food${ui.fx['food' + side] ? ' bump' : ''}" id="food${side}"><b>${ui.food[side]}</b><small>/ ${GOAL}</small></div>`;
+  return `<div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div><div class="pile s${side}">${p.deck.length}</div>`;
+}
+function histHTML(h) {
+  if (h.sep) return `<div class="hsep s${h.side}"></div>`;
+  const chip = h.food ? `<span class="chip coin"></span>` : `<span class="chip ${CARDS[h.card].kind} s${h.side}">${CARDS[h.card].n}</span>`;
+  return `<div class="hist s${h.side}">${chip}<span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`;
 }
 
 function boardHTML() {
@@ -75,18 +76,18 @@ function render() {
   const s = ui.view;
   $('opphand').innerHTML = '<i class="back"></i>'.repeat(s.p[BOT].hand.length);
   for (const side of [0, 1]) {
-    const el = $('plate' + side);
-    el.innerHTML = plateHTML(side);
-    el.classList.toggle('active', !ui.over && s.turn === side);
+    $('res' + side).innerHTML = resHTML(side);
+    const f = $('food' + side);
+    f.innerHTML = `<b>${ui.food[side]}</b><small>/${GOAL}</small>`;
+    f.classList.toggle('active', !ui.over && s.turn === side);
+    f.classList.toggle('bump', !!ui.fx['food' + side]);
   }
   $('board').innerHTML = boardHTML();
   $('hand').innerHTML = handHTML();
   const myTurn = !ui.over && s.turn === ME;
   const canAct = myTurn && !ui.busy && s.p[ME].hand.some(id => canPlay(s, id));
-  $('turnbox').innerHTML = `<button id="endturn" class="${myTurn && !canAct ? 'done' : ''}"${myTurn && !ui.busy ? '' : ' disabled'}>${myTurn ? 'End turn' : 'His turn'}</button>`;
-  $('history').innerHTML = ui.hist.slice(-10).map(h => h.sep
-    ? `<div class="hist sep">${h.sep}</div>`
-    : `<div class="hist s${h.side}"><span class="hn">${h.text}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`).join('');
+  $('turnbox').innerHTML = `<button id="endturn" class="${myTurn && !canAct ? 'done' : ''}"${myTurn && !ui.busy ? '' : ' disabled'}>End turn</button>`;
+  $('history').innerHTML = ui.hist.slice(-14).map(histHTML).join('');
   ui.fresh.clear(); ui.fx = {};
 }
 
@@ -122,30 +123,29 @@ async function apply(fn) {
   for (const e of ev) {
     if (e.t === 'turn') {
       ui.view = next; ui.sel = null;
-      ui.hist.push({ sep: e.side === ME ? 'Your turn' : 'His turn' });
+      ui.hist.push({ sep: 1, side: e.side });
       render();
-      banner(e.side === ME ? 'Your turn' : 'His turn');
-      await wait(650);
+      if (e.side === ME) { banner('Your turn'); await wait(650); } else await wait(300);
     } else if (e.t === 'food') {
       for (const i of e.tiles) ui.fx['t' + i] = 'scored';
       ui.food[e.side] = e.food; ui.fx['food' + e.side] = 1;
       render();
       for (const i of e.tiles) floater($('tile' + i), '+1', 'gain', -10);
       floater($('food' + e.side), '+' + e.n, 'gainbig', -46);
-      ui.hist.push({ side: e.side, text: 'Food', out: '+' + e.n, cls: 'gain' });
+      ui.hist.push({ side: e.side, food: 1, out: '+' + e.n, cls: 'gain' });
       await wait(750);
     } else if (e.t === 'play') {
       if (e.side === BOT || CARDS[e.card].kind === 'Strike') await spotlight(e.card, e.side);
     } else if (e.t === 'place') {
       ui.view = next; ui.fx['t' + e.tile] = 'new';
-      ui.hist.push({ side: e.side, text: label(ev.find(x => x.t === 'play').card) });
+      ui.hist.push({ side: e.side, card: ev.find(x => x.t === 'play').card });
       render();
     } else if (e.t === 'hit') {
       const died = ev.some(x => x.t === 'die');
       ui.view = next;
       if (died) ui.fx['dead' + e.tile] = { side: e.side };
       else ui.fx['t' + e.tile] = 'shake';
-      ui.hist.push({ side: 1 - e.side, text: label(ev.find(x => x.t === 'play').card), out: died ? 'kill' : '−' + e.dmg, cls: died ? 'kill' : 'dmg' });
+      ui.hist.push({ side: 1 - e.side, card: ev.find(x => x.t === 'play').card, out: died ? '✕' : '−' + e.dmg, cls: died ? 'kill' : 'dmg' });
       render();
       floater($('tile' + e.tile), '−' + e.dmg, 'dmg');
       await wait(died ? 450 : 250);
@@ -177,8 +177,8 @@ async function startMatch() {
   ui.view = ui.s; ui.over = false; ui.hist = []; ui.sel = null; ui.food = [0, 0];
   $('over').classList.remove('show');
   ui.busy = true; render();
-  ui.hist.push({ sep: ui.s.first === ME ? 'Your turn' : 'His turn' });
-  banner(ui.s.first === ME ? 'You go first' : 'He goes first');
+  ui.hist.push({ sep: 1, side: ui.s.first });
+  if (ui.s.first === ME) banner('Your turn');
   await wait(900);
   if (tok !== ui.token) return;
   if (ui.s.turn === BOT) await botMove(tok);
