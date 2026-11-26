@@ -43,6 +43,7 @@ Object.assign(variants, {
   t8b: train({ deck: { S: 2, T: 2, X: 2 } }),
   t8ab: train({ draw: 4, plays: 2, deck: { S: 2, T: 2, X: 2 } }),
 });
-import { sr, ruleBot, planBot, rolloutBot } from './sr.js';
+import { sr, ruleBot, planBot, rolloutBot, fighterFace, fighterBase, econBot, outpostBot } from './sr.js';
 Object.assign(variants, { sr30: sr({ hp: 30 }), sr40: sr({ hp: 40 }), sr50: sr({ hp: 50 }) });
-for (const k of ['sr30', 'sr40', 'sr50']) variants[k].bots = { rule: ruleBot, plan: planBot, roll: rolloutBot(300), roll30: rolloutBot(30) };
+for (const h of [60, 80, 150, 300, 1000]) variants['sr' + h] = sr({ hp: h });
+for (const k of ['sr30', 'sr40', 'sr50', 'sr60', 'sr80', 'sr150', 'sr300', 'sr1000']) variants[k].bots = { rule: ruleBot, plan: planBot, roll: rolloutBot(300), roll30: rolloutBot(30), ffFace: fighterFace, ffBase: fighterBase, econ: econBot, outpost: outpostBot };

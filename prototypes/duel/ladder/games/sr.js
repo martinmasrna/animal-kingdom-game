@@ -96,7 +96,7 @@ export function sr(o = {}) {
       end(t);
       return t;
     },
-    winner(s) { if (s.hp[0] <= 0) return 1; if (s.hp[1] <= 0) return 0; if (s.ply >= 120) return 'draw'; return null; },
+    winner(s) { if (s.hp[0] <= 0) return 1; if (s.hp[1] <= 0) return 0; if (s.ply >= (o.maxTurns ?? 400)) return 'draw'; return null; },
     evaluate(s, side) {
       const inc = (q) => {
         const all = s.hand[q].concat(s.deck[q], s.disc[q]);
@@ -172,4 +172,35 @@ export function rolloutBot(ms = 300) {
     for (const m of opts) { const v = score.get(m) / Math.max(1, n.get(m)); if (v > bv) { bv = v; best = m; } }
     return best;
   };
+}
+
+// Probe strategies: buy only Fighters (as many as trade allows), never scrap; hit face, or break bases first.
+export function fighterFace(g, s) {
+  if (s.phase === 'scrap') return 'X-';
+  if (s.phase === 'buy') return g.moves(s).includes('BF') ? 'BF' : 'B-';
+  return 'A-';
+}
+export function fighterBase(g, s) {
+  if (s.phase === 'scrap') return 'X-';
+  if (s.phase === 'buy') return g.moves(s).includes('BF') ? 'BF' : 'B-';
+  return g.moves(s).includes('AO') ? 'AO' : 'A-';
+}
+export function econBot(g, s) {
+  const me = s.turn, ms = g.moves(s);
+  if (s.phase === 'scrap') { for (const c of ['C', 'V']) if (ms.includes('X' + c)) return 'X' + c; return 'X-'; }
+  if (s.phase === 'buy') {
+    const all = s.hand[me].concat(s.deck[me], s.disc[me]);
+    const n = (c) => all.filter(x => x === c).length;
+    if (ms.includes('BH')) return 'BH';
+    if (ms.includes('BX') && n('X') < 2) return 'BX';
+    if (ms.includes('BE') && n('E') < 4) return 'BE';
+    return 'B-';
+  }
+  return 'A-';
+}
+export function outpostBot(g, s) {
+  const ms = g.moves(s);
+  if (s.phase === 'scrap') return 'X-';
+  if (s.phase === 'buy') { if (ms.includes('BO')) return 'BO'; if (ms.includes('BE')) return 'BE'; return 'B-'; }
+  return ms.includes('AO') ? 'AO' : 'A-';
 }
