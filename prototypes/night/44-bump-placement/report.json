@@ -1,0 +1,139 @@
+{
+  "concept": "44-bump-placement",
+  "expert": {
+    "playouts": 400,
+    "depth": 2,
+    "eps": 0.05,
+    "keep": 12,
+    "beta": 0.5
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "endedByRound12": 0,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 6,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "endedByRound12": 0,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 6.5,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "endedByRound12": 0,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 6.2,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 200,
+      "endedByRound12": 0,
+      "aWinRate": 0.51,
+      "draws": 0,
+      "firstPlayerWinRate": 0.57,
+      "avgTurns": 9,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "endedByRound12": 0,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.66,
+      "avgTurns": 9,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 1,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "cappedCountedOver": "every game Expert plays (no safety cap exists: round 12 is the designed end and counts as an ending)",
+    "expertGreedyAgreement": 0.3486,
+    "agreementDecisions": 35959,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.57,
+    "firstPlayerPass": true,
+    "seconds": 179,
+    "setPositionsPass": true,
+    "allPass": true
+  },
+  "costBinding": {
+    "measuredIn": "Expert mirror, both seats, every round",
+    "rounds": 3612,
+    "handCostsMoreThanManaRate": 0.975,
+    "fundedRoundRate": 0.445,
+    "unspentManaShare": 0.063,
+    "passedWithManaLeftAndADearerCardHeldRate": 0.206
+  },
+  "mirror": {
+    "games": 200,
+    "endedByRound12": 0,
+    "avgRounds": 9.03,
+    "bumpsPerRound": 2.35,
+    "avgWinnerPoints": 21.2,
+    "avgLoserPoints": 14.9
+  },
+  "sanity": [
+    {
+      "position": "lethal: on 17, he has passed with a Worker on Score 3; my Hand (1 mana) bumps it",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "lethal: on 17, he has passed with a Worker on Score 3; my Hand (1 mana) bumps it",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "free bump: his Worker on Score 3, my Hand in hand: take it",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "free bump: his Worker on Score 3, my Hand in hand: take it",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: he has passed, Score 3 is the one open space: take it with the Worker, never the Chief",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "don't waste: he has passed, Score 3 is the one open space: take it with the Worker, never the Chief",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "report": {
+    "verdict": "alive",
+    "numbers": "Expert vs Random 100%, vs Greedy 100%, vs Racer 100% (400 games each, seats alternated); no game needs a safety cap (round 12 is the designed end and no Expert game reached it: Expert mirror games last 9.0 rounds, winner 21.2 points, loser 14.9); Expert = Greedy on 34.9% of 35,959 decisions; first player of round 1 wins 57% in Expert vs Expert (200 games; Greedy mirror 66%); set positions all 5/5 (Greedy spends the Chief on an uncontested space).",
+    "costBinding": "Mana binds hard: in 97.5% of rounds the cards in hand cost more than the round's mana, only 6.3% of mana goes unspent, and 20.6% of passes leave mana unused only because every card left costs more than it. The Chief (5) is unplayable without Fund (4 base mana), so Fund is contested every round (held in 44.5% of player-rounds) and Expert often discards Chiefs and Foremen when it must cut to 8.",
+    "expertNote": "Expert: determinized play-outs (the opponent's hand reshuffled with his deck, its own deck reshuffled, the Sabotage luck re-rolled), Greedy on both sides with 5% random moves, 400 a decision, to the start of the round after next, then scored by points, cards in hand and Fund; successive halving over the 12 best one-ply candidates with the one-ply worth breaking near-ties. It beat every trivial bot in every one of 1,200 games, so the 70% line is far away.",
+    "loop": "Each round is an auction run one card at a time: where to commit strength, and when to stop. Expert puts a Lock (unbumpable) or a 4 on Score 3 early, fights over Fund because 3 extra mana next round is the only way to afford the Chief, spends free Workers last on whatever is left open, and passes at the moment the other side can no longer profitably bump. Bumping is constant (2.35 bumps a round), and Shove's side-bump is used to steal a second space for 1 mana. The round-1 starter's 57% shows the alternating start roughly evens out."
+  }
+}

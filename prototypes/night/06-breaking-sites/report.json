@@ -1,0 +1,98 @@
+{
+  "games": 400,
+  "expert": {
+    "playouts": 1000,
+    "depth": 99,
+    "eps": 0,
+    "C": 0.5
+  },
+  "pairings": {
+    "expert-random": {
+      "n": 400,
+      "aScore": 0.98,
+      "aWins": 390,
+      "draws": 4,
+      "aLosses": 6,
+      "firstPlayerScore": 0.495,
+      "capped": 0,
+      "avgTurnsEach": 8.4
+    },
+    "expert-greedy": {
+      "n": 400,
+      "aScore": 0.955,
+      "aWins": 381,
+      "draws": 2,
+      "aLosses": 17,
+      "firstPlayerScore": 0.49,
+      "capped": 0,
+      "avgTurnsEach": 8.9,
+      "turnsCompared": 3488,
+      "turnAgreement": 0.293,
+      "actionsCompared": 6309,
+      "actionAgreement": 0.426
+    },
+    "expert-racer": {
+      "n": 400,
+      "aScore": 0.998,
+      "aWins": 399,
+      "draws": 0,
+      "aLosses": 1,
+      "firstPlayerScore": 0.502,
+      "capped": 0,
+      "avgTurnsEach": 8.1
+    },
+    "expert-expert": {
+      "n": 400,
+      "aScore": 0.489,
+      "aWins": 194,
+      "draws": 3,
+      "aLosses": 203,
+      "firstPlayerScore": 0.439,
+      "capped": 0,
+      "avgTurnsEach": 8.8
+    },
+    "greedy-greedy": {
+      "n": 400,
+      "aScore": 0.5,
+      "aWins": 200,
+      "draws": 0,
+      "aLosses": 200,
+      "firstPlayerScore": 0.485,
+      "capped": 0,
+      "avgTurnsEach": 11.5
+    }
+  },
+  "gate": {
+    "expertVsRandom": 0.98,
+    "expertVsGreedy": 0.955,
+    "expertVsRacer": 0.998,
+    "capRate": 0,
+    "turnAgreementWithGreedy": 0.293,
+    "actionAgreementWithGreedy": 0.426,
+    "firstPlayerScoreExpertMirror": 0.439
+  },
+  "fails": [],
+  "alive": true,
+  "seconds": 1136,
+  "setPositions": {
+    "expertFailures": 0,
+    "lines": [
+      "ok   greedy a Pawn breaks the site and wins: SQUAD@0",
+      "ok   expert a Pawn breaks the site and wins: PAWN@0",
+      "ok   greedy never break the site he wins: PAWN@1, end",
+      "ok   expert never break the site he wins: PAWN@2, end",
+      "ok   greedy never break a site for him mid-game: FORCE@1, end",
+      "ok   expert never break a site for him mid-game: end",
+      "ok   greedy Strike his only unit at my site: strike 1:0, end",
+      "ok   expert Strike his only unit at my site: strike 1:0, end",
+      "Expert passes every position"
+    ]
+  },
+  "pageCheck": [
+    "node game 0: winner 1 after 20 turns",
+    "node game 1: winner 1 after 17 turns",
+    "slowest Expert decision 471 ms",
+    "  0s: 1 clicks, last card",
+    "browser: 39 clicks, end screen: Defeat12 – 16Play again, script errors: none"
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "firstPlayer": "replaced by the role check: the Runner win rate in Expert against Expert",
+  "concept": "29 Hidden runner",
+  "turnCap": "none needed: the game ends after round 12 by rule (the Runner survives)",
+  "racer": "none: there is no race in this game",
+  "gamesPerMatchup": 400,
+  "expertPlayouts": 1000,
+  "pageExpertPlayouts": 1500,
+  "agreementCountedOn": "Expert decisions with 2+ sensible options, all Expert games, against Greedy for the same role",
+  "decisions": 20040,
+  "matchups": [
+    {
+      "a": "expert",
+      "b": "random",
+      "games": 400,
+      "aWins": 352,
+      "bWins": 48,
+      "draws": 0,
+      "aRate": 0.88,
+      "runnerWinRate": 0.38,
+      "aRateAsRunner": 0.76,
+      "aRateAsHunter": 1,
+      "avgRounds": 7.54,
+      "capped": 0,
+      "runnerSurvived12": 152
+    },
+    {
+      "a": "expert",
+      "b": "greedy",
+      "games": 400,
+      "aWins": 387,
+      "bWins": 13,
+      "draws": 0,
+      "aRate": 0.9675,
+      "runnerWinRate": 0.4725,
+      "aRateAsRunner": 0.94,
+      "aRateAsHunter": 0.995,
+      "avgRounds": 8.84,
+      "capped": 0,
+      "runnerSurvived12": 189
+    },
+    {
+      "a": "expert",
+      "b": "expert",
+      "games": 400,
+      "aWins": 200,
+      "bWins": 200,
+      "draws": 0,
+      "aRate": 0.5,
+      "runnerWinRate": 0.075,
+      "aRateAsRunner": 0.075,
+      "aRateAsHunter": 0.925,
+      "avgRounds": 6.78,
+      "capped": 0,
+      "runnerSurvived12": 30
+    }
+  ],
+  "sanity": [
+    {
+      "position": "Hunter lethal: the Runner was just shown at a corner next to a pawn, both exits covered: move onto it",
+      "greedy": true,
+      "expert": "5/5"
+    },
+    {
+      "position": "Runner don't blunder: shown at the centre, pawns two away: never end next to a pawn when a node out of reach exists",
+      "greedy": true,
+      "expert": "5/5"
+    },
+    {
+      "position": "free Search: only two nodes possible, both out of every pawn's reach, only Searches in hand and energy that would cap anyway: Search one of them this round",
+      "greedy": true,
+      "expert": "5/5"
+    }
+  ],
+  "gate": {
+    "expertVsTrivial": {
+      "random": 0.88,
+      "greedy": 0.9675
+    },
+    "expertBeatsTrivial70": true,
+    "setPositionsPass": true,
+    "turnCapShare": 0,
+    "turnCapOK": true,
+    "greedyAgreement": 0.234,
+    "greedyAgreementOK": true,
+    "runnerRateExpertMirror": 0.075,
+    "roleBalanceOK": false,
+    "alive": false
+  },
+  "seconds": 1813,
+  "report": {
+    "verdict": "dead",
+    "summary": "Dead on the role check, twice. The Runner wins 4.5% of Expert mirrors as specified (Sprint reach 3) and 7.5% after the one allowed rule change (Sprint reach 2); the band is 30-70%. Everything else passes: Expert beats Random 88.0% and Greedy 96.8% over 400 games each with roles alternated (as Hunter 100% and 99.5%, as Runner 76% and 94%); set positions 5/5; no caps (12 rounds by rule); Expert equals Greedy in 23.4% of 20,040 decisions. The Runner bot is not the weak link: as Runner it beats the Greedy Hunter 94%; it loses to a Hunter that uses its information.",
+    "loop": "The Runner picks a move kind each round knowing the kind is announced; the Hunter narrows the possible nodes (announced kinds, Searches, Flares, reveals at 3, 6 and 9) and closes in. Watching Expert: the Hunter keeps the possible set to a handful of nodes with a Search or Block every round, and after any exact sighting it pounces; in the first run 25 of 37 catches were Sprints and 16 came with the Runner's node known exactly, mostly the round after a reveal. On a 4x4 grid two pawns sit within two or three steps of almost every node, so the Runner's choice of move rarely changes the outcome: a sighting ends the game instead of starting a chase.",
+    "ruleChange": "Sprint reach 3 -> 2 (equal to the Runner's Dash), so that after a sighting the Runner could get out of reach and its choice of move would decide the chase. Runner mirror rate went 4.5% -> 7.5%: the grid itself, not the Sprint, is too small for two pawns with this much information.",
+    "firstRun": {
+      "rule": "Sprint reach 3 (as specified)",
+      "matchups": [
+        {
+          "a": "expert",
+          "b": "random",
+          "games": 400,
+          "aWins": 340,
+          "bWins": 60,
+          "draws": 0,
+          "aRate": 0.85,
+          "runnerWinRate": 0.35,
+          "aRateAsRunner": 0.7,
+          "aRateAsHunter": 1,
+          "avgRounds": 7.02,
+          "capped": 0,
+          "runnerSurvived12": 140
+        },
+        {
+          "a": "expert",
+          "b": "greedy",
+          "games": 400,
+          "aWins": 391,
+          "bWins": 9,
+          "draws": 0,
+          "aRate": 0.9775,
+          "runnerWinRate": 0.4775,
+          "aRateAsRunner": 0.955,
+          "aRateAsHunter": 1,
+          "avgRounds": 8.58,
+          "capped": 0,
+          "runnerSurvived12": 191
+        },
+        {
+          "a": "expert",
+          "b": "expert",
+          "games": 400,
+          "aWins": 196,
+          "bWins": 204,
+          "draws": 0,
+          "aRate": 0.49,
+          "runnerWinRate": 0.045,
+          "aRateAsRunner": 0.035,
+          "aRateAsHunter": 0.945,
+          "avgRounds": 6.68,
+          "capped": 0,
+          "runnerSurvived12": 18
+        }
+      ],
+      "gate": {
+        "expertVsTrivial": {
+          "random": 0.85,
+          "greedy": 0.9775
+        },
+        "expertBeatsTrivial70": true,
+        "setPositionsPass": true,
+        "turnCapShare": 0,
+        "turnCapOK": true,
+        "greedyAgreement": 0.2197,
+        "greedyAgreementOK": true,
+        "runnerRateExpertMirror": 0.045,
+        "roleBalanceOK": false,
+        "alive": false
+      },
+      "expertPlayouts": 700
+    },
+    "notes": "Expert is determinized flat Monte Carlo with paired samples (every action played out on the same redraws and seeds), honest on both sides: a Hunter, bot or page, reads only the public possible set, never the Runner. The spec's free-Search position was first written with a Block in hand, and Block on the right node wins 67% against Search's 48% there, so the position was rebuilt with only Searches in hand. The Expert also needed a dominance rule (never end a Hunter round leaving a free, informative Search unused when its energy would cap) because the Search's 3-point edge sits inside play-out noise."
+  }
+}

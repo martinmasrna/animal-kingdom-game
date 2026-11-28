@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Range Duel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="turns"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="opp"></div>
+  <div id="arena"><div id="line"></div><div id="f0" class="fighter s0"></div><div id="f1" class="fighter s1"></div><div id="shown"></div></div>
+  <div id="me"></div>
+  <div id="controls"></div>
+  <div id="hand"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Range Duel</h3>
+    <p>Two fighters on a line of 7 spaces, 12 life each. Bring the other to 0; after 20 turns the higher life wins.</p>
+    <p>Each turn both gain 2 energy (max 6), then both pick one move in secret: a card from hand or a basic. Moves are shown together and resolve by speed, lowest first; equal speeds at once (both move, then both hit).</p>
+    <p>A move first moves you (→ toward the other fighter, ← away; you can't enter or pass their space), then hits if the distance is inside its range (adjacent = 1). A hit on a fighter whose move has not resolved yet cancels that move.</p>
+    <p><b>Cards:</b> top left energy cost, top right speed, big number damage, bottom range and movement. Guard: damage to you this turn is 3 less. Sweep pushes the other 1 away on a hit.</p>
+    <p><b>Basics:</b> Step (speed 3) one space either way. Rest (speed 5): +1 energy next turn. After each turn both draw 1.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rally</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* one screen: scoreboard left; the court (his shots above the net, mine below) in the middle; the incoming Pace and Let it go right; the hand below */
+:root {
+  --bg: #2a3340; --court: #2f6b4f; --court2: #285c44; --ink: #1b1b1b; --paper: #fbf7ee;
+  --gold: #f2b632; --ok: #5fdc6f; --stam: #3d8bf2;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86; --pace: #f08a3c; --reach: #4fc08a;
+  --cardw: 104px; --cardh: 140px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game {
+  position: relative; height: 100%; max-width: 1300px; margin: 0 auto;
+  display: grid; grid-template-columns: 260px minmax(0, 1fr) 200px;
+  grid-template-rows: 40px minmax(0, 1fr) auto; gap: 12px 24px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+}
+#top { grid-row: 1; grid-column: 1 / -1; display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; }
+#opphand { display: flex; }
+.cb { width: 24px; height: 34px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
+.cb:first-child { margin-left: 0; }
+#menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; display: flex; gap: 10px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 18px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#board { grid-row: 2; grid-column: 1; align-self: center; display: flex; flex-direction: column; gap: 6px; background: #1d2630; border-radius: 10px; padding: 10px; }
+#court { grid-row: 2; grid-column: 2; display: flex; flex-direction: column; min-height: 0; border-radius: 14px; background: linear-gradient(180deg, var(--court), var(--court2)); box-shadow: inset 0 0 0 3px rgba(255,255,255,.55), inset 0 0 30px rgba(0,0,0,.3); overflow: hidden; }
+#turnbox { grid-row: 2; grid-column: 3; align-self: center; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+#hand { grid-row: 3; grid-column: 1 / -1; }
+
+/* ---------------- scoreboard: server ball, games, points, stamina */
+.srow { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; border-left: 5px solid; background: rgba(255,255,255,.04); }
+.srow.s0 { border-color: var(--me); } .srow.s1 { border-color: var(--him); }
+.ball { width: 14px; color: #e8f45a; font-size: 16px; }
+.srow .g { min-width: 34px; height: 34px; border-radius: 6px; background: #0f151b; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; color: #ffe08a; }
+.srow .pt { min-width: 34px; height: 34px; border-radius: 6px; background: #0f151b; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; }
+.srow .pop { animation: pop .5s ease-out; }
+@keyframes pop { 0% { transform: scale(.5); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.stam { display: grid; grid-template-columns: repeat(5, 9px); gap: 3px; }
+.stam i { width: 9px; height: 9px; border-radius: 2px; background: #33414f; }
+.stam i.on { background: var(--stam); }
+.stn { font-weight: 800; color: #bcd9ff; min-width: 18px; }
+
+/* ---------------- the court */
+.half { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 0 12px; }
+#net { height: 4px; background: repeating-linear-gradient(90deg, #f4f4f4 0 8px, transparent 8px 14px); opacity: .8; }
+.lane { display: flex; gap: 10px; align-items: center; }
+.lane.fading { opacity: .55; }
+.gap { width: 18px; }
+.shot { position: relative; width: 66px; height: 84px; border-radius: 10px; border: 3px solid rgba(255,255,255,.85); box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.shot.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); } .shot.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.shot .pace { width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffb070, #d0601c); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; border: 2px solid #fff; }
+.shot .rch { position: absolute; right: -8px; bottom: -8px; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #7fe0b0, #2a9a64); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; }
+.shot .snm { font-size: 11px; font-weight: 800; margin-top: 4px; }
+.shot.last { transform: scale(1.18); box-shadow: 0 0 0 3px var(--gold), 0 6px 14px rgba(0,0,0,.5); }
+
+/* ---------------- incoming pace and let it go */
+.need span { width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffb070, #d0601c); border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 34px; box-shadow: 0 0 18px rgba(240,138,60,.6); }
+#letgo { width: 140px; min-height: 50px; border-radius: 10px; border: 0; font-weight: 800; font-size: 16px; background: #c9d3de; color: #1b1b1b; box-shadow: 0 3px 0 #8e98a3; }
+#letgo:disabled { background: #46515d; color: #7e8893; box-shadow: none; cursor: default; }
+
+/* ---------------- cards */
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; text-align: left;
+  background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; }
+.card .art { margin: 4px 4px 0; border-radius: 6px; flex: 0 0 55%; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--me), var(--me2)); }
+.card .pace { width: calc(var(--cardw) * .48); height: calc(var(--cardw) * .48); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffb070, #d0601c); border: 3px solid #fff; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: calc(var(--cardw) * .26); }
+.card .nm { font-weight: 800; font-size: calc(var(--cardw) * .14); padding: 5px 8px 0; }
+.card .rch { position: absolute; right: -8px; bottom: -8px; width: calc(var(--cardw) * .34); height: calc(var(--cardw) * .34); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #7fe0b0, #2a9a64); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: calc(var(--cardw) * .17); }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+#hand { display: flex; justify-content: center; align-items: flex-end; gap: 14px; padding: 12px 0 8px; min-height: calc(var(--cardh) + 20px); }
+#hand .card { transition: transform .12s, box-shadow .12s; }
+#hand .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok:hover { transform: translateY(-8px); }
+#hand .card:disabled { cursor: default; }
+#hand .card.no { filter: brightness(.62) saturate(.6); }
+
+/* ---------------- floaters, banner, game over, rules */
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 30px; color: #ffe08a; text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 10px rgba(0,0,0,.4); transform: translate(-50%, -50%); animation: floatup 1.3s ease-out forwards; white-space: nowrap; }
+.float.pt.s1 { color: #d9b8ff; }
+@keyframes floatup { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -90%) scale(1); } }
+#banner { position: absolute; left: 0; right: 0; top: 45%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 48px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.win { color: #ffd36b; } #banner.lose { color: #d9b8ff; }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over .final { font-size: 28px; font-weight: 900; }
+#over button, #rules button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+#rules .panel { max-width: 560px; max-height: 100%; overflow: auto; background: #1f2731; border: 1px solid #4b5a6a; border-radius: 12px; padding: 18px 22px; line-height: 1.4; }
+#rules h3 { margin: 0 0 8px; font-size: 22px; }
+#rules p { margin: 0 0 10px; color: #dfe5eb; }
+
+/* ---------------- phone */
+@media (max-width: 760px) {
+  :root { --cardw: 64px; --cardh: 88px; }
+  #game { grid-template-columns: 1fr auto; grid-template-rows: 30px auto minmax(0, 1fr) auto; gap: 8px; }
+  #top { justify-content: flex-start; }
+  .cb { width: 16px; height: 24px; }
+  #menu { top: 2px; gap: 6px; } #menu button { min-height: 26px; padding: 2px 8px; font-size: 13px; }
+  .tally { font-size: 14px; } .tally b { min-width: 24px; height: 24px; }
+  #board { grid-row: 2; grid-column: 1; padding: 6px; gap: 4px; }
+  #turnbox { grid-row: 2; grid-column: 2; gap: 8px; }
+  #court { grid-row: 3; grid-column: 1 / -1; }
+  #hand { grid-row: 4; gap: 8px; }
+  .srow { gap: 6px; padding: 4px 6px; } .srow .g, .srow .pt { min-width: 26px; height: 26px; font-size: 15px; }
+  .stam { grid-template-columns: repeat(10, 6px); gap: 2px; } .stam i { width: 6px; height: 8px; }
+  .shot { width: 46px; height: 60px; border-width: 2px; } .shot .pace { width: 28px; height: 28px; font-size: 15px; } .shot .rch { width: 20px; height: 20px; font-size: 11px; } .shot .snm { font-size: 9px; }
+  .lane { gap: 6px; } .gap { width: 8px; }
+  .need span { width: 48px; height: 48px; font-size: 24px; }
+  #letgo { width: auto; min-height: 40px; padding: 0 12px; font-size: 14px; }
+  .card .nm { font-size: 10px; padding: 4px 4px 0; }
+  .cgem { width: 22px; height: 22px; font-size: 13px; top: -6px; left: -6px; }
+  #over h2 { font-size: 44px; }
+}
+
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="opphand"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="board"></div>
+  <div id="court"><div id="half1" class="half"></div><div id="net"></div><div id="half0" class="half"></div></div>
+  <div id="turnbox"></div>
+  <div id="hand"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Rally</h3>
+    <p>Each shot card has a <b>Pace</b>, a <b>Reach</b> and a stamina cost. Both players use the same 20-card deck and hold 5 cards.</p>
+    <p><b>A point.</b> The server plays any shot. Then the players take turns: each must answer the last shot with a card whose Reach is at least that shot's Pace, paying its cost. A player who cannot, or lets it go, loses the point. Afterwards both discard the shots they played and draw back up to 5.</p>
+    <p><b>Stamina</b> is 10 each at the start of every game and carries from point to point within the game.</p>
+    <p>First to 4 points wins a game; first to 3 games wins the match. The serve passes to the other player after every point.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 24 Rally. Tennis points from a deck of shots: a return needs Reach at least the incoming shot's
+// Pace, every shot costs stamina (10 a game), first to 4 points takes a game, first to 3 games the
+// match. The server of a game serves all its points; it alternates every game.
+// Pure from the outside: act() clones the state.
+
+const HAND = 5, STAMINA = 10, POINTS = 4, GAMES = 3;
+// The one rule changed after the gate (see report.json): the serve passes to the other player after
+// every point, not every game. Under the spec's rule the server loses long rallies by card count
+// (it plays shots 1, 3, 5, 7, 9 and has no 11th), so the player serving three of five games loses
+// the match 77% of the time against itself. false restores the spec's rule.
+let SERVE_EVERY_POINT = true;
+function setServeRule(v) { SERVE_EVERY_POINT = v; }
+
+const CARDS = {
+  PUS: { id: 'PUS', name: 'Push', cost: 0, pace: 1, reach: 2 },
+  DRI: { id: 'DRI', name: 'Drive', cost: 1, pace: 3, reach: 3 },
+  SLI: { id: 'SLI', name: 'Slice', cost: 1, pace: 2, reach: 4 },
+  LOB: { id: 'LOB', name: 'Lob', cost: 1, pace: 2, reach: 5 },
+  DIG: { id: 'DIG', name: 'Dig', cost: 2, pace: 1, reach: 6 },
+  SMA: { id: 'SMA', name: 'Smash', cost: 3, pace: 5, reach: 3 },
+  ACE: { id: 'ACE', name: 'Ace', cost: 4, pace: 6, reach: 2 },
+};
+const DECK = { PUS: 4, DRI: 4, SLI: 3, LOB: 2, DIG: 2, SMA: 3, ACE: 2 };
+
+function deckList() { const out = []; for (const [id, k] of Object.entries(DECK)) for (let i = 0; i < k; i++) out.push(id); return out; }
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function newPlayer() { return { stamina: STAMINA, points: 0, games: 0, hand: [], deck: deckList(), discard: [] }; }
+function clone(s) {
+  return { seed: s.seed, turnNo: s.turnNo, first: s.first, server: s.server, toAct: s.toAct, winner: s.winner, capped: s.capped, gameNo: s.gameNo,
+    rally: s.rally.slice(), p: s.p.map(p => ({ stamina: p.stamina, points: p.points, games: p.games, hand: p.hand.slice(), deck: p.deck.slice(), discard: p.discard.slice() })) };
+}
+function emit(s, ev, e) { if (ev) { e.turnNo = s.turnNo; ev.push(e); } }
+function drawUp(s, side, ev) {
+  const p = s.p[side];
+  while (p.hand.length < HAND) {
+    if (!p.deck.length) { if (!p.discard.length) return; p.deck = shuffleInPlace(s, p.discard); p.discard = []; emit(s, ev, { t: 'reshuffle', side }); }
+    p.hand.push(p.deck.shift()); emit(s, ev, { t: 'draw', side });
+  }
+}
+
+function newMatch({ seed, first } = {}) {
+  const s = { seed: (seed >>> 0) || 1, turnNo: 0, first: 0, server: 0, toAct: 0, winner: null, capped: false, gameNo: 1, rally: [], p: [newPlayer(), newPlayer()] };
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
+  s.server = s.toAct = s.first;
+  for (const side of [0, 1]) drawUp(s, side, null);
+  return s;
+}
+
+// the last shot of this point, or null before the serve
+const lastShot = (s) => s.rally.length ? s.rally[s.rally.length - 1] : null;
+// a shot card may be played now: affordable, and (unless serving) its Reach at least the incoming Pace
+function canPlay(s, id) {
+  const P = s.p[s.toAct], c = CARDS[id], l = lastShot(s);
+  return c.cost <= P.stamina && (!l || c.reach >= CARDS[l.card].pace);
+}
+
+// Actions: { t: 'shot', card }   { t: 'concede' } (let the incoming shot go and lose the point)
+// A side that has no legal shot loses the point at once, so there is always a shot to choose.
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  const P = s.p[s.toAct], out = [];
+  for (const id of new Set(P.hand)) if (canPlay(s, id)) out.push({ t: 'shot', card: id });
+  if (s.rally.length) out.push({ t: 'concede' });
+  return out;
+}
+const actionKey = (a) => a.t === 'shot' ? 's' + a.card : 'c';
+
+// the point goes to `side`: played shots to their discard piles, both draw up to 5; 4 points take
+// the game (stamina back to 10, the other side serves next), 3 games the match
+function pointTo(s, side, ev) {
+  const W = s.p[side], L = s.p[1 - side];
+  W.points++;
+  emit(s, ev, { t: 'point', side, points: [s.p[0].points, s.p[1].points] });
+  for (const r of s.rally) s.p[r.side].discard.push(r.card);
+  s.rally = [];
+  if (W.points >= POINTS) {
+    W.games++; W.points = 0; L.points = 0;
+    emit(s, ev, { t: 'game', side, games: [s.p[0].games, s.p[1].games] });
+    if (W.games >= GAMES) { s.winner = side; emit(s, ev, { t: 'end', winner: side }); return; }
+    s.gameNo++;
+    if (!SERVE_EVERY_POINT) s.server = 1 - s.server;
+    for (const p of s.p) p.stamina = STAMINA;
+  }
+  if (SERVE_EVERY_POINT) s.server = 1 - s.server;
+  for (const x of [0, 1]) drawUp(s, x, ev);
+  s.toAct = s.server;
+  // a server with nothing it can pay for loses the point at once
+  if (!s.p[s.server].hand.some(id => CARDS[id].cost <= s.p[s.server].stamina)) { emit(s, ev, { t: 'noserve', side: s.server }); pointTo(s, 1 - s.server, ev); }
+}
+
+function mAct(s, a, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  const me = s.toAct, P = s.p[me];
+  s.turnNo++;
+  if (a.t === 'concede') {
+    if (!s.rally.length) throw new Error('the server must serve');
+    emit(s, ev, { t: 'concede', side: me });
+    return pointTo(s, 1 - me, ev);
+  }
+  const k = P.hand.indexOf(a.card);
+  if (k < 0 || !canPlay(s, a.card)) throw new Error('illegal shot ' + a.card);
+  P.hand.splice(k, 1); P.stamina -= CARDS[a.card].cost;
+  s.rally.push({ card: a.card, side: me });
+  emit(s, ev, { t: 'shot', side: me, card: a.card, serve: s.rally.length === 1, stamina: P.stamina });
+  s.toAct = 1 - me;
+  // a side with no legal return loses the point at once
+  if (!legalActions(s).some(x => x.t === 'shot')) { emit(s, ev, { t: 'noreturn', side: s.toAct }); pointTo(s, me, ev); }
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function _act(t, a) { mAct(t, a, null); return t; }
+
+// ---- src/bot.js
+// Bots for 24 Rally. Each is a function (state, rng) -> one action for s.toAct.
+// None reads a hidden card: Expert reshuffles the opponent's hand with his deck, and its own deck,
+// before each play-out (played shots and discard piles are public).
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pick = (a, rng) => a[Math.floor(rng() * a.length)];
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+const shots = (s) => legalActions(s).filter(a => a.t === 'shot');
+
+// ------------------------------------------------------------------ Random
+function randomBot(s, rng) { return pick(legalActions(s), rng); }
+
+// ------------------------------------------------------------------ Greedy
+// serves and returns with the highest-Pace shot it can legally play and afford (the cheaper on a tie)
+function greedyBot(s) {
+  const L = shots(s);
+  if (!L.length) return { t: 'concede' };
+  return L.sort((a, b) => CARDS[b.card].pace - CARDS[a.card].pace || CARDS[a.card].cost - CARDS[b.card].cost || CARDS[b.card].reach - CARDS[a.card].reach)[0];
+}
+// ------------------------------------------------------------------ Saver
+// the other fixed rule: always the cheapest legal shot (the faster on a tie), so stamina never runs dry
+function saverBot(s) {
+  const L = shots(s);
+  if (!L.length) return { t: 'concede' };
+  return L.sort((a, b) => CARDS[a.card].cost - CARDS[b.card].cost || CARDS[b.card].pace - CARDS[a.card].pace)[0];
+}
+
+// ------------------------------------------------------------------ Expert
+// Determinized play-outs: each candidate shot (or letting the ball go) is followed by a play-out
+// in which both sides play Saver's shot (MIX sets the shares of Greedy's, Saver's and any legal
+// shot; Saver is the strongest fixed rule here, it beats Greedy 79%), to the end of the current game, on a world where the cards this side cannot see are reshuffled; the
+// game's result is turned into a match-win chance from the games score (later games even).
+function determinize(s, me, rng) {
+  const t = clone(s), O = t.p[1 - me];
+  const pool = shuffle(O.hand.concat(O.deck), rng);
+  O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length);
+  shuffle(t.p[me].deck, rng);
+  t.seed = (rng() * 4294967296) >>> 0;
+  return t;
+}
+// chance to take the match from games (a, b) when every game left is even
+const MW = [];
+for (let a = GAMES; a >= 0; a--) { MW[a] = []; for (let b = GAMES; b >= 0; b--) MW[a][b] = a >= GAMES ? 1 : b >= GAMES ? 0 : 0.5 * (MW[a + 1] ? MW[a + 1][b] : 1) + 0.5 * MW[a][b + 1]; }
+const matchChance = (s, me) => s.winner === me ? 1 : s.winner !== null ? 0 : MW[s.p[me].games][s.p[1 - me].games];
+function playoutBot(t, rng, mix = [0.4, 0.8]) {
+  const r = rng();
+  if (r < mix[0]) return greedyBot(t);
+  if (r < mix[1]) return saverBot(t);
+  const L = shots(t);
+  return L.length ? pick(L, rng) : { t: 'concede' };
+}
+function rollout(t, me, gameNo, rng, mix) {
+  let steps = 0;
+  while (t.winner === null && t.gameNo === gameNo && steps < 400) { _act(t, playoutBot(t, rng, mix)); steps++; }
+  return matchChance(t, me);
+}
+
+// every candidate gets the same play-outs (there are at most six); among the candidates within TIE
+// of the best, one that wins the point on the spot comes first, then the cheaper shot
+const EXPERT = { playouts: 600, mix: [0, 1], tie: 0.03 };
+function expertBot({ playouts = 300, mix = [0.4, 0.8], tie = 0.03, timeMs = 0 } = {}) {
+  return function (s, rng) {
+    const me = s.toAct;
+    const arms = legalActions(s);
+    if (arms.length === 1) return arms[0];
+    const st = arms.map(a => { const t = clone(s); _act(t, a); return { a, w: 0, n: 0, now: t.winner === me || t.p[me].points > s.p[me].points || t.p[me].games > s.p[me].games }; });
+    const t0 = timeMs ? Date.now() : 0;
+    for (let i = 0; i < playouts; i++) {
+      const world = determinize(s, me, rng), seed = (rng() * 4294967296) >>> 0;
+      for (const x of st) { const t = clone(world); _act(t, x.a); x.w += rollout(t, me, s.gameNo, makeRng(seed), mix); x.n++; }
+      if (timeMs && Date.now() - t0 > timeMs) break;
+    }
+    const best = Math.max(...st.map(x => x.w / x.n));
+    const near = st.filter(x => x.w / x.n >= best - tie);
+    near.sort((x, y) => (y.now - x.now) || (cost(x.a) - cost(y.a)) || (y.w / y.n - x.w / x.n));
+    return near[0].a;
+  };
+}
+const cost = (a) => a.t === 'shot' ? CARDS[a.card].cost : 99;
+
+// ---- src/ui.js
+// 24 Rally as a game screen against the Expert. Each shot is animated onto the court; the point,
+// game and match results show on the scoreboard; the win tally is kept in this browser and decides
+// who serves the first game.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-24-tally';
+const expert = expertBot({ ...EXPERT, playouts: 1500, timeMs: 1200 });
+const ui = { s: null, view: null, busy: false, over: false, hist: [], fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0, lastRally: [] };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+function cardHTML(id, side, { cls = '', attrs = '' } = {}) {
+  const c = CARDS[id];
+  return `<button class="card s${side} ${cls}" ${attrs}><span class="cgem">${c.cost}</span><div class="art"><span class="pace">${c.pace}</span></div><div class="nm">${c.name}</div><div class="rch"><i></i>${c.reach}</div></button>`;
+}
+const shotHTML = (r, i, last) => `<div class="shot s${r.side}${last ? ' last' : ''}" id="shot${i}"><span class="pace">${CARDS[r.card].pace}</span><span class="rch">${CARDS[r.card].reach}</span><span class="snm">${CARDS[r.card].name}</span></div>`;
+
+// ------------------------------------------------------------------ rendering
+const myTurn = () => !ui.busy && !ui.over && ui.view.toAct === ME && ui.view.winner === null;
+function boardHTML() {
+  const s = ui.view;
+  const row = (side) => {
+    const p = s.p[side];
+    let st = '';
+    for (let i = 0; i < STAMINA; i++) st += `<i class="${i < p.stamina ? 'on' : ''}"></i>`;
+    return `<div class="srow s${side}"><span class="ball">${s.server === side ? '●' : ''}</span><span class="g ${ui.fx['g' + side] || ''}">${p.games}</span><span class="pt ${ui.fx['p' + side] || ''}">${p.points}</span><span class="stam">${st}</span><span class="stn">${p.stamina}</span></div>`;
+  };
+  return row(BOT) + row(ME);
+}
+function courtHTML(side) {
+  const s = ui.view, R = s.rally.length ? s.rally : ui.lastRally;
+  const fading = !s.rally.length && ui.lastRally.length ? ' fading' : '';
+  return `<div class="lane${fading}">${R.map((r, i) => r.side === side ? shotHTML(r, i, i === R.length - 1 && !fading) : '<div class="gap"></div>').join('')}</div>`;
+}
+function handHTML() {
+  const s = ui.view, p = s.p[ME], legal = myTurn() ? legalActions(s) : [];
+  const order = p.hand.map((_, i) => i).sort((a, b) => CARDS[p.hand[a]].pace - CARDS[p.hand[b]].pace || CARDS[p.hand[a]].reach - CARDS[p.hand[b]].reach);
+  return order.map(i => {
+    const id = p.hand[i], ok = legal.some(a => a.t === 'shot' && a.card === id);
+    return cardHTML(id, ME, { cls: ok ? 'ok' : (myTurn() ? 'no' : ''), attrs: `data-hand="${i}"${ok ? '' : ' disabled'}` });
+  }).join('');
+}
+function render() {
+  const s = ui.view;
+  const t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('opphand').innerHTML = '<i class="cb"></i>'.repeat(s.p[BOT].hand.length);
+  $('board').innerHTML = boardHTML();
+  $('half1').innerHTML = courtHTML(BOT); $('half0').innerHTML = courtHTML(ME);
+  $('hand').innerHTML = handHTML();
+  const l = lastShot(s), mine = myTurn();
+  const need = l && s.toAct === ME && !ui.over ? `<div class="need"><span>${CARDS[l.card].pace}</span></div>` : '';
+  $('turnbox').innerHTML = `${need}<button id="letgo"${mine && s.rally.length ? '' : ' disabled'}>Let it go</button>`;
+  ui.fx = {};
+}
+
+// ------------------------------------------------------------------ effects
+function centerOf(el) { const a = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - a.left + r.width / 2, y: r.top - a.top + r.height / 2 }; }
+function floatAt(p, text, cls = '') { const f = document.createElement('div'); f.className = 'float ' + cls; f.textContent = text; f.style.left = p.x + 'px'; f.style.top = p.y + 'px'; $('game').appendChild(f); setTimeout(() => f.remove(), 1200); }
+function banner(text, cls = '') { const b = $('banner'); b.textContent = text; b.className = cls; void b.offsetWidth; b.classList.add('show'); }
+
+// ------------------------------------------------------------------ playback
+async function apply(a) {
+  const prev = ui.s, ev = [];
+  const next = act(prev, a, ev);
+  ui.s = next;
+  const shotE = ev.find(e => e.t === 'shot');
+  // the court keeps the finished point's shots on screen until the next serve
+  const pointE = ev.find(e => e.t === 'point');
+  if (shotE) {
+    const R = prev.rally.concat([{ card: shotE.card, side: shotE.side }]);
+    ui.view = { ...next, rally: R, p: next.p, toAct: pointE ? -1 : next.toAct }; ui.lastRally = [];
+    render();
+    const el = $('shot' + (R.length - 1));
+    if (el) el.animate([{ transform: `translateY(${shotE.side === ME ? 60 : -60}px) scale(.6)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: 'ease-out' });
+    await wait(pointE ? 500 : 150);
+    if (pointE) ui.lastRally = R;
+  }
+  if (a.t === 'concede') { ui.lastRally = prev.rally; }
+  for (const e of ev) {
+    if (e.t === 'point') ui.fx['p' + e.side] = 'pop';
+    if (e.t === 'game') ui.fx['g' + e.side] = 'pop';
+  }
+  ui.view = next; render();
+  const noR = ev.find(e => e.t === 'noreturn'), con = ev.find(e => e.t === 'concede'), noS = ev.find(e => e.t === 'noserve');
+  for (const e of ev) if (e.t === 'point') {
+    const why = noS && e.side !== noS.side ? 'no serve' : noR ? 'no return' : con ? 'let go' : '';
+    floatAt(centerOf($('half' + e.side)), why ? `Point · ${why}` : 'Point', 'pt s' + e.side);
+  }
+  const gameE = ev.find(e => e.t === 'game');
+  if (gameE && next.winner === null) { await wait(700); banner(gameE.side === ME ? 'Game' : 'Game lost', gameE.side === ME ? 'win' : 'lose'); ui.lastRally = []; await wait(900); render(); }
+  else if (ev.some(e => e.t === 'point')) await wait(900);
+  if (next.winner !== null) finish();
+  render();
+}
+
+function finish() {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><div class="final">${ui.s.p[ME].games} – ${ui.s.p[BOT].games}</div><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+// ------------------------------------------------------------------ flow
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.view = ui.s; ui.over = false; ui.lastRally = [];
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  await wait(700);
+  if (tok !== ui.token) return;
+  await botLoop(tok);
+}
+async function botLoop(tok) {
+  ui.busy = true; render();
+  for (let k = 0; k < 400; k++) {
+    if (tok !== ui.token || ui.over || ui.s.winner !== null || ui.s.toAct !== BOT) break;
+    await wait(450);
+    const a = expert(ui.s, ui.rng);
+    if (tok !== ui.token) return;
+    await apply(a);
+  }
+  if (tok !== ui.token || ui.over) return;
+  ui.busy = false; render();
+}
+async function doAct(a) {
+  if (!myTurn()) return;
+  const tok = ui.token;
+  ui.busy = true;
+  await apply(a);
+  if (tok !== ui.token || ui.over) return;
+  await botLoop(tok);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#rulesbtn')) { $('rules').classList.add('show'); return; }
+  if (e.target.closest('#rulesclose') || e.target.id === 'rules') { $('rules').classList.remove('show'); return; }
+  const b = e.target.closest('button');
+  if (!b || b.disabled) return;
+  if (b.id === 'rematch' || b.id === 'newgame') return startMatch();
+  if (b.id === 'letgo') return doAct({ t: 'concede' });
+  if (b.dataset.hand !== undefined) return doAct({ t: 'shot', card: ui.view.p[ME].hand[+b.dataset.hand] });
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('rules').classList.remove('show'); });
+window.__game = { state: () => ui.s, busy: () => ui.busy, act: (a) => doAct(a), legal: () => legalActions(ui.s) };
+startMatch();
+
+})();
+</script>
+</body>
+</html>

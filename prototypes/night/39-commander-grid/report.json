@@ -1,0 +1,204 @@
+{
+  "concept": "39-commander-grid",
+  "expert": {
+    "playouts": 400,
+    "depth": 6,
+    "eps": 0.05,
+    "keep": 12,
+    "beta": 0.5,
+    "policy": "careful"
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.9775,
+      "draws": 0,
+      "firstPlayerWinRate": 0.4775,
+      "avgTurns": 23.4,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.84,
+      "draws": 0,
+      "firstPlayerWinRate": 0.405,
+      "avgTurns": 32.6,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.9812,
+      "draws": 1,
+      "firstPlayerWinRate": 0.4938,
+      "avgTurns": 14.1,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 200,
+      "aWinRate": 0.505,
+      "draws": 0,
+      "firstPlayerWinRate": 0.215,
+      "avgTurns": 35.3,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.1,
+      "avgTurns": 36.2,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.84,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "cappedCountedOver": "every game Expert plays",
+    "expertGreedyAgreement": 0.4192,
+    "agreementDecisions": 80280,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.215,
+    "firstPlayerPass": false,
+    "seconds": 1316,
+    "setPositionsPass": true,
+    "allPass": false
+  },
+  "costBinding": {
+    "measuredIn": "Expert mirror, both seats, every turn",
+    "turns": 6869,
+    "handCostsMoreThanManaRate": 0.417,
+    "atManaCapRate": 0.593,
+    "unspentManaShare": 0.597,
+    "endedWithManaLeftAndADearerCardHeldRate": 0.09
+  },
+  "sanity": [
+    {
+      "position": "lethal: his Commander on 3 health next to my ready Raider",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "lethal: his Commander on 3 health next to my ready Raider",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "free trade: my ready Heavy next to his Pawn takes it",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "free trade: my ready Heavy next to his Pawn takes it",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: never Hit 3 his 1-health Pawn that my Pawn next to it kills for free",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "don't waste: never Hit 3 his 1-health Pawn that my Pawn next to it kills for free",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "rules": "changed: a piece may move and then attack in the same turn (MOVE_THEN_ATTACK in src/engine.js); the spec lets it move or attack",
+  "specRules": {
+    "expert": {
+      "playouts": 400,
+      "depth": 6,
+      "eps": 0.05,
+      "keep": 12,
+      "beta": 0.5,
+      "policy": "careful"
+    },
+    "pairings": {
+      "expert-random": {
+        "games": 400,
+        "aWinRate": 0.93,
+        "draws": 0,
+        "firstPlayerWinRate": 0.43,
+        "avgTurns": 27,
+        "capped": 0
+      },
+      "expert-greedy": {
+        "games": 400,
+        "aWinRate": 0.655,
+        "draws": 0,
+        "firstPlayerWinRate": 0.2,
+        "avgTurns": 35.7,
+        "capped": 0
+      },
+      "expert-racer": {
+        "games": 400,
+        "aWinRate": 0.965,
+        "draws": 0,
+        "firstPlayerWinRate": 0.485,
+        "avgTurns": 15.1,
+        "capped": 0
+      },
+      "expert-expert": {
+        "games": 200,
+        "aWinRate": 0.5,
+        "draws": 0,
+        "firstPlayerWinRate": 0.04,
+        "avgTurns": 36.6,
+        "capped": 0
+      },
+      "greedy-greedy": {
+        "games": 1000,
+        "aWinRate": 0.5,
+        "draws": 0,
+        "firstPlayerWinRate": 0.034,
+        "avgTurns": 36.9,
+        "capped": 0
+      }
+    },
+    "gate": {
+      "expertMinWinRateVsTrivial": 0.655,
+      "expertVsTrivialPass": false,
+      "cappedRate": 0,
+      "cappedPass": true,
+      "cappedCountedOver": "every game Expert plays",
+      "expertGreedyAgreement": 0.4116,
+      "agreementDecisions": 88592,
+      "agreementPass": true,
+      "firstPlayerWinRateExpertMirror": 0.04,
+      "firstPlayerPass": false,
+      "seconds": 771,
+      "setPositionsPass": true,
+      "allPass": false
+    },
+    "costBinding": {
+      "measuredIn": "Expert mirror, both seats, every turn",
+      "turns": 7118,
+      "handCostsMoreThanManaRate": 0.409,
+      "atManaCapRate": 0.607,
+      "unspentManaShare": 0.604,
+      "endedWithManaLeftAndADearerCardHeldRate": 0.085
+    }
+  },
+  "report": {
+    "verdict": "dead",
+    "numbers": "Spec rules (move or attack): Expert vs Random 93.0%, vs Greedy 65.5%, vs Racer 96.5%; first player 4.0% in Expert vs Expert (Greedy mirror 3.4%); 0 capped; Expert = Greedy on 41.2% of decisions; set positions 5/5. Fails twice: Expert under 70% against Greedy, first player far outside 30-70%. One rule changed (move then attack): Expert vs Random 97.8%, vs Greedy 84.0%, vs Racer 98.1%; 0 capped; Expert = Greedy on 41.9% of 80,280 decisions; set positions 5/5; first player 21.5% in Expert vs Expert (200 games; Greedy mirror 10.0%). Still fails the first-player gate, so dead.",
+    "ruleChange": "Why move-then-attack: under move-or-attack a piece that steps next to an enemy is hit first by everything touching it, so neither side approaches, the 5x6 board clogs, and the round-15 damage settles the game; that damage reaches the first player's Commander first every round, so the second player won 96% of Expert mirror games. Letting a piece close and strike in one turn removes the defender's free first hit. It fixed Expert's edge over Greedy (65.5% to 84%) but not the stall: Expert mirror games still last 35.3 turns against the damage starting at turns 29-30, and the second player still wins 78.5%.",
+    "costBinding": "Mana binds on a minority of turns: in the Expert mirror the cards in hand cost more than the mana on 41.7% of turns, the cap of 8 is reached on 59.3% of turns, 59.7% of all mana goes unspent, and 9% of turns end with mana left while a dearer card waits. The 4 cells next to the Commander limit deployment more than mana does.",
+    "expertNote": "Expert: determinized play-outs with a careful policy on both sides (Greedy's plays and kills, units step forward only onto cells no enemy that could destroy them touches; 5% random moves), 400 a decision, 6 turns deep from the decision's turn then scored by Commander health, material and threat; successive halving over the 12 best one-ply candidates with the one-ply worth breaking near-ties. Tried and dropped: Greedy as the play-out policy (70% vs Greedy in 20 games), 2 and 4 turns deep (55%, 65%), 800 play-outs 8 deep (75%), careful 8 deep (60%).",
+    "loop": "The decision each turn is where the Commander stands: units deploy next to it and Hit 3 reaches 2 cells from it, so Commanders walk forward to fight, and a Commander that walks one cell too far is finished by Lancers (2 cells, no hit back) plus Rally, as in the traced mirror game won at turn 23. Pieces avoid cells touched by several enemies, Lancers and Hit 3 do most of the killing, and when neither side over-extends the board fills up and the round-15 damage settles it: Expert mirror games average 35.3 turns, past the damage's start at turns 29-30, and the side that moved second wins 78.5%."
+  }
+}

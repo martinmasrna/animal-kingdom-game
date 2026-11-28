@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Attack and Block</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #232a33; --table: #303b48; --ink: #1b1b1b; --paper: #f6f2e8;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86;
+  --gold: #f2b632; --ok: #5fdc6f; --atk: #f2b632; --hp: #e0553a; --mana: #3d8bf2;
+  --cardw: 96px; --cardh: 132px; --uw: 84px; --uh: 104px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.3 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game { position: relative; height: 100%; max-width: 1300px; margin: 0 auto;
+  display: grid; grid-template-columns: 170px minmax(0, 1fr); grid-template-rows: 44px minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 6px 18px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#top { grid-row: 1; grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; }
+#opphand { display: flex; align-items: center; gap: 0; padding-left: 4px; }
+.back { width: 22px; height: 32px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -5px; }
+.back:first-child { margin-left: 0; }
+#menu { display: flex; gap: 10px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 16px; }
+.tally b { min-width: 28px; height: 28px; padding: 0 8px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#history { grid-row: 2 / 4; grid-column: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; padding-bottom: 6px; }
+.hist { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; font-size: 13px; font-weight: 700; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
+.hist .o { margin-left: auto; color: #ff9a80; }
+
+.row { grid-column: 2; display: grid; grid-template-columns: 84px minmax(0, 1fr) 84px; gap: 12px; align-items: center; min-height: 0; }
+#row1 { grid-row: 2; } #row0 { grid-row: 3; }
+.board { height: 100%; display: flex; justify-content: center; align-items: center; gap: 18px; border-radius: 14px; background: var(--table); min-height: calc(var(--uh) + 24px); }
+#row1 .board { border-bottom-left-radius: 0; border-bottom-right-radius: 0; } #row0 .board { border-top-left-radius: 0; border-top-right-radius: 0; }
+.lifebox { justify-self: center; width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; border: 4px solid #fff; }
+#life0 { background: var(--me2); } #life1 { background: var(--him2); }
+.res { display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 800; }
+.manaval { font-size: 22px; color: #bcd9ff; }
+.pile { width: 32px; height: 42px; border-radius: 5px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; }
+.pile.s0 { background: var(--me2); } .pile.s1 { background: var(--him2); }
+
+.unit { position: relative; width: var(--uw); height: var(--uh); border-radius: 10px; border: 3px solid rgba(255,255,255,.85); flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8px; transition: transform .2s, opacity .2s, filter .2s; }
+.unit.s0 { background: var(--me); } .unit.s1 { background: var(--him); }
+.unit .nm { font-size: 13px; font-weight: 800; opacity: .9; }
+.unit .st { position: absolute; bottom: -10px; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 17px; }
+.unit .st.a { left: -8px; background: var(--atk); color: #2a1d00; }
+.unit .st.h { right: -8px; background: var(--hp); }
+.unit .st.h.hurt { background: #ff9a80; color: #3a0b00; }
+.unit.fresh { filter: saturate(.5) brightness(.8); }
+.unit.ex { transform: rotate(90deg) scale(.82); filter: brightness(.6) saturate(.5); }
+.unit.can { cursor: pointer; box-shadow: 0 0 0 3px var(--ok); }
+.unit.chosen { transform: translateY(-14px); box-shadow: 0 0 0 4px var(--gold); }
+#row1 .unit.attacking { transform: translateY(18px); }
+#row0 .unit.attacking { transform: translateY(-18px); }
+.unit.tgt { cursor: pointer; box-shadow: 0 0 0 4px var(--gold); animation: pulse 1.1s ease-in-out infinite; }
+.unit.picked { box-shadow: 0 0 0 4px #fff; transform: translateY(-10px); }
+.unit .mark { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px var(--gold); } }
+.unit.new { animation: pop .35s ease-out; }
+@keyframes pop { 0% { transform: scale(.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.shake { animation: shake .35s; }
+@keyframes shake { 0%,100% { translate: 0; } 25% { translate: -6px; } 50% { translate: 5px; } 75% { translate: -3px; } }
+
+#controls { grid-row: 4; grid-column: 2; display: flex; justify-content: center; gap: 12px; min-height: 50px; align-items: center; }
+#controls button { min-height: 46px; min-width: 130px; padding: 0 18px; border-radius: 10px; border: 0; font-weight: 800; font-size: 16px; background: var(--gold); color: #2a1d00; }
+#controls button.go { background: var(--ok); color: #08300f; }
+#controls button:disabled { background: #56616d; color: #8e98a3; cursor: default; }
+
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 9px; padding: 0; text-align: center; background: var(--paper); color: var(--ink); border: 3px solid #cbbd9c; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.card .cost { position: absolute; top: -9px; left: -9px; width: 28px; height: 28px; border-radius: 50%; background: var(--mana); border: 2px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; }
+.card .nm { font-weight: 800; font-size: 14px; }
+.card .stats { display: flex; gap: 8px; font-weight: 900; font-size: 20px; }
+.card .stats .a { color: #b07700; } .card .stats .h { color: #c0391f; }
+.card .tx { font-size: 12px; padding: 0 6px; color: #4a453c; }
+#hand { grid-row: 5; grid-column: 1 / -1; display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 10px 0 4px; min-height: calc(var(--cardh) + 14px); }
+#hand .card.ok { border-color: var(--ok); }
+#hand .card.ok:hover { transform: translateY(-6px); }
+#hand .card.sel { transform: translateY(-14px); border-color: var(--gold); }
+#hand .card.no { filter: brightness(.6) saturate(.6); cursor: default; }
+
+#spot { position: absolute; z-index: 20; pointer-events: none; left: 50%; top: 40%; }
+#spot .card { --cardw: 130px; --cardh: 176px; position: absolute; left: -65px; top: -88px; box-shadow: 0 14px 40px rgba(0,0,0,.6); animation: fromtop .3s ease-out; }
+@keyframes fromtop { from { transform: translateY(-120px) scale(.5); opacity: 0; } }
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 34px; color: #ff6a4d; text-shadow: 0 2px 0 rgba(0,0,0,.6); transform: translate(-50%, -50%); animation: floatup 1.1s ease-out forwards; }
+@keyframes floatup { 0% { opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -120%); } }
+.ghost { position: absolute; z-index: 15; pointer-events: none; animation: die .5s ease-in forwards; }
+@keyframes die { to { transform: scale(.4); opacity: 0; } }
+#banner { position: absolute; left: 0; right: 0; top: 45%; text-align: center; z-index: 25; pointer-events: none; font-size: 40px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; } 20% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 56px; font-weight: 900; }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button, #rules button { min-height: 46px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 16px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+#rules .panel { max-width: 560px; max-height: 100%; overflow: auto; background: #2f3945; border-radius: 12px; padding: 18px 22px; font-size: 15px; }
+#rules h3 { margin: 0 0 8px; } #rules p { margin: 0 0 10px; }
+
+@media (max-width: 760px) {
+  :root { --cardw: 58px; --cardh: 84px; --uw: 40px; --uh: 56px; }
+  #game { grid-template-columns: minmax(0, 1fr); grid-template-rows: 36px minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 5px; }
+  #history { display: none; }
+  .row { grid-column: 1; grid-template-columns: 44px minmax(0, 1fr) 36px; gap: 5px; }
+  #controls, #hand { grid-column: 1; }
+  .board { gap: 6px; min-height: calc(var(--uh) + 18px); }
+  .lifebox { width: 42px; height: 42px; font-size: 18px; border-width: 3px; }
+  .manaval { font-size: 15px; } .pile { width: 24px; height: 32px; font-size: 12px; }
+  .unit { border-radius: 7px; border-width: 2px; padding-top: 3px; } .unit .nm { font-size: 9px; }
+  .unit .st { width: 19px; height: 19px; font-size: 11px; bottom: -7px; } .unit .st.a { left: -3px; } .unit .st.h { right: -3px; }
+  .unit .mark { width: 16px; height: 16px; top: -8px; }
+  .card .nm { font-size: 10px; } .card .stats { font-size: 14px; gap: 4px; } .card .tx { font-size: 9px; padding: 0 2px; }
+  .card .cost { width: 20px; height: 20px; font-size: 12px; top: -6px; left: -6px; }
+  #hand { gap: 5px; flex-wrap: wrap; padding-top: 8px; }
+  #controls button { min-height: 40px; min-width: 100px; font-size: 14px; }
+  #menu button { min-height: 28px; padding: 2px 8px; font-size: 13px; }
+  .back { width: 14px; height: 22px; }
+}
+
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="opphand"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="row1" class="row"><div id="life1" class="lifebox"></div><div id="board1" class="board"></div><div id="res1" class="res"></div></div>
+  <div id="row0" class="row"><div id="life0" class="lifebox"></div><div id="board0" class="board"></div><div id="res0" class="res"></div></div>
+  <div id="controls"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Attack and Block</h3>
+    <p>Life 20 each; bring the other to 0. Same 30-card deck for both. The first player starts with 3 cards, the second with 4 and the Coin (+1 mana this turn).</p>
+    <p><b>Your turn.</b> Ready your units, mana +1 (up to 10) and refill, draw 1 (empty deck: lose 1 life, then 2, then 3). Play cards for their cost. A unit can't attack the turn it is played, but it can block on the next enemy turn.</p>
+    <p><b>Attack, once a turn.</b> Tap your ready units, then Attack. They stay exhausted until your next turn, so they can't block.</p>
+    <p><b>Block.</b> The defender gives each attacker at most one of its ready units: tap your unit, then the attacker; tap again to undo. Blocked units hit each other; unblocked attackers hit life. Damage at least a unit's health destroys it.</p>
+    <p>At end of turn every surviving unit heals fully. Max 6 units a side.</p>
+    <p>Hit 2 / Hit 4: damage to an enemy unit. Draw 2: draw two cards.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 02 Attack and block: a life duel where the defender chooses the blocks, attackers stay
+// exhausted through the opponent's turn and damage on surviving units heals at end of turn.
+// One API for the page, the bots and the sim: legalActions(s) for the player to act (s.toAct),
+// act(s, a, ev) returns the next state (the input is never changed).
+
+const LIFE = 20, MAX_MANA = 10, BOARD = 6, TURN_LIMIT = 120;
+
+const CARDS = {
+  STR: { id: 'STR', name: 'Striker', kind: 'unit', cost: 1, atk: 2, hp: 1 },
+  RAI: { id: 'RAI', name: 'Raider', kind: 'unit', cost: 2, atk: 3, hp: 2 },
+  WAL: { id: 'WAL', name: 'Wall', kind: 'unit', cost: 2, atk: 0, hp: 5 },
+  LIN: { id: 'LIN', name: 'Line', kind: 'unit', cost: 3, atk: 3, hp: 3 },
+  HEA: { id: 'HEA', name: 'Heavy', kind: 'unit', cost: 4, atk: 4, hp: 4 },
+  BIG: { id: 'BIG', name: 'Big', kind: 'unit', cost: 5, atk: 5, hp: 5 },
+  HUG: { id: 'HUG', name: 'Huge', kind: 'unit', cost: 6, atk: 6, hp: 6 },
+  H2: { id: 'H2', name: 'Hit 2', kind: 'hit', cost: 1, dmg: 2 },
+  H4: { id: 'H4', name: 'Hit 4', kind: 'hit', cost: 3, dmg: 4 },
+  D2: { id: 'D2', name: 'Draw 2', kind: 'draw', cost: 2, n: 2 },
+  COIN: { id: 'COIN', name: 'Coin', kind: 'coin', cost: 0 },
+};
+const DECK = { STR: 3, RAI: 3, WAL: 3, LIN: 3, HEA: 3, BIG: 3, HUG: 3, H2: 3, H4: 3, D2: 3 };
+
+function deckList() { const out = []; for (const [id, k] of Object.entries(DECK)) for (let i = 0; i < k; i++) out.push(id); return out; }
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function newPlayer() { return { life: LIFE, mana: 0, maxMana: 0, fatigue: 0, hand: [], deck: deckList(), board: [] }; }
+function clone(s) {
+  return { ...s, attackers: s.attackers.slice(), p: s.p.map(p => ({ ...p, hand: p.hand.slice(), deck: p.deck.slice(), board: p.board.map(u => ({ ...u })) })) };
+}
+function emit(s, ev, e) { if (ev) { e.turnNo = s.turnNo; ev.push(e); } }
+function draw(s, side, ev) {
+  const p = s.p[side];
+  if (p.deck.length) { p.hand.push(p.deck.shift()); emit(s, ev, { t: 'draw', side }); return; }
+  p.fatigue++; p.life -= p.fatigue; emit(s, ev, { t: 'fatigue', side, n: p.fatigue });
+}
+
+function newMatch({ seed, first } = {}) {
+  const s = { seed: (seed >>> 0) || 1, uid: 1, turnNo: 0, turn: 0, toAct: 0, phase: 'main', attacked: false, attackers: [], first: 0, winner: null, capped: false, p: [newPlayer(), newPlayer()] };
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
+  for (let i = 0; i < 3; i++) draw(s, s.first, null);
+  for (let i = 0; i < 4; i++) draw(s, 1 - s.first, null);
+  s.p[1 - s.first].hand.push('COIN');
+  s.turn = s.first;
+  startTurn(s, null);
+  return s;
+}
+
+function checkWin(s, ev) {
+  if (s.winner !== null) return true;
+  const a = s.p[0].life <= 0, b = s.p[1].life <= 0;
+  if (!a && !b) return false;
+  s.winner = a && b ? 'draw' : a ? 1 : 0;
+  emit(s, ev, { t: 'end', winner: s.winner });
+  return true;
+}
+function startTurn(s, ev) {
+  const side = s.turn, p = s.p[side];
+  s.turnNo++; s.phase = 'main'; s.toAct = side; s.attacked = false; s.attackers = [];
+  emit(s, ev, { t: 'turn', side });
+  p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
+  p.mana = p.maxMana;
+  for (const u of p.board) { u.ex = false; u.fresh = false; }
+  draw(s, side, ev);
+  checkWin(s, ev);
+}
+
+const unitAt = (P, uid) => P.board.find(u => u.uid === uid);
+const canAttackWith = (u) => !u.ex && !u.fresh;
+const canBlockWith = (u) => !u.ex;
+const left = (u) => u.hp - u.dmg; // health left this turn
+
+function subsets(arr) { const out = []; for (let m = 1; m < (1 << arr.length); m++) { const x = []; for (let k = 0; k < arr.length; k++) if (m & (1 << k)) x.push(arr[k]); out.push(x); } return out; }
+// every assignment of at most one blocker to each attacker (each blocker blocks at most one)
+function blockAssignments(blockers, attackers) {
+  const out = [];
+  const rec = (i, used, pairs) => {
+    if (i === blockers.length) { out.push(pairs.slice()); return; }
+    rec(i + 1, used, pairs);
+    for (const a of attackers) if (!used.has(a)) { used.add(a); pairs.push([blockers[i], a]); rec(i + 1, used, pairs); pairs.pop(); used.delete(a); }
+  };
+  rec(0, new Set(), []);
+  return out;
+}
+
+// Actions: { t: 'play', card, tgt } (tgt: an enemy unit's uid, for Hit cards)
+//          { t: 'attack', units: [uid...] }   once a turn, from the main phase
+//          { t: 'block', pairs: [[blockerUid, attackerUid]...] }   the defender, right after an attack
+//          { t: 'end' }
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  const me = s.toAct, P = s.p[me], O = s.p[1 - me];
+  if (s.phase === 'block') {
+    const bl = P.board.filter(canBlockWith).map(u => u.uid);
+    return blockAssignments(bl, s.attackers).map(pairs => ({ t: 'block', pairs }));
+  }
+  const out = [];
+  for (const id of new Set(P.hand)) {
+    const c = CARDS[id];
+    if (c.cost > P.mana) continue;
+    if (c.kind === 'unit') { if (P.board.length < BOARD) out.push({ t: 'play', card: id }); }
+    else if (c.kind === 'hit') { for (const u of O.board) out.push({ t: 'play', card: id, tgt: u.uid }); }
+    else out.push({ t: 'play', card: id });
+  }
+  if (!s.attacked) { const el = P.board.filter(canAttackWith).map(u => u.uid); for (const x of subsets(el)) out.push({ t: 'attack', units: x }); }
+  out.push({ t: 'end' });
+  return out;
+}
+
+function sweep(s, ev) {
+  for (const side of [0, 1]) {
+    const B = s.p[side].board;
+    for (let i = B.length - 1; i >= 0; i--) if (B[i].dmg >= B[i].hp) { emit(s, ev, { t: 'die', side, uid: B[i].uid, card: B[i].card }); B.splice(i, 1); }
+  }
+}
+function hurt(s, side, u, n, ev) { if (n <= 0) return; u.dmg += n; emit(s, ev, { t: 'hit', side, uid: u.uid, n }); }
+
+function mAct(s, a, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  const me = s.toAct, P = s.p[me], O = s.p[1 - me];
+  if (a.t === 'play') {
+    if (s.phase !== 'main') throw new Error('not now');
+    const c = CARDS[a.card];
+    if (!c || !P.hand.includes(a.card) || c.cost > P.mana) throw new Error('illegal play ' + a.card);
+    if (c.kind === 'unit' && P.board.length >= BOARD) throw new Error('board full');
+    let tgt = null;
+    if (c.kind === 'hit') { tgt = unitAt(O, a.tgt); if (!tgt) throw new Error('bad target'); }
+    P.mana -= c.cost; P.hand.splice(P.hand.indexOf(a.card), 1);
+    emit(s, ev, { t: 'play', side: me, card: a.card, tgt: a.tgt });
+    if (c.kind === 'unit') { const u = { uid: s.uid++, card: a.card, atk: c.atk, hp: c.hp, dmg: 0, fresh: true, ex: false }; P.board.push(u); emit(s, ev, { t: 'summon', side: me, uid: u.uid }); }
+    else if (c.kind === 'hit') { hurt(s, 1 - me, tgt, c.dmg, ev); sweep(s, ev); }
+    else if (c.kind === 'draw') { for (let i = 0; i < c.n; i++) draw(s, me, ev); }
+    else P.mana += 1;
+  } else if (a.t === 'attack') {
+    if (s.phase !== 'main' || s.attacked) throw new Error('no attack now');
+    const units = a.units || [];
+    if (!units.length || new Set(units).size !== units.length) throw new Error('bad attack');
+    for (const id of units) { const u = unitAt(P, id); if (!u || !canAttackWith(u)) throw new Error('cannot attack with ' + id); }
+    s.attacked = true; s.attackers = units.slice();
+    for (const id of units) unitAt(P, id).ex = true;
+    emit(s, ev, { t: 'attack', side: me, units: units.slice() });
+    s.phase = 'block'; s.toAct = 1 - me;
+  } else if (a.t === 'block') {
+    if (s.phase !== 'block') throw new Error('no block now');
+    const att = s.turn, A = s.p[att], D = P; // the defender is acting
+    const pairs = a.pairs || [], usedB = new Set(), usedA = new Set();
+    for (const [b, x] of pairs) {
+      const bu = unitAt(D, b);
+      if (!bu || !canBlockWith(bu) || usedB.has(b) || usedA.has(x) || !s.attackers.includes(x)) throw new Error('bad block');
+      usedB.add(b); usedA.add(x);
+    }
+    emit(s, ev, { t: 'block', side: me, pairs: pairs.map(p => p.slice()) });
+    const blockedBy = new Map(pairs.map(([b, x]) => [x, b]));
+    let face = 0;
+    for (const x of s.attackers) {
+      const au = unitAt(A, x); if (!au) continue;
+      const b = blockedBy.get(x);
+      if (b === undefined) { face += au.atk; emit(s, ev, { t: 'face', side: att, uid: x, n: au.atk }); continue; }
+      const bu = unitAt(D, b);
+      const da = au.atk, db = bu.atk;
+      hurt(s, me, bu, da, ev); hurt(s, att, au, db, ev);
+    }
+    if (face) { D.life -= face; emit(s, ev, { t: 'life', side: me, n: face, life: D.life }); }
+    sweep(s, ev);
+    s.phase = 'main'; s.toAct = att; s.attackers = [];
+  } else if (a.t === 'end') {
+    if (s.phase !== 'main') throw new Error('cannot end now');
+    for (const side of [0, 1]) for (const u of s.p[side].board) u.dmg = 0;
+    if (s.turnNo >= TURN_LIMIT) { s.winner = 'draw'; s.capped = true; emit(s, ev, { t: 'end', winner: 'draw' }); return; }
+    s.turn = 1 - s.turn;
+    startTurn(s, ev);
+    return;
+  } else throw new Error('unknown action');
+  checkWin(s, ev);
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function _act(t, a) { mAct(t, a, null); return t; }
+const actionKey = (a) => a.t === 'play' ? 'p' + a.card + (a.tgt !== undefined ? '@' + a.tgt : '') : a.t === 'attack' ? 'a' + a.units.slice().sort((x, y) => x - y).join(',') : a.t === 'block' ? 'b' + a.pairs.map(p => p.join('>')).sort().join(',') : 'e';
+
+// ---- src/bot.js
+// Bots for 02 Attack and block. Each is a function (state, rng) -> one action for s.toAct.
+// None reads a hidden card: Expert reshuffles everything its side cannot see before each play-out.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pick = (a, rng) => a[Math.floor(rng() * a.length)];
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+// ------------------------------------------------------------------ Random
+// uniform over the legal actions; a block is a random assignment drawn directly
+function randomBot(s, rng) {
+  if (s.phase === 'block') {
+    const P = s.p[s.toAct], free = s.attackers.slice(), pairs = [];
+    for (const u of P.board) if (canBlockWith(u) && free.length && rng() < 0.5) { const k = Math.floor(rng() * free.length); pairs.push([u.uid, free[k]]); free.splice(k, 1); }
+    return { t: 'block', pairs };
+  }
+  return pick(legalActions(s), rng);
+}
+
+// ------------------------------------------------------------------ Greedy
+// plays the most expensive card that does something (a Hit only where it destroys, the most
+// costly unit it can), attacks with every unit no enemy blocker could destroy and survive,
+// all-in when the attack adds up to his life; blocks each attacker with its smallest unit that
+// destroys it and survives, the rest unblocked unless that is lethal.
+const size = (u) => u.atk + u.hp;
+function hitTarget(O, dmg) {
+  let best = null;
+  for (const u of O.board) if (left(u) <= dmg && (!best || CARDS[u.card].cost > CARDS[best.card].cost)) best = u;
+  return best;
+}
+function usefulPlay(s, id, P, O) {
+  const c = CARDS[id];
+  if (c.kind === 'unit') return P.board.length < BOARD ? { t: 'play', card: id } : null;
+  if (c.kind === 'hit') { const u = hitTarget(O, c.dmg); return u ? { t: 'play', card: id, tgt: u.uid } : null; }
+  if (c.kind === 'draw') return { t: 'play', card: id };
+  return null;
+}
+function bestPlay(s) {
+  const me = s.toAct, P = s.p[me], O = s.p[1 - me];
+  const ids = [...new Set(P.hand)].filter(id => id !== 'COIN').sort((a, b) => CARDS[b].cost - CARDS[a].cost);
+  for (const id of ids) if (CARDS[id].cost <= P.mana) { const a = usefulPlay(s, id, P, O); if (a) return a; }
+  if (P.hand.includes('COIN')) for (const id of ids) if (CARDS[id].cost === P.mana + 1 && usefulPlay(s, id, P, O)) return { t: 'play', card: 'COIN' };
+  return null;
+}
+function lethalAttack(s) {
+  const P = s.p[s.toAct], O = s.p[1 - s.toAct];
+  const el = P.board.filter(u => canAttackWith(u) && u.atk > 0);
+  const tot = el.reduce((a, u) => a + u.atk, 0);
+  return el.length && tot >= O.life ? { t: 'attack', units: el.map(u => u.uid) } : null;
+}
+function safeAttackers(s) {
+  const P = s.p[s.toAct], O = s.p[1 - s.toAct];
+  const blockers = O.board.filter(canBlockWith);
+  return P.board.filter(u => canAttackWith(u) && u.atk > 0 && !blockers.some(b => b.atk >= left(u) && left(b) > u.atk));
+}
+function greedyBlock(s) {
+  const D = s.p[s.toAct], A = s.p[s.turn];
+  const att = s.attackers.map(x => unitAt(A, x)).filter(Boolean).sort((a, b) => b.atk - a.atk);
+  const free = D.board.filter(canBlockWith).sort((a, b) => size(a) - size(b));
+  const pairs = [], done = new Set();
+  for (const x of att) {
+    const b = free.find(b => b.atk >= left(x) && left(b) > x.atk);
+    if (b) { pairs.push([b.uid, x.uid]); done.add(x.uid); free.splice(free.indexOf(b), 1); }
+  }
+  let face = att.filter(x => !done.has(x.uid)).reduce((a, x) => a + x.atk, 0);
+  for (const x of att) {
+    if (face < D.life || !free.length) break;
+    if (done.has(x.uid)) continue;
+    const b = free.shift(); pairs.push([b.uid, x.uid]); done.add(x.uid); face -= x.atk;
+  }
+  return { t: 'block', pairs };
+}
+function greedyBot(s) {
+  if (s.phase === 'block') return greedyBlock(s);
+  if (!s.attacked) { const l = lethalAttack(s); if (l) return l; }
+  const p = bestPlay(s); if (p) return p;
+  if (!s.attacked) { const safe = safeAttackers(s); if (safe.length) return { t: 'attack', units: safe.map(u => u.uid) }; }
+  return { t: 'end' };
+}
+
+// ------------------------------------------------------------------ Racer
+// plays like Greedy, attacks with everything every turn, blocks only to stop lethal
+function racerBlock(s) {
+  const D = s.p[s.toAct], A = s.p[s.turn];
+  const att = s.attackers.map(x => unitAt(A, x)).filter(Boolean).sort((a, b) => b.atk - a.atk);
+  const free = D.board.filter(canBlockWith).sort((a, b) => size(a) - size(b));
+  let face = att.reduce((a, x) => a + x.atk, 0); const pairs = [];
+  for (const x of att) { if (face < D.life || !free.length) break; const b = free.shift(); pairs.push([b.uid, x.uid]); face -= x.atk; }
+  return { t: 'block', pairs };
+}
+function racerBot(s) {
+  if (s.phase === 'block') return racerBlock(s);
+  const p = bestPlay(s); if (p) return p;
+  if (!s.attacked) { const el = s.p[s.toAct].board.filter(u => canAttackWith(u) && u.atk > 0); if (el.length) return { t: 'attack', units: el.map(u => u.uid) }; }
+  return { t: 'end' };
+}
+
+// ------------------------------------------------------------------ evaluation
+const W = { life: 0.7, low: 0.6, lowAt: 8, atk: 1.0, hp: 0.7, unit: 1.0, card: 1.3, ex: 0.3 };
+const lifeWorth = (l) => W.life * l - W.low * Math.max(0, W.lowAt - l);
+function evaluate(s, me) {
+  if (s.winner === me) return 1000;
+  if (s.winner !== null) return s.winner === 'draw' ? 0 : -1000;
+  let v = 0;
+  for (const side of [0, 1]) {
+    const P = s.p[side], sg = side === me ? 1 : -1;
+    let x = lifeWorth(Math.max(0, P.life)) + W.card * P.hand.length + 0.15 * P.maxMana;
+    for (const u of P.board) x += W.atk * u.atk + W.hp * left(u) + W.unit - (u.ex ? W.ex : 0);
+    v += sg * x;
+  }
+  return v;
+}
+const winProb = (s, me) => s.winner === me ? 1 : s.winner === 'draw' ? 0.5 : s.winner !== null ? 0 : 1 / (1 + Math.exp(-evaluate(s, me) / 5));
+
+// ------------------------------------------------------------------ Expert
+// Determinized play-outs: every candidate action is followed by a Greedy-vs-Greedy play-out on a
+// world where the cards this side cannot see are reshuffled, to the end of the game or DEPTH
+// turns and then scored; successive halving spends the play-outs on the candidates that lead.
+function determinize(s, me, rng) {
+  const t = clone(s), O = t.p[1 - me];
+  const pool = shuffle(O.hand.concat(O.deck), rng);
+  O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length);
+  shuffle(t.p[me].deck, rng);
+  return t;
+}
+function rollout(t, me, depth, rng, eps) {
+  const start = t.turnNo;
+  let steps = 0;
+  while (t.winner === null && t.turnNo - start < depth && steps < 400) {
+    const a = eps > 0 && rng() < eps ? randomBot(t, rng) : greedyBot(t);
+    _act(t, a); steps++;
+  }
+  return winProb(t, me);
+}
+// a one-ply look: the action, the opponent's Greedy block when it is an attack, the worth after
+function quick(s, a, me) {
+  let t = act(s, a);
+  if (t.phase === 'block' && t.winner === null) t = act(t, greedyBlock(t));
+  return evaluate(t, me);
+}
+function candidates(s, keepAttacks = 8, keepBlocks = 10) {
+  const me = s.toAct, all = legalActions(s);
+  if (s.phase === 'block') {
+    let opts = all;
+    if (opts.length > keepBlocks) {
+      const g = greedyBlock(s), r = racerBlock(s);
+      const scored = opts.map(a => ({ a, v: quick(s, a, me) })).sort((x, y) => y.v - x.v).slice(0, keepBlocks).map(x => x.a);
+      opts = scored.concat([g, r, { t: 'block', pairs: [] }]);
+    }
+    return dedupe(opts);
+  }
+  const plays = all.filter(a => a.t !== 'attack');
+  let atks = all.filter(a => a.t === 'attack' && a.units.every(id => unitAt(s.p[me], id).atk > 0));
+  if (atks.length > keepAttacks) atks = atks.map(a => ({ a, v: quick(s, a, me) })).sort((x, y) => y.v - x.v).slice(0, keepAttacks).map(x => x.a);
+  return dedupe(plays.concat(atks));
+}
+const key = (a) => JSON.stringify(a.t === 'block' ? { t: 'b', p: a.pairs.map(p => p.join('>')).sort() } : a.t === 'attack' ? { t: 'a', u: a.units.slice().sort() } : a);
+function dedupe(list) { const seen = new Set(), out = []; for (const a of list) { const k = key(a); if (!seen.has(k)) { seen.add(k); out.push(a); } } return out; }
+
+// the settings the sim and the set positions use (the page gives Expert more play-outs and a clock)
+const EXPERT = { playouts: 1000, depth: 99, eps: 0.05 };
+function expertBot({ playouts = 600, depth = 99, eps = 0.05, timeMs = 0 } = {}) {
+  return function (s, rng) {
+    const me = s.toAct;
+    let arms = candidates(s);
+    if (arms.length === 1) return arms[0];
+    for (const a of arms) { const t = act(s, a); if (t.winner === me) return a; }
+    const stats = arms.map(a => ({ a, w: 0, n: 0 }));
+    let alive = stats.slice();
+    const rounds = Math.max(1, Math.ceil(Math.log2(alive.length)));
+    const t0 = timeMs ? Date.now() : 0;
+    for (let r = 0; r < rounds && alive.length > 1; r++) {
+      const per = Math.max(2, Math.floor(playouts / rounds / alive.length));
+      for (let i = 0; i < per; i++) {
+        const world = determinize(s, me, rng), seed = (rng() * 4294967296) >>> 0;
+        for (const st of alive) {
+          const t = clone(world); _act(t, st.a);
+          st.w += rollout(t, me, depth, makeRng(seed), eps); st.n++;
+        }
+        if (timeMs && Date.now() - t0 > timeMs) break;
+      }
+      alive.sort((x, y) => y.w / y.n - x.w / x.n);
+      alive = alive.slice(0, Math.ceil(alive.length / 2));
+      if (timeMs && Date.now() - t0 > timeMs) break;
+    }
+    return alive[0].a;
+  };
+}
+
+// ---- src/ui.js
+// 02 Attack and block as a page: you against Expert. Every change goes through the engine's
+// act() with the same actions the bots use; the bot's turn is played one action at a time.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-02-tally';
+const expert = expertBot({ playouts: 3000, timeMs: 1500 });
+const MARKS = ['#f2b632', '#5fdc6f', '#ff6a4d', '#5ad1f0', '#ff7ad9', '#ffffff'];
+const ui = { s: null, busy: false, over: false, sel: null, chosen: new Set(), pairs: [], pick: null, show: null, hist: [], rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+function cardHTML(id, { cls = '', attrs = '' } = {}) {
+  const c = CARDS[id];
+  let body = '';
+  if (c.kind === 'unit') body = `<div class="stats"><span class="a">${c.atk}</span><span class="h">${c.hp}</span></div>`;
+  else if (c.kind === 'hit') body = `<div class="tx">${c.dmg} damage to an enemy unit</div>`;
+  else if (c.kind === 'draw') body = `<div class="tx">Draw ${c.n}</div>`;
+  else body = `<div class="tx">+1 mana this turn</div>`;
+  return `<button class="card ${cls}" ${attrs}><span class="cost">${c.cost}</span><div class="nm">${c.name}</div>${body}</button>`;
+}
+
+const myMove = () => !ui.busy && !ui.over && ui.s.toAct === ME;
+const legal = () => (myMove() && ui.s.phase === 'main') ? legalActions(ui.s) : [];
+
+function unitHTML(side, u) {
+  const s = ui.s; let cls = '', mark = '';
+  if (u.fresh && side === s.turn) cls += ' fresh';
+  if (u.ex) cls += ' ex';
+  const phase = s.phase;
+  if (phase === 'block' && side === s.turn && s.attackers.includes(u.uid)) {
+    cls = cls.replace(' ex', '') + ' attacking';
+    mark = `<i class="mark" style="background:${MARKS[s.attackers.indexOf(u.uid) % MARKS.length]}"></i>`;
+    if (myMove() && ui.pick !== null) cls += ' tgt';
+  }
+  const pairs = ui.show || ui.pairs;
+  if (phase === 'block' && side !== s.turn) {
+    const pr = pairs.find(p => p[0] === u.uid);
+    if (pr) mark = `<i class="mark" style="background:${MARKS[s.attackers.indexOf(pr[1]) % MARKS.length]}"></i>`;
+    if (myMove() && canBlockWith(u)) cls += ui.pick === u.uid ? ' picked' : ' can';
+  }
+  if (phase === 'main' && myMove() && side === ME) {
+    if (ui.chosen.has(u.uid)) cls += ' chosen';
+    else if (!s.attacked && canAttackWith(u) && u.atk > 0 && !ui.sel) cls += ' can';
+  }
+  if (phase === 'main' && side === BOT && ui.sel && legal().some(a => a.card === ui.sel && a.tgt === u.uid)) cls += ' tgt';
+  if (ui.fx && ui.fx[u.uid]) cls += ' ' + ui.fx[u.uid];
+  return `<div class="unit s${side}${cls}" id="u${u.uid}" data-side="${side}" data-uid="${u.uid}"><span class="nm">${CARDS[u.card].name}</span>${mark}<span class="st a">${u.atk}</span><span class="st h${u.dmg ? ' hurt' : ''}">${u.hp - u.dmg}</span></div>`;
+}
+function render() {
+  const s = ui.s, t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('opphand').innerHTML = '<i class="back"></i>'.repeat(s.p[BOT].hand.length);
+  for (const side of [0, 1]) {
+    const P = s.p[side];
+    $('life' + side).textContent = P.life;
+    $('board' + side).innerHTML = P.board.map(u => unitHTML(side, u)).join('');
+    $('res' + side).innerHTML = `<span class="manaval">${P.mana}/${P.maxMana}</span><span class="pile s${side}">${P.deck.length}</span>`;
+  }
+  const L = legal();
+  const P = s.p[ME];
+  $('hand').innerHTML = P.hand.map((id, i) => ({ id, i })).sort((a, b) => CARDS[a.id].cost - CARDS[b.id].cost).map(({ id, i }) => {
+    const ok = L.some(a => a.t === 'play' && a.card === id);
+    return cardHTML(id, { cls: (ok ? 'ok' : (myMove() ? 'no' : '')) + (ui.sel === id ? ' sel' : ''), attrs: `data-card="${id}"${ok ? '' : ' disabled'}` });
+  }).join('');
+  let ctl = '';
+  if (myMove() && s.phase === 'main') {
+    if (ui.chosen.size) ctl += `<button id="attack" class="go">Attack</button>`;
+    ctl += `<button id="end">End turn</button>`;
+  } else if (myMove() && s.phase === 'block') {
+    ctl += `<button id="block" class="go">${ui.pairs.length ? 'Block' : 'No block'}</button>`;
+  } else ctl += `<button disabled>End turn</button>`;
+  $('controls').innerHTML = ctl;
+  $('history').innerHTML = ui.hist.slice(-16).map(h => `<div class="hist s${h.side}"><span>${h.txt}</span><span class="o">${h.out || ''}</span></div>`).join('');
+  ui.fx = null;
+}
+
+// ------------------------------------------------------------------ effects
+function centerOf(el) { const a = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - a.left + r.width / 2, y: r.top - a.top + r.height / 2 }; }
+function floatAt(p, text) { const f = document.createElement('div'); f.className = 'float'; f.textContent = text; f.style.left = p.x + 'px'; f.style.top = p.y + 'px'; $('game').appendChild(f); setTimeout(() => f.remove(), 1200); }
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+function snapshot() { const out = {}; document.querySelectorAll('.unit, .lifebox').forEach(el => { const g = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(); out[el.id] = { c: centerOf(el), html: el.outerHTML, x: r.left - g.left, y: r.top - g.top }; }); return out; }
+function ghost(sn) { const d = document.createElement('div'); d.className = 'ghost'; d.innerHTML = sn.html; d.style.left = sn.x + 'px'; d.style.top = sn.y + 'px'; $('game').appendChild(d); setTimeout(() => d.remove(), 550); }
+async function spotlight(id) { $('spot').innerHTML = cardHTML(id); await wait(800); $('spot').innerHTML = ''; }
+
+async function apply(a) {
+  const qtok = ui.token;
+  const prev = ui.s, ev = [], side = prev.toAct;
+  if (a.t === 'play' && side === BOT) await spotlight(a.card);
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  if (a.t === 'block') { ui.show = a.pairs; render(); await wait(side === BOT ? 900 : 300); }
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  const before = snapshot();
+  const next = act(prev, a, ev);
+  ui.s = next; ui.show = null; ui.fx = {};
+  for (const e of ev) {
+    if (e.t === 'summon') ui.fx[e.uid] = 'new';
+    if (e.t === 'hit') ui.fx[e.uid] = 'shake';
+  }
+  render();
+  for (const e of ev) {
+    if (e.t === 'hit') { const p = before['u' + e.uid]; if (p) floatAt(p.c, '−' + e.n); }
+    if (e.t === 'die') { const p = before['u' + e.uid]; if (p) ghost(p); }
+    if (e.t === 'life' || e.t === 'fatigue') { const p = before['life' + e.side]; if (p) floatAt(p.c, '−' + e.n); }
+    if (e.t === 'turn' && e.side === ME) banner('Your turn');
+  }
+  // history
+  if (a.t === 'play') {
+    const c = CARDS[a.card], died = ev.some(e => e.t === 'die');
+    ui.hist.push({ side, txt: c.name, out: c.kind === 'hit' ? (died ? '✕' : '−' + c.dmg) : '' });
+  } else if (a.t === 'attack') ui.hist.push({ side, txt: `Attack ×${a.units.length}` });
+  else if (a.t === 'block') {
+    const face = ev.filter(e => e.t === 'life').reduce((x, e) => x + e.n, 0), dead = ev.filter(e => e.t === 'die');
+    ui.hist.push({ side, txt: a.pairs.length ? `Block ×${a.pairs.length}` : 'No block', out: [face ? '−' + face : '', dead.length ? '✕' + dead.length : ''].filter(Boolean).join(' ') });
+  }
+  if (next.winner !== null) finish();
+  await wait(ev.some(e => e.t === 'hit' || e.t === 'life') ? 700 : 250);
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+}
+
+function finish() {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+// ------------------------------------------------------------------ flow
+async function advance(tok) {
+  while (!ui.over && ui.s.toAct === BOT) {
+    ui.busy = true; render();
+    await wait(450);
+    if (tok !== ui.token) return;
+    const a = expert(ui.s, ui.rng);
+    if (tok !== ui.token) return;
+    await apply(a);
+    if (tok !== ui.token) return;
+  }
+  ui.busy = false; ui.sel = null; ui.chosen.clear(); ui.pairs = []; ui.pick = null; render();
+}
+async function mine(a) {
+  if (!myMove()) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel = null; ui.chosen.clear(); ui.pairs = []; ui.pick = null;
+  await apply(a);
+  if (tok !== ui.token) return;
+  await advance(tok);
+}
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.over = false; ui.hist = []; ui.sel = null; ui.chosen.clear(); ui.pairs = []; ui.pick = null; ui.show = null;
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  if (ui.s.first === ME) banner('Your turn');
+  await wait(700);
+  if (tok !== ui.token) return;
+  await advance(tok);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (b && b.id === 'rulesbtn') { $('rules').classList.add('show'); return; }
+  if (b && b.id === 'rulesclose') { $('rules').classList.remove('show'); return; }
+  if (e.target.id === 'rules') { $('rules').classList.remove('show'); return; }
+  if (b && (b.id === 'newgame' || b.id === 'rematch')) return startMatch();
+  if (!myMove()) return;
+  const s = ui.s;
+  const uel = e.target.closest('.unit');
+  if (s.phase === 'block') {
+    if (b && b.id === 'block') return mine({ t: 'block', pairs: ui.pairs.map(p => p.slice()) });
+    if (uel) {
+      const side = +uel.dataset.side, uid = +uel.dataset.uid;
+      if (side === ME && canBlockWith(unitAt(s.p[ME], uid))) {
+        const had = ui.pairs.findIndex(p => p[0] === uid);
+        if (had >= 0) { ui.pairs.splice(had, 1); ui.pick = null; } else ui.pick = ui.pick === uid ? null : uid;
+        render(); return;
+      }
+      if (side === BOT && ui.pick !== null && s.attackers.includes(uid)) {
+        ui.pairs = ui.pairs.filter(p => p[1] !== uid); ui.pairs.push([ui.pick, uid]); ui.pick = null; render(); return;
+      }
+    }
+    if (ui.pick !== null) { ui.pick = null; render(); }
+    return;
+  }
+  if (b && b.id === 'end') return mine({ t: 'end' });
+  if (b && b.id === 'attack') return mine({ t: 'attack', units: [...ui.chosen] });
+  if (b && b.dataset.card) {
+    const id = b.dataset.card, c = CARDS[id];
+    if (c.kind === 'hit') { ui.sel = ui.sel === id ? null : id; ui.chosen.clear(); render(); return; }
+    return mine({ t: 'play', card: id });
+  }
+  if (uel) {
+    const side = +uel.dataset.side, uid = +uel.dataset.uid;
+    if (ui.sel && side === BOT) { const a = legal().find(x => x.card === ui.sel && x.tgt === uid); if (a) return mine(a); }
+    if (side === ME && !ui.sel) { const u = unitAt(s.p[ME], uid); if (!s.attacked && canAttackWith(u) && u.atk > 0) { if (ui.chosen.has(uid)) ui.chosen.delete(uid); else ui.chosen.add(uid); render(); return; } }
+  }
+  if (ui.sel) { ui.sel = null; render(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { ui.sel = null; ui.pick = null; $('rules').classList.remove('show'); render(); } });
+startMatch();
+
+})();
+</script>
+</body>
+</html>

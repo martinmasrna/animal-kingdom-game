@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prize Auction</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #232a33; --table: #303b48; --ink: #1b1b1b; --paper: #f6f2e8;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86;
+  --gold: #f2b632; --ok: #5fdc6f; --coin: #c98b00; --pts: #2f9a4a; --debt: #c0391f;
+  --cardw: 84px; --cardh: 112px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.3 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game { position: relative; height: 100%; max-width: 1300px; margin: 0 auto; display: grid;
+  grid-template-columns: 190px minmax(0, 1fr); grid-template-rows: 44px auto minmax(0, 1fr) auto auto auto; gap: 8px 18px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#top { grid-row: 1; grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; }
+#round { display: flex; gap: 3px; align-items: center; }
+#round i { width: 10px; height: 14px; border-radius: 2px; background: #46525f; } #round i.done { background: #8c98a5; } #round i.now { background: var(--gold); }
+#menu { display: flex; gap: 10px; align-items: center; }
+#menu button { white-space: nowrap; min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 16px; }
+.tally b { min-width: 28px; height: 28px; padding: 0 8px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#history { grid-row: 2 / 5; grid-column: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; }
+.hist { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid #56616d; font-size: 13px; font-weight: 700; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
+.hist .v { font-variant-numeric: tabular-nums; color: #c8d0d8; }
+
+.side { grid-column: 2; display: flex; align-items: center; gap: 14px; padding: 6px 12px; border-radius: 12px; background: rgba(0,0,0,.18); }
+#side1 { grid-row: 2; } #side0 { grid-row: 4; }
+.score { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; flex: 0 0 auto; }
+#side0 .score { background: var(--me2); } #side1 .score { background: var(--him2); }
+.piles { display: flex; gap: 8px; align-items: center; }
+.pile { min-width: 34px; height: 44px; padding: 0 4px; border-radius: 5px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; }
+.pile.deck.s0 { background: var(--me2); } .pile.deck.s1 { background: var(--him2); }
+.pile.disc { background: transparent; border-style: dashed; color: #c9d3de; }
+.backs { display: flex; } .back { width: 22px; height: 32px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; } .back:first-child { margin-left: 0; }
+.owned { display: flex; flex-wrap: wrap; gap: 4px; margin-left: auto; justify-content: flex-end; }
+.chip { min-width: 26px; height: 24px; padding: 0 5px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; background: var(--paper); }
+.chip.coin { color: var(--coin); } .chip.pts { color: var(--pts); } .chip.debt { color: var(--debt); }
+
+#middle { grid-row: 3; grid-column: 2; display: grid; grid-template-rows: 1fr auto 1fr; align-items: center; justify-items: center; border-radius: 14px; background: var(--table); min-height: 0; padding: 6px; }
+.bidrow { display: flex; gap: 6px; align-items: center; min-height: 40px; }
+.bidrow .val { font-size: 26px; font-weight: 900; margin-left: 10px; color: var(--gold); }
+.bidrow.win .val::after { content: ' ✓'; color: var(--ok); }
+#potbox { display: flex; align-items: center; gap: 24px; }
+#pot { display: flex; gap: 10px; }
+#pot .card { --cardw: 104px; --cardh: 138px; }
+#next { opacity: .55; }
+#next .card { --cardw: 66px; --cardh: 88px; }
+#pot.fly0 { animation: fly0 .7s ease-in forwards; } #pot.fly1 { animation: fly1 .7s ease-in forwards; }
+@keyframes fly0 { to { transform: translateY(160px) scale(.4); opacity: 0; } }
+@keyframes fly1 { to { transform: translateY(-160px) scale(.4); opacity: 0; } }
+
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 9px; padding: 0; background: var(--paper); color: var(--ink); border: 3px solid #cbbd9c; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; transition: transform .12s; }
+.card .big { font-size: calc(var(--cardw) * .42); font-weight: 900; line-height: 1; }
+.card .big.coin { color: var(--coin); } .card .big.pts { color: var(--pts); } .card .big.debt { color: var(--debt); }
+.card .nm { font-size: calc(var(--cardw) * .14); font-weight: 800; }
+.card .tx { font-size: calc(var(--cardw) * .11); color: #4a453c; padding: 0 4px; line-height: 1.1; }
+.card.mini { --cardw: 40px; --cardh: 52px; border-width: 2px; border-radius: 6px; } .card.mini .nm, .card.mini .tx { display: none; }
+#hand { grid-row: 6; grid-column: 1 / -1; display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding-top: 14px; min-height: calc(var(--cardh) + 18px); }
+#hand .card.can:hover { transform: translateY(-5px); }
+#hand .card.sel { transform: translateY(-14px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.5); }
+#hand .card.sel.drop { border-color: #ff6a4d; box-shadow: 0 0 0 3px rgba(255,106,77,.5); }
+#hand .card:disabled { cursor: default; }
+#controls { grid-row: 5; grid-column: 2; display: flex; justify-content: center; min-height: 50px; align-items: center; }
+#controls button { min-height: 46px; min-width: 150px; padding: 0 18px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--ok); color: #08300f; }
+#controls button:disabled { background: #56616d; color: #8e98a3; cursor: default; }
+#controls button.drop { background: #ff8a70; color: #3a0b00; }
+
+#banner { position: absolute; left: 0; right: 0; top: 42%; text-align: center; z-index: 25; pointer-events: none; font-size: 40px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; } 20% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 56px; font-weight: 900; } #over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over p { margin: 0; font-size: 22px; font-weight: 800; }
+#over button, #rules button { min-height: 46px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 16px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+#rules .panel { max-width: 560px; max-height: 100%; overflow: auto; background: #2f3945; border-radius: 12px; padding: 18px 22px; font-size: 15px; }
+#rules h3 { margin: 0 0 8px; } #rules p { margin: 0 0 10px; }
+
+@media (max-width: 760px) {
+  :root { --cardw: 46px; --cardh: 62px; }
+  #game { grid-template-columns: minmax(0, 1fr); grid-template-rows: 36px auto minmax(0, 1fr) auto auto auto; gap: 6px; }
+  #history { display: none; }
+  .side, #middle, #controls { grid-column: 1; }
+  .side { gap: 8px; padding: 4px 8px; } .score { width: 40px; height: 40px; font-size: 18px; }
+  .pile { min-width: 26px; height: 34px; font-size: 12px; } .back { width: 14px; height: 22px; margin-left: -4px; }
+  .chip { min-width: 20px; height: 20px; font-size: 11px; padding: 0 3px; }
+  #pot .card { --cardw: 74px; --cardh: 98px; } #next .card { --cardw: 46px; --cardh: 62px; }
+  .card.mini { --cardw: 28px; --cardh: 38px; } .bidrow .val { font-size: 20px; }
+  #hand { gap: 6px; flex-wrap: wrap; } #hand .card { --cardw: 62px; --cardh: 82px; } #round { gap: 2px; } #round i { width: 5px; height: 11px; } #menu { gap: 6px; }
+  #menu button { min-height: 28px; padding: 2px 8px; font-size: 13px; }
+  #controls button { min-height: 40px; font-size: 15px; }
+}
+
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="round"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="side1" class="side"></div>
+  <div id="middle"><div id="bid1" class="bidrow"></div><div id="potbox"><div id="pot"></div><div id="next"></div></div><div id="bid0" class="bidrow"></div></div>
+  <div id="side0" class="side"></div>
+  <div id="controls"></div>
+  <div id="hand"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Prize Auction</h3>
+    <p>16 prizes, one a round. Most points at the end wins (tie: more coin owned).</p>
+    <p>You both start with the same 8 coin cards (six 1s, two 2s); 5 in hand. Each round both draw 2 (an empty deck reshuffles your discard). Over 7 cards: discard down to 7.</p>
+    <p><b>Bid:</b> pick any cards from your hand, in secret; both bids are shown at once. The higher bid takes the prize, pays its bid cards to its discard, and the prize goes to its discard too: from then on you draw it. The lower bidder keeps its cards. Equal bids: nobody takes it and it stays, joined by the next prize.</p>
+    <p><b>Debt</b> (−3) goes the other way: with Debt up, the lower bidder takes everything up, and every bid comes back.</p>
+    <p>Coin prizes make your money stronger; point prizes score but sit in your deck as 0. Messenger: when you draw it, draw 1 more. The next prize is shown beside the one up now.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 17 Prize auction: sealed bids from a hand of coin cards for one prize a round. Your deck is your
+// money; prizes are better coin or points that clog the deck. Simultaneous: each round both sides
+// submit (a discard down to 7 when needed, then a bid) and the round resolves when both bids are in.
+
+const HAND_MAX = 7, START_HAND = 5, DRAW = 2;
+const CARDS = {
+  C1: { id: 'C1', name: 'Coin 1', coin: 1, pts: 0 },
+  C2: { id: 'C2', name: 'Coin 2', coin: 2, pts: 0 },
+  C3: { id: 'C3', name: 'Coin 3', coin: 3, pts: 0 },
+  MES: { id: 'MES', name: 'Messenger', coin: 1, pts: 0, text: 'When drawn, draw 1 more' },
+  P2: { id: 'P2', name: 'Point 2', coin: 0, pts: 2 },
+  P3: { id: 'P3', name: 'Point 3', coin: 0, pts: 3 },
+  P5: { id: 'P5', name: 'Point 5', coin: 0, pts: 5 },
+  DEBT: { id: 'DEBT', name: 'Debt', coin: 0, pts: -3, text: 'The lower bidder takes it' },
+};
+const START = { C1: 6, C2: 2 };
+const PRIZES = { C3: 4, C2: 3, MES: 2, P2: 3, P3: 2, P5: 1, DEBT: 1 };
+const list = (o) => { const out = []; for (const [id, k] of Object.entries(o)) for (let i = 0; i < k; i++) out.push(id); return out; };
+const NPRIZES = list(PRIZES).length;
+
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function newPlayer() { return { hand: [], deck: list(START), discard: [], won: [] }; }
+function clone(s) {
+  return { ...s, prizes: s.prizes.slice(), pot: s.pot.slice(), need: s.need.slice(), bids: s.bids.slice(), last: s.last, p: s.p.map(p => ({ hand: p.hand.slice(), deck: p.deck.slice(), discard: p.discard.slice(), won: p.won.slice() })) };
+}
+function emit(ev, e) { if (ev) ev.push(e); }
+function draw1(s, side, ev) {
+  const p = s.p[side];
+  if (!p.deck.length) { if (!p.discard.length) return; p.deck = shuffleInPlace(s, p.discard); p.discard = []; emit(ev, { t: 'shuffle', side }); }
+  const c = p.deck.shift(); p.hand.push(c); emit(ev, { t: 'draw', side, card: c });
+  if (c === 'MES') draw1(s, side, ev);
+}
+
+function newMatch({ seed } = {}) {
+  const s = { seed: (seed >>> 0) || 1, round: 0, phase: 'bid', need: [false, false], bids: [null, null], prizes: list(PRIZES), pot: [], winner: null, capped: false, last: null, p: [newPlayer(), newPlayer()] };
+  shuffleInPlace(s, s.prizes);
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  for (const side of [0, 1]) for (let i = 0; i < START_HAND; i++) draw1(s, side, null);
+  startRound(s, null);
+  return s;
+}
+function startRound(s, ev) {
+  s.round++;
+  for (const side of [0, 1]) for (let i = 0; i < DRAW; i++) draw1(s, side, ev);
+  s.pot.push(s.prizes.shift());
+  emit(ev, { t: 'round', round: s.round, pot: s.pot.slice() });
+  s.bids = [null, null];
+  const over = [0, 1].map(side => s.p[side].hand.length > HAND_MAX);
+  if (over[0] || over[1]) { s.phase = 'discard'; s.need = over; } else { s.phase = 'bid'; s.need = [true, true]; }
+}
+const coinOf = (cards) => cards.reduce((a, c) => a + CARDS[c].coin, 0);
+const pointsOf = (p) => p.hand.concat(p.deck, p.discard).reduce((a, c) => a + CARDS[c].pts, 0);
+const ownedCoin = (p) => coinOf(p.hand.concat(p.deck, p.discard));
+const nextPrize = (s) => s.prizes[0];
+
+// is `cards` a sub-multiset of `hand`?
+function within(hand, cards) {
+  const h = hand.slice();
+  for (const c of cards) { const i = h.indexOf(c); if (i < 0) return false; h.splice(i, 1); }
+  return true;
+}
+// Actions: { t: 'discard', cards: [...] } (exactly down to 7) or { t: 'bid', cards: [...] }
+function canSubmit(s, side, a) {
+  if (s.winner !== null || !s.need[side]) return false;
+  const P = s.p[side];
+  if (s.phase === 'discard') return a.t === 'discard' && within(P.hand, a.cards) && P.hand.length - a.cards.length === HAND_MAX;
+  return a.t === 'bid' && within(P.hand, a.cards);
+}
+function removeFrom(arr, cards) { for (const c of cards) arr.splice(arr.indexOf(c), 1); }
+function mSubmit(s, side, a, ev) {
+  if (!canSubmit(s, side, a)) throw new Error('illegal ' + JSON.stringify(a) + ' for ' + side + ' in ' + s.phase);
+  const P = s.p[side];
+  if (s.phase === 'discard') {
+    removeFrom(P.hand, a.cards); P.discard.push(...a.cards); s.need[side] = false;
+    emit(ev, { t: 'discard', side, cards: a.cards.slice() });
+    if (!s.need[0] && !s.need[1]) { s.phase = 'bid'; s.need = [true, true]; }
+    return;
+  }
+  s.bids[side] = a.cards.slice(); s.need[side] = false;
+  if (s.need[0] || s.need[1]) return;
+  resolve(s, ev);
+}
+function resolve(s, ev) {
+  const v = s.bids.map(coinOf), debt = s.pot.includes('DEBT');
+  let taker = null, payer = null;
+  if (v[0] !== v[1]) {
+    const hi = v[0] > v[1] ? 0 : 1;
+    if (debt) taker = 1 - hi; else { taker = hi; payer = hi; }
+  }
+  const pot = s.pot.slice();
+  s.last = { bids: [s.bids[0].slice(), s.bids[1].slice()], values: v, pot, taker, payer };
+  emit(ev, { t: 'reveal', bids: s.last.bids, values: v, pot, taker });
+  if (payer !== null) { const P = s.p[payer]; removeFrom(P.hand, s.bids[payer]); P.discard.push(...s.bids[payer]); }
+  if (taker !== null) { const P = s.p[taker]; P.discard.push(...pot); P.won.push(...pot); s.pot = []; }
+  s.bids = [null, null];
+  if (!s.prizes.length) { s.pot = []; return endGame(s, ev); }
+  startRound(s, ev);
+}
+function endGame(s, ev) {
+  const pts = s.p.map(pointsOf);
+  if (pts[0] !== pts[1]) s.winner = pts[0] > pts[1] ? 0 : 1;
+  else { const c = s.p.map(ownedCoin); s.winner = c[0] === c[1] ? 'draw' : c[0] > c[1] ? 0 : 1; }
+  s.phase = 'over'; s.need = [false, false];
+  emit(ev, { t: 'end', winner: s.winner, pts });
+}
+function submit(s, side, a, ev) { const t = clone(s); mSubmit(t, side, a, ev); return t; }
+function _submit(t, side, a) { mSubmit(t, side, a, null); return t; }
+const actionKey = (a) => a.t + ':' + coinOf(a.cards);
+
+// ---- src/bot.js
+// Bots for 17 Prize auction. Each is a function (state, side, rng) -> the action that side submits
+// now (a discard when its hand is over 7, else a bid). Bots are asked before either bid is in, so
+// none sees the other's bid; Expert also reshuffles every card it cannot see.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+// the bid of value v (or the least above it) that pays with the most, smallest cards
+function bidFor(hand, v) {
+  const n = { C1: 0, MES: 0, C2: 0, C3: 0 };
+  for (const c of hand) if (c in n) n[c]++;
+  const ones = n.C1 + n.MES, total = ones + 2 * n.C2 + 3 * n.C3;
+  if (v <= 0) return [];
+  if (v >= total) return hand.filter(c => CARDS[c].coin > 0);
+  for (let target = v; target <= total; target++) {
+    let best = null;
+    for (let a3 = 0; a3 <= n.C3; a3++) for (let a2 = 0; a2 <= n.C2; a2++) {
+      const r = target - 3 * a3 - 2 * a2;
+      if (r < 0 || r > ones) continue;
+      const k = a3 + a2 + r;
+      if (!best || k > best.k) best = { a3, a2, r, k };
+    }
+    if (best) {
+      const out = [];
+      for (let i = 0; i < best.a3; i++) out.push('C3');
+      for (let i = 0; i < best.a2; i++) out.push('C2');
+      const c1 = Math.min(best.r, n.C1);
+      for (let i = 0; i < c1; i++) out.push('C1');
+      for (let i = 0; i < best.r - c1; i++) out.push('MES');
+      return out;
+    }
+  }
+  return hand.filter(c => CARDS[c].coin > 0);
+}
+const DISCARD_ORDER = { DEBT: 0, P2: 0, P3: 0, P5: 0, C1: 1, MES: 2, C2: 3, C3: 4 };
+// down to 7: points and Debt first, then the smallest coin
+function discardFor(hand) {
+  const k = hand.length - HAND_MAX;
+  return hand.slice().sort((a, b) => DISCARD_ORDER[a] - DISCARD_ORDER[b]).slice(0, k);
+}
+const handCoin = (s, side) => coinOf(s.p[side].hand);
+function potInfo(s) {
+  let pts = 0, coin = 0, debt = false;
+  for (const c of s.pot) { if (c === 'DEBT') debt = true; pts += Math.max(0, CARDS[c].pts); if (CARDS[c].pts <= 0 && c !== 'DEBT') coin += CARDS[c].coin + (c === 'MES' ? 1 : 0); }
+  return { pts, coin, debt, net: pts + (debt ? -3 : 0) };
+}
+
+// ------------------------------------------------------------------ Random
+function randomBot(s, side, rng) {
+  const hand = s.p[side].hand;
+  if (s.phase === 'discard') return { t: 'discard', cards: shuffle(hand.slice(), rng).slice(0, hand.length - HAND_MAX) };
+  return { t: 'bid', cards: hand.filter(() => rng() < 0.5) };
+}
+// ------------------------------------------------------------------ Greedy
+// all its coin on point prizes, half (rounded down) on coin prizes, nothing on Debt
+function greedyBot(s, side) {
+  const hand = s.p[side].hand;
+  if (s.phase === 'discard') return { t: 'discard', cards: discardFor(hand) };
+  const { pts, debt } = potInfo(s), sum = handCoin(s, side);
+  if (debt) return { t: 'bid', cards: [] };
+  return { t: 'bid', cards: bidFor(hand, pts > 0 ? sum : Math.floor(sum / 2)) };
+}
+// ------------------------------------------------------------------ Racer
+// points only: all its coin on point prizes, nothing on anything else
+function racerBot(s, side) {
+  const hand = s.p[side].hand;
+  if (s.phase === 'discard') return { t: 'discard', cards: discardFor(hand) };
+  const { pts, debt } = potInfo(s);
+  return { t: 'bid', cards: pts > 0 && !debt ? bidFor(hand, handCoin(s, side)) : [] };
+}
+
+// ------------------------------------------------------------------ Expert
+// The play-out policy: values the pot (points, coin worth more early), bids that value times a
+// random appetite; with Debt in the pot, all or nothing depending on the pot's sign.
+function policyBid(s, side, rng, appetite) {
+  const hand = s.p[side].hand, sum = handCoin(s, side);
+  const { pts, coin, debt, net } = potInfo(s);
+  const left = s.prizes.length / NPRIZES;
+  const val = (debt ? net : pts) + coin * (0.3 + 1.1 * left);
+  if (debt) return bidFor(hand, val + coin * 0.5 > 0 ? 0 : sum);
+  return bidFor(hand, Math.min(sum, Math.round(val * appetite * (0.6 + 0.8 * rng()))));
+}
+function runOut(t, rng, app) {
+  while (t.winner === null) {
+    if (t.phase === 'discard') { const side = t.need[0] ? 0 : 1; _submit(t, side, { t: 'discard', cards: discardFor(t.p[side].hand) }); continue; }
+    const b0 = policyBid(t, 0, rng, app[0]), b1 = policyBid(t, 1, rng, app[1]);
+    _submit(t, 0, { t: 'bid', cards: b0 }); _submit(t, 1, { t: 'bid', cards: b1 });
+  }
+}
+// what the opponent could bid at most: its hand size in its best cards from what it may hold
+function maxPossible(s, o) {
+  const P = s.p[o], pool = P.hand.concat(P.deck).map(c => CARDS[c].coin).sort((a, b) => b - a);
+  return pool.slice(0, P.hand.length).reduce((a, b) => a + b, 0);
+}
+function determinize(s, me, rng) {
+  const t = clone(s), o = 1 - me, O = t.p[o];
+  const pool = shuffle(O.hand.concat(O.deck), rng);
+  O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length);
+  shuffle(t.p[me].deck, rng);
+  if (t.prizes.length > 1) { const rest = shuffle(t.prizes.slice(1), rng); t.prizes = [t.prizes[0]].concat(rest); }
+  return t;
+}
+// zero-sum matrix game by fictitious play: the row player's mixed strategy
+function solve(A, iters = 600) {
+  const R = A.length, C = A[0].length, rc = new Float64Array(R), cc = new Float64Array(C), rs = new Float64Array(R), cs = new Float64Array(C);
+  let r = 0, c = 0;
+  for (let it = 0; it < iters; it++) {
+    rc[r]++; cc[c]++;
+    for (let j = 0; j < C; j++) cs[j] += A[r][j];
+    for (let i = 0; i < R; i++) rs[i] += A[i][c];
+    r = 0; for (let i = 1; i < R; i++) if (rs[i] > rs[r]) r = i;
+    c = 0; for (let j = 1; j < C; j++) if (cs[j] < cs[c]) c = j;
+  }
+  return Array.from(rc, x => x / iters);
+}
+// a finished play-out's worth: mostly who won, partly by how much (a smoother signal)
+function score(t, me) {
+  const w = t.winner === me ? 1 : t.winner === 'draw' ? 0.5 : 0;
+  const m = pointsOf(t.p[me]) - pointsOf(t.p[1 - me]);
+  return 0.6 * w + 0.4 / (1 + Math.exp(-m / 4));
+}
+function expertBot({ worlds = 6, timeMs = 0 } = {}) {
+  return function (s, me, rng) {
+    const hand = s.p[me].hand;
+    if (s.phase === 'discard') return { t: 'discard', cards: discardFor(hand) };
+    const o = 1 - me, oMax = maxPossible(s, o), mySum = handCoin(s, me);
+    const myVals = []; for (let v = 0; v <= Math.min(mySum, oMax + 1); v++) myVals.push(v);
+    // distinct bids only (some values pay the same cards)
+    const myBids = [], seenV = new Set();
+    for (const v of myVals) { const b = bidFor(hand, v), k = coinOf(b); if (!seenV.has(k)) { seenV.add(k); myBids.push(b); } }
+    if (myBids.length === 1) return { t: 'bid', cards: myBids[0] };
+    const oVals = []; for (let v = 0; v <= Math.min(oMax, mySum + 1); v++) oVals.push(v);
+    const A = myBids.map(() => new Float64Array(oVals.length)), N = myBids.map(() => new Float64Array(oVals.length));
+    const t0 = timeMs ? Date.now() : 0;
+    for (let w = 0; w < worlds; w++) {
+      const world = determinize(s, me, rng), oHand = world.p[o].hand, seed = (rng() * 4294967296) >>> 0;
+      const app = [0.7 + 0.8 * rng(), 0.7 + 0.8 * rng()];
+      for (let j = 0; j < oVals.length; j++) {
+        const ob = bidFor(oHand, oVals[j]);
+        for (let i = 0; i < myBids.length; i++) {
+          const t = clone(world);
+          _submit(t, me, { t: 'bid', cards: myBids[i] }); _submit(t, o, { t: 'bid', cards: ob });
+          if (t.winner === null) runOut(t, makeRng(seed + j), app);
+          A[i][j] += score(t, me); N[i][j]++;
+        }
+      }
+      if (timeMs && Date.now() - t0 > timeMs) break;
+    }
+    const M = A.map((row, i) => Array.from(row, (x, j) => x / N[i][j]));
+    const mix = solve(M);
+    // play the equilibrium mix, ignoring slivers
+    let tot = 0; const p = mix.map(x => (x >= 0.05 ? x : 0)); for (const x of p) tot += x;
+    let r = rng() * tot, k = 0;
+    for (; k < p.length - 1; k++) { r -= p[k]; if (r <= 0) break; }
+    // with Debt in the pot every bid comes back, so a side that bids at all should bid the most
+    // it needs (weakly dominant): it wants to be the higher bidder
+    if (s.pot.includes('DEBT') && coinOf(myBids[k]) > 0) k = myBids.length - 1;
+    return { t: 'bid', cards: myBids[k] };
+  };
+}
+// the settings the sim and the set positions use
+const EXPERT = { worlds: 12 };
+
+// ---- src/ui.js
+// 17 Prize auction as a page: you against Expert. Expert chooses its bid from the round's state
+// before yours is in; both go to the engine's submit() and the round resolves on the reveal.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-17-tally';
+const expert = expertBot({ worlds: 16, timeMs: 1500 });
+const ui = { s: null, busy: false, over: false, sel: new Set(), botBid: null, reveal: null, hist: [], rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+function cardHTML(id, { cls = '', attrs = '', tag = 'div' } = {}) {
+  const c = CARDS[id];
+  const big = c.pts > 0 ? `<div class="big pts">${c.pts}</div>` : c.pts < 0 ? `<div class="big debt">${c.pts}</div>` : `<div class="big coin">${c.coin}</div>`;
+  return `<${tag} class="card ${cls}" ${attrs}>${big}<div class="nm">${c.name}</div>${c.text ? `<div class="tx">${c.text}</div>` : ''}</${tag}>`;
+}
+const chip = (id) => { const c = CARDS[id]; return `<span class="chip ${c.pts > 0 ? 'pts' : c.pts < 0 ? 'debt' : 'coin'}">${c.pts ? c.pts : c.coin}</span>`; };
+const myMove = () => !ui.busy && !ui.over && ui.s.need[ME];
+
+function render() {
+  const s = ui.s, t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  let r = ''; for (let i = 1; i <= NPRIZES; i++) r += `<i class="${i < s.round ? 'done' : i === s.round ? 'now' : ''}"></i>`;
+  $('round').innerHTML = r;
+  for (const side of [0, 1]) {
+    const P = s.p[side];
+    const handPart = side === BOT ? `<div class="backs">${'<i class="back"></i>'.repeat(P.hand.length)}</div>` : '';
+    $('side' + side).innerHTML = `<div class="score">${pointsOf(P)}</div><div class="piles"><span class="pile deck s${side}">${P.deck.length}</span><span class="pile disc">${P.discard.length}</span></div>${handPart}<div class="owned">${P.won.map(chip).join('')}</div>`;
+  }
+  // the pot, the next prize, the bids of the last reveal
+  $('pot').innerHTML = (ui.reveal ? ui.reveal.pot : s.pot).map(id => cardHTML(id)).join('');
+  $('pot').className = ui.reveal && ui.reveal.fly !== undefined ? 'fly' + ui.reveal.fly : '';
+  $('next').innerHTML = s.prizes.length && s.winner === null ? cardHTML(s.prizes[0]) : '';
+  for (const side of [0, 1]) {
+    const R = ui.reveal;
+    $('bid' + side).innerHTML = R ? R.bids[side].map(id => cardHTML(id, { cls: 'mini' })).join('') + `<span class="val">${R.values[side]}</span>` : '';
+    $('bid' + side).className = 'bidrow' + (R && R.taker === side ? ' win' : '');
+  }
+  // hand and the button
+  const P = s.p[ME], dropping = s.phase === 'discard' && s.need[ME];
+  $('hand').innerHTML = P.hand.map((id, i) => ({ id, i })).sort((a, b) => (CARDS[b.id].coin - CARDS[a.id].coin) || (CARDS[b.id].pts - CARDS[a.id].pts)).map(({ id, i }) =>
+    cardHTML(id, { tag: 'button', cls: (myMove() ? 'can' : '') + (ui.sel.has(i) ? ' sel' + (dropping ? ' drop' : '') : ''), attrs: `data-i="${i}"${myMove() ? '' : ' disabled'}` })).join('');
+  let ctl = '';
+  if (myMove() && dropping) { const k = P.hand.length - HAND_MAX; ctl = `<button id="go" class="drop"${ui.sel.size === k ? '' : ' disabled'}>Discard ${ui.sel.size}/${k}</button>`; }
+  else if (myMove()) { const v = coinOf([...ui.sel].map(i => P.hand[i])); ctl = `<button id="go">Bid ${v}</button>`; }
+  else ctl = `<button disabled>Bid</button>`;
+  $('controls').innerHTML = ctl;
+  $('history').innerHTML = ui.hist.slice(-18).map(h => `<div class="hist s${h.taker === null ? 'x' : h.taker}"><span>${h.pot.map(chip).join(' ')}</span><span class="v">${h.values[0]} : ${h.values[1]}</span><span>${h.taker === ME ? '◀' : h.taker === BOT ? '▶' : '='}</span></div>`).join('');
+}
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+
+// the bot submits what it must before you act; its bid waits, already chosen, for yours
+async function prepare(tok) {
+  while (!ui.over && ui.s.phase === 'discard' && ui.s.need[BOT]) {
+    const a = expert(ui.s, BOT, ui.rng);
+    ui.s = submit(ui.s, BOT, a);
+  }
+  if (tok !== ui.token) return;
+  if (ui.s.phase === 'bid' && ui.s.need[BOT] && !ui.botBid) {
+    ui.busy = true; render(); await wait(30);
+    if (tok !== ui.token) return;
+    ui.botBid = expert(ui.s, BOT, ui.rng);
+  }
+  ui.busy = false; render();
+}
+async function mine(a) {
+  if (!myMove() || !canSubmit(ui.s, ME, a)) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel.clear();
+  if (a.t === 'discard') { ui.s = submit(ui.s, ME, a); await prepare(tok); return; }
+  const before = ui.s, ev = [];
+  let s = submit(before, ME, a, ev);
+  s = submit(s, BOT, ui.botBid, ev); ui.botBid = null;
+  const R = s.last;
+  ui.reveal = { pot: R.pot, bids: R.bids, values: R.values, taker: R.taker };
+  render();
+  await wait(1400);
+  if (tok !== ui.token) return;
+  ui.hist.push({ pot: R.pot, values: R.values, taker: R.taker });
+  if (R.taker !== null) { ui.reveal.fly = R.taker; render(); await wait(700); }
+  if (tok !== ui.token) return;
+  ui.reveal = null; ui.s = s;
+  if (s.winner !== null) { finish(); render(); return; }
+  render();
+  await prepare(tok);
+}
+function finish() {
+  if (ui.over) return;
+  ui.over = true; ui.busy = false;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><p>${pointsOf(ui.s.p[ME])} : ${pointsOf(ui.s.p[BOT])}</p><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+async function startMatch() {
+  const tok = ++ui.token;
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0 });
+  ui.over = false; ui.hist = []; ui.sel.clear(); ui.botBid = null; ui.reveal = null;
+  $('over').classList.remove('show');
+  render();
+  await prepare(tok);
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (b && b.id === 'rulesbtn') { $('rules').classList.add('show'); return; }
+  if ((b && b.id === 'rulesclose') || e.target.id === 'rules') { $('rules').classList.remove('show'); return; }
+  if (b && (b.id === 'newgame' || b.id === 'rematch')) return startMatch();
+  if (!myMove()) return;
+  const s = ui.s, P = s.p[ME];
+  if (b && b.dataset.i !== undefined) {
+    const i = +b.dataset.i;
+    if (ui.sel.has(i)) ui.sel.delete(i);
+    else if (!(s.phase === 'discard' && ui.sel.size >= P.hand.length - HAND_MAX)) ui.sel.add(i);
+    render(); return;
+  }
+  if (b && b.id === 'go') {
+    const cards = [...ui.sel].map(i => P.hand[i]);
+    return mine(s.phase === 'discard' ? { t: 'discard', cards } : { t: 'bid', cards });
+  }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { ui.sel.clear(); $('rules').classList.remove('show'); render(); } });
+startMatch();
+
+})();
+</script>
+</body>
+</html>

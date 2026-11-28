@@ -1,0 +1,258 @@
+{
+  "concept": "34-pitch-to-pay",
+  "expert": {
+    "playouts": 1500,
+    "eps": 0.03,
+    "mix": true
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 9.4,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.9,
+      "draws": 0,
+      "firstPlayerWinRate": 0.58,
+      "avgTurns": 12.5,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.885,
+      "draws": 0,
+      "firstPlayerWinRate": 0.59,
+      "avgTurns": 8.6,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.485,
+      "draws": 0,
+      "firstPlayerWinRate": 0.675,
+      "avgTurns": 12.8,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.524,
+      "avgTurns": 15.4,
+      "capped": 0
+    },
+    "racer-racer": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.638,
+      "avgTurns": 7.5,
+      "capped": 0
+    },
+    "greedy-racer": {
+      "games": 1000,
+      "aWinRate": 0.517,
+      "draws": 0,
+      "firstPlayerWinRate": 0.657,
+      "avgTurns": 9,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.885,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "expertGreedyAgreement": 0.4703,
+    "agreementDecisions": 40274,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.675,
+    "firstPlayerPass": true,
+    "setPositionsPass": true,
+    "seconds": 1369,
+    "allPass": true
+  },
+  "cost": {
+    "expertTurnsMeasured": 9985,
+    "pitchesPerTurn": 3.59,
+    "playsPerTurn": 1.65,
+    "turnsEndingWithManaLeft": 0.527,
+    "manaLeftPerTurn": 1.58,
+    "pitchesWhoseManaWentUnused": 0.331,
+    "cardsLeftInHandPerTurn": 0.15,
+    "turnsHandEmptied": 0.865,
+    "turnsEndingWithAPlayableCardKept": 0.135,
+    "turnsWithACardUnpayableEvenPitchingAll": 0.128,
+    "expertGreedyAgreementOnPitchDecisions": 0.325,
+    "pitchDecisions": 24806
+  },
+  "sanity": [
+    {
+      "position": "lethal: he is on 5, Hit 5 and two Pips in hand (pitch both, Hit 5 at him)",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1,
+      "example": "pitch Pip, pitch Pip, play Hit 5→u0, end"
+    },
+    {
+      "position": "lethal: he is on 5, Hit 5 and two Pips in hand (pitch both, Hit 5 at him)",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "pitch Pip, pitch Pip, play Hit 5→player"
+    },
+    {
+      "position": "don't overpay: Raider and two Pips in hand, empty boards (no card pitched for nothing)",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "pitch Pip, play Raider, play Pip, end"
+    },
+    {
+      "position": "don't overpay: Raider and two Pips in hand, empty boards (no card pitched for nothing)",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "pitch Pip, play Raider, play Pip, end"
+    },
+    {
+      "position": "free trade: my ready Line against his Raider, I am on 12",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "attack u0→u0, end"
+    },
+    {
+      "position": "free trade: my ready Line against his Raider, I am on 12",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "attack u0→u0, end"
+    }
+  ],
+  "report": {
+    "verdict": "alive (after the one rule change: life 30)",
+    "numbers": "Life 30: Expert beats Random 100%, Greedy 90.0%, Racer 88.5% (400 games each, seats alternated); Expert equals Greedy in 47.0% of 40,274 decisions (32.5% of pitch decisions); first player wins 67.5% of 400 Expert mirror games; 0 games hit the turn cap; Expert passes all three set positions on 5 seeds each. As specified (life 20) it failed only the first-player line: 73.8% over 600 Expert mirror games (70.5% of the gate's 200, 75.5% of 400 more), with Expert at 100/88.8/83.8% against Random/Greedy/Racer.",
+    "loop": [
+      "Each turn a player turns the whole hand into one or two plays: Expert pitches 3.6 cards and plays 1.7 a turn, and empties its hand in 86.5% of turns.",
+      "Because a pitched card goes under the deck and the hand refills to five, pitching is free cycling: a third of Expert's pitches (33%) buy mana it never spends, to swap a card it does not want (Big, Hit 5: pitch 1) for a fresh draw. Holding cards for next turn almost never happens (0.15 left in hand a turn).",
+      "So the real decision is which one or two cards to play and which to burn: Pips (pitch 3) are money far more often than bodies; Hits go at units to win the board and at the player to finish. Expert disagrees with Greedy's pitch-the-highest rule on two pitch decisions in three.",
+      "Still a race at heart: the first player wins 67.5% of Expert mirrors even at 30 life, close to the line."
+    ],
+    "cost": "Paying binds every turn in the sense that a hand of five buys one or two plays, but mana itself rarely limits: the pool is left over in 52.7% of turns (1.58 a turn), because surplus pitches are taken for cycling, not for mana. A card that could not be paid for even pitching everything else is in hand in 12.8% of turns.",
+    "ruleChange": {
+      "from": "life 20",
+      "to": "life 30",
+      "why": "At 20 life the Expert mirror lasted 7.9 turns (four each) and the first player won 73.8% of 600 Expert mirror games: in a four-turn race the first player's extra attack turn is a quarter of the game, and starting one card short (4 against 5) does not pay for it. 30 life lengthens the race by half so a single tempo step weighs less, without touching the pitch economy the concept tests."
+    },
+    "asSpecified": {
+      "rule": "life 20, as in the spec",
+      "pairings": {
+        "expert-random": {
+          "games": 400,
+          "aWinRate": 1,
+          "draws": 0,
+          "firstPlayerWinRate": 0.5,
+          "avgTurns": 7.5,
+          "capped": 0
+        },
+        "expert-greedy": {
+          "games": 400,
+          "aWinRate": 0.8875,
+          "draws": 0,
+          "firstPlayerWinRate": 0.5825,
+          "avgTurns": 8.5,
+          "capped": 0
+        },
+        "expert-racer": {
+          "games": 400,
+          "aWinRate": 0.8375,
+          "draws": 0,
+          "firstPlayerWinRate": 0.5925,
+          "avgTurns": 6.7,
+          "capped": 0
+        },
+        "expert-expert": {
+          "games": 200,
+          "aWinRate": 0.465,
+          "draws": 0,
+          "firstPlayerWinRate": 0.705,
+          "avgTurns": 7.9,
+          "capped": 0
+        },
+        "greedy-greedy": {
+          "games": 1000,
+          "aWinRate": 0.5,
+          "draws": 0,
+          "firstPlayerWinRate": 0.542,
+          "avgTurns": 11.6,
+          "capped": 0
+        },
+        "racer-racer": {
+          "games": 1000,
+          "aWinRate": 0.5,
+          "draws": 0,
+          "firstPlayerWinRate": 0.634,
+          "avgTurns": 6.2,
+          "capped": 0
+        },
+        "greedy-racer": {
+          "games": 1000,
+          "aWinRate": 0.434,
+          "draws": 0,
+          "firstPlayerWinRate": 0.708,
+          "avgTurns": 7.4,
+          "capped": 0
+        }
+      },
+      "gate": {
+        "expertMinWinRateVsTrivial": 0.8375,
+        "expertVsTrivialPass": true,
+        "cappedRate": 0,
+        "cappedPass": true,
+        "expertGreedyAgreement": 0.4883,
+        "agreementDecisions": 27406,
+        "agreementPass": true,
+        "firstPlayerWinRateExpertMirror": 0.705,
+        "firstPlayerPass": false,
+        "setPositionsPass": true,
+        "seconds": 258,
+        "allPass": false
+      },
+      "cost": {
+        "expertTurnsMeasured": 5083,
+        "pitchesPerTurn": 3.64,
+        "playsPerTurn": 1.74,
+        "turnsEndingWithManaLeft": 0.495,
+        "manaLeftPerTurn": 1.32,
+        "pitchesWhoseManaWentUnused": 0.28,
+        "cardsLeftInHandPerTurn": 0.2,
+        "turnsHandEmptied": 0.834,
+        "turnsEndingWithAPlayableCardKept": 0.165,
+        "turnsWithACardUnpayableEvenPitchingAll": 0.158,
+        "expertGreedyAgreementOnPitchDecisions": 0.3449,
+        "pitchDecisions": 17336
+      },
+      "extraExpertMirror": {
+        "games": 400,
+        "firstPlayerWins": 302,
+        "firstPlayerWinRate": 0.755
+      },
+      "expertMirrorAllGames": {
+        "games": 600,
+        "firstPlayerWinRate": 0.7383
+      }
+    }
+  }
+}

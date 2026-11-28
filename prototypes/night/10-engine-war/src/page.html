@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Engine War</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="opphand"></div>
+  <div id="menu"><span id="tally"></span><button id="openrules">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="zone1" class="zone"><div id="score1w"></div><div id="posts1" class="posts"></div><div id="oppplayed" class="played"></div></div>
+  <div id="side1" class="side"><div id="pools1" class="pools"></div><div id="piles1" class="piles"></div></div>
+  <div id="row"></div>
+  <div id="zone0" class="zone"><div id="score0w"></div><div id="posts0" class="posts"></div></div>
+  <div id="side0" class="side"><div id="pools0" class="pools"></div><div id="piles0" class="piles"></div></div>
+  <div id="mine" class="played"></div>
+  <div id="turnbox"></div>
+  <div id="trash"><div class="tpanel"><div class="tcard">✕</div><div id="trashopts"></div><button id="keep">Keep all</button></div></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Engine War</h3>
+    <p>Points come only from <b>Posts</b> on your table: at the start of your turn each gives its yield (green). <b>20 points</b> at the start of your turn wins.</p>
+    <p>Your turn: your Posts yield; your whole hand plays itself (gold adds coin, red adds damage, a Post goes onto your table, Draw adds 1 coin and plays the next 2 cards of your deck). Then:</p>
+    <ul>
+      <li><b>Buy</b> row cards with coin; they go to your discard pile and the row refills.</li>
+      <li><b>Shoot</b> enemy Posts: one whose health (red) your damage covers is destroyed. While a Wall Post (striped) stands, only it can be shot.</li>
+    </ul>
+    <p>Unspent coin and damage are lost. You draw 5 for your next turn, shuffling your discard pile when the deck runs out. Trash removes another card in your hand or discard pile from the game.</p>
+    <p>You start with 7 Coin and 3 Shot; the first player's first hand is 3 cards. When the market deck runs out, the round is finished and the higher score wins.</p>
+    <button id="closerules">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

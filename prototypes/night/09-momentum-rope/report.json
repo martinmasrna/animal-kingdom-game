@@ -1,0 +1,109 @@
+{
+  "firstPlayer": "the player who takes the first turn",
+  "concept": "09 Momentum rope",
+  "turnCap": "none needed: the game ends after 12 rounds by rule (counted as wentAll12Rounds, not as a cap)",
+  "gamesPerMatchup": 400,
+  "expertPlayouts": 800,
+  "pageExpertPlayouts": 1000,
+  "agreementCountedOn": "Expert decisions with 2+ sensible options, all Expert games",
+  "decisions": 31524,
+  "matchups": [
+    {
+      "a": "expert",
+      "b": "random",
+      "games": 400,
+      "aWins": 399,
+      "bWins": 1,
+      "draws": 0,
+      "aRate": 0.9975,
+      "firstPlayerRate": 0.5025,
+      "avgTurns": 11.47,
+      "capped": 0,
+      "wentAll12Rounds": 9
+    },
+    {
+      "a": "expert",
+      "b": "greedy",
+      "games": 400,
+      "aWins": 323,
+      "bWins": 71,
+      "draws": 6,
+      "aRate": 0.815,
+      "firstPlayerRate": 0.44,
+      "avgTurns": 21.43,
+      "capped": 0,
+      "wentAll12Rounds": 230
+    },
+    {
+      "a": "expert",
+      "b": "racer",
+      "games": 400,
+      "aWins": 397,
+      "bWins": 3,
+      "draws": 0,
+      "aRate": 0.9925,
+      "firstPlayerRate": 0.4975,
+      "avgTurns": 12.9,
+      "capped": 0,
+      "wentAll12Rounds": 4
+    },
+    {
+      "a": "expert",
+      "b": "expert",
+      "games": 400,
+      "aWins": 211,
+      "bWins": 186,
+      "draws": 3,
+      "aRate": 0.5313,
+      "firstPlayerRate": 0.3663,
+      "avgTurns": 21.5,
+      "capped": 0,
+      "wentAll12Rounds": 228
+    }
+  ],
+  "sanity": [
+    {
+      "position": "lethal: marker 6 forward, Jolt in hand and 2 mana: Jolt wins",
+      "greedy": true,
+      "expert": "5/5"
+    },
+    {
+      "position": "don't waste: velocity 0, Check and Jolt in hand, 3 mana: never Check",
+      "greedy": true,
+      "expert": "5/5"
+    },
+    {
+      "position": "don't waste: the last turn of the game, marker 0, velocity 0 (nothing can move it toward me), Anchor and Heave in hand, 2 mana: Heave, never Anchor",
+      "greedy": true,
+      "expert": "5/5"
+    },
+    {
+      "position": "free swing: velocity 3 toward me, 5 mana and Reverse: Reverse",
+      "greedy": true,
+      "expert": "5/5"
+    }
+  ],
+  "gate": {
+    "expertVsTrivial": {
+      "random": 0.9975,
+      "greedy": 0.815,
+      "racer": 0.9925
+    },
+    "expertBeatsTrivial70": true,
+    "setPositionsPass": true,
+    "turnCapShare": 0,
+    "turnCapOK": true,
+    "greedyAgreement": 0.5204,
+    "greedyAgreementOK": true,
+    "firstPlayerRateExpertMirror": 0.3663,
+    "firstPlayerOK": true,
+    "alive": true
+  },
+  "seconds": 2960,
+  "report": {
+    "verdict": "alive",
+    "summary": "Every machine criterion passes. Expert (determinized information-set MCTS, 800 play-outs a decision in the gate, 1000 on the page, play-outs to the end) beats Random 99.8%, Greedy 81.5%, Racer 99.3% over 400 games each; set positions 5/5 on all four; no caps (the game ends after 12 rounds by rule); Expert equals Greedy in 52.0% of 31,524 decisions; the first player wins 36.6% of Expert mirrors, inside the band but leaning to the second player, who has the Coin, an extra card and the game's last end-of-turn move. 57% of mirror games go the full 12 rounds and are decided by which side the marker is on.",
+    "loop": "Each turn you choose between moving the marker now (Shove, Jolt), changing the velocity that moves it at the end of every turn (Heave, Big Heave, Check, Reverse, Surge), and defending (Anchor). Velocity is shared, so a Heave also moves the marker at the end of the opponent's turn unless they Check or Reverse it; Expert answers the opponent's velocity with Check or Anchor almost every time, and builds its own velocity when the opponent is low on mana or answers. The best play boils down to timing: build velocity when the opponent cannot afford Check (3) or Reverse (5), save Check/Anchor for their big Heave, and hold Jolts for the final push or the last round, where only the marker's side matters. Greedy (best position plus 2x velocity this turn) gets 18.5% off Expert, the most of the trivial bots, because it plays the swing cards at sensible times; the Racer, which never answers, loses 99% of games.",
+    "notes": "The spec's Anchor position (nothing can move the marker toward you) was won on every line, so the search was indifferent; it was rebuilt as the last turn of the game, where Heave wins and Anchor draws."
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "games": 400,
+  "expert": {
+    "R": 200,
+    "rounds": 2
+  },
+  "seconds": 1160,
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "turnCapRate": 0,
+      "wentTheFull20Rounds": 0,
+      "avgRounds": 7.9,
+      "expertDecisions": 6536,
+      "sameAsGreedy": 0.567,
+      "expertMsPerMove": 69.3,
+      "expertMaxMs": 532,
+      "buy": {
+        "buys": 5782,
+        "meanSpent": 3.86,
+        "manaCapsTheStrongestLine": 0.324,
+        "boughtABluff": 0.213,
+        "threeCards": 0.611,
+        "weakerThanStrongestAffordable": 0.662
+      },
+      "betting": {
+        "betsOrRaisesPerRound": 1.19,
+        "foldsPerRound": 0.31,
+        "showdownsPerRound": 0.57
+      }
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.978,
+      "draws": 0,
+      "firstPlayerWinRate": 0.492,
+      "turnCapRate": 0,
+      "wentTheFull20Rounds": 0.018,
+      "avgRounds": 10.2,
+      "expertDecisions": 8841,
+      "sameAsGreedy": 0.532,
+      "expertMsPerMove": 63.4,
+      "expertMaxMs": 508,
+      "buy": {
+        "buys": 7624,
+        "meanSpent": 3.84,
+        "manaCapsTheStrongestLine": 0.152,
+        "boughtABluff": 0.1,
+        "threeCards": 0.62,
+        "weakerThanStrongestAffordable": 0.205
+      },
+      "betting": {
+        "betsOrRaisesPerRound": 1.15,
+        "foldsPerRound": 0.08,
+        "showdownsPerRound": 0.83
+      }
+    },
+    "expert-caller": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "turnCapRate": 0,
+      "wentTheFull20Rounds": 0.007,
+      "avgRounds": 11.6,
+      "expertDecisions": 8704,
+      "sameAsGreedy": 0.535,
+      "expertMsPerMove": 78.2,
+      "expertMaxMs": 629,
+      "buy": {
+        "buys": 8704,
+        "meanSpent": 3.78,
+        "manaCapsTheStrongestLine": 0.141,
+        "boughtABluff": 0.103,
+        "threeCards": 0.605,
+        "weakerThanStrongestAffordable": 0.214
+      },
+      "betting": {
+        "betsOrRaisesPerRound": 0.53,
+        "foldsPerRound": 0,
+        "showdownsPerRound": 0.91
+      }
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.496,
+      "draws": 3,
+      "firstPlayerWinRate": 0.484,
+      "turnCapRate": 0,
+      "wentTheFull20Rounds": 0.512,
+      "avgRounds": 16.9,
+      "buy": {
+        "buys": 13280,
+        "meanSpent": 4.77,
+        "manaCapsTheStrongestLine": 0.207,
+        "boughtABluff": 0.215,
+        "threeCards": 0.942,
+        "weakerThanStrongestAffordable": 0.369
+      },
+      "betting": {
+        "betsOrRaisesPerRound": 1.15,
+        "foldsPerRound": 0.26,
+        "showdownsPerRound": 0.71
+      }
+    },
+    "greedy-greedy": {
+      "games": 2000,
+      "aWinRate": 0.5,
+      "draws": 40,
+      "firstPlayerWinRate": 0.474,
+      "turnCapRate": 0,
+      "wentTheFull20Rounds": 0.364,
+      "avgRounds": 14.3,
+      "buy": {
+        "buys": 56132,
+        "meanSpent": 2.84,
+        "manaCapsTheStrongestLine": 0.057,
+        "boughtABluff": 0,
+        "threeCards": 0.219,
+        "weakerThanStrongestAffordable": 0
+      },
+      "betting": {
+        "betsOrRaisesPerRound": 0.97,
+        "foldsPerRound": 0,
+        "showdownsPerRound": 0.96
+      }
+    },
+    "greedy-random": {
+      "games": 400,
+      "aWinRate": 0.961,
+      "draws": 5,
+      "firstPlayerWinRate": 0.494,
+      "turnCapRate": 0,
+      "wentTheFull20Rounds": 0.098,
+      "avgRounds": 11.6,
+      "buy": {
+        "buys": 8870,
+        "meanSpent": 2.95,
+        "manaCapsTheStrongestLine": 0.24,
+        "boughtABluff": 0.108,
+        "threeCards": 0.278,
+        "weakerThanStrongestAffordable": 0.456
+      },
+      "betting": {
+        "betsOrRaisesPerRound": 0.98,
+        "foldsPerRound": 0.19,
+        "showdownsPerRound": 0.74
+      }
+    },
+    "greedy-caller": {
+      "games": 400,
+      "aWinRate": 0.71,
+      "draws": 8,
+      "firstPlayerWinRate": 0.526,
+      "turnCapRate": 0,
+      "wentTheFull20Rounds": 0.583,
+      "avgRounds": 17.9,
+      "buy": {
+        "buys": 14150,
+        "meanSpent": 2.74,
+        "manaCapsTheStrongestLine": 0.046,
+        "boughtABluff": 0,
+        "threeCards": 0.174,
+        "weakerThanStrongestAffordable": 0
+      },
+      "betting": {
+        "betsOrRaisesPerRound": 0.38,
+        "foldsPerRound": 0,
+        "showdownsPerRound": 0.98
+      }
+    }
+  },
+  "gate": {
+    "expert-random": 1,
+    "expert-greedy": 0.978,
+    "expert-caller": 1,
+    "firstPlayerWinRate": 0.484,
+    "turnCapRate": 0,
+    "sameAsGreedy": 0.543,
+    "fails": []
+  },
+  "sanity": {
+    "positions": [
+      "free win, first to act (Top + High against a shown spend of 0): bet",
+      "the same line facing a bet: raise, never fold",
+      "lethal: he has 2 chips behind and my line cannot lose: bet",
+      "a Bluff is bought only into a line that then bets or raises (whole round played against Greedy)"
+    ],
+    "greedy": "4/4",
+    "expert": "20/20 (5 seeds each)"
+  },
+  "expertNotes": "Expert tries every legal action (every line the hand can buy, every betting move) in 200 worlds dealt from what it cannot see: the opponent's hand, deck and line are dealt again from his unseen cards, the line kept to the size shown and, once spends are shown, to the mana it cost (lines weighted toward the stronger ones, with some chance of anything). Each world is played to the end of the next round with a betting rule for both sides that reads only its own line and the other's spend, and scored by the chip difference (a won or lost game counts 40). The same worlds serve every action. It never reads the opponent's line.",
+  "report": {
+    "verdict": "alive",
+    "gateNumbers": "Expert beats Random 100%, Greedy 97.8%, Caller 100% (400 games each); the first player of round 1 wins 48.4% Expert against Expert; no turn caps (51% of Expert games run the full 20 rounds, which is the rules' own end; 3 of 400 were drawn on chips); Expert equals Greedy on 54.3% of decisions.",
+    "caveat": "Both trivial bots never fold, so a betting bot beats them almost every time; these numbers show the game is not decided by luck or a simple rule, not that the Expert reads well. Expert against Expert, rounds end in a fold about a quarter of the time (0.26 folds a round) and bets or raises come 1.15 times a round.",
+    "loop": [
+      "Each round: which up-to-3 cards to buy from a hand of 5 with 6 mana, knowing the spend is shown and the cards are not; then whether to bet, raise, call or fold given your line and his spend.",
+      "From watching Expert: it buys strong lines when it holds them and bets them, and with weak hands it either buys a Bluff line that spends like a strong one (Bluff + Bluff + Low for 6) and raises, or buys cheap and folds to pressure. It buys a Bluff in 22% of rounds against itself and a line weaker than the strongest it could afford in 37%.",
+      "Cards left unbought stay in hand, so a hand clogs: Greedy never buys Bluff or Solo and ends up buying 3-card lines only 22% of the time; Expert spends them as bluffs or Solo lines and buys 3 cards 94% of the time. Clearing the hand is part of the buy.",
+      "Costs bind but not tightly: Expert spends 4.8 of 6 mana on average; 6 mana caps the strongest line a hand holds in 21% of buys (Top + High is exactly 6, two Tops are 8); the 3-card limit binds more often. What the cost buys is information: the spend is the only thing the opponent sees."
+    ]
+  }
+}

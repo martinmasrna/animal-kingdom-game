@@ -1,0 +1,124 @@
+{
+  "game": "21 Round purse",
+  "games": 400,
+  "budget": 2000,
+  "seconds": 1571,
+  "matchups": {
+    "expert-random": {
+      "games": 400,
+      "expertWins": 397,
+      "draws": 2,
+      "expertRate": 0.995,
+      "firstPlayerRate": 0.5,
+      "avgTurns": 19.3
+    },
+    "expert-greedy": {
+      "games": 400,
+      "expertWins": 399,
+      "draws": 0,
+      "expertRate": 0.998,
+      "firstPlayerRate": 0.497,
+      "avgTurns": 10.6
+    },
+    "expert-spend": {
+      "games": 400,
+      "expertWins": 389,
+      "draws": 9,
+      "expertRate": 0.984,
+      "firstPlayerRate": 0.491,
+      "avgTurns": 22.8
+    },
+    "expert-thrifty": {
+      "games": 400,
+      "expertWins": 386,
+      "draws": 4,
+      "expertRate": 0.97,
+      "firstPlayerRate": 0.517,
+      "avgTurns": 15.3
+    },
+    "expert-expert": {
+      "games": 400,
+      "expertWins": 180,
+      "draws": 40,
+      "expertRate": 0.5,
+      "firstPlayerRate": 0.49,
+      "avgTurns": 28.3
+    }
+  },
+  "gate": {
+    "expertVsRandom": 0.995,
+    "expertVsGreedy": 0.998,
+    "expertVsSpend": 0.984,
+    "expertVsThriftyForInformation": 0.97,
+    "firstPlayerRateExpertMirror": 0.49,
+    "turnCapRate": 0,
+    "expertEqualsGreedy": 0.327,
+    "expertDecisions": 24885,
+    "fails": []
+  },
+  "sanity": [
+    {
+      "position": "cheapest win",
+      "bot": "greedy",
+      "pass": false,
+      "chose": "play Big"
+    },
+    {
+      "position": "cheapest win",
+      "bot": "expert",
+      "pass": true,
+      "chose": "play Troop"
+    },
+    {
+      "position": "pass when ahead",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "pass"
+    },
+    {
+      "position": "pass when ahead",
+      "bot": "expert",
+      "pass": true,
+      "chose": "pass"
+    },
+    {
+      "position": "Heavy for the match",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "play Heavy"
+    },
+    {
+      "position": "Heavy for the match",
+      "bot": "expert",
+      "pass": true,
+      "chose": "play Heavy"
+    }
+  ],
+  "expertMirrorBehaviour": {
+    "games": 30,
+    "budget": 2000,
+    "plays": {
+      "Grunt": 165,
+      "Gift": 75,
+      "Troop": 148,
+      "Squad": 113,
+      "Heavy": 99,
+      "Big": 37,
+      "Cut": 71
+    },
+    "passesWhileBehind": 40,
+    "passesWhileAhead": 108,
+    "passesWhileLevel": 6,
+    "matchScores": {
+      "2-0": 14,
+      "2-1": 13,
+      "draw": 3
+    },
+    "roundsPlayed": 77,
+    "avgPurseLeftAfterRound": [
+      9.5,
+      3.4,
+      0.8
+    ]
+  }
+}

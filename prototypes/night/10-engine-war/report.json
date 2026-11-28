@@ -1,0 +1,96 @@
+{
+  "games": 400,
+  "expert": {
+    "playouts": 600,
+    "depth": 99,
+    "eps": 0,
+    "C": 0.5
+  },
+  "pairings": {
+    "expert-random": {
+      "n": 400,
+      "aScore": 0.968,
+      "aWins": 387,
+      "draws": 0,
+      "aLosses": 13,
+      "firstPlayerScore": 0.492,
+      "capped": 0,
+      "avgTurnsEach": 13.7
+    },
+    "expert-greedy": {
+      "n": 400,
+      "aScore": 0.743,
+      "aWins": 297,
+      "draws": 0,
+      "aLosses": 103,
+      "firstPlayerScore": 0.403,
+      "capped": 0,
+      "avgTurnsEach": 14.2,
+      "turnsCompared": 4430,
+      "turnAgreement": 0.556,
+      "actionsCompared": 5016,
+      "actionAgreement": 0.58
+    },
+    "expert-racer": {
+      "n": 400,
+      "aScore": 0.772,
+      "aWins": 307,
+      "draws": 4,
+      "aLosses": 89,
+      "firstPlayerScore": 0.472,
+      "capped": 4,
+      "avgTurnsEach": 16.1
+    },
+    "expert-expert": {
+      "n": 400,
+      "aScore": 0.482,
+      "aWins": 193,
+      "draws": 0,
+      "aLosses": 207,
+      "firstPlayerScore": 0.378,
+      "capped": 0,
+      "avgTurnsEach": 15
+    },
+    "greedy-greedy": {
+      "n": 400,
+      "aScore": 0.5,
+      "aWins": 200,
+      "draws": 0,
+      "aLosses": 200,
+      "firstPlayerScore": 0.38,
+      "capped": 0,
+      "avgTurnsEach": 14.6
+    }
+  },
+  "gate": {
+    "expertVsRandom": 0.968,
+    "expertVsGreedy": 0.743,
+    "expertVsRacer": 0.772,
+    "capRate": 0.002,
+    "turnAgreementWithGreedy": 0.556,
+    "actionAgreementWithGreedy": 0.58,
+    "firstPlayerScoreExpertMirror": 0.378
+  },
+  "fails": [],
+  "alive": true,
+  "seconds": 1376,
+  "setPositions": {
+    "expertFailures": 0,
+    "lines": [
+      "ok   greedy shoot the Post that would win: buy TRASH, shoot 0, end",
+      "ok   expert shoot the Post that would win: buy TRASH, shoot 0, end",
+      "ok   greedy 6 damage, two Health-5 Posts: shoot 0, end",
+      "ok   expert 6 damage, two Health-5 Posts: shoot 0, end",
+      "ok   greedy 8 coin and a Big Post in the row: buy BPOST, end",
+      "ok   expert 8 coin and a Big Post in the row: buy BPOST, end",
+      "Expert passes every position"
+    ]
+  },
+  "pageCheck": [
+    "node game 0: winner 1 after 26 turns",
+    "node game 1: winner 1 after 25 turns",
+    "slowest Expert decision 731 ms",
+    "  1s: 1 clicks, last end",
+    "browser: 38 clicks, end screen: Defeat3 – 22Play again, script errors: none"
+  ]
+}

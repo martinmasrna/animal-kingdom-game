@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Swing Neutrals</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="opphand"></div>
+  <div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="hero1" class="herorow"></div>
+  <div id="field"></div>
+  <div id="hero0" class="herorow"></div>
+  <div id="res1" class="res"></div>
+  <div id="turnbox"></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Swing Neutrals</h3>
+    <ul>
+      <li>Life 15. Bring the other player to 0.</li>
+      <li>Three shared Neutrals stand on loyalty tracks. A Neutral below the middle leans your way, above it leans his. The number is its attack.</li>
+      <li>At the start of your turn, every Neutral leaning your way deals its attack to the other player.</li>
+      <li>Then your mana goes up by 1 (up to 8) and refills, and you draw 1. An empty deck costs 1 life, then 2, then 3.</li>
+      <li>Play cards by paying their cost. "Toward you" moves a Neutral one step your way; a track ends 3 steps from the middle.</li>
+      <li>The first player starts with 3 cards; the second with 4 and the Coin (gain 1 mana this turn).</li>
+    </ul>
+    <table><tr><th>Card</th><th>Cost</th><th></th><th>×</th></tr>
+      <tr><td>Sway 1</td><td>1</td><td>one Neutral 1 toward you</td><td>5</td></tr>
+      <tr><td>Sway 2</td><td>2</td><td>one Neutral 2 toward you</td><td>4</td></tr>
+      <tr><td>Sway 3</td><td>4</td><td>one Neutral 3 toward you</td><td>3</td></tr>
+      <tr><td>Spread</td><td>3</td><td>every Neutral 1 toward you</td><td>3</td></tr>
+      <tr><td>Exile</td><td>3</td><td>a Neutral leaves; the next from the Neutral deck takes its place in the middle</td><td>3</td></tr>
+      <tr><td>Shield</td><td>2</td><td>prevent the next 4 damage to you</td><td>3</td></tr>
+      <tr><td>Rally</td><td>2</td><td>a Neutral leaning your way deals its attack now</td><td>2</td></tr>
+      <tr><td>Draw 2</td><td>2</td><td>draw 2 cards</td><td>3</td></tr>
+    </table>
+    <p>Neutral deck: 12 Neutrals with attack 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5; three start in play.</p>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

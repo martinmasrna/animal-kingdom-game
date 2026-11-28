@@ -1,0 +1,157 @@
+{
+  "concept": "32-hidden-contracts",
+  "expert": {
+    "playouts": 400,
+    "depth": 6,
+    "eps": 0.05,
+    "keep": 12,
+    "beta": 0.5
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 21.2,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.95,
+      "draws": 0,
+      "firstPlayerWinRate": 0.475,
+      "avgTurns": 31.3,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 18.2,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 200,
+      "aWinRate": 0.465,
+      "draws": 0,
+      "firstPlayerWinRate": 0.425,
+      "avgTurns": 41.6,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.414,
+      "avgTurns": 39.3,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.95,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "cappedCountedOver": "every game Expert plays",
+    "expertGreedyAgreement": 0.6054,
+    "agreementDecisions": 30038,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.425,
+    "firstPlayerPass": true,
+    "seconds": 128,
+    "setPositionsPass": true,
+    "allPass": true
+  },
+  "costBinding": {
+    "measuredIn": "Expert mirror, both seats, every turn",
+    "turns": 8115,
+    "handCostsMoreThanManaRate": 0.375,
+    "atManaCapRate": 0.561,
+    "unspentManaShare": 0.546,
+    "endedWithManaLeftAndADearerCardHeldRate": 0.053
+  },
+  "contracts": {
+    "measuredIn": "Expert mirror",
+    "swapsPerPlayerGame": 3.54,
+    "scoredPerGame": {
+      "HUNTER": 1.14,
+      "CLEAN": 1.04,
+      "MORE": 0.97,
+      "TOWER": 0.8,
+      "PATIENCE": 0.73,
+      "FORCE": 0.67,
+      "SPREAD": 0.35,
+      "CROWD": 0.17
+    },
+    "gamesEndedAtTarget": 199,
+    "gamesEndedOnContractsOut": 1
+  },
+  "sanity": [
+    {
+      "position": "free points: I hold Hunter; my ready Heavy and Line each destroy one of his two Strikers and survive: take both",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "free points: I hold Hunter; my ready Heavy and Line each destroy one of his two Strikers and survive: take both",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "free points: I hold Crowd with 3 units, a Striker in hand and room on the board: play it",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "free points: I hold Crowd with 3 units, a Striker in hand and room on the board: play it",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: never pay to replace a contract whose condition already holds (Crowd, 4 units on board)",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "don't waste: never pay to replace a contract whose condition already holds (Crowd, 4 units on board)",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: never Hit 6 a 2-health unit while Hit 2 is in hand",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "don't waste: never Hit 6 a 2-health unit while Hit 2 is in hand",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "report": {
+    "verdict": "alive",
+    "numbers": "Expert vs Random 100%, vs Greedy 95.0%, vs Racer 100% (400 games each, seats alternated); 0 games hit the 120-turn cap; Expert = Greedy on 60.5% of 30,038 decisions; first player 42.5% in Expert vs Expert (200 games; Greedy mirror 41.4%); set positions all 5/5 (Greedy wastes Hit 6 on a 2-health unit).",
+    "costBinding": "Mana barely binds: on 37.5% of turns the usable cards in hand cost more than the mana there is, the 10-mana cap is reached on 56% of turns, 55% of all mana goes unspent, and only 5% of turns end with mana left while a dearer card waits. With no life to race and a 6-unit board, cards are not dumped, and the spare mana goes into the 1-mana contract swap (3.5 swaps per player per game in the Expert mirror).",
+    "setPositionNote": "The spec's free trade (my ready Heavy into his Raider) is not free in this game and was replaced: damage stays, so the Heavy is left at 2 health for a 1-mana Hit 2, and contracts count bodies, so a 1-for-1 kill changes no count. Expert took it 1 time in 5; Greedy-to-the-end play-outs from that position give 0.819 after attacking and 0.818 after passing. The gate uses two free-points positions instead (Hunter: kill two Strikers; Crowd: play the fourth unit) and the two don't-waste positions.",
+    "expertNote": "Expert: determinized play-outs (the opponent's hand, deck, held, buried and undrawn contracts reshuffled from what it cannot see), Greedy on both sides with 5% random moves, 400 a decision, 6 turns deep from the decision's turn and then scored by points, contract progress and material, successive halving over the 12 best one-ply candidates, the one-ply worth breaking near-ties.",
+    "loop": "Points come from two directions: building your own board toward what your contracts ask (More, Force, Tower, Patience) and cutting the opponent's board down (Hit cards and attacks feed your Hunter and Clean and starve whatever they hold). Expert spends removal to keep the opponent below the unit counts most contracts ask for, rerolls hard contracts every few turns because mana is spare, and Clean and Patience often pay out in the opening for free (the first player often has no unit on board at the second player's first turn; the second player starts on 6 cards), a luck spike the Expert still beats Greedy through 95% of the time. Contracts scored per Expert-mirror game: Hunter 1.14, Clean 1.04, More 0.97, Tower 0.80, Patience 0.73, Force 0.67, Spread 0.35, Crowd 0.17."
+  }
+}

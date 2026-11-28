@@ -1,0 +1,187 @@
+{
+  "games": 400,
+  "expert": {
+    "K": 60,
+    "S": 8,
+    "KR": 24
+  },
+  "seconds": 161,
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "seatAWinRate": 0.5,
+      "turnCapRate": 0,
+      "wentAll12Rounds": 0,
+      "avgRounds": 3.2,
+      "expertDecisions": 3064,
+      "sameAsGreedy": 0.612,
+      "expertMsPerMove": 13.3,
+      "expertMaxMs": 102,
+      "gold": {
+        "shops": 2558,
+        "meanGoldLeft": 0.98,
+        "endedWithGoldAndAnAffordableCard": 0.213,
+        "deckAtCap": 0.085,
+        "rerollsPerShop": 0.35,
+        "removesPerShop": 0.34,
+        "buysPerShop": 1.64,
+        "boughtShare": {
+          "Guardian": 0.179,
+          "Heavy": 0.13,
+          "Opener": 0.128,
+          "Pip": 0.127,
+          "Rally": 0.125,
+          "Brawler": 0.12,
+          "Wall": 0.115,
+          "Bomb": 0.075
+        }
+      }
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.917,
+      "draws": 0,
+      "seatAWinRate": 0.492,
+      "turnCapRate": 0,
+      "wentAll12Rounds": 0,
+      "avgRounds": 5.4,
+      "expertDecisions": 5828,
+      "sameAsGreedy": 0.528,
+      "expertMsPerMove": 13.4,
+      "expertMaxMs": 80,
+      "gold": {
+        "shops": 4314,
+        "meanGoldLeft": 1.33,
+        "endedWithGoldAndAnAffordableCard": 0.002,
+        "deckAtCap": 0.483,
+        "rerollsPerShop": 0.16,
+        "removesPerShop": 0.2,
+        "buysPerShop": 1.48,
+        "boughtShare": {
+          "Heavy": 0.225,
+          "Guardian": 0.193,
+          "Rally": 0.133,
+          "Opener": 0.123,
+          "Wall": 0.088,
+          "Brawler": 0.087,
+          "Bomb": 0.081,
+          "Pip": 0.071
+        }
+      }
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.527,
+      "draws": 0,
+      "seatAWinRate": 0.497,
+      "turnCapRate": 0,
+      "wentAll12Rounds": 0.007,
+      "avgRounds": 6.2,
+      "gold": {
+        "shops": 4968,
+        "meanGoldLeft": 0.4,
+        "endedWithGoldAndAnAffordableCard": 0.006,
+        "deckAtCap": 0.528,
+        "rerollsPerShop": 0.39,
+        "removesPerShop": 0.47,
+        "buysPerShop": 1.57,
+        "boughtShare": {
+          "Heavy": 0.303,
+          "Guardian": 0.195,
+          "Rally": 0.154,
+          "Opener": 0.096,
+          "Brawler": 0.089,
+          "Wall": 0.066,
+          "Pip": 0.065,
+          "Bomb": 0.032
+        }
+      }
+    },
+    "greedy-greedy": {
+      "games": 2000,
+      "aWinRate": 0.5,
+      "draws": 4,
+      "seatAWinRate": 0.475,
+      "turnCapRate": 0,
+      "wentAll12Rounds": 0.011,
+      "avgRounds": 6,
+      "gold": {
+        "shops": 24076,
+        "meanGoldLeft": 2.68,
+        "endedWithGoldAndAnAffordableCard": 0,
+        "deckAtCap": 0.538,
+        "rerollsPerShop": 0,
+        "removesPerShop": 0,
+        "buysPerShop": 1.15,
+        "boughtShare": {
+          "Heavy": 0.22,
+          "Rally": 0.135,
+          "Guardian": 0.13,
+          "Opener": 0.128,
+          "Bomb": 0.124,
+          "Wall": 0.093,
+          "Brawler": 0.09,
+          "Pip": 0.08
+        }
+      }
+    },
+    "greedy-random": {
+      "games": 400,
+      "aWinRate": 0.998,
+      "draws": 0,
+      "seatAWinRate": 0.497,
+      "turnCapRate": 0,
+      "wentAll12Rounds": 0,
+      "avgRounds": 3.3,
+      "gold": {
+        "shops": 2600,
+        "meanGoldLeft": 1.17,
+        "endedWithGoldAndAnAffordableCard": 0.205,
+        "deckAtCap": 0.076,
+        "rerollsPerShop": 0.29,
+        "removesPerShop": 0.3,
+        "buysPerShop": 1.58,
+        "boughtShare": {
+          "Heavy": 0.161,
+          "Rally": 0.125,
+          "Pip": 0.124,
+          "Guardian": 0.124,
+          "Opener": 0.12,
+          "Brawler": 0.118,
+          "Bomb": 0.115,
+          "Wall": 0.113
+        }
+      }
+    }
+  },
+  "gate": {
+    "expert-random": 1,
+    "expert-greedy": 0.917,
+    "seatAWinRate": 0.497,
+    "turnCapRate": 0,
+    "sameAsGreedy": 0.557,
+    "fails": []
+  },
+  "sanity": {
+    "positions": [
+      "6 gold, a deck of 5 and four affordable cards: spend it",
+      "full deck of 10 with Pips, a Heavy in the shop, 5 gold: remove a Pip, buy the Heavy",
+      "he is on 1 life: buy the deck most likely to win the battle (measured against 3000 of his possible next decks; within 3 points of the best plan)"
+    ],
+    "greedy": "1/3 (it never removes, and buys by price)",
+    "expert": "15/15 (5 seeds each)"
+  },
+  "expertNotes": "Expert enumerates every plan for the shop in hand (a removal or none, any set of shop cards it can afford and fit), fights each resulting deck 60 times against sampled versions of the opponent's next deck (his shown deck plus what a random shop would let him buy, bought by price or at random), scores each battle by the lives it leaves (a won or lost game counts 30), and rerolls when the best plans of 8 fresh shops beat the best plan now. Seat A is read in place of the first player; the shops are simultaneous and secret.",
+  "report": {
+    "verdict": "alive",
+    "gateNumbers": "Expert beats Random 100% and Greedy 91.7% (400 games each); seat A wins 49.7% Expert against Expert (47.5% Greedy against Greedy); no game is capped (the 12-round end was reached in 0.7% of Expert games); Expert equals Greedy on 55.7% of decisions.",
+    "loop": [
+      "Each round is one shopping decision with 6 gold, hidden from the opponent, whose deck you can see: which two or three cards, whether to reroll, and from round 3 or 4 which card to throw out, because decks reach the cap of 10 by then.",
+      "From watching Expert: early rounds buy two 3-cost cards (Guardian, Rally, Opener) or Heavy plus Brawler; once full, every round is Remove a Pip and buy a Heavy. Heavy (30% of Expert buys) and Guardian (20%) dominate its decks; Bomb is nearly never bought (3%).",
+      "The battle snowballs: the side left with cards deals up to 4, so three lost battles end the game; Expert games last 6.2 rounds of 12.",
+      "Costs bind: Expert ends a shop with 0.4 gold on average and almost never with gold and an affordable card it skipped (0.6%); gold caps a round at two or three cards. Later the deck cap is the binding limit (the deck sat at 10 at 53% of shop ends), and removal at 1 gold becomes the main lever."
+    ]
+  }
+}

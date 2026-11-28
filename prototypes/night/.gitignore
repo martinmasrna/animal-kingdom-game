@@ -1,0 +1,4 @@
+shots/
+*/shots/
+sim-progress*.jsonl
+*.log

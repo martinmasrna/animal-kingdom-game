@@ -1,0 +1,67 @@
+{
+  "prototype": "02-attack-and-block",
+  "knob": "playouts per decision (expertBot)",
+  "N": 1000,
+  "gamesPerPair": 200,
+  "seatsAlternated": "each deal played twice, seats swapped",
+  "score": "stronger rung: (wins + draws/2) / games, 95% Wilson interval",
+  "files": {
+    "engine": "c107c6d1d262",
+    "bot": "8e258d735a5f"
+  },
+  "started": "2026-11-28T06:53:29.247Z",
+  "complete": false,
+  "pairs": [
+    {
+      "pair": "Greedy > Random",
+      "stronger": "Greedy",
+      "weaker": "Random",
+      "games": 200,
+      "wins": 200,
+      "draws": 0,
+      "losses": 0,
+      "score": 1,
+      "ci95": [
+        0.981,
+        1
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0
+    },
+    {
+      "pair": "Expert N > Greedy",
+      "stronger": "Expert N",
+      "weaker": "Greedy",
+      "games": 200,
+      "wins": 192,
+      "draws": 0,
+      "losses": 8,
+      "score": 0.96,
+      "ci95": [
+        0.923,
+        0.98
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0.379
+    },
+    {
+      "pair": "Expert 4N > Expert N",
+      "stronger": "Expert 4N",
+      "weaker": "Expert N",
+      "games": 200,
+      "wins": 118,
+      "draws": 0,
+      "losses": 82,
+      "score": 0.59,
+      "ci95": [
+        0.521,
+        0.656
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 2.818
+    }
+  ]
+}

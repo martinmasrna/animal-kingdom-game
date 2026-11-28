@@ -1,0 +1,98 @@
+{
+  "games": 400,
+  "expert": {
+    "playouts": 500,
+    "depth": 99,
+    "eps": 0,
+    "C": 0.5
+  },
+  "pairings": {
+    "expert-random": {
+      "n": 400,
+      "aScore": 0.998,
+      "aWins": 399,
+      "draws": 0,
+      "aLosses": 1,
+      "firstPlayerScore": 0.497,
+      "capped": 0,
+      "avgTurnsEach": 7
+    },
+    "expert-greedy": {
+      "n": 400,
+      "aScore": 0.993,
+      "aWins": 397,
+      "draws": 0,
+      "aLosses": 3,
+      "firstPlayerScore": 0.492,
+      "capped": 0,
+      "avgTurnsEach": 10.5,
+      "turnsCompared": 4173,
+      "turnAgreement": 0.183,
+      "actionsCompared": 9283,
+      "actionAgreement": 0.464
+    },
+    "expert-racer": {
+      "n": 400,
+      "aScore": 0.983,
+      "aWins": 393,
+      "draws": 0,
+      "aLosses": 7,
+      "firstPlayerScore": 0.507,
+      "capped": 0,
+      "avgTurnsEach": 9.3
+    },
+    "expert-expert": {
+      "n": 400,
+      "aScore": 0.501,
+      "aWins": 197,
+      "draws": 7,
+      "aLosses": 196,
+      "firstPlayerScore": 0.434,
+      "capped": 0,
+      "avgTurnsEach": 8.1
+    },
+    "greedy-greedy": {
+      "n": 400,
+      "aScore": 0.5,
+      "aWins": 180,
+      "draws": 40,
+      "aLosses": 180,
+      "firstPlayerScore": 0.3,
+      "capped": 0,
+      "avgTurnsEach": 11.4
+    }
+  },
+  "gate": {
+    "expertVsRandom": 0.998,
+    "expertVsGreedy": 0.993,
+    "expertVsRacer": 0.983,
+    "capRate": 0,
+    "turnAgreementWithGreedy": 0.183,
+    "actionAgreementWithGreedy": 0.464,
+    "firstPlayerScoreExpertMirror": 0.434
+  },
+  "fails": [],
+  "alive": true,
+  "seconds": 2400,
+  "setPositions": {
+    "expertFailures": 0,
+    "lines": [
+      "ok   greedy Heavy next to the enemy Base: strike 17→22",
+      "ok   expert Heavy next to the enemy Base: strike 17→22",
+      "ok   greedy cut the chain that kills my Base: place POST@8, cut 17, end",
+      "ok   expert cut the chain that kills my Base: place POST@1, cut 17, end",
+      "ok   greedy cut the one link to three pieces (last turn): place POST@6, cut 17, end",
+      "ok   expert cut the one link to three pieces (last turn): cut 11, place POST@1, strike 7→12, end",
+      "ok   greedy never strike a stronger piece: end",
+      "ok   expert never strike a stronger piece: end",
+      "Expert passes every position"
+    ]
+  },
+  "pageCheck": [
+    "node game 0: winner 1 after 14 turns",
+    "node game 1: winner 1 after 21 turns",
+    "slowest Expert decision 968 ms",
+    "  1s: 1 clicks, last end",
+    "browser: 13 clicks, end screen: DefeatPlay again, script errors: none"
+  ]
+}

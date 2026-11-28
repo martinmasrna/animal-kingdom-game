@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bump Placement</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="opphand"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="info1" class="info"></div>
+  <div id="spaces"></div>
+  <div id="info0" class="info"></div>
+  <div id="turnbox"></div>
+  <div id="hand"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Bump Placement</h3>
+    <p>First to 20 points at the end of a round wins (both: the higher; equal plays on). After round 12 the higher score wins. Same 24-card deck for both; each starts with 5 cards.</p>
+    <p><b>Each round</b> both draw 3 (more than 8 cards: discard down), get 4 mana (+3 if their card was on Fund last round). Unspent mana is lost. The starting player alternates every round.</p>
+    <p><b>Place or pass,</b> taking turns from the starting player. Pay a card's cost and put it on a space. A space holds one card: a stronger card bumps a weaker enemy card back to its owner's hand; you can't place on your own card or on an enemy card as strong or stronger. Once you pass you place nothing more this round.</p>
+    <p>When both have passed, the spaces pay their owners left to right: Score 3, Score 1 (+1 and draw 1), Study (draw 2), Fund (+3 mana next round), Sabotage (the opponent discards a random card). Then every placed card goes to its owner's discard pile.</p>
+    <p>Lock can't be bumped. Shove, when placed, bumps an enemy card of strength 3 or less from another space.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

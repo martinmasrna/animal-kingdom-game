@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Score or Fight</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="opphand"></div>
+  <div id="menu"><span id="tally"></span><button id="openrules">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="hero1" class="herorow"></div>
+  <div id="board1" class="board"></div>
+  <div id="board0" class="board"></div>
+  <div id="hero0" class="herorow"></div>
+  <div id="res1" class="res"></div>
+  <div id="turnbox"></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Score or Fight</h3>
+    <p>First to <b>40</b> points wins. There is no hero and no life.</p>
+    <p>Each turn: mana +1 (up to 10) and refills, your units get ready, draw 1. Play cards by paying their cost; up to 6 units. A unit cannot act the turn it is played.</p>
+    <p>Each ready unit does one thing, then is spent until your next turn:</p>
+    <ul><li><b>Attack</b> an enemy unit: both deal their attack to each other. Damage stays.</li><li><b>Score</b>: add its current health to your points (tap the unit, then your points).</li></ul>
+    <p>Hit cards damage an enemy unit. The second player starts with 4 cards and the Coin (+1 mana once); the first with 3. An empty deck gives the opponent 2 points, then 4, then 6.</p>
+    <button id="closerules">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Supply Grid</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="opphand"></div>
+  <div id="menu"><span id="tally"></span><button id="openrules">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="gridwrap"><div id="grid"></div></div>
+  <div id="res1" class="res"></div>
+  <div id="mid"><div id="rounds"></div><div id="turnbox"></div></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Supply Grid</h3>
+    <p>Your Base (power 3) is at the bottom, the enemy's at the top. <b>Destroy the enemy Base</b>, or have <b>more pieces</b> on the grid (Bases included) after round 12.</p>
+    <p>Each turn: mana +1 (up to 8) and refills, draw 1. Then in any order:</p>
+    <ul>
+      <li><b>Place</b> a unit by paying its cost, on an empty square next to one of your pieces.</li>
+      <li><b>Strike</b>: each of your pieces, the Base and new units included, may strike once per turn at a neighbouring enemy piece. The lower power is destroyed; equal powers destroy both. A Wall cannot strike.</li>
+      <li><b>Cut</b>: destroy an enemy unit of power 2 or less.</li>
+    </ul>
+    <p>A piece no longer connected to its Base through its own pieces (side by side, not diagonal) is removed at once.</p>
+    <p>The first player starts with 3 cards; the second with 4 and the Coin (+1 mana once).</p>
+    <button id="closerules">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

@@ -1,0 +1,727 @@
+<title>Supply Grid</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* one screen: history left; the grid in the middle; mana, deck, rounds and End turn right; hand below */
+:root {
+  --bg: #2a3340; --table: #3b4a5c; --table2: #34424f; --ink: #1b1b1b; --paper: #fbf7ee;
+  --mana: #3d8bf2; --gold: #f2b632; --ok: #5fdc6f;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86; --spell: #e0673f; --spell2: #b8452a;
+  --cardw: 96px; --cardh: 124px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game {
+  position: relative; height: 100%; max-width: 1300px; margin: 0 auto;
+  display: grid; grid-template-columns: 170px minmax(0, 1fr) 230px; grid-template-rows: 40px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: 6px 20px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+}
+#opphand { grid-row: 1; grid-column: 2; display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; }
+.back { width: 24px; height: 34px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
+.back:first-child { margin-left: 0; }
+#menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; display: flex; gap: 12px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 18px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#history { grid-row: 2 / 5; grid-column: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; overflow: hidden; }
+#gridwrap { grid-row: 2 / 5; grid-column: 2; display: flex; align-items: center; justify-content: center; min-height: 0; container-type: size; }
+#res1 { grid-row: 2; grid-column: 3; align-self: start; padding-top: 10px; } #mid { grid-row: 3; grid-column: 3; align-self: center; } #res0 { grid-row: 4; grid-column: 3; align-self: end; padding-bottom: 10px; }
+#hand { grid-row: 5; grid-column: 1 / -1; }
+
+/* ---------------- grid */
+#grid { width: min(100cqw, 100cqh); height: min(100cqw, 100cqh); display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 5px; padding: 8px;
+  border-radius: 14px; background: radial-gradient(ellipse at center, var(--table), var(--table2)); box-shadow: inset 0 0 24px rgba(0,0,0,.3); }
+.cell { position: relative; border-radius: 9px; background: rgba(0,0,0,.18); display: flex; align-items: center; justify-content: center; container-type: size; }
+.cell.tgt { cursor: pointer; background: rgba(242,182,50,.18); box-shadow: inset 0 0 0 3px var(--gold); animation: pulsebg 1.2s ease-in-out infinite; }
+@keyframes pulsebg { 50% { background: rgba(242,182,50,.32); } }
+.piece { width: 74%; height: 74%; border-radius: 12%; border: 3px solid rgba(255,255,255,.85); display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 42cqh; text-shadow: 0 1px 3px rgba(0,0,0,.5); box-shadow: 0 4px 8px rgba(0,0,0,.45); transition: transform .12s; }
+.piece.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); } .piece.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.piece.base { width: 86%; height: 86%; border-radius: 50%; border-width: 5px; box-shadow: 0 0 0 4px rgba(0,0,0,.25), 0 4px 10px rgba(0,0,0,.5); }
+.piece.base.s0 { background: radial-gradient(circle at 35% 30%, #7db3f5, var(--me2)); } .piece.base.s1 { background: radial-gradient(circle at 35% 30%, #c09ae8, var(--him2)); }
+.piece.wall { border-style: double; border-width: 6px; border-radius: 4%; }
+.piece.wall.s0 { background: repeating-linear-gradient(45deg, var(--me2) 0 8px, #24508f 8px 16px); } .piece.wall.s1 { background: repeating-linear-gradient(45deg, var(--him2) 0 8px, #4d3471 8px 16px); }
+.piece.spent { filter: saturate(.55) brightness(.8); }
+.piece.can { cursor: pointer; box-shadow: 0 0 0 3px var(--ok), 0 0 16px rgba(95,220,111,.8); }
+.piece.sel { transform: scale(1.08); box-shadow: 0 0 0 4px var(--gold), 0 0 20px rgba(242,182,50,.9); }
+.cell.tgt .piece { box-shadow: 0 0 0 4px var(--gold), 0 0 18px rgba(242,182,50,.85); }
+.piece.new { animation: pop .4s ease-out; }
+@keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+
+/* ---------------- mana, deck, rounds, turn */
+.res { display: flex; align-items: center; gap: 12px; }
+.mana { display: flex; align-items: center; gap: 3px; }
+.gemc { width: 13px; height: 17px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: #1d2a38; }
+.gemc.on { background: linear-gradient(180deg, #8cc2ff, var(--mana)); } .gemc.off { opacity: .4; }
+.manatxt { font-weight: 800; font-size: 18px; margin-right: 6px; color: #bcd9ff; min-width: 40px; }
+.pile { width: 34px; height: 46px; border-radius: 5px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; flex: 0 0 auto; box-shadow: 2px 2px 0 rgba(0,0,0,.3), 4px 4px 0 rgba(0,0,0,.2); }
+.pile.s0 { background: linear-gradient(135deg, var(--me), var(--me2)); } .pile.s1 { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
+#mid { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+#rounds { display: grid; grid-template-columns: repeat(6, 14px); gap: 5px; }
+#rounds i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #6b7a8a; }
+#rounds i.done { background: #6b7a8a; } #rounds i.now { border-color: var(--gold); background: var(--gold); }
+#endturn { width: 140px; min-height: 54px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; box-shadow: 0 3px 0 #a8770d; }
+#endturn.done { background: var(--ok); box-shadow: 0 3px 0 #2c8a3a, 0 0 14px rgba(95,220,111,.7); color: #08300f; }
+#endturn:disabled { background: #56616d; color: #8e98a3; box-shadow: none; cursor: default; }
+
+/* ---------------- history */
+.hist { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
+.chip { min-width: 34px; height: 30px; padding: 0 5px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; flex: 0 0 auto; }
+.chip.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); } .chip.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.chip.Spell { background: linear-gradient(160deg, #f08a5d, var(--spell2)); }
+.chip.Coin { background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); color: #2a1d00; }
+.chip.Strike::before { content: '⚔'; margin-right: 3px; font-size: 12px; }
+.ho { font-weight: 800; font-size: 15px; } .ho.kill { color: #ff6a4d; }
+
+/* ---------------- cards */
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; text-align: left;
+  background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; }
+.card .art { margin: 4px 4px 0; border-radius: 6px; flex: 0 0 62%; display: flex; align-items: center; justify-content: center; color: #fff; }
+.card.Unit .art { background: linear-gradient(160deg, var(--me), var(--me2)); } .card.Unit.s1 .art { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.card.Wall .art { background: repeating-linear-gradient(45deg, var(--me2) 0 8px, #24508f 8px 16px); } .card.Wall.s1 .art { background: repeating-linear-gradient(45deg, var(--him2) 0 8px, #4d3471 8px 16px); }
+.card.Spell .art { background: linear-gradient(160deg, #f08a5d, var(--spell2)); }
+.card.Coin .art { background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); color: #2a1d00; }
+.card .big { font-size: calc(var(--cardw) * .4); font-weight: 900; text-shadow: 0 2px 3px rgba(0,0,0,.35); line-height: 1; } .card .big.sm { font-size: calc(var(--cardw) * .3); }
+.card.Coin .big { text-shadow: none; }
+.card .nm { font-weight: 800; font-size: calc(var(--cardw) * .15); padding: 6px 8px 0; }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+#hand { display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 12px 0 4px; min-height: calc(var(--cardh) + 18px); }
+#hand .card { transition: transform .12s, box-shadow .12s; }
+#hand .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok:hover { transform: translateY(-8px); }
+#hand .card.sel { transform: translateY(-16px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8), 0 6px 12px rgba(0,0,0,.5); }
+#hand .card:disabled { cursor: default; } #hand .card.no { filter: brightness(.62) saturate(.6); }
+#hand .card.drawn { animation: drawin .45s ease-out; }
+@keyframes drawin { from { transform: translateY(-60px) scale(.6); opacity: 0; } }
+
+/* ---------------- spotlight, ghosts, banner, game over, rules */
+#spot { position: absolute; z-index: 20; pointer-events: none; }
+#spot .card { --cardw: 140px; --cardh: 180px; position: absolute; left: calc(var(--cardw) / -2); top: calc(var(--cardh) / -2); box-shadow: 0 14px 40px rgba(0,0,0,.6); animation: fromtop .32s cubic-bezier(.2,.8,.3,1.1); }
+#spot .card.out { animation: spotout .2s ease-in forwards; }
+@keyframes fromtop { from { transform: translateY(-240px) scale(.4); opacity: .2; } }
+@keyframes spotout { to { transform: scale(.5); opacity: 0; } }
+.ghost { position: absolute; z-index: 15; pointer-events: none; display: flex; align-items: center; justify-content: center; animation: die .5s ease-in forwards; }
+.ghost > .piece { width: 100%; height: 100%; font-size: 40px; }
+.ghost.cutoff { animation: fade .6s ease-in forwards; }
+@keyframes die { to { transform: scale(.4) rotate(-8deg); opacity: 0; } }
+@keyframes fade { 0% { opacity: 1; filter: grayscale(0); } 100% { opacity: 0; filter: grayscale(1); transform: translateY(8px); } }
+#banner { position: absolute; left: 0; right: 0; top: 45%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 44px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over .sub { margin: 0; font-size: 28px; font-weight: 800; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); }
+#rules.show { display: flex; }
+#rules .panel { max-width: 540px; width: calc(100% - 32px); max-height: calc(100% - 32px); overflow: auto; background: #1f2731; border: 1px solid #4a5868; border-radius: 12px; padding: 18px 22px; font-size: 15px; line-height: 1.4; color: #dfe5eb; }
+#rules h3 { margin: 0 0 8px; font-size: 20px; color: #fff; } #rules p, #rules ul { margin: 6px 0; } #rules ul { padding-left: 20px; }
+#rules button { margin-top: 10px; min-height: 40px; padding: 0 18px; border-radius: 8px; border: 0; font-weight: 800; background: var(--gold); color: #2a1d00; }
+
+/* ---------------- phone */
+@media (max-width: 760px) {
+  :root { --cardw: 60px; --cardh: 80px; }
+  #game { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 30px auto minmax(0, 1fr) auto auto; gap: 6px 8px; }
+  #history { display: none; }
+  #opphand { grid-row: 1; grid-column: 1; justify-content: flex-start; }
+  .back { width: 16px; height: 24px; }
+  #menu { top: 2px; } #menu button { min-height: 24px; padding: 2px 10px; font-size: 13px; }
+  .tally { font-size: 14px; } .tally b { min-width: 24px; height: 24px; }
+  #res1 { grid-row: 2; grid-column: 1 / -1; justify-self: end; padding: 0; }
+  #gridwrap { grid-row: 3; grid-column: 1 / -1; }
+  #mid { grid-row: 4; grid-column: 1; flex-direction: row; align-items: center; gap: 12px; }
+  #res0 { grid-row: 4; grid-column: 2; align-self: center; padding: 0; }
+  #hand { grid-row: 5; grid-column: 1 / -1; gap: 6px; flex-wrap: wrap; padding-top: 8px; }
+  .gemc { display: none; } .manatxt { font-size: 15px; margin: 0; min-width: 0; }
+  .pile { width: 24px; height: 32px; font-size: 12px; }
+  #rounds { grid-template-columns: repeat(12, 9px); gap: 3px; } #rounds i { width: 9px; height: 9px; border-width: 1.5px; }
+  #endturn { width: auto; min-height: 38px; padding: 0 12px; font-size: 14px; }
+  .card .nm { font-size: 10px; padding-top: 3px; } .cgem { width: 20px; height: 20px; font-size: 12px; top: -6px; left: -6px; }
+  #grid { gap: 3px; padding: 5px; } .piece { border-width: 2px; } .piece.base { border-width: 3px; }
+  #spot .card { --cardw: 100px; --cardh: 130px; }
+}
+
+</style>
+
+<div id="game">
+  <div id="opphand"></div>
+  <div id="menu"><span id="tally"></span><button id="openrules">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="gridwrap"><div id="grid"></div></div>
+  <div id="res1" class="res"></div>
+  <div id="mid"><div id="rounds"></div><div id="turnbox"></div></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Supply Grid</h3>
+    <p>Your Base (power 3) is at the bottom, the enemy's at the top. <b>Destroy the enemy Base</b>, or have <b>more pieces</b> on the grid (Bases included) after round 12.</p>
+    <p>Each turn: mana +1 (up to 8) and refills, draw 1. Then in any order:</p>
+    <ul>
+      <li><b>Place</b> a unit by paying its cost, on an empty square next to one of your pieces.</li>
+      <li><b>Strike</b>: each of your pieces, the Base and new units included, may strike once per turn at a neighbouring enemy piece. The lower power is destroyed; equal powers destroy both. A Wall cannot strike.</li>
+      <li><b>Cut</b>: destroy an enemy unit of power 2 or less.</li>
+    </ul>
+    <p>A piece no longer connected to its Base through its own pieces (side by side, not diagonal) is removed at once.</p>
+    <p>The first player starts with 3 cards; the second with 4 and the Coin (+1 mana once).</p>
+    <button id="closerules">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// Supply grid. A 5x5 grid; each player's Base sits on its own edge. You place units only next to
+// a piece that is connected to your Base through your own pieces; a piece that loses that
+// connection is removed at once. Pieces strike orthogonal neighbours: the lower power is destroyed,
+// equal powers destroy both. Destroy the enemy Base, or have more pieces after round 12.
+// Pure from the outside: act() clones the state; _act() mutates (for the bots' play-outs).
+
+const N = 5, MAX_MANA = 8, ROUNDS = 12, BASE_POWER = 3;
+const BASE = [2, 22]; // A: row 1 column 3; B: row 5 column 3
+
+const CARDS = {
+  POST: { id: 'POST', name: 'Post', kind: 'Unit', cost: 1, power: 1 },
+  LINE: { id: 'LINE', name: 'Line', kind: 'Unit', cost: 2, power: 2 },
+  SQUAD: { id: 'SQUAD', name: 'Squad', kind: 'Unit', cost: 3, power: 3 },
+  HEAVY: { id: 'HEAVY', name: 'Heavy', kind: 'Unit', cost: 4, power: 4 },
+  BIG: { id: 'BIG', name: 'Big', kind: 'Unit', cost: 6, power: 6 },
+  WALL: { id: 'WALL', name: 'Wall', kind: 'Unit', cost: 2, power: 3, wall: true },
+  CUT: { id: 'CUT', name: 'Cut', kind: 'Spell', cost: 2, max: 2 },
+  COIN: { id: 'COIN', name: 'Coin', kind: 'Coin', cost: 0 },
+};
+const DECK = { POST: 5, LINE: 5, SQUAD: 4, HEAVY: 3, BIG: 2, WALL: 3, CUT: 2 };
+
+const ADJ = [];
+for (let i = 0; i < N * N; i++) {
+  const r = Math.floor(i / N), c = i % N, a = [];
+  if (r > 0) a.push(i - N); if (r < N - 1) a.push(i + N); if (c > 0) a.push(i - 1); if (c < N - 1) a.push(i + 1);
+  ADJ.push(a);
+}
+const dist = (i, j) => Math.abs(Math.floor(i / N) - Math.floor(j / N)) + Math.abs(i % N - j % N);
+
+function deckList() { const out = []; for (const [id, k] of Object.entries(DECK)) for (let i = 0; i < k; i++) out.push(id); return out; }
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+let UID = 1;
+function newPlayer() { return { mana: 0, maxMana: 0, hand: [], deck: deckList() }; }
+function clone(s) {
+  return { ...s, cells: s.cells.map(x => x && { ...x }), p: s.p.map(p => ({ ...p, hand: p.hand.slice(), deck: p.deck.slice() })) };
+}
+function emit(s, ev, e) { if (ev) { e.round = s.turnNo; ev.push(e); } }
+function draw(s, side, ev) {
+  const p = s.p[side];
+  if (p.deck.length) { p.hand.push(p.deck.shift()); emit(s, ev, { t: 'draw', side }); }
+}
+
+function newMatch({ seed, first }) {
+  const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, first: 0, winner: null, capped: false, cells: Array(N * N).fill(null), p: [newPlayer(), newPlayer()] };
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
+  for (const side of [0, 1]) s.cells[BASE[side]] = { uid: UID++, side, card: 'BASE', power: BASE_POWER, base: true, struck: false };
+  for (let i = 0; i < 3; i++) draw(s, s.first, null);
+  for (let i = 0; i < 4; i++) draw(s, 1 - s.first, null);
+  s.p[1 - s.first].hand.push('COIN');
+  s.turn = s.first;
+  startTurn(s, null);
+  return s;
+}
+
+function startTurn(s, ev) {
+  const side = s.turn, p = s.p[side];
+  s.turnNo++;
+  emit(s, ev, { t: 'turn', side });
+  p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
+  p.mana = p.maxMana;
+  for (const x of s.cells) if (x && x.side === side) x.struck = false;
+  draw(s, side, ev);
+}
+
+// Every piece of `side` connected to its Base through its own pieces.
+function supplied(s, side) {
+  const out = new Set(), b = BASE[side], C = s.cells;
+  if (!C[b] || C[b].side !== side || !C[b].base) return out;
+  const st = [b]; out.add(b);
+  while (st.length) { const i = st.pop(); for (const j of ADJ[i]) if (!out.has(j) && C[j] && C[j].side === side) { out.add(j); st.push(j); } }
+  return out;
+}
+function sweep(s, ev) {
+  for (const side of [0, 1]) {
+    const ok = supplied(s, side);
+    for (let i = 0; i < N * N; i++) { const x = s.cells[i]; if (x && x.side === side && !ok.has(i)) { emit(s, ev, { t: 'cutoff', side, cell: i, uid: x.uid, card: x.card }); s.cells[i] = null; } }
+  }
+  const a = !(s.cells[BASE[0]] && s.cells[BASE[0]].base), b = !(s.cells[BASE[1]] && s.cells[BASE[1]].base);
+  if (a || b) { s.winner = a && b ? 'draw' : a ? 1 : 0; emit(s, ev, { t: 'end', winner: s.winner }); }
+}
+function count(s, side) { let n = 0; for (const x of s.cells) if (x && x.side === side) n++; return n; }
+// Cells where `side` may place a unit: empty and next to one of its (always supplied) pieces.
+function frontier(s, side) {
+  const out = [];
+  for (let i = 0; i < N * N; i++) { if (s.cells[i]) continue; for (const j of ADJ[i]) { const x = s.cells[j]; if (x && x.side === side) { out.push(i); break; } } }
+  return out;
+}
+
+// Actions: { t: 'place', card, cell }  { t: 'strike', from, to }  { t: 'cut', to }  { t: 'coin' }  { t: 'end' }
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  const me = s.turn, P = s.p[me], out = [], C = s.cells;
+  let fr = null;
+  for (const id of new Set(P.hand)) {
+    const c = CARDS[id];
+    if (c.cost > P.mana) continue;
+    if (c.kind === 'Coin') out.push({ t: 'coin' });
+    else if (c.kind === 'Unit') { fr = fr || frontier(s, me); for (const cell of fr) out.push({ t: 'place', card: id, cell }); }
+    else for (let i = 0; i < N * N; i++) { const x = C[i]; if (x && x.side !== me && !x.base && x.power <= c.max) out.push({ t: 'cut', to: i }); }
+  }
+  for (let i = 0; i < N * N; i++) {
+    const x = C[i];
+    if (!x || x.side !== me || x.struck || x.wall) continue;
+    for (const j of ADJ[i]) if (C[j] && C[j].side !== me) out.push({ t: 'strike', from: i, to: j });
+  }
+  out.push({ t: 'end' });
+  return out;
+}
+
+function endTurn(s, ev) {
+  if (s.turnNo >= 2 * ROUNDS) {
+    const a = count(s, 0), b = count(s, 1);
+    s.winner = a === b ? 'draw' : a > b ? 0 : 1;
+    emit(s, ev, { t: 'end', winner: s.winner, by: 'count', counts: [a, b] });
+    return;
+  }
+  s.turn = 1 - s.turn;
+  startTurn(s, ev);
+}
+
+function mAct(s, a, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  const me = s.turn, P = s.p[me], C = s.cells;
+  if (a.t === 'end') { endTurn(s, ev); return; }
+  if (a.t === 'coin') {
+    if (!P.hand.includes('COIN')) throw new Error('no coin');
+    P.hand.splice(P.hand.indexOf('COIN'), 1); P.mana += 1; emit(s, ev, { t: 'coin', side: me, mana: P.mana }); return;
+  }
+  if (a.t === 'place') {
+    const c = CARDS[a.card];
+    if (!P.hand.includes(a.card) || c.kind !== 'Unit' || c.cost > P.mana) throw new Error('illegal place ' + a.card);
+    if (C[a.cell] || !ADJ[a.cell].some(j => C[j] && C[j].side === me)) throw new Error('illegal cell ' + a.cell);
+    P.mana -= c.cost; P.hand.splice(P.hand.indexOf(a.card), 1);
+    const x = { uid: UID++, side: me, card: a.card, power: c.power, wall: !!c.wall, struck: false };
+    C[a.cell] = x;
+    emit(s, ev, { t: 'place', side: me, card: a.card, cell: a.cell, uid: x.uid, mana: P.mana });
+    return;
+  }
+  if (a.t === 'cut') {
+    const c = CARDS.CUT, x = C[a.to];
+    if (!P.hand.includes('CUT') || c.cost > P.mana || !x || x.side === me || x.base || x.power > c.max) throw new Error('illegal cut');
+    P.mana -= c.cost; P.hand.splice(P.hand.indexOf('CUT'), 1);
+    emit(s, ev, { t: 'cut', side: me, to: a.to, uid: x.uid, card: x.card, mana: P.mana });
+    C[a.to] = null; emit(s, ev, { t: 'die', side: x.side, cell: a.to, uid: x.uid, card: x.card });
+    sweep(s, ev); return;
+  }
+  if (a.t === 'strike') {
+    const x = C[a.from], y = C[a.to];
+    if (!x || x.side !== me || x.struck || x.wall || !y || y.side === me || !ADJ[a.from].includes(a.to)) throw new Error('illegal strike');
+    x.struck = true;
+    emit(s, ev, { t: 'strike', side: me, from: a.from, to: a.to, uid: x.uid, tuid: y.uid, p1: x.power, p2: y.power });
+    if (x.power <= y.power) { C[a.from] = null; emit(s, ev, { t: 'die', side: x.side, cell: a.from, uid: x.uid, card: x.card }); }
+    if (y.power <= x.power) { C[a.to] = null; emit(s, ev, { t: 'die', side: y.side, cell: a.to, uid: y.uid, card: y.card }); }
+    sweep(s, ev); return;
+  }
+  throw new Error('unknown action ' + a.t);
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function _act(t, a) { mAct(t, a, null); return t; }
+
+function key(s) {
+  return JSON.stringify([s.turn, s.winner, s.cells.map(x => x ? x.side + x.card + (x.struck ? '*' : '') : '.').join(','), s.p.map(p => p.mana), s.p[s.turn].hand.slice().sort()]);
+}
+function determinize(s, me, rng) {
+  const t = clone(s), O = t.p[1 - me], P = t.p[me];
+  const coins = O.hand.filter(c => c === 'COIN'), hidden = O.hand.filter(c => c !== 'COIN');
+  const pool = shuffle(hidden.concat(O.deck), rng);
+  O.hand = pool.slice(0, hidden.length).concat(coins); O.deck = pool.slice(hidden.length);
+  shuffle(P.deck, rng);
+  return t;
+}
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+// ---- src/bot.js
+// Bots for the supply grid. Each is a step function: given a position, the one action it takes
+// next ({ t: 'end' } ends its turn). None reads a hidden card: the Expert deals the unseen cards
+// again before every play-out.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const END = { t: 'end' };
+function randomBot(s, rng) { const o = legalActions(s); return o[Math.floor(rng() * o.length)]; }
+
+function coinHelps(P) {
+  if (!P.hand.includes('COIN')) return false;
+  let now = -1, withCoin = -1;
+  for (const id of P.hand) { const c = CARDS[id]; if (c.kind === 'Coin') continue; if (c.cost <= P.mana) now = Math.max(now, c.cost); else if (c.cost <= P.mana + 1) withCoin = Math.max(withCoin, c.cost); }
+  return withCoin > now;
+}
+// a strike of mine that destroys the enemy Base
+function baseKill(s, me) {
+  const eb = BASE[1 - me];
+  for (const i of ADJ[eb]) { const x = s.cells[i]; if (x && x.side === me && !x.struck && !x.wall && x.power >= BASE_POWER) return { t: 'strike', from: i, to: eb }; }
+  return null;
+}
+function dearestUnit(P) {
+  let best = null;
+  for (const id of P.hand) { const c = CARDS[id]; if (c.kind === 'Unit' && c.cost <= P.mana && (!best || c.cost > CARDS[best].cost || (c.cost === CARDS[best].cost && !c.wall))) best = id; }
+  return best;
+}
+const towardBase = (me) => (a, b) => dist(a, BASE[1 - me]) - dist(b, BASE[1 - me]) || Math.abs(a % N - 2) - Math.abs(b % N - 2) || a - b;
+// enemy pieces gone if the enemy piece on `cell` is destroyed: it and every piece that hangs on it
+function removes(s, cell, me) {
+  const C = s.cells, side = 1 - me, b = BASE[side], seen = new Uint8Array(N * N), st = [b];
+  let reached = 0, all = 0;
+  for (const x of C) if (x && x.side === side) all++;
+  seen[b] = 1; seen[cell] = 1; reached = 1;
+  while (st.length) { const i = st.pop(); for (const j of ADJ[i]) if (!seen[j] && C[j] && C[j].side === side) { seen[j] = 1; reached++; st.push(j); } }
+  return all - reached;
+}
+
+// Greedy (the spec's rule): strike the enemy Base when that destroys it; play the dearest affordable
+// unit on a cell next to an enemy piece it beats (else the cell closest to the enemy Base); Cut the
+// enemy piece whose loss takes the most pieces with it; then every strike that destroys an enemy
+// piece without losing the striker.
+function greedyBot(s) {
+  const me = s.turn, P = s.p[me], C = s.cells;
+  const k = baseKill(s, me); if (k) return k;
+  if (coinHelps(P)) return { t: 'coin' };
+  const u = dearestUnit(P);
+  if (u) {
+    const fr = frontier(s, me);
+    if (fr.length) {
+      const c = CARDS[u];
+      let best = -1, bp = -1;
+      if (!c.wall) for (const cell of fr) for (const j of ADJ[cell]) { const y = C[j]; if (y && y.side !== me && c.power > y.power && y.power > bp) { bp = y.power; best = cell; } }
+      if (best < 0) best = fr.sort(towardBase(me))[0];
+      return { t: 'place', card: u, cell: best };
+    }
+  }
+  if (P.hand.includes('CUT') && CARDS.CUT.cost <= P.mana) {
+    let best = null, bn = 0;
+    for (let i = 0; i < N * N; i++) { const y = C[i]; if (y && y.side !== me && !y.base && y.power <= CARDS.CUT.max) { const a = { t: 'cut', to: i }, n = removes(s, i, me) + y.power / 10; if (n > bn) { bn = n; best = a; } } }
+    if (best) return best;
+  }
+  let best = null, bn = 0;
+  for (let i = 0; i < N * N; i++) {
+    const x = C[i];
+    if (!x || x.side !== me || x.struck || x.wall) continue;
+    for (const j of ADJ[i]) { const y = C[j]; if (y && y.side !== me && x.power > y.power) { const a = { t: 'strike', from: i, to: j }, n = removes(s, j, me) + y.power / 10; if (n > bn) { bn = n; best = a; } } }
+  }
+  return best || END;
+}
+
+// Racer: grows a chain straight at the enemy Base (dearest unit first) and strikes the Base when it
+// can destroy it; no other strike, no Cut.
+function racerBot(s) {
+  const me = s.turn, P = s.p[me];
+  const k = baseKill(s, me); if (k) return k;
+  if (coinHelps(P)) return { t: 'coin' };
+  const u = dearestUnit(P);
+  if (u) { const fr = frontier(s, me); if (fr.length) return { t: 'place', card: u, cell: fr.sort(towardBase(me))[0] }; }
+  return END;
+}
+
+// A position's worth to `me` as a win chance: pieces (the count decides round 12), power, and how
+// close each side's front is to the other's Base.
+function evaluate(s, me) {
+  let v = 0;
+  for (let i = 0; i < N * N; i++) { const x = s.cells[i]; if (!x || x.base) continue; const w = 1 + 0.25 * x.power + 0.3 * Math.max(0, 4 - dist(i, BASE[1 - x.side])); v += x.side === me ? w : -w; }
+  v += 0.6 * (s.p[me].hand.length - s.p[1 - me].hand.length);
+  return 1 / (1 + Math.exp(-v / 3));
+}
+
+function policy(t, rng, eps) { return rng() < eps ? randomBot(t, rng) : greedyBot(t); }
+function rollout(t, me, rng, depth, eps, start) {
+  for (let steps = 0; t.winner === null && t.turnNo - start < depth && steps < 600; steps++) _act(t, policy(t, rng, eps));
+  if (t.winner === null) return evaluate(t, me);
+  return t.winner === me ? 1 : t.winner === 'draw' ? 0.5 : 0;
+}
+
+// Expert: flat Monte Carlo with UCB1 over the distinct actions now (actions that give the same
+// position count once). Each play-out deals the unseen cards again, takes the action, and plays on
+// with the play-out policy for `depth` turns; an unfinished one is scored by evaluate().
+// `playouts` is the budget per action; with `timeMs` it also stops at that time (after at least
+// `minPlayouts`), so the page never waits long.
+function mcExpert({ playouts = 3000, depth = 99, eps = 0, C = 0.5, timeMs = 0, minPlayouts = 200 } = {}) {
+  return function expert(s, rng) {
+    const me = s.turn, opts = [], seen = new Set();
+    for (const a of legalActions(s)) {
+      const t = clone(s); _act(t, a);
+      if (t.winner === me) return a;
+      const k = a.t === 'end' ? 'end' : key(t);
+      if (!seen.has(k)) { seen.add(k); opts.push({ a, n: 0, w: 0 }); }
+    }
+    if (opts.length === 1) return opts[0].a;
+    const t0 = timeMs ? Date.now() : 0;
+    for (let total = 0; ; total++) {
+      if (total >= playouts) break;
+      if (timeMs && total >= minPlayouts && (total & 15) === 0 && Date.now() - t0 > timeMs) break;
+      let o;
+      if (total < opts.length) o = opts[total];
+      else { let bu = -1; const lg = Math.log(total); for (const x of opts) { const u = x.w / x.n + C * Math.sqrt(lg / x.n); if (u > bu) { bu = u; o = x; } } }
+      const t = determinize(s, me, rng), start = t.turnNo; _act(t, o.a);
+      o.w += rollout(t, me, rng, depth, eps, start); o.n++;
+    }
+    let best = opts[0];
+    for (const x of opts) if (x.n > best.n || (x.n === best.n && x.w > best.w)) best = x;
+    return best.a;
+  };
+}
+const EXPERT = { playouts: 500, depth: 99, eps: 0, C: 0.5 };
+
+// ---- src/ui.js
+// Supply grid as a game screen against the Expert. Your Base is drawn at the bottom. The bot's
+// turn plays out one action at a time; the win tally is kept in this browser and decides who goes
+// first (alternating).
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-19-supply-grid-tally';
+const expert = mcExpert({ ...EXPERT, timeMs: 900, minPlayouts: 300 });
+const ui = { s: null, view: null, busy: false, over: false, sel: null, hist: [], fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0, fresh: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+// my Base at the bottom: screen row = 4 - engine row
+const toScreen = (i) => (N - 1 - Math.floor(i / N)) * N + (i % N);
+
+function cardHTML(id, side, { cls = '', attrs = '' } = {}) {
+  const c = CARDS[id];
+  const art = c.kind === 'Unit' ? `<span class="big">${c.power}</span>` : c.kind === 'Spell' ? `<span class="big sm">≤${c.max}</span>` : `<span class="big">+1</span>`;
+  return `<button class="card ${c.kind}${c.wall ? ' Wall' : ''} s${side} ${cls}" ${attrs}><span class="cgem">${c.cost}</span><div class="art">${art}</div><div class="nm">${c.name}</div></button>`;
+}
+
+const myTurn = () => !ui.busy && !ui.over && ui.view.turn === ME;
+function targetsNow() {
+  const out = new Set();
+  if (!ui.sel || !myTurn()) return out;
+  for (const a of legalActions(ui.view)) {
+    if (ui.sel.kind === 'card' && a.t === 'place' && a.card === ui.sel.id) out.add(a.cell);
+    if (ui.sel.kind === 'card' && a.t === 'cut' && ui.sel.id === 'CUT') out.add(a.to);
+    if (ui.sel.kind === 'piece' && a.t === 'strike' && a.from === ui.sel.cell) out.add(a.to);
+  }
+  return out;
+}
+const canStrike = (cell) => myTurn() && legalActions(ui.view).some(a => a.t === 'strike' && a.from === cell);
+
+function gridHTML(T) {
+  const s = ui.view, cells = Array(N * N);
+  for (let i = 0; i < N * N; i++) {
+    const x = s.cells[i];
+    let cls = 'cell' + (T.has(i) ? ' tgt' : '');
+    let inner = '';
+    if (x) {
+      let pc = `piece s${x.side}${x.base ? ' base' : ''}${x.wall ? ' wall' : ''}`;
+      if (x.side === s.turn && (x.struck || x.wall) && !x.base) pc += ' spent';
+      if (x.side === s.turn && x.base && x.struck) pc += ' spent';
+      if (x.side === ME && ui.sel && ui.sel.kind === 'piece' && ui.sel.cell === i) pc += ' sel';
+      else if (x.side === ME && !ui.sel && canStrike(i)) pc += ' can';
+      if (ui.fx['p' + x.uid]) pc += ' ' + ui.fx['p' + x.uid];
+      inner = `<div class="${pc}" id="p${x.uid}">${x.power}</div>`;
+    }
+    cells[toScreen(i)] = `<div class="${cls}" data-cell="${i}" id="c${i}">${inner}</div>`;
+  }
+  return cells.join('');
+}
+function resHTML(side) {
+  const p = ui.view.p[side];
+  let gems = '';
+  for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < p.mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
+  return `<div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div><div class="pile s${side}">${p.deck.length}</div>`;
+}
+function handHTML() {
+  const p = ui.view.p[ME], legal = myTurn() ? legalActions(ui.view) : [];
+  const R = { Coin: 0, Unit: 1, Spell: 2 };
+  const order = p.hand.map((_, i) => i).sort((a, b) => { const A = CARDS[p.hand[a]], B = CARDS[p.hand[b]]; return R[A.kind] - R[B.kind] || A.cost - B.cost || (A.wall ? 1 : 0) - (B.wall ? 1 : 0); });
+  return order.map(i => {
+    const id = p.hand[i], c = CARDS[id];
+    const ok = legal.some(a => (a.t === 'place' && a.card === id) || (a.t === 'cut' && id === 'CUT') || (a.t === 'coin' && id === 'COIN'));
+    let cls = ok ? 'ok' : (myTurn() ? 'no' : '');
+    if (ok && ui.sel && ui.sel.kind === 'card' && ui.sel.hand === i) cls += ' sel';
+    if (ui.fresh && i === p.hand.length - 1) cls += ' drawn';
+    return cardHTML(id, ME, { cls, attrs: `data-hand="${i}"${ok ? '' : ' disabled'}` });
+  }).join('');
+}
+function roundsHTML() {
+  const r = Math.ceil(ui.view.turnNo / 2);
+  let h = '';
+  for (let i = 1; i <= ROUNDS; i++) h += `<i class="${i < r ? 'done' : i === r ? 'now' : ''}"></i>`;
+  return h;
+}
+function histHTML(h) { return `<div class="hist s${h.side}"><span class="chip ${h.kind} s${h.side}">${h.chip}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`; }
+function render() {
+  const s = ui.view, T = targetsNow(), t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('opphand').innerHTML = '<i class="back"></i>'.repeat(s.p[BOT].hand.length);
+  $('grid').innerHTML = gridHTML(T);
+  for (const side of [0, 1]) $('res' + side).innerHTML = resHTML(side);
+  $('rounds').innerHTML = roundsHTML();
+  $('hand').innerHTML = handHTML();
+  const mine = !ui.over && s.turn === ME, left = mine && !ui.busy && legalActions(s).some(a => a.t !== 'end');
+  $('turnbox').innerHTML = `<button id="endturn" class="${mine && !left ? 'done' : ''}"${mine && !ui.busy ? '' : ' disabled'}>End turn</button>`;
+  $('history').innerHTML = ui.hist.slice(-14).map(histHTML).join('');
+  ui.fx = {}; ui.fresh = 0;
+}
+
+function centerOf(el) { const a = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - a.left + r.width / 2, y: r.top - a.top + r.height / 2 }; }
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+function ghost(el, cls = 'ghost') {
+  if (!el) return;
+  const g = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(), d = document.createElement('div');
+  d.className = cls; d.innerHTML = el.outerHTML; d.style.left = (r.left - g.left) + 'px'; d.style.top = (r.top - g.top) + 'px'; d.style.width = r.width + 'px'; d.style.height = r.height + 'px';
+  $('game').appendChild(d); setTimeout(() => d.remove(), 600);
+}
+async function lunge(fromEl, toEl) {
+  if (!fromEl || !toEl) return;
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+  fromEl.style.zIndex = 10;
+  await fromEl.animate([{ transform: 'translate(0,0)' }, { transform: `translate(${dx * .6}px, ${dy * .6}px)`, offset: .55 }, { transform: 'translate(0,0)' }], { duration: 380, easing: 'ease-in-out' }).finished;
+}
+async function spotlight(card, side) {
+  const g = $('game').getBoundingClientRect(), b = $('grid').getBoundingClientRect();
+  $('spot').style.left = (b.left - g.left + b.width / 2) + 'px'; $('spot').style.top = (b.top - g.top + b.height / 2) + 'px';
+  $('spot').innerHTML = cardHTML(card, side);
+  await wait(600);
+  const c = $('spot').querySelector('.card'); if (c) c.classList.add('out');
+  await wait(180); $('spot').innerHTML = '';
+}
+
+async function apply(a) {
+  const qtok = ui.token;
+  const prev = ui.s, ev = [];
+  const next = act(prev, a, ev);
+  ui.s = next;
+  const pl = ev.find(e => e.t === 'place'), st = ev.find(e => e.t === 'strike'), cu = ev.find(e => e.t === 'cut'), co = ev.find(e => e.t === 'coin');
+  if ((pl && pl.side === BOT) || cu || (co && co.side === BOT)) await spotlight(pl ? pl.card : cu ? 'CUT' : 'COIN', (pl || cu || co).side);
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  if (st) await lunge($('p' + st.uid), $('p' + st.tuid));
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  for (const e of ev) {
+    if (e.t === 'die') ghost($('p' + e.uid));
+    if (e.t === 'cutoff') ghost($('p' + e.uid), 'ghost cutoff');
+    if (e.t === 'place') ui.fx['p' + e.uid] = 'new';
+    if (e.t === 'turn') { ui.sel = null; if (e.side === ME) banner('Your turn'); }
+    if (e.t === 'draw' && e.side === ME) ui.fresh = 1;
+  }
+  ui.view = next; render();
+  const lost = (side) => ev.filter(e => (e.t === 'die' || e.t === 'cutoff') && e.side === side).length;
+  if (pl) ui.hist.push({ side: pl.side, kind: 'Place', chip: CARDS[pl.card].power, out: '' });
+  if (st) { const k = lost(1 - st.side), l = lost(st.side); ui.hist.push({ side: st.side, kind: 'Strike', chip: `${st.p1}›${st.p2}`, out: (k ? '✕' + (k > 1 ? k : '') : '') + (l ? ' −' + l : ''), cls: 'kill' }); }
+  if (cu) { const k = lost(1 - cu.side); ui.hist.push({ side: cu.side, kind: 'Spell', chip: '≤2', out: '✕' + (k > 1 ? k : ''), cls: 'kill' }); }
+  if (co) ui.hist.push({ side: co.side, kind: 'Coin', chip: '+1', out: '' });
+  if (ev.some(e => e.t === 'turn')) await wait(next.turn === ME ? 500 : 250);
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  if (next.winner !== null) finish(ev.find(e => e.t === 'end'));
+  render();
+}
+function finish(e) {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  const sub = e && e.by === 'count' ? `<p class="sub">${e.counts[ME]} – ${e.counts[BOT]}</p>` : '';
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2>${sub}<button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.view = ui.s; ui.over = false; ui.hist = []; ui.sel = null;
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  if (ui.s.first === ME) banner('Your turn');
+  await wait(800);
+  if (tok !== ui.token) return;
+  if (ui.s.turn === BOT) await botMove(tok); else { ui.busy = false; render(); }
+}
+async function botMove(tok) {
+  ui.busy = true; render();
+  await wait(300);
+  for (let k = 0; k < 60; k++) {
+    if (tok !== ui.token || ui.over || ui.s.turn !== BOT) return;
+    const a = expert(ui.s, ui.rng);
+    await wait(250);
+    if (tok !== ui.token || ui.over) return;
+    await apply(a);
+    if (a.t === 'end') break;
+  }
+  if (tok !== ui.token || ui.over) return;
+  ui.busy = false; render();
+}
+async function doAct(a) { if (!myTurn()) return; ui.busy = true; ui.sel = null; await apply(a); ui.busy = false; render(); }
+async function myEndTurn() {
+  if (!myTurn()) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel = null; render();
+  await apply({ t: 'end' });
+  if (tok !== ui.token || ui.over) return;
+  await botMove(tok);
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#rules')) { if (e.target.closest('#closerules')) $('rules').classList.remove('show'); return; }
+  const cellEl = e.target.closest('.cell');
+  if (cellEl && myTurn()) {
+    const i = +cellEl.dataset.cell, x = ui.view.cells[i];
+    if (ui.sel && cellEl.classList.contains('tgt')) {
+      if (ui.sel.kind === 'card') return doAct(ui.sel.id === 'CUT' ? { t: 'cut', to: i } : { t: 'place', card: ui.sel.id, cell: i });
+      return doAct({ t: 'strike', from: ui.sel.cell, to: i });
+    }
+    if (x && x.side === ME && canStrike(i)) { ui.sel = ui.sel && ui.sel.kind === 'piece' && ui.sel.cell === i ? null : { kind: 'piece', cell: i }; render(); return; }
+  }
+  const b = e.target.closest('button');
+  if (b && !b.disabled && b.dataset.hand !== undefined) {
+    const i = +b.dataset.hand, id = ui.view.p[ME].hand[i];
+    if (id === 'COIN') return doAct({ t: 'coin' });
+    ui.sel = ui.sel && ui.sel.kind === 'card' && ui.sel.hand === i ? null : { kind: 'card', id, hand: i }; render(); return;
+  }
+  if (b && !b.disabled) {
+    if (b.id === 'rematch' || b.id === 'newmatch') return startMatch();
+    if (b.id === 'endturn') return myEndTurn();
+    if (b.id === 'openrules') { $('rules').classList.add('show'); return; }
+  }
+  if (ui.sel) { ui.sel = null; render(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { $('rules').classList.remove('show'); if (ui.sel) { ui.sel = null; render(); } } });
+startMatch();
+
+})();
+</script>

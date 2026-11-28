@@ -1,0 +1,323 @@
+{
+  "concept": "24-rally",
+  "expert": {
+    "playouts": 600,
+    "mix": [
+      0,
+      1
+    ],
+    "tie": 0.03
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.9675,
+      "draws": 0,
+      "firstPlayerWinRate": 0.4975,
+      "avgTurns": 56.4,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.9425,
+      "draws": 0,
+      "firstPlayerWinRate": 0.4875,
+      "avgTurns": 58.2,
+      "capped": 0
+    },
+    "expert-saver": {
+      "games": 400,
+      "aWinRate": 0.695,
+      "draws": 0,
+      "firstPlayerWinRate": 0.49,
+      "avgTurns": 72.7,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 200,
+      "aWinRate": 0.475,
+      "draws": 0,
+      "firstPlayerWinRate": 0.485,
+      "avgTurns": 74.8,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.46,
+      "avgTurns": 60.5,
+      "capped": 0
+    },
+    "saver-saver": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.438,
+      "avgTurns": 74.5,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.695,
+    "expertVsTrivialPass": false,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "cappedCountedOver": "every game Expert plays (no cap is needed: a point ends within ten shots)",
+    "firstPlayerMeans": "the first server",
+    "expertGreedyAgreement": 0.3701,
+    "agreementDecisions": 37148,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.485,
+    "firstPlayerPass": true,
+    "seconds": 566,
+    "setPositionsPass": true,
+    "allPass": false
+  },
+  "costBinding": {
+    "measuredIn": "Expert mirror, both seats, every shot",
+    "shots": 14956,
+    "aFittingCardUnaffordableRate": 0.297,
+    "atZeroStaminaRate": 0.034,
+    "unspentStaminaShareAtGameEnd": 0.101,
+    "serverWinsPointRate": 0.509
+  },
+  "sanity": [
+    {
+      "position": "free point: he has 0 stamina, so only Push (Reach 2) is payable: serve with Pace 3 or more",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "free point: he has 0 stamina, so only Push (Reach 2) is payable: serve with Pace 3 or more",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "lethal: match point (2 games, 3 points), he has 0 stamina: serve with Pace 3 or more",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "lethal: match point (2 games, 3 points), he has 0 stamina: serve with Pace 3 or more",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: answering a Pace 1 shot with Push and Dig as the only legal returns: Push, which is free",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "don't waste: answering a Pace 1 shot with Push and Dig as the only legal returns: Push, which is free",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "rules": "changed: the serve passes after every point (SERVE_EVERY_POINT in src/engine.js); the spec passes it after every game",
+  "specRules": {
+    "expert": {
+      "playouts": 300,
+      "mix": [
+        0.1,
+        0.9
+      ],
+      "tie": 0.03
+    },
+    "pairings": {
+      "expert-random": {
+        "games": 400,
+        "aWinRate": 0.94,
+        "draws": 0,
+        "firstPlayerWinRate": 0.445,
+        "avgTurns": 55.2,
+        "capped": 0
+      },
+      "expert-greedy": {
+        "games": 400,
+        "aWinRate": 0.8625,
+        "draws": 0,
+        "firstPlayerWinRate": 0.3675,
+        "avgTurns": 59.7,
+        "capped": 0
+      },
+      "expert-saver": {
+        "games": 400,
+        "aWinRate": 0.6425,
+        "draws": 0,
+        "firstPlayerWinRate": 0.2075,
+        "avgTurns": 69.6,
+        "capped": 0
+      },
+      "expert-expert": {
+        "games": 200,
+        "aWinRate": 0.51,
+        "draws": 0,
+        "firstPlayerWinRate": 0.15,
+        "avgTurns": 69.7,
+        "capped": 0
+      },
+      "greedy-greedy": {
+        "games": 1000,
+        "aWinRate": 0.5,
+        "draws": 0,
+        "firstPlayerWinRate": 0.128,
+        "avgTurns": 60.4,
+        "capped": 0
+      },
+      "saver-saver": {
+        "games": 1000,
+        "aWinRate": 0.5,
+        "draws": 0,
+        "firstPlayerWinRate": 0.15,
+        "avgTurns": 73.8,
+        "capped": 0
+      }
+    },
+    "gate": {
+      "expertMinWinRateVsTrivial": 0.6425,
+      "expertVsTrivialPass": false,
+      "cappedRate": 0,
+      "cappedPass": true,
+      "cappedCountedOver": "every game Expert plays (no cap is needed: a point ends within ten shots)",
+      "firstPlayerMeans": "the server of game 1",
+      "expertGreedyAgreement": 0.4044,
+      "agreementDecisions": 36047,
+      "agreementPass": true,
+      "firstPlayerWinRateExpertMirror": 0.15,
+      "firstPlayerPass": false,
+      "seconds": 384,
+      "setPositionsPass": true,
+      "allPass": false
+    },
+    "costBinding": {
+      "measuredIn": "Expert mirror, both seats, every shot",
+      "shots": 13937,
+      "aFittingCardUnaffordableRate": 0.272,
+      "atZeroStaminaRate": 0.047,
+      "unspentStaminaShareAtGameEnd": 0.14,
+      "serverWinsPointRate": 0.383
+    }
+  },
+  "changedRuleFirstExpert": {
+    "expert": {
+      "playouts": 300,
+      "mix": [
+        0.1,
+        0.9
+      ],
+      "tie": 0.03
+    },
+    "pairings": {
+      "expert-random": {
+        "games": 400,
+        "aWinRate": 0.98,
+        "draws": 0,
+        "firstPlayerWinRate": 0.495,
+        "avgTurns": 55.9,
+        "capped": 0
+      },
+      "expert-greedy": {
+        "games": 400,
+        "aWinRate": 0.9675,
+        "draws": 0,
+        "firstPlayerWinRate": 0.4975,
+        "avgTurns": 56.7,
+        "capped": 0
+      },
+      "expert-saver": {
+        "games": 400,
+        "aWinRate": 0.6775,
+        "draws": 0,
+        "firstPlayerWinRate": 0.4525,
+        "avgTurns": 74.8,
+        "capped": 0
+      },
+      "expert-expert": {
+        "games": 200,
+        "aWinRate": 0.495,
+        "draws": 0,
+        "firstPlayerWinRate": 0.395,
+        "avgTurns": 75.7,
+        "capped": 0
+      },
+      "greedy-greedy": {
+        "games": 1000,
+        "aWinRate": 0.5,
+        "draws": 0,
+        "firstPlayerWinRate": 0.46,
+        "avgTurns": 60.5,
+        "capped": 0
+      },
+      "saver-saver": {
+        "games": 1000,
+        "aWinRate": 0.5,
+        "draws": 0,
+        "firstPlayerWinRate": 0.438,
+        "avgTurns": 74.5,
+        "capped": 0
+      }
+    },
+    "gate": {
+      "expertMinWinRateVsTrivial": 0.6775,
+      "expertVsTrivialPass": false,
+      "cappedRate": 0,
+      "cappedPass": true,
+      "cappedCountedOver": "every game Expert plays (no cap is needed: a point ends within ten shots)",
+      "firstPlayerMeans": "the first server",
+      "expertGreedyAgreement": 0.3469,
+      "agreementDecisions": 37023,
+      "agreementPass": true,
+      "firstPlayerWinRateExpertMirror": 0.395,
+      "firstPlayerPass": true,
+      "seconds": 403,
+      "setPositionsPass": true,
+      "allPass": false
+    }
+  },
+  "extraRunsVsSaver": [
+    {
+      "expert": {
+        "playouts": 600,
+        "mix": [
+          0.05,
+          0.95
+        ]
+      },
+      "games": 400,
+      "expertWinRate": 0.695
+    },
+    {
+      "expert": {
+        "playouts": 600,
+        "mix": [
+          0,
+          1
+        ]
+      },
+      "games": 400,
+      "expertWinRate": 0.7125,
+      "note": "same Expert as the gate run, different seeds"
+    }
+  ],
+  "report": {
+    "verdict": "dead (at the line)",
+    "numbers": "Spec rules (serve passes every game): Expert vs Random 94.0%, vs Greedy 86.3%, vs Saver 64.3%; first player (the server of game 1) 15% in Expert vs Expert, 12.8% in the Greedy mirror; the server wins 38% of points; set positions 5/5. One rule changed (serve passes every point): Expert vs Random 96.8%, vs Greedy 94.3%, vs Saver 69.5% (278/400); first server 48.5% in Expert vs Expert (Greedy mirror 46%); 0 capped; Expert = Greedy on 37.0% of 37,148 decisions; set positions 5/5. Dead on one number: Saver (always the cheapest legal shot) holds the Expert under 70%. Three 400-game runs of the strongest Expert found against Saver gave 69.5%, 71.3% and 69.5%, so the game sits on the line rather than clearly under it.",
+    "ruleChange": "Why the serve now passes every point: each player holds 5 cards in a point and the server plays shots 1, 3, 5, 7 and 9, so a long rally always ends with the server out of cards; with a free Push answering anything of Pace 2 or less, rallies go long by default and the receiver wins them, so the player serving three of five games lost 85% of Expert mirror matches. Passing the serve every point gives both players the same number of serves; it fixed the first-player rate (15% to 48.5%) and widened Expert's edge over Greedy, but not over Saver.",
+    "costBinding": "Stamina binds: on 29.7% of shots a card the player could otherwise return with is out of reach of its stamina, only 10% of a game's stamina is left unspent when the game ends, and late in a game players at 0 stamina without a Push lose their serves outright (no legal serve). The free Push is what keeps the cheapest-shot rule strong.",
+    "expertNote": "Expert: determinized play-outs to the end of the current game (the opponent's hand reshuffled with his deck), both sides playing Saver's shot in the play-outs, 600 a decision for every candidate, the game's result turned into a match-win chance from the games score; among candidates within 3% of the best, a shot that wins the point at once comes first, then the cheaper. Its first version (play-outs mixing Greedy, Saver and random shots, 300) failed the set positions (it served Push at match point because every serve won eventually) and reached only 52% against Saver; with the tie rule and Saver-like play-outs it passes them and reaches 69.5-71%.",
+    "loop": "A point is a stamina-for-tempo trade: hitting Pace 5-6 (Smash, Ace) costs 3-4 of the game's 10 stamina and wins the point at once unless the other side holds the one Reach-5/6 card that answers it, while cheap shots (Push, free) keep the rally going until someone runs out of cards. Expert spends its Smashes and Aces on its own serves, answers cheaply, and saves Dig for the opponent's Ace; games are often decided at the end when one side reaches 0 stamina and starts losing serves it cannot pay for."
+  }
+}

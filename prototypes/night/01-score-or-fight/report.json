@@ -1,0 +1,102 @@
+{
+  "games": 400,
+  "expert": {
+    "playouts": 3000,
+    "depth": 99,
+    "eps": 0,
+    "C": 0.5
+  },
+  "pairings": {
+    "expert-random": {
+      "n": 400,
+      "aScore": 1,
+      "aWins": 400,
+      "draws": 0,
+      "aLosses": 0,
+      "firstPlayerScore": 0.5,
+      "capped": 0,
+      "avgTurnsEach": 9.1
+    },
+    "expert-greedy": {
+      "n": 400,
+      "aScore": 0.938,
+      "aWins": 375,
+      "draws": 0,
+      "aLosses": 25,
+      "firstPlayerScore": 0.463,
+      "capped": 0,
+      "avgTurnsEach": 12.1,
+      "turnsCompared": 4787,
+      "turnAgreement": 0.485,
+      "actionsCompared": 12837,
+      "actionAgreement": 0.559
+    },
+    "expert-racer": {
+      "n": 400,
+      "aScore": 0.98,
+      "aWins": 392,
+      "draws": 0,
+      "aLosses": 8,
+      "firstPlayerScore": 0.51,
+      "capped": 0,
+      "avgTurnsEach": 8.3
+    },
+    "expert-expert": {
+      "n": 400,
+      "aScore": 0.52,
+      "aWins": 208,
+      "draws": 0,
+      "aLosses": 192,
+      "firstPlayerScore": 0.365,
+      "capped": 0,
+      "avgTurnsEach": 15.4
+    },
+    "greedy-greedy": {
+      "n": 400,
+      "aScore": 0.5,
+      "aWins": 200,
+      "draws": 0,
+      "aLosses": 200,
+      "firstPlayerScore": 0.385,
+      "capped": 0,
+      "avgTurnsEach": 14.4
+    }
+  },
+  "gate": {
+    "expertVsRandom": 1,
+    "expertVsGreedy": 0.938,
+    "expertVsRacer": 0.98,
+    "capRate": 0,
+    "turnAgreementWithGreedy": 0.485,
+    "actionAgreementWithGreedy": 0.559,
+    "firstPlayerScoreExpertMirror": 0.365
+  },
+  "fails": [],
+  "alive": true,
+  "seconds": 6002,
+  "setPositions": {
+    "expertFailures": 0,
+    "lines": [
+      "ok   greedy lethal 33 + 4 + 3: score 0, score 1",
+      "ok   expert lethal 33 + 4 + 3: score 0, score 1",
+      "ok   greedy kill the unit that would win: attack 0→0, end",
+      "ok   expert kill the unit that would win: attack 0→0, end",
+      "ok   greedy no ready unit left idle: score 0, score 1, score 2, end",
+      "ok   expert no ready unit left idle: score 1, score 2, score 0, end",
+      "FAIL greedy Hit 2, not Hit 6, on a 2/1: play H6→0, end",
+      "ok   expert Hit 2, not Hit 6, on a 2/1: play H2→0, end",
+      "ok   greedy Heavy 4/5 and an enemy Raider 3/2 (not gated): attack 0→0, end",
+      "ok   expert Heavy 4/5 and an enemy Raider 3/2 (not gated): attack 0→0, end",
+      "Expert passes every gated position"
+    ]
+  },
+  "pageCheck": [
+    "node game 0: winner 1 after 20 turns",
+    "node game 1: winner 1 after 15 turns",
+    "node game 2: winner 1 after 24 turns",
+    "node game 3: winner 1 after 21 turns",
+    "slowest Expert decision 1218 ms",
+    "  0s: 1 clicks, last end",
+    "browser: 15 clicks, end screen: DefeatPlay again, script errors: none"
+  ]
+}

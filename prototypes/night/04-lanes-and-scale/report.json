@@ -1,0 +1,80 @@
+{
+  "games": 400,
+  "expert": {
+    "iters": 1500,
+    "c": 0.7,
+    "plies": 4
+  },
+  "seconds": 1913,
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.973,
+      "draws": 0,
+      "firstPlayerWinRate": 0.512,
+      "turnCapRate": 0,
+      "avgLength": 7.2,
+      "expertDecisions": 1899,
+      "sameAsGreedy": 0.54,
+      "expertMsPerMove": 674.2,
+      "expertMaxMs": 2010
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.738,
+      "draws": 0,
+      "firstPlayerWinRate": 0.557,
+      "turnCapRate": 0,
+      "avgLength": 8.3,
+      "expertDecisions": 2139,
+      "sameAsGreedy": 0.54,
+      "expertMsPerMove": 762.7,
+      "expertMaxMs": 1866
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.892,
+      "draws": 0,
+      "firstPlayerWinRate": 0.482,
+      "turnCapRate": 0,
+      "avgLength": 7.4,
+      "expertDecisions": 1867,
+      "sameAsGreedy": 0.542,
+      "expertMsPerMove": 666,
+      "expertMaxMs": 1798
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.505,
+      "draws": 0,
+      "firstPlayerWinRate": 0.445,
+      "turnCapRate": 0,
+      "avgLength": 9.2
+    },
+    "greedy-greedy": {
+      "games": 2000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.659,
+      "turnCapRate": 0,
+      "avgLength": 9
+    },
+    "greedy-random": {
+      "games": 400,
+      "aWinRate": 0.875,
+      "draws": 0,
+      "firstPlayerWinRate": 0.55,
+      "turnCapRate": 0,
+      "avgLength": 8.5
+    }
+  },
+  "gate": {
+    "expert-random": 0.973,
+    "expert-greedy": 0.738,
+    "expert-racer": 0.892,
+    "firstPlayerWinRate": 0.445,
+    "turnCapRate": 0,
+    "sameAsGreedy": 0.541,
+    "fails": []
+  }
+}

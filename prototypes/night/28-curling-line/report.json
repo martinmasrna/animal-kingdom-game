@@ -1,0 +1,113 @@
+{
+  "game": "28 Curling line",
+  "games": 400,
+  "budget": 1000,
+  "seconds": 3358,
+  "matchups": {
+    "expert-random": {
+      "games": 400,
+      "expertWins": 398,
+      "draws": 1,
+      "expertRate": 0.996,
+      "firstPlayerRate": 0.504
+    },
+    "expert-greedy": {
+      "games": 400,
+      "expertWins": 400,
+      "draws": 0,
+      "expertRate": 1,
+      "firstPlayerRate": 0.5
+    },
+    "expert-expert": {
+      "games": 400,
+      "expertWins": 191,
+      "draws": 18,
+      "expertRate": 0.5,
+      "firstPlayerRate": 0.667
+    }
+  },
+  "gate": {
+    "expertVsRandom": 0.996,
+    "expertVsGreedy": 1,
+    "firstPlayerRateExpertMirror": 0.667,
+    "turnCapRate": 0,
+    "expertEqualsGreedy": 0.582,
+    "expertDecisions": 38911,
+    "fails": [],
+    "firstPlayerMeaning": "the player holding the hammer in end 1"
+  },
+  "sanity": [
+    {
+      "position": "free takeout",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "Hit to 12"
+    },
+    {
+      "position": "free takeout",
+      "bot": "expert",
+      "pass": true,
+      "chose": "Hit to 12"
+    },
+    {
+      "position": "no Any for a cheap cell",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "Draw 9 to 9"
+    },
+    {
+      "position": "no Any for a cheap cell",
+      "bot": "expert",
+      "pass": true,
+      "chose": "Draw 9 to 9"
+    },
+    {
+      "position": "draw to the Mark for the match",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "Hit to 12"
+    },
+    {
+      "position": "draw to the Mark for the match",
+      "bot": "expert",
+      "pass": true,
+      "chose": "Hit to 12"
+    }
+  ],
+  "expertMirrorBehaviour": {
+    "games": 30,
+    "budget": 1000,
+    "throws": {
+      "Lag": 451,
+      "Any": 205,
+      "Hit": 172,
+      "Short": 169,
+      "Draw10": 162,
+      "Draw8": 158,
+      "Draw9": 141,
+      "Guard": 78
+    },
+    "ends": 192,
+    "blankEnds": 29,
+    "scoringEndsWonByHammer": 130,
+    "scoringEndsStolen": 33,
+    "points": 163,
+    "anyTargets": {
+      "4": 14,
+      "5": 8,
+      "6": 8,
+      "7": 3,
+      "8": 29,
+      "9": 45,
+      "10": 25,
+      "11": 38,
+      "12": 35
+    }
+  },
+  "extraMirror": {
+    "note": "400 more Expert mirror games on fresh seeds, budget 1000, because the gate figure sat near the 70% line",
+    "firstPlayerRate": 0.645,
+    "draws": 24,
+    "pooled800": 0.656
+  }
+}

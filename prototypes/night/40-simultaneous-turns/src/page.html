@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simultaneous Turns</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="opphand"></div>
+  <div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="hero1" class="herorow"></div>
+  <div id="board1" class="board"></div>
+  <div id="board0" class="board"></div>
+  <div id="hero0" class="herorow"></div>
+  <div id="res1" class="res"></div>
+  <div id="turnbox"></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <svg id="arrows"></svg>
+  <div id="reveal"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Simultaneous Turns</h3>
+    <ul>
+      <li>Life 20. Bring the other player to 0; both at once is a draw.</li>
+      <li>Each round both players' mana is the round number (up to 10) and both draw 1. An empty deck costs 1 life, then 2, then 3.</li>
+      <li>Both plan the round at the same time, then press Go. Plan which cards to play (within your mana; up to 6 units), a target for each Hit, and for each of your units an enemy unit or the enemy player to attack, or nothing.</li>
+      <li>Tap a unit card to play it. Tap a Hit, then its target. Tap your unit, then what it attacks; tap it twice to keep it home.</li>
+      <li>Then everything resolves: first all Hits at once; then all new units enter (they attack from next round); then all attacks at once. An attacked unit deals its attack back to every unit attacking it. Damage stays. An attack whose attacker or target was destroyed by a Hit does not happen.</li>
+      <li>Deck, the same for both, 3 of each: Striker 1 mana 2/1, Raider 2: 3/2, Guard 2: 2/3, Line 3: 3/4, Heavy 4: 4/5, Big 5: 5/5, Huge 6: 6/7, Hit 2 (1 mana), Hit 3 (2), Hit 6 (4), each to any unit or player.</li>
+    </ul>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

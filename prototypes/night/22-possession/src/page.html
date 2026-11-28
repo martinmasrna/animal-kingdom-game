@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Possession</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="menu"><span id="tally"></span><button id="openrules">Rules</button><button id="newmatch">New game</button></div>
+  <div id="top"><div id="stam1" class="stam s1"></div><div id="opphand"></div></div>
+  <div id="board">
+    <div id="goals"></div>
+    <div id="plays"></div>
+    <div id="pitch"></div>
+    <div id="reveal"></div>
+  </div>
+  <div id="log"></div>
+  <div id="mine"><div id="stam0" class="stam s0"></div><div id="role" class="role"></div></div>
+  <div id="opts"><div id="basics"></div><div id="hand"></div></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Possession</h3>
+    <p>You attack to the right. Score by <b>Shooting</b> from the last three zones before the goal. Most goals after <b>20 plays</b> wins.</p>
+    <p>Every play both of you choose at once: whoever has the ball an attacking option, the other a defending one. Each costs stamina (●). Basics are always there; cards come from your hand and you draw a new one after playing it. You start with 10 stamina and get 4 back after play 10.</p>
+    <table>
+      <tr><th></th><th>Stand</th><th>Block</th><th>Tackle</th><th>Intercept</th><th>Press</th></tr>
+      <tr><th>Walk</th><td>0</td><td>+1</td><td class="t">⇄</td><td>+1</td><td class="t">⇄</td></tr>
+      <tr><th>Pass</th><td>+2</td><td>+2</td><td class="t">⇄</td><td class="t">⇄</td><td class="t">⇄</td></tr>
+      <tr><th>Long</th><td>+3</td><td>+3</td><td>+3</td><td class="t">⇄</td><td>+3</td></tr>
+      <tr><th>Dribble</th><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td class="t">⇄</td></tr>
+      <tr><th>Shoot</th><td class="g">goal</td><td class="t">⇄</td><td class="g">goal</td><td class="g">goal</td><td class="g">goal</td></tr>
+    </table>
+    <p>⇄ the ball changes hands where it is. After a goal the ball goes back to the middle and the side that conceded gets it.</p>
+    <button id="closerules">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

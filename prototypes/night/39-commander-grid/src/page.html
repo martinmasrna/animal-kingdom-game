@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Commander Grid</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="opphand"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="boardwrap"><div id="board"></div></div>
+  <div id="res1" class="res"></div>
+  <div id="turnbox"></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Commander Grid</h3>
+    <p>Each side has a Commander (2 attack, 15 health). Bring the enemy Commander to 0. Same 24-card deck for both. The first player starts with 3 cards, the second with 4 and the Coin (+1 mana this turn).</p>
+    <p><b>Your turn.</b> Mana +1 (up to 8) and refill, draw 1. From round 15 your Commander first takes 1 damage, 2 in round 16, and so on.</p>
+    <p><b>Play cards</b> for their cost. A unit goes onto an empty cell next to your Commander (not diagonal) and can't act this turn.</p>
+    <p><b>Act.</b> Each of your pieces, the Commander too, may <b>move</b> 1 cell (not diagonal) to an empty cell and then <b>attack</b> an enemy piece next to it: both deal their attack to each other. Attacking ends its turn. Damage stays.</p>
+    <p>Line: moves up to 2. Lancer: attacks a piece exactly 2 cells away in a straight line, over anything between, and takes nothing back; it can't attack next to it. Hit 3: 3 damage to an enemy piece within 2 cells of your Commander. Rally: a piece that has moved or attacked may do so again.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

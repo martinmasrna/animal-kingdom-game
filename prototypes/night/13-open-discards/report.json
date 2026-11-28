@@ -1,0 +1,201 @@
+{
+  "games": 400,
+  "expert": {
+    "kind": "turn",
+    "beam": 48,
+    "top": 14,
+    "R": 128,
+    "depth": 40,
+    "score": "win",
+    "margin": 0.03
+  },
+  "seconds": 34,
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "turnCapRate": 0,
+      "avgTurns": 11.9,
+      "expertDecisions": 6605,
+      "sameAsGreedy": 0.937,
+      "expertMsPerMove": 122.2,
+      "expertMaxMs": 1630,
+      "mana": {
+        "turns": 4353,
+        "meanMana": 3.28,
+        "meanSpent": 2.58,
+        "atCap": 0,
+        "leftManaWithAPlayableCard": 0.205,
+        "heldACardItCouldNotAfford": 0.986
+      },
+      "discard": {
+        "turnsTakingFromHisDiscard": 0.173,
+        "turnsWithHisDiscardNonEmpty": 0.569
+      }
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.838,
+      "draws": 0,
+      "firstPlayerWinRate": 0.652,
+      "turnCapRate": 0,
+      "avgTurns": 15.7,
+      "expertDecisions": 8331,
+      "sameAsGreedy": 0.857,
+      "expertMsPerMove": 158.1,
+      "expertMaxMs": 1693,
+      "mana": {
+        "turns": 5891,
+        "meanMana": 4.29,
+        "meanSpent": 4.07,
+        "atCap": 0.013,
+        "leftManaWithAPlayableCard": 0.068,
+        "heldACardItCouldNotAfford": 0.996
+      },
+      "discard": {
+        "turnsTakingFromHisDiscard": 0.271,
+        "turnsWithHisDiscardNonEmpty": 0.741
+      }
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.973,
+      "draws": 0,
+      "firstPlayerWinRate": 0.517,
+      "turnCapRate": 0,
+      "avgTurns": 12,
+      "expertDecisions": 7477,
+      "sameAsGreedy": 0.897,
+      "expertMsPerMove": 97.8,
+      "expertMaxMs": 1517,
+      "mana": {
+        "turns": 4397,
+        "meanMana": 3.3,
+        "meanSpent": 3.12,
+        "atCap": 0,
+        "leftManaWithAPlayableCard": 0.039,
+        "heldACardItCouldNotAfford": 0.999
+      },
+      "discard": {
+        "turnsTakingFromHisDiscard": 0.137,
+        "turnsWithHisDiscardNonEmpty": 0.592
+      }
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.517,
+      "draws": 0,
+      "firstPlayerWinRate": 0.652,
+      "turnCapRate": 0,
+      "avgTurns": 17.6,
+      "mana": {
+        "turns": 6659,
+        "meanMana": 4.79,
+        "meanSpent": 4.58,
+        "atCap": 0.046,
+        "leftManaWithAPlayableCard": 0.044,
+        "heldACardItCouldNotAfford": 0.969
+      },
+      "discard": {
+        "turnsTakingFromHisDiscard": 0.374,
+        "turnsWithHisDiscardNonEmpty": 0.809
+      }
+    },
+    "greedy-greedy": {
+      "games": 2000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.874,
+      "turnCapRate": 0,
+      "avgTurns": 15.9,
+      "mana": {
+        "turns": 29836,
+        "meanMana": 4.35,
+        "meanSpent": 4.09,
+        "atCap": 0.016,
+        "leftManaWithAPlayableCard": 0.088,
+        "heldACardItCouldNotAfford": 0.998
+      },
+      "discard": {
+        "turnsTakingFromHisDiscard": 0.267,
+        "turnsWithHisDiscardNonEmpty": 0.744
+      }
+    },
+    "greedy-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "turnCapRate": 0,
+      "avgTurns": 12.4,
+      "mana": {
+        "turns": 4548,
+        "meanMana": 3.41,
+        "meanSpent": 2.66,
+        "atCap": 0,
+        "leftManaWithAPlayableCard": 0.214,
+        "heldACardItCouldNotAfford": 0.984
+      },
+      "discard": {
+        "turnsTakingFromHisDiscard": 0.156,
+        "turnsWithHisDiscardNonEmpty": 0.553
+      }
+    },
+    "greedy-racer": {
+      "games": 400,
+      "aWinRate": 0.797,
+      "draws": 0,
+      "firstPlayerWinRate": 0.637,
+      "turnCapRate": 0,
+      "avgTurns": 12,
+      "mana": {
+        "turns": 4407,
+        "meanMana": 3.3,
+        "meanSpent": 3.11,
+        "atCap": 0,
+        "leftManaWithAPlayableCard": 0.043,
+        "heldACardItCouldNotAfford": 0.998
+      },
+      "discard": {
+        "turnsTakingFromHisDiscard": 0.128,
+        "turnsWithHisDiscardNonEmpty": 0.566
+      }
+    }
+  },
+  "gate": {
+    "expert-random": 1,
+    "expert-greedy": 0.838,
+    "expert-racer": 0.973,
+    "firstPlayerWinRate": 0.652,
+    "turnCapRate": 0,
+    "sameAsGreedy": 0.894,
+    "fails": []
+  },
+  "sanity": {
+    "positions": [
+      "turn 1: no Hit 2 at the face",
+      "lethal 3 + 3 + 2 into 7",
+      "lethal through the Coin",
+      "lethal: his Hit 3 from his discard",
+      "free trade: Line into Striker (no damage spell left that he can reach)",
+      "4 idle mana and nothing in hand: take his discarded Line (3 + 1)"
+    ],
+    "greedy": "6/6",
+    "expert": "30/30 (5 seeds each)",
+    "replaced": "The spec's don't-waste position (never pay cost + 1 from the discard when the same card in hand costs less and only one is affordable) was not used: with mana that would otherwise go unspent, taking the discard copy keeps the hand copy for later, so it is not a play a person never makes."
+  },
+  "expertNotes": "Expert is the same turn search as in 46 (beam over this turn's actions, the best 14 ends plus Greedy's turn each played to the end 128 times by Greedy on both sides in dealt worlds, Greedy's turn kept unless another wins 3 points more). ISMCTS (1500 iterations) beat Greedy only 59.5% and was replaced. In the browser its slowest move was 282 ms.",
+  "report": {
+    "verdict": "alive",
+    "gateNumbers": "Expert beats Random 100%, Greedy 83.8%, Racer 97.3% (400 games each); first player 65.2% Expert against Expert (87.4% Greedy against Greedy); no turn caps; Expert equals Greedy on 89.4% of decisions.",
+    "atTheEdge": "Sameness with Greedy (0.894 against 0.90) and the first-player rate (0.652 against 0.70) are both near their lines; Greedy against Greedy the first player wins 87%, against 67.5% on the plain vanilla rules, so open discards amplify tempo.",
+    "loop": [
+      "Each turn adds one question to the vanilla duel: which of his used cards to take back for one more mana, and which of yours you are about to hand him. From the middle of the game Expert takes from his pile on 37% of turns (his pile is non-empty on 81%).",
+      "Removal circulates: a Hit 2 or Hit 3 used on a unit lands in your pile, and he plays it back next turn for one more; in traced games the same Hit 2 crossed between the piles three or four times. Spells become a shared pool, units mostly do not (a dead unit is a 1-mana-dearer body for him).",
+      "Best play from watching Expert: develop on curve as in the vanilla duel, but spend a turn's leftover mana on his pile rather than waste it, and prefer trades that do not feed him a cheap spell.",
+      "Costs bind as in the vanilla duel (mana 1 to 10, a card in hand it could not afford at 97% of turn ends, mana left with a playable card on only 4% of Expert's turns); the +1 on his pile is paid often enough (a third of turns) to matter."
+    ]
+  }
+}

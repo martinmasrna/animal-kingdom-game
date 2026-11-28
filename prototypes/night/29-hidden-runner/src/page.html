@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hidden Runner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="menu"><span id="tally"></span><button id="rules">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="side1" class="side"></div>
+  <div id="boardwrap"><div id="board"></div></div>
+  <div id="info"><div id="rounds"></div><div id="turnbox"></div></div>
+  <div id="side0" class="side"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rulesbox"><div class="rulecard">
+    <h3>Hidden runner</h3>
+    <p>One side is the <b>Runner</b> (◆, hidden), the other the <b>Hunter</b> (two pawns). Roles swap every game.</p>
+    <p>The Runner starts on any node of the top row, unseen. Each round both sides gain 2 energy (max 5) and draw a card. Then:</p>
+    <p><b>Runner</b>: a free Step (move 1 or stay) or one card. The card's name is announced, never where it went. The Runner can never enter a pawn's node or a Block.</p>
+    <p><b>Hunter</b>: move each pawn 1 (or leave it) and play at most one card, before or after moving. Tap a pawn, then a node. End the round when done.</p>
+    <p>A pawn landing on the Runner wins for the Hunter. The Runner is shown at the end of rounds 3, 6 and 9 (marked on the round track). The Runner wins by surviving round 12.</p>
+    <p>Search: name a node; you learn whether the Runner is on it or next to it (✓ or ✕). Hide makes this round's Searches answer ✕.</p>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

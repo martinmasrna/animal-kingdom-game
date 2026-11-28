@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Curling Line</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #27303b; --ice: #dfe9f1; --ice2: #c9d8e4; --house: #f4c9c0; --house2: #e9b2a6; --mark: #c6372a; --ink: #1b1b1b; --paper: #fbf7ee;
+  --gold: #f2b632; --ok: #5fdc6f; --bad: #ff6a4d; --energy: #3d8bf2;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86;
+  --cardw: 92px; --cardh: 118px; --stone: 54px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game { position: relative; height: 100%; max-width: 1200px; margin: 0 auto; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; gap: 10px;
+  padding: 8px max(12px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+#menu { display: flex; gap: 8px; align-items: center; flex: 0 0 auto; }
+#menu button, #rules button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 17px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+/* ---------------- the scoreboard of ends */
+#board table { border-collapse: separate; border-spacing: 3px; font-weight: 800; }
+#board td { min-width: 30px; height: 26px; text-align: center; border-radius: 5px; background: rgba(0,0,0,.25); font-size: 14px; padding: 0 4px; }
+#board td.now { box-shadow: inset 0 0 0 2px var(--gold); }
+#board td.tot { min-width: 40px; font-size: 18px; }
+#board tr.s0 td.pt { background: var(--me2); } #board tr.s1 td.pt { background: var(--him2); }
+#board td.dot i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+#board tr.s0 td.dot i { background: var(--me); } #board tr.s1 td.dot i { background: var(--him); }
+
+/* ---------------- player rows: stones left this end, energy */
+.info { display: flex; align-items: center; gap: 16px; justify-content: center; min-height: 34px; }
+.left { display: flex; gap: 6px; } .left i { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,.8); }
+.left.s0 i { background: radial-gradient(circle at 35% 30%, #8cc2ff, var(--me2)); } .left.s1 i { background: radial-gradient(circle at 35% 30%, #c9a6ee, var(--him2)); }
+.left i.gone { opacity: .18; }
+.hammer { font-size: 22px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+.energy { display: flex; gap: 4px; align-items: center; } .energy b { font-size: 17px; color: #bcd9ff; margin-right: 4px; }
+.gemc { width: 14px; height: 18px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: #1d2a38; }
+.gemc.on { background: linear-gradient(180deg, #8cc2ff, var(--energy)); }
+.backs { display: flex; } .back { width: 18px; height: 26px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -5px; }
+.back:first-child { margin-left: 0; }
+.pile { width: 26px; height: 34px; border-radius: 4px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; }
+.pile.s0 { background: linear-gradient(135deg, var(--me), var(--me2)); } .pile.s1 { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
+
+/* ---------------- the sheet */
+#sheetwrap { display: flex; align-items: center; min-height: 0; }
+#sheet { position: relative; width: 100%; height: 150px; border-radius: 14px; background: linear-gradient(180deg, var(--ice), var(--ice2)); box-shadow: inset 0 0 18px rgba(0,0,0,.18), 0 6px 18px rgba(0,0,0,.35); overflow: hidden; }
+.cells { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(12, 1fr); }
+.cell { position: relative; border-right: 1px solid rgba(40,60,80,.18); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; color: rgba(40,60,80,.45); font-weight: 800; font-size: 12px; }
+.cell:last-child { border-right: 0; }
+.cell.house { background: rgba(233,150,130,.30); } .cell.h2 { background: rgba(233,150,130,.48); } .cell.h1 { background: rgba(233,130,110,.62); }
+.cell.mark::before { content: ''; position: absolute; left: 50%; top: 50%; width: calc(var(--stone) + 16px); height: calc(var(--stone) + 16px); transform: translate(-50%, -50%); border-radius: 50%; border: 4px solid var(--mark); opacity: .8; }
+.cell.tgt { cursor: pointer; box-shadow: inset 0 0 0 3px var(--gold); background-color: rgba(242,182,50,.22); }
+.cell.tgt:hover { background-color: rgba(242,182,50,.45); }
+.stones { position: absolute; inset: 0; pointer-events: none; }
+.stone { position: absolute; top: 50%; width: var(--stone); height: var(--stone); margin: calc(var(--stone) / -2) 0 0 calc(var(--stone) / -2); border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 8px rgba(0,0,0,.4);
+  transition: left .28s cubic-bezier(.2,.7,.3,1), opacity .3s; }
+.stone.s0 { background: radial-gradient(circle at 35% 30%, #8cc2ff, var(--me2)); } .stone.s1 { background: radial-gradient(circle at 35% 30%, #c9a6ee, var(--him2)); }
+.stone.out { opacity: 0; }
+.stone.count { box-shadow: 0 0 0 4px var(--gold), 0 0 18px rgba(242,182,50,.9); }
+
+/* ---------------- cards */
+#hand { display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 10px 0 2px; min-height: calc(var(--cardh) + 12px); }
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; text-align: left; transition: transform .12s, box-shadow .12s;
+  background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; }
+.card .art { margin: 4px 4px 0; border-radius: 6px; flex: 0 0 56%; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(160deg, #5b9bd8, #2e5f97); }
+.card.lag { background: #e6e9ec; } .card.lag .art { background: linear-gradient(160deg, #8b97a3, #5d6873); }
+.card.any .art { background: linear-gradient(160deg, #e7a83a, #b97a0c); }
+.card.any .big { font-size: calc(var(--cardw) * .24); white-space: nowrap; }
+.card .big { font-size: calc(var(--cardw) * .34); font-weight: 900; text-shadow: 0 2px 3px rgba(0,0,0,.35); line-height: 1; }
+.card .nm { font-weight: 800; font-size: calc(var(--cardw) * .15); padding: 6px 7px 0; }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; }
+#hand .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok:hover { transform: translateY(-6px); }
+#hand .card.sel { transform: translateY(-12px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8); }
+#hand .card:disabled { cursor: default; filter: brightness(.62) saturate(.6); }
+#hand .card.drawn { animation: drawin .45s ease-out; }
+@keyframes drawin { from { transform: translateY(-60px) scale(.6); opacity: 0; } }
+
+/* ---------------- banner, game over, rules */
+#banner { position: absolute; left: 0; right: 0; top: 30%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 40px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1.4s ease-out; }
+#banner.s0 { color: #9fcaff; } #banner.s1 { color: #d9bdf5; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 15% { opacity: 1; transform: translateY(-50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 60px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+#rules .panel { max-width: 560px; max-height: 100%; overflow: auto; background: #1f2731; border: 1px solid #4a5868; border-radius: 12px; padding: 16px 20px; line-height: 1.4; font-size: 15px; }
+#rules h3 { margin: 0 0 8px; } #rules p { margin: 6px 0; }
+
+@media (max-width: 760px) {
+  :root { --cardw: 52px; --cardh: 70px; --stone: 24px; }
+  #game { gap: 6px; }
+  #top { flex-direction: column-reverse; align-items: stretch; } #menu { justify-content: flex-end; }
+  #menu button { min-height: 28px; padding: 2px 8px; font-size: 13px; } .tally { font-size: 13px; } .tally b { min-width: 24px; height: 24px; }
+  #board { overflow-x: auto; } #board td { min-width: 20px; height: 22px; font-size: 12px; padding: 0 2px; } #board td.tot { min-width: 28px; font-size: 15px; }
+  .info { gap: 8px; } .left i { width: 16px; height: 16px; } .gemc { width: 10px; height: 13px; }
+  #sheet { height: 110px; border-radius: 8px; } .cell { font-size: 9px; padding-bottom: 2px; }
+  .cell.mark::before { border-width: 3px; }
+  #hand { gap: 5px; flex-wrap: wrap; } .card .nm { font-size: 9px; padding: 3px 3px 0; } .cgem { width: 20px; height: 20px; font-size: 12px; top: -6px; left: -6px; }
+}
+
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="board"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div></div>
+  <div id="info1" class="info"></div>
+  <div id="sheetwrap"><div id="sheet"></div></div>
+  <div id="info0" class="info"></div>
+  <div id="hand"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Curling Line</h3>
+    <p>A sheet of cells 1 to 12. The Mark is cell 9; the House is cells 6 to 12.</p>
+    <p><b>A throw</b> slides from the left toward its target cell. If a stone stands on the way, the first one stops it on the cell before and is pushed on by what is left of the throw; a pushed stone that meets another stops before it and passes the rest on. Pushed past 12, or stopped on 0, is out.</p>
+    <p><b>An end:</b> each player discards its hand, draws 5 and has 5 energy. Eight throws, alternating, the player without the hammer first. A throw plays a card (paying its energy) or the free Lag (to cell 4). A card throws to the cell on it; Any lets you pick a cell from 4 to 12.</p>
+    <p><b>Scoring:</b> only House stones count. The player with the stone closest to the Mark scores 1 for each of its House stones closer than the other player's closest. Equal closest, or an empty House: no score. The player who did not score takes the hammer (the last throw); after no score, the hammer stays.</p>
+    <p>After 6 ends, more points wins; equal plays one more end.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// Curling line: stones on a one-dimensional sheet of 12 cells push the first stone in their path;
+// closest to the Mark (cell 9) scores curling-style. Throws are cards bought with energy.
+// Pure from the outside: act() clones the state.
+
+const CELLS = 12, MARK = 9, HOUSE = 3, ENDS = 6, THROWS = 8, HAND = 5, ENERGY = 5, LAG = 4;
+const CARDS = {
+  Guard: { id: 'Guard', name: 'Guard', cost: 0, d: 5 },
+  Short: { id: 'Short', name: 'Short', cost: 0, d: 7 },
+  Draw8: { id: 'Draw8', name: 'Draw 8', cost: 1, d: 8 },
+  Draw9: { id: 'Draw9', name: 'Draw 9', cost: 2, d: 9 },
+  Draw10: { id: 'Draw10', name: 'Draw 10', cost: 1, d: 10 },
+  Hit: { id: 'Hit', name: 'Hit', cost: 1, d: 12 },
+  Any: { id: 'Any', name: 'Any', cost: 3, d: null },
+};
+const DECK = { Guard: 2, Short: 2, Draw8: 2, Draw9: 2, Draw10: 2, Hit: 2, Any: 2 };
+const deckList = () => { const a = []; for (const [id, n] of Object.entries(DECK)) for (let i = 0; i < n; i++) a.push(id); return a; };
+const inHouse = (c) => Math.abs(c - MARK) <= HOUSE;
+
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleIn(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+function clone(s) { return { ...s, stones: s.stones.map(x => ({ ...x })), score: s.score.slice(), energy: s.energy.slice(), p: s.p.map(p => ({ deck: p.deck.slice(), hand: p.hand.slice(), discard: p.discard.slice() })) }; }
+function emit(ev, e) { if (ev) ev.push(e); }
+
+// A throw to d: the lowest stone on cells 1..d stops it on the cell before and is pushed on by what
+// is left of the throw; a pushed stone that meets another stops before it and passes the rest on.
+// Returns the moves for the page: [{ uid, from, to }] with to 0 or 13 meaning out.
+function slide(stones, owner, d, uid) {
+  const moves = [];
+  const at = (c) => stones.find(x => x.cell === c);
+  const firstIn = (lo, hi) => { let best = null; for (const x of stones) if (x.cell >= lo && x.cell <= hi && (!best || x.cell < best.cell)) best = x; return best; };
+  const push = (st, k) => {
+    const from = st.cell, target = from + k, q = firstIn(from + 1, target);
+    if (q) { st.cell = q.cell - 1; moves.push({ uid: st.uid, from, to: st.cell }); push(q, target - q.cell + 1); }
+    else if (target > CELLS) { moves.push({ uid: st.uid, from, to: CELLS + 1 }); stones.splice(stones.indexOf(st), 1); }
+    else { st.cell = target; moves.push({ uid: st.uid, from, to: target }); }
+  };
+  const p = firstIn(1, d);
+  if (!p) { stones.push({ uid, owner, cell: d }); moves.push({ uid, from: 0, to: d, thrown: true }); return moves; }
+  const stop = p.cell - 1;
+  if (stop >= 1) { stones.push({ uid, owner, cell: stop }); moves.push({ uid, from: 0, to: stop, thrown: true }); }
+  else moves.push({ uid, from: 0, to: 0, thrown: true, out: true });
+  push(p, d - p.cell + 1);
+  return moves;
+}
+// The end's score if it stopped now: [side, points] or null for a blank end.
+function endScore(stones) {
+  const best = [99, 99];
+  for (const x of stones) if (inHouse(x.cell)) best[x.owner] = Math.min(best[x.owner], Math.abs(x.cell - MARK));
+  if (best[0] === 99 && best[1] === 99) return null;
+  if (best[0] === best[1]) return null;
+  const w = best[0] < best[1] ? 0 : 1;
+  const n = stones.filter(x => x.owner === w && inHouse(x.cell) && Math.abs(x.cell - MARK) < best[1 - w]).length;
+  return [w, n];
+}
+
+function startEnd(s, ev) {
+  s.stones = []; s.throwNo = 0; s.energy = [ENERGY, ENERGY];
+  for (const P of s.p) {
+    P.discard.push(...P.hand); P.hand = [];
+    for (let i = 0; i < HAND; i++) { if (!P.deck.length) { P.deck = shuffleIn(s, P.discard); P.discard = []; } if (P.deck.length) P.hand.push(P.deck.shift()); }
+  }
+  s.toMove = 1 - s.hammer;
+  emit(ev, { t: 'endStart', end: s.end, hammer: s.hammer });
+}
+function newMatch({ seed, hammer }) {
+  const s = { seed: (seed >>> 0) || 1, end: 1, throwNo: 0, hammer: 0, firstHammer: 0, toMove: 0, stones: [], score: [0, 0], energy: [ENERGY, ENERGY], winner: null, cap: false, uid: 1, lastEnd: null,
+    p: [{ deck: deckList(), hand: [], discard: [] }, { deck: deckList(), hand: [], discard: [] }] };
+  for (const P of s.p) shuffleIn(s, P.deck);
+  s.hammer = rand(s) < 0.5 ? 0 : 1;
+  if (hammer === 0 || hammer === 1) s.hammer = hammer;
+  s.firstHammer = s.first = s.hammer; // the first-player check reads the hammer in end 1
+  startEnd(s, null);
+  return s;
+}
+
+// Actions: { t: 'throw', card, d } with card null for the free Lag (d 4); Any takes any d from 4 to 12.
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  const me = s.toMove, out = [{ t: 'throw', card: null, d: LAG }];
+  for (const id of new Set(s.p[me].hand)) {
+    const c = CARDS[id];
+    if (c.cost > s.energy[me]) continue;
+    if (c.d) out.push({ t: 'throw', card: id, d: c.d });
+    else for (let d = LAG; d <= CELLS; d++) out.push({ t: 'throw', card: id, d });
+  }
+  return out;
+}
+function mAct(s, a, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  if (a.t !== 'throw') throw new Error('unknown action');
+  const me = s.toMove, P = s.p[me];
+  if (a.card) {
+    const c = CARDS[a.card], k = P.hand.indexOf(a.card);
+    if (k < 0 || c.cost > s.energy[me] || (c.d ? a.d !== c.d : !(a.d >= LAG && a.d <= CELLS))) throw new Error('illegal throw');
+    s.energy[me] -= c.cost; P.hand.splice(k, 1); P.discard.push(a.card);
+  } else if (a.d !== LAG) throw new Error('Lag is d 4');
+  const moves = slide(s.stones, me, a.d, s.uid++);
+  emit(ev, { t: 'throw', side: me, card: a.card, d: a.d, moves });
+  s.throwNo++;
+  if (s.throwNo < THROWS) { s.toMove = s.throwNo % 2 === 0 ? 1 - s.hammer : s.hammer; return; }
+  // the end is scored
+  const sc = endScore(s.stones);
+  s.lastEnd = sc;
+  if (sc) { s.score[sc[0]] += sc[1]; s.hammer = 1 - sc[0]; }
+  emit(ev, { t: 'score', end: s.end, result: sc, score: s.score.slice() });
+  const done = s.end >= ENDS && s.score[0] !== s.score[1];
+  if (done || s.end >= ENDS + 1) {
+    s.winner = s.score[0] === s.score[1] ? 'draw' : s.score[0] > s.score[1] ? 0 : 1;
+    emit(ev, { t: 'end', winner: s.winner }); return;
+  }
+  s.end++;
+  startEnd(s, ev);
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function _act(t, a) { mAct(t, a, null); return t; }
+
+// ---- src/bot.js
+// Bots for Curling line, simplest first. One throw at a time through legalActions/act, the same API
+// the page uses. None reads a hidden card: the Expert deals the opponent's hand again from the cards
+// not in its discard pile, and reshuffles both decks, before every play-out.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pick = (a, rng) => a[Math.floor(rng() * a.length)];
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+const cost = (a) => a.card ? CARDS[a.card].cost : 0;
+
+function randomBot(s, rng) { return pick(legalActions(s), rng); }
+
+// Greedy: the throw that leaves the best score if the end stopped now, cheapest among ties.
+function nowValue(s, a) {
+  const me = s.toMove, st = s.stones.map(x => ({ ...x }));
+  slide(st, me, a.d, -1);
+  const sc = endScore(st);
+  return sc ? (sc[0] === me ? sc[1] : -sc[1]) : 0;
+}
+function greedyBot(s) {
+  // each target cell once, reached by the cheapest throw that reaches it
+  const byD = new Map();
+  for (const a of legalActions(s)) { const o = byD.get(a.d); if (!o || cost(a) < cost(o)) byD.set(a.d, a); }
+  let best = null, bv = -Infinity, bc = Infinity;
+  for (const a of byD.values()) { const v = nowValue(s, a), c = cost(a); if (v > bv || (v === bv && c < bc)) { bv = v; bc = c; best = a; } }
+  return best;
+}
+// Greedy with noise, for play-outs: one throw in EPS is random.
+function noisyGreedy(s, rng, eps = 0.25) { return rng() < eps ? pick(legalActions(s), rng) : greedyBot(s); }
+
+// ------------------------------------------------------------------ the Expert
+function determinize(s, me, rng) {
+  const t = clone(s), O = t.p[1 - me];
+  const pool = shuffle(O.hand.concat(O.deck), rng), h = O.hand.length;
+  O.hand = pool.slice(0, h); O.deck = pool.slice(h);
+  shuffle(t.p[me].deck, rng);
+  t.seed = (rng() * 4294967296) >>> 0;
+  return t;
+}
+function playout(t, me, rng) {
+  while (t.winner === null) _act(t, noisyGreedy(t, rng));
+  return t.winner === me ? 1 : t.winner === 'draw' ? 0.5 : 0;
+}
+// Successive halving on common resampled worlds; the default (Greedy's throw) is never dropped and
+// stands unless the best beats it, world by world, by more than one standard error.
+function halving(n, budget, run, keep) {
+  let alive = [...Array(n).keys()];
+  const vals = [...Array(n)].map(() => []);
+  const mean = (i) => { let a = 0, c = 0; for (const v of vals[i]) if (v !== undefined) { a += v; c++; } return a / Math.max(1, c); };
+  const rounds = Math.max(1, Math.ceil(Math.log2(n)));
+  let sample = 0;
+  for (let r = 0; r < rounds && alive.length > 1; r++) {
+    const per = Math.max(2, Math.floor(budget / (rounds * alive.length)));
+    for (let k = 0; k < per; k++, sample++) for (const i of alive) vals[i][sample] = run(i, sample);
+    alive.sort((a, b) => mean(b) - mean(a));
+    const half = alive.slice(0, Math.max(1, Math.ceil(alive.length / 2)));
+    if (keep >= 0 && !half.includes(keep)) half.push(keep);
+    alive = half;
+  }
+  alive.sort((a, b) => mean(b) - mean(a));
+  const best = alive[0];
+  if (keep < 0 || best === keep) return best;
+  const d = [];
+  for (let k = 0; k < sample; k++) if (vals[best][k] !== undefined && vals[keep][k] !== undefined) d.push(vals[best][k] - vals[keep][k]);
+  const m = d.reduce((a, b) => a + b, 0) / d.length, sd = Math.sqrt(d.reduce((a, b) => a + (b - m) * (b - m), 0) / Math.max(1, d.length - 1));
+  return m > sd / Math.sqrt(d.length) ? best : keep;
+}
+const sig = (t) => JSON.stringify([t.end, t.score, t.hammer, t.winner, t.stones.map(x => x.owner + ':' + x.cell).sort(), t.energy, t.p.map(p => p.hand.slice().sort().join())]);
+function sameDecision(s, a, b) { const x = clone(s), y = clone(s); _act(x, a); _act(y, b); return sig(x) === sig(y); }
+function expertBot({ budget = 3000 } = {}) {
+  return function (s, rng) {
+    const me = s.toMove, seen = new Map();
+    // equivalent throws collapse onto the cheapest
+    for (const a of legalActions(s).sort((x, y) => cost(x) - cost(y))) { const t = clone(s); _act(t, a); const k = sig(t); if (!seen.has(k)) seen.set(k, a); }
+    const acts = [...seen.values()];
+    if (acts.length === 1) return acts[0];
+    const g = greedyBot(s), keep = acts.findIndex(a => sameDecision(s, a, g));
+    const seeds = [];
+    const seedOf = (k) => { while (seeds.length <= k) seeds.push((rng() * 4294967296) >>> 0); return seeds[k]; };
+    const best = halving(acts.length, budget, (i, k) => {
+      const r = makeRng(seedOf(k)), t = determinize(s, me, r);
+      _act(t, acts[i]);
+      return playout(t, me, r);
+    }, keep);
+    return acts[best];
+  };
+}
+
+// ---- src/ui.js
+// Curling line as a game screen against the Expert. Every throw goes through legalActions/act; each
+// throw slides and pushes step by step. The win tally is kept in this browser and decides who holds
+// the hammer in end 1 (alternating).
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-28-curling-tally';
+const expert = expertBot({ budget: 2000 });
+const ui = { s: null, view: null, busy: false, over: false, sel: null, ends: [], fresh: 0, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+const xOf = (cell) => ((cell - 0.5) / CELLS * 100) + '%';
+
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+function cardHTML(id, { cls = '', attrs = '' } = {}) {
+  const c = id ? CARDS[id] : { name: 'Lag', cost: 0, d: LAG };
+  const big = c.d ? c.d : '4–12';
+  return `<button class="card${id ? '' : ' lag'}${id === 'Any' ? ' any' : ''} ${cls}" ${attrs}>${c.cost ? `<span class="cgem">${c.cost}</span>` : ''}<div class="art"><span class="big">${big}</span></div><div class="nm">${c.name}</div></button>`;
+}
+
+// ------------------------------------------------------------------ rendering
+const myTurn = () => !ui.busy && !ui.over && ui.view.toMove === ME && ui.view.winner === null;
+const thrownBy = (s, side) => side === s.hammer ? Math.floor(s.throwNo / 2) : Math.ceil(s.throwNo / 2);
+function boardHTML() {
+  const s = ui.view, n = Math.max(ENDS, s.end, ui.ends.length);
+  let html = '<table>';
+  for (const side of [BOT, ME]) {
+    html += `<tr class="s${side}"><td class="dot"><i></i></td>`;
+    for (let e = 1; e <= n; e++) { const r = ui.ends[e - 1]; const v = r === undefined ? '' : r && r[0] === side ? r[1] : r ? '' : '·'; html += `<td class="${e === s.end && !ui.over ? 'now' : ''}">${v}</td>`; }
+    html += `<td class="tot pt">${s.score[side]}</td></tr>`;
+  }
+  return html + '</table>';
+}
+function infoHTML(side) {
+  const s = ui.view, P = s.p[side], left = 4 - thrownBy(s, side);
+  let stones = ''; for (let i = 0; i < 4; i++) stones += `<i class="${i < left ? '' : 'gone'}"></i>`;
+  let gems = ''; for (let i = 0; i < ENERGY; i++) gems += `<i class="gemc${i < s.energy[side] ? ' on' : ''}"></i>`;
+  const backs = side === BOT ? `<div class="backs">${'<i class="back"></i>'.repeat(P.hand.length)}</div>` : '';
+  return `${s.hammer === side ? '<span class="hammer">🔨</span>' : ''}<div class="left s${side}">${stones}</div><div class="energy"><b>${s.energy[side]}</b>${gems}</div><span class="pile s${side}">${P.deck.length}</span>${backs}`;
+}
+function sheetHTML(stones) {
+  const tg = ui.sel && myTurn() ? new Set(legalActions(ui.view).filter(a => a.card === ui.sel).map(a => a.d)) : new Set();
+  let cells = '';
+  for (let c = 1; c <= CELLS; c++) {
+    const d = Math.abs(c - MARK), house = d <= HOUSE ? (d === 0 ? ' house h1 mark' : d === 1 ? ' house h1' : d === 2 ? ' house h2' : ' house') : '';
+    cells += `<div class="cell${house}${tg.has(c) ? ' tgt' : ''}" data-cell="${c}">${c}</div>`;
+  }
+  const st = stones.map(x => `<div class="stone s${x.owner}" id="st${x.uid}" style="left:${xOf(x.cell)}"></div>`).join('');
+  return `<div class="cells">${cells}</div><div class="stones">${st}</div>`;
+}
+function handHTML() {
+  const s = ui.view, can = myTurn(), L = can ? legalActions(s) : [];
+  const ok = (id) => L.some(a => a.card === id);
+  let html = cardHTML(null, { cls: can ? 'ok' : '', attrs: `data-card=""${can ? '' : ' disabled'}` });
+  const H = s.p[ME].hand.map((id, i) => i).sort((a, b) => (CARDS[s.p[ME].hand[a]].d || 99) - (CARDS[s.p[ME].hand[b]].d || 99));
+  for (const i of H) { const id = s.p[ME].hand[i], k = ok(id); html += cardHTML(id, { cls: (k ? 'ok' : '') + (ui.sel === id ? ' sel' : '') + (ui.fresh ? ' drawn' : ''), attrs: `data-card="${id}"${k ? '' : ' disabled'}` }); }
+  return html;
+}
+function render() {
+  const s = ui.view, t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('board').innerHTML = boardHTML();
+  $('info1').innerHTML = infoHTML(BOT); $('info0').innerHTML = infoHTML(ME);
+  $('sheet').innerHTML = sheetHTML(s.stones);
+  $('hand').innerHTML = handHTML();
+  ui.fresh = 0;
+}
+function banner(text, side) { const b = $('banner'); b.textContent = text; b.className = side === undefined ? '' : 's' + side; void b.offsetWidth; b.classList.add('show'); }
+
+// ------------------------------------------------------------------ playback
+async function apply(a) {
+  const qtok = ui.token;
+  const prev = ui.s, ev = [];
+  const next = act(prev, a, ev);
+  ui.s = next;
+  const th = ev.find(e => e.t === 'throw'), sc = ev.find(e => e.t === 'score');
+  // the throw, then each push, on the table as it was
+  const layer = document.querySelector('#sheet .stones');
+  for (const m of th.moves) {
+    let el = $('st' + m.uid);
+    if (m.thrown) { el = document.createElement('div'); el.className = 'stone s' + th.side; el.id = 'st' + m.uid; el.style.left = '-6%'; layer.appendChild(el); void el.offsetWidth; }
+    if (!el) continue;
+    if (m.out || m.to > CELLS) { el.style.left = m.out ? '2%' : '106%'; el.classList.add('out'); }
+    else el.style.left = xOf(m.to);
+    await wait(300);
+    if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  }
+  if (sc) {
+    // the end's last table: the counting stones glow, the scoreboard fills, then the next end
+    ui.ends[sc.end - 1] = sc.result;
+    if (sc.result) {
+      // the end's final stones, as the engine had them before clearing (the thrown stone keeps its uid)
+      const w = sc.result[0], after = prev.stones.map(x => ({ ...x }));
+      slide(after, prev.toMove, a.d, prev.uid);
+      const opp = Math.min(99, ...after.filter(x => x.owner !== w && Math.abs(x.cell - MARK) <= HOUSE).map(x => Math.abs(x.cell - MARK)));
+      for (const x of after) if (x.owner === w && Math.abs(x.cell - MARK) <= HOUSE && Math.abs(x.cell - MARK) < opp) { const el = $('st' + x.uid); if (el) el.classList.add('count'); }
+      banner((w === ME ? 'You +' : '+') + sc.result[1], w);
+    } else banner('No score');
+    $('board').innerHTML = boardHTML();
+    await wait(1700);
+    if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+    if (next.winner !== null) { ui.view = next; finish(); render(); return; }
+    ui.fresh = 1;
+  }
+  ui.view = next; render();
+}
+
+function finish() {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+// ------------------------------------------------------------------ flow
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, hammer: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.view = ui.s; ui.over = false; ui.sel = null; ui.ends = [];
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  await wait(700);
+  if (tok !== ui.token) return;
+  await run(tok);
+}
+async function run(tok) {
+  while (tok === ui.token && !ui.over && ui.s.toMove === BOT && ui.s.winner === null) {
+    ui.busy = true; render();
+    await wait(500);
+    if (tok !== ui.token) return;
+    const a = expert(ui.s, ui.rng);
+    if (tok !== ui.token || ui.over) return;
+    await apply(a);
+  }
+  if (tok !== ui.token) return;
+  ui.busy = false; render();
+}
+async function doAct(a) {
+  if (!myTurn()) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel = null;
+  await apply(a);
+  await run(tok);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (b && b.id === 'rulesbtn') { $('rules').classList.add('show'); return; }
+  if (b && b.id === 'rulesclose') { $('rules').classList.remove('show'); return; }
+  if (e.target.id === 'rules') { $('rules').classList.remove('show'); return; }
+  if (b && (b.id === 'rematch' || b.id === 'newmatch')) return startMatch();
+  if (!myTurn()) return;
+  const cell = e.target.closest('.cell.tgt');
+  if (cell && ui.sel) return doAct({ t: 'throw', card: ui.sel, d: +cell.dataset.cell });
+  if (b && !b.disabled && b.dataset.card !== undefined) {
+    const id = b.dataset.card || null;
+    if (!id) return doAct({ t: 'throw', card: null, d: LAG });
+    if (!CARDS[id].d) { ui.sel = ui.sel === id ? null : id; render(); return; }
+    return doAct({ t: 'throw', card: id, d: CARDS[id].d });
+  }
+  if (ui.sel) { ui.sel = null; render(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (ui.sel) { ui.sel = null; render(); } $('rules').classList.remove('show'); } });
+startMatch();
+
+})();
+</script>
+</body>
+</html>

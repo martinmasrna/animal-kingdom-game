@@ -1,0 +1,98 @@
+{
+  "concept": "03 Exert to score",
+  "gamesPerMatchup": 400,
+  "expertPlayouts": 4000,
+  "pageExpertPlayouts": 10000,
+  "agreementCountedOn": "Expert decisions with 2+ sensible options, all Expert games",
+  "decisions": 52551,
+  "matchups": [
+    {
+      "a": "expert",
+      "b": "random",
+      "games": 400,
+      "aWins": 400,
+      "bWins": 0,
+      "draws": 0,
+      "aRate": 1,
+      "firstPlayerRate": 0.5,
+      "avgTurns": 14.63,
+      "capped": 0
+    },
+    {
+      "a": "expert",
+      "b": "greedy",
+      "games": 400,
+      "aWins": 375,
+      "bWins": 25,
+      "draws": 0,
+      "aRate": 0.9375,
+      "firstPlayerRate": 0.5225,
+      "avgTurns": 17.45,
+      "capped": 0
+    },
+    {
+      "a": "expert",
+      "b": "racer",
+      "games": 400,
+      "aWins": 392,
+      "bWins": 8,
+      "draws": 0,
+      "aRate": 0.98,
+      "firstPlayerRate": 0.51,
+      "avgTurns": 14.56,
+      "capped": 0
+    },
+    {
+      "a": "expert",
+      "b": "expert",
+      "games": 400,
+      "aWins": 196,
+      "bWins": 204,
+      "draws": 0,
+      "aRate": 0.49,
+      "firstPlayerRate": 0.545,
+      "avgTurns": 18.48,
+      "capped": 0
+    }
+  ],
+  "sanity": [
+    {
+      "position": "lethal: at 17 with ready Score-2 and Score-1 units, an exerted enemy to tempt: score both",
+      "greedy": false,
+      "expert": "5/5"
+    },
+    {
+      "position": "free trade: ready Line 3/3 against an exerted Runner 1/1 that is his only scorer, him at 17: challenge it",
+      "greedy": true,
+      "expert": "5/5"
+    },
+    {
+      "position": "don't waste: Hit 2 and Hit 4 in hand, 4 mana, enemy Runner 1/1 and Line 3/3: never Hit 4 the Runner",
+      "greedy": true,
+      "expert": "5/5"
+    }
+  ],
+  "gate": {
+    "expertVsTrivial": {
+      "random": 1,
+      "greedy": 0.9375,
+      "racer": 0.98
+    },
+    "expertBeatsTrivial70": true,
+    "setPositionsPass": true,
+    "turnCapShare": 0,
+    "turnCapOK": true,
+    "greedyAgreement": 0.4819,
+    "greedyAgreementOK": true,
+    "firstPlayerRateExpertMirror": 0.545,
+    "firstPlayerOK": true,
+    "alive": true
+  },
+  "seconds": 7781,
+  "report": {
+    "verdict": "alive",
+    "summary": "Every machine criterion passes. Expert (determinized information-set MCTS, 4000 play-outs a decision in the gate, 10000 on the page) beats Random 100%, Greedy 93.8%, Racer 98.0% over 400 games each; set positions 5/5 on all three (Greedy fails lethal: it challenges instead of scoring out); no game reached the 120-turn cap; Expert equals Greedy in 48.2% of 52,551 decisions; the first player wins 54.5% of Expert mirrors. Mirror games last about 18 turns.",
+    "loop": "Each turn every ready unit chooses between scoring (points now, but it stays exposed through the opponent's turn), challenging an exposed enemy (also exposes it) and staying ready (safe, no progress). Watching Expert mirrors: about 18 scores and 10 challenges a game, 62% of the challenges a kill that survives, about 5 Hits on units a game, and a unit deliberately held back from scoring only once every 17 turns. So the best play boils down to: score with what the opponent cannot profitably challenge back, challenge exposed scorers your unit kills and survives, spend Hits to break the board the opponent would score with, and rarely hold back. High-Health units score safely; the Raider (3/2, Score 0) exists only to punish exposure. Racing loses badly (Racer 2%): scoring without fighting feeds the opponent free kills.",
+    "notes": "Expert never 'scores' 0 points (it only exposes the unit) and never Hits its own units; both are cut from its options, and Greedy follows the same rule."
+  }
+}

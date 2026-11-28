@@ -1,0 +1,540 @@
+<title>Possession</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* one screen: his stamina on top; goals, plays and the pitch in the middle with the last reveal; my stamina and options below; the play log left */
+:root {
+  --bg: #2a3340; --ink: #1b1b1b; --paper: #fbf7ee; --gold: #f2b632; --ok: #5fdc6f;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86;
+  --grass: #2f6b45; --grass2: #2a603e;
+  --optw: 118px; --opth: 150px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game { position: relative; height: 100%; max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 190px minmax(0, 1fr) 190px; grid-template-rows: 48px minmax(0, 1fr) auto auto; gap: 8px 16px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#menu { position: absolute; top: 8px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; display: flex; gap: 12px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 18px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#top { grid-row: 1; grid-column: 2; display: flex; align-items: center; justify-content: center; gap: 18px; }
+#opphand { display: flex; } .back { width: 20px; height: 28px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -5px; }
+#board { grid-row: 2; grid-column: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 0; }
+#log { grid-row: 2 / 4; grid-column: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; overflow: hidden; }
+#mine { grid-row: 3; grid-column: 2; display: flex; align-items: center; justify-content: center; gap: 18px; }
+#opts { grid-row: 4; grid-column: 1 / -1; display: flex; justify-content: center; align-items: flex-end; gap: 26px; padding: 6px 0 4px; }
+#basics, #hand { display: flex; gap: 10px; }
+
+/* ---------------- goals, plays */
+#goals { display: flex; gap: 10px; font-weight: 900; font-size: 34px; }
+#goals b { min-width: 58px; height: 52px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+#goals .g0 { background: var(--me2); } #goals .g1 { background: var(--him2); }
+#plays { display: flex; gap: 4px; }
+#plays i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #6b7a8a; } #plays i.done { background: #6b7a8a; } #plays i.half { margin-left: 10px; }
+
+/* ---------------- pitch */
+#pitch { width: 100%; max-width: 900px; height: 120px; display: grid; grid-template-columns: 18px repeat(9, 1fr) 18px; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
+.zone { position: relative; display: flex; align-items: center; justify-content: center; background: var(--grass); border-right: 2px solid rgba(255,255,255,.35); }
+.zone:nth-child(odd) { background: var(--grass2); }
+.zone[data-z="8"] { border-right: 0; }
+.zone.r0::after, .zone.r1::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+.zone.r0::after { background: linear-gradient(0deg, rgba(61,127,214,.22), rgba(61,127,214,.22)); } .zone.r1::after { background: linear-gradient(0deg, rgba(138,98,184,.22), rgba(138,98,184,.22)); }
+.zone[data-z="4"]::before { content: ''; position: absolute; width: 54px; height: 54px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); }
+.goal { display: flex; align-items: center; justify-content: center; }
+.goal.g1 { background: var(--him2); } .goal.g0 { background: var(--me2); }
+.ball { position: relative; z-index: 2; width: 44px; height: 44px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,.5); transition: transform .12s; }
+.ball.s0 { background: radial-gradient(circle at 35% 30%, #8cc2ff, var(--me2)); } .ball.s1 { background: radial-gradient(circle at 35% 30%, #c9a6f0, var(--him2)); }
+.goal .ball { width: 16px; height: 16px; border-width: 2px; }
+
+/* ---------------- stamina */
+.stam { display: flex; align-items: center; gap: 10px; }
+.stam .sn { font-weight: 900; font-size: 22px; min-width: 28px; text-align: right; }
+.stam .bar { display: flex; gap: 3px; } .stam .bar i { width: 14px; height: 20px; border-radius: 3px; background: rgba(255,255,255,.12); }
+.stam.s0 .bar i.on { background: linear-gradient(180deg, #8fdc9c, #3f9c55); } .stam.s1 .bar i.on { background: linear-gradient(180deg, #8fdc9c, #3f9c55); }
+.stam .pile { width: 30px; height: 40px; border-radius: 5px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; margin-left: 6px; }
+.stam.s0 .pile { background: linear-gradient(135deg, var(--me), var(--me2)); } .stam.s1 .pile { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
+.role { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #fff; }
+.role.att { background: radial-gradient(circle at 35% 30%, #8cc2ff, var(--me2)); } .role.def { background: transparent; border-style: dashed; border-color: #8a96a3; }
+
+/* ---------------- options */
+.opt { position: relative; width: var(--optw); height: var(--opth); border-radius: 10px; padding: 6px 8px; text-align: left; background: var(--paper); color: var(--ink); border: 3px solid #d5c39f;
+  box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto; transition: transform .12s; }
+.opt.basic { background: #dfe6ee; border-color: #a9b6c3; }
+.opt .cost { position: absolute; top: 6px; right: 8px; font-size: 13px; letter-spacing: -1px; color: #2f8a45; }
+.opt .big { font-weight: 900; font-size: calc(var(--optw) * .34); line-height: 1; margin-top: 4px; }
+.opt .big.long { font-size: calc(var(--optw) * .26); margin-top: 8px; }
+.opt.att .big { color: #1f5fb8; } .opt.def .big { color: #a8341f; }
+.opt .nm { font-weight: 800; font-size: 16px; }
+.opt .tx { font-size: 12px; line-height: 1.2; color: #4a463e; }
+.opt.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+.opt.ok:hover { transform: translateY(-8px); }
+.opt.no { filter: brightness(.62) saturate(.6); cursor: default; } .opt.off { opacity: .55; }
+
+/* ---------------- reveal */
+#reveal { display: flex; align-items: center; justify-content: center; gap: 20px; min-height: calc(var(--opth) * .8); }
+#reveal .opt { --optw: 96px; --opth: 122px; cursor: default; } #reveal .opt .tx { display: none; }
+#reveal .rv.s0 .opt { border-color: var(--me); } #reveal .rv.s1 .opt { border-color: var(--him); }
+#reveal.show .rv { animation: flip .35s ease-out; } #reveal.show .rv.s1 { animation-delay: .12s; animation-fill-mode: both; }
+@keyframes flip { from { transform: rotateY(90deg); opacity: 0; } }
+#reveal .out { min-width: 90px; text-align: center; font-weight: 900; font-size: 30px; }
+#reveal .out.gain { color: #8ff09a; } #reveal .out.turn { color: #ffb36b; } #reveal .out.goal { color: var(--gold); }
+
+/* ---------------- log */
+.hist { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.22); font-size: 13px; font-weight: 700; }
+.lc { padding: 3px 6px; border-radius: 4px; } .lc.s0 { background: var(--me2); } .lc.s1 { background: var(--him2); }
+.lo { margin-left: auto; font-weight: 900; } .lo.gain { color: #8ff09a; } .lo.turn { color: #ffb36b; } .lo.goal { color: var(--gold); }
+
+/* ---------------- banner, game over, rules */
+#banner { position: absolute; left: 0; right: 0; top: 40%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 56px; font-weight: 900; opacity: 0; color: var(--gold); text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); } #over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over .sub { margin: 0; font-size: 28px; font-weight: 800; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); }
+#rules.show { display: flex; }
+#rules .panel { max-width: 580px; width: calc(100% - 32px); max-height: calc(100% - 32px); overflow: auto; background: #1f2731; border: 1px solid #4a5868; border-radius: 12px; padding: 18px 22px; font-size: 15px; line-height: 1.4; color: #dfe5eb; }
+#rules h3 { margin: 0 0 8px; font-size: 20px; color: #fff; } #rules p { margin: 6px 0; }
+#rules table { border-collapse: collapse; margin: 8px 0; font-size: 13px; width: 100%; } #rules th, #rules td { padding: 4px 6px; text-align: center; border: 1px solid #3a4756; } #rules td.t { color: #ffb36b; } #rules td.g { color: var(--gold); font-weight: 800; }
+#rules button { margin-top: 10px; min-height: 40px; padding: 0 18px; border-radius: 8px; border: 0; font-weight: 800; background: var(--gold); color: #2a1d00; }
+
+/* ---------------- phone */
+@media (max-width: 760px) {
+  :root { --optw: 84px; --opth: 116px; }
+  #game { grid-template-columns: minmax(0, 1fr); grid-template-rows: 36px auto minmax(0, 1fr) auto auto; gap: 6px; }
+  #menu { top: 3px; } #menu button { min-height: 26px; padding: 2px 8px; font-size: 13px; } .tally { font-size: 14px; } .tally b { min-width: 24px; height: 24px; }
+  #top { grid-row: 2; grid-column: 1; justify-content: flex-start; } #board { grid-row: 3; grid-column: 1; gap: 10px; }
+  #log { display: none; } #mine { grid-row: 4; grid-column: 1; } #opts { grid-row: 5; grid-column: 1; flex-wrap: wrap; gap: 6px; }
+  #basics, #hand { gap: 5px; }
+  #pitch { height: 80px; grid-template-columns: 10px repeat(9, 1fr) 10px; } .ball { width: 26px; height: 26px; border-width: 3px; } .zone[data-z="4"]::before { width: 32px; height: 32px; }
+  .stam .bar i { width: 9px; height: 16px; } .stam .sn { font-size: 18px; }
+  .opt { padding: 4px 5px; } .opt .nm { font-size: 13px; } .opt .tx { font-size: 10px; } .opt .cost { font-size: 11px; top: 4px; right: 5px; }
+  #reveal .opt { --optw: 74px; --opth: 96px; } #reveal .out { min-width: 60px; font-size: 22px; }
+  #goals { font-size: 24px; } #goals b { min-width: 44px; height: 40px; } #plays i { width: 9px; height: 9px; }
+}
+
+</style>
+
+<div id="game">
+  <div id="menu"><span id="tally"></span><button id="openrules">Rules</button><button id="newmatch">New game</button></div>
+  <div id="top"><div id="stam1" class="stam s1"></div><div id="opphand"></div></div>
+  <div id="board">
+    <div id="goals"></div>
+    <div id="plays"></div>
+    <div id="pitch"></div>
+    <div id="reveal"></div>
+  </div>
+  <div id="log"></div>
+  <div id="mine"><div id="stam0" class="stam s0"></div><div id="role" class="role"></div></div>
+  <div id="opts"><div id="basics"></div><div id="hand"></div></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Possession</h3>
+    <p>You attack to the right. Score by <b>Shooting</b> from the last three zones before the goal. Most goals after <b>20 plays</b> wins.</p>
+    <p>Every play both of you choose at once: whoever has the ball an attacking option, the other a defending one. Each costs stamina (●). Basics are always there; cards come from your hand and you draw a new one after playing it. You start with 10 stamina and get 4 back after play 10.</p>
+    <table>
+      <tr><th></th><th>Stand</th><th>Block</th><th>Tackle</th><th>Intercept</th><th>Press</th></tr>
+      <tr><th>Walk</th><td>0</td><td>+1</td><td class="t">⇄</td><td>+1</td><td class="t">⇄</td></tr>
+      <tr><th>Pass</th><td>+2</td><td>+2</td><td class="t">⇄</td><td class="t">⇄</td><td class="t">⇄</td></tr>
+      <tr><th>Long</th><td>+3</td><td>+3</td><td>+3</td><td class="t">⇄</td><td>+3</td></tr>
+      <tr><th>Dribble</th><td>+1</td><td>+1</td><td>+1</td><td>+1</td><td class="t">⇄</td></tr>
+      <tr><th>Shoot</th><td class="g">goal</td><td class="t">⇄</td><td class="g">goal</td><td class="g">goal</td><td class="g">goal</td></tr>
+    </table>
+    <p>⇄ the ball changes hands where it is. After a goal the ball goes back to the middle and the side that conceded gets it.</p>
+    <button id="closerules">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// Possession. A ball on zones 0 to 8; A scores at 8, B at 0. Each play both players choose at once,
+// the one in possession an attacking option, the other a defending one, each priced in stamina; the
+// pair is looked up in one table. Most goals after 20 plays wins.
+// Pure from the outside: play() clones the state; _play() mutates (for the bots' play-outs).
+
+const ZONES = 9, MID = 4, PLAYS = 20, HALF = 10, STAMINA = 10, REFILL = 4, HAND = 4;
+
+const OPTS = {
+  WALK: { id: 'WALK', name: 'Walk', side: 'att', cost: 0, basic: true },
+  SHOOT: { id: 'SHOOT', name: 'Shoot', side: 'att', cost: 1, basic: true },
+  PASS: { id: 'PASS', name: 'Pass', side: 'att', cost: 1 },
+  LONG: { id: 'LONG', name: 'Long', side: 'att', cost: 2 },
+  DRIBBLE: { id: 'DRIBBLE', name: 'Dribble', side: 'att', cost: 1 },
+  STAND: { id: 'STAND', name: 'Stand', side: 'def', cost: 0, basic: true },
+  BLOCK: { id: 'BLOCK', name: 'Block', side: 'def', cost: 1, basic: true },
+  TACKLE: { id: 'TACKLE', name: 'Tackle', side: 'def', cost: 1 },
+  INTERCEPT: { id: 'INTERCEPT', name: 'Intercept', side: 'def', cost: 1 },
+  PRESS: { id: 'PRESS', name: 'Press', side: 'def', cost: 2 },
+};
+const ATT = ['WALK', 'SHOOT', 'PASS', 'LONG', 'DRIBBLE'], DEF = ['STAND', 'BLOCK', 'TACKLE', 'INTERCEPT', 'PRESS'];
+// outcome: a number = zones gained, 'T' = turnover, 'G' = goal
+const TABLE = {
+  WALK: { STAND: 0, BLOCK: 1, TACKLE: 'T', INTERCEPT: 1, PRESS: 'T' },
+  PASS: { STAND: 2, BLOCK: 2, TACKLE: 'T', INTERCEPT: 'T', PRESS: 'T' },
+  LONG: { STAND: 3, BLOCK: 3, TACKLE: 3, INTERCEPT: 'T', PRESS: 3 },
+  DRIBBLE: { STAND: 1, BLOCK: 1, TACKLE: 1, INTERCEPT: 1, PRESS: 'T' },
+  SHOOT: { STAND: 'G', BLOCK: 'T', TACKLE: 'G', INTERCEPT: 'G', PRESS: 'G' },
+};
+const DECK = { PASS: 3, LONG: 2, DRIBBLE: 3, TACKLE: 3, INTERCEPT: 3, PRESS: 2 };
+
+function deckList() { const out = []; for (const [id, k] of Object.entries(DECK)) for (let i = 0; i < k; i++) out.push(id); return out; }
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(rnd, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function clone(s) { return { ...s, hist: s.hist.slice(), goals: s.goals.slice(), p: s.p.map(p => ({ ...p, hand: p.hand.slice(), deck: p.deck.slice(), discard: p.discard.slice() })) }; }
+function draw(s, side) {
+  const p = s.p[side];
+  if (!p.deck.length) { if (!p.discard.length) return; p.deck = shuffleInPlace(() => rand(s), p.discard); p.discard = []; }
+  p.hand.push(p.deck.shift());
+}
+
+// s.first: the side with possession at kickoff
+function newMatch({ seed, first }) {
+  const s = { seed: (seed >>> 0) || 1, play: 0, ball: MID, poss: 0, first: 0, goals: [0, 0], winner: null, capped: false, last: null, hist: [],
+    p: [0, 1].map(() => ({ stamina: STAMINA, hand: [], deck: deckList(), discard: [] })) };
+  for (const p of s.p) shuffleInPlace(() => rand(s), p.deck);
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
+  s.poss = s.first;
+  for (const side of [0, 1]) for (let i = 0; i < HAND; i++) draw(s, side);
+  return s;
+}
+
+const inRange = (s, side) => side === 0 ? s.ball >= ZONES - 3 : s.ball <= 2;
+const role = (s, side) => s.poss === side ? 'att' : 'def';
+// The options `side` may choose now: the basics of its role (Shoot only in range) and the cards of
+// its role in hand, each only if its stamina pays for it. Every option once.
+function options(s, side) {
+  const p = s.p[side], r = role(s, side), out = [];
+  for (const id of (r === 'att' ? ATT : DEF)) {
+    const o = OPTS[id];
+    if (o.cost > p.stamina) continue;
+    if (o.basic) { if (id === 'SHOOT' && !inRange(s, side)) continue; out.push(id); }
+    else if (p.hand.includes(id)) out.push(id);
+  }
+  return out;
+}
+
+// Both choices revealed and applied. ev (optional) collects what happened.
+function mPlay(s, choice, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  const att = s.poss, def = 1 - att, a = choice[att], d = choice[def];
+  if (!options(s, att).includes(a) || !options(s, def).includes(d)) throw new Error('illegal option ' + a + '/' + d);
+  for (const side of [0, 1]) {
+    const id = choice[side], p = s.p[side];
+    p.stamina -= OPTS[id].cost;
+    if (!OPTS[id].basic) { p.hand.splice(p.hand.indexOf(id), 1); p.discard.push(id); }
+  }
+  s.hist.push({ att, a, d, r: inRange(s, att) }); // every revealed pair, public
+  const r = TABLE[a][d], from = s.ball;
+  let out;
+  if (r === 'G') { s.goals[att]++; s.ball = MID; s.poss = def; out = 'goal'; }
+  else if (r === 'T') { s.poss = def; out = 'turnover'; }
+  else { s.ball = att === 0 ? Math.min(ZONES - 1, s.ball + r) : Math.max(0, s.ball - r); out = r; }
+  for (const side of [0, 1]) if (!OPTS[choice[side]].basic) draw(s, side);
+  s.play++;
+  s.last = { att, a, d, out, from, to: s.ball };
+  if (ev) ev.push({ t: 'play', ...s.last, play: s.play });
+  if (s.play === HALF) { for (const p of s.p) p.stamina = Math.min(STAMINA, p.stamina + REFILL); if (ev) ev.push({ t: 'refill' }); }
+  if (s.play >= PLAYS) { s.winner = s.goals[0] === s.goals[1] ? 'draw' : s.goals[0] > s.goals[1] ? 0 : 1; if (ev) ev.push({ t: 'end', winner: s.winner }); }
+}
+function play(s, choice, ev) { const t = clone(s); mPlay(t, choice, ev); return t; }
+function _play(t, choice) { mPlay(t, choice, null); return t; }
+
+// What `me` cannot see dealt again: the opponent's hand and deck reshuffled together (its discard
+// pile is public), and `me`'s own deck.
+function determinize(s, me, rng) {
+  const t = clone(s), O = t.p[1 - me], P = t.p[me];
+  const pool = shuffleInPlace(rng, O.hand.concat(O.deck));
+  O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length);
+  shuffleInPlace(rng, P.deck);
+  t.seed = (rng() * 4294967296) >>> 0; // future reshuffles unknown too
+  return t;
+}
+
+// ---- src/bot.js
+// Bots for Possession. Each takes (position, its side, rng) and returns the option it chooses. None
+// reads the opponent's choice or hand: the Expert deals the opponent's hand again for every sample.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+function randomBot(s, side, rng) { const o = options(s, side); return o[Math.floor(rng() * o.length)]; }
+
+// Greedy (the spec's rule): Shoot whenever in range, otherwise the dearest affordable option of its
+// side; ties go cards first in a fixed order.
+const GREEDY_ATT = ['LONG', 'PASS', 'DRIBBLE', 'WALK'], GREEDY_DEF = ['PRESS', 'TACKLE', 'INTERCEPT', 'BLOCK', 'STAND'];
+function greedyBot(s, side) {
+  const o = options(s, side);
+  if (o.includes('SHOOT')) return 'SHOOT';
+  for (const id of role(s, side) === 'att' ? GREEDY_ATT : GREEDY_DEF) if (o.includes(id)) return id;
+  return o[0];
+}
+// Racer: attacks as hard as it can (Shoot in range, else the longest gain) and never spends on defence.
+function racerBot(s, side) {
+  const o = options(s, side);
+  if (role(s, side) === 'def') return 'STAND';
+  for (const id of ['SHOOT', 'LONG', 'PASS', 'DRIBBLE', 'WALK']) if (o.includes(id)) return id;
+  return o[0];
+}
+
+// The play-out policy. 'uniform': both sides choose uniformly among their options. 'mix': a rough
+// sensible player: in range the attacker shoots half the time and the defender blocks half the
+// time; otherwise cards are twice as likely as basics.
+function pickMix(t, side, rng) {
+  const o = options(t, side), r = role(t, side), att = t.poss;
+  if (r === 'att' && o.includes('SHOOT')) return rng() < 0.5 ? 'SHOOT' : pickW(o.filter(x => x !== 'SHOOT'), rng);
+  if (r === 'def' && inRange(t, att) && o.includes('BLOCK')) return rng() < 0.5 ? 'BLOCK' : pickW(o.filter(x => x !== 'BLOCK'), rng);
+  return pickW(o, rng);
+}
+function pickW(o, rng) {
+  let z = 0; for (const x of o) z += OPTS[x].basic ? 1 : 2;
+  let r = rng() * z; for (const x of o) { r -= OPTS[x].basic ? 1 : 2; if (r <= 0) return x; } return o[o.length - 1];
+}
+function rollout(t, me, rng, pol) {
+  while (t.winner === null) {
+    if (pol === 'mix') _play(t, [pickMix(t, 0, rng), pickMix(t, 1, rng)]);
+    else { const a = options(t, 0), b = options(t, 1); _play(t, [a[Math.floor(rng() * a.length)], b[Math.floor(rng() * b.length)]]); }
+  }
+  return t.winner === me ? 1 : t.winner === 'draw' ? 0.5 : 0;
+}
+
+// Expert: the spec's matrix-game player. It samples `dets` deals of the opponent's hidden hand; for
+// each deal it estimates every pair (my option, his option) by `reps` play-outs of the rest of the
+// match; then it solves the resulting game of incomplete information (my one mixed strategy against
+// a mixed strategy of his for each deal) by regret matching, and samples its option from the
+// average strategy. It never sees his choice.
+const PURIFY = 0.1;
+// My options that no other option of mine beats outright: one that does at least as well against
+// every option he may have, for no more stamina, makes it pointless.
+function outcomeFor(s, me, mine, his) {
+  const att = s.poss === me, a = att ? mine : his, d = att ? his : mine, r = TABLE[a][d];
+  const room = s.poss === 0 ? ZONES - 1 - s.ball : s.ball;
+  const v = r === 'G' ? 100 : r === 'T' ? -100 : Math.min(r, room);
+  return att ? v : -v;
+}
+function undominated(s, me, mine, his) {
+  return mine.filter(i => !mine.some(k => {
+    if (k === i || OPTS[k].cost > OPTS[i].cost) return false;
+    let strict = OPTS[k].cost < OPTS[i].cost;
+    for (const j of his) { const a = outcomeFor(s, me, k, j), b = outcomeFor(s, me, i, j); if (a < b) return false; if (a > b) strict = true; }
+    return strict;
+  }));
+}
+function matrixExpert({ dets = 8, reps = 12, iters = 1000, pol = 'uniform', vsUniform = false, read = true, K = 1, margin = 0.01 } = {}) {
+  return function expert(s, me, rng) {
+    const deals = [];
+    for (let d = 0; d < dets; d++) { const base = determinize(s, me, rng); deals.push({ base, his: options(base, 1 - me) }); }
+    const mine = undominated(s, me, options(s, me), [...new Set(deals.flatMap(d => d.his))]);
+    if (mine.length === 1) return mine[0];
+    const D = [];
+    for (const { base, his } of deals) {
+      // the same `reps` futures for every pair (common random numbers), so the pairs differ
+      // only by what the choices themselves change
+      const seeds = Array.from({ length: reps }, () => (rng() * 4294967296) >>> 0);
+      const M = mine.map(a => his.map(b => {
+        let w = 0;
+        for (let r = 0; r < reps; r++) {
+          const rr = makeRng(seeds[r]), t = clone(base); shuffle(t.p[0].deck, rr); shuffle(t.p[1].deck, rr); t.seed = seeds[r]; // his hand stays this deal's
+          _play(t, me === 0 ? [a, b] : [b, a]); w += rollout(t, me, rr, pol);
+        }
+        return w / reps;
+      }));
+      D.push({ his, M });
+    }
+    if (vsUniform) { // diagnostic only: best reply to an opponent who picks uniformly
+      let bi = 0, bv = -1;
+      for (let i = 0; i < mine.length; i++) { let v = 0; for (const d of D) v += d.M[i].reduce((a, b) => a + b, 0) / d.his.length; if (v > bv) { bv = v; bi = i; } }
+      return mine[bi];
+    }
+    // regret matching: x over my options; y[d] over his options in deal d
+    const n = mine.length, R = new Float64Array(n), X = new Float64Array(n);
+    for (const d of D) { d.R = new Float64Array(d.his.length); d.Y = new Float64Array(d.his.length); }
+    const strat = (Rg) => { let z = 0; for (const r of Rg) z += Math.max(0, r); return Array.from(Rg, r => z > 0 ? Math.max(0, r) / z : 1 / Rg.length); };
+    for (let it = 0; it < iters; it++) {
+      const x = strat(R), ys = D.map(d => strat(d.R));
+      const u = new Float64Array(n);
+      D.forEach((d, k) => { for (let i = 0; i < n; i++) for (let j = 0; j < d.his.length; j++) u[i] += d.M[i][j] * ys[k][j] / D.length; });
+      let ux = 0; for (let i = 0; i < n; i++) ux += x[i] * u[i];
+      for (let i = 0; i < n; i++) { R[i] += u[i] - ux; X[i] += x[i]; }
+      D.forEach((d, k) => {
+        const m = d.his.length, v = new Float64Array(m);
+        for (let j = 0; j < m; j++) for (let i = 0; i < n; i++) v[j] += x[i] * (1 - d.M[i][j]);
+        let vy = 0; for (let j = 0; j < m; j++) vy += ys[k][j] * v[j];
+        for (let j = 0; j < m; j++) { d.R[j] += v[j] - vy; d.Y[j] += ys[k][j]; }
+      });
+    }
+    // drop the options the average strategy plays rarely (left over from early iterations)
+    let z = 0; for (const v of X) z += v;
+    for (let i = 0; i < n; i++) if (X[i] < PURIFY * z) X[i] = 0;
+    z = 0; for (const v of X) z += v;
+    if (read) {
+      // Reading: what he chose before in this situation (his role, ball in range or not), from
+      // the revealed plays only, pulls the forecast of his choice away from the equilibrium.
+      // Play the best reply to that forecast when it clearly beats the equilibrium mix.
+      const opp = 1 - me, oppAtt = s.poss === opp, ctx = inRange(s, s.poss), cnt = {};
+      for (const h of s.hist) if ((h.att === opp) === oppAtt && h.r === ctx) { const c = oppAtt ? h.a : h.d; cnt[c] = (cnt[c] || 0) + 1; }
+      const ev = new Float64Array(n);
+      for (const d of D) {
+        const m = d.his.length; let zy = 0; for (const v of d.Y) zy += v;
+        let zc = 0; for (const id of d.his) zc += cnt[id] || 0;
+        const q = d.his.map((id, j) => ((cnt[id] || 0) + K * d.Y[j] / zy) / (zc + K));
+        for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) ev[i] += d.M[i][j] * q[j] / D.length;
+      }
+      let evEq = 0, bi = 0; for (let i = 0; i < n; i++) { evEq += ev[i] * X[i] / z; if (ev[i] > ev[bi]) bi = i; }
+      if (ev[bi] > evEq + margin) return mine[bi];
+    }
+    let r = rng() * z;
+    for (let i = 0; i < n; i++) { r -= X[i]; if (r <= 0) return mine[i]; }
+    return mine[n - 1];
+  };
+}
+const EXPERT = { dets: 8, reps: 12, iters: 1000, read: true, K: 1, margin: 0.01 };
+const mcExpert = matrixExpert;
+
+// ---- src/ui.js
+// Possession as a game screen against the Expert. Every play you pick one option; the Expert has
+// already picked its own without seeing yours; both are revealed and the ball moves. You attack to
+// the right. The win tally is kept in this browser and decides who has the ball at kickoff.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-22-possession-tally';
+const expert = matrixExpert(EXPERT);
+const ui = { s: null, busy: false, over: false, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0, reveal: null, log: [] };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+// a card's own rules: what it gains, and what it is stopped by or stops
+const names = (ids) => ids.map(id => OPTS[id].name).join(', ');
+function text(id) {
+  if (OPTS[id].side === 'att') {
+    const row = TABLE[id], stop = DEF.filter(d => row[d] === 'T');
+    const gain = id === 'SHOOT' ? 'goal' : '+' + Math.max(...DEF.map(d => typeof row[d] === 'number' ? row[d] : 0));
+    const zero = DEF.filter(d => row[d] === 0);
+    return { big: gain, line: (stop.length ? 'stopped by ' + names(stop) : '') + (zero.length ? `; 0 vs ${names(zero)}` : '') };
+  }
+  const stops = ATT.filter(a => TABLE[a][id] === 'T');
+  return { big: stops.length ? '✕' : '–', line: stops.length ? 'stops ' + names(stops) : 'stops nothing' };
+}
+function optHTML(id, { cls = '', attrs = '' } = {}) {
+  const o = OPTS[id], t = text(id);
+  return `<button class="opt ${o.side} ${o.basic ? 'basic' : 'card'} ${cls}" ${attrs}><span class="cost">${'●'.repeat(o.cost) || '○'}</span><span class="big${String(t.big).length > 2 ? ' long' : ''}">${t.big}</span><span class="nm">${o.name}</span><span class="tx">${t.line}</span></button>`;
+}
+
+function render() {
+  const s = ui.s, t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('goals').innerHTML = `<b class="g0">${s.goals[0]}</b><b class="g1">${s.goals[1]}</b>`;
+  let pips = ''; for (let i = 0; i < PLAYS; i++) pips += `<i class="${i < s.play ? 'done' : ''}${i === HALF ? ' half' : ''}"></i>`;
+  $('plays').innerHTML = pips;
+  let z = '';
+  for (let i = 0; i < ZONES; i++) {
+    const rng0 = i >= ZONES - 3, rng1 = i <= 2;
+    z += `<div class="zone${rng0 ? ' r0' : ''}${rng1 ? ' r1' : ''}" data-z="${i}">${s.ball === i ? `<div id="ball" class="ball s${s.poss}"></div>` : ''}</div>`;
+  }
+  $('pitch').innerHTML = `<div class="goal g1"></div>${z}<div class="goal g0"></div>`;
+  for (const side of [0, 1]) {
+    const p = s.p[side];
+    let bar = ''; for (let i = 0; i < STAMINA; i++) bar += `<i class="${i < p.stamina ? 'on' : ''}"></i>`;
+    $('stam' + side).innerHTML = `<span class="sn">${p.stamina}</span><span class="bar">${bar}</span><span class="pile">${p.deck.length}</span>`;
+  }
+  $('opphand').innerHTML = s.p[BOT].hand.map(() => '<i class="back"></i>').join('');
+  const mine = s.winner === null ? options(s, ME) : [], r = role(s, ME);
+  const free = !ui.busy && !ui.over;
+  const basics = (r === 'att' ? ['WALK', 'SHOOT'] : ['STAND', 'BLOCK']);
+  $('basics').innerHTML = basics.map(id => { const ok = free && mine.includes(id); return optHTML(id, { cls: ok ? 'ok' : 'no', attrs: `data-opt="${id}"${ok ? '' : ' disabled'}` }); }).join('');
+  const order = { att: 0, def: 1 };
+  $('hand').innerHTML = s.p[ME].hand.map((id, i) => ({ id, i })).sort((a, b) => order[OPTS[a.id].side] - order[OPTS[b.id].side] || OPTS[a.id].cost - OPTS[b.id].cost)
+    .map(({ id }) => { const ok = free && mine.includes(id); return optHTML(id, { cls: (ok ? 'ok' : 'no') + (OPTS[id].side !== r ? ' off' : ''), attrs: `data-opt="${id}"${ok ? '' : ' disabled'}` }); }).join('');
+  $('role').className = 'role ' + r;
+  const rv = ui.reveal;
+  $('reveal').innerHTML = rv ? `<div class="rv s0">${optHTML(rv.c[0])}</div><div class="out ${rv.cls}">${rv.out}</div><div class="rv s1">${optHTML(rv.c[1])}</div>` : '';
+  $('log').innerHTML = ui.log.slice(-12).map(l => `<div class="hist">${l}</div>`).join('');
+}
+
+async function choose(id) {
+  if (ui.busy || ui.over) return;
+  const tok = ui.token;
+  ui.busy = true; ui.reveal = null; render();
+  const his = expert(ui.s, BOT, ui.rng); // chosen without looking at mine
+  const ch = [id, his], ev = [];
+  ui.reveal = { c: ch, out: '', cls: '' }; render();
+  $('reveal').classList.remove('show'); void $('reveal').offsetWidth; $('reveal').classList.add('show');
+  await wait(700);
+  if (tok !== ui.token) return;
+  const next = play(ui.s, ch, ev), e = ev.find(x => x.t === 'play');
+  const out = e.out === 'goal' ? 'Goal' : e.out === 'turnover' ? '⇄' : '+' + e.out;
+  ui.reveal = { c: ch, out, cls: e.out === 'goal' ? 'goal' : e.out === 'turnover' ? 'turn' : 'gain' };
+  ui.log.push(`<span class="lc s${e.att}">${OPTS[e.a].name}</span><span class="lc s${1 - e.att}">${OPTS[e.d].name}</span><span class="lo ${ui.reveal.cls}">${out}</span>`);
+  // the ball travels zone by zone, then the new state shows
+  const from = ui.s.ball, to = e.out === 'goal' ? (e.att === 0 ? ZONES : -1) : next.ball;
+  render();
+  const step = to > from ? 1 : -1;
+  for (let zz = from; zz !== to && Math.abs(to - from) > 0; zz += step) {
+    await wait(140); if (tok !== ui.token) return;
+    const ball = $('ball'), target = document.querySelector(`.zone[data-z="${zz + step}"]`) || document.querySelector(`.goal.g${e.att === 0 ? 0 : 1}`);
+    if (ball && target) target.appendChild(ball);
+  }
+  if (e.out === 'goal') { $('banner').textContent = e.att === ME ? 'Goal!' : 'Goal'; $('banner').classList.remove('show'); void $('banner').offsetWidth; $('banner').classList.add('show'); await wait(900); }
+  else await wait(350);
+  if (tok !== ui.token) return;
+  ui.s = next;
+  if (next.winner !== null) finish();
+  ui.busy = false; render();
+}
+function finish() {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><p class="sub">${ui.s.goals[ME]} – ${ui.s.goals[BOT]}</p><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+function startMatch() {
+  ui.token++;
+  const t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.over = false; ui.busy = false; ui.reveal = null; ui.log = [];
+  $('over').classList.remove('show');
+  render();
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#rules')) { if (e.target.closest('#closerules')) $('rules').classList.remove('show'); return; }
+  const b = e.target.closest('button');
+  if (!b || b.disabled) return;
+  if (b.dataset.opt) return choose(b.dataset.opt);
+  if (b.id === 'rematch' || b.id === 'newmatch') return startMatch();
+  if (b.id === 'openrules') $('rules').classList.add('show');
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('rules').classList.remove('show'); });
+startMatch();
+
+})();
+</script>

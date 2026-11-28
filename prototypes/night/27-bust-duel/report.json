@@ -1,0 +1,104 @@
+{
+  "firstPlayer": "the first player of round 1",
+  "concept": "27 Bust duel",
+  "turnCap": "none needed: the game ends after round 15 by rule (counted as wentAll15Rounds, not as a cap)",
+  "gamesPerMatchup": 400,
+  "expertPlayouts": 600,
+  "pageExpertPlayouts": 1500,
+  "agreementCountedOn": "Expert decisions with 2+ sensible options, all Expert games",
+  "decisions": 104007,
+  "matchups": [
+    {
+      "a": "expert",
+      "b": "random",
+      "games": 400,
+      "aWins": 400,
+      "bWins": 0,
+      "draws": 0,
+      "aRate": 1,
+      "firstPlayerRate": 0.5,
+      "avgRounds": 4.5,
+      "capped": 0,
+      "wentAll15Rounds": 0
+    },
+    {
+      "a": "expert",
+      "b": "greedy",
+      "games": 400,
+      "aWins": 394,
+      "bWins": 6,
+      "draws": 0,
+      "aRate": 0.985,
+      "firstPlayerRate": 0.505,
+      "avgRounds": 6.77,
+      "capped": 0,
+      "wentAll15Rounds": 0
+    },
+    {
+      "a": "expert",
+      "b": "racer",
+      "games": 400,
+      "aWins": 396,
+      "bWins": 4,
+      "draws": 0,
+      "aRate": 0.99,
+      "firstPlayerRate": 0.5,
+      "avgRounds": 5.75,
+      "capped": 0,
+      "wentAll15Rounds": 0
+    },
+    {
+      "a": "expert",
+      "b": "expert",
+      "games": 400,
+      "aWins": 209,
+      "bWins": 191,
+      "draws": 0,
+      "aRate": 0.5225,
+      "firstPlayerRate": 0.4775,
+      "avgRounds": 7.11,
+      "capped": 0,
+      "wentAll15Rounds": 0
+    }
+  ],
+  "sanity": [
+    {
+      "position": "don't push for nothing: he busted, my line is 11 (the most damage, coin for any card) at strain 3: Stop",
+      "greedy": true,
+      "expert": "5/5"
+    },
+    {
+      "position": "free draw: no strain card left in my draw pile, he is still drawing: Draw",
+      "greedy": false,
+      "expert": "5/5"
+    },
+    {
+      "position": "lethal: he stopped on 2 life, I lead by 2 at strain 3: Stop",
+      "greedy": true,
+      "expert": "5/5"
+    }
+  ],
+  "gate": {
+    "expertVsTrivial": {
+      "random": 1,
+      "greedy": 0.985,
+      "racer": 0.99
+    },
+    "expertBeatsTrivial70": true,
+    "setPositionsPass": true,
+    "turnCapShare": 0,
+    "turnCapOK": true,
+    "greedyAgreement": 0.7529,
+    "greedyAgreementOK": true,
+    "firstPlayerRateExpertMirror": 0.4775,
+    "firstPlayerOK": true,
+    "alive": true
+  },
+  "seconds": 3403,
+  "report": {
+    "verdict": "alive",
+    "summary": "Every machine criterion passes. Expert (determinized information-set MCTS, 600 play-outs a decision in the gate, 1500 on the page, play-outs to the end) beats Random 100%, Greedy 98.5%, Pusher 99.0% over 400 games each; set positions 5/5 on all three (Greedy fails the free draw); no caps (15 rounds by rule, never reached: mirror games last 7.1 rounds on average because the clash takes up to 5 of 15 life); Expert equals Greedy in 75.3% of 104,007 decisions (high but under 90: most decisions are a binary draw or stop); the first player of round 1 wins 47.8% of Expert mirrors.",
+    "loop": "Each draw you choose push or stop with the opponent's line in plain sight, then you buy one card with your line's power. Expert stops early when it acts first (strain 0-1 in two thirds of those stops) and pushes to strain 3 when it is second and still behind; it stops ahead three times as often as behind, at a bust chance around 0.2. Its buys go to deck control rather than raw power: Calm, Step 3, Step 4, Trim and Spoil dominate and Big 6 is rare. The best play boils down to reading the bust odds of your own draw pile against the other line, and building a deck whose strain you control, since the round's damage is capped at 5 and coin past 7 buys nothing more.",
+    "notes": "Rulings the spec left open: a bought Trim removes a card already in the discard and then goes there itself. The page lists what is left in each draw pile (public: every discard is face-up), so the odds are readable without memory."
+  }
+}

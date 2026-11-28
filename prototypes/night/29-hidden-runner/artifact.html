@@ -1,0 +1,711 @@
+<title>Hidden Runner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* one screen: history left; the grid in the middle with each side's energy above and below; rounds right; hand below */
+:root {
+  --bg: #2a3340; --table: #3b4a5c; --table2: #34424f; --ink: #1b1b1b; --paper: #fbf7ee;
+  --gold: #f2b632; --ok: #5fdc6f; --bad: #e0473a;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86;
+  --cardw: 100px; --cardh: 134px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game {
+  position: relative; height: 100%; max-width: 1300px; margin: 0 auto;
+  display: grid; grid-template-columns: 190px minmax(0, 1fr) 190px;
+  grid-template-rows: 44px auto minmax(0, 1fr) auto auto; gap: 6px 20px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+}
+#menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 45; display: flex; gap: 10px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 18px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#side1 { grid-row: 2; grid-column: 2; } #boardwrap { grid-row: 3; grid-column: 2; } #side0 { grid-row: 4; grid-column: 2; }
+#history { grid-row: 2 / 5; grid-column: 1; min-height: 0; }
+#info { grid-row: 2 / 5; grid-column: 3; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 30px; }
+#hand { grid-row: 5; grid-column: 1 / -1; }
+
+/* ---------------- sides */
+.side { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 40px; }
+.who { font-size: 20px; font-weight: 900; } .who.s0 { color: #8cc2ff; } .who.s1 { color: #c09ae8; }
+.en { display: flex; gap: 4px; }
+.en i { width: 16px; height: 16px; border-radius: 50%; background: #1d2a38; border: 2px solid #6b7b8c; }
+.en i.on { background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); border-color: #fff; }
+.pile { width: 28px; height: 38px; border-radius: 4px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; }
+.pile.s0 { background: linear-gradient(135deg, var(--me), var(--me2)); } .pile.s1 { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
+.backs { display: flex; } .backs i { width: 18px; height: 26px; border-radius: 3px; margin-left: -4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; }
+
+/* ---------------- the grid */
+#boardwrap { display: flex; align-items: center; justify-content: center; min-height: 0; }
+#board { position: relative; height: 100%; max-height: 500px; aspect-ratio: 1; border-radius: 18px; background: radial-gradient(ellipse at center, var(--table), var(--table2)); box-shadow: inset 0 0 24px rgba(0,0,0,.3); }
+.links { position: absolute; inset: 0; width: 100%; height: 100%; }
+.links line { stroke: #6b7b8c; stroke-width: .9; }
+.node { position: absolute; width: 17%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: #2a3646; border: 3px solid #6b7b8c; display: flex; align-items: center; justify-content: center; }
+.node.startrow { border-color: #c09ae8; border-style: dashed; }
+.node.tgt { cursor: pointer; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(242,182,50,.35), 0 0 18px rgba(242,182,50,.7); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(242,182,50,.55), 0 0 24px rgba(242,182,50,.9); } }
+.node.syes { background: #2c5a3a; } .node.sno { background: #5a2c2c; }
+.ans { position: absolute; top: -14px; right: -10px; width: 28px; height: 28px; border-radius: 50%; background: #fff; color: #1b1b1b; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 4; }
+.blk { width: 62%; height: 62%; border-radius: 6px; background: #12181f; border: 2px solid #dfe5eb; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; color: #dfe5eb; }
+.pawn { position: absolute; width: 11%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; border: 4px solid #fff; z-index: 3; box-shadow: 0 4px 10px rgba(0,0,0,.5); transition: left .45s ease-in-out, top .45s ease-in-out; }
+.pawn.s0 { background: radial-gradient(circle at 35% 30%, #7db3f5, var(--me2)); } .pawn.s1 { background: radial-gradient(circle at 35% 30%, #c09ae8, var(--him2)); }
+.pawn.can { cursor: pointer; box-shadow: 0 0 0 4px var(--ok), 0 0 16px rgba(95,220,111,.8); }
+.pawn.sel { box-shadow: 0 0 0 5px var(--gold), 0 0 20px rgba(242,182,50,.9); }
+.pawn.moved { filter: brightness(.75); }
+.asH .pawn.tgtpawn { cursor: pointer; }
+.runner { position: absolute; width: 8%; aspect-ratio: 1; transform: translate(-50%, -50%) rotate(45deg); border: 4px solid #fff; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,.5); transition: left .45s ease-in-out, top .45s ease-in-out; pointer-events: none; }
+.runner.s0 { background: linear-gradient(135deg, #8cc2ff, var(--me2)); } .runner.s1 { background: linear-gradient(135deg, #d2b5f2, var(--him2)); }
+.runner.flash { animation: flash .5s ease-in-out 2; }
+@keyframes flash { 50% { box-shadow: 0 0 0 10px rgba(255,255,255,.5), 0 0 30px #fff; } }
+.seen { position: absolute; width: 9%; aspect-ratio: 1; transform: translate(-50%, -50%) rotate(45deg); border: 3px dashed #c9b6e6; z-index: 1; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+.asR .seen { display: none; }
+.seen { font-weight: 900; font-size: 13px; color: #e8dcf7; } .seen span { transform: rotate(-45deg); }
+
+/* ---------------- rounds, end round */
+#rounds { display: grid; grid-template-columns: repeat(3, 22px); gap: 6px; }
+#rounds i { height: 22px; border-radius: 5px; background: #1d2a38; }
+#rounds i.past { background: #6b7b8c; } #rounds i.now { background: var(--gold); }
+#rounds i.rev { box-shadow: inset 0 0 0 3px #c9b6e6; }
+#done { width: 150px; min-height: 54px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; box-shadow: 0 3px 0 #a8770d; }
+#done:disabled { background: #56616d; color: #8e98a3; box-shadow: none; cursor: default; }
+
+/* ---------------- history */
+#history { display: flex; flex-direction: column; justify-content: center; gap: 4px; overflow: hidden; }
+.hist { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; min-height: 32px; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
+.rn { font-size: 12px; font-weight: 800; color: #9aa8b6; min-width: 16px; }
+.chip { min-width: 28px; height: 26px; padding: 0 4px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; flex: 0 0 auto; }
+.chip.rc { background: linear-gradient(160deg, #5fb8a8, #2f7d70); } .chip.hc { background: linear-gradient(160deg, #f08a5d, #b8452a); } .chip.seenc { background: #5d3f86; }
+.ho { font-weight: 800; font-size: 14px; } .ho.yes { color: var(--ok); margin-left: auto; } .ho.no { color: #ff8a70; margin-left: auto; }
+
+/* ---------------- cards */
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; text-align: left;
+  background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; }
+.card .art { margin: 4px 4px 0; border-radius: 6px; flex: 0 0 46%; display: flex; align-items: center; justify-content: center; color: #fff; }
+.card.rc .art { background: linear-gradient(160deg, #5fb8a8, #2f7d70); } .card.hc .art { background: linear-gradient(160deg, #f08a5d, #b8452a); }
+.card.basic .art { background: linear-gradient(160deg, #7d8ea2, #4d5d70); }
+.card .big { font-size: calc(var(--cardw) * .36); font-weight: 900; line-height: 1; }
+.card .nm { font-weight: 800; font-size: calc(var(--cardw) * .14); padding: 4px 7px 0; }
+.card .tx { font-size: calc(var(--cardw) * .11); padding: 1px 7px; color: #3a352c; line-height: 1.15; }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); border: 2px solid #fff; color: #2a1d00;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; }
+#hand { display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 12px 0 2px; min-height: calc(var(--cardh) + 16px); }
+#hand .card { transition: transform .12s, box-shadow .12s; }
+#hand .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok:hover { transform: translateY(-8px); }
+#hand .card.sel { transform: translateY(-16px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8); }
+#hand .card:disabled { cursor: default; }
+#hand .card.no { filter: brightness(.62) saturate(.6); }
+
+/* ---------------- spotlight, banner, game over, rules */
+#spot { position: absolute; z-index: 20; pointer-events: none; }
+#spot .card { --cardw: 140px; --cardh: 188px; position: absolute; left: calc(var(--cardw) / -2); top: calc(var(--cardh) / -2); box-shadow: 0 14px 40px rgba(0,0,0,.6); animation: fromtop .32s cubic-bezier(.2,.8,.3,1.1); }
+#spot .card.out { animation: spotout .2s ease-in forwards; }
+@keyframes fromtop { from { transform: translateY(-240px) scale(.4); opacity: .2; } }
+@keyframes spotout { to { transform: scale(.5); opacity: 0; } }
+#banner { position: absolute; left: 0; right: 0; top: 45%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 44px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1.2s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.45); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+#rulesbox { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rulesbox.show { display: flex; }
+.rulecard { max-width: 560px; max-height: 100%; overflow: auto; background: #f4efe4; color: #1b1b1b; border-radius: 12px; padding: 18px 22px; font-size: 15px; line-height: 1.4; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+.rulecard h3 { margin: 0 0 8px; font-size: 20px; }
+.rulecard p { margin: 0 0 8px; }
+
+/* ---------------- phone */
+@media (max-width: 760px) {
+  :root { --cardw: 66px; --cardh: 90px; }
+  #game { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 36px auto minmax(0, 1fr) auto auto; gap: 6px 8px; }
+  #history { display: none; }
+  #side1 { grid-column: 1 / -1; } #boardwrap { grid-column: 1 / -1; } #side0 { grid-row: 4; grid-column: 1; }
+  #info { grid-row: 4; grid-column: 2; flex-direction: row; gap: 10px; }
+  #rounds { grid-template-columns: repeat(6, 10px); gap: 3px; } #rounds i { height: 10px; border-radius: 2px; } #rounds i.rev { box-shadow: inset 0 0 0 2px #c9b6e6; }
+  #done { width: auto; min-height: 40px; padding: 0 12px; font-size: 14px; }
+  #board { height: auto; width: 100%; max-height: none; }
+  .node { border-width: 2px; } .pawn { border-width: 3px; } .runner { border-width: 3px; }
+  .en i { width: 12px; height: 12px; }
+  #menu { top: 3px; gap: 6px; } #menu button { min-height: 26px; padding: 2px 8px; font-size: 13px; }
+  .tally { font-size: 14px; } .tally b { min-width: 24px; height: 24px; }
+  .card .tx { display: none; } .card .art { flex: 0 0 60%; } .card .nm { font-size: 10px; padding: 3px 4px 0; }
+  .cgem { width: 20px; height: 20px; font-size: 12px; top: -6px; left: -6px; }
+  #hand { gap: 5px; flex-wrap: wrap; padding-top: 8px; }
+  #spot .card { --cardw: 110px; --cardh: 148px; }
+}
+
+</style>
+
+<div id="game">
+  <div id="menu"><span id="tally"></span><button id="rules">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="side1" class="side"></div>
+  <div id="boardwrap"><div id="board"></div></div>
+  <div id="info"><div id="rounds"></div><div id="turnbox"></div></div>
+  <div id="side0" class="side"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rulesbox"><div class="rulecard">
+    <h3>Hidden runner</h3>
+    <p>One side is the <b>Runner</b> (◆, hidden), the other the <b>Hunter</b> (two pawns). Roles swap every game.</p>
+    <p>The Runner starts on any node of the top row, unseen. Each round both sides gain 2 energy (max 5) and draw a card. Then:</p>
+    <p><b>Runner</b>: a free Step (move 1 or stay) or one card. The card's name is announced, never where it went. The Runner can never enter a pawn's node or a Block.</p>
+    <p><b>Hunter</b>: move each pawn 1 (or leave it) and play at most one card, before or after moving. Tap a pawn, then a node. End the round when done.</p>
+    <p>A pawn landing on the Runner wins for the Hunter. The Runner is shown at the end of rounds 3, 6 and 9 (marked on the round track). The Runner wins by surviving round 12.</p>
+    <p>Search: name a node; you learn whether the Runner is on it or next to it (✓ or ✕). Hide makes this round's Searches answer ✕.</p>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 29 Hidden runner: asymmetric. The Runner moves secretly on a 4x4 grid, announcing only the kind
+// of move, and is shown at the end of rounds 3, 6 and 9; the Hunter's two visible pawns search and
+// corner it. Both sides play costed move cards from their own 12-card decks.
+// The engine keeps `poss`, the nodes the Runner could be on given everything public, so a Hunter
+// (bot or page) reads only that, never `runner`. Pure from the outside: act() clones the state.
+
+const N = 4, ROUNDS = 12, REVEALS = [3, 6, 9], ECAP = 5, EGAIN = 2;
+// The one rule changed after the first gate: Sprint reaches 2, not 3 (see report.json).
+const SPRINT = 2;
+const rc = (n) => [Math.floor(n / N), n % N];
+const at = (r, c) => (r >= 0 && r < N && c >= 0 && c < N) ? r * N + c : -1;
+const ADJ = [], DIAG = [], DIST = [];
+for (let n = 0; n < N * N; n++) {
+  const [r, c] = rc(n);
+  ADJ[n] = [at(r - 1, c), at(r + 1, c), at(r, c - 1), at(r, c + 1)].filter(x => x >= 0);
+  DIAG[n] = [at(r - 1, c - 1), at(r - 1, c + 1), at(r + 1, c - 1), at(r + 1, c + 1)].filter(x => x >= 0);
+  DIST[n] = []; for (let m = 0; m < N * N; m++) { const [a, b] = rc(m); DIST[n][m] = Math.abs(a - r) + Math.abs(b - c); }
+}
+const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+const RCARDS = {
+  STEP: { id: 'STEP', name: 'Step', cost: 0, text: 'Move 1 or stay.' },
+  DASH: { id: 'DASH', name: 'Dash', cost: 1, text: 'Move 1 or 2 in a straight line.' },
+  SLIP: { id: 'SLIP', name: 'Slip', cost: 1, text: 'Move 1 diagonally.' },
+  HIDE: { id: 'HIDE', name: 'Hide', cost: 1, text: 'Stay; Searches this round answer no.' },
+  SMOK: { id: 'SMOK', name: 'Smoke', cost: 2, text: 'Move 1 or stay; skip the next reveal.' },
+  DOUB: { id: 'DOUB', name: 'Double', cost: 2, text: 'Step twice.' },
+};
+const HCARDS = {
+  SPR: { id: 'SPR', name: 'Sprint', cost: 1, text: 'One pawn moves up to 2 instead of 1.' },
+  SEA: { id: 'SEA', name: 'Search', cost: 1, text: 'Name a node: is the Runner on it or next to it?' },
+  FLA: { id: 'FLA', name: 'Flare', cost: 3, text: 'The Runner is shown now.' },
+  BLO: { id: 'BLO', name: 'Block', cost: 1, text: 'Block a node for 3 rounds.' },
+};
+const RDECK = { DASH: 4, SLIP: 3, HIDE: 2, SMOK: 1, DOUB: 2 };
+const HDECK = { SPR: 4, SEA: 4, FLA: 2, BLO: 2 };
+
+const list = (m) => { const out = []; for (const [id, k] of Object.entries(m)) for (let i = 0; i < k; i++) out.push(id); return out; };
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleWith(r, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+const bits = (mask) => { const out = []; for (let n = 0; n < N * N; n++) if (mask & (1 << n)) out.push(n); return out; };
+
+function clone(s) {
+  return { ...s, pawns: s.pawns.slice(), moved: s.moved.slice(), blocks: s.blocks.map(b => ({ ...b })), R: { ...s.R, hand: s.R.hand.slice(), deck: s.R.deck.slice() }, H: { ...s.H, hand: s.H.hand.slice(), deck: s.H.deck.slice() }, kinds: s.kinds.slice() };
+}
+function emit(s, ev, e) { if (ev) ev.push(e); }
+
+// seatR plays the Runner (seat 0 or 1); the other seat hunts.
+function newMatch({ seed, seatR = 0 } = {}) {
+  const s = { seed: (seed >>> 0) || 1, round: 0, phase: 'start', seatR, turn: seatR, first: seatR, winner: null, runner: -1, pawns: [at(N - 1, 0), at(N - 1, N - 1)], moved: [false, false], cardUsed: false,
+    blocks: [], hide: false, skip: false, poss: 0, kinds: [], lastSeen: null, search: null,
+    R: { energy: 2, hand: [], deck: list(RDECK) }, H: { energy: 2, hand: [], deck: list(HDECK) } };
+  const r = () => rand(s);
+  for (const P of [s.R, s.H]) { shuffleWith(r, P.deck); for (let i = 0; i < 3; i++) P.hand.push(P.deck.shift()); }
+  for (let c = 0; c < N; c++) s.poss |= 1 << at(0, c);
+  return s;
+}
+const roleOf = (s, seat) => seat === s.seatR ? 'R' : 'H';
+const blocked = (s, n) => s.blocks.some(b => b.node === n);
+const free = (s, n) => !s.pawns.includes(n) && !blocked(s, n);
+
+// Where a Runner on n can end with a card of this kind (given pawns and blocks now).
+function reach(s, n, kind) {
+  const out = new Set();
+  const step = (m) => { const o = [m]; for (const x of ADJ[m]) if (free(s, x)) o.push(x); return o; };
+  if (kind === 'STEP' || kind === 'SMOK') step(n).forEach(x => out.add(x));
+  else if (kind === 'HIDE') out.add(n);
+  else if (kind === 'SLIP') DIAG[n].forEach(x => { if (free(s, x)) out.add(x); });
+  else if (kind === 'DOUB') step(n).forEach(x => step(x).forEach(y => out.add(y)));
+  else if (kind === 'DASH') {
+    const [r, c] = rc(n);
+    for (const [dr, dc] of DIRS) { const a = at(r + dr, c + dc); if (a < 0 || !free(s, a)) continue; out.add(a); const b = at(r + 2 * dr, c + 2 * dc); if (b >= 0 && free(s, b)) out.add(b); }
+  }
+  return [...out];
+}
+const pawnReach = (s, p, k) => { const out = []; for (let n = 0; n < N * N; n++) if (DIST[s.pawns[p]][n] <= k) out.push(n); return out; };
+
+// Actions. Runner: { t: 'start', to } · { t: 'run', card, to } (card 'STEP' is the free basic move)
+// Hunter: { t: 'move', pawn, to } · { t: 'card', card: 'SPR', pawn, to } · { t: 'card', card: 'SEA', node }
+//         { t: 'card', card: 'FLA' } · { t: 'card', card: 'BLO', node } · { t: 'done' }
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  const out = [];
+  if (s.phase === 'start') { for (let c = 0; c < N; c++) out.push({ t: 'start', to: at(0, c) }); return out; }
+  if (s.phase === 'run') {
+    const kinds = ['STEP', ...new Set(s.R.hand.filter(id => RCARDS[id].cost <= s.R.energy))];
+    for (const k of kinds) for (const to of reach(s, s.runner, k)) out.push({ t: 'run', card: k, to });
+    return out;
+  }
+  for (let p = 0; p < 2; p++) if (!s.moved[p]) for (const to of [s.pawns[p], ...ADJ[s.pawns[p]]]) out.push({ t: 'move', pawn: p, to });
+  if (!s.cardUsed) for (const id of new Set(s.H.hand)) {
+    if (HCARDS[id].cost > s.H.energy) continue;
+    if (id === 'SPR') { for (let p = 0; p < 2; p++) if (!s.moved[p]) for (const to of pawnReach(s, p, SPRINT)) if (DIST[s.pawns[p]][to] >= 2) out.push({ t: 'card', card: id, pawn: p, to }); }
+    else if (id === 'FLA') out.push({ t: 'card', card: id });
+    else for (let n = 0; n < N * N; n++) out.push({ t: 'card', card: id, node: n });
+  }
+  out.push({ t: 'done' });
+  return out;
+}
+
+function startRound(s, ev) {
+  s.round++;
+  for (const P of [s.R, s.H]) { P.energy = Math.min(ECAP, P.energy + EGAIN); if (P.deck.length) P.hand.push(P.deck.shift()); }
+  s.hide = false; s.search = null; s.phase = 'run'; s.turn = s.seatR;
+  emit(s, ev, { t: 'round', round: s.round });
+}
+function landPawn(s, p, to, ev) {
+  s.pawns[p] = to; s.moved[p] = true;
+  emit(s, ev, { t: 'pawn', pawn: p, to });
+  if (to === s.runner) { s.winner = 1 - s.seatR; emit(s, ev, { t: 'caught', node: to }); emit(s, ev, { t: 'end', winner: s.winner }); return; }
+  s.poss &= ~(1 << to);
+}
+function show(s, why, ev) { s.poss = 1 << s.runner; s.lastSeen = { node: s.runner, round: s.round }; emit(s, ev, { t: 'show', node: s.runner, why }); }
+function endRound(s, ev) {
+  if (REVEALS.includes(s.round)) { if (s.skip) { s.skip = false; emit(s, ev, { t: 'smoked' }); } else show(s, 'reveal', ev); }
+  s.blocks = s.blocks.filter(b => b.until > s.round);
+  if (s.round >= ROUNDS) { s.winner = s.seatR; s.timeout = true; emit(s, ev, { t: 'end', winner: s.winner }); return; }
+  startRound(s, ev);
+}
+
+function mAct(s, a, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  if (s.phase === 'start') {
+    if (a.t !== 'start' || Math.floor(a.to / N) !== 0) throw new Error('bad start');
+    s.runner = a.to; emit(s, ev, { t: 'start' });
+    startRound(s, ev); return;
+  }
+  if (s.phase === 'run') {
+    if (a.t !== 'run') throw new Error('bad run');
+    const c = RCARDS[a.card];
+    if (a.card !== 'STEP' && (!s.R.hand.includes(a.card) || c.cost > s.R.energy)) throw new Error('cannot play ' + a.card);
+    const prevPoss = bits(s.poss);
+    if (!reach(s, s.runner, a.card).includes(a.to)) throw new Error('bad destination');
+    if (a.card !== 'STEP') { s.R.energy -= c.cost; s.R.hand.splice(s.R.hand.indexOf(a.card), 1); }
+    if (a.card === 'HIDE') s.hide = true;
+    if (a.card === 'SMOK') s.skip = true;
+    s.runner = a.to;
+    let poss = 0; for (const n of prevPoss) for (const m of reach(s, n, a.card)) poss |= 1 << m;
+    s.poss = poss; s.kinds.push(a.card);
+    emit(s, ev, { t: 'run', card: a.card, to: a.to });
+    s.phase = 'hunt'; s.turn = 1 - s.seatR; s.moved = [false, false]; s.cardUsed = false;
+    return;
+  }
+  // the Hunter
+  if (a.t === 'done') { emit(s, ev, { t: 'done' }); return endRound(s, ev); }
+  if (a.t === 'move') {
+    if (s.moved[a.pawn] || !(a.to === s.pawns[a.pawn] || ADJ[s.pawns[a.pawn]].includes(a.to))) throw new Error('bad move');
+    landPawn(s, a.pawn, a.to, ev);
+  } else if (a.t === 'card') {
+    const c = HCARDS[a.card];
+    if (s.cardUsed || !s.H.hand.includes(a.card) || c.cost > s.H.energy) throw new Error('cannot play ' + a.card);
+    s.H.energy -= c.cost; s.H.hand.splice(s.H.hand.indexOf(a.card), 1); s.cardUsed = true;
+    emit(s, ev, { t: 'hcard', card: a.card, node: a.node, pawn: a.pawn, to: a.to });
+    if (a.card === 'SPR') { if (s.moved[a.pawn] || DIST[s.pawns[a.pawn]][a.to] > SPRINT) throw new Error('bad sprint'); landPawn(s, a.pawn, a.to, ev); }
+    else if (a.card === 'FLA') show(s, 'flare', ev);
+    else if (a.card === 'BLO') { s.blocks.push({ node: a.node, until: s.round + 3 }); emit(s, ev, { t: 'block', node: a.node }); }
+    else if (a.card === 'SEA') {
+      const near = a.node === s.runner || ADJ[a.node].includes(s.runner);
+      const yes = near && !s.hide;
+      let m = 1 << a.node; for (const x of ADJ[a.node]) m |= 1 << x;
+      if (!s.hide) s.poss = yes ? (s.poss & m) : (s.poss & ~m);
+      s.search = { node: a.node, yes };
+      emit(s, ev, { t: 'search', node: a.node, yes });
+    }
+  } else throw new Error('bad hunter action');
+  if (s.winner === null && s.moved[0] && s.moved[1] && s.cardUsed) endRound(s, ev);
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function _act(t, a) { mAct(t, a, null); return t; }
+
+// What the mover cannot see. The Hunter: where the Runner is (drawn from `poss`) and the Runner's
+// cards. The Runner: the Hunter's cards. Both: deck orders.
+function determinize(s, seat, r) {
+  const t = clone(s);
+  t.seed = (r() * 4294967296) >>> 0;
+  const other = roleOf(s, seat) === 'R' ? t.H : t.R;
+  const pool = shuffleWith(r, other.hand.concat(other.deck));
+  other.hand = pool.slice(0, other.hand.length); other.deck = pool.slice(other.hand.length);
+  shuffleWith(r, (roleOf(s, seat) === 'R' ? t.R : t.H).deck);
+  if (roleOf(s, seat) === 'H' && t.phase !== 'start') { const P = bits(t.poss); t.runner = P[Math.floor(r() * P.length)]; }
+  return t;
+}
+function actionKey(s, a) {
+  if (a.t === 'start') return 's' + a.to;
+  if (a.t === 'run') return a.card + a.to;
+  if (a.t === 'move') return 'm' + a.pawn + ':' + a.to;
+  if (a.t === 'done') return 'd';
+  return a.card + (a.node ?? '') + (a.pawn ?? '') + ':' + (a.to ?? '');
+}
+
+// ---- src/bot.js
+// Bots for Hidden runner, both roles. A Hunter (any of them) reads only public information: the
+// pawns, blocks, the announced kinds and `poss`, the nodes the Runner could be on. A Runner never
+// reads the Hunter's hand. Expert redraws what its side cannot see before every play-out.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pick = (a, r) => a[Math.floor(r() * a.length)];
+const popc = (m) => { let k = 0; while (m) { m &= m - 1; k++; } return k; };
+const near = (s, n) => Math.min(DIST[s.pawns[0]][n], DIST[s.pawns[1]][n]);
+const nbhd = (n) => { let m = 1 << n; for (const x of ADJ[n]) m |= 1 << x; return m; };
+
+function randomBot(s, r) { return pick(legalActions(s), r); }
+// The choices worth considering: a Search or Block that touches where the Runner could be.
+function sensible(s) {
+  const L = legalActions(s);
+  if (s.phase !== 'hunt') return L;
+  let zone = 0; for (const n of bits(s.poss)) zone |= nbhd(n);
+  let zone2 = zone; for (const n of bits(zone)) zone2 |= nbhd(n);
+  return L.filter(a => !(a.card === 'SEA' && !(nbhd(a.node) & s.poss)) && !(a.card === 'BLO' && (!(zone2 & (1 << a.node)) || s.pawns.includes(a.node))));
+}
+
+// ------------------------------------------------------------------ Greedy (one per role)
+// Greedy Runner: its most expensive move card, to the node farthest from the nearest pawn.
+function greedyRunner(s) {
+  const L = legalActions(s);
+  if (s.phase === 'start') { let best = L[0], bd = -1; for (const a of L) { const d = near(s, a.to); if (d > bd) { bd = d; best = a; } } return best; }
+  const kinds = [...new Set(L.map(a => a.card))].filter(k => k !== 'HIDE').sort((a, b) => RCARDS[b].cost - RCARDS[a].cost);
+  const k = kinds[0] || 'STEP';
+  let best = null, bd = -1;
+  for (const a of L) if (a.card === k) { const d = near(s, a.to); if (d > bd) { bd = d; best = a; } }
+  return best || L[0];
+}
+// the node whose neighbourhood splits the possible set most evenly
+function splitNode(s) {
+  const P = s.poss, n0 = popc(P); let best = -1, bv = Infinity;
+  for (let n = 0; n < N * N; n++) { const k = popc(P & nbhd(n)); if (!k) continue; const v = Math.abs(2 * k - n0); if (v < bv) { bv = v; best = n; } }
+  return best;
+}
+// Greedy Hunter: Search when 4 nodes or fewer are possible; each pawn one step toward its nearest
+// possible node.
+function greedyHunter(s) {
+  const P = bits(s.poss);
+  if (!s.cardUsed && P.length >= 2 && P.length <= 4 && s.H.hand.includes('SEA') && s.H.energy >= HCARDS.SEA.cost) return { t: 'card', card: 'SEA', node: splitNode(s) };
+  for (let p = 0; p < 2; p++) {
+    if (s.moved[p]) continue;
+    const from = s.pawns[p];
+    let tgt = P[0], td = Infinity; for (const n of P) if (DIST[from][n] < td) { td = DIST[from][n]; tgt = n; }
+    let to = from, bd = DIST[from][tgt];
+    for (const x of ADJ[from]) if (DIST[x][tgt] < bd) { bd = DIST[x][tgt]; to = x; }
+    return { t: 'move', pawn: p, to };
+  }
+  return { t: 'done' };
+}
+function greedyBot(s) { return roleOf(s, s.turn) === 'R' ? greedyRunner(s) : greedyHunter(s); }
+
+// ------------------------------------------------------------------ Expert
+// Play-out policies, both honest. Runner: weighs distance from the pawns, how much the Hunter's
+// possible set grows, and the card's cost. Hunter: catches what is certain, Searches a small set,
+// otherwise moves the pawns to cover the possible set.
+function runnerPolicy(s, r) {
+  const L = legalActions(s);
+  if (r() < 0.1) return pick(L, r);
+  if (s.phase === 'start') return pick(L, r);
+  const prev = bits(s.poss), spread = {};
+  let best = L[0], bv = -Infinity;
+  for (const a of L) {
+    if (!(a.card in spread)) { let m = 0; for (const n of prev) for (const x of reach(s, n, a.card)) m |= 1 << x; spread[a.card] = popc(m); }
+    const v = 3 * Math.min(3, near(s, a.to)) + 0.6 * spread[a.card] - 0.7 * RCARDS[a.card].cost + r();
+    if (v > bv) { bv = v; best = a; }
+  }
+  return best;
+}
+function cover(s, pawns) { let c = 0; for (const n of bits(s.poss)) c += Math.min(DIST[pawns[0]][n], DIST[pawns[1]][n]); return c; }
+function hunterPolicy(s, r) {
+  const P = bits(s.poss), H = s.H;
+  if (P.length === 1) {
+    const t = P[0];
+    for (let p = 0; p < 2; p++) if (!s.moved[p] && ADJ[s.pawns[p]].includes(t)) return { t: 'move', pawn: p, to: t };
+    if (!s.cardUsed && H.hand.includes('SPR') && H.energy >= 1) for (let p = 0; p < 2; p++) if (!s.moved[p] && DIST[s.pawns[p]][t] <= SPRINT) return { t: 'card', card: 'SPR', pawn: p, to: t };
+  }
+  if (!s.cardUsed && P.length >= 2 && P.length <= 6 && H.hand.includes('SEA') && H.energy >= 1) return { t: 'card', card: 'SEA', node: splitNode(s) };
+  if (!s.cardUsed && P.length >= 7 && H.hand.includes('FLA') && H.energy >= 3 && r() < 0.5) return { t: 'card', card: 'FLA' };
+  for (let p = 0; p < 2; p++) {
+    if (s.moved[p]) continue;
+    const from = s.pawns[p];
+    let to = from, bc = Infinity;
+    for (const x of [from, ...ADJ[from]]) { const pw = s.pawns.slice(); pw[p] = x; const c = cover(s, pw) + ((s.poss >> x) & 1 ? -0.5 : 0) + 0.3 * r(); if (c < bc) { bc = c; to = x; } }
+    return { t: 'move', pawn: p, to };
+  }
+  return { t: 'done' };
+}
+function policy(s, r) { return roleOf(s, s.turn) === 'R' ? runnerPolicy(s, r) : hunterPolicy(s, r); }
+
+// Determinized flat Monte Carlo with paired samples: each round of the search redraws what the
+// mover cannot see once, then plays every action out from that same redraw with the same play-out
+// seed, so actions are compared on identical worlds and a small edge (free information) shows.
+function flatMC(s, r, { iters = 3000 } = {}) {
+  const me = s.turn, acts = sensible(s);
+  if (acts.length === 1) return acts[0];
+  // a win now in every redraw of the hidden part (a catch that cannot miss) is taken at once
+  for (const a of acts) { let all = true; for (let k = 0; k < 8 && all; k++) if (_act(determinize(s, me, r), a).winner !== me) all = false; if (all) return a; }
+  const w = new Array(acts.length).fill(0), rounds = Math.max(8, Math.floor(iters / acts.length));
+  // dominance: free information is never worse. Before ending a Hunter round, Search if a Search
+  // splits the possible set and the energy it costs would be lost to the cap next round anyway.
+  const freeSearch = s.phase === 'hunt' && !s.cardUsed && s.H.hand.includes('SEA') && s.H.energy + EGAIN - HCARDS.SEA.cost >= ECAP && popc(s.poss) >= 2;
+  for (let k = 0; k < rounds; k++) {
+    const d0 = determinize(s, me, r), seed = (r() * 4294967296) >>> 0;
+    for (let i = 0; i < acts.length; i++) {
+      const d = clone(d0), rr = makeRng(seed);
+      d.seed = seed;
+      _act(d, acts[i]);
+      while (d.winner === null) _act(d, policy(d, rr));
+      if (d.winner === me) w[i]++;
+    }
+  }
+  let best = 0; for (let i = 1; i < acts.length; i++) if (w[i] > w[best]) best = i;
+  if (freeSearch && acts[best].t === 'done') { const n = splitNode(s); if (n >= 0 && popc(s.poss & nbhd(n)) < popc(s.poss)) return { t: 'card', card: 'SEA', node: n }; }
+  return acts[best];
+}
+const expertBot = (o) => (s, r) => flatMC(s, r, o);
+const racerBot = null;
+
+// ---- src/ui.js
+// Hidden runner as a game screen against Expert. The human is seat 0 and alternates roles from game
+// to game. As the Hunter the page shows only what a Hunter knows: announced kinds, reveals, Search
+// answers; never the Runner. Every action goes through legalActions/act.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-29-tally';
+const expert = expertBot({ iters: 1500 });
+const ui = { s: null, busy: false, over: false, sel: null, hist: [], rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0, flash: null };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+const role = () => ui.s.seatR === ME ? 'R' : 'H';
+const CARD = (id) => RCARDS[id] || HCARDS[id];
+const SHORT = { SEA: 'Name a node: on it or next to it?', HIDE: 'Stay; Searches say no.', SMOK: 'Move 1 or stay; skip the next reveal.', SPR: 'A pawn moves up to 2.' };
+const GLYPH = { STEP: '·', DASH: '⇉', SLIP: '⤡', HIDE: '◌', SMOK: '≋', DOUB: '⇶', SPR: '⇉', SEA: '?', FLA: '✦', BLO: '■' };
+function cardHTML(id, { cls = '', attrs = '' } = {}) {
+  const c = CARD(id);
+  return `<button class="card ${RCARDS[id] ? 'rc' : 'hc'} ${cls}" ${attrs}><span class="cgem">${c.cost}</span><div class="art"><span class="big">${GLYPH[id]}</span></div><div class="nm">${c.name}</div><div class="tx">${SHORT[id] || c.text}</div></button>`;
+}
+
+// ------------------------------------------------------------------ what can be done now
+const myMove = () => !ui.busy && !ui.over && ui.s.turn === ME;
+const legal = () => myMove() ? legalActions(ui.s) : [];
+// node -> the action a click there does, given the selection
+function clickMap() {
+  const out = new Map(), L = legal(), sel = ui.sel;
+  for (const a of L) {
+    if (a.t === 'start') out.set(a.to, a);
+    if (a.t === 'run' && sel && sel.card === a.card) out.set(a.to, a);
+    if (a.t === 'move' && sel && sel.pawn === a.pawn && !sel.card) out.set(a.to, a);
+    if (a.t === 'card' && sel && sel.card === a.card) {
+      if (a.card === 'SPR' && sel.pawn === a.pawn) out.set(a.to, a);
+      if (a.card === 'SEA' || a.card === 'BLO') out.set(a.node, a);
+    }
+  }
+  return out;
+}
+
+// ------------------------------------------------------------------ rendering
+const pct = (n) => ({ x: ((n % N) + 0.5) * 100 / N, y: (Math.floor(n / N) + 0.5) * 100 / N });
+function boardHTML() {
+  const s = ui.s, M = clickMap(), L = legal();
+  let h = '<svg class="links" viewBox="0 0 100 100" preserveAspectRatio="none">';
+  for (let n = 0; n < N * N; n++) for (const m of ADJ[n]) if (m > n) { const a = pct(n), b = pct(m); h += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`; }
+  h += '</svg>';
+  const srch = s.search ? [s.search.node, ...ADJ[s.search.node]] : [];
+  for (let n = 0; n < N * N; n++) {
+    const p = pct(n), blk = s.blocks.find(b => b.node === n);
+    let cls = M.has(n) ? ' tgt' : '';
+    if (s.phase === 'start' && Math.floor(n / N) === 0 && role() === 'H') cls += ' startrow';
+    if (s.search && srch.includes(n)) cls += s.search.yes ? ' syes' : ' sno';
+    h += `<div class="node${cls}" data-node="${n}" style="left:${p.x}%;top:${p.y}%">${blk ? `<span class="blk">${blk.until - s.round}</span>` : ''}${s.search && s.search.node === n ? `<b class="ans">${s.search.yes ? '✓' : '✕'}</b>` : ''}</div>`;
+  }
+  // the Runner: always for the Runner's own player; for the Hunter only the last sighting
+  const showRunner = s.runner >= 0 && (role() === 'R' || ui.over || (ui.flash && ui.flash.node === s.runner));
+  if (s.lastSeen && !showRunner) { const p = pct(s.lastSeen.node); h += `<div class="seen" style="left:${p.x}%;top:${p.y}%"><span>${s.lastSeen.round}</span></div>`; }
+  if (showRunner) { const p = pct(s.runner); h += `<div class="runner s${s.seatR}${ui.flash ? ' flash' : ''}" style="left:${p.x}%;top:${p.y}%"></div>`; }
+  const hs = 1 - s.seatR;
+  s.pawns.forEach((n, i) => {
+    const p = pct(n);
+    const can = role() === 'H' && myMove() && s.phase === 'hunt' && L.some(a => (a.t === 'move' && a.pawn === i) || (a.card === 'SPR' && a.pawn === i));
+    const sel = ui.sel && ui.sel.pawn === i;
+    h += `<div class="pawn s${hs}${can && !sel && (!ui.sel || ui.sel.card === 'SPR') ? ' can' : ''}${sel ? ' sel' : ''}${s.phase === 'hunt' && s.moved[i] ? ' moved' : ''}" data-pawn="${i}" style="left:${p.x}%;top:${p.y}%"></div>`;
+  });
+  return h;
+}
+function energyHTML(P) { let g = ''; for (let i = 0; i < ECAP; i++) g += `<i class="${i < P.energy ? 'on' : ''}"></i>`; return `<span class="en">${g}</span>`; }
+function sideHTML(seat) {
+  const s = ui.s, P = seat === s.seatR ? s.R : s.H;
+  return `<span class="who s${seat}">${seat === s.seatR ? '◆' : '●●'}</span>${energyHTML(P)}<span class="pile s${seat}">${P.deck.length}</span>${seat === BOT ? `<span class="backs">${'<i></i>'.repeat(P.hand.length)}</span>` : ''}`;
+}
+function handHTML() {
+  const s = ui.s, L = legal(), mine = role() === 'R' ? s.R : s.H;
+  const ids = role() === 'R' ? ['STEP', ...mine.hand.slice().sort()] : mine.hand.slice().sort();
+  return ids.map((id, k) => {
+    const ok = role() === 'R' ? L.some(a => a.t === 'run' && a.card === id) : L.some(a => a.t === 'card' && a.card === id);
+    const sel = ui.sel && ui.sel.card === id && ui.sel.k === k;
+    return cardHTML(id, { cls: (ok ? 'ok' : (myMove() ? 'no' : '')) + (sel ? ' sel' : '') + (id === 'STEP' ? ' basic' : ''), attrs: `data-card="${id}" data-k="${k}"${ok ? '' : ' disabled'}` });
+  }).join('');
+}
+function render() {
+  const s = ui.s, t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('board').innerHTML = boardHTML();
+  let r = ''; for (let i = 1; i <= ROUNDS; i++) r += `<i class="${i < s.round ? 'past' : i === s.round ? 'now' : ''}${REVEALS.includes(i) ? ' rev' : ''}"></i>`;
+  $('rounds').innerHTML = r;
+  $('side1').innerHTML = sideHTML(BOT); $('side0').innerHTML = sideHTML(ME);
+  $('hand').innerHTML = handHTML();
+  const canDone = legal().some(a => a.t === 'done');
+  $('turnbox').innerHTML = role() === 'H' ? `<button id="done"${canDone ? '' : ' disabled'}>End round</button>` : '';
+  $('history').innerHTML = ui.hist.slice(-14).map(h => `<div class="hist s${h.side}">${h.html}</div>`).join('');
+}
+
+// ------------------------------------------------------------------ effects
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+async function spotlight(id) {
+  const g = $('game').getBoundingClientRect(), b = $('board').getBoundingClientRect();
+  $('spot').style.left = (b.left - g.left + b.width / 2) + 'px'; $('spot').style.top = (b.top - g.top + b.height / 2) + 'px';
+  $('spot').innerHTML = cardHTML(id);
+  await wait(850);
+  const c = $('spot').querySelector('.card'); if (c) c.classList.add('out');
+  await wait(180); $('spot').innerHTML = '';
+}
+
+// ------------------------------------------------------------------ playback
+async function apply(a) {
+  const prev = ui.s, ev = [];
+  const next = act(prev, a, ev);
+  const actor = prev.turn;
+  const runE = ev.find(e => e.t === 'run'), hcE = ev.find(e => e.t === 'hcard');
+  if (actor === BOT && runE) await spotlight(runE.card);
+  if (actor === BOT && hcE) await spotlight(hcE.card);
+  ui.sel = null;
+  // a reveal or flare or catch: show the Runner on the pre-round board for a moment
+  const showE = ev.find(e => e.t === 'show') || ev.find(e => e.t === 'caught');
+  if (showE) { ui.s = { ...next, round: prev.round, blocks: prev.blocks.length >= next.blocks.length ? next.blocks : prev.blocks, search: next.search ?? prev.search }; ui.flash = { node: showE.node }; render(); await wait(1100); ui.flash = null; }
+  ui.s = next; render();
+  // history
+  const kindHTML = (id, side) => `<span class="chip ${RCARDS[id] ? 'rc' : 'hc'}">${GLYPH[id]}</span><span class="ho">${CARD(id).name}</span>`;
+  if (runE) ui.hist.push({ side: actor, html: `<span class="rn">${prev.round}</span>` + kindHTML(runE.card) });
+  if (hcE) ui.hist.push({ side: actor, html: kindHTML(hcE.card) + (hcE.card === 'SEA' ? `<span class="ho ${ev.find(e => e.t === 'search').yes ? 'yes' : 'no'}">${ev.find(e => e.t === 'search').yes ? '✓' : '✕'}</span>` : '') });
+  for (const e of ev) {
+    if (e.t === 'show') ui.hist.push({ side: next.seatR, html: `<span class="chip seenc">◆</span><span class="ho">${e.why === 'flare' ? 'Flare' : 'Shown'}</span>` });
+    if (e.t === 'smoked') ui.hist.push({ side: next.seatR, html: `<span class="chip rc">≋</span><span class="ho">No reveal</span>` });
+  }
+  if (ev.some(e => e.t === 'round') && next.round > 1) await wait(400);
+  if (next.winner !== null) finish();
+  render();
+}
+
+function finish() {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  render();
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+// ------------------------------------------------------------------ flow
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, seatR: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.over = false; ui.hist = []; ui.sel = null; ui.flash = null;
+  $('over').classList.remove('show');
+  $('game').classList.toggle('asR', role() === 'R'); $('game').classList.toggle('asH', role() === 'H');
+  ui.busy = true; render();
+  banner(role() === 'R' ? 'You run' : 'You hunt');
+  await wait(1000);
+  if (tok !== ui.token) return;
+  return loop(tok);
+}
+async function loop(tok) {
+  while (tok === ui.token && !ui.over && ui.s.turn === BOT) {
+    ui.busy = true; render();
+    await wait(500);
+    const a = expert(ui.s, ui.rng);
+    if (tok !== ui.token) return;
+    await apply(a);
+  }
+  if (tok !== ui.token || ui.over) return;
+  ui.busy = false; render();
+}
+async function doAct(a) {
+  if (!myMove()) return;
+  const tok = ui.token;
+  ui.busy = true;
+  await apply(a);
+  if (tok !== ui.token) return;
+  return loop(tok);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#rules')) { $('rulesbox').classList.toggle('show'); return; }
+  if (e.target.closest('#rulesbox')) { $('rulesbox').classList.remove('show'); return; }
+  const b = e.target.closest('button');
+  if (b && (b.id === 'rematch' || b.id === 'newmatch')) return startMatch();
+  if (!myMove()) return;
+  const s = ui.s;
+  const nodeEl = e.target.closest('.node'), pawnEl = e.target.closest('.pawn');
+  if (pawnEl && role() === 'H') {
+    const i = +pawnEl.dataset.pawn;
+    const L = legalActions(s);
+    if (ui.sel && ui.sel.card === 'SPR' && ui.sel.pawn === undefined && L.some(a => a.card === 'SPR' && a.pawn === i)) { ui.sel = { ...ui.sel, pawn: i }; render(); return; }
+    if (!ui.sel && L.some(a => a.t === 'move' && a.pawn === i)) { ui.sel = { pawn: i }; render(); return; }
+    if (ui.sel && ui.sel.pawn === i && !ui.sel.card) { const a = clickMap().get(s.pawns[i]); if (a) return doAct(a); }
+  }
+  if (nodeEl || pawnEl) {
+    const n = nodeEl ? +nodeEl.dataset.node : s.pawns[+pawnEl.dataset.pawn];
+    const a = clickMap().get(n);
+    if (a) return doAct(a);
+  }
+  if (b && !b.disabled && b.dataset.card) {
+    const id = b.dataset.card, k = +b.dataset.k;
+    if (ui.sel && ui.sel.card === id && ui.sel.k === k) { ui.sel = null; render(); return; }
+    if (id === 'FLA') return doAct({ t: 'card', card: 'FLA' });
+    ui.sel = { card: id, k }; render(); return;
+  }
+  if (b && !b.disabled && b.id === 'done') return doAct({ t: 'done' });
+  if (ui.sel) { ui.sel = null; render(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { ui.sel = null; $('rulesbox').classList.remove('show'); render(); } });
+startMatch();
+
+})();
+</script>

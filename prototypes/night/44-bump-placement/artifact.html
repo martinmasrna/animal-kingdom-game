@@ -1,0 +1,696 @@
+<title>Bump Placement</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* one screen: history left; his score, the five spaces, my score in the middle; round and Pass right; the hand below */
+:root {
+  --bg: #2a3340; --table: #3b4a5c; --table2: #34424f; --ink: #1b1b1b; --paper: #fbf7ee;
+  --mana: #3d8bf2; --gold: #f2b632; --ok: #5fdc6f;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86;
+  --cardw: 96px; --cardh: 130px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game {
+  position: relative; height: 100%; max-width: 1300px; margin: 0 auto;
+  display: grid; grid-template-columns: 170px minmax(0, 1fr) 170px;
+  grid-template-rows: 40px auto minmax(0, 1fr) auto auto; gap: 10px 20px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+}
+#top { grid-row: 1; grid-column: 1 / -1; display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; }
+#opphand { display: flex; }
+.cb { width: 24px; height: 34px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
+.cb:first-child { margin-left: 0; }
+#menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; display: flex; gap: 10px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 18px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#history { grid-row: 2 / 5; grid-column: 1; }
+#info1 { grid-row: 2; grid-column: 2; } #spaces { grid-row: 3; grid-column: 2; } #info0 { grid-row: 4; grid-column: 2; }
+#turnbox { grid-row: 2 / 5; grid-column: 3; align-self: center; }
+#hand { grid-row: 5; grid-column: 1 / -1; }
+
+/* ---------------- score, mana, piles */
+.info { display: flex; align-items: center; gap: 22px; justify-content: center; }
+.score { display: flex; align-items: center; gap: 12px; }
+.score .pn { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 26px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.score.s0 .pn { background: radial-gradient(circle at 35% 30%, #7db3f5, var(--me2)); } .score.s1 .pn { background: radial-gradient(circle at 35% 30%, #c09ae8, var(--him2)); }
+.bar { width: 200px; height: 12px; border-radius: 6px; background: #1d2a38; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 6px; transition: width .4s; }
+.score.s0 .bar i { background: linear-gradient(90deg, #5b9cf0, #8cc2ff); } .score.s1 .bar i { background: linear-gradient(90deg, #9a72c8, #c9a6f0); }
+.mana { display: flex; align-items: center; gap: 3px; }
+.mana.passed { opacity: .35; filter: grayscale(1); }
+.gemc { width: 13px; height: 17px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: #1d2a38; }
+.gemc.on { background: linear-gradient(180deg, #8cc2ff, var(--mana)); }
+.gemc.off { opacity: .35; }
+.manatxt { font-weight: 800; font-size: 20px; margin-right: 6px; color: #bcd9ff; min-width: 16px; }
+.fund { padding: 2px 8px; border-radius: 10px; background: rgba(61,139,242,.25); color: #bcd9ff; font-weight: 900; font-size: 13px; }
+.piles { display: flex; gap: 8px; }
+.pile { width: 32px; height: 44px; border-radius: 5px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; box-shadow: 2px 2px 0 rgba(0,0,0,.3); }
+.pile.s0 { background: linear-gradient(135deg, var(--me), var(--me2)); } .pile.s1 { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
+.pile.disc { background: #2b3644; border-style: dashed; color: #aab6c3; }
+
+/* ---------------- the five spaces */
+#spaces { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; min-height: 0; }
+.space { position: relative; display: flex; flex-direction: column; border-radius: 12px; background: radial-gradient(ellipse at center, var(--table), var(--table2)); box-shadow: inset 0 0 18px rgba(0,0,0,.3); padding: 10px 8px; min-height: 0; transition: box-shadow .15s; }
+.space .sh { text-align: center; }
+.space .sh b { display: block; font-size: 17px; }
+.space .sh span { display: block; font-size: 12px; color: #b8c4d0; margin-top: 2px; line-height: 1.2; }
+.space .slot { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.space.dest { cursor: pointer; box-shadow: inset 0 0 0 3px var(--ok), 0 0 16px rgba(95,220,111,.5); }
+.space.chosen { box-shadow: inset 0 0 0 3px var(--gold); }
+.space.pay { animation: pay .6s ease-out; }
+@keyframes pay { 30% { box-shadow: inset 0 0 0 4px var(--gold), 0 0 26px rgba(242,182,50,.8); } }
+.placed { width: 74px; height: 92px; border-radius: 10px; border: 3px solid rgba(255,255,255,.85); box-shadow: 0 4px 8px rgba(0,0,0,.45); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.placed.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); } .placed.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.placed .pstr { font-weight: 900; font-size: 32px; text-shadow: 0 2px 3px rgba(0,0,0,.4); }
+.placed .pnm { font-weight: 800; font-size: 12px; }
+.placed.tgt { cursor: pointer; box-shadow: 0 0 0 4px var(--gold), 0 0 18px rgba(242,182,50,.85); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px var(--gold), 0 0 24px rgba(242,182,50,.9); } }
+.space.land .placed { animation: pop .4s ease-out; }
+@keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+
+/* ---------------- round and pass */
+#turnbox { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+.round { font-weight: 900; font-size: 30px; color: #dfe5eb; } .round small { font-size: 15px; color: #8e98a3; }
+.discn { font-weight: 900; font-size: 30px; color: #ff8a70; }
+#pass { width: 130px; min-height: 54px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; box-shadow: 0 3px 0 #a8770d; }
+#pass.done { background: var(--ok); box-shadow: 0 3px 0 #2c8a3a, 0 0 14px rgba(95,220,111,.7); color: #08300f; }
+#pass:disabled { background: #56616d; color: #8e98a3; box-shadow: none; cursor: default; }
+
+/* ---------------- history */
+#history { display: flex; flex-direction: column; justify-content: center; gap: 4px; overflow: hidden; }
+.hist { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
+.chip { min-width: 34px; height: 28px; padding: 0 5px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; flex: 0 0 auto; }
+.chip.pl.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); } .chip.pl.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.chip.pass, .chip.disc { background: #47525e; }
+.chip.pay { background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); color: #2a1d00; font-size: 11px; }
+.ho { font-weight: 700; font-size: 13px; color: #dfe5eb; }
+.ho.kill { color: #ff8a70; } .ho.face { color: #ffb36b; }
+
+/* ---------------- cards */
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; text-align: left;
+  background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; }
+.card .art { margin: 4px 4px 0; border-radius: 6px; flex: 0 0 50%; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(160deg, var(--me), var(--me2)); }
+.card .big { font-size: calc(var(--cardw) * .38); font-weight: 900; text-shadow: 0 2px 3px rgba(0,0,0,.35); line-height: 1; }
+.card .nm { font-weight: 800; font-size: calc(var(--cardw) * .14); padding: 5px 8px 0; }
+.card .tx { font-size: calc(var(--cardw) * .105); padding: 1px 8px; color: #3a352c; line-height: 1.15; }
+.card:has(.tx:not(:empty)) .art { flex-basis: 40%; }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+#hand { display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 12px 0 2px; min-height: calc(var(--cardh) + 16px); }
+#hand .card { transition: transform .12s, box-shadow .12s; }
+#hand .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok.disc { border-color: #ff8a70; box-shadow: 0 0 12px rgba(255,138,112,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok:hover { transform: translateY(-8px); }
+#hand .card.sel { transform: translateY(-16px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8), 0 6px 12px rgba(0,0,0,.5); }
+#hand .card:disabled { cursor: default; }
+#hand .card.no { filter: brightness(.62) saturate(.6); }
+
+/* ---------------- floaters, banner, game over, rules */
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 34px; color: #ffe08a; text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 10px rgba(0,0,0,.4); transform: translate(-50%, -50%); animation: floatup 1.1s ease-out forwards; white-space: nowrap; }
+.float.meta { font-size: 22px; color: #bcd9ff; }
+@keyframes floatup { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -110%) scale(1); } }
+.ghost { position: absolute; z-index: 15; pointer-events: none; }
+.ghost .placed { width: 100%; height: 100%; }
+#banner { position: absolute; left: 0; right: 0; top: 45%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 44px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over .final { font-size: 28px; font-weight: 900; }
+#over button, #rules button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+#rules .panel { max-width: 580px; max-height: 100%; overflow: auto; background: #1f2731; border: 1px solid #4b5a6a; border-radius: 12px; padding: 18px 22px; line-height: 1.4; }
+#rules h3 { margin: 0 0 8px; font-size: 22px; }
+#rules p { margin: 0 0 10px; color: #dfe5eb; }
+
+/* ---------------- phone */
+@media (max-width: 760px) {
+  :root { --cardw: 56px; --cardh: 78px; }
+  #game { grid-template-columns: 1fr auto; grid-template-rows: 30px auto minmax(0, 1fr) auto auto; gap: 8px 8px; }
+  #history { display: none; }
+  #top { justify-content: flex-start; }
+  .cb { width: 16px; height: 24px; }
+  #menu { top: 2px; gap: 6px; } #menu button { min-height: 26px; padding: 2px 8px; font-size: 13px; }
+  .tally { font-size: 14px; } .tally b { min-width: 24px; height: 24px; }
+  #info1 { grid-row: 2; grid-column: 1 / -1; } #spaces { grid-row: 3; grid-column: 1 / -1; }
+  #info0 { grid-row: 4; grid-column: 1; } #turnbox { grid-row: 4; grid-column: 2; flex-direction: row; gap: 8px; }
+  .info { gap: 10px; justify-content: flex-start; }
+  .score .pn { width: 40px; height: 40px; font-size: 19px; } .bar { width: 60px; height: 8px; }
+  .gemc { display: none; } .manatxt { font-size: 17px; margin: 0; }
+  .pile { width: 24px; height: 32px; font-size: 12px; }
+  #spaces { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+  .space { padding: 6px 3px; border-radius: 8px; }
+  .space .sh b { font-size: 11px; } .space .sh span { font-size: 9px; }
+  .placed { width: 50px; height: 64px; border-width: 2px; border-radius: 8px; } .placed .pstr { font-size: 22px; } .placed .pnm { font-size: 9px; }
+  .round { font-size: 20px; } .round small { font-size: 11px; }
+  #pass { width: auto; min-height: 40px; padding: 0 14px; font-size: 14px; }
+  .card .nm { font-size: 10px; padding: 4px 4px 0; } .card .tx { display: none; }
+  .cgem { width: 20px; height: 20px; font-size: 12px; top: -6px; left: -6px; }
+  #hand { gap: 5px; flex-wrap: wrap; padding-top: 8px; }
+  #over h2 { font-size: 44px; }
+}
+
+</style>
+
+<div id="game">
+  <div id="top"><div id="opphand"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="info1" class="info"></div>
+  <div id="spaces"></div>
+  <div id="info0" class="info"></div>
+  <div id="turnbox"></div>
+  <div id="hand"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Bump Placement</h3>
+    <p>First to 20 points at the end of a round wins (both: the higher; equal plays on). After round 12 the higher score wins. Same 24-card deck for both; each starts with 5 cards.</p>
+    <p><b>Each round</b> both draw 3 (more than 8 cards: discard down), get 4 mana (+3 if their card was on Fund last round). Unspent mana is lost. The starting player alternates every round.</p>
+    <p><b>Place or pass,</b> taking turns from the starting player. Pay a card's cost and put it on a space. A space holds one card: a stronger card bumps a weaker enemy card back to its owner's hand; you can't place on your own card or on an enemy card as strong or stronger. Once you pass you place nothing more this round.</p>
+    <p>When both have passed, the spaces pay their owners left to right: Score 3, Score 1 (+1 and draw 1), Study (draw 2), Fund (+3 mana next round), Sabotage (the opponent discards a random card). Then every placed card goes to its owner's discard pile.</p>
+    <p>Lock can't be bumped. Shove, when placed, bumps an enemy card of strength 3 or less from another space.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 44 Bump placement. Five shared action spaces; players alternately place costed cards on them, a
+// stronger card bumping a weaker enemy card back to its owner's hand; when both have passed, the
+// spaces pay out in order. First to 20 points at the end of a round; after round 12 the higher.
+// Pure from the outside: act() clones the state.
+
+const TARGET = 20, ROUNDS = 12, BASE_MANA = 4, FUND = 3, DRAW = 3, HAND_MAX = 8, OPEN_HAND = 5;
+
+const CARDS = {
+  WOR: { id: 'WOR', name: 'Worker', cost: 0, str: 1 },
+  HAN: { id: 'HAN', name: 'Hand', cost: 1, str: 2 },
+  FOR: { id: 'FOR', name: 'Foreman', cost: 2, str: 3 },
+  BOS: { id: 'BOS', name: 'Boss', cost: 3, str: 4 },
+  CHI: { id: 'CHI', name: 'Chief', cost: 5, str: 6 },
+  LOC: { id: 'LOC', name: 'Lock', cost: 2, str: 2, lock: true },
+  SHO: { id: 'SHO', name: 'Shove', cost: 1, str: 1, shove: 3 },
+};
+const DECK = { WOR: 6, HAN: 5, FOR: 4, BOS: 3, CHI: 2, LOC: 2, SHO: 2 };
+// the spaces, in the order they pay out at the end of a round
+const SPACES = [
+  { id: 'S3', name: 'Score 3', text: '+3 points' },
+  { id: 'S1', name: 'Score 1', text: '+1 point, draw 1' },
+  { id: 'ST', name: 'Study', text: 'Draw 2' },
+  { id: 'FU', name: 'Fund', text: '+3 mana next round' },
+  { id: 'SA', name: 'Sabotage', text: 'They discard a random card' },
+];
+
+function deckList() { const out = []; for (const [id, k] of Object.entries(DECK)) for (let i = 0; i < k; i++) out.push(id); return out; }
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function newPlayer() { return { points: 0, mana: 0, fund: false, passed: false, hand: [], deck: deckList(), discard: [] }; }
+function clone(s) {
+  return { seed: s.seed, round: s.round, turnNo: s.turnNo, first: s.first, starter: s.starter, toAct: s.toAct, phase: s.phase, winner: s.winner, capped: s.capped, byLimit: s.byLimit,
+    spaces: s.spaces.map(x => x && { ...x }), p: s.p.map(p => ({ points: p.points, mana: p.mana, fund: p.fund, passed: p.passed, hand: p.hand.slice(), deck: p.deck.slice(), discard: p.discard.slice() })) };
+}
+function emit(s, ev, e) { if (ev) { e.round = s.round; ev.push(e); } }
+function draw(s, side, n, ev) {
+  const p = s.p[side];
+  for (let i = 0; i < n; i++) {
+    if (!p.deck.length) { if (!p.discard.length) return; p.deck = shuffleInPlace(s, p.discard); p.discard = []; emit(s, ev, { t: 'reshuffle', side }); }
+    p.hand.push(p.deck.shift()); emit(s, ev, { t: 'draw', side });
+  }
+}
+
+function newMatch({ seed, first } = {}) {
+  const s = { seed: (seed >>> 0) || 1, round: 0, turnNo: 0, first: 0, starter: 0, toAct: 0, phase: 'place', winner: null, capped: false, byLimit: false, spaces: [null, null, null, null, null], p: [newPlayer(), newPlayer()] };
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
+  for (const side of [0, 1]) draw(s, side, OPEN_HAND, null);
+  startRound(s, null);
+  return s;
+}
+
+// a new round: the starter alternates; both draw 3, mana 4 (+3 after Fund), then anyone over 8
+// cards discards down, the starter first
+function startRound(s, ev) {
+  s.round++;
+  s.starter = s.round === 1 ? s.first : 1 - s.starter;
+  emit(s, ev, { t: 'round', starter: s.starter });
+  for (const side of [0, 1]) {
+    const p = s.p[side];
+    draw(s, side, DRAW, ev);
+    p.mana = BASE_MANA + (p.fund ? FUND : 0); p.fund = false; p.passed = false;
+  }
+  nextDiscarder(s);
+}
+function nextDiscarder(s) {
+  for (const side of [s.starter, 1 - s.starter]) if (s.p[side].hand.length > HAND_MAX) { s.phase = 'discard'; s.toAct = side; return; }
+  s.phase = 'place'; s.toAct = s.starter;
+}
+
+// can card id go on space k for player me
+function canPlace(s, me, id, k) {
+  const c = CARDS[id], x = s.spaces[k];
+  if (c.cost > s.p[me].mana) return false;
+  if (!x) return true;
+  if (x.side === me) return false;
+  return !CARDS[x.card].lock && CARDS[x.card].str < c.str;
+}
+// the enemy cards a Shove placed on space k may push out: strength 3 or less, not a Lock, another space
+function shoveTargets(s, me, k) {
+  const out = [];
+  s.spaces.forEach((x, j) => { if (x && j !== k && x.side !== me && !CARDS[x.card].lock && CARDS[x.card].str <= CARDS.SHO.shove) out.push(j); });
+  return out;
+}
+
+// Actions: { t: 'place', card, space, tgt } (tgt: for Shove, the space whose enemy card it bumps, or -1 when none can be)
+//          { t: 'pass' }   { t: 'discard', card } (when over 8 cards at the start of a round)
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  const me = s.toAct, P = s.p[me], out = [];
+  if (s.phase === 'discard') { for (const id of new Set(P.hand)) out.push({ t: 'discard', card: id }); return out; }
+  for (const id of new Set(P.hand)) for (let k = 0; k < SPACES.length; k++) if (canPlace(s, me, id, k)) {
+    if (CARDS[id].shove) { const tg = shoveTargets(s, me, k); if (tg.length) for (const j of tg) out.push({ t: 'place', card: id, space: k, tgt: j }); else out.push({ t: 'place', card: id, space: k, tgt: -1 }); }
+    else out.push({ t: 'place', card: id, space: k });
+  }
+  out.push({ t: 'pass' });
+  return out;
+}
+const actionKey = (a) => a.t === 'place' ? `p${a.card}@${a.space}${a.tgt !== undefined ? '>' + a.tgt : ''}` : a.t === 'discard' ? 'd' + a.card : 'x';
+
+function bump(s, k, ev) { const x = s.spaces[k]; s.spaces[k] = null; s.p[x.side].hand.push(x.card); emit(s, ev, { t: 'bump', side: x.side, card: x.card, space: k }); }
+
+function mAct(s, a, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  const me = s.toAct, P = s.p[me];
+  s.turnNo++;
+  if (a.t === 'discard') {
+    if (s.phase !== 'discard') throw new Error('not discarding');
+    const k = P.hand.indexOf(a.card); if (k < 0) throw new Error('no such card');
+    P.hand.splice(k, 1); P.discard.push(a.card); emit(s, ev, { t: 'discard', side: me, card: a.card });
+    nextDiscarder(s);
+    return;
+  }
+  if (s.phase !== 'place') throw new Error('not placing');
+  if (a.t === 'pass') {
+    P.passed = true; emit(s, ev, { t: 'pass', side: me });
+    if (s.p[1 - me].passed) return endRound(s, ev);
+    s.toAct = 1 - me;
+    return;
+  }
+  const c = CARDS[a.card], h = P.hand.indexOf(a.card);
+  if (h < 0 || !canPlace(s, me, a.card, a.space)) throw new Error('illegal place');
+  if (c.shove) { const tg = shoveTargets(s, me, a.space); if (tg.length ? !tg.includes(a.tgt) : a.tgt !== -1) throw new Error('bad shove target'); }
+  P.mana -= c.cost; P.hand.splice(h, 1);
+  emit(s, ev, { t: 'place', side: me, card: a.card, space: a.space, mana: P.mana });
+  if (s.spaces[a.space]) bump(s, a.space, ev);
+  s.spaces[a.space] = { card: a.card, side: me };
+  if (c.shove && a.tgt >= 0) bump(s, a.tgt, ev);
+  if (!s.p[1 - me].passed) s.toAct = 1 - me;
+}
+
+// both have passed: the spaces pay out in order, every placed card goes to its owner's discard,
+// then 20 points wins (both: the higher; equal plays on); after round 12 the higher wins, equal draws
+function endRound(s, ev) {
+  emit(s, ev, { t: 'payout' });
+  const sp = s.spaces;
+  if (sp[0]) { const p = s.p[sp[0].side]; p.points += 3; emit(s, ev, { t: 'gain', side: sp[0].side, space: 0, n: 3, points: p.points }); }
+  if (sp[1]) { const p = s.p[sp[1].side]; p.points += 1; emit(s, ev, { t: 'gain', side: sp[1].side, space: 1, n: 1, points: p.points }); draw(s, sp[1].side, 1, ev); }
+  if (sp[2]) { emit(s, ev, { t: 'study', side: sp[2].side, space: 2 }); draw(s, sp[2].side, 2, ev); }
+  if (sp[3]) { s.p[sp[3].side].fund = true; emit(s, ev, { t: 'fund', side: sp[3].side, space: 3 }); }
+  if (sp[4]) { const o = 1 - sp[4].side, O = s.p[o]; if (O.hand.length) { const k = Math.floor(rand(s) * O.hand.length); const c = O.hand.splice(k, 1)[0]; O.discard.push(c); emit(s, ev, { t: 'sabotage', side: o, card: c, space: 4 }); } }
+  for (let k = 0; k < sp.length; k++) if (sp[k]) { s.p[sp[k].side].discard.push(sp[k].card); sp[k] = null; }
+  emit(s, ev, { t: 'cleared' });
+  const a = s.p[0].points, b = s.p[1].points;
+  if (a >= TARGET || b >= TARGET) { if (a !== b) { s.winner = a > b ? 0 : 1; emit(s, ev, { t: 'end', winner: s.winner }); return; } }
+  if (s.round >= ROUNDS) { s.byLimit = true; s.winner = a === b ? 'draw' : a > b ? 0 : 1; emit(s, ev, { t: 'end', winner: s.winner }); return; }
+  startRound(s, ev);
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function _act(t, a) { mAct(t, a, null); return t; }
+
+// ---- src/bot.js
+// Bots for 44 Bump placement. Each is a function (state, rng) -> one action for s.toAct.
+// None reads a hidden card: Expert reshuffles the opponent's hand with his deck, and its own deck,
+// before each play-out (discard piles are public).
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pick = (a, rng) => a[Math.floor(rng() * a.length)];
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+const PRIORITY = [0, 2, 1, 3, 4]; // Score 3, Study, Score 1, Fund, Sabotage
+
+// ------------------------------------------------------------------ Random
+function randomBot(s, rng) { return pick(legalActions(s), rng); }
+
+// the weakest card goes first when discarding down
+function discardWeakest(s) {
+  const P = s.p[s.toAct];
+  let w = P.hand[0];
+  for (const id of P.hand) if (CARDS[id].str < CARDS[w].str || (CARDS[id].str === CARDS[w].str && CARDS[id].cost < CARDS[w].cost)) w = id;
+  return { t: 'discard', card: w };
+}
+// Shove's push: the strongest enemy card it can reach, the better space first
+function shoveTgt(s, me, k) {
+  const tg = shoveTargets(s, me, k);
+  if (!tg.length) return -1;
+  return tg.sort((a, b) => CARDS[s.spaces[b].card].str - CARDS[s.spaces[a].card].str || PRIORITY.indexOf(a) - PRIORITY.indexOf(b))[0];
+}
+const placeAct = (s, me, id, k) => CARDS[id].shove ? { t: 'place', card: id, space: k, tgt: shoveTgt(s, me, k) } : { t: 'place', card: id, space: k };
+
+// ------------------------------------------------------------------ Greedy
+// its strongest affordable card on the best space it can take (Score 3, Study, Score 1, Fund,
+// Sabotage); passes when it can place nothing
+function greedyBot(s) {
+  if (s.phase === 'discard') return discardWeakest(s);
+  const me = s.toAct, P = s.p[me];
+  const ids = [...new Set(P.hand)].sort((a, b) => CARDS[b].str - CARDS[a].str || CARDS[a].cost - CARDS[b].cost);
+  for (const k of PRIORITY) for (const id of ids) if (canPlace(s, me, id, k)) return placeAct(s, me, id, k);
+  return { t: 'pass' };
+}
+
+// ------------------------------------------------------------------ Racer
+// points only: takes Score 3, else Score 1, with its cheapest card that can; ignores every other space
+function racerBot(s) {
+  if (s.phase === 'discard') return discardWeakest(s);
+  const me = s.toAct, P = s.p[me];
+  const ids = [...new Set(P.hand)].sort((a, b) => CARDS[a].cost - CARDS[b].cost || CARDS[b].str - CARDS[a].str);
+  for (const k of [0, 1]) for (const id of ids) if (canPlace(s, me, id, k)) return placeAct(s, me, id, k);
+  return { t: 'pass' };
+}
+
+// ------------------------------------------------------------------ evaluation
+// a position's worth to `me`: points (more as 20 nears), cards in hand, Fund for next round, and
+// what each space it holds will pay, discounted while the opponent can still place
+const W = { pt: 1, near: 0.15, card: 0.55, fund: 1.0, hold: 0.8 };
+const PAY = [3, 1 + 0.55, 1.1, 1.0, 0.5];
+function evaluate(s, me) {
+  if (s.winner === me) return 1000;
+  if (s.winner !== null) return s.winner === 'draw' ? 0 : -1000;
+  let v = 0;
+  for (const side of [0, 1]) {
+    const P = s.p[side], sg = side === me ? 1 : -1;
+    let x = W.pt * P.points + W.near * Math.max(0, P.points - (TARGET - 8)) + W.card * P.hand.length + (P.fund ? W.fund : 0);
+    s.spaces.forEach((sp, k) => { if (sp && sp.side === side) x += PAY[k] * (s.p[1 - side].passed ? 1 : W.hold); });
+    v += sg * x;
+  }
+  return v;
+}
+const winProb = (s, me) => s.winner === me ? 1 : s.winner === 'draw' ? 0.5 : s.winner !== null ? 0 : 1 / (1 + Math.exp(-evaluate(s, me) / 3));
+
+// ------------------------------------------------------------------ Expert
+// Determinized play-outs: each candidate action is followed by Greedy on both sides (a share of
+// random moves) to the start of round +DEPTH for every candidate alike, on a world where the cards
+// this side cannot see are reshuffled, then scored as a win chance; successive halving spends the
+// play-outs on the leaders, and the one-ply worth breaks near-ties.
+function determinize(s, me, rng) {
+  const t = clone(s), O = t.p[1 - me];
+  const pool = shuffle(O.hand.concat(O.deck), rng);
+  O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length);
+  shuffle(t.p[me].deck, rng);
+  t.seed = (rng() * 4294967296) >>> 0; // the Sabotage draws and reshuffles to come
+  return t;
+}
+function rollout(t, me, start, depth, rng, eps) {
+  let steps = 0;
+  while (t.winner === null && t.round - start < depth && steps < 400) {
+    const a = eps > 0 && rng() < eps ? randomBot(t, rng) : greedyBot(t);
+    _act(t, a); steps++;
+  }
+  return winProb(t, me);
+}
+function candidates(s, keep = 12, withPrior = false) {
+  const me = s.toAct;
+  const seen = new Set(), all = [];
+  for (const a of legalActions(s)) { const k = actionKey(a); if (!seen.has(k)) { seen.add(k); all.push(a); } }
+  const scored = all.map(a => ({ a, v: evaluate(act(s, a), me) })).sort((x, y) => y.v - x.v);
+  let out = scored;
+  if (scored.length > keep) {
+    const g = actionKey(greedyBot(s));
+    out = scored.slice(0, keep);
+    for (const x of scored.slice(keep)) if (x.a.t === 'pass' || actionKey(x.a) === g) out.push(x);
+  }
+  return withPrior ? out.map(x => ({ a: x.a, prior: 1 / (1 + Math.exp(-x.v / 3)) })) : out.map(x => x.a);
+}
+
+const EXPERT = { playouts: 400, depth: 2, eps: 0.05, keep: 12, beta: 0.5 };
+function expertBot({ playouts = 400, depth = 2, eps = 0.05, keep = 12, beta = 0.5, timeMs = 0 } = {}) {
+  return function (s, rng) {
+    const me = s.toAct;
+    const arms = candidates(s, keep, true);
+    if (arms.length === 1) return arms[0].a;
+    let alive = arms.map(({ a, prior }) => ({ a, w: 0, n: 0, b: beta * prior }));
+    const rounds = Math.max(1, Math.ceil(Math.log2(alive.length)));
+    const t0 = timeMs ? Date.now() : 0;
+    for (let r = 0; r < rounds && alive.length > 1; r++) {
+      const per = Math.max(2, Math.floor(playouts / rounds / alive.length));
+      for (let i = 0; i < per; i++) {
+        const world = determinize(s, me, rng), seed = (rng() * 4294967296) >>> 0;
+        for (const st of alive) { const t = clone(world); _act(t, st.a); st.w += rollout(t, me, s.round, depth, makeRng(seed), eps); st.n++; }
+        if (timeMs && Date.now() - t0 > timeMs) break;
+      }
+      alive.sort((x, y) => (y.w / y.n + y.b) - (x.w / x.n + x.b));
+      alive = alive.slice(0, Math.ceil(alive.length / 2));
+      if (timeMs && Date.now() - t0 > timeMs) break;
+    }
+    return alive[0].a;
+  };
+}
+
+// ---- src/ui.js
+// 44 Bump placement as a game screen against the Expert. Each action is animated from the state
+// before and the state after; the round's payout plays space by space; the win tally is kept in
+// this browser and decides who starts round 1.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-44-tally';
+const expert = expertBot({ ...EXPERT, playouts: 2400, timeMs: 1200 });
+const ui = { s: null, view: null, busy: false, over: false, sel: null, hist: [], fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+const TXT = { LOC: "Can't be bumped", SHO: 'Also bumps a 3 or less elsewhere' };
+function cardHTML(id, side, { cls = '', attrs = '' } = {}) {
+  const c = CARDS[id];
+  return `<button class="card s${side} ${cls}" ${attrs}><span class="cgem">${c.cost}</span><div class="art"><span class="big">${c.str}</span></div><div class="nm">${c.name}</div>${TXT[id] ? `<div class="tx">${TXT[id]}</div>` : ''}</button>`;
+}
+const placedHTML = (x, k, cls = '') => `<div class="placed s${x.side} ${cls}" id="pl${k}" data-space="${k}"><span class="pstr">${CARDS[x.card].str}</span><span class="pnm">${CARDS[x.card].name}</span></div>`;
+
+// ------------------------------------------------------------------ what can be done now
+const myTurn = () => !ui.busy && !ui.over && ui.view.toAct === ME && ui.view.winner === null;
+function legalFor(sel) { return myTurn() && sel ? legalActions(ui.view).filter(a => a.t === 'place' && a.card === sel.id) : []; }
+
+// ------------------------------------------------------------------ rendering
+function spacesHTML() {
+  const s = ui.view, L = legalFor(ui.sel);
+  const open = new Set(L.map(a => a.space)), shove = ui.sel && ui.sel.space !== undefined ? new Set(L.filter(a => a.space === ui.sel.space).map(a => a.tgt)) : new Set();
+  return SPACES.map((sp, k) => {
+    const x = s.spaces[k];
+    let cls = '';
+    if (ui.sel && ui.sel.space === undefined && open.has(k)) cls += ' dest';
+    if (ui.sel && ui.sel.space === k) cls += ' chosen';
+    if (ui.fx['sp' + k]) cls += ' ' + ui.fx['sp' + k];
+    const inner = x ? placedHTML(x, k, shove.has(k) ? 'tgt' : '') : '';
+    return `<div class="space${cls}" data-space="${k}"><div class="sh"><b>${sp.name}</b><span>${sp.text}</span></div><div class="slot">${inner}</div></div>`;
+  }).join('');
+}
+function infoHTML(side) {
+  const s = ui.view, p = s.p[side];
+  const pct = Math.min(100, p.points / TARGET * 100);
+  let gems = '';
+  const cap = BASE_MANA + FUND;
+  for (let i = 0; i < cap; i++) gems += `<i class="gemc${i < p.mana ? ' on' : ''}${i >= BASE_MANA && !(p.mana > BASE_MANA) && i >= p.mana ? ' off' : ''}"></i>`;
+  const passed = p.passed && s.phase === 'place' ? ' passed' : '';
+  return `<div class="score s${side} ${ui.fx['score' + side] || ''}" id="score${side}"><span class="pn">${p.points}</span><span class="bar"><i style="width:${pct}%"></i></span></div>
+    <div class="mana${passed}"><span class="manatxt">${p.mana}</span>${gems}</div>${p.fund ? '<span class="fund">+3</span>' : ''}
+    <div class="piles"><div class="pile s${side}">${p.deck.length}</div><div class="pile disc">${p.discard.length}</div></div>`;
+}
+function handHTML() {
+  const s = ui.view, p = s.p[ME], legal = myTurn() ? legalActions(s) : [];
+  const order = p.hand.map((_, i) => i).sort((a, b) => CARDS[p.hand[a]].str - CARDS[p.hand[b]].str || CARDS[p.hand[a]].cost - CARDS[p.hand[b]].cost);
+  return order.map(i => {
+    const id = p.hand[i];
+    const ok = s.phase === 'discard' ? myTurn() : legal.some(a => a.t === 'place' && a.card === id);
+    let cls = ok ? (s.phase === 'discard' ? 'ok disc' : 'ok') : (myTurn() ? 'no' : '');
+    if (ok && ui.sel && ui.sel.hand === i) cls += ' sel';
+    if (ui.fx['h' + i]) cls += ' ' + ui.fx['h' + i];
+    return cardHTML(id, ME, { cls, attrs: `data-hand="${i}"${ok ? '' : ' disabled'}` });
+  }).join('');
+}
+const histHTML = (h) => `<div class="hist s${h.side}"><span class="chip ${h.kind} s${h.side}">${h.chip}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`;
+function render() {
+  const s = ui.view;
+  const t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('opphand').innerHTML = '<i class="cb"></i>'.repeat(s.p[BOT].hand.length);
+  $('spaces').innerHTML = spacesHTML();
+  for (const side of [0, 1]) $('info' + side).innerHTML = infoHTML(side);
+  $('hand').innerHTML = handHTML();
+  const mine = myTurn();
+  const roundBox = `<div class="round">${s.round}<small>/12</small></div>`;
+  if (s.phase === 'discard' && s.toAct === ME) $('turnbox').innerHTML = `${roundBox}<div class="discn">−${s.p[ME].hand.length - 8}</div>`;
+  else $('turnbox').innerHTML = `${roundBox}<button id="pass" class="${mine && !legalActions(s).some(a => a.t === 'place') ? 'done' : ''}"${mine ? '' : ' disabled'}>Pass</button>`;
+  $('history').innerHTML = ui.hist.slice(-14).map(histHTML).join('');
+  ui.fx = {};
+}
+
+// ------------------------------------------------------------------ effects
+function centerOf(el) { const a = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - a.left + r.width / 2, y: r.top - a.top + r.height / 2 }; }
+function floatAt(p, text, cls = '') { const f = document.createElement('div'); f.className = 'float ' + cls; f.textContent = text; f.style.left = p.x + 'px'; f.style.top = p.y + 'px'; $('game').appendChild(f); setTimeout(() => f.remove(), 1200); }
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+// a bumped card flies back toward its owner's side
+function flyBack(fromEl, side) {
+  if (!fromEl) return;
+  const g = $('game').getBoundingClientRect(), r = fromEl.getBoundingClientRect(), d = document.createElement('div');
+  d.className = 'ghost'; d.innerHTML = fromEl.outerHTML; d.style.left = (r.left - g.left) + 'px'; d.style.top = (r.top - g.top) + 'px'; d.style.width = r.width + 'px'; d.style.height = r.height + 'px';
+  $('game').appendChild(d);
+  const to = side === ME ? $('hand') : $('opphand'), t = to.getBoundingClientRect();
+  d.animate([{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${t.left + t.width / 2 - r.left - r.width / 2}px, ${t.top + t.height / 2 - r.top - r.height / 2}px) scale(.5)`, opacity: .2 }], { duration: 500, easing: 'ease-in' });
+  setTimeout(() => d.remove(), 480);
+}
+
+// ------------------------------------------------------------------ playback
+async function apply(a) {
+  const qtok = ui.token;
+  const prev = ui.s, ev = [];
+  const next = act(prev, a, ev);
+  ui.s = next;
+  const placeE = ev.find(e => e.t === 'place'), bumps = ev.filter(e => e.t === 'bump');
+  // bumps: the old card leaves first
+  for (const b of bumps) flyBack($('pl' + b.space), b.side);
+  if (placeE) {
+    const c = CARDS[placeE.card];
+    ui.hist.push({ side: placeE.side, kind: 'pl', chip: c.str, out: SPACES[placeE.space].name + (bumps.length ? ' ✕' + bumps.map(b => CARDS[b.card].str).join(' ✕') : ''), cls: bumps.length ? 'kill' : '' });
+    ui.fx['sp' + placeE.space] = 'land';
+  }
+  if (a.t === 'pass') ui.hist.push({ side: prev.toAct, kind: 'pass', chip: '–' });
+  if (a.t === 'discard') ui.hist.push({ side: prev.toAct, kind: 'disc', chip: CARDS[a.card].str, out: '↓' });
+  // the payout, space by space, on the board as it stood
+  const payIdx = ev.findIndex(e => e.t === 'payout');
+  if (payIdx >= 0) {
+    const mid = { ...prev, spaces: prev.spaces.map(x => x), p: prev.p.map(p => ({ ...p })) };
+    if (placeE) mid.spaces[placeE.space] = { card: placeE.card, side: placeE.side };
+    mid.p[prev.toAct] = { ...mid.p[prev.toAct], passed: true };
+    ui.view = mid; render();
+    await wait(450);
+    if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+    for (const e of ev.slice(payIdx)) {
+      if (e.space === undefined) continue;
+      const el = document.querySelector(`.space[data-space="${e.space}"]`);
+      if (el) { el.classList.add('pay'); const txt = e.t === 'gain' ? '+' + e.n : e.t === 'study' ? '+2 cards' : e.t === 'fund' ? '+3 mana' : '−1 card'; floatAt(centerOf(el), txt, e.t === 'gain' ? 'gain' : 'meta'); }
+      if (e.t === 'gain') { mid.p[e.side] = { ...mid.p[e.side], points: e.points }; ui.view = mid; render(); const el2 = document.querySelector(`.space[data-space="${e.space}"]`); if (el2) el2.classList.add('pay'); }
+      if (e.t === 'gain' || e.t === 'study' || e.t === 'fund' || e.t === 'sabotage') ui.hist.push({ side: e.t === 'sabotage' ? 1 - e.side : e.side, kind: 'pay', chip: SPACES[e.space].name.replace('Score ', '+'), out: e.t === 'sabotage' ? '−' + CARDS[e.card].name : '', cls: 'face' });
+      await wait(650);
+      if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+    }
+  }
+  ui.view = next; render();
+  if (ev.some(e => e.t === 'round') && next.winner === null) { banner('Round ' + next.round); await wait(700); }
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  if (next.winner !== null) finish();
+  render();
+}
+
+function finish() {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><div class="final">${ui.s.p[ME].points} – ${ui.s.p[BOT].points}</div><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+// ------------------------------------------------------------------ flow
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.view = ui.s; ui.over = false; ui.hist = []; ui.sel = null;
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  banner('Round 1');
+  await wait(900);
+  if (tok !== ui.token) return;
+  await botLoop(tok);
+}
+// the bot acts while it is its move, one action at a time, each shown before the next is chosen
+async function botLoop(tok) {
+  ui.busy = true; render();
+  for (let k = 0; k < 200; k++) {
+    if (tok !== ui.token || ui.over || ui.s.winner !== null || ui.s.toAct !== BOT) break;
+    await wait(300);
+    const a = expert(ui.s, ui.rng);
+    if (tok !== ui.token) return;
+    await apply(a);
+  }
+  if (tok !== ui.token || ui.over) return;
+  ui.busy = false; render();
+}
+async function doAct(a) {
+  if (!myTurn()) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel = null;
+  await apply(a);
+  if (tok !== ui.token || ui.over) return;
+  await botLoop(tok);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#rulesbtn')) { $('rules').classList.add('show'); return; }
+  if (e.target.closest('#rulesclose') || e.target.id === 'rules') { $('rules').classList.remove('show'); return; }
+  const b = e.target.closest('button');
+  if (b && !b.disabled && (b.id === 'rematch' || b.id === 'newgame')) return startMatch();
+  if (!myTurn()) return;
+  const s = ui.view;
+  if (b && b.id === 'pass') return doAct({ t: 'pass' });
+  if (b && b.dataset.hand !== undefined) {
+    const i = +b.dataset.hand, id = s.p[ME].hand[i];
+    if (s.phase === 'discard') return doAct({ t: 'discard', card: id });
+    ui.sel = ui.sel && ui.sel.hand === i ? null : { id, hand: i }; render(); return;
+  }
+  // a Shove's target: an enemy card that glows
+  const pl = e.target.closest('.placed.tgt');
+  if (pl && ui.sel && ui.sel.space !== undefined) return doAct({ t: 'place', card: ui.sel.id, space: ui.sel.space, tgt: +pl.dataset.space });
+  const sp = e.target.closest('.space.dest');
+  if (sp && ui.sel) {
+    const k = +sp.dataset.space, L = legalFor(ui.sel).filter(a => a.space === k);
+    if (L.length === 1) return doAct(L[0]);
+    if (L.length > 1) { ui.sel = { ...ui.sel, space: k }; render(); return; }
+  }
+  if (ui.sel) { ui.sel = null; render(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (ui.sel) { ui.sel = null; render(); } $('rules').classList.remove('show'); } });
+window.__game = { state: () => ui.s, busy: () => ui.busy, act: (a) => doAct(a), legal: () => legalActions(ui.s) };
+startMatch();
+
+})();
+</script>

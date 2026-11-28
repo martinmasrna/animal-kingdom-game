@@ -1,0 +1,569 @@
+[
+  {
+    "id": "01-score-or-fight",
+    "name": "Score or fight",
+    "what": "A unit duel where each ready unit either attacks an enemy unit or scores its current health as points; first to 40 points wins.",
+    "loop": "Each turn, unit by unit, you choose between cashing the unit's health now or spending it to kill an enemy unit that would score every turn. The real decision is when to stop fighting and start cashing.",
+    "alive": true,
+    "changed": "Hit cards hit enemy units only",
+    "numbers": "Expert beats Random 100%, Greedy 93.8%, Racer 98.0%; first player 36.5% in Expert mirrors; Expert = Greedy on 48.5% of 4,787 turns (55.9% of single actions)",
+    "flags": [
+      "second player (4 cards and the Coin) wins 63.5% of Expert mirrors"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "02-attack-and-block",
+    "name": "Attack and block",
+    "what": "A 20-life creature duel where attackers stay exhausted through the opponent's turn and the defender chooses blockers, as in Magic.",
+    "loop": "Each turn is the attack-or-hold question: attack only with units the defender cannot block profitably, and keep the rest home as blockers. Removal spells are used to take out the blocker that stops an attack.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 97.3%, Racer 95.3%; first player 41% in Expert mirrors (Greedy mirror 67%); Expert = Greedy on 46% of 31,480 decisions",
+    "flags": [
+      "Expert mirror games average 37 turns against 20 with Greedy, stalling into wide boards",
+      "Greedy mirror first player 67%"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "03-exert-to-score",
+    "name": "Exert to score",
+    "what": "A points race to 20 where a unit scores by exerting itself, and only exerted units can be attacked, so scoring exposes it.",
+    "loop": "Each ready unit chooses between scoring (points now, but exposed through the opponent's turn), challenging an exposed enemy, or staying ready. Best play scores with what the opponent cannot profitably challenge, and challenges exposed scorers it kills and survives.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 93.8%, Racer 98.0%; first player 54.5% in Expert mirrors; Expert = Greedy on 48.2% of 52,551 decisions",
+    "flags": [],
+    "why_dead": null
+  },
+  {
+    "id": "04-lanes-and-scale",
+    "name": "Lanes and scale",
+    "what": "Four lanes of facing units; each unit hits the one across from it or, in an empty lane, tips a shared scale. Five ahead wins.",
+    "loop": "Each card is a placement choice: run free into an empty lane to tip the scale, stand opposite their best attacker, or kill outright. Expert blocks early, kills what it can for free, and saves Shift for the turn a lane opens.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 97.3%, Greedy 73.8%, Racer 89.2%; first player 44.5% in Expert mirrors (Greedy mirror 65.9%); Expert = Greedy on 54.1% of its decisions with more than one option",
+    "flags": [
+      "beats Greedy 73.8%, near the 70% line; more search did not raise it",
+      "Greedy mirror favours the first player 66%",
+      "games are short, about 9 turns between Experts"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "05-front-and-back",
+    "name": "Front and back rows",
+    "what": "A 20-life creature duel where a front row shields the back row and your life; ranged units hit the front without being hit back.",
+    "loop": "Each turn is about the enemy front row: whoever empties it gets free hits on the back row and the player. Ranged units carry the game, so Expert keeps something in front and spends removal on enemy Cannons.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 91.0%, Racer 98.8%; first player 46.5% in Expert mirrors (Greedy mirror 61%); Expert = Greedy on 54.8% of 34,710 decisions",
+    "flags": [
+      "mana binds early and stops late: 45% of all mana goes unspent, the cap of 10 is reached on 26% of turns",
+      "the 3+3 row limit, not mana, caps the late game"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "06-breaking-sites",
+    "name": "Breaking sites",
+    "what": "Three shared sites; a site scores when total power on it reaches its threshold, the side with more power taking more. First to 15.",
+    "loop": "Each turn you choose which site to add power to, how much, and whether to play at all, since power near a threshold is a gift to whoever breaks it. Best play is a last-mover fight at each threshold: hold the big card until the site is one push from breaking.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 98.0%, Greedy 95.5%, Racer 99.8%; first player 43.9% in Expert mirrors; Expert = Greedy on 29.3% of 3,488 turns (42.6% of single actions)",
+    "flags": [],
+    "why_dead": null
+  },
+  {
+    "id": "07-blind-fronts",
+    "name": "Blind fronts",
+    "what": "Players alternately commit cards face-down to three fronts worth 1, 2 and 3, then reveal; the stronger side at each front scores it.",
+    "loop": "Each placement is a read of the other side's face-down cards and energy spent, against your own hand and energy. Expert takes cheap fronts, gives up fronts the opponent paid heavily for, uses decoys, and often passes early to bank energy.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 99.5%, Spread 99.5%; first player 52.5% in Expert mirrors; Expert = Greedy on 17.3% of its decisions with more than one option",
+    "flags": [],
+    "why_dead": null
+  },
+  {
+    "id": "09-momentum-rope",
+    "name": "Momentum rope",
+    "what": "No units: cards shove a shared marker along a track now or add velocity that moves it every turn; reach the far end to win.",
+    "loop": "Each turn you either move the marker now, change the shared velocity, or defend. Best play builds velocity when the opponent cannot afford Check or Reverse, saves Check and Anchor for their big Heave, and holds Jolts for the last round.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 99.8%, Greedy 81.5%, Racer 99.3%; first player 36.6% in Expert mirrors; Expert = Greedy on 52.0% of 31,524 decisions",
+    "flags": [
+      "57% of mirror games go the full 12 rounds and are decided by which side the marker is on",
+      "first player 36.6%, leaning to the second player"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "10-engine-war",
+    "name": "Engine war",
+    "what": "A two-player deckbuilder with a market row where points come only from Posts on your table, which the opponent can shoot. 20 points wins.",
+    "loop": "Your hand plays itself, so the turn is two choices: what to buy from the row and which enemy Posts to shoot. Best play is mostly a race of Post yield, with damage bought only to deny the Post that would decide it.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 96.8%, Greedy 74.3%, Racer 77.2%; first player 37.8% in Expert mirrors; Expert = Greedy on 55.6% of 4,430 turns (58.0% of single actions)",
+    "flags": [
+      "beats Greedy 74.3% and Racer 77.2%, near the 70% line; racing is close to the right plan",
+      "second player wins 62% of Expert mirrors",
+      "4 of 2,000 games hit the turn cap, all against Racer"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "12-deck-is-life",
+    "name": "Deck is life",
+    "what": "A creature duel with no life total: damage burns cards off the top of your deck, and you lose when you cannot draw.",
+    "loop": "Nothing blocks, so it is a race of decks: choose which enemy units are worth killing, when to cash Burn 3, and when to spend life on cards via Draw 2 or Recover. The first player hits first.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 82.8%, Racer 86.8%; first player 66.2% in Expert mirrors (Greedy mirror 62.1%); Expert = Greedy on 43.3% of its decisions with more than one option",
+    "flags": [
+      "first player 66.2%, near the line (95% interval reaches past 70%)"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "13-open-discards",
+    "name": "Open discards",
+    "what": "A 30-health hero duel where discard piles are face-up and once a turn you may play a card from the opponent's for one extra mana.",
+    "loop": "Each turn adds one question to the plain duel: which of his used cards to take back for one more mana, and which of yours you are about to hand him. Expert develops on curve and spends leftover mana on his pile.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 83.8%, Racer 97.3%; first player 65.2% in Expert mirrors (Greedy mirror 87.4%); Expert = Greedy on 89.4% of decisions",
+    "flags": [
+      "matches Greedy 89.4%, near the 90% line",
+      "first player 65.2%, near the line",
+      "Greedy mirror first player 87%, against 67.5% on plain rules",
+      "the same removal spell crossed between piles three or four times in traced games"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "14-response-duel",
+    "name": "Response duel",
+    "what": "No board: spells hit the opponent's 20 life, and mana left unspent at end of your turn pays for a response on theirs.",
+    "loop": "The whole game is one question twice a turn: spend the mana now, or hold it so every spell the opponent casts meets an answer. Expert feeds cheap Bolts to bait answers and casts big spells only into an empty or spent store.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 99.8%, Greedy 96.0%, Racer 98.5%; first player 55.0% in Expert mirrors; Expert = Greedy on 46.2% of its decisions with more than one option",
+    "flags": [
+      "games last 28.8 turns between Experts"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "15-key-pieces",
+    "name": "Key pieces",
+    "what": "Win by holding three different Keys in play at the start of your turn; Keys are bodies the opponent can attack, and Guards protect them.",
+    "loop": "The game is denial against assembly: whoever plays a third Key gives the other one turn to break one, and Hits ignore Guard. Expert keeps its Hits for denial and plays only 0.9 cards a turn.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 98.8%, Greedy 95.5%, Racer 81.3%; first player 55.5% in Expert mirrors; Expert = Greedy on 15.1% of 52,255 decisions",
+    "flags": [
+      "mana barely binds: Expert leaves 5.4 mana unspent a turn, at cap on 56% of turns",
+      "in one traced mirror the first player ended 18 turns in a row without a play",
+      "mirrors last 41 turns; 55% end on a deck run out, 45% on three Keys"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "16-showdown",
+    "name": "Showdown",
+    "what": "Each round both buy a face-down hand with mana, the mana spent is shown, then poker-style betting with chips that are your life.",
+    "loop": "Each round you pick which cards to buy knowing only the spend is shown, then bet, raise, call or fold. Expert buys strong lines when it has them, or buys a bluff that spends like a strong one.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 97.8%, Caller 100%; first player 48.4% in Expert mirrors; Expert = Greedy on 54.3% of decisions",
+    "flags": [
+      "both trivial bots never fold, so these numbers do not show Expert reads well (builder's caveat)",
+      "51% of Expert games run the full 20 rounds",
+      "costs bind loosely: Expert spends 4.8 of 6 mana"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "17-prize-auction",
+    "name": "Prize auction",
+    "what": "Sealed bids from a hand of coin cards for one prize a round; prizes are better coin or points that clog your deck.",
+    "loop": "Each round is one sealed number: how much of your hand the prize is worth, given what the opponent can bid at most and what the next prize is. Expert lets point-hungry opponents overpay early and outbids on late point prizes.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 98.3%, Greedy 81.0%, Racer 84.6%; seat A 52.5% in Expert mirrors (no turn order); Expert = Greedy on 25% of 19,181 bids",
+    "flags": [
+      "Greedy mirror ties 85% of games (equal all-in bids)",
+      "equal bids are common in every pairing and prizes pile up into pots"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "18-edge-flip",
+    "name": "Edge flip grid",
+    "what": "A 4x4 grid where cards have four edge numbers and a placed card flips adjacent enemy cards with a lower touching edge; most cells wins.",
+    "loop": "Every card placed is a target, so it is a waiting game over who places last next to whom. Expert places about one card a turn, passes 15% of turns, and holds Crowns for the end.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 98.4%, Greedy 87.3%, Filler 97.6%; first player 65.5% in 200 Expert mirrors, 59.5% in 200 more, 62.5% pooled (Greedy mirror 64%); Expert = Greedy on 22% of 10,990 decisions",
+    "flags": [
+      "first player 62.5% pooled, near the line",
+      "28% of Expert mirror games end level on cells",
+      "flips are mostly temporary, about 7 a game"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "19-supply-grid",
+    "name": "Supply grid",
+    "what": "A 5x5 grid where you place pieces next to a chain connected to your Base; strikes compare power and cut-off pieces die. Destroy the Base.",
+    "loop": "Each turn you choose where to grow, what to place, and which strikes to make, knowing any piece you destroy takes down everything hanging on it. Best play reads threats two moves deep: where can he land a 3 next to my Base.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 99.8%, Greedy 99.3%, Racer 98.3%; first player 43.4% in Expert mirrors; Expert = Greedy on 18.3% of 4,173 turns (46.4% of single actions)",
+    "flags": [
+      "7 of 400 Expert mirrors are drawn"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "21-round-purse",
+    "name": "Round purse",
+    "what": "Best of three rounds of total power, each ending when both pass, all paid from one mana purse that never refills.",
+    "loop": "Each turn you play one card or pass, which really means how much of the one purse this round is worth and whether to give the round up. Best play buys each round as cheaply as possible and refuses rounds that cost too much.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 99.5%, Greedy 99.8%, Spend 98.4%; first player 49.0% in Expert mirrors; Expert = Greedy on 32.7% of 24,885 decisions",
+    "flags": [
+      "10% of Expert mirror games are draws",
+      "no fixed rule solves it: Expert beats the Thrifty rule 97%"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "22-possession",
+    "name": "Possession",
+    "what": "A ball on nine zones; each play both sides secretly pick cards from a rock-paper-scissors table priced in stamina; most goals in 20 plays wins.",
+    "loop": "Every play is a blind guess priced in stamina: the attacker needs a few won guesses to reach shooting range, then one more to score. Best play reads the opponent's pattern while hiding your own.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 76.1%, Greedy 88.5%, Racer 95.3%; kickoff possession 60.4% in Expert mirrors; Expert = Greedy on 41.8% of 6,732 choices",
+    "flags": [
+      "alive narrowly: 76.1% against Random is the closest call",
+      "47% of Expert mirror matches are drawn, 1.15 goals a match",
+      "a third of matches are drawn even against Random",
+      "kickoff possession is worth 60.4%"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "24-rally",
+    "name": "Rally",
+    "what": "Tennis points: a return needs reach at least the incoming shot's pace, every shot costs stamina, first to three games wins.",
+    "loop": "A point is a stamina-for-tempo trade: Pace 5-6 shots win at once for 3-4 stamina unless the other side holds the one card that answers, while cheap shots keep the rally going. Games are often decided when one side hits 0 stamina and loses serves it cannot pay for.",
+    "alive": false,
+    "changed": "serve passes after every point instead of every game",
+    "numbers": "Expert beats Random 96.8%, Greedy 94.3%, Saver 69.5%; first server 48.5% in Expert mirrors (Greedy mirror 46%); Expert = Greedy on 37.0% of 37,148 decisions",
+    "flags": [
+      "stamina binds: on 29.7% of shots a card the player could otherwise return with is unaffordable",
+      "players at 0 stamina without a Push lose their serves outright",
+      "at the spec's serve rule the first server won 15% of Expert mirrors"
+    ],
+    "why_dead": "Saver (always the cheapest legal shot) holds Expert to 69.5% against the 70% line (three runs: 69.5%, 71.3%, 69.5%)"
+  },
+  {
+    "id": "25-range-duel",
+    "name": "Range duel",
+    "what": "Two fighters on a seven-space line secretly pick moves at once; speed decides who acts first, range whether it hits, energy pays. 12 life each.",
+    "loop": "Both fighters close to distance 1 and the duel becomes a speed guess: Jab cancels slower attacks, Punch beats Kick or Lunge, Guard blanks the big hit. The decisions are distance and speed reads.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 98.5%, Greedy 84.5% (no Racer); fighter A 47% in Expert mirrors (no first player); Expert = Greedy on 31% of 8,301 moves",
+    "flags": [
+      "energy almost never binds: at the cap of 6 in 93% of decisions"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "27-bust-duel",
+    "name": "Bust duel",
+    "what": "Each round both draw cards into face-up lines, stopping before strain busts them; the higher line hits the other, then each buys a card.",
+    "loop": "Each draw you choose push or stop with the opponent's line in plain sight, then buy one card with your line's power. Expert stops early when it acts first and buys deck control rather than raw power.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 98.5%, Pusher 99.0%; first player 47.8% in Expert mirrors; Expert = Greedy on 75.3% of 104,007 decisions",
+    "flags": [
+      "round damage is capped at 5 and coin past 7 buys nothing more"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "28-curling-line",
+    "name": "Curling line",
+    "what": "Stones on a one-dimensional sheet push the first stone in their path; closest to the mark scores, and the scorer throws first next end.",
+    "loop": "Each throw is a free Lag or Guard in front, a draw to a cell in the House, or a hit that pushes a stone out, paid from 5 energy. Best play is the hammer: the side throwing last converts the end.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 99.6%, Greedy 100% (no Racer); hammer in end 1 wins 66.7% of Expert mirrors, 64.5% on 400 more, 65.6% pooled; Expert = Greedy on 58.2% of 38,911 throws",
+    "flags": [
+      "hammer holder wins 65.6% pooled, near the line",
+      "the hammer scores 80% of scoring ends (130 against 33 stolen)",
+      "15% of ends are blank"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "29-hidden-runner",
+    "name": "Hidden runner",
+    "what": "Asymmetric: a Runner moves secretly on a 4x4 grid while two Hunters search and corner it; both sides play costed move decks, roles alternate.",
+    "loop": "The Runner picks a move kind each round knowing the kind is announced; the Hunter narrows the possible nodes and closes in. After any exact sighting the Hunter pounces, so a sighting ends the game instead of starting a chase.",
+    "alive": false,
+    "changed": "Sprint reach 3 to 2",
+    "numbers": "Expert beats Random 88.0%, Greedy 96.8%; Runner wins 7.5% of Expert mirrors; Expert = Greedy on 23.4% of 20,040 decisions",
+    "flags": [
+      "Runner wins 4.5% of Expert mirrors as specified",
+      "on a 4x4 grid two pawns sit within two or three steps of almost every node",
+      "as Runner Expert beats Greedy 94%, as Hunter 99.5%"
+    ],
+    "why_dead": "Runner wins 7.5% of Expert mirrors after the rule change (4.5% as specified), against a 30-70% band"
+  },
+  {
+    "id": "30-siege-clock",
+    "name": "Siege clock",
+    "what": "Asymmetric decks: the Attacker must break a gate of 20 within ten rounds; the Defender blocks, shoots and repairs.",
+    "loop": "The Attacker sends units into Wall units that trade or die; the Defender blocks every sent unit it can, chump blocks included, and repairs. Best play is the Defender's fixed rule of blocking everything.",
+    "alive": false,
+    "changed": "a Wall unit that blocks is tired and cannot block the next round",
+    "numbers": "Expert beats Random 99.0%, Greedy 65.5%, Racer 98.8%; Attacker wins 4.5% of Expert mirrors; Expert = Greedy on 71.8% of its decisions",
+    "flags": [
+      "Expert wins 97% as Defender and 34% as Attacker against Greedy",
+      "Attacker wins 1.8% of Expert mirrors as specified",
+      "Greedy mirror Attacker 14%",
+      "the Gate ends with 14 of 20 left on average between Experts"
+    ],
+    "why_dead": "Attacker wins 4.5% of Expert mirrors after the rule change (1.8% as specified), against a 30-70% band; Expert beats Greedy only 65.5%"
+  },
+  {
+    "id": "31-claims",
+    "name": "Claims",
+    "what": "A unit duel where every card is played face-down as a named card; the opponent may challenge, and a caught lie costs 3 life.",
+    "loop": "Each turn you choose which card to put down and what to call it, whether to challenge each enemy claim, and the usual attacks. Best play counts copies and challenges almost everything.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 80.0%, Racer 85.5%; first player 52.5% in Expert mirrors; Expert = Greedy on 56.6% of 31,326 decisions",
+    "flags": [
+      "penalties come to about 20 life a game, a full life bar; mirror ends in 8.1 turns",
+      "76% of claims are challenged, 39% of those catch a lie"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "32-hidden-contracts",
+    "name": "Hidden contracts",
+    "what": "A unit board with no life; points come from two face-down contracts you satisfy and the opponent must guess and deny. First to 10.",
+    "loop": "Points come from building your board toward your contracts and cutting down the opponent's. Expert spends removal to keep the opponent under the unit counts most contracts ask for, and rerolls hard contracts because mana is spare.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 95.0%, Racer 100%; first player 42.5% in Expert mirrors (Greedy mirror 41.4%); Expert = Greedy on 60.5% of 30,038 decisions",
+    "flags": [
+      "mana barely binds: 55% of all mana goes unspent, cap of 10 reached on 56% of turns",
+      "Clean and Patience often pay out in the opening for free, a luck spike"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "33-time-track",
+    "name": "Time track",
+    "what": "No turns: whoever is behind on a shared time track acts next; cards and attacks cost time, and units recover on the same timeline.",
+    "loop": "On each action you choose what to spend time on: a unit, a removal Hit, an attack, or a draw. The real price of a big card is that it hands the opponent a run of consecutive actions.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 93.8%, Racer 79.3%; the player whose marker starts on top wins 50.4% of Expert mirrors; Expert = Greedy on 34.9% of 24,594 decisions",
+    "flags": [
+      "Racer holds Expert nearest the line (79.3%)",
+      "mirror games are short, about 25 actions"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "34-pitch-to-pay",
+    "name": "Pitch to pay",
+    "what": "No mana: you pay by pitching cards from hand, which go under the deck, and the hand refills to five; otherwise a plain unit duel.",
+    "loop": "Each turn you turn the whole hand into one or two plays and burn the rest; Expert pitches 3.6 cards and plays 1.7 a turn. The real decision is which one or two cards to play and which to burn.",
+    "alive": true,
+    "changed": "life 30 instead of 20",
+    "numbers": "Expert beats Random 100%, Greedy 90.0%, Racer 88.5%; first player 67.5% in Expert mirrors; Expert = Greedy on 47.0% of 40,274 decisions",
+    "flags": [
+      "first player 67.5%, near the line (73.8% at life 20)",
+      "33% of Expert's pitches buy mana it never spends, to cycle a card",
+      "Expert empties its hand in 86.5% of turns"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "37-price-tracks",
+    "name": "Price tracks",
+    "what": "Goods in your deck sell at shared prices that fall when sold and rise each round; cards push or crash prices. First to 40 points.",
+    "loop": "Each turn a player sells one type of good, boosting its price first when able, and crashes the good the other side is likely to sell. Guessing what the opponent holds is worth a lot, but the seat is worth more.",
+    "alive": false,
+    "changed": "reaching 40 ends the match at the end of that round, not at once",
+    "numbers": "Expert beats Random 99.5%, Greedy 58.4%, Racer 84.1%; first player 80.0% in Expert mirrors; Expert = Greedy on 57.5% of 9,720 decisions",
+    "flags": [
+      "first player wins 72-92% of mirrors with every bot and Expert tried",
+      "first player 92.0% in Expert mirrors as specified",
+      "coin rarely binds: 2.14 coin a turn goes unspent"
+    ],
+    "why_dead": "First player wins 80.0% of Expert mirrors after the rule change (92.0% as specified), and Expert beats Greedy only 58.4%"
+  },
+  {
+    "id": "38-costed-tricks",
+    "name": "Costed tricks",
+    "what": "Trick-taking with follow-suit and trumps where a face-up card costs energy by rank and each trick's prize is shown in advance; first to 20 points.",
+    "loop": "Ten energy has to buy eight tricks whose prizes are shown, so each hand is a budget: which 2s and 3s to fight for and which 1s to throw away. Expert leads strong cards into 3-point tricks and dumps cards face-down into 1-point tricks.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 86.8%, High 83.3% (no Racer); first leader of hand 1 wins 48.7% of Expert mirrors; Expert = Greedy on 37.9% of its decisions with more than one option",
+    "flags": [],
+    "why_dead": null
+  },
+  {
+    "id": "39-commander-grid",
+    "name": "Commander grid",
+    "what": "A 5x6 grid where units deploy next to your Commander, move and strike; the Commander fights too. Kill the enemy Commander.",
+    "loop": "Each turn's decision is where the Commander stands, since units deploy next to it. When neither side over-extends the board fills up and the round-15 damage settles it.",
+    "alive": false,
+    "changed": "a piece may move and then attack in the same turn",
+    "numbers": "Expert beats Random 97.8%, Greedy 84.0%, Racer 98.1%; first player 21.5% in Expert mirrors (Greedy mirror 10.0%); Expert = Greedy on 41.9% of 80,280 decisions",
+    "flags": [
+      "Expert mirror games average 35.3 turns, past the damage's start at turns 29-30",
+      "second player wins 78.5% of Expert mirrors",
+      "59.7% of all mana goes unspent",
+      "as specified Expert beats Greedy only 65.5% and first player wins 4.0%"
+    ],
+    "why_dead": "First player wins 21.5% of Expert mirrors after the rule change (4.0% as specified), against a 30-70% band"
+  },
+  {
+    "id": "40-simultaneous-turns",
+    "name": "Simultaneous turns",
+    "what": "Both players secretly plan the whole round at once (cards, Hit targets, attack targets), then everything resolves together. 20 life, no first player.",
+    "loop": "Each round you pick the cards that fill the mana, aim your Hits, and send each unit at the player or a unit. Hits land before attacks, so the real choice is which enemy unit to remove before it swings; Expert sends 90% of attacks at the player.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 99.9%, Greedy 90.4%, Racer 82.6%; seat A 50.4% in Expert mirrors; Expert plan = Greedy plan on 47.2% of 6,024 decisions",
+    "flags": [
+      "35% of Expert mirror games are draws; 47% of Racer mirror games",
+      "mana binds every round: a card is priced out in 98.9% of rounds"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "41-wave-defense",
+    "name": "Wave defense",
+    "what": "One player against the game's threat deck walking down three lanes, with defenders and spells from a deck you add to; keep your Wall alive.",
+    "loop": "Each round you choose where 4 mana goes among Hit 3s, Draw 2s and Defenders, which lane gets a Defender, and whether to add a reward card. Best play kills everything early with the cheapest damage and does not dilute the deck.",
+    "alive": true,
+    "changed": "mana is 4 every round instead of rising with the round",
+    "numbers": "Single-player: Expert wins 100% at full Wall, Greedy 39% (13.3 Wall on wins), Random 0%; Expert ends better than Greedy in 370 of 400 paired games, than Random in 400 of 400; Expert = Greedy on 24.5% of 25,621 decisions",
+    "flags": [
+      "a hand-written fixed rule wins 97% (single-player)",
+      "Expert never loses a point of Wall, so it is an easy puzzle",
+      "at the spec's rules Greedy wins 99.5% and a fixed rule solves it"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "42-real-time-lane",
+    "name": "Real-time lane",
+    "what": "Mana flows by the second and an eight-card deck cycles through a hand of four; units walk one lane and fight for three minutes.",
+    "loop": "The decisions are which card answers the push in front of you and what to send behind your surviving units. Expert waits in 42% of the moments it could afford something, holding for the answer.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 97.5%, Racer 90.6%; seat A 45% in Expert mirrors (no first player); Expert = Greedy on 33% of 20,472 decisions",
+    "flags": [
+      "Expert almost never plays Wall or Tank, so the deck is in practice six cards",
+      "Greedy mirror ends level after overtime 14% of games",
+      "a mirror game runs about 1:45"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "43-auto-deck-battle",
+    "name": "Auto deck battle",
+    "what": "Each round buy cards from a secret shop with gold; battles resolve themselves, the top cards of both decks fighting until a deck runs out.",
+    "loop": "Each round is one shopping decision with 6 gold: which two or three cards, whether to reroll, and later which card to throw out. Once decks are full, every round is remove a Pip and buy a Heavy.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 91.7% (no Racer); seat A 49.7% in Expert mirrors; Expert = Greedy on 55.7% of decisions",
+    "flags": [
+      "Heavy is 30% and Guardian 20% of Expert buys, Bomb 3%",
+      "the deck sits at the cap of 10 at 53% of shop ends"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "44-bump-placement",
+    "name": "Bump placement",
+    "what": "Five shared action spaces; players alternately place costed cards, a stronger card bumps a weaker one back to hand, and spaces pay at round end.",
+    "loop": "Each round is an auction run one card at a time: where to commit strength and when to stop. Expert fights over Fund because its extra mana is the only way to afford the Chief.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 100%, Racer 100%; first player 57% in Expert mirrors (Greedy mirror 66%); Expert = Greedy on 34.9% of 35,959 decisions",
+    "flags": [
+      "mana binds hard: cards in hand cost more than the round's mana in 97.5% of rounds",
+      "Fund is held in 44.5% of player-rounds",
+      "bumping is constant, 2.35 bumps a round"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "45-swing-neutrals",
+    "name": "Swing neutrals",
+    "what": "Three shared Neutral pieces with loyalty tracks; influence cards pull them, and each Neutral leaning your way hits the opponent. Life 15.",
+    "loop": "Each turn a player pulls Neutrals with the mana it has; a pull pays only if it survives the other player's turn, so the choice is how far to pull one against pulling several. Concentration wins over spreading.",
+    "alive": true,
+    "changed": "a Neutral hits at the start of its side's next turn, not at the end of the pull turn",
+    "numbers": "Expert beats Random 100%, Greedy 83.8%, Racer 92.0%; first player 40.5% in Expert mirrors; Expert = Greedy on 41.4% of 11,487 decisions",
+    "flags": [
+      "mirror games last 22 turns (6.4 as specified)",
+      "mana binds: a card is priced out in 75% of turns",
+      "as specified Expert beat Greedy only 64.0% and Racer 61.3%"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "46-echo-mana",
+    "name": "Echo mana",
+    "what": "A 30-health hero duel where your mana each turn is what the opponent spent on their last turn plus one, so spending little starves them.",
+    "loop": "Each turn the question is how much to spend: whatever you pay, the opponent gets back plus one. When both hands clog with dear cards the game locks, and whoever breaks the lock pays for it.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 100%, Greedy 76.2%, Starver 93.8%, Racer 96.8%; first player 31.0% in Expert mirrors; Expert = Greedy on 88.8% of decisions",
+    "flags": [
+      "first player 31.0%, near the 30% floor (second player wins 69%)",
+      "matches Greedy 88.8%, near the 90% line",
+      "in traced games both sides sat at 2 mana for ten turns, holding dear cards",
+      "mana sits at the floor of 2 on 30% of turns"
+    ],
+    "why_dead": null
+  },
+  {
+    "id": "48-junk-war",
+    "name": "Junk war",
+    "what": "A market deckbuilder where you score by playing cards and attack by pushing Junk into the opponent's deck; cleaning cards remove it. First to 25.",
+    "loop": "Each turn the hand plays itself; the decisions are what to buy with the coin and what Purge removes. Best play is a thinning race, with Foul bought nearly as often as Coin 2 to clog the other deck.",
+    "alive": true,
+    "changed": null,
+    "numbers": "Expert beats Random 97.8%, Greedy 85.0%, Racer 94.5%; first player 43.0% in Expert mirrors; Expert = Greedy on 66.7% of 27,095 decisions",
+    "flags": [
+      "Score 4 was bought once in 30 mirror games: 8 coin in one hand almost never happens",
+      "about 8 Junk enter decks a game",
+      "mirror games last 25.6 turns"
+    ],
+    "why_dead": null
+  }
+]

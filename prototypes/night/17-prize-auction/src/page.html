@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prize Auction</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="round"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="side1" class="side"></div>
+  <div id="middle"><div id="bid1" class="bidrow"></div><div id="potbox"><div id="pot"></div><div id="next"></div></div><div id="bid0" class="bidrow"></div></div>
+  <div id="side0" class="side"></div>
+  <div id="controls"></div>
+  <div id="hand"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Prize Auction</h3>
+    <p>16 prizes, one a round. Most points at the end wins (tie: more coin owned).</p>
+    <p>You both start with the same 8 coin cards (six 1s, two 2s); 5 in hand. Each round both draw 2 (an empty deck reshuffles your discard). Over 7 cards: discard down to 7.</p>
+    <p><b>Bid:</b> pick any cards from your hand, in secret; both bids are shown at once. The higher bid takes the prize, pays its bid cards to its discard, and the prize goes to its discard too: from then on you draw it. The lower bidder keeps its cards. Equal bids: nobody takes it and it stays, joined by the next prize.</p>
+    <p><b>Debt</b> (−3) goes the other way: with Debt up, the lower bidder takes everything up, and every bid comes back.</p>
+    <p>Coin prizes make your money stronger; point prizes score but sit in your deck as 0. Messenger: when you draw it, draw 1 more. The next prize is shown beside the one up now.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

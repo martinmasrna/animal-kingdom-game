@@ -1,0 +1,119 @@
+{
+  "game": "48 Junk war",
+  "games": 400,
+  "budget": 2000,
+  "seconds": 3939,
+  "matchups": {
+    "expert-random": {
+      "games": 400,
+      "expertWins": 391,
+      "draws": 0,
+      "expertRate": 0.978,
+      "firstPlayerRate": 0.492,
+      "avgTurns": 25.7
+    },
+    "expert-greedy": {
+      "games": 400,
+      "expertWins": 340,
+      "draws": 0,
+      "expertRate": 0.85,
+      "firstPlayerRate": 0.46,
+      "avgTurns": 26.5
+    },
+    "expert-racer": {
+      "games": 400,
+      "expertWins": 378,
+      "draws": 0,
+      "expertRate": 0.945,
+      "firstPlayerRate": 0.485,
+      "avgTurns": 25.2
+    },
+    "expert-expert": {
+      "games": 400,
+      "expertWins": 200,
+      "draws": 0,
+      "expertRate": 0.5,
+      "firstPlayerRate": 0.43,
+      "avgTurns": 26.8
+    }
+  },
+  "gate": {
+    "expertVsRandom": 0.978,
+    "expertVsGreedy": 0.85,
+    "expertVsRacer": 0.945,
+    "firstPlayerRateExpertMirror": 0.43,
+    "turnCapRate": 0,
+    "expertEqualsGreedy": 0.667,
+    "expertDecisions": 27095,
+    "fails": []
+  },
+  "sanity": [
+    {
+      "position": "8 coin, Score 4 in the row",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "buy Score4"
+    },
+    {
+      "position": "8 coin, Score 4 in the row",
+      "bot": "expert",
+      "pass": true,
+      "chose": "buy Score4"
+    },
+    {
+      "position": "Purge the Junk",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "play Purge, purge Junk, purge Junk, play Coin"
+    },
+    {
+      "position": "Purge the Junk",
+      "bot": "expert",
+      "pass": true,
+      "chose": "play Purge, purge Junk, purge Junk, play Coin"
+    },
+    {
+      "position": "Score 4 on 22 points",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "buy Score4"
+    },
+    {
+      "position": "Score 4 on 22 points",
+      "bot": "expert",
+      "pass": true,
+      "chose": "buy Score4"
+    }
+  ],
+  "expertMirrorBehaviour": {
+    "games": 30,
+    "budget": 2000,
+    "buys": {
+      "Coin2": 56,
+      "Score2": 53,
+      "Foul": 45,
+      "Draw": 43,
+      "Purge": 43,
+      "Clean": 31,
+      "Foul2": 21,
+      "Thief": 14,
+      "Coin3": 12,
+      "Score4": 1
+    },
+    "purgeTargets": {
+      "Coin": 146,
+      "Junk": 57,
+      "stopped": 56,
+      "other": 6
+    },
+    "avgTurnsBothPlayers": 25.6,
+    "endedAt25": 30,
+    "endedByMarket": 0,
+    "junkIntoDecksPerGame": 7.8
+  },
+  "trivialBots": {
+    "note": "smoke test, 400 games each, seats alternated",
+    "greedyVsRacer": 0.73,
+    "greedyVsRandom": 0.915
+  }
+}

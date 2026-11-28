@@ -1,0 +1,115 @@
+{
+  "concept": "42-real-time-lane",
+  "expert": {
+    "playouts": 160,
+    "horizon": 40
+  },
+  "note": "no first player: firstPlayerWinRate is seat A's (base at 0) win rate; turns are ticks; capped = level after overtime (a draw)",
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "seatAWinRate": 0.5,
+      "avgTicks": 67,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.975,
+      "draws": 0,
+      "seatAWinRate": 0.495,
+      "avgTicks": 101,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.9063,
+      "draws": 1,
+      "seatAWinRate": 0.4763,
+      "avgTicks": 140.1,
+      "capped": 1
+    },
+    "expert-expert": {
+      "games": 200,
+      "aWinRate": 0.55,
+      "draws": 0,
+      "seatAWinRate": 0.45,
+      "avgTicks": 212.8,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 142,
+      "seatAWinRate": 0.525,
+      "avgTicks": 190.9,
+      "capped": 142
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.9063,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0.0007,
+    "cappedPass": true,
+    "cappedCountedOver": "the games Expert plays",
+    "expertGreedyAgreement": 0.3348,
+    "agreementDecisions": 20472,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.45,
+    "firstPlayerPass": true,
+    "seconds": 47,
+    "setPositionsPass": true,
+    "allPass": true
+  },
+  "sanity": [
+    {
+      "position": "lethal: his base on 1, empty lane, he cannot pay for an answer in time; send the Runner",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "lethal: his base on 1, empty lane, he cannot pay for an answer in time; send the Runner",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: never Blast an empty lane (ten decisions, nothing on his side)",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "don't waste: never Blast an empty lane (ten decisions, nothing on his side)",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "free value: three Swarm units two steps from my base, Blast in hand: Blast them",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "free value: three Swarm units two steps from my base, Blast in hand: Blast them",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "report": {
+    "verdict": "alive",
+    "numbers": "Expert vs Random 100%, vs Greedy 97.5%, vs Racer 90.6%; level after overtime 0.07% of Expert games (1 of 1400); Expert=Greedy on 33% of 20,472 decisions; seat A 45% in Expert vs Expert (no first player); set positions all 5/5.",
+    "trivialBots": "Racer beats Greedy 80%: units thrown at the lane outrace Walls and Blasts aimed at single targets. Greedy vs Greedy ends level after overtime 14% of the time (everything grinds in the middle); Expert games end on a base.",
+    "loop": "Nobody banks mana: Expert plays at about 3 mana on average, but waits in 42% of the moments it could afford something, holding for the card that answers what is walking at it. The decisions are which card answers the push in front of you (Blast on grouped Swarms or a Shooter behind a Grunt, a Grunt into Swarms, a Runner at a weak base) and what to send behind your surviving units. Expert almost never plays Wall or Tank (13 of 426 plays in ten mirror games): it parks them in hand and cycles six cheap cards through three slots, so the deck is in practice six cards. A mirror game runs about 1:45 and is decided by one or two pushes that survive the answer."
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "concept": "18-edge-flip",
+  "expert": {
+    "playouts": 300
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.9838,
+      "draws": 13,
+      "firstPlayerWinRate": 0.5088,
+      "avgTurns": 10.9,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.8725,
+      "draws": 46,
+      "firstPlayerWinRate": 0.5475,
+      "avgTurns": 11.7,
+      "capped": 0
+    },
+    "expert-filler": {
+      "games": 400,
+      "aWinRate": 0.9762,
+      "draws": 19,
+      "firstPlayerWinRate": 0.5088,
+      "avgTurns": 10.7,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 200,
+      "aWinRate": 0.52,
+      "draws": 50,
+      "firstPlayerWinRate": 0.655,
+      "avgTurns": 9.4,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 220,
+      "firstPlayerWinRate": 0.642,
+      "avgTurns": 12.1,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.8725,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "cappedCountedOver": "the games Expert plays",
+    "expertGreedyAgreement": 0.2198,
+    "agreementDecisions": 10990,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.655,
+    "firstPlayerPass": true,
+    "seconds": 414,
+    "setPositionsPass": true,
+    "allPass": true,
+    "firstPlayerExtraSample": {
+      "games": 200,
+      "firstWins": 91,
+      "draws": 56,
+      "firstPlayerWinRate": 0.595,
+      "pooled400": 0.625,
+      "note": "run because the 200-game figure (65.5%) sat near the 70% line; seeds 778000-781049"
+    }
+  },
+  "sanity": [
+    {
+      "position": "free flip: a cell touching three enemy 1-edges and a Crown in hand, nothing left that could take them back: take all three",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "free flip: a cell touching three enemy 1-edges and a Crown in hand, nothing left that could take them back: take all three",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "lethal: the last empty cell decides; place the Spear with its 4 on his 3 (a Point only draws)",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "lethal: the last empty cell decides; place the Spear with its 4 on his 3 (a Point only draws)",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: never a Crown in a sealed corner where a Point takes the same card",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "don't waste: never a Crown in a sealed corner where a Point takes the same card",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "report": {
+    "verdict": "alive",
+    "numbers": "Expert vs Random 98.4%, vs Greedy 87.3%, vs Filler 97.6%; 0 games hit the 60-turn cap; Expert = Greedy on 22% of 10,990 decisions; first player 65.5% in 200 Expert mirror games, 59.5% in 200 more, 62.5% pooled (Greedy mirror 64%); set positions all 5/5 (Greedy wastes the Crown).",
+    "expertNote": "Expert: determinized play-outs to the end of the game (a sampled-greedy policy on both sides), 300 a decision, successive halving over the candidates (the best two placements of each card by a one-glance score, then the best overall, plus ending the turn).",
+    "setPositionNote": "The spec's free flip (a Crown into a cell touching three enemy 1-edges) is not something a person never gets wrong early in the game: the three cards taken keep their 1-edges toward empty cells and are taken straight back, and Expert-vs-Expert play-outs from that position favoured keeping the Crown. The gate position puts the same flip late, where nothing can take them back.",
+    "loop": "Expert places about one card a turn (1.05) although mana usually allows two or three, and passes in 15% of its turns: every card placed is a target, so the game is a waiting game over who places last next to whom. Flips are cheap and mostly temporary (about 7 a game, many retaken); what lasts is a card whose open edges are high or whose neighbours are full. Crowns are held for the end (played with about 4 empty cells left, and often not at all). The first player scores 62% in Expert mirrors (draws counted as half), and 28% of those games end level on cells."
+  }
+}

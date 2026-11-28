@@ -1,0 +1,129 @@
+{
+  "concept": "02-attack-and-block",
+  "expert": {
+    "playouts": 1000,
+    "depth": 99,
+    "eps": 0.05
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 18.4,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.9725,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5075,
+      "avgTurns": 19.8,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.9525,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5375,
+      "avgTurns": 20.4,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 200,
+      "aWinRate": 0.49,
+      "draws": 0,
+      "firstPlayerWinRate": 0.41,
+      "avgTurns": 37.2,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.668,
+      "avgTurns": 17.2,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.9525,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "expertGreedyAgreement": 0.4631,
+    "agreementDecisions": 31480,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.41,
+    "firstPlayerPass": true,
+    "seconds": 1747,
+    "setPositionsPass": true,
+    "allPass": true,
+    "cappedCountedOver": "every game (0 caps in any pairing)"
+  },
+  "sanity": [
+    {
+      "position": "lethal: he is on 5 with no ready unit, my ready Line and Striker attack",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "lethal: he is on 5 with no ready unit, my ready Line and Striker attack",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "free block: his Striker attacks, my ready Line blocks it",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "free block: his Striker attacks, my ready Line blocks it",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: never Hit 4 a unit that Hit 2 destroys",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "don't waste: never Hit 4 a unit that Hit 2 destroys",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't throw a unit away: my lone Striker never attacks into his ready Line",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "don't throw a unit away: my lone Striker never attacks into his ready Line",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "report": {
+    "verdict": "alive",
+    "numbers": "Expert vs Random 100%, vs Greedy 97.3%, vs Racer 95.3%; 0 games hit the 120-turn cap; Expert = Greedy on 46% of 31,480 decisions; first player 41% in Expert vs Expert (Greedy mirror 67%); set positions all 5/5 (Greedy wastes Hit 4).",
+    "expertNote": "Expert: determinized play-outs to the end of the game with Greedy on both sides (5% random moves), 1000 a decision, successive halving over the candidates; attack subsets and block assignments pre-ranked by a one-ply look (the defender answering with Greedy's block). Its first version, before any tuning, already beat Greedy 91%; the template's 68% problem did not appear.",
+    "loop": "Every turn is the attack-or-hold question the spec asked about: Expert attacks only with units the defender cannot block profitably, or with a single big unit to force a chump block or a trade it likes, and keeps the rest home as blockers because attackers stay exhausted through the reply. As defender it blocks to trade evenly or chump only near lethal, and uses Hit cards before combat to remove the blocker that would stop an attack, or after to finish a blocker that survived. Expert mirror games stall into wide boards (37 turns on average against 20 with Greedy); 7 of 24 sampled mirror games reached an empty deck, but fatigue was only 8% of the life lost: boards break when a removal spell or a bigger body tips one exchange."
+  }
+}

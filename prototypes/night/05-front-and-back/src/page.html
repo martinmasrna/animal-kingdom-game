@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Front and Back</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="opphand"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="hero1" class="herorow"></div>
+  <div id="back1" class="row rb"></div>
+  <div id="front1" class="row rf"></div>
+  <div id="front0" class="row rf"></div>
+  <div id="back0" class="row rb"></div>
+  <div id="hero0" class="herorow"></div>
+  <div id="res1" class="res"></div>
+  <div id="turnbox"></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Front and Back</h3>
+    <p>Life 20 each; bring the other to 0. Same 30-card deck for both. The first player starts with 3 cards, the second with 4 and the Coin (+1 mana this turn).</p>
+    <p><b>Your turn.</b> Mana +1 (up to 10) and refill, units ready, draw 1 (empty deck: lose 1 life, then 2, then 3). Play cards for their cost. A unit can't attack the turn it is played.</p>
+    <p><b>Rows.</b> Melee units go to your front row, Ranged units to your back row, 3 each at most.</p>
+    <p><b>Attack.</b> Each ready unit attacks once. It must hit an enemy front-row unit; only when the enemy front row is empty can it hit the back row or the player. A Melee attacker and its target deal their attack to each other; a Ranged attacker takes nothing back. Damage stays; 0 health destroys a unit.</p>
+    <p>Hit 2 / Hit 4: damage to any enemy unit, whatever its row.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Curling Line</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="board"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div></div>
+  <div id="info1" class="info"></div>
+  <div id="sheetwrap"><div id="sheet"></div></div>
+  <div id="info0" class="info"></div>
+  <div id="hand"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Curling Line</h3>
+    <p>A sheet of cells 1 to 12. The Mark is cell 9; the House is cells 6 to 12.</p>
+    <p><b>A throw</b> slides from the left toward its target cell. If a stone stands on the way, the first one stops it on the cell before and is pushed on by what is left of the throw; a pushed stone that meets another stops before it and passes the rest on. Pushed past 12, or stopped on 0, is out.</p>
+    <p><b>An end:</b> each player discards its hand, draws 5 and has 5 energy. Eight throws, alternating, the player without the hammer first. A throw plays a card (paying its energy) or the free Lag (to cell 4). A card throws to the cell on it; Any lets you pick a cell from 4 to 12.</p>
+    <p><b>Scoring:</b> only House stones count. The player with the stone closest to the Mark scores 1 for each of its House stones closer than the other player's closest. Equal closest, or an empty House: no score. The player who did not score takes the hammer (the last throw); after no score, the hammer stays.</p>
+    <p>After 6 ends, more points wins; equal plays one more end.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

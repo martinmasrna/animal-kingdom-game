@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Costed Tricks</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* one screen: hands left; prize row, trump and the trick in the middle; energy, scores and the
+   two play buttons right; your hand below */
+:root {
+  --bg: #2a3340; --table: #3b4a5c; --table2: #34424f; --ink: #1b1b1b; --paper: #fbf7ee;
+  --mana: #3d8bf2; --gold: #f2b632; --ok: #5fdc6f;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86;
+  --sA: #d8432e; --sB: #2f6fd0; --sC: #2f9e5a; --sD: #c98a12;
+  --cardw: 78px; --cardh: 108px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; color: inherit; }
+
+#game {
+  position: relative; height: 100%; max-width: 1300px; margin: 0 auto;
+  display: grid; grid-template-columns: 140px minmax(0, 1fr) 230px;
+  grid-template-rows: 40px minmax(0, 1fr) auto; gap: 6px 20px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+}
+#opphand { grid-row: 1; grid-column: 2; display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; }
+.bk { width: 24px; height: 34px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
+.bk:first-child { margin-left: 0; }
+#menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; display: flex; gap: 10px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 18px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#history { grid-row: 2; grid-column: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; overflow: hidden; }
+#table { grid-row: 2; grid-column: 2; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 10px; border-radius: 16px; background: radial-gradient(ellipse at center, var(--table), var(--table2)); box-shadow: inset 0 0 24px rgba(0,0,0,.3); padding: 14px; min-height: 0; }
+#side { grid-row: 2; grid-column: 3; display: flex; flex-direction: column; justify-content: space-between; padding: 8px 0; gap: 10px; }
+#hand { grid-row: 3; grid-column: 1 / -1; }
+
+/* ---------------- prize row and trump */
+#prizes { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; }
+.trumpbox { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 10px; border: 3px solid #fff; box-shadow: 0 3px 8px rgba(0,0,0,.4); }
+.trumpbox .si { font-size: 28px; color: #fff; }
+.trumpbox.suA { background: var(--sA); } .trumpbox.suB { background: var(--sB); } .trumpbox.suC { background: var(--sC); } .trumpbox.suD { background: var(--sD); }
+.prize { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 19px; background: #1d242c; border: 2px solid #5b6a7a; color: #dfe5eb; }
+.prize.now { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.35); transform: scale(1.15); }
+.prize.w0 { background: var(--me); border-color: #fff; } .prize.w1 { background: var(--him); border-color: #fff; } .prize.gone { opacity: .35; }
+
+/* ---------------- the trick */
+#trick { display: flex; align-items: center; justify-content: center; min-height: 0; }
+.tc { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.slotc { width: 104px; height: 144px; border-radius: 12px; border: 2px dashed rgba(255,255,255,.14); }
+.card.big { --cardw: 104px; --cardh: 144px; animation: drop .28s ease-out; }
+.card.big.win { box-shadow: 0 0 0 4px var(--gold), 0 0 24px rgba(242,182,50,.8); }
+.card.big.lose { filter: brightness(.6); }
+@keyframes drop { from { transform: scale(.6); opacity: .2; } }
+
+/* ---------------- cards */
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.card .rk { font-size: calc(var(--cardw) * .5); font-weight: 900; line-height: 1; }
+.card .si { font-size: calc(var(--cardw) * .26); line-height: 1; }
+.card.suA .rk, .card.suA .si { color: var(--sA); } .card.suB .rk, .card.suB .si { color: var(--sB); }
+.card.suC .rk, .card.suC .si { color: var(--sC); } .card.suD .rk, .card.suD .si { color: var(--sD); }
+.card.trump { background: #fff3c4; border-color: var(--gold); }
+.card.back { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
+.card.back.s0 { background: linear-gradient(135deg, var(--me), var(--me2)); border-color: #b9d3f5; }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+#hand { display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 14px 0 4px; min-height: calc(var(--cardh) + 20px); }
+#hand .card { transition: transform .12s, box-shadow .12s; }
+#hand .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok:hover { transform: translateY(-8px); }
+#hand .card.sel { transform: translateY(-16px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8); }
+#hand .card:disabled { cursor: default; }
+#hand .card.no { filter: brightness(.62) saturate(.6); }
+
+/* ---------------- energy, scores, buttons */
+.res { display: flex; align-items: center; gap: 10px; }
+.mana { display: flex; align-items: center; gap: 3px; }
+.gemc { width: 11px; height: 15px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: #1d2a38; }
+.gemc.on { background: linear-gradient(180deg, #8cc2ff, var(--mana)); }
+.manatxt { font-weight: 800; font-size: 20px; margin-right: 6px; color: #bcd9ff; min-width: 26px; }
+#scores { display: flex; flex-direction: column; gap: 10px; }
+.sc { display: flex; align-items: center; gap: 10px; } .sc b { font-size: 34px; font-weight: 900; min-width: 44px; }
+.sc.s0 b { color: #8cc2ff; } .sc.s1 b { color: #c9a6f0; }
+.bar { flex: 1; height: 10px; border-radius: 5px; background: #1d242c; overflow: hidden; } .bar i { display: block; height: 100%; transition: width .4s; }
+.sc.s0 .bar i { background: var(--me); } .sc.s1 .bar i { background: var(--him); }
+#turnbox { display: flex; flex-direction: column; gap: 10px; }
+#turnbox button { width: 150px; min-height: 48px; border-radius: 10px; border: 0; font-weight: 800; font-size: 16px; background: var(--gold); color: #2a1d00; box-shadow: 0 3px 0 #a8770d; }
+#turnbox #down { background: #c9b6e6; box-shadow: 0 3px 0 #7d63a3; }
+#turnbox button:disabled, #turnbox #down:disabled { background: #56616d; color: #8e98a3; box-shadow: none; cursor: default; }
+
+/* ---------------- history */
+.hist { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: rgba(0,0,0,.22); font-weight: 800; }
+.hist .rn { color: #8e98a3; min-width: 20px; } .hist .p0 { color: #8cc2ff; min-width: 34px; } .hist .p1 { color: #c9a6f0; }
+
+/* ---------------- rules, floaters, banner, game over */
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+.rulesbox { max-width: 640px; max-height: 88vh; overflow: auto; background: #1d242c; border: 1px solid #5b6a7a; border-radius: 12px; padding: 14px 22px; font-size: 15px; line-height: 1.4; color: #dfe5eb; }
+.rulesbox h2 { font-size: 20px; margin: 6px 0 8px; } .rulesbox ul { padding-left: 18px; margin: 4px 0; } .rulesbox p { margin: 6px 0; }
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 40px; text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 10px rgba(0,0,0,.4); transform: translate(-50%, -50%); animation: floatup 1.1s ease-out forwards; white-space: nowrap; }
+.float.mine { color: #8cc2ff; } .float.his { color: #c9a6f0; }
+@keyframes floatup { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -110%) scale(1); } }
+#banner { position: absolute; left: 0; right: 0; top: 45%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 44px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over .final { font-size: 28px; font-weight: 900; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+
+/* ---------------- phone */
+@media (max-width: 760px) {
+  :root { --cardw: 50px; --cardh: 70px; }
+  #game { grid-template-columns: minmax(0, 1fr); grid-template-rows: 30px minmax(0, 1fr) auto auto; gap: 6px; }
+  #history { display: none; }
+  #opphand { grid-column: 1; justify-content: flex-start; }
+  .bk { width: 16px; height: 24px; }
+  #menu { top: 2px; gap: 6px; } #menu button { min-height: 24px; padding: 2px 8px; font-size: 13px; }
+  .tally { font-size: 14px; } .tally b { min-width: 24px; height: 24px; }
+  #table { grid-row: 2; grid-column: 1; padding: 8px; }
+  .prize { width: 30px; height: 30px; font-size: 15px; } #prizes { gap: 5px; } .trumpbox { width: 38px; height: 38px; margin-right: 4px; } .trumpbox .si { font-size: 20px; }
+  .card.big, .slotc { --cardw: 84px; --cardh: 116px; width: 84px; height: 116px; }
+  #side { grid-row: 3; grid-column: 1; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 0; gap: 6px 10px; }
+  #scores { flex-direction: row; gap: 10px; } .sc b { font-size: 22px; min-width: 26px; } .bar { display: none; }
+  .gemc { display: none; } .manatxt { font-size: 17px; margin: 0; }
+  #turnbox { flex-direction: row; gap: 6px; } #turnbox button { width: auto; min-height: 38px; padding: 0 10px; font-size: 14px; }
+  #hand { grid-row: 4; grid-column: 1; gap: 5px; flex-wrap: wrap; padding-top: 10px; }
+  .cgem { width: 20px; height: 20px; font-size: 12px; top: -6px; left: -6px; }
+}
+
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="opphand"></div>
+  <div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="table"><div id="prizes"></div><div id="trick"></div></div>
+  <div id="side"><div id="res1" class="res"></div><div id="scores"></div><div id="turnbox"></div><div id="res0" class="res"></div></div>
+  <div id="hand"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="rulesbox"><h2>Costed tricks</h2>
+<p>Trick-taking where a card played face-up costs energy by its rank, and every trick's prize is shown before the hand starts.</p>
+<ul>
+<li>Four suits (● ■ ▲ ◆), ranks 1 to 6. Each player has its own deck of 24 cards: one of every suit and rank.</li>
+<li>A face-up card costs energy by rank: 1–2 cost 0, 3–4 cost 1, 5 costs 2, 6 costs 3.</li>
+<li><b>A hand.</b> Each player shuffles its own deck and deals itself 8 cards, with 10 energy for the hand (unspent energy is lost when the hand ends). The trump suit is ● in hand 1, ■ in hand 2, then ▲, ◆, ● and so on. The prizes 1, 1, 1, 2, 2, 2, 3, 3 are shuffled and laid out in order: trick 1 is worth the first, trick 2 the second, and so on. The first leader alternates from hand to hand; after that each trick's winner leads.</li>
+<li><b>A trick.</b> The leader plays a card face-up, paying its cost, or any card face-down for free. The follower: if it holds a card of the led suit it can pay for, it must play one of those; otherwise it plays any card it can pay for face-up, or any card face-down for free.</li>
+<li>A face-down card has no suit and no rank and never wins, except that two face-down cards give the trick to the leader. After a face-down lead, any face-up card from the follower wins. Otherwise the highest trump wins; with no trump, the highest card of the led suit. The winner scores the trick's prize.</li>
+<li><b>End.</b> At the end of a hand, a player on 20 or more wins; both on 20 or more: the higher wins, equal plays another hand. After 5 hands the higher score wins; equal is a draw.</li>
+</ul></div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 38 Costed tricks. Trick-taking with follow-suit and trumps, where a face-up card costs energy by
+// rank, any card can go face-down for free (and never wins), and each trick's prize is shown in
+// advance. Pure from the outside: act() clones the state.
+
+const SUITS = ['A', 'B', 'C', 'D'], RANKS = [1, 2, 3, 4, 5, 6], HAND = 8, ENERGY = 10, TARGET = 20, HANDS = 5;
+const PRIZES = [1, 1, 1, 2, 2, 2, 3, 3];
+const suitOf = (c) => c[0], rankOf = (c) => +c[1];
+const costOf = (c) => { const r = rankOf(c); return r <= 2 ? 0 : r <= 4 ? 1 : r === 5 ? 2 : 3; };
+function deckList() { const out = []; for (const s of SUITS) for (const r of RANKS) out.push(s + r); return out; }
+
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function clone(s) {
+  return { ...s, prizes: s.prizes.slice(), led: s.led && { ...s.led }, p: s.p.map(p => ({ ...p, hand: p.hand.slice(), rest: p.rest.slice(), seen: p.seen.slice(), voids: p.voids.map(v => ({ ...v })) })) };
+}
+function emit(s, ev, e) { if (ev) ev.push(e); }
+
+function newMatch({ seed, first }) {
+  const s = { seed: (seed >>> 0) || 1, hand: 0, first: 0, leader: 0, toMove: 0, trick: 0, trump: 'A', prizes: [], led: null, winner: null,
+    p: [0, 1].map(() => ({ score: 0, energy: ENERGY, hand: [], rest: [], seen: [], voids: [] })) };
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
+  startHand(s, null);
+  return s;
+}
+// each player shuffles its own 24 cards and deals itself 8; `rest` are its undealt cards, `seen`
+// the cards it has shown face-up this hand, `voids` what its failures to follow suit proved
+function startHand(s, ev) {
+  s.hand++;
+  for (const p of s.p) { const d = shuffleInPlace(s, deckList()); p.hand = d.slice(0, HAND); p.rest = d.slice(HAND); p.energy = ENERGY; p.seen = []; p.voids = []; }
+  s.trump = SUITS[(s.hand - 1) % 4];
+  s.prizes = shuffleInPlace(s, PRIZES.slice());
+  s.trick = 0; s.led = null;
+  s.leader = s.toMove = s.hand % 2 === 1 ? s.first : 1 - s.first;
+  emit(s, ev, { t: 'hand', hand: s.hand, trump: s.trump, prizes: s.prizes.slice(), leader: s.leader });
+}
+
+// Actions: { t: 'play', card, up } — up: face-up, paying its cost; otherwise face-down for free.
+function key(a) { return (a.up ? 'u' : 'd') + a.card; }
+// cards of the led suit the follower holds and can pay for
+function mustFollow(s, P) { return s.led && s.led.up ? P.hand.filter(c => suitOf(c) === suitOf(s.led.card) && costOf(c) <= P.energy) : []; }
+function isLegal(s, a) {
+  if (s.winner !== null || a.t !== 'play') return false;
+  const P = s.p[s.toMove];
+  if (!P.hand.includes(a.card)) return false;
+  if (a.up && costOf(a.card) > P.energy) return false;
+  if (s.led) { const f = mustFollow(s, P); if (f.length) return a.up && f.includes(a.card); }
+  return true;
+}
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  const out = [];
+  for (const c of s.p[s.toMove].hand) for (const up of [true, false]) { const a = { t: 'play', card: c, up }; if (isLegal(s, a)) out.push(a); }
+  return out;
+}
+// who takes a trick: led and follow are { card, up }
+function trickWinner(s, led, fol, leader) {
+  if (!led.up && !fol.up) return leader;
+  if (!led.up) return 1 - leader;
+  if (!fol.up) return leader;
+  const lt = suitOf(led.card) === s.trump, ft = suitOf(fol.card) === s.trump;
+  if (lt || ft) { if (lt && ft) return rankOf(fol.card) > rankOf(led.card) ? 1 - leader : leader; return ft ? 1 - leader : leader; }
+  return suitOf(fol.card) === suitOf(led.card) && rankOf(fol.card) > rankOf(led.card) ? 1 - leader : leader;
+}
+
+function mAct(s, a, ev) {
+  if (!isLegal(s, a)) throw new Error('illegal ' + key(a));
+  const me = s.toMove, P = s.p[me];
+  if (s.led) { const f = mustFollow(s, P); if (!f.length && s.led.up) P.voids.push({ suit: suitOf(s.led.card), max: P.energy }); }
+  P.hand.splice(P.hand.indexOf(a.card), 1);
+  if (a.up) { P.energy -= costOf(a.card); P.seen.push(a.card); }
+  emit(s, ev, { t: 'play', side: me, card: a.up ? a.card : null, up: a.up, cost: a.up ? costOf(a.card) : 0, own: a.card });
+  if (!s.led) { s.led = { card: a.card, up: a.up }; s.toMove = 1 - me; return; }
+  const w = trickWinner(s, s.led, a, s.leader);
+  const prize = s.prizes[s.trick];
+  s.p[w].score += prize;
+  emit(s, ev, { t: 'trick', winner: w, prize, trick: s.trick, score: [s.p[0].score, s.p[1].score] });
+  s.trick++; s.led = null; s.leader = s.toMove = w;
+  if (s.trick < HAND) return;
+  // end of hand
+  const [x, y] = [s.p[0].score, s.p[1].score];
+  if ((x >= TARGET || y >= TARGET) && x !== y) s.winner = x > y ? 0 : 1;
+  else if (s.hand >= HANDS) { s.winner = x > y ? 0 : y > x ? 1 : 'draw'; s.limit = true; }
+  if (s.winner !== null) { emit(s, ev, { t: 'end', winner: s.winner }); return; }
+  startHand(s, ev);
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function step(t, a) { mAct(t, a, null); return t; }
+
+// ---- src/bot.js
+// Bots for Costed tricks. None reads a hidden card: the Expert deals the opponent's hand from the
+// cards it has not seen face-up, leaving out every card its failures to follow suit ruled out,
+// and reseeds the shuffle before each search iteration.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pickOf = (a, rng) => a[Math.floor(rng() * a.length)];
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+// how much a card is worth keeping: rank, more for trumps, nothing if it can no longer be paid for
+const keep = (s, P, c) => (costOf(c) > P.energy ? 0 : rankOf(c) + (suitOf(c) === s.trump ? 5 : 0));
+const lowest = (s, P, cards) => cards.slice().sort((a, b) => keep(s, P, a) - keep(s, P, b) || rankOf(a) - rankOf(b))[0];
+// the face-up cards that would take the trick against what was led
+function winners(s, P, ups) { return ups.filter(c => trickWinner(s, s.led, { card: c, up: true }, s.leader) === s.toMove); }
+
+function cands(s) { return legalActions(s); }
+
+// ------------------------------------------------------------------ trivial bots
+function randomBot(s, rng) { return pickOf(legalActions(s), rng); }
+// Greedy (the spec's rule): following, it takes a trick worth 2 or more with its cheapest winning
+// card it can pay for; leading such a trick, it leads its strongest card it can pay for (a trump
+// first). Otherwise it plays face-down its least useful card, or its cheapest legal card when it
+// must follow suit.
+function greedyBot(s) {
+  const P = s.p[s.toMove], legal = legalActions(s), ups = legal.filter(a => a.up).map(a => a.card), forced = !legal.some(a => !a.up);
+  const prize = s.prizes[s.trick];
+  const cheapest = (cs) => cs.slice().sort((a, b) => costOf(a) - costOf(b) || rankOf(a) - rankOf(b))[0];
+  if (!s.led) {
+    if (prize >= 2 && ups.length) { const best = ups.slice().sort((a, b) => (suitOf(b) === s.trump) - (suitOf(a) === s.trump) || rankOf(b) - rankOf(a))[0]; return { t: 'play', card: best, up: true }; }
+    return { t: 'play', card: lowest(s, P, P.hand), up: false };
+  }
+  const win = winners(s, P, ups);
+  if (prize >= 2 && win.length) return { t: 'play', card: cheapest(win), up: true };
+  if (forced) return { t: 'play', card: cheapest(ups), up: true };
+  return { t: 'play', card: lowest(s, P, P.hand), up: false };
+}
+// High: its highest-ranked card it can pay for, face-up, every time.
+function highBot(s) {
+  const P = s.p[s.toMove], ups = legalActions(s).filter(a => a.up).map(a => a.card);
+  if (!ups.length) return { t: 'play', card: lowest(s, P, P.hand), up: false };
+  return { t: 'play', card: ups.sort((a, b) => rankOf(b) - rankOf(a) || (suitOf(b) === s.trump) - (suitOf(a) === s.trump))[0], up: true };
+}
+
+// ------------------------------------------------------------------ Expert: ISMCTS
+// Rollout policy: Greedy's rule with taste: leading a big trick it leads a trump it holds only
+// when that trump is high, following it takes any trick whose prize is worth the energy, it wins
+// a face-down lead with a free card, and it dumps its least useful card face-down. A little noise.
+function policy(s, rng) {
+  const P = s.p[s.toMove], legal = legalActions(s);
+  if (rng() < 0.08) return pickOf(legal, rng);
+  const ups = legal.filter(a => a.up).map(a => a.card), forced = !legal.some(a => !a.up), prize = s.prizes[s.trick];
+  const cheapest = (cs) => cs.slice().sort((a, b) => costOf(a) - costOf(b) || rankOf(a) - rankOf(b))[0];
+  const budget = P.energy / Math.max(1, 8 - s.trick);
+  if (!s.led) {
+    const strong = ups.filter(c => (suitOf(c) === s.trump && rankOf(c) >= 5) || rankOf(c) === 6);
+    if (prize >= 2 && strong.length && rng() < 0.8) return { t: 'play', card: cheapest(strong), up: true };
+    const free = ups.filter(c => costOf(c) === 0);
+    if (prize === 1 && free.length && rng() < 0.3) return { t: 'play', card: pickOf(free, rng), up: true };
+    return { t: 'play', card: lowest(s, P, P.hand), up: false };
+  }
+  const win = winners(s, P, ups);
+  if (win.length) { const c = cheapest(win); if (costOf(c) <= prize * 1.5 * (0.6 + budget / 2) || costOf(c) === 0) return { t: 'play', card: c, up: true }; }
+  if (forced) return { t: 'play', card: cheapest(ups), up: true };
+  return { t: 'play', card: lowest(s, P, P.hand), up: false };
+}
+// A position's worth to seat 0 as a win chance: the score difference, and inside a hand the
+// prizes still to play for scaled by who has more energy and trumps.
+function value0(s) {
+  if (s.winner !== null) return s.winner === 0 ? 1 : s.winner === 1 ? 0 : 0.5;
+  let v = s.p[0].score - s.p[1].score;
+  if (s.trick > 0 && s.trick < 8) {
+    const left = s.prizes.slice(s.trick).reduce((a, b) => a + b, 0);
+    const pow = (k) => { const p = s.p[k]; return p.energy + p.hand.filter(c => suitOf(c) === s.trump && costOf(c) <= p.energy).length * 2; };
+    v += left * 0.5 * Math.tanh((pow(0) - pow(1)) / 6);
+  }
+  return 1 / (1 + Math.exp(-v / 3.5));
+}
+function determinize(s, viewer, rng) {
+  const t = clone(s);
+  t.seed = (rng() * 4294967296) >>> 0;
+  const O = t.p[1 - viewer], mine = t.p[viewer];
+  const ruled = (c) => O.voids.some(v => suitOf(c) === v.suit && costOf(c) <= v.max);
+  const unseen = deckList().filter(c => !O.seen.includes(c));
+  const ok = shuffle(unseen.filter(c => !ruled(c)), rng);
+  const n = O.hand.length;
+  O.hand = ok.slice(0, n);
+  O.rest = unseen.filter(c => !O.hand.includes(c));
+  return t;
+}
+// The opponent's face-down card shows nothing.
+function obsKey(s, a, viewer) { return !a.up && s.toMove !== viewer ? 'd?' : key(a); }
+const GAME = { cands, key, obsKey, determinize, step, policy, value0, turnNo: (s) => s.hand };
+
+// Single-observer ISMCTS: each iteration deals a world consistent with what the mover has seen,
+// walks the shared tree by UCB over the moves legal in that world, expands one, plays out
+// `plies` turns with the rollout policy and scores the end by value0.
+function ismcts(s, rng, G, { iters = 1500, c = 0.7, plies = 4, stats = null } = {}) {
+  const me = s.toMove, t00 = G.turnNo(s);
+  const acts0 = G.cands(s);
+  if (acts0.length === 1) return acts0[0];
+  const root = { n: 0, kids: new Map() };
+  // a win sooner is worth a little more than a win later, a loss later a little more than one now
+  const final = (d) => { const k = 0.01 * Math.min(30, G.turnNo(d) - t00); return d.winner === 0 ? 1 - k : d.winner === 1 ? k : 0.5; };
+  for (let it = 0; it < iters; it++) {
+    const d = G.determinize(s, me, rng);
+    let node = root; const path = [];
+    while (d.winner === null) {
+      const groups = new Map();
+      for (const a of G.cands(d)) { const k = G.obsKey(d, a, me); const g = groups.get(k); if (g) g.push(a); else groups.set(k, [a]); }
+      const untried = [];
+      for (const k of groups.keys()) { const ch = node.kids.get(k); if (ch) ch.avail++; else untried.push(k); }
+      let k, fresh = false;
+      if (untried.length) { k = untried[Math.floor(rng() * untried.length)]; node.kids.set(k, { n: 0, w: 0, avail: 1, kids: new Map(), mover: d.toMove }); fresh = true; }
+      else {
+        let best = -Infinity;
+        for (const kk of groups.keys()) { const ch = node.kids.get(kk); const u = ch.w / ch.n + c * Math.sqrt(Math.log(ch.avail) / ch.n); if (u > best) { best = u; k = kk; } }
+      }
+      const g = groups.get(k);
+      G.step(d, g.length === 1 ? g[0] : g[Math.floor(rng() * g.length)]);
+      node = node.kids.get(k); path.push(node);
+      if (fresh) break;
+    }
+    const t0 = G.turnNo(d);
+    let guard = 0;
+    while (d.winner === null && G.turnNo(d) - t0 < plies && guard++ < 400) G.step(d, G.policy(d, rng));
+    const v0 = d.winner !== null ? final(d) : G.value0(d);
+    for (const nd of path) { nd.n++; nd.w += nd.mover === 0 ? v0 : 1 - v0; }
+    root.n++;
+  }
+  if (stats) for (const [k, ch] of root.kids) stats[k] = { n: ch.n, w: +(ch.w / ch.n).toFixed(3) };
+  let bestK = null, bn = -1, bw = -1;
+  for (const [k, ch] of root.kids) { const w = ch.w / ch.n; if (ch.n > bn || (ch.n === bn && w > bw)) { bn = ch.n; bw = w; bestK = k; } }
+  return acts0.find(a => G.obsKey(s, a, me) === bestK) || acts0[0];
+}
+const EXPERT = { iters: 2000, c: 0.7, plies: 1 };
+function expertBot(opts = EXPERT) { return (s, rng) => ismcts(s, rng, GAME, opts); }
+
+const TRIVIAL = { random: randomBot, greedy: greedyBot, high: highBot };
+function meaning(s, a) { return key(a); }
+
+// ---- src/ui.js
+// Costed tricks as a game screen against Expert. The prize row shows what each trick is worth
+// and who took it; pick a card, then play it face-up (paying its cost) or face-down.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-38-tally';
+const expert = expertBot(EXPERT);
+const ui = { s: null, busy: false, over: false, sel: null, hist: [], table: null, won: [], rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const FAST = /fast/.test(location.hash), wait = (ms) => new Promise(r => setTimeout(r, FAST ? 0 : ms));
+const botMs = (window.__botMs = { max: 0, n: 0 });
+
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+const suitIcon = { A: '●', B: '■', C: '▲', D: '◆' };
+function cardHTML(c, { cls = '', attrs = '', tag = 'button' } = {}) {
+  const trump = ui.s && suitOf(c) === ui.s.trump ? ' trump' : '';
+  return `<${tag} class="card su${suitOf(c)}${trump} ${cls}" ${attrs}><span class="cgem">${costOf(c)}</span><span class="rk">${rankOf(c)}</span><span class="si">${suitIcon[suitOf(c)]}</span></${tag}>`;
+}
+const backHTML = (cls = '') => `<div class="card back ${cls}"></div>`;
+
+// ------------------------------------------------------------------ what can be done now
+const myTurn = () => !ui.busy && !ui.over && ui.s.toMove === ME;
+const canUp = (c) => myTurn() && isLegal(ui.s, { t: 'play', card: c, up: true });
+const canDown = (c) => myTurn() && isLegal(ui.s, { t: 'play', card: c, up: false });
+
+// ------------------------------------------------------------------ rendering
+function prizesHTML() {
+  const s = ui.s;
+  return `<div class="trumpbox su${s.trump}"><span class="si">${suitIcon[s.trump]}</span></div>` + s.prizes.map((v, i) => {
+    const w = ui.won[i];
+    const cls = w === ME ? ' w0' : w === BOT ? ' w1' : i === s.trick && !ui.over ? ' now' : i < s.trick ? ' gone' : '';
+    return `<span class="prize${cls}">${v}</span>`;
+  }).join('');
+}
+function trickHTML() {
+  const T = ui.table;
+  if (!T) return '';
+  const one = (x) => !x ? '<div class="slotc"></div>' : x.up ? cardHTML(x.card, { tag: 'div', cls: 'big s' + x.side + (T.winner === x.side ? ' win' : T.winner !== undefined ? ' lose' : '') })
+    : backHTML('big s' + x.side + (T.winner === x.side ? ' win' : T.winner !== undefined ? ' lose' : ''));
+  // the bot's card above, mine below
+  const his = T.led && T.led.side === BOT ? T.led : T.fol && T.fol.side === BOT ? T.fol : null;
+  const mine = T.led && T.led.side === ME ? T.led : T.fol && T.fol.side === ME ? T.fol : null;
+  return `<div class="tc">${one(his)}${one(mine)}</div>`;
+}
+function resHTML(side) {
+  const p = ui.s.p[side];
+  let gems = '';
+  for (let i = 0; i < ENERGY; i++) gems += `<i class="gemc${i < p.energy ? ' on' : ''}"></i>`;
+  return `<div class="mana"><span class="manatxt">${p.energy}</span>${gems}</div>`;
+}
+function scoresHTML() {
+  const bar = (side) => { const v = ui.s.p[side].score; return `<div class="sc s${side}"><b>${v}</b><span class="bar"><i style="width:${Math.min(100, v / TARGET * 100)}%"></i></span></div>`; };
+  return bar(BOT) + bar(ME);
+}
+function handHTML() {
+  const p = ui.s.p[ME];
+  const order = p.hand.slice().sort((a, b) => (suitOf(a) === ui.s.trump) - (suitOf(b) === ui.s.trump) || SUITS.indexOf(suitOf(a)) - SUITS.indexOf(suitOf(b)) || rankOf(a) - rankOf(b));
+  return order.map(c => {
+    const ok = canUp(c) || canDown(c);
+    let cls = ok ? 'ok' : (myTurn() ? 'no' : '');
+    if (ui.sel === c) cls += ' sel';
+    return cardHTML(c, { cls, attrs: `data-card="${c}"${ok ? '' : ' disabled'}` });
+  }).join('');
+}
+function histHTML(h) { return `<div class="hist"><span class="rn">${h.hand}</span><b class="p0">+${h.pts[ME]}</b><b class="p1">+${h.pts[BOT]}</b></div>`; }
+function render() {
+  const s = ui.s, t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('opphand').innerHTML = '<i class="bk"></i>'.repeat(s.p[BOT].hand.length);
+  $('prizes').innerHTML = prizesHTML();
+  $('trick').innerHTML = trickHTML();
+  for (const side of [0, 1]) $('res' + side).innerHTML = resHTML(side);
+  $('scores').innerHTML = scoresHTML();
+  $('hand').innerHTML = handHTML();
+  const c = ui.sel;
+  $('turnbox').innerHTML = `<button id="up"${c && canUp(c) ? '' : ' disabled'}>Face up</button><button id="down"${c && canDown(c) ? '' : ' disabled'}>Face down</button>`;
+  $('history').innerHTML = ui.hist.slice(-10).map(histHTML).join('');
+}
+
+// ------------------------------------------------------------------ effects
+function centerOf(el) { const a = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - a.left + r.width / 2, y: r.top - a.top + r.height / 2 }; }
+function floatAt(p, text, cls = '') { const f = document.createElement('div'); f.className = 'float ' + cls; f.textContent = text; f.style.left = p.x + 'px'; f.style.top = p.y + 'px'; $('game').appendChild(f); setTimeout(() => f.remove(), 1200); }
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+
+// ------------------------------------------------------------------ playback
+async function apply(a) {
+  const qtok = ui.token;
+  const prev = ui.s, ev = [];
+  const next = act(prev, a, ev);
+  const playE = ev.find(e => e.t === 'play'), trickE = ev.find(e => e.t === 'trick'), handE = ev.find(e => e.t === 'hand');
+  const shown = { side: playE.side, card: playE.side === ME ? playE.own : playE.card, up: playE.up };
+  if (!prev.led) { ui.table = { led: shown }; ui.s = next; render(); return finishCheck(next); }
+  ui.table.fol = shown;
+  if (trickE) {
+    // the finished trick stays up a moment with its winner lit, the prize going to the winner
+    ui.table.winner = trickE.winner;
+    ui.s = { ...prev, p: prev.p.map((p, k) => ({ ...p, score: trickE.score[k], energy: k === playE.side ? p.energy - playE.cost : p.energy, hand: k === playE.side ? p.hand.filter(c => c !== playE.own) : p.hand })) };
+    ui.won[trickE.trick] = trickE.winner;
+    render();
+    const pz = document.querySelectorAll('.prize')[trickE.trick];
+    if (pz) floatAt(centerOf(pz), '+' + trickE.prize, trickE.winner === ME ? 'mine' : 'his');
+    await wait(1100);
+    if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+    ui.table = null;
+  }
+  if (handE) {
+    ui.hist.push({ hand: prev.hand, pts: [0, 1].map(k => ui.won.reduce((n, w, i) => n + (w === k ? prev.prizes[i] : 0), 0)) });
+    ui.won = [];
+  }
+  ui.s = next; render();
+  if (handE) banner('Hand ' + handE.hand);
+  finishCheck(next);
+}
+function finishCheck(next) { if (next.winner !== null) finish(); }
+
+function finish() {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><div class="final">${ui.s.p[ME].score} – ${ui.s.p[BOT].score}</div><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+// ------------------------------------------------------------------ flow
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.over = false; ui.hist = []; ui.sel = null; ui.table = null; ui.won = [];
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  banner('Hand 1');
+  await wait(900);
+  if (tok !== ui.token) return;
+  await botLoop(tok);
+}
+async function botLoop(tok) {
+  ui.busy = true; render();
+  while (!ui.over && ui.s.toMove === BOT) {
+    await wait(550);
+    if (tok !== ui.token || ui.over) return;
+    const t0 = performance.now(), a = expert(ui.s, ui.rng), dt = performance.now() - t0;
+    botMs.n++; if (dt > botMs.max) botMs.max = dt;
+    await apply(a);
+    if (tok !== ui.token) return;
+  }
+  ui.busy = false; render();
+}
+async function doAct(a) {
+  if (!myTurn() || !isLegal(ui.s, a)) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel = null;
+  await apply(a);
+  if (tok !== ui.token) return;
+  await botLoop(tok);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  const b0 = e.target.closest('button');
+  if (b0 && (b0.id === 'rematch' || b0.id === 'newmatch')) return startMatch();
+  if (b0 && b0.id === 'rulesbtn') { $('rules').classList.toggle('show'); return; }
+  if (e.target.closest('#rules')) { $('rules').classList.remove('show'); return; }
+  if (b0 && !b0.disabled && b0.dataset.card) {
+    const c = b0.dataset.card;
+    // a card with one way to play goes at once; otherwise it is picked and the two buttons decide
+    if (canUp(c) !== canDown(c)) return doAct({ t: 'play', card: c, up: canUp(c) });
+    ui.sel = ui.sel === c ? null : c; render(); return;
+  }
+  if (b0 && !b0.disabled && (b0.id === 'up' || b0.id === 'down') && ui.sel) return doAct({ t: 'play', card: ui.sel, up: b0.id === 'up' });
+  if (ui.sel) { ui.sel = null; render(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { ui.sel = null; $('rules').classList.remove('show'); render(); } });
+startMatch();
+
+})();
+</script>
+</body>
+</html>

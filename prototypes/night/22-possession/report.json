@@ -1,0 +1,107 @@
+{
+  "games": 400,
+  "expert": {
+    "dets": 8,
+    "reps": 12,
+    "iters": 1000,
+    "read": true,
+    "K": 1,
+    "margin": 0.01
+  },
+  "pairings": {
+    "expert-random": {
+      "n": 400,
+      "aScore": 0.761,
+      "aWins": 239,
+      "draws": 131,
+      "aLosses": 30,
+      "kickoffScore": 0.534,
+      "capped": 0,
+      "avgGoals": 1.47
+    },
+    "expert-greedy": {
+      "n": 400,
+      "aScore": 0.885,
+      "aWins": 315,
+      "draws": 78,
+      "aLosses": 7,
+      "kickoffScore": 0.522,
+      "capped": 0,
+      "avgGoals": 1.73,
+      "decisionsCompared": 6732,
+      "agreement": 0.418
+    },
+    "expert-racer": {
+      "n": 400,
+      "aScore": 0.953,
+      "aWins": 362,
+      "draws": 38,
+      "aLosses": 0,
+      "kickoffScore": 0.497,
+      "capped": 0,
+      "avgGoals": 2.35
+    },
+    "expert-expert": {
+      "n": 400,
+      "aScore": 0.491,
+      "aWins": 102,
+      "draws": 189,
+      "aLosses": 109,
+      "kickoffScore": 0.604,
+      "capped": 0,
+      "avgGoals": 1.15
+    },
+    "greedy-greedy": {
+      "n": 400,
+      "aScore": 0.5,
+      "aWins": 126,
+      "draws": 148,
+      "aLosses": 126,
+      "kickoffScore": 0.505,
+      "capped": 0,
+      "avgGoals": 2.35
+    },
+    "greedy-random": {
+      "n": 400,
+      "aScore": 0.72,
+      "aWins": 225,
+      "draws": 126,
+      "aLosses": 49,
+      "kickoffScore": 0.545,
+      "capped": 0,
+      "avgGoals": 2.02
+    }
+  },
+  "gate": {
+    "expertVsRandom": 0.761,
+    "expertVsGreedy": 0.885,
+    "expertVsRacer": 0.953,
+    "capRate": 0,
+    "agreementWithGreedy": 0.418,
+    "kickoffPossessionScoreExpertMirror": 0.604
+  },
+  "fails": [],
+  "alive": true,
+  "seconds": 1946,
+  "setPositions": {
+    "expertFailures": 0,
+    "lines": [
+      "ok   greedy free goal: SHOOT×1",
+      "ok   expert free goal: SHOOT×12",
+      "FAIL greedy no Press against a Walk-only attacker: PRESS×1",
+      "ok   expert no Press against a Walk-only attacker: TACKLE×12",
+      "FAIL greedy Block on the last play: PRESS×1",
+      "ok   expert Block on the last play: BLOCK×12",
+      "Expert passes every position"
+    ]
+  },
+  "pageCheck": [
+    "node game 0: winner 1, goals 0-2",
+    "node game 1: winner draw, goals 0-0",
+    "node game 2: winner 1, goals 0-1",
+    "node game 3: winner draw, goals 1-1",
+    "slowest Expert decision 317 ms",
+    "  0s: 1 clicks, last opt",
+    "browser: 20 clicks, end screen: Draw0 – 0Play again, script errors: none"
+  ]
+}

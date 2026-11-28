@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hidden Contracts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="opphand"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="info1" class="info"></div>
+  <div id="board1" class="board"></div>
+  <div id="board0" class="board"></div>
+  <div id="info0" class="info"></div>
+  <div id="res1" class="res"></div>
+  <div id="turnbox"></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Hidden Contracts</h3>
+    <p>No life: first to 10 points wins. Points come only from contracts. Each player holds 2 face-down contracts drawn from their own deck of 8; the opponent cannot see yours.</p>
+    <p><b>Your turn.</b> Mana +1 (up to 10) and refill, units ready, draw 1 (empty deck: the opponent gets 1 point). Then every contract you hold whose condition is true is revealed and scores; you draw a replacement.</p>
+    <p>Play cards for their cost (max 6 units). A unit can't attack the turn it is played. Once a turn you may pay 1 mana to bury a held contract face-down and draw a new one.</p>
+    <p><b>Attack.</b> Each ready unit may attack one enemy unit: both deal their attack to each other. Damage stays.</p>
+    <p>When both players have no contracts left to hold or draw, the higher score wins.</p>
+    <p>Hit 2 / 3 / 6: damage to an enemy unit.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

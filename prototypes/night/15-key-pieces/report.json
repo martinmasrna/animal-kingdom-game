@@ -1,0 +1,180 @@
+{
+  "concept": "15-key-pieces",
+  "expert": {
+    "playouts": 1200,
+    "eps": 0.04,
+    "depth": 14
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.9875,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5025,
+      "avgTurns": 29.8,
+      "capped": 0,
+      "endedBy": {
+        "keys": 336,
+        "deck": 64
+      }
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.955,
+      "draws": 0,
+      "firstPlayerWinRate": 0.51,
+      "avgTurns": 45.1,
+      "capped": 0,
+      "endedBy": {
+        "keys": 182,
+        "deck": 218
+      }
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.8125,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5875,
+      "avgTurns": 48.3,
+      "capped": 0,
+      "endedBy": {
+        "deck": 340,
+        "keys": 60
+      }
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.555,
+      "avgTurns": 40.9,
+      "capped": 0,
+      "endedBy": {
+        "keys": 180,
+        "deck": 220
+      }
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.666,
+      "avgTurns": 45.3,
+      "capped": 0,
+      "endedBy": {
+        "keys": 228,
+        "deck": 772
+      }
+    },
+    "racer-racer": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.712,
+      "avgTurns": 45.5,
+      "capped": 0,
+      "endedBy": {
+        "deck": 866,
+        "keys": 134
+      }
+    },
+    "greedy-racer": {
+      "games": 1000,
+      "aWinRate": 0.484,
+      "draws": 0,
+      "firstPlayerWinRate": 0.722,
+      "avgTurns": 46.4,
+      "capped": 0,
+      "endedBy": {
+        "deck": 860,
+        "keys": 140
+      }
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.8125,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "expertGreedyAgreement": 0.1511,
+    "agreementDecisions": 52255,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.555,
+    "firstPlayerPass": true,
+    "setPositionsPass": true,
+    "seconds": 3020,
+    "allPass": true
+  },
+  "cost": {
+    "expertTurnsMeasured": 39969,
+    "manaCap": 10,
+    "turnsAtManaCap": 0.561,
+    "turnsEndingWithManaUnspent": 0.867,
+    "manaUnspentPerTurn": 5.4,
+    "turnsWithACardInHandPricedOut": 0.364,
+    "turnsHandEmptied": 0.005,
+    "cardsPlayedPerTurn": 0.9
+  },
+  "sanity": [
+    {
+      "position": "deny: he holds Key A (3 health), B and C; I hold Hit 3 with 2 mana: break Key A",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "play Hit 3→9000, end"
+    },
+    {
+      "position": "deny: he holds Key A (3 health), B and C; I hold Hit 3 with 2 mana: break Key A",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "play Hit 3→9000, end"
+    },
+    {
+      "position": "free trade: I am second, hold Keys A and B and Key C in hand (3 mana); my ready Line against his Raider, which threatens Key A: attack it",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "play Striker, attack 9000→9003, end"
+    },
+    {
+      "position": "free trade: I am second, hold Keys A and B and Key C in hand (3 mana); my ready Line against his Raider, which threatens Key A: attack it",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "attack 9000→9003, end"
+    },
+    {
+      "position": "don't waste: I hold Key A, Fetch in hand, Keys A, B and C in my deck: never Fetch Key A",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "play Fetch (Key B), end"
+    },
+    {
+      "position": "don't waste: I hold Key A, Fetch in hand, Keys A, B and C in my deck: never Fetch Key A",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "end"
+    }
+  ],
+  "report": {
+    "verdict": "alive, as specified (no rule change); but mana barely binds: Expert leaves 5.4 mana unspent a turn",
+    "numbers": "Expert beats Random 98.8%, Greedy 95.5%, Racer 81.3% (400 games each, seats alternated); Expert equals Greedy in 15.1% of 52,255 decisions; first player wins 55.5% of 400 Expert mirror games; 0 games hit the turn cap; Expert passes all three set positions on 5 seeds each. Expert mirrors last 41 turns and end on three Keys in 45% of games, on a deck run out in 55%. Greedy and Racer mirrors end on a deck run out in 77-87% of games, and there the first player wins 67-72%, because the second player, who starts with one card more, runs out first.",
+    "loop": [
+      "The game is denial against assembly: whoever plays a third Key gives the other one turn to break one. Hits ignore Guard and kill Key A or C in one card (Hit 3, Hit 5), so a player holding Hits can deny almost indefinitely, and Expert keeps its Hits for exactly that.",
+      "With nothing to gain, a player whom the deck-out order favours does nothing: in one traced Expert mirror the first player ended 18 turns in a row without a play, holding Hits, and broke each third Key as it landed. Expert plays 0.9 cards a turn.",
+      "Board units matter only as Key attackers and Guards; trades are worth taking only when a unit threatens a Key (the set position had to put a Key at stake for the free trade to change the result: with no Keys anywhere it changed nothing, 79.5% against 80.1% over 1,500 play-outs).",
+      "Fetch thins the deck, so it hastens your own deck run out; Expert often declines it when the deck order favours it."
+    ],
+    "cost": "Mana barely binds: it is at its cap of 10 in 56% of turns, Expert ends 86.7% of turns with mana unspent (5.4 a turn) and empties its hand in 0.5%; a card is priced out in 36% of turns. What limits play is cards (one draw a turn) and the choice to hold Hits for denial, not cost.",
+    "expertNote": "Expert: determinized flat Monte Carlo over single actions, 1,200 play-outs with successive halving, play-outs 14 turns deep (Greedy or Racer per side with a denial sense, 4% noise) then scored by Keys held, board, hand and deck."
+  }
+}

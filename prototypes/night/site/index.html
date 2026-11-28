@@ -1,0 +1,183 @@
+<title>Night run</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* One scannable list of cores; each row opens its game full-screen with the verdict bar on top. */
+:root {
+  --bg: #f4f6f7; --panel: #ffffff; --fg: #15191c; --muted: #5d676e; --line: #dde2e5;
+  --accent: #1f6f78; --keep: #2f7d4a; --maybe: #9a6b12; --kill: #a33a32; --chip: #eaeef0;
+  --display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --text: "Inter", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111416; --panel: #191d20; --fg: #e6eaec; --muted: #98a3aa; --line: #2a3034;
+  --accent: #5fb6bf; --keep: #5cb87a; --maybe: #d6a53e; --kill: #e07068; --chip: #222830; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #111416; --panel: #191d20; --fg: #e6eaec; --muted: #98a3aa; --line: #2a3034;
+  --accent: #5fb6bf; --keep: #5cb87a; --maybe: #d6a53e; --kill: #e07068; --chip: #222830; color-scheme: dark }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--text); }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+header { display: grid; gap: 6px; margin-bottom: 22px; }
+h1 { font: 600 28px/1.1 var(--display); margin: 0; letter-spacing: -0.01em; }
+.sub { color: var(--muted); margin: 0; max-width: 62ch; }
+.tally { display: flex; gap: 14px; flex-wrap: wrap; font: 500 13px var(--mono); color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.tally b { font-weight: 500; }
+.tally .k { color: var(--keep); } .tally .m { color: var(--maybe); } .tally .x { color: var(--kill); }
+ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.row { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; grid-template-columns: 2.4em minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; }
+.row[data-v="kill"] { opacity: .55; }
+.row[data-v="keep"] { border-color: var(--keep); }
+.num { font: 500 13px/1.9 var(--mono); color: var(--muted); }
+.main { min-width: 0; display: grid; gap: 4px; }
+.name { font: 600 17px/1.3 var(--display); margin: 0; }
+.what { margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.chip { background: var(--chip); color: var(--muted); font-size: 12.5px; border-radius: 5px; padding: 1px 7px; }
+details.more summary { cursor: pointer; color: var(--accent); font-size: 13.5px; width: max-content; }
+details.more dl { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 4px 12px; margin: 8px 0 0; font-size: 14px; }
+details.more dt { color: var(--muted); }
+details.more dd { margin: 0; }
+.acts { display: grid; gap: 8px; justify-items: end; }
+button, .btn { font: 500 14px var(--text); border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); padding: 6px 12px; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.play { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 600; padding: 7px 18px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 5px 10px; font-size: 13px; color: var(--muted); background: transparent; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"][data-v="keep"] { background: var(--keep); color: var(--panel); }
+.seg button[aria-pressed="true"][data-v="maybe"] { background: var(--maybe); color: var(--panel); }
+.seg button[aria-pressed="true"][data-v="kill"] { background: var(--kill); color: var(--panel); }
+h2 { font: 600 15px var(--display); margin: 0; }
+#deadbox { margin-top: 28px; }
+#deadbox summary { cursor: pointer; color: var(--muted); }
+#deadbox ol { margin-top: 10px; }
+.dead .what { color: var(--muted); }
+.why { font-size: 13.5px; color: var(--kill); margin: 0; }
+#player { position: fixed; inset: 0; background: var(--bg); display: grid; grid-template-rows: auto minmax(0, 1fr); z-index: 20; }
+#player .bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: calc(8px + env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); background: var(--panel); }
+#pname { font: 600 15px var(--display); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#frame { width: 100%; height: 100%; border: 0; background: #fff; }
+@media (max-width: 560px) {
+  .row { grid-template-columns: 2em minmax(0, 1fr); }
+  .acts { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+}
+@media (prefers-reduced-motion: no-preference) { .row { transition: opacity .15s, border-color .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Night run</h1>
+    <p class="sub">Card-game cores built overnight, each playable against a search bot. Every one here passed the machine gate (not luck, not solved by a fixed rule, ends, no runaway first player); whether any is fun is yours to judge.</p>
+    <div class="tally" id="tally"></div>
+  </header>
+  <main>
+    <ol id="alive"></ol>
+    <details id="deadbox"><summary id="deadsum">Dead at the gate</summary><ol id="dead"></ol></details>
+  </main>
+</div>
+
+<div id="player" hidden>
+  <div class="bar">
+    <button id="close" type="button">Back</button>
+    <span id="pname"></span>
+    <div class="seg" id="pseg"></div>
+  </div>
+  <iframe id="frame" title="Prototype"></iframe>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var VS = [["keep", "Keep"], ["maybe", "Maybe"], ["kill", "Kill"]];
+  var entries = [], verdicts = {}, db = null, openId = null;
+  try { verdicts = JSON.parse(localStorage.getItem("night-verdicts") || "{}") || {}; } catch (e) { verdicts = {}; }
+
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+
+  function seg(id) {
+    var s = el("div", "seg");
+    VS.forEach(function (p) {
+      var b = el("button", null, p[1]); b.type = "button"; b.dataset.v = p[0];
+      b.setAttribute("aria-pressed", String((verdicts[id] || {}).v === p[0]));
+      b.addEventListener("click", function () { setVerdict(id, (verdicts[id] || {}).v === p[0] ? null : p[0]); });
+      s.appendChild(b);
+    });
+    return s;
+  }
+
+  function row(e) {
+    var li = el("li", "row" + (e.alive ? "" : " dead")); li.dataset.v = (verdicts[e.id] || {}).v || "";
+    li.appendChild(el("span", "num", e.id.slice(0, 2)));
+    var m = el("div", "main");
+    m.appendChild(el("h2", "name", e.name));
+    m.appendChild(el("p", "what", e.what));
+    if (!e.alive && e.why_dead) m.appendChild(el("p", "why", e.why_dead));
+    if (e.alive && e.flags && e.flags.length) { var c = el("div", "chips"); e.flags.forEach(function (f) { c.appendChild(el("span", "chip", f)); }); m.appendChild(c); }
+    var d = el("details", "more"); d.appendChild(el("summary", null, "Loop and numbers"));
+    var dl = el("dl");
+    [["Loop", e.loop], ["Changed", e.changed], ["Gate", e.numbers], ["Depth", e.depth]].forEach(function (p) { if (p[1]) { dl.appendChild(el("dt", null, p[0])); dl.appendChild(el("dd", null, p[1])); } });
+    if (!e.alive && e.flags && e.flags.length) { dl.appendChild(el("dt", null, "Notes")); dl.appendChild(el("dd", null, e.flags.join("; "))); }
+    d.appendChild(dl); m.appendChild(d);
+    li.appendChild(m);
+    var a = el("div", "acts");
+    var p = el("button", "play", "Play"); p.type = "button"; p.addEventListener("click", function () { open(e); });
+    a.appendChild(p);
+    if (e.alive) a.appendChild(seg(e.id));
+    li.appendChild(a);
+    return li;
+  }
+
+  function render() {
+    var alive = document.getElementById("alive"), dead = document.getElementById("dead");
+    alive.replaceChildren(); dead.replaceChildren();
+    var n = { keep: 0, maybe: 0, kill: 0 }, live = 0, gone = 0;
+    entries.forEach(function (e) {
+      if (e.alive) { live++; alive.appendChild(row(e)); var v = (verdicts[e.id] || {}).v; if (n[v] != null) n[v]++; }
+      else { gone++; dead.appendChild(row(e)); }
+    });
+    document.getElementById("deadsum").textContent = gone + " dead at the gate";
+    var t = document.getElementById("tally"); t.replaceChildren();
+    [[live + " alive", ""], [n.keep + " keep", "k"], [n.maybe + " maybe", "m"], [n.kill + " kill", "x"], [(live - n.keep - n.maybe - n.kill) + " unplayed", ""]].forEach(function (p) { t.appendChild(el("b", p[1], p[0])); });
+    if (openId) document.getElementById("pseg").replaceWith(Object.assign(seg(openId), { id: "pseg" }));
+  }
+
+  function setVerdict(id, v) {
+    if (v) verdicts[id] = { v: v, at: Date.now() }; else delete verdicts[id];
+    try { localStorage.setItem("night-verdicts", JSON.stringify(verdicts)); } catch (e) {}
+    if (db) { var ref = db.doc("verdicts/" + id); (v ? ref.set({ v: v, at: Date.now() }) : ref.delete()).catch(function () {}); }
+    render();
+  }
+
+  function open(e) {
+    openId = e.alive ? e.id : null;
+    document.getElementById("pname").textContent = e.id.slice(0, 2) + "  " + e.name;
+    var s = document.getElementById("pseg"); var ns = e.alive ? seg(e.id) : el("div"); ns.id = "pseg"; s.replaceWith(ns);
+    var f = document.getElementById("frame"); f.srcdoc = "<p style='font:15px system-ui;padding:20px'>Loading…</p>";
+    fetch("p/" + e.id + ".html").then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (html) { f.srcdoc = html; })
+      .catch(function () { f.srcdoc = "<p style='font:15px system-ui;padding:20px'>This prototype's page did not load. Go back and try again.</p>"; });
+    document.getElementById("player").hidden = false;
+  }
+  document.getElementById("close").addEventListener("click", function () {
+    document.getElementById("player").hidden = true; document.getElementById("frame").srcdoc = ""; openId = null;
+  });
+
+  fetch("entries.json").then(function (r) { return r.json(); }).then(function (list) { entries = list; render(); })
+    .catch(function () { document.getElementById("alive").appendChild(el("li", "row", "The list did not load. Reload the page.")); });
+
+  if (window.claude && window.claude.use) {
+    window.claude.use("db").then(function (d) {
+      if (!d) return; db = d;
+      d.collection("verdicts").onSnapshot(function (snap) {
+        var fromStore = {};
+        snap.docs.forEach(function (doc) { var b = doc.data(); if (b && b.v) fromStore[doc.id] = { v: b.v, at: b.at }; });
+        Object.keys(verdicts).forEach(function (id) { if (!fromStore[id]) d.doc("verdicts/" + id).set(verdicts[id]).catch(function () {}); else if ((verdicts[id].at || 0) > (fromStore[id].at || 0)) fromStore[id] = verdicts[id]; });
+        verdicts = Object.assign({}, verdicts, fromStore); render();
+      }, function () {});
+    });
+  }
+})();
+</script>

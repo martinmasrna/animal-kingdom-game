@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Key Pieces</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="opphand"></div>
+  <div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="hero1" class="herorow"><div class="keyrow" id="keys1"></div></div>
+  <div id="board1" class="board"></div>
+  <div id="board0" class="board"></div>
+  <div id="hero0" class="herorow"><div class="keyrow" id="keys0"></div></div>
+  <div id="res1" class="res"></div>
+  <div id="turnbox"></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <div id="chooser"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Key Pieces</h3>
+    <ul>
+      <li>No life. You win if you control Key A, Key B and Key C at the start of your turn. You lose if you must draw from an empty deck.</li>
+      <li>Each turn: your mana goes up by 1 (up to 10) and refills, your units become ready, you draw 1.</li>
+      <li>Play cards by paying their cost. Up to 6 pieces a side, Keys included. A unit cannot attack the turn it is played. Keys never attack.</li>
+      <li>Each ready unit may attack an enemy unit or Key once: both deal their attack to each other (a Key deals 0). Damage stays.</li>
+      <li>Guard: while the defender has a Guard, attacks must target a Guard. Hits ignore Guard.</li>
+      <li>The first player starts with 3 cards; the second with 4 and the Coin (gain 1 mana this turn).</li>
+    </ul>
+    <table><tr><th>Card</th><th>Cost</th><th></th><th>×</th></tr>
+      <tr><td>Key A</td><td>2</td><td>0/3</td><td>2</td></tr>
+      <tr><td>Key B</td><td>3</td><td>0/4</td><td>2</td></tr>
+      <tr><td>Key C</td><td>4</td><td>0/5</td><td>2</td></tr>
+      <tr><td>Fetch</td><td>2</td><td>a Key of your choice from your deck to your hand</td><td>2</td></tr>
+      <tr><td>Striker</td><td>1</td><td>2/1</td><td>3</td></tr>
+      <tr><td>Raider</td><td>2</td><td>3/2</td><td>3</td></tr>
+      <tr><td>Guard</td><td>2</td><td>1/4 Guard</td><td>3</td></tr>
+      <tr><td>Line</td><td>3</td><td>3/4</td><td>3</td></tr>
+      <tr><td>Heavy</td><td>4</td><td>4/4</td><td>3</td></tr>
+      <tr><td>Wall</td><td>4</td><td>2/7 Guard</td><td>2</td></tr>
+      <tr><td>Hit 3</td><td>2</td><td>3 damage to a unit or Key</td><td>3</td></tr>
+      <tr><td>Hit 5</td><td>4</td><td>5 damage to a unit or Key</td><td>2</td></tr>
+    </table>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

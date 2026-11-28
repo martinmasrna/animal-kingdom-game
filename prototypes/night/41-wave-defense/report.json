@@ -1,0 +1,169 @@
+{
+  "game": "41 Wave defense",
+  "seeds": 400,
+  "budget": 600,
+  "versions": {
+    "spec": {
+      "expert": {
+        "games": 400,
+        "winRate": 1,
+        "avgWallOnWins": 20,
+        "avgRounds": 25,
+        "capped": 0
+      },
+      "greedy": {
+        "games": 400,
+        "winRate": 0.995,
+        "avgWallOnWins": 19.75,
+        "avgRounds": 21,
+        "capped": 0
+      },
+      "random": {
+        "games": 400,
+        "winRate": 0.02,
+        "avgWallOnWins": 12.38,
+        "avgRounds": 19.4,
+        "capped": 0
+      },
+      "vsGreedy": {
+        "expertBetter": 30,
+        "expertWorse": 0,
+        "even": 370,
+        "decided": 30,
+        "expertShareOfDecided": 1
+      },
+      "vsRandom": {
+        "expertBetter": 398,
+        "expertWorse": 0,
+        "even": 2,
+        "decided": 398,
+        "expertShareOfDecided": 1
+      },
+      "expertEqualsGreedy": 0.278,
+      "expertDecisions": 33884,
+      "turnCapRate": 0,
+      "fails": [
+        "Greedy wins 99.5% of games at 19.75 of 20 Wall; Expert ends better than Greedy in only 30 of 400 paired games (370 even): a fixed rule solves it"
+      ],
+      "seconds": 5629,
+      "note": "measured with the first Expert (no default move); the spec version fails on Greedy alone"
+    },
+    "flat4": {
+      "expert": {
+        "games": 400,
+        "winRate": 1,
+        "avgWallOnWins": 20,
+        "avgRounds": 20.2,
+        "capped": 0
+      },
+      "greedy": {
+        "games": 400,
+        "winRate": 0.39,
+        "avgWallOnWins": 13.27,
+        "avgRounds": 23.7,
+        "capped": 0
+      },
+      "random": {
+        "games": 400,
+        "winRate": 0,
+        "avgWallOnWins": 0,
+        "avgRounds": 17.7,
+        "capped": 0
+      },
+      "vsGreedy": {
+        "expertBetter": 370,
+        "expertWorse": 0,
+        "even": 30,
+        "decided": 370,
+        "expertShareOfDecided": 1
+      },
+      "vsRandom": {
+        "expertBetter": 400,
+        "expertWorse": 0,
+        "even": 0,
+        "decided": 400,
+        "expertShareOfDecided": 1
+      },
+      "expertEqualsGreedy": 0.245,
+      "expertDecisions": 25621,
+      "turnCapRate": 0,
+      "fails": [],
+      "seconds": 580,
+      "ranAt": "2026-11-28T05:35:50.211Z"
+    }
+  },
+  "sanity": [
+    {
+      "position": "finish the last threat",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "Hit 3 lane 1 on 900"
+    },
+    {
+      "position": "finish the last threat",
+      "bot": "expert",
+      "pass": true,
+      "chose": "Hit 3 lane 1 on 901"
+    },
+    {
+      "position": "no Repair on a full Wall",
+      "bot": "greedy",
+      "pass": false,
+      "chose": "Repair, Guard lane 0, end"
+    },
+    {
+      "position": "no Repair on a full Wall",
+      "bot": "expert",
+      "pass": true,
+      "chose": "Guard lane 0, end"
+    },
+    {
+      "position": "Bomb three 2-health threats",
+      "bot": "greedy",
+      "pass": true,
+      "chose": "Bomb lane 2, end"
+    },
+    {
+      "position": "Bomb three 2-health threats",
+      "bot": "expert",
+      "pass": true,
+      "chose": "Bomb lane 2, end"
+    }
+  ],
+  "handWrittenPolicy": {
+    "note": "the Expert play-out rule without noise, flat4, 300 seeds, smoke test",
+    "winRate": 0.97,
+    "avgWallOnWins": 16.0
+  },
+  "expertBehaviourFlat4": {
+    "games": 30,
+    "budget": 600,
+    "wins": 30,
+    "avgWallOnWins": 20,
+    "avgRounds": 20.3,
+    "plays": {
+      "Hit3": 787,
+      "Draw2": 479,
+      "Guard": 180,
+      "Shooter": 130,
+      "Hit6": 44,
+      "Repair": 44,
+      "Twin": 13,
+      "Bomb": 11,
+      "Cannon": 9,
+      "Freeze": 8,
+      "Heavy": 7
+    },
+    "rewardsTaken": {
+      "none": 51,
+      "Hit6": 11,
+      "Cannon": 8,
+      "Twin": 7,
+      "Heavy": 6,
+      "Bomb": 3,
+      "Freeze": 3,
+      "Rebuild": 1
+    },
+    "unspentManaPerRound": 0.54
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "concept": "05-front-and-back",
+  "expert": {
+    "playouts": 400,
+    "depth": 6,
+    "eps": 0.05,
+    "keep": 12
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 15.4,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.91,
+      "draws": 0,
+      "firstPlayerWinRate": 0.51,
+      "avgTurns": 21.3,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.9875,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5025,
+      "avgTurns": 18.9,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 200,
+      "aWinRate": 0.495,
+      "draws": 0,
+      "firstPlayerWinRate": 0.465,
+      "avgTurns": 23.9,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.61,
+      "avgTurns": 22.9,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.91,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "cappedCountedOver": "every game Expert plays",
+    "expertGreedyAgreement": 0.5484,
+    "agreementDecisions": 34710,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.465,
+    "firstPlayerPass": true,
+    "seconds": 415,
+    "setPositionsPass": true,
+    "allPass": true
+  },
+  "costBinding": {
+    "measuredIn": "Expert mirror, both seats, every turn",
+    "turns": 4773,
+    "handCostsMoreThanManaRate": 0.56,
+    "atManaCapRate": 0.256,
+    "unspentManaShare": 0.448,
+    "endedWithManaLeftAndADearerCardHeldRate": 0.172
+  },
+  "sanity": [
+    {
+      "position": "lethal: his front is empty, he is on 4, my ready Raider (3) and Shooter (1) hit him",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "lethal: his front is empty, he is on 4, my ready Raider (3) and Shooter (1) hit him",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "free shot: my ready Gunner shoots his front Raider on 2 health",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "free shot: my ready Gunner shoots his front Raider on 2 health",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: never Hit 4 a 1-health unit while Hit 2 is in hand",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "don't waste: never Hit 4 a 1-health unit while Hit 2 is in hand",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "report": {
+    "verdict": "alive",
+    "numbers": "Expert vs Random 100%, vs Greedy 91.0%, vs Racer 98.8% (400 games each, seats alternated); 0 games hit the 120-turn cap; Expert = Greedy on 54.8% of 34,710 decisions; first player 46.5% in Expert vs Expert (200 games; Greedy mirror 61%); set positions all 5/5 (Greedy wastes Hit 4 on a 1-health unit).",
+    "costBinding": "Mana binds early and stops binding late: on 56% of turns the usable cards in hand cost more than the mana there is, but 45% of all mana goes unspent over a game, the cap of 10 is reached on 26% of turns, and 17% of turns end with mana left while a dearer card waits. The 3+3 row limit, not mana, caps the late game: once both rows are full the extra mana has nothing to buy.",
+    "expertNote": "Expert: determinized play-outs with Greedy's plays and paying attacks only (5% random moves), 400 a decision, 6 turns deep from the decision's turn then scored by a material-and-life evaluation, successive halving over the 12 best one-ply candidates. A bug in the first version (each candidate's play-out stopped at a different turn, which made ending the turn look best) gave 13% against Greedy; fixed, 91%.",
+    "loop": "Each turn is about the enemy front row: whoever empties it gets free hits on the back row and the player, so Hit cards and Ranged attacks go into the front blocker first and every unit then swings at the player in the same turn. Ranged units carry the game: a Cannon (4 ranged) kills front units without taking damage back, so Expert protects its back row by keeping something in front and spends Hit 4 on enemy Cannons. Greedy's loss pattern is attacking Melee into front units that kill them; Expert trades only when the trade opens the face or removes a Ranged threat."
+  }
+}

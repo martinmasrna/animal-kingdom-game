@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Real-Time Lane</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="opp"></div><div id="clock"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="lane"><div class="half"></div><div id="base0" class="base s0"></div><div id="base1" class="base s1"></div><div id="units"></div><div id="aim"></div></div>
+  <div id="bottom"><div id="mana"></div><div id="hand"></div></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Real-Time Lane</h3>
+    <p>One lane, your base against the other's, 20 health each. The clock runs: 3 minutes. Destroy the other base, or have more base health when time runs out (level: one more minute, and the first base damage decides).</p>
+    <p><b>Mana</b> starts at 5 and grows by 1 every 2 seconds, up to 10. <b>Cards:</b> both decks hold the same 8 cards; you hold 4, the small card is next. A card you play goes to the back and the next one comes in.</p>
+    <p>Tap a card to play it. Units appear at your base and walk toward the other base. A unit hits the nearest enemy unit, Wall or base within its range ahead, otherwise it walks on, never past an enemy. Wall: tap a spot in your half; enemy units stop at it. Blast: tap a spot; 8 damage to every enemy unit within 1.5.</p>
+    <p>Numbers per half second: Runner 4 health, 1 damage, fast. Grunt 10/2. Shooter 4/1, range 3. Brute 14/3, slow. Tank 30/1, slowest. Swarm three of 2/1. Wall 20.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

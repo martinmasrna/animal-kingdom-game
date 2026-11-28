@@ -1,0 +1,266 @@
+{
+  "games": 400,
+  "expert": {
+    "R": 64
+  },
+  "seconds": 323,
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.99,
+      "aWinRateAsAttacker": 0.98,
+      "aWinRateAsDefender": 1,
+      "attackerWinRate": 0.49,
+      "turnCapRate": 0,
+      "avgRounds": 8.4,
+      "avgGateLeft": 10,
+      "expertDecisions": 9664,
+      "sameAsGreedy": 0.712,
+      "expertMsPerMove": 15.6,
+      "expertMaxMs": 152,
+      "mana": {
+        "turns": 6536,
+        "meanLeftAtEnd": 1.86,
+        "leftManaWithAPlayableCard": 0.449,
+        "heldACardItCouldNotAfford": 0.759
+      }
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.655,
+      "aWinRateAsAttacker": 0.34,
+      "aWinRateAsDefender": 0.97,
+      "attackerWinRate": 0.185,
+      "turnCapRate": 0,
+      "avgRounds": 9.7,
+      "avgGateLeft": 11.2,
+      "expertDecisions": 12581,
+      "sameAsGreedy": 0.735,
+      "expertMsPerMove": 13.9,
+      "expertMaxMs": 197,
+      "mana": {
+        "turns": 7690,
+        "meanLeftAtEnd": 1.63,
+        "leftManaWithAPlayableCard": 0.183,
+        "heldACardItCouldNotAfford": 0.715
+      }
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.988,
+      "aWinRateAsAttacker": null,
+      "aWinRateAsDefender": 0.988,
+      "attackerWinRate": 0.013,
+      "turnCapRate": 0,
+      "avgRounds": 10,
+      "avgGateLeft": 17.2,
+      "expertDecisions": 12880,
+      "sameAsGreedy": 0.705,
+      "expertMsPerMove": 12.2,
+      "expertMaxMs": 181,
+      "mana": {
+        "turns": 7987,
+        "meanLeftAtEnd": 2.05,
+        "leftManaWithAPlayableCard": 0.342,
+        "heldACardItCouldNotAfford": 0.684
+      }
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.52,
+      "aWinRateAsAttacker": 0.065,
+      "aWinRateAsDefender": 0.975,
+      "attackerWinRate": 0.045,
+      "turnCapRate": 0,
+      "avgRounds": 9.9,
+      "avgGateLeft": 14.2,
+      "mana": {
+        "turns": 7930,
+        "meanLeftAtEnd": 1.78,
+        "leftManaWithAPlayableCard": 0.285,
+        "heldACardItCouldNotAfford": 0.717
+      }
+    },
+    "greedy-greedy": {
+      "games": 2000,
+      "aWinRate": 0.503,
+      "aWinRateAsAttacker": 0.143,
+      "aWinRateAsDefender": 0.863,
+      "attackerWinRate": 0.14,
+      "turnCapRate": 0,
+      "avgRounds": 9.8,
+      "avgGateLeft": 12.5,
+      "mana": {
+        "turns": 38932,
+        "meanLeftAtEnd": 1.64,
+        "leftManaWithAPlayableCard": 0.122,
+        "heldACardItCouldNotAfford": 0.695
+      }
+    },
+    "greedy-random": {
+      "games": 400,
+      "aWinRate": 0.998,
+      "aWinRateAsAttacker": 0.995,
+      "aWinRateAsDefender": 1,
+      "attackerWinRate": 0.497,
+      "turnCapRate": 0,
+      "avgRounds": 8.3,
+      "avgGateLeft": 9.9,
+      "mana": {
+        "turns": 6481,
+        "meanLeftAtEnd": 1.9,
+        "leftManaWithAPlayableCard": 0.422,
+        "heldACardItCouldNotAfford": 0.735
+      }
+    },
+    "greedy-racer": {
+      "games": 400,
+      "aWinRate": 0.925,
+      "aWinRateAsAttacker": null,
+      "aWinRateAsDefender": 0.925,
+      "attackerWinRate": 0.075,
+      "turnCapRate": 0,
+      "avgRounds": 9.9,
+      "avgGateLeft": 14.4,
+      "mana": {
+        "turns": 7884,
+        "meanLeftAtEnd": 2.01,
+        "leftManaWithAPlayableCard": 0.273,
+        "heldACardItCouldNotAfford": 0.662
+      }
+    }
+  },
+  "gate": {
+    "expert-random": 0.99,
+    "expert-greedy": 0.655,
+    "expert-racer": 0.988,
+    "attackerWinRate": 0.045,
+    "turnCapRate": 0,
+    "sameAsGreedy": 0.718,
+    "fails": [
+      "expert-greedy 0.655 < 0.70",
+      "attacker (role) win rate 0.045 outside 0.30-0.70"
+    ]
+  },
+  "ruleChange": {
+    "rule": "A Wall unit that blocks is tired and cannot block in the next round (the spec had Wall units block every round).",
+    "reason": "On the spec rules a block costs the Defender nothing and lasts forever, so blocking every attacker (chump blocks included) is a fixed rule that holds the Gate: the Attacker won 1.8% of Expert-against-Expert games. Tiring blockers was meant to make blocking a choice and let pressure build."
+  },
+  "specRules": {
+    "gate": {
+      "expert-random": 0.98,
+      "expert-greedy": 0.593,
+      "expert-racer": 0.998,
+      "attackerWinRate": 0.018,
+      "turnCapRate": 0,
+      "sameAsGreedy": 0.713,
+      "fails": [
+        "expert-greedy 0.593 < 0.70",
+        "attacker (role) win rate 0.018 outside 0.30-0.70"
+      ]
+    },
+    "pairings": {
+      "expert-random": {
+        "games": 400,
+        "aWinRate": 0.98,
+        "aWinRateAsAttacker": 0.96,
+        "aWinRateAsDefender": 1,
+        "attackerWinRate": 0.48,
+        "turnCapRate": 0,
+        "avgRounds": 8.5,
+        "avgGateLeft": 10.1,
+        "expertDecisions": 9802,
+        "sameAsGreedy": 0.702,
+        "expertMsPerMove": 17.2,
+        "expertMaxMs": 167
+      },
+      "expert-greedy": {
+        "games": 400,
+        "aWinRate": 0.593,
+        "aWinRateAsAttacker": 0.205,
+        "aWinRateAsDefender": 0.98,
+        "attackerWinRate": 0.113,
+        "turnCapRate": 0,
+        "avgRounds": 9.9,
+        "avgGateLeft": 13.8,
+        "expertDecisions": 13033,
+        "sameAsGreedy": 0.726,
+        "expertMsPerMove": 14.3,
+        "expertMaxMs": 160
+      },
+      "expert-racer": {
+        "games": 400,
+        "aWinRate": 0.998,
+        "aWinRateAsAttacker": null,
+        "aWinRateAsDefender": 0.998,
+        "attackerWinRate": 0.003,
+        "turnCapRate": 0,
+        "avgRounds": 10,
+        "avgGateLeft": 18.3,
+        "expertDecisions": 13618,
+        "sameAsGreedy": 0.709,
+        "expertMsPerMove": 9.7,
+        "expertMaxMs": 156
+      },
+      "expert-expert": {
+        "games": 400,
+        "aWinRate": 0.492,
+        "aWinRateAsAttacker": 0.01,
+        "aWinRateAsDefender": 0.975,
+        "attackerWinRate": 0.018,
+        "turnCapRate": 0,
+        "avgRounds": 10,
+        "avgGateLeft": 15.7
+      },
+      "greedy-greedy": {
+        "games": 2000,
+        "aWinRate": 0.51,
+        "aWinRateAsAttacker": 0.09,
+        "aWinRateAsDefender": 0.931,
+        "attackerWinRate": 0.08,
+        "turnCapRate": 0,
+        "avgRounds": 9.9,
+        "avgGateLeft": 14.7
+      },
+      "greedy-random": {
+        "games": 400,
+        "aWinRate": 0.993,
+        "aWinRateAsAttacker": 0.985,
+        "aWinRateAsDefender": 1,
+        "attackerWinRate": 0.492,
+        "turnCapRate": 0,
+        "avgRounds": 8.4,
+        "avgGateLeft": 10
+      },
+      "greedy-racer": {
+        "games": 400,
+        "aWinRate": 0.963,
+        "aWinRateAsAttacker": null,
+        "aWinRateAsDefender": 0.963,
+        "attackerWinRate": 0.037,
+        "turnCapRate": 0,
+        "avgRounds": 10,
+        "avgGateLeft": 16.4
+      }
+    }
+  },
+  "sanity": {
+    "positions": [
+      "lethal: two Climbers at a Gate on 4 (send both)",
+      "free block: Pike on a lone Grunt",
+      "no Repair at a full Gate"
+    ],
+    "greedy": "3/3",
+    "expert": "15/15 (5 seeds each)"
+  },
+  "report": {
+    "verdict": "dead",
+    "why": "The Defender wins whatever the Attacker does. Expert against Expert, the Attacker wins 1.8% on the spec rules and 4.5% after the one allowed rule change (blockers tire), against the 30-70% role band; Expert also falls under 70% against Greedy (59.3%, then 65.5%) only because it cannot win as Attacker (20.5%, then 34%) while it wins 97-98% as Defender. Not the bot: Greedy against Greedy gives the Attacker 8% (14% with the change), and hold-then-strike Attacker plans did worse (0.3-4.5%) than attacking every round.",
+    "loop": [
+      "Attacker: deploy what the round number of mana buys, then send units; each unit sent into a Wall unit trades or dies, and only Climbers and unblocked overflow touch the Gate.",
+      "Defender: block every sent unit it can, chump blocks included (a 1/3 Guard cancels a 4/6 Brute's whole hit), spend Oil and Snipes on the Field and Shooters on the 1-health Climbers, Repair when the Gate is down.",
+      "Best play boils down to the Defender's fixed rule of blocking everything; Expert matches Greedy on 72% of decisions, and the Gate ends with 14 of 20 left on average between Experts.",
+      "Costs bind: mana equals the round number, a card it could not afford sat in hand at 70% of turn ends, and a turn ended with mana and a playable card left at 18-29%."
+    ]
+  }
+}

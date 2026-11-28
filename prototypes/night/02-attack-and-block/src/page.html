@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Attack and Block</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="opphand"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="row1" class="row"><div id="life1" class="lifebox"></div><div id="board1" class="board"></div><div id="res1" class="res"></div></div>
+  <div id="row0" class="row"><div id="life0" class="lifebox"></div><div id="board0" class="board"></div><div id="res0" class="res"></div></div>
+  <div id="controls"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Attack and Block</h3>
+    <p>Life 20 each; bring the other to 0. Same 30-card deck for both. The first player starts with 3 cards, the second with 4 and the Coin (+1 mana this turn).</p>
+    <p><b>Your turn.</b> Ready your units, mana +1 (up to 10) and refill, draw 1 (empty deck: lose 1 life, then 2, then 3). Play cards for their cost. A unit can't attack the turn it is played, but it can block on the next enemy turn.</p>
+    <p><b>Attack, once a turn.</b> Tap your ready units, then Attack. They stay exhausted until your next turn, so they can't block.</p>
+    <p><b>Block.</b> The defender gives each attacker at most one of its ready units: tap your unit, then the attacker; tap again to undo. Blocked units hit each other; unblocked attackers hit life. Damage at least a unit's health destroys it.</p>
+    <p>At end of turn every surviving unit heals fully. Max 6 units a side.</p>
+    <p>Hit 2 / Hit 4: damage to an enemy unit. Draw 2: draw two cards.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+{
+  "concept": "25-range-duel",
+  "expert": {
+    "samples": 16
+  },
+  "note": "no first player: the first-player check reads fighter A's win rate (the start is mirrored); capped = games with no result (impossible: turn 20 decides on life); decidedOnLifeAtTurn20 counts the games that went the distance",
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.985,
+      "draws": 2,
+      "seatAWinRate": 0.5,
+      "avgTurns": 11.7,
+      "capped": 0,
+      "decidedOnLifeAtTurn20": 22
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.845,
+      "draws": 30,
+      "seatAWinRate": 0.5025,
+      "avgTurns": 9.1,
+      "capped": 0,
+      "decidedOnLifeAtTurn20": 0
+    },
+    "expert-expert": {
+      "games": 200,
+      "aWinRate": 0.5325,
+      "draws": 33,
+      "seatAWinRate": 0.4725,
+      "avgTurns": 15.2,
+      "capped": 0,
+      "decidedOnLifeAtTurn20": 36
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 186,
+      "seatAWinRate": 0.487,
+      "avgTurns": 7.2,
+      "capped": 0,
+      "decidedOnLifeAtTurn20": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.845,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "cappedCountedOver": "the games Expert plays",
+    "expertGreedyAgreement": 0.3135,
+    "agreementDecisions": 8301,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.4725,
+    "firstPlayerPass": true,
+    "seconds": 437,
+    "setPositionsPass": true,
+    "allPass": true
+  },
+  "sanity": [
+    {
+      "position": "lethal: he is on 1 at distance 1 (his Guard is spent): Jab, speed 1, lands before anything",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "lethal: he is on 1 at distance 1 (his Guard is spent): Jab, speed 1, lands before anything",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't waste: never Shot at distance 1 (stepping back 1 leaves him at 2, outside 3-4)",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "don't waste: never Shot at distance 1 (stepping back 1 leaves him at 2, outside 3-4)",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "don't pay for nothing: at distance 5 nothing reaches; never pay for a card that neither moves nor hits (Kick, Sweep, Guard)",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "don't pay for nothing: at distance 5 nothing reaches; never pay for a card that neither moves nor hits (Kick, Sweep, Guard)",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "report": {
+    "verdict": "alive",
+    "numbers": "Expert vs Random 98.5%, vs Greedy 84.5% (no racer: nothing here can be raced); no stalls (20 turns then life decides: 22 of 400 vs Random and 36 of 200 mirror games went the distance); Expert = Greedy on 31% of 8,301 moves; fighter A 47% in Expert vs Expert (no first player); set positions all 5/5 (Greedy fails lethal).",
+    "expertNote": "Each turn is a matrix game (Expert's moves against every move the opponent could make, cells by play-outs on reshuffled worlds where the opponent holds that column's card); Expert plays the equilibrium mix, and once it has seen the opponent twice at the current distance it plays the best answer to what it saw (blended with the equilibrium). Without that reading, the pure equilibrium beat Greedy only 57-79% depending on the play-out budget: Greedy's one rule is close to a safe strategy, and beating it well takes reading it.",
+    "loop": "Both fighters close to distance 1 within a few turns (39% of mirror decisions are at distance 1) and the duel becomes a speed guess: Jab (speed 1, 1 damage) cancels any slower attack, Punch beats a Kick or Lunge, Guard blanks the big hit, Step back makes everything miss. At range 3-4 the guess is Lunge in against Shot out (Shot is faster and cancels the Lunge). Energy almost never binds: it sits at the cap of 6 in 93% of decisions and a move costs 0.8 on average against 2 income, so the cost column on the cards barely matters; the decisions are distance and speed reads, and which card you have left in hand."
+  }
+}

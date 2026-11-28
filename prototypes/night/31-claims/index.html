@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Claims</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #27303b; --table: #384757; --table2: #313e4b; --ink: #1b1b1b; --paper: #fbf7ee;
+  --mana: #3d8bf2; --gold: #f2b632; --ok: #5fdc6f; --bad: #ff6a4d;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86; --spell: #e0673f; --spell2: #b8452a;
+  --cardw: 96px; --cardh: 128px; --uw: 84px; --uh: 100px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game { position: relative; height: 100%; max-width: 1300px; margin: 0 auto; display: grid;
+  grid-template-columns: 170px minmax(0, 1fr) 210px; grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr) auto auto auto; gap: 6px 18px;
+  padding: 6px max(12px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#history { grid-row: 1 / 5; grid-column: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; overflow: hidden; }
+#info1 { grid-row: 1; grid-column: 2; } #board1 { grid-row: 2; grid-column: 2; } #board0 { grid-row: 3; grid-column: 2; } #info0 { grid-row: 4; grid-column: 2; }
+#side { grid-row: 1 / 5; grid-column: 3; display: flex; flex-direction: column; justify-content: space-between; padding: 2px 0 8px; }
+#names { grid-row: 5; grid-column: 1 / -1; }
+#hand { grid-row: 6; grid-column: 1 / -1; }
+
+#menu { display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+#menu button, #rules button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 17px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+#turnbox { display: flex; justify-content: center; }
+#endturn { width: 150px; min-height: 54px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; box-shadow: 0 3px 0 #a8770d; }
+#endturn.done { background: var(--ok); box-shadow: 0 3px 0 #2c8a3a, 0 0 14px rgba(95,220,111,.7); color: #08300f; }
+#endturn:disabled { background: #56616d; color: #8e98a3; box-shadow: none; cursor: default; }
+
+/* ---------------- player info rows */
+.info { display: flex; align-items: center; gap: 14px; min-height: 52px; }
+.life { position: relative; width: 52px; height: 52px; border-radius: 50%; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 21px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.5); flex: 0 0 auto; }
+.life.s0 { background: radial-gradient(circle at 35% 30%, #7db3f5, var(--me2)); } .life.s1 { background: radial-gradient(circle at 35% 30%, #c09ae8, var(--him2)); }
+.life.tgt { cursor: pointer; box-shadow: 0 0 0 4px var(--gold), 0 0 18px rgba(242,182,50,.8); animation: pulse 1.2s ease-in-out infinite; }
+.mana { display: flex; align-items: center; gap: 3px; }
+.manatxt { font-weight: 800; font-size: 17px; color: #bcd9ff; margin-right: 4px; min-width: 38px; }
+.gemc { width: 12px; height: 16px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: #1d2a38; }
+.gemc.on { background: linear-gradient(180deg, #8cc2ff, var(--mana)); }
+.pile { width: 32px; height: 44px; border-radius: 5px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; flex: 0 0 auto;
+  box-shadow: 2px 2px 0 rgba(0,0,0,.3), 4px 4px 0 rgba(0,0,0,.2); }
+.pile.s0 { background: linear-gradient(135deg, var(--me), var(--me2)); } .pile.s1 { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
+.backs { display: flex; }
+.back { width: 22px; height: 32px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
+.back:first-child { margin-left: 0; }
+.coin { width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); border: 2px solid #fff; color: #2a1d00; font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+button.coin { padding: 0; width: 34px; height: 34px; font-size: 14px; box-shadow: 0 0 10px rgba(95,220,111,.8); border-color: var(--ok); }
+.disc { display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
+.dc { height: 24px; padding: 0 7px; border-radius: 4px; background: var(--paper); color: var(--ink); font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.dc i { font-style: normal; color: #7a6a4a; }
+
+/* ---------------- boards and units */
+.board { display: flex; justify-content: center; align-items: center; gap: 22px; border-radius: 16px; background: radial-gradient(ellipse at center, var(--table), var(--table2)); box-shadow: inset 0 0 24px rgba(0,0,0,.3); min-height: 0; }
+#board1 { border-bottom-left-radius: 0; border-bottom-right-radius: 0; } #board0 { border-top-left-radius: 0; border-top-right-radius: 0; }
+.unit { position: relative; width: var(--uw); height: var(--uh); border-radius: 12px; border: 3px solid rgba(255,255,255,.85); box-shadow: 0 4px 8px rgba(0,0,0,.45); flex: 0 0 auto; transition: transform .12s;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8px; }
+.unit.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); } .unit.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.unit.down { border-style: dashed; background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.10) 0 6px, transparent 6px 12px), linear-gradient(160deg, var(--me), var(--me2)); }
+.unit.down.s1 { background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.10) 0 6px, transparent 6px 12px), linear-gradient(160deg, var(--him), var(--him2)); }
+.unit .un { font-weight: 800; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.unit .real { margin-top: 4px; font-size: 11px; font-weight: 700; padding: 1px 5px; border-radius: 3px; background: rgba(0,0,0,.35); color: #ffd9a8; }
+.stat { position: absolute; bottom: -10px; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.stat.a { left: -8px; background: radial-gradient(circle at 35% 30%, #ffd36b, #d08a12); color: #2a1d00; text-shadow: none; }
+.stat.h { right: -8px; background: radial-gradient(circle at 35% 30%, #ff7a5c, #c62d1c); }
+.stat.h.hurt { background: radial-gradient(circle at 35% 30%, #ffb19e, #e0553a); }
+.unit.sleep { filter: saturate(.55) brightness(.85); }
+.unit.can { cursor: pointer; box-shadow: 0 0 0 3px var(--ok), 0 0 16px rgba(95,220,111,.8); }
+.unit.sel { transform: translateY(-8px); box-shadow: 0 0 0 4px var(--gold), 0 0 20px rgba(242,182,50,.9); }
+.unit.tgt { cursor: pointer; box-shadow: 0 0 0 4px var(--gold), 0 0 18px rgba(242,182,50,.85); animation: pulse 1.2s ease-in-out infinite; }
+.unit.new { animation: pop .4s ease-out; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px var(--gold), 0 0 26px rgba(242,182,50,.9); } }
+@keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+.shake { animation: shake .35s; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(2px); } }
+
+/* ---------------- cards */
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; text-align: left;
+  background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; }
+.card .art { margin: 4px 4px 0; border-radius: 6px; flex: 0 0 52%; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; }
+.card.Unit .art { background: linear-gradient(160deg, var(--me), var(--me2)); } .card.Unit.s1 .art { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.card.Spell .art { background: linear-gradient(160deg, #f08a5d, var(--spell2)); }
+.card .big { font-size: calc(var(--cardw) * .34); font-weight: 900; text-shadow: 0 2px 3px rgba(0,0,0,.35); line-height: 1; }
+.card .stat { bottom: -12px; width: 28px; height: 28px; font-size: 14px; }
+.card .nm { font-weight: 800; font-size: calc(var(--cardw) * .15); padding: 13px 7px 0; }
+.card.Spell .nm { padding-top: 5px; }
+.card .tx { font-size: calc(var(--cardw) * .12); padding: 1px 7px; color: #3a352c; line-height: 1.15; }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+#hand { display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 10px 0 2px; min-height: calc(var(--cardh) + 14px); }
+#hand .card { transition: transform .12s, box-shadow .12s; }
+#hand .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok:hover { transform: translateY(-6px); }
+#hand .card.sel { transform: translateY(-14px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8); }
+#hand .card:disabled { cursor: default; }
+#hand .card.no { filter: brightness(.62) saturate(.6); }
+#hand .card.drawn { animation: drawin .45s ease-out; }
+@keyframes drawin { from { transform: translateY(-60px) scale(.6); opacity: 0; } }
+
+/* the list of names to claim, shown once a hand card is picked */
+#names { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; min-height: 0; }
+#names:empty { display: none; }
+#names .card { --cardw: 74px; --cardh: 96px; }
+#names .card .tx { display: none; }
+#names .card.ok { border-color: var(--ok); }
+#names .card.sel { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 14px rgba(242,182,50,.8); transform: translateY(-4px); }
+#names .card:disabled { filter: brightness(.55) saturate(.5); cursor: default; }
+#names .card.truth { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* the claim on the table */
+#spot { position: absolute; z-index: 20; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none; flex-direction: column; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 14px; background: rgba(12,16,22,.82); box-shadow: 0 14px 40px rgba(0,0,0,.6); }
+#spot.show { display: flex; }
+#spot .pair { display: flex; gap: 14px; align-items: center; }
+#spot .card { --cardw: 120px; --cardh: 160px; }
+#spot .claimback { width: 120px; height: 160px; border-radius: 10px; border: 3px dashed #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-weight: 900; }
+#spot .claimback.s0 { background: repeating-linear-gradient(135deg, rgba(255,255,255,.10) 0 6px, transparent 6px 12px), linear-gradient(160deg, var(--me), var(--me2)); }
+#spot .claimback.s1 { background: repeating-linear-gradient(135deg, rgba(255,255,255,.10) 0 6px, transparent 6px 12px), linear-gradient(160deg, var(--him), var(--him2)); }
+#spot .claimback .q { font-size: 44px; line-height: 1; }
+#spot .card.flip { animation: flip .35s ease-out; }
+@keyframes flip { from { transform: rotateY(90deg); } }
+#spot .card.lie { border-color: var(--bad); box-shadow: 0 0 0 3px var(--bad), 0 0 20px rgba(255,106,77,.8); }
+#spot .card.true { border-color: var(--ok); box-shadow: 0 0 0 3px var(--ok), 0 0 20px rgba(95,220,111,.7); }
+#spot .btns { display: flex; gap: 12px; }
+#spot .btns button { min-height: 46px; padding: 0 18px; border-radius: 10px; border: 0; font-weight: 800; font-size: 16px; }
+#challenge { background: var(--bad); color: #2a0800; box-shadow: 0 3px 0 #a8341c; }
+#letpass { background: #dfe5eb; color: #1b1b1b; box-shadow: 0 3px 0 #8e98a3; }
+
+/* ---------------- history */
+.hist { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; font-size: 13px; font-weight: 800; min-height: 30px; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
+.hist .chip { padding: 2px 6px; border-radius: 4px; background: var(--paper); color: var(--ink); white-space: nowrap; }
+.hist .chip.real { background: #ffd9a8; }
+.hist .x { color: var(--bad); } .hist .v { color: var(--ok); }
+
+/* ---------------- floaters, banner, game over, rules */
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 38px; color: var(--bad); text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 10px rgba(0,0,0,.4); transform: translate(-50%, -50%); animation: floatup 1.1s ease-out forwards; white-space: nowrap; }
+@keyframes floatup { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -110%) scale(1); } }
+.ghost { position: absolute; z-index: 15; pointer-events: none; animation: die .45s ease-in forwards; }
+@keyframes die { to { transform: scale(.4) rotate(-8deg); opacity: 0; } }
+#banner { position: absolute; left: 0; right: 0; top: 45%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 42px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 60px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+#rules .panel { max-width: 560px; max-height: 100%; overflow: auto; background: #1f2731; border: 1px solid #4a5868; border-radius: 12px; padding: 16px 20px; line-height: 1.4; font-size: 15px; }
+#rules h3 { margin: 0 0 8px; } #rules p { margin: 6px 0; } #rules ul { margin: 4px 0; padding-left: 20px; }
+
+/* ---------------- phone */
+@media (max-width: 760px) {
+  :root { --cardw: 60px; --cardh: 82px; --uw: 54px; --uh: 66px; }
+  #game { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr) auto auto auto; gap: 5px; }
+  #history { display: none; }
+  #side { grid-row: 1; grid-column: 1; flex-direction: row; align-items: center; padding: 0; }
+  #info1 { grid-row: 2; } #board1 { grid-row: 3; } #board0 { grid-row: 4; } #info0 { grid-row: 5; } #names { grid-row: 6; } #hand { grid-row: 7; }
+  #info1, #board1, #board0, #info0 { grid-column: 1; }
+  #menu button { min-height: 28px; padding: 2px 8px; font-size: 13px; } .tally { font-size: 13px; } .tally b { min-width: 24px; height: 24px; }
+  #endturn { width: auto; min-height: 38px; padding: 0 14px; font-size: 14px; }
+  .info { gap: 8px; min-height: 40px; } .life { width: 40px; height: 40px; font-size: 16px; }
+  .gemc { display: none; } .manatxt { font-size: 14px; min-width: 0; }
+  .pile { width: 24px; height: 32px; font-size: 12px; } .back { width: 14px; height: 22px; }
+  .dc { height: 20px; padding: 0 4px; font-size: 10px; }
+  .board { gap: 10px; }
+  .unit { border-radius: 8px; border-width: 2px; padding-top: 4px; } .unit .un { font-size: 10px; } .unit .real { font-size: 9px; padding: 0 3px; }
+  .stat { width: 22px; height: 22px; font-size: 12px; bottom: -7px; } .stat.a { left: -5px; } .stat.h { right: -5px; }
+  .card .nm { font-size: 10px; padding-top: 10px; } .card .tx { display: none; } .card .stat { width: 20px; height: 20px; font-size: 11px; bottom: -8px; }
+  .cgem { width: 20px; height: 20px; font-size: 12px; top: -6px; left: -6px; }
+  #hand { gap: 5px; flex-wrap: wrap; padding-top: 8px; min-height: calc(var(--cardh) + 10px); }
+  #names { gap: 4px; } #names .card { --cardw: 56px; --cardh: 64px; } #names .card .art { flex-basis: 46%; } #names .card .nm { font-size: 10px; padding: 7px 2px 0; } #names .card .big { font-size: 17px; }
+  #names .card .stat { width: 16px; height: 16px; font-size: 9px; bottom: -6px; }
+  #spot .card, #spot .claimback { --cardw: 90px; --cardh: 120px; width: 90px; height: 120px; }
+}
+
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="history"></div>
+  <div id="info1" class="info"></div>
+  <div id="board1" class="board"></div>
+  <div id="board0" class="board"></div>
+  <div id="info0" class="info"></div>
+  <div id="side"><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div><div id="turnbox"></div></div>
+  <div id="names"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Claims</h3>
+    <p>Both decks hold the same 24 cards: three of each card on the list. Life 20. Mana goes up by 1 each turn (max 10). Draw 1 each turn; an empty deck costs 1 life, then 2, then 3.</p>
+    <p><b>Play any card face-down and name any card on the list</b>, paying the named card's cost. The other player may <b>challenge</b>:</p>
+    <ul><li>Not challenged: it works as the named card for the rest of the game.</li>
+    <li>Challenged and true: the challenger loses 3 life, the card works.</li>
+    <li>Challenged and false: the card is discarded with no effect, the mana stays spent, the claimer loses 3 life.</li></ul>
+    <p>Units attack from the turn after they are played: an enemy unit (both deal their attack to each other; damage stays) or the enemy player. Up to 5 units a side. Hit 3 and Blast deal 3 and 5 damage to a unit or player; Draw 2 draws 2 cards.</p>
+    <p>Every card turns face-up when it leaves play, so discard piles show the truth. The second player starts with one more card and the Coin (+1 mana once).</p>
+    <p>Reduce the other player to 0 life.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// Claims: a unit duel where every card is played face-down as a claimed card from the shared
+// list, paying the claimed cost; the opponent may challenge. A caught lie or a failed challenge
+// costs 3 life. Pure from the outside: act() clones the state.
+
+const LIFE = 20, MAX_MANA = 10, BOARD = 5, PENALTY = 3, TURN_CAP = 120;
+
+const CARDS = {
+  Striker: { id: 'Striker', name: 'Striker', kind: 'Unit', cost: 1, atk: 2, hp: 1 },
+  Guard: { id: 'Guard', name: 'Guard', kind: 'Unit', cost: 2, atk: 1, hp: 4 },
+  Raider: { id: 'Raider', name: 'Raider', kind: 'Unit', cost: 2, atk: 3, hp: 2 },
+  Line: { id: 'Line', name: 'Line', kind: 'Unit', cost: 3, atk: 3, hp: 4 },
+  Heavy: { id: 'Heavy', name: 'Heavy', kind: 'Unit', cost: 5, atk: 5, hp: 6 },
+  Hit3: { id: 'Hit3', name: 'Hit 3', kind: 'Spell', cost: 2, dmg: 3 },
+  Blast: { id: 'Blast', name: 'Blast', kind: 'Spell', cost: 4, dmg: 5 },
+  Draw2: { id: 'Draw2', name: 'Draw 2', kind: 'Spell', cost: 2, draw: 2 },
+};
+const LIST = ['Striker', 'Guard', 'Raider', 'Line', 'Heavy', 'Hit3', 'Blast', 'Draw2'];
+const COPIES = 3;
+const needsTarget = (id) => CARDS[id].dmg > 0;
+
+function deckList() { const out = []; for (const id of LIST) for (let i = 0; i < COPIES; i++) out.push(id); return out; }
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function newPlayer() { return { life: LIFE, mana: 0, maxMana: 0, fatigue: 0, coin: false, hand: [], deck: deckList(), board: [], discard: [], revLie: 0, revHonest: 0, faced: 0, challenges: 0 }; }
+function clone(s) {
+  return { ...s, pending: s.pending ? { ...s.pending, target: s.pending.target ? { ...s.pending.target } : null } : null,
+    p: s.p.map(p => ({ ...p, hand: p.hand.slice(), deck: p.deck.slice(), discard: p.discard.slice(), board: p.board.map(m => ({ ...m })) })) };
+}
+function emit(ev, e) { if (ev) ev.push(e); }
+function draw(s, side, ev) {
+  const p = s.p[side];
+  if (p.deck.length) { p.hand.push(p.deck.shift()); emit(ev, { t: 'draw', side }); return; }
+  p.fatigue++; p.life -= p.fatigue; emit(ev, { t: 'fatigue', side, n: p.fatigue });
+}
+
+function newMatch({ seed, first }) {
+  const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, toMove: 0, first: 0, winner: null, cap: false, pending: null, uid: 1, p: [newPlayer(), newPlayer()] };
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
+  for (let i = 0; i < 3; i++) draw(s, s.first, null);
+  for (let i = 0; i < 4; i++) draw(s, 1 - s.first, null);
+  s.p[1 - s.first].coin = true;
+  s.turn = s.first;
+  startTurn(s, null);
+  return s;
+}
+
+function checkWin(s, ev) {
+  if (s.winner !== null) return true;
+  const a = s.p[0].life <= 0, b = s.p[1].life <= 0;
+  if (!a && !b) return false;
+  s.winner = a && b ? 'draw' : a ? 1 : 0;
+  emit(ev, { t: 'end', winner: s.winner });
+  return true;
+}
+function startTurn(s, ev) {
+  const side = s.turn, p = s.p[side];
+  s.turnNo++; s.toMove = side;
+  emit(ev, { t: 'turn', side });
+  p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
+  p.mana = p.maxMana;
+  for (const m of p.board) m.ready = true;
+  draw(s, side, ev);
+  checkWin(s, ev);
+}
+
+// Actions, by the player to move (s.toMove):
+//   { t: 'play', card, name, target }  card: the real card from hand, name: the claimed card,
+//                                     target { side, i } for Hit 3 and Blast (i = -1: the player)
+//   { t: 'coin' }   { t: 'attack', from, to }  (to = -1: the player)   { t: 'end' }
+//   while a claim is pending, by the other player: { t: 'challenge' } or { t: 'pass' }
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  if (s.pending) return [{ t: 'challenge' }, { t: 'pass' }];
+  const me = s.turn, P = s.p[me], O = s.p[1 - me], out = [{ t: 'end' }];
+  if (P.coin) out.push({ t: 'coin' });
+  for (const card of new Set(P.hand)) for (const name of LIST) {
+    const c = CARDS[name];
+    if (c.cost > P.mana) continue;
+    if (c.kind === 'Unit') { if (P.board.length < BOARD) out.push({ t: 'play', card, name }); }
+    else if (!needsTarget(name)) out.push({ t: 'play', card, name });
+    else for (const side of [0, 1]) { out.push({ t: 'play', card, name, target: { side, i: -1 } }); for (let i = 0; i < s.p[side].board.length; i++) out.push({ t: 'play', card, name, target: { side, i } }); }
+  }
+  P.board.forEach((m, from) => { if (m.ready) { out.push({ t: 'attack', from, to: -1 }); for (let to = 0; to < O.board.length; to++) out.push({ t: 'attack', from, to }); } });
+  return out;
+}
+
+function hit(s, side, i, n, ev) {
+  if (i < 0) { s.p[side].life -= n; emit(ev, { t: 'hit', side, i, n }); return; }
+  const m = s.p[side].board[i]; m.hp -= n;
+  emit(ev, { t: 'hit', side, i, n, uid: m.uid });
+}
+function sweep(s, ev) {
+  for (const side of [0, 1]) {
+    const P = s.p[side], B = P.board;
+    for (let i = B.length - 1; i >= 0; i--) if (B[i].hp <= 0) {
+      const m = B[i];
+      if (!m.up) { if (m.real === m.name) P.revHonest++; else P.revLie++; }
+      emit(ev, { t: 'die', side, i, uid: m.uid, real: m.real, name: m.name, up: m.up });
+      P.discard.push(m.real); B.splice(i, 1);
+    }
+  }
+}
+// a claim that stands: the card works as the named card
+function resolve(s, pd, up, ev) {
+  const P = s.p[pd.side], c = CARDS[pd.name];
+  if (c.kind === 'Unit') {
+    const m = { uid: s.uid++, name: pd.name, real: pd.card, up, atk: c.atk, hp: c.hp, max: c.hp, ready: false };
+    P.board.push(m); emit(ev, { t: 'summon', side: pd.side, uid: m.uid, up });
+    return;
+  }
+  if (c.dmg) { hit(s, pd.target.side, pd.target.i, c.dmg, ev); sweep(s, ev); }
+  if (c.draw) for (let k = 0; k < c.draw; k++) draw(s, pd.side, ev);
+  if (!up) { if (pd.card === pd.name) P.revHonest++; else P.revLie++; }
+  P.discard.push(pd.card);
+  emit(ev, { t: 'reveal', side: pd.side, real: pd.card, name: pd.name });
+}
+
+function mAct(s, a, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  if (s.pending) {
+    const pd = s.pending, claimer = s.p[pd.side], ch = 1 - pd.side;
+    s.pending = null; s.toMove = s.turn; s.p[ch].faced++;
+    if (a.t === 'pass') { emit(ev, { t: 'pass', side: ch }); resolve(s, pd, false, ev); }
+    else if (a.t === 'challenge') {
+      s.p[ch].challenges++;
+      const honest = pd.card === pd.name;
+      emit(ev, { t: 'challenge', side: ch, honest, real: pd.card, name: pd.name });
+      if (honest) { claimer.revHonest++; s.p[ch].life -= PENALTY; emit(ev, { t: 'penalty', side: ch, n: PENALTY }); if (!checkWin(s, ev)) resolve(s, pd, true, ev); }
+      else { claimer.revLie++; claimer.life -= PENALTY; emit(ev, { t: 'penalty', side: pd.side, n: PENALTY }); claimer.discard.push(pd.card); }
+    } else throw new Error('a claim is pending');
+    checkWin(s, ev);
+    return;
+  }
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  if (a.t === 'end') {
+    if (s.turnNo >= TURN_CAP) { s.winner = 'draw'; s.cap = true; emit(ev, { t: 'end', winner: 'draw' }); return; }
+    s.turn = 1 - s.turn; startTurn(s, ev); return;
+  }
+  if (a.t === 'coin') {
+    if (!P.coin) throw new Error('no coin');
+    P.coin = false; P.mana += 1; emit(ev, { t: 'coin', side: me }); return;
+  }
+  if (a.t === 'play') {
+    const c = CARDS[a.name], k = P.hand.indexOf(a.card);
+    if (!c || k < 0 || c.cost > P.mana) throw new Error('illegal play');
+    if (c.kind === 'Unit' && P.board.length >= BOARD) throw new Error('board full');
+    if (needsTarget(a.name) && (!a.target || a.target.i >= s.p[a.target.side].board.length)) throw new Error('bad target');
+    P.mana -= c.cost; P.hand.splice(k, 1);
+    s.pending = { side: me, card: a.card, name: a.name, target: needsTarget(a.name) ? { side: a.target.side, i: a.target.i, uid: a.target.i >= 0 ? s.p[a.target.side].board[a.target.i].uid : null } : null };
+    s.toMove = 1 - me;
+    emit(ev, { t: 'claim', side: me, name: a.name, target: s.pending.target });
+    return;
+  }
+  if (a.t === 'attack') {
+    const m = P.board[a.from];
+    if (!m || !m.ready || a.to >= O.board.length) throw new Error('illegal attack');
+    m.ready = false;
+    emit(ev, { t: 'attack', side: me, from: a.from, to: a.to, uid: m.uid, tuid: a.to >= 0 ? O.board[a.to].uid : null });
+    if (a.to < 0) hit(s, 1 - me, -1, m.atk, ev);
+    else { const d = O.board[a.to], da = d.atk; hit(s, 1 - me, a.to, m.atk, ev); hit(s, me, a.from, da, ev); }
+    sweep(s, ev); checkWin(s, ev); return;
+  }
+  throw new Error('unknown action ' + a.t);
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function _act(t, a) { mAct(t, a, null); return t; }
+
+// What `viewer` knows of `side`'s cards: every copy not in its discard pile or face-up on its board
+// could be in its hand, its deck, under a face-down unit, or the claim on the table.
+function unseenPool(s, side) {
+  const P = s.p[side], pool = deckList();
+  const drop = (id) => { const k = pool.indexOf(id); if (k >= 0) pool.splice(k, 1); };
+  for (const id of P.discard) drop(id);
+  for (const m of P.board) if (m.up) drop(m.real);
+  return pool;
+}
+
+// ---- src/bot.js
+// Bots for Claims, simplest first. Every bot picks one action at a time through legalActions/act,
+// the same API the page uses. None reads a hidden card: the Expert reasons only from what the
+// table shows (discard piles, face-up units, hand sizes, the claims already revealed) and
+// resamples everything else before each play-out.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pick = (a, rng) => a[Math.floor(rng() * a.length)];
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+// ------------------------------------------------------------------ public reasoning about claims
+// The lie rate a viewer reads off `side`'s revealed claims, pulled toward a prior of 1 in 4.
+const lieRate = (P) => (P.revLie + 1) / (P.revLie + P.revHonest + 4);
+// How likely the pending claim of `name` by `side` is honest, from public information only:
+// the chance its hand held a copy (counting the unseen copies), against how often it lies.
+function pHonest(s, side, name) {
+  const P = s.p[side], pool = unseenPool(s, side), lam = lieRate(P);
+  let u = pool.filter(x => x === name).length;
+  if (u === 0) return 0;
+  const down = P.board.filter(m => !m.up);
+  u = Math.max(0, u - (1 - lam) * down.filter(m => m.name === name).length);
+  const N = pool.length - down.length, h = P.hand.length + 1; // the hand before this card left it
+  let none = 1;
+  for (let i = 0; i < h; i++) none *= Math.max(0, N - u - i) / Math.max(1, N - i);
+  const has = 1 - none;
+  if (has <= 0) return 0;
+  return (1 - lam) * has / ((1 - lam) * has + lam);
+}
+const allSeen = (s, side, name) => !unseenPool(s, side).includes(name);
+
+// ------------------------------------------------------------------ worth of a position
+const lifeWorth = (h) => 0.6 * h - 0.6 * Math.max(0, 10 - h);
+const unitWorth = (m) => 1.4 * m.atk + m.hp;
+function evaluate(s, me) {
+  if (s.winner === me) return 1e4;
+  if (s.winner !== null) return s.winner === 'draw' ? 0 : -1e4;
+  const P = s.p[me], O = s.p[1 - me];
+  let v = lifeWorth(Math.max(P.life, 0)) - lifeWorth(Math.max(O.life, 0));
+  for (const m of P.board) v += unitWorth(m);
+  for (const m of O.board) v -= unitWorth(m);
+  v += 1.6 * (P.hand.length - O.hand.length) + 0.3 * (P.maxMana - O.maxMana);
+  return v;
+}
+const winProb = (s, me) => s.winner !== null ? (s.winner === me ? 1 : s.winner === 'draw' ? 0.5 : 0) : 1 / (1 + Math.exp(-evaluate(s, me) / 9));
+
+// ------------------------------------------------------------------ simple rules shared by the bots
+// Burn and ready attackers that reach the enemy player this turn, if they add up to lethal.
+function lethalLine(s) {
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  let dmg = 0;
+  const acts = [];
+  P.board.forEach((m, i) => { if (m.ready) { dmg += m.atk; acts.push({ t: 'attack', from: i, to: -1 }); } });
+  const burns = P.hand.filter(id => CARDS[id].dmg).sort((a, b) => CARDS[b].dmg / CARDS[b].cost - CARDS[a].dmg / CARDS[a].cost);
+  let mana = P.mana + (P.coin ? 1 : 0);
+  const spells = [];
+  for (const id of burns) { if (dmg >= O.life) break; if (CARDS[id].cost <= mana) { mana -= CARDS[id].cost; dmg += CARDS[id].dmg; spells.push(id); } }
+  if (dmg < O.life) return null;
+  const spent = spells.reduce((a, id) => a + CARDS[id].cost, 0);
+  const out = [];
+  if (spent > P.mana) out.push({ t: 'coin' });
+  for (const id of spells) out.push({ t: 'play', card: id, name: id, target: { side: 1 - me, i: -1 } });
+  return out.concat(acts);
+}
+// The best enemy unit a burn of `dmg` kills (most worth), or -1.
+function bestKill(O, dmg) { let best = -1, bv = -1; O.board.forEach((m, i) => { if (m.hp <= dmg && unitWorth(m) > bv) { bv = unitWorth(m); best = i; } }); return best; }
+// One attacker's best target by a fixed rule: a kill it survives, else a trade up, else the player.
+function attackTarget(P, O, i) {
+  const m = P.board[i];
+  let best = -1, bv = 0;
+  O.board.forEach((d, j) => {
+    const kills = d.hp <= m.atk, dies = m.hp <= d.atk;
+    let v = -Infinity;
+    if (kills && !dies) v = 10 + unitWorth(d);
+    else if (kills && dies && unitWorth(d) >= unitWorth(m)) v = unitWorth(d) - unitWorth(m) + 1;
+    if (v > bv) { bv = v; best = j; }
+  });
+  return best;
+}
+
+// ------------------------------------------------------------------ trivial bots
+// Random: random claims (half of them honest), random targets, challenges a third of the time.
+function randomBot(s, rng) {
+  if (s.pending) return rng() < 1 / 3 ? { t: 'challenge' } : { t: 'pass' };
+  const me = s.turn, P = s.p[me], O = s.p[1 - me], opts = [{ t: 'end' }];
+  if (P.coin) opts.push({ t: 'coin' });
+  const ready = P.board.map((m, i) => m.ready ? i : -1).filter(i => i >= 0);
+  if (ready.length) { const from = pick(ready, rng), to = Math.floor(rng() * (O.board.length + 1)) - 1; opts.push({ t: 'attack', from, to }); }
+  if (P.hand.length) {
+    const card = pick(P.hand, rng);
+    const names = LIST.filter(n => CARDS[n].cost <= P.mana && (CARDS[n].kind !== 'Unit' || P.board.length < BOARD));
+    if (names.length) {
+      const name = rng() < 0.5 && names.includes(card) ? card : pick(names, rng);
+      let target;
+      if (needsTarget(name)) { const side = rng() < 0.5 ? 0 : 1; target = { side, i: Math.floor(rng() * (s.p[side].board.length + 1)) - 1 }; }
+      opts.push({ t: 'play', card, name, target });
+    }
+  }
+  return pick(opts, rng);
+}
+
+// Greedy: honest only; the most expensive affordable card first (burn at the best kill, else the
+// player), then each attack by the fixed rule; challenges only when every copy is in sight.
+function greedyBot(s) {
+  if (s.pending) return allSeen(s, s.pending.side, s.pending.name) ? { t: 'challenge' } : { t: 'pass' };
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  const kill = lethalLine(s);
+  if (kill && kill.length) return kill[0];
+  const playable = (mana) => P.hand.filter(id => CARDS[id].cost <= mana && (CARDS[id].kind !== 'Unit' || P.board.length < BOARD));
+  let cards = playable(P.mana);
+  if (P.coin) { const more = playable(P.mana + 1); if (more.some(id => CARDS[id].cost === P.mana + 1)) return { t: 'coin' }; }
+  if (cards.length) {
+    const id = cards.sort((a, b) => CARDS[b].cost - CARDS[a].cost)[0];
+    let target;
+    if (needsTarget(id)) { const k = bestKill(O, CARDS[id].dmg); target = { side: 1 - me, i: k }; }
+    return { t: 'play', card: id, name: id, target };
+  }
+  for (let i = 0; i < P.board.length; i++) if (P.board[i].ready) return { t: 'attack', from: i, to: attackTarget(P, O, i) };
+  return { t: 'end' };
+}
+
+// Racer: honest, the most expensive card first, every spell and every attack at the enemy player.
+function racerBot(s) {
+  if (s.pending) return allSeen(s, s.pending.side, s.pending.name) ? { t: 'challenge' } : { t: 'pass' };
+  const me = s.turn, P = s.p[me];
+  const cards = P.hand.filter(id => CARDS[id].cost <= P.mana && (CARDS[id].kind !== 'Unit' || P.board.length < BOARD));
+  if (P.coin && P.hand.some(id => CARDS[id].cost === P.mana + 1)) return { t: 'coin' };
+  if (cards.length) { const id = cards.sort((a, b) => CARDS[b].cost - CARDS[a].cost)[0]; return { t: 'play', card: id, name: id, target: needsTarget(id) ? { side: 1 - me, i: -1 } : undefined }; }
+  for (let i = 0; i < P.board.length; i++) if (P.board[i].ready) return { t: 'attack', from: i, to: -1 };
+  return { t: 'end' };
+}
+
+// ------------------------------------------------------------------ the play-out policy
+// Fast, honest, in place: claims stand unchallenged inside a play-out.
+function playHonest(t, id, target) { _act(t, { t: 'play', card: id, name: id, target }); if (t.pending) _act(t, { t: 'pass' }); }
+function policyTurn(t, rng) {
+  const me = t.turn, P = t.p[me], O = t.p[1 - me];
+  if (t.pending) _act(t, { t: 'pass' });
+  const kill = lethalLine(t);
+  if (kill) { for (const a of kill) { if (t.winner !== null) return; if (a.t === 'play') playHonest(t, a.card, a.target); else _act(t, a); } return; }
+  for (let guard = 0; guard < 12 && t.winner === null; guard++) {
+    if (P.coin && P.hand.some(id => CARDS[id].cost === P.mana + 1 && CARDS[id].kind === 'Unit') && P.board.length < BOARD) _act(t, { t: 'coin' });
+    const opts = [];
+    for (const id of new Set(P.hand)) {
+      const c = CARDS[id];
+      if (c.cost > P.mana) continue;
+      if (c.kind === 'Unit') { if (P.board.length < BOARD) opts.push({ id, v: c.cost + 0.5 }); }
+      else if (c.dmg) { const k = bestKill(O, c.dmg); if (k >= 0 && unitWorth(O.board[k]) >= 2 * c.cost) opts.push({ id, v: c.cost, target: { side: 1 - me, i: k } }); }
+      else if (P.hand.length <= 3) opts.push({ id, v: 0.5 });
+    }
+    if (!opts.length) break;
+    const o = rng() < 0.15 ? pick(opts, rng) : opts.sort((a, b) => b.v - a.v)[0];
+    playHonest(t, o.id, o.target);
+  }
+  if (t.winner !== null) return;
+  const order = P.board.map((m, i) => i).filter(i => P.board[i].ready).sort((a, b) => P.board[b].atk - P.board[a].atk).map(i => P.board[i].uid);
+  for (const uid of order) {
+    if (t.winner !== null) return;
+    const i = P.board.findIndex(m => m.uid === uid);
+    if (i < 0 || !P.board[i].ready) continue;
+    _act(t, { t: 'attack', from: i, to: attackTarget(P, O, i) });
+  }
+}
+
+// ------------------------------------------------------------------ resampling what `me` cannot see
+// The opponent's hand, deck and face-down units are dealt again from the copies `me` has not seen
+// (a face-down unit is what it claims as often as that player tells the truth); my own deck is reshuffled.
+function determinize(s, me, rng) {
+  const t = clone(s), o = 1 - me, O = t.p[o];
+  const pool = shuffle(unseenPool(t, o), rng);
+  const pd = t.pending && t.pending.side === o ? t.pending : null;
+  const take = (want) => { const k = want ? pool.indexOf(want) : -1; if (k >= 0) return pool.splice(k, 1)[0]; return pool.pop(); };
+  const lam = lieRate(O);
+  for (const m of O.board) if (!m.up) m.real = take(rng() < 1 - lam ? m.name : null);
+  if (pd) pd.card = take(null);
+  const nh = O.hand.length;
+  O.hand = pool.splice(0, nh); O.deck = pool;
+  shuffle(t.p[me].deck, rng);
+  return t;
+}
+
+// ------------------------------------------------------------------ the Expert
+// How the Expert expects an opponent to answer its claim: from the opponent's side of the table,
+// challenge when the claim looks unlikely, always when the claim would kill, never on 3 life or less.
+function challengeChance(s, name, target) {
+  const claimer = s.turn, ch = 1 - claimer, C = s.p[ch];
+  const p = pHonest(s, claimer, name);
+  if (p <= 0) return 1;
+  const c = CARDS[name];
+  if (c.dmg && target && target.side === ch && target.i < 0 && c.dmg >= C.life) return 1;
+  if (C.life <= PENALTY) return 0;
+  const q = p < 0.25 ? 1 : p > 0.45 ? 0 : (0.45 - p) / 0.2;
+  // scaled by how often this opponent has actually challenged, against a baseline of one claim in four
+  return Math.min(1, q * (C.challenges + 1) / (0.25 * C.faced + 1));
+}
+// After the root action, the rest of this turn and DEPTH more turns by the policy, then the position's worth.
+function playout(t, me, rng, depth) {
+  if (t.pending) {
+    // my claim: the opponent answers by the model; its claim cannot be pending here
+    const pd = t.pending;
+    const q = challengeChance(t, pd.name, pd.target);
+    _act(t, { t: rng() < q ? 'challenge' : 'pass' });
+  }
+  if (t.winner === null && t.turn === me) { policyTurn(t, rng); if (t.winner === null) _act(t, { t: 'end' }); }
+  for (let d = 0; d < depth && t.winner === null; d++) { policyTurn(t, rng); if (t.winner === null) _act(t, { t: 'end' }); }
+  return winProb(t, me);
+}
+const sig = (t) => JSON.stringify([t.pending && [t.pending.card, t.pending.name, t.pending.target && t.pending.target.side, t.pending.target && t.pending.target.i],
+  t.p.map(p => [p.life, p.mana, p.coin, p.hand.slice().sort().join(), p.board.map(m => m.name + m.real + m.hp + m.atk + (m.ready ? 'r' : '')).join()])]);
+// The root's candidate actions: every distinct honest play, each claim of a card not in hand paid
+// with the cheapest card in hand, every attack, the Coin, ending the turn; one per distinct result.
+function candidates(s) {
+  const me = s.turn, P = s.p[me], O = s.p[1 - me], out = [{ t: 'end' }];
+  if (P.coin) out.push({ t: 'coin' });
+  const spare = P.hand.slice().sort((a, b) => CARDS[a].cost - CARDS[b].cost)[0];
+  const targets = [{ side: 1 - me, i: -1 }].concat(O.board.map((m, i) => ({ side: 1 - me, i })));
+  for (const name of LIST) {
+    const c = CARDS[name];
+    if (c.cost > P.mana || (c.kind === 'Unit' && P.board.length >= BOARD)) continue;
+    const card = P.hand.includes(name) ? name : spare;
+    if (!card) continue;
+    if (needsTarget(name)) for (const target of targets) out.push({ t: 'play', card, name, target });
+    else out.push({ t: 'play', card, name });
+  }
+  P.board.forEach((m, from) => { if (m.ready) { out.push({ t: 'attack', from, to: -1 }); O.board.forEach((_, to) => out.push({ t: 'attack', from, to })); } });
+  const seen = new Set(), uniq = [];
+  for (const a of out) { const t = clone(s); _act(t, a); const k = sig(t); if (!seen.has(k)) { seen.add(k); uniq.push({ a, t }); } }
+  return uniq;
+}
+// One-step worth of a candidate, as if a claim stood: to keep only the most plausible for play-outs.
+function quick(c, me) { const t = clone(c.t); if (t.pending) _act(t, { t: 'pass' }); return evaluate(t, me); }
+
+// Successive halving over the candidates with common resamples: each round every survivor gets the
+// same resampled worlds, the worse half is dropped.
+function halving(n, budget, run) {
+  let alive = [...Array(n).keys()];
+  const sum = new Float64Array(n), cnt = new Uint32Array(n);
+  const rounds = Math.max(1, Math.ceil(Math.log2(n)));
+  let sample = 0;
+  for (let r = 0; r < rounds && alive.length > 1; r++) {
+    const per = Math.max(2, Math.floor(budget / (rounds * alive.length)));
+    for (let k = 0; k < per; k++, sample++) for (const i of alive) { sum[i] += run(i, sample); cnt[i]++; }
+    alive.sort((a, b) => sum[b] / cnt[b] - sum[a] / cnt[a]);
+    alive = alive.slice(0, Math.max(1, Math.ceil(alive.length / 2)));
+  }
+  return { best: alive[0], mean: (i) => sum[i] / Math.max(1, cnt[i]) };
+}
+
+function expertBot({ budget = 3000, depth = 10, topK = 10 } = {}) {
+  return function (s, rng) {
+    const me = s.toMove;
+    if (s.winner !== null) return null;
+    const seeds = []; const seedOf = (k) => { while (seeds.length <= k) seeds.push((rng() * 4294967296) >>> 0); return seeds[k]; };
+    if (s.pending) {
+      // my answer to the opponent's claim: both branches over the same resampled worlds,
+      // the claim honest as often as the table suggests
+      const pd = s.pending, p = pHonest(s, pd.side, pd.name);
+      if (p <= 0) return { t: 'challenge' };
+      const pool = unseenPool(s, pd.side).filter(x => x !== pd.name);
+      const run = (i, k) => {
+        const r = makeRng(seedOf(k)), t = determinize(s, me, r);
+        const honest = r() < p || !pool.length;
+        t.pending.card = honest ? pd.name : pick(pool, r);
+        _act(t, i === 0 ? { t: 'pass' } : { t: 'challenge' });
+        return playout(t, me, r, depth);
+      };
+      const res = halving(2, budget, run);
+      return res.best === 0 ? { t: 'pass' } : { t: 'challenge' };
+    }
+    const kill = lethalLine(s);
+    if (kill && kill.length) return kill[0];
+    let cands = candidates(s);
+    if (cands.length === 1) return cands[0].a;
+    const g = greedyBot(s);
+    cands.forEach(c => { c.q = quick(c, me); });
+    const keep = cands.filter(c => c.a.t === 'end').concat(cands.filter(c => c.a.t !== 'end').sort((a, b) => b.q - a.q).slice(0, topK));
+    const gs = (() => { const t = clone(s); _act(t, g); return sig(t); })();
+    if (!keep.some(c => sig(c.t) === gs)) { const c = cands.find(c => sig(c.t) === gs); if (c) keep.push(c); }
+    cands = keep;
+    const run = (i, k) => {
+      const r = makeRng(seedOf(k));
+      const t = determinize(s, me, r);
+      _act(t, cands[i].a);
+      return playout(t, me, r, depth);
+    };
+    const res = halving(cands.length, budget, run);
+    return cands[res.best].a;
+  };
+}
+
+// The state each action leads to, as the deciding player sees it: two actions are the same
+// decision when they lead to the same table.
+function sameDecision(s, a, b) {
+  const x = clone(s), y = clone(s);
+  try { _act(x, a); _act(y, b); } catch (e) { return false; }
+  return sig(x) === sig(y);
+}
+
+// ---- src/ui.js
+// Claims as a game screen against the Expert. Every move goes through legalActions/act, the
+// bot's moves play out one at a time; the win tally is kept in this browser and decides who
+// goes first (alternating).
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-31-claims-tally';
+const expert = expertBot({ budget: 6000, depth: 10 });
+const ui = { s: null, view: null, busy: false, over: false, sel: null, hist: [], fresh: 0, fx: {}, reveal: null, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+function cardHTML(id, side, { cls = '', attrs = '', tag = 'button' } = {}) {
+  const c = CARDS[id];
+  let art, tx = '';
+  if (c.kind === 'Unit') art = `<span class="stat a">${c.atk}</span><span class="stat h">${c.hp}</span>`;
+  else { art = `<span class="big">${c.dmg || '+' + c.draw}</span>`; tx = `<div class="tx">${c.dmg ? c.dmg + ' damage' : 'Draw 2 cards'}</div>`; }
+  return `<${tag} class="card ${c.kind} s${side} ${cls}" ${attrs}><span class="cgem">${c.cost}</span><div class="art">${art}</div><div class="nm">${c.name}</div>${tx}</${tag}>`;
+}
+
+// ------------------------------------------------------------------ what can be done now
+const myTurn = () => !ui.busy && !ui.over && ui.view.turn === ME && ui.view.toMove === ME && !ui.view.pending;
+const legal = () => myTurn() ? legalActions(ui.view) : [];
+function targetsNow() {
+  const out = { lives: new Set(), units: new Set() };
+  if (!ui.sel || !myTurn()) return out;
+  for (const a of legal()) {
+    if (ui.sel.kind === 'claim' && a.t === 'play' && a.card === ui.sel.id && a.name === ui.sel.name && a.target) { if (a.target.i < 0) out.lives.add(a.target.side); else out.units.add(a.target.side + ':' + a.target.i); }
+    if (ui.sel.kind === 'unit' && a.t === 'attack' && a.from === ui.sel.i) { if (a.to < 0) out.lives.add(BOT); else out.units.add(BOT + ':' + a.to); }
+  }
+  return out;
+}
+const canAttack = (i) => legal().some(a => a.t === 'attack' && a.from === i);
+
+// ------------------------------------------------------------------ rendering
+function infoHTML(side, T) {
+  const p = ui.view.p[side];
+  let gems = '';
+  for (let i = 0; i < MAX_MANA; i++) gems += i < p.maxMana ? `<i class="gemc${i < p.mana ? ' on' : ''}"></i>` : '';
+  const counts = {}; for (const id of p.discard) counts[id] = (counts[id] || 0) + 1;
+  const disc = LIST.filter(id => counts[id]).map(id => `<span class="dc">${CARDS[id].name}${counts[id] > 1 ? ` <i>×${counts[id]}</i>` : ''}</span>`).join('');
+  const coin = p.coin ? (side === ME && myTurn() ? `<button class="coin" id="coinbtn">+1</button>` : `<span class="coin">+1</span>`) : '';
+  const backs = side === BOT ? `<div class="backs">${'<i class="back"></i>'.repeat(p.hand.length)}</div>` : '';
+  return `<div class="life s${side}${T.lives.has(side) ? ' tgt' : ''} ${ui.fx['life' + side] || ''}" id="life${side}" data-side="${side}" data-i="-1">${p.life}</div>
+    <div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div>${coin}<div class="pile s${side}">${p.deck.length}</div>${backs}<div class="disc">${disc}</div>`;
+}
+function boardHTML(side, T) {
+  return ui.view.p[side].board.map((m, i) => {
+    let cls = m.up ? '' : ' down';
+    if (side === ME && ui.sel && ui.sel.kind === 'unit' && ui.sel.i === i) cls += ' sel';
+    else if (side === ME && !ui.sel && canAttack(i)) cls += ' can';
+    if (T.units.has(side + ':' + i)) cls += ' tgt';
+    if (side === ui.view.turn && !m.ready) cls += ' sleep';
+    if (ui.fx['u' + m.uid]) cls += ' ' + ui.fx['u' + m.uid];
+    const real = side === ME && !m.up && m.real !== m.name ? `<span class="real">${CARDS[m.real].name}</span>` : '';
+    return `<div class="unit s${side}${cls}" id="u${m.uid}" data-side="${side}" data-i="${i}"><span class="un">${CARDS[m.name].name}</span>${real}<span class="stat a">${m.atk}</span><span class="stat h${m.hp < m.max ? ' hurt' : ''}">${m.hp}</span></div>`;
+  }).join('');
+}
+function handHTML() {
+  const p = ui.view.p[ME], L = legal();
+  const order = p.hand.map((_, i) => i).sort((a, b) => CARDS[p.hand[a]].cost - CARDS[p.hand[b]].cost || LIST.indexOf(p.hand[a]) - LIST.indexOf(p.hand[b]));
+  return order.map(i => {
+    const id = p.hand[i], ok = L.some(a => a.t === 'play' && a.card === id);
+    let cls = ok ? 'ok' : (myTurn() ? 'no' : '');
+    if (ok && ui.sel && (ui.sel.kind === 'card' || ui.sel.kind === 'claim') && ui.sel.hand === i) cls += ' sel';
+    if (ui.fresh && i === p.hand.length - 1) cls += ' drawn';
+    return cardHTML(id, ME, { cls, attrs: `data-hand="${i}"${ok ? '' : ' disabled'}` });
+  }).join('');
+}
+function namesHTML() {
+  if (!ui.sel || (ui.sel.kind !== 'card' && ui.sel.kind !== 'claim') || !myTurn()) return '';
+  const L = legal();
+  return LIST.map(name => {
+    const ok = L.some(a => a.t === 'play' && a.card === ui.sel.id && a.name === name);
+    let cls = (ok ? 'ok' : '') + (name === ui.sel.id ? ' truth' : '') + (ui.sel.kind === 'claim' && ui.sel.name === name ? ' sel' : '');
+    return cardHTML(name, ME, { cls, attrs: `data-name="${name}"${ok ? '' : ' disabled'}` });
+  }).join('');
+}
+function spotHTML() {
+  const pd = ui.view.pending, R = ui.reveal;
+  if (!pd && !R) return '';
+  const side = R ? R.side : pd.side, name = R ? R.name : pd.name;
+  const c = CARDS[name];
+  const claim = `<div class="claimback s${side}"><span class="q">?</span><span>${c.name}</span><span>${c.kind === 'Unit' ? c.atk + ' / ' + c.hp : c.dmg ? c.dmg + ' damage' : 'Draw 2'}</span></div>`;
+  const real = R ? cardHTML(R.real, side, { tag: 'div', cls: 'flip ' + (R.real === R.name ? 'true' : 'lie') }) : '';
+  const btns = pd && !R && pd.side === BOT && ui.view.toMove === ME && !ui.busy ? `<div class="btns"><button id="challenge">Challenge</button><button id="letpass">Let it stand</button></div>` : '';
+  return `<div class="pair">${claim}${real}</div>${btns}`;
+}
+function histHTML(h) {
+  const real = h.real && h.real !== h.name ? `<span class="chip real">${CARDS[h.real].name}</span>` : '';
+  const mark = h.res === 'caught' ? '<span class="x">✗ −3</span>' : h.res === 'true' ? '<span class="v">✓</span>' : '';
+  if (h.kind === 'attack') return `<div class="hist s${h.side}">⚔ ${h.atk} → ${h.to}</div>`;
+  return `<div class="hist s${h.side}"><span class="chip">${CARDS[h.name].name}</span>${real}${mark}</div>`;
+}
+function render() {
+  const s = ui.view, T = targetsNow();
+  const t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  for (const side of [0, 1]) { $('info' + side).innerHTML = infoHTML(side, T); $('board' + side).innerHTML = boardHTML(side, T); }
+  $('hand').innerHTML = handHTML();
+  $('names').innerHTML = namesHTML();
+  const sp = spotHTML(); $('spot').innerHTML = sp; $('spot').classList.toggle('show', !!sp);
+  const mine = !ui.over && s.turn === ME && !s.pending, canAct = myTurn() && legal().some(a => a.t !== 'end');
+  $('turnbox').innerHTML = `<button id="endturn" class="${mine && !canAct ? 'done' : ''}"${myTurn() ? '' : ' disabled'}>End turn</button>`;
+  $('history').innerHTML = ui.hist.slice(-16).map(histHTML).join('');
+  ui.fresh = 0; ui.fx = {};
+}
+
+// ------------------------------------------------------------------ effects
+function centerOf(el) { const a = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - a.left + r.width / 2, y: r.top - a.top + r.height / 2 }; }
+function floatAt(p, text) { const f = document.createElement('div'); f.className = 'float'; f.textContent = text; f.style.left = p.x + 'px'; f.style.top = p.y + 'px'; $('game').appendChild(f); setTimeout(() => f.remove(), 1200); }
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+function snapshot() { const out = {}; document.querySelectorAll('.unit, .life').forEach(el => { out[el.id] = { c: centerOf(el), html: el.outerHTML, rect: el.getBoundingClientRect() }; }); return out; }
+async function lunge(fromEl, toEl) {
+  if (!fromEl || !toEl) return;
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+  fromEl.style.zIndex = 10;
+  await fromEl.animate([{ transform: 'translate(0,0)' }, { transform: `translate(${dx * .8}px, ${dy * .8}px)`, offset: .55 }, { transform: 'translate(0,0)' }], { duration: 420, easing: 'ease-in-out' }).finished;
+}
+function ghost(snap) {
+  const g = $('game').getBoundingClientRect(), d = document.createElement('div');
+  d.className = 'ghost'; d.innerHTML = snap.html; d.style.left = (snap.rect.left - g.left) + 'px'; d.style.top = (snap.rect.top - g.top) + 'px';
+  $('game').appendChild(d); setTimeout(() => d.remove(), 500);
+}
+
+// ------------------------------------------------------------------ playback
+async function apply(a) {
+  const qtok = ui.token;
+  const prev = ui.s, ev = [];
+  const next = act(prev, a, ev);
+  ui.s = next;
+  const atkE = ev.find(e => e.t === 'attack'), chE = ev.find(e => e.t === 'challenge'), claimE = ev.find(e => e.t === 'claim');
+  const revE = ev.find(e => e.t === 'reveal');
+  if (atkE) await lunge($('u' + atkE.uid), atkE.to < 0 ? $('life' + (1 - atkE.side)) : $('u' + atkE.tuid));
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  const pd = prev.pending;
+  if (chE) { ui.reveal = { side: pd.side, name: pd.name, real: pd.card }; render(); await wait(1300); }
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  else if (revE && pd && CARDS[pd.name].kind === 'Spell') { ui.reveal = { side: pd.side, name: pd.name, real: pd.card }; render(); await wait(pd.side === BOT ? 1000 : 600); }
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  ui.reveal = null;
+  const before = snapshot();
+  for (const e of ev) {
+    if (e.t === 'turn') { ui.sel = null; if (e.side === ME) banner('Your turn'); }
+    if (e.t === 'summon') ui.fx['u' + e.uid] = 'new';
+    if (e.t === 'hit' && e.i >= 0) ui.fx['u' + e.uid] = 'shake';
+    if ((e.t === 'hit' && e.i < 0) || e.t === 'penalty') ui.fx['life' + e.side] = 'shake';
+    if (e.t === 'draw' && e.side === ME) ui.fresh = 1;
+  }
+  ui.view = next; render();
+  for (const e of ev) {
+    if (e.t === 'hit') { const p = before[e.i < 0 ? 'life' + e.side : 'u' + e.uid]; if (p) floatAt(p.c, '−' + e.n); }
+    if (e.t === 'penalty' || e.t === 'fatigue') { const p = before['life' + e.side]; if (p) floatAt(p.c, '−' + e.n); }
+    if (e.t === 'die') {
+      const p = before['u' + e.uid]; if (p) ghost(p);
+      const h = ui.hist.find(x => x.uid === e.uid); if (h) h.real = e.real;
+    }
+  }
+  // history: one line per claim (its fate filled in as it is learned), one per attack
+  if (claimE) ui.hist.push({ side: claimE.side, kind: 'claim', name: claimE.name });
+  if (pd && (chE || ev.some(e => e.t === 'pass'))) {
+    const h = ui.hist[ui.hist.length - 1];
+    if (h && h.kind === 'claim') {
+      if (chE) { h.real = pd.card; h.res = chE.honest ? 'true' : 'caught'; }
+      if (revE) h.real = revE.real;
+      const sm = ev.find(e => e.t === 'summon'); if (sm) h.uid = sm.uid;
+      if (pd.side === ME) h.real = pd.card;
+    }
+  }
+  if (atkE) ui.hist.push({ side: atkE.side, kind: 'attack', atk: prev.p[atkE.side].board[atkE.from].atk, to: atkE.to < 0 ? '♥' : CARDS[prev.p[1 - atkE.side].board[atkE.to].name].name });
+  if (ev.some(e => e.t === 'turn')) await wait(next.turn === ME ? 500 : 250);
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  if (next.winner !== null) finish();
+  render();
+}
+
+function finish() {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+// ------------------------------------------------------------------ flow
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.view = ui.s; ui.over = false; ui.hist = []; ui.sel = null; ui.reveal = null;
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  if (ui.s.first === ME) banner('Your turn');
+  await wait(800);
+  if (tok !== ui.token) return;
+  await run(tok);
+}
+// The bot moves while the move is its own; the page waits whenever the move is the player's.
+async function run(tok) {
+  while (tok === ui.token && !ui.over && ui.s.toMove === BOT) {
+    ui.busy = true; render();
+    await wait(ui.s.pending ? 700 : 450);
+    if (tok !== ui.token) return;
+    const a = expert(ui.s, ui.rng);
+    if (tok !== ui.token || ui.over) return;
+    await apply(a);
+  }
+  if (tok !== ui.token) return;
+  ui.busy = false; render();
+}
+async function doAct(a) {
+  if (ui.busy || ui.over || ui.s.toMove !== ME) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel = null;
+  await apply(a);
+  await run(tok);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (b && b.id === 'rulesbtn') { $('rules').classList.add('show'); return; }
+  if (b && b.id === 'rulesclose') { $('rules').classList.remove('show'); return; }
+  if (e.target.id === 'rules') { $('rules').classList.remove('show'); return; }
+  if (b && !b.disabled && (b.id === 'rematch' || b.id === 'newmatch')) return startMatch();
+  if (b && b.id === 'challenge') return doAct({ t: 'challenge' });
+  if (b && b.id === 'letpass') return doAct({ t: 'pass' });
+  if (!myTurn()) return;
+  const tgt = e.target.closest('.unit, .life');
+  if (tgt) {
+    const side = +tgt.dataset.side, i = +tgt.dataset.i;
+    if (ui.sel && tgt.classList.contains('tgt')) {
+      if (ui.sel.kind === 'claim') return doAct({ t: 'play', card: ui.sel.id, name: ui.sel.name, target: { side, i } });
+      return doAct({ t: 'attack', from: ui.sel.i, to: i });
+    }
+    if (side === ME && i >= 0 && canAttack(i)) { ui.sel = ui.sel && ui.sel.kind === 'unit' && ui.sel.i === i ? null : { kind: 'unit', i }; render(); return; }
+  }
+  if (b && !b.disabled && b.dataset.hand !== undefined) {
+    const i = +b.dataset.hand, id = ui.view.p[ME].hand[i];
+    ui.sel = ui.sel && ui.sel.hand === i ? null : { kind: 'card', id, hand: i }; render(); return;
+  }
+  if (b && !b.disabled && b.dataset.name !== undefined && ui.sel && ui.sel.hand !== undefined) {
+    const name = b.dataset.name;
+    if (needsTarget(name)) { ui.sel = { kind: 'claim', id: ui.sel.id, hand: ui.sel.hand, name }; render(); return; }
+    return doAct({ t: 'play', card: ui.sel.id, name });
+  }
+  if (b && b.id === 'coinbtn') return doAct({ t: 'coin' });
+  if (b && b.id === 'endturn' && !b.disabled) return doAct({ t: 'end' });
+  if (ui.sel) { ui.sel = null; render(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (ui.sel) { ui.sel = null; render(); } $('rules').classList.remove('show'); } });
+startMatch();
+
+})();
+</script>
+</body>
+</html>

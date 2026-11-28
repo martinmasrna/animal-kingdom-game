@@ -1,0 +1,487 @@
+<title>Edge Flip</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #232a33; --table: #303b48; --ink: #1b1b1b; --paper: #f6f2e8;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86;
+  --gold: #f2b632; --ok: #5fdc6f; --mana: #3d8bf2;
+  --cell: min(120px, calc((100vh - 330px) / 4)); --cardw: 92px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.3 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game { position: relative; height: 100%; max-width: 1300px; margin: 0 auto; display: grid;
+  grid-template-columns: 190px minmax(0, 1fr); grid-template-rows: 48px minmax(0, 1fr) auto auto; gap: 8px 18px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#top { grid-row: 1; grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; }
+#opp { display: flex; align-items: center; gap: 12px; font-weight: 800; }
+.backs { display: flex; } .back { width: 22px; height: 32px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; } .back:first-child { margin-left: 0; }
+.manaval { font-size: 20px; font-weight: 900; color: #bcd9ff; }
+.pile { min-width: 30px; height: 40px; border-radius: 5px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; }
+.pile.s0 { background: var(--me2); } .pile.s1 { background: var(--him2); }
+#menu { display: flex; gap: 10px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 16px; }
+.tally b { min-width: 28px; height: 28px; padding: 0 8px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#history { grid-row: 2; grid-column: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; }
+.hist { display: flex; align-items: center; justify-content: space-between; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; font-size: 13px; font-weight: 700; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); } .hist .f { color: var(--gold); }
+
+#board { grid-row: 2; grid-column: 2; display: flex; align-items: center; justify-content: center; gap: 28px; min-height: 0; }
+.score { width: 64px; height: 64px; border-radius: 50%; border: 4px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; flex: 0 0 auto; }
+.score.s0 { background: var(--me2); } .score.s1 { background: var(--him2); }
+#grid { display: grid; grid-template-columns: repeat(4, var(--cell)); grid-template-rows: repeat(4, var(--cell)); gap: 6px; padding: 8px; border-radius: 14px; background: var(--table); }
+.cell { border-radius: 10px; border: 2px dashed rgba(255,255,255,.14); position: relative; }
+.cell.can { cursor: pointer; border-color: rgba(95,220,111,.55); background: rgba(95,220,111,.06); }
+.cell.can:hover { background: rgba(95,220,111,.18); }
+.tile { position: absolute; inset: 0; border-radius: 10px; border: 3px solid rgba(255,255,255,.85); transition: background .35s; }
+.tile.s0 { background: var(--me); } .tile.s1 { background: var(--him); }
+.tile .nm { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-size: calc(var(--cell) * .13); font-weight: 700; opacity: .75; }
+.ed { position: absolute; font-weight: 900; font-size: calc(var(--cell) * .24); line-height: 1; }
+.ed.t { top: 5%; left: 50%; transform: translateX(-50%); } .ed.b { bottom: 5%; left: 50%; transform: translateX(-50%); }
+.ed.l { left: 7%; top: 50%; transform: translateY(-50%); } .ed.r { right: 7%; top: 50%; transform: translateY(-50%); }
+.tile.new { animation: pop .35s ease-out; }
+.tile.flip { animation: flip .5s ease-in-out; }
+@keyframes pop { 0% { transform: scale(.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes flip { 0% { transform: rotateY(0); } 50% { transform: rotateY(90deg); } 100% { transform: rotateY(0); } }
+
+#bar { grid-row: 3; grid-column: 2; display: flex; align-items: center; justify-content: center; gap: 18px; min-height: 50px; }
+#mine { display: flex; align-items: center; gap: 12px; }
+#controls button { min-height: 46px; min-width: 140px; padding: 0 18px; border-radius: 10px; border: 0; font-weight: 800; font-size: 16px; background: var(--gold); color: #2a1d00; }
+#controls button.done { background: var(--ok); color: #08300f; }
+#controls button:disabled { background: #56616d; color: #8e98a3; cursor: default; }
+
+.card { position: relative; width: var(--cardw); height: var(--cardw); flex: 0 0 auto; border-radius: 10px; padding: 0; background: var(--paper); color: var(--ink); border: 3px solid #cbbd9c; transition: transform .12s; }
+.card .cost { position: absolute; top: -9px; left: -9px; width: 26px; height: 26px; border-radius: 50%; background: var(--mana); border: 2px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; z-index: 2; }
+.card .ed { font-size: calc(var(--cardw) * .24); }
+.card .nm { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-size: calc(var(--cardw) * .13); font-weight: 800; color: #6b655a; }
+.card.coin { display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); }
+#hand { grid-row: 4; grid-column: 1 / -1; display: flex; justify-content: center; align-items: flex-end; gap: 12px; padding-top: 14px; min-height: calc(var(--cardw) + 20px); flex-wrap: wrap; }
+#hand .card.ok { border-color: var(--ok); } #hand .card.ok:hover { transform: translateY(-5px); }
+#hand .card.sel { transform: translateY(-12px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.5); }
+#hand .card.no { filter: brightness(.6) saturate(.6); cursor: default; }
+
+#banner { position: absolute; left: 0; right: 0; top: 42%; text-align: center; z-index: 25; pointer-events: none; font-size: 40px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; } 20% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 56px; font-weight: 900; } #over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over p { margin: 0; font-size: 22px; font-weight: 800; }
+#over button, #rules button { min-height: 46px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 16px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+#rules .panel { max-width: 560px; max-height: 100%; overflow: auto; background: #2f3945; border-radius: 12px; padding: 18px 22px; font-size: 15px; }
+#rules h3 { margin: 0 0 8px; } #rules p { margin: 0 0 10px; }
+
+@media (max-width: 760px) {
+  :root { --cell: min(76px, calc((100vw - 60px) / 4), calc((100vh - 330px) / 4)); --cardw: 62px; }
+  #game { grid-template-columns: minmax(0, 1fr); grid-template-rows: 40px minmax(0, 1fr) auto auto; gap: 6px; }
+  #history { display: none; }
+  #board, #bar { grid-column: 1; }
+  #board { flex-direction: column; gap: 8px; }
+  .score { width: 40px; height: 40px; font-size: 18px; border-width: 3px; }
+  .back { width: 14px; height: 22px; margin-left: -4px; } #opp { gap: 6px; }
+  .card .cost { width: 20px; height: 20px; font-size: 11px; top: -6px; left: -6px; }
+  #hand { gap: 8px; }
+  #menu button { min-height: 28px; padding: 2px 8px; font-size: 13px; }
+  #controls button { min-height: 40px; min-width: 110px; font-size: 15px; }
+}
+
+</style>
+
+<div id="game">
+  <div id="top"><div id="opp"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="board"><div id="score1" class="score s1"></div><div id="grid"></div><div id="score0" class="score s0"></div></div>
+  <div id="bar"><div id="mine"></div><div id="controls"></div></div>
+  <div id="hand"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Edge Flip</h3>
+    <p>A 4×4 grid. The player owning more cells when it is full wins (or when both pass in a row).</p>
+    <p>Both play the same 20-card deck. The first player starts with 4 cards, the second with 5 and the Coin (+1 mana this turn).</p>
+    <p><b>Your turn:</b> mana +1 (up to 6) and refill, draw 1. Place any number of cards on empty cells, paying each one's cost. Tap a card to pick it, tap it again to turn it, then tap a cell.</p>
+    <p>When a card is placed, each of its edges is compared with the touching edge of every adjacent enemy card (up, down, left, right): where yours is higher, that card becomes yours. Taken cards take nothing further.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 18 Edge flip grid: a 4x4 grid; cards carry four edge numbers and cost mana by their strength. A
+// placed card takes every orthogonally adjacent enemy card whose touching edge is strictly lower.
+// Most cells when the grid is full (or both pass in a row) wins.
+
+const N = 4, CELLS = N * N, MAX_MANA = 6, TURN_LIMIT = 60;
+// edges clockwise from the top: [top, right, bottom, left]
+const CARDS = {
+  POI: { id: 'POI', name: 'Point', cost: 1, e: [3, 1, 1, 1] },
+  PAI: { id: 'PAI', name: 'Pair', cost: 1, e: [2, 2, 1, 1] },
+  EVE: { id: 'EVE', name: 'Even', cost: 2, e: [2, 2, 2, 2] },
+  SPE: { id: 'SPE', name: 'Spear', cost: 2, e: [4, 1, 2, 1] },
+  HOO: { id: 'HOO', name: 'Hook', cost: 3, e: [4, 3, 1, 1] },
+  BLO: { id: 'BLO', name: 'Block', cost: 3, e: [3, 3, 3, 2] },
+  LAN: { id: 'LAN', name: 'Lance', cost: 4, e: [5, 2, 3, 2] },
+  CRO: { id: 'CRO', name: 'Crown', cost: 5, e: [4, 4, 4, 4] },
+  COIN: { id: 'COIN', name: 'Coin', cost: 0, coin: true },
+};
+const DECK = { POI: 3, PAI: 3, EVE: 3, SPE: 3, HOO: 2, BLO: 2, LAN: 2, CRO: 2 };
+const deckList = () => { const out = []; for (const [id, k] of Object.entries(DECK)) for (let i = 0; i < k; i++) out.push(id); return out; };
+const edgesOf = (id, rot) => { const e = CARDS[id].e, out = [0, 0, 0, 0]; for (let i = 0; i < 4; i++) out[(i + rot) % 4] = e[i]; return out; };
+// the distinct rotations of a card (Even and Crown have one)
+const ROTS = {};
+for (const id of Object.keys(CARDS)) { if (CARDS[id].coin) continue; const seen = new Set(); ROTS[id] = []; for (let r = 0; r < 4; r++) { const k = edgesOf(id, r).join(); if (!seen.has(k)) { seen.add(k); ROTS[id].push(r); } } }
+// neighbours of each cell: [cell, my edge index, their edge index]
+const NB = [];
+for (let c = 0; c < CELLS; c++) {
+  const x = c % N, y = Math.floor(c / N), out = [];
+  if (y > 0) out.push([c - N, 0, 2]);
+  if (x < N - 1) out.push([c + 1, 1, 3]);
+  if (y < N - 1) out.push([c + N, 2, 0]);
+  if (x > 0) out.push([c - 1, 3, 1]);
+  NB.push(out);
+}
+
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function newPlayer() { return { mana: 0, maxMana: 0, hand: [], deck: deckList() }; }
+function clone(s) {
+  return { ...s, grid: s.grid.map(g => g && { ...g }), p: s.p.map(p => ({ ...p, hand: p.hand.slice(), deck: p.deck.slice() })) };
+}
+function emit(ev, e) { if (ev) ev.push(e); }
+function draw(s, side) { const p = s.p[side]; if (p.deck.length) p.hand.push(p.deck.shift()); }
+
+function newMatch({ seed, first } = {}) {
+  const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, first: 0, placed: false, passes: 0, winner: null, capped: false, grid: Array(CELLS).fill(null), p: [newPlayer(), newPlayer()] };
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
+  for (let i = 0; i < 4; i++) draw(s, s.first);
+  for (let i = 0; i < 5; i++) draw(s, 1 - s.first);
+  s.p[1 - s.first].hand.push('COIN');
+  s.turn = s.first;
+  startTurn(s, null);
+  return s;
+}
+function startTurn(s, ev) {
+  const P = s.p[s.turn];
+  s.turnNo++; s.placed = false;
+  P.maxMana = Math.min(MAX_MANA, P.maxMana + 1); P.mana = P.maxMana;
+  draw(s, s.turn);
+  emit(ev, { t: 'turn', side: s.turn });
+}
+const count = (s, side) => s.grid.reduce((a, g) => a + (g && g.owner === side ? 1 : 0), 0);
+const full = (s) => s.grid.every(Boolean);
+// the enemy cards a card would take from a cell
+function flipsAt(s, side, id, rot, cell) {
+  const e = edgesOf(id, rot), out = [];
+  for (const [nc, mi, ti] of NB[cell]) { const g = s.grid[nc]; if (g && g.owner !== side && e[mi] > g.e[ti]) out.push(nc); }
+  return out;
+}
+
+// Actions: { t: 'place', card, cell, rot } | { t: 'coin' } | { t: 'end' }
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  const P = s.p[s.turn], out = [];
+  if (P.hand.includes('COIN')) out.push({ t: 'coin' });
+  for (const id of new Set(P.hand)) {
+    if (id === 'COIN' || CARDS[id].cost > P.mana) continue;
+    for (let c = 0; c < CELLS; c++) if (!s.grid[c]) for (const rot of ROTS[id]) out.push({ t: 'place', card: id, cell: c, rot });
+  }
+  out.push({ t: 'end' });
+  return out;
+}
+function endGame(s, ev) {
+  const a = count(s, 0), b = count(s, 1);
+  s.winner = a === b ? 'draw' : a > b ? 0 : 1;
+  emit(ev, { t: 'end', winner: s.winner, cells: [a, b] });
+}
+function mAct(s, a, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  const me = s.turn, P = s.p[me];
+  if (a.t === 'coin') {
+    const i = P.hand.indexOf('COIN'); if (i < 0) throw new Error('no coin');
+    P.hand.splice(i, 1); P.mana += 1; emit(ev, { t: 'coin', side: me }); return;
+  }
+  if (a.t === 'place') {
+    const c = CARDS[a.card];
+    if (!c || c.coin || !P.hand.includes(a.card) || c.cost > P.mana || s.grid[a.cell] !== null || !ROTS[a.card].includes(a.rot)) throw new Error('illegal ' + JSON.stringify(a));
+    const fl = flipsAt(s, me, a.card, a.rot, a.cell);
+    P.mana -= c.cost; P.hand.splice(P.hand.indexOf(a.card), 1);
+    s.grid[a.cell] = { card: a.card, rot: a.rot, e: edgesOf(a.card, a.rot), owner: me };
+    emit(ev, { t: 'place', side: me, card: a.card, cell: a.cell, rot: a.rot });
+    for (const nc of fl) { s.grid[nc].owner = me; emit(ev, { t: 'flip', side: me, cell: nc }); }
+    s.placed = true;
+    if (full(s)) endGame(s, ev);
+    return;
+  }
+  if (a.t === 'end') {
+    s.passes = s.placed ? 0 : s.passes + 1;
+    emit(ev, { t: 'endturn', side: me, pass: !s.placed });
+    if (s.passes >= 2) { endGame(s, ev); return; }
+    if (s.turnNo >= TURN_LIMIT) { s.winner = 'draw'; s.capped = true; emit(ev, { t: 'end', winner: 'draw' }); return; }
+    s.turn = 1 - s.turn;
+    startTurn(s, ev);
+    return;
+  }
+  throw new Error('unknown action');
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function _act(t, a) { mAct(t, a, null); return t; }
+const actionKey = (a) => a.t === 'place' ? `${a.card}@${a.cell}r${a.rot}` : a.t;
+
+// ---- src/bot.js
+// Bots for 18 Edge flip grid. Each is a function (state, rng) -> one action for s.turn. None reads
+// a hidden card: Expert reshuffles the opponent's hand and deck and its own deck before each play-out.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+const END = { t: 'end' };
+const placements = (s) => legalActions(s).filter(a => a.t === 'place');
+
+// ------------------------------------------------------------------ Random
+function randomBot(s, rng) { const L = legalActions(s); return L[Math.floor(rng() * L.length)]; }
+// ------------------------------------------------------------------ Greedy
+// the Coin at once; then each placement the one that takes the most cells now (flips + its own),
+// the most expensive card among ties, until nothing can be placed
+function greedyBot(s) {
+  const P = s.p[s.turn];
+  if (P.hand.includes('COIN')) return { t: 'coin' };
+  let best = null, bv = -1;
+  for (const a of placements(s)) {
+    const v = flipsAt(s, s.turn, a.card, a.rot, a.cell).length + 1;
+    if (v > bv || (v === bv && CARDS[a.card].cost > CARDS[best.card].cost)) { bv = v; best = a; }
+  }
+  return best || END;
+}
+// ------------------------------------------------------------------ Filler
+// its cheapest card in a cell with no enemy neighbour (any cell when there is none), until nothing fits
+function fillerBot(s) {
+  const me = s.turn, P = s.p[me];
+  const ids = [...new Set(P.hand)].filter(id => id !== 'COIN' && CARDS[id].cost <= P.mana).sort((a, b) => CARDS[a].cost - CARDS[b].cost);
+  if (!ids.length) return END;
+  const empty = []; for (let c = 0; c < CELLS; c++) if (!s.grid[c]) empty.push(c);
+  if (!empty.length) return END;
+  const calm = empty.filter(c => !NB[c].some(([nc]) => s.grid[nc] && s.grid[nc].owner !== me));
+  return { t: 'place', card: ids[0], cell: (calm.length ? calm : empty)[0], rot: 0 };
+}
+
+// ------------------------------------------------------------------ Expert
+// a placement's worth at a glance: cells taken now, less what its weak edges leave open
+function glance(s, a) {
+  const me = s.turn, e = edgesOf(a.card, a.rot);
+  let v = 1 + flipsAt(s, me, a.card, a.rot, a.cell).length;
+  for (const [nc, mi] of NB[a.cell]) if (!s.grid[nc]) v -= (5 - e[mi]) * 0.08;
+  return v - CARDS[a.card].cost * 0.04;
+}
+// play-out policy: the best of a few sampled placements, now and then the turn ended early
+function policy(s, rng) {
+  const P = s.p[s.turn];
+  if (P.hand.includes('COIN') && rng() < 0.7) return { t: 'coin' };
+  const ids = [...new Set(P.hand)].filter(id => id !== 'COIN' && CARDS[id].cost <= P.mana);
+  if (!ids.length) return END;
+  const empty = []; for (let c = 0; c < CELLS; c++) if (!s.grid[c]) empty.push(c);
+  let best = null, bv = -Infinity;
+  for (let k = 0; k < 16; k++) {
+    const id = ids[Math.floor(rng() * ids.length)], rots = ROTS[id];
+    const a = { t: 'place', card: id, cell: empty[Math.floor(rng() * empty.length)], rot: rots[Math.floor(rng() * rots.length)] };
+    const v = glance(s, a) + rng() * 0.3;
+    if (v > bv) { bv = v; best = a; }
+  }
+  if (bv < 1 && rng() < 0.25) return END;
+  return best;
+}
+function determinize(s, me, rng) {
+  const t = clone(s), O = t.p[1 - me];
+  const pool = shuffle(O.hand.filter(x => x !== 'COIN').concat(O.deck), rng), coin = O.hand.includes('COIN');
+  const hn = O.hand.length - (coin ? 1 : 0);
+  O.hand = pool.slice(0, hn); if (coin) O.hand.push('COIN'); O.deck = pool.slice(hn);
+  shuffle(t.p[me].deck, rng);
+  return t;
+}
+function rollout(t, me, rng) {
+  let steps = 0;
+  while (t.winner === null && steps < 300) { _act(t, policy(t, rng)); steps++; }
+  if (t.winner === null) return 0.5;
+  const w = t.winner === me ? 1 : t.winner === 'draw' ? 0.5 : 0, m = count(t, me) - count(t, 1 - me);
+  return 0.75 * w + 0.25 / (1 + Math.exp(-m / 2));
+}
+function candidates(s, keep = 12) {
+  const L = legalActions(s), out = [], pl = [];
+  for (const a of L) if (a.t === 'place') pl.push({ a, v: glance(s, a) }); else out.push(a);
+  pl.sort((x, y) => y.v - x.v);
+  // the best few of every card, then the best overall
+  const per = new Map();
+  for (const x of pl) { const n = per.get(x.a.card) || 0; if (n < 2) { per.set(x.a.card, n + 1); out.push(x.a); } }
+  for (const x of pl) { if (out.length >= keep + 2) break; if (!out.includes(x.a)) out.push(x.a); }
+  return out;
+}
+function expertBot({ playouts = 300, timeMs = 0 } = {}) {
+  return function (s, rng) {
+    const me = s.turn;
+    const arms = candidates(s);
+    if (arms.length === 1) return arms[0];
+    for (const a of arms) { const t = act(s, a); if (t.winner === me) return a; }
+    let alive = arms.map(a => ({ a, w: 0, n: 0 }));
+    const rounds = Math.max(1, Math.ceil(Math.log2(alive.length)));
+    const t0 = timeMs ? Date.now() : 0;
+    for (let r = 0; r < rounds && alive.length > 1; r++) {
+      const per = Math.max(2, Math.floor(playouts / rounds / alive.length));
+      for (let i = 0; i < per; i++) {
+        const world = determinize(s, me, rng), seed = (rng() * 4294967296) >>> 0;
+        for (const st of alive) { const t = clone(world); _act(t, st.a); st.w += rollout(t, me, makeRng(seed)); st.n++; }
+        if (timeMs && Date.now() - t0 > timeMs) break;
+      }
+      alive.sort((x, y) => y.w / y.n - x.w / x.n);
+      alive = alive.slice(0, Math.ceil(alive.length / 2));
+      if (timeMs && Date.now() - t0 > timeMs) break;
+    }
+    return alive[0].a;
+  };
+}
+const EXPERT = { playouts: 300 };
+
+// ---- src/ui.js
+// 18 Edge flip grid as a page: you against Expert. Every change goes through the engine's act()
+// with the same actions the bots use; the bot's turn is played one placement at a time.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-18-tally';
+const expert = expertBot({ playouts: 900, timeMs: 1400 });
+const ui = { s: null, busy: false, over: false, sel: null, fx: {}, hist: [], rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+const edgesHTML = (e) => `<span class="ed t">${e[0]}</span><span class="ed r">${e[1]}</span><span class="ed b">${e[2]}</span><span class="ed l">${e[3]}</span>`;
+const myMove = () => !ui.busy && !ui.over && ui.s.turn === ME && ui.s.winner === null;
+
+function render() {
+  const s = ui.s, t = loadTally(), L = myMove() ? legalActions(s) : [];
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  const O = s.p[BOT], P = s.p[ME];
+  $('opp').innerHTML = `<div class="backs">${'<i class="back"></i>'.repeat(O.hand.length)}</div><span class="manaval">${O.mana}/${O.maxMana}</span><span class="pile s1">${O.deck.length}</span>`;
+  $('score0').textContent = count(s, 0); $('score1').textContent = count(s, 1);
+  let g = '';
+  for (let c = 0; c < CELLS; c++) {
+    const x = s.grid[c];
+    if (x) g += `<div class="cell"><div class="tile s${x.owner} ${ui.fx[c] || ''}"><span class="nm">${CARDS[x.card].name}</span>${edgesHTML(x.e)}</div></div>`;
+    else { const can = ui.sel && L.some(a => a.t === 'place' && a.card === ui.sel.card && a.cell === c); g += `<div class="cell${can ? ' can' : ''}" data-cell="${c}"></div>`; }
+  }
+  $('grid').innerHTML = g;
+  $('mine').innerHTML = `<span class="manaval">${P.mana}/${P.maxMana}</span><span class="pile s0">${P.deck.length}</span>`;
+  $('hand').innerHTML = P.hand.map((id, i) => ({ id, i })).sort((a, b) => (CARDS[a.id].cost - CARDS[b.id].cost)).map(({ id, i }) => {
+    if (id === 'COIN') { const ok = L.some(a => a.t === 'coin'); return `<button class="card coin ${ok ? 'ok' : 'no'}" data-i="${i}"${ok ? '' : ' disabled'}>+1</button>`; }
+    const ok = L.some(a => a.t === 'place' && a.card === id), sel = ui.sel && ui.sel.i === i;
+    const rot = sel ? ui.sel.rot : 0;
+    return `<button class="card ${ok ? 'ok' : (myMove() ? 'no' : '')}${sel ? ' sel' : ''}" data-i="${i}"${ok ? '' : ' disabled'}><span class="cost">${CARDS[id].cost}</span><span class="nm">${CARDS[id].name}</span>${edgesHTML(edgesOf(id, rot))}</button>`;
+  }).join('');
+  const any = L.some(a => a.t === 'place');
+  $('controls').innerHTML = `<button id="end" class="${myMove() && !any ? 'done' : ''}"${myMove() ? '' : ' disabled'}>End turn</button>`;
+  $('history').innerHTML = ui.hist.slice(-18).map(h => `<div class="hist s${h.side}"><span>${h.txt}</span><span class="f">${h.f ? '+' + h.f : ''}</span></div>`).join('');
+  ui.fx = {};
+}
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+
+async function apply(a) {
+  const qtok = ui.token;
+  const ev = [], side = ui.s.turn;
+  ui.s = act(ui.s, a, ev);
+  for (const e of ev) { if (e.t === 'place') ui.fx[e.cell] = 'new'; if (e.t === 'flip') ui.fx[e.cell] = 'flip'; }
+  const pl = ev.find(e => e.t === 'place'), fl = ev.filter(e => e.t === 'flip').length;
+  if (pl) ui.hist.push({ side, txt: CARDS[pl.card].name, f: fl });
+  if (a.t === 'end' && ev.some(e => e.t === 'endturn' && e.pass)) ui.hist.push({ side, txt: 'Pass' });
+  if (ev.some(e => e.t === 'turn' && e.side === ME)) banner('Your turn');
+  render();
+  if (ui.s.winner !== null) finish();
+  await wait(pl ? 650 : 250);
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+}
+function finish() {
+  if (ui.over) return;
+  ui.over = true; ui.busy = false;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><p>${count(ui.s, ME)} : ${count(ui.s, BOT)}</p><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+async function advance(tok) {
+  while (!ui.over && ui.s.turn === BOT && ui.s.winner === null) {
+    ui.busy = true; render();
+    await wait(450);
+    if (tok !== ui.token) return;
+    const a = expert(ui.s, ui.rng);
+    if (tok !== ui.token) return;
+    await apply(a);
+  }
+  ui.busy = false; ui.sel = null; render();
+}
+async function mine(a) {
+  if (!myMove()) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel = null;
+  await apply(a);
+  if (tok !== ui.token) return;
+  await advance(tok);
+}
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.over = false; ui.hist = []; ui.sel = null;
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  if (ui.s.first === ME) banner('Your turn');
+  await wait(700);
+  if (tok !== ui.token) return;
+  await advance(tok);
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (b && b.id === 'rulesbtn') { $('rules').classList.add('show'); return; }
+  if ((b && b.id === 'rulesclose') || e.target.id === 'rules') { $('rules').classList.remove('show'); return; }
+  if (b && (b.id === 'newgame' || b.id === 'rematch')) return startMatch();
+  if (!myMove()) return;
+  if (b && b.id === 'end') return mine({ t: 'end' });
+  if (b && b.dataset.i !== undefined) {
+    const i = +b.dataset.i, id = ui.s.p[ME].hand[i];
+    if (id === 'COIN') return mine({ t: 'coin' });
+    if (ui.sel && ui.sel.i === i) { const R = ROTS[id], k = R.indexOf(ui.sel.rot); ui.sel.rot = R[(k + 1) % R.length]; }
+    else ui.sel = { i, card: id, rot: 0 };
+    render(); return;
+  }
+  const cell = e.target.closest('.cell.can');
+  if (cell && ui.sel) return mine({ t: 'place', card: ui.sel.card, cell: +cell.dataset.cell, rot: ui.sel.rot });
+  if (ui.sel) { ui.sel = null; render(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { ui.sel = null; $('rules').classList.remove('show'); render(); } });
+startMatch();
+
+})();
+</script>

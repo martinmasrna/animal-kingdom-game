@@ -1,0 +1,151 @@
+{
+  "concept": "40-simultaneous-turns",
+  "expert": {
+    "playouts": 2500
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.9988,
+      "draws": 1,
+      "seatAWinRate": 0.5012,
+      "avgRounds": 5.6,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.9038,
+      "draws": 37,
+      "seatAWinRate": 0.5062,
+      "avgRounds": 6.5,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.8263,
+      "draws": 87,
+      "seatAWinRate": 0.5162,
+      "avgRounds": 5.4,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.4938,
+      "draws": 141,
+      "seatAWinRate": 0.5038,
+      "avgRounds": 6.5,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 114,
+      "seatAWinRate": 0.497,
+      "avgRounds": 7.2,
+      "capped": 0
+    },
+    "racer-racer": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 468,
+      "seatAWinRate": 0.506,
+      "avgRounds": 5.1,
+      "capped": 0
+    },
+    "greedy-racer": {
+      "games": 1000,
+      "aWinRate": 0.517,
+      "draws": 366,
+      "seatAWinRate": 0.5,
+      "avgRounds": 6,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.8263,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "expertGreedyAgreement": 0.4719,
+    "agreementDecisions": 6024,
+    "agreementPass": true,
+    "seatAWinRateExpertMirror": 0.5038,
+    "seatPass": true,
+    "setPositionsPass": true,
+    "drawsCountHalf": true,
+    "seconds": 120,
+    "allPass": true
+  },
+  "cost": {
+    "expertPlansMeasured": 12157,
+    "manaCap": 10,
+    "roundsAtManaCap": 0,
+    "roundsEndingWithManaUnspent": 0.27,
+    "manaUnspentPerRound": 0.38,
+    "roundsWithACardInHandPricedOut": 0.989,
+    "roundsHandEmptied": 0.01,
+    "cardsPlayedPerRound": 1.26,
+    "attacksAtUnitsShare": 0.104
+  },
+  "sanity": [
+    {
+      "position": "lethal: he is on 4 with an empty hand and a Line; my two ready Raiders go at him",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "Guard, Raider→him, Raider→him"
+    },
+    {
+      "position": "lethal: he is on 4 with an empty hand and a Line; my two ready Raiders go at him",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "Guard, Raider→him, Raider→him"
+    },
+    {
+      "position": "free trade: my ready Heavy against his Raider, his hand empty: attack it",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "Heavy→Raider"
+    },
+    {
+      "position": "free trade: my ready Heavy against his Raider, his hand empty: attack it",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "Heavy→Raider"
+    },
+    {
+      "position": "don't waste: his Raider (2 health) and Heavy; Hit 2 and Hit 6 in hand, 5 mana: no Hit 6 on the Raider",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "Hit 2→Raider, Hit 6→Heavy, Line→him"
+    },
+    {
+      "position": "don't waste: his Raider (2 health) and Heavy; Hit 2 and Hit 6 in hand, 5 mana: no Hit 6 on the Raider",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "Hit 2→Raider, Hit 6→Heavy, Line→him"
+    }
+  ],
+  "report": {
+    "verdict": "alive",
+    "numbers": "Expert beats Random 99.9%, Greedy 90.4%, Racer 82.6% (400 games each, seats alternated, draws count half); Expert plan equals Greedy plan in 47.2% of 6,024 decisions; seat A wins 50.4% of 400 Expert mirror games; 0 games hit the round cap; Expert passes all three set positions on 5 seeds each. Draws: 35% of Expert mirror games, 47% of Racer mirror games end with both players at 0 in the same round. Games last 6.5 rounds (Expert mirror).",
+    "loop": [
+      "Each round a player picks the cards that fill the mana (Expert leaves mana unspent in 27% of rounds, 0.38 a round), aims its Hits, and sends each unit at the player or at a unit.",
+      "Hits land before attacks, so the real choice is which enemy unit to remove before it swings; Expert aims most Hits at units and sends 90% of attacks at the player, because an attack at the player takes nothing back while an attack at a unit takes its attack back (twice if both attack each other).",
+      "Best play boils down to: race, spend Hits on the attacker that out-races you, trade with a unit only when it kills something big for free. Predicting the other plan is mostly guessing which of your units their Hits will remove, not where their units will attack.",
+      "The simultaneous last round makes mutual kills common: a third of Expert mirror games are draws."
+    ],
+    "cost": "Mana binds every round: a card in hand is priced out in 98.9% of rounds and the hand is never emptied (1%). Mana never reaches its cap of 10, because games end by round 6-7."
+  }
+}

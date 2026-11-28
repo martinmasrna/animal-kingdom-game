@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wave Defense</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="status"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div></div>
+  <div id="field"></div>
+  <div id="wall"></div>
+  <div id="bottom"><div id="hand"></div><div id="side"></div></div>
+  <div id="reward"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Wave Defense</h3>
+    <p>Threats walk down three lanes, rows 4 to 1, toward your Wall (20). Each lane has one Defender slot at the Wall.</p>
+    <p><b>Each round:</b> threats advance 1 row (Swift 2); only one threat can stand in row 1 of a lane, the rest wait in row 2. Each threat in row 1 attacks: the lane's Defender and the threat deal their attack to each other; with no Defender, it hits the Wall. Then new threats arrive in row 4 of the emptiest lane (1 a round, 2 from round 7).</p>
+    <p><b>Your turn:</b> 4 mana every round. Draw 2 (hand max 7). Play cards: Defenders go into a slot (replacing the one there), spells resolve at once. When you end the turn, each Defender with Shoot hits the nearest threat in its lane.</p>
+    <p>Hit 3, Hit 6: damage to a threat. Bomb: 2 damage to every threat in one lane. Freeze: threats in one lane do not advance next round. Repair, Rebuild: Wall +4, +8 (max 20).</p>
+    <p>After rounds 4, 8 and 12, take one of three cards into your deck, or none.</p>
+    <p>Win when the threat deck is empty and no threat is left. Lose when the Wall reaches 0. The Expert plays the same game alongside you; the two numbers count who ended better (a win beats a loss, then more Wall, then more rounds).</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

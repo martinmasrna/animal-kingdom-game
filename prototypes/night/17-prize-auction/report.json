@@ -1,0 +1,115 @@
+{
+  "concept": "17-prize-auction",
+  "expert": {
+    "worlds": 12
+  },
+  "note": "no turn order: the first-player check reads seat A's win rate; turns are rounds (always 16)",
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.9825,
+      "draws": 2,
+      "seatAWinRate": 0.4975,
+      "avgRounds": 16,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.81,
+      "draws": 26,
+      "seatAWinRate": 0.4975,
+      "avgRounds": 16,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.8462,
+      "draws": 27,
+      "seatAWinRate": 0.4938,
+      "avgRounds": 16,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 200,
+      "aWinRate": 0.51,
+      "draws": 16,
+      "seatAWinRate": 0.525,
+      "avgRounds": 16,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 846,
+      "seatAWinRate": 0.493,
+      "avgRounds": 16,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.81,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "cappedCountedOver": "the games Expert plays",
+    "expertGreedyAgreement": 0.2533,
+    "agreementDecisions": 19181,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.525,
+    "firstPlayerPass": true,
+    "seconds": 2742,
+    "setPositionsPass": true,
+    "allPass": true
+  },
+  "sanity": [
+    {
+      "position": "don't overpay: his hand is empty, Point 3 up: bid exactly 1",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "don't overpay: his hand is empty, Point 3 up: bid exactly 1",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "Debt alone: bids come back and the lower bidder takes it, so outbid everything he could bid",
+      "bot": "greedy",
+      "pass": false,
+      "passed": 0,
+      "of": 1
+    },
+    {
+      "position": "Debt alone: bids come back and the lower bidder takes it, so outbid everything he could bid",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    },
+    {
+      "position": "lethal: the last prize decides the game and my coin beats his largest possible bid: bid above it",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1
+    },
+    {
+      "position": "lethal: the last prize decides the game and my coin beats his largest possible bid: bid above it",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5
+    }
+  ],
+  "report": {
+    "verdict": "alive",
+    "numbers": "Expert vs Random 98.3%, vs Greedy 81.0%, vs Racer (points only) 84.6%; no game hits a cap (always 16 rounds); Expert bid = Greedy bid on 25% of 19,181 bids; seat A 52.5% in Expert vs Expert (no turn order); set positions all 5/5 (Greedy fails overpay and Debt).",
+    "expertNote": "Expert solves each bid as a matrix game (its bids against every value the opponent could bid, each cell by play-outs on reshuffled worlds) and plays the equilibrium mix; with Debt up it bids its most whenever it bids at all (the bid comes back, so more is never worse).",
+    "trivialBots": "Greedy against Greedy ties 85% of games: identical starts and all-in bids cancel out. Equal all-in bids are common in every pairing, so prizes pile up into pots.",
+    "loop": "Each round is one sealed number: how much of this hand the prize up now is worth, given what the opponent can bid at most (its hand size and what it owns are public) and what the next prize is. Expert lets point-hungry opponents overpay early, buys Coin 3s and Messengers cheaply while they do, then outbids on the late point prizes with a richer deck; against Greedy it simply bids above Greedy's whole hand when it can and 0 when it cannot. Ties are frequent and turn single prizes into pots (Expert mirror: a 1:1 tie three rounds running grew a pot to 11 coin), so matching the other's bid on purpose is a real move. Debt is a bluff-free all-in: whoever bids at all bids everything."
+  }
+}

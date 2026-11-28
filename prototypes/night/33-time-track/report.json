@@ -1,0 +1,109 @@
+{
+  "firstPlayer": "the player whose marker starts on top",
+  "turnCap": "none needed: every action moves a marker at least 1 toward 60",
+  "concept": "33 Time track",
+  "gamesPerMatchup": 400,
+  "expertPlayouts": 3000,
+  "pageExpertPlayouts": 5000,
+  "agreementCountedOn": "Expert decisions with 2+ sensible options, all Expert games",
+  "decisions": 24594,
+  "matchups": [
+    {
+      "a": "expert",
+      "b": "random",
+      "games": 400,
+      "aWins": 400,
+      "bWins": 0,
+      "draws": 0,
+      "aRate": 1,
+      "firstPlayerRate": 0.5,
+      "avgActions": 23.71,
+      "capped": 0,
+      "endedOnClock": 4
+    },
+    {
+      "a": "expert",
+      "b": "greedy",
+      "games": 400,
+      "aWins": 375,
+      "bWins": 25,
+      "draws": 0,
+      "aRate": 0.9375,
+      "firstPlayerRate": 0.5075,
+      "avgActions": 28.6,
+      "capped": 0,
+      "endedOnClock": 20
+    },
+    {
+      "a": "expert",
+      "b": "racer",
+      "games": 400,
+      "aWins": 317,
+      "bWins": 83,
+      "draws": 0,
+      "aRate": 0.7925,
+      "firstPlayerRate": 0.4875,
+      "avgActions": 23.25,
+      "capped": 0,
+      "endedOnClock": 0
+    },
+    {
+      "a": "expert",
+      "b": "expert",
+      "games": 400,
+      "aWins": 195,
+      "bWins": 204,
+      "draws": 1,
+      "aRate": 0.4888,
+      "firstPlayerRate": 0.5038,
+      "avgActions": 25.04,
+      "capped": 0,
+      "endedOnClock": 6
+    }
+  ],
+  "sanity": [
+    {
+      "position": "lethal: he is at 3, my Raider is ready, his Quick 2/1 tempts a free kill: attack him",
+      "greedy": false,
+      "expert": "5/5"
+    },
+    {
+      "position": "free trade: my ready Heavy 5/6 against his ready Quick 2/1 (his only card), I am at 2 and he acts next: attack the Quick",
+      "greedy": true,
+      "expert": "5/5"
+    },
+    {
+      "position": "don't waste: Hit 3 and Hit 6 in hand, his Quick 2/1 and Heavy 5/6: never Hit 6 the Quick",
+      "greedy": true,
+      "expert": "5/5"
+    },
+    {
+      "position": "don't waste: Haste in hand, my Line already ready: never Haste it",
+      "greedy": true,
+      "expert": "5/5"
+    }
+  ],
+  "gate": {
+    "expertVsTrivial": {
+      "random": 1,
+      "greedy": 0.9375,
+      "racer": 0.7925
+    },
+    "expertBeatsTrivial70": true,
+    "setPositionsPass": true,
+    "turnCapShare": 0,
+    "turnCapOK": true,
+    "greedyAgreement": 0.3494,
+    "greedyAgreementOK": true,
+    "firstPlayerRateExpertMirror": 0.5038,
+    "firstPlayerOK": true,
+    "alive": true
+  },
+  "seconds": 2813,
+  "report": {
+    "verdict": "alive",
+    "summary": "Every machine criterion passes. Expert (determinized information-set MCTS, 3000 play-outs a decision in the gate, 5000 on the page, play-outs to the end of the game) beats Random 100%, Greedy 93.8%, Racer 79.3% over 400 games each; set positions 5/5 on all four (Greedy fails lethal); no caps possible; Expert equals Greedy in 34.9% of 24,594 decisions; the player whose marker starts on top wins 50.4% of Expert mirrors. Mirror games are short, about 25 actions, and end on life almost always (6 of 400 reached 60/60). The Racer is the only trivial bot that holds Expert near the line.",
+    "loop": "On each action you choose what to spend time on: a unit (its time, plus 3 before it can swing), a removal Hit, an attack (1 time) or a draw (2 time). Expert mostly sends units at the opponent's life and spends Hits on the opponent's biggest units rather than at life; unit-on-unit trades are rare (2 of 11 attacks in a typical mirror). The best play boils down to: get damage-per-time onto the board early, kill the opponent's big converters with Hits, and draw when no action buys more than 2 time's worth. Because whoever is behind acts, a big card (Slow, 9 time) hands the opponent a run of consecutive actions, which is the real price of a big card.",
+    "notes": "The spec's free-trade position (Heavy against a Quick in an even game) does not discriminate: self-play from it wins 97% whether the Heavy hits the Quick or the face, so it was replaced by one where the trade is the only move that does not lose. The rules add a Wait (time 1) for the rare case where nothing is legal; the spec had none."
+  }
+}

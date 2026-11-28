@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Auto Deck Battle</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* one screen, top to bottom: his life and deck, the battle, my life and deck, my shop */
+:root {
+  --bg: #2a3340; --table: #3b4a5c; --table2: #34424f; --ink: #1b1b1b; --paper: #fbf7ee;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86; --gold: #f2b632; --ok: #5fdc6f;
+  --cardw: 96px; --cardh: 128px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; color: inherit; }
+#game { position: relative; height: 100%; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 44px auto minmax(0, 1fr) auto auto; gap: 8px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; display: flex; gap: 10px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 18px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+#rounds { display: flex; gap: 5px; align-items: center; }
+.pip { width: 14px; height: 14px; border-radius: 3px; background: #1d2a38; border: 1px solid #5b6a7a; }
+.pip.done { background: #6b7b8c; } .pip.now { background: var(--gold); border-color: #fff; }
+.side { display: flex; align-items: center; gap: 16px; min-height: 64px; }
+.life { flex: 0 0 auto; width: 60px; height: 60px; border-radius: 50%; border: 4px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 26px; box-shadow: 0 4px 10px rgba(0,0,0,.45); }
+.s0 .life { background: radial-gradient(circle at 35% 30%, #7db3f5, var(--me2)); } .s1 .life { background: radial-gradient(circle at 35% 30%, #c09ae8, var(--him2)); }
+.deck { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 52px; }
+.dk { position: relative; width: 56px; height: 52px; border-radius: 7px; padding: 0; border: 2px solid rgba(255,255,255,.8); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.s0 .dk { background: linear-gradient(160deg, var(--me), var(--me2)); } .s1 .dk { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.dk .nm { font-size: 10px; font-weight: 800; opacity: .95; } .dk .st { font-size: 14px; font-weight: 900; }
+.dk .n { position: absolute; top: -8px; right: -8px; min-width: 20px; height: 20px; border-radius: 10px; background: #1d242c; border: 1px solid #c9d3de; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.dk.new { box-shadow: 0 0 0 3px var(--gold); }
+.dk.rm { cursor: pointer; animation: wob .9s ease-in-out infinite; border-color: #ff8a70; }
+@keyframes wob { 50% { transform: rotate(-3deg); } }
+#arena { display: grid; grid-template-rows: 1fr auto 1fr; gap: 6px; border-radius: 16px; background: radial-gradient(ellipse at center, var(--table), var(--table2)); box-shadow: inset 0 0 24px rgba(0,0,0,.3); min-height: 0; padding: 8px; }
+.lane { display: flex; align-items: center; justify-content: center; gap: 18px; min-height: 0; }
+.queue { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 18px; color: #c9d3de; min-width: 70px; }
+.queue i { width: 26px; height: 36px; border-radius: 4px; border: 2px solid rgba(255,255,255,.7); }
+.s0 .queue i, #lane0 .queue i { background: linear-gradient(135deg, var(--me), var(--me2)); } #lane1 .queue i { background: linear-gradient(135deg, var(--him), var(--him2)); }
+#result { text-align: center; font-weight: 900; font-size: 22px; min-height: 28px; }
+#result .w0 { color: #8cc2ff; } #result .w1 { color: #c9a5f0; }
+/* a card: shop and battle */
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; text-align: left; background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; transition: transform .12s; }
+.card .art { margin: 4px 4px 0; border-radius: 6px; flex: 0 0 48%; position: relative; background: linear-gradient(160deg, var(--me), var(--me2)); }
+.card.s1 .art { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.card .nm { font-weight: 800; font-size: 13px; padding: 13px 7px 0; }
+.card .tx { font-size: 10.5px; padding: 1px 7px; color: #3a352c; line-height: 1.12; }
+.card:has(.tx) .art { flex-basis: 38%; } .card:has(.tx) .nm { padding-top: 11px; } .card:has(.tx) .tx { line-height: 1.05; padding: 1px 5px; }
+.stat { position: absolute; bottom: -10px; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.stat.a { left: -6px; background: radial-gradient(circle at 35% 30%, #ffd36b, #d08a12); color: #2a1d00; text-shadow: none; }
+.stat.h { right: -6px; background: radial-gradient(circle at 35% 30%, #ff7a5c, #c62d1c); }
+.stat.h.hurt { background: radial-gradient(circle at 35% 30%, #ffb19e, #e0553a); }
+.stat.up { box-shadow: 0 0 0 3px var(--ok); }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); border: 2px solid #fff; color: #2a1d00; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; }
+.lane .card { --cardw: 92px; --cardh: 122px; }
+.lane .card.hit { animation: shake .3s; } .lane .card.fall { animation: die .35s ease-in forwards; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+@keyframes die { to { transform: scale(.4) rotate(-8deg); opacity: 0; } }
+#lane0 .card.strike { animation: up .3s ease-in-out; } #lane1 .card.strike { animation: down .3s ease-in-out; }
+@keyframes up { 50% { transform: translateY(-26px); } } @keyframes down { 50% { transform: translateY(26px); } }
+/* shop */
+#shopbar { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 10px 0 4px; min-height: calc(var(--cardh) + 22px); }
+#shop { display: flex; gap: 12px; }
+#shop .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.6), 0 4px 8px rgba(0,0,0,.4); }
+#shop .card.ok:hover { transform: translateY(-6px); }
+#shop .card:disabled { cursor: default; } #shop .card.no { filter: brightness(.62) saturate(.6); }
+#shop .slot { width: var(--cardw); height: var(--cardh); border-radius: 10px; border: 2px dashed #5b6a7a; }
+#gold { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 60px; }
+#gold .g { font-weight: 900; font-size: 26px; color: #ffd36b; }
+#gold .coins { display: flex; gap: 3px; flex-wrap: wrap; width: 64px; justify-content: center; }
+#gold .coins i { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); border: 1px solid #fff4cc; }
+#gold .coins i.off { background: #1d2a38; border-color: #5b6a7a; }
+#tools { display: flex; flex-direction: column; gap: 8px; }
+#tools button { min-width: 116px; min-height: 40px; border-radius: 10px; border: 1px solid #c9d3de; background: rgba(0,0,0,.25); font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; }
+#tools button .c { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); color: #2a1d00; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; }
+#tools button.on { background: #6b3b2e; border-color: #ff8a70; }
+#tools #fight { background: var(--gold); color: #2a1d00; border: 0; box-shadow: 0 3px 0 #a8770d; min-height: 50px; font-size: 17px; }
+#tools button:disabled { opacity: .4; cursor: default; }
+/* banner, over, rules, floats */
+#banner { position: absolute; left: 0; right: 0; top: 45%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 40px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1.1s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+.rulesbox { max-width: 640px; max-height: 88vh; overflow: auto; background: #1d242c; border: 1px solid #5b6a7a; border-radius: 12px; padding: 14px 22px; font-size: 15px; line-height: 1.4; color: #dfe5eb; }
+.rulesbox h2 { font-size: 20px; margin: 6px 0 8px; } .rulesbox h3 { font-size: 16px; margin: 12px 0 4px; }
+.rulesbox ul { padding-left: 18px; margin: 4px 0; } .rulesbox p { margin: 6px 0; }
+.rulesbox table { border-collapse: collapse; margin: 6px 0; font-size: 14px; } .rulesbox td, .rulesbox th { border-bottom: 1px solid #34424f; padding: 3px 8px; text-align: left; }
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 34px; color: #ff6a4d; text-shadow: 0 2px 0 rgba(0,0,0,.5); transform: translate(-50%, -50%); animation: floatup 1s ease-out forwards; white-space: nowrap; }
+.float.buff { color: #7fe08a; }
+@keyframes floatup { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -110%) scale(1); } }
+@media (max-height: 820px) and (min-width: 761px) { :root { --cardw: 88px; --cardh: 116px; } .lane .card { --cardw: 88px; --cardh: 124px; } #shop .card, #shop .slot { --cardh: 128px; } .card .tx { font-size: 9px; } }
+@media (max-width: 760px) {
+  :root { --cardw: 74px; --cardh: 100px; }
+  #menu { top: 4px; gap: 6px; } #menu button { min-height: 28px; padding: 2px 8px; font-size: 13px; }
+  .tally { font-size: 14px; } .tally b { min-width: 24px; height: 24px; }
+  #rounds { gap: 3px; } .pip { width: 9px; height: 9px; }
+  .life { width: 46px; height: 46px; font-size: 20px; border-width: 3px; }
+  .dk { width: 44px; height: 42px; } .dk .nm { font-size: 8px; } .dk .st { font-size: 12px; } .deck { gap: 6px; }
+  .side { gap: 10px; }
+  .lane .card { --cardw: 70px; --cardh: 94px; } .card .tx { display: none; } .card .nm { font-size: 11px; padding-top: 11px; }
+  #shopbar { flex-wrap: wrap; gap: 8px; } #shop { gap: 6px; order: 1; width: 100%; justify-content: center; }
+  #gold { order: 2; flex-direction: row; } #gold .coins { width: auto; } #tools { order: 3; flex-direction: row; }
+  #tools button { min-width: 0; padding: 0 10px; min-height: 38px; } #tools #fight { min-height: 38px; }
+}
+
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div>
+  <div id="rounds"></div>
+  <div id="side1" class="side s1"><div class="life" id="life1"></div><div class="deck" id="deck1"></div></div>
+  <div id="arena"><div class="lane" id="lane1"></div><div id="result"></div><div class="lane" id="lane0"></div></div>
+  <div id="side0" class="side s0"><div class="life" id="life0"></div><div class="deck" id="deck0"></div></div>
+  <div id="shopbar"><div id="gold"></div><div id="shop"></div><div id="tools"></div></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="rulesbox"><h2>Auto deck battle</h2>
+<p>Your deck fights by itself; your skill is what you put in it. Life 10 each. Bring the opponent to 0, or have more life after 12 rounds.</p>
+<ul>
+<li>Your deck starts as 3 Pips and holds at most 10 cards. Both decks are public (the opponent's as it stood at the start of the round); shops are secret.</li>
+</ul>
+<h3>A round</h3>
+<ul>
+<li><b>Shop</b>, both players at once: 6 gold (what is left is lost). Your shop shows 4 random cards from the 8 below.</li>
+<li>Buy a shop card: pay its cost; it joins your deck.</li>
+<li>Reroll: 1 gold for 4 new shop cards.</li>
+<li>Remove: 1 gold, one card out of your deck (once per round).</li>
+<li><b>Battle</b>: both decks are shuffled; the top card of each is its front card. Each step the two front cards deal their attack to each other at once. A card at 0 health falls (it stays in your deck for later rounds) and your next card becomes the front card, its Enters text happening then. Damage lasts for this battle only.</li>
+<li>The battle ends when a side has no front card and no cards left. The other side deals 1 damage plus 1 per card it still has (front and undrawn), at most 4. Both out at the same step: no damage.</li>
+</ul>
+<h3>Cards</h3>
+<table><tr><th>Card</th><th>Cost</th><th>Attack/Health</th><th>Text</th></tr><tr><td>Pip</td><td>1</td><td>1/2</td><td></td></tr><tr><td>Brawler</td><td>2</td><td>3/2</td><td></td></tr><tr><td>Wall</td><td>2</td><td>1/5</td><td></td></tr><tr><td>Bomb</td><td>3</td><td>2/1</td><td>When it falls, 3 damage to the enemy front card.</td></tr><tr><td>Opener</td><td>3</td><td>2/3</td><td>Enters: 2 damage to the enemy front card.</td></tr><tr><td>Rally</td><td>3</td><td>1/3</td><td>When it falls, your next front card gets +2/+2.</td></tr><tr><td>Guardian</td><td>3</td><td>2/4</td><td>Takes 1 less damage from each hit.</td></tr><tr><td>Heavy</td><td>4</td><td>4/6</td><td></td></tr></table></div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 43 Auto deck battle. Each round both players shop in secret with 6 gold (buy from 4 random
+// cards, reroll, remove a card from the deck), then the two decks fight themselves: shuffled,
+// front card against front card, the next card stepping up when one falls. The side left with
+// cards deals 1 damage plus 1 per card it still has, at most 4. Life 10; 12 rounds.
+// Pure from the outside: act() clones the state; step() mutates it.
+
+const LIFE = 10, GOLD = 6, SHOP = 4, DECK_MAX = 10, ROUNDS = 12, REROLL = 1, REMOVE = 1, MAX_HIT = 4;
+
+const CARDS = {
+  PI: { id: 'PI', name: 'Pip', cost: 1, atk: 1, hp: 2 },
+  BR: { id: 'BR', name: 'Brawler', cost: 2, atk: 3, hp: 2 },
+  WA: { id: 'WA', name: 'Wall', cost: 2, atk: 1, hp: 5 },
+  BO: { id: 'BO', name: 'Bomb', cost: 3, atk: 2, hp: 1, text: 'When it falls, 3 damage to the enemy front card.' },
+  OP: { id: 'OP', name: 'Opener', cost: 3, atk: 2, hp: 3, text: 'Enters: 2 damage to the enemy front card.' },
+  RA: { id: 'RA', name: 'Rally', cost: 3, atk: 1, hp: 3, text: 'When it falls, your next front card gets +2/+2.' },
+  GU: { id: 'GU', name: 'Guardian', cost: 3, atk: 2, hp: 4, text: 'Takes 1 less damage from each hit.' },
+  HE: { id: 'HE', name: 'Heavy', cost: 4, atk: 4, hp: 6 },
+};
+const POOL = Object.keys(CARDS);
+
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(rnd, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+// p.deck: the deck as it stands (it changes while its owner shops); p.shown: the deck as the
+// opponent knows it (the deck at the start of the round, since shops are secret)
+function newPlayer() { return { life: LIFE, deck: ['PI', 'PI', 'PI'], shown: ['PI', 'PI', 'PI'], gold: 0, shop: [], removed: false, done: false }; }
+function clone(s) {
+  return { ...s, p: s.p.map(p => ({ ...p, deck: p.deck.slice(), shown: p.shown.slice(), shop: p.shop.slice() })), log: s.log };
+}
+function emit(s, ev, e) { if (ev) ev.push(e); }
+function rollShop(s, side) { const p = s.p[side]; p.shop = []; for (let i = 0; i < SHOP; i++) p.shop.push(POOL[Math.floor(rand(s) * POOL.length)]); }
+
+function newMatch({ seed }) {
+  const s = { seed: (seed >>> 0) || 1, round: 0, turnNo: 0, first: 0, toMove: 0, phase: 'shop', winner: null, log: null, p: [newPlayer(), newPlayer()] };
+  startRound(s, null);
+  return s;
+}
+function startRound(s, ev) {
+  s.round++; s.turnNo++;
+  for (const k of [0, 1]) { const p = s.p[k]; p.gold = GOLD; p.removed = false; p.done = false; p.shown = p.deck.slice(); rollShop(s, k); }
+  s.phase = 'shop'; s.toMove = 0;
+  emit(s, ev, { t: 'round', round: s.round });
+}
+
+// Actions (shop phase, the mover's own shop): { t: 'buy', i } shop slot i; { t: 'reroll' };
+// { t: 'remove', card } one card of that kind out of the deck (once a round); { t: 'done' }
+function key(a) { return a.t === 'buy' ? 'b' + a.i : a.t === 'remove' ? 'r' + a.card : a.t; }
+function isLegal(s, a) {
+  if (s.winner !== null || s.phase !== 'shop' || !a) return false;
+  const P = s.p[s.toMove];
+  if (a.t === 'done') return true;
+  if (a.t === 'buy') return a.i >= 0 && a.i < P.shop.length && P.shop[a.i] !== null && CARDS[P.shop[a.i]].cost <= P.gold && P.deck.length < DECK_MAX;
+  if (a.t === 'reroll') return P.gold >= REROLL;
+  if (a.t === 'remove') return !P.removed && P.gold >= REMOVE && P.deck.includes(a.card);
+  return false;
+}
+function legalActions(s) {
+  if (s.winner !== null || s.phase !== 'shop') return [];
+  const P = s.p[s.toMove], out = [];
+  P.shop.forEach((id, i) => { const a = { t: 'buy', i }; if (isLegal(s, a)) out.push(a); });
+  if (isLegal(s, { t: 'reroll' })) out.push({ t: 'reroll' });
+  for (const card of new Set(P.deck)) { const a = { t: 'remove', card }; if (isLegal(s, a)) out.push(a); }
+  out.push({ t: 'done' });
+  return out;
+}
+
+// ------------------------------------------------------------------ the battle
+// One step: the two front cards hit each other at once; fallen cards leave; each side without a
+// front card steps its next card up; then "when it falls" effects, then "enters" effects, each
+// on the front cards as they now stand; repeat until nothing more falls.
+const dmgTo = (c, n) => c.id === 'GU' ? Math.max(0, n - 1) : n;
+function mk(id) { const c = CARDS[id]; return { id, atk: c.atk, hp: c.hp }; }
+function battle(deckA, deckB, rnd, log) {
+  const q = [shuffleInPlace(rnd, deckA.slice()), shuffleInPlace(rnd, deckB.slice())];
+  const front = [null, null];
+  const say = (e) => { if (log) log.push(e); };
+  const enter = (k, queue) => { if (!front[k] && q[k].length) { front[k] = mk(q[k].shift()); say({ t: 'enter', side: k, card: front[k].id, left: q[k].length }); if (front[k].id === 'OP') queue.push({ k, what: 'open' }); } };
+  const settle = (queue) => {
+    for (let guard = 0; guard < 50; guard++) {
+      const falls = [];
+      for (const k of [0, 1]) if (front[k] && front[k].hp <= 0) { say({ t: 'fall', side: k, card: front[k].id }); if (front[k].id === 'BO') falls.push({ k, what: 'bomb' }); if (front[k].id === 'RA') falls.push({ k, what: 'rally' }); front[k] = null; }
+      const enters = [];
+      for (const k of [0, 1]) enter(k, enters);
+      const all = [...falls, ...queue.splice(0), ...enters];
+      if (!all.length) return;
+      for (const f of all) {
+        if (f.what === 'bomb' || f.what === 'open') { const e = front[1 - f.k]; if (e) { const n = dmgTo(e, f.what === 'bomb' ? 3 : 2); e.hp -= n; say({ t: f.what, side: f.k, n, hp: e.hp }); } }
+        if (f.what === 'rally') { const m = front[f.k]; if (m) { m.atk += 2; m.hp += 2; say({ t: 'rally', side: f.k, atk: m.atk, hp: m.hp }); } }
+      }
+    }
+  };
+  const start = []; enter(0, start); enter(1, start); settle(start);
+  for (let steps = 0; steps < 300; steps++) {
+    if (!front[0] || !front[1]) break;
+    const a = front[0], b = front[1], na = dmgTo(b, a.atk), nb = dmgTo(a, b.atk);
+    b.hp -= na; a.hp -= nb;
+    say({ t: 'clash', n: [na, nb], hp: [a.hp, b.hp] });
+    settle([]);
+  }
+  const left = [0, 1].map(k => (front[k] ? 1 : 0) + q[k].length);
+  let winner = null;
+  if (left[0] && !left[1]) winner = 0; else if (left[1] && !left[0]) winner = 1;
+  const dmg = winner === null ? 0 : Math.min(MAX_HIT, 1 + left[winner]);
+  say({ t: 'result', winner, dmg, left });
+  return { winner, dmg, left };
+}
+
+function fight(s, ev) {
+  const log = [];
+  const r = battle(s.p[0].deck, s.p[1].deck, () => rand(s), log);
+  if (r.winner !== null) s.p[1 - r.winner].life -= r.dmg;
+  s.log = { round: s.round, decks: [s.p[0].deck.slice(), s.p[1].deck.slice()], steps: log, ...r };
+  emit(s, ev, { t: 'battle', ...s.log });
+  const dead = [0, 1].filter(k => s.p[k].life <= 0);
+  if (dead.length) { s.winner = dead.length === 2 ? 'draw' : 1 - dead[0]; s.phase = 'over'; emit(s, ev, { t: 'end', winner: s.winner }); return; }
+  if (s.round >= ROUNDS) { const a = s.p[0].life, b = s.p[1].life; s.winner = a === b ? 'draw' : a > b ? 0 : 1; s.phase = 'over'; emit(s, ev, { t: 'end', winner: s.winner }); return; }
+  startRound(s, ev);
+}
+
+function mAct(s, a, ev) {
+  if (!isLegal(s, a)) throw new Error('illegal ' + key(a));
+  const me = s.toMove, P = s.p[me];
+  emit(s, ev, { t: 'shop', side: me, a });
+  if (a.t === 'buy') { const id = P.shop[a.i]; P.gold -= CARDS[id].cost; P.deck.push(id); P.shop[a.i] = null; return; }
+  if (a.t === 'reroll') { P.gold -= REROLL; rollShop(s, me); return; }
+  if (a.t === 'remove') { P.gold -= REMOVE; P.deck.splice(P.deck.indexOf(a.card), 1); P.removed = true; return; }
+  P.done = true;
+  if (me === 0) { s.toMove = 1; return; }
+  s.turnNo++;
+  fight(s, ev);
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function step(t, a) { mAct(t, a, null); return t; }
+
+// ---- src/bot.js
+// Bots for Auto deck battle. None reads a hidden thing: while shopping, a bot sees its own shop
+// and the opponent's deck as it stood at the start of the round (`shown`), never the opponent's
+// shop or what it is buying.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pickOf = (a, rng) => a[Math.floor(rng() * a.length)];
+
+// ------------------------------------------------------------------ trivial bots
+function randomBot(s, rng) { return pickOf(legalActions(s), rng); }
+// Greedy (the spec's): buys the most expensive affordable card until it cannot; never rerolls or removes.
+function greedyBot(s) {
+  const P = s.p[s.toMove];
+  let bi = -1, bc = -1;
+  P.shop.forEach((id, i) => { if (id && CARDS[id].cost <= P.gold && CARDS[id].cost > bc && P.deck.length < DECK_MAX) { bc = CARDS[id].cost; bi = i; } });
+  return bi >= 0 ? { t: 'buy', i: bi } : { t: 'done' };
+}
+
+// ------------------------------------------------------------------ Expert: plans judged by battles
+// A plan is a removal (or none) and a set of shop cards to buy. Each plan's deck fights K sampled
+// versions of the opponent's next deck (its shown deck plus what a random shop would let it buy,
+// bought one of a few plausible ways); a battle is scored by the lives it leaves: a won game +30,
+// a lost one -30, otherwise the change in the life difference (in the last round, only who leads).
+// Rerolling is judged by dealing S new shops and taking the best plan of each. The same samples
+// serve every plan, so plans differ only by what they buy.
+function oppNext(shown, rng) {
+  const deck = shown.slice(); let gold = GOLD;
+  const shop = Array.from({ length: SHOP }, () => pickOf(POOL, rng));
+  const style = rng();
+  if (deck.length >= DECK_MAX && rng() < 0.6) { const cheap = deck.slice().sort((a, b) => CARDS[a].cost - CARDS[b].cost)[0]; deck.splice(deck.indexOf(cheap), 1); gold -= REMOVE; }
+  const order = style < 0.5 ? shop.slice().sort((a, b) => CARDS[b].cost - CARDS[a].cost) : shop.slice().sort(() => rng() - 0.5);
+  for (const id of order) if (CARDS[id].cost <= gold && deck.length < DECK_MAX) { deck.push(id); gold -= CARDS[id].cost; }
+  return deck;
+}
+function plans(P, gold, shop) {
+  const out = [];
+  const removes = [null]; if (!P.removed && gold >= REMOVE) for (const c of new Set(P.deck)) removes.push(c);
+  const slots = shop.map((id, i) => id ? i : -1).filter(i => i >= 0);
+  for (const r of removes) {
+    const base = P.deck.slice(); let g = gold;
+    if (r) { base.splice(base.indexOf(r), 1); g -= REMOVE; }
+    for (let mask = 0; mask < (1 << slots.length); mask++) {
+      let cost = 0; const buys = [];
+      for (let k = 0; k < slots.length; k++) if (mask & (1 << k)) { cost += CARDS[shop[slots[k]]].cost; buys.push(slots[k]); }
+      if (cost > g || base.length + buys.length > DECK_MAX) continue;
+      out.push({ remove: r, buys, deck: base.concat(buys.map(i => shop[i])), left: g - cost });
+    }
+  }
+  return out;
+}
+function makeSamples(s, me, K, rng) {
+  const O = s.p[1 - me];
+  return Array.from({ length: K }, () => ({ opp: oppNext(O.shown, rng), seed: (rng() * 4294967296) >>> 0 }));
+}
+function judge(s, me, deck, samples) {
+  const M = s.p[me], O = s.p[1 - me], last = s.round >= ROUNDS;
+  let tot = 0;
+  for (const x of samples) {
+    const r = battle(deck, x.opp, makeRng(x.seed), null);
+    let my = M.life, his = O.life;
+    if (r.winner === 0) his -= r.dmg; else if (r.winner === 1) my -= r.dmg;
+    if (my <= 0 || his <= 0) tot += my <= 0 && his <= 0 ? 0 : my <= 0 ? -30 : 30;
+    else if (last) tot += my > his ? 30 : my < his ? -30 : 0;
+    else tot += (my - his) - (M.life - O.life);
+  }
+  return tot / samples.length;
+}
+function planBot({ K = 60, S = 8, KR = 24 } = {}) {
+  return (s, rng) => {
+    const me = s.toMove, P = s.p[me];
+    const samples = makeSamples(s, me, K, rng);
+    let best = null, bv = -Infinity;
+    for (const pl of plans(P, P.gold, P.shop)) { const v = judge(s, me, pl.deck, samples) + 0.001 * (pl.deck.length - pl.left); if (v > bv) { bv = v; best = pl; } }
+    // rerolling: the best plan of each of S fresh shops, with a gold less
+    if (P.gold >= REROLL && S > 0) {
+      const few = samples.slice(0, KR), now = plans(P, P.gold, P.shop).reduce((m, pl) => Math.max(m, judge(s, me, pl.deck, few)), -Infinity);
+      let rv = 0;
+      for (let k = 0; k < S; k++) {
+        const shop = Array.from({ length: SHOP }, () => pickOf(POOL, rng));
+        rv += plans(P, P.gold - REROLL, shop).reduce((m, pl) => Math.max(m, judge(s, me, pl.deck, few)), -Infinity);
+      }
+      if (rv / S > now + 0.05) return { t: 'reroll' };
+    }
+    if (best.remove) return { t: 'remove', card: best.remove };
+    if (best.buys.length) return { t: 'buy', i: best.buys[0] };
+    return { t: 'done' };
+  };
+}
+const EXPERT = { K: 60, S: 8, KR: 24 };
+function expertBot(opts = EXPERT) { return planBot(opts); }
+
+const TRIVIAL = { random: randomBot, greedy: greedyBot };
+function meaning(s, a) { return a.t === 'buy' ? 'b' + s.p[s.toMove].shop[a.i] : key(a); }
+
+// ---- src/ui.js
+// Auto deck battle as a game screen against Expert. You shop (buy, reroll, remove) while the
+// bot shops in secret; then the battle plays itself out step by step in the middle: the two front
+// cards strike each other, fallen cards leave, the next card steps up.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-43-tally';
+const expert = expertBot(EXPERT);
+const ui = { s: null, busy: false, over: false, removing: false, fresh: new Set(), arena: null, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const FAST = /fast/.test(location.hash), wait = (ms) => new Promise(r => setTimeout(r, FAST ? 0 : ms));
+const botMs = (window.__botMs = { max: 0, n: 0 });
+
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+function cardHTML(id, side, { cls = '', attrs = '', atk, hp } = {}) {
+  const c = CARDS[id], a = atk ?? c.atk, h = hp ?? c.hp;
+  const tx = c.text ? `<div class="tx">${c.text}</div>` : '';
+  return `<button class="card s${side} ${cls}" ${attrs}><span class="cgem">${c.cost}</span><div class="art"><span class="stat a${a > c.atk ? ' up' : ''}">${a}</span><span class="stat h${h < c.hp ? ' hurt' : h > c.hp ? ' up' : ''}">${h}</span></div><div class="nm">${c.name}</div>${tx}</button>`;
+}
+const myShop = () => !ui.busy && !ui.over && ui.s.phase === 'shop' && ui.s.toMove === ME;
+
+// ------------------------------------------------------------------ rendering
+// a deck as one tile per kind with a count; mine shows this round's buys, his the deck he showed
+function deckHTML(side) {
+  const p = ui.s.p[side], list = side === ME ? p.deck : p.shown;
+  const ids = [...new Set(list)].sort((a, b) => CARDS[a].cost - CARDS[b].cost || (a < b ? -1 : 1));
+  return ids.map(id => {
+    const c = CARDS[id], n = list.filter(x => x === id).length;
+    const rm = side === ME && ui.removing && isLegal(ui.s, { t: 'remove', card: id });
+    return `<button class="dk${rm ? ' rm' : ''}${side === ME && ui.fresh.has(id) ? ' new' : ''}" data-rm="${rm ? id : ''}"${rm ? '' : ' disabled'}><span class="nm">${c.name}</span><span class="st">${c.atk}/${c.hp}</span>${n > 1 ? `<i class="n">${n}</i>` : ''}</button>`;
+  }).join('');
+}
+function laneHTML(side) {
+  const A = ui.arena;
+  if (!A) return '';
+  const f = A.front[side], q = `<div class="queue">${A.left[side] ? '<i></i>' + A.left[side] : ''}</div>`;
+  return (side === BOT ? '' : q) + (f ? cardHTML(f.id, side, { atk: f.atk, hp: f.hp, cls: A.fx[side] || '', attrs: `id="front${side}" disabled` }) : '<div class="card" style="visibility:hidden"></div>') + (side === BOT ? q : '');
+}
+function render() {
+  const s = ui.s, t = loadTally(), P = s.p[ME];
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  let pips = '';
+  for (let r = 1; r <= ROUNDS; r++) pips += `<i class="pip${r < s.round ? ' done' : r === s.round ? ' now' : ''}"></i>`;
+  $('rounds').innerHTML = pips;
+  for (const side of [0, 1]) { $('life' + side).textContent = ui.arena ? ui.arena.life[side] : s.p[side].life; $('deck' + side).innerHTML = deckHTML(side); $('lane' + side).innerHTML = laneHTML(side); }
+  $('result').innerHTML = ui.arena && ui.arena.result ? ui.arena.result : '';
+  const shopping = myShop();
+  let coins = ''; for (let i = 0; i < GOLD; i++) coins += `<i class="${i < P.gold ? '' : 'off'}"></i>`;
+  $('gold').innerHTML = (shopping || ui.busy) && !ui.arena ? `<span class="g">${P.gold}</span><span class="coins">${coins}</span>` : '';
+  // while a battle plays, the next round's shop stays hidden
+  $('shop').innerHTML = ui.arena ? '' : P.shop.map((id, i) => {
+    if (!id) return '<div class="slot"></div>';
+    const ok = shopping && !ui.removing && isLegal(s, { t: 'buy', i });
+    return cardHTML(id, ME, { cls: ok ? 'ok' : 'no', attrs: `data-buy="${i}"${ok ? '' : ' disabled'}` });
+  }).join('');
+  const canRm = shopping && !P.removed && P.gold >= REMOVE;
+  $('tools').innerHTML = `<button id="reroll"${shopping && P.gold >= REROLL && !ui.removing ? '' : ' disabled'}>Reroll <span class="c">${REROLL}</span></button>`
+    + `<button id="remove" class="${ui.removing ? 'on' : ''}"${canRm ? '' : ' disabled'}>Remove <span class="c">${REMOVE}</span></button>`
+    + `<button id="fight"${shopping ? '' : ' disabled'}>Fight</button>`;
+}
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+function floatOn(el, text, cls = '') {
+  if (!el) return;
+  const g = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(), f = document.createElement('div');
+  f.className = 'float ' + cls; f.textContent = text; f.style.left = (r.left - g.left + r.width / 2) + 'px'; f.style.top = (r.top - g.top + r.height / 2) + 'px';
+  $('game').appendChild(f); setTimeout(() => f.remove(), 1000);
+}
+
+// ------------------------------------------------------------------ the battle, replayed from its log
+async function playBattle(log, prevLives) {
+  const A = ui.arena = { front: [null, null], left: [log.decks[0].length, log.decks[1].length], fx: {}, life: prevLives.slice(), result: '' };
+  const qtok = ui.token;
+  render(); await wait(500);
+  for (const e of log.steps) {
+    if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+    A.fx = {};
+    if (e.t === 'enter') { A.front[e.side] = { id: e.card, atk: CARDS[e.card].atk, hp: CARDS[e.card].hp }; A.left[e.side] = e.left; render(); await wait(260); continue; }
+    if (e.t === 'clash') {
+      A.fx = { 0: 'strike', 1: 'strike' }; render(); await wait(150);
+      A.front[0].hp = e.hp[0]; A.front[1].hp = e.hp[1]; A.fx = { 0: e.n[1] ? 'hit' : '', 1: e.n[0] ? 'hit' : '' }; render();
+      if (e.n[1]) floatOn($('front0'), '−' + e.n[1]); if (e.n[0]) floatOn($('front1'), '−' + e.n[0]);
+      await wait(320); continue;
+    }
+    if (e.t === 'fall') { A.fx = { [e.side]: 'fall' }; render(); await wait(300); A.front[e.side] = null; render(); continue; }
+    if (e.t === 'bomb' || e.t === 'open') { const k = 1 - e.side; if (A.front[k]) { A.front[k].hp = e.hp; A.fx = { [k]: 'hit' }; render(); floatOn($('front' + k), '−' + e.n); } await wait(320); continue; }
+    if (e.t === 'rally') { const m = A.front[e.side]; if (m) { m.atk = e.atk; m.hp = e.hp; render(); floatOn($('front' + e.side), '+2/+2', 'buff'); } await wait(320); continue; }
+    if (e.t === 'result') {
+      if (e.winner !== null) { A.life[1 - e.winner] -= e.dmg; A.result = `<span class="w${e.winner}">−${e.dmg}</span>`; render(); floatOn($('life' + (1 - e.winner)), '−' + e.dmg); }
+      else { A.result = '='; render(); }
+      await wait(1200);
+    }
+  }
+}
+
+// ------------------------------------------------------------------ flow
+async function apply(a) {
+  const qtok = ui.token;
+  const prev = ui.s, ev = [];
+  const next = act(prev, a, ev);
+  if (prev.toMove === ME && a.t === 'buy') ui.fresh.add(prev.p[ME].shop[a.i]);
+  ui.s = next;
+  const b = ev.find(e => e.t === 'battle');
+  if (b) {
+    ui.busy = true;
+    await playBattle(b, [prev.p[0].life, prev.p[1].life]);
+    if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+    ui.arena = null; ui.fresh = new Set();
+    if (next.winner !== null) return finish();
+    banner('Round ' + next.round);
+  }
+  render();
+}
+function finish() {
+  if (ui.over) return;
+  ui.over = true; render();
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+async function startMatch() {
+  const tok = ++ui.token;
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0 });
+  ui.over = false; ui.removing = false; ui.arena = null; ui.fresh = new Set();
+  $('over').classList.remove('show');
+  ui.busy = false; render();
+  banner('Round 1');
+
+}
+// you shop as seat 0; when you press Fight the bot shops (in secret) and the battle follows
+async function doAct(a) {
+  if (!myShop() || !isLegal(ui.s, a)) return;
+  const tok = ui.token;
+  ui.busy = true; ui.removing = false;
+  await apply(a);
+  if (tok !== ui.token) return;
+  while (!ui.over && ui.s.toMove === BOT && ui.s.phase === 'shop') {
+    const t0 = performance.now(), b = expert(ui.s, ui.rng), dt = performance.now() - t0;
+    botMs.n++; if (dt > botMs.max) botMs.max = dt;
+    await apply(b);
+    if (tok !== ui.token) return;
+  }
+  ui.busy = false; render();
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (b && (b.id === 'rematch' || b.id === 'newmatch')) return startMatch();
+  if (b && b.id === 'rulesbtn') { $('rules').classList.toggle('show'); return; }
+  if (e.target.closest('#rules')) { $('rules').classList.remove('show'); return; }
+  if (!b || b.disabled || !myShop()) return;
+  if (b.dataset.buy !== undefined) return doAct({ t: 'buy', i: +b.dataset.buy });
+  if (b.dataset.rm) return doAct({ t: 'remove', card: b.dataset.rm });
+  if (b.id === 'reroll') return doAct({ t: 'reroll' });
+  if (b.id === 'remove') { ui.removing = !ui.removing; render(); return; }
+  if (b.id === 'fight') return doAct({ t: 'done' });
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { ui.removing = false; $('rules').classList.remove('show'); render(); } });
+startMatch();
+
+
+})();
+</script>
+</body>
+</html>

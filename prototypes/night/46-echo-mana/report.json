@@ -1,0 +1,199 @@
+{
+  "games": 400,
+  "expert": {
+    "kind": "turn",
+    "beam": 48,
+    "top": 14,
+    "R": 128,
+    "depth": 40,
+    "score": "win",
+    "margin": 0.03
+  },
+  "seconds": 1408,
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "turnCapRate": 0,
+      "avgTurns": 12.7,
+      "expertDecisions": 7219,
+      "sameAsGreedy": 0.938,
+      "expertMsPerMove": 81.4,
+      "expertMaxMs": 1325,
+      "mana": {
+        "turns": 4684,
+        "meanMana": 3.44,
+        "meanSpent": 2.28,
+        "atCap": 0,
+        "atFloor": 0.355,
+        "leftManaWithAPlayableCard": 0.297,
+        "heldACardItCouldNotAfford": 0.961
+      }
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.762,
+      "draws": 0,
+      "firstPlayerWinRate": 0.398,
+      "turnCapRate": 0,
+      "avgTurns": 21.1,
+      "expertDecisions": 9900,
+      "sameAsGreedy": 0.839,
+      "expertMsPerMove": 99.3,
+      "expertMaxMs": 1126,
+      "mana": {
+        "turns": 8057,
+        "meanMana": 4.17,
+        "meanSpent": 3.06,
+        "atCap": 0.007,
+        "atFloor": 0.31,
+        "leftManaWithAPlayableCard": 0.141,
+        "heldACardItCouldNotAfford": 0.838
+      }
+    },
+    "expert-starver": {
+      "games": 400,
+      "aWinRate": 0.938,
+      "draws": 0,
+      "firstPlayerWinRate": 0.458,
+      "turnCapRate": 0,
+      "avgTurns": 19,
+      "expertDecisions": 9109,
+      "sameAsGreedy": 0.904,
+      "expertMsPerMove": 68.4,
+      "expertMaxMs": 838,
+      "mana": {
+        "turns": 7183,
+        "meanMana": 2.91,
+        "meanSpent": 1.77,
+        "atCap": 0,
+        "atFloor": 0.418,
+        "leftManaWithAPlayableCard": 0.173,
+        "heldACardItCouldNotAfford": 0.997
+      }
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.968,
+      "draws": 0,
+      "firstPlayerWinRate": 0.487,
+      "turnCapRate": 0,
+      "avgTurns": 10.9,
+      "expertDecisions": 7872,
+      "sameAsGreedy": 0.885,
+      "expertMsPerMove": 58,
+      "expertMaxMs": 776,
+      "mana": {
+        "turns": 3955,
+        "meanMana": 4.95,
+        "meanSpent": 4.17,
+        "atCap": 0.007,
+        "atFloor": 0.176,
+        "leftManaWithAPlayableCard": 0.075,
+        "heldACardItCouldNotAfford": 0.855
+      }
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.505,
+      "draws": 0,
+      "firstPlayerWinRate": 0.31,
+      "turnCapRate": 0,
+      "avgTurns": 22.7,
+      "mana": {
+        "turns": 8672,
+        "meanMana": 4.27,
+        "meanSpent": 3.13,
+        "atCap": 0.009,
+        "atFloor": 0.294,
+        "leftManaWithAPlayableCard": 0.139,
+        "heldACardItCouldNotAfford": 0.832
+      }
+    },
+    "greedy-greedy": {
+      "games": 2000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.367,
+      "turnCapRate": 0,
+      "avgTurns": 21.8,
+      "mana": {
+        "turns": 41526,
+        "meanMana": 4.13,
+        "meanSpent": 3.04,
+        "atCap": 0.01,
+        "atFloor": 0.315,
+        "leftManaWithAPlayableCard": 0.134,
+        "heldACardItCouldNotAfford": 0.832
+      }
+    },
+    "greedy-random": {
+      "games": 400,
+      "aWinRate": 0.998,
+      "draws": 0,
+      "firstPlayerWinRate": 0.502,
+      "turnCapRate": 0,
+      "avgTurns": 13.7,
+      "mana": {
+        "turns": 5069,
+        "meanMana": 3.3,
+        "meanSpent": 2.14,
+        "atCap": 0,
+        "atFloor": 0.399,
+        "leftManaWithAPlayableCard": 0.295,
+        "heldACardItCouldNotAfford": 0.964
+      }
+    },
+    "greedy-starver": {
+      "games": 400,
+      "aWinRate": 0.88,
+      "draws": 0,
+      "firstPlayerWinRate": 0.48,
+      "turnCapRate": 0,
+      "avgTurns": 19.4,
+      "mana": {
+        "turns": 7370,
+        "meanMana": 2.85,
+        "meanSpent": 1.7,
+        "atCap": 0,
+        "atFloor": 0.444,
+        "leftManaWithAPlayableCard": 0.153,
+        "heldACardItCouldNotAfford": 0.997
+      }
+    }
+  },
+  "gate": {
+    "expert-random": 1,
+    "expert-greedy": 0.762,
+    "expert-starver": 0.938,
+    "expert-racer": 0.968,
+    "firstPlayerWinRate": 0.31,
+    "turnCapRate": 0,
+    "sameAsGreedy": 0.888,
+    "fails": []
+  },
+  "sanity": {
+    "positions": [
+      "first turn: no Hit 2 at the face",
+      "lethal 3 + 3 + 2 into 7",
+      "lethal through the Coin",
+      "free trade: Line into Striker (no damage spells left on his side)",
+      "Hit 2 kills a wounded Big for free"
+    ],
+    "greedy": "5/5",
+    "expert": "25/25 (5 seeds each)"
+  },
+  "expertNotes": "Expert is a turn search: a beam over this turn's actions collects the distinct ways to end it, the best 14 (plus Greedy's own turn) are each played to the end of the game 128 times by Greedy on both sides in worlds dealt from what the mover cannot see (the same worlds for each), and Greedy's turn stands unless another wins 3 points more often. An action-by-action ISMCTS (1500 iterations, 4-turn play-outs) beat Greedy only 62.5% and was replaced. In the browser its slowest move was 211 ms.",
+  "report": {
+    "verdict": "alive",
+    "gateNumbers": "Expert beats Random 100%, Greedy 76.2%, Starver 93.8%, Racer 96.8% (400 games each); first player 31.0% Expert against Expert (the second player, with the Coin, wins 69%); no turn caps; Expert equals Greedy on 88.8% of decisions (Greedy 83.9%, Starver 90.4%, Racer 88.5%, Random 93.8%).",
+    "atTheEdge": "Two numbers sit near their lines: the first-player rate (0.31 against a floor of 0.30) and sameness with Greedy (0.888 against a ceiling of 0.90; the Expert keeps Greedy's turn unless another is clearly better, which pushes this up).",
+    "loop": [
+      "Each turn the question is how much to spend: whatever you pay, the opponent gets back plus one next turn. Early on both sides spend everything and mana climbs by about one a turn.",
+      "When both hands clog with cards that cost more than the floor, the game locks: in traced Expert games both sides sat at 2 mana for ten turns, passing with Big, Heavy and Huge in hand and even holding Hit 2 rather than spend it, because any spend hands the other a bigger turn. Cheap units and Hit spells decide the lock; whoever breaks it pays for it.",
+      "Costs bind hard: mana averages about 4, reaches 10 on under 1% of turns and sits at the floor of 2 on 30%; at 84% of turn ends a card in hand costs more than what is left. Ending a turn with mana and a playable card happened on 14% of Expert's turns, about as often as Greedy (13%), so deliberate starving is a phase of the game rather than a constant habit."
+    ]
+  }
+}

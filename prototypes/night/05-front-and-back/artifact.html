@@ -1,0 +1,813 @@
+<title>Front and Back</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* one screen: history left; lives, four rows and the hand in the middle; mana, deck and End turn right */
+:root {
+  --bg: #2a3340; --table: #3b4a5c; --table2: #34424f; --backrow: #2f3b49; --ink: #1b1b1b; --paper: #fbf7ee;
+  --mana: #3d8bf2; --gold: #f2b632; --ok: #5fdc6f;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86; --spell: #e0673f; --spell2: #b8452a; --rng: #2f9e8f; --rng2: #1f6f64;
+  --cardw: 100px; --cardh: 136px; --uw: 78px; --uh: 84px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.25 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game {
+  position: relative; height: 100%; max-width: 1300px; margin: 0 auto;
+  display: grid; grid-template-columns: 170px minmax(0, 1fr) 210px;
+  grid-template-rows: 40px auto minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 4px 20px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+}
+#top { grid-row: 1; grid-column: 1 / -1; display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; }
+#opphand { display: flex; }
+.back { width: 24px; height: 34px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; margin-left: -6px; box-shadow: 0 2px 4px rgba(0,0,0,.4); }
+.back:first-child { margin-left: 0; }
+#menu { position: absolute; top: 6px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 5; display: flex; gap: 10px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 18px; }
+.tally b { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#hero1 { grid-row: 2; grid-column: 2; } #back1 { grid-row: 3; grid-column: 2; } #front1 { grid-row: 4; grid-column: 2; }
+#front0 { grid-row: 5; grid-column: 2; } #back0 { grid-row: 6; grid-column: 2; } #hero0 { grid-row: 7; grid-column: 2; }
+#history { grid-row: 2 / 8; grid-column: 1; }
+#res1 { grid-row: 2 / 4; grid-column: 3; } #turnbox { grid-row: 4 / 6; grid-column: 3; align-self: center; } #res0 { grid-row: 6 / 8; grid-column: 3; }
+#hand { grid-row: 8; grid-column: 1 / -1; }
+
+/* ---------------- lives */
+.herorow { display: flex; justify-content: center; }
+.hero { position: relative; width: 58px; height: 58px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,.45); }
+.hero.s0 { background: radial-gradient(circle at 35% 30%, #7db3f5, var(--me2)); }
+.hero.s1 { background: radial-gradient(circle at 35% 30%, #c09ae8, var(--him2)); }
+.hero .hp { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 24px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.hero.tgt { cursor: pointer; box-shadow: 0 0 0 4px var(--gold), 0 0 20px rgba(242,182,50,.8); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px var(--gold), 0 0 26px rgba(242,182,50,.9); } }
+
+/* ---------------- rows and units */
+.row { display: flex; justify-content: center; align-items: center; gap: 22px; min-height: 0; background: radial-gradient(ellipse at center, var(--table), var(--table2)); }
+.row.rb { background: var(--backrow); }
+#back1 { border-radius: 16px 16px 0 0; } #back0 { border-radius: 0 0 16px 16px; }
+#front0 { border-top: 2px solid rgba(255,255,255,.18); }
+.slot { width: var(--uw); height: var(--uh); border-radius: 12px; border: 2px dashed rgba(255,255,255,.12); flex: 0 0 auto; }
+.unit { position: relative; width: var(--uw); height: var(--uh); border-radius: 12px; border: 3px solid rgba(255,255,255,.85); box-shadow: 0 4px 8px rgba(0,0,0,.45); flex: 0 0 auto; transition: transform .12s; }
+.unit.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); } .unit.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.unit.ranged { border-style: dashed; }
+.unit .un { position: absolute; top: 8px; left: 0; right: 0; text-align: center; font-weight: 800; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.stat { position: absolute; bottom: -10px; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.stat.a { left: -8px; background: radial-gradient(circle at 35% 30%, #ffd36b, #d08a12); color: #2a1d00; text-shadow: none; }
+.stat.h { right: -8px; background: radial-gradient(circle at 35% 30%, #ff7a5c, #c62d1c); }
+.stat.h.hurt { background: radial-gradient(circle at 35% 30%, #ffb19e, #e0553a); }
+.unit.sleep { filter: saturate(.55) brightness(.85); }
+.unit.can { cursor: pointer; box-shadow: 0 0 0 3px var(--ok), 0 0 16px rgba(95,220,111,.8); }
+.unit.sel { transform: translateY(-6px); box-shadow: 0 0 0 4px var(--gold), 0 0 20px rgba(242,182,50,.9); }
+.unit.tgt { cursor: pointer; box-shadow: 0 0 0 4px var(--gold), 0 0 18px rgba(242,182,50,.85); animation: pulse 1.2s ease-in-out infinite; }
+.unit.new { animation: pop .4s ease-out; }
+@keyframes pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+.shake { animation: shake .35s; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(2px); } }
+.shot { position: absolute; z-index: 18; width: 16px; height: 16px; border-radius: 50%; background: #fff3c4; box-shadow: 0 0 12px #ffd36b; pointer-events: none; }
+
+/* ---------------- mana, deck, turn */
+.res { display: flex; align-items: center; gap: 12px; align-self: center; }
+.mana { display: flex; align-items: center; gap: 3px; flex-wrap: nowrap; }
+.gemc { width: 11px; height: 15px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: #1d2a38; }
+.gemc.on { background: linear-gradient(180deg, #8cc2ff, var(--mana)); }
+.gemc.off { opacity: .4; }
+.manatxt { font-weight: 800; font-size: 18px; margin-right: 6px; color: #bcd9ff; min-width: 40px; }
+.pile { width: 34px; height: 46px; border-radius: 5px; border: 2px solid #c9d3de; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; flex: 0 0 auto;
+  box-shadow: 2px 2px 0 rgba(0,0,0,.3), 4px 4px 0 rgba(0,0,0,.2); }
+.pile.s0 { background: linear-gradient(135deg, var(--me), var(--me2)); } .pile.s1 { background: linear-gradient(135deg, var(--him), var(--him2)); border-color: #c9b6e6; }
+#endturn { width: 140px; min-height: 54px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; box-shadow: 0 3px 0 #a8770d; }
+#endturn.done { background: var(--ok); box-shadow: 0 3px 0 #2c8a3a, 0 0 14px rgba(95,220,111,.7); color: #08300f; }
+#endturn:disabled { background: #56616d; color: #8e98a3; box-shadow: none; cursor: default; }
+
+/* ---------------- history */
+#history { display: flex; flex-direction: column; justify-content: center; gap: 4px; overflow: hidden; }
+.hist { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
+.chip { min-width: 38px; height: 28px; padding: 0 5px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; flex: 0 0 auto; }
+.chip.melee.s0, .chip.atk.s0 { background: linear-gradient(160deg, var(--me), var(--me2)); } .chip.melee.s1, .chip.atk.s1 { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.chip.ranged { background: linear-gradient(160deg, var(--rng), var(--rng2)); }
+.chip.hit { background: linear-gradient(160deg, #f08a5d, var(--spell2)); }
+.chip.coin { background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); color: #2a1d00; }
+.ho { font-weight: 800; font-size: 15px; }
+.ho.dmg { color: #ff8a70; } .ho.kill { color: #ff6a4d; } .ho.face { color: #ffb36b; }
+
+/* ---------------- cards */
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 10px; padding: 0; text-align: left;
+  background: var(--paper); color: var(--ink); border: 3px solid #d5c39f; box-shadow: 0 4px 8px rgba(0,0,0,.4); display: flex; flex-direction: column; }
+.card .art { margin: 4px 4px 0; border-radius: 6px; flex: 0 0 52%; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; }
+.card.melee .art { background: linear-gradient(160deg, var(--me), var(--me2)); }
+.card.melee.s1 .art { background: linear-gradient(160deg, var(--him), var(--him2)); }
+.card.ranged .art { background: linear-gradient(160deg, var(--rng), var(--rng2)); }
+.card.hit .art { background: linear-gradient(160deg, #f08a5d, var(--spell2)); }
+.card.coin .art { background: radial-gradient(circle at 35% 30%, #ffe08a, #d08a12); color: #2a1d00; }
+.card .big { font-size: calc(var(--cardw) * .34); font-weight: 900; text-shadow: 0 2px 3px rgba(0,0,0,.35); line-height: 1; }
+.card.coin .big { text-shadow: none; }
+.card .stat { bottom: -12px; width: 30px; height: 30px; font-size: 15px; }
+.card .nm { font-weight: 800; font-size: calc(var(--cardw) * .14); padding: 14px 8px 0; }
+.card.hit .nm, .card.coin .nm { padding-top: 5px; }
+.card .tx { font-size: calc(var(--cardw) * .115); padding: 1px 8px; color: #3a352c; line-height: 1.15; }
+.cgem { position: absolute; top: -9px; left: -9px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cc2ff, #1f62c4); border: 2px solid #fff; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+#hand { display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 12px 0 2px; min-height: calc(var(--cardh) + 16px); }
+#hand .card { transition: transform .12s, box-shadow .12s; }
+#hand .card.ok { border-color: var(--ok); box-shadow: 0 0 12px rgba(95,220,111,.7), 0 4px 8px rgba(0,0,0,.4); }
+#hand .card.ok:hover { transform: translateY(-8px); }
+#hand .card.sel { transform: translateY(-16px); border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,.6), 0 0 18px rgba(242,182,50,.8), 0 6px 12px rgba(0,0,0,.5); }
+#hand .card:disabled { cursor: default; }
+#hand .card.no { filter: brightness(.62) saturate(.6); }
+#hand .card.drawn { animation: drawin .45s ease-out; }
+@keyframes drawin { from { transform: translateY(-60px) scale(.6); opacity: 0; } }
+
+/* ---------------- spotlight, floaters, banner, game over, rules */
+#spot { position: absolute; z-index: 20; pointer-events: none; }
+#spot .card { --cardw: 140px; --cardh: 190px; position: absolute; left: calc(var(--cardw) / -2); top: calc(var(--cardh) / -2); box-shadow: 0 14px 40px rgba(0,0,0,.6); animation: fromtop .32s cubic-bezier(.2,.8,.3,1.1); }
+#spot .card.out { animation: spotout .2s ease-in forwards; }
+@keyframes fromtop { from { transform: translateY(-240px) scale(.4); opacity: .2; } }
+@keyframes spotout { to { transform: scale(.5); opacity: 0; } }
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 40px; color: #ff6a4d; text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 10px rgba(0,0,0,.4); transform: translate(-50%, -50%); animation: floatup 1.1s ease-out forwards; white-space: nowrap; }
+@keyframes floatup { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -110%) scale(1); } }
+.ghost { position: absolute; z-index: 15; pointer-events: none; animation: die .45s ease-in forwards; }
+@keyframes die { to { transform: scale(.4) rotate(-8deg); opacity: 0; } }
+#banner { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; z-index: 25; pointer-events: none; font-size: 44px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; transform: translateY(-50%) scale(.8); } 20% { opacity: 1; transform: translateY(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 64px; font-weight: 900; text-shadow: 0 4px 16px rgba(0,0,0,.7); }
+#over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button, #rules button { min-height: 50px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 17px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+#rules .panel { max-width: 560px; max-height: 100%; overflow: auto; background: #1f2731; border: 1px solid #4b5a6a; border-radius: 12px; padding: 18px 22px; line-height: 1.4; }
+#rules h3 { margin: 0 0 8px; font-size: 22px; }
+#rules p { margin: 0 0 10px; color: #dfe5eb; }
+
+/* ---------------- phone */
+@media (max-width: 760px) {
+  :root { --cardw: 62px; --cardh: 86px; --uw: 54px; --uh: 58px; }
+  #game { grid-template-columns: 1fr auto 1fr; grid-template-rows: 30px auto minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 4px 8px; }
+  #history { display: none; }
+  #top { justify-content: flex-start; }
+  .back { width: 16px; height: 24px; }
+  #menu { top: 2px; gap: 6px; } #menu button { min-height: 26px; padding: 2px 8px; font-size: 13px; }
+  .tally { font-size: 14px; } .tally b { min-width: 24px; height: 24px; }
+  #back1, #front1, #front0, #back0 { grid-column: 1 / -1; }
+  #hero1 { grid-row: 2; grid-column: 2; } #res1 { grid-row: 2; grid-column: 3; justify-self: end; }
+  #turnbox { grid-row: 7; grid-column: 1; justify-self: start; align-self: center; }
+  #hero0 { grid-row: 7; grid-column: 2; } #res0 { grid-row: 7; grid-column: 3; justify-self: end; }
+  .hero { width: 44px; height: 44px; } .hero .hp { font-size: 18px; }
+  .row { gap: 12px; }
+  .unit { border-radius: 9px; border-width: 2px; } .unit .un { font-size: 10px; top: 5px; }
+  .stat { width: 22px; height: 22px; font-size: 12px; bottom: -7px; } .stat.a { left: -5px; } .stat.h { right: -5px; }
+  .slot { border-radius: 9px; }
+  .gemc { display: none; } .manatxt { font-size: 15px; margin: 0; min-width: 0; }
+  .pile { width: 24px; height: 32px; font-size: 12px; }
+  #endturn { width: auto; min-height: 40px; padding: 0 12px; font-size: 14px; }
+  .card .nm { font-size: 10px; padding: 11px 4px 0; } .card .tx { display: none; } .card .stat { width: 20px; height: 20px; font-size: 11px; bottom: -8px; }
+  .card.hit .nm, .card.coin .nm { padding-top: 4px; }
+  .cgem { width: 20px; height: 20px; font-size: 12px; top: -6px; left: -6px; }
+  #hand { gap: 5px; flex-wrap: wrap; padding-top: 8px; }
+  #spot .card { --cardw: 110px; --cardh: 148px; }
+  #over h2 { font-size: 44px; }
+}
+
+</style>
+
+<div id="game">
+  <div id="top"><div id="opphand"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="hero1" class="herorow"></div>
+  <div id="back1" class="row rb"></div>
+  <div id="front1" class="row rf"></div>
+  <div id="front0" class="row rf"></div>
+  <div id="back0" class="row rb"></div>
+  <div id="hero0" class="herorow"></div>
+  <div id="res1" class="res"></div>
+  <div id="turnbox"></div>
+  <div id="res0" class="res"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Front and Back</h3>
+    <p>Life 20 each; bring the other to 0. Same 30-card deck for both. The first player starts with 3 cards, the second with 4 and the Coin (+1 mana this turn).</p>
+    <p><b>Your turn.</b> Mana +1 (up to 10) and refill, units ready, draw 1 (empty deck: lose 1 life, then 2, then 3). Play cards for their cost. A unit can't attack the turn it is played.</p>
+    <p><b>Rows.</b> Melee units go to your front row, Ranged units to your back row, 3 each at most.</p>
+    <p><b>Attack.</b> Each ready unit attacks once. It must hit an enemy front-row unit; only when the enemy front row is empty can it hit the back row or the player. A Melee attacker and its target deal their attack to each other; a Ranged attacker takes nothing back. Damage stays; 0 health destroys a unit.</p>
+    <p>Hit 2 / Hit 4: damage to any enemy unit, whatever its row.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 05 Front and back rows. Melee units stand in the front row, Ranged units in the back row.
+// Attacks must target the enemy front row; only when it is empty can they reach the back row or
+// the player. A Melee attacker and its target trade damage; a Ranged attacker takes nothing back.
+// Pure from the outside: act() and endTurn() clone the state.
+
+const LIFE = 20, MAX_MANA = 10, ROW = 3, TURN_CAP = 120;
+
+const CARDS = {
+  STR: { id: 'STR', name: 'Striker', kind: 'unit', ranged: false, cost: 1, atk: 2, hp: 1 },
+  WAL: { id: 'WAL', name: 'Wall', kind: 'unit', ranged: false, cost: 2, atk: 1, hp: 5 },
+  RAI: { id: 'RAI', name: 'Raider', kind: 'unit', ranged: false, cost: 2, atk: 3, hp: 2 },
+  LIN: { id: 'LIN', name: 'Line', kind: 'unit', ranged: false, cost: 3, atk: 3, hp: 4 },
+  HEA: { id: 'HEA', name: 'Heavy', kind: 'unit', ranged: false, cost: 5, atk: 5, hp: 6 },
+  SHO: { id: 'SHO', name: 'Shooter', kind: 'unit', ranged: true, cost: 2, atk: 1, hp: 2 },
+  GUN: { id: 'GUN', name: 'Gunner', kind: 'unit', ranged: true, cost: 3, atk: 2, hp: 2 },
+  CAN: { id: 'CAN', name: 'Cannon', kind: 'unit', ranged: true, cost: 5, atk: 4, hp: 3 },
+  H2: { id: 'H2', name: 'Hit 2', kind: 'hit', cost: 1, dmg: 2 },
+  H4: { id: 'H4', name: 'Hit 4', kind: 'hit', cost: 3, dmg: 4 },
+  COIN: { id: 'COIN', name: 'Coin', kind: 'coin', cost: 0 },
+};
+const DECK = { STR: 3, WAL: 3, RAI: 3, LIN: 3, HEA: 3, SHO: 3, GUN: 3, CAN: 3, H2: 3, H4: 3 };
+
+function deckList() { const out = []; for (const [id, k] of Object.entries(DECK)) for (let i = 0; i < k; i++) out.push(id); return out; }
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function newPlayer() { return { life: LIFE, mana: 0, maxMana: 0, fatigue: 0, hand: [], deck: deckList(), front: [], back: [] }; }
+const cu = (u) => ({ uid: u.uid, card: u.card, atk: u.atk, hp: u.hp, max: u.max, ready: u.ready, ranged: u.ranged });
+function clone(s) {
+  return { seed: s.seed, turnNo: s.turnNo, turn: s.turn, toAct: s.toAct, first: s.first, winner: s.winner, capped: s.capped, uid: s.uid,
+    p: s.p.map(p => ({ life: p.life, mana: p.mana, maxMana: p.maxMana, fatigue: p.fatigue, hand: p.hand.slice(), deck: p.deck.slice(), front: p.front.map(cu), back: p.back.map(cu) })) };
+}
+function emit(s, ev, e) { if (ev) { e.turnNo = s.turnNo; ev.push(e); } }
+function draw(s, side, ev) {
+  const p = s.p[side];
+  if (p.deck.length) { p.hand.push(p.deck.shift()); emit(s, ev, { t: 'draw', side }); return; }
+  p.fatigue++; p.life -= p.fatigue; emit(s, ev, { t: 'fatigue', side, n: p.fatigue, life: p.life });
+}
+
+function newMatch({ seed, first } = {}) {
+  const s = { seed: (seed >>> 0) || 1, turnNo: 0, turn: 0, toAct: 0, first: 0, winner: null, capped: false, uid: 1, p: [newPlayer(), newPlayer()] };
+  for (const p of s.p) shuffleInPlace(s, p.deck);
+  s.first = rand(s) < 0.5 ? 0 : 1;
+  if (first === 0 || first === 1) s.first = first;
+  for (let i = 0; i < 3; i++) draw(s, s.first, null);
+  for (let i = 0; i < 4; i++) draw(s, 1 - s.first, null);
+  s.p[1 - s.first].hand.push('COIN');
+  s.turn = s.toAct = s.first;
+  startTurn(s, null);
+  return s;
+}
+
+function checkWin(s, ev) {
+  if (s.winner !== null) return true;
+  const a = s.p[0].life <= 0, b = s.p[1].life <= 0;
+  if (!a && !b) return false;
+  s.winner = a && b ? 'draw' : a ? 1 : 0;
+  emit(s, ev, { t: 'end', winner: s.winner });
+  return true;
+}
+function startTurn(s, ev) {
+  const side = s.turn, p = s.p[side];
+  s.turnNo++;
+  emit(s, ev, { t: 'turn', side });
+  p.maxMana = Math.min(MAX_MANA, p.maxMana + 1);
+  p.mana = p.maxMana;
+  for (const u of p.front) u.ready = true;
+  for (const u of p.back) u.ready = true;
+  draw(s, side, ev);
+  checkWin(s, ev);
+}
+
+// where a unit stands: { row, i } in its owner's rows
+function find(P, uid) {
+  let i = P.front.findIndex(u => u.uid === uid); if (i >= 0) return { row: 'front', i, u: P.front[i] };
+  i = P.back.findIndex(u => u.uid === uid); if (i >= 0) return { row: 'back', i, u: P.back[i] };
+  return null;
+}
+// what an attack may hit: the enemy front row; when it is empty, the back row and the player (0)
+function attackTargets(O) { return O.front.length ? O.front.map(u => u.uid) : O.back.map(u => u.uid).concat([0]); }
+const canPlace = (P, id) => (CARDS[id].ranged ? P.back : P.front).length < ROW;
+
+// Actions: { t: 'play', card, tgt } (tgt: an enemy unit's uid, for Hit cards)
+//          { t: 'attack', from, to } (from: own unit uid; to: enemy unit uid, or 0 for the player)
+//          { t: 'end' }
+function legalActions(s) {
+  if (s.winner !== null) return [];
+  const me = s.turn, P = s.p[me], O = s.p[1 - me], out = [];
+  const seen = new Set();
+  for (const id of P.hand) {
+    if (seen.has(id)) continue; seen.add(id);
+    const c = CARDS[id];
+    if (c.cost > P.mana) continue;
+    if (c.kind === 'unit') { if (canPlace(P, id)) out.push({ t: 'play', card: id }); }
+    else if (c.kind === 'coin') out.push({ t: 'play', card: id });
+    else for (const u of O.front.concat(O.back)) out.push({ t: 'play', card: id, tgt: u.uid });
+  }
+  const tg = attackTargets(O);
+  for (const u of P.front.concat(P.back)) if (u.ready) for (const to of tg) out.push({ t: 'attack', from: u.uid, to });
+  out.push({ t: 'end' });
+  return out;
+}
+const actionKey = (a) => a.t === 'play' ? 'p' + a.card + (a.tgt ? ':' + a.tgt : '') : a.t === 'attack' ? 'a' + a.from + '>' + a.to : 'e';
+
+function sweep(s, ev) {
+  for (const side of [0, 1]) for (const row of ['front', 'back']) {
+    const R = s.p[side][row];
+    for (let i = R.length - 1; i >= 0; i--) if (R[i].hp <= 0) { emit(s, ev, { t: 'die', side, uid: R[i].uid, card: R[i].card }); R.splice(i, 1); }
+  }
+}
+function hit(s, side, u, n, ev) { u.hp -= n; emit(s, ev, { t: 'hit', side, uid: u.uid, n, hp: u.hp }); }
+
+function mAct(s, a, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  if (a.t === 'end') return mEndTurn(s, ev);
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  if (a.t === 'play') {
+    const c = CARDS[a.card], k = P.hand.indexOf(a.card);
+    if (k < 0 || c.cost > P.mana) throw new Error('illegal play ' + a.card);
+    if (c.kind === 'unit' && !canPlace(P, a.card)) throw new Error('row full');
+    let tu = null;
+    if (c.kind === 'hit') { const f = find(O, a.tgt); if (!f) throw new Error('bad target'); tu = f.u; }
+    P.mana -= c.cost; P.hand.splice(k, 1);
+    emit(s, ev, { t: 'play', side: me, card: a.card, tgt: a.tgt, mana: P.mana });
+    if (c.kind === 'unit') {
+      const u = { uid: s.uid++, card: a.card, atk: c.atk, hp: c.hp, max: c.hp, ready: false, ranged: c.ranged };
+      (c.ranged ? P.back : P.front).push(u); emit(s, ev, { t: 'summon', side: me, uid: u.uid, row: c.ranged ? 'back' : 'front' });
+    } else if (c.kind === 'coin') { P.mana += 1; emit(s, ev, { t: 'coin', side: me, mana: P.mana }); }
+    else { hit(s, 1 - me, tu, c.dmg, ev); sweep(s, ev); }
+  } else if (a.t === 'attack') {
+    const f = find(P, a.from);
+    if (!f || !f.u.ready) throw new Error('illegal attack');
+    const tg = attackTargets(O);
+    if (!tg.includes(a.to)) throw new Error('bad attack target');
+    const u = f.u; u.ready = false;
+    emit(s, ev, { t: 'attack', side: me, uid: u.uid, to: a.to });
+    if (a.to === 0) { O.life -= u.atk; emit(s, ev, { t: 'face', side: 1 - me, n: u.atk, life: O.life }); }
+    else {
+      const d = find(O, a.to).u, back = d.atk;
+      hit(s, 1 - me, d, u.atk, ev);
+      if (!u.ranged && back > 0) hit(s, me, u, back, ev);
+      sweep(s, ev);
+    }
+  } else throw new Error('unknown action');
+  checkWin(s, ev);
+}
+function mEndTurn(s, ev) {
+  emit(s, ev, { t: 'endturn', side: s.turn });
+  if (s.turnNo >= TURN_CAP) { s.winner = 'draw'; s.capped = true; emit(s, ev, { t: 'end', winner: 'draw' }); return; }
+  s.turn = s.toAct = 1 - s.turn;
+  startTurn(s, ev);
+}
+function act(s, a, ev) { const t = clone(s); mAct(t, a, ev); return t; }
+function _act(t, a) { mAct(t, a, null); return t; }
+
+// ---- src/bot.js
+// Bots for 05 Front and back rows. Each is a function (state, rng) -> one action for s.toAct.
+// None reads a hidden card: Expert reshuffles everything its side cannot see before each play-out.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pick = (a, rng) => a[Math.floor(rng() * a.length)];
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+const units = (P) => P.front.concat(P.back);
+
+// ------------------------------------------------------------------ Random
+function randomBot(s, rng) { return pick(legalActions(s), rng); }
+
+// ------------------------------------------------------------------ Greedy
+// plays the most expensive affordable card that does something (a unit with room in its row, a
+// Hit only where it destroys, the costliest such target), the Coin when it buys a dearer card;
+// then attacks: a kill the attacker survives first, then the player when the front is open,
+// then the weakest front unit; ends the turn when nothing is left.
+function hitTarget(O, dmg, frontOnly) {
+  let best = null;
+  for (const u of frontOnly ? O.front : units(O)) if (u.hp <= dmg && (!best || CARDS[u.card].cost > CARDS[best.card].cost || (CARDS[u.card].cost === CARDS[best.card].cost && u.atk > best.atk))) best = u;
+  return best;
+}
+function usefulPlay(P, O, id, frontOnly) {
+  const c = CARDS[id];
+  if (c.kind === 'unit') return canPlace(P, id) ? { t: 'play', card: id } : null;
+  if (c.kind === 'hit') { const u = hitTarget(O, c.dmg, frontOnly); return u ? { t: 'play', card: id, tgt: u.uid } : null; }
+  return null;
+}
+function bestPlay(s, frontOnly = false) {
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  const ids = [...new Set(P.hand)].filter(id => id !== 'COIN').sort((a, b) => CARDS[b].cost - CARDS[a].cost);
+  for (const id of ids) if (CARDS[id].cost <= P.mana) { const a = usefulPlay(P, O, id, frontOnly); if (a) return a; }
+  if (P.hand.includes('COIN')) for (const id of ids) if (CARDS[id].cost === P.mana + 1 && usefulPlay(P, O, id, frontOnly)) return { t: 'play', card: 'COIN' };
+  return null;
+}
+const survives = (u, d) => u.ranged || d.atk < u.hp;
+const value = (u) => CARDS[u.card].cost * 10 + u.atk;
+function safeKill(P, O) {
+  let best = null, bv = -1;
+  const tg = attackTargets(O).filter(x => x !== 0).map(uid => find(O, uid).u);
+  for (const u of units(P)) if (u.ready) for (const d of tg) if (u.atk >= d.hp && survives(u, d)) {
+    const v = value(d) * 100 - u.atk;
+    if (v > bv) { bv = v; best = { t: 'attack', from: u.uid, to: d.uid }; }
+  }
+  return best;
+}
+function strongestReady(P) {
+  let best = null;
+  for (const u of units(P)) if (u.ready && (!best || (u.ranged && !best.ranged) || (u.ranged === best.ranged && u.atk > best.atk))) best = u;
+  return best;
+}
+function greedyBot(s) {
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  const p = bestPlay(s); if (p) return p;
+  const k = safeKill(P, O); if (k) return k;
+  const a = strongestReady(P);
+  if (a && a.atk > 0) {
+    if (!O.front.length) return { t: 'attack', from: a.uid, to: 0 };
+    let w = O.front[0]; for (const d of O.front) if (d.hp < w.hp) w = d;
+    return { t: 'attack', from: a.uid, to: w.uid };
+  }
+  return { t: 'end' };
+}
+
+// ------------------------------------------------------------------ Racer
+// plays like Greedy (its Hits only on front units); every unit hits the player whenever the front
+// is open, otherwise the front unit it can destroy (Ranged first), otherwise the weakest front unit.
+function racerBot(s) {
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  const p = bestPlay(s, true); if (p) return p;
+  const ready = units(P).filter(u => u.ready && u.atk > 0).sort((a, b) => (b.ranged - a.ranged) || (b.atk - a.atk));
+  if (!ready.length) return { t: 'end' };
+  if (!O.front.length) return { t: 'attack', from: ready[0].uid, to: 0 };
+  for (const u of ready) { const d = O.front.filter(d => d.hp <= u.atk).sort((a, b) => b.hp - a.hp)[0]; if (d) return { t: 'attack', from: u.uid, to: d.uid }; }
+  let w = O.front[0]; for (const d of O.front) if (d.hp < w.hp) w = d;
+  return { t: 'attack', from: ready[0].uid, to: w.uid };
+}
+
+// ------------------------------------------------------------------ play-out policy
+// what Expert's play-outs assume both sides do: Greedy's plays, then only attacks that pay
+// (a kill it survives, the player when the front is open, free Ranged damage, a trade at least
+// even), and nothing else.
+function playoutBot(s) {
+  const me = s.turn, P = s.p[me], O = s.p[1 - me];
+  const p = bestPlay(s); if (p) return p;
+  const k = safeKill(P, O); if (k) return k;
+  const ready = units(P).filter(u => u.ready && u.atk > 0);
+  if (!ready.length) return { t: 'end' };
+  if (!O.front.length) return { t: 'attack', from: ready[0].uid, to: 0 };
+  let w = O.front[0]; for (const d of O.front) if (d.hp < w.hp) w = d;
+  const r = ready.find(u => u.ranged); if (r) return { t: 'attack', from: r.uid, to: w.uid };
+  for (const u of ready) for (const d of O.front) if (u.atk >= d.hp && value(d) >= value(u)) return { t: 'attack', from: u.uid, to: d.uid };
+  return { t: 'end' };
+}
+
+// ------------------------------------------------------------------ evaluation
+// a position's worth to `me`: life (more once low), units by attack and health (Ranged a little
+// more: they hit without being hit), cards in hand, mana growth
+const W = { life: 0.6, low: 0.5, lowAt: 8, atk: 1.0, hp: 0.6, unit: 0.8, ranged: 0.4, card: 1.4, mana: 0.2, open: 0.25 };
+const lifeWorth = (l) => W.life * l - W.low * Math.max(0, W.lowAt - l);
+function evaluate(s, me) {
+  if (s.winner === me) return 1000;
+  if (s.winner !== null) return s.winner === 'draw' ? 0 : -1000;
+  let v = 0;
+  for (const side of [0, 1]) {
+    const P = s.p[side], sg = side === me ? 1 : -1;
+    let x = lifeWorth(Math.max(0, P.life)) + W.card * P.hand.filter(id => id !== 'COIN').length + 0.4 * (P.hand.includes('COIN') ? 1 : 0) + W.mana * P.maxMana;
+    for (const u of P.front) x += W.atk * u.atk + W.hp * u.hp + W.unit;
+    for (const u of P.back) x += (W.atk + W.ranged) * u.atk + W.hp * u.hp + W.unit;
+    // an empty front row leaves the back row and life open to the other side's attackers
+    if (!P.front.length) { const O = s.p[1 - side]; let a = 0; for (const u of units(O)) a += u.atk; x -= W.open * a; }
+    v += sg * x;
+  }
+  return v;
+}
+const winProb = (s, me) => s.winner === me ? 1 : s.winner === 'draw' ? 0.5 : s.winner !== null ? 0 : 1 / (1 + Math.exp(-evaluate(s, me) / 6));
+
+// ------------------------------------------------------------------ Expert
+// Determinized play-outs: each candidate action is followed by Greedy on both sides (5% random
+// moves) for DEPTH turns, on a world where the cards this side cannot see are reshuffled, then the
+// position is scored as a win chance; successive halving spends the play-outs on the leaders.
+function determinize(s, me, rng) {
+  const t = clone(s), O = t.p[1 - me];
+  const pool = shuffle(O.hand.concat(O.deck), rng);
+  O.hand = pool.slice(0, O.hand.length); O.deck = pool.slice(O.hand.length);
+  shuffle(t.p[me].deck, rng);
+  return t;
+}
+// every arm's play-out stops at the same turn, counted from the decision's own turn
+function rollout(t, me, start, depth, rng, eps) {
+  let steps = 0;
+  while (t.winner === null && t.turnNo - start < depth && steps < 300) {
+    const a = eps > 0 && rng() < eps ? randomBot(t, rng) : playoutBot(t);
+    _act(t, a); steps++;
+  }
+  return winProb(t, me);
+}
+// symmetric actions collapse: same card on the same kind of target
+function symKey(s, a) {
+  const P = s.p[s.turn], O = s.p[1 - s.turn];
+  const d = (side, uid) => { const f = find(side, uid); return f ? f.u.card + f.u.hp : 'x'; };
+  if (a.t === 'attack') return 'a' + d(P, a.from) + '>' + (a.to === 0 ? 'face' : d(O, a.to));
+  if (a.t === 'play') return 'p' + a.card + (a.tgt ? '>' + d(O, a.tgt) : '');
+  return 'e';
+}
+function candidates(s, keep = 12) {
+  const me = s.toAct, seen = new Set(), all = [];
+  for (const a of legalActions(s)) { const k = symKey(s, a); if (!seen.has(k)) { seen.add(k); all.push(a); } }
+  const scored = all.map(a => ({ a, v: a.t === 'end' ? evaluate(s, me) : evaluate(act(s, a), me) })).sort((x, y) => y.v - x.v);
+  if (scored.length <= keep) return scored.map(x => x.a);
+  const g = actionKey(greedyBot(s)), out = scored.slice(0, keep).map(x => x.a);
+  for (const x of scored.slice(keep)) if (x.a.t === 'end' || actionKey(x.a) === g) out.push(x.a);
+  return out;
+}
+
+// the settings the sim and the set positions use; the page gives Expert a clock as well
+const EXPERT = { playouts: 400, depth: 6, eps: 0.05, keep: 12 };
+function expertBot({ playouts = 400, depth = 6, eps = 0.05, keep = 12, timeMs = 0 } = {}) {
+  return function (s, rng) {
+    const me = s.toAct;
+    const arms = candidates(s, keep);
+    if (arms.length === 1) return arms[0];
+    for (const a of arms) if (a.t !== 'end' && act(s, a).winner === me) return a;
+    let alive = arms.map(a => ({ a, w: 0, n: 0 }));
+    const rounds = Math.max(1, Math.ceil(Math.log2(alive.length)));
+    const t0 = timeMs ? Date.now() : 0;
+    for (let r = 0; r < rounds && alive.length > 1; r++) {
+      const per = Math.max(2, Math.floor(playouts / rounds / alive.length));
+      for (let i = 0; i < per; i++) {
+        const world = determinize(s, me, rng), seed = (rng() * 4294967296) >>> 0;
+        for (const st of alive) { const t = clone(world); _act(t, st.a); st.w += rollout(t, me, s.turnNo, depth, makeRng(seed), eps); st.n++; }
+        if (timeMs && Date.now() - t0 > timeMs) break;
+      }
+      alive.sort((x, y) => y.w / y.n - x.w / x.n);
+      alive = alive.slice(0, Math.ceil(alive.length / 2));
+      if (timeMs && Date.now() - t0 > timeMs) break;
+    }
+    return alive[0].a;
+  };
+}
+
+// ---- src/ui.js
+// 05 Front and back rows as a game screen against the Expert. Each action is animated from the
+// state before and the state after; the win tally is kept in this browser and decides who goes
+// first (alternating).
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-05-tally';
+const expert = expertBot({ ...EXPERT, playouts: 2400, timeMs: 1400 });
+const ui = { s: null, view: null, busy: false, over: false, sel: null, hist: [], fresh: 0, fx: {}, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+function cardHTML(id, side, { cls = '', attrs = '' } = {}) {
+  const c = CARDS[id];
+  let art, tx = '', kind = c.kind === 'unit' ? (c.ranged ? 'ranged' : 'melee') : c.kind;
+  if (c.kind === 'unit') { art = `<span class="stat a">${c.atk}</span><span class="stat h">${c.hp}</span>`; if (c.ranged) tx = `<div class="tx">Ranged</div>`; }
+  else if (c.kind === 'hit') { art = `<span class="big">${c.dmg}</span>`; tx = `<div class="tx">${c.dmg} damage to any enemy unit</div>`; }
+  else { art = `<span class="big">+1</span>`; tx = `<div class="tx">+1 mana this turn</div>`; }
+  return `<button class="card ${kind} s${side} ${cls}" ${attrs}><span class="cgem">${c.cost}</span><div class="art">${art}</div><div class="nm">${c.name}</div>${tx}</button>`;
+}
+
+// ------------------------------------------------------------------ what can be done now
+const myTurn = () => !ui.busy && !ui.over && ui.view.turn === ME;
+function targetsNow() {
+  const out = new Set();
+  if (!ui.sel || !myTurn()) return out;
+  for (const a of legalActions(ui.view)) {
+    if (ui.sel.kind === 'card' && a.t === 'play' && a.card === ui.sel.id && a.tgt) out.add(a.tgt);
+    if (ui.sel.kind === 'unit' && a.t === 'attack' && a.from === ui.sel.uid) out.add(a.to === 0 ? 'hero' : a.to);
+  }
+  return out;
+}
+const canAttack = (uid) => myTurn() && legalActions(ui.view).some(a => a.t === 'attack' && a.from === uid);
+
+// ------------------------------------------------------------------ rendering
+function heroHTML(side, T) {
+  const p = ui.view.p[side];
+  return `<div class="hero s${side}${side === BOT && T.has('hero') ? ' tgt' : ''} ${ui.fx['hero' + side] || ''}" id="hero${side}x" data-side="${side}" data-uid="0"><span class="hp">${p.life}</span></div>`;
+}
+function rowHTML(side, row, T) {
+  const R = ui.view.p[side][row];
+  let h = R.map(u => {
+    let cls = '';
+    if (side === ME && ui.sel && ui.sel.kind === 'unit' && ui.sel.uid === u.uid) cls += ' sel';
+    else if (side === ME && !ui.sel && canAttack(u.uid)) cls += ' can';
+    if (T.has(u.uid)) cls += ' tgt';
+    if (side === ui.view.turn && !u.ready) cls += ' sleep';
+    if (ui.fx['u' + u.uid]) cls += ' ' + ui.fx['u' + u.uid];
+    return `<div class="unit s${side}${u.ranged ? ' ranged' : ''}${cls}" id="u${u.uid}" data-side="${side}" data-uid="${u.uid}"><span class="un">${CARDS[u.card].name}</span><span class="stat a">${u.atk}</span><span class="stat h${u.hp < u.max ? ' hurt' : ''}">${u.hp}</span></div>`;
+  }).join('');
+  for (let i = R.length; i < ROW; i++) h += '<div class="slot"></div>';
+  return h;
+}
+function resHTML(side) {
+  const p = ui.view.p[side];
+  let gems = '';
+  for (let i = 0; i < MAX_MANA; i++) gems += `<i class="gemc${i < p.mana ? ' on' : i < p.maxMana ? '' : ' off'}"></i>`;
+  return `<div class="mana"><span class="manatxt">${p.mana}/${p.maxMana}</span>${gems}</div><div class="pile s${side}">${p.deck.length}</div>`;
+}
+function handHTML() {
+  const p = ui.view.p[ME], legal = myTurn() ? legalActions(ui.view) : [];
+  const R = { coin: 0, unit: 1, hit: 2 };
+  const order = p.hand.map((_, i) => i).sort((a, b) => { const A = CARDS[p.hand[a]], B = CARDS[p.hand[b]]; return R[A.kind] - R[B.kind] || A.cost - B.cost; });
+  return order.map(i => {
+    const id = p.hand[i], ok = legal.some(a => a.t === 'play' && a.card === id);
+    let cls = ok ? 'ok' : (myTurn() ? 'no' : '');
+    if (ok && ui.sel && ui.sel.kind === 'card' && ui.sel.hand === i) cls += ' sel';
+    if (ui.fresh && i === p.hand.length - 1) cls += ' drawn';
+    return cardHTML(id, ME, { cls, attrs: `data-hand="${i}"${ok ? '' : ' disabled'}` });
+  }).join('');
+}
+function histHTML(h) {
+  return `<div class="hist s${h.side}"><span class="chip ${h.kind} s${h.side}">${h.chip}</span><span class="ho ${h.cls || ''}">${h.out || ''}</span></div>`;
+}
+function render() {
+  const s = ui.view, T = targetsNow();
+  const t = loadTally();
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('opphand').innerHTML = '<i class="back"></i>'.repeat(s.p[BOT].hand.length);
+  for (const side of [0, 1]) {
+    $('hero' + side).innerHTML = heroHTML(side, T);
+    $('front' + side).innerHTML = rowHTML(side, 'front', T);
+    $('back' + side).innerHTML = rowHTML(side, 'back', T);
+    $('res' + side).innerHTML = resHTML(side);
+  }
+  $('hand').innerHTML = handHTML();
+  const mine = !ui.over && s.turn === ME, canAct = mine && !ui.busy && legalActions(s).some(a => a.t !== 'end');
+  $('turnbox').innerHTML = `<button id="endturn" class="${mine && !canAct ? 'done' : ''}"${mine && !ui.busy ? '' : ' disabled'}>End turn</button>`;
+  $('history').innerHTML = ui.hist.slice(-14).map(histHTML).join('');
+  ui.fresh = 0; ui.fx = {};
+}
+
+// ------------------------------------------------------------------ effects
+function centerOf(el) { const a = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - a.left + r.width / 2, y: r.top - a.top + r.height / 2 }; }
+function floatAt(p, text) { const f = document.createElement('div'); f.className = 'float'; f.textContent = text; f.style.left = p.x + 'px'; f.style.top = p.y + 'px'; $('game').appendChild(f); setTimeout(() => f.remove(), 1200); }
+function banner(text) { const b = $('banner'); b.textContent = text; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+function snapshot() { const out = {}; document.querySelectorAll('.unit, .hero').forEach(el => { out[el.id] = { c: centerOf(el), html: el.outerHTML, rect: el.getBoundingClientRect() }; }); return out; }
+async function spotlight(card, side) {
+  const g = $('game').getBoundingClientRect(), b = $('front1').getBoundingClientRect();
+  $('spot').style.left = (b.left - g.left + b.width / 2) + 'px'; $('spot').style.top = (b.bottom - g.top) + 'px';
+  $('spot').innerHTML = cardHTML(card, side);
+  await wait(700);
+  const c = $('spot').querySelector('.card'); if (c) c.classList.add('out');
+  await wait(180); $('spot').innerHTML = '';
+}
+async function lunge(fromEl, toEl, ranged) {
+  if (!fromEl || !toEl) return;
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+  if (ranged) {
+    const g = $('game').getBoundingClientRect(), d = document.createElement('div');
+    d.className = 'shot'; d.style.left = (a.left - g.left + a.width / 2) + 'px'; d.style.top = (a.top - g.top + a.height / 2) + 'px';
+    $('game').appendChild(d);
+    await d.animate([{ transform: 'translate(-50%,-50%)' }, { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))` }], { duration: 320, easing: 'ease-in' }).finished;
+    d.remove(); return;
+  }
+  fromEl.style.zIndex = 10;
+  await fromEl.animate([{ transform: 'translate(0,0)' }, { transform: `translate(${dx * .8}px, ${dy * .8}px)`, offset: .55 }, { transform: 'translate(0,0)' }], { duration: 420, easing: 'ease-in-out' }).finished;
+}
+function ghost(snap) {
+  const g = $('game').getBoundingClientRect(), d = document.createElement('div');
+  d.className = 'ghost'; d.innerHTML = snap.html; d.style.left = (snap.rect.left - g.left) + 'px'; d.style.top = (snap.rect.top - g.top) + 'px';
+  $('game').appendChild(d); setTimeout(() => d.remove(), 500);
+}
+
+// ------------------------------------------------------------------ playback
+async function apply(a) {
+  const qtok = ui.token;
+  const prev = ui.s, ev = [];
+  const next = act(prev, a, ev);
+  ui.s = next;
+  const playE = ev.find(e => e.t === 'play'), atkE = ev.find(e => e.t === 'attack');
+  if (playE && (playE.side === BOT || CARDS[playE.card].kind === 'hit')) await spotlight(playE.card, playE.side);
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  if (atkE) { const f = find(prev.p[atkE.side], atkE.uid); await lunge($('u' + atkE.uid), atkE.to === 0 ? $('hero' + (1 - atkE.side) + 'x') : $('u' + atkE.to), f && f.u.ranged); }
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  const before = snapshot();
+  for (const e of ev) {
+    if (e.t === 'turn') { ui.sel = null; if (e.side === ME) banner('Your turn'); }
+    if (e.t === 'summon') ui.fx['u' + e.uid] = 'new';
+    if (e.t === 'hit' && e.hp > 0) ui.fx['u' + e.uid] = 'shake';
+    if (e.t === 'face' || e.t === 'fatigue') ui.fx['hero' + e.side] = 'shake';
+    if (e.t === 'draw' && e.side === ME) ui.fresh = 1;
+  }
+  ui.view = next; render();
+  for (const e of ev) {
+    if (e.t === 'hit') { const p = before['u' + e.uid]; if (p) floatAt(p.c, '−' + e.n); }
+    if (e.t === 'face' || e.t === 'fatigue') { const p = before['hero' + e.side + 'x']; if (p) floatAt(p.c, '−' + e.n); }
+    if (e.t === 'die') { const p = before['u' + e.uid]; if (p) ghost(p); }
+  }
+  if (playE) {
+    const c = CARDS[playE.card], died = ev.some(e => e.t === 'die');
+    if (c.kind === 'unit') ui.hist.push({ side: playE.side, kind: c.ranged ? 'ranged' : 'melee', chip: `${c.atk}/${c.hp}` });
+    else if (c.kind === 'hit') ui.hist.push({ side: playE.side, kind: 'hit', chip: c.dmg, out: died ? '✕' : '−' + c.dmg, cls: died ? 'kill' : 'dmg' });
+    else ui.hist.push({ side: playE.side, kind: 'coin', chip: '+1' });
+  }
+  if (atkE) {
+    const f = find(prev.p[atkE.side], atkE.uid), atk = f ? f.u.atk : 0, killed = ev.some(e => e.t === 'die' && e.side !== atkE.side);
+    ui.hist.push({ side: atkE.side, kind: 'atk', chip: '⚔' + atk, out: atkE.to === 0 ? '−' + atk + ' life' : killed ? '✕' : '−' + atk, cls: atkE.to === 0 ? 'face' : killed ? 'kill' : 'dmg' });
+  }
+  if (ev.some(e => e.t === 'turn')) await wait(next.turn === ME ? 600 : 250);
+  if (qtok !== ui.token) return new Promise(() => {}); // a new game started meanwhile
+  if (next.winner !== null) finish();
+  render();
+}
+
+function finish() {
+  if (ui.over) return;
+  ui.over = true;
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+}
+
+// ------------------------------------------------------------------ flow
+async function startMatch() {
+  const tok = ++ui.token, t = loadTally();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0, first: (t[0] + t[1]) % 2 === 0 ? ME : BOT });
+  ui.view = ui.s; ui.over = false; ui.hist = []; ui.sel = null;
+  $('over').classList.remove('show');
+  ui.busy = true; render();
+  if (ui.s.first === ME) banner('Your turn');
+  await wait(900);
+  if (tok !== ui.token) return;
+  if (ui.s.turn === BOT) await botTurn(tok); else { ui.busy = false; render(); }
+}
+// the bot's turn, one action at a time, each shown before the next is chosen
+async function botTurn(tok) {
+  ui.busy = true; render();
+  await wait(350);
+  for (let k = 0; k < 40; k++) {
+    if (tok !== ui.token || ui.over || ui.s.turn !== BOT) break;
+    const a = expert(ui.s, ui.rng);
+    await wait(a.t === 'end' ? 300 : 250);
+    if (tok !== ui.token) return;
+    await apply(a);
+    if (a.t === 'end') break;
+  }
+  if (tok !== ui.token || ui.over) return;
+  ui.busy = false; render();
+}
+async function doAct(a) {
+  if (!myTurn()) return;
+  ui.busy = true; ui.sel = null;
+  await apply(a);
+  ui.busy = false; render();
+}
+async function myEndTurn() {
+  if (!myTurn()) return;
+  const tok = ui.token;
+  ui.busy = true; ui.sel = null; render();
+  await apply({ t: 'end' });
+  if (tok !== ui.token || ui.over) return;
+  await botTurn(tok);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#rulesbtn')) { $('rules').classList.add('show'); return; }
+  if (e.target.closest('#rulesclose') || e.target.id === 'rules') { $('rules').classList.remove('show'); return; }
+  const tgt = e.target.closest('.unit, .hero');
+  if (tgt && myTurn()) {
+    const side = +tgt.dataset.side, uid = +tgt.dataset.uid;
+    if (ui.sel && tgt.classList.contains('tgt')) {
+      if (ui.sel.kind === 'card') return doAct({ t: 'play', card: ui.sel.id, tgt: uid });
+      return doAct({ t: 'attack', from: ui.sel.uid, to: uid });
+    }
+    if (side === ME && uid && canAttack(uid)) { ui.sel = ui.sel && ui.sel.kind === 'unit' && ui.sel.uid === uid ? null : { kind: 'unit', uid }; render(); return; }
+  }
+  const b = e.target.closest('button');
+  if (b && !b.disabled && b.dataset.hand !== undefined) {
+    const i = +b.dataset.hand, id = ui.view.p[ME].hand[i], c = CARDS[id];
+    if (c.kind === 'hit') { ui.sel = ui.sel && ui.sel.kind === 'card' && ui.sel.hand === i ? null : { kind: 'card', id, hand: i }; render(); return; }
+    return doAct({ t: 'play', card: id });
+  }
+  if (b && !b.disabled) {
+    if (b.id === 'rematch' || b.id === 'newgame') return startMatch();
+    if (b.id === 'endturn') return myEndTurn();
+  }
+  if (ui.sel) { ui.sel = null; render(); }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (ui.sel) { ui.sel = null; render(); } $('rules').classList.remove('show'); } });
+// for the headless check: the live state and the page's own action entry points
+window.__game = { state: () => ui.s, busy: () => ui.busy, act: (a) => doAct(a), end: () => myEndTurn(), legal: () => legalActions(ui.s) };
+startMatch();
+
+})();
+</script>

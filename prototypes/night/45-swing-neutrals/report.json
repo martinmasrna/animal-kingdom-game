@@ -1,0 +1,254 @@
+{
+  "concept": "45-swing-neutrals",
+  "expert": {
+    "playouts": 2000,
+    "eps": 0.05
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 1,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 10.3,
+      "capped": 0
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.8375,
+      "draws": 0,
+      "firstPlayerWinRate": 0.4975,
+      "avgTurns": 15.7,
+      "capped": 0
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.92,
+      "draws": 0,
+      "firstPlayerWinRate": 0.5,
+      "avgTurns": 12.9,
+      "capped": 0
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.53,
+      "draws": 0,
+      "firstPlayerWinRate": 0.405,
+      "avgTurns": 22,
+      "capped": 0
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.508,
+      "avgTurns": 18.1,
+      "capped": 0
+    },
+    "racer-racer": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 0,
+      "firstPlayerWinRate": 0.524,
+      "avgTurns": 13,
+      "capped": 0
+    },
+    "greedy-racer": {
+      "games": 1000,
+      "aWinRate": 0.654,
+      "draws": 0,
+      "firstPlayerWinRate": 0.502,
+      "avgTurns": 13.9,
+      "capped": 0
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.8375,
+    "expertVsTrivialPass": true,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "expertGreedyAgreement": 0.4139,
+    "agreementDecisions": 11487,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.405,
+    "firstPlayerPass": true,
+    "setPositionsPass": true,
+    "seconds": 535,
+    "allPass": true
+  },
+  "cost": {
+    "expertTurnsMeasured": 15332,
+    "manaCap": 8,
+    "turnsAtManaCap": 0.259,
+    "turnsEndingWithManaUnspent": 0.428,
+    "manaUnspentPerTurn": 1.38,
+    "turnsWithACardInHandPricedOut": 0.75,
+    "turnsHandEmptied": 0.15,
+    "cardsPlayedPerTurn": 1.63,
+    "turnsSwayingTwoOrMoreNeutralsOfTurnsSwaying": 0.155,
+    "spreadsPerTurn": 0.192,
+    "exilesPerTurn": 0.162,
+    "shieldsPerTurn": 0.158
+  },
+  "sanity": [
+    {
+      "position": "lethal: he is on 4, a 4-attack Neutral at 1 toward me, Rally and Sway 1 in hand: Rally it",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "Sway 1→N3, Rally→N2"
+    },
+    {
+      "position": "lethal: he is on 4, a 4-attack Neutral at 1 toward me, Rally and Sway 1 in hand: Rally it",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "Rally→N2"
+    },
+    {
+      "position": "don't waste: no Sway on a Neutral already at 3 toward me",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "Sway 2→N3, Sway 1→N2, end"
+    },
+    {
+      "position": "don't waste: no Sway on a Neutral already at 3 toward me",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "Sway 1→N2, Sway 2→N3, end"
+    },
+    {
+      "position": "free swing: a 5-attack Neutral at 1 toward him and Sway 2 in hand: pull it to my side",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "Sway 2→N1, end"
+    },
+    {
+      "position": "free swing: a 5-attack Neutral at 1 toward him and Sway 2 in hand: pull it to my side",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "Sway 2→N1, end"
+    }
+  ],
+  "report": {
+    "verdict": "alive (after the one rule change: a Neutral hits at the start of its side's next turn)",
+    "numbers": "Changed rule: Expert beats Random 100%, Greedy 83.8%, Racer 92.0% (400 games each, seats alternated); Expert equals Greedy in 41.4% of 11,487 decisions; first player wins 40.5% of 400 Expert mirror games; 0 games hit the turn cap; Expert passes all three set positions on 5 seeds each. Games last 22 turns in the Expert mirror. As specified (hit at the end of your own turn) it failed the 70% line: Expert beat Greedy 64.0% and Racer 61.3%; first player 52.3%; 6.4 turns a game.",
+    "loop": [
+      "Each turn a player pulls Neutrals with the mana it has; a pull now pays only if it survives the other player's turn, so the choice is how far to pull one Neutral (past what the other can pull back) against pulling several by one.",
+      "Exile is the answer to a big Neutral pushed deep on the other side, Shield buys a turn against the hits that are coming, Rally finishes; Expert uses each (Exile 0.16, Shield 0.16, Spread 0.19 a turn).",
+      "Concentration wins over spreading: of the turns where Expert sways, it sways two or more Neutrals in 15.5%; the rest push one Neutral as far as the mana goes.",
+      "The second player is slightly favoured (first player 40.5% in the Expert mirror): the first pull of the game is answered before it hits."
+    ],
+    "cost": "Mana binds: a card in hand is priced out in 75% of turns, the cap of 8 is reached in 26% of turns, and 1.38 mana a turn goes unspent (43% of turns), mostly when the cards left do not fit the mana.",
+    "ruleChange": {
+      "from": "each Neutral leaning your way hits at the end of your turn",
+      "to": "each Neutral leaning your way hits at the start of your turn",
+      "why": "As specified, a pull paid off at the end of the same turn, before the other player could answer it, so a turn reduced to pulling the biggest Neutrals for damage now, the race lasted about three turns each, and the hand dealt decided it: Expert beat Greedy only 64%, and an oracle with perfect information that knew its opponent was Greedy (it tried every whole-turn plan and played each out with a one-turn lookahead of its own) beat Greedy only 68.3% over 60 games, so the shortfall was the game's, not the bot's. Moving the hit to the start of the owner's next turn makes the other player's turn an answer to every pull, which is the spread-or-concentrate decision the concept asks about."
+    },
+    "asSpecified": {
+      "rule": "hit at the end of your own turn, as in the spec",
+      "pairings": {
+        "expert-random": {
+          "games": 400,
+          "aWinRate": 0.9525,
+          "draws": 0,
+          "firstPlayerWinRate": 0.4875,
+          "avgTurns": 6.1,
+          "capped": 0
+        },
+        "expert-greedy": {
+          "games": 400,
+          "aWinRate": 0.64,
+          "draws": 0,
+          "firstPlayerWinRate": 0.515,
+          "avgTurns": 6.4,
+          "capped": 0
+        },
+        "expert-racer": {
+          "games": 400,
+          "aWinRate": 0.6125,
+          "draws": 0,
+          "firstPlayerWinRate": 0.5025,
+          "avgTurns": 6.2,
+          "capped": 0
+        },
+        "expert-expert": {
+          "games": 400,
+          "aWinRate": 0.4925,
+          "draws": 0,
+          "firstPlayerWinRate": 0.5225,
+          "avgTurns": 6.4,
+          "capped": 0
+        },
+        "greedy-greedy": {
+          "games": 1000,
+          "aWinRate": 0.5,
+          "draws": 0,
+          "firstPlayerWinRate": 0.54,
+          "avgTurns": 6.6,
+          "capped": 0
+        },
+        "racer-racer": {
+          "games": 1000,
+          "aWinRate": 0.5,
+          "draws": 0,
+          "firstPlayerWinRate": 0.558,
+          "avgTurns": 6.3,
+          "capped": 0
+        },
+        "greedy-racer": {
+          "games": 1000,
+          "aWinRate": 0.509,
+          "draws": 0,
+          "firstPlayerWinRate": 0.545,
+          "avgTurns": 6.4,
+          "capped": 0
+        }
+      },
+      "gate": {
+        "expertMinWinRateVsTrivial": 0.6125,
+        "expertVsTrivialPass": false,
+        "cappedRate": 0,
+        "cappedPass": true,
+        "expertGreedyAgreement": 0.5409,
+        "agreementDecisions": 4779,
+        "agreementPass": true,
+        "firstPlayerWinRateExpertMirror": 0.5225,
+        "firstPlayerPass": true,
+        "setPositionsPass": true,
+        "seconds": 79,
+        "allPass": false
+      },
+      "cost": {
+        "expertTurnsMeasured": 6318,
+        "manaCap": 8,
+        "turnsAtManaCap": 0,
+        "turnsEndingWithManaUnspent": 0.273,
+        "manaUnspentPerTurn": 0.43,
+        "turnsWithACardInHandPricedOut": 0.964,
+        "turnsHandEmptied": 0,
+        "cardsPlayedPerTurn": 1.2,
+        "turnsSwayingTwoOrMoreNeutralsOfTurnsSwaying": 0.083,
+        "spreadsPerTurn": 0.127,
+        "exilesPerTurn": 0.036,
+        "shieldsPerTurn": 0.086
+      },
+      "oracleVsGreedy": {
+        "games": 60,
+        "winRate": 0.683,
+        "what": "perfect information, knows the opponent is Greedy, tries every whole-turn plan and plays each out with a one-turn lookahead of its own"
+      }
+    },
+    "expertNote": "Expert plans whole turns: it enumerates every sequence of plays this turn (Draw 2 ends a sequence), tells them apart by the position they leave, and scores each by determinized play-outs (Greedy or Racer per side, 5% noise) with successive halving over 2,000 play-outs."
+  }
+}

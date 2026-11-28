@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bust Duel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="menu"><span id="tally"></span><button id="rules">Rules</button><button id="newmatch">New game</button></div>
+  <div id="history"></div>
+  <div id="side1" class="side"></div>
+  <div id="line1" class="line"></div>
+  <div id="market"></div>
+  <div id="line0" class="line"></div>
+  <div id="side0" class="side"></div>
+  <div id="controls"></div>
+  <div id="trim"></div>
+  <div id="spot"></div>
+  <div id="over"></div>
+  <div id="rulesbox"><div class="rulecard">
+    <h3>Bust duel</h3>
+    <p>Life 15 each; 15 rounds, then higher life wins.</p>
+    <p><b>Lines.</b> Taking turns one card at a time, each player either <b>draws</b> (the top card of their own deck goes face-up into their line; an empty deck reshuffles the discard) or <b>stops</b>. Once you stop or bust, the other continues alone.</p>
+    <p><b>Bust.</b> Red dots are strain. Strain 4 or more and your line counts as 0. Calm's green dot takes 1 away.</p>
+    <p><b>Clash.</b> The higher line wins; the loser loses the difference in life (at least 1, at most 5). Equal: nothing.</p>
+    <p><b>Buy.</b> Each player may buy one market card costing up to its line's power (2 if busted); it goes to the discard. The loser buys first.</p>
+    <p>Spoil: on draw, the opponent's line gains 1 strain, even if they stopped. Peek: on draw, see your top card. Trim: when bought, remove a card in your discard from the game.</p>
+    <p>Every deck starts with Step 1 ×4, Step 2 ×3, Risk 3 ×2, Crack ×1. The numbers by each deck list what is left in it.</p>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

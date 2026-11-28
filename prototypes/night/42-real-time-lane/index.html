@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Real-Time Lane</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #232a33; --table: #303b48; --ink: #1b1b1b; --paper: #f6f2e8;
+  --me: #3d7fd6; --me2: #2a5ea8; --him: #8a62b8; --him2: #5d3f86;
+  --gold: #f2b632; --ok: #5fdc6f; --mana: #3d8bf2;
+  --cardw: 96px; --cardh: 124px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden; }
+body { font: 15px/1.3 -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+button { font: inherit; cursor: pointer; }
+
+#game { position: relative; height: 100%; max-width: 1300px; margin: 0 auto; display: grid;
+  grid-template-columns: 170px minmax(0, 1fr); grid-template-rows: 48px minmax(0, 1fr) auto; gap: 8px 18px;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#top { grid-row: 1; grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+#opp { display: flex; align-items: center; gap: 10px; font-weight: 800; }
+.back { width: 20px; height: 28px; border-radius: 4px; background: linear-gradient(135deg, var(--him), var(--him2)); border: 2px solid #c9b6e6; }
+.oppmana { color: #d9c6f5; font-size: 18px; }
+#clock { font-size: 26px; font-weight: 900; font-variant-numeric: tabular-nums; }
+#clock.ot { color: var(--gold); }
+#menu { justify-self: end; display: flex; gap: 10px; align-items: center; }
+#menu button { min-height: 32px; padding: 4px 12px; border-radius: 6px; border: 1px solid #5b6a7a; background: rgba(0,0,0,.2); color: #dfe5eb; font-size: 14px; }
+.tally { display: flex; gap: 6px; font-weight: 900; font-size: 16px; }
+.tally b { min-width: 28px; height: 28px; padding: 0 8px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.tally .t0 { background: var(--me2); } .tally .t1 { background: var(--him2); }
+
+#history { grid-row: 2; grid-column: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; }
+.hist { display: flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,.22); border-left: 4px solid; font-size: 13px; font-weight: 700; }
+.hist.s0 { border-color: var(--me); } .hist.s1 { border-color: var(--him); }
+.hist .t { margin-left: auto; color: #9aa6b2; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* the lane: horizontal (my base left) or vertical (my base at the bottom) */
+#lane { grid-row: 2; grid-column: 2; position: relative; align-self: center; border-radius: 14px; background: var(--table); }
+#lane.h { height: min(300px, 100%); width: 100%; }
+#lane.v { width: min(260px, 100%); height: 100%; justify-self: center; }
+#lane .half { position: absolute; background: rgba(61,127,214,.08); }
+#lane.h .half { left: 0; top: 0; bottom: 0; width: 50%; border-right: 2px dashed rgba(255,255,255,.12); }
+#lane.v .half { left: 0; right: 0; bottom: 0; height: 50%; border-top: 2px dashed rgba(255,255,255,.12); }
+#lane.aiming { cursor: crosshair; }
+#lane.aiming.wall .half { background: rgba(95,220,111,.16); }
+.base { position: absolute; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; border: 4px solid #fff; border-radius: 10px; z-index: 2; }
+.base.s0 { background: var(--me2); } .base.s1 { background: var(--him2); }
+#lane.h .base { top: 50%; width: 64px; height: 84px; transform: translateY(-50%); }
+#lane.h #base0 { left: -14px; } #lane.h #base1 { right: -14px; }
+#lane.v .base { left: 50%; width: 84px; height: 52px; transform: translateX(-50%); }
+#lane.v #base0 { bottom: -12px; } #lane.v #base1 { top: -12px; }
+#units { position: absolute; inset: 0; }
+.u { position: absolute; width: 44px; height: 34px; margin: -17px 0 0 -22px; border-radius: 6px; border: 2px solid rgba(255,255,255,.85); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; transition: left .5s linear, top .5s linear; z-index: 3; }
+.u.s0 { background: var(--me); } .u.s1 { background: var(--him); }
+.u .n { font-size: 9px; font-weight: 700; opacity: .85; } .u .hp { font-size: 15px; font-weight: 900; }
+.u.big { width: 54px; height: 42px; margin: -21px 0 0 -27px; }
+.u.small { width: 32px; height: 26px; margin: -13px 0 0 -16px; } .u.small .n { display: none; }
+.u.wall { background: repeating-linear-gradient(45deg, rgba(255,255,255,.15) 0 6px, transparent 6px 12px), var(--me2); width: 22px; height: 70px; margin: -35px 0 0 -11px; }
+.u.wall.s1 { background: repeating-linear-gradient(45deg, rgba(255,255,255,.15) 0 6px, transparent 6px 12px), var(--him2); }
+#lane.v .u.wall { width: 70px; height: 22px; margin: -11px 0 0 -35px; }
+.u.hit { box-shadow: 0 0 0 3px #ff6a4d; }
+.boom { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255,140,60,.75), rgba(255,90,40,.15)); pointer-events: none; z-index: 4; animation: boom .6s ease-out forwards; }
+@keyframes boom { from { opacity: 1; transform: scale(.6); } to { opacity: 0; transform: scale(1.1); } }
+#aim { position: absolute; display: none; border-radius: 50%; border: 2px dashed var(--gold); pointer-events: none; z-index: 5; }
+.float { position: absolute; z-index: 30; pointer-events: none; font-weight: 900; font-size: 30px; color: #ff6a4d; text-shadow: 0 2px 0 rgba(0,0,0,.6); transform: translate(-50%, -50%); animation: floatup 1s ease-out forwards; }
+@keyframes floatup { 0% { opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -130%); } }
+.pop { position: absolute; z-index: 20; pointer-events: none; animation: popc 1.1s ease-out forwards; }
+@keyframes popc { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(.9); } }
+
+#bottom { grid-row: 3; grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 4px; }
+#mana { display: flex; align-items: center; gap: 4px; }
+#mana .seg { width: 34px; height: 14px; border-radius: 4px; background: #1d2a38; position: relative; overflow: hidden; }
+#mana .seg i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(180deg, #8cc2ff, var(--mana)); }
+#mana .num { font-size: 22px; font-weight: 900; color: #bcd9ff; width: 34px; text-align: center; }
+#hand { display: flex; gap: 10px; align-items: flex-end; }
+.card { position: relative; width: var(--cardw); height: var(--cardh); flex: 0 0 auto; border-radius: 9px; padding: 0; background: var(--paper); color: var(--ink); border: 3px solid #cbbd9c; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; }
+.card .cost { position: absolute; top: -9px; left: -9px; width: 28px; height: 28px; border-radius: 50%; background: var(--mana); border: 2px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; }
+.card .nm { font-weight: 800; font-size: 14px; }
+.card .tx { font-size: 12px; color: #4a453c; padding: 0 4px; }
+.card .stats { font-weight: 900; font-size: 16px; } .card .stats .a { color: #b07700; } .card .stats .h { color: #c0391f; }
+.card.ok { border-color: var(--ok); } .card.ok:hover { transform: translateY(-5px); }
+.card.sel { transform: translateY(-12px); border-color: var(--gold); }
+.card.no { filter: brightness(.6) saturate(.6); }
+.card.next { --cardw: 62px; --cardh: 80px; opacity: .75; margin-left: 10px; cursor: default; }
+.card.next .tx, .card.next .stats { display: none; } .card.next .nm { font-size: 11px; }
+.card.next .cost { width: 20px; height: 20px; font-size: 12px; top: -6px; left: -6px; }
+
+#banner { position: absolute; left: 0; right: 0; top: 42%; text-align: center; z-index: 25; pointer-events: none; font-size: 40px; font-weight: 900; opacity: 0; text-shadow: 0 3px 12px rgba(0,0,0,.7); }
+#banner.show { animation: banner 1s ease-out; }
+@keyframes banner { 0% { opacity: 0; } 20% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+#over { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: rgba(10,14,20,.6); }
+#over.show { display: flex; }
+#over h2 { margin: 0; font-size: 56px; font-weight: 900; } #over h2.win { color: #ffd36b; } #over h2.lose { color: #ff8a70; }
+#over button, #rules button { min-height: 46px; padding: 0 22px; border-radius: 10px; border: 0; font-weight: 800; font-size: 16px; background: var(--gold); color: #2a1d00; }
+#rules { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(10,14,20,.7); padding: 16px; }
+#rules.show { display: flex; }
+#rules .panel { max-width: 560px; max-height: 100%; overflow: auto; background: #2f3945; border-radius: 12px; padding: 18px 22px; font-size: 15px; }
+#rules h3 { margin: 0 0 8px; } #rules p { margin: 0 0 10px; }
+
+@media (max-width: 760px) {
+  :root { --cardw: 66px; --cardh: 90px; }
+  #game { grid-template-columns: minmax(0, 1fr); grid-template-rows: 40px minmax(0, 1fr) auto; gap: 6px; }
+  #history { display: none; }
+  #lane { grid-column: 1; }
+  #top { grid-template-columns: auto auto 1fr; gap: 8px; }
+  #clock { font-size: 18px; } .back { width: 12px; height: 18px; } #opp { gap: 4px; } .oppmana { font-size: 15px; }
+  #menu button { min-height: 28px; padding: 2px 8px; font-size: 13px; } .tally { font-size: 13px; } .tally b { min-width: 22px; height: 22px; }
+  #mana .seg { width: 22px; height: 12px; } #mana .num { font-size: 18px; }
+  #hand { gap: 6px; } .card .nm { font-size: 11px; } .card .tx { font-size: 9px; } .card .stats { font-size: 12px; }
+  .card .cost { width: 22px; height: 22px; font-size: 12px; top: -6px; left: -6px; }
+  .card.next { --cardw: 44px; --cardh: 60px; margin-left: 4px; } .card.next .nm { font-size: 9px; }
+  .u { width: 38px; height: 28px; margin: -14px 0 0 -19px; } .u .hp { font-size: 13px; }
+}
+
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="top"><div id="opp"></div><div id="clock"></div><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newgame">New game</button></div></div>
+  <div id="history"></div>
+  <div id="lane"><div class="half"></div><div id="base0" class="base s0"></div><div id="base1" class="base s1"></div><div id="units"></div><div id="aim"></div></div>
+  <div id="bottom"><div id="mana"></div><div id="hand"></div></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Real-Time Lane</h3>
+    <p>One lane, your base against the other's, 20 health each. The clock runs: 3 minutes. Destroy the other base, or have more base health when time runs out (level: one more minute, and the first base damage decides).</p>
+    <p><b>Mana</b> starts at 5 and grows by 1 every 2 seconds, up to 10. <b>Cards:</b> both decks hold the same 8 cards; you hold 4, the small card is next. A card you play goes to the back and the next one comes in.</p>
+    <p>Tap a card to play it. Units appear at your base and walk toward the other base. A unit hits the nearest enemy unit, Wall or base within its range ahead, otherwise it walks on, never past an enemy. Wall: tap a spot in your half; enemy units stop at it. Blast: tap a spot; 8 damage to every enemy unit within 1.5.</p>
+    <p>Numbers per half second: Runner 4 health, 1 damage, fast. Grunt 10/2. Shooter 4/1, range 3. Brute 14/3, slow. Tank 30/1, slowest. Swarm three of 2/1. Wall 20.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+(function () {
+"use strict";
+// ---- src/engine.js
+// 42 Real-time lane: one lane from A's base (0) to B's base (12). Mana flows by the clock and an
+// eight-card deck cycles through a hand of four. Time runs in ticks (0.5 s); both players act in
+// the same tick and the tick resolves both at once: step(s, [actionA, actionB], ev).
+
+const LEN = 12, BASE = 20, TICKS = 360, OVERTIME = 120, MANA0 = 5, MANA_MAX = 10, MANA_EVERY = 4, HAND = 4, BLAST_R = 1.5, BLAST_DMG = 8;
+const SPAWN = [0.5, 11.5];
+const DIR = [1, -1];
+
+const CARDS = {
+  RUN: { id: 'RUN', name: 'Runner', kind: 'unit', cost: 2, hp: 4, atk: 1, spd: 1.0, rng: 0.5 },
+  GRU: { id: 'GRU', name: 'Grunt', kind: 'unit', cost: 3, hp: 10, atk: 2, spd: 0.5, rng: 0.5 },
+  SHO: { id: 'SHO', name: 'Shooter', kind: 'unit', cost: 3, hp: 4, atk: 1, spd: 0.5, rng: 3 },
+  BRU: { id: 'BRU', name: 'Brute', kind: 'unit', cost: 4, hp: 14, atk: 3, spd: 0.4, rng: 0.5 },
+  TAN: { id: 'TAN', name: 'Tank', kind: 'unit', cost: 5, hp: 30, atk: 1, spd: 0.3, rng: 0.5 },
+  SWA: { id: 'SWA', name: 'Swarm', kind: 'unit', cost: 3, hp: 2, atk: 1, spd: 0.8, rng: 0.5, n: 3 },
+  BLA: { id: 'BLA', name: 'Blast', kind: 'blast', cost: 3 },
+  WAL: { id: 'WAL', name: 'Wall', kind: 'wall', cost: 4, hp: 20, atk: 0, spd: 0, rng: 0 },
+};
+const DECK = ['RUN', 'GRU', 'SHO', 'BRU', 'TAN', 'SWA', 'BLA', 'WAL'];
+
+function rand(s) {
+  let t = (s.seed = (s.seed + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffleInPlace(s, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+
+function newMatch({ seed } = {}) {
+  const s = { seed: (seed >>> 0) || 1, uid: 1, tick: 0, winner: null, capped: false, base: [BASE, BASE], mana: [MANA0, MANA0], queue: [DECK.slice(), DECK.slice()], seen: [[], []], units: [] };
+  for (const q of s.queue) shuffleInPlace(s, q);
+  return s;
+}
+function clone(s) {
+  return { ...s, base: s.base.slice(), mana: s.mana.slice(), queue: [s.queue[0].slice(), s.queue[1].slice()], seen: [s.seen[0].slice(), s.seen[1].slice()], units: s.units.map(u => ({ ...u })) };
+}
+const hand = (s, side) => s.queue[side].slice(0, HAND);
+const nextCard = (s, side) => s.queue[side][HAND];
+const half = (side, x) => side === 0 ? x >= SPAWN[0] && x <= LEN / 2 : x >= LEN / 2 && x <= SPAWN[1];
+const wallSpots = (side) => { const out = []; for (let x = 0.5; x <= 6.0001; x += 0.5) out.push(side === 0 ? x : LEN - x); return out; };
+const blastSpots = () => { const out = []; for (let x = 0.5; x <= 11.5001; x += 0.5) out.push(x); return out; };
+
+// Actions: { t: 'wait' } or { t: 'play', card, x } (x: where a Wall stands or a Blast lands)
+function canPlay(s, side, a) {
+  if (!a || a.t !== 'play') return true;
+  const c = CARDS[a.card];
+  if (!c || !hand(s, side).includes(a.card) || s.mana[side] < c.cost) return false;
+  if (c.kind === 'wall') return typeof a.x === 'number' && half(side, a.x);
+  if (c.kind === 'blast') return typeof a.x === 'number' && a.x >= 0 && a.x <= LEN;
+  return true;
+}
+function legalActions(s, side) {
+  if (s.winner !== null) return [];
+  const out = [{ t: 'wait' }];
+  for (const id of hand(s, side)) {
+    const c = CARDS[id];
+    if (s.mana[side] < c.cost) continue;
+    if (c.kind === 'unit') out.push({ t: 'play', card: id });
+    else if (c.kind === 'wall') for (const x of wallSpots(side)) out.push({ t: 'play', card: id, x });
+    else for (const x of blastSpots()) out.push({ t: 'play', card: id, x });
+  }
+  return out;
+}
+
+function emit(ev, e) { if (ev) ev.push(e); }
+function spawn(s, side, c, x, ev) {
+  const n = c.n || 1;
+  for (let i = 0; i < n; i++) {
+    const u = { uid: s.uid++, side, card: c.id, x, hp: c.hp, max: c.hp, atk: c.atk, spd: c.spd, rng: c.rng, wall: c.kind === 'wall' };
+    s.units.push(u); emit(ev, { t: 'spawn', side, uid: u.uid, card: c.id });
+  }
+}
+// the tick: mana, both plays, every unit acts, all damage at once
+function mStep(s, acts, ev) {
+  if (s.winner !== null) throw new Error('match over');
+  if (s.tick > 0 && s.tick % MANA_EVERY === 0) for (const side of [0, 1]) s.mana[side] = Math.min(MANA_MAX, s.mana[side] + 1);
+  const blasts = [];
+  for (const side of [0, 1]) {
+    const a = acts[side];
+    if (!a || a.t !== 'play') continue;
+    if (!canPlay(s, side, a)) throw new Error('illegal play ' + JSON.stringify(a));
+    const c = CARDS[a.card], q = s.queue[side];
+    s.mana[side] -= c.cost;
+    q.splice(q.indexOf(a.card), 1); q.push(a.card); s.seen[side].push(a.card);
+    emit(ev, { t: 'play', side, card: a.card, x: a.x });
+    if (c.kind === 'blast') blasts.push({ side, x: a.x });
+    else spawn(s, side, c, c.kind === 'wall' ? a.x : SPAWN[side], ev);
+  }
+  const dmgU = new Map(), dmgB = [0, 0];
+  for (const b of blasts) for (const u of s.units) if (u.side !== b.side && Math.abs(u.x - b.x) <= BLAST_R + 1e-9) { dmgU.set(u, (dmgU.get(u) || 0) + BLAST_DMG); emit(ev, { t: 'blast', side: b.side, x: b.x, uid: u.uid }); }
+  if (blasts.length) for (const b of blasts) emit(ev, { t: 'boom', side: b.side, x: b.x });
+  // nearest enemy unit ahead of each side's units, from positions before anyone moves
+  const U = s.units, moves = [];
+  for (const u of U) {
+    if (u.wall) continue;
+    const d = DIR[u.side];
+    let near = null, nd = Infinity;
+    for (const e of U) { if (e.side === u.side) continue; const dist = (e.x - u.x) * d; if (dist >= -1e-9 && dist < nd) { nd = dist; near = e; } }
+    if (near && nd <= u.rng + 1e-9) { dmgU.set(near, (dmgU.get(near) || 0) + u.atk); emit(ev, { t: 'atk', uid: u.uid, tgt: near.uid }); continue; }
+    const baseDist = d === 1 ? LEN - u.x : u.x;
+    if (!near && baseDist <= u.rng + 1e-9) { dmgB[1 - u.side] += u.atk; emit(ev, { t: 'atk', uid: u.uid, base: 1 - u.side }); continue; }
+    let nx = u.x + d * u.spd;
+    if (near) nx = d === 1 ? Math.min(nx, near.x) : Math.max(nx, near.x);
+    nx = Math.min(SPAWN[1], Math.max(SPAWN[0], nx));
+    moves.push([u, nx]);
+  }
+  for (const [u, nx] of moves) u.x = Math.round(nx * 1000) / 1000;
+  // two fronts that walked through each other meet halfway
+  let fa = -Infinity, fb = Infinity;
+  for (const u of U) if (u.side === 0) fa = Math.max(fa, u.x); else fb = Math.min(fb, u.x);
+  if (fa > fb + 1e-9) {
+    const m = Math.round((fa + fb) / 2 * 1000) / 1000;
+    for (const u of U) { if (u.side === 0 && u.x > m && !u.wall) u.x = m; if (u.side === 1 && u.x < m && !u.wall) u.x = m; }
+  }
+  for (const [u, n] of dmgU) { u.hp -= n; emit(ev, { t: 'hit', uid: u.uid, n }); }
+  for (const side of [0, 1]) if (dmgB[side]) { s.base[side] -= dmgB[side]; emit(ev, { t: 'base', side, n: dmgB[side], hp: s.base[side] }); }
+  for (let i = U.length - 1; i >= 0; i--) if (U[i].hp <= 0) { emit(ev, { t: 'die', uid: U[i].uid, side: U[i].side }); U.splice(i, 1); }
+  s.tick++;
+  const a0 = s.base[0] <= 0, a1 = s.base[1] <= 0;
+  if (a0 || a1) s.winner = a0 && a1 ? 'draw' : a0 ? 1 : 0;
+  else if (s.tick >= TICKS && s.base[0] !== s.base[1]) s.winner = s.base[0] > s.base[1] ? 0 : 1;
+  else if (s.tick >= TICKS + OVERTIME) { s.winner = 'draw'; s.capped = true; }
+  if (s.winner !== null) emit(ev, { t: 'end', winner: s.winner });
+}
+function step(s, acts, ev) { const t = clone(s); mStep(t, acts, ev); return t; }
+function _step(t, acts) { mStep(t, acts, null); return t; }
+const actionKey = (a) => a.t === 'wait' ? 'w' : a.card + (a.x !== undefined ? '@' + a.x : '');
+
+// ---- src/bot.js
+// Bots for 42 Real-time lane. Each is a function (state, side, rng) -> one action for that side
+// this tick. Bots decide every second tick (once a second); the page asks the same. None reads a
+// hidden card: Expert rebuilds the opponent's queue from the plays it has seen.
+
+
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  return function () {
+    let t = (a = (a + 0x6D2B79F5) | 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+const WAIT = { t: 'wait' };
+const DECIDE_EVERY = 2;
+
+const enemies = (s, side) => s.units.filter(u => u.side !== side);
+// the Blast spot that hits the most enemy units (ties: the most health hit)
+function densest(s, side) {
+  const E = enemies(s, side); let best = null;
+  for (const c of E) {
+    let n = 0, h = 0; for (const e of E) if (Math.abs(e.x - c.x) <= BLAST_R) { n++; h += Math.min(8, e.hp); }
+    if (!best || n > best.n || (n === best.n && h > best.h)) best = { x: c.x, n, h };
+  }
+  return best;
+}
+const clampHalf = (side, x) => side === 0 ? Math.min(6, Math.max(SPAWN[0], x)) : Math.max(6, Math.min(SPAWN[1], x));
+const snap = (x) => Math.round(x * 2) / 2;
+// a Wall just in front of the biggest enemy unit, inside the own half
+function wallSpot(s, side) {
+  const E = enemies(s, side).filter(u => !u.wall); if (!E.length) return null;
+  const big = E.reduce((a, b) => (b.hp > a.hp ? b : a));
+  return clampHalf(side, snap(big.x - DIR[side] * 0.5));
+}
+
+// ------------------------------------------------------------------ Random
+function randomBot(s, side, rng) {
+  const opts = [WAIT];
+  for (const id of hand(s, side)) {
+    const c = CARDS[id]; if (s.mana[side] < c.cost) continue;
+    if (c.kind === 'unit') opts.push({ t: 'play', card: id });
+    else if (c.kind === 'wall') { const sp = wallSpots(side); opts.push({ t: 'play', card: id, x: sp[Math.floor(rng() * sp.length)] }); }
+    else opts.push({ t: 'play', card: id, x: snap(0.5 + rng() * 11) });
+  }
+  return opts[Math.floor(rng() * opts.length)];
+}
+// ------------------------------------------------------------------ Greedy
+// the most expensive affordable card the moment it can; Blast at the densest enemy group, Wall
+// just in front of the biggest enemy unit (neither when there is no enemy unit)
+function playOf(s, side, id) {
+  const c = CARDS[id];
+  if (c.kind === 'unit') return { t: 'play', card: id };
+  if (c.kind === 'blast') { const d = densest(s, side); return d ? { t: 'play', card: id, x: d.x } : null; }
+  const x = wallSpot(s, side); return x === null ? null : { t: 'play', card: id, x };
+}
+function greedyBot(s, side) {
+  const ids = hand(s, side).filter(id => CARDS[id].cost <= s.mana[side]).sort((a, b) => CARDS[b].cost - CARDS[a].cost);
+  for (const id of ids) { const a = playOf(s, side, id); if (a) return a; }
+  return WAIT;
+}
+// ------------------------------------------------------------------ Racer
+function racerBot(s, side) {
+  const ids = hand(s, side).filter(id => CARDS[id].kind === 'unit' && CARDS[id].cost <= s.mana[side]).sort((a, b) => CARDS[b].cost - CARDS[a].cost);
+  return ids.length ? { t: 'play', card: ids[0] } : WAIT;
+}
+
+// ------------------------------------------------------------------ evaluation
+// base health, then the units: what is left of each one's price, and how far it has come
+function evaluate(s, me) {
+  if (s.winner === me) return 1000;
+  if (s.winner !== null) return s.winner === 'draw' ? 0 : -1000;
+  let v = 1.2 * (s.base[me] - s.base[1 - me]) + 0.35 * (s.mana[me] - s.mana[1 - me]);
+  for (const u of s.units) {
+    const c = CARDS[u.card], price = c.cost / (c.n || 1);
+    const prog = u.side === 0 ? u.x / LEN : (LEN - u.x) / LEN;
+    const w = price * (0.4 + 0.6 * u.hp / u.max) + (u.wall ? 0 : u.atk * prog * 1.2);
+    v += u.side === me ? w : -w;
+  }
+  return v;
+}
+const winProb = (s, me) => s.winner === me ? 1 : s.winner === 'draw' ? 0.5 : s.winner !== null ? 0 : 1 / (1 + Math.exp(-evaluate(s, me) / 6));
+
+// ------------------------------------------------------------------ Expert
+// rebuilds the opponent's queue: the cards it has played sit at the back in the order last played,
+// the others in front in an unknown order
+function determinize(s, me, rng) {
+  const t = clone(s), o = 1 - me, seen = s.seen[o], known = [];
+  for (let i = seen.length - 1; i >= 0 && known.length < DECK.length; i--) if (!known.includes(seen[i])) known.push(seen[i]);
+  known.reverse();
+  t.queue[o] = shuffle(DECK.filter(id => !known.includes(id)), rng).concat(known);
+  return t;
+}
+// the play-out policy: a player who waits for a random amount of mana, then plays a sensible card
+function policy(s, side, rng, th) {
+  const m = s.mana[side];
+  const E = enemies(s, side), mine = s.units.filter(u => u.side === side && !u.wall);
+  // a threat close to the base with nothing in front of it: answer now
+  const d = DIR[side], threat = E.some(e => !e.wall && (side === 0 ? e.x : LEN - e.x) < 5) && !mine.some(u => (side === 0 ? u.x : LEN - u.x) < 6);
+  if (m < th && !threat) return WAIT;
+  const opts = [];
+  for (const id of hand(s, side)) {
+    const c = CARDS[id]; if (c.cost > m) continue;
+    if (c.kind === 'unit') opts.push({ t: 'play', card: id });
+    else if (c.kind === 'blast') { const b = densest(s, side); if (b && (b.n >= 2 || b.h >= 6)) opts.push({ t: 'play', card: id, x: b.x }); }
+    else { const x = wallSpot(s, side); if (x !== null && E.some(e => !e.wall && (side === 0 ? e.x : LEN - e.x) < 7)) opts.push({ t: 'play', card: id, x }); }
+  }
+  if (!opts.length) return WAIT;
+  void d;
+  return opts[Math.floor(rng() * opts.length)];
+}
+function rollout(t, me, first, horizon, rng) {
+  const th = [3 + Math.floor(rng() * 6), 3 + Math.floor(rng() * 6)];
+  const end = t.tick + horizon;
+  let acts = first;
+  while (t.winner === null && t.tick < end) {
+    if (!acts) {
+      if (t.tick % DECIDE_EVERY === 0) acts = [policy(t, 0, rng, th[0]), policy(t, 1, rng, th[1])];
+      else acts = [WAIT, WAIT];
+    }
+    _step(t, acts); acts = null;
+  }
+  return winProb(t, me);
+}
+function candidates(s, me) {
+  const out = [WAIT], seen = new Set(['w']);
+  const add = (a) => { const k = a.card + '@' + a.x; if (!seen.has(k)) { seen.add(k); out.push(a); } };
+  const E = enemies(s, me);
+  for (const id of hand(s, me)) {
+    const c = CARDS[id]; if (c.cost > s.mana[me]) continue;
+    if (c.kind === 'unit') add({ t: 'play', card: id });
+    else if (c.kind === 'blast') {
+      const d = densest(s, me); if (d) add({ t: 'play', card: id, x: d.x });
+      for (const e of E) if (!e.wall) add({ t: 'play', card: id, x: snap(e.x) });
+    } else {
+      const x = wallSpot(s, me); if (x !== null) add({ t: 'play', card: id, x });
+      add({ t: 'play', card: id, x: me === 0 ? 3 : LEN - 3 }); add({ t: 'play', card: id, x: me === 0 ? 6 : LEN - 6 });
+    }
+  }
+  return out.slice(0, 14);
+}
+// the settings the sim and the set positions use (the page gives Expert more play-outs and a clock)
+const EXPERT = { playouts: 160, horizon: 40 };
+function expertBot({ playouts = 160, horizon = 40, timeMs = 0 } = {}) {
+  return function (s, me, rng) {
+    const arms = candidates(s, me);
+    if (arms.length === 1) return arms[0];
+    const stats = arms.map(a => ({ a, w: 0, n: 0 }));
+    let alive = stats.slice();
+    const rounds = Math.max(1, Math.ceil(Math.log2(alive.length)));
+    const t0 = timeMs ? Date.now() : 0;
+    for (let r = 0; r < rounds && alive.length > 1; r++) {
+      const per = Math.max(2, Math.floor(playouts / rounds / alive.length));
+      for (let i = 0; i < per; i++) {
+        const world = determinize(s, me, rng), seed = (rng() * 4294967296) >>> 0;
+        const prng = makeRng(seed), th = 3 + Math.floor(prng() * 6), oppFirst = policy(world, 1 - me, prng, th);
+        for (const st of alive) {
+          const t = clone(world), first = me === 0 ? [st.a, oppFirst] : [oppFirst, st.a];
+          st.w += rollout(t, me, first, horizon, makeRng(seed ^ 0x5bd1e995)); st.n++;
+        }
+        if (timeMs && Date.now() - t0 > timeMs) break;
+      }
+      alive.sort((x, y) => y.w / y.n - x.w / x.n);
+      alive = alive.slice(0, Math.ceil(alive.length / 2));
+      if (timeMs && Date.now() - t0 > timeMs) break;
+    }
+    return alive[0].a;
+  };
+}
+
+// ---- src/ui.js
+// 42 Real-time lane as a page: you (base at 0) against Expert, in real time. Every half second
+// the page calls the engine's step() with your queued action and Expert's, the same API the sim uses.
+
+
+
+const ME = 0, BOT = 1, TALLY_KEY = 'night-42-tally', TICK_MS = 500, W = { t: 'wait' };
+const expert = expertBot({ playouts: 600, horizon: 40, timeMs: 220 });
+const ui = { s: null, over: false, paused: false, sel: null, pending: null, hist: [], els: new Map(), timer: null, rng: makeRng((Date.now() ^ (Math.random() * 1e9)) >>> 0), token: 0 };
+const $ = (id) => document.getElementById(id);
+function loadTally() { try { const t = JSON.parse(localStorage.getItem(TALLY_KEY)); if (Array.isArray(t) && t.length === 2) return t; } catch (e) {} return [0, 0]; }
+function saveTally(t) { try { localStorage.setItem(TALLY_KEY, JSON.stringify(t)); } catch (e) {} }
+
+function cardHTML(id, { cls = '', attrs = '' } = {}) {
+  const c = CARDS[id];
+  let body = '';
+  if (c.kind === 'unit') body = `<div class="stats"><span class="h">${c.hp}${c.n ? '×' + c.n : ''}</span> · <span class="a">${c.atk}</span></div>`;
+  else if (c.kind === 'wall') body = `<div class="stats"><span class="h">${c.hp}</span></div><div class="tx">in your half</div>`;
+  else body = `<div class="tx">8 to enemy units within 1.5</div>`;
+  return `<button class="card ${cls}" ${attrs}><span class="cost">${c.cost}</span><div class="nm">${c.name}</div>${body}</button>`;
+}
+
+// ------------------------------------------------------------------ geometry
+const vertical = () => window.innerHeight > window.innerWidth;
+function lanePos(x, track) {
+  const L = $('lane'), w = L.clientWidth, h = L.clientHeight, pad = vertical() ? 44 : 58;
+  if (!vertical()) return { left: pad + (x / LEN) * (w - 2 * pad), top: h / 2 + track * Math.min(48, h / 6) };
+  return { left: w / 2 + track * Math.min(46, w / 6), top: h - pad - (x / LEN) * (h - 2 * pad) };
+}
+function laneX(ev) {
+  const L = $('lane'), r = L.getBoundingClientRect(), pad = vertical() ? 44 : 58;
+  const f = vertical() ? (r.bottom - pad - ev.clientY) / (r.height - 2 * pad) : (ev.clientX - r.left - pad) / (r.width - 2 * pad);
+  return Math.max(0.5, Math.min(11.5, Math.round(f * LEN * 2) / 2));
+}
+const trackOf = (u) => u.wall ? 0 : [0, -1, 1, -2, 2][u.uid % 5] * (u.side === ME ? 1 : 1);
+
+// ------------------------------------------------------------------ rendering
+function render(fx = {}) {
+  const s = ui.s, t = loadTally();
+  $('lane').className = (vertical() ? 'v' : 'h') + (ui.sel ? ' aiming' + (CARDS[ui.sel].kind === 'wall' ? ' wall' : '') : '');
+  $('tally').innerHTML = `<span class="tally"><b class="t0">${t[0]}</b><b class="t1">${t[1]}</b></span>`;
+  $('opp').innerHTML = '<i class="back"></i>'.repeat(HAND) + `<span class="oppmana">${s.mana[BOT]}</span>`;
+  const left = s.tick < TICKS ? TICKS - s.tick : TICKS + OVERTIME - s.tick, sec = Math.ceil(left / 2);
+  $('clock').textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+  $('clock').className = s.tick >= TICKS ? 'ot' : '';
+  $('base0').textContent = Math.max(0, s.base[0]); $('base1').textContent = Math.max(0, s.base[1]);
+  // units, one element each so they glide
+  const box = $('units'), alive = new Set();
+  for (const u of s.units) {
+    alive.add(u.uid);
+    let el = ui.els.get(u.uid);
+    const c = CARDS[u.card];
+    if (!el) { el = document.createElement('div'); el.className = `u s${u.side}${u.wall ? ' wall' : ''}${u.card === 'TAN' || u.card === 'BRU' ? ' big' : ''}${u.card === 'SWA' ? ' small' : ''}`; box.appendChild(el); ui.els.set(u.uid, el); const p = lanePos(u.x, trackOf(u)); el.style.left = p.left + 'px'; el.style.top = p.top + 'px'; void el.offsetWidth; }
+    el.innerHTML = u.wall ? `<span class="hp">${u.hp}</span>` : `<span class="n">${c.name}</span><span class="hp">${u.hp}</span>`;
+    el.classList.toggle('hit', !!fx[u.uid]);
+    const p = lanePos(u.x, trackOf(u)); el.style.left = p.left + 'px'; el.style.top = p.top + 'px';
+  }
+  for (const [uid, el] of ui.els) if (!alive.has(uid)) { el.remove(); ui.els.delete(uid); }
+  // mana and hand
+  let m = '';
+  for (let i = 0; i < MANA_MAX; i++) { const f = i < s.mana[ME] ? 100 : i === s.mana[ME] ? 100 * (s.tick % MANA_EVERY) / MANA_EVERY : 0; m += `<span class="seg"><i style="width:${f}%"></i></span>`; }
+  $('mana').innerHTML = `<span class="num">${s.mana[ME]}</span>${m}`;
+  $('hand').innerHTML = hand(s, ME).map(id => {
+    const ok = !ui.over && CARDS[id].cost <= s.mana[ME];
+    const on = ui.sel === id || (ui.pending && ui.pending.card === id);
+    return cardHTML(id, { cls: (ok ? 'ok' : 'no') + (on ? ' sel' : ''), attrs: `data-card="${id}"` });
+  }).join('') + cardHTML(nextCard(s, ME), { cls: 'next', attrs: 'disabled' });
+  $('history').innerHTML = ui.hist.slice(-16).map(h => `<div class="hist s${h.side}"><span>${h.txt}</span><span class="t">${h.time}</span></div>`).join('');
+}
+function floatAt(x, y, text) { const f = document.createElement('div'); f.className = 'float'; f.textContent = text; f.style.left = x + 'px'; f.style.top = y + 'px'; $('game').appendChild(f); setTimeout(() => f.remove(), 1100); }
+function centerIn(el) { const g = $('game').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - g.left + r.width / 2, y: r.top - g.top + r.height / 2 }; }
+function boom(x) {
+  const L = $('lane'), p = lanePos(x, 0), span = Math.abs(lanePos(x + BLAST_R, 0)[vertical() ? 'top' : 'left'] - p[vertical() ? 'top' : 'left']) * 2;
+  const d = document.createElement('div'); d.className = 'boom'; d.style.width = d.style.height = span + 'px'; d.style.left = (p.left - span / 2) + 'px'; d.style.top = (p.top - span / 2) + 'px'; L.appendChild(d); setTimeout(() => d.remove(), 650);
+}
+function popCard(id) {
+  const b = centerIn($('base1')), d = document.createElement('div'); d.className = 'pop';
+  d.innerHTML = cardHTML(id); d.style.left = (vertical() ? b.x + 80 : b.x - 80) + 'px'; d.style.top = (vertical() ? b.y + 70 : b.y) + 'px';
+  $('game').appendChild(d); setTimeout(() => d.remove(), 1150);
+}
+const clockText = (tick) => { const sec = Math.floor(tick / 2); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
+
+// ------------------------------------------------------------------ the clock
+function tickOnce(tok) {
+  if (tok !== ui.token || ui.over || ui.paused) return;
+  const s = ui.s;
+  const mine = ui.pending && canPlay(s, ME, ui.pending) ? ui.pending : W;
+  ui.pending = null;
+  const bot = s.tick % DECIDE_EVERY === 0 ? expert(s, BOT, ui.rng) : W;
+  const ev = [];
+  ui.s = step(s, [mine, bot], ev);
+  const fx = {};
+  for (const e of ev) {
+    if (e.t === 'hit') fx[e.uid] = 1;
+    if (e.t === 'play') { ui.hist.push({ side: e.side, txt: CARDS[e.card].name, time: clockText(s.tick) }); if (e.side === BOT) popCard(e.card); }
+  }
+  render(fx);
+  for (const e of ev) {
+    if (e.t === 'boom') boom(e.x);
+    if (e.t === 'base') { const p = centerIn($('base' + e.side)); floatAt(p.x, p.y - 30, '−' + e.n); }
+  }
+  if (ui.s.winner !== null) finish();
+}
+function finish() {
+  if (ui.over) return;
+  ui.over = true; clearInterval(ui.timer);
+  const w = ui.s.winner;
+  if (w === 0 || w === 1) { const t = loadTally(); t[w]++; saveTally(t); }
+  const t = w === 'draw' ? ['Draw', ''] : w === ME ? ['Victory', 'win'] : ['Defeat', 'lose'];
+  $('over').innerHTML = `<h2 class="${t[1]}">${t[0]}</h2><button id="rematch">Play again</button>`;
+  $('over').classList.add('show');
+  render();
+}
+function startMatch() {
+  const tok = ++ui.token;
+  clearInterval(ui.timer);
+  for (const el of ui.els.values()) el.remove();
+  ui.els.clear();
+  ui.s = newMatch({ seed: (Math.random() * 4294967296) >>> 0 });
+  ui.over = false; ui.hist = []; ui.sel = null; ui.pending = null;
+  $('over').classList.remove('show');
+  render();
+  const b = $('banner'); b.textContent = 'Go'; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show');
+  setTimeout(() => { if (tok === ui.token) ui.timer = setInterval(() => tickOnce(tok), TICK_MS); }, 800);
+}
+
+// ------------------------------------------------------------------ input
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (b && b.id === 'rulesbtn') { $('rules').classList.add('show'); ui.paused = true; return; }
+  if ((b && b.id === 'rulesclose') || e.target.id === 'rules') { $('rules').classList.remove('show'); ui.paused = false; return; }
+  if (b && (b.id === 'newgame' || b.id === 'rematch')) return startMatch();
+  if (ui.over || ui.paused) return;
+  if (b && b.dataset.card) {
+    const id = b.dataset.card, c = CARDS[id];
+    if (c.cost > ui.s.mana[ME]) return;
+    if (c.kind === 'unit') { ui.pending = { t: 'play', card: id }; ui.sel = null; }
+    else { ui.sel = ui.sel === id ? null : id; ui.pending = null; }
+    render(); return;
+  }
+  if (ui.sel && e.target.closest('#lane')) {
+    const x = laneX(e), a = { t: 'play', card: ui.sel, x };
+    if (canPlay(ui.s, ME, a)) { ui.pending = a; ui.sel = null; $('aim').style.display = 'none'; render(); }
+    return;
+  }
+  if (ui.sel) { ui.sel = null; $('aim').style.display = 'none'; render(); }
+});
+document.addEventListener('pointermove', (e) => {
+  const aim = $('aim');
+  if (!ui.sel || CARDS[ui.sel].kind !== 'blast' || !e.target.closest('#lane')) { aim.style.display = 'none'; return; }
+  const x = laneX(e), p = lanePos(x, 0), q = lanePos(x + BLAST_R, 0), span = Math.abs((vertical() ? q.top - p.top : q.left - p.left)) * 2;
+  aim.style.display = 'block'; aim.style.width = aim.style.height = span + 'px'; aim.style.left = (p.left - span / 2) + 'px'; aim.style.top = (p.top - span / 2) + 'px';
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { ui.sel = null; $('rules').classList.remove('show'); ui.paused = false; render(); } });
+window.addEventListener('resize', () => { if (ui.s) render(); });
+startMatch();
+
+})();
+</script>
+</body>
+</html>

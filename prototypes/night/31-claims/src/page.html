@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Claims</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*STYLE*/
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="history"></div>
+  <div id="info1" class="info"></div>
+  <div id="board1" class="board"></div>
+  <div id="board0" class="board"></div>
+  <div id="info0" class="info"></div>
+  <div id="side"><div id="menu"><span id="tally"></span><button id="rulesbtn">Rules</button><button id="newmatch">New game</button></div><div id="turnbox"></div></div>
+  <div id="names"></div>
+  <div id="hand"></div>
+  <div id="spot"></div>
+  <div id="banner"></div>
+  <div id="over"></div>
+  <div id="rules"><div class="panel">
+    <h3>Claims</h3>
+    <p>Both decks hold the same 24 cards: three of each card on the list. Life 20. Mana goes up by 1 each turn (max 10). Draw 1 each turn; an empty deck costs 1 life, then 2, then 3.</p>
+    <p><b>Play any card face-down and name any card on the list</b>, paying the named card's cost. The other player may <b>challenge</b>:</p>
+    <ul><li>Not challenged: it works as the named card for the rest of the game.</li>
+    <li>Challenged and true: the challenger loses 3 life, the card works.</li>
+    <li>Challenged and false: the card is discarded with no effect, the mana stays spent, the claimer loses 3 life.</li></ul>
+    <p>Units attack from the turn after they are played: an enemy unit (both deal their attack to each other; damage stays) or the enemy player. Up to 5 units a side. Hit 3 and Blast deal 3 and 5 damage to a unit or player; Draw 2 draws 2 cards.</p>
+    <p>Every card turns face-up when it leaves play, so discard piles show the truth. The second player starts with one more card and the Coin (+1 mana once).</p>
+    <p>Reduce the other player to 0 life.</p>
+    <button id="rulesclose">Close</button>
+  </div></div>
+</div>
+<script>
+/*SCRIPT*/
+</script>
+</body>
+</html>

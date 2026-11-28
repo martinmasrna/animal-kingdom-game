@@ -1,0 +1,333 @@
+{
+  "concept": "37-price-tracks",
+  "expert": {
+    "playouts": 2000,
+    "eps": 0.08
+  },
+  "pairings": {
+    "expert-random": {
+      "games": 400,
+      "aWinRate": 0.995,
+      "draws": 2,
+      "firstPlayerWinRate": 0.5025,
+      "avgTurns": 9.2,
+      "capped": 0,
+      "endedBy": {
+        "target": 400
+      }
+    },
+    "expert-greedy": {
+      "games": 400,
+      "aWinRate": 0.5837,
+      "draws": 9,
+      "firstPlayerWinRate": 0.725,
+      "avgTurns": 8.5,
+      "capped": 0,
+      "endedBy": {
+        "target": 400
+      }
+    },
+    "expert-racer": {
+      "games": 400,
+      "aWinRate": 0.8413,
+      "draws": 5,
+      "firstPlayerWinRate": 0.5625,
+      "avgTurns": 8.3,
+      "capped": 0,
+      "endedBy": {
+        "target": 400
+      }
+    },
+    "expert-expert": {
+      "games": 400,
+      "aWinRate": 0.4863,
+      "draws": 5,
+      "firstPlayerWinRate": 0.8,
+      "avgTurns": 8.9,
+      "capped": 0,
+      "endedBy": {
+        "target": 400
+      }
+    },
+    "greedy-greedy": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 24,
+      "firstPlayerWinRate": 0.718,
+      "avgTurns": 8.3,
+      "capped": 0,
+      "endedBy": {
+        "target": 1000
+      }
+    },
+    "racer-racer": {
+      "games": 1000,
+      "aWinRate": 0.5,
+      "draws": 32,
+      "firstPlayerWinRate": 0.574,
+      "avgTurns": 7.7,
+      "capped": 0,
+      "endedBy": {
+        "target": 1000
+      }
+    },
+    "greedy-racer": {
+      "games": 1000,
+      "aWinRate": 0.718,
+      "draws": 18,
+      "firstPlayerWinRate": 0.617,
+      "avgTurns": 7.9,
+      "capped": 0,
+      "endedBy": {
+        "target": 1000
+      }
+    }
+  },
+  "gate": {
+    "expertMinWinRateVsTrivial": 0.5837,
+    "expertVsTrivialPass": false,
+    "cappedRate": 0,
+    "cappedPass": true,
+    "expertGreedyAgreement": 0.5754,
+    "agreementDecisions": 9720,
+    "agreementPass": true,
+    "firstPlayerWinRateExpertMirror": 0.8,
+    "firstPlayerPass": false,
+    "setPositionsPass": true,
+    "seconds": 204,
+    "allPass": false
+  },
+  "cost": {
+    "expertTurnsMeasured": 8784,
+    "coinCap": 6,
+    "turnsStartingAtCoinCap": 0.11,
+    "turnsEndingAtCoinCap": 0.029,
+    "turnsEndingWithFourPlusCoin": 0.227,
+    "coinLeftPerTurn": 2.14,
+    "turnsWithAnActionCardPricedOut": 0.099,
+    "turnsEndingWithAnActionCardHeld": 0.14,
+    "boostsPerTurn": 0.337,
+    "crashesPerTurn": 0.319,
+    "spiesPerTurn": 0.166,
+    "turnsWithoutASale": 0,
+    "cardsPerSale": 2,
+    "pricePerCardSold": 4.3,
+    "goodsHeldAtTurnEnd": 2.02
+  },
+  "sanity": [
+    {
+      "position": "lethal: I play second this round, I am on 32 and he on 30, two Good Z in hand, Z at 4: sell them",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "sell 2 Z, Spy, end"
+    },
+    {
+      "position": "lethal: I play second this round, I am on 32 and he on 30, two Good Z in hand, Z at 4: sell them",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "sell 2 Z, Spy, end"
+    },
+    {
+      "position": "don't waste: no Boost on a good I hold none of (Z is the dearest; I hold X and Y)",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "Boost X, Boost X, sell 2 X, end"
+    },
+    {
+      "position": "don't waste: no Boost on a good I hold none of (Z is the dearest; I hold X and Y)",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "Boost X, Boost X, sell 2 X, end"
+    },
+    {
+      "position": "free crash: a Spy showed him four Good Z, I hold none and have 2 coin: Crash Z",
+      "bot": "greedy",
+      "pass": true,
+      "passed": 1,
+      "of": 1,
+      "example": "sell 2 X, Crash Z, end"
+    },
+    {
+      "position": "free crash: a Spy showed him four Good Z, I hold none and have 2 coin: Crash Z",
+      "bot": "expert",
+      "pass": true,
+      "passed": 5,
+      "of": 5,
+      "example": "sell 2 Y, Crash Z, end"
+    }
+  ],
+  "report": {
+    "verdict": "dead: first-player win rate outside 30-70% and Expert under 70% against Greedy, both as specified and after the one rule change",
+    "numbers": "After the change (40 ends the match at the end of the round), whole-turn Expert: beats Random 99.5%, Greedy 58.4%, Racer 84.1% (400 games each, seats alternated, draws count half); first player wins 80.0% of 400 Expert mirror games; Expert equals Greedy in 57.5% of 9,720 decisions; 0 games hit the round cap; set positions pass. As specified (40 wins at once): Expert 97.8% / 54.0% / 74.3% against Random / Greedy / Racer, first player 92.0% of 400 Expert mirror games. Greedy mirror first player: 83.4% as specified, 71.8% after the change.",
+    "loop": [
+      "Each turn a player sells one type of good (2.0 cards a sale at 4.3 a card in Expert play), Boosting it first when it can (0.34 a turn), and Crashes the good the other side is likely to sell (0.32 a turn); a match is a race to 40 in about four and a half turns each.",
+      "Reading the other hand matters: an Expert that saw his hand and knew he was Greedy beat Greedy 84% (100% as first player, 68% as second), against 58-67% for the honest Expert at 2,000 to 8,000 play-outs. So guessing what he holds is worth a lot, but the seat is worth more.",
+      "The first player wins 72-92% of mirrors with every bot and every Expert tried. Untested explanation: the first player sells each round first, and his Crash lands just before the second player sells, while the second player's Crash is half undone by the +1 at the round's end before the first player sells again."
+    ],
+    "cost": "Coin rarely binds: it starts a turn at its cap of 6 in 11% of turns and ends at the cap in 3%, but 2.14 coin a turn goes unspent and an action card is priced out in only 9.9% of turns; the limit is the 5 action cards in a 20-card deck, not the coin.",
+    "ruleChange": {
+      "from": "reaching 40 wins at once",
+      "to": "reaching 40 ends the match at the end of that round; the higher score wins",
+      "why": "In a four-turn race the first player's extra chance to cross 40 decided most games (92% in the Expert mirror); ending at the round's end gives both players the same number of sales. It brought the Expert mirror to 80-83%, still outside the line."
+    },
+    "expertsTried": {
+      "asSpecifiedAtomic1500": {
+        "firstPlayerMirror": 0.92,
+        "vsGreedy": 0.54
+      },
+      "changedAtomic1500": {
+        "firstPlayerMirror": 0.8325,
+        "vsGreedy": 0.595,
+        "vsRacer": 0.8137
+      },
+      "changedAtomic6000Mirror": {
+        "games": 140,
+        "firstPlayerWinRate": 0.768
+      },
+      "changedWholeTurn2000": {
+        "firstPlayerMirror": 0.8,
+        "vsGreedy": 0.5837,
+        "note": "the gate numbers above"
+      },
+      "changedWholeTurn2000Mirror100": {
+        "games": 100,
+        "firstPlayerWinRate": 0.74
+      },
+      "changedWholeTurn8000VsGreedy": {
+        "games": 100,
+        "winRate": 0.67,
+        "asFirst": 0.92,
+        "asSecond": 0.42
+      },
+      "changedCheatingVsGreedy": {
+        "games": 100,
+        "winRate": 0.84,
+        "asFirst": 1,
+        "asSecond": 0.68,
+        "what": "sees the hands and the deck order, knows the opponent plays Greedy"
+      }
+    },
+    "asSpecified": {
+      "rule": "40 wins at once, as in the spec",
+      "pairings": {
+        "expert-random": {
+          "games": 400,
+          "aWinRate": 0.9775,
+          "draws": 0,
+          "firstPlayerWinRate": 0.5225,
+          "avgTurns": 8.2,
+          "capped": 0,
+          "endedBy": {
+            "target": 400
+          }
+        },
+        "expert-greedy": {
+          "games": 400,
+          "aWinRate": 0.54,
+          "draws": 0,
+          "firstPlayerWinRate": 0.865,
+          "avgTurns": 7.8,
+          "capped": 0,
+          "endedBy": {
+            "target": 400
+          }
+        },
+        "expert-racer": {
+          "games": 400,
+          "aWinRate": 0.7425,
+          "draws": 0,
+          "firstPlayerWinRate": 0.7125,
+          "avgTurns": 7.6,
+          "capped": 0,
+          "endedBy": {
+            "target": 400
+          }
+        },
+        "expert-expert": {
+          "games": 400,
+          "aWinRate": 0.505,
+          "draws": 0,
+          "firstPlayerWinRate": 0.92,
+          "avgTurns": 8.1,
+          "capped": 0,
+          "endedBy": {
+            "target": 400
+          }
+        },
+        "greedy-greedy": {
+          "games": 1000,
+          "aWinRate": 0.5,
+          "draws": 0,
+          "firstPlayerWinRate": 0.834,
+          "avgTurns": 7.5,
+          "capped": 0,
+          "endedBy": {
+            "target": 1000
+          }
+        },
+        "racer-racer": {
+          "games": 1000,
+          "aWinRate": 0.5,
+          "draws": 0,
+          "firstPlayerWinRate": 0.716,
+          "avgTurns": 7,
+          "capped": 0,
+          "endedBy": {
+            "target": 1000
+          }
+        },
+        "greedy-racer": {
+          "games": 1000,
+          "aWinRate": 0.65,
+          "draws": 0,
+          "firstPlayerWinRate": 0.744,
+          "avgTurns": 7.2,
+          "capped": 0,
+          "endedBy": {
+            "target": 1000
+          }
+        }
+      },
+      "gate": {
+        "expertMinWinRateVsTrivial": 0.54,
+        "expertVsTrivialPass": false,
+        "cappedRate": 0,
+        "cappedPass": true,
+        "expertGreedyAgreement": 0.5927,
+        "agreementDecisions": 8525,
+        "agreementPass": true,
+        "firstPlayerWinRateExpertMirror": 0.92,
+        "firstPlayerPass": false,
+        "setPositionsPass": true,
+        "seconds": 159,
+        "allPass": false
+      },
+      "cost": {
+        "expertTurnsMeasured": 6805,
+        "coinCap": 6,
+        "turnsStartingAtCoinCap": 0.103,
+        "turnsEndingAtCoinCap": 0.016,
+        "turnsEndingWithFourPlusCoin": 0.14,
+        "coinLeftPerTurn": 1.7,
+        "turnsWithAnActionCardPricedOut": 0.127,
+        "turnsEndingWithAnActionCardHeld": 0.162,
+        "boostsPerTurn": 0.361,
+        "crashesPerTurn": 0.334,
+        "spiesPerTurn": 0.174,
+        "turnsWithoutASale": 0.004,
+        "cardsPerSale": 2.07,
+        "pricePerCardSold": 4.21,
+        "goodsHeldAtTurnEnd": 1.91
+      }
+    },
+    "expertNote": "The gate Expert plans whole turns: every sequence of sells and plays this turn (a Spy ends a sequence), told apart by the position it leaves, scored by determinized play-outs (Greedy or Racer per side, 8% noise, the opponent's Spied cards kept) with successive halving over 2,000 play-outs."
+  }
+}
