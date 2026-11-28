@@ -1,0 +1,118 @@
+{
+  "prototype": "13-open-discards",
+  "knob": "play-outs per candidate turn (turnSearch R)",
+  "N": 128,
+  "gamesPerPair": 200,
+  "seatsAlternated": "each deal played twice, seats swapped",
+  "score": "stronger rung: (wins + draws/2) / games, 95% Wilson interval",
+  "files": {
+    "engine": "853276e24974",
+    "bot": "9253ba45f41b"
+  },
+  "started": "2026-11-28T08:43:29.174Z",
+  "complete": true,
+  "pairs": [
+    {
+      "pair": "Greedy > Random",
+      "stronger": "Greedy",
+      "weaker": "Random",
+      "games": 200,
+      "wins": 200,
+      "draws": 0,
+      "losses": 0,
+      "score": 1,
+      "ci95": [
+        0.981,
+        1
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0
+    },
+    {
+      "pair": "Expert N > Greedy",
+      "stronger": "Expert N",
+      "weaker": "Greedy",
+      "games": 200,
+      "wins": 179,
+      "draws": 0,
+      "losses": 21,
+      "score": 0.895,
+      "ci95": [
+        0.845,
+        0.93
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 1.034
+    },
+    {
+      "pair": "Expert 4N > Expert N",
+      "stronger": "Expert 4N",
+      "weaker": "Expert N",
+      "games": 200,
+      "wins": 96,
+      "draws": 0,
+      "losses": 104,
+      "score": 0.48,
+      "ci95": [
+        0.412,
+        0.549
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 5.713
+    },
+    {
+      "pair": "Expert 8N > Expert 4N",
+      "stronger": "Expert 8N",
+      "weaker": "Expert 4N",
+      "games": 200,
+      "wins": 102,
+      "draws": 0,
+      "losses": 98,
+      "score": 0.51,
+      "ci95": [
+        0.441,
+        0.578
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 14.356
+    },
+    {
+      "pair": "Expert N > Expert N/4",
+      "stronger": "Expert N",
+      "weaker": "Expert N/4",
+      "games": 200,
+      "wins": 108,
+      "draws": 0,
+      "losses": 92,
+      "score": 0.54,
+      "ci95": [
+        0.471,
+        0.608
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 1.49
+    }
+  ],
+  "top": 8,
+  "topChoice": {
+    "tried": [
+      16,
+      8
+    ],
+    "budgetCpuSec": 4500,
+    "projectedCpuSec": 2742
+  },
+  "gateMirror": {
+    "games": 400,
+    "draws": 0,
+    "drawRate": 0
+  },
+  "filesChangedDuringRun": false,
+  "finished": "2026-11-28T09:58:49.670Z",
+  "wallSeconds": 4520
+}

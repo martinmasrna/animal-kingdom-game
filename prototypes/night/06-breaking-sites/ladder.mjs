@@ -1,9 +1,10 @@
-// node ladder.mjs [games=200] [tops=16,8] [budgetMin=90] [vsRandom=0] [progress=<file>] [calib=1]
+// node ladder.mjs [games=200] [tops=16,8] [budgetMin=90] [vsRandom=0] [low=1] [progress=<file>] [calib=1]
 // Skill ladder for 06-breaking-sites (// generated ladder): Random < Greedy < Expert N < Expert 4N < Expert top, where
 // N is the gate's Expert budget and top is 16N unless the 16N-vs-4N games would take more than
 // budgetMin CPU-minutes (projected from the 4N-vs-N games), then the next entry of tops.
 // Each adjacent pair plays `games` games, seats alternated on the same deals; the stronger rung's
-// score (wins + draws/2) gets a 95% Wilson interval. vsRandom=n adds top vs Random over n games.
+// score (wins + draws/2) gets a 95% Wilson interval. vsRandom=n adds top vs Random over n games;
+// low=1 adds Expert N against Expert N/4, to see whether the search already saturates below N.
 // Writes ladder.json after every pair. calib=1 writes nothing: two Greedy-Random games and two
 // Expert N mirror games, and their CPU cost.
 import { writeFileSync, readFileSync, existsSync, appendFileSync } from 'node:fs';
@@ -23,11 +24,11 @@ function playGame(bots, seed, rngSeed) {
 // ---------- the ladder (shared by every prototype) ----------
 const args = Object.fromEntries(process.argv.slice(2).map(a => { const i = a.indexOf('='); return i < 0 ? [a, '1'] : [a.slice(0, i), a.slice(i + 1)]; }));
 const G = +(args.games || 200), TOPS = (args.tops || '16,8').split(',').map(Number);
-const BUDGET = +(args.budgetMin || 90) * 60, VSR = +(args.vsRandom || 0), PROG = args.progress || null;
+const BUDGET = +(args.budgetMin || 90) * 60, VSR = +(args.vsRandom || 0), LOW = !!args.low, PROG = args.progress || null;
 const here = (f) => new URL('./' + f, import.meta.url);
 const sha = (f) => createHash('sha1').update(readFileSync(here(f))).digest('hex').slice(0, 12);
 const cpu = () => { const u = process.cpuUsage(); return (u.user + u.system) / 1e6; };
-const rung = (k) => k === 0 ? { name: 'Random' } : k === -1 ? { name: 'Greedy' } : { name: k === 1 ? 'Expert N' : `Expert ${k}N`, k };
+const rung = (k) => k === 0 ? { name: 'Random' } : k === -1 ? { name: 'Greedy' } : { name: k === 1 ? 'Expert N' : k < 1 ? `Expert N/${1 / k}` : `Expert ${k}N`, k };
 const make = (r) => r.name === 'Random' ? RANDOM() : r.name === 'Greedy' ? GREEDY() : EXPERT(r.k);
 function wilson(p, n, z = 1.96) {
   const d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d;
@@ -85,6 +86,8 @@ if (args.calib) {
   out.topChoice = { tried: TOPS, budgetCpuSec: BUDGET, projectedCpuSec: Math.round(p41.cpuSecPerGame * (4 + top) / 5 * G) };
   out.pairs.push(runPair(rung(top), rung(4), G, 63000)); save();
   if (VSR) { out.pairs.push(runPair(rung(top), rung(0), VSR, 64000)); save(); }
+  // below the ladder: is N itself past the point where search stops paying?
+  if (LOW) { out.pairs.push(runPair(rung(1), rung(0.25), G, 65000)); save(); }
   out.gateMirror = gateMirror();
   out.filesChangedDuringRun = sha('src/engine.js') !== files.engine || sha('src/bot.js') !== files.bot;
   out.complete = true; out.finished = new Date().toISOString(); out.wallSeconds = Math.round((Date.now() - t0) / 1000);

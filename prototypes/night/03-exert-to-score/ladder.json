@@ -9,8 +9,7 @@
     "engine": "9802d1a58d76",
     "bot": "c9dc22d67bea"
   },
-  "started": "2026-11-28T06:53:29.247Z",
-  "complete": false,
+  "complete": true,
   "pairs": [
     {
       "pair": "Greedy > Random",
@@ -45,6 +44,73 @@
       "drawRate": 0,
       "capped": 0,
       "cpuSecPerGame": 1.692
+    },
+    {
+      "pair": "Expert 4N > Expert N",
+      "stronger": "Expert 4N",
+      "weaker": "Expert N",
+      "games": 200,
+      "wins": 99,
+      "draws": 0,
+      "losses": 101,
+      "score": 0.495,
+      "ci95": [
+        0.426,
+        0.564
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 8.352
+    },
+    {
+      "pair": "Expert 8N > Expert 4N",
+      "stronger": "Expert 8N",
+      "weaker": "Expert 4N",
+      "games": 200,
+      "wins": 97,
+      "draws": 0,
+      "losses": 103,
+      "score": 0.485,
+      "ci95": [
+        0.417,
+        0.554
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 22.258
+    },
+    {
+      "pair": "Expert N > Expert N/4",
+      "stronger": "Expert N",
+      "weaker": "Expert N/4",
+      "games": 200,
+      "wins": 100,
+      "draws": 0,
+      "losses": 100,
+      "score": 0.5,
+      "ci95": [
+        0.431,
+        0.569
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 1.992
     }
-  ]
+  ],
+  "top": 8,
+  "topChoice": {
+    "tried": [
+      16,
+      8
+    ],
+    "budgetCpuSec": 4500,
+    "projectedCpuSec": 4009
+  },
+  "gateMirror": {
+    "games": 400,
+    "draws": 0,
+    "drawRate": 0
+  },
+  "filesChangedDuringRun": false,
+  "note": "Expert N > Expert N/4 was added in a second run (finished 2026-11-28); the other pairs are the first run's games, replayed from its record"
 }

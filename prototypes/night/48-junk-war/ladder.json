@@ -1,0 +1,135 @@
+{
+  "prototype": "48-junk-war",
+  "knob": "play-out budget per decision (expertBot budget)",
+  "N": 2000,
+  "gamesPerPair": 200,
+  "seatsAlternated": "each deal played twice, seats swapped",
+  "score": "stronger rung: (wins + draws/2) / games, 95% Wilson interval",
+  "files": {
+    "engine": "6d7bfae38c98",
+    "bot": "cf3e41a6d937"
+  },
+  "started": "2026-11-28T14:22:10.990Z",
+  "complete": true,
+  "pairs": [
+    {
+      "pair": "Greedy > Random",
+      "stronger": "Greedy",
+      "weaker": "Random",
+      "games": 200,
+      "wins": 170,
+      "draws": 0,
+      "losses": 30,
+      "score": 0.85,
+      "ci95": [
+        0.794,
+        0.893
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0
+    },
+    {
+      "pair": "Expert N > Greedy",
+      "stronger": "Expert N",
+      "weaker": "Greedy",
+      "games": 200,
+      "wins": 157,
+      "draws": 0,
+      "losses": 43,
+      "score": 0.785,
+      "ci95": [
+        0.723,
+        0.836
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0.452
+    },
+    {
+      "pair": "Expert 4N > Expert N",
+      "stronger": "Expert 4N",
+      "weaker": "Expert N",
+      "games": 200,
+      "wins": 97,
+      "draws": 0,
+      "losses": 103,
+      "score": 0.485,
+      "ci95": [
+        0.417,
+        0.554
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 2.455
+    },
+    {
+      "pair": "Expert 16N > Expert 4N",
+      "stronger": "Expert 16N",
+      "weaker": "Expert 4N",
+      "games": 200,
+      "wins": 100,
+      "draws": 0,
+      "losses": 100,
+      "score": 0.5,
+      "ci95": [
+        0.431,
+        0.569
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 9.344
+    },
+    {
+      "pair": "Expert 16N > Random",
+      "stronger": "Expert 16N",
+      "weaker": "Random",
+      "games": 100,
+      "wins": 96,
+      "draws": 0,
+      "losses": 4,
+      "score": 0.96,
+      "ci95": [
+        0.902,
+        0.984
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 6.871
+    },
+    {
+      "pair": "Expert N > Expert N/4",
+      "stronger": "Expert N",
+      "weaker": "Expert N/4",
+      "games": 200,
+      "wins": 99,
+      "draws": 0,
+      "losses": 101,
+      "score": 0.495,
+      "ci95": [
+        0.426,
+        0.564
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0.623
+    }
+  ],
+  "top": 16,
+  "topChoice": {
+    "tried": [
+      16,
+      8
+    ],
+    "budgetCpuSec": 4500,
+    "projectedCpuSec": 1964
+  },
+  "gateMirror": {
+    "games": 400,
+    "draws": 0,
+    "drawRate": 0
+  },
+  "filesChangedDuringRun": false,
+  "finished": "2026-11-28T15:16:33.165Z",
+  "wallSeconds": 3262
+}

@@ -1,11 +1,12 @@
-// node ladder.mjs [games=200] [tops=16,8] [budgetMin=90] [progress=<file>] [calib=1]
+// node ladder.mjs [games=200] [tops=16,8] [budgetMin=90] [low=1] [progress=<file>] [calib=1]
 // Skill ladder for 41-wave-defense, one player against the game: Random < Greedy < Expert N <
 // Expert 4N < Expert top, where N is the gate's Expert budget (play-outs per decision) and top is
 // 16N unless its games would take more than budgetMin CPU-minutes (projected from the 4N games),
 // then the next entry of tops. Every rung plays the same `games` seeded games (the rules as gated:
 // flat mana 4); each adjacent pair is compared game by game as the gate does (a win beats a loss;
 // two wins, more Wall; two losses, more rounds), the stronger rung's score being (better + even/2)
-// / games with a 95% Wilson interval. Writes ladder.json after every rung.
+// / games with a 95% Wilson interval. low=1 adds Expert N/4, compared with Expert N. Writes
+// ladder.json after every rung.
 import { writeFileSync, readFileSync, existsSync, appendFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { newMatch, act } from './src/engine.js';
@@ -15,11 +16,11 @@ const NAME = '41-wave-defense', KNOB = 'play-out budget per decision (expertBot 
 const N = JSON.parse(readFileSync(new URL('./report.json', import.meta.url), 'utf8')).budget;
 const args = Object.fromEntries(process.argv.slice(2).map(a => { const i = a.indexOf('='); return i < 0 ? [a, '1'] : [a.slice(0, i), a.slice(i + 1)]; }));
 const G = +(args.games || 200), TOPS = (args.tops || '16,8').split(',').map(Number);
-const BUDGET = +(args.budgetMin || 90) * 60, PROG = args.progress || null;
+const BUDGET = +(args.budgetMin || 90) * 60, LOW = !!args.low, PROG = args.progress || null;
 const here = (f) => new URL('./' + f, import.meta.url);
 const sha = (f) => createHash('sha1').update(readFileSync(here(f))).digest('hex').slice(0, 12);
 const cpu = () => { const u = process.cpuUsage(); return (u.user + u.system) / 1e6; };
-const name = (k) => k === 0 ? 'Random' : k === -1 ? 'Greedy' : k === 1 ? 'Expert N' : `Expert ${k}N`;
+const name = (k) => k === 0 ? 'Random' : k === -1 ? 'Greedy' : k === 1 ? 'Expert N' : k < 1 ? `Expert N/${1 / k}` : `Expert ${k}N`;
 const make = (k) => k === 0 ? randomBot : k === -1 ? (s) => greedyBot(s) : expertBot({ budget: k * N });
 function wilson(p, n, z = 1.96) {
   const d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d;
@@ -82,6 +83,7 @@ if (args.calib) {
   out.top = top; out.topChoice = { tried: TOPS, budgetCpuSec: BUDGET, projectedCpuSec: Math.round(R.at(-1).cpuSecPerGame * top / 4 * G) };
   R.push(runRung(top)); out.rungs.push(strip(R.at(-1))); out.pairs.push(compare(R.at(-1), R.at(-2)));
   out.pairs.push(compare(R.at(-1), R[0]));
+  if (LOW) { const q = runRung(0.25); out.rungs.push(strip(q)); out.pairs.push(compare(R[2], q)); }
   out.filesChangedDuringRun = sha('src/engine.js') !== files.engine || sha('src/bot.js') !== files.bot;
   out.complete = true; out.finished = new Date().toISOString(); out.wallSeconds = Math.round((Date.now() - t0) / 1000);
   save();

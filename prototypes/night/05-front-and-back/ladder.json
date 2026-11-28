@@ -1,0 +1,116 @@
+{
+  "prototype": "05-front-and-back",
+  "knob": "playouts per decision (expertBot)",
+  "N": 400,
+  "gamesPerPair": 200,
+  "seatsAlternated": "each deal played twice, seats swapped",
+  "score": "stronger rung: (wins + draws/2) / games, 95% Wilson interval",
+  "files": {
+    "engine": "0e4a2d15a8d2",
+    "bot": "0316d5d0a348"
+  },
+  "complete": true,
+  "pairs": [
+    {
+      "pair": "Greedy > Random",
+      "stronger": "Greedy",
+      "weaker": "Random",
+      "games": 200,
+      "wins": 197,
+      "draws": 0,
+      "losses": 3,
+      "score": 0.985,
+      "ci95": [
+        0.957,
+        0.995
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0
+    },
+    {
+      "pair": "Expert N > Greedy",
+      "stronger": "Expert N",
+      "weaker": "Greedy",
+      "games": 200,
+      "wins": 182,
+      "draws": 0,
+      "losses": 18,
+      "score": 0.91,
+      "ci95": [
+        0.862,
+        0.942
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0.105
+    },
+    {
+      "pair": "Expert 4N > Expert N",
+      "stronger": "Expert 4N",
+      "weaker": "Expert N",
+      "games": 200,
+      "wins": 104,
+      "draws": 0,
+      "losses": 96,
+      "score": 0.52,
+      "ci95": [
+        0.451,
+        0.588
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0.473
+    },
+    {
+      "pair": "Expert 16N > Expert 4N",
+      "stronger": "Expert 16N",
+      "weaker": "Expert 4N",
+      "games": 200,
+      "wins": 106,
+      "draws": 0,
+      "losses": 94,
+      "score": 0.53,
+      "ci95": [
+        0.461,
+        0.598
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 1.972
+    },
+    {
+      "pair": "Expert N > Expert N/4",
+      "stronger": "Expert N",
+      "weaker": "Expert N/4",
+      "games": 200,
+      "wins": 104,
+      "draws": 0,
+      "losses": 96,
+      "score": 0.52,
+      "ci95": [
+        0.451,
+        0.588
+      ],
+      "drawRate": 0,
+      "capped": 0,
+      "cpuSecPerGame": 0.12
+    }
+  ],
+  "top": 16,
+  "topChoice": {
+    "tried": [
+      16,
+      8
+    ],
+    "budgetCpuSec": 4500,
+    "projectedCpuSec": 378
+  },
+  "gateMirror": {
+    "games": 200,
+    "draws": 0,
+    "drawRate": 0
+  },
+  "filesChangedDuringRun": false,
+  "note": "Expert N > Expert N/4 was added in a second run (finished 2026-11-28); the other pairs are the first run's games, replayed from its record"
+}

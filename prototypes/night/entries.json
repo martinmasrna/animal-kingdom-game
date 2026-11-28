@@ -10,7 +10,8 @@
     "flags": [
       "second player (4 cards and the Coin) wins 63.5% of Expert mirrors"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (54, 51, 53); Random never wins, N beats Greedy 93%: points to shallow, not luck (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "02-attack-and-block",
@@ -24,7 +25,8 @@
       "Expert mirror games average 37 turns against 20 with Greedy, stalling into wide boards",
       "Greedy mirror first player 67%"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Gains to 4N (69, 59), 16N ≈ 4N (53): saturates between 4N and 16N; Random never wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "03-exert-to-score",
@@ -35,7 +37,8 @@
     "changed": null,
     "numbers": "Expert beats Random 100%, Greedy 93.8%, Racer 98.0%; first player 54.5% in Expert mirrors; Expert = Greedy on 48.2% of 52,551 decisions",
     "flags": [],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (50, 50, 49 at 8N); Random never wins, N beats Greedy 93%: points to shallow, not luck (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "04-lanes-and-scale",
@@ -50,7 +53,8 @@
       "Greedy mirror favours the first player 66%",
       "games are short, about 9 turns between Experts"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (56, 48, 50); 16N still loses 2% to Random and N beats Greedy 77%: shallow with a luck share (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "05-front-and-back",
@@ -64,7 +68,8 @@
       "mana binds early and stops late: 45% of all mana goes unspent, the cap of 10 is reached on 26% of turns",
       "the 3+3 row limit, not mana, caps the late game"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (52, 52, 53); Random never wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "06-breaking-sites",
@@ -75,7 +80,8 @@
     "changed": null,
     "numbers": "Expert beats Random 98.0%, Greedy 95.5%, Racer 99.8%; first player 43.9% in Expert mirrors; Expert = Greedy on 29.3% of 3,488 turns (42.6% of single actions)",
     "flags": [],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (52, 49, 53); Random still wins 3 and draws 3 of 100 against 16N: mostly shallow, some luck (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "07-blind-fronts",
@@ -86,7 +92,8 @@
     "changed": null,
     "numbers": "Expert beats Random 100%, Greedy 99.5%, Spread 99.5%; first player 52.5% in Expert mirrors; Expert = Greedy on 17.3% of its decisions with more than one option",
     "flags": [],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "N beats N/4 (62), 4N ≈ N, 16N loses to 4N (37): this search gets worse past 4N; Random never wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "09-momentum-rope",
@@ -100,7 +107,8 @@
       "57% of mirror games go the full 12 rounds and are decided by which side the marker is on",
       "first player 36.6%, leaning to the second player"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "N beats N/4 (57), then 55, 53, neither clear: saturates near N; Random wins 1 game in 400: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "10-engine-war",
@@ -115,7 +123,8 @@
       "second player wins 62% of Expert mirrors",
       "4 of 2,000 games hit the turn cap, all against Racer"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "N beats N/4 (60), flat after (50, 52); 16N still loses 3% to Random, N beats Greedy 77%: shallow with a luck share (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "12-deck-is-life",
@@ -128,7 +137,8 @@
     "flags": [
       "first player 66.2%, near the line (95% interval reaches past 70%)"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (55, 53, 51); Random never wins, N beats Greedy 79%: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "13-open-discards",
@@ -144,7 +154,8 @@
       "Greedy mirror first player 87%, against 67.5% on plain rules",
       "the same removal spell crossed between piles three or four times in traced games"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (54, 48, 51 at 8N); Random never wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "14-response-duel",
@@ -157,7 +168,8 @@
     "flags": [
       "games last 28.8 turns between Experts"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Gains to 4N (59, 57), 16N ≈ 4N (49): saturates between 4N and 16N; Random wins 1 game in 400: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "15-key-pieces",
@@ -172,7 +184,8 @@
       "in one traced mirror the first player ended 18 turns in a row without a play",
       "mirrors last 41 turns; 55% end on a deck run out, 45% on three Keys"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (50, 56, 52 at 8N); 8N still loses 4% to Random: mostly shallow, some luck (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "16-showdown",
@@ -187,7 +200,8 @@
       "51% of Expert games run the full 20 rounds",
       "costs bind loosely: Expert spends 4.8 of 6 mana"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "No rung gains clearly (51, 43, 55) and 4N even loses to N; Random never wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "17-prize-auction",
@@ -201,7 +215,8 @@
       "Greedy mirror ties 85% of games (equal all-in bids)",
       "equal bids are common in every pairing and prizes pile up into pots"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Gains to 4N (67, 62), 16N ≈ 4N (53): saturates between 4N and 16N; 16N never loses to Random: points to shallow, not luck (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "18-edge-flip",
@@ -216,7 +231,8 @@
       "28% of Expert mirror games end level on cells",
       "flips are mostly temporary, about 7 a game"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Gains to 4N (59, 57), 16N ≈ 4N (49); a quarter of mirrors drawn, Random draws 7 of 100 against 16N but never wins: shallow, with draws (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "19-supply-grid",
@@ -229,7 +245,8 @@
     "flags": [
       "7 of 400 Expert mirrors are drawn"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "N beats N/4 (58), flat after (49, 48); Random wins 1 game in 400: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "21-round-purse",
@@ -243,7 +260,8 @@
       "10% of Expert mirror games are draws",
       "no fixed rule solves it: Expert beats the Thrifty rule 97%"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (56, 52, 51); Random wins 1 game in 400, 10% of mirrors drawn: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "22-possession",
@@ -259,7 +277,8 @@
       "a third of matches are drawn even against Random",
       "kickoff possession is worth 60.4%"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (50, 51, 49); 16N beats Random only 81% and 47% of mirrors are drawn: points to luck and draws (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "24-rally",
@@ -287,7 +306,8 @@
     "flags": [
       "energy almost never binds: at the cap of 6 in 93% of decisions"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "4N beats N (59), 16N ≈ 4N (53): saturates between 4N and 16N; 17% of mirrors drawn, Random rarely wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "27-bust-duel",
@@ -300,7 +320,8 @@
     "flags": [
       "round damage is capped at 5 and coin past 7 buys nothing more"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Every rung still wins clearly (84, 68, 60): no ceiling within 16N (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "28-curling-line",
@@ -315,7 +336,8 @@
       "the hammer scores 80% of scoring ends (130 against 33 stolen)",
       "15% of ends are blank"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (55, 51, 52); Random wins 1 game in 400: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "29-hidden-runner",
@@ -360,7 +382,8 @@
       "penalties come to about 20 life a game, a full life bar; mirror ends in 8.1 turns",
       "76% of claims are challenged, 39% of those catch a lie"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (49, 50, 51); Random never wins, N beats Greedy 82%: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "32-hidden-contracts",
@@ -374,7 +397,8 @@
       "mana barely binds: 55% of all mana goes unspent, cap of 10 reached on 56% of turns",
       "Clean and Patience often pay out in the opening for free, a luck spike"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (50, 47, 51); Random never wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "33-time-track",
@@ -388,7 +412,8 @@
       "Racer holds Expert nearest the line (79.3%)",
       "mirror games are short, about 25 actions"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Edges at every rung (58, 57, 55), only the first clear: gains taper past N rather than stop; Random never wins (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "34-pitch-to-pay",
@@ -403,7 +428,8 @@
       "33% of Expert's pitches buy mana it never spends, to cycle a card",
       "Expert empties its hand in 86.5% of turns"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Edges at every rung (56, 54, 55), none clear alone: gains taper rather than stop; Random never wins (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "37-price-tracks",
@@ -429,7 +455,8 @@
     "changed": null,
     "numbers": "Expert beats Random 100%, Greedy 86.8%, High 83.3% (no Racer); first leader of hand 1 wins 48.7% of Expert mirrors; Expert = Greedy on 37.9% of its decisions with more than one option",
     "flags": [],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "N beats N/4 (57), then 55, 54, neither clear: gains taper past N; Random never wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "39-commander-grid",
@@ -459,7 +486,8 @@
       "35% of Expert mirror games are draws; 47% of Racer mirror games",
       "mana binds every round: a card is priced out in 98.9% of rounds"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (51, 50, 50); a third of mirrors drawn, Random never wins: points to shallow, flattened by draws (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "41-wave-defense",
@@ -474,7 +502,8 @@
       "Expert never loses a point of Wall, so it is an easy puzzle",
       "at the spec's rules Greedy wins 99.5% and a fixed rule solves it"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Solved: every Expert rung from N/4 up wins all 200 games at full Wall; search has nothing left to find (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "42-real-time-lane",
@@ -489,7 +518,8 @@
       "Greedy mirror ends level after overtime 14% of games",
       "a mirror game runs about 1:45"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "N beats N/4 (59), then 56, 52, neither clear: saturates near N; Random never wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "43-auto-deck-battle",
@@ -503,7 +533,8 @@
       "Heavy is 30% and Guardian 20% of Expert buys, Bomb 3%",
       "the deck sits at the cap of 10 at 53% of shop ends"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "N beats N/4 (61), flat after (52, 49) though its rungs above N search more than named on rerolls: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "44-bump-placement",
@@ -518,7 +549,8 @@
       "Fund is held in 44.5% of player-rounds",
       "bumping is constant, 2.35 bumps a round"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (54, 55, 51); N never loses to Random or Greedy: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "45-swing-neutrals",
@@ -533,7 +565,8 @@
       "mana binds: a card is priced out in 75% of turns",
       "as specified Expert beat Greedy only 64.0% and Racer 61.3%"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Edges at every rung (55, 56, 52), none clear alone: saturates around 4N; Random never wins: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "46-echo-mana",
@@ -549,7 +582,8 @@
       "in traced games both sides sat at 2 mana for ten turns, holding dear cards",
       "mana sits at the floor of 2 on 30% of turns"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (55, 46, 48); Random never wins, N beats Greedy 77%: points to shallow (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   },
   {
     "id": "48-junk-war",
@@ -564,6 +598,7 @@
       "about 8 Junk enter decks a game",
       "mirror games last 25.6 turns"
     ],
-    "why_dead": null
+    "why_dead": null,
+    "depth": "Flat from N/4 (50, 49, 50); 16N still loses 4% to Random, N beats Greedy 79%: shallow with a luck share (ladder of this prototype's own search bot at 1/4, 1, 4 and 16 times its budget)"
   }
 ]
